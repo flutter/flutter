@@ -145,7 +145,7 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
+class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
   void _incrementCounter() {
@@ -168,10 +168,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final List<AnimationController> controllers = <AnimationController>[
-      for (int i = 0; i < images; i++)
-        AnimationController(duration: const Duration(milliseconds: 3600), vsync: this)..repeat(),
-    ];
     final List<Completer<bool>> completers = <Completer<bool>>[
       for (int i = 0; i < images; i++) Completer<bool>(),
     ];
@@ -190,7 +186,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Row(children: createImageList(images, completers, controllers)),
+            Row(children: createImageList(images, completers)),
             const Text('You have pushed the button this many times:'),
             Text('$_counter', style: Theme.of(context).textTheme.headlineMedium),
           ],
@@ -204,19 +200,19 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     );
   }
 
-  List<Widget> createImageList(
-    int count,
-    List<Completer<bool>> completers,
-    List<AnimationController> controllers,
-  ) {
+  List<Widget> createImageList(int count, List<Completer<bool>> completers) {
     final List<Widget> list = <Widget>[];
     for (int i = 0; i < count; i++) {
       list.add(
         Flexible(
           fit: FlexFit.tight,
           flex: i + 1,
-          child: RotationTransition(
-            turns: controllers[i],
+          child: RepeatingTweenAnimationBuilder<double>(
+            tween: Tween<double>(begin: 0, end: 1),
+            duration: const Duration(milliseconds: 3600),
+            builder: (BuildContext context, double value, Widget? child) {
+              return Transform.rotate(angle: value * 2 * pi, child: child);
+            },
             child: createImage(i + 1, completers[i]),
           ),
         ),

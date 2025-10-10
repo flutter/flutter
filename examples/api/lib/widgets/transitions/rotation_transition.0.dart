@@ -24,18 +24,18 @@ class RotationTransitionExample extends StatefulWidget {
   State<RotationTransitionExample> createState() => _RotationTransitionExampleState();
 }
 
-/// [AnimationController]s can be created with `vsync: this` because of
-/// [TickerProviderStateMixin].
 class _RotationTransitionExampleState extends State<RotationTransitionExample>
-    with TickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    duration: const Duration(seconds: 2),
-    vsync: this,
-  )..repeat(reverse: true);
-  late final Animation<double> _animation = CurvedAnimation(
-    parent: _controller,
-    curve: Curves.elasticOut,
-  );
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _turns;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(duration: const Duration(seconds: 2), vsync: this)
+      ..repeat(reverse: true);
+    _turns = CurvedAnimation(parent: _controller, curve: Curves.elasticOut);
+  }
 
   @override
   void dispose() {
@@ -48,7 +48,7 @@ class _RotationTransitionExampleState extends State<RotationTransitionExample>
     return Scaffold(
       body: Center(
         child: RotationTransition(
-          turns: _animation,
+          turns: _turns,
           child: const Padding(padding: EdgeInsets.all(8.0), child: FlutterLogo(size: 150.0)),
         ),
       ),

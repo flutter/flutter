@@ -24,26 +24,8 @@ class ProgressIndicatorExample extends StatefulWidget {
   State<ProgressIndicatorExample> createState() => _ProgressIndicatorExampleState();
 }
 
-class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
-    with TickerProviderStateMixin {
-  late AnimationController controller;
+class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> {
   bool year2023 = true;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = AnimationController(vsync: this, duration: const Duration(seconds: 5))
-      ..addListener(() {
-        setState(() {});
-      })
-      ..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +38,14 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
             const Text('Determinate CircularProgressIndicator'),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: CircularProgressIndicator(year2023: year2023, value: controller.value),
+              child: RepeatingTweenAnimationBuilder<double>(
+                tween: Tween<double>(begin: 0.0, end: 1.0),
+                duration: const Duration(seconds: 5),
+                reverse: true,
+                builder: (BuildContext context, double value, Widget? child) {
+                  return CircularProgressIndicator(year2023: year2023, value: value);
+                },
+              ),
             ),
             const Text('Indeterminate CircularProgressIndicator'),
             Padding(

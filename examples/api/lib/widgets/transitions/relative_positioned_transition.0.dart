@@ -25,14 +25,18 @@ class RelativePositionedTransitionExample extends StatefulWidget {
       _RelativePositionedTransitionExampleState();
 }
 
-/// [AnimationController]s can be created with `vsync: this` because of
-/// [TickerProviderStateMixin].
 class _RelativePositionedTransitionExampleState extends State<RelativePositionedTransitionExample>
-    with TickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    duration: const Duration(seconds: 2),
-    vsync: this,
-  )..repeat(reverse: true);
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _curve;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(duration: const Duration(seconds: 2), vsync: this)
+      ..repeat(reverse: true);
+    _curve = CurvedAnimation(parent: _controller, curve: Curves.elasticInOut);
+  }
 
   @override
   void dispose() {
@@ -48,19 +52,21 @@ class _RelativePositionedTransitionExampleState extends State<RelativePositioned
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final Size biggest = constraints.biggest;
+        final Animation<Rect?> rectAnimation = RectTween(
+          begin: const Rect.fromLTWH(0, 0, bigLogo, bigLogo),
+          end: Rect.fromLTWH(
+            biggest.width - smallLogo,
+            biggest.height - smallLogo,
+            smallLogo,
+            smallLogo,
+          ),
+        ).animate(_curve);
+
         return Stack(
           children: <Widget>[
             RelativePositionedTransition(
               size: biggest,
-              rect: RectTween(
-                begin: const Rect.fromLTWH(0, 0, bigLogo, bigLogo),
-                end: Rect.fromLTWH(
-                  biggest.width - smallLogo,
-                  biggest.height - smallLogo,
-                  smallLogo,
-                  smallLogo,
-                ),
-              ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticInOut)),
+              rect: rectAnimation,
               child: const Padding(padding: EdgeInsets.all(8), child: FlutterLogo()),
             ),
           ],

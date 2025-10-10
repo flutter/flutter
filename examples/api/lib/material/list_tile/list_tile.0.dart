@@ -38,12 +38,10 @@ class _ListTileExampleState extends State<ListTileExample> with TickerProviderSt
     super.initState();
     _fadeController = AnimationController(duration: const Duration(seconds: 1), vsync: this)
       ..repeat(reverse: true);
-
     _sizeController = AnimationController(duration: const Duration(milliseconds: 850), vsync: this)
       ..repeat(reverse: true);
 
     _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut);
-
     _sizeAnimation = CurvedAnimation(parent: _sizeController, curve: Curves.easeOut);
   }
 
@@ -116,16 +114,18 @@ class _ListTileExampleState extends State<ListTileExample> with TickerProviderSt
           SizedBox(
             height: 100,
             child: Center(
-              child: SizeTransition(
-                sizeFactor: _sizeAnimation,
-                axisAlignment: -1.0,
-                // Wrap the ListTile in a Material widget so the ListTile has someplace
-                // to draw the animated colors during the size transition.
-                child: const Material(
-                  child: ListTile(
-                    title: Text('ListTile with SizeTransition'),
-                    tileColor: Colors.red,
-                    minVerticalPadding: 25.0,
+              child: ClipRect(
+                child: SizeTransition(
+                  axisAlignment: -1.0,
+                  sizeFactor: _sizeAnimation,
+                  // Wrap the ListTile in a Material widget so the ListTile has someplace
+                  // to draw the animated colors during the size transition.
+                  child: const Material(
+                    child: ListTile(
+                      title: Text('ListTile with SizeTransition'),
+                      tileColor: Colors.red,
+                      minVerticalPadding: 25.0,
+                    ),
                   ),
                 ),
               ),

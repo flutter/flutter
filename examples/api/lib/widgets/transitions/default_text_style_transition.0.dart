@@ -25,24 +25,22 @@ class DefaultTextStyleTransitionExample extends StatefulWidget {
       _DefaultTextStyleTransitionExampleState();
 }
 
-/// [AnimationController]s can be created with `vsync: this` because of
-/// [TickerProviderStateMixin].
 class _DefaultTextStyleTransitionExampleState extends State<DefaultTextStyleTransitionExample>
-    with TickerProviderStateMixin {
-  late AnimationController _controller;
-  late TextStyleTween _styleTween;
-  late CurvedAnimation _curvedAnimation;
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<TextStyle> _style;
+
+  static final TextStyleTween _styleTween = TextStyleTween(
+    begin: const TextStyle(fontSize: 50, color: Colors.blue, fontWeight: FontWeight.w900),
+    end: const TextStyle(fontSize: 50, color: Colors.red, fontWeight: FontWeight.w100),
+  );
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(duration: const Duration(seconds: 2), vsync: this)
       ..repeat(reverse: true);
-    _styleTween = TextStyleTween(
-      begin: const TextStyle(fontSize: 50, color: Colors.blue, fontWeight: FontWeight.w900),
-      end: const TextStyle(fontSize: 50, color: Colors.red, fontWeight: FontWeight.w100),
-    );
-    _curvedAnimation = CurvedAnimation(parent: _controller, curve: Curves.elasticInOut);
+    _style = _styleTween.animate(CurvedAnimation(parent: _controller, curve: Curves.elasticInOut));
   }
 
   @override
@@ -54,10 +52,7 @@ class _DefaultTextStyleTransitionExampleState extends State<DefaultTextStyleTran
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: DefaultTextStyleTransition(
-        style: _styleTween.animate(_curvedAnimation),
-        child: const Text('Flutter'),
-      ),
+      child: DefaultTextStyleTransition(style: _style, child: const Text('Flutter')),
     );
   }
 }

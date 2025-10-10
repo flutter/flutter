@@ -24,32 +24,8 @@ class ProgressIndicatorExample extends StatefulWidget {
   State<ProgressIndicatorExample> createState() => _ProgressIndicatorExampleState();
 }
 
-class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
-    with TickerProviderStateMixin {
-  late AnimationController controller;
+class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> {
   bool determinate = false;
-
-  @override
-  void initState() {
-    super.initState();
-    controller =
-        AnimationController(
-            /// [AnimationController]s can be created with `vsync: this` because of
-            /// [TickerProviderStateMixin].
-            vsync: this,
-            duration: const Duration(seconds: 2),
-          )
-          ..addListener(() {
-            setState(() {});
-          })
-          ..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,9 +37,17 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text('Linear progress indicator', style: TextStyle(fontSize: 20)),
-            LinearProgressIndicator(
-              value: determinate ? controller.value : null,
-              semanticsLabel: 'Linear progress indicator',
+            RepeatingTweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 0, end: 1),
+              duration: const Duration(seconds: 2),
+              reverse: true,
+              paused: determinate, // Pause when determinate to match original behavior
+              builder: (BuildContext context, double value, Widget? child) {
+                return LinearProgressIndicator(
+                  value: determinate ? value : null,
+                  semanticsLabel: 'Linear progress indicator',
+                );
+              },
             ),
             Row(
               children: <Widget>[
@@ -78,13 +62,6 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
                   onChanged: (bool value) {
                     setState(() {
                       determinate = value;
-                      if (determinate) {
-                        controller.stop();
-                      } else {
-                        controller
-                          ..forward(from: controller.value)
-                          ..repeat();
-                      }
                     });
                   },
                 ),

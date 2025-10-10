@@ -26,41 +26,38 @@ class FadeTransitionExample extends StatefulWidget {
   const FadeTransitionExample({required this.duration, required this.curve, super.key});
 
   final Duration duration;
-
   final Curve curve;
 
   @override
   State<FadeTransitionExample> createState() => _FadeTransitionExampleState();
 }
 
-/// [AnimationController]s can be created with `vsync: this` because of
-/// [TickerProviderStateMixin].
 class _FadeTransitionExampleState extends State<FadeTransitionExample>
-    with TickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    duration: widget.duration,
-    vsync: this,
-  )..repeat(reverse: true);
-  late final CurvedAnimation _animation = CurvedAnimation(parent: _controller, curve: widget.curve);
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _opacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(duration: widget.duration, vsync: this)
+      ..repeat(reverse: true);
+    _opacity = CurvedAnimation(parent: _controller, curve: widget.curve);
+  }
 
   @override
   void didUpdateWidget(FadeTransitionExample oldWidget) {
     super.didUpdateWidget(oldWidget);
-
     if (oldWidget.duration != widget.duration) {
-      _controller
-        ..duration = widget.duration
-        ..repeat(reverse: true);
+      _controller.duration = widget.duration;
     }
-
     if (oldWidget.curve != widget.curve) {
-      _animation.curve = widget.curve;
+      _opacity = CurvedAnimation(parent: _controller, curve: widget.curve);
     }
   }
 
   @override
   void dispose() {
-    _animation.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -70,7 +67,7 @@ class _FadeTransitionExampleState extends State<FadeTransitionExample>
     return ColoredBox(
       color: Colors.white,
       child: FadeTransition(
-        opacity: _animation,
+        opacity: _opacity,
         child: const Padding(padding: EdgeInsets.all(8), child: FlutterLogo()),
       ),
     );

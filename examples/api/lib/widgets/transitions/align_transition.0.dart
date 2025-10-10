@@ -24,20 +24,21 @@ class AlignTransitionExample extends StatefulWidget {
   State<AlignTransitionExample> createState() => _AlignTransitionExampleState();
 }
 
-/// [AnimationController]s can be created with `vsync: this` because of
-/// [TickerProviderStateMixin].
 class _AlignTransitionExampleState extends State<AlignTransitionExample>
-    with TickerProviderStateMixin {
-  // Using `late final` for lazy initialization. See
-  // https://dart.dev/null-safety/understanding-null-safety#lazy-initialization.
-  late final AnimationController _controller = AnimationController(
-    duration: const Duration(seconds: 2),
-    vsync: this,
-  )..repeat(reverse: true);
-  late final Animation<AlignmentGeometry> _animation = Tween<AlignmentGeometry>(
-    begin: Alignment.bottomLeft,
-    end: Alignment.center,
-  ).animate(CurvedAnimation(parent: _controller, curve: Curves.decelerate));
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<AlignmentGeometry> _alignment;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(duration: const Duration(seconds: 2), vsync: this)
+      ..repeat(reverse: true);
+    _alignment = Tween<AlignmentGeometry>(
+      begin: Alignment.bottomLeft,
+      end: Alignment.center,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.decelerate));
+  }
 
   @override
   void dispose() {
@@ -50,7 +51,7 @@ class _AlignTransitionExampleState extends State<AlignTransitionExample>
     return ColoredBox(
       color: Colors.white,
       child: AlignTransition(
-        alignment: _animation,
+        alignment: _alignment,
         child: const Padding(padding: EdgeInsets.all(8.0), child: FlutterLogo(size: 150.0)),
       ),
     );

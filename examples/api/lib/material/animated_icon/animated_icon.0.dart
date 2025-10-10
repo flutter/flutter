@@ -31,21 +31,18 @@ class AnimatedIconExample extends StatefulWidget {
 
 class _AnimatedIconExampleState extends State<AnimatedIconExample>
     with SingleTickerProviderStateMixin {
-  late AnimationController controller;
-  late Animation<double> animation;
+  late final AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    controller = AnimationController(vsync: this, duration: const Duration(seconds: 2))
-      ..forward()
+    _controller = AnimationController(duration: const Duration(seconds: 2), vsync: this)
       ..repeat(reverse: true);
-    animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -55,7 +52,7 @@ class _AnimatedIconExampleState extends State<AnimatedIconExample>
       body: Center(
         child: AnimatedIcon(
           icon: AnimatedIcons.menu_arrow,
-          progress: animation,
+          progress: _controller,
           size: 72.0,
           semanticLabel: 'Show menu',
         ),
