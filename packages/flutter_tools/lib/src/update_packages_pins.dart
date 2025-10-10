@@ -22,7 +22,7 @@ const kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here. Please leave a comment explaining why.
   'archive': '3.6.1', // https://github.com/flutter/flutter/issues/115660
   'code_assets':
-      '0.19.6', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
+      '0.19.7', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
   'dds':
       '5.0.3', // 5.0.4 contains bugs described in https://github.com/Dart-Code/Dart-Code/issues/4678.
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
@@ -31,7 +31,7 @@ const kManuallyPinnedDependencies = <String, String>{
   'hooks':
       '0.20.1', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
   'hooks_runner':
-      '0.22.1', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
+      '0.23.0', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
   'material_color_utilities': '0.11.1', // Keep pinned to latest until 1.0.0.
 };
 

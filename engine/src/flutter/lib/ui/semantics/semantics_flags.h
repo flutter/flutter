@@ -81,7 +81,6 @@ class NativeSemanticsFlags
                                  bool hasImplicitScrolling,
                                  bool isMultiline,
                                  bool isReadOnly,
-                                 bool isFocusable,
                                  bool isLink,
                                  bool isSlider,
                                  bool isKeyboardKey);

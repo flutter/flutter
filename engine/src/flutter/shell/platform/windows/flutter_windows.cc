@@ -84,7 +84,7 @@ static FlutterDesktopViewControllerRef CreateViewController(
   flutter::FlutterWindowsEngine* engine_ptr = EngineFromHandle(engine_ref);
   std::unique_ptr<flutter::WindowBindingHandler> window_wrapper =
       std::make_unique<flutter::FlutterWindow>(
-          width, height, engine_ptr->display_monitor(),
+          width, height, engine_ptr->display_manager(),
           engine_ptr->windows_proc_table());
 
   std::unique_ptr<flutter::FlutterWindowsEngine> engine;

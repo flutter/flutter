@@ -250,40 +250,91 @@ void main() {
     expect(tester.widget<Overlay>(find.byType(Overlay)).clipBehavior, Clip.none);
   });
 
-  testWidgets('Navigator should call observer.didPop when pops page-based routes', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Navigator can set clip behavior', (WidgetTester tester) async {
     const MaterialPage<void> page = MaterialPage<void>(child: Text('page'));
-    const MaterialPage<void> page1 = MaterialPage<void>(child: Text('page1'));
-    final List<Page<void>> pages = <Page<void>>[page, page1];
-    final _MockNavigatorObserver observer = _MockNavigatorObserver();
-    final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: MediaQueryData.fromView(tester.view),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(pages: const <Page<void>>[page], onPopPage: (_, _) => false),
+        ),
+      ),
+    );
+    // Default to hard edge.
+    expect(tester.widget<Overlay>(find.byType(Overlay)).clipBehavior, Clip.hardEdge);
+
     await tester.pumpWidget(
       MediaQuery(
         data: MediaQueryData.fromView(tester.view),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Navigator(
-            key: nav,
-            pages: pages,
-            observers: <NavigatorObserver>[observer],
-            onPopPage: (Route<dynamic> route, dynamic result) {
-              route.didPop(result);
-              pages.remove(route.settings);
-              return true;
-            },
+            pages: const <Page<void>>[page],
+            clipBehavior: Clip.none,
+            onPopPage: (_, _) => false,
           ),
         ),
       ),
     );
+    expect(tester.widget<Overlay>(find.byType(Overlay)).clipBehavior, Clip.none);
+  });
 
-    expect(find.text('page1'), findsOneWidget);
+  testWidgets('Can remove page before they are added', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+    Future<void> buildPages(List<Page<void>> pages) {
+      return tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData.fromView(tester.view),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Navigator(key: key, pages: pages, onDidRemovePage: (_) {}),
+          ),
+        ),
+      );
+    }
 
-    observer._invocations.clear();
-    nav.currentState!.pop();
-    await tester.pumpAndSettle();
+    const MaterialPage<void> page = MaterialPage<void>(
+      key: ValueKey<String>('page'),
+      child: Text('page'),
+    );
+    const MaterialPage<void> page1 = MaterialPage<void>(
+      key: ValueKey<String>('page1'),
+      child: Text('page1'),
+    );
+    const MaterialPage<void> page2 = MaterialPage<void>(
+      key: ValueKey<String>('page2'),
+      child: Text('page2'),
+    );
+    const MaterialPage<void> page3 = MaterialPage<void>(
+      key: ValueKey<String>('page3'),
+      child: Text('page3'),
+    );
+    const MaterialPage<void> page4 = MaterialPage<void>(
+      key: ValueKey<String>('page4'),
+      child: Text('page4'),
+    );
+    const MaterialPage<void> page5 = MaterialPage<void>(
+      key: ValueKey<String>('page5'),
+      child: Text('page5'),
+    );
+    const MaterialPage<void> page6 = MaterialPage<void>(
+      key: ValueKey<String>('page6'),
+      child: Text('page6'),
+    );
+    await buildPages(<Page<void>>[page]);
+
     expect(find.text('page'), findsOneWidget);
-    observer._checkInvocations(const <Symbol>[#didPop, #didChangeTop]);
+
+    await buildPages(<Page<void>>[page, page1, page2, page3]);
+
+    // In mid transition;
+    await tester.pump(const Duration(microseconds: 150));
+    // Cause page1 and page2 to be removed before they are added.
+    await buildPages(<Page<void>>[page, page4, page5, page6]);
+    await tester.pumpAndSettle();
+    expect(find.text('page6'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Zero transition page-based route correctly notifies observers when it is popped', (

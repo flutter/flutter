@@ -1850,4 +1850,58 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Child 0'), findsOne);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/176566
+  testWidgets(
+    'ExpansionTile semantics hint uses defaultTargetPlatform for VoiceOver regardless of theme platform',
+    (WidgetTester tester) async {
+      // Regression test for VoiceOver accessibility when theme platform differs from device platform.
+      // When someone sets theme.platform to TargetPlatform.android on an iOS device,
+      // VoiceOver should still work correctly by using the actual device platform for semantics hints.
+
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
+          home: const Material(
+            child: Column(
+              children: <Widget>[
+                ExpansionTile(title: Text('First Expansion Tile')),
+                ExpansionTile(initiallyExpanded: true, title: Text('Second Expansion Tile')),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      SemanticsNode semantics = tester.getSemantics(
+        find.ancestor(of: find.byType(ListTile).first, matching: find.byType(Semantics)).first,
+      );
+
+      expect(semantics, isNotNull);
+      // On iOS/macOS platform, the semantics hint should include expanded/collapsed state guidance
+      // even theme platform is set to Android.
+      expect(
+        semantics.hint,
+        '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
+      );
+
+      semantics = tester.getSemantics(
+        find.ancestor(of: find.byType(ListTile).last, matching: find.byType(Semantics)).first,
+      );
+
+      expect(semantics, isNotNull);
+      expect(
+        semantics.hint,
+        '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}',
+      );
+      handle.dispose();
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
 }

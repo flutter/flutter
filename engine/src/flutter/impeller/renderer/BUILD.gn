@@ -124,7 +124,7 @@ template("renderer_unittests_component") {
       "../fixtures",
       "../playground:playground_test",
       "../tessellator:tessellator_libtess",
-      "//flutter/impeller/display_list:display_list",
+      "//flutter/impeller/display_list",
       "//flutter/testing:testing_lib",
     ]
     if (defined(invoker.public_configs)) {
@@ -159,8 +159,8 @@ impeller_component("renderer_dart_unittests") {
     "../playground:playground_test",
     "//flutter/lib/gpu",
     "//flutter/lib/snapshot",
-    "//flutter/runtime:runtime",
+    "//flutter/runtime",
+    "//flutter/testing",
     "//flutter/testing:fixture_test",
-    "//flutter/testing:testing",
   ]
 }

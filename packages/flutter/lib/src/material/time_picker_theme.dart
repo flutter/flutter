@@ -18,7 +18,6 @@ import 'package:flutter/widgets.dart';
 import 'button_style.dart';
 import 'colors.dart';
 import 'input_decorator.dart';
-import 'material_state.dart';
 import 'theme.dart';
 
 // Examples can assume:
@@ -120,10 +119,10 @@ class TimePickerThemeData with Diagnosticable {
   /// If the segment is not selected, [Colors.transparent] is used to allow the
   /// [Dialog]'s color to be used.
   Color? get dayPeriodColor {
-    if (_dayPeriodColor == null || _dayPeriodColor is MaterialStateColor) {
+    if (_dayPeriodColor == null || _dayPeriodColor is WidgetStateColor) {
       return _dayPeriodColor;
     }
-    return MaterialStateColor.resolveWith((Set<WidgetState> states) {
+    return WidgetStateColor.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.selected)) {
         return _dayPeriodColor;
       }

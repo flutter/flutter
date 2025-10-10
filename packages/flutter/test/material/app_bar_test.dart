@@ -2326,7 +2326,7 @@ void main() {
     });
   });
 
-  group('MaterialStateColor scrolledUnder', () {
+  group('WidgetStateColor scrolledUnder', () {
     const Color scrolledColor = Color(0xff00ff00);
     const Color defaultColor = Color(0xff0000ff);
 
@@ -2342,7 +2342,7 @@ void main() {
           appBar: AppBar(
             elevation: 0,
             scrolledUnderElevation: scrolledUnderElevation,
-            backgroundColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+            backgroundColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
               return states.contains(WidgetState.scrolledUnder) ? scrolledColor : defaultColor;
             }),
             title: const Text('AppBar'),
@@ -2365,7 +2365,7 @@ void main() {
           home: Scaffold(
             appBar: AppBar(
               elevation: 0,
-              backgroundColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+              backgroundColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
                 return states.contains(WidgetState.scrolledUnder) ? scrolledColor : defaultColor;
               }),
               title: const Text('AppBar'),
@@ -2574,7 +2574,7 @@ void main() {
           home: Scaffold(
             appBar: AppBar(
               elevation: 0,
-              backgroundColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+              backgroundColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
                 return states.contains(WidgetState.scrolledUnder) ? scrolledColor : defaultColor;
               }),
               title: const Text('AppBar'),
@@ -2656,7 +2656,7 @@ void main() {
           home: Scaffold(
             appBar: AppBar(
               elevation: 0,
-              backgroundColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+              backgroundColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
                 return states.contains(WidgetState.scrolledUnder) ? scrolledColor : defaultColor;
               }),
               title: const Text('AppBar'),
@@ -2731,7 +2731,7 @@ void main() {
           home: Scaffold(
             appBar: AppBar(
               elevation: 0,
-              backgroundColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+              backgroundColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
                 return states.contains(WidgetState.scrolledUnder) ? scrolledColor : defaultColor;
               }),
               title: const Text('AppBar'),

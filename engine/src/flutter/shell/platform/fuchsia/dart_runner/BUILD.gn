@@ -33,7 +33,7 @@ template("runner_sources") {
     if (!invoker.product) {
       dart_public_deps += [
         "$dart_src/runtime/bin:dart_io_api",
-        "//flutter/shell/platform/fuchsia/runtime/dart/utils:utils",
+        "//flutter/shell/platform/fuchsia/runtime/dart/utils",
       ]
     } else {
       dart_public_deps += [
