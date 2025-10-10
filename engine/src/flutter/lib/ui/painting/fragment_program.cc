@@ -147,7 +147,8 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
         uniforms[i];
 
     Dart_Handle map = ConvertUniformDescriptionToMap(uniform_description);
-    Dart_Handle dart_result = Dart_ListSetAt(uniform_info, i, map);
+    [[maybe_unused]] Dart_Handle dart_result =
+        Dart_ListSetAt(uniform_info, i, map);
     FML_DCHECK(!Dart_IsError(dart_result));
 
     if (uniform_description.type ==
