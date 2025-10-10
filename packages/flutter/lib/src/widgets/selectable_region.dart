@@ -1947,6 +1947,8 @@ class SelectableRegionState extends State<SelectableRegion>
     return TapRegion(
       groupId: SelectableRegion,
       onTapOutside: (PointerDownEvent event) {
+        // To match native platforms, the selection is dismissed when tapping outside
+        // of the selectable region.
         clearSelection();
         _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
         _finalizeSelectableRegionStatus();
