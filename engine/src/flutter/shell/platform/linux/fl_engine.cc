@@ -770,9 +770,13 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   custom_task_runners.struct_size = sizeof(FlutterCustomTaskRunners);
   custom_task_runners.platform_task_runner = &platform_task_runner;
 
-  if (fl_dart_project_get_ui_thread_policy(self->project) ==
-      FL_UI_THREAD_POLICY_RUN_ON_PLATFORM_THREAD) {
-    custom_task_runners.ui_task_runner = &platform_task_runner;
+  switch (fl_dart_project_get_ui_thread_policy(self->project)) {
+    case FL_UI_THREAD_POLICY_RUN_ON_SEPARATE_THREAD:
+      break;
+    case FL_UI_THREAD_POLICY_DEFAULT:
+    case FL_UI_THREAD_POLICY_RUN_ON_PLATFORM_THREAD:
+      custom_task_runners.ui_task_runner = &platform_task_runner;
+      break;
   }
 
   g_autoptr(GPtrArray) command_line_args =
