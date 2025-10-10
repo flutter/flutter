@@ -5275,6 +5275,9 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   @pragma('vm:entry-point')
   late int _samplerCount;
 
+  @pragma('vm:entry-point')
+  late List<dynamic> _uniformInfo;
+
   @Native<Void Function(Handle)>(symbol: 'FragmentProgram::Create')
   external void _constructor();
 
@@ -5283,6 +5286,60 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
 
   /// Returns a fresh instance of [FragmentShader].
   FragmentShader fragmentShader() => FragmentShader._(this, debugName: _debugName);
+}
+
+/// A binding to a uniform of type float. Calling [set] on this object updates
+/// a float uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// shader.getUniformFloat('uColor', 0).set(1.0);
+/// shader.getUniformFloat('uColor', 1).set(0.0);
+/// shader.getUniformFloat('uColor', 2).set(0.0);
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformFloat] - How [UniformFloatSlot] instances are acquired.
+///
+base class UniformFloatSlot {
+  UniformFloatSlot._(this._shader, this.name, this.offset, this._index);
+
+  /// Set the float value of the bound uniform.
+  void set(double val) {
+    _shader.setFloat(_index, val);
+  }
+
+  /// VisibleForTesting: This is the index one would use with
+  /// [FragmentShader.setFloat] for this uniform.
+  int get index {
+    return _index;
+  }
+
+  final FragmentShader _shader;
+  final int _index;
+
+  /// The name of the bound uniform.
+  final String name;
+
+  /// The offset into the bound uniform. For example, 1 for `.y` or 2 for `.b`.
+  final int offset;
+}
+
+base class UniformImageSamplerSlot {
+  UniformImageSamplerSlot._(this._shader, this.name, this._index);
+
+  final FragmentShader _shader;
+  final int _index;
+
+  void set(Image val) {
+    _shader.setImageSampler(_index, val);
+  }
+
+  get index => _index;
+
+  /// The name of the bound uniform.
+  final String name;
 }
 
 /// A [Shader] generated from a [FragmentProgram].
@@ -5299,11 +5356,11 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
 /// are required to exist simultaneously, they must be obtained from two
 /// different calls to [FragmentProgram.fragmentShader].
 base class FragmentShader extends Shader {
-  FragmentShader._(FragmentProgram program, {String? debugName})
-    : _debugName = debugName,
-      super._() {
-    _floats = _constructor(program, program._uniformFloatCount, program._samplerCount);
+  FragmentShader._(this._program, {String? debugName}) : _debugName = debugName, super._() {
+    _floats = _constructor(_program, _program._uniformFloatCount, _program._samplerCount);
   }
+
+  final FragmentProgram _program;
 
   final String? _debugName;
 
@@ -5356,6 +5413,80 @@ base class FragmentShader extends Shader {
   void setFloat(int index, double value) {
     assert(!debugDisposed, 'Tried to accesss uniforms on a disposed Shader: $this');
     _floats[index] = value;
+  }
+
+  /// Access the float binding for uniform named [name] with optional offset
+  /// [index]. Example [index] values: 1 for 'foo.y', 2 for 'foo.b'.
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform float uScale;
+  /// uniform sampler2D uTexture;
+  /// uniform vec2 uMagnitude;
+  /// uniform vec4 uColor;
+  /// ```
+  ///
+  /// ```dart
+  /// shader.getUniformFloat('uScale');
+  /// shader.getUniformFloat('uMagnitude', 0);
+  /// shader.getUniformFloat('uMagnitude', 1);
+  /// shader.getUniformFloat('uColor', 0);
+  /// shader.getUniformFloat('uColor', 1);
+  /// shader.getUniformFloat('uColor', 2);
+  /// shader.getUniformFloat('uColor', 3);
+  /// ```
+  UniformFloatSlot getUniformFloat(String name, [int? index]) {
+    index ??= 0;
+
+    if (index < 0) {
+      throw ArgumentError('Index `$index` out of bounds for `$name`.');
+    }
+
+    int offset = 0;
+    bool found = false;
+    const int sizeOfFloat = 4;
+    for (final dynamic entryDynamic in _program._uniformInfo) {
+      final Map<String, Object> entry = entryDynamic as Map<String, Object>;
+      final int sizeInFloats = (entry['size'] as int? ?? 0) ~/ sizeOfFloat;
+      if (entry['name'] == name) {
+        if (index + 1 > sizeInFloats) {
+          throw ArgumentError('Index `$index` out of bounds for `$name`.');
+        }
+        found = true;
+        break;
+      }
+      offset += sizeInFloats;
+    }
+
+    if (!found) {
+      throw ArgumentError('No uniform named "$name".');
+    }
+
+    return UniformFloatSlot._(this, name, index, offset + index);
+  }
+
+  UniformImageSamplerSlot getImageSampler(String name) {
+    int index = 0;
+    bool found = false;
+    for (final dynamic entryDynamic in _program._uniformInfo) {
+      final Map<String, Object> entry = entryDynamic as Map<String, Object>;
+      if (entry['name'] == name) {
+        if (entry['type'] != 'SampledImage') {
+          throw ArgumentError('Uniform "$name" is not an image sampler.');
+        }
+        found = true;
+        break;
+      } else if (entry['type'] == 'SampledImage') {
+        index += 1;
+      }
+    }
+
+    if (!found) {
+      throw ArgumentError('No uniform named "$name".');
+    }
+
+    return UniformImageSamplerSlot._(this, name, index);
   }
 
   /// Sets the sampler uniform at [index] to [image].
