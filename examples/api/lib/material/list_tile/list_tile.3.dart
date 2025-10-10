@@ -62,10 +62,10 @@ class _ListTileExampleState extends State<ListTileExample> {
           title: const Text('Headline'),
           subtitle: Text('Enabled: $_enabled, Selected: $_selected'),
           trailing: Switch(
-            onChanged: (bool? value) {
+            onChanged: (bool value) {
               // This is called when the user toggles the switch.
               setState(() {
-                _enabled = value!;
+                _enabled = value;
               });
             },
             value: _enabled,
