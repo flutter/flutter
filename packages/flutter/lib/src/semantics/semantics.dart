@@ -2948,13 +2948,13 @@ class SemanticsNode with DiagnosticableTreeMixin {
   ///
   /// If this node indicates an overlay portal child, this is its overlay portal
   /// parent node in traversal order. Otherwise, it is the same as [parent].
-  SemanticsNode? get traversalOwner => _traversalOwner ?? parent;
-  SemanticsNode? _traversalOwner;
-  set traversalOwner(SemanticsNode? value) {
-    if (_traversalOwner == value) {
+  SemanticsNode? get traversalParent => _traversalParent ?? parent;
+  SemanticsNode? _traversalParent;
+  set traversalParent(SemanticsNode? value) {
+    if (_traversalParent == value) {
       return;
     }
-    _traversalOwner = value;
+    _traversalParent = value;
     _markDirty();
   }
 
@@ -3757,17 +3757,17 @@ class SemanticsNode with DiagnosticableTreeMixin {
       if (fromDepth >= toDepth) {
         childToCommonAncestorTransform ??= Matrix4.identity();
         childToCommonAncestorTransform.multiply(childSemanticsNode.transform ?? Matrix4.identity());
-        childSemanticsNode = childSemanticsNode.traversalOwner!;
+        childSemanticsNode = childSemanticsNode.traversalParent!;
       }
       if (fromDepth <= toDepth) {
         parentToCommonAncestorTransform ??= Matrix4.identity();
         parentToCommonAncestorTransform.multiply(
           parentSemanticsNode.transform ?? Matrix4.identity(),
         );
-        if (parentSemanticsNode.traversalOwner == null) {
+        if (parentSemanticsNode.traversalParent == null) {
           break;
         }
-        parentSemanticsNode = parentSemanticsNode.traversalOwner!;
+        parentSemanticsNode = parentSemanticsNode.traversalParent!;
       }
     }
 
@@ -3834,19 +3834,22 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
 
     if (_isTraversalChild) {
-      traversalOwner = owner!._traversalParentNodes[traversalChildIdentifier];
+      traversalParent = owner!._traversalParentNodes[traversalChildIdentifier];
       transform = _computeChildTransform(
-        parentPaintClipRect: traversalOwner!.parentPaintClipRect,
-        parentSemanticsClipRect: traversalOwner!.parentSemanticsClipRect,
+        parentPaintClipRect: traversalParent!.parentPaintClipRect,
+        parentSemanticsClipRect: traversalParent!.parentSemanticsClipRect,
         parentTransform: null,
-        parent: traversalOwner!,
+        parent: traversalParent!,
         child: this,
       );
     }
 
-    int? traversalOwnerId;
+    int traversalParentId = -1;
     if (data.traversalChildIdentifier != null) {
-      traversalOwnerId = owner!._traversalParentNodes[data.traversalChildIdentifier]?.id;
+      final String identifier = data.traversalChildIdentifier!;
+      if (owner!._traversalParentNodes.containsKey(identifier)) {
+        traversalParentId = owner!._traversalParentNodes[identifier]!.id;
+      }
     }
 
     final Float64List updatedTransform;
@@ -3885,7 +3888,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       scrollExtentMax: data.scrollExtentMax ?? double.nan,
       scrollExtentMin: data.scrollExtentMin ?? double.nan,
       transform: updatedTransform,
-      traversalOwner: traversalOwnerId ?? -1,
+      traversalParent: traversalParentId,
       hitTestTransform: data.transform?.storage ?? _kIdentityTransform,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
