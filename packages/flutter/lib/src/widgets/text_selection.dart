@@ -1778,11 +1778,9 @@ class SelectionOverlay {
         dragStartBehavior: dragStartBehavior,
       );
     }
-    return ExcludeSemantics(
-      child: TapRegion(
-        groupId: SelectableRegion,
-        child: TextFieldTapRegion(child: ExcludeSemantics(child: handle)),
-      ),
+    return TapRegion(
+      groupId: SelectableRegion,
+      child: TextFieldTapRegion(child: ExcludeSemantics(child: handle)),
     );
   }
 
