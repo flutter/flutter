@@ -65,11 +65,29 @@ void main() {
         jsonEncode({'type': 'get_size'}),
       );
       final data = jsonDecode(response);
+      expect(data["width"], 500);
+      expect(data["height"], 501);
+    }, timeout: Timeout.none, onPlatform: {'linux': Skip('Unable to exactly set dimensions on Linux')});
+
+    test('Can set constraints and see the resize (Linux)', () async {
+      await driver.requestData(
+        jsonEncode({
+          'type': 'set_constraints',
+          'min_width': 0,
+          'min_height': 0,
+          'max_width': 500,
+          'max_height': 501,
+        }),
+      );
+      final response = await driver.requestData(
+        jsonEncode({'type': 'get_size'}),
+      );
+      final data = jsonDecode(response);
       // On Linux setting the constraints limits the window including the decorations,
       // but the returned size is the usable area and always smaller.
       expect(data["width"], lessThanOrEqualTo(500));
       expect(data["height"], lessThanOrEqualTo(501));
-    }, timeout: Timeout.none);
+    }, timeout: Timeout.none, testOn: "linux");
 
     test('Can set and get fullscreen', () async {
       await driver.requestData(jsonEncode({'type': 'set_fullscreen'}));
