@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
+import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart';
 import 'dtd/dtd_services.dart';
 import 'widget_preview.dart';
 
@@ -23,6 +24,9 @@ class WidgetPreviewScaffoldController {
   }) : _previews = previews,
        dtdServices = dtdServicesOverride ?? WidgetPreviewScaffoldDtdServices();
 
+  @visibleForTesting
+  static const kFilterBySelectedFilePreference = 'filterBySelectedFile';
+
   /// Initializes the controller by establishing a connection to DTD and
   /// listening for events.
   Future<void> initialize() async {
@@ -31,6 +35,10 @@ class WidgetPreviewScaffoldController {
       style: dtdServices.isWindows ? path.Style.windows : path.Style.posix,
     );
     _registerListeners();
+    _filterBySelectedFile.value = await dtdServices.getFlag(
+      kFilterBySelectedFilePreference,
+      defaultValue: true,
+    );
   }
 
   /// Cleanup internal controller state.
@@ -70,8 +78,10 @@ class WidgetPreviewScaffoldController {
   final _filterBySelectedFile = ValueNotifier<bool>(true);
 
   /// Enable or disable filtering by selected source file.
-  void toggleFilterBySelectedFile() {
-    _filterBySelectedFile.value = !_filterBySelectedFile.value;
+  Future<void> toggleFilterBySelectedFile() async {
+    final updated = !_filterBySelectedFile.value;
+    await dtdServices.setPreference(kFilterBySelectedFilePreference, updated);
+    _filterBySelectedFile.value = updated;
   }
 
   /// The current set of previews to be displayed.

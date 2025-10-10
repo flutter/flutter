@@ -227,6 +227,16 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   // a bitmask whose values comes from {@link AccessibilityFeature}.
   private int accessibilityFeatureFlags = 0;
 
+  // The default locale for assistive technologies in BCP 47 format.
+  //
+  // For example "en-US", "de-DE", "fr-FR".
+  @Nullable private String defaultLocale;
+
+  @VisibleForTesting
+  public void setLocale(@NonNull String locale) {
+    defaultLocale = locale;
+  }
+
   // The {@code SemanticsNode} within Flutter that currently has the focus of Android's input
   // system.
   //
@@ -371,6 +381,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             args.order(ByteOrder.LITTLE_ENDIAN);
           }
           AccessibilityBridge.this.updateSemantics(buffer, strings, stringAttributeArgs);
+        }
+
+        @Override
+        public void setLocale(String locale) {
+          AccessibilityBridge.this.setLocale(locale);
         }
       };
 
@@ -1033,7 +1048,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     // Heading support
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
-      result.setHeading(semanticsNode.hasFlag(Flag.IS_HEADER));
+      result.setHeading(semanticsNode.headingLevel > 0);
     }
 
     // Accessibility Focus
@@ -2391,6 +2406,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // The locale of the content of this node.
     @Nullable private String locale;
 
+    // The heading level for this node (0 means not a heading).
+    private int headingLevel;
+
     // The id of the sibling node that is before this node in traversal
     // order.
     //
@@ -2516,6 +2534,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 + flags
                 + "\n"
                 + indent
+                + "  +-- headingLevel="
+                + headingLevel
+                + "\n"
+                + indent
                 + "  +-- textDirection="
                 + textDirection
                 + "\n"
@@ -2591,6 +2613,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       linkUrl = getStringFromBuffer(buffer, strings);
       locale = getStringFromBuffer(buffer, strings);
 
+      headingLevel = buffer.getInt();
       textDirection = TextDirection.fromInt(buffer.getInt());
 
       left = buffer.getFloat();
@@ -2787,6 +2810,21 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return null;
     }
 
+    /**
+     * Returns the effective locale for this semantics node after taking app default locale into
+     * account.
+     *
+     * <p>Can be null if there is no preference.
+     *
+     * @return the effective locale.
+     */
+    private @Nullable String getEffectiveLocale() {
+      if (locale != null && !locale.isEmpty()) {
+        return locale;
+      }
+      return accessibilityBridge.defaultLocale;
+    }
+
     private void updateRecursively(
         float[] ancestorTransform, Set<SemanticsNode> visitedObjects, boolean forceUpdate) {
       visitedObjects.add(this);
@@ -2882,7 +2920,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return new AccessibilityStringBuilder()
           .addString(value)
           .addAttributes(valueAttributes)
-          .addLocale(locale)
+          .addLocale(getEffectiveLocale())
           .build();
     }
 
@@ -2891,7 +2929,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           .addString(label)
           .addAttributes(labelAttributes)
           .addUrl(linkUrl)
-          .addLocale(locale)
+          .addLocale(getEffectiveLocale())
           .build();
     }
 
@@ -2899,7 +2937,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return new AccessibilityStringBuilder()
           .addString(hint)
           .addAttributes(hintAttributes)
-          .addLocale(locale)
+          .addLocale(getEffectiveLocale())
           .build();
     }
 

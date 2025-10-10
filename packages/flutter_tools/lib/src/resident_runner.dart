@@ -1468,11 +1468,11 @@ abstract class ResidentRunner extends ResidentHandlers {
         /// of the default URI encoding.
         String urlToDisplayString(Uri uri) {
           final base = StringBuffer(uri.withoutQueryParameters().toString());
-          base.write(
-            uri.queryParameters.keys
-                .map((String key) => '$key=${uri.queryParameters[key]}')
-                .join('&'),
-          );
+          if (uri.hasQuery) {
+            base.write(
+              '?${uri.queryParameters.keys.map((String key) => '$key=${uri.queryParameters[key]}').join('&')}',
+            );
+          }
           return base.toString();
         }
 
@@ -1867,11 +1867,14 @@ class TerminalHandler {
 }
 
 class DebugConnectionInfo {
-  DebugConnectionInfo({this.httpUri, this.wsUri, this.baseUri});
+  DebugConnectionInfo({this.httpUri, this.wsUri, this.baseUri, this.dtdUri, this.devToolsUri});
 
   final Uri? httpUri;
   final Uri? wsUri;
   final String? baseUri;
+
+  final Uri? dtdUri;
+  final Uri? devToolsUri;
 }
 
 /// Returns the next platform value for the switcher.
