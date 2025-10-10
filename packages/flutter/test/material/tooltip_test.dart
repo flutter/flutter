@@ -3619,20 +3619,13 @@ void main() {
           body: Center(
             child: Tooltip(
               message: tooltipText,
-              positionDelegate:
-                  ({
-                    required Offset target,
-                    required Size targetSize,
-                    required Size tooltipSize,
-                    required double verticalOffset,
-                    required bool preferBelow,
-                  }) {
-                    // Align on top right of box with bottom left of tooltip.
-                    return Offset(
-                      target.dx + (targetSize.width / 2),
-                      target.dy - (targetSize.height / 2) - tooltipSize.height,
-                    );
-                  },
+              positionDelegate: (TooltipPositionContext context) {
+                // Align on top right of box with bottom left of tooltip.
+                return Offset(
+                  context.target.dx + (context.targetSize.width / 2),
+                  context.target.dy - (context.targetSize.height / 2) - context.tooltipSize.height,
+                );
+              },
               child: const SizedBox(width: 50, height: 50),
             ),
           ),

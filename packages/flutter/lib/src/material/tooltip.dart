@@ -25,24 +25,72 @@ import 'tooltip_visibility.dart';
 /// Signature for when a tooltip is triggered.
 typedef TooltipTriggeredCallback = void Function();
 
+/// Contextual information for positioning a tooltip.
+///
+/// This immutable data class contains all the necessary information for computing
+/// the position of a tooltip relative to its target widget.
+///
+/// See also:
+///
+///  * [TooltipPositionDelegate], which uses this context to compute tooltip positions.
+@immutable
+class TooltipPositionContext {
+  /// Creates a tooltip position context.
+  const TooltipPositionContext({
+    required this.target,
+    required this.targetSize,
+    required this.tooltipSize,
+    required this.verticalOffset,
+    required this.preferBelow,
+  });
+
+  /// The center point of the target widget in the global coordinate system.
+  final Offset target;
+
+  /// The size of the target widget that triggers the tooltip.
+  final Size targetSize;
+
+  /// The size of the tooltip itself.
+  final Size tooltipSize;
+
+  /// The configured vertical offset.
+  final double verticalOffset;
+
+  /// Whether the tooltip prefers to be positioned below the target.
+  final bool preferBelow;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is TooltipPositionContext &&
+        other.target == target &&
+        other.targetSize == targetSize &&
+        other.tooltipSize == tooltipSize &&
+        other.verticalOffset == verticalOffset &&
+        other.preferBelow == preferBelow;
+  }
+
+  @override
+  int get hashCode => Object.hash(target, targetSize, tooltipSize, verticalOffset, preferBelow);
+}
+
 /// Signature for computing the position of a tooltip.
 ///
-/// The arguments are:
-/// * `target`: The center point of the target widget in the global coordinate system.
-/// * `targetSize`: The size of the target widget that triggers the tooltip.
-/// * `tooltipSize`: The size of the tooltip itself.
-/// * `verticalOffset`: The configured vertical offset.
-/// * `preferBelow`: Whether the tooltip prefers to be positioned below the target.
+/// The [TooltipPositionContext] contains all the necessary information for
+/// positioning the tooltip, including the target location, sizes, offset, and
+/// positioning preference.
 ///
 /// Returns the offset from the top left of the overlay to the top left of the tooltip.
-typedef TooltipPositionDelegate =
-    Offset Function({
-      required Offset target,
-      required Size targetSize,
-      required Size tooltipSize,
-      required double verticalOffset,
-      required bool preferBelow,
-    });
+///
+/// See also:
+///
+///  * [TooltipPositionContext], which contains the positioning parameters.
+typedef TooltipPositionDelegate = Offset Function(TooltipPositionContext context);
 
 /// A special [MouseRegion] that when nested, only the first [_ExclusiveMouseRegion]
 /// to be hit in hit-testing order will be added to the BoxHitTestResult (i.e.,
@@ -414,13 +462,30 @@ class Tooltip extends StatefulWidget {
 
   /// A custom position delegate function for computing where the tooltip should be positioned.
   ///
-  /// If provided, this function will be called instead of the default positioning logic
-  /// to determine where to place the tooltip relative to its target.
+  /// If provided, this function will be called with a [TooltipPositionContext] containing
+  /// all the necessary information for positioning the tooltip. The function should return
+  /// an [Offset] indicating where to place the tooltip relative to the overlay.
   ///
   /// This allows for custom positioning such as left/right positioning, or any other
   /// arbitrary positioning logic.
   ///
+  /// Example:
+  /// ```dart
+  /// positionDelegate: (TooltipPositionContext context) {
+  ///   // Position tooltip to the right of the target
+  ///   return Offset(
+  ///     context.target.dx + context.targetSize.width / 2,
+  ///     context.target.dy - context.tooltipSize.height / 2,
+  ///   );
+  /// }
+  /// ```
+  ///
   /// If null, the default positioning behavior is used (above or below the target).
+  ///
+  /// See also:
+  ///
+  ///  * [TooltipPositionContext], which contains the positioning parameters.
+  ///  * [TooltipPositionDelegate], the function signature for custom positioning.
   final TooltipPositionDelegate? positionDelegate;
 
   static final List<TooltipState> _openedTooltips = <TooltipState>[];
@@ -1017,7 +1082,8 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 
   /// A custom position delegate function for computing where the tooltip should be positioned.
   ///
-  /// If provided, this function will be called instead of the default positioning logic.
+  /// If provided, this function will be called with a [TooltipPositionContext] instead
+  /// of the default positioning logic.
   final TooltipPositionDelegate? positionDelegate;
 
   @override
@@ -1027,11 +1093,13 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   Offset getPositionForChild(Size size, Size childSize) {
     if (positionDelegate != null) {
       return positionDelegate!(
-        target: target,
-        targetSize: targetSize,
-        tooltipSize: childSize,
-        verticalOffset: verticalOffset,
-        preferBelow: preferBelow,
+        TooltipPositionContext(
+          target: target,
+          targetSize: targetSize,
+          tooltipSize: childSize,
+          verticalOffset: verticalOffset,
+          preferBelow: preferBelow,
+        ),
       );
     }
     return positionDependentBox(
