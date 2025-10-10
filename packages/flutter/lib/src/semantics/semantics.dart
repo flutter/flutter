@@ -2946,8 +2946,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   /// The real parent of this node in traversal order.
   ///
-  /// If this node indicates an overlay portal child, this is its overlay portal
-  /// parent node in traversal order. Otherwise, it is the same as [parent].
+  /// This is useful for an [OverlayPortal] or a similar scenario where the node's
+  /// hit-test parent (i.e., [parent]) and its traversal parent (i.e., [traversalParent])
+  /// are different. If this node indicates an overlay portal child,
+  /// [traversalParent] is its overlay portal parent node in traversal order.
+  /// Otherwise, it is the same as [parent]. The [traversalParent] is used when
+  /// the transform of this node needs to be updated in traversal order.
   SemanticsNode? get traversalParent => _traversalParent ?? parent;
   SemanticsNode? _traversalParent;
   set traversalParent(SemanticsNode? value) {
