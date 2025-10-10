@@ -5970,9 +5970,6 @@ void main() {
     testWidgets('Submenu items can be traversed during opening animation', (
       WidgetTester tester,
     ) async {
-      final focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -5980,7 +5977,6 @@ void main() {
               controller: controller,
               children: <Widget>[
                 SubmenuButton(
-                  // focusNode: focusNode,
                   animated: true,
                   menuChildren: <Widget>[
                     MenuItemButton(onPressed: () {}, child: const Text('Item 0')),
