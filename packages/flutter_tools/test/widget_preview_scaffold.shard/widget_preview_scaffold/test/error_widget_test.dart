@@ -51,7 +51,7 @@ void main() {
 
     if (controller.filterBySelectedFileListenable.value) {
       // Disable filter by selected file.
-      controller.toggleFilterBySelectedFile();
+      await controller.toggleFilterBySelectedFile();
     }
     await controller.initialize();
 
