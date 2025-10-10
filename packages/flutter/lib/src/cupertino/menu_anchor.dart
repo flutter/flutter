@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -43,54 +46,273 @@ bool get _isCupertino {
   }
 }
 
-// The font size at which text scales linearly in a CupertinoMenuItem.
-const double _kBaseFontSize = 17.0;
+// The font size at which text scales linearly on the iOS 18.5 simulator.
+const double _kCupertinoMobileBaseFontSize = 17.0;
 
-// Returns an integer that represents the current text scale factor normalized
-// to the base font size.
-//
-// On iOS, each "unit" of text scaling adds or removes 1/17th of the base font size.
-//
-// Examples:
-// textScaler.scale(17) = 17 → units = 0.0 (default size)
-// textScaler.scale(17) = 19 → units = 2.0 (2 units larger)
-// textScaler.scale(17) = 15 → units = -2.0 (2 units smaller)
-//
-// The returned value is positive when the text scale factor is larger than the
-// base font size, negative when smaller, and zero when equal.
-//
-// Normalizing to the base font size simplifies calculations that depend on
-// nonlinear text scaling, such as menu layout.
-int _normalizeTextScale(BuildContext context) {
-  final TextScaler? textScaler = MediaQuery.maybeTextScalerOf(context);
-  if (textScaler == null || textScaler == TextScaler.noScaling) {
+/// The width of a Cupertino menu
+// Measured on:
+//  - iPadOS 18.5 Simulator
+//    - iPad Pro 11-inch
+//    - iPad Pro 13-inch
+//  - iOS 18.5 Simulator
+//   - iPhone 16 Pro
+enum _CupertinoMenuWidth {
+  iPadOS(points: 262),
+  iPadOSAccessible(points: 343),
+  iOS(points: 250),
+  iOSAccessible(points: 370);
+
+  const _CupertinoMenuWidth({required this.points});
+
+  // Determines the appropriate menu width based on screen width and
+  // accessibility mode.
+  //
+  // An screen width threshold of 600 points is used to differentiate
+  // between mobile and tablet devices.
+  factory _CupertinoMenuWidth.fromScreenWidth({
+    required double screenWidth,
+    required bool isAccessibilityModeEnabled,
+  }) {
+    final bool isMobile = screenWidth < _kMenuWidthMobileWidthThreshold;
+    return switch ((isMobile, isAccessibilityModeEnabled)) {
+      (false, false) => _CupertinoMenuWidth.iPadOS,
+      (false, true) => _CupertinoMenuWidth.iPadOSAccessible,
+      (true, false) => _CupertinoMenuWidth.iOS,
+      (true, true) => _CupertinoMenuWidth.iOSAccessible,
+    };
+  }
+
+  final double points;
+  static const double _kMenuWidthMobileWidthThreshold = 768;
+}
+
+/// Returns an integer that represents the current text scale factor normalized
+/// to the base font size.
+///
+/// Normalizing to the base font size simplifies storage of nonlinear layout
+/// spacing that depends on the text scale factor.
+///
+/// On iOS, the base text scale is 17.0 pt, meaning each "unit" represents an
+/// increase or decrease of 1/17th (≈5.88%) of the base font size.
+///
+/// The equation to calculate the normalized text scale is:
+///
+/// ```dart
+/// final normalizedScale = MediaQuery.of(context).scale(baseFontSize) - baseFontSize
+/// ```
+///
+/// The returned value is positive when the text scale factor is larger than the
+/// base font size, negative when smaller, and zero when equal.
+double _normalizeTextScale(TextScaler textScaler) {
+  if (textScaler == TextScaler.noScaling) {
     return 0;
   }
 
-  return (textScaler.scale(_kBaseFontSize) - _kBaseFontSize).round();
+  return textScaler.scale(_kCupertinoMobileBaseFontSize) - _kCupertinoMobileBaseFontSize;
 }
 
-// The CupertinoMenuAnchor layout policy changes depending on whether the user is using
-// a "regular" font size vs a "large" font size. This is a spectrum. There are
-// many "regular" font sizes and many "large" font sizes. But depending on which
-// policy is currently being used, a menu is laid out differently.
-//
-// Empirically, the jump from one policy to the other occurs at the following text
-// scale factors:
-// Largest regular scale factor:  1.3529411764705883
-// Smallest large scale factor:   1.6470588235294117
-//
-// The following constant represents a division in text scale factor beyond which
-// we want to change how the menu is laid out.
-//
-// This explanation was ported from CupertinoDialog.
-const double _kMaxRegularTextScaleFactor = 1.4;
+// TODO(davidhicks980): Consider moving dynamic type information to a separate Cupertino library.
+// Obtained from https://developer.apple.com/design/human-interface-guidelines/typography#Specifications
+enum _DynamicTypeSet {
+  body(
+    xSmall: TextStyle(fontSize: 14.0, height: 19.0 / 14.0, letterSpacing: -0.41),
+    small: TextStyle(fontSize: 15.0, height: 20.0 / 15.0, letterSpacing: -0.41),
+    medium: TextStyle(fontSize: 16.0, height: 21.0 / 16.0, letterSpacing: -0.41),
+    large: TextStyle(fontSize: 17.0, height: 22.0 / 17.0, letterSpacing: -0.41),
+    xLarge: TextStyle(fontSize: 19.0, height: 24.0 / 19.0, letterSpacing: -0.41),
+    xxLarge: TextStyle(fontSize: 21.0, height: 26.0 / 21.0, letterSpacing: -0.8),
+    xxxLarge: TextStyle(
+      fontSize: 23.0,
+      height: 29.0 / 23.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+    ax1: TextStyle(
+      fontSize: 28.0,
+      height: 34.0 / 28.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+    ax2: TextStyle(
+      fontSize: 33.0,
+      height: 40.0 / 33.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+    ax3: TextStyle(
+      fontSize: 40.0,
+      height: 48.0 / 40.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+    ax4: TextStyle(
+      fontSize: 47.0,
+      height: 56.0 / 47.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+    ax5: TextStyle(
+      fontSize: 53.0,
+      height: 62.0 / 53.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+  ),
+
+  subhead(
+    xSmall: TextStyle(
+      fontSize: 12.0,
+      height: 16.0 / 12.0,
+      letterSpacing: -0.025,
+      fontFamily: 'CupertinoSystemText',
+    ),
+    small: TextStyle(
+      fontSize: 13.0,
+      height: 18.0 / 13.0,
+      letterSpacing: -0.025,
+      fontFamily: 'CupertinoSystemText',
+    ),
+    medium: TextStyle(
+      fontSize: 14.0,
+      height: 19.0 / 14.0,
+      letterSpacing: -0.025,
+      fontFamily: 'CupertinoSystemText',
+    ),
+    large: TextStyle(
+      fontSize: 15.0,
+      height: 20.0 / 15.0,
+      letterSpacing: -0.2,
+      fontFamily: 'CupertinoSystemText',
+    ),
+    xLarge: TextStyle(
+      fontSize: 17.0,
+      height: 22.0 / 17.0,
+      letterSpacing: -0.41,
+      fontFamily: 'CupertinoSystemText',
+    ),
+    xxLarge: TextStyle(
+      fontSize: 19.0,
+      height: 24.0 / 19.0,
+      letterSpacing: -0.68,
+      fontFamily: 'CupertinoSystemText',
+    ),
+    xxxLarge: TextStyle(
+      fontSize: 21.0,
+      height: 28.0 / 21.0,
+      letterSpacing: -0.68,
+      fontFamily: 'CupertinoSystemText',
+    ),
+    ax1: TextStyle(
+      fontSize: 25.0,
+      height: 31.0 / 25.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+    ax2: TextStyle(
+      fontSize: 30.0,
+      height: 37.0 / 30.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+    ax3: TextStyle(
+      fontSize: 36.0,
+      height: 43.0 / 36.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+    ax4: TextStyle(
+      fontSize: 42.0,
+      height: 50.0 / 42.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+    ax5: TextStyle(
+      fontSize: 49.0,
+      height: 58.0 / 49.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+  );
+
+  const _DynamicTypeSet({
+    required this.xSmall,
+    required this.small,
+    required this.medium,
+    required this.large,
+    required this.xLarge,
+    required this.xxLarge,
+    required this.xxxLarge,
+    required this.ax1,
+    required this.ax2,
+    required this.ax3,
+    required this.ax4,
+    required this.ax5,
+  });
+
+  final TextStyle xSmall;
+  final TextStyle small;
+  final TextStyle medium;
+  final TextStyle large;
+  final TextStyle xLarge;
+  final TextStyle xxLarge;
+  final TextStyle xxxLarge;
+  final TextStyle ax1;
+  final TextStyle ax2;
+  final TextStyle ax3;
+  final TextStyle ax4;
+  final TextStyle ax5;
+
+  double _interpolateUnits(double units, int minimum, int maximum) {
+    final double t = (units - minimum) / (maximum - minimum);
+    return ui.lerpDouble(0, 1, t)!;
+  }
+
+  // The following units were measured from the iOS 18.5 simulator in points.
+  TextStyle resolveTextStyle(TextScaler textScaler) {
+    final double units =
+        textScaler.scale(_kCupertinoMobileBaseFontSize) - _kCupertinoMobileBaseFontSize;
+    return switch (units) {
+      <= -3 => xSmall,
+      < -2 => TextStyle.lerp(xSmall, small, _interpolateUnits(units, -3, -2))!,
+      < -1 => TextStyle.lerp(small, medium, _interpolateUnits(units, -2, -1))!,
+      < 0 => TextStyle.lerp(medium, large, _interpolateUnits(units, -1, 0))!,
+      < 2 => TextStyle.lerp(large, xLarge, _interpolateUnits(units, 0, 2))!,
+      < 4 => TextStyle.lerp(xLarge, xxLarge, _interpolateUnits(units, 2, 4))!,
+      < 6 => TextStyle.lerp(xxLarge, xxxLarge, _interpolateUnits(units, 4, 6))!,
+      < 11 => TextStyle.lerp(xxxLarge, ax1, _interpolateUnits(units, 6, 11))!,
+      < 16 => TextStyle.lerp(ax1, ax2, _interpolateUnits(units, 11, 16))!,
+      < 23 => TextStyle.lerp(ax2, ax3, _interpolateUnits(units, 16, 23))!,
+      < 30 => TextStyle.lerp(ax3, ax4, _interpolateUnits(units, 23, 30))!,
+      < 36 => TextStyle.lerp(ax4, ax5, _interpolateUnits(units, 30, 36))!,
+      _ => ax5,
+    };
+  }
+}
+
+/// The CupertinoMenuAnchor layout policy changes depending on whether the user is using
+/// a "regular" font size vs a "large" font size. This is a spectrum. There are
+/// many "regular" font sizes and many "large" font sizes. But depending on which
+/// policy is currently being used, a menu is laid out differently.
+///
+/// Empirically, the jump from one policy to the other occurs at the following text
+/// scale factors:
+/// * Max "regular" scale factor ≈ 23/17 ≈ 1.352...
+/// * Min "large" scale factor   ≈ 28/17 ≈ 1.647...
+///
+/// The following constant represents a division in text scale factor beyond which
+/// we want to change how the menu is laid out.
+///
+/// This explanation was ported from CupertinoDialog.
+const double _kMaxRegularTextScaleUnits = 6;
 
 // Accessibility mode on iOS is determined by the text scale factor that the
 // user has selected.
 bool _isAccessibilityModeEnabled(BuildContext context) {
-  final double scaleFactor = MediaQuery.maybeTextScalerOf(context)?.scale(1) ?? 1;
-  return scaleFactor > _kMaxRegularTextScaleFactor;
+  final TextScaler? textScaler = MediaQuery.maybeTextScalerOf(context);
+  if (textScaler == null) {
+    return false;
+  }
+  return _normalizeTextScale(textScaler) > _kMaxRegularTextScaleUnits;
 }
 
 /// Mix [CupertinoMenuEntryMixin] in to define how a menu item should be drawn
@@ -130,7 +352,7 @@ class _AnchorScope extends InheritedWidget {
 
 /// Signature for the callback called in response to a [CupertinoMenuAnchor]
 /// changing its [AnimationStatus].
-typedef CupertinoMenuStatusChangedCallback = void Function(AnimationStatus status);
+typedef CupertinoMenuAnimationStatusChangedCallback = void Function(AnimationStatus status);
 
 /// A widget used to mark the "anchor" for a menu, defining the rectangle used
 /// to position the menu, which can be done with an explicit location, or
@@ -148,7 +370,7 @@ typedef CupertinoMenuStatusChangedCallback = void Function(AnimationStatus statu
 /// status changes from [AnimationStatus.dismissed]. The [onClose] callback is
 /// invoked when the menu popup is unmounted and the menu status changes to
 /// [AnimationStatus.dismissed]. The [onAnimationStatusChange] callback is
-/// invoked when the animation status of the menu changes.
+/// invoked every time the [AnimationStatus] of the menu animation changes.
 ///
 /// ## Usage
 /// {@tool snippet}
@@ -213,7 +435,6 @@ class CupertinoMenuAnchor extends StatefulWidget {
     this.enablePan = true,
     this.consumeOutsideTaps = true,
     this.useRootOverlay = false,
-    this.semanticLabel,
     this.overlayPadding = const EdgeInsets.all(8),
   });
 
@@ -228,7 +449,7 @@ class CupertinoMenuAnchor extends StatefulWidget {
   ///
   /// Unlike [onOpen] and [onClose], this callback is invoked for all
   /// [AnimationStatus] changes.
-  final CupertinoMenuStatusChangedCallback? onAnimationStatusChange;
+  final CupertinoMenuAnimationStatusChangedCallback? onAnimationStatusChange;
 
   /// The [childFocusNode] attribute is the optional [FocusNode] also associated
   /// the [child] or [builder] widget that opens the menu.
@@ -268,10 +489,12 @@ class CupertinoMenuAnchor extends StatefulWidget {
   /// Defaults to false.
   final bool consumeOutsideTaps;
 
-  /// A callback invoked when the menu begins opening.
+  /// A callback invoked when the menu is opened while having an
+  /// [AnimationStatus] of [AnimationStatus.dismissed] or [AnimationStatus.reverse].
   final VoidCallback? onOpen;
 
-  /// A callback invoked when the menu has completely closed.
+  /// A callback invoked when the menu is closed while having an
+  /// [AnimationStatus] of [AnimationStatus.complete] or [AnimationStatus.forward].
   final VoidCallback? onClose;
 
   /// A list of menu items to display in the menu.
@@ -330,17 +553,6 @@ class CupertinoMenuAnchor extends StatefulWidget {
   /// Defaults to true.
   final bool enablePan;
 
-  /// A label that can be used by screen readers to describe the menu
-  ///
-  /// This label should clearly describe the purpose of the menu using
-  /// alphanumeric characters. For example, "Language Options" could be used as
-  /// a semantic label for a menu that users use to select a language.
-  ///
-  /// Avoid labels that are generic ("Menu"), technical ("Metric unit selection
-  /// apparatus"), redundant ("Action Menu Options"), or verbose ( "Click to
-  /// display menu list action items for metric unit selection").
-  final String? semanticLabel;
-
   /// The padding to subtract from the overlay when positioning the menu.
   final EdgeInsetsGeometry overlayPadding;
 
@@ -396,21 +608,23 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
     stiffness: 235.1,
     damping: 30.7,
   );
+
   static const Tolerance springTolerance = Tolerance(velocity: 0.1, distance: 0.1);
   late final AnimationController _animationController;
   final FocusScopeNode menuScopeNode = FocusScopeNode(debugLabel: 'Menu Scope');
   final ValueNotifier<double> _panDistanceNotifier = ValueNotifier<double>(0);
-  AnimationStatus _status = AnimationStatus.dismissed;
+
   bool _hasLeadingWidget = false;
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
   MenuController? _internalMenuController;
-  bool get excludeInteraction => !_status.isForwardOrCompleted;
+  bool get isClosing => !animationStatus.isForwardOrCompleted;
   bool get enablePan =>
       widget.enablePan &&
-      switch (_status) {
+      switch (animationStatus) {
         AnimationStatus.forward || AnimationStatus.completed || AnimationStatus.dismissed => true,
         AnimationStatus.reverse => false,
       };
+  AnimationStatus animationStatus = AnimationStatus.dismissed;
 
   @override
   void initState() {
@@ -464,7 +678,7 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
   }
 
   void _handleCloseRequested(VoidCallback hideMenu) {
-    if (_status case AnimationStatus.reverse || AnimationStatus.dismissed) {
+    if (animationStatus case AnimationStatus.reverse || AnimationStatus.dismissed) {
       return;
     }
 
@@ -489,36 +703,31 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
 
   void _handleOpenRequested(ui.Offset? position, VoidCallback showOverlay) {
     showOverlay();
-    if (_status case AnimationStatus.completed || AnimationStatus.forward) {
+
+    if (animationStatus case AnimationStatus.completed || AnimationStatus.forward) {
       return;
     }
 
     _animationController.animateWith(
       SpringSimulation(forwardSpring, _animationController.value, 1, 0.5),
     );
+
     FocusScope.of(context).setFirstFocus(menuScopeNode);
   }
 
   void _handleAnimationStatusChange(AnimationStatus status) {
-    setState(() {
-      _status = status;
-    });
+    animationStatus = status;
     widget.onAnimationStatusChange?.call(status);
-  }
-
-  void _handleFocusChange(bool focus) {
-    if (focus || menuScopeNode.hasFocus) {
-      return;
-    }
-
-    _menuController.close();
+    setState(() {
+      // Rebuild to update isClosing and enablePan.
+    });
   }
 
   void _handlePanChange(double distance) {
     if (!_menuController.isOpen) {
-      _menuController.open();
       return;
     }
+
     // Because we are triggering a nested ticker, it's easiest to pass a
     // listenable down the tree. Otherwise, it would be more idiomatic to use
     // an inherited widget.
@@ -526,28 +735,29 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
   }
 
   Widget _buildMenuOverlay(BuildContext childContext, RawMenuOverlayInfo info) {
-    return IgnorePointer(
-      ignoring: excludeInteraction,
-      child: BlockSemantics(
-        blocking: !excludeInteraction,
-        child: _MenuOverlay(
-          constrainCrossAxis: widget.constrainCrossAxis,
-          visibilityAnimation: _animationController.view,
-          panDistanceListenable: _panDistanceNotifier,
-          alignmentOffset: widget.alignmentOffset ?? Offset.zero,
-          status: _status,
-          constraints: widget.constraints,
-          consumeOutsideTaps: widget.consumeOutsideTaps,
-          alignment: widget.alignment,
-          menuAlignment: widget.menuAlignment,
-          overlaySize: info.overlaySize,
-          anchorRect: info.anchorRect,
-          anchorPosition: info.position,
-          tapRegionGroupId: info.tapRegionGroupId,
-          semanticLabel: widget.semanticLabel,
-          focusScopeNode: menuScopeNode,
-          overlayInsets: widget.overlayPadding,
-          children: widget.menuChildren,
+    return ExcludeSemantics(
+      excluding: isClosing,
+      child: IgnorePointer(
+        ignoring: isClosing,
+        child: ExcludeFocus(
+          excluding: isClosing,
+          child: _MenuOverlay(
+            constrainCrossAxis: widget.constrainCrossAxis,
+            visibilityAnimation: _animationController.view,
+            panDistanceListenable: _panDistanceNotifier,
+            alignmentOffset: widget.alignmentOffset ?? Offset.zero,
+            constraints: widget.constraints,
+            consumeOutsideTaps: widget.consumeOutsideTaps,
+            alignment: widget.alignment,
+            menuAlignment: widget.menuAlignment,
+            overlaySize: info.overlaySize,
+            anchorRect: info.anchorRect,
+            anchorPosition: info.position,
+            tapRegionGroupId: info.tapRegionGroupId,
+            focusScopeNode: menuScopeNode,
+            overlayInsets: widget.overlayPadding,
+            children: widget.menuChildren,
+          ),
         ),
       ),
     );
@@ -556,12 +766,19 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
   Widget _buildChild(BuildContext context, MenuController controller, Widget? child) {
     // The anchor can initiate a pan gesture, but should not be included in the
     // pan area.
-    return _PanSurface(
-      includeInPanArea: false,
-      child:
-          widget.builder?.call(context, _menuController, widget.child) ??
-          widget.child ??
-          const SizedBox.shrink(),
+    return GestureDetector(
+      onLongPress: () {
+        if (enablePan && !_menuController.isOpen) {
+          _menuController.open();
+        }
+      },
+      child: _PanSurface(
+        includeInPanArea: false,
+        child:
+            widget.builder?.call(context, _menuController, widget.child) ??
+            widget.child ??
+            const SizedBox.shrink(),
+      ),
     );
   }
 
@@ -570,25 +787,19 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
     return _PanRegion(
       onPanDistanceChanged: _handlePanChange,
       enabled: enablePan,
-      child: Focus(
-        includeSemantics: false,
-        canRequestFocus: false,
-        skipTraversal: true,
-        onFocusChange: _handleFocusChange,
-        child: _AnchorScope(
-          hasLeading: _hasLeadingWidget,
-          child: RawMenuAnchor(
-            useRootOverlay: widget.useRootOverlay,
-            onCloseRequested: _handleCloseRequested,
-            onOpenRequested: _handleOpenRequested,
-            overlayBuilder: _buildMenuOverlay,
-            builder: _buildChild,
-            controller: _menuController,
-            childFocusNode: widget.childFocusNode,
-            consumeOutsideTaps: widget.consumeOutsideTaps,
-            onClose: widget.onClose,
-            onOpen: widget.onOpen,
-          ),
+      child: _AnchorScope(
+        hasLeading: _hasLeadingWidget,
+        child: RawMenuAnchor(
+          useRootOverlay: widget.useRootOverlay,
+          onCloseRequested: _handleCloseRequested,
+          onOpenRequested: _handleOpenRequested,
+          overlayBuilder: _buildMenuOverlay,
+          builder: _buildChild,
+          controller: _menuController,
+          childFocusNode: widget.childFocusNode,
+          consumeOutsideTaps: widget.consumeOutsideTaps,
+          onClose: widget.onClose,
+          onOpen: widget.onOpen,
         ),
       ),
     );
@@ -612,7 +823,6 @@ class _MenuOverlay extends StatefulWidget {
   const _MenuOverlay({
     required this.children,
     required this.focusScopeNode,
-    required this.semanticLabel,
     required this.consumeOutsideTaps,
     required this.constrainCrossAxis,
     required this.constraints,
@@ -624,14 +834,12 @@ class _MenuOverlay extends StatefulWidget {
     required this.alignmentOffset,
     required this.alignment,
     required this.menuAlignment,
-    required this.status,
     required this.visibilityAnimation,
     required this.panDistanceListenable,
   });
 
   final List<Widget> children;
   final FocusScopeNode focusScopeNode;
-  final String? semanticLabel;
   final bool consumeOutsideTaps;
   final bool constrainCrossAxis;
   final BoxConstraints? constraints;
@@ -643,7 +851,6 @@ class _MenuOverlay extends StatefulWidget {
   final Offset alignmentOffset;
   final AlignmentGeometry? alignment;
   final AlignmentGeometry? menuAlignment;
-  final AnimationStatus status;
   final Animation<double> visibilityAnimation;
   final ValueListenable<double> panDistanceListenable;
 
@@ -653,15 +860,13 @@ class _MenuOverlay extends StatefulWidget {
 
 class _MenuOverlayState extends State<_MenuOverlay>
     with TickerProviderStateMixin, WidgetsBindingObserver {
-  static const double _defaultMenuWidth = 250;
-  static const double _accessibleMenuWidth = 343;
-
   static final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     _FocusDownIntent: _FocusDownAction(),
     _FocusUpIntent: _FocusUpAction(),
     _FocusFirstIntent: _FocusFirstAction(),
     _FocusLastIntent: _FocusLastAction(),
   };
+  final ScrollController _scrollController = ScrollController();
   late final AnimationController _panAnimationController;
   late final ProxyAnimation _scaleAnimation = ProxyAnimation(kAlwaysCompleteAnimation);
   final ProxyAnimation _fadeAnimation = ProxyAnimation(kAlwaysCompleteAnimation);
@@ -686,8 +891,6 @@ class _MenuOverlayState extends State<_MenuOverlay>
 
   // A ticker used to drive the pan animation.
   Ticker? _panTicker;
-
-  bool get _excludeInteraction => !widget.status.isForwardOrCompleted;
 
   @override
   void initState() {
@@ -744,6 +947,7 @@ class _MenuOverlayState extends State<_MenuOverlay>
 
   @override
   void dispose() {
+    _scrollController.dispose();
     widget.panDistanceListenable.removeListener(_handlePanDistanceChanged);
     _panTicker
       ?..stop()
@@ -783,8 +987,9 @@ class _MenuOverlayState extends State<_MenuOverlay>
   void _resolveMotion() {
     // Behavior of reduce motion is based on iOS 18.5 simulator. Behavior of
     // disable animations could not be determined, so all animations are disabled.
-    final ui.AccessibilityFeatures accessibilityFeatures =
-        View.of(context).platformDispatcher.accessibilityFeatures;
+    final ui.AccessibilityFeatures accessibilityFeatures = View.of(
+      context,
+    ).platformDispatcher.accessibilityFeatures;
 
     final _CompatAnimationBehavior newAnimationBehavior = switch (accessibilityFeatures) {
       ui.AccessibilityFeatures(disableAnimations: true) => _CompatAnimationBehavior.none,
@@ -879,7 +1084,7 @@ class _MenuOverlayState extends State<_MenuOverlay>
   }
 
   void _handleOutsideTap(PointerDownEvent event) {
-    MenuController.maybeOf(context)!.close();
+    // MenuController.maybeOf(context)!.close();
   }
 
   void _handlePanDistanceChanged() {
@@ -908,7 +1113,7 @@ class _MenuOverlayState extends State<_MenuOverlay>
     // velocity reduces proportionally to create smooth arrival at the target.
     // Higher values mean the animation begins to decelerate sooner, resulting to
     // a smoother animation curve.
-    const double decelerationDistanceThreshold = 40;
+    const double decelerationDistanceThreshold = 80;
 
     // The distance at which the animation will snap to the target distance without
     // any animation.
@@ -947,23 +1152,21 @@ class _MenuOverlayState extends State<_MenuOverlay>
     _panAnimationController.value = 1 - _panCurrentDistance / maxPanDistance;
   }
 
-  // Avoid using a SizeTransition since CupertinoPopupSurface already clips its child.
-  Widget _buildAlignTransition(BuildContext context, Widget? child) {
-    return Align(
-      heightFactor: _sizeAnimation.value,
-      widthFactor: 1,
-      alignment: Alignment.topCenter,
-      child: child,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final BoxConstraints constraints =
-        widget.constraints ??
-        (_isAccessibilityModeEnabled(context)
-            ? const BoxConstraints.tightFor(width: _accessibleMenuWidth)
-            : const BoxConstraints.tightFor(width: _defaultMenuWidth));
+    final BoxConstraints constraints;
+    if (widget.constraints != null) {
+      constraints = widget.constraints!;
+    } else {
+      final bool isAccessibilityModeEnabled = _isAccessibilityModeEnabled(context);
+      final double screenWidth = MediaQuery.widthOf(context);
+      final _CupertinoMenuWidth desiredMenuWidth = _CupertinoMenuWidth.fromScreenWidth(
+        isAccessibilityModeEnabled: isAccessibilityModeEnabled,
+        screenWidth: screenWidth,
+      );
+      constraints = BoxConstraints.tightFor(width: desiredMenuWidth.points);
+    }
+
     Widget child = ConstrainedBox(
       constraints: constraints,
       child: _PanSurface(
@@ -991,35 +1194,29 @@ class _MenuOverlayState extends State<_MenuOverlay>
                 // only guassian blur, linear color filter, and shadows, because the
                 // iOS popup surface does not linearly transform underlying colors.
                 // A custom shader would need to be used to achieve the same effect.
-                // Please correct me if I am wrong.
                 child: CustomPaint(
                   painter: _ShadowPainter(
-                    radius: const Radius.circular(13),
                     brightness: CupertinoTheme.brightnessOf(context),
                     repaint: _fadeAnimation,
                   ),
                   child: FadeTransition(
                     opacity: _fadeAnimation,
+                    alwaysIncludeSemantics: true,
                     child: CupertinoPopupSurface(
-                      // The FadeTransition widget needs to wrap Semantics so that
-                      // the semantics widget senses that the menu is the same
-                      // opacity as the menu items. Otherwise, "a menu cannot be
-                      // empty" is thrown due to the menu items being transparent
-                      // while the menu semantics are still present.
+                      // The FadeTransition widget needs to wrap Semantics so
+                      // that the semantics widget senses that the menu is the
+                      // same opacity as the menu items. Otherwise, "a menu
+                      // cannot be empty" error is thrown due to the menu items
+                      // being transparent while the menu semantics are still
+                      // present.
                       child: Semantics.fromProperties(
                         explicitChildNodes: true,
-                        excludeSemantics: _excludeInteraction,
-                        properties: SemanticsProperties(
-                          role: _excludeInteraction ? null : SemanticsRole.menu,
-                          scopesRoute: true,
-                          namesRoute: true,
-                          label: widget.semanticLabel,
-                        ),
-                        child: AnimatedBuilder(
-                          animation: _sizeAnimation,
-                          builder: _buildAlignTransition,
+                        properties: const SemanticsProperties(scopesRoute: true, namesRoute: true),
+                        child: PrimaryScrollController(
+                          controller: _scrollController,
                           child: SingleChildScrollView(
                             clipBehavior: Clip.none,
+                            physics: const NeverScrollableScrollPhysics(),
                             child: Column(children: _children),
                           ),
                         ),
@@ -1050,19 +1247,20 @@ class _MenuOverlayState extends State<_MenuOverlay>
       child: ScaleTransition(
         scale: _scaleAnimation,
         alignment: _attachmentPointAlignment,
-        child: Builder(
-          builder: (BuildContext context) {
-            final MediaQueryData mediaQuery = MediaQuery.of(context);
-            return CustomSingleChildLayout(
-              delegate: _MenuLayoutDelegate(
-                isPositioned: widget.anchorPosition != null,
-                constrainCrossAxis: widget.constrainCrossAxis,
-                padding: mediaQuery.padding + widget.overlayInsets.resolve(_textDirection),
-                avoidBounds: DisplayFeatureSubScreen.avoidBounds(mediaQuery).toSet(),
-                anchorRect: widget.anchorRect,
-                attachmentPoint: _attachmentPoint,
-                menuAlignment: _menuAlignment,
-              ),
+        child: ValueListenableBuilder<double>(
+          valueListenable: _sizeAnimation,
+          child: child,
+          builder: (BuildContext context, double value, Widget? child) {
+            final ui.Rect anchorRect = widget.anchorPosition != null
+                ? _attachmentPoint & Size.zero
+                : widget.anchorRect;
+            return _MenuLayout(
+              constrainCrossAxis: widget.constrainCrossAxis,
+              anchorRect: anchorRect,
+              padding: widget.overlayInsets.resolve(Directionality.of(context)),
+              attachmentPoint: _attachmentPoint,
+              menuAlignment: _menuAlignment,
+              heightFactor: value,
               child: child,
             );
           },
@@ -1073,12 +1271,11 @@ class _MenuOverlayState extends State<_MenuOverlay>
 }
 
 class _ShadowPainter extends CustomPainter {
-  const _ShadowPainter({required this.radius, required this.brightness, required this.repaint})
-    : super(repaint: repaint);
+  const _ShadowPainter({required this.brightness, required this.repaint}) : super(repaint: repaint);
 
+  static const Radius radius = Radius.circular(13);
   double get shadowOpacity => ui.clampDouble(repaint.value, 0, 1);
   final Animation<double> repaint;
-  final Radius radius;
   final ui.Brightness brightness;
 
   @override
@@ -1089,10 +1286,13 @@ class _ShadowPainter extends CustomPainter {
       Rect.fromCenter(center: center, width: size.width, height: size.height),
       radius,
     );
-    final Paint shadowPaint =
-        Paint()
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal, shadowOpacity * 50)
-          ..color = ui.Color.fromRGBO(0, 0, 10, shadowOpacity * shadowOpacity * 0.24);
+    final double opacityMultiplier = switch (brightness) {
+      ui.Brightness.light => 0.12,
+      ui.Brightness.dark => 0.24,
+    };
+    final Paint shadowPaint = Paint()
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, shadowOpacity * 50)
+      ..color = ui.Color.fromRGBO(0, 0, 10, shadowOpacity * shadowOpacity * opacityMultiplier);
     final ui.Paint clearPaint = Paint()..blendMode = BlendMode.clear;
 
     canvas
@@ -1104,80 +1304,275 @@ class _ShadowPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_ShadowPainter oldDelegate) =>
-      oldDelegate.radius != radius ||
-      oldDelegate.brightness != brightness ||
-      oldDelegate.repaint != repaint;
+      oldDelegate.brightness != brightness || oldDelegate.repaint != repaint;
 
   @override
   bool shouldRebuildSemantics(_ShadowPainter oldDelegate) => false;
 }
 
-class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
-  const _MenuLayoutDelegate({
+// Positions the menu in the view while trying to keep as much as possible
+// visible in the view.
+class _MenuLayout extends SingleChildRenderObjectWidget {
+  const _MenuLayout({
     required this.anchorRect,
-    required this.attachmentPoint,
-    required this.avoidBounds,
-    required this.padding,
     required this.menuAlignment,
     required this.constrainCrossAxis,
-    required this.isPositioned,
+    required this.padding,
+    required this.attachmentPoint,
+    required this.heightFactor,
+    required super.child,
   });
 
-  // Rectangle anchoring the menu
+  // Rectangle anchoring the menu. If the menu was opened at a specific point,
+  // this will be a zero-size rect at that point.
   final ui.Rect anchorRect;
-
-  // The offset of the menu from the top-left corner of the overlay.
-  final ui.Offset attachmentPoint;
-
-  // List of rectangles that the menu should not overlap. Unusable screen area.
-  final Set<Rect> avoidBounds;
-
-  // Whether an explicit position was provided when opening the menu.
-  final bool isPositioned;
 
   // Whether to constrain the menu surface to the cross axis.
   final bool constrainCrossAxis;
 
+  // The padding to subtract from the overlay when positioning the menu.
+  final EdgeInsets padding;
+
   // The resolved alignment of the menu attachment point relative to the menu surface.
   final Alignment menuAlignment;
 
-  // Unsafe bounds used when constraining and positioning the menu.
-  //
-  // Used to prevent the menu from being obstructed by system UI.
-  final EdgeInsets padding;
+  // The offset of the menu from the top-left corner of the overlay.
+  final ui.Offset attachmentPoint;
 
-  @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    // The menu can be at most the size of the overlay minus padding.
-    return BoxConstraints.loose(constraints.biggest).deflate(padding);
+  // The factor by which to multiply the height of the child.
+  final double heightFactor;
+
+  Set<ui.Rect> avoidBounds(List<ui.DisplayFeature> displayFeatures) {
+    return displayFeatures
+        .where((ui.DisplayFeature d) {
+          return d.bounds.shortestSide > 0 || d.state == ui.DisplayFeatureState.postureHalfOpened;
+        })
+        .map((ui.DisplayFeature d) => d.bounds)
+        .toSet();
   }
 
   @override
-  Offset getPositionForChild(Size size, Size childSize) {
-    final ui.Offset position = attachmentPoint - menuAlignment.alongSize(childSize);
-    final ui.Rect anchor = isPositioned ? attachmentPoint & Size.zero : anchorRect;
-    final Rect screen = _findClosestScreen(size, anchor.center, avoidBounds);
-    return _fitInsideScreen(padding.deflateRect(screen), childSize, position, anchor);
-  }
-
-  // Finds the closest screen to the anchor point.
-  Rect _findClosestScreen(Size parentSize, Offset point, Set<Rect> avoidBounds) {
-    final Iterable<ui.Rect> screens = DisplayFeatureSubScreen.subScreensInBounds(
-      Offset.zero & parentSize,
-      avoidBounds,
+  RenderObject createRenderObject(BuildContext context) {
+    final List<ui.DisplayFeature>? displayFeatures = MediaQuery.maybeDisplayFeaturesOf(context);
+    return _RenderMenuLayout(
+      anchorRect: anchorRect,
+      menuAlignment: menuAlignment,
+      avoidBounds: displayFeatures != null ? avoidBounds(displayFeatures) : <Rect>{},
+      constrainCrossAxis: constrainCrossAxis,
+      padding: padding,
+      attachmentPoint: attachmentPoint,
+      heightFactor: heightFactor,
     );
+  }
 
-    Rect closest = screens.first;
-    for (final ui.Rect screen in screens.skip(1)) {
-      if ((screen.center - point).distanceSquared < (closest.center - point).distanceSquared) {
-        closest = screen;
-      }
+  @override
+  void updateRenderObject(BuildContext context, _RenderMenuLayout renderObject) {
+    final List<ui.DisplayFeature>? displayFeatures = MediaQuery.maybeDisplayFeaturesOf(context);
+    renderObject
+      ..anchorRect = anchorRect
+      ..menuAlignment = menuAlignment
+      ..avoidBounds = displayFeatures != null ? avoidBounds(displayFeatures) : <Rect>{}
+      ..constrainCrossAxis = constrainCrossAxis
+      ..padding = padding
+      ..attachmentPoint = attachmentPoint
+      ..heightFactor = heightFactor;
+  }
+}
+
+class _RenderMenuLayout extends RenderShiftedBox {
+  _RenderMenuLayout({
+    required Rect anchorRect,
+    required ui.Offset attachmentPoint,
+    required Set<Rect> avoidBounds,
+    required bool constrainCrossAxis,
+    required EdgeInsets padding,
+    required Alignment menuAlignment,
+    required double heightFactor,
+    RenderBox? child,
+  }) : _anchorRect = anchorRect,
+       _attachmentPoint = attachmentPoint,
+       _avoidBounds = avoidBounds,
+       _constrainCrossAxis = constrainCrossAxis,
+       _padding = padding,
+       _menuAlignment = menuAlignment,
+       _heightFactor = heightFactor,
+       super(child);
+
+  Rect get anchorRect => _anchorRect;
+  Rect _anchorRect;
+  set anchorRect(Rect value) {
+    if (_anchorRect == value) {
+      return;
+    }
+    _anchorRect = value;
+    markNeedsLayout();
+  }
+
+  ui.Offset get attachmentPoint => _attachmentPoint;
+  ui.Offset _attachmentPoint;
+  set attachmentPoint(ui.Offset value) {
+    if (_attachmentPoint == value) {
+      return;
+    }
+    _attachmentPoint = value;
+    markNeedsLayout();
+  }
+
+  Set<Rect> get avoidBounds => _avoidBounds;
+  Set<Rect> _avoidBounds;
+  set avoidBounds(Set<Rect> value) {
+    if (setEquals(_avoidBounds, value)) {
+      return;
+    }
+    _avoidBounds = value;
+    markNeedsLayout();
+  }
+
+  bool get constrainCrossAxis => _constrainCrossAxis;
+  bool _constrainCrossAxis;
+  set constrainCrossAxis(bool value) {
+    if (_constrainCrossAxis == value) {
+      return;
+    }
+    _constrainCrossAxis = value;
+    markNeedsLayout();
+  }
+
+  EdgeInsets get padding => _padding;
+  EdgeInsets _padding;
+  set padding(EdgeInsets value) {
+    if (_padding == value) {
+      return;
+    }
+    _padding = value;
+    markNeedsLayout();
+  }
+
+  Alignment get menuAlignment => _menuAlignment;
+  Alignment _menuAlignment;
+  set menuAlignment(Alignment value) {
+    if (_menuAlignment == value) {
+      return;
+    }
+    _menuAlignment = value;
+    markNeedsLayout();
+  }
+
+  double get heightFactor => _heightFactor;
+  double _heightFactor;
+  set heightFactor(double value) {
+    if (_heightFactor == value) {
+      return;
+    }
+    _heightFactor = value;
+    markNeedsLayout();
+  }
+
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    // The menu can be at most the size of the overlay minus the view padding
+    // in each direction.
+    return BoxConstraints.loose(constraints.biggest);
+  }
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final BoxConstraints childConstraints = getConstraintsForChild(constraints);
+    final double? result = child.getDryBaseline(childConstraints, baseline);
+    if (result == null) {
+      return null;
     }
 
-    return closest;
+    final Size drySize = childConstraints.isTight
+        ? childConstraints.smallest
+        : child.getDryLayout(childConstraints);
+    final ui.Offset position = attachmentPoint - menuAlignment.alongSize(drySize);
+
+    return result +
+        _positionChild(
+          padding.deflateRect(Offset.zero & constraints.biggest),
+          drySize,
+          position,
+          anchorRect,
+        ).dy;
   }
 
-  Offset _fitInsideScreen(Rect screen, Size childSize, Offset position, ui.Rect anchor) {
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    final double width = BoxConstraints.tightForFinite(height: height).maxWidth;
+    if (width.isFinite) {
+      return width;
+    }
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    final double width = BoxConstraints.tightForFinite(height: height).maxWidth;
+    if (width.isFinite) {
+      return width;
+    }
+    return 0.0;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    final double height = BoxConstraints.tightForFinite(width: width).maxHeight;
+    if (height.isFinite) {
+      return height;
+    }
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    final double height = BoxConstraints.tightForFinite(width: width).maxHeight;
+    if (height.isFinite) {
+      return height;
+    }
+    return 0.0;
+  }
+
+  @override
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    return constraints.biggest;
+  }
+
+  @override
+  void performLayout() {
+    final BoxConstraints constraints = this.constraints;
+    if (child != null) {
+      size = constraints.biggest;
+      final BoxConstraints childConstraints = getConstraintsForChild(constraints);
+      assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
+      final Size drySize = child!.getDryLayout(childConstraints);
+      child!.layout(
+        childConstraints.copyWith(maxHeight: drySize.height * _heightFactor),
+        parentUsesSize: true,
+      );
+
+      final ui.Offset position = attachmentPoint - menuAlignment.alongSize(drySize);
+      final ui.Rect screen = _findClosestScreen(size, anchorRect.center, avoidBounds);
+      final Rect paddedScreen = padding.deflateRect(screen);
+      final ui.Offset startPosition = _positionChild(
+        paddedScreen,
+        Size(drySize.width, 0),
+        position,
+        anchorRect,
+      );
+      final ui.Offset endPosition = _positionChild(paddedScreen, drySize, position, anchorRect);
+      final ui.Offset childPosition = Offset.lerp(startPosition, endPosition, _heightFactor)!;
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      childParentData.offset = childPosition;
+    } else {
+      size = constraints.smallest;
+    }
+  }
+
+  Offset _positionChild(Rect screen, Size childSize, Offset position, ui.Rect anchor) {
     double x = position.dx;
     double y = position.dy;
 
@@ -1242,16 +1637,21 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
     return Offset(x, y);
   }
 
-  @override
-  bool shouldRelayout(_MenuLayoutDelegate oldDelegate) {
-    return menuAlignment != oldDelegate.menuAlignment ||
-        isPositioned != oldDelegate.isPositioned ||
-        attachmentPoint != oldDelegate.attachmentPoint ||
-        anchorRect != oldDelegate.anchorRect ||
-        constrainCrossAxis != oldDelegate.constrainCrossAxis ||
-        padding != oldDelegate.padding ||
-        anchorRect != oldDelegate.anchorRect ||
-        !setEquals(avoidBounds, oldDelegate.avoidBounds);
+  // Finds the closest screen to the anchor point.
+  Rect _findClosestScreen(Size parentSize, Offset point, Set<Rect> avoidBounds) {
+    final Iterable<ui.Rect> screens = DisplayFeatureSubScreen.subScreensInBounds(
+      Offset.zero & parentSize,
+      avoidBounds,
+    );
+
+    Rect closest = screens.first;
+    for (final ui.Rect screen in screens.skip(1)) {
+      if ((screen.center - point).distanceSquared < (closest.center - point).distanceSquared) {
+        closest = screen;
+      }
+    }
+
+    return closest;
   }
 }
 
@@ -1388,7 +1788,7 @@ class _CupertinoMenuDivider extends StatelessWidget {
   /// This color is used to make the divider more opaque.
   static const CupertinoDynamicColor color = CupertinoDynamicColor.withBrightness(
     color: Color.fromRGBO(0, 0, 0, 0.24),
-    darkColor: Color.fromRGBO(255, 255, 255, 0.10),
+    darkColor: Color.fromRGBO(255, 255, 255, 0.3),
   );
 
   @override
@@ -1427,11 +1827,10 @@ class _AliasedLinePainter extends CustomPainter {
 
     // BlendMode.overlay is not supported on the web.
     if (!kIsWeb) {
-      final Paint overlayPainter =
-          border.toPaint()
-            ..color = overlayColor
-            ..isAntiAlias = antiAlias
-            ..blendMode = BlendMode.overlay;
+      final Paint overlayPainter = border.toPaint()
+        ..color = overlayColor
+        ..isAntiAlias = antiAlias
+        ..blendMode = BlendMode.overlay;
       canvas.drawLine(p1, p2, overlayPainter);
     }
 
@@ -1497,7 +1896,7 @@ class _AliasedLinePainter extends CustomPainter {
 /// The [leading] and [trailing] widgets display before and after the [child]
 /// widget, respectively. The [leadingWidth] and [trailingWidth] parameters
 /// control the horizontal space that these widgets occupy. The
-/// [leadingAlignment] and [trailingAlignment] parameters control the alignment
+/// [leadingMidpointAlignment] and [trailingMidpointAlignment] parameters control the alignment
 /// of the leading and trailing widgets within their respective spaces.
 ///
 ///
@@ -1553,22 +1952,22 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
     this.subtitle,
     this.leading,
     this.leadingWidth,
-    this.leadingAlignment,
+    this.leadingMidpointAlignment,
     this.trailing,
     this.trailingWidth,
-    this.trailingAlignment,
+    this.trailingMidpointAlignment,
     this.padding,
     this.constraints,
+    this.autofocus = false,
     this.focusNode,
-    this.onHover,
     this.onFocusChange,
+    this.onHover,
     this.onPressed,
     this.decoration,
     this.mouseCursor,
     this.panActivationDelay,
     this.statesController,
     this.behavior = HitTestBehavior.opaque,
-    this.applyInsetScaling = true,
     this.requestCloseOnActivate = true,
     this.requestFocusOnHover = true,
     this.isDestructiveAction = false,
@@ -1584,41 +1983,43 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
   /// The padding applied to this menu item.
   final EdgeInsetsGeometry? padding;
 
-  /// The widget shown before the label; typically a [CupertinoIcons].
+  /// The widget shown before the label. Typically an [Icon].
   final Widget? leading;
 
-  /// The widget shown after the label; typically a [CupertinoIcons].
+  /// The widget shown after the label. Typically an [Icon].
   final Widget? trailing;
 
-  /// A widget displayed underneath the [child]; typically a [Text] widget.
-  ///
-  /// If overriding the default [TextStyle.color] of the [subtitle] widget,
-  /// [CupertinoDynamicColor.resolve] should be used to resolve the color
-  /// against the ambient [CupertinoTheme] and [TextStyle.inherit] should be set
-  /// to false.
+  /// A widget displayed underneath the [child]. Typically a [Text] widget.
   final Widget? subtitle;
 
-  /// Called when the button is tapped or otherwise activated.
+  /// Called when this menu is tapped or otherwise activated.
   ///
   /// If a callback is not provided, then the button will be disabled.
   final VoidCallback? onPressed;
 
-  /// Called when a pointer enters or exits the button response area.
+  /// Triggered when a pointer moves into a position within this widget without
+  /// buttons pressed.
   ///
-  /// The value passed to the callback is true if a pointer has entered the
-  /// button area and false if a pointer has exited.
+  /// Usually this is only fired for pointers which report their location when
+  /// not down (e.g. mouse pointers). Certain devices also fire this event on
+  /// single taps in accessibility mode.
+  ///
+  /// This callback is not triggered by the movement of the widget.
+  ///
+  /// The time that this callback is triggered is during the callback of a
+  /// pointer event, which is always between frames.
   final ValueChanged<bool>? onHover;
 
-  /// Called when the menu item gains or loses focus.
-  ///
-  /// The value parameter is true when the widget's [FocusNode] gains focus, and
-  /// false when it loses focus.
+  /// {@macro flutter.material.inkwell.onFocusChange}
   final ValueChanged<bool>? onFocusChange;
 
   /// Whether hovering should request focus for this widget.
   ///
   /// Defaults to true.
   final bool requestFocusOnHover;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
@@ -1638,13 +2039,14 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
   /// The mouse cursor to display on hover.
   final WidgetStateProperty<MouseCursor>? mouseCursor;
 
-  /// The [WidgetStatesController] that controls the state of this menu item.
+  /// {@macro flutter.material.inkwell.statesController}
   final WidgetStatesController? statesController;
 
   /// How the menu item should respond to hit tests.
   final HitTestBehavior behavior;
 
   /// Determines if the menu will be closed when a [CupertinoMenuItem] is pressed.
+  ///
   /// Defaults to true.
   final bool requestCloseOnActivate;
 
@@ -1660,19 +2062,21 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
   /// The horizontal space in which the [trailing] widget can be placed.
   final double? trailingWidth;
 
-  /// The alignment of the leading widget within the [leadingWidth] of the menu
-  /// item.
-  final AlignmentGeometry? leadingAlignment;
+  /// The alignment of the center point of the leading widget within the
+  /// [leadingWidth] of the menu item.
+  final AlignmentGeometry? leadingMidpointAlignment;
 
-  /// The alignment of the trailing widget within the [trailingWidth] of the
-  /// menu item.
-  final AlignmentGeometry? trailingAlignment;
+  /// The alignment of the center point of the trailing widget within the
+  /// [trailingWidth] of the menu item.
+  final AlignmentGeometry? trailingMidpointAlignment;
 
-  /// Whether the insets of the menu item should scale with
-  /// [MediaQuery.textScalerOf].
+  /// The [BoxConstraints] to apply to the menu item.
   ///
-  /// Defaults to true.
-  final bool applyInsetScaling;
+  /// Because [padding] is applied to the menu item prior to [constraints], [padding]
+  /// will only affect the size of the menu item if the vertical [padding]
+  /// plus the height of the menu item's children exceeds the
+  /// [BoxConstraints.minHeight].
+  final BoxConstraints? constraints;
 
   /// Whether the menu item will respond to user input.
   bool get enabled => onPressed != null;
@@ -1686,16 +2090,6 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
   @override
   bool get allowTrailingSeparator => true;
 
-  /// The [BoxConstraints] to apply to the menu item.
-  ///
-  /// Because [padding] is applied to the menu item prior to [constraints], [padding]
-  /// will only affect the size of the menu item if the vertical [padding]
-  /// plus the height of the menu item's children exceeds the
-  /// [BoxConstraints.minHeight].
-  final BoxConstraints? constraints;
-
-  /// The default [MouseCursor] for a [CupertinoMenuItem].
-  // Obtained from
   static final WidgetStateProperty<MouseCursor> defaultCursor =
       WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
         return !states.contains(WidgetState.disabled) && kIsWeb
@@ -1703,33 +2097,22 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
             : MouseCursor.defer;
       });
 
-  /// The default [TextStyle] applied to the [child] widget.
-  // Color and size were obtained from the iOS 18.5 simulator.
-  static const TextStyle defaultTitleStyle = TextStyle(
-    fontSize: 17,
-    letterSpacing: -0.41,
-    color: CupertinoDynamicColor.withBrightness(
-      color: Color.from(alpha: 0.96, red: 0, green: 0, blue: 0),
-      darkColor: Color.from(alpha: 0.96, red: 255, green: 255, blue: 255),
-    ),
+  // Obtained from the iOS 18.5 simulator debug view.
+  static const Color _childTextColor = CupertinoDynamicColor.withBrightness(
+    color: Color.from(alpha: 0.96, red: 0, green: 0, blue: 0),
+    darkColor: Color.from(alpha: 0.96, red: 1, green: 1, blue: 1),
   );
 
-  // Obtained from the iOS 18.5 simulator.
-  static const double _defaultSubtitleFontSize = 15.0;
-
-  /// The default [TextStyle] applied to the [subtitle] widget.
+  /// The default [Color] applied to a [CupertinoMenuItem]'s [subtitle]
+  /// widget, if a subtitle is provided.
   // A custom blend mode is applied to the subtitle to mimick the visual effect of
   // the iOS menu subtitle. As a result, the defaultSubtitleStyle color does not match the
   // reported color on the iOS 18.5 simulator.
-  static const TextStyle defaultSubtitleStyle = TextStyle(
-    fontSize: _defaultSubtitleFontSize,
-    letterSpacing: -0.21,
-    color: CupertinoDynamicColor.withBrightnessAndContrast(
-      color: Color.from(alpha: 0.4, red: 0, green: 0, blue: 0),
-      darkColor: Color.from(alpha: 0.4, red: 1, green: 1, blue: 1),
-      highContrastColor: Color.from(alpha: 0.8, red: 0, green: 0, blue: 0),
-      darkHighContrastColor: Color.from(alpha: 0.8, red: 1, green: 1, blue: 1),
-    ),
+  static const Color _defaultSubtitleTextColor = CupertinoDynamicColor.withBrightnessAndContrast(
+    color: Color.from(alpha: 0.55, red: 0, green: 0, blue: 0),
+    darkColor: Color.from(alpha: 0.4, red: 1, green: 1, blue: 1),
+    highContrastColor: Color.from(alpha: 0.8, red: 0, green: 0, blue: 0),
+    darkHighContrastColor: Color.from(alpha: 0.8, red: 1, green: 1, blue: 1),
   );
 
   /// The color of a [CupertinoMenuItem] when pressed.
@@ -1784,89 +2167,61 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
   /// The maximum number of lines for the [child] widget when
   /// [MediaQuery.textScalerOf] returns a [TextScaler] that is less than or
   /// equal to 1.25.
-  // Observed to be 2 on the iOS 17.2 simulator.
+  // Observed on the iOS and iPadOS 18.5 simulators.
   static const int defaultMaxLines = 2;
 
   /// The maximum number of lines for the [child] widget when
   /// [MediaQuery.textScalerOf] returns a [TextScaler] that is greater than
   /// 1.25.
   ///
-  // Observed to be infinite on the iOS 17.2 simulator.
+  // Observed on the iOS and iPadOS 18.5 simulators.
   static const int defaultAccessibilityModeMaxLines = 100;
+
+  /// The base font size multiplier for the [trailing] widget when
+  /// [MediaQuery.textScalerOf] returns a [TextScaler] that is less than or
+  /// equal to 1.25.
+  static const double _trailingIconFontSizeMultiplier = 1.24;
 
   /// Resolves the title [TextStyle] in response to
   /// [CupertinoThemeData.brightness], [isDestructiveAction], and [enabled].
   //
-  // Approximated from the iOS 17.2 simulator.
-  TextStyle _resolveChildStyle(BuildContext context) {
-    final Color color;
+  // Approximated from the iOS and iPadOS 18.5 simulators.
+  TextStyle _resolveDefaultTextStyle(BuildContext context, TextScaler textScaler) {
+    Color color;
     if (!enabled) {
       color = CupertinoColors.systemGrey;
     } else if (isDestructiveAction) {
       color = CupertinoColors.systemRed;
     } else {
-      color = defaultTitleStyle.color!;
+      color = _childTextColor;
     }
 
-    return defaultTitleStyle.copyWith(
-      color: CupertinoDynamicColor.maybeResolve(color, context) ?? color,
-      fontWeight: FontWeight.normal,
-      fontFamily: CupertinoTheme.of(context).textTheme.textStyle.fontFamily,
-    );
+    return _DynamicTypeSet.body
+        .resolveTextStyle(textScaler)
+        .copyWith(
+          // Font size will be scaled by TextScaler.
+          fontSize: 17,
+          color: CupertinoDynamicColor.resolve(color, context),
+        );
   }
 
-  // The font sizes observed on the iOS 18.5 simulator differ from the HIG
-  // guidelines for fonts, so a correction factor is applied to the subtitle
-  // font size to match the observed sizes.
-  //
-  // iOS font sizes:
-  //  Units    | -3 | -2 | -1 |  0 |  2 |  4 |  6 | 11 | 16 | 23 | 30 | 36
-  //  Subtitle | 12 | 13 | 14 | 15 | 17 | 19 | 21 | 25 | 30 | 36 | 42 | 49
-  double _calculateSubtitleCorrectionFactor(BuildContext context) {
-    final int units = _normalizeTextScale(context);
-    if (units == 0) {
-      return 1.0;
-    }
-
-    final TextScaler textScaler = MediaQuery.textScalerOf(context);
-    final double higFontSize = textScaler.scale(_defaultSubtitleFontSize);
-    final double linearTextSize = units + _defaultSubtitleFontSize;
-
-    // correctedTextSize is the font size observed on iOS 18.5, and the font
-    // size we want to match.
-    final double correctedTextSize =
-        linearTextSize +
-        switch (units) {
-          < 16 => 0,
-          < 23 => -1,
-          == 30 => -3,
-          _ => -2,
-        };
-
-    // Return the factor to convert the HIG font size to the desired font size.
-    return correctedTextSize / higFontSize;
-  }
-
-  TextStyle _resolveSubtitleStyle(BuildContext context) {
-    TextStyle subtitleStyle = defaultSubtitleStyle;
-    final double correctionFactor = _calculateSubtitleCorrectionFactor(context);
-    if (correctionFactor != 1.0) {
-      final double fontSize = defaultSubtitleStyle.fontSize!;
-      subtitleStyle = subtitleStyle.copyWith(fontSize: correctionFactor * fontSize);
-    }
-
-    final bool isDark = CupertinoTheme.brightnessOf(context) == Brightness.dark;
-    subtitleStyle = subtitleStyle.copyWith(
-      fontFamily: CupertinoTheme.of(context).textTheme.textStyle.fontFamily,
-      foreground:
-          Paint()
+  TextStyle _resolveDefaultSubtitleStyle(BuildContext context, TextScaler textScaler) {
+    final bool isDark = CupertinoTheme.maybeBrightnessOf(context) == Brightness.dark;
+    return _DynamicTypeSet.subhead
+        .resolveTextStyle(textScaler)
+        .copyWith(
+          // Font size will be scaled by TextScaler.
+          fontSize: 15,
+          textBaseline: TextBaseline.alphabetic,
+          foreground: Paint()
+            // Per iOS 18.5 simulator:
+            // Dark mode: linearDodge is used on iOS to achieve a lighter color.
+            // This is approximated with BlendMode.plus.
+            // For light mode: plusDarker is used on iOS to achieve a darker color.
+            // HardLight is used as an approximation.
             ..blendMode = isDark ? BlendMode.plus : BlendMode.hardLight
-            ..color =
-                CupertinoDynamicColor.maybeResolve(defaultSubtitleStyle.color, context) ??
-                defaultSubtitleStyle.color!,
-    );
-
-    return subtitleStyle;
+            ..color = CupertinoDynamicColor.resolve(_defaultSubtitleTextColor, context),
+        );
   }
 
   void _handleSelect(BuildContext context) {
@@ -1879,30 +2234,39 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle childTextStyle = _resolveChildStyle(context);
+    final TextScaler textScaler = MediaQuery.maybeTextScalerOf(context) ?? TextScaler.noScaling;
+    final TextStyle defaultTextStyle = _resolveDefaultTextStyle(context, textScaler);
     final bool isAccessibilityModeEnabled = _isAccessibilityModeEnabled(context);
+    Widget? leadingWidget;
+    Widget? trailingWidget;
 
-    Widget label = _CupertinoMenuItemLabel(
-      padding: padding,
-      constraints: constraints,
-      trailing: isAccessibilityModeEnabled ? trailing : null,
-      leading: leading,
-      leadingAlignment: leadingAlignment,
-      trailingAlignment: trailingAlignment,
-      leadingWidth: leadingWidth,
-      trailingWidth: trailingWidth,
-      applyInsetScaling: applyInsetScaling,
-      subtitle:
-          subtitle != null
-              ? DefaultTextStyle.merge(style: _resolveSubtitleStyle(context), child: subtitle!)
-              : null,
-      child: DefaultTextStyle.merge(style: childTextStyle, child: child),
-    );
+    if (leading != null) {
+      leadingWidget = DefaultTextStyle.merge(
+        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: _childTextColor),
+        child: IconTheme.merge(
+          data: const IconThemeData(
+            size: 15,
+            weight: 700,
+            applyTextScaling: true,
+            color: _childTextColor,
+          ),
+          child: leading!,
+        ),
+      );
+    }
 
-    if (leading != null || trailing != null) {
-      label = IconTheme.merge(
-        data: IconThemeData(size: 21, color: childTextStyle.color, applyTextScaling: true),
-        child: label,
+    if (trailing != null && !isAccessibilityModeEnabled) {
+      final double fontSize = _trailingIconFontSizeMultiplier * textScaler.scale(17);
+      trailingWidget = DefaultTextStyle(
+        style: TextStyle(fontSize: fontSize.roundToDouble(), color: _childTextColor),
+        child: IconTheme.merge(
+          data: IconThemeData(
+            size: fontSize.roundToDouble(),
+            color: _childTextColor,
+            applyTextScaling: false,
+          ),
+          child: trailing!,
+        ),
       );
     }
 
@@ -1913,8 +2277,8 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
       onPressed: onPressed != null ? () => _handleSelect(context) : null,
       onHover: onHover,
       onFocusChange: onFocusChange,
+      autofocus: autofocus,
       focusNode: focusNode,
-      focusNodeDebugLabel: child.toString(),
       decoration: decoration ?? defaultDecoration,
       statesController: statesController,
       behavior: behavior,
@@ -1922,8 +2286,24 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
         maxLines: isAccessibilityModeEnabled ? defaultAccessibilityModeMaxLines : defaultMaxLines,
         overflow: TextOverflow.ellipsis,
         softWrap: true,
-        style: const TextStyle(height: 1.25, textBaseline: TextBaseline.ideographic),
-        child: label,
+        style: TextStyle(color: defaultTextStyle.color),
+        child: _CupertinoMenuItemLabel(
+          padding: padding,
+          constraints: constraints,
+          trailing: trailingWidget,
+          leading: leadingWidget,
+          leadingMidpointAlignment: leadingMidpointAlignment,
+          trailingMidpointAlignment: trailingMidpointAlignment,
+          leadingWidth: leadingWidth,
+          trailingWidth: trailingWidth,
+          subtitle: subtitle != null
+              ? DefaultTextStyle.merge(
+                  style: _resolveDefaultSubtitleStyle(context, textScaler),
+                  child: subtitle!,
+                )
+              : null,
+          child: DefaultTextStyle.merge(style: defaultTextStyle, child: child),
+        ),
       ),
     );
   }
@@ -1957,187 +2337,343 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
 class _CupertinoMenuItemLabel extends StatelessWidget {
   const _CupertinoMenuItemLabel({
     required this.child,
+    this.subtitle,
     this.leading,
     this.leadingWidth,
-    AlignmentGeometry? leadingAlignment,
+    AlignmentGeometry? leadingMidpointAlignment,
     this.trailing,
     this.trailingWidth,
-    AlignmentGeometry? trailingAlignment,
-    this.subtitle,
-    this.applyInsetScaling = true,
+    AlignmentGeometry? trailingMidpointAlignment,
     BoxConstraints? constraints,
     this.padding,
-  }) : _leadingAlignment = leadingAlignment ?? defaultLeadingAlignment,
-       _trailingAlignment = trailingAlignment ?? defaultTrailingAlignment,
+  }) : _leadingAlignment = leadingMidpointAlignment,
+       _trailingAlignment = trailingMidpointAlignment,
        _constraints = constraints;
 
-  // Values were obtained from the iOS 17.2 simulator. Values were measured
-  // with a TextScaler of 1.0.
-  static const double defaultHorizontalWidth = 16.0;
-  static const double leadingWidgetWidth = 32.0;
-  static const double trailingWidgetWidth = 44.0;
+  // Values were obtained from the iOS 18.5 simulator.
+  static const double _defaultHorizontalWidth = 16;
+  static const double _leadingWidthSlope = -311 / 1000;
+  static const double _leadingMidpointSlope = 118 / 1000000;
+  static const double _leadingMidpointYIntercept = 73 / 125;
+  static const double _trailingWidthSlope = 1 / 10;
+  static const double _firstBaselineToTopSlope = 14 / 11;
+  static const double _lastBaselineToBottomSlope = 71 / 100;
 
-  // Because iOS uses last baseline alignment to position the child and subtitle
-  // and Flutter does not yet support last baseline alignment, padding is used
-  // to approximate the vertical alignment of the text.
-  static const EdgeInsetsDirectional defaultPadding = EdgeInsetsDirectional.symmetric(
-    vertical: 11.5,
-  );
-
-  /// Approximate position of the leading widget within the leading width.
-  static const AlignmentDirectional defaultLeadingAlignment = AlignmentDirectional(1 / 6, 0.0);
-
-  /// Approximate position of the trailing widget within the trailing width.
-  static const AlignmentDirectional defaultTrailingAlignment = AlignmentDirectional(-3 / 11, 0.0);
-
-  // Minimum default constraints of a menu item before one physical pixel is
-  // subtracted from the height. If the pixel ratio is 2, then the final
-  // vertical minHeight will be 43.5. Height retrieved from the iOS 17.2 simulator
-  // debug view.
-  static const double defaultHeightWithDivider = kMinInteractiveDimensionCupertino;
-
-  /// The padding for the contents of the menu item.
-  ///
-  /// If null, the [defaultPadding] minus one physical pixel is used for the
-  /// total vertical padding.
-  final EdgeInsetsGeometry? padding;
-
-  /// The widget shown before the title. Typically an [Icon].
-  ///
-  /// Defaults to null.
   final Widget? leading;
-
-  /// The widget shown after the title. Typically an [Icon].
-  ///
-  /// Defaults to null.
-  final Widget? trailing;
-
-  /// The width of the leading portion of the label.
-  ///
-  /// If null, [leadingWidgetWidth] is used when this menu item or a sibling
-  /// menu item has a leading widget, and [defaultHorizontalWidth] is used
-  /// otherwise.
   final double? leadingWidth;
+  final AlignmentGeometry? _leadingAlignment;
 
-  /// The width of the trailing portion of the label.
-  ///
-  /// Defaults to [trailingWidgetWidth] when this menu item has a trailing
-  /// widget, and [defaultHorizontalWidth] otherwise.
+  final Widget? trailing;
   final double? trailingWidth;
+  final AlignmentGeometry? _trailingAlignment;
 
-  /// The alignment of the leading widget within the leading portion of the menu
-  /// item.
-  ///
-  /// Defaults to [defaultLeadingAlignment] when null.
-  final AlignmentGeometry _leadingAlignment;
-
-  /// The alignment of the trailing widget within the trailing portion of the
-  /// menu item.
-  ///
-  /// Defaults to [defaultTrailingAlignment].
-  final AlignmentGeometry _trailingAlignment;
-
-  /// The constraints applied to this menu item.
-  ///
-  /// If null, [defaultConstraints] is used.
+  final Widget child;
+  final Widget? subtitle;
+  final EdgeInsetsGeometry? padding;
   final BoxConstraints? _constraints;
 
-  /// The top center content of the menu item. Typically a [Text] widget.
-  final Widget child;
+  /// Returns the nearest multiple of [to] to [value].
+  /// ```dart
+  /// print(quantize(3.15, to: 0));    // 3.14
+  /// print(quantize(3.15, to: 1));    // 3
+  /// print(quantize(3.15, to: 0.1));  // 3.2
+  /// print(quantize(3.15, to: 0.01)); // 3.15
+  /// print(quantize(3.15, to: 0.25)); // 3.25
+  /// print(quantize(3.15, to: 0.5));  // 3.0
+  /// print(quantize(-3.15, to: 0.5)); // -3.0
+  /// print(quantize(-3.15, to: 0.1)); // -3.2
+  /// ```
+  static double _quantize(double value, {required double to}) {
+    if (to == 0) {
+      return value;
+    }
+    return (value / to).round() * to;
+  }
 
-  /// The bottom center content of the menu item. Typically a [Text] widget.
-  final Widget? subtitle;
+  // Tested across all iOS dynamic type sizes on iOS and iPadOS 18.5 simulators.
+  // Expected values deviate by no more than 1 physical pixel.
+  double _resolveLeadingWidth(TextScaler textScaler, double pixelRatio, double lineHeight) {
+    final double units = _normalizeTextScale(textScaler);
+    final double value = 10 + _leadingWidthSlope * units;
+    return _quantize(value, to: pixelRatio) + lineHeight;
+  }
 
-  /// Whether the insets of the menu item should scale with the
-  /// [MediaQuery.textScalerOf].
-  final bool applyInsetScaling;
+  // Tested across all iOS dynamic type sizes on iOS and iPadOS 18.5 simulators.
+  // Expected values deviate by no more than 1 physical pixel.
+  double _resolveTrailingWidth(TextScaler textScaler, double pixelRatio, double lineHeight) {
+    final double units = _normalizeTextScale(textScaler);
+    final double value = 22 + _trailingWidthSlope * units;
+    return _quantize(value, to: pixelRatio) + lineHeight;
+  }
+
+  AlignmentDirectional _resolveTrailingAlignment(double trailingWidth) {
+    final double horizontalOffset = trailingWidth / 2 + 6;
+    final double horizontalRatio = (trailingWidth - horizontalOffset) / trailingWidth;
+    final double horizontalAlignment = (horizontalRatio * 2) - 1;
+    return AlignmentDirectional(horizontalAlignment, 0.0);
+  }
+
+  AlignmentDirectional _resolveLeadingAlignment(double leadingWidth, TextScaler textScaler) {
+    final double units = _normalizeTextScale(textScaler);
+    final double horizontalRatio = _leadingMidpointSlope * units + _leadingMidpointYIntercept;
+    final double horizontalAlignment = (horizontalRatio * 2) - 1;
+    return AlignmentDirectional(horizontalAlignment, 0.0);
+  }
+
+  double _resolveFirstBaselineToTop(double lineHeight, double pixelRatio) {
+    return _quantize(lineHeight * _firstBaselineToTopSlope, to: 1 / pixelRatio);
+  }
+
+  double _resolveLastBaselineToBottom(double lineHeight, double pixelRatio) {
+    return _quantize(lineHeight * _lastBaselineToBottomSlope, to: 1 / pixelRatio);
+  }
+
+  EdgeInsets _resolvePadding(double minimumHeight, double lineHeight) {
+    final double padding = math.max(0, minimumHeight - lineHeight);
+    return EdgeInsets.symmetric(vertical: padding / 2);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final double textScale = MediaQuery.maybeTextScalerOf(context)?.scale(1) ?? 1.0;
+    final TextScaler textScaler = MediaQuery.maybeTextScalerOf(context) ?? TextScaler.noScaling;
     final double pixelRatio = MediaQuery.maybeDevicePixelRatioOf(context) ?? 1.0;
-    final double physicalPixel = 1 / pixelRatio;
-
+    final TextStyle dynamicBodyText = _DynamicTypeSet.body.resolveTextStyle(textScaler);
+    final double lineHeight = dynamicBodyText.fontSize! * (dynamicBodyText.height ?? 1.0);
     final bool showLeadingWidget =
         leading != null || (CupertinoMenuAnchor.maybeHasLeadingOf(context) ?? false);
 
-    double resolvedLeadingWidth =
+    // TODO(davidhicks980): Use last baseline layout when supported.
+    // (https://github.com/flutter/flutter/issues/4614)
+
+    // The actual menu item layout uses first and last baselines to position the
+    // text, but Flutter does not support last baseline alignment.
+    //
+    // To approximate the padding, subtract the default height of a single line
+    // of text from the height of a single-line menu item, and divide the result
+    // in half to get an estimated top and bottom padding. The downside to this
+    // approach is that child and subtitle text with different line heights may
+    // appear to have uneven padding.
+    final double minimumHeight =
+        _resolveFirstBaselineToTop(lineHeight, pixelRatio) +
+        _resolveLastBaselineToBottom(lineHeight, pixelRatio);
+    final BoxConstraints constraints = _constraints ?? BoxConstraints(minHeight: minimumHeight);
+    final EdgeInsetsGeometry resolvedPadding =
+        padding ?? _resolvePadding(minimumHeight, lineHeight);
+
+    final double resolvedLeadingWidth =
         leadingWidth ??
         (showLeadingWidget
-            ? leadingWidgetWidth //
-            : defaultHorizontalWidth);
+            ? _resolveLeadingWidth(textScaler, pixelRatio, lineHeight)
+            : _defaultHorizontalWidth);
 
-    double resolvedTrailingWidth =
+    final double resolvedTrailingWidth =
         trailingWidth ??
         (trailing != null
-            ? trailingWidgetWidth //
-            : defaultHorizontalWidth);
-
-    // Subtract a physical pixel from the default padding if no padding is
-    // specified by the user. Padding retrieved from the iOS 17.2 simulator
-    // debug view.
-    EdgeInsetsGeometry padding =
-        this.padding ?? (defaultPadding - EdgeInsetsDirectional.symmetric(vertical: physicalPixel));
-
-    BoxConstraints constraints =
-        _constraints ?? BoxConstraints(minHeight: defaultHeightWithDivider - physicalPixel);
-
-    if (applyInsetScaling && textScale != 1.0) {
-      // Padding scales with textScale, but at a slower rate than text. Square
-      // root is a (very) rough estimate the padding scaling factor.
-      final double paddingScaler = math.sqrt(textScale);
-      padding *= paddingScaler;
-      constraints *= paddingScaler;
-      resolvedLeadingWidth *= paddingScaler;
-      resolvedTrailingWidth *= paddingScaler;
-    }
+            ? _resolveTrailingWidth(textScaler, pixelRatio, lineHeight)
+            : _defaultHorizontalWidth);
 
     return ConstrainedBox(
       constraints: constraints,
       child: Padding(
-        padding: padding,
+        padding: resolvedPadding,
         child: Row(
           children: <Widget>[
-            // The leading and trailing widgets are wrapped in SizedBoxes and
-            // then aligned, rather than just padded, because the alignment
-            // behavior of the SizedBoxes appears to be more consistent with
-            // the iOS simulator.
             SizedBox(
               width: resolvedLeadingWidth,
-              child: showLeadingWidget ? Align(alignment: _leadingAlignment, child: leading) : null,
+              child: leading != null
+                  ? _AlignMidpoint(
+                      alignment:
+                          _leadingAlignment ??
+                          _resolveLeadingAlignment(resolvedLeadingWidth, textScaler),
+                      child: leading,
+                    )
+                  : null,
             ),
-            // Ideally, we would align text with a first-baseline of 28 a
-            // last-baseline of 15.667 (iOS 17.4 simulator), but we have to
-            // accommodate multiple text styles for their menu implementation.
-            // Instead, padding is used to approximate the vertical alignment of
-            // the text.
             Expanded(
-              child:
-                  subtitle == null
-                      ? child
-                      : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[child, const SizedBox(height: 1), subtitle!],
-                      ),
+              child: subtitle == null
+                  ? child
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[child, const SizedBox(height: 1), subtitle!],
+                    ),
             ),
             SizedBox(
               width: resolvedTrailingWidth,
-              child:
-                  trailing != null
-                      ? Align(
-                        alignment: _trailingAlignment,
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(maxHeight: 20 * textScale),
-                          child: trailing,
-                        ),
-                      )
-                      : null,
+              child: trailing != null
+                  // On native platform, the trailing widget is constrained to a
+                  // maximum height of minimumHeight - 12 and a maximum width of
+                  // resolvedTrailingWidth - 20. However, because the trailing
+                  // width is customizable on Flutter, the maximum width is not
+                  // set.
+                  ? _AlignMidpoint(
+                      alignment:
+                          _trailingAlignment ?? _resolveTrailingAlignment(resolvedTrailingWidth),
+                      child: trailing,
+                    )
+                  : null,
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+/// A widget that positions the midpoint of its child at an alignment within
+/// itself.
+///
+/// Almost identical to [Align], but aligns the midpoint of the child rather
+/// than the top-left corner.
+class _AlignMidpoint extends SingleChildRenderObjectWidget {
+  /// Creates a widget that positions its child's center point at a specific
+  /// [alignment].
+  ///
+  /// The [alignment] and [textDirection] parameters are required and must not
+  /// be null.
+  const _AlignMidpoint({required this.alignment, super.child});
+
+  /// The alignment for positioning the child's horizontal midpoint.
+  final AlignmentGeometry alignment;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderAlignMidpoint(
+      alignment: alignment,
+      textDirection: Directionality.maybeOf(context),
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderAlignMidpoint renderObject) {
+    renderObject
+      ..alignment = alignment
+      ..textDirection = Directionality.maybeOf(context);
+  }
+}
+
+class _RenderAlignMidpoint extends RenderAligningShiftedBox {
+  _RenderAlignMidpoint({super.alignment, super.textDirection});
+
+  @override
+  @protected
+  Size computeDryLayout(BoxConstraints constraints) {
+    final bool shrinkWrapWidth = constraints.maxWidth == double.infinity;
+    final bool shrinkWrapHeight = constraints.maxHeight == double.infinity;
+    if (child != null) {
+      final Size childSize = child!.getDryLayout(constraints.loosen());
+      return constraints.constrain(
+        Size(
+          shrinkWrapWidth ? childSize.width : double.infinity,
+          shrinkWrapHeight ? childSize.height : double.infinity,
+        ),
+      );
+    }
+    return constraints.constrain(
+      Size(shrinkWrapWidth ? 0.0 : double.infinity, shrinkWrapHeight ? 0.0 : double.infinity),
+    );
+  }
+
+  @override
+  void alignChild() {
+    assert(child != null);
+    assert(!child!.debugNeedsLayout);
+    assert(child!.hasSize);
+    assert(hasSize);
+    final BoxParentData childParentData = child!.parentData! as BoxParentData;
+    final Alignment resolvedAlignment = alignment.resolve(textDirection);
+    final Offset parentPosition = resolvedAlignment.alongSize(size);
+
+    // Position the child so its midpoint aligns with the target
+    final Offset(:double dx, :double dy) = parentPosition - child!.size.center(Offset.zero);
+
+    // Ensure the child remains within the parent's bounds
+    final double childX = ui.clampDouble(dx, 0.0, size.width - child!.size.width);
+    final double childY = ui.clampDouble(dy, 0.0, size.height - child!.size.height);
+
+    childParentData.offset = Offset(childX, childY);
+  }
+
+  @override
+  void performLayout() {
+    final BoxConstraints constraints = this.constraints;
+    final bool shrinkWrapWidth = constraints.maxWidth == double.infinity;
+    final bool shrinkWrapHeight = constraints.maxHeight == double.infinity;
+
+    if (child != null) {
+      child!.layout(constraints.loosen(), parentUsesSize: true);
+      size = constraints.constrain(
+        Size(
+          shrinkWrapWidth ? child!.size.width : double.infinity,
+          shrinkWrapHeight ? child!.size.height : double.infinity,
+        ),
+      );
+      alignChild();
+    } else {
+      size = constraints.constrain(
+        Size(shrinkWrapWidth ? 0.0 : double.infinity, shrinkWrapHeight ? 0.0 : double.infinity),
+      );
+    }
+  }
+
+  @override
+  void debugPaintSize(PaintingContext context, Offset offset) {
+    super.debugPaintSize(context, offset);
+    assert(() {
+      final Paint paint;
+      if (child != null && !child!.size.isEmpty) {
+        paint = Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.0
+          ..color = const Color(0xFFFFFF00);
+        final BoxParentData childParentData = child!.parentData! as BoxParentData;
+        // vertical alignment arrows
+        final double headSize = math.min(childParentData.offset.dy * 0.2, 10.0);
+        final ui.Size childSize = child!.size;
+        final double horizontalMidpoint =
+            offset.dx + childParentData.offset.dx + childSize.width / 2;
+        final double verticalMidpoint =
+            offset.dy + childParentData.offset.dy + childSize.height / 2;
+
+        final ui.Path path = Path()
+          // Top arrow
+          ..moveTo(horizontalMidpoint, offset.dy)
+          ..relativeLineTo(0.0, childParentData.offset.dy - headSize)
+          ..relativeLineTo(headSize, 0.0)
+          ..relativeLineTo(-headSize, headSize)
+          ..relativeLineTo(-headSize, -headSize)
+          ..relativeLineTo(headSize, 0.0)
+          // Bottom arrow
+          ..moveTo(horizontalMidpoint, offset.dy + size.height + headSize)
+          ..relativeLineTo(0.0, -size.height + childSize.height + childParentData.offset.dy)
+          ..relativeLineTo(headSize, 0)
+          ..relativeLineTo(-headSize, -headSize)
+          ..relativeLineTo(-headSize, headSize)
+          ..relativeLineTo(headSize, 0)
+          // Left arrow
+          ..moveTo(offset.dx, verticalMidpoint)
+          ..relativeLineTo(childParentData.offset.dx - headSize, 0.0)
+          ..relativeLineTo(0.0, headSize)
+          ..relativeLineTo(headSize, -headSize)
+          ..relativeLineTo(-headSize, -headSize)
+          ..relativeLineTo(0.0, headSize)
+          // Right arrow
+          ..moveTo(offset.dx + size.width, verticalMidpoint)
+          ..relativeLineTo(
+            -size.width + childSize.width + childParentData.offset.dx + headSize,
+            0.0,
+          )
+          ..relativeLineTo(0.0, headSize)
+          ..relativeLineTo(-headSize, -headSize)
+          ..relativeLineTo(headSize, -headSize)
+          ..relativeLineTo(0.0, headSize);
+        context.canvas.drawPath(path, paint);
+      } else {
+        paint = Paint()..color = const Color(0x90909090);
+        context.canvas.drawRect(offset & size, paint);
+      }
+      return true;
+    }());
   }
 }
 
@@ -2183,107 +2719,41 @@ class CupertinoLargeMenuDivider extends StatelessWidget with CupertinoMenuEntryM
 
   @override
   Widget build(BuildContext context) {
-    return Container(height: _height, color: CupertinoDynamicColor.resolve(color, context));
+    return ColoredBox(
+      color: CupertinoDynamicColor.resolve(color, context),
+      child: const SizedBox(height: _height),
+    );
   }
 }
 
-/// A gesture and focus handler for [CupertinoMenuItem].
-///
-/// The [onPressed] callback is called when the user taps the menu item, pans over
-/// the menu item and lifts their finger, or when the user long-presses a menu
-/// item that has a non-null [panActivationDelay].
-///
-/// A [mouseCursor] can be provided to change the cursor that appears when a
-/// mouse hovers over the menu item. If [mouseCursor] is null, the
-/// [SystemMouseCursors.click] cursor is used.
-///
-/// If [focusNode] is provided, the menu item will be focusable. When the menu
-/// item is focused, the [focusedColor] will be used to highlight the menu item.
 class _CupertinoMenuItemInteractionHandler extends StatefulWidget {
-  /// Creates a [_CupertinoMenuItemInteractionHandler].
-  ///
-  /// The [child] and [pressedColor] arguments are required and must not be null.
   const _CupertinoMenuItemInteractionHandler({
-    required this.child,
-    required this.decoration,
-    required this.mouseCursor,
-    required this.focusNode,
-    required this.panActivationDelay,
-    required this.onPressed,
     required this.onHover,
+    required this.onPressed,
     required this.onFocusChange,
-    required this.focusNodeDebugLabel,
+    required this.focusNode,
+    required this.autofocus,
     required this.requestFocusOnHover,
+    required this.panActivationDelay,
     required this.behavior,
     required this.statesController,
+    required this.mouseCursor,
+    required this.decoration,
+    required this.child,
   });
 
-  /// The widget displayed in the center of this button.
-  ///
-  /// Typically this is the button's label, using a [Text] widget.
-  ///
-  /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget child;
-
-  /// Called when the button is tapped or otherwise activated.
-  ///
-  /// If this callback is null, then the button will be disabled.
-  ///
-  /// See also:
-  ///
-  ///  * [enabled], which is true if the button is enabled.
-  final VoidCallback? onPressed;
-
-  /// Called when a pointer enters or exits the button response area.
-  ///
-  /// The value passed to the callback is true if a pointer has entered button
-  /// area and false if a pointer has exited.
   final ValueChanged<bool>? onHover;
-
-  /// Handler called when the focus changes.
-  ///
-  /// Called with true if this widget's node gains focus, and false if it loses
-  /// focus.
+  final VoidCallback? onPressed;
   final ValueChanged<bool>? onFocusChange;
-
-  /// Whether hovering can request focus.
-  ///
-  /// Defaults to false.
-  final bool requestFocusOnHover;
-
-  /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
-
-  /// Delay between a user's pointer entering a menu item during a pan, and
-  /// the menu item being tapped.
-  ///
-  /// If null, the menu item will not be pressed when panned over.
+  final bool autofocus;
+  final bool requestFocusOnHover;
   final Duration? panActivationDelay;
-
-  /// How the menu item should respond to hit tests.
   final HitTestBehavior behavior;
-
-  /// A debug label that is used to identify the focus node.
-  final String? focusNodeDebugLabel;
-
-  /// The mouse cursor to display on hover.
-  final WidgetStateProperty<MouseCursor> mouseCursor;
-
-  /// The decoration to show around the menu item based on its state.
-  final WidgetStateProperty<BoxDecoration> decoration;
-
-  /// Represents the interactive "state" of this widget in terms of a set of
-  /// [WidgetState]s, like [WidgetState.pressed] and [WidgetState.focused].
-  ///
-  /// Using [WidgetStatesController.addListener], listeners can be added to
-  /// observe state changes in this widget. To add or remove states to this widget,
-  /// [WidgetStatesController.update] can be used. Note that added states are
-  /// only visually represented. In other words, adding [WidgetState.focused] to
-  /// this widget will make the widget look like it has focus, but it will not
-  /// actually receive focus.
   final WidgetStatesController? statesController;
-
-  bool get enabled => onPressed != null;
+  final WidgetStateProperty<BoxDecoration> decoration;
+  final WidgetStateProperty<MouseCursor> mouseCursor;
+  final Widget child;
 
   @override
   State<_CupertinoMenuItemInteractionHandler> createState() =>
@@ -2293,36 +2763,80 @@ class _CupertinoMenuItemInteractionHandler extends StatefulWidget {
 class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItemInteractionHandler>
     implements _PanTarget {
   late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
-    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _simulateTap),
-    ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: _simulateTap),
+    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleActivation),
+    ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: _handleActivation),
   };
-
-  // If a focus node isn't given to the widget, then we have to manage our own.
-  FocusNode get _focusNode => widget.focusNode ?? (_internalFocusNode ??= FocusNode());
-  FocusNode? _internalFocusNode;
-
-  Set<WidgetState> _states = <WidgetState>{};
-  WidgetStatesController get _statesController {
-    return widget.statesController ?? (_internalStatesController ??= WidgetStatesController());
-  }
-
-  WidgetStatesController? _internalStatesController;
-  bool get isHovered => _statesController.value.contains(WidgetState.hovered);
-  bool get isPressed => _statesController.value.contains(WidgetState.pressed);
-  bool get isFocused => _statesController.value.contains(WidgetState.focused);
-  bool get isDragged => _statesController.value.contains(WidgetState.dragged);
-  bool get isEnabled => !_statesController.value.contains(WidgetState.disabled);
-
   Timer? _longPanPressTimer;
 
-  void _storeStates() {
-    _states = _statesController.value;
+  // If a focus node isn't given to the widget, then we have to manage our own.
+  FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
+  FocusNode? _internalFocusNode;
+
+  WidgetStatesController? _internalStatesController;
+  WidgetStatesController get _statesController {
+    return widget.statesController ?? _internalStatesController!;
+  }
+
+  Map<Type, GestureRecognizerFactory>? gestures;
+
+  bool get isHovered => _isHovered;
+  bool _isHovered = false;
+  set isHovered(bool value) {
+    if (_isHovered != value) {
+      _isHovered = value;
+      _statesController.update(WidgetState.hovered, value);
+    }
+  }
+
+  bool get isPressed => _isPressed;
+  bool _isPressed = false;
+  set isPressed(bool value) {
+    if (_isPressed != value) {
+      _isPressed = value;
+      _statesController.update(WidgetState.pressed, value);
+    }
+  }
+
+  bool get isPanned => _isPanned;
+  bool _isPanned = false;
+  set isPanned(bool value) {
+    if (_isPanned != value) {
+      _isPanned = value;
+      _statesController.update(WidgetState.dragged, value);
+    }
+  }
+
+  bool get isFocused => _isFocused;
+  bool _isFocused = false;
+  set isFocused(bool value) {
+    if (_isFocused != value) {
+      _isFocused = value;
+      _statesController.update(WidgetState.focused, value);
+    }
+  }
+
+  bool get isEnabled => _isEnabled;
+  bool _isEnabled = false;
+  set isEnabled(bool value) {
+    if (_isEnabled != value) {
+      _isEnabled = value;
+      _statesController.update(WidgetState.disabled, !value);
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    _statesController.addListener(_storeStates);
+    if (widget.focusNode == null) {
+      _internalFocusNode = FocusNode();
+    }
+
+    if (widget.statesController == null) {
+      _internalStatesController = WidgetStatesController();
+    }
+
+    isEnabled = widget.onPressed != null;
+    isFocused = _focusNode.hasPrimaryFocus;
   }
 
   @override
@@ -2334,44 +2848,69 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
         _internalFocusNode = null;
       } else {
         assert(_internalFocusNode == null);
-        _internalFocusNode = FocusNode(debugLabel: widget.focusNodeDebugLabel);
+        _internalFocusNode = FocusNode();
       }
+
+      isFocused = _focusNode.hasPrimaryFocus;
     }
 
     if (widget.statesController != oldWidget.statesController) {
-      _statesController.removeListener(_storeStates);
-      // States are currently being stored on WidgetStatesController and not on
-      // the widget, so states should be transferred if a widget's controller is
-      // replaced.
       if (widget.statesController != null) {
         _internalStatesController?.dispose();
         _internalStatesController = null;
-      }
-      _statesController.addListener(_storeStates);
-      // Synchronize the states of this widget with the new controller.
-      for (final WidgetState state in _states) {
-        _statesController.update(state, true);
+      } else {
+        assert(_internalStatesController == null);
+        _internalStatesController = WidgetStatesController();
       }
     }
 
-    if (!widget.enabled && oldWidget.enabled) {
-      if (isEnabled) {
-        _statesController
-          ..update(WidgetState.disabled, true)
-          ..update(WidgetState.pressed, false)
-          ..update(WidgetState.focused, false)
-          ..update(WidgetState.hovered, false)
-          ..update(WidgetState.dragged, false);
+    if (widget.onPressed != oldWidget.onPressed) {
+      if (widget.onPressed == null) {
+        isEnabled = isHovered = isPressed = isPanned = isFocused = false;
+        _longPanPressTimer?.cancel();
+        _longPanPressTimer = null;
+      } else {
+        isEnabled = true;
       }
-      _longPanPressTimer?.cancel();
-      _longPanPressTimer = null;
     }
   }
 
   @override
-  void dispose() {
-    _statesController.removeListener(_storeStates);
+  bool didPanEnter() {
+    if (!isEnabled) {
+      return false;
+    }
 
+    if (widget.panActivationDelay != null) {
+      _longPanPressTimer ??= Timer(widget.panActivationDelay!, () {
+        assert(_longPanPressTimer?.isActive == false);
+        assert(mounted);
+        assert(isEnabled);
+        _longPanPressTimer = null;
+        _handleActivation();
+      });
+    }
+
+    isPanned = true;
+    return true;
+  }
+
+  @override
+  void didPanLeave({bool pointerUp = false}) {
+    _longPanPressTimer?.cancel();
+    _longPanPressTimer = null;
+    if (pointerUp) {
+      assert(mounted);
+      assert(isPanned);
+      assert(isEnabled);
+      _handleActivation();
+    }
+
+    isPanned = isPressed = false;
+  }
+
+  @override
+  void dispose() {
     _internalStatesController?.dispose();
     _internalStatesController = null;
 
@@ -2383,65 +2922,37 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
     super.dispose();
   }
 
-  @override
-  bool didPanEnter() {
-    if (!widget.enabled) {
-      return false;
-    }
-
-    if (widget.panActivationDelay != null && _longPanPressTimer == null) {
-      _longPanPressTimer = Timer(widget.panActivationDelay!, () {
-        _longPanPressTimer?.cancel();
-        _longPanPressTimer = null;
-        _simulateTap();
-      });
-    }
-
-    _statesController.update(WidgetState.dragged, true);
-    return true;
-  }
-
-  @override
-  void didPanLeave({bool pointerUp = false}) {
-    _longPanPressTimer?.cancel();
-    _longPanPressTimer = null;
-    if (pointerUp && widget.enabled && mounted) {
-      _simulateTap();
-    }
-
-    _statesController.update(WidgetState.dragged, false);
-  }
-
   void _handleFocusChange([bool? focused]) {
     final bool hasPrimaryFocus = focused ?? _focusNode.hasPrimaryFocus;
     if (hasPrimaryFocus != isFocused) {
-      _statesController.update(WidgetState.focused, hasPrimaryFocus);
       widget.onFocusChange?.call(isFocused);
+      setState(() {
+        isFocused = hasPrimaryFocus;
+      });
     }
   }
 
-  void _simulateTap([Intent? intent]) {
+  void _handleActivation([Intent? intent]) {
+    isPanned = isPressed = false;
     widget.onPressed?.call();
   }
 
   void _handleTapDown(TapDownDetails details) {
-    _statesController.update(WidgetState.pressed, true);
+    isPressed = true;
   }
 
   void _handleTapUp(TapUpDetails? details) {
-    _statesController.update(WidgetState.pressed, false);
+    isPressed = false;
     widget.onPressed?.call();
   }
 
   void _handleTapCancel() {
-    _statesController.update(WidgetState.pressed, false);
+    isPressed = false;
   }
 
   void _handlePointerExit(PointerExitEvent event) {
     if (isHovered) {
-      _statesController
-        ..update(WidgetState.hovered, false)
-        ..update(WidgetState.focused, false);
+      isHovered = false;
       widget.onHover?.call(false);
     }
   }
@@ -2450,8 +2961,8 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
   // focus on scroll.
   void _handlePointerHover(PointerHoverEvent event) {
     if (!isHovered) {
+      isHovered = true;
       widget.onHover?.call(true);
-      _statesController.update(WidgetState.hovered, true);
       if (widget.requestFocusOnHover) {
         _focusNode.requestFocus();
 
@@ -2468,49 +2979,62 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
 
   Widget _buildStatefulWrapper(BuildContext context, Set<WidgetState> value, Widget? child) {
     final MouseCursor cursor = widget.mouseCursor.resolve(value);
-    BoxDecoration decoration = widget.decoration.resolve(value);
-    if (decoration.color != null) {
-      decoration = decoration.copyWith(
-        color: CupertinoDynamicColor.maybeResolve(decoration.color, context),
-      );
-
-      // Don't apply a blend mode if the user has specified one.
-      if (!kIsWeb && decoration.backgroundBlendMode == null) {
-        decoration = decoration.copyWith(
-          backgroundBlendMode:
-              CupertinoTheme.maybeBrightnessOf(context) == Brightness.light
-                  ? BlendMode.multiply
-                  : BlendMode.plus,
-        );
-      }
-    }
-
+    final BoxDecoration decoration = widget.decoration.resolve(value);
+    final bool hasBackground = decoration.color != null || decoration.gradient != null;
     return MouseRegion(
-      onHover: widget.enabled ? _handlePointerHover : null,
-      onExit: widget.enabled ? _handlePointerExit : null,
+      onHover: isEnabled ? _handlePointerHover : null,
+      onExit: isEnabled ? _handlePointerExit : null,
       hitTestBehavior: HitTestBehavior.deferToChild,
       cursor: cursor,
-      child: DecoratedBox(decoration: decoration, child: child),
+      child: DecoratedBox(
+        decoration: decoration.copyWith(
+          color: CupertinoDynamicColor.maybeResolve(decoration.color, context),
+          backgroundBlendMode: kIsWeb || !hasBackground || decoration.backgroundBlendMode != null
+              ? decoration.backgroundBlendMode
+              : CupertinoTheme.maybeBrightnessOf(context) == Brightness.light
+              ? BlendMode.multiply
+              : BlendMode.plus,
+        ),
+        child: child,
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
+    if (isEnabled && gestures == null) {
+      final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
+      gestures = <Type, GestureRecognizerFactory>{
+        TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+          () => TapGestureRecognizer(),
+          (TapGestureRecognizer instance) {
+            instance
+              ..onTapDown = _handleTapDown
+              ..onTapUp = _handleTapUp
+              ..onTapCancel = _handleTapCancel
+              ..gestureSettings = gestureSettings;
+          },
+        ),
+      };
+    } else {
+      gestures = null;
+    }
+
     return MetaData(
       metaData: this,
       child: Actions(
-        actions: widget.enabled ? _actionMap : <Type, Action<Intent>>{},
+        actions: isEnabled ? _actionMap : <Type, Action<Intent>>{},
         child: Focus(
+          autofocus: widget.autofocus,
           focusNode: _focusNode,
-          canRequestFocus: widget.enabled,
-          skipTraversal: !widget.enabled,
+          canRequestFocus: isEnabled,
+          skipTraversal: !isEnabled,
           onFocusChange: _handleFocusChange,
           child: Semantics.fromProperties(
             properties: SemanticsProperties(
-              role: SemanticsRole.menuItem,
-              enabled: widget.enabled,
+              enabled: isEnabled,
               focused: isFocused,
+              focusable: true,
               onDismiss: _dismissMenu,
             ),
             child: ValueListenableBuilder<Set<WidgetState>>(
@@ -2518,18 +3042,7 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
               builder: _buildStatefulWrapper,
               child: RawGestureDetector(
                 behavior: widget.behavior,
-                gestures: <Type, GestureRecognizerFactory>{
-                  TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-                    () => TapGestureRecognizer(),
-                    (TapGestureRecognizer instance) {
-                      instance
-                        ..onTapDown = widget.enabled ? _handleTapDown : null
-                        ..onTapUp = widget.enabled ? _handleTapUp : null
-                        ..onTapCancel = widget.enabled ? _handleTapCancel : null
-                        ..gestureSettings = gestureSettings;
-                    },
-                  ),
-                },
+                gestures: gestures ?? const <Type, GestureRecognizerFactory>{},
                 child: widget.child,
               ),
             ),
@@ -2565,8 +3078,9 @@ class _PanRegion extends StatefulWidget {
   final Widget child;
 
   static _PanRegionState _of(BuildContext context) {
-    final _PanRegionState? result =
-        context.dependOnInheritedWidgetOfExactType<_PanRegionScope>()?.state;
+    final _PanRegionState? result = context
+        .dependOnInheritedWidgetOfExactType<_PanRegionScope>()
+        ?.state;
     assert(result != null, 'No PanRegion found in context');
     return result!;
   }
