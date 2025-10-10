@@ -3717,6 +3717,7 @@ targets:
 
   - name: Mac_x64 build_ios_framework_module_test
     recipe: devicelab/devicelab_drone
+    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
