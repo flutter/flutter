@@ -574,6 +574,33 @@ void main() {
           'params': <String, Object?>{'url': 'http://localhost:123/', 'launched': false},
         });
       });
+
+      test('app.warning', () async {
+        final adapter = FakeFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
+
+        // Start listening for the forwarded event (don't await it yet, it won't
+        // be triggered until the call below).
+        final Future<Map<String, Object?>> forwardedEvent = adapter.dapToClientMessages.firstWhere(
+          (Map<String, Object?> data) => data['event'] == 'flutter.forwardedEvent',
+        );
+
+        // Simulate Flutter emitting an `app.warning` event.
+        adapter.simulateStdoutMessage(<String, Object?>{
+          'event': 'app.warning',
+          'params': <String, Object?>{'warning': 'This is a test warning'},
+        });
+
+        // Expect the message to be forwarded to the DAP client as the body of
+        // the forwarded event.
+        final Map<String, Object?> message = await forwardedEvent;
+        expect(message['body'], <String, Object?>{
+          'event': 'app.warning',
+          'params': <String, Object?>{'warning': 'This is a test warning'},
+        });
+      });
     });
 
     group('handles reverse requests', () {
