@@ -377,8 +377,14 @@ class MenuAnchor extends StatefulWidget {
   /// Defaults to false.
   final bool animated;
 
-  /// An optional callback that is invoked when the menu's open/close animation's
-  /// status changes.
+  /// An optional callback that is invoked when the animation status of the menu
+  /// changes during open and close animations.
+  ///
+  /// If [animated] is false, this callback will only be invoked with
+  /// [AnimationStatus.completed] when the menu is opened, and
+  /// [AnimationStatus.dismissed] when the menu is closed.
+  ///
+  /// Defaults to null.
   final ValueChanged<AnimationStatus>? onAnimationStatusChanged;
 
   /// A list of children containing the menu items that are the contents of the
