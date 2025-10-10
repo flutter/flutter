@@ -1567,7 +1567,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     if (items.isEmpty || effectiveSelectedIndex == null) {
       // TODO(bleroux): replace the empty text with SizedBox.shrink once
       // https://github.com/flutter/flutter/issues/157915 is solved.
-      innerItemsWidget = const Text('');
+      innerItemsWidget = const ExcludeSemantics(child: Text(''));
     } else {
       innerItemsWidget = IndexedStack(
         index: effectiveSelectedIndex,
