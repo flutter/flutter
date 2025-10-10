@@ -12,11 +12,9 @@ library;
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -452,6 +450,7 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
     reverseCurve: _kMenuPanelOpacityReverseCurve,
   );
   List<Widget> _menuChildren = <Widget>[];
+
   _MenuAnchorState? get _parent => _maybeOf(context);
   bool get isSubmenu => MenuController.maybeOf(context) != null;
   bool get isClosing => !_animationController.status.isForwardOrCompleted;
@@ -643,12 +642,12 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
     // An animated menu should behave the same as a menu without animations.
     // Focus should be able to move to a menu as soon as it starts to open, and
     // a menu should not be interactive as soon as it starts to close.
-    return BlockSemantics(
-      blocking: !isClosing,
-      child: ExcludeSemantics(
-        excluding: isClosing,
-        child: IgnorePointer(
-          ignoring: isClosing,
+    return ExcludeSemantics(
+      excluding: isClosing,
+      child: IgnorePointer(
+        ignoring: isClosing,
+        child: ExcludeFocus(
+          excluding: isClosing,
           child: _Submenu(
             fadeAnimation: opacityAnimation,
             heightAnimation: heightAnimation,
@@ -2133,7 +2132,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
 
           child = MergeSemantics(
             child: Semantics(
-              expanded: _enabled && controller.isOpen,
+              expanded: _enabled && _animationStatus.isForwardOrCompleted,
               child: TextButton(
                 style: mergedStyle,
                 focusNode: _buttonFocusNode,
@@ -2172,6 +2171,13 @@ class _SubmenuButtonState extends State<SubmenuButton> {
         child: widget.child,
       ),
     );
+  }
+
+  // ignore: use_setters_to_change_properties
+  void _handleAnimationStatusChanged(AnimationStatus status) {
+    setState(() {
+      _animationStatus = status;
+    });
   }
 
   void _handleClose() {
@@ -2216,11 +2222,6 @@ class _SubmenuButtonState extends State<SubmenuButton> {
         .resolve(Directionality.of(context));
   }
 
-  // ignore: use_setters_to_change_properties
-  void _handleAnimationStatusChanged(AnimationStatus status) {
-    _animationStatus = status;
-  }
-
   void _handleFocusChange() {
     _handleTogglingInteraction();
   }
@@ -2263,7 +2264,9 @@ class _SubmenuButtonState extends State<SubmenuButton> {
       return;
     }
 
-    _hoverOpenTimer = Timer(widget.hoverOpenDelay, _menuController.open);
+    _hoverOpenTimer = Timer(widget.hoverOpenDelay, () {
+      _menuController.open();
+    });
   }
 
   void _clearHoverOpenTimer() {
@@ -2361,8 +2364,8 @@ class _SubmenuDirectionalFocusAction extends DirectionalFocusAction {
               // the menu.
               return;
             }
-            _parent?._focusButton();
             _parent?._menuController.close();
+            _parent?._focusButton();
           } else {
             // If focus is not on a submenu button, closing the anchor this item
             // presides in will close the menu and focus the anchor button.
@@ -3187,7 +3190,7 @@ class _MenuItemLabel extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              ?leadingIcon,
+              leadingIcon ?? const SizedBox.shrink(),
               if (child != null)
                 Expanded(
                   child: ClipRect(
@@ -3207,7 +3210,7 @@ class _MenuItemLabel extends StatelessWidget {
       leadings = Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          ?leadingIcon,
+          leadingIcon ?? const SizedBox.shrink(),
           if (child != null)
             Padding(
               padding: leadingIcon != null
@@ -3518,6 +3521,34 @@ class _RenderMenuLayout extends RenderShiftedBox {
   }
 
   @override
+  double computeMinIntrinsicWidth(double height) {
+    return getMaxIntrinsicWidth(height);
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    final double width = BoxConstraints.tightForFinite(height: height).maxWidth;
+    if (width.isFinite) {
+      return width;
+    }
+    return 0.0;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    return getMaxIntrinsicHeight(width);
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    final double height = BoxConstraints.tightForFinite(width: width).maxHeight;
+    if (height.isFinite) {
+      return height;
+    }
+    return 0.0;
+  }
+
+  @override
   Size computeDryLayout(covariant BoxConstraints constraints) {
     return constraints.biggest;
   }
@@ -3818,7 +3849,6 @@ class _MenuPanelState extends State<_MenuPanel> {
               controller: scrollController,
               child: Scrollbar(
                 thumbVisibility: displayScrollbar,
-                trackVisibility: displayScrollbar,
                 child: SingleChildScrollView(
                   controller: scrollController,
                   scrollDirection: widget.orientation,
@@ -3958,16 +3988,12 @@ class _Submenu extends StatelessWidget {
               child: FadeTransition(
                 opacity: fadeAnimation,
                 alwaysIncludeSemantics: true,
-                child: Semantics.fromProperties(
-                  explicitChildNodes: true,
-                  properties: const SemanticsProperties(scopesRoute: true, namesRoute: true),
-                  child: _MenuPanel(
-                    menuStyle: menuStyle,
-                    clipBehavior: clipBehavior,
-                    orientation: anchor._orientation,
-                    crossAxisUnconstrained: crossAxisUnconstrained,
-                    children: menuChildren,
-                  ),
+                child: _MenuPanel(
+                  menuStyle: menuStyle,
+                  clipBehavior: clipBehavior,
+                  orientation: anchor._orientation,
+                  crossAxisUnconstrained: crossAxisUnconstrained,
+                  children: menuChildren,
                 ),
               ),
             ),
@@ -4096,14 +4122,14 @@ bool get _platformSupportsAccelerators {
 // dart format off
 class _MenuBarDefaultsM3 extends MenuStyle {
   _MenuBarDefaultsM3(this.context)
-    : super(
-      elevation: const MaterialStatePropertyAll<double?>(3.0),
-      shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
-      alignment: AlignmentDirectional.bottomStart,
-    );
+      : super(
+          elevation: const MaterialStatePropertyAll<double?>(3.0),
+          shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
+          alignment: AlignmentDirectional.bottomStart,
+        );
 
   static const RoundedRectangleBorder _defaultMenuBorder =
-    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 
   final BuildContext context;
 
@@ -4127,9 +4153,7 @@ class _MenuBarDefaultsM3 extends MenuStyle {
   @override
   WidgetStateProperty<EdgeInsetsGeometry?>? get padding {
     return const MaterialStatePropertyAll<EdgeInsetsGeometry>(
-      EdgeInsetsDirectional.symmetric(
-        horizontal: _kTopLevelMenuHorizontalMinPadding
-      ),
+      EdgeInsetsDirectional.symmetric(horizontal: _kTopLevelMenuHorizontalMinPadding),
     );
   }
 
@@ -4139,11 +4163,11 @@ class _MenuBarDefaultsM3 extends MenuStyle {
 
 class _MenuButtonDefaultsM3 extends ButtonStyle {
   _MenuButtonDefaultsM3(this.context)
-    : super(
-      animationDuration: kThemeChangeDuration,
-      enableFeedback: true,
-      alignment: AlignmentDirectional.centerStart,
-    );
+      : super(
+          animationDuration: kThemeChangeDuration,
+          enableFeedback: true,
+          alignment: AlignmentDirectional.centerStart,
+        );
 
   final BuildContext context;
 
@@ -4294,11 +4318,13 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
     final double fontSize = Theme.of(context).textTheme.labelLarge?.fontSize ?? 14.0;
     final double fontSizeRatio = MediaQuery.textScalerOf(context).scale(fontSize) / 14.0;
     return ButtonStyleButton.scaledPadding(
-      EdgeInsets.symmetric(horizontal: math.max(
+      EdgeInsets.symmetric(
+          horizontal: math.max(
         _kMenuViewPadding,
         _kLabelItemDefaultSpacing + visualDensity.baseSizeAdjustment.dx,
       )),
-      EdgeInsets.symmetric(horizontal: math.max(
+      EdgeInsets.symmetric(
+          horizontal: math.max(
         _kMenuViewPadding,
         8 + visualDensity.baseSizeAdjustment.dx,
       )),
@@ -4310,14 +4336,14 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
 class _MenuDefaultsM3 extends MenuStyle {
   _MenuDefaultsM3(this.context)
-    : super(
-      elevation: const MaterialStatePropertyAll<double?>(3.0),
-      shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
-      alignment: AlignmentDirectional.topEnd,
-    );
+      : super(
+          elevation: const MaterialStatePropertyAll<double?>(3.0),
+          shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
+          alignment: AlignmentDirectional.topEnd,
+        );
 
   static const RoundedRectangleBorder _defaultMenuBorder =
-    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 
   final BuildContext context;
 

@@ -26,7 +26,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.text('Background Color'), findsOneWidget);
     expect(find.text(example.MenuEntry.colorRed.label), findsOneWidget);
@@ -34,7 +34,7 @@ void main() {
     expect(find.text(example.MenuEntry.colorBlue.label), findsOneWidget);
 
     await tester.tap(find.text('Background Color'));
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
 
     expect(find.text(example.MenuEntry.colorRed.label), findsNothing);
     expect(find.text(example.MenuEntry.colorGreen.label), findsNothing);

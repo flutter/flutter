@@ -2078,6 +2078,133 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
     });
+    testWidgets('hoverOpenDelay delays when a SubmenuButton opens', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: SubmenuButton(
+              hoverOpenDelay: const Duration(milliseconds: 500),
+              menuChildren: <Widget>[MenuItemButton(onPressed: () {}, child: const Text('Item 0'))],
+              child: const Text('Submenu'),
+            ),
+          ),
+        ),
+      );
+
+      // Hover over the submenu button
+      await hoverOver(tester, find.text('Submenu'));
+      await tester.pump(const Duration(milliseconds: 499));
+
+      expect(find.text('Item 0'), findsNothing);
+
+      await tester.pump(const Duration(milliseconds: 1));
+
+      // Menu should now be open
+      expect(find.text('Item 0'), findsOneWidget);
+    });
+
+    testWidgets('hoverOpenDelay can be cancelled', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                const Text('Outside'),
+                SubmenuButton(
+                  hoverOpenDelay: const Duration(milliseconds: 500),
+                  menuChildren: <Widget>[
+                    MenuItemButton(onPressed: () {}, child: const Text('Item 0')),
+                  ],
+                  child: const Text('Submenu'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Hover over the submenu button
+      await hoverOver(tester, find.text('Submenu'));
+      await tester.pump(const Duration(milliseconds: 499));
+
+      expect(find.text('Item 0'), findsNothing);
+
+      // Move hover away before the delay completes
+      await hoverOver(tester, find.text('Outside'));
+      await tester.pump(const Duration(milliseconds: 1));
+
+      expect(find.text('Item 0'), findsNothing);
+    });
+
+    testWidgets('hoverOpenDelay restarts after cancellation', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                const Text('Outside'),
+                SubmenuButton(
+                  hoverOpenDelay: const Duration(milliseconds: 500),
+                  menuChildren: <Widget>[
+                    MenuItemButton(onPressed: () {}, child: const Text('Item 0')),
+                  ],
+                  child: const Text('Submenu'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await hoverOver(tester, find.text('Submenu'));
+      await tester.pump(const Duration(milliseconds: 499));
+
+      expect(find.text('Item 0'), findsNothing);
+
+      await hoverOver(tester, find.text('Outside'));
+      await tester.pump(const Duration(milliseconds: 1));
+
+      expect(find.text('Item 0'), findsNothing);
+
+      await hoverOver(tester, find.text('Submenu'));
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.text('Item 0'), findsOneWidget);
+    });
+
+    testWidgets('Throws if non-zero hoverOpenDelay is applied to MenuBar items', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              children: <Widget>[
+                SubmenuButton(
+                  hoverOpenDelay: const Duration(milliseconds: 1),
+                  menuChildren: <Widget>[
+                    MenuItemButton(onPressed: () {}, child: const Text('Item 0')),
+                  ],
+                  child: const Text('Submenu'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Should throw because MenuBar items cannot have a hoverOpenDelay
+      expect(
+        tester.takeException(),
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains(
+            'A non-zero hoverOpenDelay was used in a top-level SubmenuButton situated in a MenuBar',
+          ),
+        ),
+      );
+    });
 
     testWidgets('scrolling does not trigger hover traversal', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/150911.
@@ -5049,215 +5176,6 @@ void main() {
   });
 
   group('Animations', () {
-    testWidgets('Menu animation defaults', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Center(
-            child: MenuAnchor(
-              animated: true,
-              builder: (BuildContext context, MenuController controller, Widget? child) {
-                return IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () {
-                    if (controller.isOpen) {
-                      controller.close();
-                    } else {
-                      controller.open();
-                    }
-                  },
-                );
-              },
-              menuChildren: <Widget>[
-                SubmenuButton(
-                  animated: true,
-                  menuChildren: <Widget>[
-                    MenuItemButton(child: const Text('Item 0.0'), onPressed: () {}),
-                    MenuItemButton(child: const Text('Item 0.1'), onPressed: () {}),
-                    MenuItemButton(child: const Text('Item 0.2'), onPressed: () {}),
-                    MenuItemButton(child: const Text('Item 0.3'), onPressed: () {}),
-                  ],
-                  child: const Text('Item 0'),
-                ),
-                MenuItemButton(child: const Text('Item 1'), onPressed: () {}),
-                MenuItemButton(child: const Text('Item 2'), onPressed: () {}),
-              ],
-            ),
-          ),
-        ),
-      );
-
-      await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
-      await tester.pump();
-
-      final Rect menuPanel = tester.getRect(findMenuPanels());
-      expect(menuPanel.height, 0);
-
-      // Menu height(160) = button height(48) * 3 + top vertical padding(8) + bottom vertical padding
-      await tester.pump(const Duration(milliseconds: 50));
-      // After 50 ms, the animated height should be less than half of the menu height
-      // based on Curves.easeInOutCubicEmphasized.
-      expect(tester.getRect(findMenuPanels().last).height, lessThan(80));
-
-      await tester.pump(const Duration(milliseconds: 300));
-      // After 350 ms, the animated height should be less than menu height based on
-      // Curves.easeInOutCubicEmphasized.
-      expect(tester.getRect(findMenuPanels().last).height, lessThan(160));
-
-      await tester.pump(const Duration(milliseconds: 150));
-      // Default duration is 500ms. After 500 ms, the animated height should be equal
-      // to the menu height based on Curves.easeInOutCubicEmphasized.
-      expect(tester.getRect(findMenuPanels().last).height, 160);
-
-      await tester.tap(find.widgetWithText(SubmenuButton, 'Item 0'));
-      await tester.pump();
-      final Rect submenuPanel = tester.getRect(findMenuPanels().last);
-      expect(submenuPanel.height, 0);
-
-      // Menu height is 208 (48 * 4 + 8 * 2).
-      await tester.pump(const Duration(milliseconds: 50));
-      // After 50 ms, the animated height should be less than half of the menu height
-      // based on Curves.easeInOutCubicEmphasized.
-      expect(tester.getRect(findMenuPanels().last).height, lessThan(104));
-
-      await tester.pump(const Duration(milliseconds: 300));
-      // After 350 ms, the animated height should be less than menu height based on
-      // Curves.easeInOutCubicEmphasized.
-      expect(tester.getRect(findMenuPanels().last).height, lessThan(208));
-
-      await tester.pump(const Duration(milliseconds: 150));
-      // Default duration is 500ms. After 500 ms, the animated height should be equal
-      // to the menu height based on Curves.easeInOutCubicEmphasized.
-      expect(tester.getRect(findMenuPanels().last).height, 208);
-    });
-
-    testWidgets('hoverOpenDelay delays when a SubmenuButton opens', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: SubmenuButton(
-              hoverOpenDelay: const Duration(milliseconds: 500),
-              menuChildren: <Widget>[MenuItemButton(onPressed: () {}, child: const Text('Item 0'))],
-              child: const Text('Submenu'),
-            ),
-          ),
-        ),
-      );
-
-      // Hover over the submenu button
-      await hoverOver(tester, find.text('Submenu'));
-      await tester.pump(const Duration(milliseconds: 499));
-
-      expect(find.text('Item 0'), findsNothing);
-
-      await tester.pump(const Duration(milliseconds: 1));
-
-      // Menu should now be open
-      expect(find.text('Item 0'), findsOneWidget);
-    });
-
-    testWidgets('hoverOpenDelay can be cancelled', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Column(
-              children: <Widget>[
-                const Text('Outside'),
-                SubmenuButton(
-                  hoverOpenDelay: const Duration(milliseconds: 500),
-                  menuChildren: <Widget>[
-                    MenuItemButton(onPressed: () {}, child: const Text('Item 0')),
-                  ],
-                  child: const Text('Submenu'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-
-      // Hover over the submenu button
-      await hoverOver(tester, find.text('Submenu'));
-      await tester.pump(const Duration(milliseconds: 499));
-
-      expect(find.text('Item 0'), findsNothing);
-
-      // Move hover away before the delay completes
-      await hoverOver(tester, find.text('Outside'));
-      await tester.pump(const Duration(milliseconds: 1));
-
-      expect(find.text('Item 0'), findsNothing);
-    });
-
-    testWidgets('hoverOpenDelay restarts after cancellation', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Column(
-              children: <Widget>[
-                const Text('Outside'),
-                SubmenuButton(
-                  hoverOpenDelay: const Duration(milliseconds: 500),
-                  menuChildren: <Widget>[
-                    MenuItemButton(onPressed: () {}, child: const Text('Item 0')),
-                  ],
-                  child: const Text('Submenu'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-
-      await hoverOver(tester, find.text('Submenu'));
-      await tester.pump(const Duration(milliseconds: 499));
-
-      expect(find.text('Item 0'), findsNothing);
-
-      await hoverOver(tester, find.text('Outside'));
-      await tester.pump(const Duration(milliseconds: 1));
-
-      expect(find.text('Item 0'), findsNothing);
-
-      await hoverOver(tester, find.text('Submenu'));
-      await tester.pump(const Duration(milliseconds: 500));
-
-      expect(find.text('Item 0'), findsOneWidget);
-    });
-
-    testWidgets('Nonzero hoverOpenDelay throws when applied to MenuBar items', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: MenuBar(
-              children: <Widget>[
-                SubmenuButton(
-                  hoverOpenDelay: const Duration(milliseconds: 500),
-                  menuChildren: <Widget>[
-                    MenuItemButton(onPressed: () {}, child: const Text('Item 0')),
-                  ],
-                  child: const Text('Submenu'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-
-      // Should throw because MenuBar items cannot have a hoverOpenDelay
-      expect(
-        tester.takeException(),
-        isA<FlutterError>().having(
-          (FlutterError e) => e.message,
-          'message',
-          contains(
-            'A non-zero hoverOpenDelay was used in a top-level SubmenuButton situated in a MenuBar',
-          ),
-        ),
-      );
-    });
-
     testWidgets('Menu panel fades in', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -5277,6 +5195,7 @@ void main() {
 
       controller.open();
       await tester.pump();
+
       double getOpacity() {
         return tester
             .firstWidget<FadeTransition>(
@@ -5295,6 +5214,7 @@ void main() {
         40: 0.8,
         50: 1.0,
       };
+
       for (final int ms in animationOpacities.keys) {
         expect(getOpacity(), closeTo(animationOpacities[ms]!, 0.05), reason: 'at t=$ms');
         await tester.pump(const Duration(milliseconds: 10));
@@ -5321,7 +5241,6 @@ void main() {
       controller.open();
       await tester.pump();
       await tester.pumpAndSettle();
-
       controller.close();
       await tester.pump();
 
@@ -5353,7 +5272,7 @@ void main() {
       }
     });
 
-    testWidgets('Menu panel height eases out while opening', (WidgetTester tester) async {
+    testWidgets('Menu panel height eases out over while opening', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -5410,7 +5329,6 @@ void main() {
       controller.open();
       await tester.pump();
       await tester.pumpAndSettle();
-
       controller.close();
       await tester.pump();
 
@@ -5495,7 +5413,9 @@ void main() {
       }
     });
 
-    testWidgets('Item fade-out animation staggers over 150 ms', (WidgetTester tester) async {
+    testWidgets('Item fade-out animation staggers over 150 ms with 50 ms delay', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -5528,7 +5448,6 @@ void main() {
       await tester.tap(find.text('Open Menu'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 501));
-
       controller.close();
       await tester.pump();
 
@@ -5559,9 +5478,107 @@ void main() {
       }
     });
 
-    testWidgets('Interaction is blocked while menu is closing', (WidgetTester tester) async {
-      bool itemPressed = false;
+    testWidgets('Animation status callback is invoked correctly', (WidgetTester tester) async {
+      AnimationStatus? animationStatus;
 
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuAnchor(
+              controller: controller,
+              animated: true,
+              onAnimationStatusChanged: (AnimationStatus status) {
+                animationStatus = status;
+              },
+              menuChildren: <Widget>[MenuItemButton(onPressed: () {}, child: const Text('Item 0'))],
+            ),
+          ),
+        ),
+      );
+
+      // Open the menu
+      controller.open();
+      await tester.pump();
+
+      expect(animationStatus, equals(AnimationStatus.forward));
+
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(animationStatus, equals(AnimationStatus.forward));
+
+      controller.close();
+      await tester.pump();
+
+      expect(animationStatus, equals(AnimationStatus.reverse));
+
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(animationStatus, equals(AnimationStatus.reverse));
+
+      controller.open();
+      await tester.pump();
+
+      expect(animationStatus, equals(AnimationStatus.forward));
+
+      await tester.pumpAndSettle();
+
+      expect(animationStatus, equals(AnimationStatus.completed));
+
+      controller.close();
+
+      await tester.pumpAndSettle();
+
+      expect(animationStatus, equals(AnimationStatus.dismissed));
+    });
+
+    testWidgets('Menu items can be pressed during opening animation', (WidgetTester tester) async {
+      int pressCount = 0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuAnchor(
+              controller: controller,
+              animated: true,
+              menuChildren: <Widget>[
+                MenuItemButton(
+                  onPressed: () {
+                    pressCount += 1;
+                  },
+                  child: const Text('Item 0'),
+                ),
+                MenuItemButton(
+                  onPressed: () {
+                    pressCount += 1;
+                  },
+                  child: const Text('Item 1'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      await tester.tap(find.text('Item 0'));
+      await tester.pump();
+
+      expect(pressCount, 1);
+
+      controller.open();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
+      await tester.tap(find.text('Item 1'));
+      await tester.pump();
+
+      expect(pressCount, 2);
+    });
+
+    testWidgets('Pointer is blocked while menu is closing', (WidgetTester tester) async {
+      bool itemPressed = false;
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -5585,27 +5602,124 @@ void main() {
       controller.open();
       await tester.pumpAndSettle();
 
-      // Item should be pressable when open
-      await tester.tap(find.text('Item 0'));
-      await tester.pump();
-      expect(itemPressed, true);
-      itemPressed = false;
+      expect(find.text('Item 0'), findsOneWidget);
 
       // Start closing
       controller.close();
       await tester.pump();
 
       // Try to tap the item while closing
-      await tester.tap(find.text('Item 0'));
+      await tester.tap(find.text('Item 0'), warnIfMissed: false);
       await tester.pump();
 
       // Item should not have been pressed
       expect(itemPressed, false);
     });
 
-    testWidgets('Focus is blocked while menu is closing', (WidgetTester tester) async {
-      final FocusNode itemFocusNode = FocusNode();
-      addTearDown(itemFocusNode.dispose);
+    testWidgets('Submenu semantics are excluded during closing', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              children: [
+                SubmenuButton(
+                  animated: true,
+                  focusNode: focusNode,
+                  controller: controller,
+                  menuChildren: [
+                    MenuItemButton(onPressed: () {}, child: const Text('Submenu Item')),
+                  ],
+                  child: const Text('Submenu'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      focusNode.requestFocus();
+      await tester.pump();
+
+      // Open the submenu and wait for animation to complete
+      controller.open();
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Submenu Item'), findsOneWidget);
+
+      // Close the submenu
+      controller.close();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(
+        semantics,
+        hasSemantics(
+          ignoreRect: true,
+          ignoreTransform: true,
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                textDirection: TextDirection.ltr,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 2,
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 3,
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 4,
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                id: 5,
+                                flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                                children: <TestSemantics>[
+                                  TestSemantics(
+                                    id: 6,
+                                    flags: <SemanticsFlag>[
+                                      SemanticsFlag.isFocused,
+                                      SemanticsFlag.hasEnabledState,
+                                      SemanticsFlag.isEnabled,
+                                      SemanticsFlag.isFocusable,
+                                      SemanticsFlag.hasExpandedState,
+                                    ],
+                                    actions: <SemanticsAction>[
+                                      SemanticsAction.tap,
+                                      SemanticsAction.focus,
+                                    ],
+                                    label: 'Submenu',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      semantics.dispose();
+    });
+
+    testWidgets('Menu items can be focused during opening animation', (WidgetTester tester) async {
+      final FocusNode item0FocusNode = FocusNode();
+      final FocusNode item1FocusNode = FocusNode();
+      addTearDown(item0FocusNode.dispose);
+      addTearDown(item1FocusNode.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -5615,9 +5729,14 @@ void main() {
               animated: true,
               menuChildren: <Widget>[
                 MenuItemButton(
-                  focusNode: itemFocusNode,
+                  focusNode: item0FocusNode,
                   onPressed: () {},
                   child: const Text('Item 0'),
+                ),
+                MenuItemButton(
+                  focusNode: item1FocusNode,
+                  onPressed: () {},
+                  child: const Text('Item 1'),
                 ),
               ],
             ),
@@ -5625,28 +5744,198 @@ void main() {
         ),
       );
 
-      // Open and wait for animation to complete
       controller.open();
-      await tester.pumpAndSettle();
-
-      // Item should be focusable when open
-      itemFocusNode.requestFocus();
       await tester.pump();
-      expect(itemFocusNode.hasFocus, true);
 
-      // Start closing
+      item0FocusNode.requestFocus();
+      await tester.pump();
+
+      expect(item0FocusNode.hasFocus, true);
+
+      item1FocusNode.requestFocus();
+      await tester.pump();
+
+      expect(item1FocusNode.hasFocus, true);
+    });
+
+    testWidgets('Focus returns to parent scope during closing animation', (
+      WidgetTester tester,
+    ) async {
+      final FocusNode submenuFocusNode = FocusNode();
+      final FocusNode outsideFocusNode = FocusNode();
+      addTearDown(submenuFocusNode.dispose);
+      addTearDown(outsideFocusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 400, minHeight: 400),
+              child: Column(
+                children: [
+                  TextButton(
+                    onPressed: () {},
+                    focusNode: outsideFocusNode,
+                    child: const Text('Outside'),
+                  ),
+                  MenuAnchor(
+                    controller: controller,
+                    animated: true,
+                    builder: (BuildContext context, MenuController controller, Widget? child) {
+                      return TextButton(
+                        autofocus: true,
+                        onPressed: () {
+                          if (controller.isOpen) {
+                            controller.close();
+                          } else {
+                            controller.open();
+                          }
+                        },
+                        child: const Text('Open Menu'),
+                      );
+                    },
+                    menuChildren: <Widget>[
+                      MenuItemButton(
+                        autofocus: true,
+                        onPressed: () {},
+                        child: const Text('Item 0'),
+                      ),
+                      SubmenuButton(
+                        animated: true,
+                        menuChildren: [
+                          MenuItemButton(
+                            focusNode: submenuFocusNode,
+                            onPressed: () {},
+                            child: const Text('Nested'),
+                          ),
+                        ],
+                        child: const Text('Submenu'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      outsideFocusNode.requestFocus();
+      await tester.pump();
+
+      expect(outsideFocusNode.hasPrimaryFocus, true);
+
+      await tester.tap(find.text('Open Menu'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      await hoverOver(tester, find.text('Submenu'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.text('Nested'), findsOneWidget);
+
+      submenuFocusNode.requestFocus();
+      await tester.pump();
+
+      expect(submenuFocusNode.hasPrimaryFocus, true);
+
       controller.close();
       await tester.pump();
 
-      // Focus should be blocked while closing
-      itemFocusNode.unfocus();
-      itemFocusNode.requestFocus();
-      await tester.pump();
-      expect(itemFocusNode.hasFocus, false);
+      expect(outsideFocusNode.hasPrimaryFocus, true);
+
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(outsideFocusNode.hasPrimaryFocus, true);
+
+      await tester.pumpAndSettle();
+
+      expect(outsideFocusNode.hasPrimaryFocus, true);
     });
 
-    testWidgets('Animation status callback is invoked correctly', (WidgetTester tester) async {
-      final List<AnimationStatus> statuses = <AnimationStatus>[];
+    testWidgets('Submenu items can be traversed during opening animation', (
+      WidgetTester tester,
+    ) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              controller: controller,
+              children: <Widget>[
+                SubmenuButton(
+                  // focusNode: focusNode,
+                  animated: true,
+                  menuChildren: <Widget>[
+                    MenuItemButton(onPressed: () {}, child: const Text('Item 0')),
+                    SubmenuButton(
+                      animated: true,
+                      menuChildren: <Widget>[
+                        MenuItemButton(onPressed: () {}, child: const Text('Sub Item 0')),
+                        MenuItemButton(onPressed: () {}, child: const Text('Sub Item 1')),
+                      ],
+                      child: const Text('Submenu'),
+                    ),
+                  ],
+                  child: const Text('Menu'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      listenForFocusChanges();
+
+      await tester.tap(find.text('Menu'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+
+      expect(focusedMenu, equals('MenuItemButton(Text("Item 0"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+
+      expect(focusedMenu, equals('SubmenuButton(Text("Submenu"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Item 0"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Item 1"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+
+      expect(focusedMenu, equals('SubmenuButton(Text("Submenu"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Item 0"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+
+      expect(focusedMenu, equals('MenuItemButton(Text("Item 0"))'));
+    });
+
+    testWidgets('Hover traversal works during opening animation', (WidgetTester tester) async {
+      listenForFocusChanges();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -5654,33 +5943,47 @@ void main() {
             child: MenuAnchor(
               controller: controller,
               animated: true,
-              onAnimationStatusChanged: statuses.add,
-              menuChildren: <Widget>[MenuItemButton(onPressed: () {}, child: const Text('Item 0'))],
+              menuChildren: <Widget>[
+                MenuItemButton(onPressed: () {}, child: const Text('Item 0')),
+                MenuItemButton(onPressed: () {}, child: const Text('Item 1')),
+                MenuItemButton(onPressed: () {}, child: const Text('Item 2')),
+              ],
             ),
           ),
         ),
       );
 
-      // Open the menu
       controller.open();
       await tester.pump();
-      expect(statuses, contains(AnimationStatus.forward));
+      await tester.pump(const Duration(milliseconds: 100));
 
-      await tester.pumpAndSettle();
-      expect(statuses, contains(AnimationStatus.completed));
-
-      statuses.clear();
-
-      // Close the menu
-      controller.close();
+      await hoverOver(tester, find.text('Item 0'));
       await tester.pump();
-      expect(statuses, contains(AnimationStatus.reverse));
 
-      await tester.pumpAndSettle();
-      expect(statuses, contains(AnimationStatus.dismissed));
+      expect(focusedMenu, equals('MenuItemButton(Text("Item 0"))'));
+
+      await tester.pump(const Duration(milliseconds: 100));
+      await hoverOver(tester, find.text('Item 1'));
+      await tester.pump();
+
+      expect(focusedMenu, equals('MenuItemButton(Text("Item 1"))'));
+
+      await tester.pump(const Duration(milliseconds: 100));
+      await hoverOver(tester, find.text('Item 2'));
+      await tester.pump();
+
+      expect(focusedMenu, equals('MenuItemButton(Text("Item 2"))'));
+
+      await tester.pump(const Duration(milliseconds: 200));
+      await hoverOver(tester, find.text('Item 0'));
+      await tester.pump();
+
+      expect(focusedMenu, equals('MenuItemButton(Text("Item 0"))'));
     });
 
-    testWidgets('Submenu animation works independently', (WidgetTester tester) async {
+    testWidgets('MenuBar items can be traversed during submenu opening animation', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -5690,15 +5993,76 @@ void main() {
                 SubmenuButton(
                   animated: true,
                   menuChildren: <Widget>[
-                    SubmenuButton(
-                      animated: true,
-                      menuChildren: <Widget>[
-                        MenuItemButton(onPressed: () {}, child: const Text('Nested Item')),
-                      ],
-                      child: const Text('Nested Submenu'),
-                    ),
+                    MenuItemButton(onPressed: () {}, child: const Text('Menu 0 Item')),
                   ],
-                  child: const Text('Root Submenu'),
+                  child: const Text('Menu 0'),
+                ),
+                SubmenuButton(
+                  animated: true,
+                  menuChildren: <Widget>[
+                    MenuItemButton(onPressed: () {}, child: const Text('Menu 1 Item')),
+                  ],
+                  child: const Text('Menu 1'),
+                ),
+                SubmenuButton(
+                  animated: true,
+                  menuChildren: <Widget>[
+                    MenuItemButton(onPressed: () {}, child: const Text('Menu 2 Item')),
+                  ],
+                  child: const Text('Menu 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      listenForFocusChanges();
+
+      await tester.tap(find.text('Menu 0'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 20));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
+
+      await tester.pump(const Duration(milliseconds: 20));
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 2"))'));
+
+      await tester.pump(const Duration(milliseconds: 20));
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+
+      expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
+    });
+
+    testWidgets('Focus state remains consistent throughout opening animation', (
+      WidgetTester tester,
+    ) async {
+      final FocusNode itemFocusNode = FocusNode();
+      addTearDown(itemFocusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                TextButton(onPressed: () {}, autofocus: true, child: const Text('Outside')),
+                MenuAnchor(
+                  controller: controller,
+                  animated: true,
+                  menuChildren: <Widget>[
+                    MenuItemButton(
+                      focusNode: itemFocusNode,
+                      onPressed: () {},
+                      child: const Text('Item 0'),
+                    ),
+                    MenuItemButton(autofocus: true, onPressed: () {}, child: const Text('Item 1')),
+                  ],
                 ),
               ],
             ),
@@ -5706,79 +6070,54 @@ void main() {
         ),
       );
 
-      // Open root submenu
-      await tester.tap(find.text('Root Submenu'));
+      controller.open();
       await tester.pump();
 
-      final double rootHeight = tester.getSize(findMenuPanels().first).height;
+      itemFocusNode.requestFocus();
+      await tester.pump();
 
-      // Animate in
-      await tester.pump(const Duration(milliseconds: 250));
-      expect(tester.getSize(findMenuPanels().first).height, lessThan(rootHeight));
+      expect(itemFocusNode.hasPrimaryFocus, true);
+
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(itemFocusNode.hasPrimaryFocus, true);
 
       await tester.pumpAndSettle();
-      expect(tester.getSize(findMenuPanels().first).height, closeTo(rootHeight, 0.1));
 
-      // Open nested submenu
-      await tester.tap(find.text('Nested Submenu'));
-      await tester.pump();
-
-      // There should be two menu panels now
-      expect(findMenuPanels(), findsNWidgets(2));
-
-      // Both should animate independently
-      await tester.pump(const Duration(milliseconds: 100));
-      // Root menu should remain at full height
-      expect(tester.getSize(findMenuPanels().first).height, closeTo(rootHeight, 0.1));
-      // Nested menu should be animating
-      expect(tester.getSize(findMenuPanels().last).height, greaterThan(0));
+      expect(itemFocusNode.hasPrimaryFocus, true);
     });
 
-    testWidgets('Focus behavior during animation', (WidgetTester tester) async {
-      final FocusNode buttonFocus = FocusNode(debugLabel: 'Button');
-      final FocusNode itemFocus = FocusNode(debugLabel: 'Item');
-      addTearDown(buttonFocus.dispose);
-      addTearDown(itemFocus.dispose);
-
+    testWidgets('Scrollbar thumb is not shown while animated menu is opening', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
             child: MenuAnchor(
               controller: controller,
-              childFocusNode: buttonFocus,
               animated: true,
               menuChildren: <Widget>[
-                MenuItemButton(focusNode: itemFocus, onPressed: () {}, child: const Text('Item 0')),
+                for (int i = 0; i < 20; i++)
+                  MenuItemButton(onPressed: () {}, child: Text('Item $i')),
               ],
             ),
           ),
         ),
       );
 
-      // Focus button and open menu
-      buttonFocus.requestFocus();
-      await tester.pump();
-      expect(buttonFocus.hasFocus, true);
-
       controller.open();
       await tester.pump();
 
-      // During opening animation, button should still have focus
-      await tester.pump(const Duration(milliseconds: 100));
-      expect(buttonFocus.hasFocus, true);
+      expect(tester.widget<Scrollbar>(find.byType(Scrollbar)).thumbVisibility, isFalse);
 
-      // After animation completes, we can focus items
+      // Progress the animation to the middle.
+      await tester.pump(const Duration(milliseconds: 250));
+
+      expect(tester.widget<Scrollbar>(find.byType(Scrollbar)).thumbVisibility, isFalse);
+
       await tester.pumpAndSettle();
-      itemFocus.requestFocus();
-      await tester.pump();
-      expect(itemFocus.hasFocus, true);
 
-      // Start closing
-      controller.close();
-      await tester.pump();
-
-      // During closing, focus should return to button
-      expect(buttonFocus.hasFocus, true);
+      expect(tester.widget<Scrollbar>(find.byType(Scrollbar)).thumbVisibility, isTrue);
     });
   });
 
