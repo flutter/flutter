@@ -237,7 +237,9 @@ void main() {
       );
     });
 
-    testWidgets('tapping outside the selectable region dismisses selection', (WidgetTester tester) async {
+    testWidgets('tapping outside the selectable region dismisses selection', (
+      WidgetTester tester,
+    ) async {
       const String text = 'Hello world';
       await tester.pumpWidget(
         MaterialApp(
@@ -260,20 +262,21 @@ void main() {
       final Offset textTopLeft = tester.getTopLeft(find.text(text));
       final Offset textBottomRight = tester.getBottomRight(find.text(text));
       final TestGesture gesture = await tester.startGesture(
-        textTopLeft + const Offset(10.0, 5.0),
+        textTopLeft,
         kind: PointerDeviceKind.mouse,
       );
       addTearDown(gesture.removePointer);
-      await gesture.moveTo(textBottomRight - const Offset(10.0, 5.0));
+      await gesture.moveTo(textBottomRight);
       await gesture.up();
       await tester.pump();
 
       expect(paragraph.selections, isNotEmpty);
 
-      // Tap outside the selectable region to dismiss the selection.
-      await tester.tapAt(const Offset(10.0, 10.0));
+      // Tap just outside the top-left corner of the selectable region
+      // to dismiss the selection.
+      final Rect selectableRegionRect = tester.getRect(find.byType(SelectableRegion));
+      await tester.tapAt(selectableRegionRect.topLeft - const Offset(10.0, 10.0));
       await tester.pump();
-
       expect(paragraph.selections, isEmpty);
     });
 
