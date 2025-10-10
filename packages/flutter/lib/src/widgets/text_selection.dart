@@ -570,8 +570,8 @@ class TextSelectionOverlay {
     _selectionOverlay.markNeedsBuild();
   }
 
-  /// Whether the handles are currently visible.
-  bool get handlesAreVisible => _selectionOverlay._handles != null && handlesVisible;
+  /// {@macro flutter.widgets.SelectionOverlay.handlesAreVisible}
+  bool get handlesAreVisible => _selectionOverlay.handlesAreVisible;
 
   /// {@macro flutter.widgets.SelectionOverlay.toolbarIsVisible}
   ///
@@ -1124,6 +1124,14 @@ class SelectionOverlay {
         ? _contextMenuController.isShown || _spellCheckToolbarController.isShown
         : _toolbar != null || _spellCheckToolbarController.isShown;
   }
+
+  /// {@template flutter.widgets.SelectionOverlay.handlesAreVisible}
+  /// Whether the selection handles are currently visible.
+  /// {@endtemplate}
+  bool get handlesAreVisible =>
+      _handles != null &&
+      (endHandlesVisible?.value ?? false) &&
+      (startHandlesVisible?.value ?? false);
 
   /// {@template flutter.widgets.SelectionOverlay.magnifierIsVisible}
   /// Whether the magnifier is currently visible.

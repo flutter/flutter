@@ -594,6 +594,78 @@ void main() {
       expect(selectionEvent.globalPosition, const Offset(200.0, 200.0));
     });
 
+    testWidgets(
+      'ending a drag on a selection handle does not show the context menu on mobile web',
+      (WidgetTester tester) async {
+        const String text = 'Hello world, how are you today?';
+        final UniqueKey toolbarKey = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              selectionControls: materialTextSelectionControls,
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    return SizedBox(key: toolbarKey);
+                  },
+              child: const Text(text),
+            ),
+          ),
+        );
+
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+          find.descendant(of: find.text(text), matching: find.byType(RichText)),
+        );
+
+        // Long press to select 'world'.
+        await tester.longPressAt(textOffsetToPosition(paragraph, 7));
+        await tester.pumpAndSettle();
+
+        // Verify selection, handle visibility, and toolbar visibility.
+        expect(paragraph.selections, isNotEmpty);
+        expect(paragraph.selections.length, 1);
+        expect(paragraph.selections.first, const TextSelection(baseOffset: 6, extentOffset: 11));
+        final SelectableRegionState state = tester.state<SelectableRegionState>(
+          find.byType(SelectableRegion),
+        );
+        expect(state.selectionOverlay?.handlesAreVisible, isTrue);
+        expect(find.byKey(toolbarKey), findsNothing);
+
+        // Drag start handle.
+        List<TextBox> boxes = paragraph.getBoxesForSelection(paragraph.selections.first);
+        expect(boxes, hasLength(1));
+        Offset handlePos = globalize(boxes.first.toRect().bottomLeft, paragraph);
+        TestGesture gesture = await tester.startGesture(handlePos);
+        await gesture.moveTo(textOffsetToPosition(paragraph, 1));
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+
+        // Verify selection and toolbar visibility.
+        expect(find.byKey(toolbarKey), findsNothing);
+        expect(paragraph.selections, isNotEmpty);
+        expect(paragraph.selections.length, 1);
+        expect(paragraph.selections.first, const TextSelection(baseOffset: 1, extentOffset: 11));
+
+        // Drag end handle.
+        boxes = paragraph.getBoxesForSelection(paragraph.selections.first);
+        expect(boxes, hasLength(1));
+        handlePos = globalize(boxes.first.toRect().bottomRight, paragraph);
+        gesture = await tester.startGesture(handlePos);
+        await gesture.moveTo(textOffsetToPosition(paragraph, 20));
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+
+        // Verify selection and toolbar visibility.
+        expect(find.byKey(toolbarKey), findsNothing);
+        expect(paragraph.selections, isNotEmpty);
+        expect(paragraph.selections.length, 1);
+        expect(paragraph.selections.first, const TextSelection(baseOffset: 1, extentOffset: 20));
+      },
+      variant: TargetPlatformVariant.mobile(),
+      skip: !kIsWeb, // [intended] This test verifies mobile web behavior.
+    );
+
     testWidgets('touch long press and drag sends correct events', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
 
