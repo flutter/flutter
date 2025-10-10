@@ -39,6 +39,7 @@ Future<void> runServiceWorkerCleanupTest({required bool headless}) async {
 'use strict';
 const CACHE_NAME = 'flutter-app-cache';
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(['/', 'index.html', 'main.dart.js']);
@@ -70,14 +71,12 @@ self.addEventListener('fetch', (event) => {
 
   try {
     await runCommand(_flutter, <String>['clean'], workingDirectory: _testAppDirectory);
-    await runCommand(_flutter, <String>[
-      'build',
-      'web',
-      '--no-web-resources-cdn',
-      '--profile',
-      '-t',
-      _target,
-    ], workingDirectory: _testAppDirectory);
+    await runCommand(
+      _flutter,
+      <String>['build', 'web', '--no-web-resources-cdn', '--profile', '-t', _target],
+      workingDirectory: _testAppDirectory,
+      environment: <String, String>{'FLUTTER_WEB': 'true'},
+    );
     print('\n${yellow}Phase 1: Installing dummy caching worker and verifying it caches...$reset');
     final String cleanupWorkerContent = serviceWorkerBuildFile.readAsStringSync();
     serviceWorkerBuildFile.writeAsStringSync(oldCachingWorkerContent);
