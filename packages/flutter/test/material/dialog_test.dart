@@ -76,6 +76,35 @@ final ShapeBorder _defaultM3DialogShape = RoundedRectangleBorder(
   borderRadius: BorderRadius.circular(28.0),
 );
 
+Future<void> _pumpDialogWithTheme({
+  required WidgetTester tester,
+  required Widget dialog,
+  required TargetPlatform themePlatform,
+}) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: ThemeData(platform: themePlatform),
+      home: Material(
+        child: Builder(
+          builder: (BuildContext context) {
+            return Center(
+              child: ElevatedButton(
+                child: const Text('X'),
+                onPressed: () {
+                  showDialog<void>(context: context, builder: (BuildContext context) => dialog);
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    ),
+  );
+
+  await tester.tap(find.text('X'));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   final ThemeData material3Theme = ThemeData(brightness: Brightness.dark);
   final ThemeData material2Theme = ThemeData(useMaterial3: false, brightness: Brightness.dark);
@@ -3196,37 +3225,11 @@ void main() {
       const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
 
       // Test with Android theme on Apple platforms.
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.android),
-          home: Material(
-            child: Builder(
-              builder: (BuildContext context) {
-                return Center(
-                  child: ElevatedButton(
-                    child: const Text('X'),
-                    onPressed: () {
-                      showDialog<void>(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return const AlertDialog(
-                            title: Text('Title'),
-                            content: Text('Y'),
-                            actions: <Widget>[],
-                          );
-                        },
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
+      await _pumpDialogWithTheme(
+        tester: tester,
+        themePlatform: TargetPlatform.android,
+        dialog: const AlertDialog(title: Text('Title'), content: Text('Y'), actions: <Widget>[]),
       );
-
-      await tester.tap(find.text('X'));
-      await tester.pumpAndSettle();
 
       // On iOS/macOS, the semantic label should not be added,
       // and namesRoute flag should not exist.
@@ -3260,37 +3263,11 @@ void main() {
       const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
 
       // Test with iOS theme but on non-Apple platforms.
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: Material(
-            child: Builder(
-              builder: (BuildContext context) {
-                return Center(
-                  child: ElevatedButton(
-                    child: const Text('X'),
-                    onPressed: () {
-                      showDialog<void>(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return const AlertDialog(
-                            title: Text('Title'),
-                            content: Text('Y'),
-                            actions: <Widget>[],
-                          );
-                        },
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
+      await _pumpDialogWithTheme(
+        tester: tester,
+        themePlatform: TargetPlatform.iOS,
+        dialog: const AlertDialog(title: Text('Title'), content: Text('Y'), actions: <Widget>[]),
       );
-
-      await tester.tap(find.text('X'));
-      await tester.pumpAndSettle();
 
       // On Android and other platforms, the default semantic label should be added
       // and namesRoute should also exist, although it is false as label is non-null.
@@ -3325,39 +3302,17 @@ void main() {
       const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
 
       // Test with Android theme on Apple platforms.
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.android),
-          home: Material(
-            child: Builder(
-              builder: (BuildContext context) {
-                return Center(
-                  child: ElevatedButton(
-                    child: const Text('X'),
-                    onPressed: () {
-                      showDialog<void>(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return const SimpleDialog(
-                            title: Text('Title'),
-                            children: <Widget>[
-                              Text('content'),
-                              TextButton(onPressed: null, child: Text('action')),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
+      await _pumpDialogWithTheme(
+        tester: tester,
+        themePlatform: TargetPlatform.android,
+        dialog: const SimpleDialog(
+          title: Text('Title'),
+          children: <Widget>[
+            Text('content'),
+            TextButton(onPressed: null, child: Text('action')),
+          ],
         ),
       );
-
-      await tester.tap(find.text('X'));
-      await tester.pumpAndSettle();
 
       // On iOS/macOS, the semantic label should not be added,
       // and namesRoute flag should not exist.
@@ -3391,39 +3346,17 @@ void main() {
       const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
 
       // Test with iOS theme but on non-Apple platforms.
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: Material(
-            child: Builder(
-              builder: (BuildContext context) {
-                return Center(
-                  child: ElevatedButton(
-                    child: const Text('X'),
-                    onPressed: () {
-                      showDialog<void>(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return const SimpleDialog(
-                            title: Text('Title'),
-                            children: <Widget>[
-                              Text('content'),
-                              TextButton(onPressed: null, child: Text('action')),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
+      await _pumpDialogWithTheme(
+        tester: tester,
+        themePlatform: TargetPlatform.iOS,
+        dialog: const SimpleDialog(
+          title: Text('Title'),
+          children: <Widget>[
+            Text('content'),
+            TextButton(onPressed: null, child: Text('action')),
+          ],
         ),
       );
-
-      await tester.tap(find.text('X'));
-      await tester.pumpAndSettle();
 
       // On Android and other platforms, the default semantic label should be added
       // and namesRoute should also exist, although it is false as label is non-null.
