@@ -119,7 +119,7 @@ abstract class AddAarTask extends DefaultTask {
             it.groupId = "${it.groupId}"
             it.artifactId = "${it.artifactId}_${variantName}"
             it.version = "${it.version}"
-            it.from(project.components.named(variantName))
+            it.from(project.components.named(variantName).get())
         }
     }
 }
