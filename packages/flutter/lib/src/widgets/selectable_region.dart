@@ -1940,8 +1940,10 @@ class SelectableRegionState extends State<SelectableRegion>
     }
     return TapRegion(
       groupId: SelectableRegion,
-      onTapOutside: (PointerEvent event) {
+      onTapOutside: (PointerDownEvent event) {
         clearSelection();
+        _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
+        _finalizeSelectableRegionStatus();
       },
       child: CompositedTransformTarget(
         link: _toolbarLayerLink,
