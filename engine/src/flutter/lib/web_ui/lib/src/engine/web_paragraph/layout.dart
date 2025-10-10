@@ -87,9 +87,7 @@ class TextLayout {
 
     for (final span in paragraph.spans) {
       assert(span.isNotEmpty);
-      for (final cluster in span.extractClusters()) {
-        allClusters.add(cluster);
-      }
+      allClusters.addAll(span.extractClusters());
     }
     allClusters.sort((a, b) => a.start.compareTo(b.start));
     for (int i = 0; i < allClusters.length; ++i) {
@@ -461,7 +459,7 @@ class TextLayout {
       }
 
       for (final LineBlock block in line.visualBlocks) {
-        ui.TextRange intersect = block.textRange.intersect(textRange);
+        final ui.TextRange intersect = block.textRange.intersect(textRange);
         //if (boxWidthStyle == ui.BoxWidthStyle.tight) {
         //  // Ignore whitespaces at the end of the line
         //  intersect = intersect.intersect(line.textRange);
