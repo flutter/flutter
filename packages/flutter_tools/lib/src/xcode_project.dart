@@ -748,6 +748,10 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       projectInfo.reportFlavorNotFoundAndExit();
     }
     for (final String scheme in projectInfo.schemes) {
+      // Only check the build settings of the default scheme.
+      if (scheme != defaultScheme) {
+        continue;
+      }
       final Map<String, String>? allBuildSettings = await buildSettingsForBuildInfo(
         buildInfo,
         deviceId: deviceId,
