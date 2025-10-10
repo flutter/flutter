@@ -16,12 +16,8 @@ Future<void> testMain() async {
   setUpUnitTests();
 
   test('Extract unicode info', () {
-    final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
-    final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
-    builder.addText(
-      'World domination is such an ugly phrase - \nI prefer to call it world optimisation.',
-    );
-    final WebParagraph paragraph = builder.build();
+    const text =
+        'World domination is such an ugly phrase - \nI prefer to call it world optimisation.';
 
     /*
 0: grapheme softBreak word
@@ -109,9 +105,13 @@ Future<void> testMain() async {
 82: grapheme softBreak word
 */
 
-    int i = 0;
-    for (final CodeUnitFlags flags in CodeUnitFlags.extractForParagraph(paragraph)) {
-      expect(flags.isGraphemeStart, true);
+    final codeUnitFlags = AllCodeUnitFlags(text);
+    for (int i = 0; i < text.length; i++) {
+      expect(
+        codeUnitFlags.hasFlag(i, CodeUnitFlag.grapheme),
+        isTrue,
+        reason: 'Expected grapheme start at index $i',
+      );
       if (i == 0 ||
           i == 6 ||
           i == 17 ||
@@ -127,14 +127,30 @@ Future<void> testMain() async {
           i == 63 ||
           i == 69 ||
           i == 82) {
-        expect(flags.isSoftLineBreak, isTrue, reason: 'Expected soft line break at index $i');
+        expect(
+          codeUnitFlags.hasFlag(i, CodeUnitFlag.softLineBreak),
+          isTrue,
+          reason: 'Expected soft line break at index $i',
+        );
       } else {
-        expect(flags.isSoftLineBreak, isFalse, reason: 'Expected no soft line break at index $i');
+        expect(
+          codeUnitFlags.hasFlag(i, CodeUnitFlag.softLineBreak),
+          isFalse,
+          reason: 'Expected no soft line break at index $i',
+        );
       }
       if (i == 43) {
-        expect(flags.isHardLineBreak, isTrue, reason: 'Expected hard line break at index $i');
+        expect(
+          codeUnitFlags.hasFlag(i, CodeUnitFlag.hardLineBreak),
+          isTrue,
+          reason: 'Expected hard line break at index $i',
+        );
       } else {
-        expect(flags.isHardLineBreak, isFalse, reason: 'Expected no hard line break at index $i');
+        expect(
+          codeUnitFlags.hasFlag(i, CodeUnitFlag.hardLineBreak),
+          isFalse,
+          reason: 'Expected no hard line break at index $i',
+        );
       }
       if (i == 0 ||
           i == 5 ||
@@ -168,9 +184,17 @@ Future<void> testMain() async {
           i == 69 ||
           i == 81 ||
           i == 82) {
-        expect(flags.isWordBreak, isTrue, reason: 'Expected word break at index $i');
+        expect(
+          codeUnitFlags.hasFlag(i, CodeUnitFlag.wordBreak),
+          isTrue,
+          reason: 'Expected word break at index $i',
+        );
       } else {
-        expect(flags.isWordBreak, isFalse, reason: 'Expected no word break at index $i');
+        expect(
+          codeUnitFlags.hasFlag(i, CodeUnitFlag.wordBreak),
+          isFalse,
+          reason: 'Expected no word break at index $i',
+        );
       }
       if (i == 5 ||
           i == 16 ||
@@ -187,9 +211,17 @@ Future<void> testMain() async {
           i == 59 ||
           i == 62 ||
           i == 68) {
-        expect(flags.isWhitespace, isTrue, reason: 'Expected whitespace at index $i');
+        expect(
+          codeUnitFlags.hasFlag(i, CodeUnitFlag.whitespace),
+          isTrue,
+          reason: 'Expected whitespace at index $i',
+        );
       } else {
-        expect(flags.isWhitespace, isFalse, reason: 'Expected no whitespace at index $i');
+        expect(
+          codeUnitFlags.hasFlag(i, CodeUnitFlag.whitespace),
+          isFalse,
+          reason: 'Expected no whitespace at index $i',
+        );
       }
       i += 1;
     }

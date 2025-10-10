@@ -9,7 +9,7 @@ import 'package:ui/ui.dart';
 
 import '../common/test_initialization.dart';
 
-// TODO(jlavrova): To make the tests consistent in all environments, we need to use the Ahem font.
+// TODO(mdebbar): To make the tests consistent in all environments, we need to use the Ahem font.
 final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
 
 void main() {
@@ -17,7 +17,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
+  setUpUnitTests();
 
   test(
     'Text wrapper, 10 lines, 3 trailing whitespaces on each line except the one that has a cluster break',
@@ -32,9 +32,9 @@ Future<void> testMain() async {
       expect(lines.length, 10);
       for (int i = 0; i < 10; i++) {
         if (i == 8) {
-          expect(lines[i].whitespaces.isEmpty, true);
+          expect(lines[i].whitespacesRange.isEmpty, true);
         } else {
-          expect(lines[i].whitespaces.size, 3);
+          expect(lines[i].whitespacesRange.size, 3);
         }
       }
     },
@@ -49,7 +49,7 @@ Future<void> testMain() async {
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 4);
     for (int i = 0; i < 4; i++) {
-      expect(lines[i].whitespaces.size, 3);
+      expect(lines[i].whitespacesRange.size, 3);
     }
   });
   test('Text wrapper, 1 line, 5 whitespaces and nothing else', () {
@@ -59,8 +59,8 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: double.infinity));
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 1);
-    expect(lines[0].whitespaces.size, 5);
-    expect(lines[0].clusters.size, 0);
+    expect(lines[0].whitespacesRange.size, 5);
+    expect(lines[0].textRange.size, 0);
   });
   test('Text wrapper, 3 lines, one very long word', () {
     final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
@@ -71,10 +71,24 @@ Future<void> testMain() async {
     expect(lines.length, 3);
     int length = 0;
     for (int i = 0; i < 3; i++) {
-      expect(lines[i].whitespaces.size, 0);
-      length += lines[i].clusters.size;
+      expect(lines[i].whitespacesRange.size, 0);
+      length += lines[i].textRange.size;
     }
     expect(length, paragraph.text.length);
+  });
+
+  test('1 line, one cluster that does not fit', () {
+    final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
+    builder.pushStyle(WebTextStyle(fontSize: 500));
+    builder.addText('a');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 50));
+    final List<TextLine> lines = paragraph.lines;
+    expect(lines, hasLength(1));
+
+    final singleLine = lines.single;
+    expect(singleLine.textRange.size, paragraph.text.length);
+    expect(singleLine.whitespacesRange.size, 0);
   });
 
   test('Text wrapper, leading spaces', () {
@@ -87,8 +101,8 @@ Future<void> testMain() async {
     expect(lines.length, 3);
     int length = 0;
     for (int i = 0; i < 3; i++) {
-      expect(lines[i].whitespaces.size, 0);
-      length += lines[i].clusters.size;
+      expect(lines[i].whitespacesRange.size, 0);
+      length += lines[i].textRange.size;
     }
     expect(length, paragraph.text.length);
   });
@@ -105,10 +119,10 @@ Future<void> testMain() async {
     expect(lines.length, 15);
     int length = 0;
     for (int i = 0; i < 15; i++) {
-      expect(lines[i].whitespaces.size, i != 14 ? 1 : 0);
-      expect(lines[i].hardBreak, i != 14);
-      length += lines[i].clusters.size;
-      length += lines[i].whitespaces.size;
+      expect(lines[i].whitespacesRange.size, i != 14 ? 1 : 0);
+      expect(lines[i].hardLineBreak, i != 14);
+      length += lines[i].textRange.size;
+      length += lines[i].whitespacesRange.size;
     }
     expect(length, paragraph.text.length);
   });
@@ -122,10 +136,10 @@ Future<void> testMain() async {
 
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 2);
-    expect(lines[0].whitespaces.size, 3 + 1);
-    expect(lines[0].hardBreak, true);
-    expect(lines[1].whitespaces.size, 0);
-    expect(lines[1].hardBreak, false);
+    expect(lines[0].whitespacesRange.size, 3 + 1);
+    expect(lines[0].hardLineBreak, true);
+    expect(lines[1].whitespacesRange.size, 0);
+    expect(lines[1].hardLineBreak, false);
   });
 
   test('Text wrapper, 3 hard line breaks and nothing else', () {
@@ -138,9 +152,9 @@ Future<void> testMain() async {
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 3);
     for (int i = 0; i < 3; i++) {
-      expect(lines[i].whitespaces.size, 1);
-      expect(lines[i].clusters.size, 0);
-      expect(lines[i].hardBreak, i != 3);
+      expect(lines[i].whitespacesRange.size, 1);
+      expect(lines[i].textRange.size, 0);
+      expect(lines[i].hardLineBreak, i != 3);
     }
   });
 }

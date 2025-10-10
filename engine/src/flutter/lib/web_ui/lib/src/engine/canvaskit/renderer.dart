@@ -312,7 +312,29 @@ class CanvasKitRenderer extends Renderer {
     List<ui.FontFeature>? fontFeatures,
     List<ui.FontVariation>? fontVariations,
   }) => isExperimentalWebParagraph
-      ? WebTextStyle(fontFamily: fontFamily, fontSize: fontSize, color: color)
+      ? WebTextStyle(
+          color: color,
+          decoration: decoration,
+          decorationColor: decorationColor,
+          decorationStyle: decorationStyle,
+          decorationThickness: decorationThickness,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          textBaseline: textBaseline,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+          fontSize: fontSize,
+          letterSpacing: letterSpacing,
+          wordSpacing: wordSpacing,
+          height: height,
+          leadingDistribution: leadingDistribution,
+          locale: locale,
+          background: background as CkPaint?,
+          foreground: foreground as CkPaint?,
+          shadows: shadows,
+          fontFeatures: fontFeatures,
+          fontVariations: fontVariations,
+        )
       : CkTextStyle(
           color: color,
           decoration: decoration,
@@ -353,10 +375,18 @@ class CanvasKitRenderer extends Renderer {
     ui.Locale? locale,
   }) => isExperimentalWebParagraph
       ? WebParagraphStyle(
-          textDirection: textDirection,
           textAlign: textAlign,
+          textDirection: textDirection,
+          maxLines: maxLines,
           fontFamily: fontFamily,
           fontSize: fontSize,
+          height: height,
+          textHeightBehavior: textHeightBehavior,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          strutStyle: strutStyle as WebStrutStyle?,
+          ellipsis: ellipsis,
+          locale: locale,
         )
       : CkParagraphStyle(
           textAlign: textAlign,
@@ -385,7 +415,17 @@ class CanvasKitRenderer extends Renderer {
     ui.FontStyle? fontStyle,
     bool? forceStrutHeight,
   }) => isExperimentalWebParagraph
-      ? WebStrutStyle()
+      ? WebStrutStyle(
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+          fontSize: fontSize,
+          height: height,
+          leadingDistribution: leadingDistribution,
+          leading: leading,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          forceStrutHeight: forceStrutHeight,
+        )
       : CkStrutStyle(
           fontFamily: fontFamily,
           fontFamilyFallback: fontFamilyFallback,
