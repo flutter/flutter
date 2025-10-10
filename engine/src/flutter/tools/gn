@@ -909,7 +909,9 @@ def parse_args(args):
       '--optimize-for-size',
       default=False,
       action='store_true',
-      help="Optimize for code size rather than speed. This is always true for windows, ios, and android."
+      help='Optimize for code size rather than speed. '
+      'Optimized builds for Windows, iOS, and Android are '
+      'always optimized for size regardless of the value of this flag.'
   )
   parser.add_argument(
       '--enable-unittests',
