@@ -51,7 +51,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) => {
-      cache.match(event.request).then((response) => {
+      return cache.match(event.request).then((response) => {
         return response || fetch(event.request).then((response) => {
           if (response && Boolean(response.ok)) {
             cache.put(event.request, response.clone());
