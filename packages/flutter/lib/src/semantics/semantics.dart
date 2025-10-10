@@ -4545,6 +4545,8 @@ class SemanticsOwner extends ChangeNotifier {
     _dirtyNodes.clear();
     _nodes.clear();
     _detachedNodes.clear();
+    _traversalChildNodes.clear();
+    _traversalParentNodes.clear();
     super.dispose();
   }
 
