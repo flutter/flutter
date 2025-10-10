@@ -41,11 +41,12 @@ public class FlutterImageDecoder {
       @NonNull ByteBuffer buffer, @NonNull HeaderListener headerListener) {
     Metadata metadata = Metadata.create(buffer, headerListener);
     FlutterImageDecoderImpl impl = null;
+    Utils utils = new Utils();
     if (metadata.isHeif()) {
       if (Build.VERSION.SDK_INT == io.flutter.Build.API_LEVELS.API_36) {
-        impl = new FlutterImageDecoderImplHeifApi36();
+        impl = new FlutterImageDecoderImplHeifApi36(utils);
       } else if (Build.VERSION.SDK_INT < io.flutter.Build.API_LEVELS.API_36) {
-        impl = new FlutterImageDecoderImplHeifPre36();
+        impl = new FlutterImageDecoderImplHeifPre36(utils);
       }
     }
     if (impl == null) {

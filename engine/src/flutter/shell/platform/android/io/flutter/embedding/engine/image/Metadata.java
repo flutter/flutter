@@ -2,6 +2,7 @@ package io.flutter.embedding.engine.image;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.annotation.VisibleForTesting;
 import io.flutter.Build;
 import java.nio.ByteBuffer;
 
@@ -20,12 +21,13 @@ class Metadata {
   int originalHeight;
   int originalWidth;
 
+  @VisibleForTesting
   Metadata() {}
 
   static Metadata create(
       @NonNull ByteBuffer buffer, @NonNull FlutterImageDecoder.HeaderListener headerListener) {
     Metadata metadata = new Metadata();
-    byte[] bytes = Utils.getBytes(buffer);
+    byte[] bytes = new Utils().getBytes(buffer);
     // Use bitmap decode to get the mimetype and original dimensions.
     BitmapMetadataReader.read(bytes, metadata);
     // For non-heif images, we'll let the default implementation ImageDecoder handle the rest.

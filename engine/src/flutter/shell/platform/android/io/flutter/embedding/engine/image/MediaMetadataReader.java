@@ -5,6 +5,7 @@ import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import java.io.IOException;
 
@@ -53,9 +54,18 @@ class MediaMetadataReader {
    * @param metadata The {@link Metadata} object to populate.
    */
   static void read(byte[] bytes, @NonNull Metadata metadata) {
-    int rotation = 0;
     try {
       MediaExtractor extractor = getMediaExtractor(bytes);
+      read(bytes, metadata, extractor);
+    } catch (Exception e) {
+      Log.e(TAG, "Failed to decode HEIF image using MediaExtractor", e);
+    }
+  }
+
+  @VisibleForTesting
+  static void read(byte[] bytes, @NonNull Metadata metadata, MediaExtractor extractor) {
+    int rotation = 0;
+    try {
       int trackCount = extractor.getTrackCount();
       for (int i = 0; i < trackCount; i++) {
         MediaFormat format = extractor.getTrackFormat(i);
