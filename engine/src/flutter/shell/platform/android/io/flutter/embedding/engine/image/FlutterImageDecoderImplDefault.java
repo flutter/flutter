@@ -9,15 +9,31 @@ import io.flutter.Log;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+/**
+ * The default implementation of {@link FlutterImageDecoderImpl} that uses {@link ImageDecoder} to
+ * decode images.
+ */
 @RequiresApi(io.flutter.Build.API_LEVELS.API_28)
 class FlutterImageDecoderImplDefault implements FlutterImageDecoderImpl {
   private static final String TAG = "FlutterImageDecoderImplDefault";
   private final FlutterImageDecoder.HeaderListener listener;
 
+  /**
+   * Constructs a new {@code FlutterImageDecoderImplDefault}.
+   *
+   * @param listener A listener to receive image header information.
+   */
   public FlutterImageDecoderImplDefault(FlutterImageDecoder.HeaderListener listener) {
     this.listener = listener;
   }
 
+  /**
+   * Decodes an image from the given {@link ByteBuffer}.
+   *
+   * @param buffer The {@link ByteBuffer} containing the encoded image.
+   * @param metadata The metadata of the image. This is unused here.
+   * @return The decoded {@link Bitmap}, or null if decoding fails.
+   */
   public Bitmap decodeImage(ByteBuffer buffer, Metadata metadata) {
     ImageDecoder.Source source = ImageDecoder.createSource(buffer);
     try {

@@ -5,11 +5,19 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import io.flutter.Log;
 
+/** Reads metadata from an image using {@link BitmapFactory}. */
 @RequiresApi(io.flutter.Build.API_LEVELS.API_28)
 public class BitmapMetadataReader {
   private static final String TAG = "BitmapMetadataReader";
 
-  public static void read(byte[] bytes, @NonNull Metadata metadata) {
+  /**
+   * Reads the metadata from the given byte array and populates the provided {@link Metadata}
+   * object.
+   *
+   * @param bytes The byte array containing the image data.
+   * @param metadata The {@link Metadata} object to populate.
+   */
+  static void read(byte[] bytes, @NonNull Metadata metadata) {
     try {
       BitmapFactory.Options options = new BitmapFactory.Options();
       options.inJustDecodeBounds = true;

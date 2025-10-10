@@ -6,7 +6,16 @@ import android.media.ExifInterface;
 import androidx.annotation.NonNull;
 import java.nio.ByteBuffer;
 
+/** Utility methods for image decoding. */
 class Utils {
+  /**
+   * Returns a byte array containing the remaining bytes of the given {@link ByteBuffer}.
+   *
+   * <p>The buffer's position is rewound after the bytes are read.
+   *
+   * @param buffer The {@link ByteBuffer} to read from.
+   * @return A byte array containing the remaining bytes of the buffer.
+   */
   static @NonNull byte[] getBytes(@NonNull ByteBuffer buffer) {
     byte[] bytes = new byte[buffer.remaining()];
     buffer.get(bytes);
@@ -15,7 +24,12 @@ class Utils {
     return bytes;
   }
 
-  ///  Only interested in the Flip.
+  /**
+   * Returns whether the given EXIF orientation indicates a flip.
+   *
+   * @param orientation The EXIF orientation.
+   * @return True if the orientation is a flip case, false otherwise.
+   */
   static boolean isFlipCase(int orientation) {
     switch (orientation) {
       case ExifInterface.ORIENTATION_FLIP_HORIZONTAL: // 2
@@ -28,8 +42,16 @@ class Utils {
     }
   }
 
-  ///  This only applies the flip based on the Exif data, as the rotation should be handled by
-  // ImageDecoder.
+  /**
+   * Applies a flip to the given {@link Bitmap} if needed, based on the EXIF orientation.
+   *
+   * <p>This method only applies the flip based on the Exif data, as the rotation should be handled
+   * by ImageDecoder.
+   *
+   * @param decoded The {@link Bitmap} to potentially flip.
+   * @param exifOrientation The EXIF orientation of the image.
+   * @return The flipped {@link Bitmap}, or the original if no flip was needed.
+   */
   static Bitmap applyFlipIfNeeded(Bitmap decoded, int exifOrientation) {
     if (decoded == null || !Utils.isFlipCase(exifOrientation)) {
       return decoded;

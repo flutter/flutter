@@ -8,6 +8,7 @@ import androidx.annotation.RequiresApi;
 import io.flutter.Log;
 import java.io.IOException;
 
+/** Reads metadata from an image using {@link MediaExtractor}. */
 @RequiresApi(io.flutter.Build.API_LEVELS.API_28)
 class MediaMetadataReader {
 
@@ -44,7 +45,14 @@ class MediaMetadataReader {
     return extractor;
   }
 
-  public static void read(byte[] bytes, @NonNull Metadata metadata) {
+  /**
+   * Reads the metadata from the given byte array and populates the provided {@link Metadata}
+   * object.
+   *
+   * @param bytes The byte array containing the image data.
+   * @param metadata The {@link Metadata} object to populate.
+   */
+  static void read(byte[] bytes, @NonNull Metadata metadata) {
     int rotation = 0;
     try {
       MediaExtractor extractor = getMediaExtractor(bytes);

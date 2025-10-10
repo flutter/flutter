@@ -5,15 +5,20 @@ import androidx.annotation.RequiresApi;
 import io.flutter.Build;
 import java.nio.ByteBuffer;
 
+/**
+ * Represents the metadata of an image.
+ *
+ * <p>This class is populated by the various metadata reader classes.
+ */
 @RequiresApi(Build.API_LEVELS.API_28)
-public class Metadata {
-  public int width;
-  public int height;
-  public int rotation;
-  public String mimeType;
-  public int orientation;
-  public int originalHeight;
-  public int originalWidth;
+class Metadata {
+  int width;
+  int height;
+  int rotation;
+  String mimeType;
+  int orientation;
+  int originalHeight;
+  int originalWidth;
 
   Metadata() {}
 
@@ -35,7 +40,12 @@ public class Metadata {
     return metadata;
   }
 
-  public boolean isHeif() {
+  /**
+   * Returns whether the image is in HEIF format.
+   *
+   * @return True if the image is HEIF, false otherwise.
+   */
+  boolean isHeif() {
     return mimeType.equals("image/heif");
   }
 }

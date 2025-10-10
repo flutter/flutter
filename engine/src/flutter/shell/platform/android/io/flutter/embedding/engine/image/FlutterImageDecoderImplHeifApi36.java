@@ -6,11 +6,23 @@ import android.graphics.Matrix;
 import androidx.annotation.RequiresApi;
 import java.nio.ByteBuffer;
 
+/**
+ * An implementation of {@link FlutterImageDecoderImpl} that decodes HEIF images on API 36 using
+ * {@link BitmapFactory}.
+ *
+ * <p>There is a known bug for Android 36 where ImageDecoder will fail to retrieve HEIF images with
+ * certain gain maps. The workaround is to use BitmapFactory. Rotation and flipping must be applied
+ * manually.
+ */
 @RequiresApi(io.flutter.Build.API_LEVELS.API_36)
 class FlutterImageDecoderImplHeifApi36 implements FlutterImageDecoderImpl {
-  /// There is a known bug for Android 36 where ImageDecoder will fail to retrieve HEIF images with
-  /// certain gain maps.  The workaround is to use BitmapFactory.  Rotation and flipping must be
-  /// applied manually.
+  /**
+   * Decodes an image from the given {@link ByteBuffer}.
+   *
+   * @param buffer The {@link ByteBuffer} containing the encoded image.
+   * @param metadata The metadata of the image.
+   * @return The decoded {@link Bitmap}, or null if decoding fails.
+   */
   public Bitmap decodeImage(ByteBuffer buffer, Metadata metadata) {
     byte[] bytes = Utils.getBytes(buffer);
     BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
