@@ -838,29 +838,27 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
         target = viewport.getOffsetToReveal(object, alignment, rect: targetRect, axis: axis).offset;
         target = clampDouble(target, minScrollExtent, maxScrollExtent);
       case ScrollPositionAlignmentPolicy.keepVisibleAtEnd:
-        target =
-            viewport
-                .getOffsetToReveal(
-                  object,
-                  1.0, // Aligns to end
-                  rect: targetRect,
-                  axis: axis,
-                )
-                .offset;
+        target = viewport
+            .getOffsetToReveal(
+              object,
+              1.0, // Aligns to end
+              rect: targetRect,
+              axis: axis,
+            )
+            .offset;
         target = clampDouble(target, minScrollExtent, maxScrollExtent);
         if (target < pixels) {
           target = pixels;
         }
       case ScrollPositionAlignmentPolicy.keepVisibleAtStart:
-        target =
-            viewport
-                .getOffsetToReveal(
-                  object,
-                  0.0, // Aligns to start
-                  rect: targetRect,
-                  axis: axis,
-                )
-                .offset;
+        target = viewport
+            .getOffsetToReveal(
+              object,
+              0.0, // Aligns to start
+              rect: targetRect,
+              axis: axis,
+            )
+            .offset;
         target = clampDouble(target, minScrollExtent, maxScrollExtent);
         if (target > pixels) {
           target = pixels;

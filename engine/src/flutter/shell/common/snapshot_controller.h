@@ -39,19 +39,21 @@ class SnapshotController {
 
   virtual void MakeRasterSnapshot(
       sk_sp<DisplayList> display_list,
-      SkISize picture_size,
+      DlISize picture_size,
       std::function<void(const sk_sp<DlImage>&)> callback) = 0;
 
   // Note that this image is not guaranteed to be UIThreadSafe and must
   // be converted to a DlImageGPU if it is to be handed back to the UI
   // thread.
   virtual sk_sp<DlImage> MakeRasterSnapshotSync(sk_sp<DisplayList> display_list,
-                                                SkISize picture_size) = 0;
+                                                DlISize picture_size) = 0;
 
   virtual sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) = 0;
 
   virtual void CacheRuntimeStage(
       const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) = 0;
+
+  virtual bool MakeRenderContextCurrent() = 0;
 
  protected:
   explicit SnapshotController(const Delegate& delegate);

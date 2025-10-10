@@ -39,8 +39,8 @@ void testMain() {
             as JsFlutterConfiguration?,
       );
       renderer.fontCollection.fontFallbackManager!.debugUserPreferredLanguage = 'en';
-      renderer.fontCollection.fontFallbackManager!.debugOnLoadFontFamily =
-          (String family) => downloadedFontFamilies.add(family);
+      renderer.fontCollection.fontFallbackManager!.debugOnLoadFontFamily = (String family) =>
+          downloadedFontFamilies.add(family);
       savedCallback = ui.PlatformDispatcher.instance.onPlatformMessage;
     });
 
@@ -571,10 +571,12 @@ void testMain() {
         }
         final Set<NotoFont> fonts = <NotoFont>{};
         for (final int codePoint in codePoints) {
-          final List<NotoFont> fontsForPoint =
-              renderer.fontCollection.fontFallbackManager!.codePointToComponents
-                  .lookup(codePoint)
-                  .fonts;
+          final List<NotoFont> fontsForPoint = renderer
+              .fontCollection
+              .fontFallbackManager!
+              .codePointToComponents
+              .lookup(codePoint)
+              .fonts;
 
           // All code points are extracted from the same tree, so there must
           // be at least one font supporting each code point

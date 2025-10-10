@@ -215,20 +215,18 @@ class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbar
               // The navButton that shows and hides the overflow menu is the
               // first child.
               _TextSelectionToolbarOverflowButton(
-                key:
-                    _overflowOpen
-                        ? StandardComponentType.backButton.key
-                        : StandardComponentType.moreButton.key,
+                key: _overflowOpen
+                    ? StandardComponentType.backButton.key
+                    : StandardComponentType.moreButton.key,
                 icon: Icon(_overflowOpen ? Icons.arrow_back : Icons.more_vert),
                 onPressed: () {
                   setState(() {
                     _overflowOpen = !_overflowOpen;
                   });
                 },
-                tooltip:
-                    _overflowOpen
-                        ? localizations.backButtonTooltip
-                        : localizations.moreButtonTooltip,
+                tooltip: _overflowOpen
+                    ? localizations.backButtonTooltip
+                    : localizations.moreButtonTooltip,
               ),
               ...widget.children,
             ],
@@ -477,10 +475,9 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox
   // overflow, if at all.
   void _layoutChildren() {
     // When overflow is not open, the toolbar is always a specific height.
-    final BoxConstraints sizedConstraints =
-        _overflowOpen
-            ? constraints
-            : BoxConstraints.loose(Size(constraints.maxWidth, _kToolbarHeight));
+    final BoxConstraints sizedConstraints = _overflowOpen
+        ? constraints
+        : BoxConstraints.loose(Size(constraints.maxWidth, _kToolbarHeight));
 
     int i = -1;
     double width = 0.0;

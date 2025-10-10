@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "웹 검색",
   "shareButtonLabel": "공유",
   "pasteButtonLabel": "붙여넣기",
-  "selectAllButtonLabel": "전체 선택"
+  "selectAllButtonLabel": "전체 선택",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found",
+  "radioButtonUnselectedLabel": "Not selected"
 }

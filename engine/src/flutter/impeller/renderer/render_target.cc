@@ -4,9 +4,9 @@
 
 #include "impeller/renderer/render_target.h"
 
+#include <format>
 #include <sstream>
 
-#include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/formats.h"
@@ -279,22 +279,22 @@ std::string RenderTarget::ToString() const {
   std::stringstream stream;
 
   if (color0_.has_value()) {
-    stream << SPrintF("Color[%d]=(%s)", 0,
-                      ColorAttachmentToString(color0_.value()).c_str());
+    stream << std::format("Color[{}]=({})", 0,
+                          ColorAttachmentToString(color0_.value()));
   }
   for (const auto& [index, color] : colors_) {
-    stream << SPrintF("Color[%zu]=(%s)", index,
-                      ColorAttachmentToString(color).c_str());
+    stream << std::format("Color[{}]=({})", index,
+                          ColorAttachmentToString(color));
   }
   if (depth_) {
     stream << ",";
-    stream << SPrintF("Depth=(%s)",
-                      DepthAttachmentToString(depth_.value()).c_str());
+    stream << std::format("Depth=({})",
+                          DepthAttachmentToString(depth_.value()));
   }
   if (stencil_) {
     stream << ",";
-    stream << SPrintF("Stencil=(%s)",
-                      StencilAttachmentToString(stencil_.value()).c_str());
+    stream << std::format("Stencil=({})",
+                          StencilAttachmentToString(stencil_.value()));
   }
   return stream.str();
 }

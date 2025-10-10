@@ -78,7 +78,10 @@ void main() {
             body: SelectionArea(
               child: SizedBox(
                 height: 100,
-                child: FittedBox(fit: BoxFit.fill, child: Text('test', key: textKey)),
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child: Text('test', key: textKey),
+                ),
               ),
             ),
           ),
@@ -134,7 +137,9 @@ void main() {
       addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(home: SelectionArea(focusNode: focusNode, child: const Text('How are you?'))),
+        MaterialApp(
+          home: SelectionArea(focusNode: focusNode, child: const Text('How are you?')),
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -171,12 +176,10 @@ void main() {
         MaterialApp(
           home: SelectionArea(
             focusNode: focusNode,
-            contextMenuBuilder: (
-              BuildContext context,
-              SelectableRegionState selectableRegionState,
-            ) {
-              return Placeholder(key: key);
-            },
+            contextMenuBuilder:
+                (BuildContext context, SelectableRegionState selectableRegionState) {
+                  return Placeholder(key: key);
+                },
             child: const Text('How are you?'),
           ),
         ),
@@ -226,7 +229,9 @@ void main() {
       addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(home: SelectionArea(focusNode: focusNode, child: const Text('How are you?'))),
+        MaterialApp(
+          home: SelectionArea(focusNode: focusNode, child: const Text('How are you?')),
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -577,4 +582,73 @@ void main() {
     variant: TargetPlatformVariant.only(TargetPlatform.android),
     skip: kIsWeb, // [intended] on web only one selection handle can be dragged at a time.
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/174246 .
+  // This is a control case against its Web counterpart in
+  // html_element_view_test.dart.
+  testWidgets('SelectionArea applies correct mouse cursors in its empty region', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey innerRegion = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          // Region 1 (fullscreen)
+          body: MouseRegion(
+            cursor: SystemMouseCursors.grab,
+            child: Center(
+              child: Container(
+                decoration: BoxDecoration(border: Border.all()),
+                // Region 2 (SelectionArea)
+                child: SelectionArea(
+                  child: Padding(
+                    padding: const EdgeInsetsGeometry.all(40),
+                    // Region 3 (inner MouseRegion)
+                    child: MouseRegion(
+                      key: innerRegion,
+                      cursor: SystemMouseCursors.forbidden,
+                      onHover: (_) {},
+                      child: Container(color: const Color(0xFFAA9933), width: 200, height: 50),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    const Offset region1 = Offset(10, 10);
+    final Offset region2 = tester.getTopLeft(find.byKey(innerRegion)) - const Offset(3, 3);
+    final Offset region3 = tester.getCenter(find.byKey(innerRegion));
+
+    final TestGesture gesture = await tester.startGesture(region1, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+
+    await gesture.moveTo(region2);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+
+    await gesture.moveTo(region3);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.forbidden,
+    );
+
+    await gesture.moveTo(region2);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+  }, skip: kIsWeb); // There's a Web version in html_element_view_test.dart
 }

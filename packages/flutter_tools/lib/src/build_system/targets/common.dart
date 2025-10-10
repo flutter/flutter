@@ -14,6 +14,7 @@ import '../../dart/package_map.dart';
 import '../../darwin/darwin.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals show xcode;
+import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -60,7 +61,7 @@ class CopyFlutterBundle extends Target {
     }
     final String? flavor = environment.defines[kFlavor];
 
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     environment.outputDir.createSync(recursive: true);
 
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
@@ -83,9 +84,11 @@ class CopyFlutterBundle extends Target {
           .file(isolateSnapshotData)
           .copySync(environment.outputDir.childFile('isolate_snapshot_data').path);
     }
+    final DartHooksResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       environment.outputDir,
+      dartHookResult: dartHookResult,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
       flavor: flavor,
@@ -102,7 +105,11 @@ class CopyFlutterBundle extends Target {
   }
 
   @override
-  List<Target> get dependencies => const <Target>[KernelSnapshot(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+    DartBuildForNative(),
+    KernelSnapshot(),
+    InstallCodeAssets(),
+  ];
 }
 
 /// Copies the pre-built flutter bundle for release mode.
@@ -150,7 +157,7 @@ class KernelSnapshot extends Target {
     // TODO(mosuem): Should output resources.json. https://github.com/flutter/flutter/issues/146263
   ];
 
-  static const String depfile = 'kernel_snapshot_program.d';
+  static const depfile = 'kernel_snapshot_program.d';
 
   @override
   List<String> get depfiles => const <String>[depfile];
@@ -161,11 +168,11 @@ class KernelSnapshot extends Target {
     DartPluginRegistrantTarget(),
   ];
 
-  static const String dillName = 'app.dill';
+  static const dillName = 'app.dill';
 
   @override
   Future<void> build(Environment environment) async {
-    final KernelCompiler compiler = KernelCompiler(
+    final compiler = KernelCompiler(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
       processManager: environment.processManager,
@@ -180,13 +187,13 @@ class KernelSnapshot extends Target {
     if (targetPlatformEnvironment == null) {
       throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
     }
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String targetFile =
         environment.defines[kTargetFile] ?? environment.fileSystem.path.join('lib', 'main.dart');
     final File packagesFile = findPackageConfigFileOrDefault(environment.projectDir);
     final String targetFileAbsolute = environment.fileSystem.file(targetFile).absolute.path;
     // everything besides 'false' is considered to be enabled.
-    final bool trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
+    final trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
     final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
 
     // This configuration is all optional.
@@ -332,7 +339,7 @@ abstract class AotElfBase extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final AOTSnapshotter snapshotter = AOTSnapshotter(
+    final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
       xcode: globals.xcode!,
@@ -352,10 +359,10 @@ abstract class AotElfBase extends Target {
       environment.defines,
       kExtraGenSnapshotOptions,
     );
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
-    final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
+    final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];
 
     if (codeSizeDirectory != null) {
@@ -489,7 +496,7 @@ abstract final class Lipo {
       }
     }
 
-    final List<String> lipoArgs = <String>['lipo', ...inputPaths, '-create', '-output', resultPath];
+    final lipoArgs = <String>['lipo', ...inputPaths, '-create', '-output', resultPath];
 
     final ProcessResult result = await environment.processManager.run(lipoArgs);
     if (result.exitCode != 0) {

@@ -54,7 +54,9 @@ void main() {
     expect(log, isEmpty);
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoRadio<int>(key: key, value: 1, groupValue: 2))),
+      CupertinoApp(
+        home: Center(child: CupertinoRadio<int>(key: key, value: 1, groupValue: 2)),
+      ),
     );
 
     await tester.tap(find.byKey(key));
@@ -326,41 +328,38 @@ void main() {
                     CupertinoRadio<int>(
                       key: radioKey0,
                       value: 0,
-                      onChanged:
-                          enabled
-                              ? (int? newValue) {
-                                setState(() {
-                                  groupValue = newValue;
-                                });
-                              }
-                              : null,
+                      onChanged: enabled
+                          ? (int? newValue) {
+                              setState(() {
+                                groupValue = newValue;
+                              });
+                            }
+                          : null,
                       groupValue: groupValue,
                       autofocus: true,
                     ),
                     CupertinoRadio<int>(
                       key: radioKey1,
                       value: 1,
-                      onChanged:
-                          enabled
-                              ? (int? newValue) {
-                                setState(() {
-                                  groupValue = newValue;
-                                });
-                              }
-                              : null,
+                      onChanged: enabled
+                          ? (int? newValue) {
+                              setState(() {
+                                groupValue = newValue;
+                              });
+                            }
+                          : null,
                       groupValue: groupValue,
                     ),
                     CupertinoRadio<int>(
                       key: radioKey2,
                       value: 2,
-                      onChanged:
-                          enabled
-                              ? (int? newValue) {
-                                setState(() {
-                                  groupValue = newValue;
-                                });
-                              }
-                              : null,
+                      onChanged: enabled
+                          ? (int? newValue) {
+                              setState(() {
+                                groupValue = newValue;
+                              });
+                            }
+                          : null,
                       groupValue: groupValue,
                       focusNode: focusNode2,
                     ),
@@ -449,15 +448,9 @@ void main() {
     Widget buildRadio(bool show) {
       return CupertinoApp(
         home: Center(
-          child:
-              show
-                  ? CupertinoRadio<bool>(
-                    key: key,
-                    value: true,
-                    groupValue: false,
-                    onChanged: (_) {},
-                  )
-                  : Container(),
+          child: show
+              ? CupertinoRadio<bool>(key: key, value: true, groupValue: false, onChanged: (_) {})
+              : Container(),
         ),
       );
     }
@@ -932,6 +925,42 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
+  });
+
+  // Regression tests for https://github.com/flutter/flutter/issues/170422
+  group('Radio accessibility announcements on various platforms', () {
+    testWidgets('Unselected radio should be vocalized via hint on iOS/macOS platform', (
+      WidgetTester tester,
+    ) async {
+      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(child: CupertinoRadio<int>(value: 2, groupValue: 1, onChanged: (int? i) {})),
+        ),
+      );
+
+      final SemanticsNode semanticNode = tester.getSemantics(find.byType(Focus).last);
+      if (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS) {
+        expect(semanticNode.hint, localizations.radioButtonUnselectedLabel);
+      } else {
+        expect(semanticNode.hint, anyOf(isNull, isEmpty));
+      }
+    });
+
+    testWidgets('Selected radio should be vocalized via the selected flag on all platforms', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(child: CupertinoRadio<int>(value: 1, groupValue: 1, onChanged: (int? i) {})),
+        ),
+      );
+
+      final SemanticsNode semanticNode = tester.getSemantics(find.byType(Focus).last);
+      // Radio semantics should not have hint.
+      expect(semanticNode.hint, anyOf(isNull, isEmpty));
+    });
   });
 }
 

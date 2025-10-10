@@ -47,8 +47,9 @@ void main() {
 
   testWithoutContext('abiFilters provided by the user take precedence over the default', () async {
     final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
-    final String buildGradleContents =
-        projectDir.childFile('android/app/build.gradle.kts').readAsStringSync();
+    final String buildGradleContents = projectDir
+        .childFile('android/app/build.gradle.kts')
+        .readAsStringSync();
 
     // Modify the project's build.gradle.kts file to include abiFilters for a single ABI only.
     final String updatedBuildGradleContents = buildGradleContents.replaceFirstMapped(
@@ -56,7 +57,7 @@ void main() {
       (Match match) {
         final String before = match.group(1)!;
         final String body = match.group(2)!;
-        const String ndkBlock = '''
+        const ndkBlock = '''
                 ndk {
                     abiFilters.clear()
                     abiFilters.addAll(listOf("arm64-v8a"))
@@ -124,7 +125,7 @@ bool _checkLibIsInApk(
   }
 
   final String fileContent = localPropertiesFile.readAsStringSync();
-  final RegExp regex = RegExp(r'sdk\.dir=(.+)');
+  final regex = RegExp(r'sdk\.dir=(.+)');
   final Match? match = regex.firstMatch(fileContent);
   final String sdkPath = match?.group(1) ?? '';
 
@@ -132,12 +133,11 @@ bool _checkLibIsInApk(
     throw StateError('SDK path not found in local.properties');
   }
 
-  final String apkAnalyzer =
-      fileSystem
-          .directory(sdkPath)
-          .childDirectory('cmdline-tools/latest/bin')
-          .childFile(Platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer')
-          .path;
+  final String apkAnalyzer = fileSystem
+      .directory(sdkPath)
+      .childDirectory('cmdline-tools/latest/bin')
+      .childFile(Platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer')
+      .path;
 
   final File apkFile = appDir
       .childDirectory('build/app/outputs/apk/${buildMode.cliName}')

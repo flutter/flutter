@@ -24,8 +24,8 @@ import '../../src/test_flutter_command_runner.dart';
 import '../../src/testbed.dart';
 
 class FakePub extends Fake implements Pub {
-  int calledGetOffline = 0;
-  int calledOnline = 0;
+  var calledGetOffline = 0;
+  var calledOnline = 0;
 
   @override
   Future<void> get({
@@ -63,7 +63,7 @@ void main() {
         setup: () {
           fakePub = FakePub();
           Cache.flutterRoot = 'flutter';
-          final List<String> filePaths = <String>[
+          final filePaths = <String>[
             globals.fs.path.join('flutter', 'packages', 'flutter', 'pubspec.yaml'),
             globals.fs.path.join('flutter', 'packages', 'flutter_driver', 'pubspec.yaml'),
             globals.fs.path.join('flutter', 'packages', 'flutter_test', 'pubspec.yaml'),
@@ -78,10 +78,10 @@ void main() {
             globals.fs.path.join('usr', 'local', 'bin', 'adb'),
             globals.fs.path.join('Android', 'platform-tools', 'adb.exe'),
           ];
-          for (final String filePath in filePaths) {
+          for (final filePath in filePaths) {
             globals.fs.file(filePath).createSync(recursive: true);
           }
-          final List<String> templatePaths = <String>[
+          final templatePaths = <String>[
             globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'app'),
             globals.fs.path.join(
               'flutter',
@@ -131,7 +131,7 @@ void main() {
               'plugin_cocoapods',
             ),
           ];
-          for (final String templatePath in templatePaths) {
+          for (final templatePath in templatePaths) {
             globals.fs.directory(templatePath).createSync(recursive: true);
             globals.fs
                 .directory(templatePath)
@@ -184,7 +184,7 @@ void main() {
     testUsingContext(
       'set template type as usage value',
       () => testbed.run(() async {
-        final CreateCommand command = CreateCommand();
+        final command = CreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         await runner.run(<String>['create', '--no-pub', '--template=module', 'testy']);
@@ -222,36 +222,9 @@ void main() {
     );
 
     testUsingContext(
-      'set iOS host language type as usage value',
-      () => testbed.run(() async {
-        final CreateCommand command = CreateCommand();
-        final CommandRunner<void> runner = createTestCommandRunner(command);
-
-        await runner.run(<String>['create', '--no-pub', '--template=plugin', 'testy']);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createIosLanguage'],
-          'swift',
-        );
-
-        await runner.run(<String>[
-          'create',
-          '--no-pub',
-          '--template=plugin',
-          '--ios-language=objc',
-          'testy',
-        ]);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createIosLanguage'],
-          'objc',
-        );
-      }),
-      overrides: <Type, Generator>{Java: () => FakeJava()},
-    );
-
-    testUsingContext(
       'set Android host language type as usage value',
       () => testbed.run(() async {
-        final CreateCommand command = CreateCommand();
+        final command = CreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         await runner.run(<String>['create', '--no-pub', '--template=app', 'testy']);
@@ -278,7 +251,7 @@ void main() {
     testUsingContext(
       'create --offline',
       () => testbed.run(() async {
-        final CreateCommand command = CreateCommand();
+        final command = CreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['create', 'testy', '--offline']);
         expect(fakePub.calledOnline, 0);
@@ -291,7 +264,7 @@ void main() {
     testUsingContext(
       'package_ffi template not enabled',
       () async {
-        final CreateCommand command = CreateCommand();
+        final command = CreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         expect(
@@ -302,11 +275,10 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
-        FeatureFlags:
-            () => TestFeatureFlags(
-              isNativeAssetsEnabled:
-                  false, // ignore: avoid_redundant_argument_values, If we graduate the feature to true by default, don't break this test.
-            ),
+        FeatureFlags: () => TestFeatureFlags(
+          isNativeAssetsEnabled:
+              false, // ignore: avoid_redundant_argument_values, If we graduate the feature to true by default, don't break this test.
+        ),
       },
     );
   });

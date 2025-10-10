@@ -13,6 +13,7 @@ import '../../build_info.dart';
 import '../../darwin/darwin.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals show xcode;
+import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -57,7 +58,7 @@ abstract class UnpackMacOS extends UnpackDarwin {
     }
 
     // Copy FlutterMacOS framework.
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     await copyFramework(
       environment,
       framework: Artifact.flutterMacOSFramework,
@@ -84,7 +85,7 @@ abstract class UnpackMacOS extends UnpackDarwin {
   }
 
   /// Files that should not be copied to build output directory if found during framework copy step.
-  static const List<String> _copyDenylist = <String>[
+  static const _copyDenylist = <String>[
     'entitlements.txt',
     'without_entitlements.txt',
     'unsigned_binaries.txt',
@@ -132,7 +133,7 @@ class ReleaseUnpackMacOS extends UnpackMacOS {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'unpack_macos');
     }
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory frameworkDsym = environment.fileSystem.directory(
       environment.artifacts.getArtifactPath(
         Artifact.flutterMacOSFrameworkDsym,
@@ -206,16 +207,15 @@ class DebugMacOSFramework extends Target {
       environment.fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App'),
     );
 
-    final Iterable<DarwinArch> darwinArchs =
-        environment.defines[kDarwinArchs]?.split(' ').map(getDarwinArchForName) ??
-        <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
+    final Iterable<DarwinArch> darwinArchs = getDarwinArchsFromEnv(environment.defines);
 
     final Iterable<String> darwinArchArguments = darwinArchs.expand(
       (DarwinArch arch) => <String>['-arch', arch.name],
     );
 
     outputFile.createSync(recursive: true);
-    final File debugApp = environment.buildDir.childFile('debug_app.cc')..writeAsStringSync(r'''
+    final File debugApp = environment.buildDir.childFile('debug_app.cc')
+      ..writeAsStringSync(r'''
 static const int Moo = 88;
 ''');
     final RunResult result = await globals.xcode!.clang(<String>[
@@ -271,27 +271,25 @@ class CompileMacOSFramework extends Target {
     if (targetPlatformEnvironment == null) {
       throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
     }
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     if (buildMode == BuildMode.debug) {
       throw Exception('precompiled macOS framework only supported in release/profile builds.');
     }
     final String buildOutputPath = environment.buildDir.path;
     final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
-    final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
+    final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(
       environment.defines,
       kExtraGenSnapshotOptions,
     );
     final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
-    final List<DarwinArch> darwinArchs =
-        environment.defines[kDarwinArchs]?.split(' ').map(getDarwinArchForName).toList() ??
-        <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
+    final List<DarwinArch> darwinArchs = getDarwinArchsFromEnv(environment.defines);
     if (targetPlatform != TargetPlatform.darwin) {
       throw Exception('compile_macos_framework is only supported for darwin TargetPlatform.');
     }
 
-    final AOTSnapshotter snapshotter = AOTSnapshotter(
+    final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
       xcode: globals.xcode!,
@@ -299,8 +297,8 @@ class CompileMacOSFramework extends Target {
       processManager: environment.processManager,
     );
 
-    final List<Future<int>> pending = <Future<int>>[];
-    for (final DarwinArch darwinArch in darwinArchs) {
+    final pending = <Future<int>>[];
+    for (final darwinArch in darwinArchs) {
       if (codeSizeDirectory != null) {
         final File codeSizeFile = environment.fileSystem
             .directory(codeSizeDirectory)
@@ -377,6 +375,9 @@ abstract class MacOSBundleFlutterAssets extends Target {
   const MacOSBundleFlutterAssets();
 
   @override
+  List<Target> get dependencies => const <Target>[DartBuildForNative()];
+
+  @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/App.framework/App'),
     ...IconTreeShaker.inputs,
@@ -398,11 +399,11 @@ abstract class MacOSBundleFlutterAssets extends Target {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
     }
 
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory frameworkRootDirectory = environment.outputDir.childDirectory('App.framework');
-    final Directory outputDirectory = frameworkRootDirectory
-      .childDirectory('Versions')
-      .childDirectory('A')..createSync(recursive: true);
+    final Directory outputDirectory =
+        frameworkRootDirectory.childDirectory('Versions').childDirectory('A')
+          ..createSync(recursive: true);
 
     // Copy App into framework directory.
     environment.buildDir
@@ -437,9 +438,11 @@ abstract class MacOSBundleFlutterAssets extends Target {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final String? flavor = await flutterProject.macos.parseFlavorFromConfiguration(environment);
 
+    final DartHooksResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       assetDirectory,
+      dartHookResult: dartHookResult,
       targetPlatform: TargetPlatform.darwin,
       buildMode: buildMode,
       flavor: flavor,
@@ -559,11 +562,12 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   String get name => 'debug_macos_bundle_flutter_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[
-    KernelSnapshot(),
-    DebugMacOSFramework(),
-    DebugUnpackMacOS(),
-    InstallCodeAssets(),
+  List<Target> get dependencies => <Target>[
+    ...super.dependencies,
+    const KernelSnapshot(),
+    const DebugMacOSFramework(),
+    const DebugUnpackMacOS(),
+    const InstallCodeAssets(),
   ];
 
   @override
@@ -605,10 +609,11 @@ class ProfileMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   String get name => 'profile_macos_bundle_flutter_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[
-    CompileMacOSFramework(),
-    InstallCodeAssets(),
-    ProfileUnpackMacOS(),
+  List<Target> get dependencies => <Target>[
+    ...super.dependencies,
+    const CompileMacOSFramework(),
+    const InstallCodeAssets(),
+    const ProfileUnpackMacOS(),
   ];
 
   @override
@@ -652,7 +657,7 @@ class ReleaseMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
 
   @override
   Future<void> build(Environment environment) async {
-    bool buildSuccess = true;
+    var buildSuccess = true;
     try {
       await super.build(environment);
     } catch (_) {

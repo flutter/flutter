@@ -165,12 +165,11 @@ class Divider extends StatelessWidget {
   /// {@end-tool}
   static BorderSide createBorderSide(BuildContext? context, {Color? color, double? width}) {
     final DividerThemeData? dividerTheme = context != null ? DividerTheme.of(context) : null;
-    final DividerThemeData? defaults =
-        context != null
-            ? Theme.of(context).useMaterial3
-                ? _DividerDefaultsM3(context)
-                : _DividerDefaultsM2(context)
-            : null;
+    final DividerThemeData? defaults = context != null
+        ? Theme.of(context).useMaterial3
+              ? _DividerDefaultsM3(context)
+              : _DividerDefaultsM2(context)
+        : null;
     final Color? effectiveColor = color ?? dividerTheme?.color ?? defaults?.color;
     final double effectiveWidth = width ?? dividerTheme?.thickness ?? defaults?.thickness ?? 0.0;
 
@@ -186,8 +185,9 @@ class Divider extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final DividerThemeData dividerTheme = DividerTheme.of(context);
-    final DividerThemeData defaults =
-        theme.useMaterial3 ? _DividerDefaultsM3(context) : _DividerDefaultsM2(context);
+    final DividerThemeData defaults = theme.useMaterial3
+        ? _DividerDefaultsM3(context)
+        : _DividerDefaultsM2(context);
     final double height = this.height ?? dividerTheme.space ?? defaults.space!;
     final double thickness = this.thickness ?? dividerTheme.thickness ?? defaults.thickness!;
     final double indent = this.indent ?? dividerTheme.indent ?? defaults.indent!;
@@ -201,7 +201,9 @@ class Divider extends StatelessWidget {
           margin: EdgeInsetsDirectional.only(start: indent, end: endIndent),
           decoration: BoxDecoration(
             borderRadius: radius ?? dividerTheme.radius ?? defaults.radius,
-            border: Border(bottom: createBorderSide(context, color: color, width: thickness)),
+            border: Border(
+              bottom: createBorderSide(context, color: color, width: thickness),
+            ),
           ),
         ),
       ),
@@ -311,8 +313,9 @@ class VerticalDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final DividerThemeData dividerTheme = DividerTheme.of(context);
-    final DividerThemeData defaults =
-        theme.useMaterial3 ? _DividerDefaultsM3(context) : _DividerDefaultsM2(context);
+    final DividerThemeData defaults = theme.useMaterial3
+        ? _DividerDefaultsM3(context)
+        : _DividerDefaultsM2(context);
     final double width = this.width ?? dividerTheme.space ?? defaults.space!;
     final double thickness = this.thickness ?? dividerTheme.thickness ?? defaults.thickness!;
     final double indent = this.indent ?? dividerTheme.indent ?? defaults.indent!;
@@ -326,7 +329,9 @@ class VerticalDivider extends StatelessWidget {
           margin: EdgeInsetsDirectional.only(top: indent, bottom: endIndent),
           decoration: BoxDecoration(
             borderRadius: radius ?? dividerTheme.radius ?? defaults.radius,
-            border: Border(left: Divider.createBorderSide(context, color: color, width: thickness)),
+            border: Border(
+              left: Divider.createBorderSide(context, color: color, width: thickness),
+            ),
           ),
         ),
       ),

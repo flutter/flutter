@@ -17,7 +17,7 @@ import '../../../src/context.dart';
 import '../../../src/package_config.dart';
 import '../../../src/throwing_pub.dart';
 
-const String _kEmptyPubspecFile = '''
+const _kEmptyPubspecFile = '''
 name: path_provider_example
 
 dependencies:
@@ -25,7 +25,7 @@ dependencies:
     sdk: flutter
 ''';
 
-const String _kSamplePubspecFile = '''
+const _kSamplePubspecFile = '''
 name: path_provider_example
 description: Demonstrates how to use the path_provider plugin.
 
@@ -35,7 +35,7 @@ dependencies:
   path_provider_linux: 1.0.0
 ''';
 
-const String _kSamplePluginPubspec = '''
+const _kSamplePluginPubspec = '''
 name: path_provider_linux
 description: linux implementation of the path_provider plugin
 // version: 2.0.1
@@ -63,7 +63,7 @@ void main() {
     });
 
     testWithoutContext('skipped based on environment.generateDartPluginRegistry', () async {
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
         fileSystem: fileSystem,
@@ -73,7 +73,7 @@ void main() {
 
       expect(await const DartPluginRegistrantTarget().canSkip(environment), isTrue);
 
-      final Environment environment2 = Environment.test(
+      final environment2 = Environment.test(
         fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
         fileSystem: fileSystem,
@@ -86,7 +86,7 @@ void main() {
     });
 
     testWithoutContext('skipped based on platform', () async {
-      const Map<String, bool> canSkip = <String, bool>{
+      const canSkip = <String, bool>{
         'darwin-x64': false,
         'linux-x64': false,
         'linux-arm64': false,
@@ -120,7 +120,7 @@ void main() {
       "doesn't generate dart_plugin_registrant.dart if there aren't Dart plugins",
       () async {
         final Directory projectDir = fileSystem.directory('project')..createSync();
-        final Environment environment = Environment.test(
+        final environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
           artifacts: Artifacts.test(),
@@ -162,7 +162,7 @@ name: path_provider_example
       'regenerates dart_plugin_registrant.dart',
       () async {
         final Directory projectDir = fileSystem.directory('project')..createSync();
-        final Environment environment = Environment.test(
+        final environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
           artifacts: Artifacts.test(),
@@ -211,7 +211,7 @@ name: path_provider_example
             '// @dart = 2.12\n'
             '\n'
             "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
-            "import 'package:path_provider_linux/path_provider_linux.dart';\n"
+            "import 'package:path_provider_linux/path_provider_linux.dart' as path_provider_linux;\n"
             '\n'
             "@pragma('vm:entry-point')\n"
             'class _PluginRegistrant {\n'
@@ -222,7 +222,7 @@ name: path_provider_example
             '    } else if (Platform.isIOS) {\n'
             '    } else if (Platform.isLinux) {\n'
             '      try {\n'
-            '        PathProviderLinux.registerWith();\n'
+            '        path_provider_linux.PathProviderLinux.registerWith();\n'
             '      } catch (err) {\n'
             '        print(\n'
             "          '`path_provider_linux` threw an error: \$err. '\n"
@@ -248,7 +248,7 @@ name: path_provider_example
       'removes dart_plugin_registrant.dart if plugins are removed from pubspec.yaml',
       () async {
         final Directory projectDir = fileSystem.directory('project')..createSync();
-        final Environment environment = Environment.test(
+        final environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
           artifacts: Artifacts.test(),
@@ -301,7 +301,7 @@ name: path_provider_example
       'target file is outside the current project package',
       () async {
         final Directory projectDir = fileSystem.directory('project')..createSync();
-        final Environment environment = Environment.test(
+        final environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
           artifacts: Artifacts.test(),
@@ -350,7 +350,7 @@ name: path_provider_example
             '// @dart = 2.12\n'
             '\n'
             "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
-            "import 'package:path_provider_linux/path_provider_linux.dart';\n"
+            "import 'package:path_provider_linux/path_provider_linux.dart' as path_provider_linux;\n"
             '\n'
             "@pragma('vm:entry-point')\n"
             'class _PluginRegistrant {\n'
@@ -361,7 +361,7 @@ name: path_provider_example
             '    } else if (Platform.isIOS) {\n'
             '    } else if (Platform.isLinux) {\n'
             '      try {\n'
-            '        PathProviderLinux.registerWith();\n'
+            '        path_provider_linux.PathProviderLinux.registerWith();\n'
             '      } catch (err) {\n'
             '        print(\n'
             "          '`path_provider_linux` threw an error: \$err. '\n"

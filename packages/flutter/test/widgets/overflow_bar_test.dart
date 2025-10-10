@@ -34,7 +34,10 @@ void main() {
     expect(tester.getSize(find.byType(OverflowBar)), size);
 
     await tester.pumpWidget(
-      const Directionality(textDirection: TextDirection.ltr, child: Center(child: OverflowBar())),
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: OverflowBar()),
+      ),
     );
 
     expect(tester.getSize(find.byType(OverflowBar)), Size.zero);

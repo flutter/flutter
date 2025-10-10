@@ -738,7 +738,7 @@ void main() {
             containsIgnoringWhitespace("Your app isn't using AndroidX"),
             containsIgnoringWhitespace(
               'To avoid potential build failures, you can quickly migrate your app by '
-              'following the steps on https://goo.gl/CP92wY',
+              'following the steps on https://docs.flutter.dev/release/breaking-changes/androidx-migration',
             ),
           ),
         );
@@ -837,7 +837,7 @@ void main() {
 }
 
 Future<BuildApkCommand> runBuildApkCommand(String target, {List<String>? arguments}) async {
-  final BuildApkCommand command = BuildApkCommand(logger: BufferLogger.test());
+  final command = BuildApkCommand(logger: BufferLogger.test());
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
     'apk',

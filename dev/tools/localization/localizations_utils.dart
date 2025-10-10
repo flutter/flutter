@@ -214,29 +214,28 @@ void checkCwdIsRepoRoot(String commandName) {
 }
 
 GeneratorOptions parseArgs(List<String> rawArgs) {
-  final argslib.ArgParser argParser =
-      argslib.ArgParser()
-        ..addFlag('help', abbr: 'h', help: 'Print the usage message for this command')
-        ..addFlag('overwrite', abbr: 'w', help: 'Overwrite existing localizations')
-        ..addFlag(
-          'remove-undefined',
-          help: 'Remove any localizations that are not defined in the canonical locale.',
-        )
-        ..addFlag(
-          'widgets',
-          help:
-              'Whether to print the generated classes for the Widgets package only. Ignored when --overwrite is passed.',
-        )
-        ..addFlag(
-          'material',
-          help:
-              'Whether to print the generated classes for the Material package only. Ignored when --overwrite is passed.',
-        )
-        ..addFlag(
-          'cupertino',
-          help:
-              'Whether to print the generated classes for the Cupertino package only. Ignored when --overwrite is passed.',
-        );
+  final argslib.ArgParser argParser = argslib.ArgParser()
+    ..addFlag('help', abbr: 'h', help: 'Print the usage message for this command')
+    ..addFlag('overwrite', abbr: 'w', help: 'Overwrite existing localizations')
+    ..addFlag(
+      'remove-undefined',
+      help: 'Remove any localizations that are not defined in the canonical locale.',
+    )
+    ..addFlag(
+      'widgets',
+      help:
+          'Whether to print the generated classes for the Widgets package only. Ignored when --overwrite is passed.',
+    )
+    ..addFlag(
+      'material',
+      help:
+          'Whether to print the generated classes for the Material package only. Ignored when --overwrite is passed.',
+    )
+    ..addFlag(
+      'cupertino',
+      help:
+          'Whether to print the generated classes for the Cupertino package only. Ignored when --overwrite is passed.',
+    );
   final argslib.ArgResults args = argParser.parse(rawArgs);
   if (args.wasParsed('help') && args['help'] == true) {
     stderr.writeln(argParser.usage);
@@ -307,12 +306,11 @@ const String kParentheticalPrefix = ' (';
 ///
 /// The data is obtained from the official IANA registry.
 void precacheLanguageAndRegionTags() {
-  final List<Map<String, List<String>>> sections =
-      languageSubtagRegistry
-          .split('%%')
-          .skip(1)
-          .map<Map<String, List<String>>>(_parseSection)
-          .toList();
+  final List<Map<String, List<String>>> sections = languageSubtagRegistry
+      .split('%%')
+      .skip(1)
+      .map<Map<String, List<String>>>(_parseSection)
+      .toList();
   for (final Map<String, List<String>> section in sections) {
     assert(section.containsKey('Type'), section.toString());
     final String type = section['Type']!.single;
@@ -452,7 +450,8 @@ String generateEncodedString(String? locale, String value) {
     return generateString(value);
   }
 
-  final String unicodeEscapes =
-      value.runes.map((int code) => '\\u{${code.toRadixString(16)}}').join();
+  final String unicodeEscapes = value.runes
+      .map((int code) => '\\u{${code.toRadixString(16)}}')
+      .join();
   return "'$unicodeEscapes'";
 }

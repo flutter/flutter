@@ -8,7 +8,11 @@ import 'package:flutter/services.dart';
 /// Flutter code sample for [Action.overridable].
 
 void main() {
-  runApp(const MaterialApp(home: Scaffold(body: Center(child: VerificationCodeGenerator()))));
+  runApp(
+    const MaterialApp(
+      home: Scaffold(body: Center(child: VerificationCodeGenerator())),
+    ),
+  );
 }
 
 const CopyTextIntent copyTextIntent = CopyTextIntent._();

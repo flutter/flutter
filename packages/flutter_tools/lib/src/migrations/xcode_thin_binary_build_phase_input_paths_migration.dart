@@ -39,8 +39,8 @@ class XcodeThinBinaryBuildPhaseInputPathsMigration extends ProjectMigrator {
     // 	 inputPaths = (
     // 	 );
 
-    String newProjectContents = originalProjectContents;
-    const String thinBinaryBuildPhaseOriginal = '''
+    var newProjectContents = originalProjectContents;
+    const thinBinaryBuildPhaseOriginal = '''
 		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -51,7 +51,7 @@ class XcodeThinBinaryBuildPhaseInputPathsMigration extends ProjectMigrator {
 			);
 ''';
 
-    const String thinBinaryBuildPhaseReplacement = r'''
+    const thinBinaryBuildPhaseReplacement = r'''
 		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;

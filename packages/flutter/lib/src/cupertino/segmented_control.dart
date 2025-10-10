@@ -399,12 +399,11 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
         cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTapDown:
-              widget.disabledChildren.contains(currentKey)
-                  ? null
-                  : (TapDownDetails event) {
-                    _onTapDown(currentKey);
-                  },
+          onTapDown: widget.disabledChildren.contains(currentKey)
+              ? null
+              : (TapDownDetails event) {
+                  _onTapDown(currentKey);
+                },
           onTapCancel: widget.disabledChildren.contains(currentKey) ? null : _onTapCancel,
           onTap: () {
             _onTap(currentKey);

@@ -133,7 +133,7 @@ void testUsingContext(
               // the zone from outside the zone. Instead, we create a Completer outside the zone,
               // and have the test complete it when the test ends (in success or failure), and we
               // await that.
-              final Completer<void> completer = Completer<void>();
+              final completer = Completer<void>();
               runZonedGuarded<Future<dynamic>>(
                 () async {
                   try {
@@ -198,7 +198,7 @@ void testUsingContext(
 
 void _printBufferedErrors(AppContext testContext) {
   if (testContext.get<Logger>() is BufferLogger) {
-    final BufferLogger bufferLogger = testContext.get<Logger>()! as BufferLogger;
+    final bufferLogger = testContext.get<Logger>()! as BufferLogger;
     if (bufferLogger.errorText.isNotEmpty) {
       // This is where the logger outputting errors is implemented, so it has
       // to use `print`.
@@ -209,8 +209,8 @@ void _printBufferedErrors(AppContext testContext) {
 }
 
 class FakeDeviceManager implements DeviceManager {
-  List<Device> attachedDevices = <Device>[];
-  List<Device> wirelessDevices = <Device>[];
+  var attachedDevices = <Device>[];
+  var wirelessDevices = <Device>[];
 
   String? _specifiedDeviceId;
 
@@ -221,6 +221,9 @@ class FakeDeviceManager implements DeviceManager {
     }
     return _specifiedDeviceId;
   }
+
+  @override
+  void stopExtendedWirelessDeviceDiscoverers() {}
 
   @override
   set specifiedDeviceId(String? id) {

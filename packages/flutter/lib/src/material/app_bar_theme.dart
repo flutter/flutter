@@ -34,6 +34,10 @@ class AppBarTheme extends InheritedTheme with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.appBarTheme].
   const AppBarTheme({
     super.key,
+    @Deprecated(
+      'Use backgroundColor instead. '
+      'This feature was deprecated after v3.33.0-0.2.pre.',
+    )
     Color? color,
     Color? backgroundColor,
     Color? foregroundColor,
@@ -260,6 +264,10 @@ class AppBarTheme extends InheritedTheme with Diagnosticable {
   /// please use the [AppBarThemeData.copyWith] method instead.
   AppBarTheme copyWith({
     IconThemeData? actionsIconTheme,
+    @Deprecated(
+      'Use backgroundColor instead. '
+      'This feature was deprecated after v3.33.0-0.2.pre.',
+    )
     Color? color,
     Color? backgroundColor,
     Color? foregroundColor,
@@ -370,6 +378,10 @@ class AppBarThemeData with Diagnosticable {
   const AppBarThemeData({
     this.backgroundColor,
     this.foregroundColor,
+    @Deprecated(
+      'Use backgroundColor instead. '
+      'This feature was deprecated after v3.33.0-0.2.pre.',
+    )
     Color? color,
     this.elevation,
     this.scrolledUnderElevation,
@@ -447,6 +459,10 @@ class AppBarThemeData with Diagnosticable {
   AppBarThemeData copyWith({
     Color? backgroundColor,
     Color? foregroundColor,
+    @Deprecated(
+      'Use backgroundColor instead. '
+      'This feature was deprecated after v3.33.0-0.2.pre.',
+    )
     Color? color,
     double? elevation,
     double? scrolledUnderElevation,
@@ -593,10 +609,9 @@ class AppBarThemeData with Diagnosticable {
         'systemOverlayStyle',
         systemOverlayStyle,
         defaultValue: null,
-        description:
-            systemOverlayStyle == null
-                ? null
-                : 'SystemUiOverlayStyle(${<String>[if (systemOverlayStyle?.systemNavigationBarColor != null) 'systemNavigationBarColor: ${systemOverlayStyle?.systemNavigationBarColor}', if (systemOverlayStyle?.systemNavigationBarDividerColor != null) 'systemNavigationBarDividerColor: ${systemOverlayStyle?.systemNavigationBarDividerColor}', if (systemOverlayStyle?.systemNavigationBarIconBrightness != null) 'systemNavigationBarIconBrightness: ${systemOverlayStyle?.systemNavigationBarIconBrightness}', if (systemOverlayStyle?.statusBarColor != null) 'statusBarColor: ${systemOverlayStyle?.statusBarColor}', if (systemOverlayStyle?.statusBarBrightness != null) 'statusBarBrightness: ${systemOverlayStyle?.statusBarBrightness}', if (systemOverlayStyle?.statusBarIconBrightness != null) 'statusBarIconBrightness: ${systemOverlayStyle?.statusBarIconBrightness}', if (systemOverlayStyle?.systemStatusBarContrastEnforced != null) 'systemStatusBarContrastEnforced: ${systemOverlayStyle?.systemStatusBarContrastEnforced}', if (systemOverlayStyle?.systemNavigationBarContrastEnforced != null) 'systemNavigationBarContrastEnforced: ${systemOverlayStyle?.systemNavigationBarContrastEnforced}'].where((String s) => s.isNotEmpty).join(', ')})',
+        description: systemOverlayStyle == null
+            ? null
+            : 'SystemUiOverlayStyle(${<String>[if (systemOverlayStyle?.systemNavigationBarColor != null) 'systemNavigationBarColor: ${systemOverlayStyle?.systemNavigationBarColor}', if (systemOverlayStyle?.systemNavigationBarDividerColor != null) 'systemNavigationBarDividerColor: ${systemOverlayStyle?.systemNavigationBarDividerColor}', if (systemOverlayStyle?.systemNavigationBarIconBrightness != null) 'systemNavigationBarIconBrightness: ${systemOverlayStyle?.systemNavigationBarIconBrightness}', if (systemOverlayStyle?.statusBarColor != null) 'statusBarColor: ${systemOverlayStyle?.statusBarColor}', if (systemOverlayStyle?.statusBarBrightness != null) 'statusBarBrightness: ${systemOverlayStyle?.statusBarBrightness}', if (systemOverlayStyle?.statusBarIconBrightness != null) 'statusBarIconBrightness: ${systemOverlayStyle?.statusBarIconBrightness}', if (systemOverlayStyle?.systemStatusBarContrastEnforced != null) 'systemStatusBarContrastEnforced: ${systemOverlayStyle?.systemStatusBarContrastEnforced}', if (systemOverlayStyle?.systemNavigationBarContrastEnforced != null) 'systemNavigationBarContrastEnforced: ${systemOverlayStyle?.systemNavigationBarContrastEnforced}'].where((String s) => s.isNotEmpty).join(', ')})',
       ),
     );
     properties.add(

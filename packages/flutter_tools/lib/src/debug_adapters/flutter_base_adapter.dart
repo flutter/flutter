@@ -147,21 +147,22 @@ abstract class FlutterBaseDebugAdapter
     required List<String> processArgs,
     required Map<String, String>? env,
   }) async {
-    final Process process = await (
-      String executable,
-      List<String> processArgs, {
-      required Map<String, String>? env,
-    }) async {
-      logger?.call('Spawning $executable with $processArgs in ${args.cwd}');
-      final Process process = await Process.start(
-        executable,
-        processArgs,
-        workingDirectory: args.cwd,
-        environment: env,
-      );
-      pidsToTerminate.add(process.pid);
-      return process;
-    }(executable, processArgs, env: env);
+    final Process process =
+        await (
+          String executable,
+          List<String> processArgs, {
+          required Map<String, String>? env,
+        }) async {
+          logger?.call('Spawning $executable with $processArgs in ${args.cwd}');
+          final Process process = await Process.start(
+            executable,
+            processArgs,
+            workingDirectory: args.cwd,
+            environment: env,
+          );
+          pidsToTerminate.add(process.pid);
+          return process;
+        }(executable, processArgs, env: env);
     this.process = process;
 
     process.stdout.transform(ByteToLineTransformer()).listen(handleStdout);

@@ -99,12 +99,11 @@ class Options {
     // path/to/engine/src/out/variant/compile_commands.json
     buildCommandsPath ??= variantToBuildCommandsFilePath(argResults['target-variant'] as String);
     final io.File buildCommands = io.File(buildCommandsPath);
-    final List<io.File> shardCommands =
-        (argResults['shard-variants'] as String? ?? '')
-            .split(',')
-            .where((String element) => element.isNotEmpty)
-            .map((String variant) => io.File(variantToBuildCommandsFilePath(variant)))
-            .toList();
+    final List<io.File> shardCommands = (argResults['shard-variants'] as String? ?? '')
+        .split(',')
+        .where((String element) => element.isNotEmpty)
+        .map((String variant) => io.File(variantToBuildCommandsFilePath(variant)))
+        .toList();
     final String? message = _checkArguments(argResults, buildCommands);
     if (message != null) {
       return Options._error(message, errSink: errSink);
@@ -117,9 +116,8 @@ class Options {
     if (shardId != null && (shardId > shardCommands.length || shardId < 0)) {
       return Options._error('Invalid shard-id value: $shardId.', errSink: errSink);
     }
-    final io.File? clangTidyPath = ((String? path) => path == null ? null : io.File(path))(
-      argResults['clang-tidy'] as String?,
-    );
+    final io.File? clangTidyPath = ((String? path) =>
+        path == null ? null : io.File(path))(argResults['clang-tidy'] as String?);
     return Options._fromArgResults(
       argResults,
       buildCommandsPath: buildCommands,

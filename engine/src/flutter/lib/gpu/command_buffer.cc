@@ -39,29 +39,35 @@ bool CommandBuffer::Submit() {
 
 bool CommandBuffer::Submit(
     const impeller::CommandBuffer::CompletionCallback& completion_callback) {
-  for (auto& encodable : encodables_) {
-    encodable->EncodeCommands();
-  }
-
   // For the GLES backend, command queue submission just flushes the reactor,
   // which needs to happen on the raster thread.
   if (context_->GetBackendType() == impeller::Context::BackendType::kOpenGLES) {
     auto dart_state = flutter::UIDartState::Current();
     auto& task_runners = dart_state->GetTaskRunners();
 
-    task_runners.GetRasterTaskRunner()->PostTask(fml::MakeCopyable(
-        [context = context_, command_buffer = command_buffer_,
-         completion_callback = completion_callback]() mutable {
-          context->GetCommandQueue()
-              ->Submit({command_buffer}, completion_callback)
-              .ok();
+    task_runners.GetRasterTaskRunner()->PostTask(
+        fml::MakeCopyable([context = context_, command_buffer = command_buffer_,
+                           completion_callback = completion_callback,
+                           encodables = encodables_]() mutable {
+          for (auto& encodable : encodables) {
+            encodable->EncodeCommands();
+          }
+
+          context->GetCommandQueue()->Submit({command_buffer},
+                                             completion_callback);
+          context->DisposeThreadLocalCachedResources();
         }));
     return true;
   }
 
-  return context_->GetCommandQueue()
-      ->Submit({command_buffer_}, completion_callback)
-      .ok();
+  for (auto& encodable : encodables_) {
+    encodable->EncodeCommands();
+  }
+
+  auto status = context_->GetCommandQueue()->Submit({command_buffer_},
+                                                    completion_callback);
+  context_->DisposeThreadLocalCachedResources();
+  return status.ok();
 }
 
 }  // namespace gpu
@@ -75,8 +81,8 @@ bool InternalFlutterGpu_CommandBuffer_Initialize(
     Dart_Handle wrapper,
     flutter::gpu::Context* contextWrapper) {
   auto res = fml::MakeRefCounted<flutter::gpu::CommandBuffer>(
-      contextWrapper->GetContext(),
-      contextWrapper->GetContext()->CreateCommandBuffer());
+      contextWrapper->GetContextShared(),
+      contextWrapper->GetContext().CreateCommandBuffer());
   res->AssociateWithDartWrapper(wrapper);
 
   return true;

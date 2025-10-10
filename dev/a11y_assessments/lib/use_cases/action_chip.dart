@@ -7,6 +7,8 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class ActionChipUseCase extends UseCase {
+  ActionChipUseCase() : super(useCaseCategory: UseCaseCategory.core);
+
   @override
   String get name => 'ActionChip';
 

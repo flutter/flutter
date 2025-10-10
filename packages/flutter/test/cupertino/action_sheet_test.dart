@@ -579,15 +579,14 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    final List<CupertinoScrollbar> scrollbars =
-        find
-            .descendant(
-              of: find.byType(CupertinoActionSheet),
-              matching: find.byType(CupertinoScrollbar),
-            )
-            .evaluate()
-            .map((Element e) => e.widget as CupertinoScrollbar)
-            .toList();
+    final List<CupertinoScrollbar> scrollbars = find
+        .descendant(
+          of: find.byType(CupertinoActionSheet),
+          matching: find.byType(CupertinoScrollbar),
+        )
+        .evaluate()
+        .map((Element e) => e.widget as CupertinoScrollbar)
+        .toList();
 
     expect(scrollbars.length, 2);
     expect(scrollbars[0].controller != scrollbars[1].controller, isTrue);
@@ -2031,28 +2030,26 @@ class TestScaffoldAppState extends State<TestScaffoldApp> {
       debugShowCheckedModeBanner: false,
       theme: widget.theme,
       home: Builder(
-        builder:
-            (BuildContext context) => CupertinoPageScaffold(
-              child: Center(
-                child:
-                    _pressedButton
-                        ? Container()
-                        : CupertinoButton(
-                          onPressed: () {
-                            setState(() {
-                              _pressedButton = true;
-                            });
-                            showCupertinoModalPopup<void>(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return widget.actionSheet;
-                              },
-                            );
-                          },
-                          child: const Text('Go'),
-                        ),
-              ),
-            ),
+        builder: (BuildContext context) => CupertinoPageScaffold(
+          child: Center(
+            child: _pressedButton
+                ? Container()
+                : CupertinoButton(
+                    onPressed: () {
+                      setState(() {
+                        _pressedButton = true;
+                      });
+                      showCupertinoModalPopup<void>(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return widget.actionSheet;
+                        },
+                      );
+                    },
+                    child: const Text('Go'),
+                  ),
+          ),
+        ),
       ),
     );
   }

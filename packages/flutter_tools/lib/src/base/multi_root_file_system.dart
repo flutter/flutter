@@ -134,7 +134,7 @@ class MultiRootFileSystem extends ForwardingFileSystem {
     }
 
     final p.Context pathContext = delegate.path;
-    final bool isWindows = pathContext.style == p.Style.windows;
+    final isWindows = pathContext.style == p.Style.windows;
     final String path = uri.toFilePath(windows: isWindows);
     for (final String root in _roots) {
       if (path.startsWith('$root${pathContext.separator}')) {

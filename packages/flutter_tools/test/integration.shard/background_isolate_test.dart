@@ -26,14 +26,14 @@ void main() {
   });
 
   testWithoutContext('Hot restart kills background isolates', () async {
-    final BackgroundProject project = BackgroundProject();
+    final project = BackgroundProject();
     await project.setUpIn(tempDir);
-    final FlutterRunTestDriver flutter = FlutterRunTestDriver(tempDir);
+    final flutter = FlutterRunTestDriver(tempDir);
 
-    const String newBackgroundMessage = 'New Background';
-    final Completer<void> sawForegroundMessage = Completer<void>.sync();
-    final Completer<void> sawBackgroundMessage = Completer<void>.sync();
-    final Completer<void> sawNewBackgroundMessage = Completer<void>.sync();
+    const newBackgroundMessage = 'New Background';
+    final sawForegroundMessage = Completer<void>.sync();
+    final sawBackgroundMessage = Completer<void>.sync();
+    final sawNewBackgroundMessage = Completer<void>.sync();
     final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
       printOnFailure('[LOG]:"$line"');
       if (line.contains('Main thread') && !sawForegroundMessage.isCompleted) {
@@ -60,13 +60,13 @@ void main() {
   });
 
   testWithoutContext('Hot reload updates background isolates', () async {
-    final RepeatingBackgroundProject project = RepeatingBackgroundProject();
+    final project = RepeatingBackgroundProject();
     await project.setUpIn(tempDir);
-    final FlutterRunTestDriver flutter = FlutterRunTestDriver(tempDir);
+    final flutter = FlutterRunTestDriver(tempDir);
 
-    const String newBackgroundMessage = 'New Background';
-    final Completer<void> sawBackgroundMessage = Completer<void>.sync();
-    final Completer<void> sawNewBackgroundMessage = Completer<void>.sync();
+    const newBackgroundMessage = 'New Background';
+    final sawBackgroundMessage = Completer<void>.sync();
+    final sawNewBackgroundMessage = Completer<void>.sync();
     final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
       printOnFailure('[LOG]:"$line"');
       if (line.contains('Isolate thread') && !sawBackgroundMessage.isCompleted) {

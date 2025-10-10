@@ -37,7 +37,7 @@ import '../../src/fakes.dart';
 /// is flushed.
 Future<T> _runFakeAsync<T>(Future<T> Function(FakeAsync time) f) async {
   return FakeAsync().run((FakeAsync time) async {
-    bool pump = true;
+    var pump = true;
     final Future<T> future = f(time).whenComplete(() => pump = false);
     while (pump) {
       time.flushMicrotasks();
@@ -47,8 +47,8 @@ Future<T> _runFakeAsync<T>(Future<T> Function(FakeAsync time) f) async {
 }
 
 class FakeDaemonStreams implements DaemonStreams {
-  final StreamController<DaemonMessage> inputs = StreamController<DaemonMessage>();
-  final StreamController<DaemonMessage> outputs = StreamController<DaemonMessage>();
+  final inputs = StreamController<DaemonMessage>();
+  final outputs = StreamController<DaemonMessage>();
 
   @override
   Stream<DaemonMessage> get inputStream {
@@ -199,13 +199,12 @@ void main() {
       },
       overrides: <Type, Generator>{
         // Disable Android/iOS and enable macOS to make sure result is consistent and defaults are tested off.
-        FeatureFlags:
-            () => TestFeatureFlags(
-              isAndroidEnabled: false,
-              isIOSEnabled: false,
-              isMacOSEnabled: true,
-              isWindowsEnabled: true,
-            ),
+        FeatureFlags: () => TestFeatureFlags(
+          isAndroidEnabled: false,
+          isIOSEnabled: false,
+          isMacOSEnabled: true,
+          isWindowsEnabled: true,
+        ),
       },
     );
 
@@ -222,8 +221,9 @@ void main() {
         });
         expect(response.data['id'], isNull);
         expect(response.data['event'], 'daemon.logMessage');
-        final Map<String, String> logMessage =
-            castStringKeyedMap(response.data['params'])!.cast<String, String>();
+        final Map<String, String> logMessage = castStringKeyedMap(
+          response.data['params'],
+        )!.cast<String, String>();
         expect(logMessage['level'], 'error');
         expect(logMessage['message'], 'daemon.logMessage test');
       },
@@ -243,8 +243,9 @@ void main() {
         });
         expect(response.data['id'], isNull);
         expect(response.data['event'], 'daemon.logMessage');
-        final Map<String, String> logMessage =
-            castStringKeyedMap(response.data['params'])!.cast<String, String>();
+        final Map<String, String> logMessage = castStringKeyedMap(
+          response.data['params'],
+        )!.cast<String, String>();
         expect(logMessage['level'], 'warning');
         expect(logMessage['message'], 'daemon.logMessage test');
       },
@@ -295,8 +296,9 @@ void main() {
         });
         expect(response.data['id'], isNull);
         expect(response.data['event'], 'daemon.logMessage');
-        final Map<String, String> logMessage =
-            castStringKeyedMap(response.data['params'])!.cast<String, String>();
+        final Map<String, String> logMessage = castStringKeyedMap(
+          response.data['params'],
+        )!.cast<String, String>();
         expect(logMessage['level'], 'trace');
         expect(logMessage['message'], 'daemon.logMessage test 2');
       },
@@ -398,7 +400,7 @@ void main() {
 
     testUsingContext('device.getDevices reports available devices', () async {
       daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
-      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+      final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(FakeAndroidDevice());
       daemonStreams.inputs.add(
@@ -416,11 +418,11 @@ void main() {
       () async {
         daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
 
-        final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+        final discoverer = FakePollingDeviceDiscovery();
         daemon.deviceDomain.addDeviceDiscoverer(discoverer);
         discoverer.addDevice(FakeAndroidDevice());
 
-        final List<Map<String, Object?>> names = <Map<String, Object?>>[];
+        final names = <Map<String, Object?>>[];
         await daemonStreams.outputs.stream.skipWhile(_isConnectedEvent).take(1).forEach((
           DaemonMessage response,
         ) async {
@@ -450,7 +452,7 @@ void main() {
                 'hotReload': true,
                 'hotRestart': true,
                 'screenshot': true,
-                'fastStart': true,
+                'fastStart': false,
                 'flutterExit': true,
                 'hardwareRendering': true,
                 'startPaused': true,
@@ -478,7 +480,7 @@ void main() {
 
     testUsingContext('device.discoverDevices reports available devices', () async {
       daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
-      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+      final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(FakeAndroidDevice());
       daemonStreams.inputs.add(
@@ -494,9 +496,9 @@ void main() {
 
     testUsingContext('device.supportsRuntimeMode returns correct value', () async {
       daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
-      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+      final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
-      final FakeAndroidDevice device = FakeAndroidDevice();
+      final device = FakeAndroidDevice();
       discoverer.addDevice(device);
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{
@@ -514,11 +516,11 @@ void main() {
 
     testUsingContext('device.logReader.start and .stop starts and stops log reader', () async {
       daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
-      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+      final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
-      final FakeAndroidDevice device = FakeAndroidDevice();
+      final device = FakeAndroidDevice();
       discoverer.addDevice(device);
-      final FakeDeviceLogReader logReader = FakeDeviceLogReader();
+      final logReader = FakeDeviceLogReader();
       device.logReader = logReader;
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{
@@ -527,11 +529,11 @@ void main() {
           'params': <String, Object?>{'deviceId': 'device'},
         }),
       );
-      final Stream<DaemonMessage> broadcastOutput =
-          daemonStreams.outputs.stream.asBroadcastStream();
+      final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream
+          .asBroadcastStream();
       final DaemonMessage firstResponse = await broadcastOutput.firstWhere(_notEvent);
       expect(firstResponse.data['id'], 0);
-      final String? logReaderId = firstResponse.data['result'] as String?;
+      final logReaderId = firstResponse.data['result'] as String?;
       expect(logReaderId, isNotNull);
 
       // Try sending logs.
@@ -566,15 +568,15 @@ void main() {
         'device.startApp and .stopApp starts and stops an app',
         () async {
           daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
-          final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+          final discoverer = FakePollingDeviceDiscovery();
           daemon.deviceDomain.addDeviceDiscoverer(discoverer);
-          final FakeAndroidDevice device = FakeAndroidDevice();
+          final device = FakeAndroidDevice();
           discoverer.addDevice(device);
-          final Stream<DaemonMessage> broadcastOutput =
-              daemonStreams.outputs.stream.asBroadcastStream();
+          final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream
+              .asBroadcastStream();
 
           // First upload the application package.
-          final FakeApplicationPackage applicationPackage = FakeApplicationPackage();
+          final applicationPackage = FakeApplicationPackage();
           applicationPackageFactory.applicationPackage = applicationPackage;
           daemonStreams.inputs.add(
             DaemonMessage(<String, Object?>{
@@ -592,8 +594,7 @@ void main() {
           expect(applicationPackageIdResponse.data['id'], 0);
           expect(applicationPackageFactory.applicationBinaryRequested!.basename, 'test_file');
           expect(applicationPackageFactory.platformRequested, TargetPlatform.android);
-          final String? applicationPackageId =
-              applicationPackageIdResponse.data['result'] as String?;
+          final applicationPackageId = applicationPackageIdResponse.data['result'] as String?;
 
           // Try starting the app.
           final Uri vmServiceUri = Uri.parse('http://127.0.0.1:12345/vmService');
@@ -612,8 +613,7 @@ void main() {
           final DaemonMessage startAppResponse = await broadcastOutput.firstWhere(_notEvent);
           expect(startAppResponse.data['id'], 1);
           expect(device.startAppPackage, applicationPackage);
-          final Map<String, Object?> startAppResult =
-              startAppResponse.data['result']! as Map<String, Object?>;
+          final startAppResult = startAppResponse.data['result']! as Map<String, Object?>;
           expect(startAppResult['started'], true);
           expect(startAppResult['vmServiceUri'], vmServiceUri.toString());
 
@@ -631,7 +631,7 @@ void main() {
           final DaemonMessage stopAppResponse = await broadcastOutput.firstWhere(_notEvent);
           expect(stopAppResponse.data['id'], 2);
           expect(device.stopAppPackage, applicationPackage);
-          final bool? stopAppResult = stopAppResponse.data['result'] as bool?;
+          final stopAppResult = stopAppResponse.data['result'] as bool?;
           expect(stopAppResult, true);
         },
         overrides: <Type, Generator>{ApplicationPackageFactory: () => applicationPackageFactory},
@@ -642,12 +642,12 @@ void main() {
       'device.startDartDevelopmentService and .shutdownDartDevelopmentService starts and stops DDS',
       () async {
         daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
-        final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+        final discoverer = FakePollingDeviceDiscovery();
         daemon.deviceDomain.addDeviceDiscoverer(discoverer);
-        final FakeAndroidDevice device = FakeAndroidDevice();
+        final device = FakeAndroidDevice();
         discoverer.addDevice(device);
 
-        final Completer<void> ddsDoneCompleter = Completer<void>();
+        final ddsDoneCompleter = Completer<void>();
         device.dds.done = ddsDoneCompleter.future;
         final Uri fakeDdsUri = Uri.parse('http://fake_dds_uri');
         device.dds.uri = fakeDdsUri;
@@ -662,20 +662,22 @@ void main() {
               'deviceId': 'device',
               'disableServiceAuthCodes': false,
               'vmServiceUri': 'http://fake_uri/auth_code',
+              'enableDevTools': true,
             },
           }),
         );
-        final Stream<DaemonMessage> broadcastOutput =
-            daemonStreams.outputs.stream.asBroadcastStream();
+        final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream
+            .asBroadcastStream();
         final DaemonMessage startResponse = await broadcastOutput.firstWhere(_notEvent);
         expect(startResponse.data['id'], 0);
         expect(startResponse.data['error'], isNull);
-        final Map<String, Object?>? result = startResponse.data['result'] as Map<String, Object?>?;
-        final String? ddsUri = result!['ddsUri'] as String?;
+        final result = startResponse.data['result'] as Map<String, Object?>?;
+        final ddsUri = result!['ddsUri'] as String?;
         expect(ddsUri, fakeDdsUri.toString());
         expect(device.dds.startCalled, true);
         expect(device.dds.startDisableServiceAuthCodes, false);
         expect(device.dds.startVMServiceUri, Uri.parse('http://fake_uri/auth_code'));
+        expect(device.dds.enableDevTools, true);
 
         // dds.done event should be sent to the client.
         ddsDoneCompleter.complete();
@@ -703,9 +705,9 @@ void main() {
 
     testUsingContext('device.getDiagnostics returns correct value', () async {
       daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
-      final FakePollingDeviceDiscovery discoverer1 = FakePollingDeviceDiscovery();
+      final discoverer1 = FakePollingDeviceDiscovery();
       discoverer1.diagnostics = <String>['fake diagnostic 1', 'fake diagnostic 2'];
-      final FakePollingDeviceDiscovery discoverer2 = FakePollingDeviceDiscovery();
+      final discoverer2 = FakePollingDeviceDiscovery();
       discoverer2.diagnostics = <String>['fake diagnostic 3', 'fake diagnostic 4'];
       daemon.deviceDomain.addDeviceDiscoverer(discoverer1);
       daemon.deviceDomain.addDeviceDiscoverer(discoverer2);
@@ -735,7 +737,7 @@ void main() {
 
     testUsingContext('emulator.launch coldboot parameter must be boolean', () async {
       daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
-      final Map<String, Object?> params = <String, Object?>{'emulatorId': 'device', 'coldBoot': 1};
+      final params = <String, Object?>{'emulatorId': 'device', 'coldBoot': 1};
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'emulator.launch', 'params': params}),
       );
@@ -755,8 +757,8 @@ void main() {
     });
 
     testUsingContext('daemon can send exposeUrl requests to the client', () async {
-      const String originalUrl = 'http://localhost:1234/';
-      const String mappedUrl = 'https://publichost:4321/';
+      const originalUrl = 'http://localhost:1234/';
+      const mappedUrl = 'https://publichost:4321/';
 
       daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
 
@@ -790,14 +792,14 @@ void main() {
         final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(
           (DaemonMessage response) => response.data['id'] == 0,
         );
-        final Map<String, Object?> result = response.data['result']! as Map<String, Object?>;
+        final result = response.data['result']! as Map<String, Object?>;
         expect(result, isNotEmpty);
         expect(result['host'], '127.0.0.1');
         expect(result['port'], 1234);
       },
       overrides: <Type, Generator>{
-        DevtoolsLauncher:
-            () => FakeDevtoolsLauncher(serverAddress: DevToolsServerAddress('127.0.0.1', 1234)),
+        DevtoolsLauncher: () =>
+            FakeDevtoolsLauncher(serverAddress: DevToolsServerAddress('127.0.0.1', 1234)),
       },
     );
 
@@ -812,7 +814,7 @@ void main() {
         final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(
           (DaemonMessage response) => response.data['id'] == 0,
         );
-        final Map<String, Object?> result = response.data['result']! as Map<String, Object?>;
+        final result = response.data['result']! as Map<String, Object?>;
         expect(result, isNotEmpty);
         expect(result['host'], null);
         expect(result['port'], null);
@@ -823,10 +825,10 @@ void main() {
     testUsingContext(
       'proxy.connect tries to connect to an ipv4 address and proxies the connection correctly',
       () async {
-        final TestIOOverrides ioOverrides = TestIOOverrides();
+        final ioOverrides = TestIOOverrides();
         await io.IOOverrides.runWithIOOverrides(() async {
-          final FakeSocket socket = FakeSocket();
-          bool connectCalled = false;
+          final socket = FakeSocket();
+          var connectCalled = false;
           int? connectPort;
           ioOverrides.connectCallback = (Object? host, int port) async {
             connectCalled = true;
@@ -846,8 +848,8 @@ void main() {
             }),
           );
 
-          final Stream<DaemonMessage> broadcastOutput =
-              daemonStreams.outputs.stream.asBroadcastStream();
+          final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream
+              .asBroadcastStream();
           final DaemonMessage firstResponse = await broadcastOutput.firstWhere(_notEvent);
           expect(firstResponse.data['id'], 0);
           expect(firstResponse.data['result'], isNotNull);
@@ -901,10 +903,10 @@ void main() {
     );
 
     testUsingContext('proxy.connect connects to ipv6 if ipv4 failed', () async {
-      final TestIOOverrides ioOverrides = TestIOOverrides();
+      final ioOverrides = TestIOOverrides();
       await io.IOOverrides.runWithIOOverrides(() async {
-        final FakeSocket socket = FakeSocket();
-        bool connectIpv4Called = false;
+        final socket = FakeSocket();
+        var connectIpv4Called = false;
         int? connectPort;
         ioOverrides.connectCallback = (Object? host, int port) async {
           connectPort = port;
@@ -925,8 +927,8 @@ void main() {
           }),
         );
 
-        final Stream<DaemonMessage> broadcastOutput =
-            daemonStreams.outputs.stream.asBroadcastStream();
+        final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream
+            .asBroadcastStream();
         final DaemonMessage firstResponse = await broadcastOutput.firstWhere(_notEvent);
         expect(firstResponse.data['id'], 0);
         expect(firstResponse.data['result'], isNotNull);
@@ -936,10 +938,10 @@ void main() {
     });
 
     testUsingContext('proxy.connect fails if both ipv6 and ipv4 failed', () async {
-      final TestIOOverrides ioOverrides = TestIOOverrides();
+      final ioOverrides = TestIOOverrides();
       await io.IOOverrides.runWithIOOverrides(() async {
-        ioOverrides.connectCallback =
-            (Object? host, int port) => throw const io.SocketException('fail');
+        ioOverrides.connectCallback = (Object? host, int port) =>
+            throw const io.SocketException('fail');
 
         daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
         daemonStreams.inputs.add(
@@ -950,8 +952,8 @@ void main() {
           }),
         );
 
-        final Stream<DaemonMessage> broadcastOutput =
-            daemonStreams.outputs.stream.asBroadcastStream();
+        final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream
+            .asBroadcastStream();
         final DaemonMessage firstResponse = await broadcastOutput.firstWhere(_notEvent);
         expect(firstResponse.data['id'], 0);
         expect(firstResponse.data['result'], isNull);
@@ -971,13 +973,13 @@ void main() {
     });
 
     testUsingContext('outputs trace messages in verbose mode', () async {
-      final NotifyingLogger logger = NotifyingLogger(verbose: true, parent: bufferLogger);
+      final logger = NotifyingLogger(verbose: true, parent: bufferLogger);
       logger.printTrace('test');
       expect(bufferLogger.errorText, contains('test'));
     });
 
     testUsingContext('ignores trace messages in non-verbose mode', () async {
-      final NotifyingLogger logger = NotifyingLogger(verbose: false, parent: bufferLogger);
+      final logger = NotifyingLogger(verbose: false, parent: bufferLogger);
 
       final Future<LogMessage> messageResult = logger.onMessage.first;
       logger.printTrace('test');
@@ -991,11 +993,7 @@ void main() {
     });
 
     testUsingContext('sends trace messages in notify verbose mode', () async {
-      final NotifyingLogger logger = NotifyingLogger(
-        verbose: false,
-        parent: bufferLogger,
-        notifyVerbose: true,
-      );
+      final logger = NotifyingLogger(verbose: false, parent: bufferLogger, notifyVerbose: true);
 
       final Future<LogMessage> messageResult = logger.onMessage.first;
       logger.printTrace('hello');
@@ -1008,7 +1006,7 @@ void main() {
     });
 
     testUsingContext('buffers messages sent before a subscription', () async {
-      final NotifyingLogger logger = NotifyingLogger(verbose: false, parent: bufferLogger);
+      final logger = NotifyingLogger(verbose: false, parent: bufferLogger);
 
       logger.printStatus('hello');
 
@@ -1019,14 +1017,14 @@ void main() {
     });
 
     testWithoutContext('responds to .supportsColor', () async {
-      final NotifyingLogger logger = NotifyingLogger(verbose: false, parent: bufferLogger);
+      final logger = NotifyingLogger(verbose: false, parent: bufferLogger);
       expect(logger.supportsColor, isFalse);
     });
   });
 
   group('daemon queue', () {
     late DebounceOperationQueue<int, String> queue;
-    const Duration debounceDuration = Duration(seconds: 1);
+    const debounceDuration = Duration(seconds: 1);
 
     setUp(() {
       queue = DebounceOperationQueue<int, String>();
@@ -1034,7 +1032,7 @@ void main() {
 
     testWithoutContext('debounces/merges same operation type and returns same result', () async {
       await _runFakeAsync((FakeAsync time) async {
-        final List<Future<int>> operations = <Future<int>>[
+        final operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
           queue.queueAndDebounce('OP1', debounceDuration, () async => 2),
         ];
@@ -1048,7 +1046,7 @@ void main() {
 
     testWithoutContext('does not merge results outside of the debounce duration', () async {
       await _runFakeAsync((FakeAsync time) async {
-        final List<Future<int>> operations = <Future<int>>[
+        final operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
           Future<void>.delayed(
             debounceDuration * 2,
@@ -1064,7 +1062,7 @@ void main() {
 
     testWithoutContext('does not merge results of different operations', () async {
       await _runFakeAsync((FakeAsync time) async {
-        final List<Future<int>> operations = <Future<int>>[
+        final operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
           queue.queueAndDebounce('OP2', debounceDuration, () async => 2),
         ];
@@ -1079,7 +1077,7 @@ void main() {
     testWithoutContext('does not run any operations concurrently', () async {
       // Crete a function that's slow, but throws if another instance of the
       // function is running.
-      bool isRunning = false;
+      var isRunning = false;
       Future<int> f(int ret) async {
         if (isRunning) {
           throw Exception('Functions ran concurrently!');
@@ -1091,7 +1089,7 @@ void main() {
       }
 
       await _runFakeAsync((FakeAsync time) async {
-        final List<Future<int>> operations = <Future<int>>[
+        final operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () => f(1)),
           queue.queueAndDebounce('OP2', debounceDuration, () => f(2)),
         ];
@@ -1132,10 +1130,10 @@ class FakeIOSWorkflow extends Fake implements IOSWorkflow {
 
 class FakeAndroidDevice extends Fake implements AndroidDevice {
   @override
-  final String id = 'device';
+  final id = 'device';
 
   @override
-  final String name = 'android device';
+  final name = 'android device';
 
   @override
   String get displayName => name;
@@ -1156,10 +1154,10 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   final PlatformType platformType = PlatformType.android;
 
   @override
-  final bool ephemeral = false;
+  final ephemeral = false;
 
   @override
-  final bool isConnected = true;
+  final isConnected = true;
 
   @override
   final DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
@@ -1177,9 +1175,6 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   bool get supportsScreenshot => true;
 
   @override
-  bool get supportsFastStart => true;
-
-  @override
   bool get supportsFlutterExit => true;
 
   @override
@@ -1189,6 +1184,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   bool get supportsStartPaused => true;
 
   @override
+  // ignore: omit_obvious_property_types
   final FakeDartDevelopmentService dds = FakeDartDevelopmentService();
 
   BuildMode? supportsRuntimeModeCalledBuildMode;
@@ -1230,17 +1226,24 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 }
 
 class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
-  bool startCalled = false;
+  var startCalled = false;
   late Uri startVMServiceUri;
   bool? startDisableServiceAuthCodes;
 
-  bool shutdownCalled = false;
+  var shutdownCalled = false;
+  var enableDevTools = false;
 
   @override
   late Future<void> done;
 
   @override
   Uri? uri;
+
+  @override
+  Uri? devToolsUri;
+
+  @override
+  Uri? dtdUri;
 
   @override
   Future<void> startDartDevelopmentService(
@@ -1257,6 +1260,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
     startCalled = true;
     startVMServiceUri = vmServiceUri;
     startDisableServiceAuthCodes = disableServiceAuthCodes;
+    this.enableDevTools = enableDevTools;
   }
 
   @override
@@ -1266,8 +1270,8 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 }
 
 class FakeDeviceLogReader implements DeviceLogReader {
-  final StreamController<String> logLinesController = StreamController<String>();
-  bool disposeCalled = false;
+  final logLinesController = StreamController<String>();
+  var disposeCalled = false;
 
   @override
   void dispose() {
@@ -1303,7 +1307,7 @@ class FakeApplicationPackageFactory implements ApplicationPackageFactory {
 
 class FakeApplicationPackage extends Fake implements ApplicationPackage {}
 
-class TestIOOverrides extends io.IOOverrides {
+final class TestIOOverrides extends io.IOOverrides {
   late Future<io.Socket> Function(Object? host, int port) connectCallback;
 
   @override
@@ -1319,10 +1323,10 @@ class TestIOOverrides extends io.IOOverrides {
 }
 
 class FakeSocket extends Fake implements io.Socket {
-  bool closeCalled = false;
-  final StreamController<Uint8List> controller = StreamController<Uint8List>();
-  final List<List<int>> addedData = <List<int>>[];
-  final Completer<bool> doneCompleter = Completer<bool>();
+  var closeCalled = false;
+  final controller = StreamController<Uint8List>();
+  final addedData = <List<int>>[];
+  final doneCompleter = Completer<bool>();
 
   @override
   StreamSubscription<Uint8List> listen(

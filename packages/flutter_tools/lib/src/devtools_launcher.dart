@@ -33,17 +33,17 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   late final String _dartExecutable = _artifacts.getArtifactPath(Artifact.engineDartBinary);
   final Logger _logger;
   final BotDetector _botDetector;
-  final Completer<void> _processStartCompleter = Completer<void>();
+  final _processStartCompleter = Completer<void>();
 
   io.Process? _devToolsProcess;
-  bool _devToolsProcessKilled = false;
+  var _devToolsProcessKilled = false;
   @visibleForTesting
   Future<void>? devToolsProcessExit;
 
-  static final RegExp _serveDevToolsPattern = RegExp(
+  static final _serveDevToolsPattern = RegExp(
     r'Serving DevTools at ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+?)\.?$',
   );
-  static final RegExp _serveDtdPattern = RegExp(
+  static final _serveDtdPattern = RegExp(
     r'Serving the Dart Tooling Daemon at (ws:\/\/[a-zA-Z0-9:/=_\-\.\[\]]+?)\.?$',
   );
 
@@ -65,7 +65,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       ]);
       _processStartCompleter.complete();
 
-      final Completer<Uri> devToolsCompleter = Completer<Uri>();
+      final devToolsCompleter = Completer<Uri>();
       _devToolsProcess!.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((
         String line,
       ) {

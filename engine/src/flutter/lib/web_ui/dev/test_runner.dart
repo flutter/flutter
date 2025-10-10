@@ -260,13 +260,13 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
     final FileFilter? fileFilter = makeFileFilter();
     return <SuiteFilter>[
       PlatformBrowserFilter(),
-      if (browserFilter != null) browserFilter,
-      if (compilerFilter != null) compilerFilter,
-      if (rendererFilter != null) rendererFilter,
-      if (canvaskitVariantFilter != null) canvaskitVariantFilter,
-      if (suiteNameFilter != null) suiteNameFilter,
-      if (bundleNameFilter != null) bundleNameFilter,
-      if (fileFilter != null) fileFilter,
+      ?browserFilter,
+      ?compilerFilter,
+      ?rendererFilter,
+      ?canvaskitVariantFilter,
+      ?suiteNameFilter,
+      ?bundleNameFilter,
+      ?fileFilter,
     ];
   }
 
@@ -275,19 +275,18 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
       print('Filtering suites...');
     }
     final List<SuiteFilter> filters = suiteFilters;
-    final List<TestSuite> filteredSuites =
-        config.testSuites.where((TestSuite suite) {
-          for (final SuiteFilter filter in filters) {
-            final SuiteFilterResult result = filter.filterSuite(suite);
-            if (!result.isAccepted) {
-              if (isVerbose) {
-                print('  ${suite.name.ansiCyan} rejected for reason: ${result.rejectReason}');
-              }
-              return false;
-            }
+    final List<TestSuite> filteredSuites = config.testSuites.where((TestSuite suite) {
+      for (final SuiteFilter filter in filters) {
+        final SuiteFilterResult result = filter.filterSuite(suite);
+        if (!result.isAccepted) {
+          if (isVerbose) {
+            print('  ${suite.name.ansiCyan} rejected for reason: ${result.rejectReason}');
           }
-          return true;
-        }).toList();
+          return false;
+        }
+      }
+      return true;
+    }).toList();
     return filteredSuites;
   }
 

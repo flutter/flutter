@@ -28,7 +28,7 @@ final String integrationTestDirectory = fileSystem.path.join(
 
 // Running Integration Tests in the Flutter Tester will still exercise the same
 // flows specific to Integration Tests.
-final List<String> integrationTestExtraArgs = <String>['-d', 'flutter-tester'];
+final integrationTestExtraArgs = <String>['-d', 'flutter-tester'];
 
 void main() {
   setUpAll(() async {
@@ -481,8 +481,8 @@ void main() {
         flutterTestDirectory,
         extraArguments: const <String>['--start-paused'],
       );
-      final Completer<Uri> completer = Completer<Uri>();
-      final RegExp devToolsUriRegExp = RegExp(
+      final completer = Completer<Uri>();
+      final devToolsUriRegExp = RegExp(
         r'The Flutter DevTools debugger and profiler is available at: (http://[^\s]+)',
       );
       sub = process.stdout.transform(utf8.decoder).listen((String e) {
@@ -491,7 +491,7 @@ void main() {
         }
       });
       final Uri devToolsUri = await completer.future;
-      final HttpClient client = HttpClient();
+      final client = HttpClient();
       final HttpClientRequest request = await client.getUrl(devToolsUri);
       final HttpClientResponse response = await request.close();
       final String content = await response.transform(utf8.decoder).join();
@@ -552,10 +552,10 @@ Future<void> _testFile(
   output.add('<<stderr>>');
   output.addAll((exec.stderr as String).split('\n'));
   final List<String> expectations = fileSystem.file(fullTestExpectation).readAsLinesSync();
-  bool allowSkip = false;
-  int expectationLineNumber = 0;
-  int outputLineNumber = 0;
-  bool haveSeenStdErrMarker = false;
+  var allowSkip = false;
+  var expectationLineNumber = 0;
+  var outputLineNumber = 0;
+  var haveSeenStdErrMarker = false;
   while (expectationLineNumber < expectations.length) {
     expect(
       output,
@@ -585,7 +585,7 @@ Future<void> _testFile(
       // that it is possible to write expectations that still hold even if a
       // line is wrapped slightly differently due to for example a file name
       // being longer on one platform than another.
-      final String mergedLines = '$outputLine\n${output[outputLineNumber + 1]}';
+      final mergedLines = '$outputLine\n${output[outputLineNumber + 1]}';
       if (RegExp(expectationLine).hasMatch(mergedLines)) {
         outputLineNumber += 1;
         outputLine = mergedLines;
@@ -607,13 +607,11 @@ Future<void> _testFile(
   }
 }
 
-final RegExp _fontServerProtocolPattern = RegExp(
-  r'flutter_tester.*Font server protocol version mismatch',
-);
-final RegExp _unableToConnectToFontDaemonPattern = RegExp(
+final _fontServerProtocolPattern = RegExp(r'flutter_tester.*Font server protocol version mismatch');
+final _unableToConnectToFontDaemonPattern = RegExp(
   r'flutter_tester.*XType: unable to make a connection to the font daemon!',
 );
-final RegExp _xtFontStaticRegistryPattern = RegExp(
+final _xtFontStaticRegistryPattern = RegExp(
   r'flutter_tester.*XType: XTFontStaticRegistry is enabled as fontd is not available',
 );
 
@@ -657,7 +655,7 @@ Future<ProcessResult> _runFlutterTest(
     }
   }
 
-  final List<String> args = <String>[
+  final args = <String>[
     'test',
     '--no-color',
     '--no-version-check',
@@ -700,7 +698,7 @@ Future<Process> _runFlutterTestConcurrent(
     }
   }
 
-  final List<String> args = <String>[
+  final args = <String>[
     'test',
     '--no-color',
     '--no-version-check',

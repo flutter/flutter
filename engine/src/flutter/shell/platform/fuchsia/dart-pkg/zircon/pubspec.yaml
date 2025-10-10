@@ -5,7 +5,7 @@
 name: zircon
 
 environment:
-  sdk: ^3.7.0-0
+  sdk: ^3.8.0-0
 
 
 # Uncomment block for local testing

@@ -48,7 +48,10 @@ StatefulBuilder setupSimpleSegmentedControl() {
 }
 
 Widget boilerplate({required Widget child}) {
-  return Directionality(textDirection: TextDirection.ltr, child: Center(child: child));
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Center(child: child),
+  );
 }
 
 int getChildCount(WidgetTester tester) {

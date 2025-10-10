@@ -444,8 +444,8 @@ void main() {
     final ui.Image testImage2 = await createTestImage(width: 10, height: 10);
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter()..testSetImage(testImage);
-    final TestImageStreamCompleter completer2 =
-        TestImageStreamCompleter()..testSetImage(testImage2);
+    final TestImageStreamCompleter completer2 = TestImageStreamCompleter()
+      ..testSetImage(testImage2);
 
     completer1.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
 
@@ -517,8 +517,8 @@ void main() {
     final ui.Image testImage2 = await createTestImage(width: 10, height: 10);
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
-    final TestImageStreamCompleter completer2 =
-        TestImageStreamCompleter()..testSetImage(testImage2);
+    final TestImageStreamCompleter completer2 = TestImageStreamCompleter()
+      ..testSetImage(testImage2);
 
     imageCache.putIfAbsent(testImage1, () => completer1);
     expect(imageCache.statusForKey(testImage1).pending, true);
@@ -593,10 +593,9 @@ void main() {
   test('Evicting a completed image does clear the live image by default', () async {
     final ui.Image testImage = await createTestImage(width: 8, height: 8);
 
-    final TestImageStreamCompleter completer1 =
-        TestImageStreamCompleter()
-          ..testSetImage(testImage)
-          ..addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
+    final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
+      ..testSetImage(testImage)
+      ..addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
 
     imageCache.putIfAbsent(testImage, () => completer1);
     expect(imageCache.statusForKey(testImage).pending, false);
@@ -612,10 +611,9 @@ void main() {
     () async {
       final ui.Image testImage = await createTestImage(width: 8, height: 8);
 
-      final TestImageStreamCompleter completer1 =
-          TestImageStreamCompleter()
-            ..testSetImage(testImage)
-            ..addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
+        ..testSetImage(testImage)
+        ..addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
 
       imageCache.putIfAbsent(testImage, () => completer1);
       expect(imageCache.statusForKey(testImage).pending, false);
@@ -634,15 +632,13 @@ void main() {
 
     final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {});
 
-    final TestImageStreamCompleter completer1 =
-        TestImageStreamCompleter()
-          ..testSetImage(testImage)
-          ..addListener(listener);
+    final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
+      ..testSetImage(testImage)
+      ..addListener(listener);
 
-    final TestImageStreamCompleter completer2 =
-        TestImageStreamCompleter()
-          ..testSetImage(testImage)
-          ..addListener(listener);
+    final TestImageStreamCompleter completer2 = TestImageStreamCompleter()
+      ..testSetImage(testImage)
+      ..addListener(listener);
 
     imageCache.putIfAbsent(testImage, () => completer1);
     expect(imageCache.statusForKey(testImage).pending, false);

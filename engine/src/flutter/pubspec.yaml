@@ -76,7 +76,7 @@ name: _engine_workspace
 
 # Required for workspace support.
 environment:
-  sdk: ^3.7.0-0
+  sdk: ^3.8.0-0
 
 # Declare all packages that are part of the workspace.
 workspace:
@@ -101,7 +101,7 @@ workspace:
   - tools/header_guard_check
   - tools/gen_web_locale_keymap
   - tools/githooks
-  - tools/licenses
+  - tools/mcp
   - tools/path_ops/dart
   - tools/golden_tests_harvester
   - tools/pkg/engine_build_configs
@@ -178,14 +178,18 @@ dependency_overrides:
     path: ./third_party/dart/pkg/async_helper
   boolean_selector:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/boolean_selector
+  cli_config:
+    path: ./third_party/dart/third_party/pkg/tools/pkgs/cli_config
   collection:
     path: ./third_party/dart/third_party/pkg/core/pkgs/collection
   convert:
     path: ./third_party/dart/third_party/pkg/core/pkgs/convert
   coverage:
-    path: ./third_party/pkg/coverage
+    path: ./third_party/dart/third_party/pkg/tools/pkgs/coverage
   crypto:
     path: ./third_party/dart/third_party/pkg/core/pkgs/crypto
+  dart_mcp:
+    path: ./third_party/dart/third_party/pkg/ai/pkgs/dart_mcp
   equatable:
     path: ./third_party/pkg/equatable
   expect:
@@ -216,6 +220,8 @@ dependency_overrides:
     path: ./third_party/pkg/io
   js:
     path: ./third_party/dart/pkg/js
+  json_rpc_2:
+    path: ./third_party/dart/third_party/pkg/tools/pkgs/json_rpc_2
   kernel:
     path: ./third_party/dart/pkg/kernel
   logging:
@@ -270,6 +276,8 @@ dependency_overrides:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/stream_channel
   string_scanner:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/string_scanner
+  stream_transform:
+    path: ./third_party/dart/third_party/pkg/tools/pkgs/stream_transform
   term_glyph:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/term_glyph
   test:

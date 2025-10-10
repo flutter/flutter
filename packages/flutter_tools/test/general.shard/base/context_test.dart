@@ -86,8 +86,8 @@ void main() {
 
     group('operator[]', () {
       test('still finds values if async code runs after body has finished', () async {
-        final Completer<void> outer = Completer<void>();
-        final Completer<void> inner = Completer<void>();
+        final outer = Completer<void>();
+        final inner = Completer<void>();
         String? value;
         await context.run<void>(
           body: () {
@@ -105,11 +105,11 @@ void main() {
       });
 
       test('caches generated override values', () async {
-        int consultationCount = 0;
+        var consultationCount = 0;
         String? value;
         await context.run<void>(
           body: () async {
-            final StringBuffer buf = StringBuffer(context.get<String>()!);
+            final buf = StringBuffer(context.get<String>()!);
             buf.write(context.get<String>());
             await context.run<void>(
               body: () {
@@ -130,11 +130,11 @@ void main() {
       });
 
       test('caches generated fallback values', () async {
-        int consultationCount = 0;
+        var consultationCount = 0;
         String? value;
         await context.run(
           body: () async {
-            final StringBuffer buf = StringBuffer(context.get<String>()!);
+            final buf = StringBuffer(context.get<String>()!);
             buf.write(context.get<String>());
             await context.run<void>(
               body: () {
@@ -232,7 +232,7 @@ void main() {
         });
 
         test('are not applied if parent context supplies value', () async {
-          bool childConsulted = false;
+          var childConsulted = false;
           final String? value = await context.run<String?>(
             body: () {
               return context.run<String?>(
@@ -268,7 +268,7 @@ void main() {
 
       group('overrides', () {
         test('intercept consultation of parent context', () async {
-          bool parentConsulted = false;
+          var parentConsulted = false;
           final String? value = await context.run<String?>(
             body: () {
               return context.run<String?>(

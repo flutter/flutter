@@ -6,8 +6,21 @@ import 'dart:js_interop';
 import 'package:ui/src/engine.dart';
 
 /// The JS bindings for the configuration object passed to [FlutterApp.addView].
-extension type JsFlutterViewOptions._(JSObject _) implements JSObject {
-  factory JsFlutterViewOptions() => JSObject() as JsFlutterViewOptions;
+extension type JsFlutterViewOptions._primary(JSObject _) implements JSObject {
+  factory JsFlutterViewOptions({
+    required DomElement hostElement,
+    JsViewConstraints? viewConstraints,
+    Object? initialData,
+  }) => JsFlutterViewOptions._(
+    hostElement: hostElement,
+    viewConstraints: viewConstraints,
+    initialData: initialData?.toJSAnyDeep,
+  );
+  external factory JsFlutterViewOptions._({
+    required DomElement hostElement,
+    JsViewConstraints? viewConstraints,
+    JSAny? initialData,
+  });
 
   @JS('hostElement')
   external DomElement? get _hostElement;
@@ -44,6 +57,12 @@ extension type FlutterApp._primary(JSObject _) implements JSObject {
     required RemoveFlutterViewFn removeView,
   }) => FlutterApp._(addView: addView.toJS, removeView: ((int id) => removeView(id)).toJS);
   external factory FlutterApp._({required JSFunction addView, required JSFunction removeView});
+
+  @JS('addView')
+  external int addView(JsFlutterViewOptions options);
+
+  @JS('removeView')
+  external JsFlutterViewOptions? removeView(int id);
 }
 
 /// Typedef for the function that adds a new view to the app.

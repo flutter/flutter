@@ -145,14 +145,12 @@ class Square4x4Image {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, Rect.fromLTWH(0.0, 0.0, width, width));
 
-    final Paint black =
-        Paint()
-          ..strokeWidth = 1.0
-          ..color = _kBlack;
-    final Paint green =
-        Paint()
-          ..strokeWidth = 1.0
-          ..color = _kGreen;
+    final Paint black = Paint()
+      ..strokeWidth = 1.0
+      ..color = _kBlack;
+    final Paint green = Paint()
+      ..strokeWidth = 1.0
+      ..color = _kGreen;
 
     canvas.drawRect(Rect.fromLTWH(0.0, 0.0, width, width), black);
     canvas.drawRect(Rect.fromLTWH(radius, radius, innerWidth, innerWidth), green);

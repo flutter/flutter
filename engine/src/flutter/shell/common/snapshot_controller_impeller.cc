@@ -21,7 +21,7 @@ namespace {
 
 sk_sp<DlImage> DoMakeRasterSnapshot(
     const sk_sp<DisplayList>& display_list,
-    SkISize size,
+    DlISize size,
     const std::shared_ptr<impeller::AiksContext>& context) {
   TRACE_EVENT0("flutter", __FUNCTION__);
   if (!context) {
@@ -32,12 +32,12 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
                       ->GetResourceAllocator()
                       ->GetMaxTextureSizeSupported();
   double scale_factor_x =
-      static_cast<double>(max_size.width) / static_cast<double>(size.width());
+      static_cast<double>(max_size.width) / static_cast<double>(size.width);
   double scale_factor_y =
-      static_cast<double>(max_size.height) / static_cast<double>(size.height());
+      static_cast<double>(max_size.height) / static_cast<double>(size.height);
   double scale_factor = std::min({1.0, scale_factor_x, scale_factor_y});
 
-  auto render_target_size = impeller::ISize(size.width(), size.height());
+  auto render_target_size = impeller::ISize(size.width, size.height);
 
   // Scale down the render target size to the max supported by the
   // GPU if necessary. Exceeding the max would otherwise cause a
@@ -56,7 +56,7 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
 
 sk_sp<DlImage> DoMakeRasterSnapshot(
     const sk_sp<DisplayList>& display_list,
-    SkISize size,
+    DlISize size,
     const SnapshotController::Delegate& delegate) {
   // Ensure that the current thread has a rendering context. This must be done
   // before calling GetAiksContext because constructing the AiksContext may
@@ -77,7 +77,7 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
 
 sk_sp<DlImage> DoMakeRasterSnapshot(
     sk_sp<DisplayList> display_list,
-    SkISize picture_size,
+    DlISize picture_size,
     const std::shared_ptr<const fml::SyncSwitch>& sync_switch,
     const std::shared_ptr<impeller::AiksContext>& context) {
   sk_sp<DlImage> result;
@@ -96,7 +96,7 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
 
 void SnapshotControllerImpeller::MakeRasterSnapshot(
     sk_sp<DisplayList> display_list,
-    SkISize picture_size,
+    DlISize picture_size,
     std::function<void(const sk_sp<DlImage>&)> callback) {
   std::shared_ptr<const fml::SyncSwitch> sync_switch =
       GetDelegate().GetIsGpuDisabledSyncSwitch();
@@ -140,7 +140,7 @@ void SnapshotControllerImpeller::MakeRasterSnapshot(
 
 sk_sp<DlImage> SnapshotControllerImpeller::MakeRasterSnapshotSync(
     sk_sp<DisplayList> display_list,
-    SkISize picture_size) {
+    DlISize picture_size) {
   return DoMakeRasterSnapshot(display_list, picture_size, GetDelegate());
 }
 
@@ -161,6 +161,16 @@ void SnapshotControllerImpeller::CacheRuntimeStage(
 sk_sp<SkImage> SnapshotControllerImpeller::ConvertToRasterImage(
     sk_sp<SkImage> image) {
   FML_UNREACHABLE();
+}
+
+bool SnapshotControllerImpeller::MakeRenderContextCurrent() {
+  const std::unique_ptr<Surface>& surface = GetDelegate().GetSurface();
+  if (!surface) {
+    // Some backends (such as Metal) can operate without a surface and do not
+    // require MakeRenderContextCurrent.
+    return true;
+  }
+  return surface->MakeRenderContextCurrent()->GetResult();
 }
 
 }  // namespace flutter

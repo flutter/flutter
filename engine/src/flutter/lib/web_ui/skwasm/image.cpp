@@ -8,11 +8,15 @@
 #include "surface.h"
 #include "wrappers.h"
 
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
+#include "flutter/display_list/skia/dl_sk_dispatcher.h"
+
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
 #include "third_party/skia/include/core/SkPicture.h"
+#include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/gpu/GpuTypes.h"
 #include "third_party/skia/include/gpu/ganesh/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
@@ -28,6 +32,7 @@
 #include <emscripten/html5_webgl.h>
 
 using namespace SkImages;
+using namespace flutter;
 
 namespace {
 
@@ -114,12 +119,18 @@ class TextureSourceImageGenerator : public GrExternalTextureGenerator {
   std::unique_ptr<Skwasm::TextureSourceWrapper> _textureSourceWrapper;
 };
 
-SKWASM_EXPORT SkImage* image_createFromPicture(SkPicture* picture,
+SKWASM_EXPORT SkImage* image_createFromPicture(DisplayList* displayList,
                                                int32_t width,
                                                int32_t height) {
   liveImageCount++;
-  return DeferredFromPicture(sk_ref_sp<SkPicture>(picture), {width, height},
-                             nullptr, nullptr, BitDepth::kU8,
+  SkPictureRecorder recorder;
+  SkCanvas* canvas =
+      recorder.beginRecording(ToSkRect(displayList->GetBounds()));
+  DlSkCanvasDispatcher dispatcher(canvas);
+  dispatcher.drawDisplayList(sk_ref_sp(displayList), 1.0f);
+
+  return DeferredFromPicture(recorder.finishRecordingAsPicture(),
+                             {width, height}, nullptr, nullptr, BitDepth::kU8,
                              SkColorSpace::MakeSRGB())
       .release();
 }

@@ -67,7 +67,8 @@ class ProcessInfo {
   command: $command
   started: $startTime
   pid    : ${process.pid}
-'''.trim();
+'''
+        .trim();
   }
 }
 

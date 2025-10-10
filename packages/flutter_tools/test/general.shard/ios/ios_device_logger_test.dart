@@ -7,12 +7,16 @@ import 'dart:async';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/version.dart' as base;
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/ios/core_devices.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
+import 'package:flutter_tools/src/ios/lldb.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart';
@@ -74,6 +78,7 @@ Runner(UIKit)[297] <Notice>: E is for enpitsu"
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
         );
         final List<String> lines = await logReader.logLines.toList();
 
@@ -103,6 +108,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
         );
         final List<String> lines = await logReader.logLines.toList();
 
@@ -136,6 +142,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
       );
       final List<String> lines = await logReader.logLines.toList();
 
@@ -150,35 +157,34 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 
   group('VM service', () {
     testWithoutContext('IOSDeviceLogReader can listen to VM Service logs', () async {
-      final Event stdoutEvent = Event(
+      final stdoutEvent = Event(
         kind: 'Stdout',
         timestamp: 0,
         bytes: base64.encode(utf8.encode('  This is a message ')),
       );
-      final Event stderrEvent = Event(
+      final stderrEvent = Event(
         kind: 'Stderr',
         timestamp: 0,
         bytes: base64.encode(utf8.encode('  And this is an error ')),
       );
-      final FlutterVmService vmService =
-          FakeVmServiceHost(
-            requests: <VmServiceExpectation>[
-              const FakeVmServiceRequest(
-                method: 'streamListen',
-                args: <String, Object>{'streamId': 'Debug'},
-              ),
-              const FakeVmServiceRequest(
-                method: 'streamListen',
-                args: <String, Object>{'streamId': 'Stdout'},
-              ),
-              const FakeVmServiceRequest(
-                method: 'streamListen',
-                args: <String, Object>{'streamId': 'Stderr'},
-              ),
-              FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
-              FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
-            ],
-          ).vmService;
+      final FlutterVmService vmService = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Debug'},
+          ),
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Stdout'},
+          ),
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Stderr'},
+          ),
+          FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
+          FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
+        ],
+      ).vmService;
       final DeviceLogReader logReader = IOSDeviceLogReader.test(
         useSyslog: false,
         iMobileDevice: IMobileDevice(
@@ -187,6 +193,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
       );
       await logReader.provideVmService(vmService);
 
@@ -203,36 +210,35 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
     testWithoutContext(
       'IOSDeviceLogReader ignores VM Service logs when attached to and received flutter logs from debugger',
       () async {
-        final Event stdoutEvent = Event(
+        final stdoutEvent = Event(
           kind: 'Stdout',
           timestamp: 0,
           bytes: base64.encode(utf8.encode('  This is a message ')),
         );
-        final Event stderrEvent = Event(
+        final stderrEvent = Event(
           kind: 'Stderr',
           timestamp: 0,
           bytes: base64.encode(utf8.encode('  And this is an error ')),
         );
-        final FlutterVmService vmService =
-            FakeVmServiceHost(
-              requests: <VmServiceExpectation>[
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Debug'},
-                ),
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Stdout'},
-                ),
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Stderr'},
-                ),
-                FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
-                FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
-              ],
-            ).vmService;
-        final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        final FlutterVmService vmService = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Debug'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Stdout'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Stderr'},
+            ),
+            FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
+            FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
+          ],
+        ).vmService;
+        final logReader = IOSDeviceLogReader.test(
           useSyslog: false,
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
@@ -240,13 +246,14 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
         );
         await logReader.provideVmService(vmService);
 
-        final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+        final iosDeployDebugger = FakeIOSDeployDebugger();
         iosDeployDebugger.debuggerAttached = true;
 
-        final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
+        final debuggingLogs = Stream<String>.fromIterable(<String>[
           'flutter: Message from debugger',
         ]);
         iosDeployDebugger.logLines = debuggingLogs;
@@ -263,23 +270,24 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 
   group('debugger stream', () {
     testWithoutContext('IOSDeviceLogReader removes metadata prefix from lldb output', () async {
-      final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
+      final debuggingLogs = Stream<String>.fromIterable(<String>[
         '2020-09-15 19:15:10.931434-0700 Runner[541:226276] Did finish launching.',
         '2020-09-15 19:15:10.931434-0700 Runner[541:226276] [Category] Did finish launching from logging category.',
         'stderr from dart',
         '',
       ]);
 
-      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+      final logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
           processManager: processManager,
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
         useSyslog: false,
       );
-      final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+      final iosDeployDebugger = FakeIOSDeployDebugger();
       iosDeployDebugger.logLines = debuggingLogs;
       logReader.debuggerStream = iosDeployDebugger;
       final Future<List<String>> logLines = logReader.logLines.toList();
@@ -293,18 +301,19 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
     });
 
     testWithoutContext('errors on debugger stream closes log stream', () async {
-      final Stream<String> debuggingLogs = Stream<String>.error('ios-deploy error');
-      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+      final debuggingLogs = Stream<String>.error('ios-deploy error');
+      final logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
           processManager: processManager,
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
         useSyslog: false,
       );
-      final Completer<void> streamComplete = Completer<void>();
-      final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+      final streamComplete = Completer<void>();
+      final iosDeployDebugger = FakeIOSDeployDebugger();
       iosDeployDebugger.logLines = debuggingLogs;
       logReader.logLines.listen(null, onError: (Object error) => streamComplete.complete());
       logReader.debuggerStream = iosDeployDebugger;
@@ -313,16 +322,17 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
     });
 
     testWithoutContext('detaches debugger', () async {
-      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+      final logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
           processManager: processManager,
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
         useSyslog: false,
       );
-      final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+      final iosDeployDebugger = FakeIOSDeployDebugger();
       logReader.debuggerStream = iosDeployDebugger;
 
       logReader.dispose();
@@ -330,20 +340,21 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
     });
 
     testWithoutContext('Does not throw if debuggerStream set after logReader closed', () async {
-      final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
+      final debuggingLogs = Stream<String>.fromIterable(<String>[
         '2020-09-15 19:15:10.931434-0700 Runner[541:226276] Did finish launching.',
         '2020-09-15 19:15:10.931434-0700 Runner[541:226276] [Category] Did finish launching from logging category.',
         'stderr from dart',
         '',
       ]);
 
-      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+      final logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
           processManager: processManager,
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
         useSyslog: false,
       );
       Object? exception;
@@ -351,7 +362,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       await asyncGuard(
         () async {
           await logReader.linesController.close();
-          final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+          final iosDeployDebugger = FakeIOSDeployDebugger();
           iosDeployDebugger.logLines = debuggingLogs;
           logReader.debuggerStream = iosDeployDebugger;
           await logReader.logLines.drain<void>();
@@ -367,13 +378,14 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 
   group('Determine which loggers to use', () {
     testWithoutContext('for physically attached CoreDevice', () {
-      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+      final logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
           processManager: processManager,
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
         majorSdkVersion: 17,
         isCoreDevice: true,
       );
@@ -381,18 +393,20 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.useSyslogLogging, isTrue);
       expect(logReader.useUnifiedLogging, isTrue);
       expect(logReader.useIOSDeployLogging, isFalse);
+      expect(logReader.useCoreDeviceLogging, isFalse);
       expect(logReader.logSources.primarySource, IOSDeviceLogSource.idevicesyslog);
       expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
     });
 
     testWithoutContext('for wirelessly attached CoreDevice', () {
-      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+      final logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
           processManager: processManager,
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
         majorSdkVersion: 17,
         isCoreDevice: true,
         isWirelesslyConnected: true,
@@ -401,24 +415,27 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.useSyslogLogging, isFalse);
       expect(logReader.useUnifiedLogging, isTrue);
       expect(logReader.useIOSDeployLogging, isFalse);
+      expect(logReader.useCoreDeviceLogging, isFalse);
       expect(logReader.logSources.primarySource, IOSDeviceLogSource.unifiedLogging);
       expect(logReader.logSources.fallbackSource, isNull);
     });
 
     testWithoutContext('for iOS 12 or less device', () {
-      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+      final logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
           processManager: processManager,
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
         majorSdkVersion: 12,
       );
 
       expect(logReader.useSyslogLogging, isTrue);
       expect(logReader.useUnifiedLogging, isFalse);
       expect(logReader.useIOSDeployLogging, isFalse);
+      expect(logReader.useCoreDeviceLogging, isFalse);
       expect(logReader.logSources.primarySource, IOSDeviceLogSource.idevicesyslog);
       expect(logReader.logSources.fallbackSource, isNull);
     });
@@ -426,19 +443,21 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
     testWithoutContext(
       'for iOS 13 or greater non-CoreDevice and _iosDeployDebugger not attached',
       () {
-        final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        final logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
             processManager: processManager,
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
           majorSdkVersion: 13,
         );
 
         expect(logReader.useSyslogLogging, isFalse);
         expect(logReader.useUnifiedLogging, isTrue);
         expect(logReader.useIOSDeployLogging, isTrue);
+        expect(logReader.useCoreDeviceLogging, isFalse);
         expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
         expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
       },
@@ -447,39 +466,40 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
     testWithoutContext(
       'for iOS 13 or greater non-CoreDevice, _iosDeployDebugger not attached, and VM is connected',
       () async {
-        final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        final logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
             processManager: processManager,
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
           majorSdkVersion: 13,
         );
 
-        final FlutterVmService vmService =
-            FakeVmServiceHost(
-              requests: <VmServiceExpectation>[
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Debug'},
-                ),
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Stdout'},
-                ),
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Stderr'},
-                ),
-              ],
-            ).vmService;
+        final FlutterVmService vmService = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Debug'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Stdout'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Stderr'},
+            ),
+          ],
+        ).vmService;
 
         await logReader.provideVmService(vmService);
 
         expect(logReader.useSyslogLogging, isFalse);
         expect(logReader.useUnifiedLogging, isTrue);
         expect(logReader.useIOSDeployLogging, isTrue);
+        expect(logReader.useCoreDeviceLogging, isFalse);
         expect(logReader.logSources.primarySource, IOSDeviceLogSource.unifiedLogging);
         expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.iosDeploy);
       },
@@ -488,78 +508,82 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
     testWithoutContext(
       'for iOS 13 or greater non-CoreDevice and _iosDeployDebugger is attached',
       () async {
-        final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        final logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
             processManager: processManager,
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
           majorSdkVersion: 13,
         );
 
-        final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+        final iosDeployDebugger = FakeIOSDeployDebugger();
         iosDeployDebugger.debuggerAttached = true;
         logReader.debuggerStream = iosDeployDebugger;
 
-        final FlutterVmService vmService =
-            FakeVmServiceHost(
-              requests: <VmServiceExpectation>[
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Debug'},
-                ),
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Stdout'},
-                ),
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Stderr'},
-                ),
-              ],
-            ).vmService;
+        final FlutterVmService vmService = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Debug'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Stdout'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Stderr'},
+            ),
+          ],
+        ).vmService;
 
         await logReader.provideVmService(vmService);
 
         expect(logReader.useSyslogLogging, isFalse);
         expect(logReader.useUnifiedLogging, isTrue);
         expect(logReader.useIOSDeployLogging, isTrue);
+        expect(logReader.useCoreDeviceLogging, isFalse);
         expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
         expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
       },
     );
 
     testWithoutContext('for iOS 16 or greater non-CoreDevice', () {
-      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+      final logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
           processManager: processManager,
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
         majorSdkVersion: 16,
       );
 
-      final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+      final iosDeployDebugger = FakeIOSDeployDebugger();
       iosDeployDebugger.debuggerAttached = true;
       logReader.debuggerStream = iosDeployDebugger;
 
       expect(logReader.useSyslogLogging, isFalse);
       expect(logReader.useUnifiedLogging, isTrue);
       expect(logReader.useIOSDeployLogging, isTrue);
+      expect(logReader.useCoreDeviceLogging, isFalse);
       expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
       expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
     });
 
     testWithoutContext('for iOS 16 or greater non-CoreDevice in CI', () {
-      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+      final logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
           processManager: processManager,
           cache: fakeCache,
           logger: logger,
         ),
+        xcode: FakeXcode(),
         usingCISystem: true,
         majorSdkVersion: 16,
       );
@@ -567,8 +591,30 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.useSyslogLogging, isTrue);
       expect(logReader.useUnifiedLogging, isFalse);
       expect(logReader.useIOSDeployLogging, isTrue);
+      expect(logReader.useCoreDeviceLogging, isFalse);
       expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
       expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.idevicesyslog);
+    });
+
+    testWithoutContext('for CoreDevice and Xcode 26', () {
+      final logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        xcode: FakeXcode(version: base.Version(26, 0, 0)),
+        majorSdkVersion: 17,
+        isCoreDevice: true,
+      );
+
+      expect(logReader.useSyslogLogging, isFalse);
+      expect(logReader.useUnifiedLogging, isTrue);
+      expect(logReader.useIOSDeployLogging, isFalse);
+      expect(logReader.useCoreDeviceLogging, isTrue);
+      expect(logReader.logSources.primarySource, IOSDeviceLogSource.devicectlAndLldb);
+      expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
     });
 
     group('when useSyslogLogging', () {
@@ -585,13 +631,14 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
   ''',
           ),
         );
-        final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        final logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
             processManager: processManager,
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
           usingCISystem: true,
           majorSdkVersion: 16,
         );
@@ -606,17 +653,18 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       });
 
       testWithoutContext('is false syslog does not send flutter messages to stream', () async {
-        final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        final logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
             processManager: processManager,
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
           majorSdkVersion: 16,
         );
 
-        final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+        final iosDeployDebugger = FakeIOSDeployDebugger();
         iosDeployDebugger.logLines = Stream<String>.fromIterable(<String>[]);
         logReader.debuggerStream = iosDeployDebugger;
 
@@ -630,18 +678,19 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 
     group('when useIOSDeployLogging', () {
       testWithoutContext('is true ios-deploy sends flutter messages to stream', () async {
-        final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        final logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
             processManager: processManager,
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
           majorSdkVersion: 16,
         );
 
-        final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
-        final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
+        final iosDeployDebugger = FakeIOSDeployDebugger();
+        final debuggingLogs = Stream<String>.fromIterable(<String>[
           'flutter: Message from debugger',
         ]);
         iosDeployDebugger.logLines = debuggingLogs;
@@ -655,18 +704,19 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       });
 
       testWithoutContext('is false ios-deploy does not send flutter messages to stream', () async {
-        final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        final logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
             processManager: FakeProcessManager.any(),
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
           majorSdkVersion: 12,
         );
 
-        final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
-        final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
+        final iosDeployDebugger = FakeIOSDeployDebugger();
+        final debuggingLogs = Stream<String>.fromIterable(<String>[
           'flutter: Message from debugger',
         ]);
         iosDeployDebugger.logLines = debuggingLogs;
@@ -682,36 +732,35 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 
     group('when useUnifiedLogging', () {
       testWithoutContext('is true Dart VM sends flutter messages to stream', () async {
-        final Event stdoutEvent = Event(
+        final stdoutEvent = Event(
           kind: 'Stdout',
           timestamp: 0,
           bytes: base64.encode(utf8.encode('flutter: A flutter message')),
         );
-        final Event stderrEvent = Event(
+        final stderrEvent = Event(
           kind: 'Stderr',
           timestamp: 0,
           bytes: base64.encode(utf8.encode('flutter: A second flutter message')),
         );
-        final FlutterVmService vmService =
-            FakeVmServiceHost(
-              requests: <VmServiceExpectation>[
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Debug'},
-                ),
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Stdout'},
-                ),
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Stderr'},
-                ),
-                FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
-                FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
-              ],
-            ).vmService;
-        final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        final FlutterVmService vmService = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Debug'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Stdout'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Stderr'},
+            ),
+            FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
+            FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
+          ],
+        ).vmService;
+        final logReader = IOSDeviceLogReader.test(
           useSyslog: false,
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
@@ -719,6 +768,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
         );
         await logReader.provideVmService(vmService);
 
@@ -735,42 +785,42 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       });
 
       testWithoutContext('is false Dart VM does not send flutter messages to stream', () async {
-        final Event stdoutEvent = Event(
+        final stdoutEvent = Event(
           kind: 'Stdout',
           timestamp: 0,
           bytes: base64.encode(utf8.encode('flutter: A flutter message')),
         );
-        final Event stderrEvent = Event(
+        final stderrEvent = Event(
           kind: 'Stderr',
           timestamp: 0,
           bytes: base64.encode(utf8.encode('flutter: A second flutter message')),
         );
-        final FlutterVmService vmService =
-            FakeVmServiceHost(
-              requests: <VmServiceExpectation>[
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Debug'},
-                ),
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Stdout'},
-                ),
-                const FakeVmServiceRequest(
-                  method: 'streamListen',
-                  args: <String, Object>{'streamId': 'Stderr'},
-                ),
-                FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
-                FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
-              ],
-            ).vmService;
-        final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        final FlutterVmService vmService = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Debug'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Stdout'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Stderr'},
+            ),
+            FakeVmServiceStreamResponse(event: stdoutEvent, streamId: 'Stdout'),
+            FakeVmServiceStreamResponse(event: stderrEvent, streamId: 'Stderr'),
+          ],
+        ).vmService;
+        final logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
             processManager: FakeProcessManager.any(),
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
           majorSdkVersion: 12,
         );
         await logReader.provideVmService(vmService);
@@ -784,17 +834,78 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       });
     });
 
+    group('when useCoreDeviceLogging', () {
+      testWithoutContext('is true devicectl and lldb sends messages to stream', () async {
+        final logReader = IOSDeviceLogReader.test(
+          iMobileDevice: IMobileDevice(
+            artifacts: artifacts,
+            processManager: FakeProcessManager.any(),
+            cache: fakeCache,
+            logger: logger,
+          ),
+          xcode: FakeXcode(version: base.Version(26, 0, 0)),
+          majorSdkVersion: 17,
+          isCoreDevice: true,
+        );
+
+        final coreDeviceLauncher = FakeIOSCoreDeviceLauncher();
+        await logReader.listenToCoreDeviceLauncher(coreDeviceLauncher);
+
+        const deviceCtlLog = 'A log from devicectl\n';
+        const lldbLog = 'A log from LLDB\n';
+
+        coreDeviceLauncher.coreDeviceLogForwarder.addLog(deviceCtlLog);
+        coreDeviceLauncher.lldbLogForwarder.addLog(lldbLog);
+
+        expect(logReader.useCoreDeviceLogging, isTrue);
+        await expectLater(
+          logReader.logLines,
+          emitsInAnyOrder(<Matcher>[equals(deviceCtlLog), equals(lldbLog)]),
+        );
+      });
+
+      testWithoutContext('is false devicectl and lldb do not sends messages to stream', () async {
+        final logReader = IOSDeviceLogReader.test(
+          iMobileDevice: IMobileDevice(
+            artifacts: artifacts,
+            processManager: FakeProcessManager.any(),
+            cache: fakeCache,
+            logger: logger,
+          ),
+          xcode: FakeXcode(version: base.Version(16, 0, 0)),
+          majorSdkVersion: 17,
+          isCoreDevice: true,
+        );
+
+        final coreDeviceLauncher = FakeIOSCoreDeviceLauncher();
+        await logReader.listenToCoreDeviceLauncher(coreDeviceLauncher);
+
+        const deviceCtlLog = 'A log from devicectl\n';
+        const lldbLog = 'A log from LLDB\n';
+
+        coreDeviceLauncher.coreDeviceLogForwarder.addLog(deviceCtlLog);
+        coreDeviceLauncher.lldbLogForwarder.addLog(lldbLog);
+
+        expect(logReader.useCoreDeviceLogging, isFalse);
+        await expectLater(logReader.logLines, neverEmits(deviceCtlLog));
+
+        expect(logReader.useCoreDeviceLogging, isFalse);
+        await expectLater(logReader.logLines, neverEmits(lldbLog));
+      });
+    });
+
     group('and when to exclude logs:', () {
       testWithoutContext(
         'all primary messages are included except if fallback sent flutter message first',
         () async {
-          final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+          final logReader = IOSDeviceLogReader.test(
             iMobileDevice: IMobileDevice(
               artifacts: artifacts,
               processManager: FakeProcessManager.any(),
               cache: fakeCache,
               logger: logger,
             ),
+            xcode: FakeXcode(),
             usingCISystem: true,
             majorSdkVersion: 16,
           );
@@ -837,13 +948,14 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       );
 
       testWithoutContext('all primary messages are included when there is no fallback', () async {
-        final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        final logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
             processManager: FakeProcessManager.any(),
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
           majorSdkVersion: 12,
         );
 
@@ -884,13 +996,14 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       testWithoutContext(
         'primary messages are not added if fallback already added them, otherwise duplicates are allowed',
         () async {
-          final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+          final logReader = IOSDeviceLogReader.test(
             iMobileDevice: IMobileDevice(
               artifacts: artifacts,
               processManager: FakeProcessManager.any(),
               cache: fakeCache,
               logger: logger,
             ),
+            xcode: FakeXcode(),
             usingCISystem: true,
             majorSdkVersion: 16,
           );
@@ -947,13 +1060,14 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       testWithoutContext(
         'flutter fallback messages are included until a primary flutter message is received',
         () async {
-          final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+          final logReader = IOSDeviceLogReader.test(
             iMobileDevice: IMobileDevice(
               artifacts: artifacts,
               processManager: FakeProcessManager.any(),
               cache: fakeCache,
               logger: logger,
             ),
+            xcode: FakeXcode(),
             usingCISystem: true,
             majorSdkVersion: 16,
           );
@@ -1005,13 +1119,14 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       );
 
       testWithoutContext('non-flutter fallback messages are not included', () async {
-        final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        final logReader = IOSDeviceLogReader.test(
           iMobileDevice: IMobileDevice(
             artifacts: artifacts,
             processManager: FakeProcessManager.any(),
             cache: fakeCache,
             logger: logger,
           ),
+          xcode: FakeXcode(),
           usingCISystem: true,
           majorSdkVersion: 16,
         );
@@ -1039,16 +1154,34 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 }
 
 class FakeIOSDeployDebugger extends Fake implements IOSDeployDebugger {
-  bool detached = false;
+  var detached = false;
 
   @override
-  bool debuggerAttached = false;
+  var debuggerAttached = false;
 
   @override
-  Stream<String> logLines = const Stream<String>.empty();
+  var logLines = const Stream<String>.empty();
 
   @override
   Future<void> detach() async {
     detached = true;
   }
+}
+
+@override
+class FakeXcode extends Fake implements Xcode {
+  FakeXcode({this.version});
+
+  base.Version? version;
+
+  @override
+  base.Version? get currentVersion => version ?? base.Version(16, 0, 0);
+}
+
+class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
+  @override
+  final coreDeviceLogForwarder = IOSCoreDeviceLogForwarder();
+
+  @override
+  final lldbLogForwarder = LLDBLogForwarder();
 }

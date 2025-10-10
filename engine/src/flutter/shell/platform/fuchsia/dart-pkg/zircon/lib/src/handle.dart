@@ -63,5 +63,6 @@ class _OnWaitCompleteClosure {
   Object _arg2;
 
   @pragma('vm:entry-point')
-  Function get _closure => () => _callback(_arg1, _arg2);
+  Function get _closure =>
+      () => _callback(_arg1, _arg2);
 }

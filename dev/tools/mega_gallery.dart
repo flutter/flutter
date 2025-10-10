@@ -115,7 +115,8 @@ void _createEntry(File mainFile, int copies) {
     imports.writeln("import 'gallery_$i/main.dart' as main_$i;");
   }
 
-  final String contents = '''
+  final String contents =
+      '''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.

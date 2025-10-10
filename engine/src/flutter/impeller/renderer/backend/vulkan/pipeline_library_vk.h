@@ -59,8 +59,10 @@ class PipelineLibraryVK final
   bool IsValid() const override;
 
   // |PipelineLibrary|
-  PipelineFuture<PipelineDescriptor> GetPipeline(PipelineDescriptor descriptor,
-                                                 bool async) override;
+  PipelineFuture<PipelineDescriptor> GetPipeline(
+      PipelineDescriptor descriptor,
+      bool async,
+      bool threadsafe = false) override;
 
   // |PipelineLibrary|
   PipelineFuture<ComputePipelineDescriptor> GetPipeline(

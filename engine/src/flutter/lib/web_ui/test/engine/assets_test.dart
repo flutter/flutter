@@ -127,10 +127,9 @@ void removeAssetBaseMeta() {
 
 /// Adds a meta-tag with name=assetBase and the passed-in [value].
 void addAssetBaseMeta(String value) {
-  final DomHTMLMetaElement meta =
-      createDomHTMLMetaElement()
-        ..name = 'assetBase'
-        ..content = value;
+  final DomHTMLMetaElement meta = createDomHTMLMetaElement()
+    ..name = 'assetBase'
+    ..content = value;
 
   domDocument.head!.append(meta);
 }

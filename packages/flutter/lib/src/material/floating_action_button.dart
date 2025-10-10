@@ -16,7 +16,6 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'color_scheme.dart';
 import 'floating_action_button_theme.dart';
-import 'material_state.dart';
 import 'scaffold.dart';
 import 'text_theme.dart';
 import 'theme.dart';
@@ -114,8 +113,9 @@ class FloatingActionButton extends StatelessWidget {
        assert(hoverElevation == null || hoverElevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
-       _floatingActionButtonType =
-           mini ? _FloatingActionButtonType.small : _FloatingActionButtonType.regular,
+       _floatingActionButtonType = mini
+           ? _FloatingActionButtonType.small
+           : _FloatingActionButtonType.regular,
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
        extendedPadding = null,
@@ -488,10 +488,9 @@ class FloatingActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final FloatingActionButtonThemeData floatingActionButtonTheme = theme.floatingActionButtonTheme;
-    final FloatingActionButtonThemeData defaults =
-        theme.useMaterial3
-            ? _FABDefaultsM3(context, _floatingActionButtonType, child != null)
-            : _FABDefaultsM2(context, _floatingActionButtonType, child != null);
+    final FloatingActionButtonThemeData defaults = theme.useMaterial3
+        ? _FABDefaultsM3(context, _floatingActionButtonType, child != null)
+        : _FABDefaultsM2(context, _floatingActionButtonType, child != null);
 
     final Color foregroundColor =
         this.foregroundColor ??
@@ -527,15 +526,20 @@ class FloatingActionButton extends StatelessWidget {
     final bool enableFeedback =
         this.enableFeedback ?? floatingActionButtonTheme.enableFeedback ?? defaults.enableFeedback!;
     final double iconSize = floatingActionButtonTheme.iconSize ?? defaults.iconSize!;
-    final TextStyle extendedTextStyle = (this.extendedTextStyle ??
-            floatingActionButtonTheme.extendedTextStyle ??
-            defaults.extendedTextStyle!)
-        .copyWith(color: foregroundColor);
+    final TextStyle extendedTextStyle =
+        (this.extendedTextStyle ??
+                floatingActionButtonTheme.extendedTextStyle ??
+                defaults.extendedTextStyle!)
+            .copyWith(color: foregroundColor);
     final ShapeBorder shape = this.shape ?? floatingActionButtonTheme.shape ?? defaults.shape!;
 
     BoxConstraints sizeConstraints;
-    Widget? resolvedChild =
-        child != null ? IconTheme.merge(data: IconThemeData(size: iconSize), child: child!) : child;
+    Widget? resolvedChild = child != null
+        ? IconTheme.merge(
+            data: IconThemeData(size: iconSize),
+            child: child!,
+          )
+        : child;
     switch (_floatingActionButtonType) {
       case _FloatingActionButtonType.regular:
         sizeConstraints = floatingActionButtonTheme.sizeConstraints ?? defaults.sizeConstraints!;
@@ -560,7 +564,7 @@ class FloatingActionButton extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                if (child != null) child!,
+                ?child,
                 if (child != null && isExtended) SizedBox(width: iconLabelSpacing),
                 if (isExtended) _extendedLabel!,
               ],
@@ -632,24 +636,24 @@ class FloatingActionButton extends StatelessWidget {
   }
 }
 
-// This MaterialStateProperty is passed along to RawMaterialButton which
-// resolves the property against MaterialState.pressed, MaterialState.hovered,
-// MaterialState.focused, MaterialState.disabled.
-class _EffectiveMouseCursor extends MaterialStateMouseCursor {
+// This WidgetStateProperty is passed along to RawMaterialButton which
+// resolves the property against WidgetState.pressed, WidgetState.hovered,
+// WidgetState.focused, WidgetState.disabled.
+class _EffectiveMouseCursor extends WidgetStateMouseCursor {
   const _EffectiveMouseCursor(this.widgetCursor, this.themeCursor);
 
   final MouseCursor? widgetCursor;
-  final MaterialStateProperty<MouseCursor?>? themeCursor;
+  final WidgetStateProperty<MouseCursor?>? themeCursor;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
-    return MaterialStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
+  MouseCursor resolve(Set<WidgetState> states) {
+    return WidgetStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
         themeCursor?.resolve(states) ??
-        MaterialStateMouseCursor.clickable.resolve(states);
+        WidgetStateMouseCursor.clickable.resolve(states);
   }
 
   @override
-  String get debugDescription => 'MaterialStateMouseCursor(FloatActionButton)';
+  String get debugDescription => 'WidgetStateMouseCursor(FloatActionButton)';
 }
 
 // This widget's size matches its child's size unless its constraints

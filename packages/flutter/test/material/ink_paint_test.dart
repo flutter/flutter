@@ -607,10 +607,9 @@ void main() {
 
     late OverlayEntry overlayEntry;
     addTearDown(
-      () =>
-          overlayEntry
-            ..remove()
-            ..dispose(),
+      () => overlayEntry
+        ..remove()
+        ..dispose(),
     );
 
     await tester.pumpWidget(

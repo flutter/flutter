@@ -443,6 +443,7 @@ class ColorFilter implements ImageFilter {
   const factory ColorFilter.matrix(List<double> matrix) = engine.EngineColorFilter.matrix;
   const factory ColorFilter.linearToSrgbGamma() = engine.EngineColorFilter.linearToSrgbGamma;
   const factory ColorFilter.srgbToLinearGamma() = engine.EngineColorFilter.srgbToLinearGamma;
+  factory ColorFilter.saturation(double saturation) = engine.EngineColorFilter.saturation;
 }
 
 // These enum values must be kept in sync with SkBlurStyle.
@@ -707,8 +708,9 @@ Future<Codec> createBmp(Uint8List pixels, int width, int height, int rowBytes, P
   final bool swapRedBlue = switch (format) {
     PixelFormat.bgra8888 => true,
     PixelFormat.rgba8888 => false,
-    PixelFormat.rgbaFloat32 =>
-      throw UnimplementedError('RGB conversion from rgbaFloat32 data is not implemented'),
+    PixelFormat.rgbaFloat32 => throw UnimplementedError(
+      'RGB conversion from rgbaFloat32 data is not implemented',
+    ),
   };
 
   // See https://en.wikipedia.org/wiki/BMP_file_format for format examples.

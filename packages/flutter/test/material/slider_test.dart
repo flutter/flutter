@@ -153,29 +153,36 @@ class TallSliderTickMarkShape extends SliderTickMarkShape {
   }
 }
 
-class _StateDependentMouseCursor extends MaterialStateMouseCursor {
+class _StateDependentMouseCursor extends WidgetStateMouseCursor {
   const _StateDependentMouseCursor({
     this.disabled = SystemMouseCursors.none,
+    this.focused = SystemMouseCursors.none,
     this.dragged = SystemMouseCursors.none,
     this.hovered = SystemMouseCursors.none,
+    this.regular = SystemMouseCursors.none,
   });
 
   final MouseCursor disabled;
+  final MouseCursor focused;
   final MouseCursor hovered;
   final MouseCursor dragged;
+  final MouseCursor regular;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  MouseCursor resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return disabled;
     }
-    if (states.contains(MaterialState.dragged)) {
+    if (states.contains(WidgetState.focused)) {
+      return focused;
+    }
+    if (states.contains(WidgetState.dragged)) {
       return dragged;
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return hovered;
     }
-    return SystemMouseCursors.none;
+    return regular;
   }
 
   @override
@@ -1906,14 +1913,13 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Slider(
                   value: value,
-                  onChanged:
-                      enabled
-                          ? (double newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                   autofocus: true,
                   focusNode: focusNode,
                 );
@@ -1959,21 +1965,20 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Slider(
                   value: value,
-                  overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                    if (states.contains(MaterialState.focused)) {
+                  overlayColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+                    if (states.contains(WidgetState.focused)) {
                       return Colors.purple[500]!;
                     }
 
                     return Colors.transparent;
                   }),
-                  onChanged:
-                      enabled
-                          ? (double newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                   autofocus: true,
                   focusNode: focusNode,
                 );
@@ -2017,14 +2022,13 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Slider(
                   value: value,
-                  onChanged:
-                      enabled
-                          ? (double newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                 );
               },
             ),
@@ -2091,21 +2095,20 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Slider(
                   value: value,
-                  overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                    if (states.contains(MaterialState.hovered)) {
+                  overlayColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+                    if (states.contains(WidgetState.hovered)) {
                       return Colors.cyan[500]!;
                     }
 
                     return Colors.transparent;
                   }),
-                  onChanged:
-                      enabled
-                          ? (double newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                 );
               },
             ),
@@ -2166,14 +2169,13 @@ void main() {
                   key: sliderKey,
                   value: value,
                   focusNode: focusNode,
-                  onChanged:
-                      enabled
-                          ? (double newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                 );
               },
             ),
@@ -2245,21 +2247,20 @@ void main() {
                   key: sliderKey,
                   value: value,
                   focusNode: focusNode,
-                  overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                    if (states.contains(MaterialState.dragged)) {
+                  overlayColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+                    if (states.contains(WidgetState.dragged)) {
                       return Colors.lime[500]!;
                     }
 
                     return Colors.transparent;
                   }),
-                  onChanged:
-                      enabled
-                          ? (double newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                 );
               },
             ),
@@ -2322,14 +2323,13 @@ void main() {
                   value: value,
                   activeColor: activeColor,
                   overlayColor: const MaterialStatePropertyAll<Color?>(overlayColor),
-                  onChanged:
-                      enabled
-                          ? (double newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                   focusNode: focusNode,
                 );
               },
@@ -2788,7 +2788,9 @@ void main() {
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(
         MaterialApp(
-          home: Material(child: Slider(value: 0.5, onChanged: (double _) {}, focusNode: focusNode)),
+          home: Material(
+            child: Slider(value: 0.5, onChanged: (double _) {}, focusNode: focusNode),
+          ),
         ),
       );
 
@@ -2904,13 +2906,13 @@ void main() {
         valueIndicatorBox,
         isVisible
             ? (paints
-              ..path(color: theme.valueIndicatorColor)
-              ..paragraph())
-            : isNot(
-              paints
                 ..path(color: theme.valueIndicatorColor)
-                ..paragraph(),
-            ),
+                ..paragraph())
+            : isNot(
+                paints
+                  ..path(color: theme.valueIndicatorColor)
+                  ..paragraph(),
+              ),
       );
       if (dragged) {
         await gesture!.up();
@@ -3331,8 +3333,11 @@ void main() {
     );
   });
 
-  testWidgets('Slider MaterialStateMouseCursor resolves correctly', (WidgetTester tester) async {
-    const MouseCursor disabledCursor = SystemMouseCursors.basic;
+  testWidgets('Slider WidgetStateMouseCursor resolves correctly', (WidgetTester tester) async {
+    const MouseCursor systemDefaultCursor = SystemMouseCursors.basic;
+    const MouseCursor regularCursor = SystemMouseCursors.click;
+    const MouseCursor disabledCursor = SystemMouseCursors.forbidden;
+    const MouseCursor focusedCursor = SystemMouseCursors.precise;
     const MouseCursor hoveredCursor = SystemMouseCursors.grab;
     const MouseCursor draggedCursor = SystemMouseCursors.move;
 
@@ -3341,19 +3346,23 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: Material(
-            child: Center(
-              child: MouseRegion(
-                cursor: SystemMouseCursors.forbidden,
-                child: Slider(
-                  mouseCursor: const _StateDependentMouseCursor(
-                    disabled: disabledCursor,
-                    hovered: hoveredCursor,
-                    dragged: draggedCursor,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Center(
+                  child: Slider(
+                    mouseCursor: const _StateDependentMouseCursor(
+                      disabled: disabledCursor,
+                      focused: focusedCursor,
+                      hovered: hoveredCursor,
+                      dragged: draggedCursor,
+                      regular: regularCursor,
+                    ),
+                    value: 0.5,
+                    onChanged: enabled ? (double newValue) {} : null,
                   ),
-                  value: 0.5,
-                  onChanged: enabled ? (double newValue) {} : null,
                 ),
-              ),
+              ],
             ),
           ),
         ),
@@ -3364,30 +3373,48 @@ void main() {
       kind: PointerDeviceKind.mouse,
       pointer: 1,
     );
-    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
 
+    // System default.
+    await gesture.addPointer(location: Offset.zero);
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), systemDefaultCursor);
+
+    // Disabled.
     await tester.pumpWidget(buildFrame(enabled: false));
+    await gesture.moveTo(tester.getCenter(find.byType(Slider)));
+    await tester.pump();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), disabledCursor);
 
+    // Regular.
     await tester.pumpWidget(buildFrame(enabled: true));
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.none,
-    );
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), regularCursor);
 
-    await gesture.moveTo(tester.getCenter(find.byType(Slider))); // start hover
-    await tester.pumpAndSettle();
+    // Hovered.
+    await tester.pump();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), hoveredCursor);
 
-    await tester.timedDrag(
-      find.byType(Slider),
-      const Offset(20.0, 0.0),
-      const Duration(milliseconds: 100),
-    );
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.move,
-    );
+    // Dragged.
+    await gesture.down(tester.getCenter(find.byType(Slider)));
+    await gesture.moveBy(const Offset(20.0, 0.0));
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), draggedCursor);
+
+    // Hovered.
+    await gesture.up();
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), hoveredCursor);
+
+    // Focused.
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), focusedCursor);
+
+    // System default.
+    await gesture.moveTo(Offset.zero);
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), systemDefaultCursor);
   });
 
   testWidgets('Slider implements debugFillProperties', (WidgetTester tester) async {
@@ -3405,11 +3432,10 @@ void main() {
       secondaryTrackValue: 75.0,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'value: 50.0',
@@ -3440,10 +3466,9 @@ void main() {
       ),
     );
 
-    final RenderObject renderObject =
-        tester.allRenderObjects
-            .where((RenderObject e) => e.runtimeType.toString() == '_RenderSlider')
-            .first;
+    final RenderObject renderObject = tester.allRenderObjects
+        .where((RenderObject e) => e.runtimeType.toString() == '_RenderSlider')
+        .first;
 
     // The active track rect should start at 24.0 pixels,
     // and there should not have a gap between active and inactive track.
@@ -3484,10 +3509,9 @@ void main() {
 
     await tester.pumpWidget(buildFrame(ThemeMode.light));
 
-    final RenderObject renderObject =
-        tester.allRenderObjects
-            .where((RenderObject e) => e.runtimeType.toString() == '_RenderSlider')
-            .first;
+    final RenderObject renderObject = tester.allRenderObjects
+        .where((RenderObject e) => e.runtimeType.toString() == '_RenderSlider')
+        .first;
     expect(renderObject.debugNeedsLayout, false);
 
     await tester.pumpWidget(buildFrame(ThemeMode.dark));
@@ -3520,10 +3544,9 @@ void main() {
       ),
     );
 
-    final RenderObject renderObject =
-        tester.allRenderObjects
-            .where((RenderObject e) => e.runtimeType.toString() == '_RenderSlider')
-            .first;
+    final RenderObject renderObject = tester.allRenderObjects
+        .where((RenderObject e) => e.runtimeType.toString() == '_RenderSlider')
+        .first;
 
     expect(
       renderObject,
@@ -3558,10 +3581,9 @@ void main() {
 
     await tester.pumpWidget(buildFrame(10));
 
-    final RenderObject renderObject =
-        tester.allRenderObjects
-            .where((RenderObject e) => e.runtimeType.toString() == '_RenderSlider')
-            .first;
+    final RenderObject renderObject = tester.allRenderObjects
+        .where((RenderObject e) => e.runtimeType.toString() == '_RenderSlider')
+        .first;
 
     // Update the divisions from 10 to 15, the thumb should be paint at the correct position.
     await tester.pumpWidget(buildFrame(15));
@@ -3600,7 +3622,9 @@ void main() {
 
     final Widget sliderAdaptive = MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
-      home: Material(child: Slider(value: 0, onChanged: (double newValue) {}, thumbColor: color)),
+      home: Material(
+        child: Slider(value: 0, onChanged: (double newValue) {}, thumbColor: color),
+      ),
     );
 
     await tester.pumpWidget(sliderAdaptive);
@@ -3644,12 +3668,12 @@ void main() {
     expect(
       material,
       paints
-        ..rsuperellipse()
-        ..rsuperellipse()
-        ..rsuperellipse()
-        ..rsuperellipse()
-        ..rsuperellipse()
-        ..rsuperellipse(color: CupertinoColors.white),
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(color: CupertinoColors.white),
     );
   });
 
@@ -3672,12 +3696,12 @@ void main() {
     expect(
       material,
       paints
-        ..rsuperellipse()
-        ..rsuperellipse()
-        ..rsuperellipse()
-        ..rsuperellipse()
-        ..rsuperellipse()
-        ..rsuperellipse(color: color),
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(color: color),
     );
   });
 
@@ -3904,14 +3928,13 @@ void main() {
                   return Slider(
                     value: value,
                     overlayColor: const MaterialStatePropertyAll<Color?>(overlayColor),
-                    onChanged:
-                        enabled
-                            ? (double newValue) {
-                              setState(() {
-                                value = newValue;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (double newValue) {
+                            setState(() {
+                              value = newValue;
+                            });
+                          }
+                        : null,
                   );
                 },
               ),
@@ -3973,14 +3996,13 @@ void main() {
                   value: value,
                   focusNode: focusNode,
                   overlayColor: const MaterialStatePropertyAll<Color?>(overlayColor),
-                  onChanged:
-                      enabled
-                          ? (double newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                 );
               },
             ),
@@ -4111,14 +4133,13 @@ void main() {
                     focusNode: focusNode,
                     divisions: 5,
                     label: value.toStringAsFixed(1),
-                    onChanged:
-                        enabled
-                            ? (double newValue) {
-                              setState(() {
-                                value = newValue;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (double newValue) {
+                            setState(() {
+                              value = newValue;
+                            });
+                          }
+                        : null,
                   );
                 },
               ),
@@ -4200,17 +4221,16 @@ void main() {
                         // Note: it is important that `onTap` is non-null so
                         // [GestureDetector] will register tap events.
                         onTap: () {},
-                        child:
-                            shouldShowSlider
-                                ? Slider(
-                                  value: value,
-                                  onChanged: (double newValue) {
-                                    setState(() {
-                                      value = newValue;
-                                    });
-                                  },
-                                )
-                                : const SizedBox.expand(),
+                        child: shouldShowSlider
+                            ? Slider(
+                                value: value,
+                                onChanged: (double newValue) {
+                                  setState(() {
+                                    value = newValue;
+                                  });
+                                },
+                              )
+                            : const SizedBox.expand(),
                       );
                     },
                   ),
@@ -4258,14 +4278,13 @@ void main() {
                 builder: (BuildContext context, StateSetter setState) {
                   return Slider(
                     value: value,
-                    onChanged:
-                        enabled
-                            ? (double newValue) {
-                              setState(() {
-                                value = newValue;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (double newValue) {
+                            setState(() {
+                              value = newValue;
+                            });
+                          }
+                        : null,
                   );
                 },
               ),
@@ -4322,14 +4341,13 @@ void main() {
                 builder: (BuildContext context, StateSetter setState) {
                   return Slider(
                     value: value,
-                    onChanged:
-                        enabled
-                            ? (double newValue) {
-                              setState(() {
-                                value = newValue;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (double newValue) {
+                            setState(() {
+                              value = newValue;
+                            });
+                          }
+                        : null,
                     autofocus: true,
                     focusNode: focusNode,
                   );
@@ -4381,14 +4399,13 @@ void main() {
                     key: sliderKey,
                     value: value,
                     focusNode: focusNode,
-                    onChanged:
-                        enabled
-                            ? (double newValue) {
-                              setState(() {
-                                value = newValue;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (double newValue) {
+                            setState(() {
+                              value = newValue;
+                            });
+                          }
+                        : null,
                   );
                 },
               ),
@@ -5085,7 +5102,9 @@ void main() {
     const double startPadding = 100;
     const double endPadding = 20;
     await tester.pumpWidget(
-      buildSlider(padding: const EdgeInsetsDirectional.only(start: startPadding, end: endPadding)),
+      buildSlider(
+        padding: const EdgeInsetsDirectional.only(start: startPadding, end: endPadding),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -5145,12 +5164,11 @@ void main() {
       final Color valueIndicatorColor = colorScheme.inverseSurface;
       double value = 0.45;
       Widget buildApp({int? divisions, bool enabled = true}) {
-        final ValueChanged<double>? onChanged =
-            !enabled
-                ? null
-                : (double d) {
-                  value = d;
-                };
+        final ValueChanged<double>? onChanged = !enabled
+            ? null
+            : (double d) {
+                value = d;
+              };
         return MaterialApp(
           home: Directionality(
             textDirection: TextDirection.ltr,

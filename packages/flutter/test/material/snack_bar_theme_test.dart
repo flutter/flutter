@@ -45,11 +45,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SnackBarThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -72,11 +71,10 @@ void main() {
       dismissDirection: DismissDirection.down,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'backgroundColor: ${const Color(0xffffffff)}',
@@ -289,10 +287,10 @@ void main() {
   });
 
   testWidgets('SnackBarAction uses actionBackgroundColor', (WidgetTester tester) async {
-    final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((
-      Set<MaterialState> states,
+    final WidgetStateColor actionBackgroundColor = WidgetStateColor.resolveWith((
+      Set<WidgetState> states,
     ) {
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         return Colors.blue;
       }
       return Colors.purple;
@@ -349,19 +347,19 @@ void main() {
   testWidgets('SnackBarAction backgroundColor overrides SnackBarThemeData actionBackgroundColor', (
     WidgetTester tester,
   ) async {
-    final MaterialStateColor snackBarActionBackgroundColor = MaterialStateColor.resolveWith((
-      Set<MaterialState> states,
+    final WidgetStateColor snackBarActionBackgroundColor = WidgetStateColor.resolveWith((
+      Set<WidgetState> states,
     ) {
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         return Colors.amber;
       }
       return Colors.cyan;
     });
 
-    final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((
-      Set<MaterialState> states,
+    final WidgetStateColor actionBackgroundColor = WidgetStateColor.resolveWith((
+      Set<WidgetState> states,
     ) {
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         return Colors.blue;
       }
       return Colors.purple;
@@ -420,12 +418,12 @@ void main() {
   });
 
   testWidgets(
-    'SnackBarThemeData asserts when actionBackgroundColor is a MaterialStateColor and disabledActionBackgroundColor is also provided',
+    'SnackBarThemeData asserts when actionBackgroundColor is a WidgetStateColor and disabledActionBackgroundColor is also provided',
     (WidgetTester tester) async {
-      final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((
-        Set<MaterialState> states,
+      final WidgetStateColor actionBackgroundColor = WidgetStateColor.resolveWith((
+        Set<WidgetState> states,
       ) {
-        if (states.contains(MaterialState.disabled)) {
+        if (states.contains(WidgetState.disabled)) {
           return Colors.blue;
         }
         return Colors.purple;
@@ -464,7 +462,7 @@ void main() {
             (AssertionError e) => e.toString(),
             'description',
             contains(
-              'disabledBackgroundColor must not be provided when background color is a MaterialStateColor',
+              'disabledBackgroundColor must not be provided when background color is a WidgetStateColor',
             ),
           ),
         ),

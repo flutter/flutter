@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'use_cases.dart';
 
 class AppBarUseCase extends UseCase {
+  AppBarUseCase() : super(useCaseCategory: UseCaseCategory.core);
+
   @override
   String get name => 'AppBar';
 
@@ -36,58 +38,57 @@ class MainWidgetState extends State<MainWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          <PreferredSizeWidget>[
-            AppBar(
-              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-              title: Semantics(headingLevel: 1, child: const Text('AppBar')),
+      appBar: <PreferredSizeWidget>[
+        AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Semantics(headingLevel: 1, child: const Text('AppBar')),
+        ),
+        AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Semantics(headingLevel: 1, child: const Text('AppBar')),
+          actions: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.add_alert),
+              tooltip: 'Show Snackbar',
+              onPressed: () {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('This is a snackbar')));
+              },
             ),
-            AppBar(
-              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-              title: Semantics(headingLevel: 1, child: const Text('AppBar')),
-              actions: <Widget>[
-                IconButton(
-                  icon: const Icon(Icons.add_alert),
-                  tooltip: 'Show Snackbar',
-                  onPressed: () {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(const SnackBar(content: Text('This is a snackbar')));
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.navigate_next),
-                  tooltip: 'Go to the next page',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute<void>(
-                        builder: (BuildContext context) {
-                          return Scaffold(
-                            appBar: AppBar(
-                              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-                              title: Semantics(headingLevel: 1, child: const Text('Next Page')),
-                            ),
-                            body: const Center(
-                              child: Text('This is the next page', style: TextStyle(fontSize: 24)),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ],
+            IconButton(
+              icon: const Icon(Icons.navigate_next),
+              tooltip: 'Go to the next page',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (BuildContext context) {
+                      return Scaffold(
+                        appBar: AppBar(
+                          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+                          title: Semantics(headingLevel: 1, child: const Text('Next Page')),
+                        ),
+                        body: const Center(
+                          child: Text('This is the next page', style: TextStyle(fontSize: 24)),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
             ),
-            AppBar(
-              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-              title: Semantics(headingLevel: 1, child: const Text('AppBar')),
-              actions: <Widget>[
-                TextButton(onPressed: () {}, child: const Text('Action 1')),
-                TextButton(onPressed: () {}, child: const Text('Action 2')),
-              ],
-            ),
-          ][currentIndex],
+          ],
+        ),
+        AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Semantics(headingLevel: 1, child: const Text('AppBar')),
+          actions: <Widget>[
+            TextButton(onPressed: () {}, child: const Text('Action 1')),
+            TextButton(onPressed: () {}, child: const Text('Action 2')),
+          ],
+        ),
+      ][currentIndex],
       body: ListView(
         children: <Widget>[
           RadioListTile<int>(

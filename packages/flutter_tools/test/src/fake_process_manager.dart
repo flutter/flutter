@@ -37,6 +37,7 @@ class FakeCommand {
     this.exception,
     this.outputFollowsExit = false,
     this.processStartMode,
+    this.process,
   });
 
   /// The exact commands that must be matched for this [FakeCommand] to be
@@ -114,6 +115,11 @@ class FakeCommand {
 
   final io.ProcessStartMode? processStartMode;
 
+  /// The fake process to be returned by the process manager.
+  ///
+  /// If this is null, a default [FakeProcess] will be created.
+  final FakeProcess? process;
+
   void _matches(
     List<String> command,
     String? workingDirectory,
@@ -121,8 +127,9 @@ class FakeCommand {
     Encoding? encoding,
     io.ProcessStartMode? mode,
   ) {
-    final List<dynamic> matchers =
-        this.command.map((Pattern x) => x is String ? x : matches(x)).toList();
+    final List<dynamic> matchers = this.command
+        .map((Pattern x) => x is String ? x : matches(x))
+        .toList();
     expect(command, matchers);
     if (processStartMode != null) {
       expect(mode, processStartMode);
@@ -236,7 +243,7 @@ class FakeProcess implements io.Process {
   /// The list of [kill] signals this process received so far.
   @visibleForTesting
   List<io.ProcessSignal> get signals => _signals;
-  final List<io.ProcessSignal> _signals = <io.ProcessSignal>[];
+  final _signals = <io.ProcessSignal>[];
 
   @override
   bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
@@ -285,7 +292,7 @@ abstract class FakeProcessManager implements ProcessManager {
     commands.forEach(addCommand);
   }
 
-  final Map<int, FakeProcess> _fakeRunningProcesses = <int, FakeProcess>{};
+  final _fakeRunningProcesses = <int, FakeProcess>{};
 
   /// Whether this fake has more [FakeCommand]s that are expected to run.
   ///
@@ -304,7 +311,7 @@ abstract class FakeProcessManager implements ProcessManager {
     io.ProcessStartMode? mode,
   );
 
-  int _pid = 9999;
+  var _pid = 9999;
 
   FakeProcess _runCommand(
     List<String> command, {
@@ -328,6 +335,10 @@ abstract class FakeProcessManager implements ProcessManager {
     if (fakeCommand.onRun != null) {
       fakeCommand.onRun!(command);
     }
+    if (fakeCommand.process != null) {
+      return fakeCommand.process!;
+    }
+
     return FakeProcess(
       duration: fakeCommand.duration,
       exitCode: fakeCommand.exitCode,
@@ -419,7 +430,7 @@ abstract class FakeProcessManager implements ProcessManager {
   bool canRun(dynamic executable, {String? workingDirectory}) =>
       !excludedExecutables.contains(executable);
 
-  Set<String> excludedExecutables = <String>{};
+  var excludedExecutables = <String>{};
 
   @override
   bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
@@ -524,7 +535,7 @@ class _HasNoRemainingExpectations extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose,
   ) {
-    final FakeProcessManager fakeProcessManager = item as FakeProcessManager;
+    final fakeProcessManager = item as FakeProcessManager;
     return description.add(
       'has remaining expectations:\n${fakeProcessManager._remainingExpectations.map((FakeCommand command) => command.command).join('\n')}',
     );

@@ -1054,10 +1054,9 @@ void main() {
     'VisualDensity in ThemeData defaults to the right thing when a platform is supplied to it',
     (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
-        platform:
-            debugDefaultTargetPlatformOverride! == TargetPlatform.android
-                ? TargetPlatform.linux
-                : TargetPlatform.android,
+        platform: debugDefaultTargetPlatformOverride! == TargetPlatform.android
+            ? TargetPlatform.linux
+            : TargetPlatform.android,
       );
       switch (debugDefaultTargetPlatformOverride!) {
         case TargetPlatform.iOS:
@@ -1854,11 +1853,10 @@ void main() {
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
     ThemeData().debugFillProperties(properties);
-    final List<String> propertyNameList =
-        properties.properties
-            .map((final DiagnosticsNode node) => node.name)
-            .whereType<String>()
-            .toList();
+    final List<String> propertyNameList = properties.properties
+        .map((final DiagnosticsNode node) => node.name)
+        .whereType<String>()
+        .toList();
     final Set<String> propertyNames = propertyNameList.toSet();
 
     // Ensure there are no duplicates.
@@ -1889,10 +1887,7 @@ void main() {
       );
 
       expect(adaptiveString, 'Adaptive theme.');
-      expect(
-        adaptiveSwitchTheme.thumbColor?.resolve(<MaterialState>{}),
-        isSameColorAs(Colors.brown),
-      );
+      expect(adaptiveSwitchTheme.thumbColor?.resolve(<WidgetState>{}), isSameColorAs(Colors.brown));
     });
 
     testWidgets('should return null on extension not found', (WidgetTester tester) async {

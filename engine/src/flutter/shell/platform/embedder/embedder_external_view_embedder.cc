@@ -38,9 +38,9 @@ void EmbedderExternalViewEmbedder::SetSurfaceTransformationCallback(
   surface_transformation_callback_ = std::move(surface_transformation_callback);
 }
 
-SkMatrix EmbedderExternalViewEmbedder::GetSurfaceTransformation() const {
+DlMatrix EmbedderExternalViewEmbedder::GetSurfaceTransformation() const {
   if (!surface_transformation_callback_) {
-    return SkMatrix{};
+    return DlMatrix{};
   }
 
   return surface_transformation_callback_();
@@ -63,7 +63,7 @@ void EmbedderExternalViewEmbedder::BeginFrame(
 
 // |ExternalViewEmbedder|
 void EmbedderExternalViewEmbedder::PrepareFlutterView(
-    SkISize frame_size,
+    DlISize frame_size,
     double device_pixel_ratio) {
   Reset();
 
@@ -119,13 +119,13 @@ DlCanvas* EmbedderExternalViewEmbedder::CompositeEmbeddedView(int64_t view_id) {
 
 static FlutterBackingStoreConfig MakeBackingStoreConfig(
     int64_t view_id,
-    const SkISize& backing_store_size) {
+    const DlISize& backing_store_size) {
   FlutterBackingStoreConfig config = {};
 
   config.struct_size = sizeof(config);
 
-  config.size.width = backing_store_size.width();
-  config.size.height = backing_store_size.height();
+  config.size.width = backing_store_size.width;
+  config.size.height = backing_store_size.height;
   config.view_id = view_id;
 
   return config;
@@ -145,7 +145,7 @@ struct PlatformView {
     view_identifier = view->GetViewIdentifier();
     params = view->GetEmbeddedViewParams();
 
-    DlRect clip = ToDlRect(view->GetEmbeddedViewParams()->finalBoundingRect());
+    DlRect clip = view->GetEmbeddedViewParams()->finalBoundingRect();
     DlMatrix matrix;
     for (auto i = params->mutatorsStack().Begin();
          i != params->mutatorsStack().End(); ++i) {
@@ -293,9 +293,9 @@ class LayerBuilder {
  public:
   using RenderTargetProvider =
       std::function<std::unique_ptr<EmbedderRenderTarget>(
-          const SkISize& frame_size)>;
+          const DlISize& frame_size)>;
 
-  explicit LayerBuilder(SkISize frame_size) : frame_size_(frame_size) {
+  explicit LayerBuilder(DlISize frame_size) : frame_size_(frame_size) {
     layers_.push_back(Layer());
   }
 
@@ -414,7 +414,7 @@ class LayerBuilder {
   }
 
   std::vector<Layer> layers_;
-  SkISize frame_size_;
+  DlISize frame_size_;
 };
 
 };  // namespace
@@ -428,18 +428,17 @@ void EmbedderExternalViewEmbedder::SubmitFlutterView(
   // unrecognized.
   EmbedderRenderTargetCache& render_target_cache =
       render_target_caches_[flutter_view_id];
-  SkRect _rect = SkRect::MakeIWH(pending_frame_size_.width(),
-                                 pending_frame_size_.height());
-  pending_surface_transformation_.mapRect(&_rect);
+  DlRect _rect = DlRect::MakeSize(pending_frame_size_)
+                     .TransformAndClipBounds(pending_surface_transformation_);
 
-  LayerBuilder builder(SkISize::Make(_rect.width(), _rect.height()));
+  LayerBuilder builder(DlIRect::RoundOut(_rect).GetSize());
 
   for (auto view_id : composition_order_) {
     auto& view = pending_views_[view_id];
     builder.AddExternalView(view.get());
   }
 
-  builder.PrepareBackingStore([&](const SkISize& frame_size) {
+  builder.PrepareBackingStore([&](const DlISize& frame_size) {
     if (!avoid_backing_store_cache_) {
       std::unique_ptr<EmbedderRenderTarget> target =
           render_target_cache.GetRenderTarget(

@@ -62,10 +62,9 @@ void main() {
       decelerationRate: ScrollDecelerationRate.fast,
     );
 
-    String types(ScrollPhysics? value) =>
-        value!.parent == null
-            ? '${value.runtimeType}'
-            : '${value.runtimeType} ${types(value.parent)}';
+    String types(ScrollPhysics? value) => value!.parent == null
+        ? '${value.runtimeType}'
+        : '${value.runtimeType} ${types(value.parent)}';
 
     expect(
       types(bounce.applyTo(clamp.applyTo(never.applyTo(always.applyTo(page))))),

@@ -678,8 +678,9 @@ ui.Scene backdropBlurWithTileMode(ui.TileMode? tileMode, final double rectSize, 
     for (int i = 0; i < count; i++) {
       for (int j = 0; j < count; j++) {
         final bool rectOdd = (i + j) & 1 == 0;
-        final ui.Color fg =
-            (i < count / 2) ? ((j < count / 2) ? green : blue) : ((j < count / 2) ? yellow : red);
+        final ui.Color fg = (i < count / 2)
+            ? ((j < count / 2) ? green : blue)
+            : ((j < count / 2) ? yellow : red);
         canvas.drawRect(
           ui.Rect.fromLTWH(i * rectSize, j * rectSize, rectSize, rectSize),
           ui.Paint()..color = rectOdd ? fg : white,

@@ -57,24 +57,15 @@ if (![string]::IsNullOrEmpty($env:FLUTTER_PREBUILT_ENGINE_VERSION)) {
 # the current branch is forked from, which would be the last version of the
 # engine artifacts built from CI.
 } else {
-  $ErrorActionPreference = "Continue"
-  git -C "$flutterRoot" remote get-url upstream *> $null
-  $exitCode = $?
-  $ErrorActionPreference = "Stop"
-  if ($exitCode) {
-    $engineVersion = (git -C "$flutterRoot"  merge-base HEAD upstream/master)
-  } else {
-    $engineVersion = (git -C "$flutterRoot"  merge-base HEAD origin/master)
-  }
+  $engineVersion = Invoke-Expression "& '$flutterRoot/bin/internal/content_aware_hash.ps1'"
 }
 
 # Write the engine version out so downstream tools know what to look for.
-$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-[System.IO.File]::WriteAllText("$flutterRoot/bin/cache/engine.stamp", $engineVersion, $utf8NoBom)
+Set-Content -Path $flutterRoot/bin/cache/engine.stamp -Value $engineVersion -Encoding Ascii
 
 # The realm on CI is passed in.
-if ($Env:FLUTTER_REALM) {
-    [System.IO.File]::WriteAllText("$flutterRoot/bin/cache/engine.realm", $Env:FLUTTER_REALM, $utf8NoBom)
+if ($env:FLUTTER_REALM) {
+    Set-Content -Path $flutterRoot/bin/cache/engine.realm -Value $env:FLUTTER_REALM -Encoding Ascii
 } else {
-    [System.IO.File]::WriteAllText("$flutterRoot/bin/cache/engine.realm", "", $utf8NoBom)
+    Set-Content -Path $flutterRoot/bin/cache/engine.realm -Value "" -Encoding Ascii
 }

@@ -17,7 +17,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../src/common.dart';
 import '../src/fake_vm_services.dart';
 
-final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
+final fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
   pauseEvent: vm_service.Event(kind: vm_service.EventKind.kResume, timestamp: 0),
   breakpoints: <vm_service.Breakpoint>[],
@@ -34,16 +34,16 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   isolateFlags: <vm_service.IsolateFlag>[],
 );
 
-final FlutterView fakeFlutterView = FlutterView(id: 'a', uiIsolate: fakeUnpausedIsolate);
+final fakeFlutterView = FlutterView(id: 'a', uiIsolate: fakeUnpausedIsolate);
 
-final FakeVmServiceRequest listViews = FakeVmServiceRequest(
+final listViews = FakeVmServiceRequest(
   method: kListViewsMethod,
   jsonResponse: <String, Object>{
     'views': <Object>[fakeFlutterView.toJson()],
   },
 );
 
-final List<FakeVmServiceRequest> vmServiceSetup = <FakeVmServiceRequest>[
+final vmServiceSetup = <FakeVmServiceRequest>[
   const FakeVmServiceRequest(
     method: 'streamListen',
     args: <String, Object>{'streamId': vm_service.EventKind.kExtension},
@@ -59,36 +59,35 @@ final List<FakeVmServiceRequest> vmServiceSetup = <FakeVmServiceRequest>[
 
 void main() {
   testWithoutContext('Can trace application startup', () async {
-    final BufferLogger logger = BufferLogger.test();
+    final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+    final fakeVmServiceHost = FakeVmServiceHost(
       requests: <FakeVmServiceRequest>[
         ...vmServiceSetup,
         FakeVmServiceRequest(
           method: 'getVMTimeline',
-          jsonResponse:
-              vm_service.Timeline(
-                timeExtentMicros: 4,
-                timeOriginMicros: 0,
-                traceEvents: <vm_service.TimelineEvent>[
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFlutterEngineMainEnterEventName,
-                    'ts': 0,
-                  })!,
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFrameworkInitEventName,
-                    'ts': 1,
-                  })!,
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFirstFrameBuiltEventName,
-                    'ts': 2,
-                  })!,
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFirstFrameRasterizedEventName,
-                    'ts': 3,
-                  })!,
-                ],
-              ).toJson(),
+          jsonResponse: vm_service.Timeline(
+            timeExtentMicros: 4,
+            timeOriginMicros: 0,
+            traceEvents: <vm_service.TimelineEvent>[
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFlutterEngineMainEnterEventName,
+                'ts': 0,
+              })!,
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFrameworkInitEventName,
+                'ts': 1,
+              })!,
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFirstFrameBuiltEventName,
+                'ts': 2,
+              })!,
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFirstFrameRasterizedEventName,
+                'ts': 3,
+              })!,
+            ],
+          ).toJson(),
         ),
         const FakeVmServiceRequest(
           method: 'setVMTimelineFlags',
@@ -118,9 +117,9 @@ void main() {
   });
 
   testWithoutContext('throws tool exit if the vmservice disconnects', () async {
-    final BufferLogger logger = BufferLogger.test();
+    final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+    final fakeVmServiceHost = FakeVmServiceHost(
       requests: <FakeVmServiceRequest>[
         ...vmServiceSetup,
         FakeVmServiceRequest(
@@ -145,19 +144,18 @@ void main() {
   });
 
   testWithoutContext('throws tool exit if timeline is missing the engine start event', () async {
-    final BufferLogger logger = BufferLogger.test();
+    final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+    final fakeVmServiceHost = FakeVmServiceHost(
       requests: <FakeVmServiceRequest>[
         ...vmServiceSetup,
         FakeVmServiceRequest(
           method: 'getVMTimeline',
-          jsonResponse:
-              vm_service.Timeline(
-                timeExtentMicros: 4,
-                timeOriginMicros: 0,
-                traceEvents: <vm_service.TimelineEvent>[],
-              ).toJson(),
+          jsonResponse: vm_service.Timeline(
+            timeExtentMicros: 4,
+            timeOriginMicros: 0,
+            traceEvents: <vm_service.TimelineEvent>[],
+          ).toJson(),
         ),
         const FakeVmServiceRequest(
           method: 'setVMTimelineFlags',
@@ -177,15 +175,12 @@ void main() {
   });
 
   testWithoutContext('prints when first frame is taking a long time', () async {
-    final BufferLogger logger = BufferLogger.test();
+    final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     await FakeAsync().run((FakeAsync time) {
-      final Map<String, String> extensionData = <String, String>{
-        'test': 'data',
-        'renderedErrorText': 'error text',
-      };
-      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      final extensionData = <String, String>{'test': 'data', 'renderedErrorText': 'error text'};
+      final fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -236,28 +231,27 @@ void main() {
   });
 
   testWithoutContext('throws tool exit if first frame events are missing', () async {
-    final BufferLogger logger = BufferLogger.test();
+    final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+    final fakeVmServiceHost = FakeVmServiceHost(
       requests: <FakeVmServiceRequest>[
         ...vmServiceSetup,
         FakeVmServiceRequest(
           method: 'getVMTimeline',
-          jsonResponse:
-              vm_service.Timeline(
-                timeExtentMicros: 4,
-                timeOriginMicros: 0,
-                traceEvents: <vm_service.TimelineEvent>[
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFlutterEngineMainEnterEventName,
-                    'ts': 0,
-                  })!,
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFrameworkInitEventName,
-                    'ts': 1,
-                  })!,
-                ],
-              ).toJson(),
+          jsonResponse: vm_service.Timeline(
+            timeExtentMicros: 4,
+            timeOriginMicros: 0,
+            traceEvents: <vm_service.TimelineEvent>[
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFlutterEngineMainEnterEventName,
+                'ts': 0,
+              })!,
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFrameworkInitEventName,
+                'ts': 1,
+              })!,
+            ],
+          ).toJson(),
         ),
         const FakeVmServiceRequest(
           method: 'setVMTimelineFlags',
@@ -277,27 +271,26 @@ void main() {
   });
 
   testWithoutContext('Can trace application startup without awaiting for first frame', () async {
-    final BufferLogger logger = BufferLogger.test();
+    final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+    final fakeVmServiceHost = FakeVmServiceHost(
       requests: <FakeVmServiceRequest>[
         FakeVmServiceRequest(
           method: 'getVMTimeline',
-          jsonResponse:
-              vm_service.Timeline(
-                timeExtentMicros: 4,
-                timeOriginMicros: 0,
-                traceEvents: <vm_service.TimelineEvent>[
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFlutterEngineMainEnterEventName,
-                    'ts': 0,
-                  })!,
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFrameworkInitEventName,
-                    'ts': 1,
-                  })!,
-                ],
-              ).toJson(),
+          jsonResponse: vm_service.Timeline(
+            timeExtentMicros: 4,
+            timeOriginMicros: 0,
+            traceEvents: <vm_service.TimelineEvent>[
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFlutterEngineMainEnterEventName,
+                'ts': 0,
+              })!,
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFrameworkInitEventName,
+                'ts': 1,
+              })!,
+            ],
+          ).toJson(),
         ),
         const FakeVmServiceRequest(
           method: 'setVMTimelineFlags',
@@ -323,36 +316,35 @@ void main() {
   });
 
   testWithoutContext('downloadStartupTrace also downloads the timeline', () async {
-    final BufferLogger logger = BufferLogger.test();
+    final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+    final fakeVmServiceHost = FakeVmServiceHost(
       requests: <FakeVmServiceRequest>[
         ...vmServiceSetup,
         FakeVmServiceRequest(
           method: 'getVMTimeline',
-          jsonResponse:
-              vm_service.Timeline(
-                timeExtentMicros: 4,
-                timeOriginMicros: 0,
-                traceEvents: <vm_service.TimelineEvent>[
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFlutterEngineMainEnterEventName,
-                    'ts': 0,
-                  })!,
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFrameworkInitEventName,
-                    'ts': 1,
-                  })!,
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFirstFrameBuiltEventName,
-                    'ts': 2,
-                  })!,
-                  vm_service.TimelineEvent.parse(<String, Object>{
-                    'name': kFirstFrameRasterizedEventName,
-                    'ts': 3,
-                  })!,
-                ],
-              ).toJson(),
+          jsonResponse: vm_service.Timeline(
+            timeExtentMicros: 4,
+            timeOriginMicros: 0,
+            traceEvents: <vm_service.TimelineEvent>[
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFlutterEngineMainEnterEventName,
+                'ts': 0,
+              })!,
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFrameworkInitEventName,
+                'ts': 1,
+              })!,
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFirstFrameBuiltEventName,
+                'ts': 2,
+              })!,
+              vm_service.TimelineEvent.parse(<String, Object>{
+                'name': kFirstFrameRasterizedEventName,
+                'ts': 3,
+              })!,
+            ],
+          ).toJson(),
         ),
         const FakeVmServiceRequest(
           method: 'setVMTimelineFlags',
@@ -371,7 +363,7 @@ void main() {
       logger: logger,
     );
 
-    final Map<String, Object> expectedTimeline = <String, Object>{
+    final expectedTimeline = <String, Object>{
       'type': 'Timeline',
       'traceEvents': <Object>[
         <String, Object>{'name': 'FlutterEngineMainEnter', 'ts': 0, 'type': 'TimelineEvent'},

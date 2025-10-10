@@ -17,7 +17,9 @@ void main() {
       mockClipboard.handleMethodCall,
     );
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: Center(child: example.VerificationCodeGenerator()))),
+      const MaterialApp(
+        home: Scaffold(body: Center(child: example.VerificationCodeGenerator())),
+      ),
     );
 
     expect(primaryFocus, isNotNull);

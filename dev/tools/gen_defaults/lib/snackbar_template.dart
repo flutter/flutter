@@ -16,7 +16,8 @@ class SnackbarTemplate extends TokenTemplate {
   final String tokenGroup;
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends SnackBarThemeData {
     _${blockName}DefaultsM3(this.context);
 
@@ -28,17 +29,17 @@ class _${blockName}DefaultsM3 extends SnackBarThemeData {
   Color get backgroundColor => ${componentColor("$tokenGroup.container")};
 
   @override
-  Color get actionTextColor =>  MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  Color get actionTextColor =>  WidgetStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return ${componentColor("$tokenGroup.action.pressed.label-text")};
     }
-    if (states.contains(MaterialState.pressed)) {
+    if (states.contains(WidgetState.pressed)) {
       return ${componentColor("$tokenGroup.action.pressed.label-text")};
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return ${componentColor("$tokenGroup.action.hover.label-text")};
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return ${componentColor("$tokenGroup.action.focus.label-text")};
     }
     return ${componentColor("$tokenGroup.action.label-text")};

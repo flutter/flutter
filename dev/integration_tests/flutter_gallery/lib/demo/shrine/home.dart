@@ -36,7 +36,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
-        if (backdrop != null) backdrop!,
+        ?backdrop,
         Align(alignment: Alignment.bottomRight, child: expandingBottomSheet),
       ],
     );

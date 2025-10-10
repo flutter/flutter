@@ -964,17 +964,15 @@ void main() {
     const BoxConstraints square = BoxConstraints.tightFor(width: 100.0, height: 100.0);
     final RenderConstrainedBox box1 = RenderConstrainedBox(
       additionalConstraints: square,
-      child:
-          RenderFlowBaselineTestBox()
-            ..gridCount = 1
-            ..baselinePlacer = (double height) => 10,
+      child: RenderFlowBaselineTestBox()
+        ..gridCount = 1
+        ..baselinePlacer = (double height) => 10,
     );
     final RenderConstrainedBox box2 = RenderConstrainedBox(
       additionalConstraints: square,
-      child:
-          RenderFlowBaselineTestBox()
-            ..gridCount = 1
-            ..baselinePlacer = (double height) => 10,
+      child: RenderFlowBaselineTestBox()
+        ..gridCount = 1
+        ..baselinePlacer = (double height) => 10,
     );
     RenderConstrainedBox filler() => RenderConstrainedBox(additionalConstraints: square);
     final RenderFlex flex = RenderFlex(
@@ -1160,16 +1158,14 @@ void main() {
 
     test('baseline aligned flex flow computeDryLayout', () {
       // box1 has its baseline placed at the top of the box.
-      final RenderFlowBaselineTestBox box1 =
-          RenderFlowBaselineTestBox()
-            ..baselinePlacer = ((double height) => 0.0)
-            ..gridCount = 10;
+      final RenderFlowBaselineTestBox box1 = RenderFlowBaselineTestBox()
+        ..baselinePlacer = ((double height) => 0.0)
+        ..gridCount = 10;
 
       // box2 has its baseline placed at the bottom of the box.
-      final RenderFlowBaselineTestBox box2 =
-          RenderFlowBaselineTestBox()
-            ..baselinePlacer = ((double height) => height)
-            ..gridCount = 10;
+      final RenderFlowBaselineTestBox box2 = RenderFlowBaselineTestBox()
+        ..baselinePlacer = ((double height) => height)
+        ..gridCount = 10;
 
       final RenderFlex flex = RenderFlex(
         textDirection: TextDirection.ltr,
@@ -1196,16 +1192,14 @@ void main() {
 
     test('baseline aligned children cross intrinsic size', () {
       // box1 has its baseline placed at the top of the box.
-      final RenderFlowBaselineTestBox box1 =
-          RenderFlowBaselineTestBox()
-            ..baselinePlacer = ((double height) => 0.0)
-            ..gridCount = 10;
+      final RenderFlowBaselineTestBox box1 = RenderFlowBaselineTestBox()
+        ..baselinePlacer = ((double height) => 0.0)
+        ..gridCount = 10;
 
       // box2 has its baseline placed at the bottom of the box.
-      final RenderFlowBaselineTestBox box2 =
-          RenderFlowBaselineTestBox()
-            ..baselinePlacer = ((double height) => height)
-            ..gridCount = 10;
+      final RenderFlowBaselineTestBox box2 = RenderFlowBaselineTestBox()
+        ..baselinePlacer = ((double height) => height)
+        ..gridCount = 10;
 
       final RenderFlex flex = RenderFlex(
         textDirection: TextDirection.ltr,
@@ -1231,16 +1225,14 @@ void main() {
 
     test('children with no baselines do not affect the baseline location', () {
       // box1 has its baseline placed at the bottom of the box.
-      final RenderFlowBaselineTestBox box1 =
-          RenderFlowBaselineTestBox()
-            ..baselinePlacer = ((double height) => height)
-            ..gridCount = 10;
+      final RenderFlowBaselineTestBox box1 = RenderFlowBaselineTestBox()
+        ..baselinePlacer = ((double height) => height)
+        ..gridCount = 10;
 
       // box2 has its baseline placed at the bottom of the box.
-      final RenderFlowBaselineTestBox box2 =
-          RenderFlowBaselineTestBox()
-            ..baselinePlacer = ((double height) => null)
-            ..gridCount = 10;
+      final RenderFlowBaselineTestBox box2 = RenderFlowBaselineTestBox()
+        ..baselinePlacer = ((double height) => null)
+        ..gridCount = 10;
 
       final RenderFlex flex = RenderFlex(
         textDirection: TextDirection.ltr,
@@ -1304,8 +1296,9 @@ class RenderFlowBaselineTestBox extends RenderBox {
   int gridCount = 0;
 
   int lineGridCount(double width) {
-    final int gridsPerLine =
-        width >= gridCount * gridSize.width ? gridCount : width ~/ gridSize.width;
+    final int gridsPerLine = width >= gridCount * gridSize.width
+        ? gridCount
+        : width ~/ gridSize.width;
     return math.max(1, gridsPerLine);
   }
 

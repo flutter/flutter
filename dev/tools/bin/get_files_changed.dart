@@ -7,19 +7,18 @@ import 'dart:io' as io;
 
 import 'package:args/args.dart';
 
-final ArgParser _argParser =
-    ArgParser()
-      ..addOption(
-        'since',
-        help: 'What previous SHA to compare the current git state to.',
-        defaultsTo: 'HEAD^',
-      )
-      ..addOption(
-        'output',
-        help: 'What format to output in.',
-        defaultsTo: io.stdout.hasTerminal ? 'text' : 'json',
-        allowed: <String>['text', 'json'],
-      );
+final ArgParser _argParser = ArgParser()
+  ..addOption(
+    'since',
+    help: 'What previous SHA to compare the current git state to.',
+    defaultsTo: 'HEAD^',
+  )
+  ..addOption(
+    'output',
+    help: 'What format to output in.',
+    defaultsTo: io.stdout.hasTerminal ? 'text' : 'json',
+    allowed: <String>['text', 'json'],
+  );
 
 void main(List<String> args) async {
   final ArgResults argResults = _argParser.parse(args);

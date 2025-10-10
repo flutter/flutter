@@ -50,7 +50,10 @@ Future<void> testMain() async {
       domDocument.querySelectorAll('flutter-view[flt-view-id="${view2.viewId}"]'),
       hasLength(1),
     );
-    expect(domDocument.querySelectorAll('flt-semantics[id=flt-semantic-node-0]'), hasLength(2));
+    expect(
+      domDocument.querySelectorAll('flt-semantics[id=${kFlutterSemanticNodePrefix}0]'),
+      hasLength(2),
+    );
 
     // Check that each is attached to its own view
     expect(view1.semantics.semanticsHost, view1.dom.semanticsHost);
@@ -73,9 +76,8 @@ Future<void> testMain() async {
         tester1.updateNode(
           id: 1,
           flags: const ui.SemanticsFlags(
-            isFocusable: true,
-            hasEnabledState: true,
-            isEnabled: true,
+            isFocused: ui.Tristate.isFalse,
+            isEnabled: ui.Tristate.isTrue,
             isButton: true,
           ),
           hasTap: true,
@@ -113,12 +115,21 @@ Future<void> testMain() async {
     EnginePlatformDispatcher.instance.viewManager.disposeAndUnregisterView(view1.viewId);
 
     expect(domDocument.querySelectorAll('flutter-view'), hasLength(1));
-    expect(domDocument.querySelectorAll('flt-semantics[id=flt-semantic-node-0]'), hasLength(1));
-    expect(domDocument.querySelectorAll('flt-semantics[id=flt-semantic-node-2]'), hasLength(1));
+    expect(
+      domDocument.querySelectorAll('flt-semantics[id=${kFlutterSemanticNodePrefix}0]'),
+      hasLength(1),
+    );
+    expect(
+      domDocument.querySelectorAll('flt-semantics[id=${kFlutterSemanticNodePrefix}2]'),
+      hasLength(1),
+    );
 
     // Disable semantics; make sure the view is there but semantics is removed.
     EngineSemantics.instance.semanticsEnabled = false;
     expect(domDocument.querySelectorAll('flutter-view'), hasLength(1));
-    expect(domDocument.querySelectorAll('flt-semantics[id=flt-semantic-node-0]'), isEmpty);
+    expect(
+      domDocument.querySelectorAll('flt-semantics[id=${kFlutterSemanticNodePrefix}0]'),
+      isEmpty,
+    );
   });
 }

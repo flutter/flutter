@@ -16,10 +16,10 @@ import '../src/common.dart';
 final DateTime inFuture = DateTime.now().add(const Duration(days: 100));
 
 void main() {
-  for (final bool asyncScanning in <bool>[true, false]) {
+  for (final asyncScanning in <bool>[true, false]) {
     testWithoutContext('No last compile, asyncScanning: $asyncScanning', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+      final projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: fileSystem,
         platform: FakePlatform(),
         logger: BufferLogger.test(),
@@ -47,7 +47,7 @@ void main() {
 
     testWithoutContext('Empty project, asyncScanning: $asyncScanning', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+      final projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: fileSystem,
         platform: FakePlatform(),
         logger: BufferLogger.test(),
@@ -75,7 +75,7 @@ void main() {
 
     testWithoutContext('Non-existent files are ignored, asyncScanning: $asyncScanning', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+      final projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: MemoryFileSystem.test(),
         platform: FakePlatform(),
         logger: BufferLogger.test(),
@@ -110,7 +110,7 @@ void main() {
           scheme: 'scheme',
           roots: <String>['/root'],
         );
-        final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+        final projectFileInvalidator = ProjectFileInvalidator(
           fileSystem: multiRootFileSystem,
           platform: FakePlatform(),
           logger: BufferLogger.test(),

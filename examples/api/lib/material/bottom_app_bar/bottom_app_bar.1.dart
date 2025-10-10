@@ -88,14 +88,13 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
             ),
           ],
         ),
-        floatingActionButton:
-            _showFab
-                ? FloatingActionButton(
-                  onPressed: () {},
-                  tooltip: 'Create',
-                  child: const Icon(Icons.add),
-                )
-                : null,
+        floatingActionButton: _showFab
+            ? FloatingActionButton(
+                onPressed: () {},
+                tooltip: 'Create',
+                child: const Icon(Icons.add),
+              )
+            : null,
         floatingActionButtonLocation: _fabLocation,
         bottomNavigationBar: _DemoBottomAppBar(
           fabLocation: _fabLocation,

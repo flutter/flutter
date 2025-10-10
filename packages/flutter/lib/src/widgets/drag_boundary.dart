@@ -100,20 +100,19 @@ class DragBoundary extends InheritedWidget {
     BuildContext context, {
     bool useGlobalPosition = true,
   }) {
-    final InheritedElement? element =
-        context.getElementForInheritedWidgetOfExactType<DragBoundary>();
+    final InheritedElement? element = context
+        .getElementForInheritedWidgetOfExactType<DragBoundary>();
     if (element == null) {
       return null;
     }
     final RenderBox? rb = element.findRenderObject() as RenderBox?;
     assert(rb != null && rb.hasSize, 'DragBoundary is not available');
-    final Rect boundary =
-        useGlobalPosition
-            ? Rect.fromPoints(
-              rb!.localToGlobal(Offset.zero),
-              rb.localToGlobal(rb.size.bottomRight(Offset.zero)),
-            )
-            : Offset.zero & rb!.size;
+    final Rect boundary = useGlobalPosition
+        ? Rect.fromPoints(
+            rb!.localToGlobal(Offset.zero),
+            rb.localToGlobal(rb.size.bottomRight(Offset.zero)),
+          )
+        : Offset.zero & rb!.size;
     return _DragBoundaryDelegateForRect(boundary);
   }
 

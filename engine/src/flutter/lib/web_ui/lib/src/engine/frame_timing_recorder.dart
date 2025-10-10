@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 class FrameTimingRecorder {
+  final int _frameNumber = _currentFrameNumber;
   final int _vsyncStartMicros = _currentFrameVsyncStart;
   final int _buildStartMicros = _currentFrameBuildStart;
 
@@ -18,11 +20,29 @@ class FrameTimingRecorder {
   /// This list is periodically reported to the framework (see [_kFrameTimingsSubmitInterval]).
   static List<ui.FrameTiming> _frameTimings = <ui.FrameTiming>[];
 
-  /// These two metrics are collected early in the process, before the respective
+  /// List of the collected frame timings that are not yet reported.
+  ///
+  /// This is intended for tests only.
+  @visibleForTesting
+  static List<ui.FrameTiming> get debugFrameTimings => _frameTimings;
+
+  @visibleForTesting
+  static void debugResetFrameTimings() {
+    _frameTimings = <ui.FrameTiming>[];
+  }
+
+  /// These three metrics are collected early in the process, before the respective
   /// scene builders are created. These are instead treated as global state, which
   /// are used to initialize any recorders that are created by the scene builders.
+  static int _currentFrameNumber = 0;
   static int _currentFrameVsyncStart = 0;
   static int _currentFrameBuildStart = 0;
+
+  static void recordCurrentFrameNumber(int frameNumber) {
+    if (frameTimingsEnabled) {
+      _currentFrameNumber = frameNumber;
+    }
+  }
 
   static void recordCurrentFrameVsync() {
     if (frameTimingsEnabled) {
@@ -34,6 +54,21 @@ class FrameTimingRecorder {
     if (frameTimingsEnabled) {
       _currentFrameBuildStart = _nowMicros();
     }
+  }
+
+  @visibleForTesting
+  static void debugResetCurrentFrameNumber() {
+    _currentFrameNumber = 0;
+  }
+
+  @visibleForTesting
+  static void debugResetCurrentFrameVsync() {
+    _currentFrameVsyncStart = 0;
+  }
+
+  @visibleForTesting
+  static void debugResetCurrentFrameBuildStart() {
+    _currentFrameBuildStart = 0;
   }
 
   /// The last time (in microseconds) we submitted frame timings.
@@ -87,6 +122,7 @@ class FrameTimingRecorder {
       rasterStart: _rasterStartMicros!,
       rasterFinish: _rasterFinishMicros!,
       rasterFinishWallTime: _rasterFinishMicros!,
+      frameNumber: _frameNumber,
     );
     _frameTimings.add(timing);
     final int now = _nowMicros();

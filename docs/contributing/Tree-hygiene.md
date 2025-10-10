@@ -61,6 +61,12 @@ The general process for submitting code to a Flutter repository is as follows:
 6. Submit this branch as a PR to the relevant Flutter repository.
    _(See also: [Signing commits](./Signing-commits.md))_
 
+   All submissions to Google Open Source projects need to follow
+   [Google’s Contributor License Agreement (CLA)](https://cla.developers.google.com/),
+   in which contributors agree that their contribution is an original work of authorship.
+   This doesn’t prohibit the use of coding assistance tools, but what’s submitted does
+   need to be a contributor’s original creation.
+
 7. Get your code reviewed (see below). You should probably reach out to the relevant
    expert(s) for the areas you touched and ask them to review your PR directly.
    GitHub sometimes recommends specific reviewers; if you're not sure who to ask,
@@ -146,7 +152,7 @@ feel empowered to ask for tests.
 ## Using git
 
 Assuming your environment has been configured according to the instructions in
-[Setting up the Engine development environment](../../engine/src/flutter/docs/contributing/Setting-up-the-Engine-development-environment.md),
+[Setting up the Engine development environment](../../docs/engine/contributing/Setting-up-the-Engine-development-environment.md),
 [Setting up the Framework development environment](Setting-up-the-Framework-development-environment.md), or
 [Setting up the Packages development environment](../ecosystem/contributing/Setting-up-the-Packages-development-environment.md),
 follow these steps to start working on a patch:

@@ -7,6 +7,8 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class SliderUseCase extends UseCase {
+  SliderUseCase() : super(useCaseCategory: UseCaseCategory.core);
+
   @override
   String get name => 'Slider';
 

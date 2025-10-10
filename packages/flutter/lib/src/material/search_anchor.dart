@@ -175,15 +175,15 @@ class SearchAnchor extends StatefulWidget {
     ValueChanged<String>? onChanged,
     VoidCallback? onClose,
     VoidCallback? onOpen,
-    MaterialStateProperty<double?>? barElevation,
-    MaterialStateProperty<Color?>? barBackgroundColor,
-    MaterialStateProperty<Color?>? barOverlayColor,
-    MaterialStateProperty<BorderSide?>? barSide,
-    MaterialStateProperty<OutlinedBorder?>? barShape,
-    MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
+    WidgetStateProperty<double?>? barElevation,
+    WidgetStateProperty<Color?>? barBackgroundColor,
+    WidgetStateProperty<Color?>? barOverlayColor,
+    WidgetStateProperty<BorderSide?>? barSide,
+    WidgetStateProperty<OutlinedBorder?>? barShape,
+    WidgetStateProperty<EdgeInsetsGeometry?>? barPadding,
     EdgeInsetsGeometry? viewBarPadding,
-    MaterialStateProperty<TextStyle?>? barTextStyle,
-    MaterialStateProperty<TextStyle?>? barHintStyle,
+    WidgetStateProperty<TextStyle?>? barTextStyle,
+    WidgetStateProperty<TextStyle?>? barHintStyle,
     ViewBuilder? viewBuilder,
     Widget? viewLeading,
     Iterable<Widget>? viewTrailing,
@@ -757,10 +757,9 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
           );
 
           final Rect viewRect = _rectTween.evaluate(curvedAnimation!)!;
-          final double topPadding =
-              showFullScreenView
-                  ? lerpDouble(0.0, MediaQuery.paddingOf(context).top, curvedAnimation!.value)!
-                  : 0.0;
+          final double topPadding = showFullScreenView
+              ? lerpDouble(0.0, MediaQuery.paddingOf(context).top, curvedAnimation!.value)!
+              : 0.0;
 
           viewFadeOnIntervalCurve ??= CurvedAnimation(
             parent: animation,
@@ -1027,10 +1026,9 @@ class _ViewContentState extends State<_ViewContent> {
         dividerTheme.color ??
         viewDefaults.dividerColor!;
     final double? effectiveHeaderHeight = widget.viewHeaderHeight ?? viewTheme.headerHeight;
-    final BoxConstraints? headerConstraints =
-        effectiveHeaderHeight == null
-            ? null
-            : BoxConstraints.tightFor(height: effectiveHeaderHeight);
+    final BoxConstraints? headerConstraints = effectiveHeaderHeight == null
+        ? null
+        : BoxConstraints.tightFor(height: effectiveHeaderHeight);
     final TextStyle? effectiveTextStyle =
         widget.viewHeaderTextStyle ?? viewTheme.headerTextStyle ?? viewDefaults.headerTextStyle;
     final TextStyle? effectiveHintStyle =
@@ -1069,8 +1067,9 @@ class _ViewContentState extends State<_ViewContent> {
             maxHeight: _viewRect.height,
           ),
           child: Padding(
-            padding:
-                widget.showFullScreenView ? EdgeInsets.zero : (effectivePadding ?? EdgeInsets.zero),
+            padding: widget.showFullScreenView
+                ? EdgeInsets.zero
+                : (effectivePadding ?? EdgeInsets.zero),
             child: Material(
               clipBehavior: Clip.antiAlias,
               shape: effectiveShape,
@@ -1099,8 +1098,8 @@ class _ViewContentState extends State<_ViewContent> {
                                 headerConstraints ??
                                 (widget.showFullScreenView
                                     ? BoxConstraints(
-                                      minHeight: _SearchViewDefaultsM3.fullScreenBarHeight,
-                                    )
+                                        minHeight: _SearchViewDefaultsM3.fullScreenBarHeight,
+                                      )
                                     : null),
                             padding: WidgetStatePropertyAll<EdgeInsetsGeometry?>(
                               effectiveBarPadding,
@@ -1133,26 +1132,24 @@ class _ViewContentState extends State<_ViewContent> {
                           result.isNotEmpty) ...<Widget>[
                         FadeTransition(opacity: viewDividerFadeCurve, child: viewDivider),
                         Flexible(
-                          fit:
-                              (effectiveShrinkWrap && !widget.showFullScreenView)
-                                  ? FlexFit.loose
-                                  : FlexFit.tight,
+                          fit: (effectiveShrinkWrap && !widget.showFullScreenView)
+                              ? FlexFit.loose
+                              : FlexFit.tight,
                           child: FadeTransition(
                             opacity: viewListFadeOnIntervalCurve,
-                            child:
-                                widget.viewBuilder == null
-                                    ? MediaQuery.removePadding(
-                                      context: context,
-                                      removeTop: true,
-                                      child: ListView(
-                                        padding: EdgeInsets.only(
-                                          bottom: MediaQuery.viewInsetsOf(context).bottom,
-                                        ),
-                                        shrinkWrap: effectiveShrinkWrap,
-                                        children: result.toList(),
+                            child: widget.viewBuilder == null
+                                ? MediaQuery.removePadding(
+                                    context: context,
+                                    removeTop: true,
+                                    child: ListView(
+                                      padding: EdgeInsets.only(
+                                        bottom: MediaQuery.viewInsetsOf(context).bottom,
                                       ),
-                                    )
-                                    : widget.viewBuilder!(result),
+                                      shrinkWrap: effectiveShrinkWrap,
+                                      children: result.toList(),
+                                    ),
+                                  )
+                                : widget.viewBuilder!(result),
                           ),
                         ),
                       ],
@@ -1174,15 +1171,15 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     Iterable<Widget>? barTrailing,
     String? barHintText,
     GestureTapCallback? onTap,
-    MaterialStateProperty<double?>? barElevation,
-    MaterialStateProperty<Color?>? barBackgroundColor,
-    MaterialStateProperty<Color?>? barOverlayColor,
-    MaterialStateProperty<BorderSide?>? barSide,
-    MaterialStateProperty<OutlinedBorder?>? barShape,
-    MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
+    WidgetStateProperty<double?>? barElevation,
+    WidgetStateProperty<Color?>? barBackgroundColor,
+    WidgetStateProperty<Color?>? barOverlayColor,
+    WidgetStateProperty<BorderSide?>? barSide,
+    WidgetStateProperty<OutlinedBorder?>? barShape,
+    WidgetStateProperty<EdgeInsetsGeometry?>? barPadding,
     super.viewBarPadding,
-    MaterialStateProperty<TextStyle?>? barTextStyle,
-    MaterialStateProperty<TextStyle?>? barHintStyle,
+    WidgetStateProperty<TextStyle?>? barTextStyle,
+    WidgetStateProperty<TextStyle?>? barHintStyle,
     super.viewBuilder,
     super.viewLeading,
     super.viewTrailing,
@@ -1376,6 +1373,7 @@ class SearchBar extends StatefulWidget {
     this.keyboardType,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.contextMenuBuilder = _defaultContextMenuBuilder,
+    this.readOnly = false,
   });
 
   /// Controls the text being edited in the search bar's text field.
@@ -1433,19 +1431,19 @@ class SearchBar extends StatefulWidget {
   ///
   /// If null, the value of [SearchBarThemeData.elevation] will be used. If this
   /// is also null, then default value is 6.0.
-  final MaterialStateProperty<double?>? elevation;
+  final WidgetStateProperty<double?>? elevation;
 
   /// The search bar's background fill color.
   ///
   /// If null, the value of [SearchBarThemeData.backgroundColor] will be used.
   /// If this is also null, then the default value is [ColorScheme.surfaceContainerHigh].
-  final MaterialStateProperty<Color?>? backgroundColor;
+  final WidgetStateProperty<Color?>? backgroundColor;
 
   /// The shadow color of the search bar's [Material].
   ///
   /// If null, the value of [SearchBarThemeData.shadowColor] will be used.
   /// If this is also null, then the default value is [ColorScheme.shadow].
-  final MaterialStateProperty<Color?>? shadowColor;
+  final WidgetStateProperty<Color?>? shadowColor;
 
   /// The surface tint color of the search bar's [Material].
   ///
@@ -1456,11 +1454,11 @@ class SearchBar extends StatefulWidget {
   ///
   /// If null, the value of [SearchBarThemeData.surfaceTintColor] will be used.
   /// If this is also null, then the default value is [Colors.transparent].
-  final MaterialStateProperty<Color?>? surfaceTintColor;
+  final WidgetStateProperty<Color?>? surfaceTintColor;
 
   /// The highlight color that's typically used to indicate that
   /// the search bar is focused, hovered, or pressed.
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
 
   /// The color and weight of the search bar's outline.
   ///
@@ -1469,7 +1467,7 @@ class SearchBar extends StatefulWidget {
   ///
   /// If null, the value of [SearchBarThemeData.side] will be used. If this is
   /// also null, the search bar doesn't have a side by default.
-  final MaterialStateProperty<BorderSide?>? side;
+  final WidgetStateProperty<BorderSide?>? side;
 
   /// The shape of the search bar's underlying [Material].
   ///
@@ -1478,19 +1476,19 @@ class SearchBar extends StatefulWidget {
   ///
   /// If null, the value of [SearchBarThemeData.shape] will be used.
   /// If this is also null, defaults to [StadiumBorder].
-  final MaterialStateProperty<OutlinedBorder?>? shape;
+  final WidgetStateProperty<OutlinedBorder?>? shape;
 
   /// The padding between the search bar's boundary and its contents.
   ///
   /// If null, the value of [SearchBarThemeData.padding] will be used.
   /// If this is also null, then the default value is 16.0 horizontally.
-  final MaterialStateProperty<EdgeInsetsGeometry?>? padding;
+  final WidgetStateProperty<EdgeInsetsGeometry?>? padding;
 
   /// The style to use for the text being edited.
   ///
   /// If null, defaults to the `bodyLarge` text style from the current [Theme].
   /// The default text color is [ColorScheme.onSurface].
-  final MaterialStateProperty<TextStyle?>? textStyle;
+  final WidgetStateProperty<TextStyle?>? textStyle;
 
   /// The style to use for the [hintText].
   ///
@@ -1498,7 +1496,7 @@ class SearchBar extends StatefulWidget {
   /// is also null, the value of [textStyle] will be used. If this is also null,
   /// defaults to the `bodyLarge` text style from the current [Theme].
   /// The default text color is [ColorScheme.onSurfaceVariant].
-  final MaterialStateProperty<TextStyle?>? hintStyle;
+  final WidgetStateProperty<TextStyle?>? hintStyle;
 
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization? textCapitalization;
@@ -1535,11 +1533,14 @@ class SearchBar extends StatefulWidget {
   ///    be disabled and Flutter-rendered context menus to appear.
   final EditableTextContextMenuBuilder? contextMenuBuilder;
 
+  /// {@macro flutter.widgets.editableText.readOnly}
+  final bool readOnly;
+
   static Widget _defaultContextMenuBuilder(
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    if (defaultTargetPlatform == TargetPlatform.iOS && SystemContextMenu.isSupported(context)) {
+    if (SystemContextMenu.isSupportedByField(editableTextState)) {
       return SystemContextMenu.editableText(editableTextState: editableTextState);
     }
     return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
@@ -1578,11 +1579,11 @@ class _SearchBarState extends State<SearchBar> {
     final SearchBarThemeData defaults = _SearchBarDefaultsM3(context);
 
     T? resolve<T>(
-      MaterialStateProperty<T>? widgetValue,
-      MaterialStateProperty<T>? themeValue,
-      MaterialStateProperty<T>? defaultValue,
+      WidgetStateProperty<T>? widgetValue,
+      WidgetStateProperty<T>? themeValue,
+      WidgetStateProperty<T>? defaultValue,
     ) {
-      final Set<MaterialState> states = _internalStatesController.value;
+      final Set<WidgetState> states = _internalStatesController.value;
       return widgetValue?.resolve(states) ??
           themeValue?.resolve(states) ??
           defaultValue?.resolve(states);
@@ -1628,14 +1629,14 @@ class _SearchBarState extends State<SearchBar> {
       searchBarTheme.padding,
       defaults.padding,
     );
-    final MaterialStateProperty<Color?>? effectiveOverlayColor =
+    final WidgetStateProperty<Color?>? effectiveOverlayColor =
         widget.overlayColor ?? searchBarTheme.overlayColor ?? defaults.overlayColor;
     final TextCapitalization effectiveTextCapitalization =
         widget.textCapitalization ??
         searchBarTheme.textCapitalization ??
         defaults.textCapitalization!;
 
-    final Set<MaterialState> states = _internalStatesController.value;
+    final Set<WidgetState> states = _internalStatesController.value;
     final TextStyle? effectiveHintStyle =
         widget.hintStyle?.resolve(states) ??
         searchBarTheme.hintStyle?.resolve(states) ??
@@ -1660,15 +1661,14 @@ class _SearchBarState extends State<SearchBar> {
       );
     }
 
-    final List<Widget>? trailing =
-        widget.trailing
-            ?.map(
-              (Widget trailing) => IconTheme.merge(
-                data: customTheme ?? IconThemeData(color: colorScheme.onSurfaceVariant),
-                child: trailing,
-              ),
-            )
-            .toList();
+    final List<Widget>? trailing = widget.trailing
+        ?.map(
+          (Widget trailing) => IconTheme.merge(
+            data: customTheme ?? IconThemeData(color: colorScheme.onSurfaceVariant),
+            child: trailing,
+          ),
+        )
+        .toList();
 
     return ConstrainedBox(
       constraints: widget.constraints ?? searchBarTheme.constraints ?? defaults.constraints!,
@@ -1697,13 +1697,14 @@ class _SearchBarState extends State<SearchBar> {
                 child: Row(
                   textDirection: textDirection,
                   children: <Widget>[
-                    if (leading != null) leading,
+                    ?leading,
                     Expanded(
                       child: Padding(
                         padding: effectivePadding,
                         child: Semantics(
                           inputType: SemanticsInputType.search,
                           child: TextField(
+                            readOnly: widget.readOnly,
                             autofocus: widget.autoFocus,
                             onTap: widget.onTap,
                             onTapAlwaysCalled: true,
@@ -1765,31 +1766,31 @@ class _SearchBarDefaultsM3 extends SearchBarThemeData {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  MaterialStateProperty<Color?>? get backgroundColor =>
+  WidgetStateProperty<Color?>? get backgroundColor =>
     MaterialStatePropertyAll<Color>(_colors.surfaceContainerHigh);
 
   @override
-  MaterialStateProperty<double>? get elevation =>
+  WidgetStateProperty<double>? get elevation =>
     const MaterialStatePropertyAll<double>(6.0);
 
   @override
-  MaterialStateProperty<Color>? get shadowColor =>
+  WidgetStateProperty<Color>? get shadowColor =>
     MaterialStatePropertyAll<Color>(_colors.shadow);
 
   @override
-  MaterialStateProperty<Color>? get surfaceTintColor =>
+  WidgetStateProperty<Color>? get surfaceTintColor =>
     const MaterialStatePropertyAll<Color>(Colors.transparent);
 
   @override
-  MaterialStateProperty<Color?>? get overlayColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+  WidgetStateProperty<Color?>? get overlayColor =>
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return _colors.onSurface.withOpacity(0.1);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.onSurface.withOpacity(0.08);
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return Colors.transparent;
       }
       return Colors.transparent;
@@ -1798,19 +1799,19 @@ class _SearchBarDefaultsM3 extends SearchBarThemeData {
   // No default side
 
   @override
-  MaterialStateProperty<OutlinedBorder>? get shape =>
+  WidgetStateProperty<OutlinedBorder>? get shape =>
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
+  WidgetStateProperty<EdgeInsetsGeometry>? get padding =>
     const MaterialStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.symmetric(horizontal: 8.0));
 
   @override
-  MaterialStateProperty<TextStyle?> get textStyle =>
+  WidgetStateProperty<TextStyle?> get textStyle =>
     MaterialStatePropertyAll<TextStyle?>(_textTheme.bodyLarge?.copyWith(color: _colors.onSurface));
 
   @override
-  MaterialStateProperty<TextStyle?> get hintStyle =>
+  WidgetStateProperty<TextStyle?> get hintStyle =>
     MaterialStatePropertyAll<TextStyle?>(_textTheme.bodyLarge?.copyWith(color: _colors.onSurfaceVariant));
 
   @override

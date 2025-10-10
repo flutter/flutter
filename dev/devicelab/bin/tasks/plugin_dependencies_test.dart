@@ -199,8 +199,8 @@ public class DummyPluginAClass {
         return TaskResult.failure("${flutterPluginsDependenciesFile.path} doesn't exist");
       }
 
-      final String flutterPluginsDependenciesFileContent =
-          flutterPluginsDependenciesFile.readAsStringSync();
+      final String flutterPluginsDependenciesFileContent = flutterPluginsDependenciesFile
+          .readAsStringSync();
 
       final Map<String, dynamic> jsonContent =
           json.decode(flutterPluginsDependenciesFileContent) as Map<String, dynamic>;

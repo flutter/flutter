@@ -25,10 +25,9 @@ class ScrollMetricsDemoState extends State<ScrollMetricsDemo> {
         appBar: AppBar(title: const Text('ScrollMetrics Demo')),
         floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.add),
-          onPressed:
-              () => setState(() {
-                windowSize += 10.0;
-              }),
+          onPressed: () => setState(() {
+            windowSize += 10.0;
+          }),
         ),
         body: NotificationListener<ScrollMetricsNotification>(
           onNotification: (ScrollMetricsNotification notification) {

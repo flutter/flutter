@@ -64,11 +64,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const MenuThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -80,11 +79,10 @@ void main() {
       submenuIcon: WidgetStatePropertyAll<Widget?>(Icon(Icons.add)),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -249,19 +247,15 @@ void main() {
     expect(menuItemMaterial.elevation, equals(0.0));
     expect(menuItemMaterial.shape, equals(const StadiumBorder()));
     expect(getLabelStyle(tester, TestMenu.subMenu10.label).style.color, equals(Colors.grey));
-    final ButtonStyle? textButtonStyle =
-        tester
-            .widget<TextButton>(
-              find
-                  .ancestor(
-                    of: find.text(TestMenu.subMenu10.label),
-                    matching: find.byType(TextButton),
-                  )
-                  .first,
-            )
-            .style;
+    final ButtonStyle? textButtonStyle = tester
+        .widget<TextButton>(
+          find
+              .ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(TextButton))
+              .first,
+        )
+        .style;
     expect(
-      textButtonStyle?.overlayColor?.resolve(<MaterialState>{MaterialState.hovered}),
+      textButtonStyle?.overlayColor?.resolve(<WidgetState>{WidgetState.hovered}),
       equals(Colors.blueGrey),
     );
   });
@@ -297,10 +291,9 @@ void main() {
               SubmenuButton(
                 menuChildren: <Widget>[
                   SubmenuButton(
-                    menuChildren:
-                        enabled
-                            ? <Widget>[MenuItemButton(child: Text(TestMenu.mainMenu0.label))]
-                            : <Widget>[],
+                    menuChildren: enabled
+                        ? <Widget>[MenuItemButton(child: Text(TestMenu.mainMenu0.label))]
+                        : <Widget>[],
                     child: Text(TestMenu.subSubMenu110.label),
                   ),
                 ],
@@ -369,18 +362,21 @@ List<Widget> createTestMenus({
 }) {
   final MenuStyle menuStyle = MenuStyle(
     padding: menuPadding != null ? MaterialStatePropertyAll<EdgeInsetsGeometry>(menuPadding) : null,
-    backgroundColor:
-        menuBackground != null ? MaterialStatePropertyAll<Color>(menuBackground) : null,
+    backgroundColor: menuBackground != null
+        ? MaterialStatePropertyAll<Color>(menuBackground)
+        : null,
     elevation: menuElevation != null ? MaterialStatePropertyAll<double>(menuElevation) : null,
     shape: menuShape != null ? MaterialStatePropertyAll<OutlinedBorder>(menuShape) : null,
   );
   final ButtonStyle itemStyle = ButtonStyle(
     padding: itemPadding != null ? MaterialStatePropertyAll<EdgeInsetsGeometry>(itemPadding) : null,
     shape: itemShape != null ? MaterialStatePropertyAll<OutlinedBorder>(itemShape) : null,
-    foregroundColor:
-        itemForeground != null ? MaterialStatePropertyAll<Color>(itemForeground) : null,
-    backgroundColor:
-        itemBackground != null ? MaterialStatePropertyAll<Color>(itemBackground) : null,
+    foregroundColor: itemForeground != null
+        ? MaterialStatePropertyAll<Color>(itemForeground)
+        : null,
+    backgroundColor: itemBackground != null
+        ? MaterialStatePropertyAll<Color>(itemBackground)
+        : null,
     overlayColor: itemOverlay != null ? MaterialStatePropertyAll<Color>(itemOverlay) : null,
   );
   final List<Widget> result = <Widget>[

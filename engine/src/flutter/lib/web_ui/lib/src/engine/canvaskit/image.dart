@@ -215,10 +215,9 @@ void skiaDecodeImageFromPixels(
       SkImageInfo(
         width: width.toDouble(),
         height: height.toDouble(),
-        colorType:
-            format == ui.PixelFormat.rgba8888
-                ? canvasKit.ColorType.RGBA_8888
-                : canvasKit.ColorType.BGRA_8888,
+        colorType: format == ui.PixelFormat.rgba8888
+            ? canvasKit.ColorType.RGBA_8888
+            : canvasKit.ColorType.BGRA_8888,
         alphaType: canvasKit.AlphaType.Premul,
         colorSpace: SkColorSpaceSRGB,
       ),
@@ -311,17 +310,6 @@ CkImage scaleImage(SkImage image, int? targetWidth, int? targetHeight) {
 
   final CkImage ckImage = finalImage as CkImage;
   return ckImage;
-}
-
-/// Thrown when the web engine fails to decode an image, either due to a
-/// network issue, corrupted image contents, or missing codec.
-class ImageCodecException implements Exception {
-  ImageCodecException(this._message);
-
-  final String _message;
-
-  @override
-  String toString() => 'ImageCodecException: $_message';
 }
 
 const String _kNetworkImageMessage = 'Failed to load network image.';
@@ -558,10 +546,9 @@ class CkImage implements ui.Image, StackTraceDebugger {
   ui.ColorSpace get colorSpace => ui.ColorSpace.sRGB;
 
   ByteData? _readPixelsFromSkImage(ui.ImageByteFormat format) {
-    final SkAlphaType alphaType =
-        format == ui.ImageByteFormat.rawStraightRgba
-            ? canvasKit.AlphaType.Unpremul
-            : canvasKit.AlphaType.Premul;
+    final SkAlphaType alphaType = format == ui.ImageByteFormat.rawStraightRgba
+        ? canvasKit.AlphaType.Unpremul
+        : canvasKit.AlphaType.Premul;
     final ByteData? data = _encodeImage(
       skImage: skImage,
       format: format,

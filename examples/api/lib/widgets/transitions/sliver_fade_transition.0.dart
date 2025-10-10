@@ -65,11 +65,12 @@ class _SliverFadeTransitionExampleState extends State<SliverFadeTransitionExampl
       slivers: <Widget>[
         SliverFadeTransition(
           opacity: animation,
-          sliver: SliverFixedExtentList(
+          sliver: SliverFixedExtentList.builder(
             itemExtent: 100.0,
-            delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+            itemCount: 5,
+            itemBuilder: (BuildContext context, int index) {
               return Container(color: index.isEven ? Colors.indigo[200] : Colors.orange[200]);
-            }, childCount: 5),
+            },
           ),
         ),
       ],

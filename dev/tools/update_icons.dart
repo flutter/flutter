@@ -245,52 +245,50 @@ void main(List<String> args) {
 }
 
 ArgResults _handleArguments(List<String> args) {
-  final ArgParser argParser =
-      ArgParser()
-        ..addOption(
-          _iconsPathOption,
-          defaultsTo: _defaultIconsPath,
-          help: 'Location of the material icons file',
-        )
-        ..addOption(
-          _iconsTemplatePathOption,
-          defaultsTo: _defaultIconsPath,
-          help:
-              'Location of the material icons file template. Usually the same as --$_iconsPathOption',
-        )
-        ..addOption(
-          _newCodepointsPathOption,
-          defaultsTo: _defaultNewCodepointsPath,
-          help: 'Location of the new codepoints directory',
-        )
-        ..addOption(
-          _oldCodepointsPathOption,
-          defaultsTo: _defaultOldCodepointsPath,
-          help: 'Location of the existing codepoints directory',
-        )
-        ..addOption(
-          _fontFamilyOption,
-          defaultsTo: _defaultFontFamily,
-          help: 'The font family to use for the IconData constants',
-        )
-        ..addMultiOption(
-          _possibleStyleSuffixesOption,
-          defaultsTo: _defaultPossibleStyleSuffixes,
-          help:
-              'A comma-separated list of suffixes (typically an optional '
-              'family + a style) e.g. _outlined, _monoline_filled',
-        )
-        ..addOption(
-          _classNameOption,
-          defaultsTo: _defaultClassName,
-          help: 'The containing class for all icons',
-        )
-        ..addFlag(
-          _enforceSafetyChecks,
-          defaultsTo: true,
-          help: 'Whether to exit if safety checks fail (e.g. codepoints are missing or unstable',
-        )
-        ..addFlag(_dryRunOption);
+  final ArgParser argParser = ArgParser()
+    ..addOption(
+      _iconsPathOption,
+      defaultsTo: _defaultIconsPath,
+      help: 'Location of the material icons file',
+    )
+    ..addOption(
+      _iconsTemplatePathOption,
+      defaultsTo: _defaultIconsPath,
+      help: 'Location of the material icons file template. Usually the same as --$_iconsPathOption',
+    )
+    ..addOption(
+      _newCodepointsPathOption,
+      defaultsTo: _defaultNewCodepointsPath,
+      help: 'Location of the new codepoints directory',
+    )
+    ..addOption(
+      _oldCodepointsPathOption,
+      defaultsTo: _defaultOldCodepointsPath,
+      help: 'Location of the existing codepoints directory',
+    )
+    ..addOption(
+      _fontFamilyOption,
+      defaultsTo: _defaultFontFamily,
+      help: 'The font family to use for the IconData constants',
+    )
+    ..addMultiOption(
+      _possibleStyleSuffixesOption,
+      defaultsTo: _defaultPossibleStyleSuffixes,
+      help:
+          'A comma-separated list of suffixes (typically an optional '
+          'family + a style) e.g. _outlined, _monoline_filled',
+    )
+    ..addOption(
+      _classNameOption,
+      defaultsTo: _defaultClassName,
+      help: 'The containing class for all icons',
+    )
+    ..addFlag(
+      _enforceSafetyChecks,
+      defaultsTo: true,
+      help: 'Whether to exit if safety checks fail (e.g. codepoints are missing or unstable',
+    )
+    ..addFlag(_dryRunOption);
   argParser.addFlag(
     'help',
     abbr: 'h',
@@ -330,13 +328,12 @@ String _regenerateIconsFile(
   String className,
   bool enforceSafetyChecks,
 ) {
-  final List<Icon> newIcons =
-      tokenPairMap.entries
-          .map(
-            (MapEntry<String, String> entry) =>
-                Icon(entry, fontFamily: fontFamily, className: className),
-          )
-          .toList();
+  final List<Icon> newIcons = tokenPairMap.entries
+      .map(
+        (MapEntry<String, String> entry) =>
+            Icon(entry, fontFamily: fontFamily, className: className),
+      )
+      .toList();
   newIcons.sort((Icon a, Icon b) => a._compareTo(b));
 
   final StringBuffer buf = StringBuffer();
@@ -389,8 +386,9 @@ String _regenerateIconsFile(
     // Generate for Icons
     if (line.contains(_beginGeneratedMark)) {
       generating = true;
-      final String iconDeclarationsString =
-          newIcons.map((Icon icon) => icon.fullDeclaration).join();
+      final String iconDeclarationsString = newIcons
+          .map((Icon icon) => icon.fullDeclaration)
+          .join();
       buf.write(iconDeclarationsString);
     } else if (line.contains(_endGeneratedMark)) {
       generating = false;
@@ -461,7 +459,8 @@ void _generateIconDemo(File demoFilePath, Map<String, String> tokenPairMap) {
   for (final MapEntry<String, String> entry in tokenPairMap.entries) {
     newIconUsages.writeln(Icon(entry).usage);
   }
-  final String demoFileContents = '''
+  final String demoFileContents =
+      '''
     import 'package:flutter/material.dart';
 
     void main() => runApp(const IconDemo());
@@ -561,13 +560,15 @@ class Icon {
   String get declaration =>
       "static const IconData $flutterId = IconData(0x$hexCodepoint, fontFamily: '$fontFamily'${isMirroredInRTL ? ', matchTextDirection: true' : ''});";
 
-  String get fullDeclaration => '''
+  String get fullDeclaration =>
+      '''
 
   /// $dartDoc.
   $declaration
 ''';
 
-  String platformAdaptiveDeclaration(String fullFlutterId, Icon iOSIcon) => '''
+  String platformAdaptiveDeclaration(String fullFlutterId, Icon iOSIcon) =>
+      '''
 
   /// Platform-adaptive icon for $dartDoc and ${iOSIcon.dartDoc}.;
   IconData get $fullFlutterId => !_isCupertino() ? $className.$flutterId : $className.${iOSIcon.flutterId};

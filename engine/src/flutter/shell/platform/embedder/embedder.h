@@ -169,6 +169,10 @@ typedef enum {
   /// Request that scrolls the current scrollable container to a given scroll
   /// offset.
   kFlutterSemanticsActionScrollToOffset = 1 << 23,
+  /// A request that the node should be expanded.
+  kFlutterSemanticsActionExpand = 1 << 24,
+  /// A request that the node should be collapsed.
+  kFlutterSemanticsActionCollapse = 1 << 25,
 } FlutterSemanticsAction;
 
 /// The set of properties that may be associated with a semantics node.
@@ -1586,6 +1590,10 @@ typedef struct {
   FlutterPlatformViewIdentifier platform_view_id;
   /// A textual tooltip attached to the node.
   const char* tooltip;
+  /// The heading level for this node. A value of 0 means the node is not a
+  /// heading; higher values (1, 2, …) indicate the heading rank, with lower
+  /// numbers being higher-level headings.
+  int32_t heading_level;
 } FlutterSemanticsNode;
 
 /// A node in the Flutter semantics tree.
@@ -1693,6 +1701,10 @@ typedef struct {
   // The set of semantics flags associated with this node. Prefer to use this
   // over `flags__deprecated__`.
   FlutterSemanticsFlags* flags2;
+  /// The heading level for this node. A value of 0 means the node is not a
+  /// heading; higher values (1, 2, …) indicate the heading rank, with lower
+  /// numbers being higher-level headings.
+  int32_t heading_level;
 } FlutterSemanticsNode2;
 
 /// `FlutterSemanticsCustomAction` ID used as a sentinel to signal the end of a
@@ -3354,7 +3366,7 @@ uint64_t FlutterEngineGetCurrentTime();
 
 //------------------------------------------------------------------------------
 /// @brief      Inform the engine to run the specified task. This task has been
-///             given to the engine via the
+///             given to the embedder via the
 ///             `FlutterTaskRunnerDescription.post_task_callback`. This call
 ///             must only be made at the target time specified in that callback.
 ///             Running the task before that time is undefined behavior.

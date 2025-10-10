@@ -566,6 +566,7 @@ public class PlatformChannel {
   /** Types of sounds the Android OS can play on behalf of an application. */
   public enum SoundType {
     CLICK("SystemSoundType.click"),
+    TICK("SystemSoundType.tick"),
     ALERT("SystemSoundType.alert");
 
     @NonNull

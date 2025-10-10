@@ -416,7 +416,10 @@ class ControlSlider extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Expanded(flex: 2, child: Text(label, textAlign: TextAlign.end)),
-          Expanded(flex: 5, child: Slider(onChanged: onChanged, min: min, max: max, value: value)),
+          Expanded(
+            flex: 5,
+            child: Slider(onChanged: onChanged, min: min, max: max, value: value),
+          ),
           Expanded(child: Text(value.toStringAsFixed(precision))),
         ],
       ),

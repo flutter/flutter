@@ -31,7 +31,7 @@ class EmbedderRenderTargetImpeller final : public EmbedderRenderTarget {
   std::shared_ptr<impeller::AiksContext> GetAiksContext() const override;
 
   // |EmbedderRenderTarget|
-  SkISize GetRenderTargetSize() const override;
+  DlISize GetRenderTargetSize() const override;
 
  private:
   std::shared_ptr<impeller::AiksContext> aiks_context_;

@@ -15,12 +15,11 @@ void main() {
     RenderSizedBox child;
     final RenderBox root = RenderPositionedBox(
       alignment: Alignment.topLeft,
-      child:
-          parent = RenderBaseline(
-            baseline: 0.0,
-            baselineType: TextBaseline.alphabetic,
-            child: child = RenderSizedBox(const Size(100.0, 100.0)),
-          ),
+      child: parent = RenderBaseline(
+        baseline: 0.0,
+        baselineType: TextBaseline.alphabetic,
+        child: child = RenderSizedBox(const Size(100.0, 100.0)),
+      ),
     );
     final BoxParentData childParentData = child.parentData! as BoxParentData;
 
@@ -55,11 +54,10 @@ void main() {
   });
 
   test('RenderBaseline different baseline types', () {
-    final _RenderBaselineTester child =
-        _RenderBaselineTester()
-          ..boxSize = const Size.square(100)
-          ..alphabeticBaselineOffset = 50
-          ..ideographicBaselineOffset = 60;
+    final _RenderBaselineTester child = _RenderBaselineTester()
+      ..boxSize = const Size.square(100)
+      ..alphabeticBaselineOffset = 50
+      ..ideographicBaselineOffset = 60;
     final RenderBaseline renderBaseline = RenderBaseline(
       baseline: 1.0,
       baselineType: TextBaseline.alphabetic,
@@ -121,17 +119,19 @@ void main() {
       textDirection: TextDirection.ltr,
       children: <RenderBox>[
         RenderIgnoreBaseline(
-          child:
-              a = RenderParagraph(
-                const TextSpan(
-                  text: 'a',
-                  style: TextStyle(fontSize: 128.0, fontFamily: 'FlutterTest'),
-                ),
-                textDirection: TextDirection.ltr,
-              ),
+          child: a = RenderParagraph(
+            const TextSpan(
+              text: 'a',
+              style: TextStyle(fontSize: 128.0, fontFamily: 'FlutterTest'),
+            ),
+            textDirection: TextDirection.ltr,
+          ),
         ),
         b = RenderParagraph(
-          const TextSpan(text: 'b', style: TextStyle(fontSize: 32.0, fontFamily: 'FlutterTest')),
+          const TextSpan(
+            text: 'b',
+            style: TextStyle(fontSize: 32.0, fontFamily: 'FlutterTest'),
+          ),
           textDirection: TextDirection.ltr,
         ),
       ],

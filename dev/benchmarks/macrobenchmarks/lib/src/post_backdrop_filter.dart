@@ -87,18 +87,16 @@ class _PostBackdropFilterPageState extends State<PostBackdropFilterPage>
                       Checkbox(
                         key: const Key('bdf-checkbox'), // this key is used by the driver test
                         value: _includeBackdropFilter,
-                        onChanged:
-                            (bool? v) => setState(() {
-                              _includeBackdropFilter = v ?? false;
-                            }),
+                        onChanged: (bool? v) => setState(() {
+                          _includeBackdropFilter = v ?? false;
+                        }),
                       ),
                       MaterialButton(
                         key: const Key('bdf-animate'), // this key is used by the driver test
                         child: const Text('Animate'),
-                        onPressed:
-                            () => setState(() {
-                              animation.repeat();
-                            }),
+                        onPressed: () => setState(() {
+                          animation.repeat();
+                        }),
                       ),
                     ],
                   ),

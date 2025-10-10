@@ -28,7 +28,7 @@ void main() {
   });
 
   testWithoutContext('startup events', () async {
-    final BasicProject project = BasicProject();
+    final project = BasicProject();
     await project.setUpIn(tempDir);
 
     const ProcessManager processManager = LocalProcessManager();
@@ -39,13 +39,12 @@ void main() {
       'daemon',
     ], workingDirectory: tempDir.path);
 
-    final StreamController<String> stdout = StreamController<String>.broadcast();
+    final stdout = StreamController<String>.broadcast();
     transformToLines(daemonProcess.stdout).listen((String line) => stdout.add(line));
-    final Stream<Map<String, Object?>> stream =
-        stdout.stream
-            .map<Map<String, Object?>?>(parseFlutterResponse)
-            .where((Map<String, Object?>? value) => value != null)
-            .cast<Map<String, Object?>>();
+    final Stream<Map<String, Object?>> stream = stdout.stream
+        .map<Map<String, Object?>?>(parseFlutterResponse)
+        .where((Map<String, Object?>? value) => value != null)
+        .cast<Map<String, Object?>>();
 
     final [
       Map<String, Object?> connectedEvent,
@@ -56,17 +55,17 @@ void main() {
     ]);
 
     // Check the connected message has a version.
-    final Map<String, Object?> connectedParams = connectedEvent['params']! as Map<String, Object?>;
+    final connectedParams = connectedEvent['params']! as Map<String, Object?>;
     expect(connectedParams['version'], isNotNull);
 
     // Check we got the startup message.
-    final Map<String, Object?> logParams = logMessage['params']! as Map<String, Object?>;
+    final logParams = logMessage['params']! as Map<String, Object?>;
     expect(logParams['level'], 'status');
     expect(logParams['message'], 'Device daemon started.');
   });
 
   testWithoutContext('device.getDevices', () async {
-    final BasicProject project = BasicProject();
+    final project = BasicProject();
     await project.setUpIn(tempDir);
 
     const ProcessManager processManager = LocalProcessManager();
@@ -77,7 +76,7 @@ void main() {
       'daemon',
     ], workingDirectory: tempDir.path);
 
-    final StreamController<String> stdout = StreamController<String>.broadcast();
+    final stdout = StreamController<String>.broadcast();
     transformToLines(daemonProcess.stdout).listen((String line) => stdout.add(line));
     final Stream<Map<String, Object?>?> stream = stdout.stream
         .map<Map<String, Object?>?>(parseFlutterResponse)
@@ -104,10 +103,9 @@ void main() {
       '[${jsonEncode(<String, dynamic>{'id': 2, 'method': 'device.getDevices'})}]',
     );
     // Skip other device.added events that may fire (desktop/web devices).
-    response =
-        (await stream.firstWhere(
-          (Map<String, Object?>? response) => response!['event'] != 'device.added',
-        ))!;
+    response = (await stream.firstWhere(
+      (Map<String, Object?>? response) => response!['event'] != 'device.added',
+    ))!;
     expect(response['id'], 2);
     expect(response['error'], isNull);
 

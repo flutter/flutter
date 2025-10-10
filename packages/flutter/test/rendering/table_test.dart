@@ -64,15 +64,14 @@ void main() {
     RenderTable table;
     layout(
       RenderPositionedBox(
-        child:
-            table = RenderTable(
-              columns: 5,
-              rows: 5,
-              defaultColumnWidth: const IntrinsicColumnWidth(),
-              textDirection: TextDirection.ltr,
-              defaultVerticalAlignment: TableCellVerticalAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-            ),
+        child: table = RenderTable(
+          columns: 5,
+          rows: 5,
+          defaultColumnWidth: const IntrinsicColumnWidth(),
+          textDirection: TextDirection.ltr,
+          defaultVerticalAlignment: TableCellVerticalAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+        ),
       ),
     );
 

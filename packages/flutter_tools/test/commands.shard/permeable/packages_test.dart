@@ -75,7 +75,7 @@ void main() {
       List<String>? args,
       List<String>? globalArgs,
     }) async {
-      final PackagesCommand command = PackagesCommand();
+      final command = PackagesCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
         ...?globalArgs,
@@ -122,18 +122,18 @@ void main() {
       );
     }
 
-    final List<String> pubOutput = <String>[
+    final pubOutput = <String>[
       globals.fs.path.join('.dart_tool', 'package_config.json'),
       'pubspec.lock',
     ];
 
-    const List<String> pluginRegistrants = <String>[
+    const pluginRegistrants = <String>[
       'ios/Runner/GeneratedPluginRegistrant.h',
       'ios/Runner/GeneratedPluginRegistrant.m',
       'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
     ];
 
-    const List<String> modulePluginRegistrants = <String>[
+    const modulePluginRegistrants = <String>[
       '.ios/Flutter/FlutterPluginRegistrant/Classes/GeneratedPluginRegistrant.h',
       '.ios/Flutter/FlutterPluginRegistrant/Classes/GeneratedPluginRegistrant.m',
       '.android/Flutter/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
@@ -155,14 +155,14 @@ void main() {
       ];
     }
 
-    const Map<String, String> pluginContentWitnesses = <String, String>{
+    const pluginContentWitnesses = <String, String>{
       'ios/Flutter/Debug.xcconfig':
           '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
       'ios/Flutter/Release.xcconfig':
           '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
     };
 
-    const Map<String, String> modulePluginContentWitnesses = <String, String>{
+    const modulePluginContentWitnesses = <String, String>{
       '.ios/Config/Debug.xcconfig':
           '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
       '.ios/Config/Release.xcconfig':
@@ -170,13 +170,13 @@ void main() {
     };
 
     void expectDependenciesResolved(String projectPath) {
-      for (final String output in pubOutput) {
+      for (final output in pubOutput) {
         expectExists(projectPath, output);
       }
     }
 
     void expectZeroPluginsInjected(String projectPath) {
-      for (final String registrant in modulePluginRegistrants) {
+      for (final registrant in modulePluginRegistrants) {
         expectExists(projectPath, registrant);
       }
       for (final String witness in pluginWitnesses(includeLegacyPluginsList: true)) {
@@ -191,7 +191,7 @@ void main() {
     }
 
     void expectPluginInjected(String projectPath, {required bool includeLegacyPluginsList}) {
-      for (final String registrant in pluginRegistrants) {
+      for (final registrant in pluginRegistrants) {
         expectExists(projectPath, registrant);
       }
       for (final String witness in pluginWitnesses(
@@ -208,7 +208,7 @@ void main() {
     }
 
     void expectModulePluginInjected(String projectPath, {required bool includeLegacyPluginsList}) {
-      for (final String registrant in modulePluginRegistrants) {
+      for (final registrant in modulePluginRegistrants) {
         expectExists(projectPath, registrant);
       }
       for (final String witness in modulePluginWitnesses(
@@ -227,7 +227,7 @@ void main() {
         modulePluginRegistrants,
         pluginWitnesses(includeLegacyPluginsList: true),
       ].expand<String>((List<String> list) => list);
-      for (final String path in allFiles) {
+      for (final path in allFiles) {
         final File file = globals.fs.file(globals.fs.path.join(projectPath, path));
         ErrorHandlingFileSystem.deleteIfExists(file);
       }
@@ -269,15 +269,14 @@ void main() {
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
         Analytics: () => fakeAnalytics,
       },
     );
@@ -298,15 +297,14 @@ void main() {
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -325,8 +323,8 @@ workspace:
           arguments: <String>['--no-pub', '--template=module'],
         );
         final File pubspecFile = fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'));
-        final YamlMap pubspecYaml = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
-        final Map<String, Object?> pubspec = <String, Object?>{
+        final pubspecYaml = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
+        final pubspec = <String, Object?>{
           ...pubspecYaml.value.cast<String, Object?>(),
           'resolution': 'workspace',
           'environment': <String, Object?>{
@@ -373,15 +371,14 @@ workspace:
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
         Analytics: () => fakeAnalytics,
       },
     );
@@ -403,8 +400,8 @@ workspace:
         );
         final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub']);
         final File pubspecFile = fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'));
-        final YamlMap pubspecYaml = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
-        final Map<String, Object?> pubspec = <String, Object?>{
+        final pubspecYaml = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
+        final pubspec = <String, Object?>{
           ...pubspecYaml.value.cast<String, Object?>(),
           'resolution': 'workspace',
           'environment': <String, Object?>{'sdk': '^3.5.0-0'},
@@ -451,15 +448,14 @@ workspace:
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
         Analytics: () => fakeAnalytics,
       },
     );
@@ -493,14 +489,13 @@ flutter:
         );
       },
       overrides: <Type, Generator>{
-        Pub:
-            () => Pub(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-            ),
+        Pub: () => Pub(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+        ),
       },
     );
 
@@ -514,7 +509,7 @@ flutter:
         removeGeneratedFiles(projectPath);
 
         final PackagesCommand command = await runCommandIn(projectPath, 'get');
-        final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
+        final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
           (await getCommand.unifiedAnalyticsUsageValues(
@@ -525,15 +520,14 @@ flutter:
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -551,7 +545,7 @@ flutter:
         final String exampleProjectPath = globals.fs.path.join(projectPath, 'example');
 
         final PackagesCommand command = await runCommandIn(exampleProjectPath, 'get');
-        final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
+        final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         // A plugin example depends on the plugin itself, and integration_test.
         expect(
@@ -563,15 +557,14 @@ flutter:
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -582,7 +575,7 @@ flutter:
         removeGeneratedFiles(projectPath);
 
         final PackagesCommand command = await runCommandIn(projectPath, 'get');
-        final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
+        final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
           (await getCommand.unifiedAnalyticsUsageValues(
@@ -593,15 +586,14 @@ flutter:
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -615,7 +607,7 @@ flutter:
         removeGeneratedFiles(projectPath);
 
         final PackagesCommand command = await runCommandIn(projectPath, 'get');
-        final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
+        final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
           (await getCommand.unifiedAnalyticsUsageValues(
@@ -626,15 +618,14 @@ flutter:
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -645,7 +636,7 @@ flutter:
         removeGeneratedFiles(projectPath);
 
         final PackagesCommand command = await runCommandIn(projectPath, 'get');
-        final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
+        final getCommand = command.subcommands['get']! as PackagesGetCommand;
 
         expect(
           (await getCommand.unifiedAnalyticsUsageValues(
@@ -656,15 +647,14 @@ flutter:
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -684,15 +674,14 @@ flutter:
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -712,15 +701,14 @@ flutter:
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -746,15 +734,14 @@ flutter:
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -778,15 +765,14 @@ flutter:
       },
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
   });
@@ -827,15 +813,14 @@ flutter:
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
         BotDetector: () => const FakeBotDetector(false),
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -866,15 +851,14 @@ flutter:
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
         BotDetector: () => const FakeBotDetector(true),
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -883,7 +867,7 @@ flutter:
       () async {
         Cache.flutterRoot = '';
         globals.fs.file('pubspec.yaml').createSync();
-        final IOSink stdin = IOSink(StreamController<List<int>>().sink);
+        final stdin = IOSink(StreamController<List<int>>().sink);
         processManager.addCommand(
           FakeCommand(
             command: const <String>[
@@ -908,15 +892,14 @@ flutter:
         Platform: () => FakePlatform(environment: <String, String>{}),
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -925,7 +908,7 @@ flutter:
       () async {
         Cache.flutterRoot = '';
         globals.fs.file('pubspec.yaml').createSync();
-        final IOSink stdin = IOSink(StreamController<List<int>>().sink);
+        final stdin = IOSink(StreamController<List<int>>().sink);
         processManager.addCommand(
           FakeCommand(
             command: const <String>[
@@ -949,15 +932,14 @@ flutter:
         Platform: () => FakePlatform(environment: <String, String>{}),
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
 
@@ -986,15 +968,14 @@ flutter:
         Platform: () => FakePlatform(environment: <String, String>{}),
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
-        Pub:
-            () => Pub.test(
-              fileSystem: globals.fs,
-              logger: globals.logger,
-              processManager: globals.processManager,
-              botDetector: globals.botDetector,
-              platform: globals.platform,
-              stdio: mockStdio,
-            ),
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
       },
     );
   });

@@ -6,7 +6,7 @@ import 'project.dart';
 
 class CompileErrorProject extends Project {
   @override
-  final String pubspec = '''
+  final pubspec = '''
   name: test
   environment:
     sdk: ^3.7.0-0
@@ -17,7 +17,7 @@ class CompileErrorProject extends Project {
   ''';
 
   @override
-  final String main = r'''
+  final main = r'''
   import 'dart:async';
 
   import 'package:flutter/material.dart';

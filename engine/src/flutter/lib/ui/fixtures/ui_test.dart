@@ -234,6 +234,7 @@ void sendSemanticsUpdate() {
     linkUrl: '',
     controlsNodes: null,
     inputType: SemanticsInputType.none,
+    locale: null,
   );
   _semanticsUpdate(builder.build());
 }
@@ -287,6 +288,115 @@ void sendSemanticsUpdateWithRole() {
     role: SemanticsRole.tab,
     controlsNodes: null,
     inputType: SemanticsInputType.none,
+    locale: null,
+  );
+  _semanticsUpdate(builder.build());
+}
+
+@pragma('vm:entry-point')
+void sendSemanticsUpdateWithLocale() {
+  final SemanticsUpdateBuilder builder = SemanticsUpdateBuilder();
+
+  final Float64List transform = Float64List(16);
+  final Int32List childrenInTraversalOrder = Int32List(0);
+  final Int32List childrenInHitTestOrder = Int32List(0);
+  final Int32List additionalActions = Int32List(0);
+  // Identity matrix 4x4.
+  transform[0] = 1;
+  transform[5] = 1;
+  transform[10] = 1;
+  builder.updateNode(
+    id: 0,
+    flags: SemanticsFlags.none,
+    actions: 0,
+    maxValueLength: 0,
+    currentValueLength: 0,
+    textSelectionBase: -1,
+    textSelectionExtent: -1,
+    platformViewId: -1,
+    scrollChildren: 0,
+    scrollIndex: 0,
+    scrollPosition: 0,
+    scrollExtentMax: 0,
+    scrollExtentMin: 0,
+    rect: Rect.fromLTRB(0, 0, 10, 10),
+    identifier: "identifier",
+    label: "label",
+    labelAttributes: const <StringAttribute>[],
+    value: "value",
+    valueAttributes: const <StringAttribute>[],
+    increasedValue: "increasedValue",
+    increasedValueAttributes: const <StringAttribute>[],
+    decreasedValue: "decreasedValue",
+    decreasedValueAttributes: const <StringAttribute>[],
+    hint: "hint",
+    hintAttributes: const <StringAttribute>[],
+    tooltip: "tooltip",
+    textDirection: TextDirection.ltr,
+    transform: transform,
+    childrenInTraversalOrder: childrenInTraversalOrder,
+    childrenInHitTestOrder: childrenInHitTestOrder,
+    additionalActions: additionalActions,
+    headingLevel: 0,
+    linkUrl: '',
+    role: SemanticsRole.none,
+    controlsNodes: null,
+    inputType: SemanticsInputType.none,
+    locale: Locale('es', 'MX'),
+  );
+  _semanticsUpdate(builder.build());
+}
+
+@pragma('vm:entry-point')
+void sendSemanticsUpdateWithIsLink() {
+  final SemanticsUpdateBuilder builder = SemanticsUpdateBuilder();
+
+  final Float64List transform = Float64List(16);
+  final Int32List childrenInTraversalOrder = Int32List(0);
+  final Int32List childrenInHitTestOrder = Int32List(0);
+  final Int32List additionalActions = Int32List(0);
+  // Identity matrix 4x4.
+  transform[0] = 1;
+  transform[5] = 1;
+  transform[10] = 1;
+  builder.updateNode(
+    id: 0,
+    flags: SemanticsFlags.none.copyWith(isLink: true),
+    actions: 0,
+    maxValueLength: 0,
+    currentValueLength: 0,
+    textSelectionBase: -1,
+    textSelectionExtent: -1,
+    platformViewId: -1,
+    scrollChildren: 0,
+    scrollIndex: 0,
+    scrollPosition: 0,
+    scrollExtentMax: 0,
+    scrollExtentMin: 0,
+    rect: Rect.fromLTRB(0, 0, 10, 10),
+    identifier: "identifier",
+    label: "label",
+    labelAttributes: const <StringAttribute>[],
+    value: "value",
+    valueAttributes: const <StringAttribute>[],
+    increasedValue: "increasedValue",
+    increasedValueAttributes: const <StringAttribute>[],
+    decreasedValue: "decreasedValue",
+    decreasedValueAttributes: const <StringAttribute>[],
+    hint: "hint",
+    hintAttributes: const <StringAttribute>[],
+    tooltip: "tooltip",
+    textDirection: TextDirection.ltr,
+    transform: transform,
+    childrenInTraversalOrder: childrenInTraversalOrder,
+    childrenInHitTestOrder: childrenInHitTestOrder,
+    additionalActions: additionalActions,
+    headingLevel: 0,
+    linkUrl: '',
+    role: SemanticsRole.none,
+    controlsNodes: null,
+    inputType: SemanticsInputType.none,
+    locale: Locale('es', 'MX'),
   );
   _semanticsUpdate(builder.build());
 }
@@ -371,10 +481,9 @@ external void validateConfiguration();
 Future<void> encodeImageProducesExternalUint8List() async {
   final PictureRecorder pictureRecorder = PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
-  final Paint paint =
-      Paint()
-        ..color = Color.fromRGBO(255, 255, 255, 1.0)
-        ..style = PaintingStyle.fill;
+  final Paint paint = Paint()
+    ..color = Color.fromRGBO(255, 255, 255, 1.0)
+    ..style = PaintingStyle.fill;
   final Offset c = Offset(50.0, 50.0);
   canvas.drawCircle(c, 25.0, paint);
   final Picture picture = pictureRecorder.endRecording();
@@ -404,10 +513,9 @@ external void _validateNotNull(Object? object);
 Future<void> toByteDataWithoutGPU() async {
   final PictureRecorder pictureRecorder = PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
-  final Paint paint =
-      Paint()
-        ..color = Color.fromRGBO(255, 255, 255, 1.0)
-        ..style = PaintingStyle.fill;
+  final Paint paint = Paint()
+    ..color = Color.fromRGBO(255, 255, 255, 1.0)
+    ..style = PaintingStyle.fill;
   final Offset c = Offset(50.0, 50.0);
   canvas.drawCircle(c, 25.0, paint);
   final Picture picture = pictureRecorder.endRecording();
@@ -430,10 +538,9 @@ Future<void> toByteDataWithoutGPU() async {
 Future<void> toByteDataRetries() async {
   final PictureRecorder pictureRecorder = PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
-  final Paint paint =
-      Paint()
-        ..color = Color.fromRGBO(255, 255, 255, 1.0)
-        ..style = PaintingStyle.fill;
+  final Paint paint = Paint()
+    ..color = Color.fromRGBO(255, 255, 255, 1.0)
+    ..style = PaintingStyle.fill;
   final Offset c = Offset(50.0, 50.0);
   canvas.drawCircle(c, 25.0, paint);
   final Picture picture = pictureRecorder.endRecording();
@@ -454,10 +561,9 @@ Future<void> toByteDataRetries() async {
 Future<void> toByteDataRetryOverflows() async {
   final PictureRecorder pictureRecorder = PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
-  final Paint paint =
-      Paint()
-        ..color = Color.fromRGBO(255, 255, 255, 1.0)
-        ..style = PaintingStyle.fill;
+  final Paint paint = Paint()
+    ..color = Color.fromRGBO(255, 255, 255, 1.0)
+    ..style = PaintingStyle.fill;
   final Offset c = Offset(50.0, 50.0);
   canvas.drawCircle(c, 25.0, paint);
   final Picture picture = pictureRecorder.endRecording();
@@ -494,10 +600,9 @@ Future<void> toByteDataRetryOverflows() async {
 Future<void> toImageRetries() async {
   final PictureRecorder pictureRecorder = PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
-  final Paint paint =
-      Paint()
-        ..color = Color.fromRGBO(255, 255, 255, 1.0)
-        ..style = PaintingStyle.fill;
+  final Paint paint = Paint()
+    ..color = Color.fromRGBO(255, 255, 255, 1.0)
+    ..style = PaintingStyle.fill;
   final Offset c = Offset(50.0, 50.0);
   canvas.drawCircle(c, 25.0, paint);
   final Picture picture = pictureRecorder.endRecording();
@@ -517,10 +622,9 @@ Future<void> toImageRetries() async {
 Future<void> toImageRetryOverflows() async {
   final PictureRecorder pictureRecorder = PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
-  final Paint paint =
-      Paint()
-        ..color = Color.fromRGBO(255, 255, 255, 1.0)
-        ..style = PaintingStyle.fill;
+  final Paint paint = Paint()
+    ..color = Color.fromRGBO(255, 255, 255, 1.0)
+    ..style = PaintingStyle.fill;
   final Offset c = Offset(50.0, 50.0);
   canvas.drawCircle(c, 25.0, paint);
   final Picture picture = pictureRecorder.endRecording();
@@ -680,7 +784,7 @@ void hooksTests() async {
     window.onMetricsChanged!();
     _callHook(
       '_updateWindowMetrics',
-      21,
+      25,
       0, // window Id
       0.1234, // device pixel ratio
       0.0, // width
@@ -702,6 +806,10 @@ void hooksTests() async {
       <int>[], // display features types
       <int>[], // display features states
       0, // Display ID
+      0.0, // minWidth
+      0.0, // maxWidth
+      0.0, // minHeight
+      0.0, // maxHeight
     );
 
     expectIdentical(originalZone, callbackZone);
@@ -794,7 +902,7 @@ void hooksTests() async {
   await test('View padding/insets/viewPadding/systemGestureInsets', () {
     _callHook(
       '_updateWindowMetrics',
-      21,
+      25,
       0, // window Id
       1.0, // devicePixelRatio
       800.0, // width
@@ -816,6 +924,10 @@ void hooksTests() async {
       <int>[], // display features types
       <int>[], // display features states
       0, // Display ID
+      0.0, // minWidth
+      1000.0, // maxWidth
+      0.0, // minHeight
+      1000.0, // maxHeight
     );
 
     expectEquals(window.viewInsets.bottom, 0.0);
@@ -825,7 +937,7 @@ void hooksTests() async {
 
     _callHook(
       '_updateWindowMetrics',
-      21,
+      25,
       0, // window Id
       1.0, // devicePixelRatio
       800.0, // width
@@ -847,6 +959,10 @@ void hooksTests() async {
       <int>[], // display features types
       <int>[], // display features states
       0, // Display ID
+      0.0, // minWidth
+      0.0, // maxWidth
+      0.0, // minHeight
+      0.0, // maxHeight
     );
 
     expectEquals(window.viewInsets.bottom, 400.0);
@@ -858,7 +974,7 @@ void hooksTests() async {
   await test('Window physical touch slop', () {
     _callHook(
       '_updateWindowMetrics',
-      21,
+      25,
       0, // window Id
       1.0, // devicePixelRatio
       800.0, // width
@@ -880,13 +996,17 @@ void hooksTests() async {
       <int>[], // display features types
       <int>[], // display features states
       0, // Display ID
+      0.0, // minWidth
+      0.0, // maxWidth
+      0.0, // minHeight
+      0.0, // maxHeight
     );
 
     expectEquals(window.gestureSettings, GestureSettings(physicalTouchSlop: 11.0));
 
     _callHook(
       '_updateWindowMetrics',
-      21,
+      25,
       0, // window Id
       1.0, // devicePixelRatio
       800.0, // width
@@ -908,13 +1028,17 @@ void hooksTests() async {
       <int>[], // display features types
       <int>[], // display features states
       0, // Display ID
+      0.0, // minWidth
+      0.0, // maxWidth
+      0.0, // minHeight
+      0.0, // maxHeight
     );
 
     expectEquals(window.gestureSettings, GestureSettings(physicalTouchSlop: null));
 
     _callHook(
       '_updateWindowMetrics',
-      21,
+      25,
       0, // window Id
       1.0, // devicePixelRatio
       800.0, // width
@@ -936,6 +1060,10 @@ void hooksTests() async {
       <int>[], // display features types
       <int>[], // display features states
       0, // Display ID
+      0.0, // minWidth
+      0.0, // maxWidth
+      0.0, // minHeight
+      0.0, // maxHeight
     );
 
     expectEquals(window.gestureSettings, GestureSettings(physicalTouchSlop: 22.0));
@@ -1332,4 +1460,8 @@ external void _callHook(
   Object? arg19,
   Object? arg20,
   Object? arg21,
+  Object? arg22,
+  Object? arg23,
+  Object? arg24,
+  Object? arg25,
 ]);

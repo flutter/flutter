@@ -236,10 +236,12 @@ class ButtonBar extends StatelessWidget {
         overflowDirection:
             overflowDirection ?? barTheme.overflowDirection ?? VerticalDirection.down,
         overflowButtonSpacing: overflowButtonSpacing,
-        children:
-            children.map<Widget>((Widget child) {
-              return Padding(padding: EdgeInsets.symmetric(horizontal: paddingUnit), child: child);
-            }).toList(),
+        children: children.map<Widget>((Widget child) {
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: paddingUnit),
+            child: child,
+          );
+        }).toList(),
       ),
     );
     switch (buttonTheme.layoutBehavior) {

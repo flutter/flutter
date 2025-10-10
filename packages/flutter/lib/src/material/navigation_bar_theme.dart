@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'material_state.dart';
 import 'navigation_bar.dart';
 import 'theme.dart';
 
@@ -80,20 +79,20 @@ class NavigationBarThemeData with Diagnosticable {
   /// [NavigationDestination] labels.
   ///
   /// You can use this to specify a different style when the label is selected.
-  final MaterialStateProperty<TextStyle?>? labelTextStyle;
+  final WidgetStateProperty<TextStyle?>? labelTextStyle;
 
   /// The theme to merge with the default icon theme for
   /// [NavigationDestination] icons.
   ///
   /// You can use this to specify a different icon theme when the icon is
   /// selected.
-  final MaterialStateProperty<IconThemeData?>? iconTheme;
+  final WidgetStateProperty<IconThemeData?>? iconTheme;
 
   /// Overrides the default value of [NavigationBar.labelBehavior].
   final NavigationDestinationLabelBehavior? labelBehavior;
 
   /// Overrides the default value of [NavigationBar.overlayColor].
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
 
   /// Overrides the default value of [NavigationBar.labelPadding].
   final EdgeInsetsGeometry? labelPadding;
@@ -108,10 +107,10 @@ class NavigationBarThemeData with Diagnosticable {
     Color? surfaceTintColor,
     Color? indicatorColor,
     ShapeBorder? indicatorShape,
-    MaterialStateProperty<TextStyle?>? labelTextStyle,
-    MaterialStateProperty<IconThemeData?>? iconTheme,
+    WidgetStateProperty<TextStyle?>? labelTextStyle,
+    WidgetStateProperty<IconThemeData?>? iconTheme,
     NavigationDestinationLabelBehavior? labelBehavior,
-    MaterialStateProperty<Color?>? overlayColor,
+    WidgetStateProperty<Color?>? overlayColor,
     EdgeInsetsGeometry? labelPadding,
   }) {
     return NavigationBarThemeData(
@@ -151,20 +150,20 @@ class NavigationBarThemeData with Diagnosticable {
       surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
       indicatorColor: Color.lerp(a?.indicatorColor, b?.indicatorColor, t),
       indicatorShape: ShapeBorder.lerp(a?.indicatorShape, b?.indicatorShape, t),
-      labelTextStyle: MaterialStateProperty.lerp<TextStyle?>(
+      labelTextStyle: WidgetStateProperty.lerp<TextStyle?>(
         a?.labelTextStyle,
         b?.labelTextStyle,
         t,
         TextStyle.lerp,
       ),
-      iconTheme: MaterialStateProperty.lerp<IconThemeData?>(
+      iconTheme: WidgetStateProperty.lerp<IconThemeData?>(
         a?.iconTheme,
         b?.iconTheme,
         t,
         IconThemeData.lerp,
       ),
       labelBehavior: t < 0.5 ? a?.labelBehavior : b?.labelBehavior,
-      overlayColor: MaterialStateProperty.lerp<Color?>(
+      overlayColor: WidgetStateProperty.lerp<Color?>(
         a?.overlayColor,
         b?.overlayColor,
         t,
@@ -226,14 +225,14 @@ class NavigationBarThemeData with Diagnosticable {
       DiagnosticsProperty<ShapeBorder>('indicatorShape', indicatorShape, defaultValue: null),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<TextStyle?>>(
+      DiagnosticsProperty<WidgetStateProperty<TextStyle?>>(
         'labelTextStyle',
         labelTextStyle,
         defaultValue: null,
       ),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<IconThemeData?>>(
+      DiagnosticsProperty<WidgetStateProperty<IconThemeData?>>(
         'iconTheme',
         iconTheme,
         defaultValue: null,
@@ -247,7 +246,7 @@ class NavigationBarThemeData with Diagnosticable {
       ),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<Color?>>(
+      DiagnosticsProperty<WidgetStateProperty<Color?>>(
         'overlayColor',
         overlayColor,
         defaultValue: null,
@@ -289,8 +288,8 @@ class NavigationBarTheme extends InheritedTheme {
   /// NavigationBarThemeData theme = NavigationBarTheme.of(context);
   /// ```
   static NavigationBarThemeData of(BuildContext context) {
-    final NavigationBarTheme? navigationBarTheme =
-        context.dependOnInheritedWidgetOfExactType<NavigationBarTheme>();
+    final NavigationBarTheme? navigationBarTheme = context
+        .dependOnInheritedWidgetOfExactType<NavigationBarTheme>();
     return navigationBarTheme?.data ?? Theme.of(context).navigationBarTheme;
   }
 

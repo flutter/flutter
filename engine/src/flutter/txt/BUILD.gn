@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//flutter/common/config.gni")
+import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/testing/testing.gni")
 
 if (is_fuchsia) {
@@ -85,6 +86,10 @@ source_set("txt") {
     "//flutter/skia/modules/skparagraph",
   ]
 
+  if (impeller_supports_rendering) {
+    deps += [ "//flutter/impeller/display_list" ]
+  }
+
   libs = []
   if (flutter_use_fontconfig) {
     libs += [ "fontconfig" ]
@@ -137,6 +142,7 @@ if (enable_unittests) {
       ":txt_fixtures",
       "//flutter/fml",
       "//flutter/skia/modules/skparagraph",
+      "//flutter/skia/modules/skparagraph:utils",
       "//flutter/testing:testing_lib",
       "//flutter/third_party/benchmark",
     ]
@@ -165,7 +171,7 @@ if (enable_unittests) {
       ":txt_fixtures",
       "//flutter/fml",
       "//flutter/runtime:test_font",
-      "//flutter/skia/modules/skparagraph:skparagraph",
+      "//flutter/skia/modules/skparagraph",
       "//flutter/testing:skia",
       "//flutter/testing:testing_lib",
     ]

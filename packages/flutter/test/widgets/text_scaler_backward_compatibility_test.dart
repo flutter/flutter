@@ -224,8 +224,9 @@ void main() {
         ),
       );
 
-      final RenderEditable renderEditable =
-          tester.allRenderObjects.whereType<RenderEditable>().first;
+      final RenderEditable renderEditable = tester.allRenderObjects
+          .whereType<RenderEditable>()
+          .first;
       expect(renderEditable.textScaler, const TextScaler.linear(2.0));
     });
   });

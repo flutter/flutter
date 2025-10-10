@@ -17,7 +17,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
   group('chrome: $chrome'
       '${additionalCommandArgs.isEmpty ? '' : ' with args: $additionalCommandArgs'}', () {
     late Directory tempDir;
-    final HotReloadWithAssetProject project = HotReloadWithAssetProject();
+    final project = HotReloadWithAssetProject();
     late FlutterRunTestDriver flutter;
 
     setUp(() async {
@@ -32,9 +32,9 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
     });
 
     testWithoutContext('hot reload/restart do not need to sync assets on reload', () async {
-      final Completer<void> onFirstLoad = Completer<void>();
-      final Completer<void> onSecondLoad = Completer<void>();
-      final Completer<void> onThirdLoad = Completer<void>();
+      final onFirstLoad = Completer<void>();
+      final onSecondLoad = Completer<void>();
+      final onThirdLoad = Completer<void>();
 
       flutter.stdout.listen((String line) {
         // If the asset fails to load, this message will be printed instead.

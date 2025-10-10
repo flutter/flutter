@@ -37,7 +37,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
 
   /// The key used to identify the metadata element as the loading unit id to
   /// deferred component mapping.
-  static const String _mappingKey =
+  static const _mappingKey =
       'io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager.loadingUnitMapping';
 
   /// Checks if the base module `app`'s `AndroidManifest.xml` contains the
@@ -98,8 +98,8 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
       return false;
     }
     // Create loading unit mapping.
-    final Map<int, String> mapping = <int, String>{};
-    for (final DeferredComponent component in components) {
+    final mapping = <int, String>{};
+    for (final component in components) {
       component.assignLoadingUnits(generatedLoadingUnits);
       final Set<LoadingUnit>? loadingUnits = component.loadingUnits;
       if (loadingUnits == null) {
@@ -111,7 +111,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
         }
       }
     }
-    for (final LoadingUnit unit in generatedLoadingUnits) {
+    for (final unit in generatedLoadingUnits) {
       if (!mapping.containsKey(unit.id)) {
         // Store an empty string for unassigned loading units,
         // indicating that it is in the base component.
@@ -119,18 +119,18 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
       }
     }
     // Encode the mapping as a string.
-    final StringBuffer mappingBuffer = StringBuffer();
+    final mappingBuffer = StringBuffer();
     for (final int key in mapping.keys) {
       mappingBuffer.write('$key:${mapping[key]},');
     }
-    String encodedMapping = mappingBuffer.toString();
+    var encodedMapping = mappingBuffer.toString();
     // remove trailing comma if any
     if (encodedMapping.endsWith(',')) {
       encodedMapping = encodedMapping.substring(0, encodedMapping.length - 1);
     }
     // Check for existing metadata entry and see if needs changes.
-    bool exists = false;
-    bool modified = false;
+    var exists = false;
+    var modified = false;
     for (final XmlElement application in document.findAllElements('application')) {
       for (final XmlElement metaData in application.findElements('meta-data')) {
         final String? name = metaData.getAttribute('android:name');
@@ -146,11 +146,10 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
     }
     if (!exists) {
       // Create an meta-data XmlElement that contains the mapping.
-      final XmlElement mappingMetadataElement =
-          XmlElement(XmlName.fromString('meta-data'), <XmlAttribute>[
-            XmlAttribute(XmlName.fromString('android:name'), _mappingKey),
-            XmlAttribute(XmlName.fromString('android:value'), encodedMapping),
-          ]);
+      final mappingMetadataElement = XmlElement(XmlName.fromString('meta-data'), <XmlAttribute>[
+        XmlAttribute(XmlName.fromString('android:name'), _mappingKey),
+        XmlAttribute(XmlName.fromString('android:value'), encodedMapping),
+      ]);
       for (final XmlElement application in document.findAllElements('application')) {
         application.children.add(mappingMetadataElement);
         break;
@@ -187,13 +186,13 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
       projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName),
     );
     loadingUnitComparisonResults = <String, Object>{};
-    final Set<LoadingUnit> unmatchedLoadingUnits = <LoadingUnit>{};
-    final List<LoadingUnit> newLoadingUnits = <LoadingUnit>[];
+    final unmatchedLoadingUnits = <LoadingUnit>{};
+    final newLoadingUnits = <LoadingUnit>[];
     unmatchedLoadingUnits.addAll(cachedLoadingUnits);
-    final Set<int> addedNewIds = <int>{};
-    for (final LoadingUnit genUnit in generatedLoadingUnits) {
-      bool matched = false;
-      for (final LoadingUnit cacheUnit in cachedLoadingUnits) {
+    final addedNewIds = <int>{};
+    for (final genUnit in generatedLoadingUnits) {
+      var matched = false;
+      for (final cacheUnit in cachedLoadingUnits) {
         if (genUnit.equalsIgnoringPath(cacheUnit)) {
           matched = true;
           unmatchedLoadingUnits.remove(cacheUnit);
@@ -213,12 +212,12 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
   }
 
   List<LoadingUnit> _parseLoadingUnitsCache(File cacheFile) {
-    final List<LoadingUnit> loadingUnits = <LoadingUnit>[];
+    final loadingUnits = <LoadingUnit>[];
     inputs.add(cacheFile);
     if (!cacheFile.existsSync()) {
       return loadingUnits;
     }
-    final YamlMap data = loadYaml(cacheFile.readAsStringSync()) as YamlMap;
+    final data = loadYaml(cacheFile.readAsStringSync()) as YamlMap;
     // validate yaml format.
     if (!data.containsKey('loading-units')) {
       invalidFiles[cacheFile.path] =
@@ -233,7 +232,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
         return loadingUnits;
       }
       if (data['loading-units'] != null) {
-        for (final Object? loadingUnitData in data['loading-units'] as List<Object?>) {
+        for (final loadingUnitData in data['loading-units'] as List<Object?>) {
           if (loadingUnitData is! YamlMap) {
             invalidFiles[cacheFile.path] =
                 "Invalid loading units yaml file, 'loading-units' "
@@ -270,10 +269,10 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
     // Parse out validated yaml.
     if (data.containsKey('loading-units')) {
       if (data['loading-units'] != null) {
-        for (final Object? loadingUnitData in data['loading-units'] as List<Object?>) {
-          final YamlMap? loadingUnitDataMap = loadingUnitData as YamlMap?;
-          final List<String> libraries = <String>[];
-          final YamlList? nodes = loadingUnitDataMap?['libraries'] as YamlList?;
+        for (final loadingUnitData in data['loading-units'] as List<Object?>) {
+          final loadingUnitDataMap = loadingUnitData as YamlMap?;
+          final libraries = <String>[];
+          final nodes = loadingUnitDataMap?['libraries'] as YamlList?;
           if (nodes != null) {
             for (final Object node in nodes.whereType<Object>()) {
               libraries.add(node as String);
@@ -302,7 +301,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
     ErrorHandlingFileSystem.deleteIfExists(cacheFile);
     cacheFile.createSync(recursive: true);
 
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     buffer.write('''
 # ==============================================================================
 # The contents of this file are automatically generated and it is not
@@ -330,7 +329,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
 # also introduce deferred imports that result in unexpected loading units.
 loading-units:
 ''');
-    final Set<int> usedIds = <int>{};
+    final usedIds = <int>{};
     for (final LoadingUnit unit in generatedLoadingUnits) {
       if (usedIds.contains(unit.id)) {
         continue;

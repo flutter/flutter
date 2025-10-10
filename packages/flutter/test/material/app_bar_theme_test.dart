@@ -562,7 +562,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(appBarTheme: const AppBarThemeData(shadowColor: Colors.red)),
-        home: Scaffold(appBar: AppBar(title: const Text('Title'), shadowColor: Colors.yellow)),
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Title'), shadowColor: Colors.yellow),
+        ),
       ),
     );
 
@@ -577,7 +579,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(appBarTheme: const AppBarThemeData(surfaceTintColor: Colors.red)),
-        home: Scaffold(appBar: AppBar(title: const Text('Title'), surfaceTintColor: Colors.yellow)),
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Title'), surfaceTintColor: Colors.yellow),
+        ),
       ),
     );
 
@@ -1156,11 +1160,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const AppBarThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -1187,11 +1190,10 @@ void main() {
       actionsPadding: EdgeInsets.symmetric(horizontal: 8.0),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,

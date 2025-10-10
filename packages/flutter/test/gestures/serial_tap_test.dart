@@ -19,17 +19,16 @@ void main() {
 
   setUp(() {
     events = <String>[];
-    serial =
-        SerialTapGestureRecognizer()
-          ..onSerialTapDown = (SerialTapDownDetails details) {
-            events.add('down#${details.count}');
-          }
-          ..onSerialTapCancel = (SerialTapCancelDetails details) {
-            events.add('cancel#${details.count}');
-          }
-          ..onSerialTapUp = (SerialTapUpDetails details) {
-            events.add('up#${details.count}');
-          };
+    serial = SerialTapGestureRecognizer()
+      ..onSerialTapDown = (SerialTapDownDetails details) {
+        events.add('down#${details.count}');
+      }
+      ..onSerialTapCancel = (SerialTapCancelDetails details) {
+        events.add('cancel#${details.count}');
+      }
+      ..onSerialTapUp = (SerialTapUpDetails details) {
+        events.add('up#${details.count}');
+      };
     addTearDown(serial.dispose);
   });
 
@@ -102,14 +101,13 @@ void main() {
   testGesture('Wins over tap gesture below it in the tree', (GestureTester tester) {
     bool recognizedSingleTap = false;
     bool canceledSingleTap = false;
-    final TapGestureRecognizer singleTap =
-        TapGestureRecognizer()
-          ..onTap = () {
-            recognizedSingleTap = true;
-          }
-          ..onTapCancel = () {
-            canceledSingleTap = true;
-          };
+    final TapGestureRecognizer singleTap = TapGestureRecognizer()
+      ..onTap = () {
+        recognizedSingleTap = true;
+      }
+      ..onTapCancel = () {
+        canceledSingleTap = true;
+      };
     addTearDown(singleTap.dispose);
 
     singleTap.addPointer(down1);
@@ -127,14 +125,13 @@ void main() {
   testGesture('Wins over tap gesture above it in the tree', (GestureTester tester) {
     bool recognizedSingleTap = false;
     bool canceledSingleTap = false;
-    final TapGestureRecognizer singleTap =
-        TapGestureRecognizer()
-          ..onTap = () {
-            recognizedSingleTap = true;
-          }
-          ..onTapCancel = () {
-            canceledSingleTap = true;
-          };
+    final TapGestureRecognizer singleTap = TapGestureRecognizer()
+      ..onTap = () {
+        recognizedSingleTap = true;
+      }
+      ..onTapCancel = () {
+        canceledSingleTap = true;
+      };
     addTearDown(singleTap.dispose);
 
     serial.addPointer(down1);
@@ -151,11 +148,10 @@ void main() {
 
   testGesture('Loses to release gesture below it in the tree', (GestureTester tester) {
     bool recognizedRelease = false;
-    final ReleaseGestureRecognizer release =
-        ReleaseGestureRecognizer()
-          ..onRelease = () {
-            recognizedRelease = true;
-          };
+    final ReleaseGestureRecognizer release = ReleaseGestureRecognizer()
+      ..onRelease = () {
+        recognizedRelease = true;
+      };
     addTearDown(release.dispose);
 
     release.addPointer(down1);
@@ -170,11 +166,10 @@ void main() {
 
   testGesture('Wins over release gesture above it in the tree', (GestureTester tester) {
     bool recognizedRelease = false;
-    final ReleaseGestureRecognizer release =
-        ReleaseGestureRecognizer()
-          ..onRelease = () {
-            recognizedRelease = true;
-          };
+    final ReleaseGestureRecognizer release = ReleaseGestureRecognizer()
+      ..onRelease = () {
+        recognizedRelease = true;
+      };
     addTearDown(release.dispose);
 
     serial.addPointer(down1);
@@ -201,11 +196,10 @@ void main() {
 
   testGesture('Wins over double-tap recognizer below it in the tree', (GestureTester tester) {
     bool recognizedDoubleTap = false;
-    final DoubleTapGestureRecognizer doubleTap =
-        DoubleTapGestureRecognizer()
-          ..onDoubleTap = () {
-            recognizedDoubleTap = true;
-          };
+    final DoubleTapGestureRecognizer doubleTap = DoubleTapGestureRecognizer()
+      ..onDoubleTap = () {
+        recognizedDoubleTap = true;
+      };
     addTearDown(doubleTap.dispose);
 
     doubleTap.addPointer(down1);
@@ -240,11 +234,10 @@ void main() {
 
   testGesture('Wins over double-tap recognizer above it in the tree', (GestureTester tester) {
     bool recognizedDoubleTap = false;
-    final DoubleTapGestureRecognizer doubleTap =
-        DoubleTapGestureRecognizer()
-          ..onDoubleTap = () {
-            recognizedDoubleTap = true;
-          };
+    final DoubleTapGestureRecognizer doubleTap = DoubleTapGestureRecognizer()
+      ..onDoubleTap = () {
+        recognizedDoubleTap = true;
+      };
     addTearDown(doubleTap.dispose);
 
     serial.addPointer(down1);
