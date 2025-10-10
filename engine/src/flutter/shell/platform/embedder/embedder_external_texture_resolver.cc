@@ -10,9 +10,11 @@
 namespace flutter {
 
 #ifdef SHELL_ENABLE_GL
+#ifndef SLIMPELLER
 EmbedderExternalTextureResolver::EmbedderExternalTextureResolver(
-    EmbedderExternalTextureGL::ExternalTextureCallback gl_callback)
+    EmbedderExternalTextureGLSkia::ExternalTextureCallback gl_callback)
     : gl_callback_(std::move(gl_callback)) {}
+#endif
 #endif
 
 #ifdef SHELL_ENABLE_METAL
@@ -24,10 +26,12 @@ EmbedderExternalTextureResolver::EmbedderExternalTextureResolver(
 std::unique_ptr<Texture>
 EmbedderExternalTextureResolver::ResolveExternalTexture(int64_t texture_id) {
 #ifdef SHELL_ENABLE_GL
+#ifndef SLIMPELLER
   if (gl_callback_) {
-    return std::make_unique<EmbedderExternalTextureGL>(texture_id,
-                                                       gl_callback_);
+    return std::make_unique<EmbedderExternalTextureGLSkia>(texture_id,
+                                                           gl_callback_);
   }
+#endif
 #endif
 
 #ifdef SHELL_ENABLE_METAL
@@ -42,9 +46,11 @@ EmbedderExternalTextureResolver::ResolveExternalTexture(int64_t texture_id) {
 
 bool EmbedderExternalTextureResolver::SupportsExternalTextures() {
 #ifdef SHELL_ENABLE_GL
+#ifndef SLIMPELLER
   if (gl_callback_) {
     return true;
   }
+#endif
 #endif
 
 #ifdef SHELL_ENABLE_METAL
