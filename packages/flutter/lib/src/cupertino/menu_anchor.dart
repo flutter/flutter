@@ -1084,7 +1084,7 @@ class _MenuOverlayState extends State<_MenuOverlay>
   }
 
   void _handleOutsideTap(PointerDownEvent event) {
-    // MenuController.maybeOf(context)!.close();
+    MenuController.maybeOf(context)!.close();
   }
 
   void _handlePanDistanceChanged() {
