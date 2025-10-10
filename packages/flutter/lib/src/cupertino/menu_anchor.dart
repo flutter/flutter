@@ -2952,7 +2952,7 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
 
   void _handlePointerExit(PointerExitEvent event) {
     if (isHovered) {
-      isHovered = false;
+      isHovered = isFocused = false;
       widget.onHover?.call(false);
     }
   }
