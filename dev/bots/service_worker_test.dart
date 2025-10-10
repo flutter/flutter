@@ -79,7 +79,7 @@ self.addEventListener('fetch', (event) => {
       _target,
     ], workingDirectory: _testAppDirectory);
     print('\n${yellow}Phase 1: Installing dummy caching worker and verifying it caches...$reset');
-    final cleanupWorkerContent = serviceWorkerBuildFile.readAsStringSync();
+    final String cleanupWorkerContent = serviceWorkerBuildFile.readAsStringSync();
     serviceWorkerBuildFile.writeAsStringSync(oldCachingWorkerContent);
 
     server = await _startServer(headless: headless);
@@ -101,8 +101,10 @@ self.addEventListener('fetch', (event) => {
     print('\n${yellow}Phase 2: Deploying cleanup worker and verifying cache is removed...$reset');
     serviceWorkerBuildFile.writeAsStringSync(cleanupWorkerContent);
 
+    _requestedPaths.clear();
     server = await _startServer(headless: headless);
     await _waitForAppToRequest(server, 'main.dart.js');
+    _requestedPaths.clear();
     print('== RELOADING PAGE ==');
     await server.chrome.reloadPage();
     await _waitForAppToRequest(server, 'main.dart.js');
