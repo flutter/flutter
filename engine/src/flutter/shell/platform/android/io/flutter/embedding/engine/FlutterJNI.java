@@ -1387,6 +1387,18 @@ public class FlutterJNI {
         viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
   }
 
+  @UiThread
+  @SuppressWarnings("unused")
+  @SuppressLint("NewApi")
+  public void hidePlatformView2(int viewId) {
+    ensureRunningOnMainThread();
+    if (platformViewsController2 == null) {
+      throw new RuntimeException(
+          "platformViewsController must be set before attempting to hide a platform view");
+    }
+    platformViewsController2.hidePlatformView(viewId);
+  }
+
   // ----- Start Localization Support ----
 
   /** Sets the localization plugin that is used in various localization methods. */

@@ -114,6 +114,7 @@ class MockPlatformViewAndroidJNI : public PlatformViewAndroidJNI {
                int32_t viewHeight,
                MutatorsStack mutators_stack),
               (override));
+  MOCK_METHOD(void, hidePlatformView2, (int32_t view_id), (override));
   MOCK_METHOD(void, onEndFrame2, (), (override));
   MOCK_METHOD(void, showOverlaySurface2, (), (override));
   MOCK_METHOD(void, hideOverlaySurface2, (), (override));
