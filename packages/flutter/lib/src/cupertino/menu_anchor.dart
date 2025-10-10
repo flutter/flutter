@@ -2906,7 +2906,7 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
       _handleActivation();
     }
 
-    isPanned = isPressed = false;
+    isPanned = false;
   }
 
   @override
