@@ -14,7 +14,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
+  setUpUnitTests();
 
   test('Paragraph bidi 1 LTR only', () {
     final WebParagraphStyle paragraphStyle = WebParagraphStyle(
@@ -27,7 +27,7 @@ Future<void> testMain() async {
     builder.addText('Arial, 30px;');
     final WebParagraph paragraph = builder.build();
     final layout = paragraph.getLayout();
-    layout.extractClusterTexts();
+    layout.extractTextClusters();
     layout.extractBidiRuns();
     expect(layout.bidiRuns.length, 1);
   });
@@ -43,7 +43,7 @@ Future<void> testMain() async {
     builder.addText('بَالَكُمُ');
     final WebParagraph paragraph = builder.build();
     final layout = paragraph.getLayout();
-    layout.extractClusterTexts();
+    layout.extractTextClusters();
     layout.extractBidiRuns();
     expect(layout.bidiRuns.length, 1);
   });
@@ -63,7 +63,7 @@ Future<void> testMain() async {
     builder.addText('يَهْدِيْكُمُ');
     final WebParagraph paragraph = builder.build();
     final layout = paragraph.getLayout();
-    layout.extractClusterTexts();
+    layout.extractTextClusters();
     layout.extractBidiRuns();
     expect(layout.bidiRuns.length, 5);
   });

@@ -196,6 +196,7 @@ void testCacheCapacity(LruCache<String, SegmentationResult> cache, SegmentationC
 }
 
 int _seed = 0;
+
 String _randomString(int length) {
   const String allChars =
       ' 1234567890'
