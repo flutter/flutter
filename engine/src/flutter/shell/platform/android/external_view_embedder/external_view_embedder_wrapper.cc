@@ -4,7 +4,6 @@
 
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_wrapper.h"
 
-#include <memory>
 #include <utility>
 
 #include "flutter/impeller/renderer/backend/vulkan/context_vk.h"

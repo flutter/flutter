@@ -5,7 +5,6 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_WRAPPER_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_WRAPPER_H_
 
-#include <memory>
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/embedded_views.h"
 #include "flutter/shell/platform/android/context/android_context.h"
