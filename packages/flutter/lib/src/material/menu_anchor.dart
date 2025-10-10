@@ -3503,6 +3503,7 @@ class _RenderMenuLayout extends RenderShiftedBox {
     if (child == null) {
       return null;
     }
+
     final BoxConstraints childConstraints = getConstraintsForChild(constraints);
     final double? result = child.getDryBaseline(childConstraints, baseline);
     if (result == null) {
@@ -3520,7 +3521,11 @@ class _RenderMenuLayout extends RenderShiftedBox {
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    return getMaxIntrinsicWidth(height);
+    final double width = BoxConstraints.tightForFinite(height: height).maxWidth;
+    if (width.isFinite) {
+      return width;
+    }
+    return 0.0;
   }
 
   @override
@@ -3534,7 +3539,11 @@ class _RenderMenuLayout extends RenderShiftedBox {
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    return getMaxIntrinsicHeight(width);
+    final double height = BoxConstraints.tightForFinite(width: width).maxHeight;
+    if (height.isFinite) {
+      return height;
+    }
+    return 0.0;
   }
 
   @override
