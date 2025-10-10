@@ -5187,6 +5187,108 @@ void main() {
   });
 
   group('Animations', () {
+    testWidgets('Animations can be disabled', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuAnchor(
+              controller: controller,
+              animated: true,
+              menuChildren: <Widget>[MenuItemButton(onPressed: () {}, child: const Text('Item 0'))],
+            ),
+          ),
+        ),
+      );
+
+      // When animations are enabled, this will return the opacity of the
+      // FadeTransition wrapping the MenuItemButton.
+      //
+      // When animations are disabled, this will return the opacity of the
+      // FadeTransition wrapping the MenuAnchor's surface.
+      double getOpacity(String text) {
+        return tester
+            .firstWidget<FadeTransition>(
+              find.ancestor(
+                of: find.widgetWithText(MenuItemButton, text),
+                matching: find.byType(FadeTransition),
+              ),
+            )
+            .opacity
+            .value;
+      }
+
+      // Open the menu and verify animations are enabled.
+      controller.open();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(getOpacity('Item 0'), closeTo(0.2, 0.05));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuAnchor(
+              controller: controller,
+              menuChildren: <Widget>[MenuItemButton(onPressed: () {}, child: const Text('Item 0'))],
+            ),
+          ),
+        ),
+      );
+
+      expect(getOpacity('Item 0'), equals(1.0));
+    });
+
+    testWidgets('MenuAnchor children can be changed', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuAnchor(
+              controller: controller,
+              animated: true,
+              menuChildren: <Widget>[MenuItemButton(onPressed: () {}, child: const Text('Item 0'))],
+            ),
+          ),
+        ),
+      );
+
+      // When animations are enabled, this will return the opacity of the
+      // FadeTransition wrapping the MenuItemButton.
+      //
+      // When animations are disabled, this will return the opacity of the
+      // FadeTransition wrapping the MenuAnchor's surface.
+      double getOpacity(String text) {
+        return tester
+            .firstWidget<FadeTransition>(
+              find.ancestor(
+                of: find.widgetWithText(MenuItemButton, text),
+                matching: find.byType(FadeTransition),
+              ),
+            )
+            .opacity
+            .value;
+      }
+
+      controller.open();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(getOpacity('Item 0'), closeTo(0.2, 0.05));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuAnchor(
+              controller: controller,
+              animated: true,
+              menuChildren: <Widget>[MenuItemButton(onPressed: () {}, child: const Text('Item 1'))],
+            ),
+          ),
+        ),
+      );
+
+      expect(getOpacity('Item 1'), closeTo(0.2, 0.05));
+    });
+
     testWidgets('Menu panel fades in', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(

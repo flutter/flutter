@@ -467,6 +467,7 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
     _resolveAnimationController();
     _resolveMenuItems();
     _animationController.addStatusListener(_handleAnimationStatusChanged);
+
     if (widget.controller == null) {
       _internalMenuController = MenuController();
     }
