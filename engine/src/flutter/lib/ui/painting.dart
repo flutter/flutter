@@ -5330,9 +5330,11 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
 /// Example:
 ///
 /// ```dart
-/// shader.getUniformFloat('uColor', 0).set(1.0);
-/// shader.getUniformFloat('uColor', 1).set(0.0);
-/// shader.getUniformFloat('uColor', 2).set(0.0);
+/// void updateShader(ui.FragmentShader shader) {
+///   shader.getUniformFloat('uColor', 0).set(1.0);
+///   shader.getUniformFloat('uColor', 1).set(0.0);
+///   shader.getUniformFloat('uColor', 2).set(0.0);
+/// }
 /// ```
 ///
 /// See also:
@@ -5453,13 +5455,15 @@ base class FragmentShader extends Shader {
   /// ```
   ///
   /// ```dart
-  /// shader.getUniformFloat('uScale');
-  /// shader.getUniformFloat('uMagnitude', 0);
-  /// shader.getUniformFloat('uMagnitude', 1);
-  /// shader.getUniformFloat('uColor', 0);
-  /// shader.getUniformFloat('uColor', 1);
-  /// shader.getUniformFloat('uColor', 2);
-  /// shader.getUniformFloat('uColor', 3);
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   shader.getUniformFloat('uScale');
+  ///   shader.getUniformFloat('uMagnitude', 0);
+  ///   shader.getUniformFloat('uMagnitude', 1);
+  ///   shader.getUniformFloat('uColor', 0);
+  ///   shader.getUniformFloat('uColor', 1);
+  ///   shader.getUniformFloat('uColor', 2);
+  ///   shader.getUniformFloat('uColor', 3);
+  /// }
   /// ```
   UniformFloatSlot getUniformFloat(String name, [int? index]) {
     index ??= 0;
