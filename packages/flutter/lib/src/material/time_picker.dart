@@ -807,6 +807,7 @@ class _AmPmButton extends StatelessWidget {
       checked: defaultTargetPlatform == TargetPlatform.iOS ? null : selected,
       inMutuallyExclusiveGroup: true,
       button: true,
+      liveRegion: true,
       child: Padding(
         padding: padding,
         child: Material(
