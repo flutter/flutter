@@ -6048,8 +6048,6 @@ void main() {
     });
 
     testWidgets('Hover traversal works during opening animation', (WidgetTester tester) async {
-      listenForFocusChanges();
-
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -6065,6 +6063,8 @@ void main() {
           ),
         ),
       );
+
+      listenForFocusChanges();
 
       controller.open();
       await tester.pump();
@@ -6129,18 +6129,17 @@ void main() {
           ),
         ),
       );
+
       listenForFocusChanges();
 
       await tester.tap(find.text('Menu 0'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 20));
-
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump();
 
       expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
 
-      await tester.pump(const Duration(milliseconds: 20));
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump();
 
