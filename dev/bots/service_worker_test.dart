@@ -82,12 +82,12 @@ self.addEventListener('fetch', (event) => {
     serviceWorkerBuildFile.writeAsStringSync(oldCachingWorkerContent);
 
     server = await _startServer(headless: headless);
+    await _waitForAppToRequest(server, 'flutter_service_worker.js');
     await _waitForAppToRequest(server, 'main.dart.js');
     await _waitForAppToRequest(server, 'CLOSE');
     _requestedPaths.clear();
     print('== RELOADING PAGE ==');
     await server.chrome.reloadPage();
-    await _waitForAppToRequest(server, 'flutter_service_worker.js');
     await _waitForAppToRequest(server, 'CLOSE');
 
     expect(
@@ -104,6 +104,7 @@ self.addEventListener('fetch', (event) => {
 
     _requestedPaths.clear();
     server = await _startServer(headless: headless);
+    await _waitForAppToRequest(server, 'flutter_service_worker.js');
     await _waitForAppToRequest(server, 'main.dart.js');
     await _waitForAppToRequest(server, 'CLOSE');
     _requestedPaths.clear();
