@@ -1130,8 +1130,8 @@ class SelectionOverlay {
   /// {@endtemplate}
   bool get handlesAreVisible =>
       _handles != null &&
-      (endHandlesVisible?.value ?? false) &&
-      (startHandlesVisible?.value ?? false);
+      (endHandlesVisible?.value ?? true) &&
+      (startHandlesVisible?.value ?? true);
 
   /// {@template flutter.widgets.SelectionOverlay.magnifierIsVisible}
   /// Whether the magnifier is currently visible.
