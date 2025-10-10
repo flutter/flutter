@@ -64,31 +64,28 @@ void main() {
       // Needs https://github.com/flutter/flutter/issues/129659
       return;
     }
+    final String testAssetName =
+        'test_reorder_uniforms_${DateTime.now().millisecondsSinceEpoch}.frag.iplr';
     final String buildDir = Platform.environment['FLUTTER_BUILD_DIRECTORY']!;
     final String assetsDir = path.join(buildDir, 'gen/flutter/lib/ui/assets');
     final String shaderSrcA = path.join(assetsDir, 'uniforms.frag.iplr');
     final String shaderSrcB = path.join(assetsDir, 'uniforms_reordered.frag.iplr');
-    final String shaderSrcC = path.join(assetsDir, 'test_reorder_uniforms.frag.iplr');
+    final String shaderSrcC = path.join(assetsDir, testAssetName);
 
     final File fileC = File(shaderSrcC);
     final Uint8List sourceA = File(shaderSrcA).readAsBytesSync();
     final Uint8List sourceB = File(shaderSrcB).readAsBytesSync();
 
-    fileC.writeAsBytesSync(sourceA);
+    fileC.writeAsBytesSync(sourceA, flush: true);
 
     try {
-      final FragmentProgram program = await FragmentProgram.fromAsset(
-        'test_reorder_uniforms.frag.iplr',
-      );
+      final FragmentProgram program = await FragmentProgram.fromAsset(testAssetName);
       final FragmentShader shader = program.fragmentShader();
       final UniformFloatSlot slot = shader.getUniformFloat('iVec2Uniform');
       expect(slot.shaderIndex, 1);
 
-      fileC.writeAsBytesSync(sourceB);
-      await _performReload('test_reorder_uniforms.frag.iplr');
-      // TODO(tbd): The reload future returns when the vm service has been sent,
-      // not when it's executed.  Find a way to remove this.
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+      fileC.writeAsBytesSync(sourceB, flush: true);
+      await _performReload(testAssetName);
       expect(slot.shaderIndex, 5);
     } finally {
       if (fileC.existsSync()) {
@@ -102,7 +99,8 @@ void main() {
       // Needs https://github.com/flutter/flutter/issues/129659
       return;
     }
-    const String testAssetName = 'test_insert_uniforms.frag.iplr';
+    final String testAssetName =
+        'test_insert_uniforms_${DateTime.now().millisecondsSinceEpoch}.frag.iplr';
     final String buildDir = Platform.environment['FLUTTER_BUILD_DIRECTORY']!;
     final String assetsDir = path.join(buildDir, 'gen/flutter/lib/ui/assets');
     final String shaderSrcA = path.join(assetsDir, 'uniforms.frag.iplr');
@@ -113,7 +111,7 @@ void main() {
     final Uint8List sourceA = File(shaderSrcA).readAsBytesSync();
     final Uint8List sourceB = File(shaderSrcB).readAsBytesSync();
 
-    fileC.writeAsBytesSync(sourceA);
+    fileC.writeAsBytesSync(sourceA, flush: true);
 
     try {
       final FragmentProgram program = await FragmentProgram.fromAsset(testAssetName);
@@ -121,11 +119,8 @@ void main() {
       final UniformFloatSlot slot = shader.getUniformFloat('iMat2Uniform', 3);
       expect(slot.shaderIndex, 6);
 
-      fileC.writeAsBytesSync(sourceB);
+      fileC.writeAsBytesSync(sourceB, flush: true);
       await _performReload(testAssetName);
-      // TODO(tbd): The reload future returns when the vm service has been sent,
-      // not when it's executed.  Find a way to remove this.
-      await Future<void>.delayed(const Duration(milliseconds: 100));
       expect(slot.shaderIndex, 7);
       // Make sure there is no crash here.
       slot.set(1.0);
