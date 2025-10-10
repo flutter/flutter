@@ -6390,10 +6390,12 @@ class SemanticsConfiguration {
     _platformViewId ??= child._platformViewId;
     _maxValueLength ??= child._maxValueLength;
     _currentValueLength ??= child._currentValueLength;
-    if (_traversalChildIdentifier == null) {
+    // A node cannot have both `_traversalChildIdentifier` and
+    // `_traversalParentIdentifier` not null and the same value.
+    if (_traversalChildIdentifier != child._traversalParentIdentifier) {
       _traversalParentIdentifier ??= child._traversalParentIdentifier;
     }
-    if (_traversalParentIdentifier == null) {
+    if (_traversalParentIdentifier != child._traversalChildIdentifier) {
       _traversalChildIdentifier ??= child._traversalChildIdentifier;
     }
 
