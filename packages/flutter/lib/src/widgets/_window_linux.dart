@@ -461,7 +461,6 @@ class WindowingOwnerLinux extends WindowingOwner {
   /// If [Platform.isLinux] is false, then this constructor will throw an
   /// [UnsupportedError]
   ///
-  ///
   /// {@macro flutter.widgets.windowing.experimental}
   ///
   /// See also:
