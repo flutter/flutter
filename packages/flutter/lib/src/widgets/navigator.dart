@@ -5646,7 +5646,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// [result] to the last popped route.
   ///
   /// {@macro flutter.widgets.navigator.popUntil}
-  ///
   @optionalTypeArgs
   void popUntilWithResult<T extends Object?>(RoutePredicate predicate, T? result) {
     _RouteEntry? candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
