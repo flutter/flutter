@@ -132,6 +132,10 @@ declare_args() {
   # Debug build.
   is_debug = true
 
+  # Optimize for size over speed in optimized builds. This is always true for
+  # Windows, ios, and Android.
+  optimize_for_size = false
+
   # Whether this is a minimal linux instance without x11, etc.
   is_minimal_linux = false
 
