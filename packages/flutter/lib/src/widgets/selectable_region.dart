@@ -32,6 +32,7 @@ import 'media_query.dart';
 import 'overlay.dart';
 import 'platform_selectable_region_context_menu.dart';
 import 'selection_container.dart';
+import 'tap_region.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
 import 'text_selection_toolbar_anchors.dart';
@@ -1943,18 +1944,24 @@ class SelectableRegionState extends State<SelectableRegion>
     if (kIsWeb) {
       result = PlatformSelectableRegionContextMenu(child: result);
     }
-    return CompositedTransformTarget(
-      link: _toolbarLayerLink,
-      child: RawGestureDetector(
-        gestures: _gestureRecognizers,
-        behavior: HitTestBehavior.translucent,
-        excludeFromSemantics: true,
-        child: Actions(
-          actions: _actions,
-          child: Focus.withExternalFocusNode(
-            includeSemantics: false,
-            focusNode: _focusNode,
-            child: result,
+    return TapRegion(
+      groupId: SelectableRegion,
+      onTapOutside: (PointerEvent event) {
+        clearSelection();
+      },
+      child: CompositedTransformTarget(
+        link: _toolbarLayerLink,
+        child: RawGestureDetector(
+          gestures: _gestureRecognizers,
+          behavior: HitTestBehavior.translucent,
+          excludeFromSemantics: true,
+          child: Actions(
+            actions: _actions,
+            child: Focus.withExternalFocusNode(
+              includeSemantics: false,
+              focusNode: _focusNode,
+              child: result,
+            ),
           ),
         ),
       ),
