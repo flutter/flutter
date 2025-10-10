@@ -20,21 +20,21 @@ static const size_t kMaxFrameMarkers = 8;
 
 void DlStopwatchVisualizer::Visualize(DlCanvas* canvas,
                                       const DlRect& rect) const {
-  auto painter = DlVertexPainter(vertices_storage_, color_storage_);
+  DlVertexPainter painter(vertices_storage_, color_storage_);
   DlPaint paint;
 
   // Establish the graph position.
-  auto const x = rect.GetX();
-  auto const y = rect.GetY();
-  auto const width = rect.GetWidth();
-  auto const height = rect.GetHeight();
-  auto const bottom = rect.GetBottom();
+  const DlScalar x = rect.GetX();
+  const DlScalar y = rect.GetY();
+  const DlScalar width = rect.GetWidth();
+  const DlScalar height = rect.GetHeight();
+  const DlScalar bottom = rect.GetBottom();
 
   // Scale the graph to show time frames up to those that are 3x the frame time.
-  auto const one_frame_ms = GetFrameBudget().count();
-  auto const max_interval = one_frame_ms * 3.0;
-  auto const max_unit_interval = UnitFrameInterval(max_interval);
-  auto const sample_unit_width = (1.0 / kMaxSamples);
+  const DlScalar one_frame_ms = GetFrameBudget().count();
+  const DlScalar max_interval = one_frame_ms * 3.0;
+  const DlScalar max_unit_interval = UnitFrameInterval(max_interval);
+  const DlScalar sample_unit_width = width / kMaxSamples;
 
   // resize backing storage to match expected lap count.
   size_t required_storage =
@@ -50,20 +50,21 @@ void DlStopwatchVisualizer::Visualize(DlCanvas* canvas,
   // Prepare a path for the data; we start at the height of the last point so
   // it looks like we wrap around.
   {
-    for (auto i = 0u; i < stopwatch_.GetLapsCount(); i++) {
-      auto const sample_unit_height =
-          (1.0 - UnitHeight(stopwatch_.GetLap(i).ToMillisecondsF(),
-                            max_unit_interval));
+    DlScalar bar_left = x;
+    for (size_t i = 0u; i < stopwatch_.GetLapsCount(); i++) {
+      const double time_ms = stopwatch_.GetLap(i).ToMillisecondsF();
+      const DlScalar sample_unit_height = static_cast<DlScalar>(
+          height * UnitHeight(time_ms, max_unit_interval));
 
-      auto const bar_width = width * sample_unit_width;
-      auto const bar_height = height * sample_unit_height;
-      auto const bar_left = x + width * sample_unit_width * i;
+      const DlScalar bar_top = bottom - sample_unit_height;
+      const DlScalar bar_right = x + (i + 1) * sample_unit_width;
 
       painter.DrawRect(DlRect::MakeLTRB(/*left=*/bar_left,
-                                        /*top=*/y + bar_height,
-                                        /*right=*/bar_left + bar_width,
+                                        /*top=*/bar_top,
+                                        /*right=*/bar_right,
                                         /*bottom=*/bottom),
                        DlColor(0xAA0000FF));
+      bar_left = bar_right;
     }
   }
 
@@ -71,22 +72,22 @@ void DlStopwatchVisualizer::Visualize(DlCanvas* canvas,
   {
     if (max_interval > one_frame_ms) {
       // Paint the horizontal markers.
-      auto count = static_cast<size_t>(max_interval / one_frame_ms);
+      size_t count = static_cast<size_t>(max_interval / one_frame_ms);
 
       // Limit the number of markers to a reasonable amount.
       if (count > kMaxFrameMarkers) {
         count = 1;
       }
 
-      for (auto i = 0u; i < count; i++) {
-        auto const frame_height =
+      for (uint32_t i = 0u; i < count; i++) {
+        const DlScalar frame_height =
             height * (1.0 - (UnitFrameInterval(i + 1) * one_frame_ms) /
                                 max_unit_interval);
 
         // Draw a skinny rectangle (i.e. a line).
         painter.DrawRect(DlRect::MakeLTRB(/*left=*/x,
                                           /*top=*/y + frame_height,
-                                          /*right=*/width,
+                                          /*right=*/x + width,
                                           /*bottom=*/y + frame_height + 1),
                          DlColor(0xCC000000));
       }
@@ -100,12 +101,12 @@ void DlStopwatchVisualizer::Visualize(DlCanvas* canvas,
       // budget exceeded.
       color = DlColor::kRed();
     }
-    auto const l =
-        x + width * (static_cast<double>(stopwatch_.GetCurrentSample()) /
-                     kMaxSamples);
-    auto const t = y;
-    auto const r = l + width * sample_unit_width;
-    auto const b = rect.GetBottom();
+    size_t sample =
+        (stopwatch_.GetCurrentSample() + 1) % stopwatch_.GetLapsCount();
+    const DlScalar l = x + sample * sample_unit_width;
+    const DlScalar t = y;
+    const DlScalar r = l + sample_unit_width;
+    const DlScalar b = rect.GetBottom();
     painter.DrawRect(DlRect::MakeLTRB(l, t, r, b), color);
   }
 
@@ -124,10 +125,10 @@ DlVertexPainter::DlVertexPainter(std::vector<DlPoint>& vertices_storage,
     : vertices_(vertices_storage), colors_(color_storage) {}
 
 void DlVertexPainter::DrawRect(const DlRect& rect, const DlColor& color) {
-  auto const left = rect.GetLeft();
-  auto const top = rect.GetTop();
-  auto const right = rect.GetRight();
-  auto const bottom = rect.GetBottom();
+  const DlScalar left = rect.GetLeft();
+  const DlScalar top = rect.GetTop();
+  const DlScalar right = rect.GetRight();
+  const DlScalar bottom = rect.GetBottom();
 
   FML_DCHECK(6 + colors_offset_ <= vertices_.size());
   FML_DCHECK(6 + colors_offset_ <= colors_.size());
@@ -139,7 +140,7 @@ void DlVertexPainter::DrawRect(const DlRect& rect, const DlColor& color) {
   vertices_[vertices_offset_++] = DlPoint(right, bottom);  // tl
   vertices_[vertices_offset_++] = DlPoint(left, bottom);   // bl br
   vertices_[vertices_offset_++] = DlPoint(left, top);      //
-  for (auto i = 0u; i < 6u; i++) {
+  for (size_t i = 0u; i < 6u; i++) {
     colors_[colors_offset_++] = color;
   }
 }

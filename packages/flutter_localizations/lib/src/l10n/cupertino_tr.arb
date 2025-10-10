@@ -30,10 +30,10 @@
   "clearButtonLabel": "Temizle",
   "cancelButtonLabel": "İptal",
   "backButtonLabel": "Geri",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "daraltmak için iki kez dokunun",
+  "expansionTileCollapsedHint": "genişletmek için iki kez dokunun",
+  "expansionTileExpandedTapHint": "Daralt",
+  "expansionTileCollapsedTapHint": "Daha fazla ayrıntı için genişletin",
+  "expandedHint": "Daraltıldı",
+  "collapsedHint": "Genişletildi"
 }

@@ -935,7 +935,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
       autofocus: widget.enabled && widget.autofocus,
       statesController: widget.statesController,
       clipBehavior: widget.clipBehavior,
-      isSemanticButton: null,
+      isSemanticButton: kIsWeb ? true : null,
       child: _MenuItemLabel(
         leadingIcon: widget.leadingIcon,
         shortcut: widget.shortcut,
@@ -1846,7 +1846,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
                 focusNode: _buttonFocusNode,
                 onFocusChange: _enabled ? widget.onFocusChange : null,
                 onPressed: _enabled ? toggleShowMenu : null,
-                isSemanticButton: null,
+                isSemanticButton: kIsWeb ? true : null,
                 child: _MenuItemLabel(
                   leadingIcon: widget.leadingIcon,
                   trailingIcon: widget.trailingIcon,
@@ -3085,6 +3085,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         menuPadding != oldDelegate.menuPadding ||
         orientation != oldDelegate.orientation ||
         parentOrientation != oldDelegate.parentOrientation ||
+        reservedPadding != oldDelegate.reservedPadding ||
         !setEquals(avoidBounds, oldDelegate.avoidBounds);
   }
 

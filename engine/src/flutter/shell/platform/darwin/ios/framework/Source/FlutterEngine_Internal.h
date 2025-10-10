@@ -32,6 +32,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface FlutterEngine () <FlutterViewEngineDelegate>
 
+// Indicates whether this engine has **ever** been manually registered to a scene.
+@property(nonatomic, assign) BOOL manuallyRegisteredToScene;
+
 - (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics;
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet;
 
@@ -106,6 +109,24 @@ NS_ASSUME_NONNULL_BEGIN
 + (nullable FlutterEngine*)engineForIdentifier:(int64_t)identifier;
 
 - (void)addSceneLifeCycleDelegate:(NSObject<FlutterSceneLifeCycleDelegate>*)delegate;
+
+/*
+ * Performs AppDelegate callback provided through the `FlutterImplicitEngineDelegate` protocol to
+ * inform apps that the implicit `FlutterEngine` has initialized.
+ */
+- (BOOL)performImplicitEngineCallback;
+
+/*
+ * Creates a `FlutterEngineApplicationRegistrar` that can be used to access application-level
+ * services, such as the engine's `FlutterBinaryMessenger` or `FlutterTextureRegistry`.
+ */
+- (NSObject<FlutterApplicationRegistrar>*)registrarForApplication:(NSString*)key;
+
+- (void)sendDeepLinkToFramework:(NSURL*)url completionHandler:(void (^)(BOOL success))completion;
+
+@end
+
+@interface FlutterImplicitEngineBridgeImpl : NSObject <FlutterImplicitEngineBridge>
 
 @end
 

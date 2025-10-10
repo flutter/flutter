@@ -33,8 +33,6 @@ import 'android_sdk.dart';
 const templateDefaultGradleVersion = '8.12';
 
 // When bumping, also update:
-//  * ndkVersion constant in this file
-//  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
 //  * AGP version constants in packages/flutter_tools/gradle/build.gradle.kts
 //  * AGP test constants in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 // See https://mvnrepository.com/artifact/com.android.tools.build/gradle
@@ -56,7 +54,10 @@ const compileSdkVersion = '$compileSdkVersionInt';
 const minSdkVersionInt = 24;
 const minSdkVersion = '$minSdkVersionInt';
 const targetSdkVersion = '36';
-const ndkVersion = '27.0.12077973';
+// When bumping, also update:
+//  * ndkVersion constant in this file
+//  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
+const ndkVersion = '28.2.13676358';
 final minBuildToolsVersion = Version(28, 0, 3);
 // Align with packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt.
 final errorJavaMinVersionAndroid = Version(17, 0, 0);

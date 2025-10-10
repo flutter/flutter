@@ -119,5 +119,12 @@ Future<void> main() async {
   }
 
   print('\n\n╡ ••• Done ••• ╞\n\n');
+
+  // Ensure stdout buffers are flushed so the collecting process gets Done
+  await stdout.flush();
+
+  // Now we're just being paranoid here and letting the process churn through
+  // log lines before handling the exit code.
+  await Future<void>.delayed(const Duration(seconds: 5));
   exit(0);
 }

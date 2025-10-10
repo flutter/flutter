@@ -11,16 +11,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widget_previews.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'package:stack_trace/stack_trace.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:widget_preview_scaffold/src/dtd/editor_service.dart';
+import 'dtd/editor_service.dart';
+import 'theme/ide_theme.dart';
+import 'theme/theme.dart';
 
 import 'controls.dart';
 import 'generated_preview.dart';
 import 'utils.dart';
 import 'widget_preview.dart';
+import 'widget_preview_inspector_service.dart';
 import 'widget_preview_scaffold_controller.dart';
 
 /// Displayed when an unhandled exception is thrown when initializing the widget
@@ -50,39 +52,36 @@ class WidgetPreviewErrorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle boldStyle = fixBlurryText(
-      TextStyle(fontWeight: FontWeight.bold),
-    );
-    final TextStyle monospaceStyle = GoogleFonts.robotoMono();
-
+    final theme = Theme.of(context);
     return SizedBox(
       height: size.height,
       child: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text.rich(
               TextSpan(
                 children: [
                   TextSpan(
                     text: 'Failed to initialize widget tree: ',
-                    style: boldStyle,
+                    style: theme.boldTextStyle,
                   ),
-                  TextSpan(text: error.toString(), style: monospaceStyle),
+                  TextSpan(text: error.toString(), style: theme.fixedFontStyle),
                 ],
               ),
             ),
-            Text('Stacktrace:', style: boldStyle),
+            Text('Stacktrace:', style: theme.boldTextStyle),
             ValueListenableBuilder(
               valueListenable: controller.editorServiceAvailable,
               builder: (context, editorServiceAvailable, child) {
                 return SelectableText.rich(
                   TextSpan(
                     children: _formatFrames(
+                      theme,
                       trace.frames,
                       editorServiceAvailable,
                     ),
-                    style: monospaceStyle,
+                    style: theme.fixedFontStyle,
                   ),
                 );
               },
@@ -94,6 +93,7 @@ class WidgetPreviewErrorWidget extends StatelessWidget {
   }
 
   List<TextSpan> _formatFrames(
+    ThemeData theme,
     List<Frame> frames,
     bool editorServiceAvailable,
   ) {
@@ -111,11 +111,14 @@ class WidgetPreviewErrorWidget extends StatelessWidget {
       final isLinkable =
           (frame.uri.isScheme('file') || frame.uri.isScheme('package')) &&
           editorServiceAvailable;
+      final style = isLinkable
+          ? theme.fixedFontLinkStyle
+          : theme.fixedFontStyle;
       return TextSpan(
         children: [
           TextSpan(
             text: frame.location,
-            style: isLinkable ? linkTextStyle : underlineTextStyle,
+            style: style,
             recognizer: isLinkable
                 ? (TapGestureRecognizer()
                     ..onTap = () async {
@@ -133,7 +136,7 @@ class WidgetPreviewErrorWidget extends StatelessWidget {
           ),
           TextSpan(text: ' ' * (longest - frame.location.length)),
           const TextSpan(text: '  '),
-          TextSpan(text: '${frame.member}\n'),
+          TextSpan(text: '${frame.member}\n', style: style),
         ],
       );
     }).toList();
@@ -150,27 +153,22 @@ class NoPreviewsDetectedWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO(bkonyi): base this on the current color theme (dark vs light)
-    final style = fixBlurryText(TextStyle(color: Colors.black));
+    final theme = Theme.of(context);
     return Center(
       child: Column(
         children: [
-          Text(
-            'No previews detected',
-            style: style.copyWith(fontWeight: FontWeight.bold),
-          ),
+          Text('No previews detected', style: theme.boldTextStyle),
           const VerticalSpacer(),
           Text('Read more about getting started with widget previews at:'),
           Text.rich(
             TextSpan(
               text: documentationUrl.toString(),
-              style: linkTextStyle,
+              style: theme.linkTextStyle,
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
                   launchUrl(documentationUrl);
                 },
             ),
-            style: style,
           ),
         ],
       ),
@@ -422,6 +420,10 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       valueListenable:
           WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier,
       builder: (context, enableWidgetInspector, child) {
+        // Don't allow inspecting the error widget.
+        if (child is WidgetPreviewErrorWidget) {
+          return child;
+        }
         if (enableWidgetInspector) {
           return WidgetInspector(
             // TODO(bkonyi): wire up inspector controls for individual previews or
@@ -505,12 +507,16 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
                 child: preview,
               ),
               const VerticalSpacer(),
-              _WidgetPreviewControlRow(
-                transformationController: transformationController,
-                errorThrownDuringTreeConstruction:
-                    errorThrownDuringTreeConstruction,
-                brightnessListenable: brightnessListenable,
-                softRestartListenable: softRestartListenable,
+              Builder(
+                builder: (context) {
+                  return _WidgetPreviewControlRow(
+                    transformationController: transformationController,
+                    errorThrownDuringTreeConstruction:
+                        errorThrownDuringTreeConstruction,
+                    brightnessListenable: brightnessListenable,
+                    softRestartListenable: softRestartListenable,
+                  );
+                },
               ),
             ],
           ),
@@ -545,26 +551,21 @@ class _WidgetPreviewControlRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Don't show controls if an error occurred.
+    if (errorThrownDuringTreeConstruction) {
+      return Container();
+    }
     return Row(
       mainAxisSize: MainAxisSize.min,
       // If an unhandled exception was caught and we're displaying an error
       // widget, these controls should be disabled.
       // TODO(bkonyi): improve layout of controls.
       children: [
-        ZoomControls(
-          transformationController: transformationController,
-          enabled: !errorThrownDuringTreeConstruction,
-        ),
+        ZoomControls(transformationController: transformationController),
         const SizedBox(width: 30),
-        BrightnessToggleButton(
-          enabled: !errorThrownDuringTreeConstruction,
-          brightnessListenable: brightnessListenable,
-        ),
+        BrightnessToggleButton(brightnessListenable: brightnessListenable),
         const SizedBox(width: 10),
-        SoftRestartButton(
-          enabled: !errorThrownDuringTreeConstruction,
-          softRestartListenable: softRestartListenable,
-        ),
+        SoftRestartButton(softRestartListenable: softRestartListenable),
       ],
     );
   }
@@ -928,21 +929,30 @@ class PreviewAssetBundle extends PlatformAssetBundle {
 /// the preview scaffold project which prevents us from being able to use hot
 /// restart to iterate on this file.
 Future<void> mainImpl() async {
+  final controller = WidgetPreviewScaffoldController(previews: previews);
+  await controller.initialize();
+  // WARNING: do not move this line. This constructor sets
+  // [WidgetInspectorService.instance] to the custom service for the widget
+  // previewer. If [WidgetsFlutterBinding.ensureInitialized()] is invoked before
+  // the custom service is set, inspector service extensions will be registered
+  // against the wrong service.
+  WidgetPreviewScaffoldInspectorService(dtdServices: controller.dtdServices);
   final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
   // Disable the injection of [WidgetInspector] into the widget tree built by
   // [WidgetsApp]. [WidgetInspector] instances will be created for each
   // individual preview so the widget inspector won't allow for users to select
   // widgets that make up the widget preview scaffolding.
   binding.debugExcludeRootWidgetInspector = true;
-  final controller = WidgetPreviewScaffoldController(previews: previews);
-  await controller.initialize();
   runWidget(
     DisableWidgetInspectorScope(
       child: binding.wrapWithDefaultView(
         // Forces the set of previews to be recalculated after a hot reload.
         HotReloadListener(
           onHotReload: controller.onHotReload,
-          child: WidgetPreviewScaffold(controller: controller),
+          child: WidgetPreviewScaffold(
+            controller: controller,
+            ideTheme: getIdeTheme(),
+          ),
         ),
       ),
     ),
@@ -950,16 +960,31 @@ Future<void> mainImpl() async {
 }
 
 class WidgetPreviewScaffold extends StatelessWidget {
-  const WidgetPreviewScaffold({super.key, required this.controller});
+  const WidgetPreviewScaffold({
+    super.key,
+    required this.controller,
+    this.ideTheme = const IdeTheme(),
+  });
 
   final WidgetPreviewScaffoldController controller;
+  final IdeTheme ideTheme;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: themeFor(
+        isDarkTheme: false,
+        ideTheme: ideTheme,
+        theme: ThemeData(),
+      ),
+      darkTheme: themeFor(
+        isDarkTheme: true,
+        ideTheme: ideTheme,
+        theme: ThemeData.dark(),
+      ),
+      themeMode: ideTheme.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: Material(
-        color: Colors.transparent,
         child: Column(
           children: [
             // Display the previewer

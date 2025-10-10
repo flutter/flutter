@@ -926,6 +926,42 @@ void main() {
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
+
+  // Regression tests for https://github.com/flutter/flutter/issues/170422
+  group('Radio accessibility announcements on various platforms', () {
+    testWidgets('Unselected radio should be vocalized via hint on iOS/macOS platform', (
+      WidgetTester tester,
+    ) async {
+      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(child: CupertinoRadio<int>(value: 2, groupValue: 1, onChanged: (int? i) {})),
+        ),
+      );
+
+      final SemanticsNode semanticNode = tester.getSemantics(find.byType(Focus).last);
+      if (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS) {
+        expect(semanticNode.hint, localizations.radioButtonUnselectedLabel);
+      } else {
+        expect(semanticNode.hint, anyOf(isNull, isEmpty));
+      }
+    });
+
+    testWidgets('Selected radio should be vocalized via the selected flag on all platforms', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(child: CupertinoRadio<int>(value: 1, groupValue: 1, onChanged: (int? i) {})),
+        ),
+      );
+
+      final SemanticsNode semanticNode = tester.getSemantics(find.byType(Focus).last);
+      // Radio semantics should not have hint.
+      expect(semanticNode.hint, anyOf(isNull, isEmpty));
+    });
+  });
 }
 
 class _RadioMouseCursor extends WidgetStateMouseCursor {
