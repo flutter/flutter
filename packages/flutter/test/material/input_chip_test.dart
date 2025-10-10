@@ -688,4 +688,26 @@ void main() {
       SystemMouseCursors.forbidden,
     );
   });
+
+  testWidgets('InputChip does not crash at zero area', (WidgetTester tester) async {
+    Future<void> testChip(Widget chip) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(child: SizedBox.shrink(child: chip)),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(InputChip)), Size.zero);
+    }
+
+    await testChip(const InputChip(label: Text('X')));
+    await testChip(
+      const InputChip(
+        label: Text('X'),
+        avatar: CircleAvatar(child: Text('A')),
+      ),
+    );
+    await testChip(InputChip(label: const Text('X'), onDeleted: () {}));
+  });
 }
