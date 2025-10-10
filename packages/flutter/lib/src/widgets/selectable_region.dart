@@ -408,6 +408,9 @@ class SelectableRegionState extends State<SelectableRegion>
   Orientation? _lastOrientation;
   SelectedContent? _lastSelectedContent;
 
+  /// Whether the native browser context menu is enabled.
+  bool get _webContextMenuEnabled => kIsWeb && BrowserContextMenu.enabled;
+
   /// The [SelectionOverlay] that is currently visible on the screen.
   ///
   /// Can be null if there is no visible [SelectionOverlay].
@@ -506,7 +509,7 @@ class SelectableRegionState extends State<SelectableRegion>
 
   void _handleFocusChanged() {
     if (!_focusNode.hasFocus) {
-      if (kIsWeb) {
+      if (_webContextMenuEnabled) {
         PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
       }
       if (SchedulerBinding.instance.lifecycleState == AppLifecycleState.resumed) {
@@ -522,7 +525,7 @@ class SelectableRegionState extends State<SelectableRegion>
         _finalizeSelectableRegionStatus();
       }
     }
-    if (kIsWeb) {
+    if (_webContextMenuEnabled) {
       PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
     }
   }
@@ -1125,17 +1128,12 @@ class SelectableRegionState extends State<SelectableRegion>
     if (widget.selectionControls is! TextSelectionHandleControls) {
       if (!draggingHandles) {
         _selectionOverlay!.hideMagnifier();
-        _selectionOverlay!.showToolbar();
+        _showToolbar();
       }
     } else {
       if (!draggingHandles) {
         _selectionOverlay!.hideMagnifier();
-        _selectionOverlay!.showToolbar(
-          context: context,
-          contextMenuBuilder: (BuildContext context) {
-            return widget.contextMenuBuilder!(context, this);
-          },
-        );
+        _showToolbar();
       }
     }
     _finalizeSelection();
@@ -1357,7 +1355,7 @@ class SelectableRegionState extends State<SelectableRegion>
     // functionality depending on the browser (such as translate). Due to this,
     // we should not show a Flutter toolbar for the editable text elements
     // unless the browser's context menu is explicitly disabled.
-    if (kIsWeb && BrowserContextMenu.enabled) {
+    if (_webContextMenuEnabled) {
       return false;
     }
 
@@ -1940,7 +1938,7 @@ class SelectableRegionState extends State<SelectableRegion>
       selectionStatusNotifier: _selectionStatusNotifier,
       child: SelectionContainer(registrar: this, delegate: _selectionDelegate, child: widget.child),
     );
-    if (kIsWeb) {
+    if (_webContextMenuEnabled) {
       result = PlatformSelectableRegionContextMenu(child: result);
     }
     return CompositedTransformTarget(
