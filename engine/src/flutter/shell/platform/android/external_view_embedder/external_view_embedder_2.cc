@@ -72,9 +72,20 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
 
   if (!FrameHasPlatformLayers()) {
     frame->Submit();
-    // If the previous frame had platform views, hide the overlay surface.
-    HideOverlayLayerIfNeeded();
-    jni_facade_->applyTransaction();
+    task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
+        [this, jni_facade = jni_facade_,
+         views_visible_last_frame = views_visible_last_frame_]() {
+          // This pointer is guaranteed to not be dangling as long as
+          // DestroySurfaces is called before the embedder is deleted. See
+          // https://github.com/flutter/flutter/pull/176742#discussion_r2415229396.
+          this->HideOverlayLayerIfNeeded();
+          for (int64_t view_id : views_visible_last_frame) {
+            jni_facade->hidePlatformView2(view_id);
+          }
+
+          jni_facade->applyTransaction();
+        }));
+    views_visible_last_frame_.clear();
     return;
   }
 
@@ -151,13 +162,14 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   } else {
     overlay_layer_has_content_this_frame_ = false;
   }
-  frame->Submit();
 
+  frame->Submit();
   task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
       [&, composition_order = composition_order_, view_params = view_params_,
        jni_facade = jni_facade_, device_pixel_ratio = device_pixel_ratio_,
        slices = std::move(slices_),
-       overlay_layer_has_content_this_frame_]() -> void {
+       views_visible_last_frame = views_visible_last_frame_,
+       overlay_layer_has_content_this_frame_]() mutable -> void {
         jni_facade->swapTransaction();
 
         if (overlay_layer_has_content_this_frame_) {
@@ -179,9 +191,20 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
               params.sizePoints().height * device_pixel_ratio,
               params.mutatorsStack()  //
           );
+          // Remove from views visible last frame, so we can hide the rest.
+          views_visible_last_frame.erase(view_id);
         }
+        // Hide views that were visible last frame, but not in this frame.
+        for (int64_t view_id : views_visible_last_frame) {
+          jni_facade->hidePlatformView2(view_id);
+        }
+
         jni_facade_->onEndFrame2();
       }));
+
+  views_visible_last_frame_.clear();
+  views_visible_last_frame_.insert(composition_order_.begin(),
+                                   composition_order_.end());
 }
 
 // |ExternalViewEmbedder|
@@ -259,20 +282,20 @@ void AndroidExternalViewEmbedder2::DestroySurfaces() {
                                       latch.Signal();
                                     });
   latch.Wait();
-  overlay_layer_is_shown_ = false;
+  overlay_layer_is_shown_.store(false);
 }
 
 void AndroidExternalViewEmbedder2::ShowOverlayLayerIfNeeded() {
-  if (!overlay_layer_is_shown_) {
+  if (!overlay_layer_is_shown_.load()) {
     jni_facade_->showOverlaySurface2();
-    overlay_layer_is_shown_ = true;
+    overlay_layer_is_shown_.store(true);
   }
 }
 
 void AndroidExternalViewEmbedder2::HideOverlayLayerIfNeeded() {
-  if (overlay_layer_is_shown_) {
+  if (overlay_layer_is_shown_.load()) {
     jni_facade_->hideOverlaySurface2();
-    overlay_layer_is_shown_ = false;
+    overlay_layer_is_shown_.store(false);
   }
 }
 
