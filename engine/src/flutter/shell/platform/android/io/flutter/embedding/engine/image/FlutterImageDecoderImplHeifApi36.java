@@ -16,6 +16,12 @@ import java.nio.ByteBuffer;
  */
 @RequiresApi(io.flutter.Build.API_LEVELS.API_36)
 class FlutterImageDecoderImplHeifApi36 implements FlutterImageDecoderImpl {
+
+  private final Utils utils;
+
+  public FlutterImageDecoderImplHeifApi36(Utils utils) {
+    this.utils = utils;
+  }
   /**
    * Decodes an image from the given {@link ByteBuffer}.
    *
@@ -24,7 +30,7 @@ class FlutterImageDecoderImplHeifApi36 implements FlutterImageDecoderImpl {
    * @return The decoded {@link Bitmap}, or null if decoding fails.
    */
   public Bitmap decodeImage(ByteBuffer buffer, Metadata metadata) {
-    byte[] bytes = Utils.getBytes(buffer);
+    byte[] bytes = utils.getBytes(buffer);
     BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
     decodeOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
     Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, decodeOptions);
@@ -34,9 +40,9 @@ class FlutterImageDecoderImplHeifApi36 implements FlutterImageDecoderImpl {
       Bitmap rotatedBitmap =
           Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
       bitmap.recycle();
-      return Utils.applyFlipIfNeeded(rotatedBitmap, metadata.orientation);
+      return utils.applyFlipIfNeeded(rotatedBitmap, metadata.orientation);
     } else {
-      return Utils.applyFlipIfNeeded(bitmap, metadata.orientation);
+      return utils.applyFlipIfNeeded(bitmap, metadata.orientation);
     }
   }
 }

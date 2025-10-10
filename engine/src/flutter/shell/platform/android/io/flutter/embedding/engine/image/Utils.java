@@ -16,7 +16,8 @@ class Utils {
    * @param buffer The {@link ByteBuffer} to read from.
    * @return A byte array containing the remaining bytes of the buffer.
    */
-  static @NonNull byte[] getBytes(@NonNull ByteBuffer buffer) {
+  @NonNull
+  byte[] getBytes(@NonNull ByteBuffer buffer) {
     byte[] bytes = new byte[buffer.remaining()];
     buffer.get(bytes);
     // Rewind the buffer so it can be used again.
@@ -30,7 +31,7 @@ class Utils {
    * @param orientation The EXIF orientation.
    * @return True if the orientation is a flip case, false otherwise.
    */
-  static boolean isFlipCase(int orientation) {
+  boolean isFlipCase(int orientation) {
     switch (orientation) {
       case ExifInterface.ORIENTATION_FLIP_HORIZONTAL: // 2
       case ExifInterface.ORIENTATION_FLIP_VERTICAL: // 4
@@ -52,8 +53,8 @@ class Utils {
    * @param exifOrientation The EXIF orientation of the image.
    * @return The flipped {@link Bitmap}, or the original if no flip was needed.
    */
-  static Bitmap applyFlipIfNeeded(Bitmap decoded, int exifOrientation) {
-    if (decoded == null || !Utils.isFlipCase(exifOrientation)) {
+  Bitmap applyFlipIfNeeded(Bitmap decoded, int exifOrientation) {
+    if (decoded == null || !isFlipCase(exifOrientation)) {
       return decoded;
     }
 
