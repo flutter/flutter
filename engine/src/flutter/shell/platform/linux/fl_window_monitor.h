@@ -27,7 +27,7 @@ G_DECLARE_FINAL_TYPE(FlWindowMonitor,
  * closed.
  * @on_destroy: the function to call when the window is destroyed.
  *
- * Helper class to allow Dart to monitor a GtkWindow.
+ * Helper class to allow the Flutter engine to monitor a GtkWindow using FFI.
  * Callbacks are called in the isolate this class was created with.
  *
  * Returns: a new #FlWindowMonitor.
