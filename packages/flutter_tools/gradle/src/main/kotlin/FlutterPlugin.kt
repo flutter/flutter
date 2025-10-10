@@ -636,11 +636,11 @@ class FlutterPlugin : Plugin<Project> {
             // In add to app scenarios, a Gradle project contains a `:flutter` and `:app` project.
             // `:flutter` is used as a subproject when these tasks exists and the build isn't building an AAR.
             // TODO(gmackall): I think this is just always null? Which is great news! Consider removing.
-            val packageAssets: Task? =
-                findTaskOrNull(
-                    project,
-                    "package${FlutterPluginUtils.capitalize(variant.name)}Assets"
-                )
+            // val packageAssets: Task? =
+            //     findTaskOrNull(
+            //         project,
+            //         "package${FlutterPluginUtils.capitalize(variant.name)}Assets"
+            //     )
             val cleanPackageAssets: Task? =
                 findTaskOrNull(
                     project,
@@ -648,7 +648,7 @@ class FlutterPlugin : Plugin<Project> {
                 )
 
             val isUsedAsSubproject: Boolean =
-                packageAssets != null && cleanPackageAssets != null && !isBuildingAar
+               cleanPackageAssets != null && !isBuildingAar
 
             val variantBuildMode: String = FlutterPluginUtils.buildModeFor(variant.buildType)
             val flavorValue: String = variant.flavorName
@@ -757,9 +757,9 @@ class FlutterPlugin : Plugin<Project> {
                     }
                     if (isUsedAsSubproject) {
                         // TODO(gmackall): above is always false, can delete
-                        dependsOn(packageAssets)
+                        // dependsOn(packageAssets)
                         dependsOn(cleanPackageAssets)
-                        into(packageAssets!!.outputs)
+                        // into(packageAssets!!.outputs)
                     }
                     val mergeAssets =
                         try {
