@@ -456,11 +456,10 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
     reverseCurve: _kMenuPanelOpacityReverseCurve,
   );
   List<Widget> _menuChildren = <Widget>[];
-
   _MenuAnchorState? get _parent => _maybeOf(context);
   bool get isSubmenu => MenuController.maybeOf(context) != null;
   bool get isClosing => !_animationController.status.isForwardOrCompleted;
-  List<CurvedAnimation> _cachedAnimations = <CurvedAnimation>[]; // Add this
+  List<CurvedAnimation> _cachedAnimations = <CurvedAnimation>[];
 
   @override
   void initState() {
@@ -588,28 +587,21 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
   }
 
   void _handleMenuOpenRequest(Offset? position, VoidCallback showOverlay) {
-    // Mount or reposition the menu before animating the menu open.
     showOverlay();
 
     if (_animationController.isForwardOrCompleted) {
-      // If the menu is already open or opening, the animation is already
-      // running forward.
       return;
     }
 
-    // Animate the menu into view.
     _animationController.forward();
   }
 
   void _handleMenuCloseRequest(VoidCallback hideOverlay) {
     if (!_animationController.isForwardOrCompleted) {
-      // If the menu is already closed or closing, do nothing.
       return;
     }
 
     _menuController.closeChildren();
-
-    // Animate the menu out of view.
     _animationController.reverse().whenComplete(hideOverlay);
   }
 
@@ -641,7 +633,6 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
   }
 
   Widget _buildOverlay(BuildContext context, RawMenuOverlayInfo position) {
-    // BlockSemantics behaves like focus trap for screen readers.
     // ExcludeSemantics and IgnorePointer are used to effectively disable all
     // interactions with the menu while it is closing.
     //
