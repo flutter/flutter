@@ -444,7 +444,7 @@ class FlutterPlugin : Plugin<Project> {
             // once per flavor; see https://github.com/dart-lang/native/issues/1359.
             val androidComponents =
                 projectToAddTasksTo.extensions.findByType(
-                    com.android.build.api.variant.AndroidComponentsExtension::class.java,
+                    com.android.build.api.variant.AndroidComponentsExtension::class.java
                 )
 
             androidComponents?.onVariants { variant ->
