@@ -241,6 +241,7 @@ class Form extends StatefulWidget {
 class FormState extends State<Form> {
   int _generation = 0;
   bool _hasInteractedByUser = false;
+  bool _hasError = false;
   final Set<FormFieldState<dynamic>> _fields = <FormFieldState<dynamic>>{};
 
   // Called when a form field has changed. This will cause all form fields
@@ -251,6 +252,7 @@ class FormState extends State<Form> {
     _hasInteractedByUser = _fields.any(
       (FormFieldState<dynamic> field) => field._hasInteractedByUser.value,
     );
+    _hasError = _fields.any((FormFieldState<dynamic> field) => field.hasError);
     _forceRebuild();
   }
 
@@ -277,6 +279,10 @@ class FormState extends State<Form> {
       case AutovalidateMode.onUserInteraction:
         if (_hasInteractedByUser) {
           _validate(View.of(context));
+        }
+      case AutovalidateMode.onUserInteractionIfError:
+        if (_hasInteractedByUser && _hasError) {
+          _validate();
         }
       case AutovalidateMode.onUnfocus:
       case AutovalidateMode.disabled:
@@ -751,6 +757,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
         });
       case AutovalidateMode.onUnfocus:
       case AutovalidateMode.onUserInteraction:
+      case AutovalidateMode.onUserInteractionIfError:
       case AutovalidateMode.disabled:
       case null:
         break;
@@ -774,6 +781,10 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
           _validate();
         case AutovalidateMode.onUserInteraction:
           if (_hasInteractedByUser.value) {
+            _validate();
+          }
+        case AutovalidateMode.onUserInteractionIfError:
+          if (_hasInteractedByUser.value && hasError) {
             _validate();
           }
         case AutovalidateMode.onUnfocus:
@@ -831,4 +842,11 @@ enum AutovalidateMode {
   /// In order to validate all fields of a [Form] after the first time the user interacts
   /// with one, use [always] instead.
   onUnfocus,
+
+  /// Used to auto-validate [Form] and [FormField] only when a field
+  /// already has an error, and the user starts interacting with it again.
+  ///
+  /// This is useful for reducing unnecessary validation calls while
+  /// still ensuring errors are re-checked when the user attempts to fix them.
+  onUserInteractionIfError,
 }
