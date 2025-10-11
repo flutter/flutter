@@ -1634,18 +1634,13 @@ void main() {
     await tester.pumpWidget(build(items: menuItems, hint: const Text('hint')));
     expect(tester.getCenter(find.text('hint')).dy, tester.getCenter(find.byType(Icon)).dy);
 
-    int? getIndex() {
-      final IndexedStack stack = tester.element(find.byType(IndexedStack)).widget as IndexedStack;
-      return stack.index;
-    }
-
     // If [value], [hint] and [disabledHint] are null, the button is disabled, nothing displayed.
     await tester.pumpWidget(build(items: menuItems));
-    expect(getIndex(), null);
+    expect(find.byType(IndexedStack), findsNothing);
 
     // If [value], [hint] and [disabledHint] are null, the button is enabled, nothing displayed.
     await tester.pumpWidget(build(items: menuItems, onChanged: onChanged));
-    expect(getIndex(), null);
+    expect(find.byType(IndexedStack), findsNothing);
   });
 
   testWidgets('DropdownButton selected item color test', (WidgetTester tester) async {
