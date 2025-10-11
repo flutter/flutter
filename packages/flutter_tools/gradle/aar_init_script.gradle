@@ -92,9 +92,9 @@ static void addAarTask(Project project, component) {
 
     project.tasks.register(taskName, AssembleAarTask) { task ->
         task.variantName.set(variantName)
-        task.groupId.set(project.group.toString())
-        task.artifactId.set(project.name.toString())
-        task.versionName.set(project.version.toString())
+        task.pubGroupId.set(project.group.toString())
+        task.pubArtifactId.set(project.name.toString())
+        task.pubVersionName.set(project.version.toString())
         task.outputDir.set(project.layout.buildDirectory.dir("outputs/aar/${variantName}"))
     }
 }
