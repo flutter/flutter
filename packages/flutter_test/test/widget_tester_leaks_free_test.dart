@@ -12,18 +12,18 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/169119.
   testWidgets('Does not leak if restorationManager is accessed', (WidgetTester tester) async {
-    int counter = 0;
-
+    int counterByWidgets = 0;
     final RestorationManager managerByWidgets = WidgetsBinding.instance.restorationManager;
     expect(managerByWidgets, isA<TestRestorationManager>());
-    managerByWidgets.addListener(() => counter++);
+    managerByWidgets.addListener(() => counterByWidgets++);
     managerByWidgets.notifyListeners();
-    expect(counter, 1);
+    expect(counterByWidgets, 1);
 
+    int counterByServices = 0;
     final RestorationManager managerByServices = ServicesBinding.instance.restorationManager;
     expect(managerByServices, isA<TestRestorationManager>());
-    managerByServices.addListener(() => counter++);
+    managerByServices.addListener(() => counterByServices++);
     managerByServices.notifyListeners();
-    expect(counter, 3);
+    expect(counterByServices, 1);
   });
 }
