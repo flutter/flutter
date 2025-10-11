@@ -11,9 +11,7 @@ void main() {
   LeakTesting.enable(); // Enable leak testing and use default collectedLeaksReporter.
 
   // Regression test for https://github.com/flutter/flutter/issues/169119.
-  testWidgets('Disposes test restoration manager when accessed by bindings', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Does not leak if restorationManager is accessed', (WidgetTester tester) async {
     int counter = 0;
 
     final RestorationManager managerByWidgets = WidgetsBinding.instance.restorationManager;
