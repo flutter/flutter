@@ -1443,7 +1443,6 @@ class _RenderDropdownMenuBody extends RenderBox
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    final BoxConstraints constraints = this.constraints;
     double maxWidth = 0.0;
     double? maxHeight;
     RenderBox? child = firstChild;
