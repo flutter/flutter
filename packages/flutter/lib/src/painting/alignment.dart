@@ -54,6 +54,28 @@ abstract class AlignmentGeometry {
   /// * [Alignment.topRight], which is the same thing.
   static const AlignmentGeometry topRight = Alignment.topRight;
 
+  /// The top corner on the "start" edge.
+  ///
+  /// This can be used to indicate an offset from the left in [TextDirection.ltr]
+  /// text and an offset from the right in [TextDirection.rtl] text without having
+  /// to be aware of the current text direction.
+  ///
+  /// See also:
+  ///
+  /// * [AlignmentDirectional.topStart], which is the same thing.
+  static const AlignmentGeometry topStart = AlignmentDirectional.topStart;
+
+  /// The top corner on the "end" edge.
+  ///
+  /// This can be used to indicate an offset from the right in [TextDirection.ltr]
+  /// text and an offset from the left in [TextDirection.rtl] text without having
+  /// to be aware of the current text direction.
+  ///
+  /// See also:
+  ///
+  /// * [AlignmentDirectional.topEnd], which is the same thing.
+  static const AlignmentGeometry topEnd = AlignmentDirectional.topEnd;
+
   /// The center point along the left edge.
   ///
   /// See also:
@@ -75,6 +97,28 @@ abstract class AlignmentGeometry {
   /// * [Alignment.centerRight], which is the same thing.
   static const AlignmentGeometry centerRight = Alignment.centerRight;
 
+  /// The center point along the "start" edge.
+  ///
+  /// This can be used to indicate an offset from the left in [TextDirection.ltr]
+  /// text and an offset from the right in [TextDirection.rtl] text without having
+  /// to be aware of the current text direction.
+  ///
+  /// See also:
+  ///
+  /// * [AlignmentDirectional.centerStart], which is the same thing.
+  static const AlignmentGeometry centerStart = AlignmentDirectional.centerStart;
+
+  /// The center point along the "end" edge.
+  ///
+  /// This can be used to indicate an offset from the right in [TextDirection.ltr]
+  /// text and an offset from the left in [TextDirection.rtl] text without having
+  /// to be aware of the current text direction.
+  ///
+  /// See also:
+  ///
+  /// * [AlignmentDirectional.centerEnd], which is the same thing.
+  static const AlignmentGeometry centerEnd = AlignmentDirectional.centerEnd;
+
   /// The bottom left corner.
   ///
   /// See also:
@@ -95,6 +139,28 @@ abstract class AlignmentGeometry {
   ///
   /// * [Alignment.bottomRight], which is the same thing.
   static const AlignmentGeometry bottomRight = Alignment.bottomRight;
+
+  /// The bottom corner on the "start" edge.
+  ///
+  /// This can be used to indicate an offset from the left in [TextDirection.ltr]
+  /// text and an offset from the right in [TextDirection.rtl] text without having
+  /// to be aware of the current text direction.
+  ///
+  /// See also:
+  ///
+  /// * [AlignmentDirectional.bottomStart], which is the same thing.
+  static const AlignmentGeometry bottomStart = AlignmentDirectional.bottomStart;
+
+  /// The bottom corner on the "end" edge.
+  ///
+  /// This can be used to indicate an offset from the right in [TextDirection.ltr]
+  /// text and an offset from the left in [TextDirection.rtl] text without having
+  /// to be aware of the current text direction.
+  ///
+  /// See also:
+  ///
+  /// * [AlignmentDirectional.bottomEnd], which is the same thing.
+  static const AlignmentGeometry bottomEnd = AlignmentDirectional.bottomEnd;
 
   double get _x;
 
