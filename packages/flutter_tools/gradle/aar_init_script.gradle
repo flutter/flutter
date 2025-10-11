@@ -45,7 +45,7 @@ void configureProject(Project project, String outputDir) {
     String storageUrl = System.getenv('FLUTTER_STORAGE_BASE_URL') ?: "https://storage.googleapis.com"
 
     String engineRealm = Paths.get(getFlutterRoot(project), "bin", "cache", "engine.realm")
-            .toFile().text.trim()
+        .toFile().text.trim()
     if (engineRealm) {
         engineRealm += "/"
     }
@@ -84,45 +84,23 @@ static String getFlutterRoot(Project project) {
     return project.property("flutter-root")
 }
 
+// Helper function to register tasks for each variant safely
+static void addAarTask(Project project, component) {
+    // Use public AGP API if available
+    def variantName = component.hasProperty("name") ? component.name.capitalize() : "Main"
+    def taskName = "assembleAar${variantName}"
 
-static void  addAarTask(Project project, component) {
-    String variantName = component.name
-    String capitalizedVariant = variantName.capitalize()
-    String taskName = "assembleAar${capitalizedVariant}"
-
-    project.tasks.register(taskName, AddAarTask) { t ->
-        t.variantName = variantName
-        t.group = "publishing"
-        t.description = "Assembles and publishes AAR for variant ${variantName}"
-
-        // Use proper lazy dependency wiring
-        t.finalizedBy(project.tasks.named("publish"))
+    project.tasks.register(taskName, AssembleAarTask) { task ->
+        task.variantName.set(variantName)
+        task.groupId.set(project.group.toString())
+        task.artifactId.set(project.name.toString())
+        task.versionName.set(project.version.toString())
+        task.outputDir.set(project.layout.buildDirectory.dir("outputs/aar/${variantName}"))
     }
 }
-
-abstract class AddAarTask extends DefaultTask {
-
-    @Input
-    String variantName
-
-    @OutputDirectory
-    File getOutputDir() {
-        return new File(project.buildDir, "outputs/aar/${variantName}")
-    }
-
-    @TaskAction
-    void run() {
-        project.logger.lifecycle("Creating MavenPublication for variant: $variantName")
-
-        // Use lazy publication registration
-        project.publishing.publications.maybeCreate(variantName, MavenPublication).with {
-            it.groupId = "${it.groupId}"
-            it.artifactId = "${it.artifactId}_${variantName}"
-            it.version = "${it.version}"
-            it.from(project.components.named(variantName).get())
-        }
-    }
-}
+// maven-publish has to be applied _before_ the project gets evaluated, but some of the code in
+// `configureProject` requires the project to be evaluated. Apply the maven plugin to all projects, but
+// only configure it if it matches the conditions in `projectsEvaluated`
 
 allprojects {
    apply plugin: "maven-publish"
@@ -200,5 +178,39 @@ projectsEvaluated {
                 assert(pluginProjectTask != null)
                 moduleProjectTask.dependsOn(pluginProjectTask)
         }
+    }
+}
+abstract class AssembleAarTask extends DefaultTask {
+
+    @Input
+    abstract Property<String> getVariantName()
+
+    @Input
+    abstract Property<String> getGroupId()
+
+    @Input
+    abstract Property<String> getArtifactId()
+
+    @Input
+    abstract Property<String> getVersionName()
+
+    @OutputDirectory
+    abstract DirectoryProperty getOutputDir()
+
+    @TaskAction
+    void assemble() {
+        def variant = variantName.get()
+        def outDir = outputDir.get().asFile
+
+        project.logger.lifecycle("Assembling AAR for variant: $variant into $outDir")
+
+        project.publishing.publications.create(variant, MavenPublication) { pub ->
+            groupId = getGroupId().get()
+            artifactId = "${getArtifactId().get()}_${variant}"
+            version = getVersionName().get()
+            from project.components.named(variant)
+        }
+
+        project.tasks.named("publish").get().execute()
     }
 }
