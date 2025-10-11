@@ -397,7 +397,7 @@ class FlutterPlugin : Plugin<Project> {
                         variantOutput.processResources
                     }
                 processResources.dependsOn(copyFlutterAssetsTask)
-                
+
                 // Copy the output APKs into a known location, so `flutter run` or `flutter build apk`
                 // can discover them. By default, this is `<app-dir>/build/app/outputs/flutter-apk/<filename>.apk`.
                 //
