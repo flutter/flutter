@@ -1040,7 +1040,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       enableScrollToHighlight: false,
       // The _initialMenu is invisible, we should not add semantics nodes to it
       excludeSemantics: true,
-      useMaterial3: useMaterial3,
     );
     final DropdownMenuThemeData theme = DropdownMenuTheme.of(context);
     final DropdownMenuThemeData defaults = _DropdownMenuDefaultsM3(context);
