@@ -190,12 +190,87 @@ class CupertinoSegmentedControl<T extends Object> extends StatefulWidget {
   State<CupertinoSegmentedControl<T>> createState() => _SegmentedControlState<T>();
 }
 
+/// A wrapper widget that implements RadioClient for each segment button.
+class _SegmentButton<T> extends StatefulWidget {
+  const _SegmentButton({
+    super.key,
+    required this.value,
+    required this.child,
+    required this.enabled,
+  });
+
+  final T value;
+  final Widget child;
+  final bool enabled;
+
+  @override
+  State<_SegmentButton<T>> createState() => _SegmentButtonState<T>();
+}
+
+class _SegmentButtonState<T> extends State<_SegmentButton<T>> with RadioClient<T> {
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode(debugLabel: 'CupertinoSegmentedControl<$T>[${widget.value}]');
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    registry = widget.enabled ? RadioGroup.maybeOf<T>(context) : null;
+  }
+
+  @override
+  void didUpdateWidget(_SegmentButton<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.enabled != widget.enabled) {
+      registry = widget.enabled ? RadioGroup.maybeOf<T>(context) : null;
+    }
+  }
+
+  @override
+  void dispose() {
+    registry = null;
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  T get radioValue => widget.value;
+
+  @override
+  FocusNode get focusNode => _focusNode;
+
+  @override
+  bool get tristate => false;
+
+  void requestFocus() {
+    if (widget.enabled) {
+      _focusNode.requestFocus();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Focus(
+      focusNode: _focusNode,
+      canRequestFocus: widget.enabled,
+      onKeyEvent: (FocusNode node, KeyEvent event) => KeyEventResult.ignored,
+      child: widget.child,
+    );
+  }
+}
+
 class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedControl<T>>
     with TickerProviderStateMixin<CupertinoSegmentedControl<T>> {
   T? _pressedKey;
 
   final List<AnimationController> _selectionControllers = <AnimationController>[];
   final List<ColorTween> _childTweens = <ColorTween>[];
+  final Map<T, GlobalKey<_SegmentButtonState<T>>> _segmentKeys =
+      <T, GlobalKey<_SegmentButtonState<T>>>{};
 
   late ColorTween _forwardBackgroundColorTween;
   late ColorTween _reverseBackgroundColorTween;
@@ -341,11 +416,15 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
       return;
     }
     if (!widget.disabledChildren.contains(currentKey)) {
+      _segmentKeys[currentKey]?.currentState?.requestFocus();
+
       if (currentKey != widget.groupValue) {
         widget.onValueChanged(currentKey);
       }
     }
-    _pressedKey = null;
+    setState(() {
+      _pressedKey = null;
+    });
   }
 
   Color? getTextColor(int index, T currentKey) {
@@ -395,28 +474,43 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
 
       Widget child = Center(child: widget.children[currentKey]);
 
-      child = MouseRegion(
-        cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTapDown: widget.disabledChildren.contains(currentKey)
-              ? null
-              : (TapDownDetails event) {
-                  _onTapDown(currentKey);
-                },
-          onTapCancel: widget.disabledChildren.contains(currentKey) ? null : _onTapCancel,
-          onTap: () {
-            _onTap(currentKey);
-          },
-          child: IconTheme(
-            data: iconTheme,
-            child: DefaultTextStyle(
-              style: textStyle,
-              child: Semantics(
-                button: true,
-                inMutuallyExclusiveGroup: true,
-                selected: widget.groupValue == currentKey,
-                child: child,
+      final bool isEnabled = !widget.disabledChildren.contains(currentKey);
+
+      final GlobalKey<_SegmentButtonState<T>> segmentKey = _segmentKeys.putIfAbsent(
+        currentKey,
+        () => GlobalKey<_SegmentButtonState<T>>(),
+      );
+
+      child = _SegmentButton<T>(
+        key: segmentKey,
+        value: currentKey,
+        enabled: isEnabled,
+        child: MouseRegion(
+          cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTapDown: isEnabled
+                ? (TapDownDetails event) {
+                    _onTapDown(currentKey);
+                  }
+                : null,
+            onTapCancel: isEnabled ? _onTapCancel : null,
+            onTap: () {
+              if (isEnabled) {
+                _segmentKeys[currentKey]?.currentState?.requestFocus();
+              }
+              _onTap(currentKey);
+            },
+            child: IconTheme(
+              data: iconTheme,
+              child: DefaultTextStyle(
+                style: textStyle,
+                child: Semantics(
+                  button: true,
+                  inMutuallyExclusiveGroup: true,
+                  selected: widget.groupValue == currentKey,
+                  child: child,
+                ),
               ),
             ),
           ),
@@ -436,9 +530,20 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
       children: gestureChildren,
     );
 
-    return Padding(
-      padding: widget.padding ?? _kHorizontalItemPadding,
-      child: UnconstrainedBox(constrainedAxis: Axis.horizontal, child: box),
+    return Actions(
+      actions: <Type, Action<Intent>>{VoidCallbackIntent: VoidCallbackAction()},
+      child: RadioGroup<T>(
+        groupValue: widget.groupValue,
+        onChanged: (T? value) {
+          if (value != null && !widget.disabledChildren.contains(value)) {
+            widget.onValueChanged(value);
+          }
+        },
+        child: Padding(
+          padding: widget.padding ?? _kHorizontalItemPadding,
+          child: UnconstrainedBox(constrainedAxis: Axis.horizontal, child: box),
+        ),
+      ),
     );
   }
 }
