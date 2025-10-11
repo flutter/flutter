@@ -34,6 +34,7 @@ class WindowContent extends StatelessWidget {
         child: MaterialApp(home: RegularWindowContent(window: regular)),
       ),
       DialogWindowController() => throw UnimplementedError(),
+      OverlayWindowController() => throw UnimplementedError(),
     };
   }
 }

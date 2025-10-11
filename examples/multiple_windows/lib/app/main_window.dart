@@ -97,6 +97,7 @@ class _WindowsTable extends StatelessWidget {
         controller: regular,
       ),
       DialogWindowController() => throw UnimplementedError(),
+      OverlayWindowController() => throw UnimplementedError(),
     };
   }
 
@@ -104,6 +105,7 @@ class _WindowsTable extends StatelessWidget {
     return switch (controller) {
       RegularWindowController() => 'Regular',
       DialogWindowController() => 'Dialog',
+      OverlayWindowController() => 'Overlay',
     };
   }
 
