@@ -3022,6 +3022,30 @@ void main() {
     expect(find.byType(CloseButton), findsOneWidget);
   });
 
+  testWidgets('SimpleDialog does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: SimpleDialog(title: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SimpleDialog)), Size.zero);
+  });
+
+  testWidgets('SimpleDialogOption does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox.shrink(child: SimpleDialogOption(child: Text('X'))),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SimpleDialogOption)), Size.zero);
+  });
+
   testWidgets('Dialog does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
