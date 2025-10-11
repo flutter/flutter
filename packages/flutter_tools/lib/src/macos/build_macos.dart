@@ -197,7 +197,25 @@ Future<void> buildMacOS({
     HostPlatform.darwin_x64 => 'x86_64',
     _ => throw UnimplementedError('Unsupported platform'),
   };
-  final String destination = buildInfo.isDebug
+
+  // Parse DarwinArchs from dartDefines to determine if we should limit architectures
+  String? darwinArchs;
+  try {
+    const prefix = '$kDarwinArchs=';
+    final String define = buildInfo.dartDefines.firstWhere(
+      (String d) => d.startsWith(prefix),
+    );
+    darwinArchs = define.substring(prefix.length);
+  } on StateError {
+    // No DarwinArchs define found.
+  }
+
+  // Use specific architecture destination if:
+  // 1. Debug build (existing behavior)
+  // 2. DarwinArchs is explicitly defined (new behavior)
+  // Otherwise use generic platform for universal binary
+  final bool shouldUseSpecificArch = buildInfo.isDebug || darwinArchs != null;
+  final String destination = shouldUseSpecificArch
       ? 'platform=${XcodeSdk.MacOSX.displayName},arch=$arch'
       : XcodeSdk.MacOSX.genericPlatform;
 
@@ -221,6 +239,11 @@ Future<void> buildMacOS({
         'SYMROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
         if (verboseLogging) 'VERBOSE_SCRIPT_LOGGING=YES' else '-quiet',
         'COMPILER_INDEX_STORE_ENABLE=NO',
+        if (darwinArchs != null) ...[
+          'ARCHS=$arch',
+          'ONLY_ACTIVE_ARCH=YES',
+          'EXCLUDED_ARCHS=${arch == 'arm64' ? 'x86_64' : 'arm64'}',
+        ],
         if (disabledSandboxEntitlementFile != null)
           'CODE_SIGN_ENTITLEMENTS=${disabledSandboxEntitlementFile.path}',
         ...environmentVariablesAsXcodeBuildSettings(globals.platform),
