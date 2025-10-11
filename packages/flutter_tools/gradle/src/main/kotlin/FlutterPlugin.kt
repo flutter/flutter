@@ -5,6 +5,8 @@
 package com.flutter.gradle
 
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.variant.ApplicationVariant
+import com.android.build.api.variant.FilterConfiguration
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
@@ -59,7 +61,7 @@ class FlutterPlugin : Plugin<Project> {
             resolveFlutterSdkProperty(flutterRootSystemVal)
                 ?: throw GradleException(
                     "Flutter SDK not found. Define location with flutter.sdk in the " +
-                        "local.properties file or with a FLUTTER_ROOT environment variable."
+                            "local.properties file or with a FLUTTER_ROOT environment variable."
                 )
 
         flutterRoot = project.file(flutterRootPath)
@@ -213,9 +215,9 @@ class FlutterPlugin : Plugin<Project> {
         // supported range.
         val shouldSkipDependencyChecks: Boolean =
             project.hasProperty("skipDependencyChecks") &&
-                (
-                    project.properties["skipDependencyChecks"].toString().toBoolean()
-                )
+                    (
+                            project.properties["skipDependencyChecks"].toString().toBoolean()
+                            )
         if (!shouldSkipDependencyChecks) {
             try {
                 DependencyVersionChecker.checkDependencyVersions(project)
@@ -226,8 +228,8 @@ class FlutterPlugin : Plugin<Project> {
                     // Possible bug in dependency checking code - warn and do not block build.
                     project.logger.error(
                         "Warning: Flutter was unable to detect project Gradle, Java, " +
-                            "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
-                            e
+                                "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
+                                e
                     )
                 } else {
                     // If usesUnsupportedDependencyVersions is set, the exception was thrown by us
@@ -438,16 +440,27 @@ class FlutterPlugin : Plugin<Project> {
                     }
                 }
             }
+
             // Copy the native assets created by build.dart and placed here by flutter assemble.
             // This path is not flavor specific and must only be added once.
             // If support for flavors is added to native assets, then they must only be added
             // once per flavor; see https://github.com/dart-lang/native/issues/1359.
-            val nativeAssetsDir =
-                "${projectToAddTasksTo.layout.buildDirectory.get()}/../native_assets/android/jniLibs/lib/"
-            android.sourceSets
-                .getByName("main")
-                .jniLibs
-                .srcDir(nativeAssetsDir)
+            val androidComponents =
+                projectToAddTasksTo.extensions.findByType(
+                    com.android.build.api.variant.AndroidComponentsExtension::class.java
+                )
+
+            androidComponents?.onVariants { variant ->
+                val nativeAssetsDir =
+                    projectToAddTasksTo.layout.projectDirectory
+                        .dir("native_assets/android/jniLibs/lib")
+                        .asFile
+                        .absolutePath
+
+                // Register JNI libs directory for each variant safely
+                variant.sources.jniLibs?.addStaticSourceDirectory(nativeAssetsDir)
+            }
+
             getPluginHandler(projectToAddTasksTo).configurePlugins(engineVersion!!)
             FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
                 projectToAddTasksTo,
@@ -608,27 +621,57 @@ class FlutterPlugin : Plugin<Project> {
                 project.findProperty("validate-deferred-components")?.toString()?.toBoolean() ?: true
 
             if (FlutterPluginUtils.shouldProjectSplitPerAbi(project)) {
-                variant.outputs.forEach { output ->
-                    // need to force this as the API does not return the right thing for our use.
-                    // TODO(gmackall): Migrate to AGPs variant api.
-                    //    https://github.com/flutter/flutter/issues/166550
-                    @Suppress("DEPRECATION")
-                    output as com.android.build.gradle.api.ApkVariantOutput
-                    val versionCodeIfPresent: Int? = if (variant is ApkVariant) variant.versionCode else null
+                val androidComponents =
+                    project.extensions.findByType(
+                        com.android.build.api.variant.AndroidComponentsExtension::class.java
+                    )
+//                androidComponents {
+//                    onVariants { variant ->
+//                        // Example: Transform the merged manifest
+//                        variant.artifacts.use(MyManifestTransformerTask::class.java)
+//                            .wiredWithFiles(
+//                                MyManifestTransformerTask::inputManifest,
+//                                MyManifestTransformerTask::outputManifest
+//                            )
+//                            .toTransform(SingleArtifact.MERGED_MANIFEST.INSTANCE)
+//                    }
+//                }
+                androidComponents?.onVariants(androidComponents.selector().all()) { variant ->
+                    if (variant is ApplicationVariant) {
+                        variant.outputs.forEach { output ->
+                            val abiFilter = output.filters.find {
+                                it.filterType == FilterConfiguration.FilterType.ABI
+                            }
+                            val abiVersionCode = FlutterPluginConstants.ABI_VERSION[abiFilter?.identifier]
 
-                    // TODO(gmackall): Migrate to AGPs variant api.
-                    //    https://github.com/flutter/flutter/issues/166550
-                    @Suppress("DEPRECATION")
-                    val filterIdentifier: String? =
-                        output.getFilter(com.android.build.VariantOutput.FilterType.ABI)
-                    val abiVersionCode: Int? = FlutterPluginConstants.ABI_VERSION[filterIdentifier]
-                    if (abiVersionCode != null) {
-                        output.versionCodeOverride = abiVersionCode * 1000 + (
-                            versionCodeIfPresent
-                                ?: variant.mergedFlavor.versionCode as Int
-                        )
+                            if (abiVersionCode != null) {
+                                val baseVersionCode = output.versionCode.getOrElse(0)
+                                output.versionCode.set(abiVersionCode * 1000 + baseVersionCode)
+                            }
+                        }
                     }
                 }
+//                variant.outputs.forEach { output ->
+//                    // need to force this as the API does not return the right thing for our use.
+//                    // TODO(gmackall): Migrate to AGPs variant api.
+//                    //    https://github.com/flutter/flutter/issues/166550
+//                    @Suppress("DEPRECATION")
+//                    output as com.android.build.gradle.api.ApkVariantOutput
+//                    val versionCodeIfPresent: Int? = if (variant is ApkVariant) variant.versionCode else null
+//
+//                    // TODO(gmackall): Migrate to AGPs variant api.
+//                    //    https://github.com/flutter/flutter/issues/166550
+//                    @Suppress("DEPRECATION")
+//                    val filterIdentifier: String? =
+//                        output.getFilter(com.android.build.VariantOutput.FilterType.ABI)
+//                    val abiVersionCode: Int? = FlutterPluginConstants.ABI_VERSION[filterIdentifier]
+//                    if (abiVersionCode != null) {
+//                        output.versionCodeOverride = abiVersionCode * 1000 + (
+//                                versionCodeIfPresent
+//                                    ?: variant.mergedFlavor.versionCode as Int
+//                                )
+//                    }
+//                }
             }
 
             // Build an AAR when this property is defined.
