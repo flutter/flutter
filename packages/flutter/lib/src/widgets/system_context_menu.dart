@@ -160,7 +160,14 @@ class SystemContextMenu extends StatefulWidget {
       if (editableTextState.copyEnabled) const IOSSystemContextMenuItemCopy(),
       if (editableTextState.cutEnabled) const IOSSystemContextMenuItemCut(),
       if (editableTextState.pasteEnabled) const IOSSystemContextMenuItemPaste(),
-      if (editableTextState.selectAllEnabled) const IOSSystemContextMenuItemSelectAll(),
+      if (editableTextState.selectAllEnabled)
+        IOSSystemContextMenuItemCustom(
+          title: WidgetsLocalizations.of(editableTextState.context).selectAllButtonLabel,
+          attributes: IOSSystemContextMenuItemAttributes.keepsMenuPresented,
+          onPressed: () {
+            editableTextState.selectAll(SelectionChangedCause.toolbar);
+          },
+        ),
       if (editableTextState.lookUpEnabled) const IOSSystemContextMenuItemLookUp(),
       if (editableTextState.searchWebEnabled) const IOSSystemContextMenuItemSearchWeb(),
       if (editableTextState.liveTextInputEnabled) const IOSSystemContextMenuItemLiveText(),
@@ -487,7 +494,11 @@ final class IOSSystemContextMenuItemLiveText extends IOSSystemContextMenuItem {
 @immutable
 class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemCustom].
-  const IOSSystemContextMenuItemCustom({required this.title, required this.onPressed});
+  const IOSSystemContextMenuItemCustom({
+    required this.title,
+    required this.onPressed,
+    this.attributes = IOSSystemContextMenuItemAttributes.none,
+  });
 
   @override
   final String title;
@@ -495,13 +506,21 @@ class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagn
   /// The callback that is called when the button is pressed.
   final VoidCallback onPressed;
 
+  /// The [IOSSystemContextMenuItemAttributes] indicating
+  /// additional configurations for this button.
+  final IOSSystemContextMenuItemAttributes attributes;
+
   @override
   IOSSystemContextMenuItemData getData(WidgetsLocalizations localizations) {
-    return IOSSystemContextMenuItemDataCustom(title: title, onPressed: onPressed);
+    return IOSSystemContextMenuItemDataCustom(
+      title: title,
+      attributes: attributes,
+      onPressed: onPressed,
+    );
   }
 
   @override
-  int get hashCode => Object.hash(title, onPressed);
+  int get hashCode => Object.hash(title, attributes, onPressed);
 
   @override
   bool operator ==(Object other) {
@@ -510,6 +529,7 @@ class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagn
     }
     return other is IOSSystemContextMenuItemCustom &&
         other.title == title &&
+        other.attributes == attributes &&
         other.onPressed == onPressed;
   }
 
@@ -517,6 +537,9 @@ class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagn
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('title', title));
+    properties.add(
+      DiagnosticsProperty<IOSSystemContextMenuItemAttributes>('attributes', attributes),
+    );
     properties.add(ObjectFlagProperty<VoidCallback>.has('onPressed', onPressed));
   }
 }
