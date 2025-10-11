@@ -706,9 +706,6 @@ class Context {
 }
 
 enum TargetPlatform {
-  ios('ios'),
-  macos('macos');
-
-  const TargetPlatform(this.name);
-  final String name;
+  ios,
+  macos;
 }
