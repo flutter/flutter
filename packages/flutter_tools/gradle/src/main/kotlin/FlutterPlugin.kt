@@ -59,7 +59,7 @@ class FlutterPlugin : Plugin<Project> {
             resolveFlutterSdkProperty(flutterRootSystemVal)
                 ?: throw GradleException(
                     "Flutter SDK not found. Define location with flutter.sdk in the " +
-                            "local.properties file or with a FLUTTER_ROOT environment variable."
+                        "local.properties file or with a FLUTTER_ROOT environment variable."
                 )
 
         flutterRoot = project.file(flutterRootPath)
@@ -213,9 +213,9 @@ class FlutterPlugin : Plugin<Project> {
         // supported range.
         val shouldSkipDependencyChecks: Boolean =
             project.hasProperty("skipDependencyChecks") &&
-                    (
-                            project.properties["skipDependencyChecks"].toString().toBoolean()
-                            )
+                (
+                    project.properties["skipDependencyChecks"].toString().toBoolean()
+                )
         if (!shouldSkipDependencyChecks) {
             try {
                 DependencyVersionChecker.checkDependencyVersions(project)
@@ -226,8 +226,8 @@ class FlutterPlugin : Plugin<Project> {
                     // Possible bug in dependency checking code - warn and do not block build.
                     project.logger.error(
                         "Warning: Flutter was unable to detect project Gradle, Java, " +
-                                "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
-                                e
+                            "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
+                            e
                     )
                 } else {
                     // If usesUnsupportedDependencyVersions is set, the exception was thrown by us
@@ -633,9 +633,9 @@ class FlutterPlugin : Plugin<Project> {
                     val abiVersionCode: Int? = FlutterPluginConstants.ABI_VERSION[filterIdentifier]
                     if (abiVersionCode != null) {
                         output.versionCodeOverride = abiVersionCode * 1000 + (
-                                versionCodeIfPresent
-                                    ?: variant.mergedFlavor.versionCode as Int
-                                )
+                            versionCodeIfPresent
+                                ?: variant.mergedFlavor.versionCode as Int
+                            )
                     }
                 }
             }
