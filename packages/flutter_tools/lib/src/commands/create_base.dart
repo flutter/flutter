@@ -18,11 +18,27 @@ import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
 
-const _kAvailablePlatforms = <String>['ios', 'android', 'windows', 'linux', 'macos', 'web'];
+const _kAvailablePlatforms = <String>[
+  'ios',
+  'android',
+  'windows',
+  'linux',
+  'macos',
+  'web',
+  'darwin',
+];
 
 /// A list of all possible create platforms, even those that may not be enabled
 /// with the current config.
-const kAllCreatePlatforms = <String>['ios', 'android', 'windows', 'linux', 'macos', 'web'];
+const kAllCreatePlatforms = <String>[
+  'ios',
+  'android',
+  'windows',
+  'linux',
+  'macos',
+  'web',
+  'darwin',
+];
 
 const _kDefaultPlatformArgumentHelp =
     '(required) The platforms supported by this project. '
@@ -312,6 +328,7 @@ mixin CreateBase on FlutterCommand {
     bool linux = false,
     bool macos = false,
     bool windows = false,
+    bool darwin = false,
     bool implementationTests = false,
   }) {
     final String pluginDartClass = _createPluginClassName(projectName);
@@ -336,6 +353,7 @@ mixin CreateBase on FlutterCommand {
       'androidIdentifier': androidIdentifier,
       'iosIdentifier': appleIdentifier,
       'macosIdentifier': appleIdentifier,
+      'darwinIdentifier': appleIdentifier,
       'linuxIdentifier': linuxIdentifier,
       'windowsIdentifier': windowsIdentifier,
       'description': projectDescription,
@@ -365,6 +383,8 @@ mixin CreateBase on FlutterCommand {
       'web': web,
       'linux': linux,
       'macos': macos,
+      'darwin': darwin,
+      'sharedDarwinSource': darwin,
       'windows': windows,
       'year': DateTime.now().year,
       'dartSdkVersionBounds': dartSdkVersionBounds,
@@ -469,6 +489,7 @@ mixin CreateBase on FlutterCommand {
     final bool macOSPlatform = templateContext['macos'] as bool? ?? false;
     final bool windowsPlatform = templateContext['windows'] as bool? ?? false;
     final bool webPlatform = templateContext['web'] as bool? ?? false;
+    final bool darwinPlatform = templateContext['darwin'] as bool? ?? false;
 
     final platformsForMigrateConfig = <SupportedPlatform>[SupportedPlatform.root];
     if (androidPlatform) {
@@ -482,6 +503,10 @@ mixin CreateBase on FlutterCommand {
       platformsForMigrateConfig.add(SupportedPlatform.linux);
     }
     if (macOSPlatform) {
+      platformsForMigrateConfig.add(SupportedPlatform.macos);
+    }
+    if (darwinPlatform) {
+      platformsForMigrateConfig.add(SupportedPlatform.ios);
       platformsForMigrateConfig.add(SupportedPlatform.macos);
     }
     if (webPlatform) {
