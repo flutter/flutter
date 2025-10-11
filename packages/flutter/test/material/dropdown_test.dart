@@ -3934,7 +3934,58 @@ void main() {
     });
   });
 
-  testWidgets('DropdownButton changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('DropdownMenuItem has expected default mouse cursor on hover', (
+    WidgetTester tester,
+  ) async {
+    const Key menuKey = Key('testDropdownMenuButton');
+    const Key itemKey = Key('testDropdownMenuItem');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DropdownButton<String>(
+            key: menuKey,
+            onChanged: (String? value) {},
+            items: const <DropdownMenuItem<String>>[
+              DropdownMenuItem<String>(
+                key: itemKey,
+                value: 'testDropdownMenuItem',
+                child: Text('TestDropdownMenuItem'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Open DropdownButton.
+    await tester.tap(find.byKey(menuKey));
+    await tester.pump();
+
+    // Find DropdownMenuItem.
+    final Finder menuItemFinder = find.byKey(itemKey);
+    final Offset onMenuItem = tester.getCenter(menuItemFinder);
+    final Offset offMenuItem = tester.getBottomRight(menuItemFinder) + const Offset(1, 1);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+
+    await gesture.addPointer(location: onMenuItem);
+    await tester.pump();
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+
+    await gesture.moveTo(offMenuItem);
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+  });
+
+  testWidgets('DropdownButton changes mouse cursor when hovered as expected', (
+    WidgetTester tester,
+  ) async {
     const Key key = Key('testDropdownButton');
     await tester.pumpWidget(
       MaterialApp(
@@ -3967,8 +4018,9 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
+
     await gesture.moveTo(offDropdownButton);
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
@@ -4003,6 +4055,62 @@ void main() {
       SystemMouseCursors.basic,
     );
   });
+
+  testWidgets(
+    'DropdownButton and DropdownMenuItem have expected mouse cursor when explicitly configured',
+    (WidgetTester tester) async {
+      const Key menuKey = Key('testDropdownButton');
+      const Key itemKey = Key('testDropdownMenuItem');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: DropdownButton<String>(
+              key: menuKey,
+              mouseCursor: SystemMouseCursors.cell,
+              onChanged: (String? newValue) {},
+              items: const <DropdownMenuItem<String>>[
+                DropdownMenuItem<String>(key: itemKey, value: 'One', child: Text('One')),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final Finder dropdownButtonFinder = find.byKey(menuKey);
+      final Offset onDropdownButton = tester.getCenter(dropdownButtonFinder);
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+        pointer: 1,
+      );
+
+      // Test DropdownButton.
+      await gesture.addPointer(location: onDropdownButton);
+      await tester.pump();
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.cell,
+      );
+
+      // Test DropdownMenuItem.
+
+      // Open DropdownButton.
+      await tester.tap(find.byKey(menuKey));
+      await tester.pumpAndSettle();
+
+      // Find DropdownMenuItem.
+      final Finder menuItemFinder = find.byKey(itemKey);
+      final Offset onMenuItem = tester.getCenter(menuItemFinder);
+
+      await gesture.moveTo(onMenuItem);
+      await tester.pump();
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.cell,
+      );
+    },
+  );
 
   testWidgets(
     'Conflicting scrollbars are not applied by ScrollBehavior to Dropdown',

@@ -344,8 +344,8 @@ class ElevatedButton extends ButtonStyleButton {
   /// * `side` - null
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
   /// * `mouseCursor`
-  ///   * disabled - SystemMouseCursors.basic
-  ///   * others - SystemMouseCursors.click
+  ///   * on web and enabled - SystemMouseCursors.click
+  ///   * others - SystemMouseCursors.basic
   /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
@@ -399,8 +399,8 @@ class ElevatedButton extends ButtonStyleButton {
   /// * `side` - null
   /// * `shape` - StadiumBorder()
   /// * `mouseCursor`
-  ///   * disabled - SystemMouseCursors.basic
-  ///   * others - SystemMouseCursors.click
+  ///   * on web and enabled - SystemMouseCursors.click
+  ///   * others - SystemMouseCursors.basic
   /// * `visualDensity` - Theme.visualDensity
   /// * `tapTargetSize` - Theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
@@ -430,7 +430,7 @@ class ElevatedButton extends ButtonStyleButton {
             minimumSize: const Size(64, 36),
             maximumSize: Size.infinite,
             shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
-            enabledMouseCursor: SystemMouseCursors.click,
+            enabledMouseCursor: kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
             disabledMouseCursor: SystemMouseCursors.basic,
             visualDensity: theme.visualDensity,
             tapTargetSize: theme.materialTapTargetSize,
@@ -677,13 +677,7 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
-    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      if (states.contains(WidgetState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+  WidgetStateProperty<MouseCursor?>? get mouseCursor => WidgetStateMouseCursor.adaptiveClickable;
 
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;
