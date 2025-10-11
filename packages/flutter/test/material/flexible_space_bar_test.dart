@@ -1624,6 +1624,21 @@ void main() {
     final DefaultTextStyle textStyle = DefaultTextStyle.of(tester.element(find.text('Title')));
     expect(textStyle.style.color, theme.textTheme.titleLarge!.color);
   });
+
+  testWidgets('FlexibleSpaceBar does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(
+              appBar: AppBar(flexibleSpace: const FlexibleSpaceBar(title: Text('X'))),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(FlexibleSpaceBar)), Size.zero);
+  });
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {

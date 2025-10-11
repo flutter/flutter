@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -144,26 +145,26 @@ void main() {
     const Color defaultOverlayColor = Color(0xffffff00);
 
     final ButtonStyle customButtonStyle = ButtonStyle(
-      backgroundColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.focused)) {
+      backgroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.focused)) {
           return focusedBackgroundColor;
         }
         return defaultBackgroundColor;
       }),
-      foregroundColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.focused)) {
+      foregroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.focused)) {
           return focusedForegroundColor;
         }
         return defaultForegroundColor;
       }),
-      iconColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.focused)) {
+      iconColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.focused)) {
           return focusedIconColor;
         }
         return defaultIconColor;
       }),
-      overlayColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.focused)) {
+      overlayColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.focused)) {
           return focusedOverlayColor;
         }
         return defaultOverlayColor;
@@ -3807,7 +3808,7 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/151686.
-  testWidgets('Setting DropdownMenu.requestFocusOnTap to false makes TextField read only', (
+  testWidgets('Setting DropdownMenu.requestFocusOnTap to false makes TextField a button', (
     WidgetTester tester,
   ) async {
     const String label = 'Test';
@@ -3838,6 +3839,7 @@ void main() {
         isEnabled: true,
         label: 'Test',
         textDirection: TextDirection.ltr,
+        hasExpandedState: true,
       ),
     );
 
@@ -3845,16 +3847,20 @@ void main() {
 
     expect(
       tester.getSemantics(find.byType(TextField)),
-      matchesSemantics(
-        hasFocusAction: true,
-        isTextField: true,
-        isFocusable: true,
-        hasEnabledState: true,
-        isEnabled: true,
-        label: 'Test',
-        isReadOnly: true,
-        textDirection: TextDirection.ltr,
-      ),
+      kIsWeb
+          ? matchesSemantics(isButton: true, hasExpandedState: true)
+          : matchesSemantics(
+              isButton: true,
+              hasExpandedState: true,
+              hasFocusAction: true,
+              isTextField: true,
+              isFocusable: true,
+              hasEnabledState: true,
+              isEnabled: true,
+              label: 'Test',
+              isReadOnly: true,
+              textDirection: TextDirection.ltr,
+            ),
     );
   });
 
@@ -4426,36 +4432,34 @@ void main() {
                       id: 3,
                       flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
-                        TestSemantics(
-                          id: 5,
-                          inputType: SemanticsInputType.text,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.isTextField,
-                            SemanticsFlag.isFocusable,
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isEnabled,
-                            SemanticsFlag.isReadOnly,
-                          ],
-                          actions: <SemanticsAction>[SemanticsAction.focus],
-                          textDirection: TextDirection.ltr,
-                          currentValueLength: 0,
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              id: 6,
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.hasSelectedState,
-                                SemanticsFlag.isButton,
-                                SemanticsFlag.hasEnabledState,
-                                SemanticsFlag.isEnabled,
-                                SemanticsFlag.isFocusable,
-                              ],
-                              actions: <SemanticsAction>[
-                                SemanticsAction.tap,
-                                SemanticsAction.focus,
-                              ],
-                            ),
-                          ],
-                        ),
+                        if (kIsWeb)
+                          TestSemantics(
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isButton,
+                              SemanticsFlag.hasExpandedState,
+                            ],
+                            actions: <SemanticsAction>[SemanticsAction.expand],
+                          )
+                        else
+                          TestSemantics(
+                            id: 5,
+                            inputType: SemanticsInputType.text,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocusable,
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isReadOnly,
+                              SemanticsFlag.isButton,
+                              SemanticsFlag.hasExpandedState,
+                            ],
+                            actions: <SemanticsAction>[
+                              SemanticsAction.focus,
+                              SemanticsAction.expand,
+                            ],
+                            textDirection: TextDirection.ltr,
+                            currentValueLength: 0,
+                          ),
                       ],
                     ),
                   ],
@@ -4739,6 +4743,27 @@ void main() {
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.cursorHeight, cursorHeight);
+  });
+
+  testWidgets('DropdownMenu accepts a MenuController', (WidgetTester tester) async {
+    final MenuController menuController = MenuController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            menuController: menuController,
+            dropdownMenuEntries: menuChildren,
+          ),
+        ),
+      ),
+    );
+    expect(findMenuItemButton('Item 0').hitTestable(), findsNothing);
+    menuController.open();
+    await tester.pumpAndSettle();
+    expect(findMenuItemButton('Item 0').hitTestable(), findsOne);
+    menuController.close();
+    await tester.pumpAndSettle();
+    expect(findMenuItemButton('Item 0').hitTestable(), findsNothing);
   });
 }
 

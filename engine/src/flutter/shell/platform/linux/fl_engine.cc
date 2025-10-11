@@ -564,12 +564,16 @@ static void fl_engine_dispose(GObject* object) {
   FlEngine* self = FL_ENGINE(object);
 
   if (self->engine != nullptr) {
-    self->embedder_api.Shutdown(self->engine);
+    if (self->embedder_api.Shutdown(self->engine) != kSuccess) {
+      g_warning("Failed to shutdown Flutter engine");
+    }
     self->engine = nullptr;
   }
 
   if (self->aot_data != nullptr) {
-    self->embedder_api.CollectAOTData(self->aot_data);
+    if (self->embedder_api.CollectAOTData(self->aot_data) != kSuccess) {
+      g_warning("Failed to send collect AOT data");
+    }
     self->aot_data = nullptr;
   }
 
@@ -766,9 +770,13 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   custom_task_runners.struct_size = sizeof(FlutterCustomTaskRunners);
   custom_task_runners.platform_task_runner = &platform_task_runner;
 
-  if (fl_dart_project_get_ui_thread_policy(self->project) ==
-      FL_UI_THREAD_POLICY_RUN_ON_PLATFORM_THREAD) {
-    custom_task_runners.ui_task_runner = &platform_task_runner;
+  switch (fl_dart_project_get_ui_thread_policy(self->project)) {
+    case FL_UI_THREAD_POLICY_RUN_ON_SEPARATE_THREAD:
+      break;
+    case FL_UI_THREAD_POLICY_DEFAULT:
+    case FL_UI_THREAD_POLICY_RUN_ON_PLATFORM_THREAD:
+      custom_task_runners.ui_task_runner = &platform_task_runner;
+      break;
   }
 
   g_autoptr(GPtrArray) command_line_args =
@@ -1084,8 +1092,10 @@ void fl_engine_send_platform_message(FlEngine* self,
   }
 
   if (response_handle != nullptr) {
-    self->embedder_api.PlatformMessageReleaseResponseHandle(self->engine,
-                                                            response_handle);
+    if (self->embedder_api.PlatformMessageReleaseResponseHandle(
+            self->engine, response_handle) != kSuccess) {
+      g_warning("Failed to release response handle");
+    }
   }
 }
 
@@ -1117,7 +1127,10 @@ void fl_engine_send_window_metrics_event(FlEngine* self,
   event.pixel_ratio = pixel_ratio;
   event.display_id = display_id;
   event.view_id = view_id;
-  self->embedder_api.SendWindowMetricsEvent(self->engine, &event);
+  if (self->embedder_api.SendWindowMetricsEvent(self->engine, &event) !=
+      kSuccess) {
+    g_warning("Failed to send window metrics");
+  }
 }
 
 void fl_engine_send_mouse_pointer_event(FlEngine* self,
@@ -1151,7 +1164,10 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
   fl_event.buttons = buttons;
   fl_event.device = kMousePointerDeviceId;
   fl_event.view_id = view_id;
-  self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1);
+  if (self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1) !=
+      kSuccess) {
+    g_warning("Failed to send pointer event");
+  }
 }
 
 void fl_engine_send_touch_up_event(FlEngine* self,
@@ -1177,7 +1193,10 @@ void fl_engine_send_touch_up_event(FlEngine* self,
   event.phase = FlutterPointerPhase::kUp;
   event.struct_size = sizeof(event);
 
-  self->embedder_api.SendPointerEvent(self->engine, &event, 1);
+  if (self->embedder_api.SendPointerEvent(self->engine, &event, 1) !=
+      kSuccess) {
+    g_warning("Failed to send pointer event");
+  }
 }
 
 void fl_engine_send_touch_down_event(FlEngine* self,
@@ -1203,7 +1222,10 @@ void fl_engine_send_touch_down_event(FlEngine* self,
   event.phase = FlutterPointerPhase::kDown;
   event.struct_size = sizeof(event);
 
-  self->embedder_api.SendPointerEvent(self->engine, &event, 1);
+  if (self->embedder_api.SendPointerEvent(self->engine, &event, 1) !=
+      kSuccess) {
+    g_warning("Failed to send pointer event");
+  }
 }
 
 void fl_engine_send_touch_move_event(FlEngine* self,
@@ -1229,7 +1251,10 @@ void fl_engine_send_touch_move_event(FlEngine* self,
   event.phase = FlutterPointerPhase::kMove;
   event.struct_size = sizeof(event);
 
-  self->embedder_api.SendPointerEvent(self->engine, &event, 1);
+  if (self->embedder_api.SendPointerEvent(self->engine, &event, 1) !=
+      kSuccess) {
+    g_warning("Failed to send pointer event");
+  }
 }
 
 void fl_engine_send_touch_add_event(FlEngine* self,
@@ -1255,7 +1280,10 @@ void fl_engine_send_touch_add_event(FlEngine* self,
   event.phase = FlutterPointerPhase::kAdd;
   event.struct_size = sizeof(event);
 
-  self->embedder_api.SendPointerEvent(self->engine, &event, 1);
+  if (self->embedder_api.SendPointerEvent(self->engine, &event, 1) !=
+      kSuccess) {
+    g_warning("Failed to send pointer event");
+  }
 }
 
 void fl_engine_send_touch_remove_event(FlEngine* self,
@@ -1281,7 +1309,10 @@ void fl_engine_send_touch_remove_event(FlEngine* self,
   event.phase = FlutterPointerPhase::kRemove;
   event.struct_size = sizeof(event);
 
-  self->embedder_api.SendPointerEvent(self->engine, &event, 1);
+  if (self->embedder_api.SendPointerEvent(self->engine, &event, 1) !=
+      kSuccess) {
+    g_warning("Failed to send pointer event");
+  }
 }
 
 void fl_engine_send_pointer_pan_zoom_event(FlEngine* self,
@@ -1313,7 +1344,10 @@ void fl_engine_send_pointer_pan_zoom_event(FlEngine* self,
   fl_event.device = kPointerPanZoomDeviceId;
   fl_event.device_kind = kFlutterPointerDeviceKindTrackpad;
   fl_event.view_id = view_id;
-  self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1);
+  if (self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1) !=
+      kSuccess) {
+    g_warning("Failed to send pointer event");
+  }
 }
 
 static void send_key_event_cb(bool handled, void* user_data) {
@@ -1388,7 +1422,9 @@ void fl_engine_dispatch_semantics_action(FlEngine* self,
   info.action = action;
   info.data = action_data;
   info.data_length = action_data_length;
-  self->embedder_api.SendSemanticsAction(self->engine, &info);
+  if (self->embedder_api.SendSemanticsAction(self->engine, &info) != kSuccess) {
+    g_warning("Failed to send semantics action");
+  }
 }
 
 gboolean fl_engine_mark_texture_frame_available(FlEngine* self,
@@ -1425,7 +1461,9 @@ FlTaskRunner* fl_engine_get_task_runner(FlEngine* self) {
 
 void fl_engine_execute_task(FlEngine* self, FlutterTask* task) {
   g_return_if_fail(FL_IS_ENGINE(self));
-  self->embedder_api.RunTask(self->engine, task);
+  if (self->embedder_api.RunTask(self->engine, task) != kSuccess) {
+    g_warning("Failed to run task");
+  }
 }
 
 G_MODULE_EXPORT FlTextureRegistrar* fl_engine_get_texture_registrar(
@@ -1441,8 +1479,11 @@ void fl_engine_update_accessibility_features(FlEngine* self, int32_t flags) {
     return;
   }
 
-  self->embedder_api.UpdateAccessibilityFeatures(
-      self->engine, static_cast<FlutterAccessibilityFeature>(flags));
+  if (self->embedder_api.UpdateAccessibilityFeatures(
+          self->engine, static_cast<FlutterAccessibilityFeature>(flags)) !=
+      kSuccess) {
+    g_warning("Failed to update accessibility features");
+  }
 }
 
 void fl_engine_request_app_exit(FlEngine* self) {

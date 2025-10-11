@@ -28,7 +28,6 @@ import 'ink_well.dart';
 import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'scrollbar.dart';
 import 'shadows.dart';
 import 'theme.dart';
@@ -1627,7 +1626,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     }
 
     final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor>(
-      MaterialStateMouseCursor.clickable,
+      WidgetStateMouseCursor.clickable,
       <WidgetState>{if (!_enabled) WidgetState.disabled},
     );
 
@@ -1641,10 +1640,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     // https://m2.material.io/components/menus#dropdown-menu
     if (widget._inputDecoration != null) {
       final bool filled =
-          widget._inputDecoration?.filled ?? Theme.of(context).inputDecorationTheme.filled;
+          widget._inputDecoration?.filled ?? InputDecorationTheme.of(context).filled;
       final bool oulined =
           widget._inputDecoration?.border?.isOutline ??
-          Theme.of(context).inputDecorationTheme.border?.isOutline ??
+          InputDecorationTheme.of(context).border?.isOutline ??
           false;
 
       final double suffixIconEndMargin = (filled || oulined) ? 12.0 : 0.0;
@@ -1813,7 +1812,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
          builder: (FormFieldState<T> field) {
            final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;
            InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
-               .applyDefaults(Theme.of(field.context).inputDecorationTheme);
+               .applyDefaults(InputDecorationTheme.of(field.context));
 
            final bool showSelectedItem =
                items != null &&
@@ -1887,6 +1886,10 @@ class DropdownButtonFormField<T> extends FormField<T> {
        );
 
   /// {@macro flutter.material.dropdownButton.onChanged}
+  ///
+  /// This callback is invoked after the parent [Form]'s [Form.onChanged] callback.
+  /// The field's updated value is available in the [Form.onChanged] callback
+  /// via [FormFieldState.value].
   final ValueChanged<T?>? onChanged;
 
   /// The decoration to show around the dropdown button form field.

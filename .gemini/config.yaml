@@ -11,6 +11,7 @@ code_review:
     # These tend to be verbose, and since we expect PR authors to clearly
     # describe their PRs this would be at best duplicative.
     summary: false
+    include_drafts: false
 ignore_patterns:
   # Avoid code reviews on rolls.
   - DEPS

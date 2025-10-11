@@ -11,7 +11,7 @@ import 'package:ui/ui.dart' as ui;
 
 typedef ImageFilterHandleBorrow<T> = T Function(ImageFilterHandle handle);
 
-abstract class SkwasmImageFilter implements SceneImageFilter {
+abstract class SkwasmImageFilter implements LayerImageFilter {
   const SkwasmImageFilter();
 
   factory SkwasmImageFilter.blur({
@@ -65,9 +65,6 @@ abstract class SkwasmImageFilter implements SceneImageFilter {
 
   @override
   ui.Rect filterBounds(ui.Rect inputBounds) => withRawImageFilter((handle) {
-    if (handle == nullptr) {
-      return inputBounds;
-    }
     return withStackScope((StackScope scope) {
       final RawIRect rawRect = scope.convertIRectToNative(inputBounds);
       imageFilterGetFilterBounds(handle, rawRect);
@@ -99,10 +96,24 @@ class SkwasmBlurFilter extends SkwasmImageFilter {
   }
 
   @override
-  String toString() => 'ImageFilter.blur($sigmaX, $sigmaY, ${tileModeString(tileMode)})';
+  Matrix4? get transform => null;
 
   @override
-  Matrix4? get transform => null;
+  bool operator ==(Object other) {
+    if (runtimeType != other.runtimeType) {
+      return false;
+    }
+    return other is SkwasmBlurFilter &&
+        other.sigmaX == sigmaX &&
+        other.sigmaY == sigmaY &&
+        other.tileMode == tileMode;
+  }
+
+  @override
+  int get hashCode => Object.hash(sigmaX, sigmaY, tileMode);
+
+  @override
+  String toString() => 'ImageFilter.blur($sigmaX, $sigmaY, ${tileModeString(tileMode)})';
 }
 
 class SkwasmDilateFilter extends SkwasmImageFilter {
@@ -123,10 +134,21 @@ class SkwasmDilateFilter extends SkwasmImageFilter {
   }
 
   @override
-  String toString() => 'ImageFilter.dilate($radiusX, $radiusY)';
+  Matrix4? get transform => null;
 
   @override
-  Matrix4? get transform => null;
+  bool operator ==(Object other) {
+    if (runtimeType != other.runtimeType) {
+      return false;
+    }
+    return other is SkwasmDilateFilter && other.radiusX == radiusX && other.radiusY == radiusY;
+  }
+
+  @override
+  int get hashCode => Object.hash(radiusX, radiusY);
+
+  @override
+  String toString() => 'ImageFilter.dilate($radiusX, $radiusY)';
 }
 
 class SkwasmErodeFilter extends SkwasmImageFilter {
@@ -147,10 +169,21 @@ class SkwasmErodeFilter extends SkwasmImageFilter {
   }
 
   @override
-  String toString() => 'ImageFilter.erode($radiusX, $radiusY)';
+  Matrix4? get transform => null;
 
   @override
-  Matrix4? get transform => null;
+  bool operator ==(Object other) {
+    if (runtimeType != other.runtimeType) {
+      return false;
+    }
+    return other is SkwasmErodeFilter && other.radiusX == radiusX && other.radiusY == radiusY;
+  }
+
+  @override
+  int get hashCode => Object.hash(radiusX, radiusY);
+
+  @override
+  String toString() => 'ImageFilter.erode($radiusX, $radiusY)';
 }
 
 class SkwasmMatrixFilter extends SkwasmImageFilter {
@@ -174,10 +207,23 @@ class SkwasmMatrixFilter extends SkwasmImageFilter {
   });
 
   @override
-  String toString() => 'ImageFilter.matrix($matrix4, $filterQuality)';
+  Matrix4? get transform => Matrix4.fromFloat32List(toMatrix32(matrix4));
 
   @override
-  Matrix4? get transform => Matrix4.fromFloat32List(toMatrix32(matrix4));
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is SkwasmMatrixFilter &&
+        other.filterQuality == filterQuality &&
+        listEquals<double>(other.matrix4, matrix4);
+  }
+
+  @override
+  int get hashCode => Object.hash(filterQuality, Object.hashAll(matrix4));
+
+  @override
+  String toString() => 'ImageFilter.matrix($matrix4, $filterQuality)';
 }
 
 class SkwasmColorImageFilter extends SkwasmImageFilter {
@@ -197,10 +243,21 @@ class SkwasmColorImageFilter extends SkwasmImageFilter {
   });
 
   @override
-  String toString() => filter.toString();
+  Matrix4? get transform => null;
 
   @override
-  Matrix4? get transform => null;
+  bool operator ==(Object other) {
+    if (runtimeType != other.runtimeType) {
+      return false;
+    }
+    return other is SkwasmColorImageFilter && other.filter == filter;
+  }
+
+  @override
+  int get hashCode => filter.hashCode;
+
+  @override
+  String toString() => filter.toString();
 }
 
 class SkwasmComposedImageFilter extends SkwasmImageFilter {
@@ -224,9 +281,6 @@ class SkwasmComposedImageFilter extends SkwasmImageFilter {
   );
 
   @override
-  String toString() => 'ImageFilter.compose($outer, $inner)';
-
-  @override
   Matrix4? get transform {
     final outerTransform = outer.transform;
     final innerTransform = inner.transform;
@@ -235,6 +289,20 @@ class SkwasmComposedImageFilter extends SkwasmImageFilter {
     }
     return outerTransform ?? innerTransform;
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (runtimeType != other.runtimeType) {
+      return false;
+    }
+    return other is SkwasmComposedImageFilter && other.outer == outer && other.inner == inner;
+  }
+
+  @override
+  int get hashCode => Object.hash(outer, inner);
+
+  @override
+  String toString() => 'ImageFilter.compose($outer, $inner)';
 }
 
 typedef ColorFilterHandleBorrow<T> = T Function(ColorFilterHandle handle);
@@ -273,6 +341,17 @@ class SkwasmModeColorFilter extends SkwasmColorFilter {
   }
 
   @override
+  bool operator ==(Object other) {
+    if (runtimeType != other.runtimeType) {
+      return false;
+    }
+    return other is SkwasmModeColorFilter && other.color == color && other.blendMode == blendMode;
+  }
+
+  @override
+  int get hashCode => Object.hash(color, blendMode);
+
+  @override
   String toString() => 'ColorFilter.mode($color, $blendMode)';
 }
 
@@ -287,6 +366,12 @@ class SkwasmLinearToSrgbGammaColorFilter extends SkwasmColorFilter {
   T withRawColorFilter<T>(ColorFilterHandleBorrow<T> borrow) => borrow(_rawColorFilter);
 
   @override
+  bool operator ==(Object other) => runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
   String toString() => 'ColorFilter.linearToSrgbGamma()';
 }
 
@@ -299,6 +384,12 @@ class SkwasmSrgbToLinearGammaColorFilter extends SkwasmColorFilter {
 
   @override
   T withRawColorFilter<T>(ColorFilterHandleBorrow<T> borrow) => borrow(_rawColorFilter);
+
+  @override
+  bool operator ==(Object other) => runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
 
   @override
   String toString() => 'ColorFilter.srgbToLinearGamma()';
@@ -327,6 +418,17 @@ class SkwasmMatrixColorFilter extends SkwasmColorFilter {
     colorFilterDispose(rawColorFilter);
     return result;
   });
+
+  @override
+  bool operator ==(Object other) {
+    if (runtimeType != other.runtimeType) {
+      return false;
+    }
+    return other is SkwasmMatrixColorFilter && listEquals<double>(matrix, other.matrix);
+  }
+
+  @override
+  int get hashCode => Object.hashAll(matrix);
 
   @override
   String toString() => 'ColorFilter.matrix($matrix)';

@@ -3198,7 +3198,14 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   [(FlutterTouchInterceptingView*)touchInteceptorView blockGesture];
 
-  if (@available(iOS 18.2, *)) {
+  BOOL shouldReAddDelayingRecognizer = NO;
+  if (@available(iOS 26.0, *)) {
+    // TODO(hellohuanlin): find a solution for iOS 26,
+    // https://github.com/flutter/flutter/issues/175099.
+  } else if (@available(iOS 18.2, *)) {
+    shouldReAddDelayingRecognizer = YES;
+  }
+  if (shouldReAddDelayingRecognizer) {
     // Since we remove and add back delayingRecognizer, it would be reordered to the last.
     XCTAssertEqual(touchInteceptorView.gestureRecognizers[0], forwardingRecognizer);
     XCTAssertEqual(touchInteceptorView.gestureRecognizers[1], delayingRecognizer);
@@ -3261,7 +3268,14 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   [(FlutterTouchInterceptingView*)touchInteceptorView blockGesture];
 
-  if (@available(iOS 18.2, *)) {
+  BOOL shouldReAddDelayingRecognizer = NO;
+  if (@available(iOS 26.0, *)) {
+    // TODO(hellohuanlin): find a solution for iOS 26,
+    // https://github.com/flutter/flutter/issues/175099.
+  } else if (@available(iOS 18.2, *)) {
+    shouldReAddDelayingRecognizer = YES;
+  }
+  if (shouldReAddDelayingRecognizer) {
     // Since we remove and add back delayingRecognizer, it would be reordered to the last.
     XCTAssertEqual(touchInteceptorView.gestureRecognizers[0], forwardingRecognizer);
     XCTAssertEqual(touchInteceptorView.gestureRecognizers[1], delayingRecognizer);
