@@ -418,7 +418,6 @@ class FlutterPlugin : Plugin<Project> {
                             packageApplicationProvider.outputDirectory.get()
                         val outputDirectoryStr: String = outputDirectory.toString()
                         var filename = "app"
-
                         // TODO(gmackall): Migrate to AGPs variant api.
                         //    https://github.com/flutter/flutter/issues/166550
                         @Suppress("DEPRECATION")
@@ -438,16 +437,25 @@ class FlutterPlugin : Plugin<Project> {
                     }
                 }
             }
+
             // Copy the native assets created by build.dart and placed here by flutter assemble.
             // This path is not flavor specific and must only be added once.
             // If support for flavors is added to native assets, then they must only be added
             // once per flavor; see https://github.com/dart-lang/native/issues/1359.
-            val nativeAssetsDir =
-                "${projectToAddTasksTo.layout.buildDirectory.get()}/../native_assets/android/jniLibs/lib/"
-            android.sourceSets
-                .getByName("main")
-                .jniLibs
-                .srcDir(nativeAssetsDir)
+            val androidComponents =
+                projectToAddTasksTo.extensions.findByType(
+                    com.android.build.api.variant.AndroidComponentsExtension::class.java
+                )
+
+            androidComponents?.onVariants { variant ->
+                val nativeAssetsDir =
+                    projectToAddTasksTo.layout.projectDirectory.dir("native_assets/android/jniLibs/lib").asFile
+                        .absolutePath
+
+                // Register JNI libs directory for each variant safely
+                variant.sources.jniLibs?.addStaticSourceDirectory(nativeAssetsDir)
+            }
+
             getPluginHandler(projectToAddTasksTo).configurePlugins(engineVersion!!)
             FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
                 projectToAddTasksTo,
