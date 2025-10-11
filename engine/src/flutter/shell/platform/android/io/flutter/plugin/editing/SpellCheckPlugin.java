@@ -159,7 +159,7 @@ public class SpellCheckPlugin
         String suggestion = suggestionsInfo.getSuggestionAt(j);
         // TODO(camsim99): Support spell check on Samsung by retrieving accurate spell check
         // results, then remove this check: https://github.com/flutter/flutter/issues/120608.
-        if (!suggestion.equals("")) {
+        if (!suggestion.isEmpty()) {
           validSuggestionsFound = true;
           suggestions.add(suggestion);
         }

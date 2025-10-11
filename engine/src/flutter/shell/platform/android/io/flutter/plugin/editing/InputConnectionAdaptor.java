@@ -361,7 +361,7 @@ public class InputConnectionAdaptor extends BaseInputConnection
       setSelection(selStart, newSelectionEnd);
     }
     return true;
-  };
+  }
 
   private boolean handleVerticalMovement(boolean isUp, boolean isShiftPressed) {
     final int selStart = Selection.getSelectionStart(mEditable);
@@ -565,7 +565,7 @@ public class InputConnectionAdaptor extends BaseInputConnection
       boolean textChanged, boolean selectionChanged, boolean composingRegionChanged) {
     // This method notifies the input method that the editing state has changed.
     // updateSelection is mandatory. updateExtractedText and updateCursorAnchorInfo
-    // are on demand (if the input method set the correspoinding monitoring
+    // are on demand (if the input method set the corresponding monitoring
     // flags). See getExtractedText and requestCursorUpdates.
 
     // Always send selection update. InputMethodManager#updateSelection skips

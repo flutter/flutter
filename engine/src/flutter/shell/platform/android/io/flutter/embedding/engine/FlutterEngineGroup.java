@@ -153,7 +153,7 @@ public class FlutterEngineGroup {
       dartEntrypoint = DartEntrypoint.createDefault();
     }
 
-    if (activeEngines.size() == 0) {
+    if (activeEngines.isEmpty()) {
       engine =
           createEngine(
               context,
