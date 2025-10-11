@@ -52,7 +52,9 @@ void main() {}
 import 'package:flutter/widget_previews.dart';
 
 class BrightnessPreview extends MultiPreview {
-  const BrightnessPreview();
+  const BrightnessPreview(this.value);
+
+  final Object value;
 
   final List<Preview> previews = <Preview>[
     Preview(name: 'Light', brightness: Brightness.light, wrapper: (child) => child),
@@ -62,7 +64,7 @@ class BrightnessPreview extends MultiPreview {
 
 
 class ClassDeclaration extends StatelessWidget {
-  @BrightnessPreview()
+  @BrightnessPreview(new Object())
   @Preview(theme: () => PreviewThemeData())
   ClassDeclaration();
 
