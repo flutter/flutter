@@ -526,7 +526,7 @@ class FlutterPlatform extends PlatformPlugin {
   static const _kExtension = 'ext.$_kEventName';
 
   Future<void> _listenToVmServiceForGoldens({required Uri uri, required String testPath}) async {
-    final Uri goldensBaseUri = Uri.file(testPath, windows: Platform.isWindows);
+    final goldensBaseUri = Uri.file(testPath, windows: Platform.isWindows);
     final FlutterVmService vmService = await connectToVmService(uri, logger: logger);
     final IsolateRef testAppIsolate = await vmService.findExtensionIsolate(_kExtension);
     await vmService.service.streamListen(_kEventName);
