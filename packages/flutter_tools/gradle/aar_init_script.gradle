@@ -205,10 +205,10 @@ abstract class AssembleAarTask extends DefaultTask {
         project.logger.lifecycle("Assembling AAR for variant: $variant into $outDir")
 
         project.publishing.publications.create(variant, MavenPublication) { pub ->
-            groupId = getGroupId().get()
-            artifactId = "${getArtifactId().get()}_${variant}"
-            version = getVersionName().get()
-            from project.components.named(variant)
+            groupId = groupId.get()
+            artifactId = "${artifactId.get()}_${variant}"
+            version = versionName.get()
+            from component
         }
 
         project.tasks.named("publish").get().execute()
