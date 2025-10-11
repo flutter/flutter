@@ -14947,11 +14947,6 @@ Copyright 2014-2022 The Khronos Group Inc.
 SPDX-License-Identifier: Apache-2.0
 --------------------------------------------------------------------------------
 swiftshader
-
-Copyright 2014-2023 The Khronos Group Inc.
-
-SPDX-License-Identifier: Apache-2.0
---------------------------------------------------------------------------------
 vulkan
 vulkan-headers
 
@@ -15074,12 +15069,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --------------------------------------------------------------------------------
 swiftshader
-
-Copyright 2015-2023 The Khronos Group Inc.
-
-SPDX-License-Identifier: Apache-2.0
---------------------------------------------------------------------------------
-swiftshader
 vulkan
 vulkan-headers
 
@@ -15089,6 +15078,7 @@ Copyright 2015-2023 LunarG, Inc.
 
 SPDX-License-Identifier: Apache-2.0
 --------------------------------------------------------------------------------
+swiftshader
 vulkan
 vulkan-headers
 
@@ -16910,6 +16900,7 @@ Copyright 2023-2025 The Khronos Group Inc.
 
 SPDX-License-Identifier: Apache-2.0
 --------------------------------------------------------------------------------
+swiftshader
 vulkan-utility-libraries
 
 Copyright 2023-2025 The Khronos Group Inc.
