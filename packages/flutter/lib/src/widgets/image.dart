@@ -47,6 +47,8 @@ export 'package:flutter/painting.dart'
 // Examples can assume:
 // late Widget image;
 // late ImageProvider _image;
+// late bool isPaused;
+// late AssetImage myAnimatedGif;
 
 /// Creates an [ImageConfiguration] based on the given [BuildContext] (and
 /// optionally size).
@@ -279,6 +281,23 @@ typedef ImageErrorWidgetBuilder =
 ///
 /// ```dart
 /// Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg')
+/// ```
+/// {@end-tool}
+///
+/// Multiframe images, such as animated GIFs, are paused when [TickerMode] is
+/// disabled just like any other animation. They also paused when animations are
+/// disabled via [MediaQueryData.disableAnimations], such as for accessibility
+/// purposes. If the animation is paused when the image first loads, the first
+/// frame will be displayed and then animation will stop.
+///
+/// {@tool snippet}
+//// An example of pausing a multiframe image using [TickerMode].
+///
+/// ```dart
+/// TickerMode(
+///   enabled: !isPaused,
+///   child: Image(image: myAnimatedGif),
+/// ),
 /// ```
 /// {@end-tool}
 ///
@@ -1089,7 +1108,15 @@ class Image extends StatefulWidget {
 
 class _ImageState extends State<Image> with WidgetsBindingObserver {
   ImageStream? _imageStream;
+
+  // The currently displayed ImageInfo, if any.
   ImageInfo? _imageInfo;
+
+  // The ImageProvider of _imageInfo.
+  ImageProvider? _imageProvider;
+
+  // The most recently loaded ImageInfo of all `widget.image` ImageInfos.
+  final Map<ImageProvider, ImageInfo?> _imageInfosCache = <ImageProvider, ImageInfo?>{};
   ImageChunkEvent? _loadingProgress;
   bool _isListeningToStream = false;
   late bool _invertColors;
@@ -1099,6 +1126,13 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   Object? _lastException;
   StackTrace? _lastStack;
   ImageStreamCompleterHandle? _completerHandle;
+
+  /// True when animations are disabled and the image should not update, such as
+  /// when [TickerMode] is disabled or [MediaQueryData.disableAnimations] is
+  /// true.
+  bool _isPaused = false;
+
+  bool get _hasReceivedFirstFrame => _imageInfosCache[widget.image] != null;
 
   @override
   void initState() {
@@ -1115,6 +1149,9 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     _completerHandle?.dispose();
     _scrollAwareContext.dispose();
     _replaceImage(info: null);
+    _imageInfosCache.forEach((ImageProvider imageProvider, ImageInfo? imageInfo) {
+      imageInfo?.dispose();
+    });
     super.dispose();
   }
 
@@ -1123,10 +1160,12 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     _updateInvertColors();
     _resolveImage();
 
-    if (TickerMode.of(context)) {
-      _listenToStream();
-    } else {
+    _isPaused = !TickerMode.of(context) || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
+
+    if (_isPaused && _hasReceivedFirstFrame) {
       _stopListeningToStream(keepStreamAlive: true);
+    } else {
+      _listenToStream();
     }
 
     super.didChangeDependencies();
@@ -1142,7 +1181,15 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _imageStream!.removeListener(oldListener);
     }
     if (widget.image != oldWidget.image) {
-      _resolveImage();
+      final ImageInfo? cachedImageInfo = _imageInfosCache[widget.image];
+      if (cachedImageInfo != null && _isPaused) {
+        _replaceImage(info: cachedImageInfo);
+      } else {
+        _resolveImage();
+        if (!_isPaused || !_hasReceivedFirstFrame) {
+          _listenToStream();
+        }
+      }
     }
   }
 
@@ -1219,6 +1266,9 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _frameNumber = _frameNumber == null ? 0 : _frameNumber! + 1;
       _wasSynchronouslyLoaded = _wasSynchronouslyLoaded | synchronousCall;
     });
+    if (_isPaused) {
+      _stopListeningToStream(keepStreamAlive: true);
+    }
   }
 
   void _handleImageChunk(ImageChunkEvent event) {
@@ -1232,11 +1282,21 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
   void _replaceImage({required ImageInfo? info}) {
     final ImageInfo? oldImageInfo = _imageInfo;
-    SchedulerBinding.instance.addPostFrameCallback(
-      (_) => oldImageInfo?.dispose(),
-      debugLabel: 'Image.disposeOldInfo',
-    );
+    final ImageProvider? oldImageProvider = _imageProvider;
+    if (oldImageInfo != null) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+        // If oldImageInfo is still in the cache, then it will be disposed when
+        // the widget is disposed. Otherwise it has been evicted, so dispose it
+        // here.
+        if (_imageInfosCache[oldImageProvider] != oldImageInfo) {
+          oldImageInfo.dispose();
+        }
+      }, debugLabel: 'Image.disposeOldInfo');
+    }
+
     _imageInfo = info;
+    _imageProvider = widget.image;
+    _imageInfosCache[widget.image] = info;
   }
 
   // Updates _imageStream to newStream, and moves the stream listener
@@ -1274,11 +1334,10 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       return;
     }
 
+    _isListeningToStream = true;
     _imageStream!.addListener(_getListener());
     _completerHandle?.dispose();
     _completerHandle = null;
-
-    _isListeningToStream = true;
   }
 
   /// Stops listening to the image stream, if this state object has attached a
