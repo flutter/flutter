@@ -2369,6 +2369,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           if (_persistentSheetHistoryEntry == null) {
             _persistentSheetHistoryEntry = LocalHistoryEntry(
               onRemove: () {
+                if (!notification.context.mounted) return;
                 DraggableScrollableActuator.reset(notification.context);
                 showBodyScrim(false, 0.0);
                 _floatingActionButtonVisibilityController.value = 1.0;
@@ -2856,6 +2857,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   @protected
   @override
   void dispose() {
+    _persistentSheetHistoryEntry?.remove();
     _geometryNotifier.dispose();
     _floatingActionButtonMoveController.dispose();
     _floatingActionButtonVisibilityController.dispose();
