@@ -8,6 +8,7 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
+import 'basic.dart';
 import 'framework.dart';
 
 export 'package:flutter/scheduler.dart' show TickerProvider;
@@ -22,8 +23,13 @@ export 'package:flutter/scheduler.dart' show TickerProvider;
 /// widget-aware ticker providers. For example, using a
 /// [TickerProviderStateMixin] or a [SingleTickerProviderStateMixin].
 class TickerMode extends StatefulWidget {
-  /// Creates a widget that enables or disables tickers.
-  const TickerMode({super.key, required this.enabled, required this.child});
+  /// Creates a widget that enables or disables tickers and optionally forces frames.
+  const TickerMode({
+    super.key,
+    required this.enabled,
+    required this.child,
+    this.forceFrames = false,
+  });
 
   /// The requested ticker mode for this subtree.
   ///
@@ -37,6 +43,13 @@ class TickerMode extends StatefulWidget {
   /// ancestor [TickerMode]s. Animations driven by such tickers are not paused,
   /// they just don't call their callbacks. Time still elapses.
   final bool enabled;
+
+  /// If true, tickers in this subtree will request frames using
+  /// SchedulerBinding.scheduleForcedFrame while active.
+  ///
+  /// Use sparingly, as this can increase battery usage when frames would
+  /// otherwise be suppressed by lifecycle.
+  final bool forceFrames;
 
   /// The widget below this widget in the tree.
   ///
@@ -56,6 +69,10 @@ class TickerMode extends StatefulWidget {
   /// ```dart
   /// bool tickingEnabled = TickerMode.of(context);
   /// ```
+  @Deprecated(
+    'Use TickerMode.valuesOf to get both enabled and forceFrames. '
+    'This feature was deprecated after v3.35.0-0.0.pre.',
+  )
   static bool of(BuildContext context) {
     final _EffectiveTickerMode? widget = context
         .dependOnInheritedWidgetOfExactType<_EffectiveTickerMode>();
@@ -92,10 +109,52 @@ class TickerMode extends StatefulWidget {
   ///
   /// In the absence of a [TickerMode] widget, this function returns a
   /// [ValueListenable], whose [ValueListenable.value] is always true.
+  @Deprecated(
+    'Use TickerMode.getValuesNotifier to get both enabled and forceFrames. '
+    'This feature was deprecated after v3.35.0-0.0.pre.',
+  )
   static ValueListenable<bool> getNotifier(BuildContext context) {
     final _EffectiveTickerMode? widget = context
         .getInheritedWidgetOfExactType<_EffectiveTickerMode>();
     return widget?.notifier ?? const _ConstantValueListenable<bool>(true);
+  }
+
+  /// Returns the effective ticker mode values for this subtree and establishes
+  /// a dependency on the surrounding [TickerMode].
+  static TickerModeData valuesOf(BuildContext context) {
+    final _EffectiveTickerMode? widget = context
+        .dependOnInheritedWidgetOfExactType<_EffectiveTickerMode>();
+    return widget?.values ?? const TickerModeData(enabled: true, forceFrames: false);
+  }
+
+  /// Obtains a [ValueListenable] of [TickerModeData] from the surrounding [TickerMode]
+  /// without establishing a dependency.
+  static ValueListenable<TickerModeData> getValuesNotifier(BuildContext context) {
+    final _EffectiveTickerMode? widget = context
+        .getInheritedWidgetOfExactType<_EffectiveTickerMode>();
+    return widget?.valuesNotifier ??
+        const _ConstantTickerModeDataListenable(TickerModeData(enabled: true, forceFrames: false));
+  }
+
+  /// Creates a [TickerMode] that overrides the ambient ticker mode values.
+  ///
+  /// The given `enabled` and `forceFrames` override the ambient values when not null;
+  /// otherwise the ambient values are preserved.
+  static Widget merge({Key? key, bool? enabled, bool? forceFrames, required Widget child}) {
+    return Builder(
+      builder: (BuildContext context) {
+        final _EffectiveTickerMode? parent = context
+            .dependOnInheritedWidgetOfExactType<_EffectiveTickerMode>();
+        final bool parentEnabled = parent?.enabled ?? true;
+        final bool parentForce = parent?.forceFrames ?? false;
+        return TickerMode(
+          key: key,
+          enabled: enabled ?? parentEnabled,
+          forceFrames: forceFrames ?? parentForce,
+          child: child,
+        );
+      },
+    );
   }
 
   @override
@@ -104,12 +163,19 @@ class TickerMode extends StatefulWidget {
 
 class _TickerModeState extends State<TickerMode> {
   bool _ancestorTicketMode = true;
+  bool _ancestorForceFrames = false;
   final ValueNotifier<bool> _effectiveMode = ValueNotifier<bool>(true);
+  final ValueNotifier<TickerModeData> _effectiveValues = ValueNotifier<TickerModeData>(
+    const TickerModeData(enabled: true, forceFrames: false),
+  );
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _ancestorTicketMode = TickerMode.of(context);
+    final _EffectiveTickerMode? parent = context
+        .dependOnInheritedWidgetOfExactType<_EffectiveTickerMode>();
+    _ancestorTicketMode = parent?.enabled ?? true;
+    _ancestorForceFrames = parent?.forceFrames ?? false;
     _updateEffectiveMode();
   }
 
@@ -122,18 +188,24 @@ class _TickerModeState extends State<TickerMode> {
   @override
   void dispose() {
     _effectiveMode.dispose();
+    _effectiveValues.dispose();
     super.dispose();
   }
 
   void _updateEffectiveMode() {
-    _effectiveMode.value = _ancestorTicketMode && widget.enabled;
+    final bool enabled = _ancestorTicketMode && widget.enabled;
+    final bool force = _ancestorForceFrames || widget.forceFrames;
+    _effectiveMode.value = enabled;
+    _effectiveValues.value = TickerModeData(enabled: enabled, forceFrames: force);
   }
 
   @override
   Widget build(BuildContext context) {
     return _EffectiveTickerMode(
       enabled: _effectiveMode.value,
+      forceFrames: _effectiveValues.value.forceFrames,
       notifier: _effectiveMode,
+      valuesNotifier: _effectiveValues,
       child: widget.child,
     );
   }
@@ -154,13 +226,24 @@ class _TickerModeState extends State<TickerMode> {
 }
 
 class _EffectiveTickerMode extends InheritedWidget {
-  const _EffectiveTickerMode({required this.enabled, required this.notifier, required super.child});
+  const _EffectiveTickerMode({
+    required this.enabled,
+    required this.forceFrames,
+    required this.notifier,
+    required this.valuesNotifier,
+    required super.child,
+  });
 
   final bool enabled;
+  final bool forceFrames;
   final ValueNotifier<bool> notifier;
+  final ValueNotifier<TickerModeData> valuesNotifier;
+
+  TickerModeData get values => valuesNotifier.value;
 
   @override
-  bool updateShouldNotify(_EffectiveTickerMode oldWidget) => enabled != oldWidget.enabled;
+  bool updateShouldNotify(_EffectiveTickerMode oldWidget) =>
+      enabled != oldWidget.enabled || forceFrames != oldWidget.forceFrames;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -247,7 +330,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T>
     super.dispose();
   }
 
-  ValueListenable<bool>? _tickerModeNotifier;
+  ValueListenable<TickerModeData>? _tickerModeNotifier;
 
   @override
   void activate() {
@@ -257,10 +340,16 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T>
     _updateTicker();
   }
 
-  void _updateTicker() => _ticker?.muted = !_tickerModeNotifier!.value;
+  void _updateTicker() {
+    final TickerModeData values = _tickerModeNotifier!.value;
+    if (_ticker != null) {
+      _ticker!.muted = !values.enabled;
+      _ticker!.forceFrames = values.forceFrames;
+    }
+  }
 
   void _updateTickerModeNotifier() {
-    final ValueListenable<bool> newNotifier = TickerMode.getNotifier(context);
+    final ValueListenable<TickerModeData> newNotifier = TickerMode.getValuesNotifier(context);
     if (newNotifier == _tickerModeNotifier) {
       return;
     }
@@ -318,11 +407,15 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
     }
     assert(_tickerModeNotifier != null);
     _tickers ??= <_WidgetTicker>{};
-    final _WidgetTicker result = _WidgetTicker(
-      onTick,
-      this,
-      debugLabel: kDebugMode ? 'created by ${describeIdentity(this)}' : null,
-    )..muted = !_tickerModeNotifier!.value;
+    final TickerModeData values = _tickerModeNotifier!.value;
+    final _WidgetTicker result =
+        _WidgetTicker(
+            onTick,
+            this,
+            debugLabel: kDebugMode ? 'created by ${describeIdentity(this)}' : null,
+          )
+          ..muted = !values.enabled
+          ..forceFrames = values.forceFrames;
     _tickers!.add(result);
     return result;
   }
@@ -333,7 +426,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
     _tickers!.remove(ticker);
   }
 
-  ValueListenable<bool>? _tickerModeNotifier;
+  ValueListenable<TickerModeData>? _tickerModeNotifier;
 
   @override
   void activate() {
@@ -345,15 +438,17 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
 
   void _updateTickers() {
     if (_tickers != null) {
-      final bool muted = !_tickerModeNotifier!.value;
+      final TickerModeData values = _tickerModeNotifier!.value;
+      final bool muted = !values.enabled;
       for (final Ticker ticker in _tickers!) {
         ticker.muted = muted;
+        ticker.forceFrames = values.forceFrames;
       }
     }
   }
 
   void _updateTickerModeNotifier() {
-    final ValueListenable<bool> newNotifier = TickerMode.getNotifier(context);
+    final ValueListenable<TickerModeData> newNotifier = TickerMode.getValuesNotifier(context);
     if (newNotifier == _tickerModeNotifier) {
       return;
     }
@@ -441,4 +536,57 @@ class _ConstantValueListenable<T> implements ValueListenable<T> {
 
   @override
   final T value;
+}
+
+/// Immutable compound values that describe the effective ticker behavior
+/// for a subtree.
+///
+/// Instances of this class are produced by [TickerMode.valuesOf] and
+/// [TickerMode.getValuesNotifier] and reflect the values that apply at a given
+/// location in the widget tree after taking ancestor [TickerMode] widgets into
+/// account.
+///
+/// Semantics of the fields:
+/// - [enabled]: A ticker is considered enabled only if all ancestor
+///   [TickerMode.enabled] values and the local [TickerMode.enabled] are true
+///   (logical AND). When false, tickers are muted (time still elapses but
+///   callbacks are not invoked).
+/// - [forceFrames]: When true, tickers in the subtree request frames using
+///   [SchedulerBinding.scheduleForcedFrame] while active. This value is
+///   combined across ancestors using logical OR, so any ancestor requesting
+///   forced frames enables it for the subtree.
+///
+/// For most widgets, reading these values is unnecessary; mixins such as
+/// [SingleTickerProviderStateMixin] and [TickerProviderStateMixin] apply them
+/// automatically to the [Ticker]s they vend. Use this class when you need to
+/// observe or react to ticker policy explicitly.
+class TickerModeData {
+  /// Creates a [TickerModeData].
+  const TickerModeData({required this.enabled, required this.forceFrames});
+
+  /// Whether tickers are enabled (not muted) for the subtree.
+  ///
+  /// Effective value is the logical AND of all ancestor and local
+  /// [TickerMode.enabled] values.
+  final bool enabled;
+
+  /// Whether tickers should request forced frames while active.
+  ///
+  /// Effective value is the logical OR of all ancestor and local
+  /// [TickerMode.forceFrames] values. Forcing frames may increase battery
+  /// usage, so use sparingly.
+  final bool forceFrames;
+}
+
+class _ConstantTickerModeDataListenable implements ValueListenable<TickerModeData> {
+  const _ConstantTickerModeDataListenable(this.value);
+
+  @override
+  void addListener(VoidCallback listener) {}
+
+  @override
+  void removeListener(VoidCallback listener) {}
+
+  @override
+  final TickerModeData value;
 }
