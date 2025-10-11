@@ -5738,12 +5738,12 @@ void main() {
         MaterialApp(
           home: Material(
             child: MenuBar(
-              children: [
+              children: <Widget>[
                 SubmenuButton(
                   animated: true,
                   focusNode: focusNode,
                   controller: controller,
-                  menuChildren: [
+                  menuChildren: <Widget>[
                     MenuItemButton(onPressed: () {}, child: const Text('Submenu Item')),
                   ],
                   child: const Text('Submenu'),
@@ -5885,7 +5885,7 @@ void main() {
             child: ConstrainedBox(
               constraints: const BoxConstraints(minWidth: 400, minHeight: 400),
               child: Column(
-                children: [
+                children: <Widget>[
                   TextButton(
                     onPressed: () {},
                     focusNode: outsideFocusNode,
@@ -5915,7 +5915,7 @@ void main() {
                       ),
                       SubmenuButton(
                         animated: true,
-                        menuChildren: [
+                        menuChildren: <Widget>[
                           MenuItemButton(
                             focusNode: submenuFocusNode,
                             onPressed: () {},
