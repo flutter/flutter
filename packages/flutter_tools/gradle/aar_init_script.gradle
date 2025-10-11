@@ -186,13 +186,13 @@ abstract class AssembleAarTask extends DefaultTask {
     abstract Property<String> getVariantName()
 
     @Input
-    abstract Property<String> getGroupId()
+    abstract Property<String> getPubGroupId()
 
     @Input
-    abstract Property<String> getArtifactId()
+    abstract Property<String> getPubArtifactId()
 
     @Input
-    abstract Property<String> getVersionName()
+    abstract Property<String> getPubVersionName()
 
     @OutputDirectory
     abstract DirectoryProperty getOutputDir()
@@ -204,11 +204,16 @@ abstract class AssembleAarTask extends DefaultTask {
 
         project.logger.lifecycle("Assembling AAR for variant: $variant into $outDir")
 
+        def component = project.components.named(variant)
+        if (component == null) {
+            throw new GradleException("No component found for variant: $variant")
+        }
+
         project.publishing.publications.create(variant, MavenPublication) { pub ->
-            groupId = groupId.get()
-            artifactId = "${artifactId.get()}_${variant}"
-            version = versionName.get()
-            from component
+            pub.groupId = pubGroupId.get()
+            pub.artifactId = "${pubArtifactId.get()}_${variant}"
+            pub.version = pubVersionName.get()
+            pub.from component
         }
 
         project.tasks.named("publish").get().execute()
