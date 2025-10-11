@@ -4659,9 +4659,13 @@ class SemanticsOwner extends ChangeNotifier {
         }
 
         if (isTraversalChild) {
-          // If the node is a child of an overlay portal, we add its parent
-          // node in the `updatedVisitedNodes` list for later grafting to generate
-          // a correct traversal order.
+          // If the node has a non-null `_traversalChildIdentifier`, it indicates
+          // that its hit-test parent and traversal parent are different, and
+          // its traversal parent should update its children to include this node.
+          // Therefore, its traversal parent node should be added to the
+          // `updatedVisitedNodes` list for later grafting, in order to generate
+          // a correct `childrenIntraversalOrder`. This is typically used in
+          // `OverlayPortal` widget.
           final SemanticsNode? parentNode = _traversalParentNodes[node.traversalChildIdentifier];
           if (parentNode != null && !updatedVisitedNodes.contains(parentNode)) {
             updatedVisitedNodes.add(parentNode);
