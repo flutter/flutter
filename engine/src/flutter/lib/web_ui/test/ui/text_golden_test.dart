@@ -573,6 +573,40 @@ Future<void> testMain() async {
     );
   });
 
+  test('font weight is applied to variable fonts', () async {
+    const double testWidth = 400;
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ui.Canvas canvas = ui.Canvas(recorder);
+    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(
+      ui.ParagraphStyle(
+        fontFamily: 'RobotoVariable',
+        fontSize: 40.0,
+        fontWeight: ui.FontWeight.w100,
+        textDirection: ui.TextDirection.ltr,
+      ),
+    );
+
+    builder.addText('Web Thin - 100\n');
+    builder.pushStyle(ui.TextStyle(fontWeight: ui.FontWeight.w300));
+    builder.addText('Web Light - 300\n');
+    builder.pushStyle(ui.TextStyle(fontWeight: ui.FontWeight.normal));
+    builder.addText('Web Normal - 400\n');
+    builder.pushStyle(ui.TextStyle(fontWeight: ui.FontWeight.w700));
+    builder.addText('Web Bold - 700\n');
+    builder.pushStyle(ui.TextStyle(fontWeight: ui.FontWeight.w900));
+    builder.addText('Web Black - 900\n');
+
+    final ui.Paragraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: testWidth - 20));
+    canvas.drawParagraph(paragraph, const ui.Offset(10, 10));
+    final ui.Picture picture = recorder.endRecording();
+    await drawPictureUsingCurrentRenderer(picture);
+    await matchGoldenFile(
+      'ui_text_font_weight_variable.png',
+      region: ui.Rect.fromLTRB(0, 0, testWidth, paragraph.height + 20),
+    );
+  });
+
   test('text style - woff2 font', () async {
     await testTextStyle('emoji woff2', outerText: '🙂 🇺🇸 🙋‍♂️', innerText: '', fontSize: 24);
   });
