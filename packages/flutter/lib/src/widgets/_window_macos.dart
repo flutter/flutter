@@ -9,8 +9,8 @@ import 'dart:ui' show Display, FlutterView;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/foundation/_features.dart';
 
+import '../foundation/_features.dart';
 import '_window.dart';
 import 'binding.dart';
 
