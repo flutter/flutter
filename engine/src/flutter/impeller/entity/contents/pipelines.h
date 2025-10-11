@@ -52,6 +52,7 @@
 #include "impeller/entity/sweep_gradient_ssbo_fill.frag.h"
 #include "impeller/entity/sweep_gradient_uniform_fill.frag.h"
 #include "impeller/entity/texture_downsample.frag.h"
+#include "impeller/entity/texture_downsample_software_decal.frag.h"
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/entity/texture_fill_strict_src.frag.h"
@@ -63,7 +64,6 @@
 #include "impeller/renderer/pipeline.h"
 
 #ifdef IMPELLER_ENABLE_OPENGLES
-#include "impeller/entity/texture_downsample_gles.frag.h"
 #include "impeller/entity/tiled_texture_fill_external.frag.h"
 #endif  // IMPELLER_ENABLE_OPENGLES
 
@@ -146,6 +146,9 @@ using SweepGradientFillPipeline = GradientPipelineHandle<SweepGradientFillFragme
 using SweepGradientSSBOFillPipeline = GradientPipelineHandle<SweepGradientSsboFillFragmentShader>;
 using SweepGradientUniformFillPipeline = GradientPipelineHandle<SweepGradientUniformFillFragmentShader>;
 using TextureDownsamplePipeline = RenderPipelineHandle<TextureFillVertexShader, TextureDownsampleFragmentShader>;
+using TextureDownsampleSoftwareDecalPipeline =
+    RenderPipelineHandle<TextureFillVertexShader,
+                         TextureDownsampleSoftwareDecalFragmentShader>;
 using TexturePipeline = RenderPipelineHandle<TextureFillVertexShader, TextureFillFragmentShader>;
 using TextureStrictSrcPipeline = RenderPipelineHandle<TextureFillVertexShader, TextureFillStrictSrcFragmentShader>;
 using TiledTexturePipeline = RenderPipelineHandle<TextureUvFillVertexShader, TiledTextureFillFragmentShader>;
@@ -161,9 +164,6 @@ using TiledTextureExternalPipeline =
 using TiledTextureUvExternalPipeline =
     RenderPipelineHandle<TextureUvFillVertexShader,
                          TiledTextureFillExternalFragmentShader>;
-using TextureDownsampleGlesPipeline =
-    RenderPipelineHandle<TextureFillVertexShader,
-                         TextureDownsampleGlesFragmentShader>;
 #endif  // IMPELLER_ENABLE_OPENGLES
 }  // namespace impeller
 

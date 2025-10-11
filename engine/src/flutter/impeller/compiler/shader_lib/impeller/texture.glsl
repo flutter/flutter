@@ -138,6 +138,17 @@ f16vec4 IPHalfSampleDecal(f16sampler2D texture_sampler, vec2 coords) {
   return texture(texture_sampler, coords, float16_t(kDefaultMipBias));
 }
 
+/// Sample a texture with decal tile mode with custom bounds.
+f16vec4 IPHalfSampleDecalBounded(f16sampler2D texture_sampler,
+                                 vec2 coords,
+                                 vec4 bounds) {
+  if (any(lessThan(coords, bounds.xy)) ||
+      any(greaterThanEqual(coords, bounds.zw))) {
+    return f16vec4(0.0);
+  }
+  return texture(texture_sampler, coords, float16_t(kDefaultMipBias));
+}
+
 /// Sample a texture, emulating a specific tile mode.
 ///
 /// This is useful for Impeller graphics backend that don't have native support
