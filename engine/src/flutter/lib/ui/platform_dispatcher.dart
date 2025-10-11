@@ -1121,6 +1121,33 @@ class PlatformDispatcher {
   /// This option is used by [showTimePicker].
   bool get alwaysUse24HourFormat => _configuration.alwaysUse24HourFormat;
 
+  /// The system-reported height of the text, as a multiple of the font size.
+  ///
+  /// If this value changes, [onMetricsChanged] will be called.
+  double get lineHeightScaleFactor => _configuration.lineHeightScaleFactor;
+
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each letter.
+  ///
+  /// A negative value can be used to bring the letters closer.
+  ///
+  /// If this value changes, [onMetricsChanged] will be called.
+  double get letterSpacing => _configuration.letterSpacing;
+
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each sequence of white-space (i.e. between each word).
+  ///
+  /// A negative value can be used to bring the words closer.
+  ///
+  /// If this value changes, [onMetricsChanged] will be called.
+  double get wordSpacing => _configuration.wordSpacing;
+
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each paragraph in text.
+  ///
+  /// If this value changes, [onMetricsChanged] will be called.
+  double get paragraphSpacing => _configuration.paragraphSpacing;
+
   /// The system-reported text scale.
   ///
   /// This establishes the text scaling factor to use when rendering text,
@@ -1811,6 +1838,10 @@ class _PlatformConfiguration {
     this.defaultRouteName,
     this.systemFontFamily,
     this.configurationId,
+    this.lineHeightScaleFactor = 1.0,
+    this.letterSpacing = 0.0,
+    this.wordSpacing = 0.0,
+    this.paragraphSpacing = 0.0,
   });
 
   _PlatformConfiguration copyWith({
@@ -1823,6 +1854,10 @@ class _PlatformConfiguration {
     String? defaultRouteName,
     String? systemFontFamily,
     int? configurationId,
+    double? lineHeightScaleFactor,
+    double? letterSpacing,
+    double? wordSpacing,
+    double? paragraphSpacing,
   }) {
     return _PlatformConfiguration(
       accessibilityFeatures: accessibilityFeatures ?? this.accessibilityFeatures,
@@ -1834,6 +1869,10 @@ class _PlatformConfiguration {
       defaultRouteName: defaultRouteName ?? this.defaultRouteName,
       systemFontFamily: systemFontFamily ?? this.systemFontFamily,
       configurationId: configurationId ?? this.configurationId,
+      lineHeightScaleFactor: lineHeightScaleFactor ?? this.lineHeightScaleFactor,
+      letterSpacing: letterSpacing ?? this.letterSpacing,
+      wordSpacing: wordSpacing ?? this.wordSpacing,
+      paragraphSpacing: paragraphSpacing ?? this.paragraphSpacing,
     );
   }
 
@@ -1881,6 +1920,25 @@ class _PlatformConfiguration {
   /// configuration updates from the embedder yet. The _getScaledFontSize
   /// function should not be called in either case.
   final int? configurationId;
+
+  /// The system-reported height of the text, as a multiple of the font size.
+  final double lineHeightScaleFactor;
+
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each letter.
+  ///
+  /// A negative value can be used to bring the letters closer.
+  final double letterSpacing;
+
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each sequence of white-space (i.e. between each word).
+  ///
+  /// A negative value can be used to bring the words closer.
+  final double wordSpacing;
+
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each paragraph in text.
+  final double paragraphSpacing;
 }
 
 /// An immutable view configuration.

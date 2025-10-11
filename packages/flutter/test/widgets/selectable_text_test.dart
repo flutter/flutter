@@ -5598,6 +5598,24 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('SelectableText respects MediaQueryData.paragraphSpacing', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData(paragraphSpacing: 2.0),
+          child: SelectableText('hello world'),
+        ),
+      ),
+    );
+
+    final Padding padding = tester.firstWidget(find.byType(Padding));
+    expect(padding, isNotNull);
+    expect(padding.padding, const EdgeInsets.only(bottom: 2.0));
+  });
+
   group('context menu', () {
     // Regression test for https://github.com/flutter/flutter/issues/169001.
     testWidgets(
