@@ -648,7 +648,7 @@ abstract class SemanticRole {
     element.style
       ..position = 'absolute'
       ..overflow = 'visible';
-    element.setAttribute('id', '$kFlutterSemanticNodePrefix${semanticsObject.id}');
+    element.setAttribute('id', getIdAttribute(semanticsObject.id));
 
     // The root node has some properties that other nodes do not.
     if (semanticsObject.id == 0 && !configuration.debugShowSemanticsNodes) {
@@ -723,6 +723,11 @@ abstract class SemanticRole {
   /// Convenience getter for the [Focusable] behavior, if any.
   Focusable? get focusable => _focusable;
   Focusable? _focusable;
+
+  /// Convenience method to get the node id with prefix.
+  String getIdAttribute(int semanticsId) {
+    return '$kFlutterSemanticNodePrefix${semanticsId}';
+  }
 
   /// Adds generic focus management features.
   void addFocusManagement() {
@@ -834,7 +839,7 @@ abstract class SemanticRole {
     }
 
     if (semanticsObject.isTraversalParentDirty) {
-      _updateTraversalParent();
+      semanticsObject.owner.addOneTimePostUpdateCallback(_updateTraversalParent);
     }
   }
 
@@ -855,7 +860,7 @@ abstract class SemanticRole {
           if (semanticNodeId == null) {
             continue;
           }
-          elementIds.add('$kFlutterSemanticNodePrefix$semanticNodeId');
+          elementIds.add(getIdAttribute(semanticNodeId));
         }
         if (elementIds.isNotEmpty) {
           setAttribute('aria-controls', elementIds.join(' '));
@@ -882,10 +887,7 @@ abstract class SemanticRole {
       final SemanticsObject? parent =
           semanticsObject.owner._semanticsTree[semanticsObject.traversalParent!];
       if (parent != null && parent.semanticRole != null) {
-        parent.element.setAttribute(
-          'aria-owns',
-          '$kFlutterSemanticNodePrefix${semanticsObject.id}',
-        );
+        parent.element.setAttribute('aria-owns', getIdAttribute(semanticsObject.id));
       }
     }
     // Clean up aria-owns relationship.
