@@ -13,6 +13,7 @@ void main() {
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
+      await driver.requestData(jsonEncode({'type': 'ping'}));
     });
 
     tearDownAll(() async {
@@ -127,6 +128,12 @@ void main() {
       );
       final data = jsonDecode(response);
       expect(data["isActivated"], true);
+    }, timeout: Timeout.none);
+
+    test('Can open dialog', () async {
+      await driver.requestData(jsonEncode({'type': 'open_dialog'}));
+      await driver.waitFor(find.byValueKey('close_dialog'));
+      await driver.requestData(jsonEncode({'type': 'close_dialog'}));
     }, timeout: Timeout.none);
   });
 }

@@ -39,10 +39,17 @@ struct WindowConstraints {
 };
 
 // Sent by the framework to request a new window be created.
-struct WindowCreationRequest {
+struct RegularWindowCreationRequest {
   WindowSizeRequest preferred_size;
   WindowConstraints preferred_constraints;
   LPCWSTR title;
+};
+
+struct DialogWindowCreationRequest {
+  WindowSizeRequest preferred_size;
+  WindowConstraints preferred_constraints;
+  LPCWSTR title;
+  HWND parent_or_null;
 };
 
 struct WindowsMessage {
@@ -83,7 +90,10 @@ class WindowManager {
 
   bool HasTopLevelWindows() const;
 
-  FlutterViewId CreateRegularWindow(const WindowCreationRequest* request);
+  FlutterViewId CreateRegularWindow(
+      const RegularWindowCreationRequest* request);
+
+  FlutterViewId CreateDialogWindow(const DialogWindowCreationRequest* request);
 
   // Message handler called by |HostWindow::WndProc| to process window
   // messages before delegating them to the host window. This allows the
@@ -128,7 +138,12 @@ bool InternalFlutterWindows_WindowManager_HasTopLevelWindows(int64_t engine_id);
 FLUTTER_EXPORT
 FlutterViewId InternalFlutterWindows_WindowManager_CreateRegularWindow(
     int64_t engine_id,
-    const flutter::WindowCreationRequest* request);
+    const flutter::RegularWindowCreationRequest* request);
+
+FLUTTER_EXPORT
+FlutterViewId InternalFlutterWindows_WindowManager_CreateDialogWindow(
+    int64_t engine_id,
+    const flutter::DialogWindowCreationRequest* request);
 
 // Retrives the HWND associated with this |engine_id| and |view_id|. Returns
 // NULL if the HWND cannot be found
