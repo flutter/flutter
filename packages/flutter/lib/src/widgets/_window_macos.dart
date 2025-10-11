@@ -99,7 +99,8 @@ class WindowingOwnerMacOS extends WindowingOwner {
 
   /// Returns the window handle for the given [view], or null is the window
   /// handle is not available.
-  /// The window handle is a pointer to NSWindow instance.
+  ///
+  /// The window handle is a pointer to the NSWindow instance.
   static Pointer<Void> getWindowHandle(FlutterView view) {
     return _MacOSPlatformInterface.getWindowHandle(
       PlatformDispatcher.instance.engineId!,
@@ -160,7 +161,8 @@ class RegularWindowControllerMacOS extends RegularWindowController {
   }
 
   /// Returns window handle for the current window.
-  /// The handle is a pointer to NSWindow instance.
+  ///
+  /// The handle is a pointer to an NSWindow instance.
   Pointer<Void> getWindowHandle() {
     _ensureNotDestroyed();
     return WindowingOwnerMacOS.getWindowHandle(rootView);
