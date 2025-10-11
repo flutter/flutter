@@ -397,9 +397,19 @@ class FlutterPlugin : Plugin<Project> {
                         variantOutput.processResources
                     }
                 processResources.dependsOn(copyFlutterAssetsTask)
-
+                
+                // Copy the output APKs into a known location, so `flutter run` or `flutter build apk`
+                // can discover them. By default, this is `<app-dir>/build/app/outputs/flutter-apk/<filename>.apk`.
+                //
+                // The filename consists of `app<-abi>?<-flavor-name>?-<build-mode>.apk`.
+                // Where:
+                //   * `abi` can be `armeabi-v7a|arm64-v8a|x86_64` only if the flag `split-per-abi` is set.
+                //   * `flavor-name` is the flavor used to build the app in lower case if the assemble task is called.
+                //   * `build-mode` can be `release|debug|profile`.
                 variant.outputs.forEach { output ->
                     assembleTask.doLast {
+                        // TODO(gmackall): Migrate to AGPs variant api.
+                        //    https://github.com/flutter/flutter/issues/166550
                         @Suppress("DEPRECATION")
                         output as com.android.build.gradle.api.ApkVariantOutput
                         val packageApplicationProvider: PackageAndroidArtifact =
@@ -408,7 +418,8 @@ class FlutterPlugin : Plugin<Project> {
                             packageApplicationProvider.outputDirectory.get()
                         val outputDirectoryStr: String = outputDirectory.toString()
                         var filename = "app"
-
+                        // TODO(gmackall): Migrate to AGPs variant api.
+                        //    https://github.com/flutter/flutter/issues/166550
                         @Suppress("DEPRECATION")
                         val abi = output.getFilter(com.android.build.VariantOutput.FilterType.ABI)
                         if (abi != null && abi.isNotEmpty()) {
@@ -427,15 +438,16 @@ class FlutterPlugin : Plugin<Project> {
                 }
             }
 
-            // ✅ Modern replacement for old nativeAssetsDir / sourceSets logic
-            // This uses the Android Components API (safe in AGP 8+)
+            // Copy the native assets created by build.dart and placed here by flutter assemble.
+            // This path is not flavor specific and must only be added once.
+            // If support for flavors is added to native assets, then they must only be added
+            // once per flavor; see https://github.com/dart-lang/native/issues/1359.
             val androidComponents =
                 projectToAddTasksTo.extensions.findByType(
                     com.android.build.api.variant.AndroidComponentsExtension::class.java
                 )
 
             androidComponents?.onVariants { variant ->
-                // Use a safe path relative to the project instead of "../build/..."
                 val nativeAssetsDir =
                     projectToAddTasksTo.layout.projectDirectory.dir("native_assets/android/jniLibs/lib").asFile
                         .absolutePath
