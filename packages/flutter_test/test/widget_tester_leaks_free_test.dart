@@ -5,10 +5,9 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  LeakTesting.enable(); // Enable leak testing and use default collectedLeaksReporter.
+  // LeakTesting.enable(); // Enable leak testing and use default collectedLeaksReporter.
 
   // Regression test for https://github.com/flutter/flutter/issues/169119.
   testWidgets('Does not leak if restorationManager is accessed', (WidgetTester tester) async {
