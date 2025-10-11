@@ -141,6 +141,55 @@
   return self;
 }
 
+- (FlutterViewIdentifier)createDialogWindow:(const FlutterWindowCreationRequest*)request {
+  FlutterViewController* c = [[FlutterViewController alloc] initWithEngine:_engine
+                                                                   nibName:nil
+                                                                    bundle:nil];
+
+  NSWindow* window = [[NSWindow alloc] init];
+  // If this is not set there will be double free on window close when
+  // using ARC.
+  [window setReleasedWhenClosed:NO];
+
+  window.contentViewController = c;
+  window.styleMask = NSWindowStyleMaskResizable | NSWindowStyleMaskTitled |
+                     NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable;
+  if (request->has_size) {
+    [window flutterSetContentSize:request->size];
+  }
+  if (request->has_constraints) {
+    [window flutterSetConstraints:request->constraints];
+  }
+
+  FlutterWindowOwner* w = [[FlutterWindowOwner alloc] initWithWindow:window
+                                               flutterViewController:c
+                                                     creationRequest:*request];
+  window.delegate = w;
+  [_windows addObject:w];
+
+  NSWindow* parent = nil;
+
+  if (request->parent_view_id != 0) {
+    for (FlutterWindowOwner* owner in _windows) {
+      if (owner.flutterViewController.viewIdentifier == request->parent_view_id) {
+        parent = owner.window;
+        break;
+      }
+    }
+  }
+
+  if (parent != nil) {
+    [parent beginCriticalSheet:window
+             completionHandler:^(NSModalResponse response){
+             }];
+  } else {
+    [window setIsVisible:YES];
+    [window makeKeyAndOrderFront:nil];
+  }
+
+  return c.viewIdentifier;
+}
+
 - (FlutterViewIdentifier)createRegularWindow:(const FlutterWindowCreationRequest*)request {
   FlutterViewController* c = [[FlutterViewController alloc] initWithEngine:_engine
                                                                    nibName:nil
@@ -208,6 +257,14 @@ int64_t InternalFlutter_WindowController_CreateRegularWindow(
   FlutterEngine* engine = [FlutterEngine engineForIdentifier:engine_id];
   [engine enableMultiView];
   return [engine.windowController createRegularWindow:request];
+}
+
+int64_t InternalFlutter_WindowController_CreateDialogWindow(
+    int64_t engine_id,
+    const FlutterWindowCreationRequest* request) {
+  FlutterEngine* engine = [FlutterEngine engineForIdentifier:engine_id];
+  [engine enableMultiView];
+  return [engine.windowController createDialogWindow:request];
 }
 
 void InternalFlutter_Window_Destroy(int64_t engine_id, void* window) {

@@ -41,6 +41,7 @@ struct FlutterWindowCreationRequest {
   struct FlutterWindowSize size;
   bool has_constraints;
   struct FlutterWindowConstraints constraints;
+  int64_t parent_view_id;
   void (*on_close)();
   void (*notify_listeners)();
 };
@@ -51,6 +52,11 @@ extern "C" {
 
 FLUTTER_DARWIN_EXPORT
 int64_t InternalFlutter_WindowController_CreateRegularWindow(
+    int64_t engine_id,
+    const FlutterWindowCreationRequest* request);
+
+FLUTTER_DARWIN_EXPORT
+int64_t InternalFlutter_WindowController_CreateDialogWindow(
     int64_t engine_id,
     const FlutterWindowCreationRequest* request);
 
