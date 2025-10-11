@@ -231,7 +231,7 @@ void main() {
     );
 
     // Simulate being in a LUCI environment.
-    environment['LUCI_CI'] = 'true';
+    environment['LUCI_CONTEXT'] = 'true';
     expect(runContentAwareHash(), processStdout('63a6c6dc494d9a2fc3e78e8505e878d129429246'));
   });
 
