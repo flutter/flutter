@@ -237,6 +237,49 @@ void main() {
       );
     });
 
+    testWidgets('tapping outside the selectable region dismisses selection', (
+      WidgetTester tester,
+    ) async {
+      const String text = 'Hello world';
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: SelectableRegion(
+                selectionControls: materialTextSelectionControls,
+                child: const Text(text),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text(text), matching: find.byType(RichText)),
+      );
+
+      // Drag to select.
+      final Offset textTopLeft = tester.getTopLeft(find.text(text));
+      final Offset textBottomRight = tester.getBottomRight(find.text(text));
+      final TestGesture gesture = await tester.startGesture(
+        textTopLeft,
+        kind: PointerDeviceKind.mouse,
+      );
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(textBottomRight);
+      await gesture.up();
+      await tester.pump();
+
+      expect(paragraph.selections, isNotEmpty);
+
+      // Tap just outside the top-left corner of the selectable region
+      // to dismiss the selection.
+      final Rect selectableRegionRect = tester.getRect(find.byType(SelectableRegion));
+      await tester.tapAt(selectableRegionRect.topLeft - const Offset(10.0, 10.0));
+      await tester.pump();
+      expect(paragraph.selections, isEmpty);
+    });
+
     testWidgets('does not merge semantics node of the children', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
 
@@ -6415,6 +6458,9 @@ class RenderSelectionSpy extends RenderProxyBox with Selectable, SelectionRegist
   Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
 
   @override
+  bool hitTestSelf(Offset position) => true;
+
+  @override
   void performLayout() => size = computeDryLayout(constraints);
 
   @override
@@ -6478,6 +6524,9 @@ class RenderSelectAll extends RenderProxyBox with Selectable, SelectionRegistran
   RenderSelectAll(SelectionRegistrar? registrar) {
     this.registrar = registrar;
   }
+
+  @override
+  bool hitTestSelf(Offset position) => true;
 
   @override
   List<Rect> get boundingBoxes => <Rect>[paintBounds];
