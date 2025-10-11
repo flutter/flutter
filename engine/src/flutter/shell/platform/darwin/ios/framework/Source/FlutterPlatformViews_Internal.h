@@ -148,6 +148,7 @@
 
 // Sets flutterAccessibilityContainer as this view's accessibilityContainer.
 @property(nonatomic, retain) id flutterAccessibilityContainer;
+@property(nonatomic, copy) NSArray<UIView*>* overlays;
 @end
 
 @interface UIView (FirstResponder)

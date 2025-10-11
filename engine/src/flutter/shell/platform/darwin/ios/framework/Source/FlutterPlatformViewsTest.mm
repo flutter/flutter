@@ -3403,6 +3403,177 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   XCTAssertEqual(touchInteceptorView.gestureRecognizers[1], forwardingRecognizer);
 }
 
+- (void)
+    testFlutterPlatformViewBlockGestureUnderHitTestByOverlayPolicyShouldNotAddDelayingRecognizer {
+  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
+
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/GetDefaultTaskRunner(),
+                               /*raster=*/GetDefaultTaskRunner(),
+                               /*ui=*/GetDefaultTaskRunner(),
+                               /*io=*/GetDefaultTaskRunner());
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      [[FlutterPlatformViewsController alloc] init];
+  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
+
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController registerViewFactory:factory
+                                               withId:@"MockFlutterPlatformView"
+                     gestureRecognizersBlockingPolicy:
+                         FlutterPlatformViewGestureRecognizersBlockingPolicyNaiveHitTestByOverlay];
+  FlutterResult result = ^(id result) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @2,
+                                                       @"viewType" : @"MockFlutterPlatformView"
+                                                     }]
+            result:result];
+
+  XCTAssertNotNil(gMockPlatformView);
+
+  // Find touch inteceptor view
+  UIView* touchInterceptorView = gMockPlatformView;
+  while (touchInterceptorView != nil &&
+         ![touchInterceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
+    touchInterceptorView = touchInterceptorView.superview;
+  }
+  XCTAssertNotNil(touchInterceptorView);
+
+  XCTAssert(touchInterceptorView.gestureRecognizers.count == 1);
+  UIGestureRecognizer* forwardingRecognizer = touchInterceptorView.gestureRecognizers[0];
+  XCTAssert([forwardingRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]);
+}
+
+- (void)testFlutterPlatformViewBlockGestureUnderHitTestByOverlayPolicyHitTestBehavior {
+  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
+
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/GetDefaultTaskRunner(),
+                               /*raster=*/GetDefaultTaskRunner(),
+                               /*ui=*/GetDefaultTaskRunner(),
+                               /*io=*/GetDefaultTaskRunner());
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      [[FlutterPlatformViewsController alloc] init];
+  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
+
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController registerViewFactory:factory
+                                               withId:@"MockFlutterPlatformView"
+                     gestureRecognizersBlockingPolicy:
+                         FlutterPlatformViewGestureRecognizersBlockingPolicyNaiveHitTestByOverlay];
+  FlutterResult result = ^(id result) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @2,
+                                                       @"viewType" : @"MockFlutterPlatformView"
+                                                     }]
+            result:result];
+
+  XCTAssertNotNil(gMockPlatformView);
+
+  // Find touch inteceptor view
+  UIView* touchInterceptorView = gMockPlatformView;
+  while (touchInterceptorView != nil &&
+         ![touchInterceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
+    touchInterceptorView = touchInterceptorView.superview;
+  }
+  XCTAssertNotNil(touchInterceptorView);
+
+  touchInterceptorView.frame = CGRectMake(0, 0, 100, 100);
+
+  UIView* overlay = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 50, 50)];
+  [touchInterceptorView.superview addSubview:overlay];
+  ((FlutterTouchInterceptingView*)touchInterceptorView).overlays = @[ overlay ];
+
+  UIView* hitTestResultInsideOverlay = [touchInterceptorView hitTest:CGPointMake(25, 25)
+                                                           withEvent:[[UIEvent alloc] init]];
+  XCTAssert(hitTestResultInsideOverlay == touchInterceptorView);
+
+  UIView* hitTestResultOutsideOverlay = [touchInterceptorView hitTest:CGPointMake(75, 75)
+                                                            withEvent:[[UIEvent alloc] init]];
+  XCTAssert(hitTestResultOutsideOverlay == gMockPlatformView);
+}
+
+- (void)testFlutterPlatformViewBlockGestureUnderNonHitTestPolicy {
+  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
+
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/GetDefaultTaskRunner(),
+                               /*raster=*/GetDefaultTaskRunner(),
+                               /*ui=*/GetDefaultTaskRunner(),
+                               /*io=*/GetDefaultTaskRunner());
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      [[FlutterPlatformViewsController alloc] init];
+  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
+
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id result) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @2,
+                                                       @"viewType" : @"MockFlutterPlatformView"
+                                                     }]
+            result:result];
+
+  XCTAssertNotNil(gMockPlatformView);
+
+  // Find touch inteceptor view
+  UIView* touchInterceptorView = gMockPlatformView;
+  while (touchInterceptorView != nil &&
+         ![touchInterceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
+    touchInterceptorView = touchInterceptorView.superview;
+  }
+  XCTAssertNotNil(touchInterceptorView);
+
+  touchInterceptorView.frame = CGRectMake(0, 0, 100, 100);
+
+  UIView* overlay = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 50, 50)];
+  [touchInterceptorView.superview addSubview:overlay];
+  ((FlutterTouchInterceptingView*)touchInterceptorView).overlays = @[ overlay ];
+
+  UIView* hitTestResultInsideOverlay = [touchInterceptorView hitTest:CGPointMake(25, 25)
+                                                           withEvent:[[UIEvent alloc] init]];
+  XCTAssert(hitTestResultInsideOverlay == gMockPlatformView);
+
+  UIView* hitTestResultOutsideOverlay = [touchInterceptorView hitTest:CGPointMake(75, 75)
+                                                            withEvent:[[UIEvent alloc] init]];
+  XCTAssert(hitTestResultOutsideOverlay == gMockPlatformView);
+}
+
 - (void)testFlutterPlatformViewControllerSubmitFrameWithoutFlutterViewNotCrashing {
   flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
 

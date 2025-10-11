@@ -861,13 +861,19 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
       [desiredPlatformSubviews addObject:platformViewRoot];
     }
 
+    NSMutableArray<UIView*>* overlays = [NSMutableArray array];
     auto maybeLayerData = layerMap.find(platformViewId);
     if (maybeLayerData != layerMap.end()) {
       auto view = maybeLayerData->second.layer->overlay_view_wrapper;
       if (view != nil) {
         [desiredPlatformSubviews addObject:view];
+        [overlays addObject:view];
       }
     }
+
+    FlutterTouchInterceptingView* touchInterceptor =
+        self.platformViews[platformViewId].touch_interceptor;
+    touchInterceptor.overlays = overlays;
   }
 
   NSSet* desiredPlatformSubviewsSet = [NSSet setWithArray:desiredPlatformSubviews];
