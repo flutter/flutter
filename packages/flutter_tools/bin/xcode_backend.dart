@@ -705,7 +705,4 @@ class Context {
   }
 }
 
-enum TargetPlatform {
-  ios,
-  macos;
-}
+enum TargetPlatform { ios, macos }
