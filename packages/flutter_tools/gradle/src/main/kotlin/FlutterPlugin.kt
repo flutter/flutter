@@ -635,7 +635,7 @@ class FlutterPlugin : Plugin<Project> {
                         output.versionCodeOverride = abiVersionCode * 1000 + (
                             versionCodeIfPresent
                                 ?: variant.mergedFlavor.versionCode as Int
-                            )
+                        )
                     }
                 }
             }
