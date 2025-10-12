@@ -8397,7 +8397,28 @@ class ColoredBox extends SingleChildRenderObjectWidget {
   /// The color to paint the background area with.
   final Color color;
 
-  /// Whether to apply anti-aliasing to the color. Defaults to true.
+  /// {@template flutter.widgets.ColoredBox.isAntiAlias}
+  /// Whether to apply anti-aliasing when painting the box.
+  ///
+  /// Defaults to `true`.
+  ///
+  /// When `true`, the painted box will have smooth edges. This is crucial for
+  /// animations and transformations (such as rotation or scaling) where the
+  /// widget's edges may not align perfectly with the physical pixel grid.
+  /// Anti-aliasing allows for sub-pixel rendering, which prevents a 'jagged'
+  /// appearance during motion and ensures visually smooth transitions.
+  ///
+  /// Set this to `false` for specific use cases where multiple `ColoredBox`
+  /// widgets are positioned adjacent to each other to form a larger, seamless
+  /// area of solid color. With anti-aliasing enabled (`true`), faint seams or
+  /// gaps might appear between the boxes due to the semi-transparent pixels at
+  /// their edges. Disabling anti-aliasing ensures that the boxes align perfectly
+  /// without such visual artifacts.
+  ///
+  /// See also:
+  ///
+  ///  * [Paint.isAntiAlias], the underlying property that this controls.
+  /// {@endtemplate}
   final bool isAntiAlias;
 
   @override
@@ -8416,7 +8437,7 @@ class ColoredBox extends SingleChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Color>('color', color));
-    properties.add(DiagnosticsProperty<bool?>('isAntiAlias', isAntiAlias));
+    properties.add(DiagnosticsProperty<bool>('isAntiAlias', isAntiAlias));
   }
 }
 
@@ -8437,7 +8458,6 @@ class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
     markNeedsPaint();
   }
 
-  /// Whether to apply anti-aliasing to the color.
   bool get isAntiAlias => _isAntiAlias;
   bool _isAntiAlias;
   set isAntiAlias(bool value) {

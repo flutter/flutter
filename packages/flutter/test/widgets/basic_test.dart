@@ -1238,6 +1238,137 @@ void main() {
       renderColoredBox.paint(mockContext, Offset.zero);
       expect(mockCanvas.paints.single.isAntiAlias, isFalse);
     });
+
+    testWidgets('ColoredBox golden test - anti-aliasing and rotation variations', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Center(
+          child: RepaintBoundary(
+            child: ColoredBox(
+              color: Colors.white,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  // Row 1: Three ColoredBoxes with isAntiAlias: true, true, true
+                  const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    textDirection: TextDirection.ltr,
+                    children: <Widget>[
+                      SizedBox.square(
+                        dimension: 80,
+                        child: ColoredBox(color: Colors.red, isAntiAlias: true),
+                      ),
+                      SizedBox.square(
+                        dimension: 80,
+                        child: ColoredBox(color: Colors.green, isAntiAlias: true),
+                      ),
+                      SizedBox.square(
+                        dimension: 80,
+                        child: ColoredBox(color: Colors.blue, isAntiAlias: true),
+                      ),
+                    ],
+                  ),
+                  // Row 2: Three ColoredBoxes with isAntiAlias: false, false, false
+                  const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    textDirection: TextDirection.ltr,
+                    children: <Widget>[
+                      SizedBox.square(
+                        dimension: 80,
+                        child: ColoredBox(color: Colors.orange, isAntiAlias: false),
+                      ),
+                      SizedBox.square(
+                        dimension: 80,
+                        child: ColoredBox(color: Colors.purple, isAntiAlias: false),
+                      ),
+                      SizedBox.square(
+                        dimension: 80,
+                        child: ColoredBox(color: Colors.teal, isAntiAlias: false),
+                      ),
+                    ],
+                  ),
+                  // Row 3: Three ColoredBoxes with isAntiAlias: true, false, true
+                  const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    textDirection: TextDirection.ltr,
+                    children: <Widget>[
+                      SizedBox.square(
+                        dimension: 80,
+                        child: ColoredBox(color: Colors.yellow, isAntiAlias: true),
+                      ),
+                      SizedBox.square(
+                        dimension: 80,
+                        child: ColoredBox(color: Colors.lime, isAntiAlias: false),
+                      ),
+                      SizedBox.square(
+                        dimension: 80,
+                        child: ColoredBox(color: Colors.cyan, isAntiAlias: true),
+                      ),
+                    ],
+                  ),
+                  // Row 4: Three ColoredBoxes rotated 36 degrees with anti-aliasing variations
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    textDirection: TextDirection.ltr,
+                    children: <Widget>[
+                      SizedBox.square(
+                        dimension: 80,
+                        child: ColoredBox(
+                          color: Colors.brown,
+                          child: Center(
+                            child: SizedBox.square(
+                              dimension: 50,
+                              child: Transform.rotate(
+                                angle: math.pi / 5,
+                                child: const ColoredBox(color: Colors.blue),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox.square(
+                        dimension: 80,
+                        child: ColoredBox(
+                          color: Colors.pink,
+                          child: Center(
+                            child: SizedBox.square(
+                              dimension: 50,
+                              child: Transform.rotate(
+                                angle: math.pi / 5,
+                                child: const ColoredBox(color: Colors.amber, isAntiAlias: false),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox.square(
+                        dimension: 80,
+                        child: ColoredBox(
+                          color: Colors.indigo,
+                          child: Center(
+                            child: SizedBox.square(
+                              dimension: 50,
+                              child: Transform.rotate(
+                                angle: math.pi / 5,
+                                child: const ColoredBox(color: Colors.teal),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      await expectLater(find.byType(RepaintBoundary), matchesGoldenFile('basic.ColoredBox.0.png'));
+    });
   });
 
   testWidgets('Inconsequential golden test', (WidgetTester tester) async {
