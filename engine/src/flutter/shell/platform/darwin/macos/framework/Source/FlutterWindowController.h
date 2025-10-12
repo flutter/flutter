@@ -90,7 +90,7 @@ int64_t InternalFlutter_WindowController_CreateDialogWindow(
     const FlutterWindowCreationRequest* request);
 
 FLUTTER_DARWIN_EXPORT
-int64_t InternalFlutter_WindowController_CreateCreateTooltipWindow(
+int64_t InternalFlutter_WindowController_CreateTooltipWindow(
     int64_t engine_id,
     const FlutterWindowCreationRequest* request);
 

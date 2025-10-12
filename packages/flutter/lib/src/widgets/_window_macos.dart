@@ -118,7 +118,16 @@ class WindowingOwnerMacOS extends WindowingOwner {
     required TooltipWindowControllerDelegate delegate,
     required BaseWindowController parent,
   }) {
-    throw UnimplementedError();
+    final TooltipWindowControllerMacOS res = TooltipWindowControllerMacOS(
+      owner: this,
+      delegate: delegate,
+      contentSizeConstraints: contentSizeConstraints,
+      anchorRect: anchorRect,
+      positioner: positioner,
+      parent: parent,
+    );
+    _activeControllers.add(res);
+    return res;
   }
 
   @override
@@ -236,7 +245,7 @@ class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowC
     required WindowingOwnerMacOS owner,
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints contentSizeConstraints,
-    required FlutterView parent,
+    required BaseWindowController parent,
     required this.anchorRect,
     required this.positioner,
   }) : _delegate = delegate,
@@ -249,7 +258,7 @@ class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowC
       onWillClose: _onWillClose.nativeFunction,
       onNotifyListeners: _onResize.nativeFunction,
       onGetWindowPosition: _onGetWindowPosition.nativeFunction,
-      parentViewId: parent.viewId,
+      parentViewId: parent.rootView.viewId,
     );
 
     final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(

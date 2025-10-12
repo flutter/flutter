@@ -138,6 +138,8 @@ class _WindowsTable extends StatelessWidget {
   }
 }
 
+final tooltipKey = GlobalKey();
+
 class _WindowCreatorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -180,6 +182,47 @@ class _WindowCreatorCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton(
+                  key: tooltipKey,
+                  onPressed: () {
+                    final renderBox =
+                        tooltipKey.currentContext?.findRenderObject()
+                            as RenderBox;
+                    final transform = renderBox.getTransformTo(null);
+                    final rect = Offset.zero & renderBox.size;
+                    final globalRect = MatrixUtils.transformRect(
+                      transform,
+                      rect,
+                    );
+                    final UniqueKey key = UniqueKey();
+                    windowManager.add(
+                      KeyedWindow(
+                        key: key,
+                        controller: TooltipWindowController(
+                          anchorRect: globalRect,
+                          positioner: WindowPositioner(
+                            childAnchor: WindowPositionerAnchor.left,
+                            parentAnchor: WindowPositionerAnchor.right,
+                            offset: const Offset(10, 0),
+                            constraintAdjustment: {
+                              // WindowPositionerConstraintAdjustment.flipX,
+                            },
+                          ),
+
+                          delegate: _TooltipWindowControllerDelegate(
+                            onDestroyed: () => windowManager.remove(key),
+                          ),
+                          // title: "Popup",
+                          parent: windowManager.windows.first.controller,
+                          // contentSize:
+                          //     WindowSizing(preferredSize: windowSettings.regularSize),
+                        ),
+                      ),
+                    );
+                  },
+                  child: Text('Tooltip'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton(
                   onPressed: () async {
                     final UniqueKey key = UniqueKey();
                     windowManager.add(
@@ -215,4 +258,16 @@ class _WindowCreatorCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _TooltipWindowControllerDelegate extends TooltipWindowControllerDelegate {
+  _TooltipWindowControllerDelegate({required this.onDestroyed});
+
+  @override
+  void onWindowDestroyed() {
+    onDestroyed();
+    super.onWindowDestroyed();
+  }
+
+  final VoidCallback onDestroyed;
 }
