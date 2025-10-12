@@ -231,6 +231,75 @@ mixin _WindowControllerMixin {
   late final WindowingOwnerMacOS _owner;
 }
 
+class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowControllerMixin {
+  TooltipWindowControllerMacOS({
+    required WindowingOwnerMacOS owner,
+    required TooltipWindowControllerDelegate delegate,
+    required BoxConstraints contentSizeConstraints,
+    required FlutterView parent,
+    required this.anchorRect,
+    required this.positioner,
+  }) : _delegate = delegate,
+       super.empty() {
+    _initController(owner);
+
+    final int viewId = _MacOSPlatformInterface.createTooltipWindow(
+      preferredConstraints: contentSizeConstraints,
+      onShouldClose: _onShouldClose.nativeFunction,
+      onWillClose: _onWillClose.nativeFunction,
+      onNotifyListeners: _onResize.nativeFunction,
+      onGetWindowPosition: _onGetWindowPosition.nativeFunction,
+      parentViewId: parent.viewId,
+    );
+
+    final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
+      (FlutterView view) => view.viewId == viewId,
+    );
+    rootView = flutterView;
+  }
+
+  @override
+  void _handleOnShouldClose() {
+    _delegate.onWindowCloseRequested(this);
+  }
+
+  @override
+  void _handleOnWillClose() {
+    super._handleOnWillClose();
+    _delegate.onWindowDestroyed();
+  }
+
+  @override
+  void _handleOnResize() {
+    notifyListeners();
+  }
+
+  @override
+  Pointer<_Rect> _handleOnGetWindowPosition(
+    Pointer<_Size> childSize,
+    Pointer<_Rect> parentRect,
+    Pointer<_Rect> outputRect,
+  ) {
+    super._handleOnGetWindowPosition(childSize, parentRect, outputRect);
+    final Pointer<_Rect> result = _allocator<_Rect>();
+    final Rect targetRect = positioner.placeWindow(
+      childSize: childSize.ref.toSize(),
+      anchorRect: anchorRect.translate(parentRect.ref.left, parentRect.ref.top),
+      parentRect: parentRect.ref.toRect(),
+      outputRect: outputRect.ref.toRect(),
+    );
+    result.ref.left = targetRect.left;
+    result.ref.top = targetRect.top;
+    result.ref.width = childSize.ref.width;
+    result.ref.height = childSize.ref.height;
+    return result;
+  }
+
+  final WindowPositioner positioner;
+  final Rect anchorRect;
+  final TooltipWindowControllerDelegate _delegate;
+}
+
 /// Implementation of [RegularWindowController] for the macOS platform.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
@@ -489,6 +558,16 @@ final class _WindowCreationRequest extends Struct {
   external Pointer<NativeFunction<Void Function()>> onShouldClose;
   external Pointer<NativeFunction<Void Function()>> onWillClose;
   external Pointer<NativeFunction<Void Function()>> onNotifyListeners;
+  external Pointer<
+    NativeFunction<
+      Pointer<_Rect> Function(
+        Pointer<_Size> childSize,
+        Pointer<_Rect> parentRect,
+        Pointer<_Rect> outputRect,
+      )
+    >
+  >
+  onGetWindowPosition;
 }
 
 final class _Size extends Struct {
@@ -497,6 +576,15 @@ final class _Size extends Struct {
 
   @Double()
   external double height;
+
+  @override
+  String toString() {
+    return 'Size(width: $width, height: $height)';
+  }
+
+  Size toSize() {
+    return Size(width, height);
+  }
 }
 
 final class _Rect extends Struct {
@@ -648,6 +736,48 @@ class _MacOSPlatformInterface {
         ..constraints.maxHeight = preferredConstraints.maxHeight;
     }
     final int viewId = _createDialogWindow(PlatformDispatcher.instance.engineId!, request);
+    _allocator.free(request);
+    return viewId;
+  }
+
+  @Native<Int64 Function(Int64, Pointer<_WindowCreationRequest>)>(
+    symbol: 'InternalFlutter_WindowController_CreateTooltipWindow',
+  )
+  external static int _createTooltipWindow(int engineId, Pointer<_WindowCreationRequest> request);
+
+  /// Creates a new window and returns the viewId of the created FlutterView.
+  static int createTooltipWindow({
+    required BoxConstraints preferredConstraints,
+    int? parentViewId,
+    required Pointer<NativeFunction<Void Function()>> onShouldClose,
+    required Pointer<NativeFunction<Void Function()>> onWillClose,
+    required Pointer<NativeFunction<Void Function()>> onNotifyListeners,
+    required Pointer<
+      NativeFunction<
+        Pointer<_Rect> Function(
+          Pointer<_Size> childSize,
+          Pointer<_Rect> parentRect,
+          Pointer<_Rect> outputRect,
+        )
+      >
+    >
+    onGetWindowPosition,
+  }) {
+    final Pointer<_WindowCreationRequest> request = _allocator<_WindowCreationRequest>()
+      ..ref.onShouldClose = onShouldClose
+      ..ref.onWillClose = onWillClose
+      ..ref.onNotifyListeners = onNotifyListeners
+      ..ref.onGetWindowPosition = onGetWindowPosition
+      ..ref.parentViewId = parentViewId ?? 0;
+
+    request.ref
+      ..hasConstraints = true
+      ..constraints.minWidth = preferredConstraints.minWidth
+      ..constraints.minHeight = preferredConstraints.minHeight
+      ..constraints.maxWidth = preferredConstraints.maxWidth
+      ..constraints.maxHeight = preferredConstraints.maxHeight;
+
+    final int viewId = _createTooltipWindow(PlatformDispatcher.instance.engineId!, request);
     _allocator.free(request);
     return viewId;
   }

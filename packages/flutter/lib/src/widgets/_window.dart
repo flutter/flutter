@@ -957,6 +957,50 @@ class DialogWindow extends StatelessWidget {
   }
 }
 
+@internal
+class TooltipWindow extends StatelessWidget {
+  /// Creates a dialog window widget.
+  ///
+  /// The [controller] creates the native backing window into which the
+  /// [child] widget is rendered.
+  ///
+  /// It is up to the caller to destroy the window by calling
+  /// [DialogWindowController.destroy] when the window is no longer needed.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  TooltipWindow({super.key, required this.controller, required this.child}) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+  }
+
+  /// Controller for this widget.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  final TooltipWindowController controller;
+
+  /// The content rendered into this window.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  final Widget child;
+
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (BuildContext context, Widget? widget) => WindowScope(
+        controller: controller,
+        child: View(view: controller.rootView, child: child),
+      ),
+    );
+  }
+}
+
 enum _WindowControllerAspect { contentSize, title, activated, maximized, minimized, fullscreen }
 
 /// Provides descendants with access to the [BaseWindowController] associated with

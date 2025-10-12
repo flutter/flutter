@@ -23,6 +23,7 @@ import 'package:flutter/rendering.dart';
 
 import '../foundation/_features.dart';
 import '_window.dart';
+import 'window_positioner.dart';
 
 /// A Win32 window handle.
 ///
@@ -166,6 +167,17 @@ class WindowingOwnerWin32 extends WindowingOwner {
       title: title,
       parent: parent,
     );
+  }
+
+  @override
+  TooltipWindowController createTooltipWindowController({
+    required BoxConstraints contentSizeConstraints,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required TooltipWindowControllerDelegate delegate,
+    required BaseWindowController parent,
+  }) {
+    throw UnimplementedError();
   }
 
   /// Register a new [WindowsMessageHandler].

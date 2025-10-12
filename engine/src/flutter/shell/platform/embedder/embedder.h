@@ -1065,6 +1065,14 @@ typedef struct {
   FlutterEngineDisplayId display_id;
   /// The view that this event is describing.
   int64_t view_id;
+  /// Minimum physical width of the window.
+  size_t min_width;
+  /// Minimum physical height of the window.
+  size_t min_height;
+  /// Maximum physical width of the window.
+  size_t max_width;
+  /// Maximum physical height of the window.
+  size_t max_height;
 } FlutterWindowMetricsEvent;
 
 typedef struct {
