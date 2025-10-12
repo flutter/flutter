@@ -624,10 +624,18 @@ void main() {
         expect(paragraph.selections, isNotEmpty);
         expect(paragraph.selections.length, 1);
         expect(paragraph.selections.first, const TextSelection(baseOffset: 6, extentOffset: 11));
-        final SelectableRegionState state = tester.state<SelectableRegionState>(
-          find.byType(SelectableRegion),
-        );
-        expect(state.selectionOverlay?.handlesAreVisible, isTrue);
+        final List<FadeTransition> transitions = find
+            .descendant(
+              of: find.byWidgetPredicate(
+                (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
+              ),
+              matching: find.byType(FadeTransition),
+            )
+            .evaluate()
+            .map((Element e) => e.widget)
+            .cast<FadeTransition>()
+            .toList();
+        expect(transitions.length, 2);
         expect(find.byKey(toolbarKey), findsNothing);
 
         // Drag start handle.
