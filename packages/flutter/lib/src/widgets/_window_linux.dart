@@ -65,8 +65,6 @@ String _nativeToString(ffi.Pointer<ffi.Uint8> value) {
   return utf8.decode(value.asTypedList(length));
 }
 
-typedef _GCallback = ffi.Void Function();
-
 /// Wraps GObject
 class _GObject {
   final ffi.Pointer instance;
