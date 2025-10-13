@@ -37,7 +37,7 @@ public interface BinaryMessenger {
   public interface TaskQueue {}
 
   /** Options that control how a TaskQueue should operate and be created. */
-  public class TaskQueueOptions {
+  public static class TaskQueueOptions {
     private boolean isSerial = true;
 
     public boolean getIsSerial() {
