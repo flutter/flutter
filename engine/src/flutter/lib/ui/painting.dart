@@ -5487,6 +5487,7 @@ base class FragmentShader extends Shader {
     index ??= 0;
     final int shaderIndex = _program._getUniformFloatIndex(name, index);
     final UniformFloatSlot result = UniformFloatSlot._(this, name, index, shaderIndex);
+    _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
     _slots.add(WeakReference<UniformFloatSlot>(result));
     return result;
   }
