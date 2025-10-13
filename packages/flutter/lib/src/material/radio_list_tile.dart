@@ -577,9 +577,6 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
   @override
   bool get tristate => widget.toggleable;
 
-  @override
-  bool get enabled => _enabled;
-
   bool get checked => radioValue == effectiveGroupValue;
 
   late final _RadioRegistry<T> _radioRegistry = _RadioRegistry<T>(this);
