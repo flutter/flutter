@@ -469,6 +469,8 @@ def to_gn_args(args):
     gn_args['enable_unittests'] = False
 
   # Skia GN args.
+  if args.target_os == 'ios':
+    gn_args['skia_use_libjpeg_turbo_decode'] = False
   gn_args['skia_use_libpng_decode'] = True
   gn_args['skia_use_libpng_encode'] = True
   gn_args['skia_use_rust_png_decode'] = False
