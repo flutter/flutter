@@ -519,7 +519,7 @@ deps = {
    Var('flutter_git') + '/third_party/pyyaml.git' + '@' + '03c67afd452cdff45b41bfe65e19a2fb5b80a0e8',
 
   'engine/src/flutter/third_party/swiftshader':
-  Var('swiftshader_git') + '/SwiftShader.git' + '@' + 'd040a5bab638bf7c226235c95787ba6288bb6416',
+  Var('swiftshader_git') + '/SwiftShader.git' + '@' + '794b0cfce1d828d187637e6d932bae484fbe0976',
 
   'engine/src/flutter/third_party/angle':
   Var('flutter_git') + '/third_party/angle' + '@' + 'e28922c5e71eb32594c2562076cd5b15383e24d4',
@@ -807,7 +807,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/linux-amd64',
-        'version': 'BWGpRvpdQh-HJpq1ci53f7Az7uOD_QW0xVJuSP8B7OIC'
+        'version': '_dd0Jv50H0oUI2Ad8Prwtr8uyaJVPRRdXCVA2omL4XgC'
        }
      ],
      'condition': 'download_fuchsia_deps and not download_fuchsia_sdk',
