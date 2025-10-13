@@ -590,11 +590,23 @@ abstract class SemanticRole {
         }
       }
     }
-    // Ignore pointer events on all container nodes.
+    // Ignore pointer events on all container nodes, unless they define a route scope.
+    // Route-scoped containers (like dialogs) need to accept pointer events to prevent
+    // clicks from escaping to the underlying barrier.
     if (semanticsObject.hasChildren) {
-      return false;
+      return semanticsObject.scopesRoute;
     }
-    return true;
+
+    // Only accept pointer events for leaf nodes with interactive semantics.
+    // This prevents non-interactive leaf nodes (like empty containers in dialogs)
+    // from intercepting pointer events meant for underlying widgets like modal
+    // barriers.
+    return semanticsObject.isTappable ||
+        semanticsObject.isButton ||
+        semanticsObject.flags.isTextField ||
+        semanticsObject.flags.isLink ||
+        semanticsObject.flags.isSlider ||
+        semanticsObject.isIncrementable;
   }
 
   /// Semantic behaviors provided by this role, if any.
