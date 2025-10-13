@@ -189,6 +189,7 @@ typedef CanvasPath Path;
   V(ColorFilter, initSrgbToLinearGamma)          \
   V(EngineLayer, dispose)                        \
   V(FragmentProgram, initFromAsset)              \
+  V(FragmentProgram, initFromBytes)              \
   V(ReusableFragmentShader, Dispose)             \
   V(ReusableFragmentShader, SetImageSampler)     \
   V(ReusableFragmentShader, ValidateSamplers)    \
