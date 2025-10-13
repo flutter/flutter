@@ -527,6 +527,17 @@ void main() {
     expect(find.text('Footer'), findsOneWidget);
     expect(find.byIcon(Icons.settings), findsOneWidget);
   });
+
+  testWidgets('NavigationDrawer does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: NavigationDrawer(children: <Widget>[])),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(NavigationDrawer)), Size.zero);
+  });
 }
 
 Widget _buildWidget(GlobalKey<ScaffoldState> scaffoldKey, Widget child, {bool? useMaterial3}) {
