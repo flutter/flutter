@@ -291,19 +291,14 @@ class Ticker {
     assert(!scheduled);
     assert(shouldScheduleTick);
     if (forceFrames) {
-      // Ensure a forced engine frame is scheduled, then register our callback
-      // without scheduling a new frame again here.
       SchedulerBinding.instance.scheduleForcedFrame();
-      _animationId = SchedulerBinding.instance.scheduleFrameCallback(
-        _tick,
-        rescheduling: rescheduling,
-        scheduleNewFrame: false,
-      );
-      return;
+    } else {
+      SchedulerBinding.instance.scheduleFrame();
     }
     _animationId = SchedulerBinding.instance.scheduleFrameCallback(
       _tick,
       rescheduling: rescheduling,
+      scheduleNewFrame: false,
     );
   }
 
