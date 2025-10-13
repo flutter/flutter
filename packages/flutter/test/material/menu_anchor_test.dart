@@ -5108,6 +5108,34 @@ void main() {
     expect(tester.getRect(findMenuPanels()).width, 800.0 - reservedPadding.horizontal);
   });
 
+  testWidgets('Layout updates when reserved padding changes', (WidgetTester tester) async {
+    const EdgeInsetsGeometry reservedPadding = EdgeInsets.symmetric(horizontal: 13.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MenuAnchor(
+          controller: controller,
+          menuChildren: const <Widget>[SizedBox(width: 800, height: 24)],
+        ),
+      ),
+    );
+
+    controller.open(position: Offset.zero);
+    await tester.pump();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MenuAnchor(
+          controller: controller,
+          reservedPadding: reservedPadding,
+          menuChildren: const <Widget>[SizedBox(width: 800, height: 24)],
+        ),
+      ),
+    );
+
+    expect(tester.getRect(findMenuPanels()).width, 800.0 - reservedPadding.horizontal);
+  });
+
   testWidgets('MenuBar does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -5163,32 +5191,21 @@ void main() {
     expect(tester.getSize(find.byType(RadioMenuButton<bool>)), Size.zero);
   });
 
-  testWidgets('Layout updates when reserved padding changes', (WidgetTester tester) async {
-    const EdgeInsetsGeometry reservedPadding = EdgeInsets.symmetric(horizontal: 13.0);
-
+  testWidgets('CheckboxMenuButton does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: MenuAnchor(
-          controller: controller,
-          menuChildren: const <Widget>[SizedBox(width: 800, height: 24)],
+        home: Center(
+          child: SizedBox.shrink(
+            child: CheckboxMenuButton(
+              value: true,
+              onChanged: (bool? value) {},
+              child: const Text('X'),
+            ),
+          ),
         ),
       ),
     );
-
-    controller.open(position: Offset.zero);
-    await tester.pump();
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MenuAnchor(
-          controller: controller,
-          reservedPadding: reservedPadding,
-          menuChildren: const <Widget>[SizedBox(width: 800, height: 24)],
-        ),
-      ),
-    );
-
-    expect(tester.getRect(findMenuPanels()).width, 800.0 - reservedPadding.horizontal);
+    expect(tester.getSize(find.byType(CheckboxMenuButton)), Size.zero);
   });
 }
 
