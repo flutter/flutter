@@ -5337,6 +5337,7 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   /// Returns a fresh instance of [FragmentShader].
   FragmentShader fragmentShader() {
     final FragmentShader result = FragmentShader._(this, debugName: _debugName);
+    _shaders.removeWhere((WeakReference<FragmentShader> ref) => ref.target == null);
     _shaders.add(WeakReference<FragmentShader>(result));
     return result;
   }
