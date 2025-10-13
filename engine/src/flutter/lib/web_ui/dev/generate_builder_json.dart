@@ -28,10 +28,15 @@ class GenerateBuilderJsonCommand extends Command<bool> {
     final FeltConfig config = FeltConfig.fromFile(
       path.join(environment.webUiTestDir.path, 'felt_config.yaml'),
     );
+    final List<TestSuite> testSuites = config.testSuites.where((suite) => suite.enableCi).toList();
+    final List<TestBundle> testBundles = testSuites
+        .map((suite) => suite.testBundle)
+        .toSet()
+        .toList();
     _writeBuilderJson(
       _generateBuilderJson(
-        config.testBundles.map((TestBundle bundle) => _getBundleBuildStep(bundle)).toList(),
-        _getAllTestSteps(config.testSuites, packageLock),
+        testBundles.map((TestBundle bundle) => _getBundleBuildStep(bundle)).toList(),
+        _getAllTestSteps(testSuites, packageLock),
       ),
       'linux_web_engine_test.json',
     );
@@ -114,9 +119,7 @@ class GenerateBuilderJsonCommand extends Command<bool> {
     String? specificOS,
     String? cpu,
   }) {
-    final filteredSuites = suites.where(
-      (suite) => suite.enableCi && suite.runConfig.browser == browser,
-    );
+    final filteredSuites = suites.where((suite) => suite.runConfig.browser == browser);
     final bundles = filteredSuites.map((suite) => suite.testBundle).toSet();
     return <String, dynamic>{
       'name': '$platform run ${browser.name} suites',
