@@ -284,7 +284,7 @@ class CocoaPods {
     if (xcodeProject is IosProject) {
       // Get the iOS minimum version from config, defaulting to '13.0' if not set or empty
       final String? configValue = globals.config.getValue('ios-min-version') as String?;
-      final String iosMinVersion = (configValue?.isNotEmpty == true) ? configValue! : '13.0';
+      final String iosMinVersion = (configValue?.isNotEmpty == true) ? configValue! : '13.0'; // TODO: Use a constant for the default value
 
       // For iOS projects, replace the commented platform line with the configured version
       final String platformLine = "platform :ios, '$iosMinVersion'";
