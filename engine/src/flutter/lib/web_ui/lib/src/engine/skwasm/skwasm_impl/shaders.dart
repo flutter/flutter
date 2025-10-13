@@ -215,11 +215,8 @@ class SkwasmImageShader extends SkwasmNativeShader implements ui.ImageShader {
 
 class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
     implements ui.FragmentProgram {
-  SkwasmFragmentProgram._(
-    this.name,
-    RuntimeEffectHandle handle,
-    this._shaderData,
-  ) : super(handle, _registry);
+  SkwasmFragmentProgram._(this.name, RuntimeEffectHandle handle, this._shaderData)
+    : super(handle, _registry);
 
   factory SkwasmFragmentProgram.fromBytes(String name, Uint8List bytes) {
     final ShaderData shaderData = ShaderData.fromBytes(bytes);
@@ -252,7 +249,7 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
   ui.FragmentShader fragmentShader() => SkwasmFragmentShader(this);
 
   int get uniformSize => runtimeEffectGetUniformSize(handle);
-  
+
   int _getShaderIndex(String name, int index) {
     int result = 0;
     for (final uniform in _shaderData.uniforms) {
