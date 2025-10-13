@@ -18,7 +18,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'constants.dart';
 import 'dialog.dart';
 import 'theme.dart';
 
@@ -433,7 +432,7 @@ class CupertinoMenuAnchor extends StatefulWidget {
     this.alignmentOffset,
     this.constrainCrossAxis = false,
     this.enablePan = true,
-    this.consumeOutsideTaps = true,
+    this.consumeOutsideTaps = false,
     this.useRootOverlay = false,
     this.overlayPadding = const EdgeInsets.all(8),
   });
@@ -575,17 +574,32 @@ class CupertinoMenuAnchor extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(
-      FlagProperty('consumeOutsideTap', value: consumeOutsideTaps, ifTrue: 'AUTO-CLOSE'),
-    );
-    properties.add(DiagnosticsProperty<FocusNode?>('focusNode', childFocusNode));
+    properties.add(DiagnosticsProperty<FocusNode?>('childFocusNode', childFocusNode));
+    properties.add(DiagnosticsProperty<BoxConstraints?>('constraints', constraints));
+    properties.add(DiagnosticsProperty<AlignmentGeometry?>('menuAlignment', menuAlignment));
+    properties.add(DiagnosticsProperty<AlignmentGeometry?>('alignment', alignment));
     properties.add(DiagnosticsProperty<Offset?>('alignmentOffset', alignmentOffset));
-    if (constraints != null) {
-      properties.add(DiagnosticsProperty<BoxConstraints?>('constraints', constraints));
-    }
-    if (child != null) {
-      properties.add(DiagnosticsProperty<String?>('child', child.toString()));
-    }
+    properties.add(
+      FlagProperty(
+        'constrainCrossAxis',
+        value: constrainCrossAxis,
+        ifTrue: 'constrains cross axis',
+      ),
+    );
+    properties.add(
+      FlagProperty('enablePan', value: enablePan, ifTrue: 'pan enabled', ifFalse: 'pan disabled'),
+    );
+    properties.add(
+      FlagProperty(
+        'consumeOutsideTaps',
+        value: consumeOutsideTaps,
+        ifTrue: 'consumes outside taps',
+      ),
+    );
+    properties.add(
+      FlagProperty('useRootOverlay', value: useRootOverlay, ifTrue: 'uses root overlay'),
+    );
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('overlayPadding', overlayPadding));
   }
 }
 
@@ -635,13 +649,7 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
 
     _animationController = AnimationController.unbounded(vsync: this);
     _animationController.addStatusListener(_handleAnimationStatusChange);
-    _hasLeadingWidget = widget.menuChildren.any((Widget element) {
-      if (element case CupertinoMenuEntryMixin(:final bool hasLeading)) {
-        return hasLeading;
-      } else {
-        return false;
-      }
-    });
+    _resolveHasLeading();
   }
 
   @override
@@ -657,13 +665,7 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
     }
 
     if (oldWidget.menuChildren != widget.menuChildren) {
-      _hasLeadingWidget = widget.menuChildren.any((Widget element) {
-        if (element case CupertinoMenuEntryMixin(:final bool hasLeading)) {
-          return hasLeading;
-        } else {
-          return false;
-        }
-      });
+      _resolveHasLeading();
     }
   }
 
@@ -677,28 +679,38 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
     super.dispose();
   }
 
+  void _resolveHasLeading() {
+    _hasLeadingWidget = widget.menuChildren.any((Widget element) {
+      if (element case CupertinoMenuEntryMixin(:final bool hasLeading)) {
+        return hasLeading;
+      } else {
+        return false;
+      }
+    });
+  }
+
   void _handleCloseRequested(VoidCallback hideMenu) {
     if (animationStatus case AnimationStatus.reverse || AnimationStatus.dismissed) {
       return;
     }
 
-    _animationController
-        .animateBackWith(
-          ClampedSimulation(
-            SpringSimulation(
-              reverseSpring,
-              _animationController.value,
-              0.0,
-              0.0,
-              tolerance: springTolerance,
-            ),
-            xMin: 0.0,
-            xMax: 1.0,
-          ),
-        )
-        .whenComplete(hideMenu);
+    // _animationController
+    //     .animateBackWith(
+    //       ClampedSimulation(
+    //         SpringSimulation(
+    //           reverseSpring,
+    //           _animationController.value,
+    //           0.0,
+    //           0.0,
+    //           tolerance: springTolerance,
+    //         ),
+    //         xMin: 0.0,
+    //         xMax: 1.0,
+    //       ),
+    //     )
+    //     .whenComplete(hideMenu);
 
-    widget.childFocusNode?.requestFocus();
+    // widget.childFocusNode?.requestFocus();
   }
 
   void _handleOpenRequested(ui.Offset? position, VoidCallback showOverlay) {
@@ -716,11 +728,10 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
   }
 
   void _handleAnimationStatusChange(AnimationStatus status) {
-    animationStatus = status;
-    widget.onAnimationStatusChange?.call(status);
     setState(() {
-      // Rebuild to update isClosing and enablePan.
+      animationStatus = status;
     });
+    widget.onAnimationStatusChange?.call(status);
   }
 
   void _handlePanChange(double distance) {
@@ -766,19 +777,12 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
   Widget _buildChild(BuildContext context, MenuController controller, Widget? child) {
     // The anchor can initiate a pan gesture, but should not be included in the
     // pan area.
-    return GestureDetector(
-      onLongPress: () {
-        if (enablePan && !_menuController.isOpen) {
-          _menuController.open();
-        }
-      },
-      child: _PanSurface(
-        includeInPanArea: false,
-        child:
-            widget.builder?.call(context, _menuController, widget.child) ??
-            widget.child ??
-            const SizedBox.shrink(),
-      ),
+    return _PanSurface(
+      includeInPanArea: false,
+      child:
+          widget.builder?.call(context, _menuController, widget.child) ??
+          widget.child ??
+          const SizedBox.shrink(),
     );
   }
 
@@ -963,25 +967,32 @@ class _MenuOverlayState extends State<_MenuOverlay>
   }
 
   void _resolveChildren() {
-    _children = <Widget>[];
+    if (widget.children.isEmpty) {
+      _children = <Widget>[];
+      return;
+    }
+
+    final List<Widget> children = <Widget>[];
     Widget child = widget.children.first;
     for (int i = 0; i < widget.children.length; i++) {
-      _children.add(child);
+      children.add(child);
       if (child == widget.children.last) {
         break;
       }
 
-      if (child case CupertinoMenuEntryMixin(allowLeadingSeparator: false)) {
+      if (child case CupertinoMenuEntryMixin(allowTrailingSeparator: false)) {
+        child = widget.children[i + 1];
         continue;
       }
 
       child = widget.children[i + 1];
-      if (child case CupertinoMenuEntryMixin(allowTrailingSeparator: false)) {
+      if (child case CupertinoMenuEntryMixin(allowLeadingSeparator: false)) {
         continue;
       }
 
-      _children.add(const _CupertinoMenuDivider());
+      children.add(const _CupertinoMenuDivider());
     }
+    _children = children;
   }
 
   void _resolveMotion() {
@@ -1171,56 +1182,43 @@ class _MenuOverlayState extends State<_MenuOverlay>
       constraints: constraints,
       child: _PanSurface(
         includeInPanArea: true,
-        child: Actions(
-          actions: _actions,
-          child: Shortcuts(
-            shortcuts: _kMenuTraversalShortcuts,
-            child: FocusScope(
-              node: widget.focusScopeNode,
-              descendantsAreFocusable: true,
-              descendantsAreTraversable: true,
-              canRequestFocus: true,
-              child: TapRegion(
-                groupId: widget.tapRegionGroupId,
-                consumeOutsideTaps: widget.consumeOutsideTaps,
-                onTapOutside: _handleOutsideTap,
-                // A custom shadow painter is used to make the underlying colors
-                // appear more vibrant. This is achieved by removing the shadow
-                // underlying the popup surface using a save layer combined with a
-                // clear blend mode.
-                //
-                // From my (davidhicks980) understanding and testing, it is
-                // impossible to achieve the appearance of an iOS backdrop using
-                // only guassian blur, linear color filter, and shadows, because the
-                // iOS popup surface does not linearly transform underlying colors.
-                // A custom shader would need to be used to achieve the same effect.
-                child: CustomPaint(
-                  painter: _ShadowPainter(
-                    brightness: CupertinoTheme.brightnessOf(context),
-                    repaint: _fadeAnimation,
-                  ),
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    alwaysIncludeSemantics: true,
-                    child: CupertinoPopupSurface(
-                      // The FadeTransition widget needs to wrap Semantics so
-                      // that the semantics widget senses that the menu is the
-                      // same opacity as the menu items. Otherwise, "a menu
-                      // cannot be empty" error is thrown due to the menu items
-                      // being transparent while the menu semantics are still
-                      // present.
-                      child: Semantics.fromProperties(
-                        explicitChildNodes: true,
-                        properties: const SemanticsProperties(scopesRoute: true, namesRoute: true),
-                        child: PrimaryScrollController(
-                          controller: _scrollController,
-                          child: SingleChildScrollView(
-                            clipBehavior: Clip.none,
-                            physics: const NeverScrollableScrollPhysics(),
-                            child: Column(children: _children),
-                          ),
-                        ),
-                      ),
+        child: TapRegion(
+          groupId: widget.tapRegionGroupId,
+          consumeOutsideTaps: widget.consumeOutsideTaps,
+          onTapOutside: _handleOutsideTap,
+          // A custom shadow painter is used to make the underlying colors
+          // appear more vibrant. This is achieved by removing the shadow
+          // underlying the popup surface using a save layer combined with a
+          // clear blend mode.
+          //
+          // From my (davidhicks980) understanding and testing, it is
+          // impossible to achieve the appearance of an iOS backdrop using
+          // only guassian blur, linear color filter, and shadows, because the
+          // iOS popup surface does not linearly transform underlying colors.
+          // A custom shader would need to be used to achieve the same effect.
+          child: CustomPaint(
+            painter: _ShadowPainter(
+              brightness: CupertinoTheme.brightnessOf(context),
+              repaint: _fadeAnimation,
+            ),
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              alwaysIncludeSemantics: true,
+              child: CupertinoPopupSurface(
+                // The FadeTransition widget needs to wrap Semantics so
+                // that the semantics widget senses that the menu is the
+                // same opacity as the menu items. Otherwise, "a menu
+                // cannot be empty" error is thrown due to the menu items
+                // being transparent while the menu semantics are still
+                // present.
+                child: Semantics.fromProperties(
+                  explicitChildNodes: true,
+                  properties: const SemanticsProperties(scopesRoute: true, namesRoute: true),
+                  child: PrimaryScrollController(
+                    controller: _scrollController,
+                    child: SingleChildScrollView(
+                      clipBehavior: Clip.none,
+                      child: Column(children: _children),
                     ),
                   ),
                 ),
@@ -1241,6 +1239,20 @@ class _MenuOverlayState extends State<_MenuOverlay>
         child: child,
       );
     }
+
+    child = Actions(
+      actions: _actions,
+      child: Shortcuts(
+        shortcuts: _kMenuTraversalShortcuts,
+        child: FocusScope(
+          node: widget.focusScopeNode,
+          descendantsAreFocusable: true,
+          descendantsAreTraversable: true,
+          canRequestFocus: true,
+          child: child,
+        ),
+      ),
+    );
 
     return ConstrainedBox(
       constraints: BoxConstraints.loose(widget.overlaySize),
@@ -1274,6 +1286,8 @@ class _ShadowPainter extends CustomPainter {
   const _ShadowPainter({required this.brightness, required this.repaint}) : super(repaint: repaint);
 
   static const Radius radius = Radius.circular(13);
+  static const double lightShadowOpacity = 0.12;
+  static const double darkShadowOpacity = 0.24;
   double get shadowOpacity => ui.clampDouble(repaint.value, 0, 1);
   final Animation<double> repaint;
   final ui.Brightness brightness;
@@ -1287,8 +1301,8 @@ class _ShadowPainter extends CustomPainter {
       radius,
     );
     final double opacityMultiplier = switch (brightness) {
-      ui.Brightness.light => 0.12,
-      ui.Brightness.dark => 0.24,
+      ui.Brightness.light => lightShadowOpacity,
+      ui.Brightness.dark => darkShadowOpacity,
     };
     final Paint shadowPaint = Paint()
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, shadowOpacity * 50)
@@ -1557,16 +1571,20 @@ class _RenderMenuLayout extends RenderShiftedBox {
       final ui.Offset position = attachmentPoint - menuAlignment.alongSize(drySize);
       final ui.Rect screen = _findClosestScreen(size, anchorRect.center, avoidBounds);
       final Rect paddedScreen = padding.deflateRect(screen);
+
       final ui.Offset startPosition = _positionChild(
         paddedScreen,
         Size(drySize.width, 0),
         position,
         anchorRect,
       );
+
       final ui.Offset endPosition = _positionChild(paddedScreen, drySize, position, anchorRect);
-      final ui.Offset childPosition = Offset.lerp(startPosition, endPosition, _heightFactor)!;
+
+      final ui.Offset lerpPosition = Offset.lerp(startPosition, endPosition, _heightFactor)!;
+
       final BoxParentData childParentData = child!.parentData! as BoxParentData;
-      childParentData.offset = childPosition;
+      childParentData.offset = lerpPosition;
     } else {
       size = constraints.smallest;
     }
@@ -1583,11 +1601,29 @@ class _RenderMenuLayout extends RenderShiftedBox {
 
     // Layout horizontally first to determine if the menu can be placed on
     // either side of the anchor without overlapping.
-    final bool hasHorizontalAnchorOverlap = childSize.width >= screen.width;
-    if (hasHorizontalAnchorOverlap || overLeftEdge(x)) {
+    bool hasHorizontalAnchorOverlap = childSize.width >= screen.width;
+    if (hasHorizontalAnchorOverlap) {
       x = screen.left;
-    } else if (overRightEdge(x)) {
-      x = screen.right - childSize.width;
+    } else {
+      if (overLeftEdge(x)) {
+        // Flip the X position across the horizontal midpoint of the anchor so that the menu is to the right of the anchor.
+        final double flipX = anchor.center.dx * 2 - position.dx - childSize.width;
+        hasHorizontalAnchorOverlap = overRightEdge(flipX);
+        if (hasHorizontalAnchorOverlap || overLeftEdge(flipX)) {
+          x = screen.left;
+        } else {
+          x = flipX;
+        }
+      } else if (overRightEdge(x)) {
+        // Flip the X position across the horizontal midpoint of the anchor so that the menu is to the left of the anchor.
+        final double flipX = anchor.center.dx * 2 - position.dx - childSize.width;
+        hasHorizontalAnchorOverlap = overLeftEdge(flipX);
+        if (hasHorizontalAnchorOverlap || overRightEdge(flipX)) {
+          x = screen.right - childSize.width;
+        } else {
+          x = flipX;
+        }
+      }
     }
 
     if (childSize.height >= screen.height) {
@@ -2072,14 +2108,11 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
 
   /// The [BoxConstraints] to apply to the menu item.
   ///
-  /// Because [padding] is applied to the menu item prior to [constraints], [padding]
+  /// Because [padding] is applied to the menu item prior to [constraints], the [padding]
   /// will only affect the size of the menu item if the vertical [padding]
   /// plus the height of the menu item's children exceeds the
   /// [BoxConstraints.minHeight].
   final BoxConstraints? constraints;
-
-  /// Whether the menu item will respond to user input.
-  bool get enabled => onPressed != null;
 
   @override
   bool get hasLeading => leading != null;
@@ -2098,7 +2131,7 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
       });
 
   // Obtained from the iOS 18.5 simulator debug view.
-  static const Color _childTextColor = CupertinoDynamicColor.withBrightness(
+  static const Color defaultTextColor = CupertinoDynamicColor.withBrightness(
     color: Color.from(alpha: 0.96, red: 0, green: 0, blue: 0),
     darkColor: Color.from(alpha: 0.96, red: 1, green: 1, blue: 1),
   );
@@ -2108,14 +2141,14 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
   // A custom blend mode is applied to the subtitle to mimick the visual effect of
   // the iOS menu subtitle. As a result, the defaultSubtitleStyle color does not match the
   // reported color on the iOS 18.5 simulator.
-  static const Color _defaultSubtitleTextColor = CupertinoDynamicColor.withBrightnessAndContrast(
+  static const Color defaultSubtitleTextColor = CupertinoDynamicColor.withBrightnessAndContrast(
     color: Color.from(alpha: 0.55, red: 0, green: 0, blue: 0),
     darkColor: Color.from(alpha: 0.4, red: 1, green: 1, blue: 1),
     highContrastColor: Color.from(alpha: 0.8, red: 0, green: 0, blue: 0),
     darkHighContrastColor: Color.from(alpha: 0.8, red: 1, green: 1, blue: 1),
   );
 
-  /// The color of a [CupertinoMenuItem] when pressed.
+  /// The decoration of a [CupertinoMenuItem] when pressed.
   // Pressed colors were sampled from the iOS simulator and are based on the
   // following:
   //
@@ -2188,12 +2221,12 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
   // Approximated from the iOS and iPadOS 18.5 simulators.
   TextStyle _resolveDefaultTextStyle(BuildContext context, TextScaler textScaler) {
     Color color;
-    if (!enabled) {
+    if (onPressed == null) {
       color = CupertinoColors.systemGrey;
     } else if (isDestructiveAction) {
       color = CupertinoColors.systemRed;
     } else {
-      color = _childTextColor;
+      color = defaultTextColor;
     }
 
     return _DynamicTypeSet.body
@@ -2220,7 +2253,7 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
             // For light mode: plusDarker is used on iOS to achieve a darker color.
             // HardLight is used as an approximation.
             ..blendMode = isDark ? BlendMode.plus : BlendMode.hardLight
-            ..color = CupertinoDynamicColor.resolve(_defaultSubtitleTextColor, context),
+            ..color = CupertinoDynamicColor.resolve(defaultSubtitleTextColor, context),
         );
   }
 
@@ -2234,7 +2267,9 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
 
   @override
   Widget build(BuildContext context) {
-    final TextScaler textScaler = MediaQuery.maybeTextScalerOf(context) ?? TextScaler.noScaling;
+    final TextScaler textScaler =
+        MediaQuery.maybeTextScalerOf(context) ??
+        TextScaler.linear(MediaQuery.maybeTextScaleFactorOf(context) ?? 1);
     final TextStyle defaultTextStyle = _resolveDefaultTextStyle(context, textScaler);
     final bool isAccessibilityModeEnabled = _isAccessibilityModeEnabled(context);
     Widget? leadingWidget;
@@ -2242,67 +2277,74 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
 
     if (leading != null) {
       leadingWidget = DefaultTextStyle.merge(
-        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: _childTextColor),
+        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         child: IconTheme.merge(
-          data: const IconThemeData(
-            size: 15,
-            weight: 700,
-            applyTextScaling: true,
-            color: _childTextColor,
-          ),
+          data: const IconThemeData(size: 15, weight: 600, applyTextScaling: true),
           child: leading!,
         ),
       );
     }
 
     if (trailing != null && !isAccessibilityModeEnabled) {
-      final double fontSize = _trailingIconFontSizeMultiplier * textScaler.scale(17);
-      trailingWidget = DefaultTextStyle(
-        style: TextStyle(fontSize: fontSize.roundToDouble(), color: _childTextColor),
+      final Widget child = DefaultTextStyle.merge(
+        style: const TextStyle(fontSize: 17),
         child: IconTheme.merge(
-          data: IconThemeData(
-            size: fontSize.roundToDouble(),
-            color: _childTextColor,
-            applyTextScaling: false,
-          ),
+          data: const IconThemeData(size: 17, applyTextScaling: true),
           child: trailing!,
         ),
       );
+      trailingWidget = Builder(
+        builder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: TextScaler.linear(textScaler.scale(_trailingIconFontSizeMultiplier)),
+            ),
+            child: child,
+          );
+        },
+      );
     }
 
-    return _CupertinoMenuItemInteractionHandler(
-      mouseCursor: mouseCursor ?? defaultCursor,
-      panActivationDelay: panActivationDelay,
-      requestFocusOnHover: requestFocusOnHover,
-      onPressed: onPressed != null ? () => _handleSelect(context) : null,
-      onHover: onHover,
-      onFocusChange: onFocusChange,
-      autofocus: autofocus,
-      focusNode: focusNode,
-      decoration: decoration ?? defaultDecoration,
-      statesController: statesController,
-      behavior: behavior,
-      child: DefaultTextStyle.merge(
-        maxLines: isAccessibilityModeEnabled ? defaultAccessibilityModeMaxLines : defaultMaxLines,
-        overflow: TextOverflow.ellipsis,
-        softWrap: true,
-        style: TextStyle(color: defaultTextStyle.color),
-        child: _CupertinoMenuItemLabel(
-          padding: padding,
-          constraints: constraints,
-          trailing: trailingWidget,
-          leading: leadingWidget,
-          leadingMidpointAlignment: leadingMidpointAlignment,
-          trailingMidpointAlignment: trailingMidpointAlignment,
-          leadingWidth: leadingWidth,
-          trailingWidth: trailingWidth,
-          subtitle: subtitle != null
-              ? DefaultTextStyle.merge(
-                  style: _resolveDefaultSubtitleStyle(context, textScaler),
-                  child: subtitle!,
-                )
-              : null,
-          child: DefaultTextStyle.merge(style: defaultTextStyle, child: child),
+    return MediaQuery.withClampedTextScaling(
+      minScaleFactor: 1 - 3 / 17,
+      maxScaleFactor: 1 + 36 / 17,
+      child: _CupertinoMenuItemInteractionHandler(
+        mouseCursor: mouseCursor ?? defaultCursor,
+        panActivationDelay: panActivationDelay,
+        requestFocusOnHover: requestFocusOnHover,
+        onPressed: onPressed != null ? () => _handleSelect(context) : null,
+        onHover: onHover,
+        onFocusChange: onFocusChange,
+        autofocus: autofocus,
+        focusNode: focusNode,
+        decoration: decoration ?? defaultDecoration,
+        statesController: statesController,
+        behavior: behavior,
+        child: DefaultTextStyle.merge(
+          maxLines: isAccessibilityModeEnabled ? defaultAccessibilityModeMaxLines : defaultMaxLines,
+          overflow: TextOverflow.ellipsis,
+          softWrap: true,
+          style: TextStyle(color: defaultTextStyle.color),
+          child: IconTheme.merge(
+            data: IconThemeData(color: defaultTextStyle.color),
+            child: _CupertinoMenuItemLabel(
+              padding: padding,
+              constraints: constraints,
+              trailing: trailingWidget,
+              leading: leadingWidget,
+              leadingMidpointAlignment: leadingMidpointAlignment,
+              trailingMidpointAlignment: trailingMidpointAlignment,
+              leadingWidth: leadingWidth,
+              trailingWidth: trailingWidth,
+              subtitle: subtitle != null
+                  ? DefaultTextStyle.merge(
+                      style: _resolveDefaultSubtitleStyle(context, textScaler),
+                      child: subtitle!,
+                    )
+                  : null,
+              child: DefaultTextStyle.merge(style: defaultTextStyle, child: child),
+            ),
+          ),
         ),
       ),
     );
@@ -2311,18 +2353,37 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<HitTestBehavior>('hitTestBehavior', behavior));
+    properties.add(DiagnosticsProperty<Widget?>('child', child));
     properties.add(
-      DiagnosticsProperty<Duration>(
-        'panActivationDelay',
-        panActivationDelay,
-        defaultValue: Duration.zero,
+      FlagProperty(
+        'requestCloseOnActivate',
+        value: requestCloseOnActivate,
+        ifTrue: 'closes on press',
+        ifFalse: 'does not close on press',
+        defaultValue: true,
       ),
     );
+
+    properties.add(
+      FlagProperty(
+        'requestFocusOnHover',
+        value: requestFocusOnHover,
+        ifFalse: 'does not request focus on hover',
+        ifTrue: 'requests focus on hover',
+        defaultValue: true,
+      ),
+    );
+
+    properties.add(EnumProperty<HitTestBehavior>('hitTestBehavior', behavior));
     properties.add(DiagnosticsProperty<FocusNode?>('focusNode', focusNode, defaultValue: null));
     properties.add(FlagProperty('enabled', value: onPressed != null, ifFalse: 'DISABLED'));
-    properties.add(DiagnosticsProperty<Widget?>('child', child));
-    properties.add(DiagnosticsProperty<Widget?>('subtitle', subtitle));
+
+    if (panActivationDelay != null) {
+      properties.add(DiagnosticsProperty<Duration>('panActivationDelay', panActivationDelay));
+    }
+    if (subtitle != null) {
+      properties.add(DiagnosticsProperty<Widget?>('subtitle', subtitle));
+    }
     if (leading != null) {
       properties.add(DiagnosticsProperty<Widget?>('leading', leading));
     }
@@ -2352,10 +2413,16 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
 
   // Values were obtained from the iOS 18.5 simulator.
   static const double _defaultHorizontalWidth = 16;
+
   static const double _leadingWidthSlope = -311 / 1000;
+  static const double _leadingWidthYIntercept = 10;
+
   static const double _leadingMidpointSlope = 118 / 1000000;
   static const double _leadingMidpointYIntercept = 73 / 125;
+
   static const double _trailingWidthSlope = 1 / 10;
+  static const double _trailingWidthYIntercept = 22;
+
   static const double _firstBaselineToTopSlope = 14 / 11;
   static const double _lastBaselineToBottomSlope = 71 / 100;
 
@@ -2394,26 +2461,26 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
   // Expected values deviate by no more than 1 physical pixel.
   double _resolveLeadingWidth(TextScaler textScaler, double pixelRatio, double lineHeight) {
     final double units = _normalizeTextScale(textScaler);
-    final double value = 10 + _leadingWidthSlope * units;
-    return _quantize(value, to: pixelRatio) + lineHeight;
+    final double value = _leadingWidthSlope * units + _leadingWidthYIntercept;
+    return _quantize(value + lineHeight, to: 1 / pixelRatio);
   }
 
   // Tested across all iOS dynamic type sizes on iOS and iPadOS 18.5 simulators.
   // Expected values deviate by no more than 1 physical pixel.
   double _resolveTrailingWidth(TextScaler textScaler, double pixelRatio, double lineHeight) {
     final double units = _normalizeTextScale(textScaler);
-    final double value = 22 + _trailingWidthSlope * units;
-    return _quantize(value, to: pixelRatio) + lineHeight;
+    final double value = _trailingWidthSlope * units + _trailingWidthYIntercept;
+    return _quantize(value + lineHeight, to: 1 / pixelRatio);
   }
 
-  AlignmentDirectional _resolveTrailingAlignment(double trailingWidth) {
+  AlignmentGeometry _resolveTrailingAlignment(double trailingWidth) {
     final double horizontalOffset = trailingWidth / 2 + 6;
     final double horizontalRatio = (trailingWidth - horizontalOffset) / trailingWidth;
     final double horizontalAlignment = (horizontalRatio * 2) - 1;
     return AlignmentDirectional(horizontalAlignment, 0.0);
   }
 
-  AlignmentDirectional _resolveLeadingAlignment(double leadingWidth, TextScaler textScaler) {
+  AlignmentGeometry _resolveLeadingAlignment(double leadingWidth, TextScaler textScaler) {
     final double units = _normalizeTextScale(textScaler);
     final double horizontalRatio = _leadingMidpointSlope * units + _leadingMidpointYIntercept;
     final double horizontalAlignment = (horizontalRatio * 2) - 1;
@@ -2457,6 +2524,7 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
         _resolveFirstBaselineToTop(lineHeight, pixelRatio) +
         _resolveLastBaselineToBottom(lineHeight, pixelRatio);
     final BoxConstraints constraints = _constraints ?? BoxConstraints(minHeight: minimumHeight);
+
     final EdgeInsetsGeometry resolvedPadding =
         padding ?? _resolvePadding(minimumHeight, lineHeight);
 
@@ -2476,29 +2544,45 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
       constraints: constraints,
       child: Padding(
         padding: resolvedPadding,
-        child: Row(
+        child: Stack(
           children: <Widget>[
-            SizedBox(
+            Positioned.directional(
+              textDirection: Directionality.maybeOf(context) ?? TextDirection.ltr,
+              start: 0,
+              top: 0,
+              bottom: 0,
               width: resolvedLeadingWidth,
               child: leading != null
-                  ? _AlignMidpoint(
-                      alignment:
-                          _leadingAlignment ??
-                          _resolveLeadingAlignment(resolvedLeadingWidth, textScaler),
-                      child: leading,
+                  ? ColoredBox(
+                      color: CupertinoColors.systemBlue,
+                      child: _AlignMidpoint(
+                        alignment:
+                            _leadingAlignment ??
+                            _resolveLeadingAlignment(resolvedLeadingWidth, textScaler),
+                        child: leading,
+                      ),
                     )
-                  : null,
+                  : const SizedBox.shrink(),
             ),
-            Expanded(
+            Padding(
+              padding: EdgeInsetsDirectional.only(
+                start: resolvedLeadingWidth,
+                end: resolvedTrailingWidth,
+              ),
               child: subtitle == null
-                  ? child
+                  ? Align(alignment: AlignmentDirectional.centerStart, child: child)
                   : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[child, const SizedBox(height: 1), subtitle!],
                     ),
             ),
-            SizedBox(
+            Positioned.directional(
+              textDirection: Directionality.maybeOf(context) ?? TextDirection.ltr,
+              end: 0,
+              top: 0,
+              bottom: 0,
               width: resolvedTrailingWidth,
               child: trailing != null
                   // On native platform, the trailing widget is constrained to a
@@ -2511,7 +2595,7 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
                           _trailingAlignment ?? _resolveTrailingAlignment(resolvedTrailingWidth),
                       child: trailing,
                     )
-                  : null,
+                  : const SizedBox.shrink(),
             ),
           ],
         ),
@@ -2529,9 +2613,9 @@ class _AlignMidpoint extends SingleChildRenderObjectWidget {
   /// Creates a widget that positions its child's center point at a specific
   /// [alignment].
   ///
-  /// The [alignment] and [textDirection] parameters are required and must not
+  /// The [alignment] parameter is required and must not
   /// be null.
-  const _AlignMidpoint({required this.alignment, super.child});
+  const _AlignMidpoint({required this.alignment, required super.child});
 
   /// The alignment for positioning the child's horizontal midpoint.
   final AlignmentGeometry alignment;
@@ -2552,27 +2636,8 @@ class _AlignMidpoint extends SingleChildRenderObjectWidget {
   }
 }
 
-class _RenderAlignMidpoint extends RenderAligningShiftedBox {
+class _RenderAlignMidpoint extends RenderPositionedBox {
   _RenderAlignMidpoint({super.alignment, super.textDirection});
-
-  @override
-  @protected
-  Size computeDryLayout(BoxConstraints constraints) {
-    final bool shrinkWrapWidth = constraints.maxWidth == double.infinity;
-    final bool shrinkWrapHeight = constraints.maxHeight == double.infinity;
-    if (child != null) {
-      final Size childSize = child!.getDryLayout(constraints.loosen());
-      return constraints.constrain(
-        Size(
-          shrinkWrapWidth ? childSize.width : double.infinity,
-          shrinkWrapHeight ? childSize.height : double.infinity,
-        ),
-      );
-    }
-    return constraints.constrain(
-      Size(shrinkWrapWidth ? 0.0 : double.infinity, shrinkWrapHeight ? 0.0 : double.infinity),
-    );
-  }
 
   @override
   void alignChild() {
@@ -2581,44 +2646,15 @@ class _RenderAlignMidpoint extends RenderAligningShiftedBox {
     assert(child!.hasSize);
     assert(hasSize);
     final BoxParentData childParentData = child!.parentData! as BoxParentData;
-    final Alignment resolvedAlignment = alignment.resolve(textDirection);
-    final Offset parentPosition = resolvedAlignment.alongSize(size);
+    final ui.Offset offset = resolvedAlignment.alongSize(size) - child!.size.center(Offset.zero);
+    final double dx = offset.dx.clamp(0.0, size.width - child!.size.width);
+    final double dy = offset.dy.clamp(0.0, size.height - child!.size.height);
 
-    // Position the child so its midpoint aligns with the target
-    final Offset(:double dx, :double dy) = parentPosition - child!.size.center(Offset.zero);
-
-    // Ensure the child remains within the parent's bounds
-    final double childX = ui.clampDouble(dx, 0.0, size.width - child!.size.width);
-    final double childY = ui.clampDouble(dy, 0.0, size.height - child!.size.height);
-
-    childParentData.offset = Offset(childX, childY);
-  }
-
-  @override
-  void performLayout() {
-    final BoxConstraints constraints = this.constraints;
-    final bool shrinkWrapWidth = constraints.maxWidth == double.infinity;
-    final bool shrinkWrapHeight = constraints.maxHeight == double.infinity;
-
-    if (child != null) {
-      child!.layout(constraints.loosen(), parentUsesSize: true);
-      size = constraints.constrain(
-        Size(
-          shrinkWrapWidth ? child!.size.width : double.infinity,
-          shrinkWrapHeight ? child!.size.height : double.infinity,
-        ),
-      );
-      alignChild();
-    } else {
-      size = constraints.constrain(
-        Size(shrinkWrapWidth ? 0.0 : double.infinity, shrinkWrapHeight ? 0.0 : double.infinity),
-      );
-    }
+    childParentData.offset = Offset(dx, dy);
   }
 
   @override
   void debugPaintSize(PaintingContext context, Offset offset) {
-    super.debugPaintSize(context, offset);
     assert(() {
       final Paint paint;
       if (child != null && !child!.size.isEmpty) {
@@ -2695,8 +2731,7 @@ class CupertinoLargeMenuDivider extends StatelessWidget with CupertinoMenuEntryM
 
   /// The color of the divider.
   ///
-  /// If this property is null, [CupertinoLargeMenuDivider.defaultColor] is
-  /// used.
+  /// Defaults to [CupertinoLargeMenuDivider.defaultColor].
   final Color color;
 
   @override
@@ -2721,7 +2756,7 @@ class CupertinoLargeMenuDivider extends StatelessWidget with CupertinoMenuEntryM
   Widget build(BuildContext context) {
     return ColoredBox(
       color: CupertinoDynamicColor.resolve(color, context),
-      child: const SizedBox(height: _height),
+      child: const SizedBox(height: _height, width: double.infinity),
     );
   }
 }
@@ -2923,13 +2958,8 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
   }
 
   void _handleFocusChange([bool? focused]) {
-    final bool hasPrimaryFocus = focused ?? _focusNode.hasPrimaryFocus;
-    if (hasPrimaryFocus != isFocused) {
-      widget.onFocusChange?.call(isFocused);
-      setState(() {
-        isFocused = hasPrimaryFocus;
-      });
-    }
+    isFocused = _focusNode.hasPrimaryFocus;
+    widget.onFocusChange?.call(isFocused);
   }
 
   void _handleActivation([Intent? intent]) {
@@ -3020,30 +3050,31 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
       gestures = null;
     }
 
-    return MetaData(
-      metaData: this,
-      child: Actions(
-        actions: isEnabled ? _actionMap : <Type, Action<Intent>>{},
-        child: Focus(
-          autofocus: widget.autofocus,
-          focusNode: _focusNode,
-          canRequestFocus: isEnabled,
-          skipTraversal: !isEnabled,
-          onFocusChange: _handleFocusChange,
-          child: Semantics.fromProperties(
-            properties: SemanticsProperties(
-              enabled: isEnabled,
-              focused: isFocused,
-              focusable: true,
-              onDismiss: _dismissMenu,
-            ),
-            child: ValueListenableBuilder<Set<WidgetState>>(
-              valueListenable: _statesController,
-              builder: _buildStatefulWrapper,
-              child: RawGestureDetector(
-                behavior: widget.behavior,
-                gestures: gestures ?? const <Type, GestureRecognizerFactory>{},
-                child: widget.child,
+    return MergeSemantics(
+      child: Semantics.fromProperties(
+        container: true,
+        properties: SemanticsProperties(
+          enabled: isEnabled,
+          onDismiss: isEnabled ? _dismissMenu : null,
+        ),
+        child: MetaData(
+          metaData: this,
+          child: Actions(
+            actions: isEnabled ? _actionMap : <Type, Action<Intent>>{},
+            child: Focus(
+              autofocus: isEnabled && widget.autofocus,
+              focusNode: _focusNode,
+              canRequestFocus: isEnabled,
+              skipTraversal: !isEnabled,
+              onFocusChange: _handleFocusChange,
+              child: ValueListenableBuilder<Set<WidgetState>>(
+                valueListenable: _statesController,
+                builder: _buildStatefulWrapper,
+                child: RawGestureDetector(
+                  behavior: widget.behavior,
+                  gestures: gestures ?? const <Type, GestureRecognizerFactory>{},
+                  child: widget.child,
+                ),
               ),
             ),
           ),
@@ -3146,31 +3177,30 @@ class _PanRegionState extends State<_PanRegion> {
     _recognizer?.addPointer(event);
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _recognizer = widget.createRecognizer(_beginPan);
+  void _resolveGesture() {
+    if (widget.enabled) {
+      _recognizer ??= widget.createRecognizer(_beginPan);
+      _recognizer!.gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
+    } else {
+      if (isPanning) {
+        _completePan();
+      }
+      _recognizer?.dispose();
+      _recognizer = null;
+    }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _recognizer!.gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
+    _resolveGesture();
   }
 
   @override
   void didUpdateWidget(_PanRegion oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.enabled != oldWidget.enabled) {
-      if (widget.enabled) {
-        _recognizer = widget.createRecognizer(_beginPan);
-      } else {
-        if (isPanning) {
-          _completePan();
-        }
-        _recognizer?.dispose();
-        _recognizer = null;
-      }
+      _resolveGesture();
     }
   }
 
@@ -3249,7 +3279,7 @@ class _PanRegionState extends State<_PanRegion> {
 
 /// An area that can initiate panning.
 ///
-/// This widget registers with the nearest [_PanRegion] and exposes its position
+/// This widget registers with the nearest [_PanRegion] and exposes it's position
 /// as a [ui.Rect]. This [_PanSurface] will route [PointerDownEvent]s to its
 /// [_PanRegion]. If a routed [PointerDownEvent] results in a pan gesture, the
 /// [_PanRegion] will use the combined [ui.Rect] of all registered [_PanSurface]s
@@ -3448,10 +3478,10 @@ class _PanHandler extends Drag {
   }
 }
 
-/// Multiplies the values of two animations.
-///
-/// This class is used to animate the scale of the menu when the user drags
-/// outside of the menu area.
+// Multiplies the values of two animations.
+//
+// This class is used to animate the scale of the menu when the user drags
+// outside of the menu area.
 class _AnimationProduct extends CompoundAnimation<double> {
   _AnimationProduct({required super.first, required super.next});
 

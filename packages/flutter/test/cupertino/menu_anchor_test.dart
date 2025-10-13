@@ -3,19 +3,286 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math show max;
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const Duration kMenuOpenDuration = Duration(milliseconds: 900);
 const Duration kMenuCloseDuration = Duration(milliseconds: 700);
 
+abstract class AccessibilityTextSize {
+  static const TextScaler xSmall = TextScaler.linear(1 - 3 / 17);
+  static const TextScaler small = TextScaler.linear(1 - 2 / 17);
+  static const TextScaler medium = TextScaler.linear(1 - 1 / 17);
+  static const TextScaler large = TextScaler.noScaling;
+  static const TextScaler xLarge = TextScaler.linear(1 + 2 / 17);
+  static const TextScaler xxLarge = TextScaler.linear(1 + 4 / 17);
+  static const TextScaler xxxLarge = TextScaler.linear(1 + 6 / 17);
+  static const TextScaler ax1 = TextScaler.linear(1 + 11 / 17);
+  static const TextScaler ax2 = TextScaler.linear(1 + 16 / 17);
+  static const TextScaler ax3 = TextScaler.linear(1 + 23 / 17);
+  static const TextScaler ax4 = TextScaler.linear(1 + 30 / 17);
+  static const TextScaler ax5 = TextScaler.linear(1 + 36 / 17);
+
+  // For testing
+  static const TextScaler oversized = TextScaler.linear(1 + 46 / 17);
+  static const TextScaler undersized = TextScaler.linear(1 - 10 / 17);
+
+  static List<TextScaler> get values => <TextScaler>[
+    xSmall,
+    small,
+    medium,
+    large,
+    xLarge,
+    xxLarge,
+    xxxLarge,
+    ax1,
+    ax2,
+    ax3,
+    ax4,
+    ax5,
+  ];
+}
+
+abstract class DynamicTypeSet<T> {
+  const DynamicTypeSet({
+    required this.xSmall,
+    required this.small,
+    required this.medium,
+    required this.large,
+    required this.xLarge,
+    required this.xxLarge,
+    required this.xxxLarge,
+    required this.ax1,
+    required this.ax2,
+    required this.ax3,
+    required this.ax4,
+    required this.ax5,
+  });
+
+  final T xSmall;
+  final T small;
+  final T medium;
+  final T large;
+  final T xLarge;
+  final T xxLarge;
+  final T xxxLarge;
+  final T ax1;
+  final T ax2;
+  final T ax3;
+  final T ax4;
+  final T ax5;
+
+  double _interpolateUnits(double units, int minimum, int maximum) {
+    final double t = (units - minimum) / (maximum - minimum);
+    return ui.lerpDouble(0, 1, t)!;
+  }
+
+  T lerp(T a, T b, double t);
+
+  // The following units were measured from the iOS 18.5 simulator in points.
+  T resolve(TextScaler textScaler, {bool round = false}) {
+    double units = textScaler.scale(17) - 17;
+    if (round) {
+      units = units.roundToDouble();
+    }
+    return switch (units) {
+      <= -3 => xSmall,
+      < -2 => lerp(xSmall, small, _interpolateUnits(units, -3, -2))!,
+      < -1 => lerp(small, medium, _interpolateUnits(units, -2, -1))!,
+      < 0 => lerp(medium, large, _interpolateUnits(units, -1, 0))!,
+      < 2 => lerp(large, xLarge, _interpolateUnits(units, 0, 2))!,
+      < 4 => lerp(xLarge, xxLarge, _interpolateUnits(units, 2, 4))!,
+      < 6 => lerp(xxLarge, xxxLarge, _interpolateUnits(units, 4, 6))!,
+      < 11 => lerp(xxxLarge, ax1, _interpolateUnits(units, 6, 11))!,
+      < 16 => lerp(ax1, ax2, _interpolateUnits(units, 11, 16))!,
+      < 23 => lerp(ax2, ax3, _interpolateUnits(units, 16, 23))!,
+      < 30 => lerp(ax3, ax4, _interpolateUnits(units, 23, 30))!,
+      < 36 => lerp(ax4, ax5, _interpolateUnits(units, 30, 36))!,
+      _ => ax5,
+    };
+  }
+}
+
+class DynamicTypeTextStyleSet extends DynamicTypeSet<TextStyle> {
+  const DynamicTypeTextStyleSet({
+    required super.xSmall,
+    required super.small,
+    required super.medium,
+    required super.large,
+    required super.xLarge,
+    required super.xxLarge,
+    required super.xxxLarge,
+    required super.ax1,
+    required super.ax2,
+    required super.ax3,
+    required super.ax4,
+    required super.ax5,
+  });
+
+  @override
+  TextStyle lerp(TextStyle a, TextStyle b, double t) {
+    return TextStyle.lerp(a, b, t)!;
+  }
+
+  static const DynamicTypeTextStyleSet body = DynamicTypeTextStyleSet(
+    xSmall: TextStyle(
+      fontSize: 14.0,
+      height: 19.0 / 14.0,
+      letterSpacing: -0.41,
+      fontFamily: 'CupertinoSystemText',
+    ),
+    small: TextStyle(
+      fontSize: 15.0,
+      height: 20.0 / 15.0,
+      letterSpacing: -0.41,
+      fontFamily: 'CupertinoSystemText',
+    ),
+    medium: TextStyle(
+      fontSize: 16.0,
+      height: 21.0 / 16.0,
+      letterSpacing: -0.41,
+      fontFamily: 'CupertinoSystemText',
+    ),
+    large: TextStyle(
+      fontSize: 17.0,
+      height: 22.0 / 17.0,
+      letterSpacing: -0.41,
+      fontFamily: 'CupertinoSystemText',
+    ),
+    xLarge: TextStyle(
+      fontSize: 19.0,
+      height: 24.0 / 19.0,
+      letterSpacing: -0.41,
+      fontFamily: 'CupertinoSystemText',
+    ),
+    xxLarge: TextStyle(
+      fontSize: 21.0,
+      height: 26.0 / 21.0,
+      letterSpacing: -0.8,
+      fontFamily: 'CupertinoSystemText',
+    ),
+    xxxLarge: TextStyle(
+      fontSize: 23.0,
+      height: 29.0 / 23.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+    ax1: TextStyle(
+      fontSize: 28.0,
+      height: 34.0 / 28.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+    ax2: TextStyle(
+      fontSize: 33.0,
+      height: 40.0 / 33.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+    ax3: TextStyle(
+      fontSize: 40.0,
+      height: 48.0 / 40.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+    ax4: TextStyle(
+      fontSize: 47.0,
+      height: 56.0 / 47.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+    ax5: TextStyle(
+      fontSize: 53.0,
+      height: 62.0 / 53.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+  );
+
+  static const DynamicTypeTextStyleSet subhead = DynamicTypeTextStyleSet(
+    xSmall: TextStyle(
+      fontSize: 12.0,
+      height: 16.0 / 12.0,
+      letterSpacing: -0.025,
+      fontFamily: 'CupertinoSystemText',
+    ),
+    small: TextStyle(
+      fontSize: 13.0,
+      height: 18.0 / 13.0,
+      letterSpacing: -0.025,
+      fontFamily: 'CupertinoSystemText',
+    ),
+    medium: TextStyle(
+      fontSize: 14.0,
+      height: 19.0 / 14.0,
+      letterSpacing: -0.025,
+      fontFamily: 'CupertinoSystemText',
+    ),
+    large: TextStyle(
+      fontSize: 15.0,
+      height: 20.0 / 15.0,
+      letterSpacing: -0.2,
+      fontFamily: 'CupertinoSystemText',
+    ),
+    xLarge: TextStyle(
+      fontSize: 17.0,
+      height: 22.0 / 17.0,
+      letterSpacing: -0.41,
+      fontFamily: 'CupertinoSystemText',
+    ),
+    xxLarge: TextStyle(
+      fontSize: 19.0,
+      height: 24.0 / 19.0,
+      letterSpacing: -0.68,
+      fontFamily: 'CupertinoSystemText',
+    ),
+    xxxLarge: TextStyle(
+      fontSize: 21.0,
+      height: 28.0 / 21.0,
+      letterSpacing: -0.68,
+      fontFamily: 'CupertinoSystemText',
+    ),
+    ax1: TextStyle(
+      fontSize: 25.0,
+      height: 31.0 / 25.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+    ax2: TextStyle(
+      fontSize: 30.0,
+      height: 37.0 / 30.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+    ax3: TextStyle(
+      fontSize: 36.0,
+      height: 43.0 / 36.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+    ax4: TextStyle(
+      fontSize: 42.0,
+      height: 50.0 / 42.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+    ax5: TextStyle(
+      fontSize: 49.0,
+      height: 58.0 / 49.0,
+      letterSpacing: 0.38,
+      fontFamily: 'CupertinoSystemDisplay',
+    ),
+  );
+}
+
 void main() {
   late MenuController controller;
-  String? focusedMenu;
   final List<Tag> selected = <Tag>[];
   final List<Tag> opened = <Tag>[];
   final List<Tag> closed = <Tag>[];
@@ -33,29 +300,26 @@ void main() {
     closed.add(item);
   }
 
-  void handleFocusChange() {
-    focusedMenu = (primaryFocus?.debugLabel ?? primaryFocus).toString();
-  }
-
   setUp(() {
-    focusedMenu = null;
     selected.clear();
     opened.clear();
     closed.clear();
     controller = MenuController();
-    focusedMenu = null;
   });
+
+  Future<void> Function(int frames) createFramePumper(WidgetTester tester) {
+    return (int frames) async {
+      for (int i = 0; i < frames; i += 1) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+    };
+  }
 
   Future<void> changeSurfaceSize(WidgetTester tester, Size size) async {
     await tester.binding.setSurfaceSize(size);
     addTearDown(() async {
       await tester.binding.setSurfaceSize(null);
     });
-  }
-
-  void listenForFocusChanges() {
-    FocusManager.instance.addListener(handleFocusChange);
-    addTearDown(() => FocusManager.instance.removeListener(handleFocusChange));
   }
 
   T findMenuPanelAncestor<T extends Widget>(WidgetTester tester) {
@@ -66,6 +330,14 @@ void main() {
 
   double getScale(WidgetTester tester) {
     return findMenuPanelAncestor<ScaleTransition>(tester).scale.value;
+  }
+
+  List<Widget> findMenuChildren(WidgetTester tester) {
+    return tester
+        .firstWidget<Column>(
+          find.descendant(of: find.byType(CupertinoPopupSurface), matching: find.byType(Column)),
+        )
+        .children;
   }
 
   List<RenderObject> findAncestorRenderTheaters(RenderObject child) {
@@ -79,6 +351,16 @@ void main() {
       node = parent is RenderObject ? parent : null;
     }
     return results;
+  }
+
+  Matcher rectEquals(Rect rect) => rectMoreOrLessEquals(rect, epsilon: 0.1);
+  RenderParagraph? findDescendentParagraph(WidgetTester tester, Finder finder) {
+    return find
+            .descendant(of: finder, matching: find.byType(RichText))
+            .evaluate()
+            .first
+            .renderObject
+        as RenderParagraph?;
   }
 
   testWidgets("MenuController.isOpen is true when a menu's overlay is shown", (
@@ -258,51 +540,6 @@ void main() {
     expect(serializedException, contains('_anchor != null'));
   });
 
-  testWidgets('MenuOverlayPosition.anchorRect applies transformations to panel', (
-    WidgetTester tester,
-  ) async {
-    final GlobalKey<State<StatefulWidget>> panelKey = GlobalKey();
-    final Matrix4 matrix = Matrix4.translationValues(50, 50, 0)..scale(1.2);
-    Widget builder(Matrix4 matrix) {
-      return App(
-        alignment: Alignment.topLeft,
-        Transform(
-          transform: matrix,
-          child: CupertinoMenuAnchor(
-            overlayPadding: EdgeInsets.zero,
-            alignment: Alignment.topLeft,
-            menuAlignment: Alignment.topLeft,
-            controller: controller,
-            menuChildren: <Widget>[
-              Container(key: panelKey, width: 50, height: 50, color: const Color(0xFF0000FF)),
-            ],
-            child: const AnchorButton(Tag.anchor),
-          ),
-        ),
-      );
-    }
-
-    // Get the initial position of the anchor.
-    await tester.pumpWidget(builder(Matrix4.identity()));
-
-    controller.open();
-    await tester.pump(kMenuOpenDuration);
-
-    final Rect panelPosition = tester.getRect(find.byKey(panelKey));
-
-    controller.close();
-    await tester.pump(kMenuOpenDuration);
-
-    await tester.pumpWidget(builder(matrix));
-
-    controller.open();
-    await tester.pump(kMenuOpenDuration);
-
-    final Rect transformedPanelPosition = tester.getRect(find.byKey(panelKey));
-
-    expect(transformedPanelPosition, equals(MatrixUtils.transformRect(matrix, panelPosition)));
-  });
-
   // Credit to Closure library for the test idea.
   testWidgets('Intents are not blocked by closed anchor', (WidgetTester tester) async {
     final List<Intent> invokedIntents = <Intent>[];
@@ -436,8 +673,8 @@ void main() {
     addTearDown(aFocusNode.dispose);
 
     await tester.pumpWidget(
-      App(
-        CupertinoMenuAnchor(
+      CupertinoApp(
+        home: CupertinoMenuAnchor(
           controller: controller,
           menuChildren: <Widget>[Button.tag(Tag.a, focusNode: aFocusNode)],
           child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
@@ -483,12 +720,12 @@ void main() {
     expect(controller.isOpen, isFalse);
   });
 
-  testWidgets('Menus close and consume tap when consumesOutsideTap is true', (
+  testWidgets('Menus close and consume tap when consumeOutsideTap is true', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      App(
-        Column(
+      CupertinoApp(
+        home: Column(
           children: <Widget>[
             Button.tag(
               Tag.outside,
@@ -497,8 +734,13 @@ void main() {
               },
             ),
             CupertinoMenuAnchor(
-              onOpen: () => onOpen(Tag.anchor),
-              onClose: () => onClose(Tag.anchor),
+              consumeOutsideTaps: true,
+              onOpen: () {
+                onOpen(Tag.anchor);
+              },
+              onClose: () {
+                onClose(Tag.anchor);
+              },
               menuChildren: <Widget>[Button.tag(Tag.a)],
               child: AnchorButton(Tag.anchor, onPressed: onPressed),
             ),
@@ -521,6 +763,7 @@ void main() {
     await tester.pump();
 
     expect(opened, equals(<NestedTag>[Tag.anchor]));
+
     expect(closed, isEmpty);
     expect(selected, equals(<NestedTag>[Tag.anchor]));
     opened.clear();
@@ -541,23 +784,26 @@ void main() {
     closed.clear();
   });
 
-  testWidgets('Menus close and do not consume tap when consumesOutsideTap is false', (
+  testWidgets('Menus close and do not consume tap when consumeOutsideTaps is false', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      App(
-        Column(
+      CupertinoApp(
+        home: Column(
           children: <Widget>[
-            Button.tag(
-              Tag.outside,
+            CupertinoButton(
+              child: Text(Tag.outside.text),
               onPressed: () {
                 selected.add(Tag.outside);
               },
             ),
             CupertinoMenuAnchor(
-              consumeOutsideTaps: false,
-              onOpen: () => onOpen(Tag.anchor),
-              onClose: () => onClose(Tag.anchor),
+              onOpen: () {
+                onOpen(Tag.anchor);
+              },
+              onClose: () {
+                onClose(Tag.anchor);
+              },
               menuChildren: <Widget>[Button.tag(Tag.a)],
               child: AnchorButton(Tag.anchor, onPressed: onPressed),
             ),
@@ -579,6 +825,7 @@ void main() {
 
     await tester.tap(find.text(Tag.anchor.text));
     await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(opened, equals(<Tag>[Tag.anchor]));
     expect(closed, isEmpty);
@@ -589,9 +836,10 @@ void main() {
     selected.clear();
 
     await tester.tap(find.text(Tag.outside.text));
+    await tester.pump();
     await tester.pumpAndSettle();
 
-    // Because consumesOutsideTap is false, outsideButton is expected to
+    // Because consumeOutsideTaps is false, outsideButton is expected to
     // receive a tap.
     expect(opened, isEmpty);
     expect(closed, equals(<Tag>[Tag.anchor]));
@@ -602,43 +850,71 @@ void main() {
     closed.clear();
   });
 
-  testWidgets('onOpen is called when the menu is opened', (WidgetTester tester) async {
-    bool opened = false;
+  testWidgets('onOpen is called when the menu starts opening', (WidgetTester tester) async {
+    int opened = 0;
+    int closed = 0;
     await tester.pumpWidget(
-      App(
-        CupertinoMenuAnchor(
+      CupertinoApp(
+        home: CupertinoMenuAnchor(
           controller: controller,
           onOpen: () {
-            opened = true;
+            opened += 1;
+          },
+          onClose: () {
+            closed += 1;
           },
           menuChildren: const <Widget>[],
           child: const AnchorButton(Tag.anchor),
         ),
       ),
     );
+
+    // onOpen is called immediately when the menu starts opening.
     await tester.tap(find.text(Tag.anchor.text));
     await tester.pump();
 
-    expect(opened, isTrue);
+    expect(opened, equals(1));
 
-    opened = false;
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Start closing the menu.
     await tester.tap(find.text(Tag.anchor.text));
     await tester.pump();
 
-    // onOpen should not be called again.
-    expect(opened, isFalse);
+    // Menu is still open because closing animation hasn't finished.
+    expect(opened, equals(1));
+    expect(closed, equals(0));
+
+    await tester.tap(find.text(Tag.anchor.text));
+    await tester.pump();
+
+    // onOpen doesn't get called again because the menu never closed.
+    expect(opened, equals(1));
+    expect(closed, equals(0));
+
+    await tester.tap(find.text(Tag.anchor.text));
+    await tester.pumpAndSettle();
+
+    expect(opened, equals(1));
+    expect(closed, equals(1));
 
     controller.open();
     await tester.pump();
 
-    expect(opened, isTrue);
+    expect(opened, equals(2));
+    expect(closed, equals(1));
+
+    await tester.pumpAndSettle();
+
+    expect(opened, equals(2));
+    expect(closed, equals(1));
   });
 
-  testWidgets('onClose is called when the menu is closed', (WidgetTester tester) async {
+  testWidgets('onClose is called when the menu finishes closing', (WidgetTester tester) async {
     bool closed = true;
     await tester.pumpWidget(
-      App(
-        CupertinoMenuAnchor(
+      CupertinoApp(
+        home: CupertinoMenuAnchor(
           controller: controller,
           onOpen: () {
             closed = false;
@@ -657,8 +933,12 @@ void main() {
 
     expect(closed, isFalse);
 
+    await tester.pumpAndSettle();
     await tester.tap(find.text(Tag.anchor.text));
     await tester.pump();
+
+    expect(closed, isFalse);
+
     await tester.pump(kMenuCloseDuration);
 
     expect(closed, isTrue);
@@ -673,34 +953,50 @@ void main() {
 
     expect(closed, isTrue);
   });
-
-  testWidgets('diagnostics', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
-    final Widget menuAnchor = CupertinoMenuAnchor(
-      controller: controller,
-      childFocusNode: focusNode,
-      menuChildren: <Widget>[Text(Tag.a.text)],
+  test('debugFillProperties', () {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final CupertinoMenuAnchor menuAnchor = CupertinoMenuAnchor(
+      menuChildren: const <Text>[Text('Menu Item')],
+      alignment: Alignment.center,
+      alignmentOffset: const Offset(10, 20),
+      constraints: const BoxConstraints.tightFor(width: 200),
+      menuAlignment: Alignment.bottomRight,
+      overlayPadding: const EdgeInsets.all(12),
+      useRootOverlay: true,
+      enablePan: false,
+      consumeOutsideTaps: true,
+      controller: MenuController(),
+      onOpen: () {},
+      onClose: () {},
+      constrainCrossAxis: true,
+      child: const Text('Anchor Child'),
     );
 
-    await tester.pumpWidget(App(menuAnchor));
-    controller.open();
-    await tester.pump();
-
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     menuAnchor.debugFillProperties(builder);
-    final List<String> properties =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
 
-    expect(properties, const <String>['has focusNode', 'use nearest overlay']);
+    final List<String> descriptions = builder.properties
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+    expect(
+      descriptions,
+      containsAll(<dynamic>[
+        'constraints: BoxConstraints(w=200.0, 0.0<=h<=Infinity)',
+        'menuAlignment: Alignment.bottomRight',
+        'alignment: Alignment.center',
+        'alignmentOffset: Offset(10.0, 20.0)',
+        'constrains cross axis',
+        'pan disabled',
+        'consumes outside taps',
+        'uses root overlay',
+        'overlayPadding: EdgeInsets.all(12.0)',
+      ]),
+    );
   });
 
   testWidgets('Tab traversal is not handled', (WidgetTester tester) async {
-    final FocusNode bFocusNode = FocusNode(debugLabel: Tag.b.focusNode);
-    final FocusNode bbFocusNode = FocusNode(debugLabel: Tag.b.b.focusNode);
+    final FocusNode bFocusNode = FocusNode();
+    final FocusNode bbFocusNode = FocusNode();
     addTearDown(bFocusNode.dispose);
     addTearDown(bbFocusNode.dispose);
     final List<Intent> invokedIntents = <Intent>[];
@@ -754,24 +1050,22 @@ void main() {
       ),
     );
 
-    listenForFocusChanges();
-
     bFocusNode.requestFocus();
     await tester.pump();
 
-    expect(focusedMenu, equals(Tag.b.focusNode));
+    expect(primaryFocus, equals(bFocusNode));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pump();
 
-    expect(focusedMenu, equals(Tag.b.focusNode));
+    expect(primaryFocus, equals(bFocusNode));
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
     await tester.pump();
 
-    expect(focusedMenu, equals(Tag.b.focusNode));
+    expect(primaryFocus, equals(bFocusNode));
 
     // Open and move focus to nested menu
     await tester.tap(find.text(Tag.b.text));
@@ -781,19 +1075,19 @@ void main() {
     bbFocusNode.requestFocus();
     await tester.pump();
 
-    expect(focusedMenu, equals(Tag.b.b.focusNode));
+    expect(primaryFocus, equals(bbFocusNode));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pump();
 
-    expect(focusedMenu, equals(Tag.b.b.focusNode));
+    expect(primaryFocus, equals(bbFocusNode));
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
     await tester.pump();
 
-    expect(focusedMenu, equals(Tag.b.b.focusNode));
+    expect(primaryFocus, equals(bbFocusNode));
     expect(
       invokedIntents,
       equals(const <Intent>[
@@ -947,7 +1241,7 @@ void main() {
     expect(rootOpened, false);
   });
 
-  // Copied from [MenuAnchor] tests.
+  // Copied from MenuAnchor tests.
   //
   // Regression test for https://github.com/flutter/flutter/issues/157606.
   testWidgets('Menu builder rebuilds when isOpen state changes', (WidgetTester tester) async {
@@ -1054,8 +1348,9 @@ void main() {
     final Overlay nonRootOverlay = tester.widget(find.byKey(overlayKey));
     final Overlay rootOverlay = overlays.firstWhere((Overlay overlay) => overlay != nonRootOverlay);
 
-    final RenderObject menuTheater =
-        findAncestorRenderTheaters(tester.renderObject(find.text(Tag.a.text))).first;
+    final RenderObject menuTheater = findAncestorRenderTheaters(
+      tester.renderObject(find.text(Tag.a.text)),
+    ).first;
 
     // Check that the ancestor _RenderTheater for the menu item is the one
     // from the root overlay.
@@ -1109,47 +1404,17 @@ void main() {
     expect(find.byType(Overlay), findsNWidgets(2));
 
     final Overlay nonRootOverlay = tester.widget(find.byKey(overlayKey));
-    final RenderObject menuTheater =
-        findAncestorRenderTheaters(tester.renderObject(find.text(Tag.a.text))).first;
+    final RenderObject menuTheater = findAncestorRenderTheaters(
+      tester.renderObject(find.text(Tag.a.text)),
+    ).first;
 
     // Check that the ancestor _RenderTheater for the menu item is the one
     // from the root overlay.
     expect(menuTheater, tester.renderObject(find.byWidget(nonRootOverlay)));
   });
 
-  testWidgets('Parent updates are not triggered during builds', (WidgetTester tester) async {
-    Widget build() {
-      return App(
-        RawMenuAnchorGroup(
-          controller: controller,
-          child: const CupertinoMenuAnchor(
-            menuChildren: <Widget>[],
-            child: AnchorButton(Tag.anchor),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(build());
-    await tester.tap(find.text(Tag.anchor.text));
-    await tester.pump();
-
-    const Size smallSize = Size(200, 200);
-    await changeSurfaceSize(tester, smallSize);
-
-    await tester.pumpWidget(build());
-    await tester.pump();
-
-    expect(tester.takeException(), isNull);
-  });
-
   testWidgets('Panning scales the menu', (WidgetTester tester) async {
-    Future<void> pumpFrames(int frames) async {
-      for (int i = 0; i < frames; i++) {
-        await tester.pump();
-      }
-    }
-
+    final Future<void> Function(int frames) pumpFrames = createFramePumper(tester);
     await changeSurfaceSize(tester, const Size(2000, 2000));
     await tester.pumpWidget(
       App(
@@ -1178,72 +1443,64 @@ void main() {
     await gesture.moveTo(menuRect.topLeft);
     await tester.pump();
     await pumpFrames(10);
-    expect(getScale(tester), moreOrLessEquals(1.0, epsilon: 0.01));
+    expect(getScale(tester), closeTo(1.0, 0.01));
 
     await gesture.moveTo(menuRect.topRight);
     await tester.pump();
     await pumpFrames(10);
-    expect(getScale(tester), moreOrLessEquals(1.0, epsilon: 0.01));
+    expect(getScale(tester), closeTo(1.0, 0.01));
 
     await gesture.moveTo(menuRect.bottomLeft);
     await tester.pump();
     await pumpFrames(10);
-    expect(getScale(tester), moreOrLessEquals(1.0, epsilon: 0.01));
+    expect(getScale(tester), closeTo(1.0, 0.01));
 
     await gesture.moveTo(menuRect.bottomRight);
     await tester.pump();
     await pumpFrames(10);
-    expect(getScale(tester), moreOrLessEquals(1.0, epsilon: 0.01));
+    expect(getScale(tester), closeTo(1.0, 0.01));
 
     // Move outside the menu bounds to trigger scaling
     await gesture.moveTo(menuRect.topLeft - const Offset(50, 50));
     await pumpFrames(3);
 
     double topLeftScale = getScale(tester);
-    expect(topLeftScale, lessThan(0.98));
-    expect(topLeftScale, greaterThan(0.95));
+    expect(topLeftScale, closeTo(0.98, 0.1));
 
     await pumpFrames(3);
 
     topLeftScale = getScale(tester);
-    expect(topLeftScale, lessThan(0.96));
-    expect(topLeftScale, greaterThan(0.93));
+    expect(topLeftScale, closeTo(0.96, 0.1));
 
     await pumpFrames(3);
 
     topLeftScale = getScale(tester);
-    expect(topLeftScale, lessThan(0.94));
-    expect(topLeftScale, greaterThan(0.89));
+    expect(topLeftScale, closeTo(0.94, 0.1));
 
     await gesture.moveTo(menuRect.bottomRight + const Offset(50, 50));
     await pumpFrames(10);
 
     // Check that scale is roughly the same around the menu
-    expect(getScale(tester), moreOrLessEquals(topLeftScale, epsilon: 0.05));
+    expect(getScale(tester), closeTo(topLeftScale, 0.05));
 
     // Test maximum distance scaling
     await gesture.moveTo(menuRect.topLeft - const Offset(200, 200));
     await pumpFrames(20);
 
     // Check that the minimum scale is 0.8 (20% reduction)
-    expect(getScale(tester), moreOrLessEquals(0.8, epsilon: 0.01));
+    expect(getScale(tester), closeTo(0.8, 0.1));
 
     await gesture.moveTo(menuRect.bottomRight + const Offset(200, 200));
     await pumpFrames(10);
 
-    expect(getScale(tester), moreOrLessEquals(0.8, epsilon: 0.01));
+    expect(getScale(tester), closeTo(0.8, 0.1));
 
     await gesture.up();
     await tester.pump();
   });
 
   testWidgets('Panning minimum scale is 80 percent', (WidgetTester tester) async {
-    Future<void> pumpFrames(int frames) async {
-      for (int i = 0; i < frames; i++) {
-        await tester.pump();
-      }
-    }
-
+    final Future<void> Function(int frames) pumpFrames = createFramePumper(tester);
     await changeSurfaceSize(tester, const Size(2000, 2000));
     await tester.pumpWidget(
       App(
@@ -1288,11 +1545,7 @@ void main() {
   testWidgets('Menu scale rebounds to full size when pan returns to menu bounds', (
     WidgetTester tester,
   ) async {
-    Future<void> pumpFrames(int frames) async {
-      for (int i = 0; i < frames; i++) {
-        await tester.pump();
-      }
-    }
+    final Future<void> Function(int frames) pumpFrames = createFramePumper(tester);
 
     await changeSurfaceSize(tester, const Size(2000, 2000));
     await tester.pumpWidget(
@@ -1305,62 +1558,50 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.createGesture(pointer: 0);
+    final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     addTearDown(gesture.removePointer);
 
     controller.open();
     await tester.pump();
-    await tester.pump(kMenuOpenDuration);
+    await tester.pumpAndSettle();
 
-    final Offset startPosition = tester.getCenter(find.text(Tag.a.text));
-    await gesture.down(startPosition);
-    await tester.pump();
+    final Rect child = tester.getRect(find.byType(CupertinoPopupSurface));
 
-    final Rect menuRect = tester.getRect(find.byType(CupertinoPopupSurface));
-
-    // Start with full scale
-    expect(getScale(tester), moreOrLessEquals(1.0, epsilon: 0.01));
-
-    // Move outside menu bounds to trigger scaling
-    await gesture.moveTo(menuRect.topLeft - const Offset(100, 100));
+    await gesture.down(child.bottomRight - const Offset(5, 5));
     await pumpFrames(15);
 
-    final double scaledValue = getScale(tester);
-    expect(scaledValue, lessThan(1.0));
-    expect(scaledValue, greaterThan(0.8));
-
-    // Move back to menu bounds
-    await gesture.moveTo(menuRect.center);
-    await pumpFrames(20);
-
-    // Verify scale rebounds back to full size
     expect(getScale(tester), moreOrLessEquals(1.0, epsilon: 0.01));
 
-    // Test rebound from different scaled position
-    await gesture.moveTo(menuRect.bottomRight + const Offset(150, 150));
-    await pumpFrames(20);
+    await gesture.moveBy(const Offset(100, 100));
+    await pumpFrames(40);
 
-    expect(getScale(tester), lessThan(1.0));
+    expect(getScale(tester), closeTo(0.85, 0.1));
 
-    // Return to menu area again
-    await gesture.moveTo(menuRect.topLeft);
-    await pumpFrames(100);
+    await gesture.moveBy(-const Offset(100, 100));
+    await pumpFrames(40);
 
-    // Should rebound to full scale again
+    expect(getScale(tester), closeTo(1.0, 0.01));
+
+    await gesture.moveTo(child.topLeft + const Offset(5, 5));
+    await pumpFrames(15);
+
     expect(getScale(tester), moreOrLessEquals(1.0, epsilon: 0.01));
 
-    await gesture.up();
-    await tester.pump();
+    await gesture.moveBy(const Offset(-100, -100));
+    await pumpFrames(15);
+
+    expect(getScale(tester), closeTo(0.85, 0.1));
+
+    await gesture.moveTo(child.center);
+    await pumpFrames(40);
+
+    expect(getScale(tester), closeTo(1.0, 0.01));
   });
 
   testWidgets('Menu scale rebounds to full size when pan gesture ends', (
     WidgetTester tester,
   ) async {
-    Future<void> pumpFrames(int frames) async {
-      for (int i = 0; i < frames; i++) {
-        await tester.pump();
-      }
-    }
+    final Future<void> Function(int frames) pumpFrames = createFramePumper(tester);
 
     await changeSurfaceSize(tester, const Size(2000, 2000));
     await tester.pumpWidget(
@@ -1399,9 +1640,6 @@ void main() {
 
     // End the gesture while still outside menu bounds
     await gesture.up();
-    await tester.pump();
-
-    // Allow time for rebound animation to complete
     await pumpFrames(25);
 
     // Verify scale rebounds back to full size after gesture ends
@@ -1416,10 +1654,10 @@ void main() {
 
     // Move to maximum scale distance
     await gesture2.moveTo(menuRect.bottomRight + const Offset(200, 200));
-    await pumpFrames(20);
+    await pumpFrames(30);
 
     // Should be at minimum scale
-    expect(getScale(tester), moreOrLessEquals(0.8, epsilon: 0.01));
+    expect(getScale(tester), closeTo(0.8, 0.01));
 
     // End gesture at maximum distance
     await gesture2.up();
@@ -1434,7 +1672,6 @@ void main() {
 
   testWidgets('Pan can be disabled', (WidgetTester tester) async {
     await changeSurfaceSize(tester, const Size(1000, 1000));
-
     Widget buildWidget({required bool enablePan}) {
       return App(
         CupertinoMenuAnchor(
@@ -1448,12 +1685,12 @@ void main() {
 
     await tester.pumpWidget(buildWidget(enablePan: false));
 
-    final TestGesture gesture = await tester.createGesture(pointer: 1);
+    final TestGesture gesture = await tester.createGesture(pointer: 0);
     addTearDown(gesture.removePointer);
 
     controller.open();
     await tester.pump();
-    await tester.pump(kMenuOpenDuration);
+    await tester.pumpAndSettle();
 
     final Offset startPosition = tester.getCenter(find.text(Tag.a.text));
     await gesture.down(startPosition);
@@ -1484,7 +1721,7 @@ void main() {
     await tester.pump();
   });
 
-  group('Menu keyboard navigation', () {
+  group('Focus', () {
     testWidgets(
       'Focus wraps when traversing with arrow keys on non-Apple platforms',
       (WidgetTester tester) async {
@@ -1651,7 +1888,7 @@ void main() {
 
       controller.open();
       await tester.pump();
-      await tester.pump(kMenuOpenDuration);
+      await tester.pumpAndSettle();
 
       aFocusNode.requestFocus();
       await tester.pump();
@@ -1978,16 +2215,9 @@ void main() {
     /// rect is taken after UnconstrainedBox clips its contents.
     List<Rect> collectOverlays({bool clipped = true}) {
       final List<Rect> menuRects = <Rect>[];
-      final Finder finder =
-          clipped
-              ? find.byType(BackdropFilter)
-              : find.ancestor(
-                of: find.byType(CupertinoPopupSurface),
-                matching: find.descendant(
-                  of: find.byType(FadeTransition),
-                  matching: find.byType(CustomPaint),
-                ),
-              );
+      final Finder finder = clipped
+          ? find.byType(UnconstrainedBox)
+          : find.byType(CupertinoPopupSurface);
       for (final Element candidate in finder.evaluate().toList()) {
         final RenderBox box = candidate.renderObject! as RenderBox;
         final Offset topLeft = box.localToGlobal(box.size.topLeft(Offset.zero));
@@ -2022,7 +2252,9 @@ void main() {
       await tester.pump(kMenuOpenDuration);
 
       // Anchor position is fixed.
-      final ui.Rect anchorRect = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+      final ui.Rect anchorRect = tester.getRect(
+        find.widgetWithText(CupertinoButton, Tag.anchor.text),
+      );
 
       for (final AlignmentGeometry alignment in alignments) {
         await tester.pumpWidget(buildApp(alignment: alignment));
@@ -2064,7 +2296,9 @@ void main() {
       await tester.pump(kMenuOpenDuration);
 
       // Anchor position is fixed.
-      final ui.Rect anchorRect = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+      final ui.Rect anchorRect = tester.getRect(
+        find.widgetWithText(CupertinoButton, Tag.anchor.text),
+      );
 
       for (final AlignmentGeometry alignment in alignments) {
         await tester.pumpWidget(buildApp(alignment: alignment));
@@ -2088,6 +2322,7 @@ void main() {
           CupertinoMenuAnchor(
             alignment: Alignment.center,
             menuAlignment: alignment,
+            overlayPadding: EdgeInsets.zero,
             menuChildren: <Widget>[
               Container(
                 width: 350,
@@ -2132,6 +2367,7 @@ void main() {
           CupertinoMenuAnchor(
             alignment: Alignment.center,
             menuAlignment: alignment,
+            overlayPadding: EdgeInsets.zero,
             menuChildren: <Widget>[
               Container(
                 width: 350,
@@ -2203,7 +2439,9 @@ void main() {
             alignment.y > 0 ? -1.0 : 1.0, // Top or Bottom
           );
 
-          final ui.Rect anchorRect = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+          final ui.Rect anchorRect = tester.getRect(
+            find.widgetWithText(CupertinoButton, Tag.anchor.text),
+          );
           final ui.Rect surface = tester.getRect(
             find.widgetWithText(CupertinoPopupSurface, Tag.a.text).first,
           );
@@ -2244,8 +2482,9 @@ void main() {
       await tester.pump();
       await tester.pump(kMenuOpenDuration);
 
-      final Offset anchorBottomCenter =
-          tester.getRect(find.widgetWithText(Button, Tag.anchor.text)).bottomCenter;
+      final Offset anchorBottomCenter = tester
+          .getRect(find.widgetWithText(CupertinoButton, Tag.anchor.text))
+          .bottomCenter;
 
       expect(
         anchorBottomCenter,
@@ -2590,7 +2829,7 @@ void main() {
 
       expect(
         collectOverlays().first,
-        rectMoreOrLessEquals(const Rect.fromLTRB(0.0, 100.0, 100.0, 200.0), epsilon: 0.01),
+        rectMoreOrLessEquals(const Rect.fromLTRB(0, 50, 100, 150), epsilon: 0.01),
       );
     });
 
@@ -2620,7 +2859,7 @@ void main() {
       expect(overlays, hasLength(1));
       expect(
         overlays.first,
-        rectMoreOrLessEquals(const Rect.fromLTRB(0.0, 100.0, 100.0, 200.0), epsilon: 0.01),
+        rectMoreOrLessEquals(const Rect.fromLTRB(0.0, 50.0, 100.0, 150.0), epsilon: 0.01),
       );
     });
 
@@ -2628,16 +2867,13 @@ void main() {
       WidgetTester tester,
     ) async {
       await changeSurfaceSize(tester, const Size(200, 200));
-      const BoxConstraints constraints = BoxConstraints.tightFor(width: 300, height: 40);
 
       await tester.pumpWidget(
         App(
           CupertinoMenuAnchor(
             overlayPadding: EdgeInsets.zero,
-            menuChildren: <Widget>[
-              Container(color: const Color(0xFFFF0000), constraints: constraints),
-            ],
-            child: const AnchorButton(Tag.anchor, constraints: constraints),
+            menuChildren: <Widget>[Container(color: const Color(0xFFFF0000), height: 40)],
+            child: const AnchorButton(Tag.anchor),
           ),
         ),
       );
@@ -2658,7 +2894,7 @@ void main() {
       // the left edge (0px).
       expect(
         overlays.first,
-        rectMoreOrLessEquals(const Rect.fromLTRB(0.0, 120.0, 250.0, 160.0), epsilon: 0.01),
+        rectMoreOrLessEquals(const Rect.fromLTRB(-0.0, 35.5, 262.0, 75.5), epsilon: 0.01),
       );
     });
 
@@ -2666,17 +2902,14 @@ void main() {
       WidgetTester tester,
     ) async {
       await changeSurfaceSize(tester, const Size(200, 200));
-      const BoxConstraints constraints = BoxConstraints.tightFor(width: 300, height: 40);
 
       await tester.pumpWidget(
         App(
           textDirection: TextDirection.rtl,
           CupertinoMenuAnchor(
             overlayPadding: EdgeInsets.zero,
-            menuChildren: <Widget>[
-              Container(color: const Color(0xFFFF0000), constraints: constraints),
-            ],
-            child: const AnchorButton(Tag.anchor, constraints: constraints),
+            menuChildren: <Widget>[Container(color: const Color(0xFFFF0000), height: 40)],
+            child: const AnchorButton(Tag.anchor),
           ),
         ),
       );
@@ -2697,7 +2930,7 @@ void main() {
       // at the right edge (200px).
       expect(
         overlays.first,
-        rectMoreOrLessEquals(const Rect.fromLTRB(-50.0, 120.0, 200.0, 160.0), epsilon: 0.01),
+        rectMoreOrLessEquals(const Rect.fromLTRB(-62.0, 35.5, 200.0, 75.5), epsilon: 0.01),
       );
     });
 
@@ -2814,7 +3047,7 @@ void main() {
       await tester.pump(kMenuOpenDuration);
 
       final [ui.Rect menu] = collectOverlays();
-      final ui.Rect anchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+      final ui.Rect anchor = tester.getRect(find.widgetWithText(CupertinoButton, Tag.anchor.text));
       expect(
         const Alignment(0.75, -0.75).withinRect(menu),
         offsetMoreOrLessEquals(anchor.topLeft, epsilon: 0.1),
@@ -2845,7 +3078,9 @@ void main() {
       await tester.pump(kMenuOpenDuration);
 
       final [ui.Rect menu] = collectOverlays();
-      final Offset anchorTopLeft = tester.getTopLeft(find.widgetWithText(Button, Tag.anchor.text));
+      final Offset anchorTopLeft = tester.getTopLeft(
+        find.widgetWithText(CupertinoButton, Tag.anchor.text),
+      );
       expect(
         const Alignment(0.75, -0.75).withinRect(menu),
         offsetMoreOrLessEquals(anchorTopLeft, epsilon: 0.1),
@@ -2876,7 +3111,7 @@ void main() {
 
       final [ui.Rect menu] = collectOverlays();
       final ui.Offset anchorTopRight = tester.getTopRight(
-        find.widgetWithText(Button, Tag.anchor.text),
+        find.widgetWithText(CupertinoButton, Tag.anchor.text),
       );
       expect(
         const Alignment(-0.75, -0.75).withinRect(menu),
@@ -2909,7 +3144,7 @@ void main() {
 
       final [ui.Rect menu] = collectOverlays();
       final ui.Offset anchorTopRight = tester.getTopRight(
-        find.widgetWithText(Button, Tag.anchor.text),
+        find.widgetWithText(CupertinoButton, Tag.anchor.text),
       );
       expect(
         const Alignment(-0.75, -0.75).withinRect(menu),
@@ -2992,7 +3227,7 @@ void main() {
         await tester.pump();
         await tester.pump(kMenuOpenDuration);
 
-        final Rect anchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+        final Rect anchor = tester.getRect(find.widgetWithText(CupertinoButton, Tag.anchor.text));
         final Rect panel = tester.getRect(find.byKey(const Key('menu')));
 
         expect(anchor.bottom, moreOrLessEquals(panel.top, epsilon: 0.01));
@@ -3022,7 +3257,7 @@ void main() {
       await tester.pump();
       await tester.pump(kMenuOpenDuration);
 
-      final Rect anchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+      final Rect anchor = tester.getRect(find.widgetWithText(CupertinoButton, Tag.anchor.text));
       expect(collectOverlays().first.bottom, moreOrLessEquals(anchor.top + 8, epsilon: 0.01));
     });
 
@@ -3047,11 +3282,11 @@ void main() {
       await tester.pump();
       await tester.pump(kMenuOpenDuration);
 
-      final Rect anchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+      final Rect anchor = tester.getRect(find.widgetWithText(CupertinoButton, Tag.anchor.text));
       expect(collectOverlays().first.top, moreOrLessEquals(anchor.bottom + 8, epsilon: 0.01));
     });
 
-    testWidgets('AlignmentOffset is reflected across anchor when menu flips', (
+    testWidgets('alignmentOffset is reflected across anchor when menu flips', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
@@ -3062,10 +3297,14 @@ void main() {
             alignment: Alignment.center,
             menuAlignment: Alignment.center,
             alignmentOffset: const Offset(200, 200),
+            constraints: const BoxConstraints.tightFor(width: 50, height: 50),
             menuChildren: <Widget>[
               Container(width: 50, height: 50, color: const Color(0xFFFF00FF)),
             ],
-            child: const AnchorButton(Tag.anchor),
+            child: const AnchorButton(
+              Tag.anchor,
+              constraints: BoxConstraints.tightFor(width: 50, height: 50),
+            ),
           ),
         ),
       );
@@ -3074,7 +3313,9 @@ void main() {
       await tester.pump();
       await tester.pump(kMenuOpenDuration);
 
-      final Offset anchorCenter = tester.getCenter(find.widgetWithText(Button, Tag.anchor.text));
+      final Offset anchorCenter = tester.getCenter(
+        find.widgetWithText(CupertinoButton, Tag.anchor.text),
+      );
       expect(
         collectOverlays().first.center,
         offsetMoreOrLessEquals(anchorCenter - const Offset(200, 200), epsilon: 0.01),
@@ -3103,7 +3344,9 @@ void main() {
       await tester.pump();
       await tester.pump(kMenuOpenDuration);
 
-      final Offset anchorTopLeft = tester.getTopLeft(find.widgetWithText(Button, Tag.anchor.text));
+      final Offset anchorTopLeft = tester.getTopLeft(
+        find.widgetWithText(CupertinoButton, Tag.anchor.text),
+      );
       expect(collectOverlays().first.center, offsetMoreOrLessEquals(anchorTopLeft, epsilon: 0.01));
     });
 
@@ -3130,7 +3373,9 @@ void main() {
       await tester.pump();
       await tester.pump(kMenuOpenDuration);
 
-      final Offset anchorCenter = tester.getCenter(find.widgetWithText(Button, Tag.anchor.text));
+      final Offset anchorCenter = tester.getCenter(
+        find.widgetWithText(CupertinoButton, Tag.anchor.text),
+      );
       expect(
         collectOverlays().first.bottomLeft,
         offsetMoreOrLessEquals(anchorCenter, epsilon: 0.01),
@@ -3378,15 +3623,19 @@ void main() {
                   overlayPadding: EdgeInsets.zero,
                   alignment: AlignmentDirectional.topStart,
                   menuAlignment: AlignmentDirectional.bottomEnd,
+                  constraints: BoxConstraints.tight(const Size(64, 50)),
                   menuChildren: <Widget>[
                     Container(
                       color: const Color(0xFF0000FF),
-                      height: 100,
-                      width: 100,
+                      height: 64,
+                      width: 50,
                       child: Text(Tag.a.text),
                     ),
                   ],
-                  child: const AnchorButton(Tag.anchor),
+                  child: const AnchorButton(
+                    Tag.anchor,
+                    constraints: BoxConstraints.tightFor(width: 50, height: 50),
+                  ),
                 ),
               ),
             ),
@@ -3403,8 +3652,8 @@ void main() {
       await tester.pump();
       await tester.pump(kMenuOpenDuration);
 
-      final Rect anchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
-      final [Rect first] = collectOverlays();
+      final Rect anchor = tester.getRect(find.widgetWithText(CupertinoButton, Tag.anchor.text));
+      final [Rect unpaddedPanel] = collectOverlays();
 
       await tester.pumpWidget(
         buildApp(
@@ -3413,13 +3662,18 @@ void main() {
         ),
       );
 
-      final [Rect firstPadded] = collectOverlays();
-      final Rect paddedAnchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+      final Rect paddedAnchor = tester.getRect(
+        find.widgetWithText(CupertinoButton, Tag.anchor.text),
+      );
+      final [Rect paddedPanel] = collectOverlays();
 
       expect(paddedAnchor, equals(anchor.shift(const Offset(31 + 64, 7 + 50))));
 
       // Hits padding on top/left
-      expect(firstPadded, equals(first.shift(const Offset(31, 7))));
+      expect(
+        paddedPanel,
+        rectMoreOrLessEquals(const Offset(31, 7) & unpaddedPanel.size, epsilon: 0.1),
+      );
     });
 
     testWidgets('RTL app and anchor padding', (WidgetTester tester) async {
@@ -3433,8 +3687,8 @@ void main() {
       // DOES affect the anchor position.
 
       Widget buildApp({
-        required EdgeInsetsGeometry appPadding,
-        required EdgeInsetsGeometry anchorPadding,
+        required EdgeInsetsDirectional appPadding,
+        required EdgeInsetsDirectional anchorPadding,
       }) {
         return Directionality(
           textDirection: TextDirection.rtl,
@@ -3448,15 +3702,19 @@ void main() {
                   overlayPadding: EdgeInsets.zero,
                   alignment: AlignmentDirectional.topStart,
                   menuAlignment: AlignmentDirectional.bottomEnd,
+                  constraints: BoxConstraints.tight(const Size(50, 50)),
                   menuChildren: <Widget>[
                     Container(
                       color: const Color(0xFF0000FF),
-                      height: 100,
-                      width: 100,
+                      height: 50,
+                      width: 50,
                       child: Text(Tag.a.text),
                     ),
                   ],
-                  child: const AnchorButton(Tag.anchor),
+                  child: const AnchorButton(
+                    Tag.b,
+                    constraints: BoxConstraints.tightFor(width: 50, height: 50),
+                  ),
                 ),
               ),
             ),
@@ -3466,15 +3724,15 @@ void main() {
 
       // First, collect measurements without padding.
       await tester.pumpWidget(
-        buildApp(appPadding: EdgeInsets.zero, anchorPadding: EdgeInsets.zero),
+        buildApp(appPadding: EdgeInsetsDirectional.zero, anchorPadding: EdgeInsetsDirectional.zero),
       );
 
-      await tester.tap(find.text(Tag.anchor.text));
+      await tester.tap(find.text(Tag.b.text));
       await tester.pump();
       await tester.pump(kMenuOpenDuration);
 
-      final Rect anchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
-      final [Rect first] = collectOverlays();
+      final Rect anchor = tester.getRect(find.widgetWithText(CupertinoButton, Tag.b.text));
+      final [Rect panel] = collectOverlays();
 
       // Next, collect measurements with padding.
       await tester.pumpWidget(
@@ -3484,14 +3742,22 @@ void main() {
         ),
       );
 
-      final [Rect menuPadded] = collectOverlays();
-      final Rect anchorPadded = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+      final [Rect paddedPanel] = collectOverlays();
+      final Rect anchorPadded = tester.getRect(find.widgetWithText(CupertinoButton, Tag.b.text));
 
       expect(
         anchorPadded,
         rectMoreOrLessEquals(anchor.shift(const Offset(-31 - 64, 7 + 50)), epsilon: 0.01),
       );
-      expect(menuPadded, rectMoreOrLessEquals(first.shift(const Offset(43, 7)), epsilon: 0.01));
+
+      // Hits padding on top/right
+      expect(
+        paddedPanel,
+        rectMoreOrLessEquals(
+          panel.shift(const Offset(31, 7) + const Offset(50, -50)),
+          epsilon: 0.1,
+        ),
+      );
     });
 
     testWidgets('Menu is positioned around display features', (WidgetTester tester) async {
@@ -3628,7 +3894,7 @@ void main() {
       await tester.pump(kMenuOpenDuration);
 
       final [ui.Rect menu] = collectOverlays();
-      final Rect anchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+      final Rect anchor = tester.getRect(find.widgetWithText(CupertinoButton, Tag.anchor.text));
 
       expect(menu.topLeft, offsetMoreOrLessEquals(anchor.bottomLeft, epsilon: 0.01));
     });
@@ -3679,11 +3945,3190 @@ void main() {
         await tester.pump(kMenuOpenDuration);
 
         final [ui.Rect menu] = collectOverlays();
-        final Rect anchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+        final Rect anchor = tester.getRect(find.widgetWithText(CupertinoButton, Tag.anchor.text));
 
         expect(menu.bottomLeft, offsetMoreOrLessEquals(anchor.topLeft, epsilon: 0.01));
       },
     );
+  });
+
+  group('CupertinoMenuEntryMixin', () {
+    App buildApp(List<Widget> children) {
+      return App(
+        CupertinoMenuAnchor(
+          controller: controller,
+          menuChildren: children,
+          child: const AnchorButton(Tag.anchor),
+        ),
+      );
+    }
+
+    testWidgets('dividers respect allowLeadingSeparator and allowTrailingSeparator', (
+      WidgetTester tester,
+    ) async {
+      Widget entry({required bool leading, required bool trailing, Widget? child}) {
+        return _DebugCupertinoMenuEntryMixin(
+          allowLeadingSeparator: leading,
+          allowTrailingSeparator: trailing,
+          child: child ?? const SizedBox(),
+        );
+      }
+
+      await tester.pumpWidget(
+        buildApp(<Widget>[
+          entry(leading: true, trailing: true, child: Text(Tag.a.text)),
+          entry(leading: true, trailing: true, child: Text(Tag.b.text)),
+          entry(leading: true, trailing: true, child: Text(Tag.c.text)),
+        ]),
+      );
+
+      controller.open();
+      await tester.pumpAndSettle();
+
+      // Borders are drawn below menu items.
+      List<Widget> children = findMenuChildren(tester);
+      expect(children.length, 5);
+      expect(children[0], isA<_DebugCupertinoMenuEntryMixin>());
+      expect(children[2], isA<_DebugCupertinoMenuEntryMixin>());
+      expect(children[4], isA<_DebugCupertinoMenuEntryMixin>());
+
+      // First item should never have a leading separator and bottom item should
+      // never have a trailing separator.
+      await tester.pumpWidget(
+        buildApp(<Widget>[
+          entry(leading: false, trailing: true, child: Text(Tag.a.text)),
+          entry(leading: true, trailing: true, child: Text(Tag.b.text)),
+          entry(leading: true, trailing: false, child: Text(Tag.c.text)),
+        ]),
+      );
+
+      children = findMenuChildren(tester);
+      expect(children.length, 5);
+      expect(children[0], isA<_DebugCupertinoMenuEntryMixin>());
+      expect(children[2], isA<_DebugCupertinoMenuEntryMixin>());
+      expect(children[4], isA<_DebugCupertinoMenuEntryMixin>());
+
+      await tester.pumpWidget(
+        buildApp(<Widget>[
+          entry(leading: true, trailing: false, child: Text(Tag.a.text)),
+          entry(leading: true, trailing: true, child: Text(Tag.b.text)),
+          entry(leading: true, trailing: true, child: Text(Tag.c.text)),
+        ]),
+      );
+
+      children = findMenuChildren(tester);
+      // item 0: trailing == false so no separator is drawn after
+      expect(children.length, 4);
+      expect(children[0], isA<_DebugCupertinoMenuEntryMixin>());
+      expect(children[1], isA<_DebugCupertinoMenuEntryMixin>());
+      expect(children[3], isA<_DebugCupertinoMenuEntryMixin>());
+
+      await tester.pumpWidget(
+        buildApp(<Widget>[
+          entry(leading: true, trailing: true, child: Text(Tag.a.text)),
+          entry(leading: false, trailing: true, child: Text(Tag.b.text)),
+          entry(leading: true, trailing: true, child: Text(Tag.c.text)),
+        ]),
+      );
+
+      children = findMenuChildren(tester);
+      // item 1: leading == false so no separator should be drawn before it
+      expect(children.length, 4);
+      expect(children[0], isA<_DebugCupertinoMenuEntryMixin>());
+      expect(children[1], isA<_DebugCupertinoMenuEntryMixin>());
+      expect(children[3], isA<_DebugCupertinoMenuEntryMixin>());
+
+      await tester.pumpWidget(
+        buildApp(<Widget>[
+          entry(leading: true, trailing: true, child: Text(Tag.a.text)),
+          entry(leading: true, trailing: false, child: Text(Tag.b.text)),
+          entry(leading: true, trailing: true, child: Text(Tag.c.text)),
+        ]),
+      );
+
+      children = findMenuChildren(tester);
+      // item 1: trailing == false so no separator should be drawn after it
+      expect(children.length, 4);
+      expect(children[0], isA<_DebugCupertinoMenuEntryMixin>());
+      expect(children[2], isA<_DebugCupertinoMenuEntryMixin>());
+      expect(children[3], isA<_DebugCupertinoMenuEntryMixin>());
+    });
+
+    testWidgets('hasLeading aligns sibling CupertinoMenuItems', (WidgetTester tester) async {
+      Widget buildApp({bool hasLeading = false}) {
+        return App(
+          CupertinoMenuAnchor(
+            controller: controller,
+            menuChildren: <Widget>[
+              CupertinoMenuItem(key: Tag.a.key, child: Text(Tag.a.text)),
+              _DebugCupertinoMenuEntryMixin(hasLeading: hasLeading),
+            ],
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp());
+
+      controller.open();
+      await tester.pumpAndSettle();
+
+      expect(tester.widget<CupertinoMenuItem>(find.byKey(Tag.a.key)).hasLeading, isFalse);
+
+      final Offset childOffsetWithoutLeading = tester.getTopLeft(find.text(Tag.a.text));
+
+      await tester.pumpWidget(buildApp(hasLeading: true));
+
+      expect(tester.widget<CupertinoMenuItem>(find.byKey(Tag.a.key)).hasLeading, isFalse);
+
+      final Offset childOffsetWithLeading = tester.getTopLeft(find.text(Tag.a.text));
+
+      expect(
+        childOffsetWithLeading - childOffsetWithoutLeading,
+        offsetMoreOrLessEquals(const Offset(16, 0.0), epsilon: 0.01),
+      );
+    });
+  });
+
+  group('CupertinoMenuLargeDivider', () {
+    testWidgets('dimensions', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Align(alignment: AlignmentDirectional.topStart, child: CupertinoLargeMenuDivider()),
+        ),
+      );
+
+      expect(
+        tester.getRect(find.byType(CupertinoLargeMenuDivider)),
+        rectEquals(const Rect.fromLTRB(0.0, 0.0, 800.0, 8.0)),
+      );
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoMenuAnchor(
+            controller: controller,
+            menuChildren: <Widget>[
+              CupertinoMenuItem(key: Tag.a.key, child: Text(Tag.a.text)),
+              const CupertinoLargeMenuDivider(),
+            ],
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pump();
+      await tester.pump(kMenuOpenDuration);
+
+      final ui.Rect menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
+
+      expect(
+        tester.getRect(find.byType(CupertinoLargeMenuDivider)),
+        rectEquals(
+          ui.Rect.fromLTWH(menuItemRect.left, menuItemRect.bottom, menuItemRect.width, 8.0),
+        ),
+      );
+    });
+    testWidgets('color', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          theme: const CupertinoThemeData(brightness: Brightness.light),
+          home: CupertinoLargeMenuDivider(key: Tag.a.key),
+        ),
+      );
+
+      final Finder coloredBoxFinder = find.descendant(
+        of: find.byKey(Tag.a.key),
+        matching: find.byType(ColoredBox),
+      );
+
+      expect(
+        tester.widget<ColoredBox>(coloredBoxFinder).color,
+        isSameColorAs(const Color.fromRGBO(0, 0, 0, 0.08)),
+      );
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          theme: const CupertinoThemeData(brightness: Brightness.dark),
+          home: CupertinoLargeMenuDivider(key: Tag.a.key),
+        ),
+      );
+
+      expect(
+        tester.widget<ColoredBox>(coloredBoxFinder).color,
+        isSameColorAs(const Color.fromRGBO(0, 0, 0, 0.16)),
+      );
+    });
+    testWidgets('no adjacent borders are drawn', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          theme: const CupertinoThemeData(brightness: Brightness.light),
+          home: CupertinoMenuAnchor(
+            controller: controller,
+            menuChildren: const <Widget>[
+              _DebugCupertinoMenuEntryMixin(allowTrailingSeparator: true),
+              CupertinoLargeMenuDivider(),
+              _DebugCupertinoMenuEntryMixin(allowLeadingSeparator: true),
+            ],
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CupertinoLargeMenuDivider), findsOneWidget);
+      expect(findMenuChildren(tester), hasLength(3));
+    });
+  });
+
+  group('CupertinoMenuItem', () {
+    const ui.Color defaultLightTextColor = ui.Color.from(alpha: 0.96, red: 0, green: 0, blue: 0);
+    const ui.Color defaultDarkTextColor = ui.Color.from(alpha: 0.96, red: 1, green: 1, blue: 1);
+    const ui.Color defaultSubtitleTextColor = ui.Color.from(alpha: 0.55, red: 0, green: 0, blue: 0);
+    const ui.Color defaultSubtitleDarkTextColor = ui.Color.from(
+      alpha: 0.4,
+      red: 1,
+      green: 1,
+      blue: 1,
+    );
+
+    group('Appearance', () {
+      testWidgets('leading style', (WidgetTester tester) async {
+        RenderParagraph? findIcon() =>
+            findDescendentParagraph(tester, find.byIcon(CupertinoIcons.check_mark));
+        RenderParagraph? findText() => findDescendentParagraph(tester, find.text(Tag.a.text));
+
+        Widget buildApp({
+          TextScaler textScaler = TextScaler.noScaling,
+          ui.Brightness brightness = ui.Brightness.light,
+        }) {
+          return CupertinoApp(
+            theme: CupertinoThemeData(brightness: brightness),
+            home: Builder(
+              builder: (BuildContext context) {
+                return MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+                  child: CupertinoMenuAnchor(
+                    controller: controller,
+                    menuChildren: <Widget>[
+                      CupertinoMenuItem(
+                        leading: Stack(
+                          children: <Widget>[
+                            Text(Tag.a.text),
+                            const Icon(CupertinoIcons.check_mark),
+                          ],
+                        ),
+                        child: const Text('Menu Item'),
+                        onPressed: () {},
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          );
+        }
+
+        await tester.pumpWidget(buildApp());
+        controller.open();
+        await tester.pumpAndSettle();
+
+        final RenderParagraph? icon = findIcon();
+        final RenderParagraph? text = findText();
+        final TextStyle iconStyle = icon!.text.style!;
+        final TextStyle textStyle = text!.text.style!;
+
+        expect(icon.textSize, equals(const Size(15.0, 15.0)));
+        expect(icon.textDirection, equals(TextDirection.ltr));
+        expect(icon.maxLines, isNull);
+        expect(iconStyle.color, isSameColorAs(defaultLightTextColor));
+        expect(iconStyle.fontSize, equals(15.0));
+        expect(iconStyle.leadingDistribution, equals(TextLeadingDistribution.even));
+        expect(
+          iconStyle.fontVariations,
+          equals(<FontVariation>[
+            const FontVariation('FILL', 0.0),
+            const FontVariation.weight(600.0),
+            const FontVariation('GRAD', 0.0),
+            const FontVariation.opticalSize(48.0),
+          ]),
+        );
+
+        expect(text.textScaler, equals(TextScaler.noScaling));
+        expect(text.textDirection, equals(TextDirection.ltr));
+        expect(text.maxLines, equals(2));
+        expect(textStyle.fontSize, equals(15));
+        expect(textStyle.color, isSameColorAs(defaultLightTextColor));
+        expect(textStyle.fontWeight, equals(FontWeight.w600));
+
+        await tester.pumpWidget(
+          buildApp(textScaler: AccessibilityTextSize.xxxLarge, brightness: ui.Brightness.dark),
+        );
+
+        final RenderParagraph? icon6x = findIcon();
+        final RenderParagraph? text6x = findText();
+        final TextStyle iconStyle6x = icon6x!.text.style!;
+        final TextStyle textStyle6x = text.text.style!;
+
+        expect(iconStyle6x.fontSize, closeTo(20, 0.5));
+        expect(iconStyle6x.color, isSameColorAs(defaultDarkTextColor));
+        expect(text6x!.textScaler, equals(AccessibilityTextSize.xxxLarge));
+        expect(textStyle6x.fontSize, equals(15));
+        expect(textStyle6x.color, isSameColorAs(defaultDarkTextColor));
+
+        await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.ax1));
+
+        expect(find.byIcon(CupertinoIcons.check_mark), findsOneWidget);
+        expect(find.text(Tag.a.text), findsOneWidget);
+      });
+
+      testWidgets('trailing style', (WidgetTester tester) async {
+        RenderParagraph? findIcon() =>
+            findDescendentParagraph(tester, find.byIcon(CupertinoIcons.trash));
+        RenderParagraph? findText() => findDescendentParagraph(tester, find.text(Tag.a.text));
+
+        Widget buildApp({
+          TextScaler textScaler = TextScaler.noScaling,
+          ui.Brightness brightness = ui.Brightness.light,
+        }) {
+          return CupertinoApp(
+            theme: CupertinoThemeData(brightness: brightness),
+            home: Builder(
+              builder: (BuildContext context) {
+                return MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+                  child: CupertinoMenuAnchor(
+                    controller: controller,
+                    menuChildren: <Widget>[
+                      CupertinoMenuItem(
+                        trailing: Stack(
+                          children: <Widget>[Text(Tag.a.text), const Icon(CupertinoIcons.trash)],
+                        ),
+                        child: const Text('Menu Item'),
+                        onPressed: () {},
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          );
+        }
+
+        await tester.pumpWidget(buildApp());
+
+        controller.open();
+        await tester.pumpAndSettle();
+
+        final RenderParagraph? icon = findIcon();
+        final RenderParagraph? text = findText();
+        final TextStyle iconStyle = icon!.text.style!;
+        final TextStyle textStyle = text!.text.style!;
+
+        expect(icon.textDirection, equals(TextDirection.ltr));
+        expect(icon.maxLines, isNull);
+        expect(iconStyle.color, isSameColorAs(defaultLightTextColor));
+        expect(iconStyle.fontSize, closeTo(21, 0.5));
+        expect(iconStyle.leadingDistribution, equals(TextLeadingDistribution.even));
+        expect(
+          iconStyle.fontVariations,
+          equals(<FontVariation>[
+            const FontVariation('FILL', 0.0),
+            const FontVariation.weight(400.0),
+            const FontVariation('GRAD', 0.0),
+            const FontVariation.opticalSize(48.0),
+          ]),
+        );
+
+        expect(
+          Offset.zero & text.textSize,
+          rectMoreOrLessEquals(Offset.zero & const Size(20.6, 21), epsilon: 0.1),
+        );
+        expect(text.textScaler, equals(TextScaler.linear(AccessibilityTextSize.large.scale(1.24))));
+        expect(text.textDirection, equals(TextDirection.ltr));
+        expect(text.maxLines, equals(2));
+        expect(textStyle.fontSize, closeTo(17, 0.5));
+        expect(textStyle.color, isSameColorAs(defaultLightTextColor));
+        expect(textStyle.fontWeight, equals(null));
+
+        await tester.pumpWidget(
+          buildApp(textScaler: AccessibilityTextSize.xxxLarge, brightness: ui.Brightness.dark),
+        );
+
+        final RenderParagraph? icon6x = findIcon();
+        final RenderParagraph? text6x = findText();
+        final TextStyle iconStyle6x = icon6x!.text.style!;
+        final TextStyle textStyle6x = text.text.style!;
+
+        expect(iconStyle6x.fontSize, closeTo(28.5, 0.5));
+        expect(iconStyle6x.color, isSameColorAs(defaultDarkTextColor));
+        expect(
+          text6x!.textScaler,
+          equals(TextScaler.linear(AccessibilityTextSize.xxxLarge.scale(1.24))),
+        );
+        expect(textStyle6x.fontSize, equals(17));
+        expect(textStyle6x.color, isSameColorAs(defaultDarkTextColor));
+
+        await tester.pumpWidget(
+          buildApp(textScaler: AccessibilityTextSize.ax1, brightness: ui.Brightness.dark),
+        );
+
+        expect(find.byIcon(CupertinoIcons.trash), findsNothing);
+        expect(find.text(Tag.a.text), findsNothing);
+      });
+
+      testWidgets('child style', (WidgetTester tester) async {
+        RenderParagraph? findText() => findDescendentParagraph(tester, find.text(Tag.a.text));
+
+        Widget buildApp({
+          TextScaler textScaler = TextScaler.noScaling,
+          ui.Brightness brightness = ui.Brightness.light,
+        }) {
+          return CupertinoApp(
+            theme: CupertinoThemeData(brightness: brightness),
+            home: Builder(
+              builder: (BuildContext context) {
+                return MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+                  child: CupertinoMenuAnchor(
+                    controller: controller,
+                    menuChildren: <Widget>[
+                      CupertinoMenuItem(child: Text(Tag.a.text), onPressed: () {}),
+                    ],
+                  ),
+                );
+              },
+            ),
+          );
+        }
+
+        await tester.pumpWidget(buildApp());
+
+        controller.open();
+        await tester.pumpAndSettle();
+
+        final RenderParagraph? text = findText();
+        final TextStyle textStyle = text!.text.style!;
+
+        expect(text.textScaler, equals(TextScaler.noScaling));
+        expect(text.textDirection, equals(TextDirection.ltr));
+        expect(text.maxLines, equals(2));
+        expect(textStyle.fontSize, equals(17));
+        expect(textStyle.color, isSameColorAs(defaultLightTextColor));
+        expect(textStyle.fontWeight, equals(null));
+
+        for (final TextScaler size in AccessibilityTextSize.values) {
+          await tester.pumpWidget(buildApp(textScaler: size));
+
+          final TextStyle expectedTextStyle = DynamicTypeTextStyleSet.body.resolve(
+            size,
+            round: true,
+          );
+          final RenderParagraph textSized = findText()!;
+          final TextStyle textStyle = textSized.text.style!;
+          expect(textSized.textScaler, equals(size));
+          expect(textStyle.fontSize, equals(17));
+          expect(textStyle.letterSpacing, equals(expectedTextStyle.letterSpacing));
+          expect(textStyle.height, equals(expectedTextStyle.height));
+          expect(textStyle.fontFamily, equals(expectedTextStyle.fontFamily));
+        }
+
+        await tester.pumpWidget(buildApp(brightness: ui.Brightness.dark));
+
+        expect(findText()!.text.style!.color, isSameColorAs(defaultDarkTextColor));
+      });
+
+      testWidgets('subtitle style', (WidgetTester tester) async {
+        RenderParagraph? findText() => findDescendentParagraph(tester, find.text(Tag.a.text));
+
+        Widget buildApp({
+          TextScaler textScaler = TextScaler.noScaling,
+          ui.Brightness brightness = ui.Brightness.light,
+        }) {
+          return CupertinoApp(
+            theme: CupertinoThemeData(brightness: brightness),
+            home: Builder(
+              builder: (BuildContext context) {
+                return MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+                  child: CupertinoMenuAnchor(
+                    controller: controller,
+                    menuChildren: <Widget>[
+                      CupertinoMenuItem(
+                        subtitle: Text(Tag.a.text),
+                        onPressed: () {},
+                        child: const Text('Menu Item'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          );
+        }
+
+        await tester.pumpWidget(buildApp());
+
+        controller.open();
+        await tester.pumpAndSettle();
+
+        final RenderParagraph? text = findText();
+        final TextStyle textStyle = text!.text.style!;
+
+        expect(text.textScaler, equals(TextScaler.noScaling));
+        expect(text.textDirection, equals(TextDirection.ltr));
+        expect(text.maxLines, equals(2));
+        expect(textStyle.fontSize, equals(15));
+        expect(textStyle.fontWeight, isNull);
+        expect(textStyle.color, isNull);
+        expect(
+          textStyle.foreground,
+          isA<ui.Paint>()
+              .having(
+                (ui.Paint paint) => paint.color,
+                'color',
+                isSameColorAs(defaultSubtitleTextColor),
+              )
+              .having(
+                (ui.Paint paint) => paint.blendMode,
+                'blendMode',
+                equals(BlendMode.hardLight),
+              ),
+        );
+
+        for (final TextScaler size in AccessibilityTextSize.values) {
+          await tester.pumpWidget(buildApp(textScaler: size));
+
+          final TextStyle expectedTextStyle = DynamicTypeTextStyleSet.subhead.resolve(
+            size,
+            round: true,
+          );
+          final RenderParagraph textSized = findText()!;
+          final TextStyle textStyle = textSized.text.style!;
+          expect(textSized.textScaler, equals(size));
+          expect(textStyle.fontSize, equals(15));
+          expect(textStyle.letterSpacing, equals(expectedTextStyle.letterSpacing));
+          expect(textStyle.height, equals(expectedTextStyle.height));
+          expect(textStyle.fontFamily, equals(expectedTextStyle.fontFamily));
+        }
+
+        await tester.pumpWidget(buildApp(brightness: ui.Brightness.dark));
+
+        final RenderParagraph? darkText = findText();
+        final TextStyle darkTextStyle = darkText!.text.style!;
+
+        expect(
+          darkTextStyle.foreground,
+          isA<ui.Paint>()
+              .having(
+                (ui.Paint paint) => paint.color,
+                'color',
+                isSameColorAs(defaultSubtitleDarkTextColor),
+              )
+              .having((ui.Paint paint) => paint.blendMode, 'blendMode', equals(BlendMode.plus)),
+        );
+      });
+
+      testWidgets('isDestructiveAction style', (WidgetTester tester) async {
+        RenderParagraph? findLeading() {
+          return findDescendentParagraph(tester, find.byIcon(CupertinoIcons.left_chevron));
+        }
+
+        RenderParagraph? findTrailing() {
+          return findDescendentParagraph(tester, find.byIcon(CupertinoIcons.right_chevron));
+        }
+
+        RenderParagraph? findChild() {
+          return findDescendentParagraph(tester, find.text(Tag.a.text));
+        }
+
+        RenderParagraph? findSubtitle() {
+          return findDescendentParagraph(tester, find.text(Tag.b.text));
+        }
+
+        Widget buildApp([ui.Brightness brightness = ui.Brightness.light]) {
+          return CupertinoApp(
+            home: CupertinoTheme(
+              data: CupertinoThemeData(brightness: brightness),
+              child: CupertinoMenuAnchor(
+                controller: controller,
+                menuChildren: <Widget>[
+                  CupertinoMenuItem(
+                    isDestructiveAction: true,
+                    subtitle: Text(Tag.b.text),
+                    leading: const Icon(CupertinoIcons.left_chevron),
+                    trailing: const Icon(CupertinoIcons.right_chevron),
+                    child: Text(Tag.a.text),
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        await tester.pumpWidget(buildApp());
+
+        controller.open();
+        await tester.pumpAndSettle();
+
+        expect(findTrailing()!.text.style!.color, isSameColorAs(CupertinoColors.systemRed));
+        expect(findLeading()!.text.style!.color, isSameColorAs(CupertinoColors.systemRed));
+        expect(findChild()!.text.style!.color, isSameColorAs(CupertinoColors.systemRed));
+        expect(
+          findSubtitle()!.text.style!.foreground!.color,
+          isSameColorAs(defaultSubtitleTextColor),
+        );
+
+        await tester.pumpWidget(buildApp(ui.Brightness.dark));
+
+        expect(
+          findTrailing()!.text.style!.color,
+          isSameColorAs(CupertinoColors.systemRed.darkColor),
+        );
+        expect(
+          findLeading()!.text.style!.color,
+          isSameColorAs(CupertinoColors.systemRed.darkColor),
+        );
+        expect(findChild()!.text.style!.color, isSameColorAs(CupertinoColors.systemRed.darkColor));
+        expect(
+          findSubtitle()!.text.style!.foreground!.color,
+          isSameColorAs(defaultSubtitleDarkTextColor),
+        );
+      });
+
+      testWidgets('allows adjacent borders', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: CupertinoTheme(
+              data: const CupertinoThemeData(brightness: Brightness.dark),
+              child: CupertinoMenuAnchor(
+                controller: controller,
+                menuChildren: <Widget>[
+                  const _DebugCupertinoMenuEntryMixin(allowTrailingSeparator: true),
+                  CupertinoMenuItem(child: Text(Tag.a.text)),
+                  const _DebugCupertinoMenuEntryMixin(allowLeadingSeparator: true),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        controller.open();
+        await tester.pumpAndSettle();
+
+        expect(findMenuChildren(tester), hasLength(5));
+      });
+
+      testWidgets('disabled items should not interact', (WidgetTester tester) async {
+        // Test various interactions to ensure that disabled items do not
+        // respond.
+        int interactions = 0;
+        final FocusNode focusNode = FocusNode();
+        focusNode.addListener(() {
+          interactions++;
+        });
+
+        addTearDown(focusNode.dispose);
+
+        BoxDecoration getItemDecoration() {
+          return tester
+                  .widget<DecoratedBox>(
+                    find.descendant(
+                      of: find.byType(CupertinoMenuItem),
+                      matching: find.byType(DecoratedBox),
+                    ),
+                  )
+                  .decoration
+              as BoxDecoration;
+        }
+
+        RenderParagraph? findChild() {
+          return findDescendentParagraph(tester, find.text(Tag.a.text));
+        }
+
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: CupertinoMenuAnchor(
+              controller: controller,
+              menuChildren: <Widget>[
+                CupertinoMenuItem(
+                  panActivationDelay: const Duration(milliseconds: 10),
+                  focusNode: focusNode,
+                  onFocusChange: (bool value) {
+                    interactions++;
+                  },
+                  onHover: (bool value) {
+                    interactions++;
+                  },
+                  child: Text(Tag.a.text),
+                ),
+              ],
+            ),
+          ),
+        );
+
+        controller.open();
+        await tester.pumpAndSettle();
+
+        final TestGesture gesture = await tester.createGesture(pointer: 1);
+
+        addTearDown(gesture.removePointer);
+
+        // Test focus
+        focusNode.requestFocus();
+        await tester.pump();
+
+        void checkAppearance() {
+          expect(getItemDecoration(), equals(const BoxDecoration()));
+          expect(findChild()!.text.style!.color, isSameColorAs(CupertinoColors.systemGrey));
+        }
+
+        // Test hover
+        await gesture.moveTo(tester.getCenter(find.text(Tag.a.text)));
+        await tester.pump();
+
+        checkAppearance();
+
+        // Test press
+        await gesture.down(tester.getCenter(find.text(Tag.a.text)));
+        await tester.pump();
+
+        checkAppearance();
+
+        // Test pan
+        await tester.pumpAndSettle(const Duration(milliseconds: 200));
+        await gesture.up();
+        await tester.pump();
+
+        checkAppearance();
+        expect(controller.isOpen, isTrue);
+        expect(interactions, 0);
+      });
+
+      testWidgets('hover color', (WidgetTester tester) async {
+        const CupertinoDynamicColor hoverColor = CupertinoDynamicColor.withBrightnessAndContrast(
+          color: Color.fromRGBO(50, 50, 50, 0.05),
+          darkColor: Color.fromRGBO(255, 255, 255, 0.05),
+          highContrastColor: Color.fromRGBO(50, 50, 50, 0.1),
+          darkHighContrastColor: Color.fromRGBO(255, 255, 255, 0.1),
+        );
+        const CupertinoDynamicColor customHoverColor = CupertinoDynamicColor.withBrightness(
+          color: Color.fromRGBO(75, 0, 0, 1),
+          darkColor: Color.fromRGBO(150, 0, 0, 1),
+        );
+
+        const WidgetStateProperty<BoxDecoration> decoration =
+            WidgetStateProperty<BoxDecoration>.fromMap(<WidgetStatesConstraint, BoxDecoration>{
+              WidgetState.hovered: BoxDecoration(color: customHoverColor),
+              WidgetState.any: BoxDecoration(),
+            });
+
+        BoxDecoration getItemDecoration(Tag tag) {
+          return tester
+                  .widget<DecoratedBox>(
+                    find.descendant(
+                      of: find.widgetWithText(CupertinoMenuItem, tag.text),
+                      matching: find.byType(DecoratedBox),
+                    ),
+                  )
+                  .decoration
+              as BoxDecoration;
+        }
+
+        Widget buildApp(ui.Brightness brightness) {
+          return CupertinoApp(
+            theme: CupertinoThemeData(brightness: brightness),
+            home: CupertinoMenuAnchor(
+              controller: controller,
+              menuChildren: <Widget>[
+                CupertinoMenuItem(
+                  requestFocusOnHover: false,
+                  child: Text(Tag.a.text),
+                  onPressed: () {},
+                ),
+                CupertinoMenuItem(
+                  requestFocusOnHover: false,
+                  onPressed: () {},
+                  decoration: decoration,
+                  child: Text(Tag.b.text),
+                ),
+              ],
+            ),
+          );
+        }
+
+        await tester.pumpWidget(buildApp(ui.Brightness.light));
+        controller.open();
+        await tester.pumpAndSettle();
+
+        final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+        addTearDown(gesture.removePointer);
+
+        expect(getItemDecoration(Tag.a), equals(const BoxDecoration()));
+        expect(getItemDecoration(Tag.b), equals(const BoxDecoration()));
+
+        await gesture.moveTo(tester.getCenter(find.text(Tag.a.text)));
+        await tester.pump();
+
+        expect(getItemDecoration(Tag.a).color, isSameColorAs(hoverColor.color));
+
+        expect(getItemDecoration(Tag.b), equals(const BoxDecoration()));
+
+        await gesture.moveTo(tester.getCenter(find.text(Tag.b.text)));
+        await tester.pump();
+
+        expect(getItemDecoration(Tag.a), equals(const BoxDecoration()));
+
+        expect(getItemDecoration(Tag.b).color, isSameColorAs(customHoverColor.color));
+
+        await tester.pumpWidget(buildApp(ui.Brightness.dark));
+
+        expect(getItemDecoration(Tag.a), equals(const BoxDecoration()));
+
+        expect(getItemDecoration(Tag.b).color, isSameColorAs(customHoverColor.darkColor));
+
+        await gesture.moveTo(tester.getCenter(find.text(Tag.a.text)));
+        await tester.pump();
+
+        expect(getItemDecoration(Tag.a).color, isSameColorAs(hoverColor.darkColor));
+
+        expect(getItemDecoration(Tag.b), equals(const BoxDecoration()));
+      });
+
+      testWidgets('pressed color', (WidgetTester tester) async {
+        const CupertinoDynamicColor pressedColor = CupertinoDynamicColor.withBrightnessAndContrast(
+          color: Color.fromRGBO(50, 50, 50, 0.1),
+          darkColor: Color.fromRGBO(255, 255, 255, 0.1),
+          highContrastColor: Color.fromRGBO(50, 50, 50, 0.2),
+          darkHighContrastColor: Color.fromRGBO(255, 255, 255, 0.2),
+        );
+
+        const CupertinoDynamicColor customPressedColor = CupertinoDynamicColor.withBrightness(
+          color: Color.fromRGBO(75, 0, 0, 1),
+          darkColor: Color.fromRGBO(150, 0, 0, 1),
+        );
+
+        const WidgetStateProperty<BoxDecoration> decoration =
+            WidgetStateProperty<BoxDecoration>.fromMap(<WidgetStatesConstraint, BoxDecoration>{
+              WidgetState.pressed: BoxDecoration(color: customPressedColor),
+              WidgetState.any: BoxDecoration(),
+            });
+
+        BoxDecoration getItemDecoration(Tag tag) {
+          return tester
+                  .widget<DecoratedBox>(
+                    find.descendant(
+                      of: find.widgetWithText(CupertinoMenuItem, tag.text),
+                      matching: find.byType(DecoratedBox),
+                    ),
+                  )
+                  .decoration
+              as BoxDecoration;
+        }
+
+        Widget buildApp(ui.Brightness brightness) {
+          return CupertinoApp(
+            theme: CupertinoThemeData(brightness: brightness),
+            home: CupertinoMenuAnchor(
+              controller: controller,
+              menuChildren: <Widget>[
+                CupertinoMenuItem(
+                  requestFocusOnHover: false,
+                  requestCloseOnActivate: false,
+                  onPressed: () {},
+                  child: Text(Tag.a.text),
+                ),
+                CupertinoMenuItem(
+                  requestFocusOnHover: false,
+                  requestCloseOnActivate: false,
+                  onPressed: () {},
+                  decoration: decoration,
+                  child: Text(Tag.b.text),
+                ),
+              ],
+            ),
+          );
+        }
+
+        await tester.pumpWidget(buildApp(ui.Brightness.light));
+        controller.open();
+        await tester.pumpAndSettle();
+
+        final TestGesture gesture = await tester.createGesture();
+        addTearDown(gesture.removePointer);
+
+        expect(getItemDecoration(Tag.a), equals(const BoxDecoration()));
+        expect(getItemDecoration(Tag.b), equals(const BoxDecoration()));
+
+        await gesture.down(tester.getCenter(find.text(Tag.a.text)));
+        await tester.pumpAndSettle();
+
+        expect(getItemDecoration(Tag.a).color, isSameColorAs(pressedColor.color));
+        expect(getItemDecoration(Tag.b), equals(const BoxDecoration()));
+
+        // Release the press
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(getItemDecoration(Tag.a), equals(const BoxDecoration()));
+        expect(getItemDecoration(Tag.b), equals(const BoxDecoration()));
+
+        // Press the second item with a custom pressed color
+        await gesture.down(tester.getCenter(find.text(Tag.b.text)));
+        await tester.pumpAndSettle();
+
+        expect(getItemDecoration(Tag.a), equals(const BoxDecoration()));
+        expect(getItemDecoration(Tag.b).color, isSameColorAs(customPressedColor.color));
+
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        controller.close();
+        await tester.pumpAndSettle();
+
+        await tester.pumpWidget(buildApp(ui.Brightness.dark));
+
+        controller.open();
+        await tester.pumpAndSettle();
+
+        expect(controller.isOpen, isTrue);
+
+        await gesture.down(tester.getCenter(find.text(Tag.a.text)));
+        await tester.pumpAndSettle();
+
+        expect(getItemDecoration(Tag.a).color, isSameColorAs(pressedColor.darkColor));
+      });
+
+      testWidgets('focused color', (WidgetTester tester) async {
+        const CupertinoDynamicColor focusedColor = CupertinoDynamicColor.withBrightnessAndContrast(
+          color: Color.fromRGBO(50, 50, 50, 0.075),
+          darkColor: Color.fromRGBO(255, 255, 255, 0.075),
+          highContrastColor: Color.fromRGBO(50, 50, 50, 0.15),
+          darkHighContrastColor: Color.fromRGBO(255, 255, 255, 0.15),
+        );
+
+        const CupertinoDynamicColor customFocusedColor = CupertinoDynamicColor.withBrightness(
+          color: Color.fromRGBO(0, 75, 0, 1),
+          darkColor: Color.fromRGBO(0, 150, 0, 1),
+        );
+
+        const WidgetStateProperty<BoxDecoration> decoration =
+            WidgetStateProperty<BoxDecoration>.fromMap(<WidgetStatesConstraint, BoxDecoration>{
+              WidgetState.focused: BoxDecoration(color: customFocusedColor),
+              WidgetState.any: BoxDecoration(),
+            });
+
+        BoxDecoration getItemDecoration(Tag tag) {
+          return tester
+                  .widget<DecoratedBox>(
+                    find.descendant(
+                      of: find.widgetWithText(CupertinoMenuItem, tag.text),
+                      matching: find.byType(DecoratedBox),
+                    ),
+                  )
+                  .decoration
+              as BoxDecoration;
+        }
+
+        final FocusNode focusNodeA = FocusNode();
+        final FocusNode focusNodeB = FocusNode();
+        addTearDown(() {
+          focusNodeA.dispose();
+          focusNodeB.dispose();
+        });
+
+        Widget buildApp(ui.Brightness brightness) {
+          return CupertinoApp(
+            theme: CupertinoThemeData(brightness: brightness),
+            home: CupertinoMenuAnchor(
+              controller: controller,
+              menuChildren: <Widget>[
+                CupertinoMenuItem(focusNode: focusNodeA, child: Text(Tag.a.text), onPressed: () {}),
+                CupertinoMenuItem(
+                  focusNode: focusNodeB,
+                  onPressed: () {},
+                  decoration: decoration,
+                  child: Text(Tag.b.text),
+                ),
+              ],
+            ),
+          );
+        }
+
+        await tester.pumpWidget(buildApp(ui.Brightness.light));
+        controller.open();
+        await tester.pumpAndSettle();
+
+        // Verify initial state
+        expect(getItemDecoration(Tag.a), equals(const BoxDecoration()));
+        expect(getItemDecoration(Tag.b), equals(const BoxDecoration()));
+
+        // Focus the first item
+        focusNodeA.requestFocus();
+        await tester.pump();
+        await tester.pump();
+
+        expect(getItemDecoration(Tag.a).color, isSameColorAs(focusedColor.color));
+        expect(getItemDecoration(Tag.b), equals(const BoxDecoration()));
+
+        // Focus the second item with a custom focused color
+        focusNodeB.requestFocus();
+        await tester.pump();
+        await tester.pump();
+
+        expect(getItemDecoration(Tag.a), equals(const BoxDecoration()));
+        expect(getItemDecoration(Tag.b).color, isSameColorAs(customFocusedColor.color));
+
+        await tester.pumpWidget(buildApp(ui.Brightness.dark));
+
+        // Verify dark mode focused colors
+        focusNodeA.requestFocus();
+        await tester.pump();
+        await tester.pump();
+
+        expect(getItemDecoration(Tag.a).color, isSameColorAs(focusedColor.darkColor));
+        expect(getItemDecoration(Tag.b), equals(const BoxDecoration()));
+
+        focusNodeB.requestFocus();
+        await tester.pump();
+        await tester.pump();
+
+        expect(getItemDecoration(Tag.b).color, isSameColorAs(customFocusedColor.darkColor));
+      });
+
+      testWidgets('mouse cursor can be set and is inherited', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Align(
+              alignment: Alignment.topLeft,
+              child: MouseRegion(
+                cursor: SystemMouseCursors.forbidden,
+                child: CupertinoMenuItem(
+                  mouseCursor: const WidgetStatePropertyAll<MouseCursor>(SystemMouseCursors.text),
+                  child: Text(Tag.a.text),
+                  onPressed: () {},
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final TestGesture gesture = await tester.createGesture(
+          kind: ui.PointerDeviceKind.mouse,
+          pointer: 1,
+        );
+
+        await gesture.addPointer(location: tester.getCenter(find.text(Tag.a.text)));
+        addTearDown(gesture.removePointer);
+
+        await tester.pump();
+
+        expect(
+          RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+          SystemMouseCursors.text,
+        );
+
+        // Test default cursor when disabled
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Align(
+              alignment: Alignment.topLeft,
+              child: CupertinoMenuItem(
+                child: MouseRegion(cursor: SystemMouseCursors.basic, child: Container()),
+              ),
+            ),
+          ),
+        );
+
+        // The cursor should defer to it's child.
+        expect(
+          RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+          SystemMouseCursors.basic,
+        );
+      });
+    });
+
+    group('Layout', () {
+      Alignment offsetAlongSize(ui.Offset offset, ui.Size size) {
+        final double x = (offset.dx / size.width) * 2 - 1;
+        final double y = (offset.dy / size.height) * 2 - 1;
+        return Alignment(x, y);
+      }
+
+      double lineHeight(TextStyle style) {
+        return style.height! * style.fontSize!;
+      }
+
+      group('Child ', () {
+        testWidgets('LTR child layout', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: CupertinoMenuAnchor(
+                controller: controller,
+                menuChildren: <Widget>[
+                  CupertinoMenuItem(onPressed: () {}, child: Text(Tag.child.text)),
+                ],
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final double childLineHeight = lineHeight(DynamicTypeTextStyleSet.body.large);
+          final Rect childRect = tester.getRect(find.text(Tag.child.text));
+          final Rect menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
+
+          expect(childRect.height, closeTo(childLineHeight, 0.1));
+          expect(childRect.top, closeTo(menuItemRect.top + 10.83, 0.1));
+          expect(childRect.left, closeTo(menuItemRect.left + 16, 0.1));
+        });
+
+        testWidgets('RTL child layout', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: Directionality(
+                textDirection: TextDirection.rtl,
+                child: CupertinoMenuAnchor(
+                  controller: controller,
+                  menuChildren: <Widget>[
+                    CupertinoMenuItem(onPressed: () {}, child: Text(Tag.child.text)),
+                  ],
+                ),
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final double childLineHeight = lineHeight(DynamicTypeTextStyleSet.body.large);
+          final Rect childRect = tester.getRect(find.text(Tag.child.text));
+          final Rect menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
+
+          expect(childRect.height, closeTo(childLineHeight, 0.1));
+          expect(childRect.top, closeTo(menuItemRect.top + 10.83, 0.1));
+          expect(childRect.right, closeTo(menuItemRect.right - 16, 0.1));
+        });
+
+        testWidgets('child text overflow', (WidgetTester tester) async {
+          final String longText = 'Very long subtitle ' * 100;
+
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: CupertinoMenuAnchor(
+                controller: controller,
+                menuChildren: <Widget>[CupertinoMenuItem(onPressed: () {}, child: Text(longText))],
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final Size childText = tester.getSize(find.text(longText));
+          final TextStyle childStyle = DynamicTypeTextStyleSet.body.large;
+          expect(childText.height, closeTo(lineHeight(childStyle) * 2, 1)); // 2 lines of text
+        });
+
+        testWidgets('child text overflow in accessibility mode', (WidgetTester tester) async {
+          final String longText = 'Very long text ' * 1000;
+
+          await tester.pumpWidget(
+            App(
+              MediaQuery(
+                data: const MediaQueryData(textScaler: AccessibilityTextSize.ax1),
+                child: CupertinoMenuAnchor(
+                  controller: controller,
+                  menuChildren: <Widget>[
+                    CupertinoMenuItem(onPressed: () {}, child: Text(longText)),
+                  ],
+                ),
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final RenderParagraph paragraph = findDescendentParagraph(tester, find.text(longText))!;
+          final double childLineHeight = lineHeight(DynamicTypeTextStyleSet.body.ax1);
+
+          expect(paragraph.maxLines, equals(CupertinoMenuItem.defaultAccessibilityModeMaxLines));
+          expect(tester.getSize(find.text(longText)).height, closeTo(childLineHeight * 100, 1));
+        });
+
+        testWidgets('LTR child with leading and trailing', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: CupertinoMenuAnchor(
+                controller: controller,
+                menuChildren: <Widget>[
+                  CupertinoMenuItem(
+                    leadingWidth: 33,
+                    trailingWidth: 47,
+                    leading: Icon(CupertinoIcons.star, key: Tag.leading.key),
+                    trailing: Icon(CupertinoIcons.heart, key: Tag.trailing.key),
+                    onPressed: () {},
+                    child: Text(Tag.child.text),
+                  ),
+                ],
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final Rect leading = tester.getRect(find.byKey(Tag.leading.key));
+          final Rect trailing = tester.getRect(find.byKey(Tag.trailing.key));
+          final Rect child = tester.getRect(find.text(Tag.child.text));
+          final Rect menuItem = tester.getRect(find.byType(CupertinoMenuItem));
+
+          expect(child.left, closeTo(menuItem.left + 33, 0.1));
+          expect(child.right, lessThanOrEqualTo(menuItem.right - 47));
+          expect(child.left, greaterThan(leading.right));
+          expect(child.right, lessThan(trailing.left));
+          expect(leading.center.dy, closeTo(child.center.dy, 0.1));
+          expect(trailing.center.dy, closeTo(child.center.dy, 0.1));
+        });
+
+        testWidgets('RTL child with leading and trailing', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: Directionality(
+                textDirection: TextDirection.rtl,
+                child: CupertinoMenuAnchor(
+                  controller: controller,
+                  menuChildren: <Widget>[
+                    CupertinoMenuItem(
+                      leadingWidth: 33,
+                      trailingWidth: 47,
+                      leading: Icon(CupertinoIcons.star, key: Tag.leading.key),
+                      trailing: Icon(CupertinoIcons.heart, key: Tag.trailing.key),
+                      onPressed: () {},
+                      child: Text(Tag.child.text),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final Rect leading = tester.getRect(find.byKey(Tag.leading.key));
+          final Rect trailing = tester.getRect(find.byKey(Tag.trailing.key));
+          final Rect child = tester.getRect(find.text(Tag.child.text));
+          final Rect menuItem = tester.getRect(find.byType(CupertinoMenuItem));
+
+          expect(child.right, closeTo(menuItem.right - 33, 0.1));
+          expect(child.right, lessThan(leading.right));
+          expect(child.left, greaterThan(trailing.left));
+          expect(leading.center.dy, closeTo(child.center.dy, 0.1));
+          expect(trailing.center.dy, closeTo(child.center.dy, 0.1));
+        });
+
+        testWidgets('child text overflow with maxLines', (WidgetTester tester) async {
+          final String longText = 'Very long text ' * 1000;
+
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: MediaQuery(
+                data: const MediaQueryData(textScaler: AccessibilityTextSize.xxxLarge),
+                child: CupertinoMenuAnchor(
+                  controller: controller,
+                  menuChildren: <Widget>[
+                    CupertinoMenuItem(
+                      onPressed: () {},
+                      child: Text(longText, key: Tag.a.key),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final RenderParagraph paragraph = findDescendentParagraph(tester, find.byKey(Tag.a.key))!;
+          expect(paragraph.maxLines, equals(CupertinoMenuItem.defaultMaxLines));
+          expect(paragraph.size.height, closeTo(58, 1)); // 2 lines of text
+          expect(tester.getSize(find.byType(CupertinoMenuItem)).height, closeTo(87, 1));
+        });
+
+        testWidgets('child text overflow with accessibility mode', (WidgetTester tester) async {
+          final String longText = 'Very long text ' * 1000;
+
+          await tester.pumpWidget(
+            App(
+              MediaQuery(
+                data: const MediaQueryData(textScaler: AccessibilityTextSize.ax1),
+                child: CupertinoMenuAnchor(
+                  controller: controller,
+                  menuChildren: <Widget>[
+                    CupertinoMenuItem(
+                      onPressed: () {},
+                      child: Text(longText, key: Tag.a.key),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final RenderParagraph paragraph = findDescendentParagraph(tester, find.byKey(Tag.a.key))!;
+          expect(paragraph.maxLines, equals(CupertinoMenuItem.defaultAccessibilityModeMaxLines));
+          expect(paragraph.size.height, closeTo(3400, 1)); // 100 lines of text
+          expect(tester.getSize(find.byType(CupertinoMenuItem)).height, closeTo(3433, 1));
+        });
+
+        testWidgets('child adjusts to dynamic type', (WidgetTester tester) async {
+          Widget buildApp({TextScaler textScaler = AccessibilityTextSize.large}) {
+            return CupertinoApp(
+              home: Builder(
+                builder: (BuildContext context) {
+                  return MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+                    child: CupertinoMenuAnchor(
+                      controller: controller,
+                      menuChildren: <Widget>[
+                        CupertinoMenuItem(
+                          onPressed: () {},
+                          leading: Icon(CupertinoIcons.left_chevron, key: Tag.leading.key),
+                          trailing: Icon(CupertinoIcons.right_chevron, key: Tag.trailing.key),
+                          subtitle: Text(Tag.subtitle.text),
+                          child: Text(Tag.child.text),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.undersized));
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final double undersizedLineHeight = lineHeight(DynamicTypeTextStyleSet.body.xSmall);
+          Size childSize = tester.getSize(find.text(Tag.child.text));
+
+          expect(childSize.height, closeTo(undersizedLineHeight, 0.1));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.xSmall));
+
+          final double xSmallLineHeight = lineHeight(DynamicTypeTextStyleSet.body.xSmall);
+          childSize = tester.getSize(find.text(Tag.child.text));
+
+          expect(childSize.height, closeTo(xSmallLineHeight, 0.1));
+
+          await tester.pumpWidget(buildApp());
+
+          final double largeLineHeight = lineHeight(DynamicTypeTextStyleSet.body.large);
+          childSize = tester.getSize(find.text(Tag.child.text));
+
+          expect(childSize.height, closeTo(largeLineHeight, 0.1));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.ax5));
+
+          final double ax5LineHeight = lineHeight(DynamicTypeTextStyleSet.body.ax5);
+          childSize = tester.getSize(find.text(Tag.child.text));
+
+          expect(childSize.height, closeTo(ax5LineHeight * 2, 0.1));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.oversized));
+
+          final double oversizedLineHeight = lineHeight(DynamicTypeTextStyleSet.body.ax5);
+          childSize = tester.getSize(find.text(Tag.child.text));
+
+          expect(childSize.height, closeTo(oversizedLineHeight * 2, 0.1));
+        });
+      });
+
+      group('Leading ', () {
+        testWidgets('LTR leading position', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: Directionality(
+                textDirection: TextDirection.ltr,
+                child: CupertinoMenuAnchor(
+                  controller: controller,
+                  menuChildren: <Widget>[
+                    CupertinoMenuItem(
+                      onPressed: () {},
+                      leading: Icon(CupertinoIcons.left_chevron, key: Tag.leading.key),
+                      trailing: Icon(CupertinoIcons.right_chevron, key: Tag.trailing.key),
+                      subtitle: const Text('Subtitle'),
+                      child: Text(Tag.child.text),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final ui.Rect leadingRect = tester.getRect(find.byKey(Tag.leading.key));
+          final ui.Rect menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
+          final ui.Rect childRect = tester.getRect(find.text(Tag.child.text));
+          final double leadingWidth = childRect.left - menuItemRect.left;
+          final Size leadingSize = ui.Size(leadingWidth, menuItemRect.height);
+          final Rect leadingWidgetRect = tester
+              .getRect(find.byKey(Tag.leading.key))
+              .translate(-menuItemRect.left, -menuItemRect.top);
+          final Alignment leadingAlignment = offsetAlongSize(leadingWidgetRect.center, leadingSize);
+
+          expect(leadingAlignment.x, closeTo(0.1680, 0.01));
+          expect(leadingAlignment.y, closeTo(0, 0.01));
+          expect(leadingRect.left, greaterThan(menuItemRect.left));
+          expect(leadingRect.right, lessThan(childRect.right));
+        });
+
+        testWidgets('RTL leading position', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: Directionality(
+                textDirection: TextDirection.rtl,
+                child: CupertinoMenuAnchor(
+                  controller: controller,
+                  menuChildren: <Widget>[
+                    CupertinoMenuItem(
+                      onPressed: () {},
+                      leading: Icon(CupertinoIcons.left_chevron, key: Tag.leading.key),
+                      trailing: Icon(CupertinoIcons.right_chevron, key: Tag.trailing.key),
+                      subtitle: Text(Tag.subtitle.text),
+                      child: Text(Tag.child.text),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final ui.Rect leadingRect = tester.getRect(find.byKey(Tag.leading.key));
+          final ui.Rect menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
+          final ui.Rect childRect = tester.getRect(find.text(Tag.child.text));
+          final double leadingWidth = menuItemRect.right - childRect.right;
+          final Size leadingSize = ui.Size(leadingWidth, menuItemRect.height);
+          final Rect leadingWidgetRect = tester
+              .getRect(find.byKey(Tag.leading.key))
+              .translate(-childRect.right, -menuItemRect.top);
+          final Alignment leadingAlignment = offsetAlongSize(leadingWidgetRect.center, leadingSize);
+
+          expect(leadingAlignment.x, closeTo(-0.168, 0.01));
+          expect(leadingAlignment.y, closeTo(0, 0.01));
+          expect(leadingRect.right, lessThan(menuItemRect.right));
+          expect(leadingRect.left, greaterThan(childRect.left));
+        });
+
+        testWidgets('leadingMidpointAlignment adjusts to dynamic type', (
+          WidgetTester tester,
+        ) async {
+          Widget buildApp({TextScaler textScaler = AccessibilityTextSize.large}) {
+            return CupertinoApp(
+              home: Builder(
+                builder: (BuildContext context) {
+                  return MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+                    child: CupertinoMenuAnchor(
+                      controller: controller,
+                      menuChildren: <Widget>[
+                        CupertinoMenuItem(
+                          onPressed: () {},
+                          leading: Icon(CupertinoIcons.left_chevron, key: Tag.leading.key),
+                          trailing: Icon(CupertinoIcons.right_chevron, key: Tag.trailing.key),
+                          subtitle: Text(Tag.subtitle.text),
+                          child: Text(Tag.child.text),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.undersized));
+          controller.open();
+          await tester.pumpAndSettle();
+
+          Alignment leadingAlignment() {
+            final ui.Rect menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
+            final ui.Rect childRect = tester.getRect(find.text(Tag.child.text));
+            final double leadingWidth = childRect.left - menuItemRect.left;
+            final Size leadingSize = ui.Size(leadingWidth, menuItemRect.height);
+            final Rect leadingWidgetRect = tester
+                .getRect(find.byKey(Tag.leading.key))
+                .translate(-menuItemRect.left, -menuItemRect.top);
+            return offsetAlongSize(leadingWidgetRect.center, leadingSize);
+          }
+
+          Alignment alignment = leadingAlignment();
+          expect(alignment.x, closeTo(0.1673, 0.01));
+          expect(alignment.y, closeTo(0, 0.01));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.xSmall));
+
+          alignment = leadingAlignment();
+          expect(alignment.x, closeTo(0.1673, 0.01));
+          expect(alignment.y, closeTo(0, 0.01));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.ax5));
+
+          alignment = leadingAlignment();
+          expect(alignment.x, closeTo(0.1765, 0.01));
+          expect(alignment.y, closeTo(0, 0.01));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.oversized));
+
+          alignment = leadingAlignment();
+          expect(alignment.x, closeTo(0.1765, 0.01));
+          expect(alignment.y, closeTo(0, 0.01));
+        });
+
+        testWidgets('leadingWidth adjusts to dynamic type', (WidgetTester tester) async {
+          Widget buildApp({TextScaler textScaler = AccessibilityTextSize.large}) {
+            return CupertinoApp(
+              home: Builder(
+                builder: (BuildContext context) {
+                  return MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+                    child: CupertinoMenuAnchor(
+                      controller: controller,
+                      menuChildren: <Widget>[
+                        CupertinoMenuItem(
+                          onPressed: () {},
+                          leading: Icon(CupertinoIcons.left_chevron, key: Tag.leading.key),
+                          trailing: Icon(CupertinoIcons.right_chevron, key: Tag.trailing.key),
+                          subtitle: Text(Tag.subtitle.text),
+                          child: Text(Tag.child.text),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.undersized));
+          controller.open();
+          await tester.pumpAndSettle();
+
+          Rect childRect() => tester.getRect(find.text(Tag.child.text));
+          Rect menuItemRect() => tester.getRect(find.byType(CupertinoMenuItem));
+          double leadingWidth() => childRect().left - menuItemRect().left;
+
+          expect(leadingWidth(), closeTo(30.0, 0.1));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.xSmall));
+
+          expect(leadingWidth(), closeTo(30.0, 0.1));
+
+          await tester.pumpWidget(buildApp());
+
+          expect(leadingWidth(), closeTo(32.0, 0.1));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.ax5));
+
+          expect(leadingWidth(), closeTo(61.0, 0.5));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.oversized));
+
+          expect(leadingWidth(), closeTo(61.0, 0.5));
+        });
+        testWidgets('leadingWidth is quantized to pixel ratio', (WidgetTester tester) async {
+          Rect childRect() => tester.getRect(find.text(Tag.child.text));
+          Rect menuItemRect() => tester.getRect(find.byType(CupertinoMenuItem));
+
+          Widget buildApp({
+            TextScaler textScaler = AccessibilityTextSize.large,
+            double devicePixelRatio = 2.0,
+          }) {
+            return CupertinoApp(
+              home: Builder(
+                builder: (BuildContext context) {
+                  return MediaQuery(
+                    data: MediaQuery.of(
+                      context,
+                    ).copyWith(textScaler: textScaler, devicePixelRatio: devicePixelRatio),
+                    child: CupertinoMenuAnchor(
+                      controller: controller,
+                      menuChildren: <Widget>[
+                        CupertinoMenuItem(
+                          onPressed: () {},
+                          leading: Icon(CupertinoIcons.left_chevron, key: Tag.leading.key),
+                          trailing: Icon(CupertinoIcons.right_chevron, key: Tag.trailing.key),
+                          subtitle: Text(Tag.subtitle.text),
+                          child: Text(Tag.child.text),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.medium));
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final double leadingWidth2x = childRect().left - menuItemRect().left;
+          expect(leadingWidth2x - leadingWidth2x.floorToDouble(), closeTo(1 / 2, 0.01));
+
+          await tester.pumpWidget(
+            buildApp(devicePixelRatio: 3.0, textScaler: AccessibilityTextSize.medium),
+          );
+
+          final double leadingWidth3x = childRect().left - menuItemRect().left;
+          expect(leadingWidth3x - leadingWidth3x.floorToDouble(), closeTo(1 / 3, 0.01));
+        });
+
+        testWidgets('custom leadingWidth', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: CupertinoMenuAnchor(
+                controller: controller,
+                menuChildren: <Widget>[
+                  CupertinoMenuItem(
+                    leadingWidth: 60,
+                    child: Text(Tag.child.text, key: Tag.child.key),
+                  ),
+                ],
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final Rect child = tester.getRect(find.byKey(Tag.child.key));
+          final Rect menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
+
+          final double leadingSpace = child.left - menuItemRect.left;
+          expect(leadingSpace, moreOrLessEquals(60, epsilon: 1));
+        });
+
+        testWidgets('custom leadingMidpointAlignment', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: CupertinoMenuAnchor(
+                controller: controller,
+                menuChildren: <Widget>[
+                  CupertinoMenuItem(
+                    padding: EdgeInsets.zero,
+                    leadingWidth: 60,
+                    leadingMidpointAlignment: const Alignment(0.5, 0.5),
+                    leading: Container(
+                      color: CupertinoColors.systemBlue,
+                      width: 5,
+                      height: 5,
+                      key: Tag.leading.key,
+                    ),
+                    onPressed: () {},
+                    child: Text('TTT', key: Tag.child.key),
+                  ),
+                ],
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final ui.Rect menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
+          final ui.Rect childRect = tester.getRect(find.byKey(Tag.child.key));
+          final double leadingWidth = childRect.left - menuItemRect.left;
+          final Size leadingSize = ui.Size(leadingWidth, menuItemRect.height);
+          final Rect leadingWidgetRect = tester
+              .getRect(find.byKey(Tag.leading.key))
+              .shift(-menuItemRect.topLeft);
+
+          final Alignment alignment = offsetAlongSize(leadingWidgetRect.center, leadingSize);
+
+          expect(alignment.x, closeTo(0.5, 0.01));
+          expect(alignment.y, closeTo(0.5, 0.01));
+        });
+      });
+
+      group('Trailing ', () {
+        testWidgets('LTR trailing position', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: Directionality(
+                textDirection: TextDirection.ltr,
+                child: CupertinoMenuAnchor(
+                  controller: controller,
+                  menuChildren: <Widget>[
+                    CupertinoMenuItem(
+                      onPressed: () {},
+                      leading: Icon(CupertinoIcons.left_chevron, key: Tag.leading.key),
+                      trailing: Icon(CupertinoIcons.right_chevron, key: Tag.trailing.key),
+                      subtitle: Text(Tag.subtitle.text),
+                      child: Text(Tag.child.text),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final ui.Rect trailingRect = tester.getRect(find.byKey(Tag.trailing.key));
+          final ui.Rect menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
+          final ui.Rect childRect = tester.getRect(find.text(Tag.child.text));
+          final double trailingWidth = menuItemRect.right - childRect.right;
+          final Size trailingSize = ui.Size(trailingWidth, menuItemRect.height);
+          final Rect trailingWidgetRect = tester
+              .getRect(find.byKey(Tag.trailing.key))
+              .translate(-childRect.right, -menuItemRect.top);
+          final Alignment trailingAlignment = offsetAlongSize(
+            trailingWidgetRect.center,
+            trailingSize,
+          );
+
+          expect(trailingAlignment.x, closeTo(-0.2727, 0.01));
+          expect(trailingAlignment.y, closeTo(0, 0.01));
+          expect(trailingRect.right, lessThan(menuItemRect.right));
+          expect(trailingRect.left, greaterThan(childRect.left));
+        });
+
+        testWidgets('RTL trailing position', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: Directionality(
+                textDirection: TextDirection.rtl,
+                child: CupertinoMenuAnchor(
+                  controller: controller,
+                  menuChildren: <Widget>[
+                    CupertinoMenuItem(
+                      onPressed: () {},
+                      leading: Icon(CupertinoIcons.left_chevron, key: Tag.leading.key),
+                      trailing: Icon(CupertinoIcons.right_chevron, key: Tag.trailing.key),
+                      subtitle: Text(Tag.subtitle.text),
+                      child: Text(Tag.child.text),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final ui.Rect trailingRect = tester.getRect(find.byKey(Tag.trailing.key));
+          final ui.Rect menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
+          final ui.Rect childRect = tester.getRect(find.text(Tag.child.text));
+          final double trailingWidth = childRect.left - menuItemRect.left;
+          final Size trailingSize = ui.Size(trailingWidth, menuItemRect.height);
+          final Rect trailingWidgetRect = tester
+              .getRect(find.byKey(Tag.trailing.key))
+              .translate(-menuItemRect.left, -menuItemRect.top);
+          final Alignment trailingAlignment = offsetAlongSize(
+            trailingWidgetRect.center,
+            trailingSize,
+          );
+
+          expect(trailingAlignment.x, closeTo(0.2727, 0.01));
+          expect(trailingAlignment.y, closeTo(0, 0.01));
+          expect(trailingRect.left, greaterThan(menuItemRect.left));
+          expect(trailingRect.right, lessThan(childRect.right));
+        });
+
+        testWidgets('trailingMidpointAlignment adjusts to dynamic type', (
+          WidgetTester tester,
+        ) async {
+          Widget buildApp({TextScaler textScaler = AccessibilityTextSize.large}) {
+            return CupertinoApp(
+              home: Builder(
+                builder: (BuildContext context) {
+                  return MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+                    child: CupertinoMenuAnchor(
+                      controller: controller,
+                      menuChildren: <Widget>[
+                        CupertinoMenuItem(
+                          onPressed: () {},
+                          leading: Icon(CupertinoIcons.left_chevron, key: Tag.leading.key),
+                          trailing: Icon(CupertinoIcons.right_chevron, key: Tag.trailing.key),
+                          subtitle: Text(Tag.subtitle.text),
+                          child: Text(Tag.child.text),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.undersized));
+          controller.open();
+          await tester.pumpAndSettle();
+
+          Alignment getTrailingAlignment() {
+            final ui.Rect menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
+            final ui.Rect childRect = tester.getRect(find.text(Tag.child.text));
+            final double trailingWidth = menuItemRect.right - childRect.right;
+            final Size trailingSize = ui.Size(trailingWidth, menuItemRect.height);
+            final Rect trailingWidgetRect = tester
+                .getRect(find.byKey(Tag.trailing.key))
+                .translate(-childRect.right, -menuItemRect.top);
+            return offsetAlongSize(trailingWidgetRect.center, trailingSize);
+          }
+
+          Alignment alignment = getTrailingAlignment();
+          expect(alignment.x, closeTo(-0.2963, 0.01));
+          expect(alignment.y, closeTo(0, 0.01));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.xSmall));
+
+          alignment = getTrailingAlignment();
+          expect(alignment.x, closeTo(-0.2963, 0.01));
+          expect(alignment.y, closeTo(0, 0.01));
+
+          await tester.pumpWidget(buildApp());
+
+          alignment = getTrailingAlignment();
+          expect(alignment.x, closeTo(-0.2727, 0.01));
+          expect(alignment.y, closeTo(0, 0.01));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.ax5));
+
+          expect(find.byKey(Tag.trailing.key), findsNothing);
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.oversized));
+
+          expect(find.byKey(Tag.trailing.key), findsNothing);
+        });
+
+        testWidgets('trailingWidth adjusts to dynamic type', (WidgetTester tester) async {
+          Widget buildApp({TextScaler textScaler = AccessibilityTextSize.large}) {
+            return CupertinoApp(
+              home: Builder(
+                builder: (BuildContext context) {
+                  return MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+                    child: CupertinoMenuAnchor(
+                      controller: controller,
+                      menuChildren: <Widget>[
+                        CupertinoMenuItem(
+                          onPressed: () {},
+                          leading: Icon(CupertinoIcons.left_chevron, key: Tag.leading.key),
+                          trailing: Icon(CupertinoIcons.right_chevron, key: Tag.trailing.key),
+                          subtitle: Text(Tag.subtitle.text),
+                          child: Text(Tag.child.text),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.undersized));
+          controller.open();
+          await tester.pumpAndSettle();
+
+          Rect childRect() => tester.getRect(find.text(Tag.child.text));
+          Rect menuItemRect() => tester.getRect(find.byType(CupertinoMenuItem));
+          double trailingWidth() => menuItemRect().right - childRect().right;
+
+          expect(trailingWidth(), closeTo(40.5, 0.25));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.xSmall));
+
+          expect(trailingWidth(), closeTo(40.5, 0.25));
+
+          await tester.pumpWidget(buildApp());
+
+          expect(trailingWidth(), closeTo(44.0, 0.1));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.ax5));
+
+          expect(trailingWidth(), closeTo(16.0, 0.5));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.oversized));
+
+          expect(trailingWidth(), closeTo(16.0, 0.5));
+        });
+
+        testWidgets('trailingWidth is quantized to pixel ratio', (WidgetTester tester) async {
+          Widget buildApp({
+            TextScaler textScaler = AccessibilityTextSize.large,
+            double devicePixelRatio = 2.0,
+          }) {
+            return CupertinoApp(
+              home: Builder(
+                builder: (BuildContext context) {
+                  return MediaQuery(
+                    data: MediaQuery.of(
+                      context,
+                    ).copyWith(textScaler: textScaler, devicePixelRatio: devicePixelRatio),
+                    child: CupertinoMenuAnchor(
+                      controller: controller,
+                      menuChildren: <Widget>[
+                        CupertinoMenuItem(
+                          onPressed: () {},
+                          leading: Icon(CupertinoIcons.left_chevron, key: Tag.leading.key),
+                          trailing: Icon(CupertinoIcons.right_chevron, key: Tag.trailing.key),
+                          subtitle: Text(Tag.subtitle.text),
+                          child: Text(Tag.child.text),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.xSmall));
+          controller.open();
+          await tester.pumpAndSettle();
+
+          Rect childRect() => tester.getRect(find.text(Tag.child.text));
+          Rect menuItemRect() => tester.getRect(find.byType(CupertinoMenuItem));
+
+          final double trailingWidth2x = menuItemRect().right - childRect().right;
+          expect(trailingWidth2x - trailingWidth2x.floorToDouble(), closeTo(1 / 2, 0.01));
+
+          await tester.pumpWidget(
+            buildApp(devicePixelRatio: 3.0, textScaler: AccessibilityTextSize.xSmall),
+          );
+
+          final double trailingWidth3x = menuItemRect().right - childRect().right;
+          expect(trailingWidth3x - trailingWidth3x.floorToDouble(), closeTo(2 / 3, 0.01));
+        });
+
+        testWidgets('custom trailingWidth', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: CupertinoMenuAnchor(
+                controller: controller,
+                menuChildren: <Widget>[
+                  CupertinoMenuItem(
+                    trailingWidth: 60,
+                    trailing: Icon(CupertinoIcons.right_chevron, key: Tag.trailing.key),
+                    child: Center(key: Tag.child.key, child: Text(Tag.child.text)),
+                  ),
+                ],
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final Rect child = tester.getRect(find.byKey(Tag.child.key));
+          final Rect menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
+          final double trailingSpace = menuItemRect.right - child.right;
+
+          expect(trailingSpace, moreOrLessEquals(60, epsilon: 1));
+        });
+
+        testWidgets('custom trailingMidpointAlignment', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: CupertinoMenuAnchor(
+                controller: controller,
+                menuChildren: <Widget>[
+                  CupertinoMenuItem(
+                    padding: EdgeInsets.zero,
+                    trailingWidth: 60,
+                    trailingMidpointAlignment: const Alignment(0.5, 0.5),
+                    trailing: Container(
+                      color: CupertinoColors.systemRed,
+                      width: 5,
+                      height: 5,
+                      key: Tag.trailing.key,
+                    ),
+                    onPressed: () {},
+                    child: Center(key: Tag.child.key, child: Text(Tag.child.text)),
+                  ),
+                ],
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final ui.Rect menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
+          final ui.Rect childRect = tester.getRect(find.byKey(Tag.child.key));
+          final double trailingWidth = menuItemRect.right - childRect.right;
+          final Size trailingSize = ui.Size(trailingWidth, menuItemRect.height);
+          final Rect trailingWidgetRect = tester
+              .getRect(find.byKey(Tag.trailing.key))
+              .translate(-childRect.right, -menuItemRect.top);
+          final Alignment trailingAlignment = offsetAlongSize(
+            trailingWidgetRect.center,
+            trailingSize,
+          );
+
+          expect(trailingAlignment.x, closeTo(0.5, 0.01));
+          expect(trailingAlignment.y, closeTo(0.5, 0.01));
+        });
+      });
+      group('Subtitle ', () {
+        testWidgets('default layout', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: CupertinoMenuAnchor(
+                controller: controller,
+                menuChildren: <Widget>[
+                  CupertinoMenuItem(
+                    onPressed: () {},
+                    leading: Icon(CupertinoIcons.left_chevron, key: Tag.leading.key),
+                    trailing: Icon(CupertinoIcons.right_chevron, key: Tag.trailing.key),
+                    subtitle: Text(Tag.subtitle.text),
+                    child: Text(Tag.child.text),
+                  ),
+                ],
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final double largeSubtitleLineHeight = lineHeight(DynamicTypeTextStyleSet.subhead.large);
+          final Rect subtitleRect = tester.getRect(find.text(Tag.subtitle.text));
+          final Rect childRect = tester.getRect(find.text(Tag.child.text));
+
+          expect(subtitleRect.height, closeTo(largeSubtitleLineHeight, 0.1));
+          expect(subtitleRect.width, equals(childRect.width));
+          expect(subtitleRect.top, closeTo(childRect.bottom + 1, 0.1));
+          expect(subtitleRect.left, equals(childRect.left));
+          expect(subtitleRect.right, equals(childRect.right));
+        });
+
+        testWidgets('subtitle text overflow', (WidgetTester tester) async {
+          final String longText = 'Very long subtitle ' * 100;
+
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: CupertinoMenuAnchor(
+                controller: controller,
+                menuChildren: <Widget>[
+                  CupertinoMenuItem(
+                    onPressed: () {},
+                    subtitle: Text(longText),
+                    child: Text(Tag.child.text),
+                  ),
+                ],
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final Size subtitleText = tester.getSize(find.text(longText));
+          final TextStyle subtitleStyle = DynamicTypeTextStyleSet.subhead.large;
+          expect(subtitleText.height, closeTo(lineHeight(subtitleStyle) * 2, 1)); // 2 lines of text
+        });
+
+        testWidgets('subtitle text overflow in accessibility mode', (WidgetTester tester) async {
+          final String longText = 'Very long text ' * 100;
+
+          await tester.pumpWidget(
+            App(
+              MediaQuery(
+                data: const MediaQueryData(textScaler: AccessibilityTextSize.ax1),
+                child: CupertinoMenuAnchor(
+                  controller: controller,
+                  menuChildren: <Widget>[
+                    CupertinoMenuItem(
+                      onPressed: () {},
+                      subtitle: Text(longText),
+                      child: Text(Tag.child.text),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final RenderParagraph paragraph = findDescendentParagraph(tester, find.text(longText))!;
+          expect(paragraph.maxLines, equals(CupertinoMenuItem.defaultAccessibilityModeMaxLines));
+          expect(tester.getSize(find.text(longText)).height, closeTo(3100, 1));
+        });
+
+        testWidgets('subtitle adjusts to dynamic type', (WidgetTester tester) async {
+          Widget buildApp({TextScaler textScaler = AccessibilityTextSize.large}) {
+            return CupertinoApp(
+              home: Builder(
+                builder: (BuildContext context) {
+                  return MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+                    child: CupertinoMenuAnchor(
+                      controller: controller,
+                      menuChildren: <Widget>[
+                        CupertinoMenuItem(
+                          onPressed: () {},
+                          leading: Icon(CupertinoIcons.left_chevron, key: Tag.leading.key),
+                          trailing: Icon(CupertinoIcons.right_chevron, key: Tag.trailing.key),
+                          subtitle: Text(Tag.subtitle.text),
+                          child: Text(Tag.child.text),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.undersized));
+          controller.open();
+          await tester.pumpAndSettle();
+
+          Rect subtitleRect = tester.getRect(find.text(Tag.subtitle.text));
+          Rect childRect = tester.getRect(find.text(Tag.child.text));
+          final double undersizedSubtitleLineHeight = lineHeight(
+            DynamicTypeTextStyleSet.subhead.xSmall,
+          );
+          expect(subtitleRect.height, closeTo(undersizedSubtitleLineHeight, 0.1));
+          expect(subtitleRect.top, closeTo(childRect.bottom + 1, 0.1));
+          expect(subtitleRect.left, equals(childRect.left));
+          expect(subtitleRect.right, equals(childRect.right));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.xSmall));
+
+          childRect = tester.getRect(find.text(Tag.child.text));
+          subtitleRect = tester.getRect(find.text(Tag.subtitle.text));
+          final double xSmallSubtitleLineHeight = lineHeight(
+            DynamicTypeTextStyleSet.subhead.xSmall,
+          );
+          expect(subtitleRect.height, closeTo(xSmallSubtitleLineHeight, 0.1));
+          expect(subtitleRect.top, closeTo(childRect.bottom + 1, 0.1));
+          expect(subtitleRect.left, equals(childRect.left));
+          expect(subtitleRect.right, equals(childRect.right));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.ax5));
+          await tester.pumpAndSettle();
+
+          childRect = tester.getRect(find.text(Tag.child.text));
+          subtitleRect = tester.getRect(find.text(Tag.subtitle.text));
+          expect(subtitleRect.height, closeTo(110, 3));
+          expect(subtitleRect.top, closeTo(childRect.bottom + 1, 0.1));
+          expect(subtitleRect.left, equals(childRect.left));
+          expect(subtitleRect.right, equals(childRect.right));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.oversized));
+
+          childRect = tester.getRect(find.text(Tag.child.text));
+          subtitleRect = tester.getRect(find.text(Tag.subtitle.text));
+          expect(subtitleRect.height, closeTo(110, 3));
+          expect(subtitleRect.top, closeTo(childRect.bottom + 1, 0.1));
+          expect(subtitleRect.left, equals(childRect.left));
+          expect(subtitleRect.right, equals(childRect.right));
+        });
+      });
+
+      group('Padding', () {
+        testWidgets('default padding', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: CupertinoMenuAnchor(
+                controller: controller,
+                menuChildren: <Widget>[
+                  CupertinoMenuItem(
+                    onPressed: () {},
+                    leadingWidth: 0,
+                    trailingWidth: 0,
+                    subtitle: Text(Tag.subtitle.text),
+                    child: Text(Tag.child.text),
+                  ),
+                ],
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final Rect menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
+          final Rect childRect = tester.getRect(find.text(Tag.child.text));
+          final Rect subtitleRect = tester.getRect(find.text(Tag.subtitle.text));
+
+          expect(childRect.top - menuItemRect.top, closeTo(10.8, 0.1));
+          expect(menuItemRect.bottom - subtitleRect.bottom, closeTo(10.8, 0.1));
+          expect(childRect.left - menuItemRect.left, closeTo(0.0, 0.1));
+          expect(menuItemRect.right - childRect.right, closeTo(0.0, 0.1));
+        });
+
+        testWidgets('padding adjusts to dynamic type', (WidgetTester tester) async {
+          Widget buildApp({TextScaler textScaler = AccessibilityTextSize.large}) {
+            return CupertinoApp(
+              home: Builder(
+                builder: (BuildContext context) {
+                  return MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+                    child: CupertinoMenuAnchor(
+                      controller: controller,
+                      menuChildren: <Widget>[
+                        CupertinoMenuItem(
+                          onPressed: () {},
+                          subtitle: Text(Tag.subtitle.text),
+                          child: Text(Tag.child.text),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.undersized));
+          controller.open();
+          await tester.pumpAndSettle();
+
+          Rect getMenuItemRect() => tester.getRect(find.byType(CupertinoMenuItem));
+          Rect getChildRect() => tester.getRect(find.text(Tag.child.text));
+          Rect getSubtitleRect() => tester.getRect(find.text(Tag.subtitle.text));
+
+          Rect childRect = getChildRect();
+          Rect menuItemRect = getMenuItemRect();
+          Rect subtitleRect = getSubtitleRect();
+
+          expect(childRect.top - menuItemRect.top, closeTo(9.3, 0.1));
+          expect(menuItemRect.bottom - subtitleRect.bottom, closeTo(9.3, 0.1));
+          expect(childRect.left - menuItemRect.left, closeTo(16.0, 0.1));
+          expect(menuItemRect.right - childRect.right, closeTo(16.0, 0.1));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.xSmall));
+
+          childRect = getChildRect();
+          menuItemRect = getMenuItemRect();
+          subtitleRect = getSubtitleRect();
+
+          expect(childRect.top - menuItemRect.top, closeTo(9.3, 0.1));
+          expect(menuItemRect.bottom - subtitleRect.bottom, closeTo(9.3, 0.1));
+          expect(childRect.left - menuItemRect.left, closeTo(16.0, 0.1));
+          expect(menuItemRect.right - childRect.right, closeTo(16.0, 0.1));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.ax5));
+
+          childRect = getChildRect();
+          menuItemRect = getMenuItemRect();
+          subtitleRect = getSubtitleRect();
+
+          expect(childRect.top - menuItemRect.top, closeTo(30.5, 0.1));
+          expect(menuItemRect.bottom - subtitleRect.bottom, closeTo(30.5, 0.1));
+          expect(childRect.left - menuItemRect.left, closeTo(16.0, 0.1));
+          expect(menuItemRect.right - childRect.right, closeTo(16.0, 0.1));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.oversized));
+
+          childRect = getChildRect();
+          menuItemRect = getMenuItemRect();
+          subtitleRect = getSubtitleRect();
+
+          expect(childRect.top - menuItemRect.top, closeTo(30.5, 0.1));
+          expect(menuItemRect.bottom - subtitleRect.bottom, closeTo(30.5, 0.1));
+          expect(childRect.left - menuItemRect.left, closeTo(16.0, 0.1));
+          expect(menuItemRect.right - childRect.right, closeTo(16.0, 0.1));
+        });
+
+        testWidgets('LTR custom padding', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: CupertinoMenuAnchor(
+                controller: controller,
+                menuChildren: <Widget>[
+                  CupertinoMenuItem(
+                    padding: const EdgeInsets.fromLTRB(7, 17, 13, 11),
+                    onPressed: () {},
+                    child: Center(key: Tag.child.key, child: Text(Tag.child.text)),
+                  ),
+                ],
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final Rect child = tester.getRect(find.byKey(Tag.child.key));
+          final Rect item = tester.getRect(find.byType(CupertinoMenuItem));
+
+          expect(child.top - item.top, closeTo(17.0, 0.1));
+          expect(item.bottom - child.bottom, closeTo(11.0, 0.1));
+
+          // Padding is applied in addition to the leading and trailing width.
+          expect(child.left - item.left, closeTo(7.0 + 16, 0.1));
+          expect(item.right - child.right, closeTo(13.0 + 16, 0.1));
+        });
+
+        testWidgets('RTL custom padding', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: Directionality(
+                textDirection: TextDirection.rtl,
+                child: CupertinoMenuAnchor(
+                  controller: controller,
+                  menuChildren: <Widget>[
+                    CupertinoMenuItem(
+                      padding: const EdgeInsetsDirectional.fromSTEB(7, 17, 13, 11),
+                      onPressed: () {},
+                      child: Center(key: Tag.child.key, child: Text(Tag.child.text)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final Rect child = tester.getRect(find.byKey(Tag.child.key));
+          final Rect item = tester.getRect(find.byType(CupertinoMenuItem));
+
+          expect(child.top - item.top, closeTo(17.0, 0.1));
+          expect(item.bottom - child.bottom, closeTo(11.0, 0.1));
+          expect(item.right - child.right, closeTo(7.0 + 16, 0.1));
+          expect(child.left - item.left, closeTo(13.0 + 16, 0.1));
+        });
+
+        testWidgets('LTR custom padding is added to leading and trailing width', (
+          WidgetTester tester,
+        ) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: Directionality(
+                textDirection: TextDirection.ltr,
+                child: CupertinoMenuAnchor(
+                  controller: controller,
+                  menuChildren: <Widget>[
+                    CupertinoMenuItem(
+                      padding: const EdgeInsetsDirectional.only(start: 7, end: 13),
+                      leadingWidth: 19,
+                      trailingWidth: 23,
+                      onPressed: () {},
+                      child: Center(key: Tag.child.key, child: Text(Tag.child.text)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final Rect child = tester.getRect(find.byKey(Tag.child.key));
+          final Rect item = tester.getRect(find.byType(CupertinoMenuItem));
+
+          expect(item.right - child.right, closeTo(13.0 + 23, 0.1));
+          expect(child.left - item.left, closeTo(7.0 + 19, 0.1));
+        });
+
+        testWidgets('RTL custom padding is added to leading and trailing width', (
+          WidgetTester tester,
+        ) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: Directionality(
+                textDirection: TextDirection.rtl,
+                child: CupertinoMenuAnchor(
+                  controller: controller,
+                  menuChildren: <Widget>[
+                    CupertinoMenuItem(
+                      padding: const EdgeInsetsDirectional.only(start: 7, end: 13),
+                      leadingWidth: 19,
+                      trailingWidth: 23,
+                      onPressed: () {},
+                      child: Center(key: Tag.child.key, child: Text(Tag.child.text)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final Rect child = tester.getRect(find.byKey(Tag.child.key));
+          final Rect item = tester.getRect(find.byType(CupertinoMenuItem));
+
+          expect(item.right - child.right, closeTo(7.0 + 19, 0.1));
+          expect(child.left - item.left, closeTo(13.0 + 23, 0.1));
+        });
+
+        testWidgets('padding is applied before constraints', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: CupertinoMenuAnchor(
+                controller: controller,
+                menuChildren: <Widget>[
+                  CupertinoMenuItem(
+                    padding: const EdgeInsets.fromLTRB(30, 7, 30, 11),
+                    constraints: const BoxConstraints(minHeight: 100, maxWidth: 50),
+                    onPressed: () {},
+                    child: Text(Tag.child.text),
+                  ),
+                ],
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final Size menuItemRect = tester.getSize(find.byType(CupertinoMenuItem));
+
+          expect(menuItemRect.height, equals(100));
+          expect(menuItemRect.width, equals(50));
+        });
+      });
+
+      group('Constraints', () {
+        testWidgets('custom constraints applied', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: CupertinoMenuAnchor(
+                controller: controller,
+                menuChildren: <Widget>[
+                  CupertinoMenuItem(
+                    constraints: const BoxConstraints(minHeight: 80, maxWidth: 100),
+                    onPressed: () {},
+                    child: const Text('Child'),
+                  ),
+                ],
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final Size item = tester.getSize(find.byType(CupertinoMenuItem));
+
+          expect(item.height, greaterThanOrEqualTo(80));
+          expect(item.width, greaterThanOrEqualTo(100));
+        });
+
+        testWidgets('custom constraints are constrained by menu constraints', (
+          WidgetTester tester,
+        ) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              home: CupertinoMenuAnchor(
+                controller: controller,
+                menuChildren: <Widget>[
+                  CupertinoMenuItem(
+                    constraints: const BoxConstraints(minWidth: 500),
+                    onPressed: () {},
+                    child: const Text('Child'),
+                  ),
+                ],
+              ),
+            ),
+          );
+
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final Size item = tester.getSize(find.byType(CupertinoMenuItem));
+
+          expect(item.width, equals(262));
+        });
+
+        testWidgets('minimum height constraint adjusts to dynamic type', (
+          WidgetTester tester,
+        ) async {
+          Widget buildApp({TextScaler textScaler = AccessibilityTextSize.large}) {
+            return CupertinoApp(
+              home: Builder(
+                builder: (BuildContext context) {
+                  return MediaQuery(
+                    data: MediaQuery.of(
+                      context,
+                    ).copyWith(textScaler: textScaler, devicePixelRatio: 2.0),
+                    child: CupertinoMenuAnchor(
+                      controller: controller,
+                      menuChildren: <Widget>[
+                        CupertinoMenuItem(onPressed: () {}, child: Text(Tag.child.text)),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.undersized));
+          controller.open();
+          await tester.pumpAndSettle();
+
+          Rect menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
+          expect(menuItemRect.height, closeTo(37.5, 0.1));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.xSmall));
+
+          menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
+          expect(menuItemRect.height, closeTo(37.5, 0.1));
+
+          await tester.pumpWidget(buildApp());
+
+          menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
+          expect(menuItemRect.height, closeTo(43.5, 0.1));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.ax5));
+
+          menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
+          expect(menuItemRect.height, closeTo(123.0, 0.1));
+
+          await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.oversized));
+
+          menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
+          expect(menuItemRect.height, closeTo(123.0, 0.1));
+        });
+
+        testWidgets('minimum height constraint is quantized to pixel ratio', (
+          WidgetTester tester,
+        ) async {
+          Widget buildApp({
+            TextScaler textScaler = AccessibilityTextSize.large,
+            required double devicePixelRatio,
+          }) {
+            return CupertinoApp(
+              home: Builder(
+                builder: (BuildContext context) {
+                  return MediaQuery(
+                    data: MediaQuery.of(
+                      context,
+                    ).copyWith(textScaler: textScaler, devicePixelRatio: devicePixelRatio),
+                    child: CupertinoMenuAnchor(
+                      controller: controller,
+                      menuChildren: <Widget>[
+                        CupertinoMenuItem(onPressed: () {}, child: Text(Tag.child.text)),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+
+          await tester.pumpWidget(buildApp(devicePixelRatio: 2.0));
+          controller.open();
+          await tester.pumpAndSettle();
+
+          final double minimumHeight2x = tester.getSize(find.byType(CupertinoMenuItem)).height;
+
+          expect(minimumHeight2x - minimumHeight2x.floorToDouble(), closeTo(1 / 2, 0.01));
+
+          await tester.pumpWidget(buildApp(devicePixelRatio: 3.0));
+
+          final double minimumHeight3x = tester.getSize(find.byType(CupertinoMenuItem)).height;
+
+          expect(minimumHeight3x - minimumHeight3x.floorToDouble(), closeTo(2 / 3, 0.01));
+        });
+      });
+    });
+
+    testWidgets('LTR hasLeading shift', (WidgetTester tester) async {
+      // When no menu item has a leading widget, leadingWidth defaults to 16.
+      // If leadingWidth is set, the default is ignored.
+      await tester.pumpWidget(
+        App(
+          CupertinoMenuAnchor(
+            controller: controller,
+            menuChildren: <Widget>[
+              CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text)),
+              CupertinoMenuItem(onPressed: () {}, child: Text(Tag.b.text)),
+              CupertinoMenuItem(onPressed: () {}, leadingWidth: 3, child: Text(Tag.c.text)),
+            ],
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pumpAndSettle();
+
+      final Rect a1 = tester.getRect(find.text(Tag.a.text));
+      final Rect b1 = tester.getRect(find.text(Tag.b.text));
+      final Rect c1 = tester.getRect(find.text(Tag.c.text));
+
+      expect(a1.left, b1.left);
+      expect(a1.left - c1.left, closeTo(16 - 3, 0.01));
+
+      // When any menu item has a leading widget, leadingWidth defaults to 32
+      // for all menu items on this menu layer. If leadingWidth is set on an
+      // item, that item ignores the default leading width.
+      await tester.pumpWidget(
+        App(
+          CupertinoMenuAnchor(
+            controller: controller,
+            menuChildren: <Widget>[
+              CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text)),
+              CupertinoMenuItem(
+                onPressed: () {},
+                leading: const Icon(CupertinoIcons.left_chevron),
+                child: Text(Tag.b.text),
+              ),
+              CupertinoMenuItem(onPressed: () {}, leadingWidth: 3, child: Text(Tag.c.text)),
+            ],
+          ),
+        ),
+      );
+
+      final Rect a2 = tester.getRect(find.text(Tag.a.text));
+      final Rect b2 = tester.getRect(find.text(Tag.b.text));
+      final Rect c2 = tester.getRect(find.text(Tag.c.text));
+
+      expect(a2.left, b2.left);
+      expect(a2.left - c2.left, closeTo(32 - 3, 0.01));
+      expect(a2.left - a1.left, closeTo(32 - 16, 0.01));
+    });
+    testWidgets('hasLeading shift RTL', (WidgetTester tester) async {
+      // When no menu item has a leading widget, leadingWidth defaults to 16.
+      // If leadingWidth is set, the default is ignored.
+      await tester.pumpWidget(
+        App(
+          textDirection: TextDirection.rtl,
+          CupertinoMenuAnchor(
+            controller: controller,
+            menuChildren: <Widget>[
+              CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text)),
+              CupertinoMenuItem(onPressed: () {}, child: Text(Tag.b.text)),
+              CupertinoMenuItem(onPressed: () {}, leadingWidth: 3, child: Text(Tag.c.text)),
+            ],
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pumpAndSettle();
+
+      final Rect a1 = tester.getRect(find.text(Tag.a.text));
+      final Rect b1 = tester.getRect(find.text(Tag.b.text));
+      final Rect c1 = tester.getRect(find.text(Tag.c.text));
+
+      expect(a1.right, b1.right);
+      expect(a1.right - c1.right, closeTo(-16 + 3, 0.01));
+
+      // When any menu item has a leading widget, leadingWidth defaults to 32
+      // for all menu items on this menu layer. If leadingWidth is set on an
+      // item, that item ignores the default leading width.
+      await tester.pumpWidget(
+        App(
+          textDirection: TextDirection.rtl,
+          CupertinoMenuAnchor(
+            controller: controller,
+            menuChildren: <Widget>[
+              CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text)),
+              CupertinoMenuItem(
+                onPressed: () {},
+                leading: const Icon(CupertinoIcons.left_chevron),
+                child: Text(Tag.b.text),
+              ),
+              CupertinoMenuItem(onPressed: () {}, leadingWidth: 3, child: Text(Tag.c.text)),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final Rect a2 = tester.getRect(find.text(Tag.a.text));
+      final Rect b2 = tester.getRect(find.text(Tag.b.text));
+      final Rect c2 = tester.getRect(find.text(Tag.c.text));
+
+      expect(a2.right, b2.right);
+      expect(a2.right - c2.right, closeTo(-32 + 3, 0.01));
+      expect(a2.right - a1.right, closeTo(-32 + 16, 0.01));
+    });
+
+    testWidgets('onFocusChange is called on enabled items', (WidgetTester tester) async {
+      final List<bool> focusChanges = <bool>[];
+      final List<bool> disabledFocusChanges = <bool>[];
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        App(
+          CupertinoMenuAnchor(
+            controller: controller,
+            menuChildren: <Widget>[
+              CupertinoMenuItem(
+                focusNode: focusNode,
+                onFocusChange: focusChanges.add,
+                onPressed: () {},
+                child: Text(Tag.a.text),
+              ),
+              CupertinoMenuItem(onFocusChange: disabledFocusChanges.add, child: Text(Tag.b.text)),
+              CupertinoMenuItem(child: Text(Tag.c.text), onPressed: () {}),
+            ],
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pumpAndSettle();
+
+      // Move focus to first item
+      focusNode.requestFocus();
+      await tester.pump();
+
+      // Move focus away
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+
+      // Move focus back
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+
+      // Close menu, should lose focus
+      controller.close();
+      await tester.pumpAndSettle();
+
+      expect(focusChanges, <bool>[true, false, true, false]);
+      expect(disabledFocusChanges, isEmpty);
+    });
+    testWidgets('onHover is called on enabled items', (WidgetTester tester) async {
+      final List<(Tag, bool)> hovered = <(Tag, bool)>[];
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoMenuAnchor(
+            controller: controller,
+            menuChildren: <Widget>[
+              CupertinoMenuItem(
+                onHover: (bool value) {
+                  hovered.add((Tag.a, value));
+                },
+                onPressed: () {},
+                child: Text(Tag.a.text),
+              ),
+
+              // Disabled item -- should not request focus
+              CupertinoMenuItem(
+                onHover: (bool value) {
+                  hovered.add((Tag.b, value));
+                },
+                child: Text(Tag.b.text, key: Tag.b.key),
+              ),
+
+              CupertinoMenuItem(
+                onHover: (bool value) {
+                  hovered.add((Tag.c, value));
+                },
+                onPressed: () {},
+                child: Text(Tag.c.text),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pumpAndSettle();
+
+      final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+
+      // (Tag.a, true)
+      await gesture.moveTo(tester.getCenter(find.text(Tag.a.text)));
+      await tester.pump();
+
+      await gesture.moveTo(tester.getCenter(find.text(Tag.b.text)));
+      await tester.pump();
+
+      // (Tag.a, false)
+      // (Tag.c, true)
+      await gesture.moveTo(tester.getCenter(find.text(Tag.c.text)));
+      await tester.pump();
+
+      // (Tag.c, false)
+      // (Tag.a, true)
+      await gesture.moveTo(tester.getCenter(find.text(Tag.a.text)));
+      await tester.pump();
+
+      expect(hovered, <(Tag, bool)>[
+        (Tag.a, true),
+        (Tag.a, false),
+        (Tag.c, true),
+        (Tag.c, false),
+        (Tag.a, true),
+      ]);
+    });
+
+    testWidgets('onPressed is called when set', (WidgetTester tester) async {
+      int pressed = 0;
+      await tester.pumpWidget(
+        App(
+          CupertinoMenuAnchor(
+            controller: controller,
+            menuChildren: <Widget>[
+              CupertinoMenuItem(
+                onPressed: () {
+                  pressed += 1;
+                },
+                child: Text(Tag.a.text),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Tap when partially open
+      await tester.tap(find.text(Tag.a.text));
+      await tester.pump();
+
+      expect(pressed, 1);
+
+      controller.open();
+      await tester.pumpAndSettle();
+
+      // Tap when fully open
+      await tester.tap(find.text(Tag.a.text));
+      await tester.pumpAndSettle();
+
+      expect(pressed, 2);
+
+      controller.open();
+      await tester.pumpAndSettle();
+
+      controller.close();
+
+      await tester.pump();
+
+      // Do not tap if closing.
+      await tester.tap(find.text(Tag.a.text), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(pressed, 2);
+    });
+
+    testWidgets('HitTestBehavior can be set', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        App(
+          CupertinoMenuAnchor(
+            controller: controller,
+            menuChildren: <Widget>[
+              CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text)),
+              CupertinoMenuItem(
+                onPressed: () {},
+                behavior: HitTestBehavior.translucent,
+                child: Text(Tag.b.text),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pumpAndSettle();
+
+      final RawGestureDetector first = tester.firstWidget(
+        find.widgetWithText(RawGestureDetector, Tag.a.text),
+      );
+
+      // Test default
+      expect(first.behavior, HitTestBehavior.opaque);
+
+      final RawGestureDetector second = tester.firstWidget(
+        find.widgetWithText(RawGestureDetector, Tag.b.text),
+      );
+
+      // Test custom
+      expect(second.behavior, HitTestBehavior.translucent);
+    });
+
+    testWidgets('panPressActivationDelay activates when set', (WidgetTester tester) async {
+      Tag? activatedItem;
+      await tester.pumpWidget(
+        App(
+          CupertinoMenuAnchor(
+            controller: controller,
+            menuChildren: <Widget>[
+              CupertinoMenuItem(
+                onPressed: () {
+                  activatedItem = Tag.a;
+                },
+                child: Text(Tag.a.text),
+              ),
+              CupertinoMenuItem(
+                panActivationDelay: const Duration(milliseconds: 300),
+                child: Text(Tag.b.text),
+              ),
+              CupertinoMenuItem(
+                onPressed: () {
+                  activatedItem = Tag.c;
+                },
+                child: Text(Tag.c.text),
+              ),
+              CupertinoMenuItem(
+                onPressed: () {
+                  activatedItem = Tag.d;
+                },
+                panActivationDelay: const Duration(milliseconds: 300),
+                child: Text(Tag.d.text),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pumpAndSettle();
+
+      final Offset startPosition = tester.getCenter(find.text(Tag.a.text));
+      final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+      await gesture.down(startPosition);
+      await tester.pump();
+
+      // Pan to disabled item with delay
+      await gesture.moveTo(tester.getCenter(find.text(Tag.b.text)));
+      await tester.pump();
+
+      // Wait for longer than the delay, it should not be activated.
+      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pumpAndSettle();
+
+      expect(controller.isOpen, isTrue);
+
+      // Pan to item without delay
+      await gesture.moveTo(tester.getCenter(find.text(Tag.c.text)));
+      await tester.pump();
+
+      // Wait for longer than the delay, it should not be activated.
+      await tester.pump(const Duration(milliseconds: 350));
+      expect(activatedItem, isNull);
+
+      // Pan to the item with the delay.
+      await gesture.moveTo(tester.getCenter(find.text(Tag.d.text)));
+      await tester.pump();
+
+      // Wait for less than the delay, it should not be activated.
+      await tester.pump(const Duration(milliseconds: 299));
+      expect(activatedItem, isNull);
+
+      // Wait for the remainder of the delay.
+      await tester.pump(const Duration(milliseconds: 30));
+
+      expect(activatedItem, Tag.d);
+
+      await tester.pumpAndSettle();
+
+      expect(controller.isOpen, isFalse);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('respects requestFocusOnHover property', (WidgetTester tester) async {
+      final List<(Tag, bool)> focusChanges = <(Tag, bool)>[];
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoMenuAnchor(
+            controller: controller,
+            menuChildren: <Widget>[
+              CupertinoMenuItem(
+                onFocusChange: (bool value) {
+                  focusChanges.add((Tag.a, value));
+                },
+                onPressed: () {},
+                child: Text(Tag.a.text),
+              ),
+
+              // Disabled item -- should not request focus
+              CupertinoMenuItem(
+                onFocusChange: (bool value) {
+                  focusChanges.add((Tag.b, value));
+                },
+                child: Text(Tag.b.text, key: Tag.b.key),
+              ),
+
+              CupertinoMenuItem(
+                onFocusChange: (bool value) {
+                  focusChanges.add((Tag.c, value));
+                },
+                onPressed: () {},
+                child: Text(Tag.c.text),
+              ),
+
+              // requestFocusOnHover is false -- should not request focus
+              CupertinoMenuItem(
+                requestFocusOnHover: false,
+                onFocusChange: (bool value) {
+                  focusChanges.add((Tag.d, value));
+                },
+                onPressed: () {},
+                child: Text(Tag.d.text),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pumpAndSettle();
+
+      final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+
+      // (Tag.a, true)
+      await gesture.moveTo(tester.getCenter(find.text(Tag.a.text)));
+      await tester.pump();
+
+      await gesture.moveTo(tester.getCenter(find.text(Tag.b.text)));
+      await tester.pump();
+
+      // (Tag.a, false)
+      // (Tag.c, true)
+      await gesture.moveTo(tester.getCenter(find.text(Tag.c.text)));
+      await tester.pump();
+
+      await gesture.moveTo(tester.getCenter(find.text(Tag.d.text)));
+      await tester.pump();
+
+      // (Tag.c, false)
+      // (Tag.a, true)
+      await gesture.moveTo(tester.getCenter(find.text(Tag.a.text)));
+      await tester.pump();
+
+      expect(focusChanges, <(Tag, bool)>[
+        (Tag.a, true),
+        (Tag.a, false),
+        (Tag.c, true),
+        (Tag.c, false),
+        (Tag.a, true),
+      ]);
+    });
+
+    testWidgets('respects closeOnActivate property', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        App(
+          CupertinoMenuAnchor(
+            controller: controller,
+            menuChildren: <Widget>[
+              CupertinoMenuItem(
+                requestCloseOnActivate: false,
+                onPressed: () {},
+                child: Text(Tag.a.text),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pumpAndSettle();
+
+      // Taps the CupertinoMenuItem which should close the menu
+      await tester.tap(find.text(Tag.a.text));
+      await tester.pumpAndSettle();
+
+      expect(controller.isOpen, isTrue);
+
+      await tester.pumpWidget(
+        App(
+          CupertinoMenuAnchor(
+            controller: controller,
+            menuChildren: <Widget>[
+              CupertinoMenuItem(key: UniqueKey(), onPressed: () {}, child: Text(Tag.a.text)),
+            ],
+          ),
+        ),
+      );
+      // Taps the CupertinoMenuItem which should close the menu
+      await tester.tap(find.byType(CupertinoMenuItem));
+      await tester.pumpAndSettle();
+
+      expect(controller.isOpen, isFalse);
+    });
+  });
+
+  group('Semantics', () {
+    testWidgets('CupertinoMenuItem default semantics', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: Center(
+            child: CupertinoMenuItem(
+              onPressed: () {},
+              constraints: BoxConstraints.tight(const Size(250, 48.0)),
+              child: const Text('ABC'),
+            ),
+          ),
+        ),
+      );
+      final SemanticsHandle handle = tester.ensureSemantics();
+
+      // The flags should not have SemanticsFlag.isButton
+      expect(
+        tester.getSemantics(find.widgetWithText(CupertinoMenuItem, 'ABC')),
+        matchesSemantics(
+          hasTapAction: true,
+          hasDismissAction: true,
+          hasFocusAction: true,
+          isEnabled: true,
+          isFocusable: true,
+          hasEnabledState: true,
+          textDirection: TextDirection.rtl,
+          rect: const Rect.fromLTRB(0.0, 0.0, 250, 48),
+        ),
+      );
+      handle.dispose();
+    });
+    testWidgets('CupertinoMenuItem disabled semantics', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: CupertinoMenuItem(
+              constraints: BoxConstraints.tight(const Size(250, 48.0)),
+              child: const Text('ABC'),
+            ),
+          ),
+        ),
+      );
+
+      final SemanticsHandle handle = tester.ensureSemantics();
+
+      // The flags should not have SemanticsFlag.isButton
+      expect(
+        tester.getSemantics(find.widgetWithText(CupertinoMenuItem, 'ABC')),
+        matchesSemantics(
+          hasEnabledState: true,
+          textDirection: TextDirection.ltr,
+          rect: const Rect.fromLTRB(0.0, 0.0, 250, 48),
+        ),
+      );
+
+      handle.dispose();
+    });
   });
 }
 
@@ -3698,6 +7143,11 @@ abstract class Tag {
   static const NestedTag b = NestedTag('b');
   static const NestedTag c = NestedTag('c');
   static const NestedTag d = NestedTag('d');
+
+  static const NestedTag child = NestedTag('child');
+  static const NestedTag subtitle = NestedTag('subtitle');
+  static const NestedTag leading = NestedTag('leading');
+  static const NestedTag trailing = NestedTag('trailing');
 
   String get text;
   String get focusNode;
@@ -3745,27 +7195,21 @@ class NestedTag extends Tag {
   Key get key => ValueKey<String>('${text}_Key');
 }
 
-// A simple, focusable button that calls onPressed when tapped.
-//
-// The widgets library can't import the material library, so a separate button
-// widget has to be created.
-class Button extends StatefulWidget {
+class Button extends StatelessWidget {
   const Button(
     this.child, {
     super.key,
-    this.onPressed,
+    this.onPressed = _onPressed,
     this.focusNode,
     this.autofocus = false,
     this.onFocusChange,
-    String? focusNodeLabel,
-    BoxConstraints? constraints,
-  }) : _focusNodeLabel = focusNodeLabel,
-       constraints = constraints ?? const BoxConstraints.tightFor(width: 225, height: 32);
+    this.constraints,
+  });
 
   factory Button.text(
     String text, {
     Key? key,
-    VoidCallback? onPressed,
+    VoidCallback? onPressed = _onPressed,
     FocusNode? focusNode,
     bool autofocus = false,
     BoxConstraints? constraints,
@@ -3785,7 +7229,7 @@ class Button extends StatefulWidget {
   factory Button.tag(
     Tag tag, {
     Key? key,
-    VoidCallback? onPressed,
+    VoidCallback? onPressed = _onPressed,
     FocusNode? focusNode,
     bool autofocus = false,
     BoxConstraints? constraints,
@@ -3799,9 +7243,10 @@ class Button extends StatefulWidget {
       autofocus: autofocus,
       constraints: constraints,
       onFocusChange: onFocusChange,
-      focusNodeLabel: tag.focusNode,
     );
   }
+
+  static void _onPressed() {}
 
   final Widget child;
   final VoidCallback? onPressed;
@@ -3809,158 +7254,27 @@ class Button extends StatefulWidget {
   final FocusNode? focusNode;
   final bool autofocus;
   final BoxConstraints? constraints;
-  final String? _focusNodeLabel;
-
-  @override
-  State<Button> createState() => _ButtonState();
-}
-
-class _ButtonState extends State<Button> {
-  late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
-    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _activateOnIntent),
-    ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: _activateOnIntent),
-  };
-  FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
-  FocusNode? _internalFocusNode;
-  final WidgetStatesController _states = WidgetStatesController();
-  ui.Brightness _brightness = ui.Brightness.light;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.focusNode == null) {
-      _internalFocusNode = FocusNode(debugLabel: widget._focusNodeLabel);
-    }
-    _states.addListener(() {
-      setState(() {
-        /* Rebuild on state changes. */
-      });
-    });
-  }
-
-  @override
-  void didUpdateWidget(Button oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.focusNode != widget.focusNode) {
-      if (widget.focusNode == null) {
-        _internalFocusNode = FocusNode(debugLabel: widget._focusNodeLabel);
-      } else {
-        _internalFocusNode?.dispose();
-        _internalFocusNode = null;
-      }
-    }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _brightness = MediaQuery.maybePlatformBrightnessOf(context) ?? _brightness;
-  }
-
-  @override
-  void dispose() {
-    _internalFocusNode?.dispose();
-    _states.dispose();
-    _internalFocusNode = null;
-    super.dispose();
-  }
-
-  void _activateOnIntent(Intent intent) {
-    _handlePressed();
-  }
-
-  void _handlePressed() {
-    widget.onPressed?.call();
-    _states.update(WidgetState.pressed, true);
-  }
-
-  void _handleTapDown(TapDownDetails details) {
-    _states.update(WidgetState.pressed, true);
-  }
-
-  void _handleFocusChange(bool value) {
-    _states.update(WidgetState.focused, value);
-    widget.onFocusChange?.call(value);
-  }
-
-  void _handleExit(PointerExitEvent event) {
-    _states.update(WidgetState.hovered, false);
-  }
-
-  void _handleHover(PointerHoverEvent event) {
-    _states.update(WidgetState.hovered, true);
-  }
-
-  void _handleTapUp(TapUpDetails details) {
-    _states.update(WidgetState.pressed, false);
-    _handlePressed.call();
-  }
-
-  void _handleTapCancel() {
-    _states.update(WidgetState.pressed, false);
-  }
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTextStyle.merge(
-      style: _textStyle,
-      child: MergeSemantics(
-        child: Semantics(
-          button: true,
-          child: Actions(
-            actions: _actions,
-            child: Focus(
-              debugLabel: widget._focusNodeLabel,
-              onFocusChange: _handleFocusChange,
-              autofocus: widget.autofocus,
-              focusNode: _focusNode,
-              child: MouseRegion(
-                onHover: _handleHover,
-                onExit: _handleExit,
-                child: GestureDetector(
-                  onTapDown: _handleTapDown,
-                  onTapCancel: _handleTapCancel,
-                  onTapUp: _handleTapUp,
-                  child: Container(
-                    constraints: widget.constraints,
-                    decoration: _decoration,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Align(alignment: AlignmentDirectional.centerStart, child: widget.child),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Used for visualizing tests.
-  BoxDecoration? get _decoration {
-    if (_states.value.contains(WidgetState.pressed)) {
-      return const BoxDecoration(color: Color(0xFF007BFF));
+    if (constraints != null) {
+      return CupertinoMenuItem(
+        constraints: constraints,
+        onPressed: onPressed,
+        onFocusChange: onFocusChange,
+        focusNode: focusNode,
+        autofocus: autofocus,
+        child: child,
+      );
+    } else {
+      return CupertinoMenuItem(
+        onPressed: onPressed,
+        onFocusChange: onFocusChange,
+        focusNode: focusNode,
+        autofocus: autofocus,
+        child: child,
+      );
     }
-    if (_states.value.contains(WidgetState.focused)) {
-      return switch (_brightness) {
-        Brightness.dark => const BoxDecoration(color: Color(0x95007BFF)),
-        Brightness.light => const BoxDecoration(color: Color(0x95007BFF)),
-      };
-    }
-    if (_states.value.contains(WidgetState.hovered)) {
-      return const BoxDecoration(color: Color(0x22BBBBBB));
-    }
-    return null;
-  }
-
-  TextStyle get _textStyle {
-    if (_states.value.contains(WidgetState.pressed)) {
-      return const TextStyle(color: Color.fromARGB(255, 255, 255, 255));
-    }
-    return switch (_brightness) {
-      Brightness.dark => const TextStyle(color: Color(0xFFFFFFFF)),
-      Brightness.light => const TextStyle(color: Color(0xFF000000)),
-    };
   }
 }
 
@@ -3983,8 +7297,8 @@ class AnchorButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MenuController? controller = MenuController.maybeOf(context);
-    return Button.tag(
-      tag,
+    return CupertinoButton.filled(
+      minimumSize: constraints?.biggest,
       onPressed: () {
         onPressed?.call(tag);
         if (controller != null) {
@@ -3996,8 +7310,8 @@ class AnchorButton extends StatelessWidget {
         }
       },
       focusNode: focusNode,
-      constraints: constraints,
       autofocus: autofocus,
+      child: Text(tag.text),
     );
   }
 }
@@ -4023,16 +7337,39 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: const Color(0xff000000),
-      child: Directionality(
-        textDirection: widget.textDirection ?? _directionality ?? TextDirection.ltr,
-        child: Overlay(initialEntries: <OverlayEntry>[OverlayEntry(builder: _buildPage)]),
+    return CupertinoApp(
+      home: ColoredBox(
+        color: const Color(0xff000000),
+        child: Directionality(
+          textDirection: widget.textDirection ?? _directionality ?? TextDirection.ltr,
+          child: Align(alignment: widget.alignment, child: widget.child),
+        ),
       ),
     );
   }
+}
 
-  Widget _buildPage(BuildContext context) {
-    return Align(alignment: widget.alignment, child: widget.child);
+class _DebugCupertinoMenuEntryMixin extends StatelessWidget with CupertinoMenuEntryMixin {
+  const _DebugCupertinoMenuEntryMixin({
+    this.hasLeading = false,
+    this.allowTrailingSeparator = false,
+    this.allowLeadingSeparator = false,
+    this.child = const SizedBox.shrink(),
+  });
+
+  @override
+  final bool hasLeading;
+
+  @override
+  final bool allowTrailingSeparator;
+
+  @override
+  final bool allowLeadingSeparator;
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return child;
   }
 }
