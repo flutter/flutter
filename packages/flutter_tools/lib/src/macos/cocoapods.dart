@@ -18,6 +18,7 @@ import '../base/project_migrator.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 import '../migrations/cocoapods_script_symlink.dart';
 import '../migrations/cocoapods_toolchain_directory_migration.dart';
@@ -258,7 +259,9 @@ class CocoaPods {
       return;
     }
     final File podfileTemplate = await getPodfileTemplate(xcodeProject, runnerProject);
-    podfileTemplate.copySync(podfile.path);
+    final String templateContent = podfileTemplate.readAsStringSync();
+    final String renderedContent = _renderPodfileTemplate(templateContent, xcodeProject);
+    podfile.writeAsStringSync(renderedContent);
     addPodsDependencyToFlutterXcconfig(xcodeProject);
   }
 
@@ -274,6 +277,25 @@ class CocoaPods {
         podfileTemplateName,
       ),
     );
+  }
+
+  String _renderPodfileTemplate(String templateContent, XcodeBasedProject xcodeProject) {
+    // Replace the platform line in the template
+    if (xcodeProject is IosProject) {
+      // Get the iOS minimum version from config, defaulting to '13.0' if not set or empty
+      final String? configValue = globals.config.getValue('ios-min-version') as String?;
+      final String iosMinVersion = (configValue?.isNotEmpty == true) ? configValue! : '13.0';
+
+      // For iOS projects, replace the commented platform line with the configured version
+      final String platformLine = "platform :ios, '$iosMinVersion'";
+      return templateContent.replaceFirst(
+        RegExp(r"# platform :ios, '[^']+'"),
+        platformLine,
+      );
+    }
+
+    // For macOS projects, return as-is (no changes needed)
+    return templateContent;
   }
 
   /// Ensures all `Flutter/Xxx.xcconfig` files for the given Xcode-based

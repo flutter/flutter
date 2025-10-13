@@ -61,6 +61,11 @@ class ConfigCommand extends FlutterCommand {
       help: 'The relative path to override a projects build directory.',
       valueHelp: 'out/',
     );
+    argParser.addOption(
+      'ios-min-version',
+      help: 'The minimum iOS version for new projects. This will be used in the Podfile platform declaration.',
+      valueHelp: '13.0',
+    );
     addMachineOutputFlag(verboseHelp: verboseHelp);
     for (final Feature feature in featureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
@@ -188,6 +193,21 @@ class ConfigCommand extends FlutterCommand {
       _updateConfig('build-dir', buildDir);
     }
 
+    if (argResults!.wasParsed('ios-min-version')) {
+      final String iosMinVersion = stringArg('ios-min-version')!;
+      // If empty string, remove the config value to use default
+      if (iosMinVersion.isEmpty) {
+        globals.config.removeValue('ios-min-version');
+        globals.printStatus('Removing "ios-min-version" value.');
+      } else {
+        // Validate the version format (basic validation)
+        if (!RegExp(r'^\d+\.\d+$').hasMatch(iosMinVersion)) {
+          throwToolExit('ios-min-version must be in format "X.Y" (e.g., "13.0")');
+        }
+        _updateConfig('ios-min-version', iosMinVersion);
+      }
+    }
+
     for (final Feature feature in featureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
       if (configSetting == null) {
@@ -228,6 +248,10 @@ class ConfigCommand extends FlutterCommand {
     final Java? java = globals.java;
     if (results['jdk-dir'] == null && java != null) {
       results['jdk-dir'] = java.javaHome;
+    }
+    // Default iOS minimum version if not set
+    if (results['ios-min-version'] == null) {
+      results['ios-min-version'] = '13.0';
     }
 
     globals.printStatus(const JsonEncoder.withIndent('  ').convert(results));
