@@ -168,8 +168,8 @@ source_set("flutter_linux_sources") {
     "fl_value.cc",
     "fl_view.cc",
     "fl_view_accessible.cc",
-    "fl_window_state_monitor.cc",
     "fl_window_monitor.cc",
+    "fl_window_state_monitor.cc",
     "fl_windowing_channel.cc",
     "fl_windowing_handler.cc",
     "key_mapping.g.cc",
@@ -182,6 +182,7 @@ source_set("flutter_linux_sources") {
   ]
 
   deps = [
+    "$dart_src/runtime:dart_api",
     "//flutter/fml",
     "//flutter/shell/platform/common:common_cpp_enums",
     "//flutter/shell/platform/common:common_cpp_input",
@@ -189,7 +190,6 @@ source_set("flutter_linux_sources") {
     "//flutter/shell/platform/common:common_cpp_switches",
     "//flutter/shell/platform/embedder:embedder_headers",
     "//flutter/third_party/rapidjson",
-    "$dart_src/runtime:dart_api",
   ]
 }
 
