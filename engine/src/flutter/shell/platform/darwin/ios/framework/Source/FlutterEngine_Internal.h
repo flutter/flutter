@@ -32,6 +32,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface FlutterEngine () <FlutterViewEngineDelegate>
 
+// Indicates whether this engine has **ever** been manually registered to a scene.
+@property(nonatomic, assign) BOOL manuallyRegisteredToScene;
+
 - (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics;
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet;
 
