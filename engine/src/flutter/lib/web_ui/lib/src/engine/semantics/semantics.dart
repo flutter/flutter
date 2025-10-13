@@ -603,6 +603,7 @@ abstract class SemanticRole {
     // barriers.
     return semanticsObject.isTappable ||
         semanticsObject.isButton ||
+        semanticsObject.isCheckable ||
         semanticsObject.flags.isTextField ||
         semanticsObject.flags.isLink ||
         semanticsObject.flags.isSlider ||

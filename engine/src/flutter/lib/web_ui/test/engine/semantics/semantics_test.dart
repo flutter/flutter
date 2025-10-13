@@ -1504,232 +1504,214 @@ void _testContainer() {
     semantics().semanticsEnabled = false;
   });
 
-  test('non-interactive leaf nodes do not accept pointer events', () async {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
+  group('pointer events acceptance', () {
+    setUp(() {
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
+    });
 
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    // Create a non-interactive leaf node (no actions, no interactive flags)
-    updateNode(builder);
+    tearDown(() {
+      semantics().semanticsEnabled = false;
+    });
 
-    owner().updateSemantics(builder.build());
+    test('non-interactive leaf nodes do not accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      // Create a non-interactive leaf node (no actions, no interactive flags)
+      updateNode(builder);
 
-    final DomElement element = owner().semanticsHost.querySelector(
-      '#${kFlutterSemanticNodePrefix}0',
-    )!;
-    expect(
-      element.style.pointerEvents,
-      'none',
-      reason: 'Non-interactive leaf nodes should not intercept pointer events',
-    );
+      owner().updateSemantics(builder.build());
 
-    semantics().semanticsEnabled = false;
-  });
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        element.style.pointerEvents,
+        'none',
+        reason: 'Non-interactive leaf nodes should not intercept pointer events',
+      );
+    });
 
-  test('tappable leaf nodes accept pointer events', () async {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
+    test('tappable leaf nodes accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(builder, actions: ui.SemanticsAction.tap.index);
 
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    updateNode(builder, actions: ui.SemanticsAction.tap.index);
+      owner().updateSemantics(builder.build());
 
-    owner().updateSemantics(builder.build());
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        element.style.pointerEvents,
+        'all',
+        reason: 'Tappable nodes should accept pointer events',
+      );
+    });
 
-    final DomElement element = owner().semanticsHost.querySelector(
-      '#${kFlutterSemanticNodePrefix}0',
-    )!;
-    expect(
-      element.style.pointerEvents,
-      'all',
-      reason: 'Tappable nodes should accept pointer events',
-    );
+    test('button leaf nodes accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        flags: const ui.SemanticsFlags(isButton: true),
+        actions: ui.SemanticsAction.tap.index,
+      );
 
-    semantics().semanticsEnabled = false;
-  });
+      owner().updateSemantics(builder.build());
 
-  test('button leaf nodes accept pointer events', () async {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        element.style.pointerEvents,
+        'all',
+        reason: 'Button nodes should accept pointer events',
+      );
+    });
 
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    updateNode(
-      builder,
-      flags: const ui.SemanticsFlags(isButton: true),
-      actions: ui.SemanticsAction.tap.index,
-    );
+    test('checkable leaf nodes accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(builder, flags: const ui.SemanticsFlags(isChecked: ui.CheckedState.isFalse));
 
-    owner().updateSemantics(builder.build());
+      owner().updateSemantics(builder.build());
 
-    final DomElement element = owner().semanticsHost.querySelector(
-      '#${kFlutterSemanticNodePrefix}0',
-    )!;
-    expect(element.style.pointerEvents, 'all', reason: 'Button nodes should accept pointer events');
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        element.style.pointerEvents,
+        'all',
+        reason: 'Checkable nodes should accept pointer events',
+      );
+    });
 
-    semantics().semanticsEnabled = false;
-  });
+    test('text field leaf nodes accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(builder, flags: const ui.SemanticsFlags(isTextField: true));
 
-  test('text field leaf nodes accept pointer events', () async {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
+      owner().updateSemantics(builder.build());
 
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    updateNode(builder, flags: const ui.SemanticsFlags(isTextField: true));
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        element.style.pointerEvents,
+        'all',
+        reason: 'Text field nodes should accept pointer events',
+      );
+    });
 
-    owner().updateSemantics(builder.build());
+    test('link leaf nodes accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(builder, flags: const ui.SemanticsFlags(isLink: true));
 
-    final DomElement element = owner().semanticsHost.querySelector(
-      '#${kFlutterSemanticNodePrefix}0',
-    )!;
-    expect(
-      element.style.pointerEvents,
-      'all',
-      reason: 'Text field nodes should accept pointer events',
-    );
+      owner().updateSemantics(builder.build());
 
-    semantics().semanticsEnabled = false;
-  });
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(element.style.pointerEvents, 'all', reason: 'Link nodes should accept pointer events');
+    });
 
-  test('link leaf nodes accept pointer events', () async {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
+    test('slider leaf nodes accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        flags: const ui.SemanticsFlags(isSlider: true),
+        actions: ui.SemanticsAction.increase.index | ui.SemanticsAction.decrease.index,
+      );
 
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    updateNode(builder, flags: const ui.SemanticsFlags(isLink: true));
+      owner().updateSemantics(builder.build());
 
-    owner().updateSemantics(builder.build());
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        element.style.pointerEvents,
+        'all',
+        reason: 'Slider nodes should accept pointer events',
+      );
+    });
 
-    final DomElement element = owner().semanticsHost.querySelector(
-      '#${kFlutterSemanticNodePrefix}0',
-    )!;
-    expect(element.style.pointerEvents, 'all', reason: 'Link nodes should accept pointer events');
+    test('incrementable leaf nodes accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(builder, actions: ui.SemanticsAction.increase.index);
 
-    semantics().semanticsEnabled = false;
-  });
+      owner().updateSemantics(builder.build());
 
-  test('slider leaf nodes accept pointer events', () async {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        element.style.pointerEvents,
+        'all',
+        reason: 'Incrementable nodes should accept pointer events',
+      );
+    });
 
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    updateNode(
-      builder,
-      flags: const ui.SemanticsFlags(isSlider: true),
-      actions: ui.SemanticsAction.increase.index | ui.SemanticsAction.decrease.index,
-    );
+    test('route-scoped containers accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      // Create a route-scoped container (like a dialog) with children
+      updateNode(
+        builder,
+        flags: const ui.SemanticsFlags(scopesRoute: true),
+        childrenInTraversalOrder: Int32List.fromList(<int>[1, 2]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1, 2]),
+      );
+      updateNode(builder, id: 1);
+      updateNode(builder, id: 2);
 
-    owner().updateSemantics(builder.build());
+      owner().updateSemantics(builder.build());
 
-    final DomElement element = owner().semanticsHost.querySelector(
-      '#${kFlutterSemanticNodePrefix}0',
-    )!;
-    expect(element.style.pointerEvents, 'all', reason: 'Slider nodes should accept pointer events');
+      final DomElement routeContainer = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        routeContainer.style.pointerEvents,
+        'all',
+        reason:
+            'Route-scoped containers (like dialogs) should accept pointer events to prevent clicks from escaping to the barrier',
+      );
 
-    semantics().semanticsEnabled = false;
-  });
+      final DomElement child1 = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}1',
+      )!;
+      expect(
+        child1.style.pointerEvents,
+        'none',
+        reason: 'Non-interactive leaf nodes should not accept pointer events',
+      );
 
-  test('incrementable leaf nodes accept pointer events', () async {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
+      final DomElement child2 = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}2',
+      )!;
+      expect(
+        child2.style.pointerEvents,
+        'none',
+        reason: 'Non-interactive leaf nodes should not accept pointer events',
+      );
+    });
 
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    updateNode(builder, actions: ui.SemanticsAction.increase.index);
+    test('regular containers do not accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      // Create a regular container (NOT route-scoped) with children
+      updateNode(
+        builder,
+        childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+      );
+      updateNode(builder, id: 1);
 
-    owner().updateSemantics(builder.build());
+      owner().updateSemantics(builder.build());
 
-    final DomElement element = owner().semanticsHost.querySelector(
-      '#${kFlutterSemanticNodePrefix}0',
-    )!;
-    expect(
-      element.style.pointerEvents,
-      'all',
-      reason: 'Incrementable nodes should accept pointer events',
-    );
-
-    semantics().semanticsEnabled = false;
-  });
-
-  test('route-scoped containers accept pointer events', () async {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
-
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    // Create a route-scoped container (like a dialog) with children
-    updateNode(
-      builder,
-      flags: const ui.SemanticsFlags(scopesRoute: true),
-      childrenInTraversalOrder: Int32List.fromList(<int>[1, 2]),
-      childrenInHitTestOrder: Int32List.fromList(<int>[1, 2]),
-    );
-    updateNode(builder, id: 1);
-    updateNode(builder, id: 2);
-
-    owner().updateSemantics(builder.build());
-
-    final DomElement routeContainer = owner().semanticsHost.querySelector(
-      '#${kFlutterSemanticNodePrefix}0',
-    )!;
-    expect(
-      routeContainer.style.pointerEvents,
-      'all',
-      reason:
-          'Route-scoped containers (like dialogs) should accept pointer events to prevent clicks from escaping to the barrier',
-    );
-
-    final DomElement child1 = owner().semanticsHost.querySelector(
-      '#${kFlutterSemanticNodePrefix}1',
-    )!;
-    expect(
-      child1.style.pointerEvents,
-      'none',
-      reason: 'Non-interactive leaf nodes should not accept pointer events',
-    );
-
-    final DomElement child2 = owner().semanticsHost.querySelector(
-      '#${kFlutterSemanticNodePrefix}2',
-    )!;
-    expect(
-      child2.style.pointerEvents,
-      'none',
-      reason: 'Non-interactive leaf nodes should not accept pointer events',
-    );
-
-    semantics().semanticsEnabled = false;
-  });
-
-  test('regular containers do not accept pointer events', () async {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
-
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    // Create a regular container (NOT route-scoped) with children
-    updateNode(
-      builder,
-      childrenInTraversalOrder: Int32List.fromList(<int>[1]),
-      childrenInHitTestOrder: Int32List.fromList(<int>[1]),
-    );
-    updateNode(builder, id: 1);
-
-    owner().updateSemantics(builder.build());
-
-    final DomElement container = owner().semanticsHost.querySelector(
-      '#${kFlutterSemanticNodePrefix}0',
-    )!;
-    expect(
-      container.style.pointerEvents,
-      'none',
-      reason: 'Regular containers (without scopesRoute) should not accept pointer events',
-    );
-
-    semantics().semanticsEnabled = false;
+      final DomElement container = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        container.style.pointerEvents,
+        'none',
+        reason: 'Regular containers (without scopesRoute) should not accept pointer events',
+      );
+    });
   });
 
   test('descendant nodes are removed from the node map, unless reparented', () async {
