@@ -85,7 +85,7 @@ void main() {
         final initialSize = controller.contentSize;
         await awaitNotification(() {
           controller.setConstraints(constraints);
-	}, () => controller.contentSize != initialSize);
+        }, () => controller.contentSize != initialSize);
       } else if (jsonMap['type'] == 'set_fullscreen') {
         await awaitNotification(() {
           controller.setFullscreen(true);
