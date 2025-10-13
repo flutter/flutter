@@ -88,7 +88,7 @@ self.addEventListener('fetch', (event) => {
     print('== RELOADING PAGE ==');
     await server.chrome.reloadPage();
     await _waitForAppToRequest(server, 'flutter_service_worker.js');
-    await _waitForAppToRequest(server, 'main.dart.js');
+    await _waitForAppToRequest(server, 'CLOSE');
 
     expect(
       _requestedPaths,
