@@ -201,8 +201,8 @@ class ConfigCommand extends FlutterCommand {
         globals.printStatus('Removing "ios-min-version" value.');
       } else {
         // Validate the version format (basic validation)
-        if (!RegExp(r'^\d+\.\d+$').hasMatch(iosMinVersion)) {
-          throwToolExit('ios-min-version must be in format "X.Y" (e.g., "13.0")');
+        if (!RegExp(r'^\d+(\.\d+){0,2}$').hasMatch(iosMinVersion)) {
+          throwToolExit('ios-min-version must be in a valid version format (e.g., "13.0")');
         }
         _updateConfig('ios-min-version', iosMinVersion);
       }
