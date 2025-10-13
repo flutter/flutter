@@ -8,6 +8,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.media.ExifInterface;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.Build;
@@ -32,6 +33,10 @@ public class FlutterImageDecoderImplHeifApi36Test {
   private byte[] createTestImageBytes(int width, int height) {
     Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    bitmap.setPixel(0, 0, Color.BLUE);
+    bitmap.setPixel(0, height - 1, Color.WHITE);
+    bitmap.setPixel(width - 1, 0, Color.BLACK);
+    bitmap.setPixel(width - 1, height - 1, Color.RED);
     bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
     bitmap.recycle();
     return stream.toByteArray();
@@ -59,6 +64,7 @@ public class FlutterImageDecoderImplHeifApi36Test {
     assertNotNull(result);
     assertEquals(100, result.getWidth());
     assertEquals(200, result.getHeight());
+    assertEquals(Color.BLUE, result.getPixel(0, 0));
 
     // Verify applyFlipIfNeeded was called with the original bitmap.
     ArgumentCaptor<Bitmap> bitmapCaptor = ArgumentCaptor.forClass(Bitmap.class);
@@ -80,6 +86,8 @@ public class FlutterImageDecoderImplHeifApi36Test {
 
     // 3. Assert
     assertNotNull(result);
+    // Would expect blue to be at top right now
+    assertEquals(Color.BLUE, result.getPixel(200 - 1, 0));
     // After a 90-degree rotation, width and height are swapped.
     assertEquals(200, result.getWidth());
     assertEquals(100, result.getHeight());
