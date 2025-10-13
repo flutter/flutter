@@ -4,7 +4,6 @@
 
 config("libprotozero_config") {
   configs = ["//flutter/third_party/dart/third_party/perfetto:libprotozero_config"]
-
   include_dirs = [ "../../flutter/third_party/dart" ]
 }
 
