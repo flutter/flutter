@@ -218,8 +218,7 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
   SkwasmFragmentProgram._(
     this.name,
     RuntimeEffectHandle handle,
-    this.floatUniformCount,
-    this.childShaderCount,
+    this._shaderData,
   ) : super(handle, _registry);
 
   factory SkwasmFragmentProgram.fromBytes(String name, Uint8List bytes) {
@@ -236,7 +235,7 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
     }
     final RuntimeEffectHandle handle = runtimeEffectCreate(sourceString);
     skStringFree(sourceString);
-    return SkwasmFragmentProgram._(name, handle, shaderData.floatCount, shaderData.textureCount);
+    return SkwasmFragmentProgram._(name, handle, shaderData);
   }
 
   static final SkwasmFinalizationRegistry<RawRuntimeEffect> _registry =
@@ -245,13 +244,28 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
       );
 
   final String name;
-  final int floatUniformCount;
-  final int childShaderCount;
+  int get floatUniformCount => _shaderData.floatCount;
+  int get childShaderCount => _shaderData.textureCount;
+  final ShaderData _shaderData;
 
   @override
   ui.FragmentShader fragmentShader() => SkwasmFragmentShader(this);
 
   int get uniformSize => runtimeEffectGetUniformSize(handle);
+  
+  int _getShaderIndex(String name, int index) {
+    int result = 0;
+    for (final uniform in _shaderData.uniforms) {
+      if (uniform.name == name) {
+        if (index < 0 || index >= uniform.floatCount) {
+          throw IndexError.withLength(index, uniform.floatCount);
+        }
+        break;
+      }
+      result += uniform.floatCount;
+    }
+    return result;
+  }
 }
 
 class SkwasmShaderData extends SkwasmObjectWrapper<RawUniformData> {
@@ -361,11 +375,33 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
 
   @override
   ui.UniformFloatSlot getUniformFloat(String name, [int? index]) {
-    throw UnsupportedError('getUniformFloat is not supported on the web.');
+    index ??= 0;
+    final shaderIndex = _program._getShaderIndex(name, index);
+    return SkwasmUniformFloatSlot._(this, index, name, shaderIndex);
   }
 
   @override
   ui.ImageSamplerSlot getImageSampler(String name) {
     throw UnsupportedError('getImageSampler is not supported on the web.');
   }
+}
+
+class SkwasmUniformFloatSlot implements ui.UniformFloatSlot {
+  SkwasmUniformFloatSlot._(this._shader, this.index, this.name, this.shaderIndex);
+
+  final SkwasmFragmentShader _shader;
+
+  @override
+  final int index;
+
+  @override
+  final String name;
+
+  @override
+  void set(double val) {
+    _shader.setFloat(shaderIndex, val);
+  }
+
+  @override
+  final int shaderIndex;
 }
