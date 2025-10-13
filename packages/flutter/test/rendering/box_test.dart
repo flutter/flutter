@@ -60,8 +60,8 @@ class InvalidSizeAccessInDryLayoutBox extends RenderBox {
   }
 }
 
-class BaselineSizeAccessRootRenderBox extends RenderProxyBox {
-  BaselineSizeAccessRootRenderBox({required RenderBox child}) : super(child);
+class _BaselineSizeAccessRootRenderBox extends RenderProxyBox {
+  _BaselineSizeAccessRootRenderBox({required RenderBox child}) : super(child);
 
   @override
   void performLayout() {
@@ -70,8 +70,8 @@ class BaselineSizeAccessRootRenderBox extends RenderProxyBox {
   }
 }
 
-class BaselineSizeAccessChildRenderBox extends RenderProxyBox {
-  BaselineSizeAccessChildRenderBox({required RenderBox child}) : super(child);
+class _BaselineSizeAccessChildRenderBox extends RenderProxyBox {
+  _BaselineSizeAccessChildRenderBox({required RenderBox child}) : super(child);
 
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
@@ -290,8 +290,8 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/157915.
   test('Does not throw when accessing child size from computeDistanceToActualBaseline', () {
     final RenderBox leaf = RenderPadding(padding: const EdgeInsets.all(10.0));
-    final BaselineSizeAccessChildRenderBox child = BaselineSizeAccessChildRenderBox(child: leaf);
-    final BaselineSizeAccessRootRenderBox root = BaselineSizeAccessRootRenderBox(child: child);
+    final _BaselineSizeAccessChildRenderBox child = _BaselineSizeAccessChildRenderBox(child: leaf);
+    final _BaselineSizeAccessRootRenderBox root = _BaselineSizeAccessRootRenderBox(child: child);
 
     bool hadErrors = false;
     void expectSizeAccessErrors() {
