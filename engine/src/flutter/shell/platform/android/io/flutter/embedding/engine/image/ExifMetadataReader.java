@@ -17,7 +17,9 @@ class ExifMetadataReader {
    * Reads the EXIF metadata from the given byte array and populates the provided {@link Metadata}
    * object.
    *
-   * @param bytes The byte array containing the image data.
+   * @param bytes The byte array containing the image data. The supported formats include JPEG, PNG,
+   *     WebP, HEIF, and various RAW formats such as DNG, CR2, NEF, ARW, and ORF. See the {@link
+   *     ExifInterface} documentation for a complete and up-to-date list.
    * @param metadata The {@link Metadata} object to populate.
    */
   static void read(byte[] bytes, @NonNull Metadata metadata) {

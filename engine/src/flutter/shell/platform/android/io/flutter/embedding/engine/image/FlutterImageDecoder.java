@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import java.nio.ByteBuffer;
 
-interface FlutterImageDecoderImpl {
+interface ImageDecoder {
   Bitmap decodeImage(ByteBuffer buffer, Metadata metadata);
 }
 
@@ -40,7 +40,7 @@ public class FlutterImageDecoder {
   public static Bitmap decodeImage(
       @NonNull ByteBuffer buffer, @NonNull HeaderListener headerListener) {
     Metadata metadata = Metadata.create(buffer, headerListener);
-    FlutterImageDecoderImpl impl = null;
+    ImageDecoder impl = null;
     Utils utils = new Utils();
     if (metadata.isHeif()) {
       if (Build.VERSION.SDK_INT == io.flutter.Build.API_LEVELS.API_36) {

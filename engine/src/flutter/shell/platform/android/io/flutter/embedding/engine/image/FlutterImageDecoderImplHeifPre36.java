@@ -6,10 +6,10 @@ import io.flutter.Build;
 import java.nio.ByteBuffer;
 
 /**
- * An implementation of {@link FlutterImageDecoderImpl} that decodes HEIF images on devices running
- * Android versions prior to 36.
+ * An implementation of {@link ImageDecoder} that decodes HEIF images on devices running Android
+ * versions prior to 36.
  *
- * <p>flipping (or mirroring) does not work Pre 36. Need to do it manually.
+ * <p>flipping (or mirroring) from metadata does not work Pre 36. Need to do it manually.
  */
 @RequiresApi(Build.API_LEVELS.API_28)
 class FlutterImageDecoderImplHeifPre36 extends FlutterImageDecoderImplDefault {

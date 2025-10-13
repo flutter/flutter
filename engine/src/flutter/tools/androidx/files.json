@@ -28,12 +28,11 @@
     "provides": ["androidx.lifecycle.LifecycleRegistry"]
   },
   {
-    "url": "https://maven.google.com/androidx/fragment/fragment/1.7.1/fragment-1.7.1.aar",
-    "out_file_name": "androidx_fragment.aar",
-    "maven_dependency": "androidx.fragment:fragment:1.7.1",
+    "url": "https://maven.google.com/androidx/exifinterface/1.4.1/exifinterface:1.4.1.aar",
+    "out_file_name": "exifinterface.aar",
+    "maven_dependency": "androidx.exifinterface:exifinterface:1.4.1",
     "provides": [
-      "androidx.fragment.app.Fragment",
-      "androidx.fragment.app.FragmentActivity"
+      "androidx.exifinterface.media.ExifInterface"
     ]
   },
   {
@@ -50,6 +49,15 @@
       "androidx.annotation.RequiresApi",
       "androidx.annotation.UiThread",
       "androidx.annotation.VisibleForTesting"
+    ]
+  },
+  {
+    "url": "https://maven.google.com/androidx/fragment/fragment/1.7.1/fragment-1.7.1.aar",
+    "out_file_name": "androidx_fragment.aar",
+    "maven_dependency": "androidx.fragment:fragment:1.7.1",
+    "provides": [
+      "androidx.fragment.app.Fragment",
+      "androidx.fragment.app.FragmentActivity"
     ]
   },
   {
