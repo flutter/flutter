@@ -60,6 +60,25 @@ class InvalidSizeAccessInDryLayoutBox extends RenderBox {
   }
 }
 
+class BaselineSizeAccessRootRenderBox extends RenderProxyBox {
+  BaselineSizeAccessRootRenderBox({required RenderBox child}) : super(child);
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    child!.getDistanceToBaseline(TextBaseline.alphabetic);
+  }
+}
+
+class BaselineSizeAccessChildRenderBox extends RenderProxyBox {
+  BaselineSizeAccessChildRenderBox({required RenderBox child}) : super(child);
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    return child!.size.height;
+  }
+}
+
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -266,6 +285,23 @@ void main() {
         "because it's established in performLayout or performResize using different BoxConstraints.",
       ),
     );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/157915.
+  test('Does not throw when accessing child size from computeDistanceToActualBaseline', () {
+    final RenderBox leaf = RenderPadding(padding: const EdgeInsets.all(10.0));
+    final BaselineSizeAccessChildRenderBox child = BaselineSizeAccessChildRenderBox(child: leaf);
+    final BaselineSizeAccessRootRenderBox root = BaselineSizeAccessRootRenderBox(child: child);
+
+    bool hadErrors = false;
+    void expectSizeAccessErrors() {
+      absorbOverflowedErrors();
+      hadErrors = true;
+    }
+
+    layout(root, onErrors: expectSizeAccessErrors);
+
+    expect(hadErrors, false);
   });
 
   test('Flex and padding', () {
