@@ -83,39 +83,39 @@ G_DEFINE_TYPE_WITH_CODE(
             G_IMPLEMENT_INTERFACE(ATK_TYPE_ACTION,
                                   fl_accessible_node_action_interface_init))
 
-/// Returns TRUE if [flags] indicate this elements is checkable.
+// Returns TRUE if [flags] indicate this element is checkable.
 static gboolean is_checkable(FlutterSemanticsFlags flags) {
   return flags.is_checked != kFlutterCheckStateNone ||
          flags.is_toggled != kFlutterTristateNone;
 }
 
-/// Returns TRUE if [flags] indicate this elements is checked.
+// Returns TRUE if [flags] indicate this element is checked.
 static gboolean is_checked(FlutterSemanticsFlags flags) {
   return flags.is_checked == kFlutterCheckStateTrue ||
          flags.is_toggled == kFlutterTristateTrue;
 }
 
-/// Returns TRUE if [flags] indicate this elements is focusable.
+// Returns TRUE if [flags] indicate this element is focusable.
 static gboolean is_focusable(FlutterSemanticsFlags flags) {
   return flags.is_focused != kFlutterTristateNone;
 }
 
-/// Returns TRUE if [flags] indicate this elements is focused.
+// Returns TRUE if [flags] indicate this element is focused.
 static gboolean is_focused(FlutterSemanticsFlags flags) {
   return flags.is_focused == kFlutterTristateTrue;
 }
 
-/// Returns TRUE if [flags] indicate this elements is selected.
+// Returns TRUE if [flags] indicate this element is selected.
 static gboolean is_selected(FlutterSemanticsFlags flags) {
   return flags.is_selected == kFlutterTristateTrue;
 }
 
-/// Returns TRUE if [flags] indicate this elements is sensitive.
+// Returns TRUE if [flags] indicate this element is sensitive.
 static gboolean is_sensitive(FlutterSemanticsFlags flags) {
   return flags.is_enabled != kFlutterTristateNone;
 }
 
-/// Returns TRUE if [flags] indicate this elements is enabled.
+// Returns TRUE if [flags] indicate this element is enabled.
 static gboolean is_enabled(FlutterSemanticsFlags flags) {
   return flags.is_enabled == kFlutterTristateTrue;
 }
