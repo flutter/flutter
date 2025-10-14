@@ -4973,7 +4973,6 @@ targets:
 
   - name: Mac_ios channels_integration_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true # TODO(vashworth): Remove once https://github.com/flutter/flutter/issues/174444 is fixed.
     presubmit: false
     timeout: 60
     properties:
@@ -5161,7 +5160,6 @@ targets:
 
   - name: Mac_arm64_ios integration_test_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true # TODO(vashworth): Remove once https://github.com/flutter/flutter/issues/174444 is fixed.
     presubmit: false
     timeout: 60
     properties:
@@ -5310,7 +5308,6 @@ targets:
 
   - name: Mac_ios native_assets_ios
     recipe: devicelab/devicelab_drone
-    bringup: true # TODO(vashworth): Remove once https://github.com/flutter/flutter/issues/174444 is fixed.
     presubmit: false
     timeout: 60
     properties:
@@ -5446,7 +5443,6 @@ targets:
 
   - name: Mac_ios wide_gamut_ios
     recipe: devicelab/devicelab_drone
-    bringup: true # TODO(vashworth): Remove once https://github.com/flutter/flutter/issues/174444 is fixed.
     presubmit: false
     timeout: 60
     properties:
@@ -5557,7 +5553,6 @@ targets:
 
   - name: Mac_ios spell_check_test
     recipe: devicelab/devicelab_drone
-    bringup: true # TODO(vashworth): Remove once https://github.com/flutter/flutter/issues/174444 is fixed.
     presubmit: false
     timeout: 60
     properties:
@@ -7021,6 +7016,17 @@ targets:
       tags: >
         ["devicelab", "hostonly", "windows"]
       task_name: windowing_test_windows
+
+  - name: Linux windowing_test
+    recipe: devicelab/devicelab_drone
+    presubmit: true
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: windowing_test_linux
+
 
   - name: Windows flutter_tool_startup__windows
     recipe: devicelab/devicelab_drone
