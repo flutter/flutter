@@ -13,6 +13,7 @@ void main() {
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
+      await driver.requestData(jsonEncode({'type': 'ping'}));
     });
 
     tearDownAll(() async {
@@ -67,6 +68,16 @@ void main() {
       final data = jsonDecode(response);
       expect(data["width"], 500);
       expect(data["height"], 501);
+
+      await driver.requestData(
+        jsonEncode({
+          'type': 'set_constraints',
+          'min_width': 0,
+          'min_height': 0,
+          'max_width': 0,
+          'max_height': 0,
+        }),
+      );
     }, timeout: Timeout.none);
 
     test('Can set and get fullscreen', () async {
@@ -127,6 +138,12 @@ void main() {
       );
       final data = jsonDecode(response);
       expect(data["isActivated"], true);
+    }, timeout: Timeout.none);
+
+    test('Can open dialog', () async {
+      await driver.requestData(jsonEncode({'type': 'open_dialog'}));
+      await driver.waitFor(find.byValueKey('close_dialog'));
+      await driver.requestData(jsonEncode({'type': 'close_dialog'}));
     }, timeout: Timeout.none);
   });
 }

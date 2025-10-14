@@ -12,6 +12,7 @@ import 'regular_window_content.dart';
 import 'window_settings_dialog.dart';
 import 'models.dart';
 import 'regular_window_edit_dialog.dart';
+import 'dialog_window_edit_dialog.dart';
 
 class MainWindow extends StatelessWidget {
   const MainWindow({super.key});
@@ -96,7 +97,11 @@ class _WindowsTable extends StatelessWidget {
         context: context,
         controller: regular,
       ),
-      DialogWindowController() => throw UnimplementedError(),
+      final DialogWindowController dialog => showDialogWindowEditDialog(
+        context: context,
+        controller: dialog,
+      ),
+      final TooltipWindowController tooltip => throw UnimplementedError(),
     };
   }
 
@@ -104,6 +109,7 @@ class _WindowsTable extends StatelessWidget {
     return switch (controller) {
       RegularWindowController() => 'Regular',
       DialogWindowController() => 'Dialog',
+      TooltipWindowController() => 'Tooltip',
     };
   }
 
@@ -131,6 +137,8 @@ class _WindowsTable extends StatelessWidget {
     );
   }
 }
+
+final tooltipKey = GlobalKey();
 
 class _WindowCreatorCard extends StatelessWidget {
   @override
@@ -173,6 +181,66 @@ class _WindowCreatorCard extends StatelessWidget {
                   child: const Text('Regular'),
                 ),
                 const SizedBox(height: 8),
+                OutlinedButton(
+                  key: tooltipKey,
+                  onPressed: () {
+                    final renderBox =
+                        tooltipKey.currentContext?.findRenderObject()
+                            as RenderBox;
+                    final transform = renderBox.getTransformTo(null);
+                    final rect = Offset.zero & renderBox.size;
+                    final globalRect = MatrixUtils.transformRect(
+                      transform,
+                      rect,
+                    );
+                    final UniqueKey key = UniqueKey();
+                    windowManager.add(
+                      KeyedWindow(
+                        key: key,
+                        controller: TooltipWindowController(
+                          anchorRect: globalRect,
+                          positioner: WindowPositioner(
+                            childAnchor: WindowPositionerAnchor.left,
+                            parentAnchor: WindowPositionerAnchor.right,
+                            offset: const Offset(10, 0),
+                            constraintAdjustment: {
+                              // WindowPositionerConstraintAdjustment.flipX,
+                            },
+                          ),
+
+                          delegate: _TooltipWindowControllerDelegate(
+                            onDestroyed: () => windowManager.remove(key),
+                          ),
+                          // title: "Popup",
+                          parent: windowManager.windows.first.controller,
+                          // contentSize:
+                          //     WindowSizing(preferredSize: windowSettings.regularSize),
+                        ),
+                      ),
+                    );
+                  },
+                  child: Text('Tooltip'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton(
+                  onPressed: () async {
+                    final UniqueKey key = UniqueKey();
+                    windowManager.add(
+                      KeyedWindow(
+                        key: key,
+                        controller: DialogWindowController(
+                          delegate: CallbackDialogWindowControllerDelegate(
+                            onDestroyed: () => windowManager.remove(key),
+                          ),
+                          title: 'Modeless Dialog',
+                          preferredSize: windowSettings.dialogSize,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Modeless Dialog'),
+                ),
+                const SizedBox(height: 8),
                 Container(
                   alignment: Alignment.bottomRight,
                   child: TextButton(
@@ -190,4 +258,16 @@ class _WindowCreatorCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _TooltipWindowControllerDelegate extends TooltipWindowControllerDelegate {
+  _TooltipWindowControllerDelegate({required this.onDestroyed});
+
+  @override
+  void onWindowDestroyed() {
+    onDestroyed();
+    super.onWindowDestroyed();
+  }
+
+  final VoidCallback onDestroyed;
 }
