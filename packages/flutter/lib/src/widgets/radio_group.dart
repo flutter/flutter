@@ -231,10 +231,10 @@ class _RadioGroupShortcutManager<T> extends ShortcutManager {
 
   @override
   KeyEventResult handleKeypress(BuildContext context, KeyEvent event) {
-    final bool hasFocusedRadio = state._radios.any(
+    final bool radioHasFocus = state._radios.any(
       (RadioClient<T> radio) => radio.focusNode.hasFocus,
     );
-    if (!hasFocusedRadio) {
+    if (!radioHasFocus) {
       // Ignore the event if no radio is focused. This prevents this handler
       // from unintentionally consuming an event meant for a non-radio widget
       // that currently has focus.
