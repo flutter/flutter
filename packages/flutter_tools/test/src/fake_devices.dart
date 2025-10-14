@@ -215,7 +215,10 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
   final _onRemovedController = StreamController<Device>.broadcast();
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     lastPollingTimeout = timeout;
     return _devices;
   }
@@ -251,9 +254,17 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
   var discoverDevicesCalled = false;
 
   @override
-  Future<List<Device>> discoverDevices({Duration? timeout, DeviceDiscoveryFilter? filter}) {
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+    bool forWirelessDiscovery = false,
+  }) {
     discoverDevicesCalled = true;
-    return super.discoverDevices(timeout: timeout);
+    return super.discoverDevices(
+      timeout: timeout,
+      filter: filter,
+      forWirelessDiscovery: forWirelessDiscovery,
+    );
   }
 
   @override
