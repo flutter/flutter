@@ -561,6 +561,9 @@ class _SlidingSegmentButtonState<T> extends State<_SlidingSegmentButton<T>> with
   }
 
   @override
+  bool get enabled => widget.enabled;
+
+  @override
   T get radioValue => widget.value;
 
   @override
