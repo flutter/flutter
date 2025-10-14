@@ -726,7 +726,7 @@ abstract class SemanticRole {
 
   /// Convenience method to get the node id with prefix.
   static String getIdAttribute(int semanticsId) {
-    return '$kFlutterSemanticNodePrefix${semanticsId}';
+    return '$kFlutterSemanticNodePrefix$semanticsId';
   }
 
   /// Adds generic focus management features.

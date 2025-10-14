@@ -145,7 +145,7 @@ void runSemanticsTests() {
   group('requirable', () {
     _testRequirable();
   });
-  group('traverslaOrder', () {
+  group('traversalOrder', () {
     _testSemanticsTraversalOrder();
   });
   group('SemanticsValidationResult', () {
