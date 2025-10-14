@@ -406,14 +406,6 @@ class Dialog extends StatelessWidget {
 /// For finer-grained control over the sizing of a dialog, consider using
 /// [Dialog] directly.
 ///
-/// ## Accessibility
-///
-/// The accessibility behavior of [AlertDialog] is platform adaptive, based on
-/// the device's actual platform rather than the theme's platform setting. This
-/// ensures that assistive technologies like VoiceOver on iOS and macOS receive
-/// the correct platform-specific semantics label and appropriate flags, even
-/// when the app's theme is configured to mimic a different platform's appearance.
-///
 /// See also:
 ///
 ///  * [SimpleDialog], which handles the scrolling of the contents but has no [actions].
@@ -1162,14 +1154,6 @@ class SimpleDialogOption extends StatelessWidget {
 /// }
 /// ```
 /// {@end-tool}
-///
-/// ## Accessibility
-///
-/// The accessibility behavior of [SimpleDialog] is platform adaptive, based on
-/// the device's actual platform rather than the theme's platform setting. This
-/// ensures that assistive technologies like VoiceOver on iOS and macOS receive
-/// the correct platform-specific semantics label and appropriate flags, even
-/// when the app's theme is configured to mimic a different platform's appearance.
 ///
 /// See also:
 ///
