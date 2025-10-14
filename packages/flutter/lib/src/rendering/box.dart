@@ -2262,6 +2262,7 @@ abstract class RenderBox extends RenderObject {
             !doingRegularLayout ||
             debugDoingThisResize ||
             debugDoingThisLayout ||
+            _debugDoingBaseline ||
             RenderObject.debugActiveLayout == parent && size._canBeUsedByParent;
         assert(
           sizeAccessAllowed,
