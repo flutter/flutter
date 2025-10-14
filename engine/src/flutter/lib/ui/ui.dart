@@ -22,8 +22,6 @@ import 'dart:math' as math;
 import 'dart:nativewrappers';
 import 'dart:typed_data';
 
-import 'package:_engine_workspace/gpu/lib/gpu.dart';
-
 part 'annotations.dart';
 part 'channel_buffers.dart';
 part 'compositing.dart';
