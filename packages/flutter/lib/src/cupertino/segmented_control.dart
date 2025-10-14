@@ -246,6 +246,9 @@ class _SegmentButtonState<T> extends State<_SegmentButton<T>> with RadioClient<T
   @override
   bool get tristate => false;
 
+  @override
+  bool get enabled => widget.enabled;
+
   void requestFocus() {
     if (widget.enabled) {
       _focusNode.requestFocus();
