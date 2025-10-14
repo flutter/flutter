@@ -182,7 +182,6 @@ class RefreshIndicator extends StatefulWidget {
   /// from [CupertinoSliverRefreshControl], due to a difference in structure.
   const RefreshIndicator.adaptive({
     super.key,
-    required this.child,
     this.displacement = 40.0,
     this.edgeOffset = 0.0,
     required this.onRefresh,
@@ -194,6 +193,7 @@ class RefreshIndicator extends StatefulWidget {
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
     this.elevation = 2.0,
+    required this.child,
   }) : _indicatorType = _IndicatorType.adaptive,
        onStatusChange = null,
        assert(elevation >= 0.0);
@@ -204,7 +204,6 @@ class RefreshIndicator extends StatefulWidget {
   /// Events can be optionally listened by using the `onStatusChange` callback.
   const RefreshIndicator.noSpinner({
     super.key,
-    required this.child,
     required this.onRefresh,
     this.onStatusChange,
     this.notificationPredicate = defaultScrollNotificationPredicate,
@@ -212,6 +211,7 @@ class RefreshIndicator extends StatefulWidget {
     this.semanticsValue,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
     this.elevation = 2.0,
+    required this.child,
   }) : _indicatorType = _IndicatorType.noSpinner,
        // The following parameters aren't used because [_IndicatorType.noSpinner] is being used,
        // which involves showing no spinner, hence the following parameters are useless since
