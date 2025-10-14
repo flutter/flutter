@@ -244,6 +244,8 @@ class PlatformViewAndroidJNI {
                                       int32_t viewHeight,
                                       MutatorsStack mutators_stack) = 0;
 
+  virtual void hidePlatformView2(int32_t view_id) = 0;
+
   virtual void showOverlaySurface2() = 0;
 
   virtual void hideOverlaySurface2() = 0;
