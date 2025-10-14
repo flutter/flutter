@@ -8,11 +8,21 @@
 #include "flutter/shell/platform/linux/fl_accessible_node.h"
 #include "flutter/shell/platform/linux/testing/mock_gtk.h"
 
-// Checks can build a tree of nodes.
-TEST(FlAccessibleNodeTest, BuildTree) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+class FlAccessibleNodeTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    g_autoptr(FlDartProject) project = fl_dart_project_new();
+    engine = fl_engine_new(project);
+  }
 
+  ~FlAccessibleNodeTest() { g_object_unref(engine); }
+
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+  FlEngine* engine;
+};
+
+// Checks can build a tree of nodes.
+TEST_F(FlAccessibleNodeTest, BuildTree) {
   int64_t view_id = 123;
   g_autoptr(FlAccessibleNode) root = fl_accessible_node_new(engine, view_id, 0);
   g_autoptr(FlAccessibleNode) child1 =
@@ -47,20 +57,14 @@ TEST(FlAccessibleNodeTest, BuildTree) {
 }
 
 // Checks node name is exposed to ATK.
-TEST(FlAccessibleNodeTest, SetName) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
+TEST_F(FlAccessibleNodeTest, SetName) {
   g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
   fl_accessible_node_set_name(node, "test");
   EXPECT_STREQ(atk_object_get_name(ATK_OBJECT(node)), "test");
 }
 
 // Checks node extents are exposed to ATK.
-TEST(FlAccessibleNodeTest, SetExtents) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
+TEST_F(FlAccessibleNodeTest, SetExtents) {
   g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
   fl_accessible_node_set_extents(node, 1, 2, 3, 4);
   gint x, y, width, height;
@@ -73,12 +77,7 @@ TEST(FlAccessibleNodeTest, SetExtents) {
 }
 
 // Checks the Flutter focused flag are mapped to ATK flags.
-TEST(FlAccessibleNodeTest, FocusedFlags) {
-  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
+TEST_F(FlAccessibleNodeTest, FocusedFlags) {
   g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
 
   FlutterSemanticsFlags flags1 = {};
@@ -111,12 +110,7 @@ TEST(FlAccessibleNodeTest, FocusedFlags) {
 }
 
 // Checks the Flutter checked and toggled flags are mapped to ATK flags.
-TEST(FlAccessibleNodeTest, CheckedAndToggledFlags) {
-  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
+TEST_F(FlAccessibleNodeTest, CheckedAndToggledFlags) {
   g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
 
   FlutterSemanticsFlags flags1 = {};
@@ -170,12 +164,7 @@ TEST(FlAccessibleNodeTest, CheckedAndToggledFlags) {
 }
 
 // Checks the Flutter selected flag is mapped to ATK flags.
-TEST(FlAccessibleNodeTest, SelectedFlags) {
-  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
+TEST_F(FlAccessibleNodeTest, SelectedFlags) {
   g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
 
   FlutterSemanticsFlags flags1 = {};
@@ -203,12 +192,7 @@ TEST(FlAccessibleNodeTest, SelectedFlags) {
 }
 
 // Checks the Flutter enabled flag is mapped to ATK flags.
-TEST(FlAccessibleNodeTest, EnabledFlags) {
-  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
+TEST_F(FlAccessibleNodeTest, EnabledFlags) {
   g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
 
   FlutterSemanticsFlags flags1 = {};
@@ -241,12 +225,7 @@ TEST(FlAccessibleNodeTest, EnabledFlags) {
 }
 
 // Checks the Flutter obscured flag is mapped to ATK flags.
-TEST(FlAccessibleNodeTest, ObscuredFlags) {
-  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
+TEST_F(FlAccessibleNodeTest, ObscuredFlags) {
   g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
 
   FlutterSemanticsFlags flags1 = {};
@@ -267,12 +246,7 @@ TEST(FlAccessibleNodeTest, ObscuredFlags) {
 }
 
 // Checks the Flutter hidden flag is mapped to ATK flags.
-TEST(FlAccessibleNodeTest, HiddenFlags) {
-  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
+TEST_F(FlAccessibleNodeTest, HiddenFlags) {
   g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
 
   FlutterSemanticsFlags flags1 = {};
@@ -293,12 +267,7 @@ TEST(FlAccessibleNodeTest, HiddenFlags) {
 }
 
 // Checks the Flutter read only flag is mapped to ATK flags.
-TEST(FlAccessibleNodeTest, ReadOnlyFlags) {
-  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
+TEST_F(FlAccessibleNodeTest, ReadOnlyFlags) {
   g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
 
   FlutterSemanticsFlags flags1 = {};
@@ -319,12 +288,7 @@ TEST(FlAccessibleNodeTest, ReadOnlyFlags) {
 }
 
 // Checks the Flutter text field flag is mapped to ATK flags.
-TEST(FlAccessibleNodeTest, TextFieldFlags) {
-  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
+TEST_F(FlAccessibleNodeTest, TextFieldFlags) {
   g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
 
   FlutterSemanticsFlags flags1 = {};
@@ -345,10 +309,7 @@ TEST(FlAccessibleNodeTest, TextFieldFlags) {
 }
 
 // Checks Flutter flags are mapped to appropriate ATK roles.
-TEST(FlAccessibleNodeTest, GetRole) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
+TEST_F(FlAccessibleNodeTest, GetRole) {
   g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
 
   FlutterSemanticsFlags flags1 = {};
@@ -385,10 +346,7 @@ TEST(FlAccessibleNodeTest, GetRole) {
 }
 
 // Checks Flutter actions are mapped to the appropriate ATK actions.
-TEST(FlAccessibleNodeTest, SetActions) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
+TEST_F(FlAccessibleNodeTest, SetActions) {
   g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
   fl_accessible_node_set_actions(
       node, static_cast<FlutterSemanticsAction>(
