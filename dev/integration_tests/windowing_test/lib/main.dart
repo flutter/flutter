@@ -81,7 +81,11 @@ void main() {
           maxWidth: jsonMap['max_width'].toDouble(),
           maxHeight: jsonMap['max_height'].toDouble(),
         );
-        controller.setConstraints(constraints);
+        // We assume that this will cause a resize, which the current tests do.
+        final initialSize = controller.contentSize;
+        await awaitNotification(() {
+          controller.setConstraints(constraints);
+        }, () => controller.contentSize != initialSize);
       } else if (jsonMap['type'] == 'set_fullscreen') {
         await awaitNotification(() {
           controller.setFullscreen(true);
