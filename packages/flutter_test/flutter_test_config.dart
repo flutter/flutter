@@ -36,8 +36,8 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
     // to print in the error message.
     LeakTracking.troubleshootingDocumentationLink =
         'https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Leak-tracking.md';
-    // Do not ignore createdByTestHelpers here, as this is a test of the leak
-    // tracking itself.
+    // Do not ignore createdByTestHelpers here, as this is a test of the test
+    // helper itself.
   }
 
   return testMain();
