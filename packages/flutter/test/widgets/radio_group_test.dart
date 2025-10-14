@@ -171,6 +171,61 @@ void main() {
     expect(state.groupValue, 1);
   });
 
+  testWidgets('Radio group arrow key skips disabled radio', (WidgetTester tester) async {
+    final UniqueKey key0 = UniqueKey();
+    final UniqueKey key1 = UniqueKey();
+    final UniqueKey key2 = UniqueKey();
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TestRadioGroup<int>(
+            child: Column(
+              children: <Widget>[
+                Radio<int>(key: key0, focusNode: focusNode, value: 0),
+                Radio<int>(key: key1, enabled: false, value: 1),
+                Radio<int>(key: key2, value: 2),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestRadioGroupState<int> state = tester.state<TestRadioGroupState<int>>(
+      find.byType(TestRadioGroup<int>),
+    );
+
+    await tester.tap(find.byKey(key0));
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(state.groupValue, 0);
+    expect(focusNode.hasFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(state.groupValue, 2);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    // Wrap around
+    expect(state.groupValue, 0);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(state.groupValue, 2);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(state.groupValue, 0);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    // Wrap around
+    expect(state.groupValue, 2);
+  });
+
   testWidgets('Radio group can tab in and out', (WidgetTester tester) async {
     final UniqueKey key0 = UniqueKey();
     final UniqueKey key1 = UniqueKey();
