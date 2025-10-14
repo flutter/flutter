@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'basic.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
+import 'localizations.dart';
 import 'radio_group.dart';
 import 'ticker_provider.dart';
 import 'toggleable.dart';
@@ -192,21 +193,32 @@ class _RawRadioState<T> extends State<RawRadio<T>>
   @override
   Widget build(BuildContext context) {
     final bool? accessibilitySelected;
+    String? semanticsHint;
+
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         accessibilitySelected = null;
+        semanticsHint = null;
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         accessibilitySelected = value;
+        // Only provide hint for unselected radio buttons to avoid duplication
+        // of the selected state announcement.
+        // Selected state is already announced by iOS via the 'selected' property.
+        if (!(value ?? false)) {
+          final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
+          semanticsHint = localizations.radioButtonUnselectedLabel;
+        }
     }
 
     return Semantics(
       inMutuallyExclusiveGroup: true,
       checked: value,
       selected: accessibilitySelected,
+      hint: semanticsHint,
       child: buildToggleableWithChild(
         focusNode: focusNode,
         autofocus: widget.autofocus,
