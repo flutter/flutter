@@ -179,8 +179,11 @@ class _RadioGroupState<T> extends State<RadioGroup<T>> implements RadioGroupRegi
       return;
     }
     final List<FocusNode> sorted = ReadingOrderTraversalPolicy.sort(
-      _radios.map<FocusNode>((RadioClient<T> radio) => radio.focusNode),
+      _radios
+          .where((RadioClient<T> radio) => radio.enabled)
+          .map<FocusNode>((RadioClient<T> radio) => radio.focusNode),
     ).toList();
+    assert(sorted.isNotEmpty);
     final Iterable<FocusNode> nodesInEffectiveOrder = forward ? sorted : sorted.reversed;
 
     final Iterator<FocusNode> iterator = nodesInEffectiveOrder.iterator;
@@ -298,6 +301,12 @@ mixin RadioClient<T> {
   ///
   /// Used by registry to provide additional feature such as keyboard support.
   T get radioValue;
+
+  /// Whether this radio is enabled.
+  ///
+  /// If false, the registry skips this client when handling keyboard
+  /// navigation.
+  bool get enabled;
 
   /// Focus node for this radio.
   ///
