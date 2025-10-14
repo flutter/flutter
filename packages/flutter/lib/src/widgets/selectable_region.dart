@@ -1357,6 +1357,9 @@ class SelectableRegionState extends State<SelectableRegion>
     }
 
     _selectionOverlay!.toolbarLocation = location;
+    // TODO(Renzo-Olivares): Remove the logic below that does a runtimeType
+    // check for TextSelectionHandleControls when TextSelectionHandleControls
+    // is fully removed, see: https://github.com/flutter/flutter/pull/124262.
     if (widget.selectionControls is! TextSelectionHandleControls) {
       _selectionOverlay!.showToolbar();
       return true;
