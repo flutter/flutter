@@ -73,6 +73,13 @@ void main() async {
     }
   });
 
+  test('FragmentProgram getImageSampler', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniform_ordering.frag.iplr');
+    final FragmentShader shader = program.fragmentShader();
+    final ImageSamplerSlot slot = shader.getImageSampler('u_texture');
+    expect(slot.shaderIndex, equals(0));
+  });
+
   test('FragmentProgram getUniformFloat unknown', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
     final FragmentShader shader = program.fragmentShader();
