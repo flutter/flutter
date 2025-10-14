@@ -6022,6 +6022,39 @@ targets:
       - engine/**
       - DEPS
 
+  - name: Windows framework_tests_misc_leak_tracking
+    recipe: flutter/flutter_drone
+    timeout: 120
+    properties:
+      test_timeout_secs: "3600" # 1 hour
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
+        ]
+      shard: framework_tests
+      subshard: misc
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+      env_variables: >-
+        {
+          "LEAK_TRACKING": "true",
+          "TEST_RANDOMIZATION_OFF": "true"
+        }
+    runIf:
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
   - name: Windows gradle_plugin_bundle_test
     recipe: devicelab/devicelab_drone
     timeout: 60
