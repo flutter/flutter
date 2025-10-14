@@ -327,8 +327,6 @@ class Container extends StatelessWidget {
   /// null.
   final Color? color;
 
-  /// The [ColoredBox.isAntiAlias] property.
-  ///
   /// {@macro flutter.widgets.ColoredBox.isAntiAlias}
   final bool isAntiAlias;
 
