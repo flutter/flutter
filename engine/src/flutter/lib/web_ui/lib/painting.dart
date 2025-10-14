@@ -993,6 +993,19 @@ abstract class FragmentProgram {
   FragmentShader fragmentShader();
 }
 
+base class UniformFloatSlot {
+  UniformFloatSlot(this.name, this.index);
+  void set(double val) {
+    throw UnsupportedError('UniformFloatSlot is not supported on the web.');
+  }
+
+  int get shaderIndex => -1;
+
+  final String name;
+
+  final int index;
+}
+
 abstract class FragmentShader implements Shader {
   void setFloat(int index, double value);
 
@@ -1003,4 +1016,6 @@ abstract class FragmentShader implements Shader {
 
   @override
   bool get debugDisposed;
+
+  UniformFloatSlot getUniformFloat(String name, [int? index]) => UniformFloatSlot(name, index ?? 0);
 }

@@ -4,16 +4,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Note: Don't update this file without updating `uniforms_reordered.frag`.
-// Note: Don't update this file without updating `uniforms_inserted.frag`.
+// This is a copy of uniforms.frag that has 2 of the uniforms order swapped.
 
 precision highp float;
 
 layout(location = 0) out vec4 oColor;
 
 layout(location = 0) uniform float iFloatUniform;
-layout(location = 1) uniform vec2 iVec2Uniform;
-layout(location = 2) uniform mat2 iMat2Uniform;
+layout(location = 1) uniform mat2 iMat2Uniform;
+layout(location = 2) uniform vec2 iVec2Uniform;
 
 void main() {
   oColor = vec4(iFloatUniform, iVec2Uniform, iMat2Uniform[1][1]);
