@@ -9,18 +9,15 @@ import java.nio.ByteBuffer;
  * An implementation of {@link ImageDecoder} that decodes HEIF images on devices running Android
  * versions prior to 36.
  *
- * <p>flipping (or mirroring) from metadata does not work Pre 36. Need to do it manually.
+ * <p>flipping (or mirroring) from metadata does not work Pre 36 so we need to do it manually.
  */
 @RequiresApi(Build.API_LEVELS.API_28)
 class FlutterImageDecoderImplHeifPre36 extends FlutterImageDecoderImplDefault {
   private static final String TAG = "FlutterImageDecoderImplHeifPre36";
 
-  private final Utils utils;
-
   /** Constructs a new {@code FlutterImageDecoderImplHeifPre36}. */
-  public FlutterImageDecoderImplHeifPre36(Utils utils) {
+  public FlutterImageDecoderImplHeifPre36() {
     super(null);
-    this.utils = utils;
   }
 
   /**
@@ -31,6 +28,6 @@ class FlutterImageDecoderImplHeifPre36 extends FlutterImageDecoderImplDefault {
    * @return The decoded {@link Bitmap}, or null if decoding fails.
    */
   public Bitmap decodeImage(ByteBuffer buffer, Metadata metadata) {
-    return utils.applyFlipIfNeeded(super.decodeImage(buffer, metadata), metadata.orientation);
+    return ImageUtils.applyFlipIfNeeded(super.decodeImage(buffer, metadata), metadata.orientation);
   }
 }

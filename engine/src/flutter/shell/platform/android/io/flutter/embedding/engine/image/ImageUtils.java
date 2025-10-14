@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import java.nio.ByteBuffer;
 
 /** Utility methods for image decoding. */
-class Utils {
+class ImageUtils {
   /**
    * Returns a byte array containing the remaining bytes of the given {@link ByteBuffer}.
    *
@@ -17,7 +17,7 @@ class Utils {
    * @return A byte array containing the remaining bytes of the buffer.
    */
   @NonNull
-  byte[] getBytes(@NonNull ByteBuffer buffer) {
+  static byte[] getBytes(@NonNull ByteBuffer buffer) {
     byte[] bytes = new byte[buffer.remaining()];
     buffer.get(bytes);
     // Rewind the buffer so it can be used again.
@@ -26,12 +26,12 @@ class Utils {
   }
 
   /**
-   * Returns whether the given EXIF orientation indicates a flip.
+   * Returns whether the given EXIF orientation indicates horizontal or vertical flip.
    *
    * @param orientation The EXIF orientation.
    * @return True if the orientation is a flip case, false otherwise.
    */
-  boolean isFlipCase(int orientation) {
+  static boolean isFlipCase(int orientation) {
     switch (orientation) {
       case ExifInterface.ORIENTATION_FLIP_HORIZONTAL: // 2
       case ExifInterface.ORIENTATION_FLIP_VERTICAL: // 4
@@ -53,7 +53,7 @@ class Utils {
    * @param exifOrientation The EXIF orientation of the image.
    * @return The flipped {@link Bitmap}, or the original if no flip was needed.
    */
-  Bitmap applyFlipIfNeeded(Bitmap decoded, int exifOrientation) {
+  static Bitmap applyFlipIfNeeded(Bitmap decoded, int exifOrientation) {
     if (decoded == null || !isFlipCase(exifOrientation)) {
       return decoded;
     }

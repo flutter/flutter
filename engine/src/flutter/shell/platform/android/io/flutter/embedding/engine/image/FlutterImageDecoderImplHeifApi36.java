@@ -15,13 +15,12 @@ import java.nio.ByteBuffer;
  * manually.
  */
 @RequiresApi(io.flutter.Build.API_LEVELS.API_36)
-class FlutterImageDecoderImplHeifApi36 implements ImageDecoder {
+class FlutterImageDecoderImplHeifApi36 extends FlutterImageDecoderImplDefault {
 
-  private final Utils utils;
-
-  public FlutterImageDecoderImplHeifApi36(Utils utils) {
-    this.utils = utils;
+  public FlutterImageDecoderImplHeifApi36() {
+    super(null);
   }
+
   /**
    * Decodes an image from the given {@link ByteBuffer}.
    *
@@ -30,7 +29,17 @@ class FlutterImageDecoderImplHeifApi36 implements ImageDecoder {
    * @return The decoded {@link Bitmap}, or null if decoding fails.
    */
   public Bitmap decodeImage(ByteBuffer buffer, Metadata metadata) {
-    byte[] bytes = utils.getBytes(buffer);
+    // Not all HEIF images fail with ImageDecoder, only the ones with unsupported gain maps.  So try
+    // the default implementation before falling back to BitmapFactory.
+    Bitmap defaultBitmap = super.decodeImage(buffer, metadata);
+    if (defaultBitmap != null) {
+      return defaultBitmap;
+    }
+    return decodeImageFallback(buffer, metadata);
+  }
+
+  Bitmap decodeImageFallback(ByteBuffer buffer, Metadata metadata) {
+    byte[] bytes = ImageUtils.getBytes(buffer);
     BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
     decodeOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
     Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, decodeOptions);
@@ -40,9 +49,9 @@ class FlutterImageDecoderImplHeifApi36 implements ImageDecoder {
       Bitmap rotatedBitmap =
           Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
       bitmap.recycle();
-      return utils.applyFlipIfNeeded(rotatedBitmap, metadata.orientation);
+      return ImageUtils.applyFlipIfNeeded(rotatedBitmap, metadata.orientation);
     } else {
-      return utils.applyFlipIfNeeded(bitmap, metadata.orientation);
+      return ImageUtils.applyFlipIfNeeded(bitmap, metadata.orientation);
     }
   }
 }
