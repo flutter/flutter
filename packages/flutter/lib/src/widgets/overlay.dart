@@ -1901,8 +1901,6 @@ class OverlayPortal extends StatefulWidget {
 }
 
 class _OverlayPortalState extends State<OverlayPortal> {
-  late final String identifier;
-
   int? _zOrderIndex;
   // The location of the overlay child within the overlay. This object will be
   // used as the slot of the overlay child widget.
@@ -1950,7 +1948,6 @@ class _OverlayPortalState extends State<OverlayPortal> {
   @override
   void initState() {
     super.initState();
-    identifier = '\$OverlayPortal$hashCode';
     _setupController(widget.controller);
   }
 
@@ -2029,16 +2026,16 @@ class _OverlayPortalState extends State<OverlayPortal> {
       return _OverlayPortal(
         overlayLocation: null,
         overlayChild: null,
-        child: Semantics(traversalParentIdentifier: identifier, child: widget.child),
+        child: Semantics(traversalParentIdentifier: this, child: widget.child),
       );
     }
     return _OverlayPortal(
       overlayLocation: _getLocation(zOrderIndex, widget.overlayLocation),
       overlayChild: _DeferredLayout(
-        childIdentifier: identifier,
+        childIdentifier: this,
         child: Builder(builder: widget.overlayChildBuilder),
       ),
-      child: Semantics(traversalParentIdentifier: identifier, child: widget.child),
+      child: Semantics(traversalParentIdentifier: this, child: widget.child),
     );
   }
 }
@@ -2421,7 +2418,7 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
     this.childIdentifier,
   }) : super(child: child);
 
-  final String? childIdentifier;
+  final Object? childIdentifier;
 
   _RenderLayoutSurrogateProxyBox getLayoutParent(BuildContext context) {
     return context.findAncestorRenderObjectOfType<_RenderLayoutSurrogateProxyBox>()!;
@@ -2465,15 +2462,15 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
 //  like an `Overlay` that has only one entry.
 final class _RenderDeferredLayoutBox extends RenderProxyBox
     with _RenderTheaterMixin, LinkedListEntry<_RenderDeferredLayoutBox> {
-  _RenderDeferredLayoutBox(this._layoutSurrogate, String? childIdentifier)
+  _RenderDeferredLayoutBox(this._layoutSurrogate, Object? childIdentifier)
     : _childIdentifier = childIdentifier;
 
   StackParentData get stackParentData => parentData! as StackParentData;
   final _RenderLayoutSurrogateProxyBox _layoutSurrogate;
 
-  String? get childIdentifier => _childIdentifier;
-  String? _childIdentifier;
-  set childIdentifier(String? value) {
+  Object? get childIdentifier => _childIdentifier;
+  Object? _childIdentifier;
+  set childIdentifier(Object? value) {
     if (_childIdentifier == childIdentifier) {
       return;
     }
