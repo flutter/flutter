@@ -12,11 +12,11 @@ import java.nio.ByteBuffer;
  * <p>flipping (or mirroring) from metadata does not work Pre 36 so we need to do it manually.
  */
 @RequiresApi(Build.API_LEVELS.API_28)
-class FlutterImageDecoderImplHeifPre36 extends FlutterImageDecoderImplDefault {
+class ImageDecoderHeifPre36Impl extends ImageDecoderDefaultImpl {
   private static final String TAG = "FlutterImageDecoderImplHeifPre36";
 
   /** Constructs a new {@code FlutterImageDecoderImplHeifPre36}. */
-  public FlutterImageDecoderImplHeifPre36() {
+  public ImageDecoderHeifPre36Impl() {
     super(null);
   }
 
@@ -27,6 +27,7 @@ class FlutterImageDecoderImplHeifPre36 extends FlutterImageDecoderImplDefault {
    * @param metadata The metadata of the image.
    * @return The decoded {@link Bitmap}, or null if decoding fails.
    */
+  @Override
   public Bitmap decodeImage(ByteBuffer buffer, Metadata metadata) {
     return ImageUtils.applyFlipIfNeeded(super.decodeImage(buffer, metadata), metadata.orientation);
   }

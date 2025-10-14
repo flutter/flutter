@@ -15,10 +15,10 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.annotation.Config;
 
-/** Unit tests for {@link FlutterImageDecoderImplDefault}. */
+/** Unit tests for {@link ImageDecoderDefaultImpl}. */
 @RunWith(AndroidJUnit4.class)
 @Config(minSdk = Build.API_LEVELS.API_28)
-public class FlutterImageDecoderImplDefaultTest {
+public class ImageDecoderDefaultImplTest {
 
   /**
    * Generates a simple PNG byte array with specified dimensions. This provides valid image data for
@@ -38,7 +38,7 @@ public class FlutterImageDecoderImplDefaultTest {
     final int imageHeight = 250;
     FlutterImageDecoder.HeaderListener mockListener =
         mock(FlutterImageDecoder.HeaderListener.class);
-    FlutterImageDecoderImplDefault decoder = new FlutterImageDecoderImplDefault(mockListener);
+    ImageDecoderDefaultImpl decoder = new ImageDecoderDefaultImpl(mockListener);
 
     byte[] imageBytes = createTestPng(imageWidth, imageHeight);
     ByteBuffer buffer = ByteBuffer.wrap(imageBytes);

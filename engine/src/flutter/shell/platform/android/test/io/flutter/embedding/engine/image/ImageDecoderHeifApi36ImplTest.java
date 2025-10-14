@@ -15,17 +15,17 @@ import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.GraphicsMode;
 
-/** Unit tests for {@link FlutterImageDecoderImplHeifApi36}. */
+/** Unit tests for {@link ImageDecoderHeifApi36Impl}. */
 @RunWith(AndroidJUnit4.class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(minSdk = Build.API_LEVELS.API_36)
-public class FlutterImageDecoderImplHeifApi36Test {
+public class ImageDecoderHeifApi36ImplTest {
 
-  private FlutterImageDecoderImplHeifApi36 decoder;
+  private ImageDecoderHeifApi36Impl decoder;
 
   @Before
   public void setUp() {
-    decoder = new FlutterImageDecoderImplHeifApi36();
+    decoder = new ImageDecoderHeifApi36Impl();
   }
 
   @Test

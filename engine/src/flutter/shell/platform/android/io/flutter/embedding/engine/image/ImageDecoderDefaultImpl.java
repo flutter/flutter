@@ -13,7 +13,7 @@ import java.nio.ByteBuffer;
  * android.graphics.ImageDecoder} to decode images.
  */
 @RequiresApi(io.flutter.Build.API_LEVELS.API_28)
-class FlutterImageDecoderImplDefault implements ImageDecoder {
+class ImageDecoderDefaultImpl implements ImageDecoder {
   private static final String TAG = "FlutterImageDecoderImplDefault";
   private final FlutterImageDecoder.HeaderListener listener;
 
@@ -22,7 +22,7 @@ class FlutterImageDecoderImplDefault implements ImageDecoder {
    *
    * @param listener A listener to receive image header information.
    */
-  public FlutterImageDecoderImplDefault(FlutterImageDecoder.HeaderListener listener) {
+  public ImageDecoderDefaultImpl(FlutterImageDecoder.HeaderListener listener) {
     this.listener = listener;
   }
 

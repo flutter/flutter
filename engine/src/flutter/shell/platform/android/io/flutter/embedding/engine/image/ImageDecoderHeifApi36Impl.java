@@ -15,9 +15,9 @@ import java.nio.ByteBuffer;
  * manually.
  */
 @RequiresApi(io.flutter.Build.API_LEVELS.API_36)
-class FlutterImageDecoderImplHeifApi36 extends FlutterImageDecoderImplDefault {
+class ImageDecoderHeifApi36Impl extends ImageDecoderDefaultImpl {
 
-  public FlutterImageDecoderImplHeifApi36() {
+  public ImageDecoderHeifApi36Impl() {
     super(null);
   }
 
@@ -28,6 +28,7 @@ class FlutterImageDecoderImplHeifApi36 extends FlutterImageDecoderImplDefault {
    * @param metadata The metadata of the image.
    * @return The decoded {@link Bitmap}, or null if decoding fails.
    */
+  @Override
   public Bitmap decodeImage(ByteBuffer buffer, Metadata metadata) {
     // Not all HEIF images fail with ImageDecoder, only the ones with unsupported gain maps.  So try
     // the default implementation before falling back to BitmapFactory.

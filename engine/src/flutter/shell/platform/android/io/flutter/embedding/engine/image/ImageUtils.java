@@ -2,12 +2,15 @@ package io.flutter.embedding.engine.image;
 
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
-import android.media.ExifInterface;
 import androidx.annotation.NonNull;
+import androidx.exifinterface.media.ExifInterface;
+import io.flutter.Log;
 import java.nio.ByteBuffer;
 
 /** Utility methods for image decoding. */
 class ImageUtils {
+  private static final String TAG = "ImageUtils";
+
   /**
    * Returns a byte array containing the remaining bytes of the given {@link ByteBuffer}.
    *
@@ -38,7 +41,13 @@ class ImageUtils {
       case ExifInterface.ORIENTATION_TRANSPOSE: // 5 (rotate 90 + flip H)
       case ExifInterface.ORIENTATION_TRANSVERSE: // 7 (rotate 270 + flip H)
         return true;
+      case ExifInterface.ORIENTATION_NORMAL:
+      case ExifInterface.ORIENTATION_ROTATE_90:
+      case ExifInterface.ORIENTATION_ROTATE_180:
+      case ExifInterface.ORIENTATION_ROTATE_270:
+        return false;
       default:
+        Log.e(TAG, "Unknown EXIF orientation: " + orientation);
         return false;
     }
   }

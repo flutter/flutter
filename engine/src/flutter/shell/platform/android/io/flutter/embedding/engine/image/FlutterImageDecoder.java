@@ -43,13 +43,13 @@ public class FlutterImageDecoder {
     ImageDecoder impl = null;
     if (metadata.isHeif()) {
       if (Build.VERSION.SDK_INT == io.flutter.Build.API_LEVELS.API_36) {
-        impl = new FlutterImageDecoderImplHeifApi36();
+        impl = new ImageDecoderHeifApi36Impl();
       } else if (Build.VERSION.SDK_INT < io.flutter.Build.API_LEVELS.API_36) {
-        impl = new FlutterImageDecoderImplHeifPre36();
+        impl = new ImageDecoderHeifPre36Impl();
       }
     }
     if (impl == null) {
-      impl = new FlutterImageDecoderImplDefault(headerListener);
+      impl = new ImageDecoderDefaultImpl(headerListener);
     }
     return impl.decodeImage(buffer, metadata);
   }
