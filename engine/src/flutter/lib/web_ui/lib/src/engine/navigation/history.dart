@@ -6,7 +6,6 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import '../dom.dart';
 import '../platform_dispatcher.dart';
 import '../services/message_codec.dart';
 import '../services/message_codecs.dart';
@@ -257,19 +256,29 @@ class SingleEntryBrowserHistory extends BrowserHistory {
 
     _setupStrategy(strategy);
 
-    final String path = currentPath;
-    if (!_isFlutterEntry(domWindow.history.state)) {
+    _currentRouteName = currentPath;
+    if (!_isFlutterEntry(currentState)) {
       // An entry may not have come from Flutter, for example, when the user
       // refreshes the page. They land directly on the "flutter" entry, so
       // there's no need to set up the "origin" and "flutter" entries, we can
       // safely assume they are already set up.
       _setupOriginEntry(strategy);
-      _setupFlutterEntry(strategy, path: path);
+      _setupFlutterEntry(strategy);
     }
   }
 
   @override
   final ui_web.UrlStrategy? urlStrategy;
+
+  /// The route name of the current page.
+  ///
+  /// This is updated whenever the framework calls `setRouteName`. This is then
+  /// used when the user hits the back button to pop a nameless route, to restore
+  /// the route name from before the nameless route was pushed.
+  ///
+  /// This is also used to track the user-provided url when they change it
+  /// directly in the address bar.
+  String _currentRouteName = '/';
 
   static const MethodCall _popRouteMethodCall = MethodCall('popRoute');
   static const String _kFlutterTag = 'flutter';
@@ -303,11 +312,11 @@ class SingleEntryBrowserHistory extends BrowserHistory {
   @override
   void setRouteName(String? routeName, {Object? state, bool replace = false}) {
     if (urlStrategy != null) {
-      _setupFlutterEntry(urlStrategy!, replace: true, path: routeName);
+      _currentRouteName = routeName ?? currentPath;
+      _setupFlutterEntry(urlStrategy!, replace: true);
     }
   }
 
-  String? _userProvidedRouteName;
   @override
   void onPopState(Object? state) {
     if (_isOriginEntry(state)) {
@@ -323,17 +332,13 @@ class SingleEntryBrowserHistory extends BrowserHistory {
       // We get into this scenario when the user changes the url manually. It
       // causes a new entry to be pushed on top of our "flutter" one. When this
       // happens it first goes to the "else" section below where we capture the
-      // path into `_userProvidedRouteName` then trigger a history back which
+      // path into `_currentRouteName` then trigger a history back which
       // brings us here.
-      assert(_userProvidedRouteName != null);
-
-      final String newRouteName = _userProvidedRouteName!;
-      _userProvidedRouteName = null;
 
       // Send a 'pushRoute' platform message so the app handles it accordingly.
       EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
         'flutter/navigation',
-        const JSONMethodCodec().encodeMethodCall(MethodCall('pushRoute', newRouteName)),
+        const JSONMethodCodec().encodeMethodCall(MethodCall('pushRoute', _currentRouteName)),
         (_) {},
       );
     } else {
@@ -342,7 +347,7 @@ class SingleEntryBrowserHistory extends BrowserHistory {
       // example.
 
       // 1. We first capture the user's desired path.
-      _userProvidedRouteName = currentPath;
+      _currentRouteName = currentPath;
 
       // 2. Then we remove the new entry.
       // This will take us back to our "flutter" entry and it causes a new
@@ -360,13 +365,9 @@ class SingleEntryBrowserHistory extends BrowserHistory {
 
   /// This method is used manipulate the Flutter Entry which is always the
   /// active entry while the Flutter app is running.
-  void _setupFlutterEntry(ui_web.UrlStrategy strategy, {bool replace = false, String? path}) {
-    path ??= currentPath;
-    if (replace) {
-      strategy.replaceState(_flutterState, 'flutter', path);
-    } else {
-      strategy.pushState(_flutterState, 'flutter', path);
-    }
+  void _setupFlutterEntry(ui_web.UrlStrategy strategy, {bool replace = false}) {
+    final updateState = replace ? strategy.replaceState : strategy.pushState;
+    updateState(_flutterState, 'flutter', _currentRouteName);
   }
 
   @override

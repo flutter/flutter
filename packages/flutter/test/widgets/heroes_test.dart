@@ -1449,6 +1449,7 @@ Future<void> main() async {
         .text('Hero')
         .evaluate()
         .map((Element e) => e.renderObject!);
+    await tester.pump(const Duration(milliseconds: 1));
     expect(renderObjects.where(isVisible).length, 1);
 
     // Hero BC's flight finishes normally.

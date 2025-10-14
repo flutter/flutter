@@ -416,7 +416,7 @@ class FlutterManifest {
         continue;
       }
       try {
-        results.add(Uri(pathSegments: item.split('/')));
+        results.add(Uri.parse(item));
       } on FormatException {
         _logger.printError('$singularName manifest contains invalid uri: $item.');
       }
@@ -822,7 +822,7 @@ class AssetsEntry {
   static (AssetsEntry? assetsEntry, String? error) parseFromYamlSafe(Object? yaml) {
     (Uri?, String?) tryParseUri(String uri) {
       try {
-        return (Uri(pathSegments: uri.split('/')), null);
+        return (Uri.parse(uri), null);
       } on FormatException {
         return (null, 'Asset manifest contains invalid uri: $uri.');
       }

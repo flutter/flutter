@@ -234,10 +234,7 @@ class ElevatedButton extends ButtonStyleButton {
     ButtonLayerBuilder? backgroundBuilder,
     ButtonLayerBuilder? foregroundBuilder,
   }) {
-    final MaterialStateProperty<Color?>? overlayColorProp = switch ((
-      foregroundColor,
-      overlayColor,
-    )) {
+    final WidgetStateProperty<Color?>? overlayColorProp = switch ((foregroundColor, overlayColor)) {
       (null, null) => null,
       (_, Color(a: 0.0)) => WidgetStatePropertyAll<Color?>(overlayColor),
       (_, final Color color) ||
@@ -496,7 +493,7 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
     final bool useMaterial3 = Theme.of(context).useMaterial3;
     final ButtonStyle buttonStyle = super.defaultStyleOf(context);
     final double defaultFontSize =
-        buttonStyle.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
+        buttonStyle.textStyle?.resolve(const <WidgetState>{})?.fontSize ?? 14.0;
     final double effectiveTextScale =
         MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
 
@@ -535,7 +532,7 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double defaultFontSize =
-        buttonStyle?.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
+        buttonStyle?.textStyle?.resolve(const <WidgetState>{})?.fontSize ?? 14.0;
     final double scale =
         clampDouble(MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0, 1.0, 2.0) - 1.0;
     final ElevatedButtonThemeData elevatedButtonTheme = ElevatedButtonTheme.of(context);
@@ -574,95 +571,95 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  MaterialStateProperty<TextStyle?> get textStyle =>
+  WidgetStateProperty<TextStyle?> get textStyle =>
     MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.labelLarge);
 
   @override
-  MaterialStateProperty<Color?>? get backgroundColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+  WidgetStateProperty<Color?>? get backgroundColor =>
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return _colors.onSurface.withOpacity(0.12);
       }
       return _colors.surfaceContainerLow;
     });
 
   @override
-  MaterialStateProperty<Color?>? get foregroundColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+  WidgetStateProperty<Color?>? get foregroundColor =>
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
       return _colors.primary;
     });
 
   @override
-  MaterialStateProperty<Color?>? get overlayColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+  WidgetStateProperty<Color?>? get overlayColor =>
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return _colors.primary.withOpacity(0.1);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.primary.withOpacity(0.08);
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return _colors.primary.withOpacity(0.1);
       }
       return null;
     });
 
   @override
-  MaterialStateProperty<Color>? get shadowColor =>
+  WidgetStateProperty<Color>? get shadowColor =>
     MaterialStatePropertyAll<Color>(_colors.shadow);
 
   @override
-  MaterialStateProperty<Color>? get surfaceTintColor =>
+  WidgetStateProperty<Color>? get surfaceTintColor =>
     const MaterialStatePropertyAll<Color>(Colors.transparent);
 
   @override
-  MaterialStateProperty<double>? get elevation =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+  WidgetStateProperty<double>? get elevation =>
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return 0.0;
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return 1.0;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return 3.0;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return 1.0;
       }
       return 1.0;
     });
 
   @override
-  MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
+  WidgetStateProperty<EdgeInsetsGeometry>? get padding =>
     MaterialStatePropertyAll<EdgeInsetsGeometry>(_scaledPadding(context));
 
   @override
-  MaterialStateProperty<Size>? get minimumSize =>
+  WidgetStateProperty<Size>? get minimumSize =>
     const MaterialStatePropertyAll<Size>(Size(64.0, 40.0));
 
   // No default fixedSize
 
   @override
-  MaterialStateProperty<double>? get iconSize =>
+  WidgetStateProperty<double>? get iconSize =>
     const MaterialStatePropertyAll<double>(18.0);
 
   @override
-  MaterialStateProperty<Color>? get iconColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+  WidgetStateProperty<Color>? get iconColor {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return _colors.primary;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.primary;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return _colors.primary;
       }
       return _colors.primary;
@@ -670,19 +667,19 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
   }
 
   @override
-  MaterialStateProperty<Size>? get maximumSize =>
+  WidgetStateProperty<Size>? get maximumSize =>
     const MaterialStatePropertyAll<Size>(Size.infinite);
 
   // No default side
 
   @override
-  MaterialStateProperty<OutlinedBorder>? get shape =>
+  WidgetStateProperty<OutlinedBorder>? get shape =>
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return SystemMouseCursors.basic;
       }
       return SystemMouseCursors.click;

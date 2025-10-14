@@ -4043,6 +4043,24 @@ class ColorFilter implements ImageFilter {
       _matrix = null,
       _type = _kTypeSrgbToLinearGamma;
 
+  /// Creates a color filter that applies the given saturation to the RGB
+  /// channels.
+  factory ColorFilter.saturation(double saturation) {
+    const double rLuminance = 0.2126;
+    const double gLuminance = 0.7152;
+    const double bLuminance = 0.0722;
+    final double invSat = 1 - saturation;
+
+    return ColorFilter.matrix(<double>[
+      // dart format off
+      invSat * rLuminance + saturation, invSat * gLuminance,              invSat * bLuminance,              0, 0,
+      invSat * rLuminance,              invSat * gLuminance + saturation, invSat * bLuminance,              0, 0,
+      invSat * rLuminance,              invSat * gLuminance,              invSat * bLuminance + saturation, 0, 0,
+      0,                                0,                                0,                                1, 0,
+      // dart format on
+    ]);
+  }
+
   final Color? _color;
   final BlendMode? _blendMode;
   final List<double>? _matrix;
@@ -4646,23 +4664,32 @@ base class Shader extends NativeFieldWrapperClass1 {
   }
 }
 
-/// Defines what happens at the edge of a gradient or the sampling of a source image
-/// in an [ImageFilter].
+/// Defines how to handle areas outside the defined bounds of a gradient or image filter.
 ///
-/// A gradient is defined along a finite inner area. In the case of a linear
-/// gradient, it's between the parallel lines that are orthogonal to the line
-/// drawn between two points. In the case of radial gradients, it's the disc
-/// that covers the circle centered on a particular point up to a given radius.
+/// ## For Gradients
 ///
-/// An image filter reads source samples from a source image and performs operations
-/// on those samples to produce a result image. An image defines color samples only
-/// for pixels within the bounds of the image but some filter operations, such as a blur
-/// filter, read samples over a wide area to compute the output for a given pixel. Such
-/// a filter would need to combine samples from inside the image with hypothetical
-/// color values from outside the image.
+/// Gradients are defined with some specific bounds creating an inner area and an outer area, and `TileMode` controls how colors
+/// are determined for areas outside these bounds:
 ///
-/// This enum is used to define how the gradient or image filter should treat the regions
-/// outside that defined inner area.
+/// - **Linear gradients**: The inner area is the area between two points
+///   (typically referred to as `start` and `end` in the gradient API), or more precisely,
+///   it's the area between the parallel lines that are orthogonal to the line drawn between the two points.
+///   Colors outside this area are determined by the `TileMode`.
+///
+/// - **Radial gradients**: The inner area is the disc defined by a center and radius.
+///   Colors outside this disc are determined by the `TileMode`.
+///
+/// - **Sweep gradients**: The inner area is the angular sector between `startAngle`
+///   and `endAngle`. Colors outside this sector are determined by the `TileMode`.
+///
+/// ## For Image Filters
+///
+/// When applying filters (like blur) that sample colors from outside an image's bounds,
+/// `TileMode` defines how those out-of-bounds samples are determined:
+///
+/// - It controls what color values are used when the filter needs to sample
+///   from areas outside the original image.
+/// - This is particularly important for effects like blurring near image edges.
 ///
 /// See also:
 ///
@@ -4680,8 +4707,12 @@ base class Shader extends NativeFieldWrapperClass1 {
 enum TileMode {
   /// Samples beyond the edge are clamped to the nearest color in the defined inner area.
   ///
-  /// A gradient will paint all the regions outside the inner area with the
-  /// color at the end of the color stop list closest to that region.
+  /// For gradients, this means the region outside the inner area is painted with
+  /// the color at the end of the color stop list closest to that region.
+  ///
+  /// For sweep gradients specifically, the entire area outside the angular sector
+  /// defined by [startAngle] and [endAngle] will be painted with the color at the
+  /// end of the color stop list closest to that region.
   ///
   /// An image filter will substitute the nearest edge pixel for any samples taken from
   /// outside its source image.
@@ -4696,6 +4727,9 @@ enum TileMode {
   /// For a gradient, this technique is as if the stop points from 0.0 to 1.0 were then
   /// repeated from 1.0 to 2.0, 2.0 to 3.0, and so forth (and for linear gradients, similarly
   /// from -1.0 to 0.0, -2.0 to -1.0, etc).
+  ///
+  /// For sweep gradients, the gradient pattern is repeated in the same direction
+  /// (clockwise) for angles beyond [endAngle] and before [startAngle].
   ///
   /// An image filter will treat its source image as if it were tiled across the enlarged
   /// sample space from which it reads, each tile in the same orientation as the base image.
@@ -4712,6 +4746,9 @@ enum TileMode {
   /// again from 4.0 to 3.0, and so forth (and for linear gradients, similarly in the
   /// negative direction).
   ///
+  /// For sweep gradients, the gradient pattern is mirrored back and forth as the angle
+  /// increases beyond [endAngle] or decreases below [startAngle].
+  ///
   /// An image filter will treat its source image as tiled in an alternating forwards and
   /// backwards or upwards and downwards direction across the sample space from which
   /// it is reading.
@@ -4724,8 +4761,11 @@ enum TileMode {
   /// Samples beyond the edge are treated as transparent black.
   ///
   /// A gradient will render transparency over any region that is outside the circle of a
-  /// radial gradient or outside the parallel lines that define the inner area of a linear
-  /// gradient.
+  /// radial gradient, outside the parallel lines that define the inner area of a linear
+  /// gradient, or outside the angular sector of a sweep gradient.
+  ///
+  /// For sweep gradients, only the sector between [startAngle] and [endAngle] will be
+  /// painted; all other areas will be transparent.
   ///
   /// An image filter will substitute transparent black for any sample it must read from
   /// outside its source image.
@@ -4933,16 +4973,38 @@ base class Gradient extends Shader {
   /// positive angles going clockwise around the `center`.
   ///
   /// If `colorStops` is provided, `colorStops[i]` is a number from 0.0 to 1.0
-  /// that specifies where `color[i]` begins in the gradient. If `colorStops` is
-  /// not provided, then only two stops, at 0.0 and 1.0, are implied (and
-  /// `color` must therefore only have two entries). Stop values less than 0.0
-  /// will be rounded up to 0.0 and stop values greater than 1.0 will be rounded
-  /// down to 1.0. Each stop value must be greater than or equal to the previous
-  /// stop value. Stop values that do not meet this criteria will be rounded up
-  /// to the previous stop value.
+  /// that specifies where `colors[i]` begins in the gradient. If `colorStops` is
+  /// not provided, then only two stops, at 0.0 and 1.0, are implied
+  /// (and `colors` must therefore only have two entries). Stop values less than
+  /// 0.0 will be rounded up to 0.0 and stop values greater than 1.0 will be
+  /// rounded down to 1.0. Each stop value must be greater than or equal to the
+  /// previous stop value. Stop values that do not meet this criteria will be
+  /// rounded up to the previous stop value.
+  ///
+  /// The `startAngle` and `endAngle` parameters define the angular sector to be
+  /// painted. Angles are measured in radians clockwise from the positive x-axis.
+  /// Values outside the range `[0, 2π]` are normalized to this range using modulo
+  /// arithmetic. The gradient is only painted in the sector between `startAngle`
+  /// and `endAngle`. The `tileMode` determines how the gradient behaves outside
+  /// this sector.
+  ///
+  /// The `tileMode` argument specifies how the gradient should handle areas
+  /// outside the angular sector defined by `startAngle` and `endAngle`:
   ///
   /// The behavior before `startAngle` and after `endAngle` is described by the
   /// `tileMode` argument. For details, see the [TileMode] enum.
+  ///
+  /// * [TileMode.clamp]: The edge colors are extended to infinity.
+  /// * [TileMode.mirror]: The gradient is repeated, alternating direction each time.
+  /// * [TileMode.repeated]: The gradient is repeated in the same direction.
+  /// * [TileMode.decal]: Only the colors within the gradient's angular sector are
+  ///   drawn, with transparent black elsewhere.
+  ///
+  /// The [colorStops] argument must have the same number of values as [colors],
+  /// if specified. It specifies the position of each color stop between 0.0 and
+  /// 1.0. If it is null, a uniform distribution is assumed. The stop values must
+  /// be in ascending order. A stop value of 0.0 corresponds to [startAngle], and
+  /// a stop value of 1.0 corresponds to [endAngle].
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_clamp_sweep.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_decal_sweep.png)
@@ -5160,6 +5222,7 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   }
 
   String? _debugName;
+  final List<WeakReference<FragmentShader>> _shaders = <WeakReference<FragmentShader>>[];
 
   /// Creates a fragment program from the asset with key [assetKey].
   ///
@@ -5205,6 +5268,55 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
     if (result.isNotEmpty) {
       throw result; // ignore: only_throw_errors
     }
+
+    // Update all the named bindings.
+    program._shaders.removeWhere((WeakReference<FragmentShader> shaderReference) {
+      final FragmentShader? shader = shaderReference.target;
+      if (shader == null) {
+        return true;
+      }
+
+      shader._reinitialize();
+      shader._slots.removeWhere((WeakReference<UniformFloatSlot> slotReference) {
+        final UniformFloatSlot? slot = slotReference.target;
+        if (slot == null) {
+          return true;
+        }
+
+        slot._shaderIndex = program._getUniformFloatIndex(slot.name, slot.index);
+        return false;
+      });
+
+      return false;
+    });
+  }
+
+  int _getUniformFloatIndex(String name, int index) {
+    if (index < 0) {
+      throw ArgumentError('Index `$index` out of bounds for `$name`.');
+    }
+
+    int offset = 0;
+    bool found = false;
+    const int sizeOfFloat = 4;
+    for (final dynamic entryDynamic in _uniformInfo) {
+      final Map<String, Object> entry = entryDynamic as Map<String, Object>;
+      final int sizeInFloats = (entry['size'] as int? ?? 0) ~/ sizeOfFloat;
+      if (entry['name'] == name) {
+        if (index + 1 > sizeInFloats) {
+          throw ArgumentError('Index `$index` out of bounds for `$name`.');
+        }
+        found = true;
+        break;
+      }
+      offset += sizeInFloats;
+    }
+
+    if (!found) {
+      throw ArgumentError('No uniform named "$name".');
+    }
+
+    return offset + index;
   }
 
   @pragma('vm:entry-point')
@@ -5213,6 +5325,9 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   @pragma('vm:entry-point')
   late int _samplerCount;
 
+  @pragma('vm:entry-point')
+  late List<dynamic> _uniformInfo;
+
   @Native<Void Function(Handle)>(symbol: 'FragmentProgram::Create')
   external void _constructor();
 
@@ -5220,7 +5335,52 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   external String _initFromAsset(String assetKey);
 
   /// Returns a fresh instance of [FragmentShader].
-  FragmentShader fragmentShader() => FragmentShader._(this, debugName: _debugName);
+  FragmentShader fragmentShader() {
+    final FragmentShader result = FragmentShader._(this, debugName: _debugName);
+    _shaders.removeWhere((WeakReference<FragmentShader> ref) => ref.target == null);
+    _shaders.add(WeakReference<FragmentShader>(result));
+    return result;
+  }
+}
+
+/// A binding to a uniform of type float. Calling [set] on this object updates
+/// a float uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader) {
+///   shader.getUniformFloat('uColor', 0).set(1.0);
+///   shader.getUniformFloat('uColor', 1).set(0.0);
+///   shader.getUniformFloat('uColor', 2).set(0.0);
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformFloat] - How [UniformFloatSlot] instances are acquired.
+///
+base class UniformFloatSlot {
+  UniformFloatSlot._(this._shader, this.name, this.index, this._shaderIndex);
+
+  /// Set the float value of the bound uniform.
+  void set(double val) {
+    _shader.setFloat(_shaderIndex, val);
+  }
+
+  /// VisibleForTesting: This is the index one would use with
+  /// [FragmentShader.setFloat] for this uniform.
+  int get shaderIndex {
+    return _shaderIndex;
+  }
+
+  final FragmentShader _shader;
+  int _shaderIndex;
+
+  /// The name of the bound uniform.
+  final String name;
+
+  /// The offset into the bound uniform. For example, 1 for `.y` or 2 for `.b`.
+  final int index;
 }
 
 /// A [Shader] generated from a [FragmentProgram].
@@ -5237,16 +5397,21 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
 /// are required to exist simultaneously, they must be obtained from two
 /// different calls to [FragmentProgram.fragmentShader].
 base class FragmentShader extends Shader {
-  FragmentShader._(FragmentProgram program, {String? debugName})
-    : _debugName = debugName,
-      super._() {
-    _floats = _constructor(program, program._uniformFloatCount, program._samplerCount);
+  FragmentShader._(this._program, {String? debugName}) : _debugName = debugName, super._() {
+    _floats = _constructor(_program, _program._uniformFloatCount, _program._samplerCount);
   }
+
+  final FragmentProgram _program;
 
   final String? _debugName;
 
   static final Float32List _kEmptyFloat32List = Float32List(0);
   Float32List _floats = _kEmptyFloat32List;
+  final List<WeakReference<UniformFloatSlot>> _slots = <WeakReference<UniformFloatSlot>>[];
+
+  void _reinitialize() {
+    _floats = _constructor(_program, _program._uniformFloatCount, _program._samplerCount);
+  }
 
   /// Sets the float uniform at [index] to [value].
   ///
@@ -5294,6 +5459,38 @@ base class FragmentShader extends Shader {
   void setFloat(int index, double value) {
     assert(!debugDisposed, 'Tried to accesss uniforms on a disposed Shader: $this');
     _floats[index] = value;
+  }
+
+  /// Access the float binding for uniform named [name] with optional offset
+  /// [index]. Example [index] values: 1 for 'foo.y', 2 for 'foo.b'.
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform float uScale;
+  /// uniform sampler2D uTexture;
+  /// uniform vec2 uMagnitude;
+  /// uniform vec4 uColor;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   shader.getUniformFloat('uScale');
+  ///   shader.getUniformFloat('uMagnitude', 0);
+  ///   shader.getUniformFloat('uMagnitude', 1);
+  ///   shader.getUniformFloat('uColor', 0);
+  ///   shader.getUniformFloat('uColor', 1);
+  ///   shader.getUniformFloat('uColor', 2);
+  ///   shader.getUniformFloat('uColor', 3);
+  /// }
+  /// ```
+  UniformFloatSlot getUniformFloat(String name, [int? index]) {
+    index ??= 0;
+    final int shaderIndex = _program._getUniformFloatIndex(name, index);
+    final UniformFloatSlot result = UniformFloatSlot._(this, name, index, shaderIndex);
+    _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
+    _slots.add(WeakReference<UniformFloatSlot>(result));
+    return result;
   }
 
   /// Sets the sampler uniform at [index] to [image].

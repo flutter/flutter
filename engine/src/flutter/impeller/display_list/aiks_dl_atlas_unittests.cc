@@ -33,8 +33,7 @@ RSTransform MakeTranslation(Scalar tx, Scalar ty) {
 
 std::tuple<std::vector<DlRect>,       //
            std::vector<RSTransform>,  //
-           sk_sp<DlImageImpeller>>
-CreateTestData(const AiksTest* test) {
+           sk_sp<DlImageImpeller>> CreateTestData(const AiksTest* test) {
   // Draws the image as four squares stiched together.
   auto atlas =
       DlImageImpeller::Make(test->CreateTextureForFixture("bay_bridge.jpg"));
@@ -192,7 +191,7 @@ TEST_P(AiksTest, DlAtlasGeometryNoBlendRenamed) {
 
   ContentContext context(GetContext(), nullptr);
   auto vertex_buffer =
-      geom.CreateSimpleVertexBuffer(context.GetTransientsBuffer());
+      geom.CreateSimpleVertexBuffer(context.GetTransientsDataBuffer());
 
   EXPECT_EQ(vertex_buffer.index_type, IndexType::kNone);
   EXPECT_EQ(vertex_buffer.vertex_count, texture_coordinates.size() * 6);
@@ -215,7 +214,7 @@ TEST_P(AiksTest, DlAtlasGeometryBlend) {
 
   ContentContext context(GetContext(), nullptr);
   auto vertex_buffer =
-      geom.CreateBlendVertexBuffer(context.GetTransientsBuffer());
+      geom.CreateBlendVertexBuffer(context.GetTransientsDataBuffer());
 
   EXPECT_EQ(vertex_buffer.index_type, IndexType::kNone);
   EXPECT_EQ(vertex_buffer.vertex_count, texture_coordinates.size() * 6);

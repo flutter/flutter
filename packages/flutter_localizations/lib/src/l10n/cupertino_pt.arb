@@ -29,5 +29,11 @@
   "shareButtonLabel": "Compartilhar…",
   "clearButtonLabel": "Limpar",
   "cancelButtonLabel": "Cancelar",
-  "backButtonLabel": "Voltar"
+  "backButtonLabel": "Voltar",
+  "expansionTileExpandedHint": "toque duas vezes para fechar",
+  "expansionTileCollapsedHint": "Toque duas vezes para abrir",
+  "expansionTileExpandedTapHint": "Feche",
+  "expansionTileCollapsedTapHint": "Abra para mostrar mais detalhes",
+  "expandedHint": "Fechado.",
+  "collapsedHint": "Aberto."
 }

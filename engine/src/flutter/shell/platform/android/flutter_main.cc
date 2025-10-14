@@ -102,7 +102,7 @@ void FlutterMain::Init(JNIEnv* env,
   }
   auto command_line = fml::CommandLineFromIterators(args.begin(), args.end());
 
-  auto settings = SettingsFromCommandLine(command_line);
+  auto settings = SettingsFromCommandLine(command_line, true);
 
   // Turn systracing on if ATrace_isEnabled is true and the user did not already
   // request systracing
@@ -124,6 +124,7 @@ void FlutterMain::Init(JNIEnv* env,
   AndroidRenderingAPI android_rendering_api =
       SelectedRenderingAPI(settings, api_level);
 
+  settings.warn_on_impeller_opt_out = true;
 #if !SLIMPELLER
   switch (android_rendering_api) {
     case AndroidRenderingAPI::kSoftware:

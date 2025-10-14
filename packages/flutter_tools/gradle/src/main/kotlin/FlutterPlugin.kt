@@ -8,6 +8,7 @@ import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
+import com.android.build.gradle.api.ApkVariant
 import com.android.build.gradle.tasks.PackageAndroidArtifact
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.flutter.gradle.FlutterPluginUtils.readPropertiesIfExist
@@ -431,14 +432,7 @@ class FlutterPlugin : Plugin<Project> {
                         filename += "-${FlutterPluginUtils.buildModeFor(variant.buildType)}"
                         projectToAddTasksTo.copy {
                             from(File("$outputDirectoryStr/${output.outputFileName}"))
-                            into(
-                                File(
-                                    "${
-                                        projectToAddTasksTo.layout.buildDirectory.dir("outputs/flutter-apk")
-                                            .get()
-                                    }"
-                                )
-                            )
+                            into(projectToAddTasksTo.layout.buildDirectory.dir("outputs/flutter-apk"))
                             rename { "$filename.apk" }
                         }
                     }
@@ -620,6 +614,8 @@ class FlutterPlugin : Plugin<Project> {
                     //    https://github.com/flutter/flutter/issues/166550
                     @Suppress("DEPRECATION")
                     output as com.android.build.gradle.api.ApkVariantOutput
+                    val versionCodeIfPresent: Int? = if (variant is ApkVariant) variant.versionCode else null
+
                     // TODO(gmackall): Migrate to AGPs variant api.
                     //    https://github.com/flutter/flutter/issues/166550
                     @Suppress("DEPRECATION")
@@ -627,7 +623,10 @@ class FlutterPlugin : Plugin<Project> {
                         output.getFilter(com.android.build.VariantOutput.FilterType.ABI)
                     val abiVersionCode: Int? = FlutterPluginConstants.ABI_VERSION[filterIdentifier]
                     if (abiVersionCode != null) {
-                        output.versionCodeOverride = abiVersionCode * 1000 + variant.mergedFlavor.versionCode as Int
+                        output.versionCodeOverride = abiVersionCode * 1000 + (
+                            versionCodeIfPresent
+                                ?: variant.mergedFlavor.versionCode as Int
+                        )
                     }
                 }
             }
@@ -681,7 +680,6 @@ class FlutterPlugin : Plugin<Project> {
                     localEngineSrcPath = flutterPlugin.localEngineSrcPath
                     targetPath = FlutterPluginUtils.getFlutterTarget(project)
                     verbose = FlutterPluginUtils.isProjectVerbose(project)
-                    fastStart = FlutterPluginUtils.isProjectFastStart(project)
                     fileSystemRoots = fileSystemRootsValue
                     fileSystemScheme = fileSystemSchemeValue
                     trackWidgetCreation = trackWidgetCreationValue
@@ -704,7 +702,7 @@ class FlutterPlugin : Plugin<Project> {
                     validateDeferredComponents = validateDeferredComponentsValue
                     flavor = flavorValue
                 }
-            val compileTask: FlutterTask = compileTaskProvider.get()
+            val flutterCompileTask: FlutterTask = compileTaskProvider.get()
             val libJar: File =
                 project.file(
                     project.layout.buildDirectory.dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/libs.jar")
@@ -716,10 +714,10 @@ class FlutterPlugin : Plugin<Project> {
                 ) {
                     destinationDirectory.set(libJar.parentFile)
                     archiveFileName.set(libJar.name)
-                    dependsOn(compileTask)
+                    dependsOn(flutterCompileTask)
                     targetPlatforms.forEach { targetPlatform ->
                         val abi: String? = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetPlatform]
-                        from("${compileTask.intermediateDir}/$abi") {
+                        from("${flutterCompileTask.intermediateDir}/$abi") {
                             include("*.so")
                             // Move `app.so` to `lib/<abi>/libapp.so`
                             rename { filename: String -> "lib/$abi/lib$filename" }
@@ -749,8 +747,8 @@ class FlutterPlugin : Plugin<Project> {
                     "copyFlutterAssets${FlutterPluginUtils.capitalize(variant.name)}",
                     Copy::class.java
                 ) {
-                    dependsOn(compileTask)
-                    with(compileTask.assets)
+                    dependsOn(flutterCompileTask)
+                    with(flutterCompileTask.assets)
                     filePermissions {
                         user {
                             read = true

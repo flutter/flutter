@@ -886,11 +886,11 @@ transforms:
       style: optional_named
       argumentValue:
         expression: "CheckboxThemeData(\n
-                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
@@ -903,11 +903,11 @@ transforms:
       style: optional_named
       argumentValue:
         expression: "{% checkboxTheme %}.copyWith(\n
-                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
@@ -920,11 +920,11 @@ transforms:
       style: optional_named
       argumentValue:
         expression: "RadioThemeData(\n
-                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
@@ -937,11 +937,11 @@ transforms:
       style: optional_named
       argumentValue:
         expression: "{% radioTheme %}.copyWith(\n
-                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
@@ -954,20 +954,20 @@ transforms:
       style: optional_named
       argumentValue:
         expression: "SwitchThemeData(\n
-                       thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       thumbColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
                        }),\n
-                       trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       trackColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
@@ -980,20 +980,20 @@ transforms:
       style: optional_named
       argumentValue:
         expression: "{% switchTheme %}.copyWith(\n
-                       thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       thumbColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
                        }),\n
-                       trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       trackColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
@@ -1030,11 +1030,11 @@ transforms:
       style: optional_named
       argumentValue:
         expression: "CheckboxThemeData(\n
-                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
@@ -1047,11 +1047,11 @@ transforms:
       style: optional_named
       argumentValue:
         expression: "{% checkboxTheme %}.copyWith(\n
-                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
@@ -1064,11 +1064,11 @@ transforms:
       style: optional_named
       argumentValue:
         expression: "RadioThemeData(\n
-                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
@@ -1081,11 +1081,11 @@ transforms:
       style: optional_named
       argumentValue:
         expression: "{% radioTheme %}.copyWith(\n
-                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
@@ -1098,20 +1098,20 @@ transforms:
       style: optional_named
       argumentValue:
         expression: "SwitchThemeData(\n
-                       thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       thumbColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
                        }),\n
-                       trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       trackColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
@@ -1124,20 +1124,20 @@ transforms:
       style: optional_named
       argumentValue:
         expression: "{% switchTheme %}.copyWith(\n
-                       thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       thumbColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
                        }),\n
-                       trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       trackColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
@@ -1174,11 +1174,11 @@ transforms:
       style: optional_named
       argumentValue:
         expression: "CheckboxThemeData(\n
-                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
@@ -1191,11 +1191,11 @@ transforms:
       style: optional_named
       argumentValue:
         expression: "{% checkboxTheme %}.copyWith(\n
-                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
@@ -1208,11 +1208,11 @@ transforms:
       style: optional_named
       argumentValue:
         expression: "RadioThemeData(\n
-                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
@@ -1225,11 +1225,11 @@ transforms:
       style: optional_named
       argumentValue:
         expression: "{% radioTheme %}.copyWith(\n
-                       fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
@@ -1242,20 +1242,20 @@ transforms:
       style: optional_named
       argumentValue:
         expression: "SwitchThemeData(\n
-                       thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       thumbColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
                        }),\n
-                       trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       trackColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
@@ -1268,20 +1268,20 @@ transforms:
       style: optional_named
       argumentValue:
         expression: "{% switchTheme %}.copyWith(\n
-                       thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       thumbColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n
                        }),\n
-                       trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {\n
-                         if (states.contains(MaterialState.disabled)) {
+                       trackColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {\n
+                         if (states.contains(WidgetState.disabled)) {
                            return null;
                          }\n
-                         if (states.contains(MaterialState.selected)) {
+                         if (states.contains(WidgetState.selected)) {
                            return {% toggleableActiveColor %};
                          }\n
                          return null;\n

@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/painting/image_decoder_impeller.h"
 
+#include <format>
 #include <memory>
 
 #include "flutter/fml/closure.h"
@@ -13,7 +14,6 @@
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/renderer/command_buffer.h"
 #include "flutter/impeller/renderer/context.h"
-#include "impeller/base/strings.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
@@ -185,9 +185,9 @@ DecompressResult ImageDecoderImpeller::DecompressTexture(
 
   const auto pixel_format = ToPixelFormat(image_info.colorType());
   if (!pixel_format.has_value()) {
-    std::string decode_error(impeller::SPrintF(
-        "Codec pixel format is not supported (SkColorType=%d)",
-        image_info.colorType()));
+    std::string decode_error(
+        std::format("Codec pixel format is not supported (SkColorType={})",
+                    static_cast<int>(image_info.colorType())));
     FML_DLOG(ERROR) << decode_error;
     return DecompressResult{.decode_error = decode_error};
   }
@@ -310,8 +310,9 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
     const std::optional<SkImageInfo>& resize_info) {
   const auto pixel_format = ToPixelFormat(image_info.colorType());
   if (!pixel_format) {
-    std::string decode_error(impeller::SPrintF(
-        "Unsupported pixel format (SkColorType=%d)", image_info.colorType()));
+    std::string decode_error(
+        std::format("Unsupported pixel format (SkColorType={})",
+                    static_cast<int>(image_info.colorType())));
     FML_DLOG(ERROR) << decode_error;
     return std::make_pair(nullptr, decode_error);
   }
@@ -337,7 +338,8 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
   }
 
   dest_texture->SetLabel(
-      impeller::SPrintF("ui.Image(%p)", dest_texture.get()).c_str());
+      std::format("ui.Image({})", static_cast<const void*>(dest_texture.get()))
+          .c_str());
 
   auto command_buffer = context->CreateCommandBuffer();
   if (!command_buffer) {
@@ -483,8 +485,9 @@ ImageDecoderImpeller::UploadTextureToStorage(
   const auto image_info = bitmap->info();
   const auto pixel_format = ToPixelFormat(image_info.colorType());
   if (!pixel_format) {
-    std::string decode_error(impeller::SPrintF(
-        "Unsupported pixel format (SkColorType=%d)", image_info.colorType()));
+    std::string decode_error(
+        std::format("Unsupported pixel format (SkColorType={})",
+                    static_cast<int>(image_info.colorType())));
     FML_DLOG(ERROR) << decode_error;
     return std::make_pair(nullptr, decode_error);
   }
@@ -515,7 +518,9 @@ ImageDecoderImpeller::UploadTextureToStorage(
     return std::make_pair(nullptr, decode_error);
   }
 
-  texture->SetLabel(impeller::SPrintF("ui.Image(%p)", texture.get()).c_str());
+  texture->SetLabel(
+      std::format("ui.Image({})", static_cast<const void*>(texture.get()))
+          .c_str());
 
   context->DisposeThreadLocalCachedResources();
 
@@ -537,7 +542,7 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
   ImageResult result = [p_result,                               //
                         raw_descriptor,                         //
                         ui_runner = runners_.GetUITaskRunner()  //
-  ](auto image, auto decode_error) {
+  ](const auto& image, const auto& decode_error) {
     ui_runner->PostTask([raw_descriptor, p_result, image, decode_error]() {
       raw_descriptor->Release();
       p_result(std::move(image), decode_error);

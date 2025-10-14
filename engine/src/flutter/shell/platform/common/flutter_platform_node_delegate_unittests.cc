@@ -48,6 +48,7 @@ TEST(FlutterPlatformNodeDelegateTest, canPerfomActions) {
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   flags.is_text_field = true;
   root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
@@ -95,6 +96,7 @@ TEST(FlutterPlatformNodeDelegateTest, canGetAXNode) {
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   flags.is_text_field = true;
   root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
@@ -216,14 +218,14 @@ TEST(FlutterPlatformNodeDelegateTest, canUseOwnerBridge) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
-  FlutterSemanticsNode2 root;
-  root.id = 0;
+  FlutterSemanticsNode2 root{sizeof(FlutterSemanticsNode2), 0};
   root.label = "root";
   root.hint = "";
   root.value = "";
   root.increased_value = "";
   root.decreased_value = "";
   root.tooltip = "";
+  root.heading_level = 0;
   root.child_count = 1;
   root.flags2 = &flags;
   int32_t children[] = {1};
@@ -233,14 +235,14 @@ TEST(FlutterPlatformNodeDelegateTest, canUseOwnerBridge) {
   root.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
-  FlutterSemanticsNode2 child1;
-  child1.id = 1;
+  FlutterSemanticsNode2 child1{sizeof(FlutterSemanticsNode2), 1};
   child1.label = "child 1";
   child1.hint = "";
   child1.value = "";
   child1.increased_value = "";
   child1.decreased_value = "";
   child1.tooltip = "";
+  child1.heading_level = 0;
   child1.child_count = 0;
   child1.flags2 = &flags;
   child1.custom_accessibility_actions_count = 0;

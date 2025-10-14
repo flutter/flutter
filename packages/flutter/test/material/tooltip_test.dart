@@ -3511,6 +3511,69 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  // This is a regression test for https://github.com/flutter/flutter/issues/169741.
+  testWidgets(
+    'Tooltip does not show while transitioning from another route with secondary animation',
+    (WidgetTester tester) async {
+      final TransitionDurationObserver observer = TransitionDurationObserver();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorObservers: <NavigatorObserver>[observer],
+          home: Scaffold(
+            body: Builder(
+              builder: (BuildContext context) {
+                return TextButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    CupertinoPageRoute<void>(
+                      builder: (BuildContext context) => Scaffold(
+                        appBar: AppBar(
+                          leading: const Tooltip(message: 'Hello', child: Text('World')),
+                        ),
+                        body: TextButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (BuildContext context) {
+                                  return Scaffold(appBar: AppBar(title: const Text('Third Page')));
+                                },
+                              ),
+                            );
+                          },
+                          child: const Text('Go to Third Page'),
+                        ),
+                      ),
+                    ),
+                  ),
+                  child: const Text('Go to Second Page'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Go to Second Page'), findsOneWidget);
+      await tester.tap(find.text('Go to Second Page'));
+      await tester.pumpAndSettle();
+      expect(find.text('Go to Third Page'), findsOneWidget);
+
+      await tester.tap(find.text('Go to Third Page'));
+      await tester.pumpAndSettle();
+      expect(find.text('Third Page'), findsOneWidget);
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      await tester.tap(find.byType(BackButton));
+      await observer.pumpPastTransition(tester);
+      await gesture.moveTo(tester.getCenter(find.text('World')));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   /// This is a regression test for https://github.com/flutter/flutter/issues/168545
   testWidgets('The Tooltip on the ModalBottomSheet can still be displayed after showMenu.', (
     WidgetTester tester,
@@ -3545,6 +3608,42 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Hello'), findsOne);
     await gesture.removePointer();
+  });
+
+  testWidgets('Custom tooltip positioning - positionDelegate parameter', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Tooltip(
+              message: tooltipText,
+              positionDelegate: (TooltipPositionContext context) {
+                // Align on top right of box with bottom left of tooltip.
+                return Offset(
+                  context.target.dx + (context.targetSize.width / 2),
+                  context.target.dy - (context.targetSize.height / 2) - context.tooltipSize.height,
+                );
+              },
+              child: const SizedBox(width: 50, height: 50),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.longPress(find.byType(Tooltip));
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text(tooltipText), findsOneWidget);
+
+    final Offset targetCenter = tester.getCenter(find.byType(Tooltip));
+    final Offset tooltipPosition = tester.getTopLeft(_findTooltipContainer(tooltipText));
+
+    // The tooltip should be positioned at target + (25, -25-32).
+    expect(tooltipPosition.dx, closeTo(targetCenter.dx + 25, 5.0));
+    expect(tooltipPosition.dy, closeTo(targetCenter.dy - 25 - 32, 5.0));
   });
 }
 

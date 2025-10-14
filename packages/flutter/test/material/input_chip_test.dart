@@ -40,7 +40,7 @@ Widget selectedInputChip({Color? checkmarkColor, bool enabled = false}) {
     isEnabled: enabled,
     // When [enabled] is true we also need to provide one of the chip
     // callbacks, otherwise the chip would have a 'disabled'
-    // [MaterialState], which is not the intention.
+    // [WidgetState], which is not the intention.
     onSelected: enabled ? (_) {} : null,
     showCheckmark: true,
     checkmarkColor: checkmarkColor,
@@ -128,15 +128,14 @@ void main() {
         child: InputChip(
           onSelected: enabled ? (bool value) {} : null,
           selected: selected,
-          color: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.disabled) &&
-                states.contains(MaterialState.selected)) {
+          color: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+            if (states.contains(WidgetState.disabled) && states.contains(WidgetState.selected)) {
               return disabledSelectedColor;
             }
-            if (states.contains(MaterialState.disabled)) {
+            if (states.contains(WidgetState.disabled)) {
               return disabledColor;
             }
-            if (states.contains(MaterialState.selected)) {
+            if (states.contains(WidgetState.selected)) {
               return selectedColor;
             }
             return backgroundColor;
@@ -688,5 +687,27 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.forbidden,
     );
+  });
+
+  testWidgets('InputChip does not crash at zero area', (WidgetTester tester) async {
+    Future<void> testChip(Widget chip) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(child: SizedBox.shrink(child: chip)),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(InputChip)), Size.zero);
+    }
+
+    await testChip(const InputChip(label: Text('X')));
+    await testChip(
+      const InputChip(
+        label: Text('X'),
+        avatar: CircleAvatar(child: Text('A')),
+      ),
+    );
+    await testChip(InputChip(label: const Text('X'), onDeleted: () {}));
   });
 }

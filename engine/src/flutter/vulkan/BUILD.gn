@@ -29,8 +29,6 @@ source_set("vulkan") {
     "vulkan_swapchain.h",
     "vulkan_utilities.cc",
     "vulkan_utilities.h",
-    "vulkan_window.cc",
-    "vulkan_window.h",
   ]
 
   if (is_android) {

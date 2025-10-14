@@ -829,16 +829,17 @@ TEST_P(EntityTest, BlendingModeOptions) {
       options.primitive_type = PrimitiveType::kTriangle;
       pass.SetPipeline(context.GetSolidFillPipeline(options));
       pass.SetVertexBuffer(
-          vtx_builder.CreateVertexBuffer(context.GetTransientsBuffer()));
+          vtx_builder.CreateVertexBuffer(context.GetTransientsDataBuffer(),
+                                         context.GetTransientsIndexesBuffer()));
 
       VS::FrameInfo frame_info;
       frame_info.mvp = pass.GetOrthographicTransform() * world_matrix;
       VS::BindFrameInfo(
-          pass, context.GetTransientsBuffer().EmplaceUniform(frame_info));
+          pass, context.GetTransientsDataBuffer().EmplaceUniform(frame_info));
       FS::FragInfo frag_info;
       frag_info.color = color.Premultiply();
       FS::BindFragInfo(
-          pass, context.GetTransientsBuffer().EmplaceUniform(frame_info));
+          pass, context.GetTransientsDataBuffer().EmplaceUniform(frag_info));
       return pass.Draw().ok();
     };
 
@@ -1907,9 +1908,11 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
   memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
 
   auto buffer_view = RuntimeEffectContents::EmplaceVulkanUniform(
-      uniform_data, GetContentContext()->GetTransientsBuffer(),
+      uniform_data, GetContentContext()->GetTransientsDataBuffer(),
       runtime_stage->GetUniforms()[0],
-      GetContentContext()->GetTransientsBuffer().GetMinimumUniformAlignment());
+      GetContentContext()
+          ->GetTransientsDataBuffer()
+          .GetMinimumUniformAlignment());
 
   // 16 bytes:
   //   8 bytes for iResolution
@@ -2581,6 +2584,83 @@ TEST_P(EntityTest, GiantStrokePathAllocation) {
   point = written_data[kPointArenaSize + 2];
   EXPECT_NEAR(point.x, expected[4].x, 0.1);
   EXPECT_NEAR(point.y, expected[4].y, 0.1);
+}
+
+class FlushTestDeviceBuffer : public DeviceBuffer {
+ public:
+  explicit FlushTestDeviceBuffer(const DeviceBufferDescriptor& desc)
+      : DeviceBuffer(desc), storage_(desc.size) {}
+
+  bool SetLabel(std::string_view label) override { return true; }
+  bool SetLabel(std::string_view label, Range range) override { return true; }
+  bool OnCopyHostBuffer(const uint8_t* source,
+                        Range source_range,
+                        size_t offset) {
+    return true;
+  }
+
+  uint8_t* OnGetContents() const override {
+    return const_cast<uint8_t*>(storage_.data());
+  }
+
+  void Flush(std::optional<Range> range) const override {
+    flush_called_ = true;
+  }
+
+  bool flush_called() const { return flush_called_; }
+
+ private:
+  std::vector<uint8_t> storage_;
+  mutable bool flush_called_ = false;
+};
+
+class FlushTestAllocator : public Allocator {
+ public:
+  ISize GetMaxTextureSizeSupported() const override {
+    return ISize(1024, 1024);
+  };
+
+  std::shared_ptr<DeviceBuffer> OnCreateBuffer(
+      const DeviceBufferDescriptor& desc) override {
+    return std::make_shared<FlushTestDeviceBuffer>(desc);
+  };
+
+  std::shared_ptr<Texture> OnCreateTexture(const TextureDescriptor& desc,
+                                           bool threadsafe) override {
+    return nullptr;
+  }
+};
+
+class FlushTestContentContext : public ContentContext {
+ public:
+  FlushTestContentContext(
+      const std::shared_ptr<Context>& context,
+      const std::shared_ptr<TypographerContext>& typographer_context,
+      const std::shared_ptr<Allocator>& allocator)
+      : ContentContext(context, typographer_context) {
+    SetTransientsDataBuffer(HostBuffer::Create(
+        allocator, context->GetIdleWaiter(),
+        context->GetCapabilities()->GetMinimumUniformAlignment()));
+    SetTransientsIndexesBuffer(HostBuffer::Create(
+        allocator, context->GetIdleWaiter(),
+        context->GetCapabilities()->GetMinimumUniformAlignment()));
+  }
+};
+
+TEST_P(EntityTest, RoundSuperellipseGetPositionBufferFlushes) {
+  RenderTarget target;
+  testing::MockRenderPass mock_pass(GetContext(), target);
+
+  auto content_context = std::make_shared<FlushTestContentContext>(
+      GetContext(), GetTypographerContext(),
+      std::make_shared<FlushTestAllocator>());
+  auto geometry =
+      Geometry::MakeRoundSuperellipse(Rect::MakeLTRB(0, 0, 100, 100), 5);
+  auto result = geometry->GetPositionBuffer(*content_context, {}, mock_pass);
+
+  auto device_buffer = reinterpret_cast<const FlushTestDeviceBuffer*>(
+      result.vertex_buffer.vertex_buffer.GetBuffer());
+  EXPECT_TRUE(device_buffer->flush_called());
 }
 
 }  // namespace testing

@@ -4,6 +4,8 @@
 
 #include "impeller/toolkit/interop/color_source.h"
 
+#include "flutter/impeller/display_list/dl_runtime_effect_impeller.h"
+
 namespace impeller::interop {
 
 ScopedObject<ColorSource> ColorSource::MakeLinearGradient(
@@ -123,7 +125,7 @@ ScopedObject<ColorSource> ColorSource::MakeFragmentProgram(
     return nullptr;
   }
   auto runtime_effect =
-      flutter::DlRuntimeEffect::MakeImpeller(std::move(runtime_stage));
+      flutter::DlRuntimeEffectImpeller::Make(std::move(runtime_stage));
   if (!runtime_effect) {
     VALIDATION_LOG << "Could not make runtime effect.";
     return nullptr;

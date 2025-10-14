@@ -440,6 +440,38 @@ void main() {
   );
 
   testUsingContext(
+    'Does not build wasm when wasm-dry-run is disabled',
+    () async {
+      final buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+      final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+      setupFileSystemForEndToEndTest(fileSystem);
+      await runner.run(<String>['build', 'web', '--no-pub', '--no-wasm-dry-run']);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => fakePlatform,
+      FileSystem: () => fileSystem,
+      FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+      ProcessManager: () => processManager,
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            expect(target, isA<WebServiceWorker>());
+            final List<WebCompilerConfig> configs = (target as WebServiceWorker).compileConfigs;
+            expect(configs, hasLength(1));
+            final WebCompilerConfig jsConfig = configs[0];
+            expect(jsConfig.renderer, WebRendererMode.canvaskit);
+            expect(jsConfig.compileTarget, CompileTarget.js);
+            final List<String> jsOptions = jsConfig.toCommandOptions(BuildMode.release);
+            expect(jsOptions, <String>[
+              '--native-null-assertions',
+              '--no-source-maps',
+              '-O4',
+              '--minify',
+            ]);
+          }),
+    },
+  );
+
+  testUsingContext(
     'Defaults to web renderer skwasm mode and minify for wasm when no option is specified',
     () async {
       final buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
@@ -644,6 +676,33 @@ void main() {
           message:
               'Received a --base-href value of "i_dont_start_with_a_forward_slash"\n'
               '--base-href should start and end with /',
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      Platform: () => fakePlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    },
+  );
+
+  testUsingContext(
+    'Rejects --static-assets-url value that does not end with /',
+    () async {
+      final buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+      final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+
+      await expectLater(
+        runner.run(<String>[
+          'build',
+          'web',
+          '--no-pub',
+          '--static-assets-url=i_dont_end_with_forward_slash',
+        ]),
+        throwsToolExit(
+          message:
+              'Received a --static-assets-url value of "i_dont_end_with_forward_slash"\n'
+              '--static-assets-url should end with /',
         ),
       );
     },

@@ -232,6 +232,7 @@ class MockCapabilities : public Capabilities {
   MOCK_METHOD(PixelFormat, GetDefaultGlyphAtlasFormat, (), (const, override));
   MOCK_METHOD(ISize, GetMaximumRenderPassAttachmentSize, (), (const override));
   MOCK_METHOD(size_t, GetMinimumUniformAlignment, (), (const override));
+  MOCK_METHOD(bool, NeedsPartitionedHostBuffer, (), (const, override));
 };
 
 class MockCommandQueue : public CommandQueue {

@@ -984,18 +984,41 @@ class SweepGradient extends Gradient {
 
   /// The angle in radians at which stop 0.0 of the gradient is placed.
   ///
+  /// The angle is measured in radians clockwise from the positive x-axis.
+  ///
+  /// Values outside the range `[0, 2π]` are normalized to the equivalent angle
+  /// within this range using modulo arithmetic.
+  ///
+  /// The gradient will be painted in the sector between [startAngle] and [endAngle].
+  /// The behavior outside this sector is determined by [tileMode].
+  ///
   /// Defaults to 0.0.
   final double startAngle;
 
   /// The angle in radians at which stop 1.0 of the gradient is placed.
   ///
-  /// Defaults to math.pi * 2.
+  /// The angle is measured in radians clockwise from the positive x-axis.
+  ///
+  /// Values outside the range `[0, 2π]` are normalized to the equivalent angle
+  /// within this range using modulo arithmetic.
+  ///
+  /// The gradient will be painted in the sector between [startAngle] and [endAngle].
+  /// The behavior outside this sector is determined by [tileMode].
+  ///
+  /// Defaults to math.pi * 2 (2π = a full circle).
   final double endAngle;
 
-  /// How this gradient should tile the plane beyond in the region before
+  /// How this gradient should tile the plane in the region before
   /// [startAngle] and after [endAngle].
   ///
-  /// For details, see [TileMode].
+  /// The gradient will be painted in the sector between [startAngle] and
+  /// [endAngle]. The [tileMode] determines what happens in the remaining area:
+  ///
+  /// * [TileMode.clamp]: The edge colors are extended to fill the remaining area.
+  /// * [TileMode.repeated]: The gradient is repeated in the angular direction.
+  /// * [TileMode.mirror]: The gradient is mirrored in the angular direction.
+  /// * [TileMode.decal]: Only the gradient is drawn, leaving the remaining area
+  ///   transparent.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_clamp_sweep.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_decal_sweep.png)

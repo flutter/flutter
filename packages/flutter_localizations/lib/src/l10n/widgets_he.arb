@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "חיפוש באינטרנט",
   "shareButtonLabel": "שיתוף",
   "pasteButtonLabel": "הדבקה",
-  "selectAllButtonLabel": "בחירת הכול"
+  "selectAllButtonLabel": "בחירת הכול",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found",
+  "radioButtonUnselectedLabel": "Not selected"
 }

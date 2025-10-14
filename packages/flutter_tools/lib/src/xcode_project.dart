@@ -7,6 +7,7 @@ library;
 
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'base/template.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
@@ -204,6 +205,22 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   }
 
   XcodeProjectInfo? _projectInfo;
+
+  /// Get the scheme using the Xcode's project [XcodeProjectInfo.schemes] and
+  /// the [BuildInfo.flavor].
+  Future<String?> schemeForBuildInfo(BuildInfo buildInfo, {Logger? logger}) async {
+    final XcodeProjectInfo? info = await projectInfo();
+    if (info == null) {
+      logger?.printError('Xcode project info not found.');
+      return null;
+    }
+
+    final String? scheme = info.schemeFor(buildInfo);
+    if (scheme == null) {
+      info.reportFlavorNotFoundAndExit();
+    }
+    return scheme;
+  }
 
   /// The build settings for the host app of this project, as a detached map.
   ///
@@ -444,8 +461,12 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       _editableDirectory.childDirectory('Runner').childFile('AppDelegate.swift');
 
   /// The 'AppDelegate.m' file of the host app. This file might not exist if the app project uses Swift.
-  File get appDelegateObjc =>
+  File get appDelegateObjcImplementation =>
       _editableDirectory.childDirectory('Runner').childFile('AppDelegate.m');
+
+  /// The 'AppDelegate.h' file of the host app. This file might not exist if the app project uses Swift.
+  File get appDelegateObjcHeader =>
+      _editableDirectory.childDirectory('Runner').childFile('AppDelegate.h');
 
   File get infoPlist => _editableDirectory.childDirectory('Runner').childFile('Info.plist');
 

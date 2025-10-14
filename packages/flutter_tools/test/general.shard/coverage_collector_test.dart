@@ -770,7 +770,7 @@ FakeVmServiceHost createFakeVmServiceHostWithFooAndBar({
           'forceCompile': true,
           'reportLines': true,
           'librariesAlreadyCompiled': librariesAlreadyCompiled,
-          if (libraryFilters != null) 'libraryFilters': libraryFilters,
+          'libraryFilters': ?libraryFilters,
         },
         jsonResponse: SourceReport(
           ranges: <SourceReportRange>[
