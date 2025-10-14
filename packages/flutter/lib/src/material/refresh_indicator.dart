@@ -148,7 +148,6 @@ class RefreshIndicator extends StatefulWidget {
   /// The [semanticsValue] may be used to specify progress on the widget.
   const RefreshIndicator({
     super.key,
-    required this.child,
     this.displacement = 40.0,
     this.edgeOffset = 0.0,
     required this.onRefresh,
@@ -160,6 +159,7 @@ class RefreshIndicator extends StatefulWidget {
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
     this.elevation = 2.0,
+    required this.child,
   }) : _indicatorType = _IndicatorType.material,
        onStatusChange = null,
        assert(elevation >= 0.0);
