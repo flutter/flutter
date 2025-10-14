@@ -141,6 +141,7 @@ class PlatformViewIOS final : public PlatformView {
   AccessibilityBridge* GetAccessibilityBridge() { return accessibility_bridge_.get(); }
 
  private:
+  void ApplyLocaleToOwnerController();
   /// Smart pointer for use with objective-c observers.
   /// This guarantees we remove the observer.
   class ScopedObserver {
@@ -156,6 +157,7 @@ class PlatformViewIOS final : public PlatformView {
   };
 
   __weak FlutterViewController* owner_controller_;
+  std::string application_locale_;
   // Since the `ios_surface_` is created on the platform thread but
   // used on the raster thread we need to protect it with a mutex.
   std::mutex ios_surface_mutex_;
