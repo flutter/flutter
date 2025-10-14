@@ -8,8 +8,8 @@ precision highp float;
 
 out vec4 oColor;
 
-uniform sampler2D tex_a;
 uniform sampler2D tex_b;
+uniform sampler2D tex_a;
 
 void main() {
   vec2 coords = texture(tex_a, vec2(1, 0)).xy;
