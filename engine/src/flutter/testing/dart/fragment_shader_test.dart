@@ -110,9 +110,9 @@ void main() async {
     final FragmentProgram program = await FragmentProgram.fromAsset('uniform_ordering.frag.iplr');
     final FragmentShader shader = program.fragmentShader();
     final Image blueGreenImage = await _createBlueGreenImage();
-    final UniformImageSamplerSlot slot = shader.getImageSampler('u_texture');
+    final ImageSamplerSlot slot = shader.getImageSampler('u_texture');
     slot.set(blueGreenImage);
-    expect(slot.index, equals(0));
+    expect(slot.shaderIndex, equals(0));
   });
 
   test('FragmentProgram getImageSampler unknown', () async {
