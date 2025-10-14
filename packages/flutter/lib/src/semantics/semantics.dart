@@ -1032,10 +1032,10 @@ class SemanticsData with Diagnosticable {
   final String identifier;
 
   /// {@macro flutter.semantics.SemanticsProperties.traversalParentIdentifier}
-  final String? traversalParentIdentifier;
+  final Object? traversalParentIdentifier;
 
   /// {@macro flutter.semantics.SemanticsProperties.traversalChildIdentifier}
-  final String? traversalChildIdentifier;
+  final Object? traversalChildIdentifier;
 
   /// A textual description for the current label of the node.
   ///
@@ -1291,10 +1291,18 @@ class SemanticsData with Diagnosticable {
     properties.add(IterableProperty<String>('flags', flagSummary, ifEmpty: null));
     properties.add(StringProperty('identifier', identifier, defaultValue: ''));
     properties.add(
-      StringProperty('traversalParentIdentifier', traversalParentIdentifier, defaultValue: null),
+      DiagnosticsProperty<Object>(
+        'traversalParentIdentifier',
+        traversalParentIdentifier,
+        defaultValue: null,
+      ),
     );
     properties.add(
-      StringProperty('traversalChildIdentifier', traversalChildIdentifier, defaultValue: null),
+      DiagnosticsProperty<Object>(
+        'traversalChildIdentifier',
+        traversalChildIdentifier,
+        defaultValue: null,
+      ),
     );
     properties.add(AttributedStringProperty('label', attributedLabel));
     properties.add(AttributedStringProperty('value', attributedValue));
@@ -1891,7 +1899,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// in their [traversalChildIdentifier]. This allows assistive technologies
   /// to navigate the UI in the correct logical order.
   /// {@endtemplate}
-  final String? traversalParentIdentifier;
+  final Object? traversalParentIdentifier;
 
   /// {@template flutter.semantics.SemanticsProperties.traversalChildIdentifier}
   /// Provides an identifier for establishing parent-child relationships in the semantics
@@ -1908,7 +1916,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// identifier as its [traversalParentIdentifier]. This allows assistive technologies
   /// to navigate the UI in the correct logical order.
   /// {@endtemplate}
-  final String? traversalChildIdentifier;
+  final Object? traversalChildIdentifier;
 
   /// Provides a textual description of the widget.
   ///
@@ -2509,10 +2517,18 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(DiagnosticsProperty<bool>('isRequired', isRequired, defaultValue: null));
     properties.add(StringProperty('identifier', identifier, defaultValue: null));
     properties.add(
-      StringProperty('traversalParentIdentifier', traversalParentIdentifier, defaultValue: null),
+      DiagnosticsProperty<Object>(
+        'traversalParentIdentifier',
+        traversalParentIdentifier,
+        defaultValue: null,
+      ),
     );
     properties.add(
-      StringProperty('traversalChildIdentifier', traversalChildIdentifier, defaultValue: null),
+      DiagnosticsProperty<Object>(
+        'traversalChildIdentifier',
+        traversalChildIdentifier,
+        defaultValue: null,
+      ),
     );
     properties.add(StringProperty('label', label, defaultValue: null));
     properties.add(
@@ -3185,12 +3201,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
   String _identifier = _kEmptyConfig.identifier;
 
   /// {@macro flutter.semantics.SemanticsProperties.traversalParentIdentifier}
-  String? get traversalParentIdentifier => _traversalParentIdentifier;
-  String? _traversalParentIdentifier;
+  Object? get traversalParentIdentifier => _traversalParentIdentifier;
+  Object? _traversalParentIdentifier;
 
   /// {@macro flutter.semantics.SemanticsProperties.traversalChildIdentifier}
-  String? get traversalChildIdentifier => _traversalChildIdentifier;
-  String? _traversalChildIdentifier;
+  Object? get traversalChildIdentifier => _traversalChildIdentifier;
+  Object? _traversalChildIdentifier;
 
   bool get _isTraversalParent => _traversalParentIdentifier != null;
   bool get _isTraversalChild => _traversalChildIdentifier != null;
@@ -3548,8 +3564,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
     // must be done after the merging the its descendants.
     int actions = _actionsAsBits;
     String identifier = _identifier;
-    String? traversalParentIdentifier = _traversalParentIdentifier;
-    String? traversalChildIdentifier = _traversalChildIdentifier;
+    Object? traversalParentIdentifier = _traversalParentIdentifier;
+    Object? traversalChildIdentifier = _traversalChildIdentifier;
     AttributedString attributedLabel = _attributedLabel;
     AttributedString attributedValue = _attributedValue;
     AttributedString attributedIncreasedValue = _attributedIncreasedValue;
@@ -3850,7 +3866,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
     int traversalParentId = -1;
     if (data.traversalChildIdentifier != null) {
-      final String identifier = data.traversalChildIdentifier!;
+      final Object identifier = data.traversalChildIdentifier!;
       if (owner!._traversalParentNodes.containsKey(identifier)) {
         traversalParentId = owner!._traversalParentNodes[identifier]!.id;
       }
@@ -3935,18 +3951,23 @@ class SemanticsNode with DiagnosticableTreeMixin {
       updatedChildren.add(child);
     }
 
-    // If the current node is an overlay portal parent, get the according overlay
-    // portal child from _traversalChildNodes and add it to the children list
+    // If the current node is a traversal parent node, it means that part of its
+    // traversal children might be on other branches of the hit-test tree and
+    // need to be grafted. To fix the traversal order, get the according traversal
+    // children from _traversalChildNodes and add them to the children list
     // of this current node.
     if (_isTraversalParent) {
       if (owner != null && owner!._traversalChildNodes.containsKey(traversalParentIdentifier)) {
-        final SemanticsNode overlayChildNode =
+        final Set<SemanticsNode> traversalChildren =
             owner!._traversalChildNodes[traversalParentIdentifier]!;
-        if (overlayChildNode.attached) {
-          updatedChildren.add(overlayChildNode);
+        for (final SemanticsNode node in traversalChildren) {
+          if (node.attached) {
+            updatedChildren.add(node);
+          }
         }
       }
     }
+
     return updatedChildren;
   }
 
@@ -4110,10 +4131,18 @@ class SemanticsNode with DiagnosticableTreeMixin {
     properties.add(FlagProperty('isHidden', value: flagsCollection.isHidden, ifTrue: 'HIDDEN'));
     properties.add(StringProperty('identifier', _identifier, defaultValue: ''));
     properties.add(
-      StringProperty('traversalParentIdentifier', traversalParentIdentifier, defaultValue: null),
+      DiagnosticsProperty<Object>(
+        'traversalParentIdentifier',
+        traversalParentIdentifier,
+        defaultValue: null,
+      ),
     );
     properties.add(
-      StringProperty('traversalChildIdentifier', traversalChildIdentifier, defaultValue: null),
+      DiagnosticsProperty<Object>(
+        'traversalChildIdentifier',
+        traversalChildIdentifier,
+        defaultValue: null,
+      ),
     );
     properties.add(AttributedStringProperty('label', _attributedLabel));
     properties.add(AttributedStringProperty('value', _attributedValue));
@@ -4531,8 +4560,8 @@ class SemanticsOwner extends ChangeNotifier {
   final Set<SemanticsNode> _dirtyNodes = <SemanticsNode>{};
   final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
   final Set<SemanticsNode> _detachedNodes = <SemanticsNode>{};
-  final Map<String, SemanticsNode> _traversalParentNodes = <String, SemanticsNode>{};
-  final Map<String, SemanticsNode> _traversalChildNodes = <String, SemanticsNode>{};
+  final Map<Object, SemanticsNode> _traversalParentNodes = <Object, SemanticsNode>{};
+  final Map<Object, Set<SemanticsNode>> _traversalChildNodes = <Object, Set<SemanticsNode>>{};
 
   /// The root node of the semantics tree, if any.
   ///
@@ -4675,13 +4704,14 @@ class SemanticsOwner extends ChangeNotifier {
         updatedVisitedNodes.add(node);
       }
 
-      // If the node is an overlay portal parent, then add it to the
-      // _traversalParentNodes map. Similarly, add the node to the
-      // _traversalChildNodes map if it is an overlay portal child.
+      // If the node is a traversal parent, then add it to the
+      // _traversalParentNodes map for later grafting. Similarly, add the node
+      // to the _traversalChildNodes map if it is a traversal child.
       if (isTraversalParent) {
         _traversalParentNodes[node.traversalParentIdentifier!] = node;
       } else if (isTraversalChild) {
-        _traversalChildNodes[node.traversalChildIdentifier!] = node;
+        _traversalChildNodes[node.traversalChildIdentifier!] ??= <SemanticsNode>{};
+        _traversalChildNodes[node.traversalChildIdentifier!]!.add(node);
       }
     }
 
@@ -5582,9 +5612,9 @@ class SemanticsConfiguration {
   }
 
   /// {@macro flutter.semantics.SemanticsProperties.traversalParentIdentifier}
-  String? get traversalParentIdentifier => _traversalParentIdentifier;
-  String? _traversalParentIdentifier;
-  set traversalParentIdentifier(String? value) {
+  Object? get traversalParentIdentifier => _traversalParentIdentifier;
+  Object? _traversalParentIdentifier;
+  set traversalParentIdentifier(Object? value) {
     if (value == traversalParentIdentifier) {
       return;
     }
@@ -5593,9 +5623,9 @@ class SemanticsConfiguration {
   }
 
   /// {@macro flutter.semantics.SemanticsProperties.traversalChildIdentifier}
-  String? get traversalChildIdentifier => _traversalChildIdentifier;
-  String? _traversalChildIdentifier;
-  set traversalChildIdentifier(String? value) {
+  Object? get traversalChildIdentifier => _traversalChildIdentifier;
+  Object? _traversalChildIdentifier;
+  set traversalChildIdentifier(Object? value) {
     if (value == traversalChildIdentifier) {
       return;
     }
