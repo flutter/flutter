@@ -1244,63 +1244,136 @@ void main() {
     ) async {
       await tester.pumpWidget(
         Center(
-          child: RepaintBoundary(
-            child: ColoredBox(
-              color: Colors.white,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  // Row 1: Three ColoredBoxes with isAntiAlias: true, true, true
-                  const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    textDirection: TextDirection.ltr,
-                    children: <Widget>[
-                      SizedBox.square(dimension: 80, child: ColoredBox(color: Colors.red)),
-                      SizedBox.square(dimension: 80, child: ColoredBox(color: Colors.green)),
-                      SizedBox.square(dimension: 80, child: ColoredBox(color: Colors.blue)),
-                    ],
-                  ),
-                  // Row 2: Three ColoredBoxes with isAntiAlias: false, false, false
-                  const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    textDirection: TextDirection.ltr,
-                    children: <Widget>[
-                      SizedBox.square(
-                        dimension: 80,
-                        child: ColoredBox(color: Colors.orange, isAntiAlias: false),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: RepaintBoundary(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 8,
+                  children: <Widget>[
+                    // Intentionally 4% larger than the original size to test anti-aliasing
+                    Transform.scale(
+                      scale: 1.04,
+                      child: const ColoredBox(
+                        color: Colors.orange,
+                        child: Padding(
+                          padding: EdgeInsets.all(2),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              ColoredBox(
+                                color: Colors.white,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    'Short',
+                                    style: TextStyle(fontSize: 16, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                              ColoredBox(
+                                color: Colors.white,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    'Just text ',
+                                    style: TextStyle(fontSize: 14, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                              ColoredBox(
+                                color: Colors.white,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    ' Tall text ',
+                                    style: TextStyle(fontSize: 18, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                              ColoredBox(
+                                color: Colors.white,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    'Medium',
+                                    style: TextStyle(fontSize: 32, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                      SizedBox.square(
-                        dimension: 80,
-                        child: ColoredBox(color: Colors.purple, isAntiAlias: false),
+                    ),
+                    Transform.scale(
+                      scale: 1.04,
+                      child: const ColoredBox(
+                        color: Colors.orange,
+                        isAntiAlias: false,
+                        child: Padding(
+                          padding: EdgeInsets.all(2),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              ColoredBox(
+                                color: Colors.white,
+                                isAntiAlias: false,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    'Short',
+                                    style: TextStyle(fontSize: 16, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                              ColoredBox(
+                                color: Colors.white,
+                                isAntiAlias: false,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    'Just text ',
+                                    style: TextStyle(fontSize: 14, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                              ColoredBox(
+                                color: Colors.white,
+                                isAntiAlias: false,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    ' Tall text ',
+                                    style: TextStyle(fontSize: 18, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                              ColoredBox(
+                                color: Colors.white,
+                                isAntiAlias: false,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    'Medium',
+                                    style: TextStyle(fontSize: 32, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                      SizedBox.square(
-                        dimension: 80,
-                        child: ColoredBox(color: Colors.teal, isAntiAlias: false),
-                      ),
-                    ],
-                  ),
-                  // Row 3: Three ColoredBoxes with isAntiAlias: true, false, true
-                  const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    textDirection: TextDirection.ltr,
-                    children: <Widget>[
-                      SizedBox.square(dimension: 80, child: ColoredBox(color: Colors.yellow)),
-                      SizedBox.square(
-                        dimension: 80,
-                        child: ColoredBox(color: Colors.lime, isAntiAlias: false),
-                      ),
-                      SizedBox.square(dimension: 80, child: ColoredBox(color: Colors.cyan)),
-                    ],
-                  ),
-                  // Row 4: Three ColoredBoxes rotated 36 degrees with anti-aliasing variations
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    textDirection: TextDirection.ltr,
-                    children: <Widget>[
-                      SizedBox.square(
-                        dimension: 80,
-                        child: ColoredBox(
-                          color: Colors.brown,
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        SizedBox.square(
+                          dimension: 80,
                           child: Center(
                             child: SizedBox.square(
                               dimension: 50,
@@ -1311,11 +1384,8 @@ void main() {
                             ),
                           ),
                         ),
-                      ),
-                      SizedBox.square(
-                        dimension: 80,
-                        child: ColoredBox(
-                          color: Colors.pink,
+                        SizedBox.square(
+                          dimension: 80,
                           child: Center(
                             child: SizedBox.square(
                               dimension: 50,
@@ -1326,25 +1396,25 @@ void main() {
                             ),
                           ),
                         ),
-                      ),
-                      SizedBox.square(
-                        dimension: 80,
-                        child: ColoredBox(
-                          color: Colors.indigo,
+                        SizedBox.square(
+                          dimension: 80,
                           child: Center(
                             child: SizedBox.square(
                               dimension: 50,
                               child: Transform.rotate(
                                 angle: math.pi / 5,
-                                child: const ColoredBox(color: Colors.teal),
+                                child: Transform.scale(
+                                  scale: 1.2,
+                                  child: const ColoredBox(color: Colors.teal, isAntiAlias: false),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
