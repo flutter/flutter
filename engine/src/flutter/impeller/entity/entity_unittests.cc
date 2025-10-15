@@ -2496,6 +2496,50 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(EntityTest, CanDrawRoundSuperEllipseWithTinyRadius) {
+  // Regression test for https://github.com/flutter/flutter/issues/176894
+  // The test would have resulted in a crash from NaNs due to the Inf ratio
+  // caused by the tiny radius.
+  auto geom = Geometry::MakeRoundSuperellipse(
+      Rect::MakeLTRB(200, 200, 300, 300), 1e-20);
+
+  ContentContext content_context(GetContext(), /*typographer_context=*/nullptr);
+  Entity entity;
+
+  auto cmd_buffer = content_context.GetContext()->CreateCommandBuffer();
+
+  RenderTargetAllocator allocator(
+      content_context.GetContext()->GetResourceAllocator());
+
+  auto render_target = allocator.CreateOffscreen(
+      *content_context.GetContext(), /*size=*/{500, 500}, /*mip_count=*/1);
+  auto pass = cmd_buffer->CreateRenderPass(render_target);
+
+  GeometryResult result =
+      geom->GetPositionBuffer(content_context, entity, *pass);
+
+  Point* written_data = reinterpret_cast<Point*>(
+      (result.vertex_buffer.vertex_buffer.GetBuffer()->OnGetContents() +
+       result.vertex_buffer.vertex_buffer.GetRange().offset));
+
+  std::vector<Point> expected_head = {
+      Point(300.00, 200.00),  // 0
+      Point(300.00, 300.00),  // 1
+      Point(296.07, 200.08),  // 2
+      Point(200.00, 300.00),  // 3
+      Point(292.16, 200.31),  // 4
+      Point(200.00, 300.00),  // 5
+      Point(288.28, 200.69),  // 6
+      Point(200.08, 296.11)   // 7
+  };
+
+  for (size_t i = 0; i < expected_head.size(); i++) {
+    const Point& point = written_data[i];
+    EXPECT_NEAR(point.x, expected_head[i].x, 0.1);
+    EXPECT_NEAR(point.y, expected_head[i].y, 0.1);
+  }
+}
+
 TEST_P(EntityTest, SolidColorApplyColorFilter) {
   auto contents = SolidColorContents();
   contents.SetColor(Color::CornflowerBlue().WithAlpha(0.75));
