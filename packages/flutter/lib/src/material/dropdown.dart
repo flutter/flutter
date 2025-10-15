@@ -494,7 +494,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     required this.enableFeedback,
     this.borderRadius,
     this.barrierDismissible = true,
-    this.mouseCursor,
+    this.dropdownMenuItemMouseCursor,
   }) : itemHeights = List<double>.filled(items.length, itemHeight ?? kMinInteractiveDimension);
 
   final List<_MenuItem<T>> items;
@@ -510,7 +510,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final double? menuMaxHeight;
   final bool enableFeedback;
   final BorderRadius? borderRadius;
-  final MouseCursor? mouseCursor;
+  final MouseCursor? dropdownMenuItemMouseCursor;
 
   final List<double> itemHeights;
 
@@ -548,7 +548,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
           enableFeedback: enableFeedback,
           borderRadius: borderRadius,
           menuWidth: menuWidth,
-          mouseCursor: mouseCursor,
+          mouseCursor: dropdownMenuItemMouseCursor,
         );
       },
     );
@@ -1018,6 +1018,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.padding,
     this.barrierDismissible = true,
     this.mouseCursor,
+    this.dropdownMenuItemMouseCursor,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButtonFormField.
   }) : assert(
@@ -1068,6 +1069,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.padding,
     this.barrierDismissible = true,
     this.mouseCursor,
+    this.dropdownMenuItemMouseCursor,
     required InputDecoration inputDecoration,
     required bool isEmpty,
   }) : assert(
@@ -1316,11 +1318,15 @@ class DropdownButton<T> extends StatefulWidget {
   /// Defaults to `true`.
   final bool barrierDismissible;
 
-  /// The cursor for a mouse pointer when it enters or is hovering over the
-  /// dropdown button and its [DropdownMenuItem]s.
+  /// The cursor for a mouse pointer when it enters or is hovering over this
+  /// button.
   ///
   /// {@macro flutter.material.InkWell.mouseCursor}
   final MouseCursor? mouseCursor;
+
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// this button's [DropdownMenuItem]s.
+  final MouseCursor? dropdownMenuItemMouseCursor;
 
   final InputDecoration? _inputDecoration;
 
@@ -1481,7 +1487,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       enableFeedback: widget.enableFeedback ?? true,
       borderRadius: widget.borderRadius,
       barrierDismissible: widget.barrierDismissible,
-      mouseCursor: widget.mouseCursor,
+      dropdownMenuItemMouseCursor: widget.dropdownMenuItemMouseCursor,
     );
 
     focusNode.requestFocus();
@@ -1811,6 +1817,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     EdgeInsetsGeometry? padding,
     this.barrierDismissible = true,
     this.mouseCursor,
+    this.dropdownMenuItemMouseCursor,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButton.
   }) : assert(
@@ -1902,6 +1909,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                  padding: padding,
                  barrierDismissible: barrierDismissible,
                  mouseCursor: mouseCursor,
+                 dropdownMenuItemMouseCursor: dropdownMenuItemMouseCursor,
                ),
              ),
            );
@@ -1934,6 +1942,12 @@ class DropdownButtonFormField<T> extends FormField<T> {
   ///
   /// {@macro flutter.material.InkWell.mouseCursor}
   final MouseCursor? mouseCursor;
+
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// dropdown menu items.
+  ///
+  /// {@macro flutter.material.InkWell.mouseCursor}
+  final MouseCursor? dropdownMenuItemMouseCursor;
 
   @override
   FormFieldState<T> createState() => _DropdownButtonFormFieldState<T>();
