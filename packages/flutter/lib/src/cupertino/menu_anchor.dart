@@ -694,23 +694,23 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
       return;
     }
 
-    // _animationController
-    //     .animateBackWith(
-    //       ClampedSimulation(
-    //         SpringSimulation(
-    //           reverseSpring,
-    //           _animationController.value,
-    //           0.0,
-    //           0.0,
-    //           tolerance: springTolerance,
-    //         ),
-    //         xMin: 0.0,
-    //         xMax: 1.0,
-    //       ),
-    //     )
-    //     .whenComplete(hideMenu);
+    _animationController
+        .animateBackWith(
+          ClampedSimulation(
+            SpringSimulation(
+              reverseSpring,
+              _animationController.value,
+              0.0,
+              0.0,
+              tolerance: springTolerance,
+            ),
+            xMin: 0.0,
+            xMax: 1.0,
+          ),
+        )
+        .whenComplete(hideMenu);
 
-    // widget.childFocusNode?.requestFocus();
+    widget.childFocusNode?.requestFocus();
   }
 
   void _handleOpenRequested(ui.Offset? position, VoidCallback showOverlay) {
