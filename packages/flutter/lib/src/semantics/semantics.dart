@@ -6435,13 +6435,11 @@ class SemanticsConfiguration {
     _maxValueLength ??= child._maxValueLength;
     _currentValueLength ??= child._currentValueLength;
     // A node cannot have both `_traversalChildIdentifier` and
-    // `_traversalParentIdentifier` not null and the same value.
-    if (_traversalChildIdentifier != child._traversalParentIdentifier) {
+    // `_traversalParentIdentifier` not null.
+    if (_traversalChildIdentifier == null) {
       _traversalParentIdentifier ??= child._traversalParentIdentifier;
     }
-    if (_traversalParentIdentifier != child._traversalChildIdentifier) {
-      _traversalChildIdentifier ??= child._traversalChildIdentifier;
-    }
+    _traversalChildIdentifier ??= child._traversalChildIdentifier;
 
     _headingLevel = _mergeHeadingLevels(
       sourceLevel: child._headingLevel,
