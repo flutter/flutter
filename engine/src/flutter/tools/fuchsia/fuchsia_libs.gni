@@ -85,7 +85,7 @@ if (is_asan) {
   ]
 }
 
-vulkan_dist = "//fuchsia/sdk/$host_os/arch/$target_cpu/dist"
+vulkan_dist = "//third_party/fuchsia-sdk/sdk/arch/$target_cpu/dist"
 
 # Note that the other validation libraries in the Fuchsia SDK seem to have a bug right
 # now causing crashes, so it is only recommended that we use
@@ -97,8 +97,7 @@ vulkan_validation_libs = [
   },
 ]
 
-vulkan_data_dir =
-    "//fuchsia/sdk/$host_os/pkg/vulkan_layers/data/vulkan/explicit_layer.d"
+vulkan_data_dir = "//third_party/fuchsia-sdk/sdk/pkg/vulkan_layers/data/vulkan/explicit_layer.d"
 
 vulkan_icds = [
   {
