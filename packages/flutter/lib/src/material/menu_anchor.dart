@@ -364,7 +364,11 @@ class _MenuAnchorState extends State<MenuAnchor> {
   void didUpdateWidget(MenuAnchor oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
-      _internalMenuController = widget.controller != null ? MenuController() : null;
+      if (widget.controller == null) {
+        _internalMenuController = MenuController();
+      } else {
+        _internalMenuController = null;
+      }
     }
   }
 
