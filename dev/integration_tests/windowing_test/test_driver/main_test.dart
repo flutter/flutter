@@ -52,23 +52,53 @@ void main() {
       expect(data["height"], 600);
     }, timeout: Timeout.none);
 
-    test('Can set constraints and see the resize', () async {
-      await driver.requestData(
-        jsonEncode({
-          'type': 'set_constraints',
-          'min_width': 0,
-          'min_height': 0,
-          'max_width': 500,
-          'max_height': 501,
-        }),
-      );
-      final response = await driver.requestData(
-        jsonEncode({'type': 'get_size'}),
-      );
-      final data = jsonDecode(response);
-      expect(data["width"], 500);
-      expect(data["height"], 501);
-    }, timeout: Timeout.none);
+    test(
+      'Can set constraints and see the resize',
+      () async {
+        await driver.requestData(
+          jsonEncode({
+            'type': 'set_constraints',
+            'min_width': 0,
+            'min_height': 0,
+            'max_width': 500,
+            'max_height': 501,
+          }),
+        );
+        final response = await driver.requestData(
+          jsonEncode({'type': 'get_size'}),
+        );
+        final data = jsonDecode(response);
+        expect(data["width"], 500);
+        expect(data["height"], 501);
+      },
+      timeout: Timeout.none,
+      onPlatform: {'linux': Skip('Unable to exactly set dimensions on Linux')},
+    );
+
+    test(
+      'Can set constraints and see the resize (Linux)',
+      () async {
+        await driver.requestData(
+          jsonEncode({
+            'type': 'set_constraints',
+            'min_width': 0,
+            'min_height': 0,
+            'max_width': 500,
+            'max_height': 501,
+          }),
+        );
+        final response = await driver.requestData(
+          jsonEncode({'type': 'get_size'}),
+        );
+        final data = jsonDecode(response);
+        // On Linux setting the constraints limits the window including the decorations,
+        // but the returned size is the usable area and always smaller.
+        expect(data["width"], lessThanOrEqualTo(500));
+        expect(data["height"], lessThanOrEqualTo(501));
+      },
+      timeout: Timeout.none,
+      testOn: "linux",
+    );
 
     test('Can set and get fullscreen', () async {
       await driver.requestData(jsonEncode({'type': 'set_fullscreen'}));
@@ -102,33 +132,43 @@ void main() {
       expect(data["isMaximized"], false);
     }, timeout: Timeout.none);
 
-    test('Can set and get minimized', () async {
-      await driver.requestData(jsonEncode({'type': 'set_minimized'}));
-      var response = await driver.requestData(
-        jsonEncode({'type': 'get_minimized'}),
-      );
-      var data = jsonDecode(response);
-      expect(data["isMinimized"], true);
+    test(
+      'Can set and get minimized',
+      () async {
+        await driver.requestData(jsonEncode({'type': 'set_minimized'}));
+        var response = await driver.requestData(
+          jsonEncode({'type': 'get_minimized'}),
+        );
+        var data = jsonDecode(response);
+        expect(data["isMinimized"], true);
 
-      await driver.requestData(jsonEncode({'type': 'unset_minimized'}));
-      response = await driver.requestData(
-        jsonEncode({'type': 'get_minimized'}),
-      );
-      data = jsonDecode(response);
-      expect(data["isMinimized"], false);
-    }, timeout: Timeout.none);
+        await driver.requestData(jsonEncode({'type': 'unset_minimized'}));
+        response = await driver.requestData(
+          jsonEncode({'type': 'get_minimized'}),
+        );
+        data = jsonDecode(response);
+        expect(data["isMinimized"], false);
+      },
+      timeout: Timeout.none,
+      onPlatform: {'linux': Skip('isMinimized is not supported on Wayland')},
+    );
 
-    test('Can set and get activated', () async {
-      await driver.requestData(
-        jsonEncode({'type': 'set_minimized'}),
-      ); // Minimize first so that the window is not active
-      await driver.requestData(jsonEncode({'type': 'set_activated'}));
-      final response = await driver.requestData(
-        jsonEncode({'type': 'get_activated'}),
-      );
-      final data = jsonDecode(response);
-      expect(data["isActivated"], true);
-    }, timeout: Timeout.none);
+    test(
+      'Can set and get activated',
+      () async {
+        await driver.requestData(
+          jsonEncode({'type': 'set_minimized'}),
+        ); // Minimize first so that the window is not active
+        await driver.requestData(jsonEncode({'type': 'set_activated'}));
+        final response = await driver.requestData(
+          jsonEncode({'type': 'get_activated'}),
+        );
+        final data = jsonDecode(response);
+        expect(data["isActivated"], true);
+      },
+      timeout: Timeout.none,
+      onPlatform: {'linux': Skip('isMinimized is not supported on Wayland')},
+    );
 
     test('Can open dialog', () async {
       await driver.requestData(jsonEncode({'type': 'open_dialog'}));
