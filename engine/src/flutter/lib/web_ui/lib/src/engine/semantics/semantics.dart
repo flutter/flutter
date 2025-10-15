@@ -887,7 +887,7 @@ abstract class SemanticRole {
       final SemanticsObject? parent =
           semanticsObject.owner._semanticsTree[semanticsObject.traversalParent!];
       if (parent != null && parent.semanticRole != null) {
-        final List<String>? children = parent.element.getAttribute('aria-owns')?.split(' ') ?? [];
+        final List<String> children = parent.element.getAttribute('aria-owns')?.split(' ') ?? [];
         children.add(getIdAttribute(semanticsObject.id));
         parent.element.setAttribute('aria-owns', children.join(' '));
       }
