@@ -36,9 +36,9 @@
     ]
   },
   {
-    "url": "https://maven.google.com/androidx/annotation/annotation/1.8.0/annotation-1.8.0.jar",
+    "url": "https://maven.google.com/androidx/annotation/annotation/1.8.1/annotation-1.8.1.jar",
     "out_file_name": "androidx_annotation.jar",
-    "maven_dependency": "androidx.annotation:annotation:1.8.0",
+    "maven_dependency": "androidx.annotation:annotation:1.8.1",
     "provides": [
       "androidx.annotation.CallSuper",
       "androidx.annotation.FloatRange",
