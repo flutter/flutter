@@ -1263,7 +1263,7 @@ void main() {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
+                            children: <Widget>[
                               ColoredBox(
                                 color: Colors.white,
                                 child: Padding(
