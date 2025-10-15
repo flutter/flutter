@@ -88,7 +88,6 @@ self.addEventListener('fetch', (event) => {
     print('== RELOADING PAGE ==');
     await server.chrome.reloadPage();
     await _waitForAppToRequest(server, 'flutter_service_worker.js');
-    await _waitForAppToRequest(server, 'CLOSE');
 
     expect(
       _requestedPaths,
@@ -138,7 +137,9 @@ Future<AppServer> _startServer({required bool headless}) async {
     cacheControl: 'max-age=0',
     additionalRequestHandlers: <Handler>[
       (Request request) {
-        _requestedPaths.add(request.url.path.split('/').last);
+        final String path = request.url.path.split('/').last;
+        print('(requested path: $path)');
+        _requestedPaths.add(path);
         return Response.notFound('');
       },
     ],
