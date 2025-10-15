@@ -39,6 +39,13 @@ void main() {
       return null;
     });
 
+    addTearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      );
+    });
+
     await tester.pumpWidget(Title(color: const Color(0xFF00FF00), child: Container()));
 
     expect(log, hasLength(1));
@@ -61,6 +68,13 @@ void main() {
       ) async {
         log.add(methodCall);
         return null;
+      });
+
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
       });
 
       final Title title = Title(color: const Color(0xFF00FF00), child: Container());
@@ -90,6 +104,13 @@ void main() {
       ) async {
         log.add(methodCall);
         return null;
+      });
+
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
       });
 
       final Title title = Title(title: 'title', color: const Color(0xFF00FF00), child: Container());
