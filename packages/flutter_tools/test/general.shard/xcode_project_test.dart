@@ -496,7 +496,6 @@ void main() {
                 contains('This prevents running on arm64 simulators (iOS 26+)'),
               );
             } finally {
-              // Cleanup using the correct FileSystem API
               if (tempDir.existsSync()) {
                 tempDir.deleteSync(recursive: true);
               }
