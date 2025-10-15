@@ -135,7 +135,7 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals(serializedActionName));
   }
 
-  // TODO(justinmc): Widgets tests should not import Cupertino.
+  // TODO(justinmc): Widgets tests should not import Material.
   // https://github.com/flutter/flutter/issues/177028
   testWidgets(
     'Tapping the Live Text button calls onLiveTextInput',
