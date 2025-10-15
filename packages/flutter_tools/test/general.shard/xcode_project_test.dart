@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Process, ProcessResult;
+
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -13,6 +15,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
@@ -436,6 +439,71 @@ void main() {
             );
           },
           overrides: <Type, Generator>{Cache: () => FakeCache(olderThanToolsStamp: true)},
+        );
+
+        testUsingContext(
+          'podhelper.rb aborts with correct message when xcconfig excludes arm64',
+          () async {
+            // --- FIX #1: Use the FileSystem from the test context, not dart:io directly ---
+            final FileSystem fs = globals.fs;
+            final Directory tempDir = fs.systemTempDirectory.createTempSync(
+              'flutter_podhelper_test',
+            );
+
+            try {
+              // Now that `tempDir` is from the correct FileSystem, these methods will work
+              final Directory podSupportDir = tempDir
+                  .childDirectory('ios')
+                  .childDirectory('Pods')
+                  .childDirectory('Target Support Files')
+                  .childDirectory('MyPlugin');
+              podSupportDir.createSync(recursive: true);
+
+              final File xcfile = podSupportDir.childFile('MyPlugin-Debug.xcconfig');
+              xcfile.writeAsStringSync('EXCLUDED_ARCHS[sdk=iphonesimulator*] = arm64\n');
+
+              const targetName = 'MyPlugin';
+
+              const rubyScript =
+                  """
+      target_name = '$targetName'
+      support_files_dir = File.join('ios', 'Pods', 'Target Support Files', target_name)
+
+      if Dir.exist?(support_files_dir)
+        Dir.glob(File.join(support_files_dir, '*.xcconfig')).each do |xcfile|
+          File.foreach(xcfile) do |line|
+            if line =~ /EXCLUDED_ARCHS.*arm64/
+              abort "The pod `#{target_name}` config in #{xcfile} excludes the arm64 simulator architecture.\\n" \\
+                "This prevents running on arm64 simulators (iOS 26+). Remove `EXCLUDED_ARCHS[sdk=iphonesimulator*] = arm64` from the podspec/pod_target_xcconfig or update the pod to a version that supports arm64 simulators."
+            end
+          end
+        end
+      end
+    """;
+
+              final ProcessResult result = await Process.run('ruby', <String>[
+                '-e',
+                rubyScript,
+              ], workingDirectory: tempDir.path);
+
+              expect(result.exitCode, 1);
+              expect(result.stdout, isEmpty);
+
+              final expectedErrorMessage =
+                  "The pod `$targetName` config in ${xcfile.path.replaceFirst(tempDir.path + fs.path.separator, '')} excludes the arm64 simulator architecture.";
+
+              expect(result.stderr.toString(), contains(expectedErrorMessage));
+              expect(
+                result.stderr.toString(),
+                contains('This prevents running on arm64 simulators (iOS 26+)'),
+              );
+            } finally {
+              // Cleanup using the correct FileSystem API
+              if (tempDir.existsSync()) {
+                tempDir.deleteSync(recursive: true);
+              }
+            }
+          },
         );
       });
     });

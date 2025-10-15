@@ -475,32 +475,6 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   /// True if the app project uses Swift.
   bool get isSwift => appDelegateSwift.existsSync();
 
-  /// Do all plugins support arm64 simulators to run natively on an ARM Mac?
-  Future<bool> pluginsSupportArmSimulator() async {
-    final Directory podXcodeProject = hostAppRoot
-        .childDirectory('Pods')
-        .childDirectory('Pods.xcodeproj');
-    if (!podXcodeProject.existsSync()) {
-      // No plugins.
-      return true;
-    }
-
-    final XcodeProjectInterpreter? xcodeProjectInterpreter = globals.xcodeProjectInterpreter;
-    if (xcodeProjectInterpreter == null) {
-      // Xcode isn't installed, don't try to check.
-      return false;
-    }
-    final String? buildSettings = await xcodeProjectInterpreter.pluginsBuildSettingsOutput(
-      podXcodeProject,
-    );
-
-    // See if any plugins or their dependencies exclude arm64 simulators
-    // as a valid architecture, usually because a binary is missing that slice.
-    // Example: EXCLUDED_ARCHS = arm64 i386
-    // NOT: EXCLUDED_ARCHS = i386
-    return buildSettings != null && !buildSettings.contains(RegExp('EXCLUDED_ARCHS.*arm64'));
-  }
-
   @override
   bool existsSync() {
     return parent.isModule || _editableDirectory.existsSync();
