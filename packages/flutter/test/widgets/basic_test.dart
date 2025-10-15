@@ -1255,18 +1255,9 @@ void main() {
                     mainAxisSize: MainAxisSize.min,
                     textDirection: TextDirection.ltr,
                     children: <Widget>[
-                      SizedBox.square(
-                        dimension: 80,
-                        child: ColoredBox(color: Colors.red),
-                      ),
-                      SizedBox.square(
-                        dimension: 80,
-                        child: ColoredBox(color: Colors.green),
-                      ),
-                      SizedBox.square(
-                        dimension: 80,
-                        child: ColoredBox(color: Colors.blue),
-                      ),
+                      SizedBox.square(dimension: 80, child: ColoredBox(color: Colors.red)),
+                      SizedBox.square(dimension: 80, child: ColoredBox(color: Colors.green)),
+                      SizedBox.square(dimension: 80, child: ColoredBox(color: Colors.blue)),
                     ],
                   ),
                   // Row 2: Three ColoredBoxes with isAntiAlias: false, false, false
@@ -1293,18 +1284,12 @@ void main() {
                     mainAxisSize: MainAxisSize.min,
                     textDirection: TextDirection.ltr,
                     children: <Widget>[
-                      SizedBox.square(
-                        dimension: 80,
-                        child: ColoredBox(color: Colors.yellow),
-                      ),
+                      SizedBox.square(dimension: 80, child: ColoredBox(color: Colors.yellow)),
                       SizedBox.square(
                         dimension: 80,
                         child: ColoredBox(color: Colors.lime, isAntiAlias: false),
                       ),
-                      SizedBox.square(
-                        dimension: 80,
-                        child: ColoredBox(color: Colors.cyan),
-                      ),
+                      SizedBox.square(dimension: 80, child: ColoredBox(color: Colors.cyan)),
                     ],
                   ),
                   // Row 4: Three ColoredBoxes rotated 36 degrees with anti-aliasing variations
