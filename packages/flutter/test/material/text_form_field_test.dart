@@ -1848,4 +1848,31 @@ void main() {
     variant: TargetPlatformVariant.all(),
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/176391.
+  testWidgets('TextFormField can inherit decoration from local InputDecorationThemeData', (
+    WidgetTester tester,
+  ) async {
+    const InputDecoration decoration = InputDecoration(labelText: 'Label');
+    const InputDecorationThemeData decorationTheme = InputDecorationThemeData(
+      labelStyle: TextStyle(color: Colors.green),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: InputDecorationTheme(
+            data: decorationTheme,
+            child: TextFormField(decoration: decoration),
+          ),
+        ),
+      ),
+    );
+
+    final InputDecorator decorator = tester.widget(find.byType(InputDecorator));
+    final InputDecoration expectedDecoration = decoration
+        .applyDefaults(decorationTheme)
+        .copyWith(enabled: true, hintMaxLines: 1);
+    expect(decorator.decoration, expectedDecoration);
+  });
 }

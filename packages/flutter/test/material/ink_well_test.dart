@@ -2588,4 +2588,15 @@ void main() {
 
     controller.dispose();
   });
+
+  testWidgets('InkWell does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(child: SizedBox.shrink(child: InkWell())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(InkWell)), Size.zero);
+  });
 }

@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "搜尋",
   "shareButtonLabel": "分享",
   "pasteButtonLabel": "貼上",
-  "selectAllButtonLabel": "全部選取"
+  "selectAllButtonLabel": "全部選取",
+  "radioButtonUnselectedLabel": "Not selected"
 }
