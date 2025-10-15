@@ -596,6 +596,24 @@ void main() {
     expect(messagesStr, contains('KEYBOARD: Pressed state before processing the event:'));
     expect(messagesStr, contains('KEYBOARD: Pressed state after processing the event:'));
   });
+
+  testWidgets('Skips asserts before keyboard state initialization', (WidgetTester tester) async {
+    // Ensure clean state and no handlers interfere with the assertion behavior.
+    ServicesBinding.instance.keyboard.clearState();
+
+    const KeyUpEvent strayUp = KeyUpEvent(
+      physicalKey: PhysicalKeyboardKey.keyA,
+      logicalKey: LogicalKeyboardKey.keyA,
+      timeStamp: Duration.zero,
+    );
+
+    // Before initialization, a stray KeyUpEvent should not trigger assertions.
+    expect(() => ServicesBinding.instance.keyboard.handleKeyEvent(strayUp), returnsNormally);
+
+    // After initialization, the same stray KeyUpEvent should assert in debug mode.
+    await ServicesBinding.instance.keyboard.syncKeyboardState();
+    expect(() => ServicesBinding.instance.keyboard.handleKeyEvent(strayUp), throwsAssertionError);
+  });
 }
 
 Future<void> _runWhileOverridingOnError(
