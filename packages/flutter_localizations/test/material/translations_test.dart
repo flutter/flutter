@@ -574,7 +574,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/141764
   testWidgets('zh-CN translation for look up label', (WidgetTester tester) async {
     const Locale locale = Locale('zh');
-    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
       locale,
     );
@@ -587,7 +587,7 @@ void main() {
     WidgetTester tester,
   ) async {
     const Locale locale = Locale('ko');
-    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
       locale,
     );
@@ -600,7 +600,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/156954
   testWidgets('Italian translation for dateHelpText', (WidgetTester tester) async {
     const Locale locale = Locale('it');
-    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
       locale,
     );
@@ -611,7 +611,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/176677
   testWidgets('Basque translation for timeOfDayFormat', (WidgetTester tester) async {
     const Locale locale = Locale('eu');
-    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
       locale,
     );
