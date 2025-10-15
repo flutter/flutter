@@ -3089,6 +3089,14 @@ class SemanticsNode with DiagnosticableTreeMixin {
     assert(!owner!._detachedNodes.contains(this));
     owner!._nodes.remove(id);
     owner!._detachedNodes.add(this);
+
+    // Clean up the according entry in owner._traversalParentNodes map.
+    _traversalParentNodes.removeWhere((key, node) => node == this);
+    // Clean up this node from the value set in owner._traversalChildNodes map.
+    for (final Set<SemanticsNode> childSet in _traversalChildNodes.values) {
+      childSet.removeWhere((node) => node == this);
+    }
+
     _owner = null;
     assert(parent == null || attached == parent!.attached);
     if (_children != null) {
