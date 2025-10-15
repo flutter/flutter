@@ -422,7 +422,7 @@ void main() {
       expect(paragraph.selections[0], const TextSelection(baseOffset: 8, extentOffset: 22));
 
       // Attempt to move the start handle while still touching the end handle.
-      final Offset startHandlePos = paragraph.localToGlobal(boxes[0].toRect().bottomLeft);
+      final Offset startHandlePos = paragraph.localToGlobal(boxes[0].toRect().topLeft);
       final TestGesture startHandleGesture = await tester.startGesture(startHandlePos);
       addTearDown(startHandleGesture.removePointer);
       await tester.pump();
