@@ -8,6 +8,12 @@ namespace impeller {
 
 namespace {
 
+// A minimal radius, below which the corner is treated as a sharp corner.
+//
+// Radii too small will cause `ratio` to be too large, which may lead to NaNs in
+// the computation. 1e-4 pixel is small enough to be visually negligible.
+constexpr Scalar kMinRadius = 1e-4f;
+
 // Return the value that splits the range from `left` to `right` into two
 // portions whose ratio equals to `ratio_left` : `ratio_right`.
 Scalar Split(Scalar left, Scalar right, Scalar ratio_left, Scalar ratio_right) {
@@ -147,7 +153,7 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
    *        ←-------- a ---------→
    */
 
-  if (radius <= 0) {
+  if (radius <= kMinRadius) {
     return RoundSuperellipseParam::Octant{
         .offset = center,
 
@@ -206,9 +212,11 @@ RoundSuperellipseParam::Quadrant ComputeQuadrant(Point center,
                                                  Size in_radii,
                                                  Size sign) {
   Point corner_vector = corner - center;
-  Size radii = in_radii.Abs();
+  Size radii = {std::min(std::abs(in_radii.width), std::abs(corner_vector.x)),
+                std::min(std::abs(in_radii.height), std::abs(corner_vector.y))};
 
-  // The prefix "norm" is short for "normalized".
+  // The prefix "norm" is short for "normalized", meaning a rounded superellipse
+  // that has a uniform radius. The quadrant is scaled from this normalized one.
   //
   // Be extra careful to avoid NaNs in cases that some coordinates of `in_radii`
   // or `corner_vector` are zero.

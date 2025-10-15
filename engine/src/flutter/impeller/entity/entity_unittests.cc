@@ -2518,20 +2518,13 @@ TEST_P(EntityTest, CanDrawRoundSuperEllipseWithTinyRadius) {
   GeometryResult result =
       geom->GetPositionBuffer(content_context, entity, *pass);
 
+  EXPECT_EQ(result.vertex_buffer.vertex_count, 4u);
   Point* written_data = reinterpret_cast<Point*>(
       (result.vertex_buffer.vertex_buffer.GetBuffer()->OnGetContents() +
        result.vertex_buffer.vertex_buffer.GetRange().offset));
 
-  std::vector<Point> expected_head = {
-      Point(300.00, 200.00),  // 0
-      Point(300.00, 300.00),  // 1
-      Point(296.07, 200.08),  // 2
-      Point(200.00, 300.00),  // 3
-      Point(292.16, 200.31),  // 4
-      Point(200.00, 300.00),  // 5
-      Point(288.28, 200.69),  // 6
-      Point(200.08, 296.11)   // 7
-  };
+  std::vector<Point> expected_head = {Point(300.0, 200.0), Point(300.0, 300.0),
+                                      Point(200.0, 200.0), Point(200.0, 300.0)};
 
   for (size_t i = 0; i < expected_head.size(); i++) {
     const Point& point = written_data[i];
