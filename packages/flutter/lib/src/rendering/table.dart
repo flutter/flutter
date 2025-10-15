@@ -1569,8 +1569,7 @@ class _Index {
     if (other is! _Index) {
       return false;
     }
-    final _Index otherIndex = other;
-    return y == otherIndex.y && x == otherIndex.x;
+    return y == other.y && x == other.x;
   }
 
   @override
