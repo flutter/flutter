@@ -65,6 +65,3 @@ android {
         implementation "org.mockito:mockito-android:$mockitoVersion"
     }
 }
-dependencies {
-    implementation 'androidx.exifinterface:exifinterface:1.4.1'
-}
