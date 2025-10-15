@@ -88,6 +88,8 @@ const kExitMessage =
     'instance in Chrome.\nThis can happen if the websocket connection used by the '
     'web tooling is unable to correctly establish a connection, for example due to a firewall.';
 
+const kNoClientConnectedMessage = 'Recompile complete. No client connected.';
+
 class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(
     FlutterDevice device, {
@@ -964,6 +966,18 @@ class ResidentWebRunner extends ResidentRunner {
       final String serviceName = e.service!;
       _registeredMethodsForService.remove(serviceName);
     }
+  }
+
+  /// Checks if the given JSON response indicates no clients are available.
+  /// Returns an [OperationResult] if no clients are available, otherwise returns null.
+  OperationResult? _checkNoClientsAvailable(Map<String, dynamic>? json, Status status) {
+    if (json != null && json['noClientsAvailable'] == true) {
+      _logger.printTrace('No browser clients currently connected');
+      status.stop();
+      _logger.printStatus(kNoClientConnectedMessage);
+      return OperationResult.ok;
+    }
+    return null;
   }
 }
 
