@@ -1555,8 +1555,24 @@ class RenderTable extends RenderBox {
 }
 
 /// Index for a cell.
+@immutable
 class _Index {
-  _Index(this.y, this.x);
-  int y;
-  int x;
+  const _Index(this.y, this.x);
+  final int y;
+  final int x;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! _Index) {
+      return false;
+    }
+    final _Index otherIndex = other;
+    return y == otherIndex.y && x == otherIndex.x;
+  }
+
+  @override
+  int get hashCode => Object.hash(y, x);
 }
