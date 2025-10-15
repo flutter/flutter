@@ -107,6 +107,73 @@ void main() {
     expect(find.text('removing item'), findsNothing);
   });
 
+  testWidgets('AnimatedList should safely execute removeAllItems during long removal of one item', (
+    WidgetTester tester,
+  ) async {
+    Widget builder(BuildContext context, int index, Animation<double> animation) {
+      return SizedBox(height: 100.0, child: Center(child: Text('item $index')));
+    }
+
+    final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedList(key: listKey, initialItemCount: 2, itemBuilder: builder),
+      ),
+    );
+
+    // Check that one AnimatedList with 2 items (item 0, item 1)
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is SliverAnimatedList &&
+            widget.initialItemCount == 2 &&
+            widget.itemBuilder == builder;
+      }),
+      findsOneWidget,
+    );
+    expect(find.byType(Text), findsExactly(2));
+    expect(find.text('item 0'), findsOne);
+    expect(find.text('item 1'), findsOne);
+
+    // Insert 1 item and check state (item 0, item 1, item 2)
+    listKey.currentState!.insertItem(0, duration: const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(find.byType(Text), findsExactly(3));
+    expect(find.text('item 0'), findsOne);
+    expect(find.text('item 1'), findsOne);
+    expect(find.text('item 2'), findsOne);
+
+    // Removing item 2 and check state (item 0, item 1, removing item 2)
+    listKey.currentState!.removeItem(2, (BuildContext context, Animation<double> animation) {
+      return const SizedBox(height: 100.0, child: Center(child: Text('removing item 2')));
+    }, duration: const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(find.byType(Text), findsExactly(3));
+    expect(find.text('item 0'), findsOne);
+    expect(find.text('item 1'), findsOne);
+    expect(find.text('removing item 2'), findsOne);
+    expect(find.text('item 2'), findsNothing);
+
+    // Call removeAllItems and check state (removing all items, removing all items, removing item 2)
+    listKey.currentState!.removeAllItems((BuildContext context, Animation<double> animation) {
+      return const SizedBox(height: 100.0, child: Center(child: Text('removing all items')));
+    }, duration: const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(find.byType(Text), findsExactly(3));
+    expect(find.text('removing all items'), findsExactly(2));
+    expect(find.text('removing item 2'), findsWidgets);
+    expect(find.text('item 0'), findsNothing);
+    expect(find.text('item 1'), findsNothing);
+    expect(find.text('item 2'), findsNothing);
+
+    // After animation is done completed, list should be empty
+    await tester.pumpAndSettle();
+    expect(find.byType(Text), findsNothing);
+    expect(find.text('removing one item'), findsNothing);
+    expect(find.text('removing all items'), findsNothing);
+  });
+
   group('SliverAnimatedList', () {
     testWidgets('initialItemCount', (WidgetTester tester) async {
       final Map<int, Animation<double>> animations = <int, Animation<double>>{};
