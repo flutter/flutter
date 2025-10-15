@@ -410,7 +410,13 @@ class SelectableRegionState extends State<SelectableRegion>
   SelectedContent? _lastSelectedContent;
 
   /// Whether the native browser context menu is enabled.
-  bool get _webContextMenuEnabled => kIsWeb && BrowserContextMenu.enabled;
+  // TODO(Renzo-Olivares): Re-enable web context menu for android
+  // and iOS when they are in a more usable state.
+  bool get _webContextMenuEnabled =>
+      kIsWeb &&
+      BrowserContextMenu.enabled &&
+      defaultTargetPlatform != TargetPlatform.android &&
+      defaultTargetPlatform != TargetPlatform.iOS;
 
   /// The [SelectionOverlay] that is currently visible on the screen.
   ///
