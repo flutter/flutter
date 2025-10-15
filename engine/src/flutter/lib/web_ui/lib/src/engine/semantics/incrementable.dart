@@ -72,6 +72,9 @@ class SemanticIncrementable extends SemanticRole {
   }
 
   @override
+  bool get acceptsPointerEvents => true;
+
+  @override
   bool focusAsRouteDefault() {
     _element.focusWithoutScroll();
     return true;

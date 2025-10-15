@@ -597,17 +597,7 @@ abstract class SemanticRole {
       return semanticsObject.scopesRoute;
     }
 
-    // Only accept pointer events for leaf nodes with interactive semantics.
-    // This prevents non-interactive leaf nodes (like empty containers in dialogs)
-    // from intercepting pointer events meant for underlying widgets like modal
-    // barriers.
-    return semanticsObject.isTappable ||
-        semanticsObject.isButton ||
-        semanticsObject.isCheckable ||
-        semanticsObject.flags.isTextField ||
-        semanticsObject.flags.isLink ||
-        semanticsObject.flags.isSlider ||
-        semanticsObject.isIncrementable;
+    return false;
   }
 
   /// Semantic behaviors provided by this role, if any.

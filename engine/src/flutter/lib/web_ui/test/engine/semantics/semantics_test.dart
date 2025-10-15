@@ -1612,26 +1612,6 @@ void _testContainer() {
       expect(element.style.pointerEvents, 'all', reason: 'Link nodes should accept pointer events');
     });
 
-    test('slider leaf nodes accept pointer events', () async {
-      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-      updateNode(
-        builder,
-        flags: const ui.SemanticsFlags(isSlider: true),
-        actions: ui.SemanticsAction.increase.index | ui.SemanticsAction.decrease.index,
-      );
-
-      owner().updateSemantics(builder.build());
-
-      final DomElement element = owner().semanticsHost.querySelector(
-        '#${kFlutterSemanticNodePrefix}0',
-      )!;
-      expect(
-        element.style.pointerEvents,
-        'all',
-        reason: 'Slider nodes should accept pointer events',
-      );
-    });
-
     test('incrementable leaf nodes accept pointer events', () async {
       final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
       updateNode(builder, actions: ui.SemanticsAction.increase.index);
