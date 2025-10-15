@@ -607,4 +607,15 @@ void main() {
     expect(localizations, isA<MaterialLocalizationIt>());
     expect(localizations.dateHelpText, 'gg/mm/aaaa');
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/176677
+  testWidgets('Basque translation for timeOfDayFormat', (WidgetTester tester) async {
+    const Locale locale = Locale('eu');
+    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
+      locale,
+    );
+    expect(localizations, isA<MaterialLocalizationEu>());
+    expect(localizations.timeOfDayFormat(), TimeOfDayFormat.HH_colon_mm);
+  });
 }
