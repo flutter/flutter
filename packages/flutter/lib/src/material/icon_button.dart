@@ -506,10 +506,7 @@ class IconButton extends StatelessWidget {
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
-  /// If set to null,
-  ///
-  /// * On web, it will default to [SystemMouseCursors.click].
-  /// * On all other platforms, it will default to [SystemMouseCursors.basic].
+  /// If set to null, [WidgetStateMouseCursor.adaptiveClickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -817,7 +814,7 @@ class IconButton extends StatelessWidget {
       onLongPress: onPressed != null ? onLongPress : null,
       mouseCursor:
           mouseCursor ??
-          ((onPressed != null && kIsWeb) ? SystemMouseCursors.click : SystemMouseCursors.basic),
+          (onPressed != null ? WidgetStateMouseCursor.adaptiveClickable : SystemMouseCursors.basic),
       enableFeedback: effectiveEnableFeedback,
       focusColor: focusColor ?? theme.focusColor,
       hoverColor: hoverColor ?? theme.hoverColor,
@@ -1009,8 +1006,8 @@ class _IconButtonM3 extends ButtonStyleButton {
   /// * `side` - null
   /// * `shape` - StadiumBorder()
   /// * `mouseCursor`
-  ///   * on web and enabled - SystemMouseCursors.click
-  ///   * others - SystemMouseCursors.basic
+  ///   * enabled - WidgetStateMouseCursor.adaptiveClickable
+  ///   * disabled - SystemMouseCursors.basic
   /// * `visualDensity` - VisualDensity.standard
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration

@@ -323,10 +323,8 @@ class FloatingActionButton extends StatelessWidget {
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
-  /// If this property is null,
-  ///
-  /// * On web, [WidgetStateMouseCursor.clickable] will be used.
-  /// * On other platforms, [SystemMouseCursors.basic] will be used.
+  /// If this property is null, [FloatingActionButtonThemeData.mouseCursor] is used.
+  /// If that is null, [WidgetStateMouseCursor.adaptiveClickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// The z-coordinate at which to place this button relative to its parent.
@@ -650,10 +648,9 @@ class _EffectiveMouseCursor extends WidgetStateMouseCursor {
 
   @override
   MouseCursor resolve(Set<WidgetState> states) {
-    const WidgetStateMouseCursor mouseCursor = WidgetStateMouseCursor.adaptiveClickable;
     return WidgetStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
         themeCursor?.resolve(states) ??
-        mouseCursor.resolve(states);
+        WidgetStateMouseCursor.adaptiveClickable.resolve(states);
   }
 
   @override
