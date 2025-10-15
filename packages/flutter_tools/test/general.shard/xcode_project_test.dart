@@ -444,14 +444,12 @@ void main() {
         testUsingContext(
           'podhelper.rb aborts with correct message when xcconfig excludes arm64',
           () async {
-            // --- FIX #1: Use the FileSystem from the test context, not dart:io directly ---
             final FileSystem fs = globals.fs;
             final Directory tempDir = fs.systemTempDirectory.createTempSync(
               'flutter_podhelper_test',
             );
 
             try {
-              // Now that `tempDir` is from the correct FileSystem, these methods will work
               final Directory podSupportDir = tempDir
                   .childDirectory('ios')
                   .childDirectory('Pods')
