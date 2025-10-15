@@ -1257,15 +1257,15 @@ void main() {
                     children: <Widget>[
                       SizedBox.square(
                         dimension: 80,
-                        child: ColoredBox(color: Colors.red, isAntiAlias: true),
+                        child: ColoredBox(color: Colors.red),
                       ),
                       SizedBox.square(
                         dimension: 80,
-                        child: ColoredBox(color: Colors.green, isAntiAlias: true),
+                        child: ColoredBox(color: Colors.green),
                       ),
                       SizedBox.square(
                         dimension: 80,
-                        child: ColoredBox(color: Colors.blue, isAntiAlias: true),
+                        child: ColoredBox(color: Colors.blue),
                       ),
                     ],
                   ),
@@ -1295,7 +1295,7 @@ void main() {
                     children: <Widget>[
                       SizedBox.square(
                         dimension: 80,
-                        child: ColoredBox(color: Colors.yellow, isAntiAlias: true),
+                        child: ColoredBox(color: Colors.yellow),
                       ),
                       SizedBox.square(
                         dimension: 80,
@@ -1303,7 +1303,7 @@ void main() {
                       ),
                       SizedBox.square(
                         dimension: 80,
-                        child: ColoredBox(color: Colors.cyan, isAntiAlias: true),
+                        child: ColoredBox(color: Colors.cyan),
                       ),
                     ],
                   ),
