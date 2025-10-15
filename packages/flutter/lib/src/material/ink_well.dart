@@ -443,10 +443,7 @@ class InkResponse extends StatelessWidget {
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
   ///
-  /// If this property is null,
-  ///
-  ///   * On web, [WidgetStateMouseCursor.clickable] will be used.
-  ///   * On other platforms, [SystemMouseCursors.basic] will be used.
+  /// If this property is null, [WidgetStateMouseCursor.adaptiveClickable] will be used.
   /// {@endtemplate}
   final MouseCursor? mouseCursor;
 
@@ -1381,9 +1378,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         widget.splashColor ??
         Theme.of(context).splashColor;
 
-    const MouseCursor fallbackMouseCursor = WidgetStateMouseCursor.adaptiveClickable;
     final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor>(
-      widget.mouseCursor ?? fallbackMouseCursor,
+      widget.mouseCursor ?? WidgetStateMouseCursor.adaptiveClickable,
       statesController.value,
     );
 

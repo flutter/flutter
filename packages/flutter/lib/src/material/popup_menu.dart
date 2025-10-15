@@ -345,10 +345,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// {@endtemplate}
   ///
   /// If null, then the value of [PopupMenuThemeData.mouseCursor] is used. If
-  /// that is also null, then:
-
-  ///  * On web, [WidgetStateMouseCursor.clickable] is used.
-  ///  * On other platforms, [SystemMouseCursors.basic] is used.
+  /// that is also null, then [WidgetStateMouseCursor.adaptiveClickable] is used.
   final MouseCursor? mouseCursor;
 
   /// The widget below this widget in the tree.
@@ -1806,10 +1803,9 @@ class _EffectiveMouseCursor extends WidgetStateMouseCursor {
 
   @override
   MouseCursor resolve(Set<WidgetState> states) {
-    const WidgetStateMouseCursor fallbackCursor = WidgetStateMouseCursor.adaptiveClickable;
     return WidgetStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
         themeCursor?.resolve(states) ??
-        fallbackCursor.resolve(states);
+        WidgetStateMouseCursor.adaptiveClickable.resolve(states);
   }
 
   @override

@@ -234,8 +234,8 @@ class Radio<T> extends StatefulWidget {
 
   /// {@macro flutter.widget.RawRadio.mouseCursor}
   ///
-  /// If null, then the value of [RadioThemeData.mouseCursor] is used.
-  /// If that is also null, then [WidgetStateMouseCursor.clickable] is used.
+  /// If null, the value of [RadioThemeData.mouseCursor] is used. If that is
+  /// also null, [WidgetStateMouseCursor.adaptiveClickable] is used.
   final MouseCursor? mouseCursor;
 
   /// {@macro flutter.widget.RawRadio.toggleable}
