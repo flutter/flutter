@@ -575,6 +575,9 @@ class DialogWindowControllerWin32 extends DialogWindowController {
   void setSize(Size? size) {
     _ensureNotDestroyed();
     _Win32PlatformInterface.setWindowContentSize(_owner.allocator, getWindowHandle(), size);
+    // Note that we do not notify the listener when setting the size,
+    // as that will happen when the WM_SIZE message is received in
+    // _handleWindowsMessage.
   }
 
   @override
