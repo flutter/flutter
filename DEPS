@@ -282,9 +282,6 @@ deps = {
   'engine/src/flutter/third_party/boringssl/src':
   'https://boringssl.googlesource.com/boringssl.git' + '@' + Var('dart_boringssl_rev'),
 
-  'engine/src/flutter/third_party/dart/third_party/perfetto/src':
-   Var('flutter_git') + "/third_party/perfetto" + '@' + Var('dart_perfetto_rev'),
-
   'engine/src/flutter/third_party/protobuf':
    Var('flutter_git') + '/third_party/protobuf' + '@' + Var('dart_libprotobuf_rev'),
 
@@ -303,6 +300,9 @@ deps = {
 
   'engine/src/flutter/third_party/dart/third_party/devtools':
    {'dep_type': 'cipd', 'packages': [{'package': 'dart/third_party/flutter/devtools', 'version': 'git_revision:0327830448901920f739259364c3f2f624df5a03'}]},
+
+  'engine/src/flutter/third_party/dart/third_party/perfetto/src':
+   Var('flutter_git') + "/third_party/perfetto" + '@' + Var('dart_perfetto_rev'),
 
   'engine/src/flutter/third_party/dart/third_party/pkg/ai':
    Var('dart_git') + '/ai.git' + '@' + Var('dart_ai_rev'),

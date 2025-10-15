@@ -115,6 +115,13 @@ def Main(argv):
                 updated_value = dart_v.replace(new_vars["dart_git"], "Var('dart_git') + '/")
                 updated_value = updated_value.replace(old_vars["chromium_git"], "Var('chromium_git') + '")
 
+                # We are aiming to produce a quoted string. The code below
+                # will add a closing ', however if we did not collapse dart_git
+                # or chromium_git paths into a Var(...) ref we need to add
+                # an opening '.
+                if updated_value == dart_v:
+                  updated_value = "'" + updated_value
+
                 plain_v = dart_k[dart_k.rfind('/') + 1:]
                 # This dependency has to be special-cased here because the
                 # repository name is not the same as the directory name.
