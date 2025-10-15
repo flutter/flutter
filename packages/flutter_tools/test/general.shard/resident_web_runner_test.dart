@@ -971,7 +971,7 @@ name: my_app
       expect(debugConnectionInfo, isNotNull);
 
       final OperationResult result = await residentWebRunner.restart();
-      expect(logger.statusText, contains('Recompile complete. No client connected.'));
+      expect(logger.statusText, contains(kNoClientConnectedMessage));
       expect(result.code, 0);
     },
     overrides: <Type, Generator>{
@@ -1174,7 +1174,7 @@ name: my_app
 
       expect(result.code, 0);
       expect(result.isOk, isTrue);
-      expect(logger.statusText, contains('Recompile complete. No client connected.'));
+      expect(logger.statusText, contains(kNoClientConnectedMessage));
     },
     overrides: <Type, Generator>{
       Analytics: () => fakeAnalytics,

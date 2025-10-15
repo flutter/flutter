@@ -89,6 +89,8 @@ const kExitMessage =
     'instance in Chrome.\nThis can happen if the websocket connection used by the '
     'web tooling is unable to correctly establish a connection, for example due to a firewall.';
 
+const kNoClientConnectedMessage = 'Recompile complete. No client connected.';
+
 class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(
     FlutterDevice device, {
@@ -490,7 +492,7 @@ class ResidentWebRunner extends ResidentRunner {
 
     if (_connectionResult == null) {
       status.stop();
-      _logger.printStatus('Recompile complete. No client connected..');
+      _logger.printStatus(kNoClientConnectedMessage);
       return OperationResult.ok;
     }
 
@@ -506,34 +508,36 @@ class ResidentWebRunner extends ResidentRunner {
           // it. Otherwise, default to calling "hotRestart" without a namespace.
           final String hotRestartMethod =
               _registeredMethodsForService['hotRestart'] ?? 'hotRestart';
-          await _vmService.service.callMethod(hotRestartMethod);
+          final vmservice.Response response = await _vmService.service.callMethod(hotRestartMethod);
+
+          // Check if response indicates no clients available
+          final OperationResult? noClientsResult = _checkNoClientsAvailable(response.json, status);
+          if (noClientsResult != null) {
+            return noClientsResult;
+          }
         } else {
           final DateTime reloadStart = _systemClock.now();
           final vmservice.VM vm = await _vmService.service.getVM();
-          final String hotReloadMethod =
-              _registeredMethodsForService['reloadSources'] ?? 'reloadSources';
 
           // Check if there are any isolates available
           if (vm.isolates == null || vm.isolates!.isEmpty) {
             _logger.printTrace('No isolates available for hot reload');
-            return _handleNoClientsAvailable(status);
+            status.stop();
+            _logger.printStatus(kNoClientConnectedMessage);
+            return OperationResult.ok;
           }
 
-          vmservice.ReloadReport report;
-          try {
-            report = await _vmService.service.reloadSources(vm.isolates!.first.id!);
-          } on vmservice.RPCError catch (e) {
-            // DWDS throws an RPC error with kIsolateCannotReload code when there are no
-            // browser clients currently connected during a hot reload operation.
-            if (e.callingMethod == hotReloadMethod &&
-                e.code == vmservice.RPCErrorKind.kIsolateCannotReload.code) {
-              return _handleNoClientsAvailable(status);
-            }
-            // Re-throw other RPC errors
-            rethrow;
-          }
-
+          final vmservice.ReloadReport report = await _vmService.service.reloadSources(
+            vm.isolates!.first.id!,
+          );
           reloadDuration = _systemClock.now().difference(reloadStart);
+
+          // Check if reload report indicates no clients available
+          final OperationResult? noClientsResult = _checkNoClientsAvailable(report.json, status);
+          if (noClientsResult != null) {
+            return noClientsResult;
+          }
+
           final contents = ReloadReportContents.fromReloadReport(report);
           final bool success = contents.success ?? false;
           if (!success) {
@@ -943,6 +947,18 @@ class ResidentWebRunner extends ResidentRunner {
       final String serviceName = e.service!;
       _registeredMethodsForService.remove(serviceName);
     }
+  }
+
+  /// Checks if the given JSON response indicates no clients are available.
+  /// Returns an [OperationResult] if no clients are available, otherwise returns null.
+  OperationResult? _checkNoClientsAvailable(Map<String, dynamic>? json, Status status) {
+    if (json != null && json['noClientsAvailable'] == true) {
+      _logger.printTrace('No browser clients currently connected');
+      status.stop();
+      _logger.printStatus(kNoClientConnectedMessage);
+      return OperationResult.ok;
+    }
+    return null;
   }
 }
 
