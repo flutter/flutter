@@ -802,7 +802,9 @@ class _AmPmButton extends StatelessWidget {
     final TextScaler buttonTextScaler = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 2.0);
 
     return Semantics(
-      checked: selected,
+      // Platform-specific semantics vary slightly here on iOS.
+      selected: defaultTargetPlatform == TargetPlatform.iOS ? selected : null,
+      checked: defaultTargetPlatform == TargetPlatform.iOS ? null : selected,
       inMutuallyExclusiveGroup: true,
       button: true,
       child: Padding(
