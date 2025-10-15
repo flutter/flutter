@@ -2722,4 +2722,53 @@ void main() {
 
     focusNode.dispose();
   });
+
+  // Regression tests for https://github.com/flutter/flutter/issues/170422
+  group('Radio accessibility announcements on various platforms', () {
+    testWidgets('Unselected radio should be vocalized via hint on iOS/macOS platform', (
+      WidgetTester tester,
+    ) async {
+      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Material(
+            child: RadioGroup<int>(
+              groupValue: 2,
+              onChanged: (int? value) {},
+              child: const Radio<int>(value: 1),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode semanticNode = tester.getSemantics(find.byType(Focus).last);
+      if (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS) {
+        expect(semanticNode.hint, localizations.radioButtonUnselectedLabel);
+      } else {
+        expect(semanticNode.hint, anyOf(isNull, isEmpty));
+      }
+    });
+
+    testWidgets('Selected radio should be vocalized via the selected flag on all platforms', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Material(
+            child: RadioGroup<int>(
+              groupValue: 1,
+              onChanged: (int? value) {},
+              child: const Radio<int>(value: 1),
+            ),
+          ),
+        ),
+      );
+
+      final SemanticsNode semanticNode = tester.getSemantics(find.byType(Focus).last);
+      // Radio semantics should not have hint.
+      expect(semanticNode.hint, anyOf(isNull, isEmpty));
+    });
+  });
 }

@@ -167,6 +167,7 @@ Widget buildFrame({
   Alignment dropdownAlignment = Alignment.center,
   bool? useMaterial3,
   InputDecoration? decoration,
+  InputDecorationThemeData? localInputDecorationTheme,
 }) {
   return Theme(
     data: ThemeData(useMaterial3: useMaterial3),
@@ -177,33 +178,36 @@ Widget buildFrame({
         child: Align(
           alignment: dropdownAlignment,
           child: RepaintBoundary(
-            child: buildDropdown(
-              isFormField: isFormField,
-              buttonKey: buttonKey,
-              initialValue: initialValue,
-              hint: hint,
-              disabledHint: disabledHint,
-              onChanged: onChanged,
-              onTap: onTap,
-              icon: icon,
-              iconSize: iconSize,
-              iconDisabledColor: iconDisabledColor,
-              iconEnabledColor: iconEnabledColor,
-              isDense: isDense,
-              isExpanded: isExpanded,
-              underline: underline,
-              focusNode: focusNode,
-              autofocus: autofocus,
-              focusColor: focusColor,
-              dropdownColor: dropdownColor,
-              items: items,
-              selectedItemBuilder: selectedItemBuilder,
-              itemHeight: itemHeight,
-              menuWidth: menuWidth,
-              alignment: alignment,
-              menuMaxHeight: menuMaxHeight,
-              padding: padding,
-              decoration: decoration,
+            child: InputDecorationTheme(
+              data: localInputDecorationTheme,
+              child: buildDropdown(
+                isFormField: isFormField,
+                buttonKey: buttonKey,
+                initialValue: initialValue,
+                hint: hint,
+                disabledHint: disabledHint,
+                onChanged: onChanged,
+                onTap: onTap,
+                icon: icon,
+                iconSize: iconSize,
+                iconDisabledColor: iconDisabledColor,
+                iconEnabledColor: iconEnabledColor,
+                isDense: isDense,
+                isExpanded: isExpanded,
+                underline: underline,
+                focusNode: focusNode,
+                autofocus: autofocus,
+                focusColor: focusColor,
+                dropdownColor: dropdownColor,
+                items: items,
+                selectedItemBuilder: selectedItemBuilder,
+                itemHeight: itemHeight,
+                menuWidth: menuWidth,
+                alignment: alignment,
+                menuMaxHeight: menuMaxHeight,
+                padding: padding,
+                decoration: decoration,
+              ),
             ),
           ),
         ),
@@ -4802,4 +4806,49 @@ void main() {
       expect(fieldKey.currentState!.value, 'one');
     },
   );
+
+  testWidgets('DropdownButtonFormField does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: DropdownButtonFormField<String>(
+                onChanged: (_) {},
+                items: const <DropdownMenuItem<String>>[
+                  DropdownMenuItem<String>(value: 'a', child: Text('a')),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DropdownButtonFormField<String>)), Size.zero);
+  });
+
+  testWidgets('DropdownButtonFormField can inherit from local InputDecorationThemeData', (
+    WidgetTester tester,
+  ) async {
+    const String labelText = 'Label';
+    const Color labelColor = Colors.green;
+    const InputDecoration decoration = InputDecoration(labelText: labelText);
+    const InputDecorationThemeData decorationTheme = InputDecorationThemeData(
+      labelStyle: TextStyle(color: labelColor),
+    );
+
+    await tester.pumpWidget(
+      buildFrame(
+        isFormField: true,
+        decoration: decoration,
+        onChanged: (_) {},
+        localInputDecorationTheme: decorationTheme,
+      ),
+    );
+
+    final TextStyle labelStyle = DefaultTextStyle.of(
+      tester.firstElement(find.text(labelText)),
+    ).style;
+    expect(labelStyle.color, labelColor);
+  });
 }
