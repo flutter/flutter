@@ -598,9 +598,7 @@ void main() {
   });
 
   testWidgets('Skips asserts before keyboard state initialization', (WidgetTester tester) async {
-    // Ensure clean state and no handlers interfere with the assertion behavior.
-    ServicesBinding.instance.keyboard.clearState();
-
+    addTearDown(() => HardwareKeyboard.instance.clearState());
     const KeyUpEvent strayUp = KeyUpEvent(
       physicalKey: PhysicalKeyboardKey.keyA,
       logicalKey: LogicalKeyboardKey.keyA,
@@ -608,11 +606,14 @@ void main() {
     );
 
     // Before initialization, a stray KeyUpEvent should not trigger assertions.
-    expect(() => ServicesBinding.instance.keyboard.handleKeyEvent(strayUp), returnsNormally);
+    expect(() => HardwareKeyboard.instance.handleKeyEvent(strayUp), returnsNormally);
+
+    // Initialize keyboard state, but make sure the pressed set is empty for determinism.
+    await HardwareKeyboard.instance.syncKeyboardState();
+    expect(HardwareKeyboard.instance.physicalKeysPressed, isEmpty);
 
     // After initialization, the same stray KeyUpEvent should assert in debug mode.
-    await ServicesBinding.instance.keyboard.syncKeyboardState();
-    expect(() => ServicesBinding.instance.keyboard.handleKeyEvent(strayUp), throwsAssertionError);
+    expect(() => HardwareKeyboard.instance.handleKeyEvent(strayUp), throwsAssertionError);
   });
 }
 
