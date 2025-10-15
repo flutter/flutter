@@ -887,16 +887,22 @@ abstract class SemanticRole {
       final SemanticsObject? parent =
           semanticsObject.owner._semanticsTree[semanticsObject.traversalParent!];
       if (parent != null && parent.semanticRole != null) {
-        parent.element.setAttribute('aria-owns', getIdAttribute(semanticsObject.id));
+        List<String>? children = parent.element.getAttribute('aria-owns')?.split(' ') ?? [];
+        children.add(getIdAttribute(semanticsObject.id));
+        parent.element.setAttribute('aria-owns', children.join(' '));
       }
     }
     // Clean up aria-owns relationship.
-    if (semanticsObject._previousTraversalParent != null &&
+    else if (semanticsObject._previousTraversalParent != null &&
         semanticsObject._previousTraversalParent != -1) {
       final SemanticsObject? parent =
           semanticsObject.owner._semanticsTree[semanticsObject._previousTraversalParent!];
       if (parent != null) {
-        parent.element.removeAttribute('aria-owns');
+        List<String>? children = parent.element.getAttribute('aria-owns')?.split(' ');
+        if (children != null) {
+          children.removeWhere((String child) => child == getIdAttribute(semanticsObject.id));
+          parent.element.setAttribute('aria-owns', children.join(' '));
+        }
       }
     }
   }
