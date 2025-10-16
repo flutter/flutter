@@ -1027,8 +1027,6 @@ void main() {
   });
 
   testWidgets('Table reuse the semantics nodes for cell wrappers', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
@@ -1059,7 +1057,5 @@ void main() {
 
     final int? cellWrapperIdAfterUIchanges = textFieldSemanticsNodeNew.parent?.id;
     expect(cellWrapperIdAfterUIchanges, cellWrapperId);
-
-    semantics.dispose();
   });
 }
