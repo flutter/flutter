@@ -1941,11 +1941,12 @@ class SelectableRegionState extends State<SelectableRegion>
     return TapRegion(
       groupId: SelectableRegion,
       onTapOutside: (PointerDownEvent event) {
-        // To match native platforms, the selection is dismissed when tapping outside
-        // of the selectable region.
-        clearSelection();
-        _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
-        _finalizeSelectableRegionStatus();
+        // To match the native web behavior, this selectable region is
+        // unfocused when tapping outside of it causing the selection to
+        // be dismissed.
+        if (kIsWeb) {
+          _focusNode.unfocus();
+        }
       },
       child: CompositedTransformTarget(
         link: _toolbarLayerLink,
