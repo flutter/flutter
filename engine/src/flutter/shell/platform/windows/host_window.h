@@ -51,10 +51,10 @@ class HostWindow {
   // the window manager. |preferred_size| is the preferred size of the window.
   // |preferred_constraints| are the constraints set on the window's size.
   // |title| is the title of the window. |parent| is the parent of this dialog,
-  // which can be `null`.
+  // which can be `nullptr`.
   //
   // On success, a valid window handle can be retrieved
-  // via |HostWindow::GetWindowHandle|. |nullptr| will be returned
+  // via |HostWindow::GetWindowHandle|. `nullptr` will be returned
   // on failure.
   static std::unique_ptr<HostWindow> CreateDialogWindow(
       WindowManager* window_manager,
@@ -161,18 +161,18 @@ class HostWindow {
   static void FocusRootViewOf(HostWindow* window);
 
   // Enables or disables mouse and keyboard input to this window and all its
-  // descendants
+  // descendants.
   void EnableRecursively(bool enable);
 
   // Returns the first enabled descendant window. If the current window itself
   // is enabled, returns the current window. If no window is enabled, returns
-  // |nullptr|.
+  // `nullptr`.
   HostWindow* FindFirstEnabledDescendant() const;
 
   // Returns windows owned by this window.
   std::vector<HostWindow*> GetOwnedWindows() const;
 
-  // Disables mouse and keyboard input to the window and all its descendants
+  // Disables mouse and keyboard input to the window and all its descendants.
   void DisableRecursively();
 
   // OS callback called by message pump. Handles the WM_NCCREATE message which
