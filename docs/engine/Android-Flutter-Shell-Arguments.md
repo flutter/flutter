@@ -32,7 +32,6 @@
 | `--vm-snapshot-data=<path>` | Specifies the path to the VM snapshot data file. |
 | `--isolate-snapshot-data=<path>` | Specifies the path to the isolate snapshot data file. |
 | `--flutter-assets-dir=<path>` | Sets the directory containing Flutter assets. |
-| `--automatically-register-plugins` | Enables automatic registration of plugins with the Flutter engine. |
 
 # TODO(camsim99): Note that all command line args could be settable in manifest (at least those deleted from FlutterShellArgs). Please audit and figure out what makes sense. I can use other platforms as guidance.
 ## Flags that can be set in the manifest:
@@ -50,10 +49,10 @@ the following in your manifest:
 </manifest>
 ```
 
-# TODO(camsim99): refactor first table based on this ones order 
+# TODO(camsim99): refactor first table based on this ones order
 | Flag                              | Description                                                      | Can Set in Release Mode? |
 |------------------------------------|------------------------------------------------------------------|--------------------------|
-| `VMServicePort`                    | Sets the port for the Dart VM Service.                           | No                       | 
+| `VMServicePort`                    | Sets the port for the Dart VM Service.                           | No                       |
 | `UseTestFonts`                     | Uses the Ahem test font for font resolution.                     | No                       |
 | `EnableSoftwareRendering`          | Uses Skia software backend for rendering.                        | Yes                      |
 | `SkiaDeterministicRendering`       | Ensures deterministic Skia rendering by skipping CPU feature swaps. | Yes                  |
@@ -78,14 +77,14 @@ the following in your manifest:
 
 
 # TODO(camsim99): Rework this note.
-> **Note:**  
-> As of [version/commit], setting Flutter shell arguments via Android Intents is no longer supported.  
-> 
+> **Note:**
+> As of [version/commit], setting Flutter shell arguments via Android Intents is no longer supported.
+>
 > For **per-launch dynamic configuration** of shell arguments (such as `--vm-service-port`), consider the following workarounds:
-> 
+>
 > - **Custom Loader:** Implement a custom Android Activity or Service that reads configuration (e.g., from an intent extra, config file, or other runtime source) and programmatically sets shell arguments before initializing the Flutter engine. This allows you to control arguments on a per-launch basis, even when launching Flutter components from native Android code.
 > - **Multiple APKs:** Build and distribute separate APKs, each with different shell argument values set in the Android manifest. Use the appropriate APK for each scenario.
-> 
+>
 > For **static configuration** (the same arguments for all launches), continue to use the Android manifest.
-> 
+>
 > Per-launch dynamic configuration is no longer possible via Intents. If you require this flexibility, use a custom loader or multiple APKs as described

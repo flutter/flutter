@@ -514,7 +514,6 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
   settings.enable_platform_isolates =
       command_line.HasOption(FlagForSwitch(Switch::EnablePlatformIsolates));
 
-  // TODO(camsim99): check boolean
   settings.enable_surface_control = command_line.HasOption(
       FlagForSwitch(Switch::EnableAndroidSurfaceControl));
 
@@ -551,10 +550,8 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
     }
   }
 
-  // TODO(camsim99): check boolean
   settings.enable_flutter_gpu =
       command_line.HasOption(FlagForSwitch(Switch::EnableFlutterGPU));
-  // TODO(camsim99): check boolean
   settings.impeller_enable_lazy_shader_mode =
       command_line.HasOption(FlagForSwitch(Switch::ImpellerLazyShaderMode));
   settings.impeller_antialiased_lines =
