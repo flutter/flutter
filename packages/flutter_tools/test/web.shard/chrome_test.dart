@@ -537,7 +537,6 @@ void main() {
           ...kChromeArgs,
           '--no-sandbox',
           '--headless',
-          '--disable-gpu',
           '--window-size=2400,1800',
           'example_url',
         ],
@@ -623,7 +622,6 @@ void main() {
       ...kChromeArgs,
       '--no-sandbox',
       '--headless',
-      '--disable-gpu',
       '--window-size=2400,1800',
       'example_url',
     ];
@@ -657,7 +655,6 @@ void main() {
       ...kChromeArgs,
       '--no-sandbox',
       '--headless',
-      '--disable-gpu',
       '--window-size=2400,1800',
       'example_url',
     ];
@@ -695,7 +692,6 @@ void main() {
             ...kChromeArgs,
             '--no-sandbox',
             '--headless',
-            '--disable-gpu',
             '--window-size=2400,1800',
             'example_url',
           ],
