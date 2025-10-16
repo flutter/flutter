@@ -278,7 +278,14 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   SliverList.separated({
     super.key,
     required NullableIndexedWidgetBuilder itemBuilder,
+    @Deprecated(
+      'Use findItemIndexCallback instead. '
+      'findChildIndexCallback returns child indices (which include separators), '
+      'while findItemIndexCallback returns item indices (which do not). '
+      'This feature was deprecated after v3.37.0-1.0.pre.',
+    )
     ChildIndexGetter? findChildIndexCallback,
+    ChildIndexGetter? findItemIndexCallback,
     required NullableIndexedWidgetBuilder separatorBuilder,
     int? itemCount,
     bool addAutomaticKeepAlives = true,
@@ -302,12 +309,12 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
              }
              return widget;
            },
-           findChildIndexCallback: findChildIndexCallback == null
-               ? null
-               : (Key key) {
-                   final int? itemIndex = findChildIndexCallback(key);
+           findChildIndexCallback: findItemIndexCallback != null
+               ? (Key key) {
+                   final int? itemIndex = findItemIndexCallback(key);
                    return itemIndex == null ? null : itemIndex * 2;
-                 },
+                 }
+               : findChildIndexCallback,
            childCount: itemCount == null ? null : math.max(0, itemCount * 2 - 1),
            addAutomaticKeepAlives: addAutomaticKeepAlives,
            addRepaintBoundaries: addRepaintBoundaries,
