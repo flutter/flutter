@@ -22,7 +22,7 @@ import 'dialog.dart';
 ///
 /// ## Updating to [OverflowBar]
 ///
-/// [ButtonBar] has been replace by a more efficient widget, [OverflowBar].
+/// [ButtonBar] has been replaced by a more efficient widget, [OverflowBar].
 ///
 /// ```dart
 /// // Before
