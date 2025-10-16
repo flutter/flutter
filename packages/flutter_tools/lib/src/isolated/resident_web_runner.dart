@@ -406,6 +406,13 @@ class ResidentWebRunner extends ResidentRunner {
     );
   }
 
+  /// Handles the no clients available scenario gracefully.
+  OperationResult _handleNoClientsAvailable(Status status) {
+    status.stop();
+    _logger.printStatus(kNoClientConnectedMessage);
+    return OperationResult.ok;
+  }
+
   @override
   Future<OperationResult> restart({
     bool fullRestart = false,
@@ -489,9 +496,7 @@ class ResidentWebRunner extends ResidentRunner {
     }
 
     if (_connectionResult == null) {
-      status.stop();
-      _logger.printStatus(kNoClientConnectedMessage);
-      return OperationResult.ok;
+      return _handleNoClientsAvailable(status);
     }
 
     // Both will be null when not assigned.
@@ -506,35 +511,45 @@ class ResidentWebRunner extends ResidentRunner {
           // it. Otherwise, default to calling "hotRestart" without a namespace.
           final String hotRestartMethod =
               _registeredMethodsForService['hotRestart'] ?? 'hotRestart';
-          final vmservice.Response response = await _vmService.service.callMethod(hotRestartMethod);
 
-          // Check if response indicates no clients available
-          final OperationResult? noClientsResult = _checkNoClientsAvailable(response.json, status);
-          if (noClientsResult != null) {
-            return noClientsResult;
+          try {
+            await _vmService.service.callMethod(hotRestartMethod);
+          } on vmservice.RPCError catch (e) {
+            // DWDS throws an RPC error with kServerError code when there are no
+            // browser clients currently connected during a hot restart operation.
+            if (e.callingMethod == hotRestartMethod &&
+                e.code == vmservice.RPCErrorKind.kServerError.code) {
+              return _handleNoClientsAvailable(status);
+            }
+            // Re-throw other RPC errors
+            rethrow;
           }
         } else {
           final DateTime reloadStart = _systemClock.now();
           final vmservice.VM vm = await _vmService.service.getVM();
+          final String hotReloadMethod =
+              _registeredMethodsForService['reloadSources'] ?? 'reloadSources';
 
           // Check if there are any isolates available
           if (vm.isolates == null || vm.isolates!.isEmpty) {
             _logger.printTrace('No isolates available for hot reload');
-            status.stop();
-            _logger.printStatus(kNoClientConnectedMessage);
-            return OperationResult.ok;
+            return _handleNoClientsAvailable(status);
           }
 
-          final vmservice.ReloadReport report = await _vmService.service.reloadSources(
-            vm.isolates!.first.id!,
-          );
+          vmservice.ReloadReport report;
+          try {
+            report = await _vmService.service.reloadSources(vm.isolates!.first.id!);
+          } on vmservice.RPCError catch (e) {
+            // DWDS throws an RPC error with kServerError code when there are no
+            // browser clients currently connected during a hot reload operation.
+            if (e.callingMethod == hotReloadMethod &&
+                e.code == vmservice.RPCErrorKind.kServerError.code) {
+              return _handleNoClientsAvailable(status);
+            }
+            // Re-throw other RPC errors
+            rethrow;
+          }
           reloadDuration = _systemClock.now().difference(reloadStart);
-
-          // Check if reload report indicates no clients available
-          final OperationResult? noClientsResult = _checkNoClientsAvailable(report.json, status);
-          if (noClientsResult != null) {
-            return noClientsResult;
-          }
 
           final contents = ReloadReportContents.fromReloadReport(report);
           final bool success = contents.success ?? false;
@@ -951,18 +966,6 @@ class ResidentWebRunner extends ResidentRunner {
       final String serviceName = e.service!;
       _registeredMethodsForService.remove(serviceName);
     }
-  }
-
-  /// Checks if the given JSON response indicates no clients are available.
-  /// Returns an [OperationResult] if no clients are available, otherwise returns null.
-  OperationResult? _checkNoClientsAvailable(Map<String, dynamic>? json, Status status) {
-    if (json != null && json['noClientsAvailable'] == true) {
-      _logger.printTrace('No browser clients currently connected');
-      status.stop();
-      _logger.printStatus(kNoClientConnectedMessage);
-      return OperationResult.ok;
-    }
-    return null;
   }
 }
 
