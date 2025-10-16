@@ -108,6 +108,16 @@ enum OptionsViewOpenDirection {
   /// The top edge of the options view will align with the bottom edge
   /// of the text field built by [RawAutocomplete.fieldViewBuilder].
   down,
+
+  /// Open in the direction with the most available space within the overlay.
+  ///
+  /// The available space is calculated as the distance from the field's top
+  /// edge to the overlay's top edge (for upward opening) or from the field's
+  /// bottom edge to the overlay's bottom edge (for downward opening).
+  ///
+  /// If both directions have the same available space, the options view opens
+  /// downward.
+  mostSpace,
 }
 
 // TODO(justinmc): Mention AutocompleteCupertino when it is implemented.
@@ -236,7 +246,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   final AutocompleteOptionsViewBuilder<T> optionsViewBuilder;
 
   /// {@template flutter.widgets.RawAutocomplete.optionsViewOpenDirection}
-  /// The direction in which to open the options-view overlay.
+  /// Determines the direction in which to open the options view.
   ///
   /// Defaults to [OptionsViewOpenDirection.down].
   /// {@endtemplate}
@@ -543,20 +553,26 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       Offset.zero & layoutInfo.overlaySize,
     );
 
-    final double optionsViewMaxHeight = switch (widget.optionsViewOpenDirection) {
-      OptionsViewOpenDirection.up => -overlayRectInField.top,
-      OptionsViewOpenDirection.down => overlayRectInField.bottom - fieldSize.height,
+    final double spaceAbove = -overlayRectInField.top;
+    final double spaceBelow = overlayRectInField.bottom - fieldSize.height;
+    final bool opensUp = switch (widget.optionsViewOpenDirection) {
+      OptionsViewOpenDirection.up => true,
+      OptionsViewOpenDirection.down => false,
+      OptionsViewOpenDirection.mostSpace => spaceAbove > spaceBelow,
     };
+
+    final double optionsViewMaxHeight = opensUp
+        ? -overlayRectInField.top
+        : overlayRectInField.bottom - fieldSize.height;
 
     final Size optionsViewBoundingBox = Size(
       fieldSize.width,
       math.max(optionsViewMaxHeight, _kMinUsableHeight),
     );
 
-    final double originY = switch (widget.optionsViewOpenDirection) {
-      OptionsViewOpenDirection.up => overlayRectInField.top,
-      OptionsViewOpenDirection.down => overlayRectInField.bottom - optionsViewBoundingBox.height,
-    };
+    final double originY = opensUp
+        ? overlayRectInField.top
+        : overlayRectInField.bottom - optionsViewBoundingBox.height;
 
     final Matrix4 transform = layoutInfo.childPaintTransform.clone()
       ..translateByDouble(0.0, originY, 0, 1);
@@ -570,10 +586,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
         child: ConstrainedBox(
           constraints: BoxConstraints.tight(optionsViewBoundingBox),
           child: Align(
-            alignment: switch (widget.optionsViewOpenDirection) {
-              OptionsViewOpenDirection.up => AlignmentDirectional.bottomStart,
-              OptionsViewOpenDirection.down => AlignmentDirectional.topStart,
-            },
+            alignment: opensUp ? AlignmentDirectional.bottomStart : AlignmentDirectional.topStart,
             child: TextFieldTapRegion(
               child: AutocompleteHighlightedOption(
                 highlightIndexNotifier: _highlightedOptionIndex,
