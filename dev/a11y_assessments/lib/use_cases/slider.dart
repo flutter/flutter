@@ -40,19 +40,25 @@ class MainWidgetState extends State<MainWidget> {
         title: Semantics(headingLevel: 1, child: Text('$pageTitle demo')),
       ),
       body: Center(
-        child: Semantics(
-          label: accessibilityLabel,
-          child: Slider(
-            value: currentSliderValue,
-            max: 100,
-            divisions: 5,
-            label: currentSliderValue.round().toString(),
-            onChanged: (double value) {
-              setState(() {
-                currentSliderValue = value;
-              });
-            },
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text('My Slider'),
+            Semantics(
+              label: accessibilityLabel,
+              child: Slider(
+                value: currentSliderValue,
+                max: 100,
+                divisions: 5,
+                label: currentSliderValue.round().toString(),
+                onChanged: (double value) {
+                  setState(() {
+                    currentSliderValue = value;
+                  });
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
