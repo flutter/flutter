@@ -4056,88 +4056,84 @@ void main() {
     );
   });
 
-    testWidgets(
-    'DropdownButton has expected mouse cursor when explicitly configured',
-    (WidgetTester tester) async {
-      const Key menuKey = Key('testDropdownButton');
-      const Key itemKey = Key('testDropdownMenuItem');
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: DropdownButton<String>(
-              key: menuKey,
-              mouseCursor: SystemMouseCursors.cell,
-              dropdownMenuItemMouseCursor: SystemMouseCursors.grab,
-              onChanged: (String? newValue) {},
-              items: const <DropdownMenuItem<String>>[
-                DropdownMenuItem<String>(key: itemKey, value: 'One', child: Text('One')),
-              ],
-            ),
+  testWidgets('DropdownButton has expected mouse cursor when explicitly configured', (
+    WidgetTester tester,
+  ) async {
+    const Key menuKey = Key('testDropdownButton');
+    const Key itemKey = Key('testDropdownMenuItem');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DropdownButton<String>(
+            key: menuKey,
+            mouseCursor: SystemMouseCursors.cell,
+            dropdownMenuItemMouseCursor: SystemMouseCursors.grab,
+            onChanged: (String? newValue) {},
+            items: const <DropdownMenuItem<String>>[
+              DropdownMenuItem<String>(key: itemKey, value: 'One', child: Text('One')),
+            ],
           ),
         ),
-      );
+      ),
+    );
 
-      final Finder dropdownButtonFinder = find.byKey(menuKey);
-      final Offset onDropdownButton = tester.getCenter(dropdownButtonFinder);
-      final TestGesture gesture = await tester.createGesture(
-        kind: PointerDeviceKind.mouse,
-        pointer: 1,
-      );
+    final Finder dropdownButtonFinder = find.byKey(menuKey);
+    final Offset onDropdownButton = tester.getCenter(dropdownButtonFinder);
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
 
-      await gesture.addPointer(location: onDropdownButton);
-      await tester.pump();
+    await gesture.addPointer(location: onDropdownButton);
+    await tester.pump();
 
-      expect(
-        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.cell,
-      );
-    },
-  );
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.cell,
+    );
+  });
 
-  testWidgets(
-    'DropdownMenuItem has expected mouse cursor when explicitly configured',
-    (WidgetTester tester) async {
-      const Key menuKey = Key('testDropdownButton');
-      const Key itemKey = Key('testDropdownMenuItem');
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: DropdownButton<String>(
-              key: menuKey,
-              dropdownMenuItemMouseCursor: SystemMouseCursors.grab,
-              onChanged: (String? newValue) {},
-              items: const <DropdownMenuItem<String>>[
-                DropdownMenuItem<String>(key: itemKey, value: 'One', child: Text('One')),
-              ],
-            ),
+  testWidgets('DropdownMenuItem has expected mouse cursor when explicitly configured', (
+    WidgetTester tester,
+  ) async {
+    const Key menuKey = Key('testDropdownButton');
+    const Key itemKey = Key('testDropdownMenuItem');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DropdownButton<String>(
+            key: menuKey,
+            dropdownMenuItemMouseCursor: SystemMouseCursors.grab,
+            onChanged: (String? newValue) {},
+            items: const <DropdownMenuItem<String>>[
+              DropdownMenuItem<String>(key: itemKey, value: 'One', child: Text('One')),
+            ],
           ),
         ),
-      );
+      ),
+    );
 
-      final Finder dropdownButtonFinder = find.byKey(menuKey);
-      final Offset onDropdownButton = tester.getCenter(dropdownButtonFinder);
-      final TestGesture gesture = await tester.createGesture(
-        kind: PointerDeviceKind.mouse,
-        pointer: 1,
-      );
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
 
-      // Open DropdownButton.
-      await tester.tap(find.byKey(menuKey));
-      await tester.pumpAndSettle();
+    // Open DropdownButton.
+    await tester.tap(find.byKey(menuKey));
+    await tester.pumpAndSettle();
 
-      // Find DropdownMenuItem.
-      final Finder menuItemFinder = find.byKey(itemKey);
-      final Offset onMenuItem = tester.getCenter(menuItemFinder);
+    // Find DropdownMenuItem.
+    final Finder menuItemFinder = find.byKey(itemKey);
+    final Offset onMenuItem = tester.getCenter(menuItemFinder);
 
-      await gesture.addPointer(location: onMenuItem);
-      await tester.pump();
+    await gesture.addPointer(location: onMenuItem);
+    await tester.pump();
 
-      expect(
-        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.grab,
-      );
-    },
-  );
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+  });
 
   testWidgets(
     'Conflicting scrollbars are not applied by ScrollBehavior to Dropdown',
