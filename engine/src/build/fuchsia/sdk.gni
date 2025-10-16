@@ -27,7 +27,7 @@ declare_args() {
   skia_using_fuchsia_sdk = using_fuchsia_sdk
 }
 
-_fuchsia_sdk_path = "//third_party/fuchsia-sdk/sdk"
+_fuchsia_sdk_path = fuchsia_sdk_path
 _fuchsia_tools_path = "${_fuchsia_sdk_path}/tools/${host_cpu}"
 
 template("_fuchsia_sysroot") {
