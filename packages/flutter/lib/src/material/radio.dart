@@ -540,12 +540,11 @@ class _RadioState<T> extends State<Radio<T>> {
     }
 
     final RadioThemeData radioTheme = RadioTheme.of(context);
-    const WidgetStateMouseCursor fallbackMouseCursor = WidgetStateMouseCursor.adaptiveClickable;
     final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
         WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
           return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
               radioTheme.mouseCursor?.resolve(states) ??
-              WidgetStateProperty.resolveAs<MouseCursor>(fallbackMouseCursor, states);
+              WidgetStateProperty.resolveAs<MouseCursor>(WidgetStateMouseCursor.adaptiveClickable, states);
         });
     return RawRadio<T>(
       value: widget.value,

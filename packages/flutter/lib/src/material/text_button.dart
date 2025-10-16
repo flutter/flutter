@@ -335,8 +335,8 @@ class TextButton extends ButtonStyleButton {
   /// * `side` - null
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
   /// * `mouseCursor`
-  ///   * on web and enabled - SystemMouseCursors.click
-  ///   * others - SystemMouseCursors.basic
+  ///   * enabled - WidgetStateMouseCursor.adaptiveClickable
+  ///   * disabled - SystemMouseCursors.basic
   /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
@@ -385,8 +385,8 @@ class TextButton extends ButtonStyleButton {
   /// * `side` - null
   /// * `shape` - StadiumBorder()
   /// * `mouseCursor`
-  ///   * on web and enabled - SystemMouseCursors.click
-  ///   * others - SystemMouseCursors.basic
+  ///   * enabled - WidgetStateMouseCursor.adaptiveClickable
+  ///   * disabled - SystemMouseCursors.basic
   /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
@@ -416,7 +416,7 @@ class TextButton extends ButtonStyleButton {
             minimumSize: const Size(64, 36),
             maximumSize: Size.infinite,
             shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
-            enabledMouseCursor: kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+            enabledMouseCursor: WidgetStateMouseCursor.adaptiveClickable,
             disabledMouseCursor: SystemMouseCursors.basic,
             visualDensity: theme.visualDensity,
             tapTargetSize: theme.materialTapTargetSize,
