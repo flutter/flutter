@@ -113,9 +113,14 @@ def Main(argv):
             if (k.endswith(dart_k_suffix)):
               if (isinstance(dart_v, str)):
                 updated_value = dart_v.replace(new_vars["dart_git"], "Var('dart_git') + '/")
-                updated_value = updated_value.replace(old_vars["chromium_git"], "Var('chromium_git') + '")
+                updated_value = updated_value.replace(new_vars["chromium_git"], "Var('chromium_git') + '")
+                updated_value = updated_value.replace(new_vars["android_git"], "Var('android_git') + '")
 
-                plain_v = dart_k[dart_k.rfind('/') + 1:]
+                plain_v = os.path.basename(dart_k)
+                # Some dependencies are placed in a subdirectory named "src"
+                # within a directory named for the package.
+                if plain_v == 'src':
+                  plain_v = os.path.basename(os.path.dirname(dart_k))
                 # This dependency has to be special-cased here because the
                 # repository name is not the same as the directory name.
                 if plain_v == "quiver":
