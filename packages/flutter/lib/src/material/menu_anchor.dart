@@ -2088,7 +2088,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
             if (!mounted) {
               return;
             }
-            if (controller.isOpen) {
+            if (_animationStatus.isForwardOrCompleted) {
               controller.close();
             } else {
               controller.open();
@@ -2263,6 +2263,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
     }
 
     _hoverOpenTimer = Timer(widget.hoverOpenDelay, () {
+      // The menu controller could change, so we can't use a tearoff.
       _menuController.open();
     });
   }
