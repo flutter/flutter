@@ -26,12 +26,6 @@ void main() {
     expect(labelWidget, findsOneWidget);
   });
 
-  testWidgets('slider semantics wrapper exists', (WidgetTester tester) async {
-    await pumpsUseCase(tester, SliderUseCase());
-    final Finder semanticsWidget = find.bySemanticsLabel('Accessibility Test Slider');
-    expect(semanticsWidget, findsOneWidget);
-  });
-
   testWidgets('slider demo page has one h1 tag', (WidgetTester tester) async {
     await pumpsUseCase(tester, SliderUseCase());
     final Finder findHeadingLevelOnes = find.bySemanticsLabel('Slider demo');

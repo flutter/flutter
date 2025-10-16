@@ -28,7 +28,6 @@ class MainWidget extends StatefulWidget {
 
 class MainWidgetState extends State<MainWidget> {
   double currentSliderValue = 20;
-  static const String accessibilityLabel = 'Accessibility Test Slider';
 
   String pageTitle = getUseCaseName(SliderUseCase());
 
@@ -44,19 +43,16 @@ class MainWidgetState extends State<MainWidget> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text('My Slider'),
-            Semantics(
-              label: accessibilityLabel,
-              child: Slider(
-                value: currentSliderValue,
-                max: 100,
-                divisions: 5,
-                label: currentSliderValue.round().toString(),
-                onChanged: (double value) {
-                  setState(() {
-                    currentSliderValue = value;
-                  });
-                },
-              ),
+            Slider(
+              value: currentSliderValue,
+              max: 100,
+              divisions: 5,
+              label: currentSliderValue.round().toString(),
+              onChanged: (double value) {
+                setState(() {
+                  currentSliderValue = value;
+                });
+              },
             ),
           ],
         ),
