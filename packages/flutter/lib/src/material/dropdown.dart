@@ -1325,7 +1325,7 @@ class DropdownButton<T> extends StatefulWidget {
   final MouseCursor? mouseCursor;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
-  /// this button's [DropdownMenuItem]s.
+  /// this button's [items].
   final MouseCursor? dropdownMenuItemMouseCursor;
 
   final InputDecoration? _inputDecoration;
@@ -1944,7 +1944,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
   final MouseCursor? mouseCursor;
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
-  /// dropdown menu items.
+  /// this button's [items].
   ///
   /// {@macro flutter.material.InkWell.mouseCursor}
   final MouseCursor? dropdownMenuItemMouseCursor;
