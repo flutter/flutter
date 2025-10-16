@@ -44,7 +44,7 @@ if (($currentBranch -ne "main") -and
     ($currentBranch -ne "master") -and
     ($currentBranch -ne "stable") -and
     ($currentBranch -ne "beta") -and
-    (-not (($currentBranch -eq "HEAD") -and (-not [string]::IsNullOrEmpty($env:LUCI_CI)))) -and
+    (-not (($currentBranch -eq "HEAD") -and (-not [string]::IsNullOrEmpty($env:LUCI_CONTEXT)))) -and
     (-not $currentBranch.StartsWith("gh-readonly-queue/master/pr-")) -and
     (-not ($currentBranch -like "flutter-*-candidate.*")) -and
     (-not $isShallow)) {
