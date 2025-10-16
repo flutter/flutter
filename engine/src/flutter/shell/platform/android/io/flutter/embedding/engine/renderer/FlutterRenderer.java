@@ -24,9 +24,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
-import androidx.lifecycle.DefaultLifecycleObserver;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.ProcessLifecycleOwner;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.view.TextureRegistry;
@@ -100,21 +97,23 @@ public class FlutterRenderer implements TextureRegistry {
   public FlutterRenderer(@NonNull FlutterJNI flutterJNI) {
     this.flutterJNI = flutterJNI;
     this.flutterJNI.addIsDisplayingFlutterUiListener(flutterUiDisplayListener);
-    ProcessLifecycleOwner.get()
-        .getLifecycle()
-        .addObserver(
-            new DefaultLifecycleObserver() {
-              @Override
-              public void onResume(@NonNull LifecycleOwner owner) {
-                Log.v(TAG, "onResume called; notifying SurfaceProducers");
-                for (ImageReaderSurfaceProducer producer : imageReaderProducers) {
-                  if (producer.callback != null && producer.notifiedDestroy) {
-                    producer.notifiedDestroy = false;
-                    producer.callback.onSurfaceAvailable();
-                  }
-                }
-              }
-            });
+  }
+
+  /**
+   * Restores {@code ImageReaderSurfaceProducer}s that were previously notified to be destroyed due
+   * to a call to {@code onTrimMemory} as part of an {@code onResume} app lifecycle event.
+   *
+   * <p>All {@code FlutterActivity}s and {@code FlutterFragment}s are expected to call this {@code
+   * onResume} to ensure surface producers are restored when the app returns to the foreground.
+   */
+  public void restoreSurfaceProducers() {
+    Log.v(TAG, "restoreSurfaceProducers called; notifying SurfaceProducers");
+    for (ImageReaderSurfaceProducer producer : imageReaderProducers) {
+      if (producer.callback != null && producer.notifiedDestroy) {
+        producer.notifiedDestroy = false;
+        producer.callback.onSurfaceAvailable();
+      }
+    }
   }
 
   /**
@@ -452,7 +451,7 @@ public class FlutterRenderer implements TextureRegistry {
      *
      * <p>Used to avoid signaling {@link Callback#onSurfaceAvailable()} unnecessarily.
      */
-    private boolean notifiedDestroy = false;
+    @VisibleForTesting boolean notifiedDestroy = false;
 
     // State held to track latency of various stages.
     private long lastDequeueTime = 0;
@@ -466,7 +465,8 @@ public class FlutterRenderer implements TextureRegistry {
     private final HashMap<ImageReader, PerImageReader> perImageReaders = new HashMap<>();
     private ArrayList<PerImage> lastDequeuedImage = new ArrayList<PerImage>();
     private PerImageReader lastReaderDequeuedFrom = null;
-    private Callback callback = null;
+
+    @VisibleForTesting Callback callback = null;
 
     /** Internal class: state held per Image produced by ImageReaders. */
     private class PerImage {
