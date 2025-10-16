@@ -45,9 +45,7 @@ public final class FlutterEngineManifestFlags {
   public static final Flag SKIA_DETERMINISTIC_RENDERING =
       new Flag(FlutterEngineCommandLineFlags.SKIA_DETERMINISTIC_RENDERING, true);
   public static final Flag AOT_SHARED_LIBRARY_NAME =
-      new Flag(
-          FlutterEngineCommandLineFlags.AOT_SHARED_LIBRARY_NAME,
-          true); // TODO(camsim99): set internally too -- note
+      new Flag(FlutterEngineCommandLineFlags.AOT_SHARED_LIBRARY_NAME, true);
   public static final Flag FLUTTER_ASSETS_DIR =
       new Flag(FlutterEngineCommandLineFlags.FLUTTER_ASSETS_DIR, true);
   public static final Flag OLD_GEN_HEAP_SIZE =
@@ -70,8 +68,6 @@ public final class FlutterEngineManifestFlags {
       new Flag(FlutterEngineCommandLineFlags.VM_SNAPSHOT_DATA, true);
   public static final Flag ISOLATE_SNAPSHOT_DATA =
       new Flag(FlutterEngineCommandLineFlags.ISOLATE_SNAPSHOT_DATA, true);
-  public static final Flag NETWORK_POLICY =
-      new Flag(FlutterEngineCommandLineFlags.NETWORK_POLICY, true);
 
   // Manifest flags NOT allowed in release mode:
 
@@ -109,7 +105,6 @@ public final class FlutterEngineManifestFlags {
               IMPELLER_ANTIALIAS_LINES,
               VM_SNAPSHOT_DATA,
               ISOLATE_SNAPSHOT_DATA,
-              NETWORK_POLICY,
               LEAK_VM));
 
   /**

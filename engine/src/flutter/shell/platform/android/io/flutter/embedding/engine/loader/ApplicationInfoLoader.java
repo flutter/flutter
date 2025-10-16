@@ -17,9 +17,9 @@ import org.xmlpull.v1.XmlPullParserException;
 
 /** Loads application information given a Context. */
 public final class ApplicationInfoLoader {
-
+  public static final String NETWORK_POLICY_METADATA_KEY = "io.flutter.network-policy";
   public static final String PUBLIC_AUTOMATICALLY_REGISTER_PLUGINS_METADATA_KEY =
-      "io.flutter." + "automatically-register-plugins";
+      "io.flutter.automatically-register-plugins";
 
   @NonNull
   private static ApplicationInfo getApplicationInfo(@NonNull Context applicationContext) {
@@ -56,8 +56,7 @@ public final class ApplicationInfoLoader {
       return null;
     }
 
-    int networkSecurityConfigRes =
-        metadata.getInt(FlutterEngineManifestFlags.NETWORK_POLICY.metaDataKey, 0);
+    int networkSecurityConfigRes = metadata.getInt(NETWORK_POLICY_METADATA_KEY, 0);
     if (networkSecurityConfigRes <= 0) {
       return null;
     }
