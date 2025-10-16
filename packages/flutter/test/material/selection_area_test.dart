@@ -165,7 +165,7 @@ void main() {
     // [intended] Android and iOS use the flutter rendered menu on the web.
     skip:
         !kIsWeb ||
-        <TargetPlatform>{
+        !<TargetPlatform>{
           TargetPlatform.android,
           TargetPlatform.iOS,
         }.contains(defaultTargetPlatform),
