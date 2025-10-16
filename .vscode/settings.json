@@ -5,5 +5,5 @@
     "githubPullRequests.ignoredPullRequestBranches": [
         "master"
     ],
-    "files.trimTrailingWhitespace": true,
+    "files.trimTrailingWhitespace": true
 }
