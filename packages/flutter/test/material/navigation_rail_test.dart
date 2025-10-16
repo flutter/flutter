@@ -6127,6 +6127,24 @@ void main() {
       expect(updatedWidthRTL, defaultWidth + safeAreaPadding);
     });
   }); // End Material 2 group
+
+  testWidgets('NavigationRail does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: NavigationRail(
+              destinations: const <NavigationRailDestination>[
+                NavigationRailDestination(icon: Icon(Icons.abc), label: Text('X')),
+              ],
+              selectedIndex: 0,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(NavigationRail)), Size.zero);
+  });
 }
 
 TestSemantics _expectedSemantics({bool scrollable = false}) {
