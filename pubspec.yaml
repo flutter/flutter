@@ -81,7 +81,7 @@ dependencies:
   _fe_analyzer_shared: 89.0.0
   adaptive_breakpoints: 0.1.7
   analyzer: 8.2.0
-  animations: 2.0.11
+  animations: 2.1.0
   archive: 3.6.1
   args: 2.7.0
   async: 2.13.0
@@ -139,7 +139,7 @@ dependencies:
   package_config: 2.2.0
   path: 1.9.1
   path_provider: 2.1.5
-  path_provider_android: 2.2.18
+  path_provider_android: 2.2.19
   path_provider_foundation: 2.4.2
   path_provider_linux: 2.2.1
   path_provider_platform_interface: 2.1.2
@@ -175,7 +175,7 @@ dependencies:
   test_core: 0.6.12
   typed_data: 1.4.0
   url_launcher: 6.3.2
-  url_launcher_android: 6.3.23
+  url_launcher_android: 6.3.24
   url_launcher_ios: 6.3.4
   url_launcher_linux: 3.2.1
   url_launcher_macos: 3.2.3
@@ -184,7 +184,7 @@ dependencies:
   url_launcher_windows: 3.1.4
   vector_math: 2.2.0
   video_player: 2.10.0
-  video_player_android: 2.8.14
+  video_player_android: 2.8.15
   video_player_avfoundation: 2.8.4
   video_player_platform_interface: 6.4.0
   video_player_web: 2.4.0
@@ -212,4 +212,4 @@ dependencies:
   pedantic: 1.11.1
   quiver: 3.2.2
   yaml_edit: 2.2.2
-# PUBSPEC CHECKSUM: 5h4lnl
+# PUBSPEC CHECKSUM: 70bb2p
