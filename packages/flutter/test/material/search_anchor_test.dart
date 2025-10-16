@@ -4242,6 +4242,44 @@ void main() {
     variant: TargetPlatformVariant.all(),
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
   );
+
+  testWidgets('smartDashesType and smartQuotesType are properly forwarded to inner text fields', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor.bar(
+            smartDashesType: SmartDashesType.disabled,
+            smartQuotesType: SmartQuotesType.disabled,
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Check anchor's text field.
+    final TextField anchorTextField = tester.widget(find.byType(TextField));
+    expect(anchorTextField.smartDashesType, SmartDashesType.disabled);
+    expect(anchorTextField.smartQuotesType, SmartQuotesType.disabled);
+
+    // Open view and check view's text field.
+    await tester.tap(find.byType(SearchBar));
+    await tester.pumpAndSettle();
+
+    final Finder viewTextFieldFinder = find.descendant(
+      of: find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_ViewContent',
+      ),
+      matching: find.byType(TextField),
+    );
+    expect(viewTextFieldFinder, findsOneWidget);
+    final TextField viewTextField = tester.widget(viewTextFieldFinder);
+    expect(viewTextField.smartDashesType, SmartDashesType.disabled);
+    expect(viewTextField.smartQuotesType, SmartQuotesType.disabled);
+  });
 }
 
 Future<void> checkSearchBarDefaults(
