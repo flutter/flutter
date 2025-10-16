@@ -321,6 +321,8 @@ TEST_F(WindowManagerTest, CreateModelessDialogWindow) {
       .preferred_size = {.has_preferred_view_size = true,
                          .preferred_view_width = 800,
                          .preferred_view_height = 600},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Hello World",
       .parent_or_null = nullptr};
   const int64_t view_id =
       InternalFlutterWindows_WindowManager_CreateDialogWindow(
@@ -345,6 +347,8 @@ TEST_F(WindowManagerTest, CreateModalDialogWindow) {
               .preferred_view_width = 800,
               .preferred_view_height = 600,
           },
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Hello World",
       .parent_or_null = parent_window_handle};
 
   const int64_t view_id =
