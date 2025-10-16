@@ -2907,6 +2907,85 @@ void main() {
     );
     expect(tester.getSize(find.byType(BottomSheet)), Size.zero);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/177004
+  group('ModalBottomSheet semantics route label for mismatched platforms', () {
+    Future<void> testModalBottomSheetSemanticsRouteLabel({
+      required WidgetTester tester,
+      required TargetPlatform themePlatform,
+      required Matcher expected,
+    }) async {
+      const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: themePlatform),
+          home: Scaffold(
+            body: Builder(
+              builder: (BuildContext context) {
+                return OutlinedButton(
+                  onPressed: () {
+                    showModalBottomSheet<void>(
+                      context: context,
+                      showDragHandle: true,
+                      builder: (BuildContext context) {
+                        return const Text('BottomSheet');
+                      },
+                    );
+                  },
+                  child: const Text('open'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      final Finder popupFinder = find.bySemanticsLabel(localizations.dialogLabel);
+      expect(popupFinder, expected);
+    }
+
+    testWidgets(
+      'Semantics label is empty by default on Apple platforms',
+      (WidgetTester tester) async {
+        // When someone sets theme.platform to TargetPlatform.android on an Apple device,
+        // assistive technology like VoiceOver should work correctly by having
+        // an empty semantics label value by default.
+        await testModalBottomSheetSemanticsRouteLabel(
+          tester: tester,
+          themePlatform: TargetPlatform.android,
+          expected: findsNothing,
+        );
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.iOS,
+        TargetPlatform.macOS,
+      }),
+    );
+
+    testWidgets(
+      'Semantics label is non-empty by default on non-Apple platforms',
+      (WidgetTester tester) async {
+        // When someone sets theme.platform to TargetPlatform.iOS on a non-Apple device,
+        // assistive technologies (Talk Back/NVDA/JAWS...) should work correctly
+        // by having a non-empty semantics label value by default.
+        await testModalBottomSheetSemanticsRouteLabel(
+          tester: tester,
+          themePlatform: TargetPlatform.iOS,
+          expected: findsOneWidget,
+        );
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.fuchsia,
+        TargetPlatform.linux,
+        TargetPlatform.windows,
+      }),
+    );
+  });
 }
 
 class _TestPage extends StatelessWidget {
