@@ -1070,6 +1070,26 @@ class ManifestAssetBundle implements AssetBundle {
     });
 
     for (final Uri shaderUri in flutterManifest.shaders) {
+      for (final AssetsEntry assetEntry in flutterManifest.assets) {
+        final String assetPath = assetEntry.uri.path;
+        final String shaderPath = shaderUri.path;
+        if (assetPath == shaderPath) {
+          _logger.printError(
+            'Error: Shader "$shaderPath" is also defined as an asset. Shaders '
+            'should only be defined in the "shaders" section of the '
+            'pubspec.yaml, not in the "assets" section.',
+          );
+          return null;
+        }
+        if (assetPath.endsWith('/') && shaderPath.startsWith(assetPath)) {
+          _logger.printError(
+            'Error: Shader "$shaderPath" is included in the asset directory '
+            '"$assetPath". Shaders should only be defined in the "shaders" '
+            'section of the pubspec.yaml, not in the "assets" section.',
+          );
+          return null;
+        }
+      }
       _parseAssetFromFile(
         packageConfig,
         flutterManifest,
