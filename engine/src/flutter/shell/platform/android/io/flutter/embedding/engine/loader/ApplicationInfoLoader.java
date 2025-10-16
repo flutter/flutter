@@ -18,6 +18,9 @@ import org.xmlpull.v1.XmlPullParserException;
 /** Loads application information given a Context. */
 public final class ApplicationInfoLoader {
 
+  public static final String PUBLIC_AUTOMATICALLY_REGISTER_PLUGINS_METADATA_KEY =
+      "io.flutter." + "automatically-register-plugins";
+
   @NonNull
   private static ApplicationInfo getApplicationInfo(@NonNull Context applicationContext) {
     try {
@@ -143,9 +146,6 @@ public final class ApplicationInfoLoader {
         getString(appInfo.metaData, FlutterEngineManifestFlags.FLUTTER_ASSETS_DIR.metaDataKey),
         getNetworkPolicy(appInfo, applicationContext),
         appInfo.nativeLibraryDir,
-        getBoolean(
-            appInfo.metaData,
-            FlutterEngineManifestFlags.AUTOMATICALLY_REGISTER_PLUGINS.metaDataKey,
-            true));
+        getBoolean(appInfo.metaData, PUBLIC_AUTOMATICALLY_REGISTER_PLUGINS_METADATA_KEY, true));
   }
 }

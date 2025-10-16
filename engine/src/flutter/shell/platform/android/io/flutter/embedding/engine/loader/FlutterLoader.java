@@ -288,7 +288,6 @@ public class FlutterLoader {
           if (!FlutterEngineCommandLineFlags.ALL_FLAGS.contains(arg)) {
             continue;
           }
-
           shellArgs.add(arg);
         }
       }
@@ -311,13 +310,15 @@ public class FlutterLoader {
           if (flag != null) {
             // Only add flags that are allowed in the current build mode.
             if (flag.allowedInRelease || !BuildConfig.RELEASE) {
-
-              // Mark if old gen heap size is set to track whether or not to set default internally.
               if (flag == FlutterEngineManifestFlags.OLD_GEN_HEAP_SIZE) {
+                // Mark if old gen heap size is set to track whether or not to set default
+                // internally.
                 oldGenHeapSizeSet = true;
               } else if (flag == FlutterEngineManifestFlags.LEAK_VM) {
+                // Mark if leak VM is set to track whether or not to set default internally.
                 isLeakVMSet = true;
               } else if (flag == FlutterEngineManifestFlags.DISABLE_MERGED_PLATFORM_UI_THREAD) {
+                // The --disable-merged-platform-ui-thread flag has been disabled on Android.
                 throw new IllegalArgumentException(
                     FlutterEngineManifestFlags.DISABLE_MERGED_PLATFORM_UI_THREAD.metaDataKey
                         + " is no longer allowed.");
@@ -329,8 +330,8 @@ public class FlutterLoader {
                     getSafeAotSharedLibraryName(applicationContext, aotSharedLibraryNameArg);
                 if (safeAotSharedLibraryName != null) {
                   shellArgs.add(
-                      FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME.toCommandLineFlag(
-                          safeAotSharedLibraryName));
+                      FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME.commandLineArgument
+                          + safeAotSharedLibraryName);
                 } else {
                   // If the library path is not safe, we will skip adding this argument.
                   Log.w(
@@ -342,11 +343,24 @@ public class FlutterLoader {
                 continue;
               }
 
-              // Add flag automatically if it does not require a security check.
-              String arg = flag.toCommandLineFlag(applicationMetaData.get(metadataKey).toString());
+              // Add flag to shell args.
+              String arg = flag.commandLineArgument;
+              if (flag.hasValue()) {
+                String value = applicationMetaData.get(metadataKey).toString();
+                if (value == null) {
+                  Log.w(
+                      TAG,
+                      "Flag with metadata key "
+                          + metadataKey
+                          + " requires a value, but no value was found. Please ensure that the value is a string.");
+                  continue;
+                }
+                arg += value;
+              }
               shellArgs.add(arg);
             }
           } else {
+            // Manifest flag was not recognized.
             Log.w(
                 TAG,
                 "Flag with metadata key "
@@ -367,26 +381,26 @@ public class FlutterLoader {
         kernelPath = snapshotAssetPath + File.separator + DEFAULT_KERNEL_BLOB;
         shellArgs.add("--" + SNAPSHOT_ASSET_PATH_KEY + "=" + snapshotAssetPath);
         shellArgs.add(
-            FlutterEngineManifestFlags.VM_SNAPSHOT_DATA.toCommandLineFlag(
-                flutterApplicationInfo.vmSnapshotData));
+            FlutterEngineManifestFlags.VM_SNAPSHOT_DATA.commandLineArgument
+                + flutterApplicationInfo.vmSnapshotData);
         shellArgs.add(
-            FlutterEngineManifestFlags.ISOLATE_SNAPSHOT_DATA.toCommandLineFlag(
-                flutterApplicationInfo.isolateSnapshotData));
+            FlutterEngineManifestFlags.ISOLATE_SNAPSHOT_DATA.commandLineArgument
+                + flutterApplicationInfo.isolateSnapshotData);
       } else {
         // Add default AOT shared library name arg. Note that this can overriden by a value
         // set in the manifest.
         shellArgs.add(
-            FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME.toCommandLineFlag(
-                flutterApplicationInfo.aotSharedLibraryName));
+            FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME.commandLineArgument
+                + flutterApplicationInfo.aotSharedLibraryName);
 
         // Some devices cannot load the an AOT shared library based on the library name
         // with no directory path. So, we provide a fully qualified path to the default library
         // as a workaround for devices where that fails.
         shellArgs.add(
-            FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME.toCommandLineFlag(
-                flutterApplicationInfo.nativeLibraryDir
-                    + File.separator
-                    + flutterApplicationInfo.aotSharedLibraryName));
+            FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME.commandLineArgument
+                + flutterApplicationInfo.nativeLibraryDir
+                + File.separator
+                + flutterApplicationInfo.aotSharedLibraryName);
 
         // In profile mode, provide a separate library containing a snapshot for
         // launching the Dart VM service isolate.
@@ -412,8 +426,8 @@ public class FlutterLoader {
         activityManager.getMemoryInfo(memInfo);
         int oldGenHeapSizeMegaBytes = (int) (memInfo.totalMem / 1e6 / 2);
         shellArgs.add(
-            FlutterEngineManifestFlags.OLD_GEN_HEAP_SIZE.toCommandLineFlag(
-                String.valueOf(oldGenHeapSizeMegaBytes)));
+            FlutterEngineManifestFlags.OLD_GEN_HEAP_SIZE.commandLineArgument
+                + String.valueOf(oldGenHeapSizeMegaBytes));
       }
 
       DisplayMetrics displayMetrics = applicationContext.getResources().getDisplayMetrics();
@@ -427,7 +441,7 @@ public class FlutterLoader {
       shellArgs.add("--prefetched-default-font-manager");
 
       if (!isLeakVMSet) {
-        shellArgs.add(FlutterEngineManifestFlags.LEAK_VM.toCommandLineFlag("true"));
+        shellArgs.add(FlutterEngineManifestFlags.LEAK_VM.commandLineArgument + "true");
       }
 
       long initTimeMillis = SystemClock.uptimeMillis() - initStartTimestampMillis;
