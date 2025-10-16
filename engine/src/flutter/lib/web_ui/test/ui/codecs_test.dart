@@ -21,16 +21,7 @@ abstract class TestCodec {
   TestCodec({required this.description});
   final String description;
 
-  ui.Codec? _cachedCodec;
-
-  Future<ui.Codec> getCodec() async => _cachedCodec ??= await createCodec();
-
   Future<ui.Codec> createCodec();
-
-  void dispose() {
-    _cachedCodec?.dispose();
-    _cachedCodec = null;
-  }
 }
 
 abstract class TestFileCodec extends TestCodec {
@@ -181,8 +172,7 @@ Future<void> testMain() async {
             targetWidth: testTargetWidth,
             targetHeight: testTargetHeight,
           ),
-          'renderer.instantiateImageCodec '
-              '($testTargetWidth x $testTargetHeight)',
+          'renderer.instantiateImageCodec ($testTargetWidth x $testTargetHeight)',
         ),
       );
       testCodecs.add(
@@ -206,10 +196,12 @@ Future<void> testMain() async {
 
     group('Codecs', () {
       final List<TestCodec> testCodecs = createTestCodecs();
+
       for (final TestCodec testCodec in testCodecs) {
         test('${testCodec.description} can create an image', () async {
+          ui.Codec? codec;
           try {
-            final ui.Codec codec = await testCodec.getCodec();
+            codec = await testCodec.createCodec();
             final ui.FrameInfo frameInfo = await codec.getNextFrame();
             final ui.Image image = frameInfo.image;
             expect(image, isNotNull);
@@ -218,20 +210,25 @@ Future<void> testMain() async {
             expect(image.colorSpace, isNotNull);
           } catch (e) {
             throw TestFailure('Failed to get image for ${testCodec.description}: $e');
+          } finally {
+            codec?.dispose();
           }
         });
 
         test('${testCodec.description} can be decoded with toByteData', () async {
+          ui.Codec? codec;
           ui.Image image;
           try {
-            final ui.Codec codec = await testCodec.getCodec();
+            codec = await testCodec.createCodec();
             final ui.FrameInfo frameInfo = await codec.getNextFrame();
             image = frameInfo.image;
           } catch (e) {
+            codec?.dispose();
             throw TestFailure('Failed to get image for ${testCodec.description}: $e');
           }
 
           final ByteData? byteData = await image.toByteData();
+          codec.dispose();
           expect(
             byteData,
             isNotNull,
@@ -250,9 +247,6 @@ Future<void> testMain() async {
                 'contain nonzero value',
           );
         });
-      }
-      for (final testCodec in testCodecs) {
-        testCodec.dispose();
       }
     });
   });
