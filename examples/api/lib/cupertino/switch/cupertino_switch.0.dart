@@ -39,10 +39,10 @@ class _CupertinoSwitchExampleState extends State<CupertinoSwitchExample> {
           // This bool value toggles the switch.
           value: switchValue,
           activeTrackColor: CupertinoColors.activeBlue,
-          onChanged: (bool? value) {
+          onChanged: (bool value) {
             // This is called when the user toggles the switch.
             setState(() {
-              switchValue = value ?? false;
+              switchValue = value;
             });
           },
         ),
