@@ -1176,7 +1176,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
         final InputDecoration effectiveDecoration = decoration.applyDefaults(
           effectiveInputDecorationTheme,
         );
-        final InputDecoration keyedDecoration = effectiveDecoration.prefixIcon == null
+        final InputDecoration textFieldDecoration = effectiveDecoration.prefixIcon == null
             ? effectiveDecoration
             : effectiveDecoration.copyWith(
                 prefixIcon: SizedBox(
@@ -1243,7 +1243,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
                 });
               },
               inputFormatters: widget.inputFormatters,
-              decoration: keyedDecoration,
+              decoration: textFieldDecoration,
               restorationId: widget.restorationId,
             ),
           ),
