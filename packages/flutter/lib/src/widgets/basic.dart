@@ -8437,7 +8437,7 @@ class ColoredBox extends SingleChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Color>('color', color));
-    properties.add(DiagnosticsProperty<bool>('isAntiAlias', isAntiAlias));
+    properties.add(DiagnosticsProperty<bool>('isAntiAlias', isAntiAlias, defaultValue: true));
   }
 }
 
