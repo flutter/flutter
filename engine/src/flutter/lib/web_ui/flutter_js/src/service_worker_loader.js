@@ -69,14 +69,15 @@ export class FlutterServiceWorkerLoader {
       return Promise.resolve();
     }
 
-    const registerAndActivate = () => {
+    const printDeprecationWarning = () => {
       console.warn(
         'Loading the service worker using Flutter bootstrap is deprecated and will stop working in ' +
-        'a future release. If a service worker is still needed, it can be loaded directly via the ' +
-        'service worker `register()` API.\n' +
-        'For more details, see: https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerContainer/register'
+        'a future release.\n' +
+        'For more details, see: https://github.com/flutter/flutter/issues/156910'
       );
+    };
 
+    const registerAndActivate = () => {
       const {
         serviceWorkerVersion,
         serviceWorkerUrl = resolveUrlWithSegments(`flutter_service_worker.js?v=${serviceWorkerVersion}`),
@@ -100,7 +101,8 @@ export class FlutterServiceWorkerLoader {
     };
 
     if (settings.serviceWorkerUrl != null) {
-      // If a custom URL is provided, register unconditionally.
+      // If a custom URL is provided, print a deprecation warning and register unconditionally.
+      printDeprecationWarning();
       return registerAndActivate();
     } else {
       // Otherwise, check for an existing registration first.

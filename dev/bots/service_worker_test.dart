@@ -147,7 +147,7 @@ Future<AppServer> _startServer({required bool headless}) async {
 }
 
 Future<void> _waitForAppToRequest(AppServer server, String file) async {
-  print('Waiting for app to request "$file" (requested so far: $_requestedPaths)');
+  print('Waiting for app to request "$file"');
   await Future.any(<Future<Object?>>[
     () async {
       int tries = 1;
@@ -157,7 +157,7 @@ Future<void> _waitForAppToRequest(AppServer server, String file) async {
         }
         await Future<void>.delayed(const Duration(milliseconds: 100));
       }
-      print('++ App has requested "$file" (requested so far: $_requestedPaths)');
+      print('++ App has requested "$file"');
     }(),
     server.onChromeError.then((String error) {
       throw Exception('Chrome error: $error');

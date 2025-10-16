@@ -16,7 +16,6 @@ self.addEventListener('activate', (event) => {
       try {
         const clients = await self.clients.matchAll({
           type: 'window',
-          includeUncontrolled: true,
         });
         // Reload clients to ensure they are not using the old service worker.
         clients.forEach((client) => {
