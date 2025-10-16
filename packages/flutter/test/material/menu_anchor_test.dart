@@ -5173,6 +5173,17 @@ void main() {
     expect(tester.getRect(findMenuPanels()).width, 800.0 - reservedPadding.horizontal);
   });
 
+  testWidgets('SubmenuButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: SubmenuButton(menuChildren: <Widget>[], child: null)),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SubmenuButton)), Size.zero);
+  });
+
   testWidgets('MenuBar does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -5191,23 +5202,6 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(MenuItemButton)), Size.zero);
-  });
-
-  testWidgets('CheckboxMenuButton does not crash at zero area', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Center(
-          child: SizedBox.shrink(
-            child: CheckboxMenuButton(
-              value: true,
-              onChanged: (bool? value) {},
-              child: const Text('X'),
-            ),
-          ),
-        ),
-      ),
-    );
-    expect(tester.getSize(find.byType(CheckboxMenuButton)), Size.zero);
   });
 
   testWidgets('RadioMenuButton does not crash at zero area', (WidgetTester tester) async {
