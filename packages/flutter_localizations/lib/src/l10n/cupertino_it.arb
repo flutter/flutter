@@ -30,10 +30,10 @@
   "clearButtonLabel": "Cancella",
   "cancelButtonLabel": "Annulla",
   "backButtonLabel": "Indietro",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "tocca due volte per comprimere",
+  "expansionTileCollapsedHint": "Tocca due volte per espandere",
+  "expansionTileExpandedTapHint": "comprimere",
+  "expansionTileCollapsedTapHint": "espandere e visualizzare altri dettagli",
+  "expandedHint": "Compresso",
+  "collapsedHint": "Espanso"
 }

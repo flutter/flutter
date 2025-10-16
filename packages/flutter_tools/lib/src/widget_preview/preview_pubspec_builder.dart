@@ -45,6 +45,7 @@ class PreviewPubspecBuilder {
   ///   - stack_trace, which is used to generate terse stack traces for displaying errors thrown
   ///     by widgets being previewed.
   ///   - url_launcher, which is used to open a browser to the preview documentation.
+  ///   - web, which is used to access query parameters provided by the IDE.
   static const _kWidgetPreviewScaffoldDeps = <String>[
     'dtd',
     'flutter_lints',
@@ -53,6 +54,7 @@ class PreviewPubspecBuilder {
     'path',
     'stack_trace',
     'url_launcher',
+    'web',
   ];
 
   /// Maps asset URIs to relative paths for the widget preview project to
@@ -112,13 +114,15 @@ class PreviewPubspecBuilder {
         rootProject,
         ...rootProject.workspaceProjects,
       ])
-        // Use `json.encode` to handle escapes correctly.
-        project.manifest.appName: json.encode(<String, Object?>{
-          // `pub add` interprets relative paths relative to the current directory.
-          'path': widgetPreviewScaffoldProject.directory.fileSystem.path.relative(
-            project.directory.path,
-          ),
-        }),
+        // Don't try and depend on unnamed projects.
+        if (project.manifest.appName.isNotEmpty)
+          // Use `json.encode` to handle escapes correctly.
+          project.manifest.appName: json.encode(<String, Object?>{
+            // `pub add` interprets relative paths relative to the current directory.
+            'path': widgetPreviewScaffoldProject.directory.fileSystem.path.relative(
+              project.directory.path,
+            ),
+          }),
     };
 
     final PubOutputMode outputMode = verbose ? PubOutputMode.all : PubOutputMode.failuresOnly;
@@ -130,8 +134,13 @@ class PreviewPubspecBuilder {
         widgetPreviewScaffoldProject.directory.path,
         // Ensure the path using POSIX separators, otherwise the "path_not_posix" check will fail.
         for (final MapEntry<String, String>(:String key, :String value)
-            in workspacePackages.entries)
+            in workspacePackages.entries) ...[
           '$key:$value',
+          // Add dependency overrides to handle "hosted" dependencies on other projects within the
+          // workspace. These dependencies take the form of "my_workspace_project: " in the
+          // pubspec's dependency list. See https://github.com/flutter/flutter/issues/176018.
+          'override:$key:$value',
+        ],
       ],
       context: PubContext.pubAdd,
       command: pubAdd,
