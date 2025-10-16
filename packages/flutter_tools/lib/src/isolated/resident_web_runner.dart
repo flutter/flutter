@@ -551,8 +551,8 @@ class ResidentWebRunner extends ResidentRunner {
             // Re-throw other RPC errors
             rethrow;
           }
-          reloadDuration = _systemClock.now().difference(reloadStart);
 
+          reloadDuration = _systemClock.now().difference(reloadStart);
           final contents = ReloadReportContents.fromReloadReport(report);
           final bool success = contents.success ?? false;
           if (!success) {
