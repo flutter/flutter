@@ -969,6 +969,161 @@ void main() {
     },
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/177005
+  group('Drawer semantics label for mismatched platforms', () {
+    Future<void> testDrawerSemanticsLabel({
+      required WidgetTester tester,
+      required TargetPlatform themePlatform,
+      required Matcher expected,
+    }) async {
+      const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: themePlatform),
+          home: Scaffold(
+            key: scaffoldKey,
+            drawer: const Drawer(child: Text('Drawer')),
+            body: Container(),
+          ),
+        ),
+      );
+
+      expect(find.text('Drawer'), findsNothing);
+
+      scaffoldKey.currentState!.openDrawer();
+      await tester.pumpAndSettle();
+      expect(find.text('Drawer'), findsOneWidget);
+
+      final Finder popupFinder = find.bySemanticsLabel(localizations.drawerLabel);
+      expect(popupFinder, expected);
+    }
+
+    testWidgets(
+      'Semantics label is null by default on Apple platforms',
+      (WidgetTester tester) async {
+        // When someone sets theme.platform to TargetPlatform.android on an Apple device,
+        // assistive technology like VoiceOver should work correctly by having
+        // a null semantics label value by default.
+        await testDrawerSemanticsLabel(
+          tester: tester,
+          themePlatform: TargetPlatform.android,
+          expected: findsNothing,
+        );
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.iOS,
+        TargetPlatform.macOS,
+      }),
+    );
+
+    testWidgets(
+      'Semantics label is non-null by default on non-Apple platforms',
+      (WidgetTester tester) async {
+        // When someone sets theme.platform to TargetPlatform.iOS on a non-Apple device,
+        // assistive technologies (Talk Back/NVDA/JAWS...) should work correctly
+        // by having a non-null semantics label value by default.
+        await testDrawerSemanticsLabel(
+          tester: tester,
+          themePlatform: TargetPlatform.iOS,
+          expected: findsOneWidget,
+        );
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.fuchsia,
+        TargetPlatform.linux,
+        TargetPlatform.windows,
+      }),
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/177005
+  group('Drawer barrier semantics for mismatched platforms', () {
+    Future<void> testDrawerSemanticsBarrier({
+      required WidgetTester tester,
+      required TargetPlatform themePlatform,
+      required Matcher expected,
+    }) async {
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      final SemanticsTester semantics = SemanticsTester(tester);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: themePlatform),
+          home: Scaffold(
+            key: scaffoldKey,
+            drawer: const Drawer(child: Text('Drawer')),
+            body: Container(),
+          ),
+        ),
+      );
+
+      expect(find.text('Drawer'), findsNothing);
+
+      scaffoldKey.currentState!.openDrawer();
+      await tester.pumpAndSettle();
+      expect(find.text('Drawer'), findsOneWidget);
+
+      expect(semantics, expected);
+
+      semantics.dispose();
+    }
+
+    testWidgets(
+      'Barrier is excluded from semantics on Android platform',
+      (WidgetTester tester) async {
+        // When theme.platform is set to iOS but the real device is Android,
+        // the barrier should be excluded from semantics because Android
+        // user may use the hardware back button to dismiss the modal.
+        const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+
+        // The barrier should NOT have the dismiss label in semantics
+        // because it's excluded on Android.
+        await testDrawerSemanticsBarrier(
+          tester: tester,
+          themePlatform: TargetPlatform.iOS,
+          expected: isNot(
+            includesNodeWith(
+              label: localizations.modalBarrierDismissLabel,
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+            ),
+          ),
+        );
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+
+    testWidgets(
+      'Barrier is included in semantics on non-Android platforms',
+      (WidgetTester tester) async {
+        // When theme.platform is set to Android but the real device is non-Android,
+        // the barrier should be included in semantics because these platforms
+        // don't have a hardware back button and need the semantic information.
+        const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+
+        // The barrier SHOULD have the dismiss label in semantics
+        // because it's not excluded on non-Android platforms.
+        await testDrawerSemanticsBarrier(
+          tester: tester,
+          themePlatform: TargetPlatform.android,
+          expected: includesNodeWith(
+            label: localizations.modalBarrierDismissLabel,
+            actions: <SemanticsAction>[SemanticsAction.tap],
+          ),
+        );
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.iOS,
+        TargetPlatform.macOS,
+        TargetPlatform.fuchsia,
+        TargetPlatform.linux,
+        TargetPlatform.windows,
+      }),
+    );
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests
