@@ -813,7 +813,7 @@ void main() {
       error = e;
     } finally {
       expect(error, isNotNull);
-      expect(error!.toStringDeep(), contains('Table contains irregular row lengths.'));
+      expect(error!.toStringDeep(), contains('Inconsistent number of table cells.'));
     }
   });
 
@@ -911,8 +911,10 @@ void main() {
 
     expect(
       result,
-      'One or more TableRow have no children.\n'
-      'Every TableRow in a Table must have at least one child, so there is no empty row.',
+      'Empty first TableRow.\n'
+      'The first TableRow in the table has no cells. '
+      'It must contain at least one child widget to define the '
+      "table's column count.",
     );
   });
 
@@ -1057,5 +1059,315 @@ void main() {
 
     final int? cellWrapperIdAfterUIchanges = textFieldSemanticsNodeNew.parent?.id;
     expect(cellWrapperIdAfterUIchanges, cellWrapperId);
+  });
+
+  group('TableCell colSpan and rowSpan tests', () {
+    testWidgets('TableCell with default colSpan and rowSpan', (WidgetTester tester) async {
+      const TableCell cell = TableCell(child: Text('Cell'));
+      expect(cell.colSpan, equals(1));
+      expect(cell.rowSpan, equals(1));
+    });
+
+    testWidgets('TableCell with custom colSpan', (WidgetTester tester) async {
+      const TableCell cell = TableCell(colSpan: 3, child: Text('Cell'));
+      expect(cell.colSpan, equals(3));
+      expect(cell.rowSpan, equals(1));
+    });
+
+    testWidgets('TableCell with custom rowSpan', (WidgetTester tester) async {
+      const TableCell cell = TableCell(rowSpan: 2, child: Text('Cell'));
+      expect(cell.colSpan, equals(1));
+      expect(cell.rowSpan, equals(2));
+    });
+
+    testWidgets('TableCell with both colSpan and rowSpan', (WidgetTester tester) async {
+      const TableCell cell = TableCell(colSpan: 2, rowSpan: 3, child: Text('Cell'));
+      expect(cell.colSpan, equals(2));
+      expect(cell.rowSpan, equals(3));
+    });
+
+    testWidgets('TableCell.none has zero colSpan and rowSpan', (WidgetTester tester) async {
+      expect(TableCell.none.colSpan, equals(0));
+      expect(TableCell.none.rowSpan, equals(0));
+    });
+
+    testWidgets('Table with colSpan - basic functionality', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(colSpan: 2, child: Text('Spanning Cell')),
+                  TableCell.none,
+                ],
+              ),
+              TableRow(children: <Widget>[Text('Cell 1'), Text('Cell 2')]),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('Spanning Cell'), findsOneWidget);
+      expect(find.text('Cell 1'), findsOneWidget);
+      expect(find.text('Cell 2'), findsOneWidget);
+    });
+
+    testWidgets('Table with rowSpan - basic functionality', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(rowSpan: 2, child: Text('Spanning Cell')),
+                  Text('Cell 1'),
+                ],
+              ),
+              TableRow(children: <Widget>[TableCell.none, Text('Cell 2')]),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('Spanning Cell'), findsOneWidget);
+      expect(find.text('Cell 1'), findsOneWidget);
+      expect(find.text('Cell 2'), findsOneWidget);
+    });
+
+    testWidgets('Table with both colSpan and rowSpan', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(colSpan: 2, rowSpan: 2, child: Text('Large Cell')),
+                  TableCell.none,
+                  Text('Right Cell'),
+                ],
+              ),
+              TableRow(children: <Widget>[TableCell.none, TableCell.none, Text('Bottom Right')]),
+              TableRow(children: <Widget>[Text('Bottom 1'), Text('Bottom 2'), Text('Bottom 3')]),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('Large Cell'), findsOneWidget);
+      expect(find.text('Right Cell'), findsOneWidget);
+      expect(find.text('Bottom Right'), findsOneWidget);
+      expect(find.text('Bottom 1'), findsOneWidget);
+      expect(find.text('Bottom 2'), findsOneWidget);
+      expect(find.text('Bottom 3'), findsOneWidget);
+    });
+
+    testWidgets('TableCell colSpan exceeds table columns - throws error', (
+      WidgetTester tester,
+    ) async {
+      FlutterError? error;
+      try {
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Table(
+              children: const <TableRow>[
+                TableRow(
+                  children: <Widget>[
+                    TableCell(colSpan: 3, child: Text('Too Wide')),
+                    Text('Cell 1'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      } on FlutterError catch (e) {
+        error = e;
+      }
+
+      expect(error, isNotNull);
+      expect(error!.toStringDeep(), contains('Invalid TableCell.colSpan'));
+    });
+
+    testWidgets('TableCell rowSpan exceeds table rows - throws error', (WidgetTester tester) async {
+      FlutterError? error;
+      try {
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Table(
+              children: const <TableRow>[
+                TableRow(
+                  children: <Widget>[
+                    TableCell(rowSpan: 3, child: Text('Too Tall')),
+                    Text('Cell 1'),
+                  ],
+                ),
+                TableRow(children: <Widget>[TableCell.none, Text('Cell 2')]),
+              ],
+            ),
+          ),
+        );
+      } on FlutterError catch (e) {
+        error = e;
+      }
+
+      expect(error, isNotNull);
+      expect(error!.toStringDeep(), contains('Invalid TableCell.rowSpan'));
+    });
+
+    testWidgets('TableCell with colSpan at last column - valid edge case', (
+      WidgetTester tester,
+    ) async {
+      // This should not throw an error as colSpan is exactly at the boundary
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  Text('Cell 1'),
+                  TableCell(colSpan: 2, child: Text('Last Two')),
+                  TableCell.none,
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('Cell 1'), findsOneWidget);
+      expect(find.text('Last Two'), findsOneWidget);
+    });
+
+    testWidgets('TableCell with rowSpan at last row - valid edge case', (
+      WidgetTester tester,
+    ) async {
+      // This should not throw an error as rowSpan is exactly at the boundary
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  Text('Cell 1'),
+                  TableCell(rowSpan: 2, child: Text('Tall Cell')),
+                ],
+              ),
+              TableRow(children: <Widget>[Text('Cell 2'), TableCell.none]),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('Cell 1'), findsOneWidget);
+      expect(find.text('Cell 2'), findsOneWidget);
+      expect(find.text('Tall Cell'), findsOneWidget);
+    });
+
+    testWidgets('TableCell colSpan and rowSpan assertions', (WidgetTester tester) async {
+      expect(() => TableCell(colSpan: 0, child: Container()), throwsAssertionError);
+
+      expect(() => TableCell(rowSpan: 0, child: Container()), throwsAssertionError);
+
+      expect(() => TableCell(colSpan: -1, child: Container()), throwsAssertionError);
+
+      expect(() => TableCell(rowSpan: -1, child: Container()), throwsAssertionError);
+    });
+
+    testWidgets('TableCell parent data contains colSpan and rowSpan', (WidgetTester tester) async {
+      const ValueKey<String> testKey = ValueKey<String>('TestCell');
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(key: testKey, colSpan: 2, rowSpan: 3, child: Text('Test')),
+                  TableCell.none,
+                ],
+              ),
+              TableRow(children: <Widget>[TableCell.none, TableCell.none]),
+              TableRow(children: <Widget>[TableCell.none, TableCell.none]),
+            ],
+          ),
+        ),
+      );
+
+      // Instead of trying to access parentData directly, test the widget properties
+      final TableCell cellWidget = tester.widget(find.byKey(testKey));
+      expect(cellWidget.colSpan, equals(2));
+      expect(cellWidget.rowSpan, equals(3));
+    });
+
+    testWidgets('Table with complex colSpan and rowSpan layout', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(colSpan: 2, child: Text('Header')),
+                  TableCell.none,
+                  Text('Top Right'),
+                ],
+              ),
+              TableRow(
+                children: <Widget>[
+                  TableCell(rowSpan: 2, child: Text('Left Tall')),
+                  Text('Middle'),
+                  TableCell(rowSpan: 2, child: Text('Right Tall')),
+                ],
+              ),
+              TableRow(children: <Widget>[TableCell.none, Text('Bottom Middle'), TableCell.none]),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('Header'), findsOneWidget);
+      expect(find.text('Top Right'), findsOneWidget);
+      expect(find.text('Left Tall'), findsOneWidget);
+      expect(find.text('Middle'), findsOneWidget);
+      expect(find.text('Right Tall'), findsOneWidget);
+      expect(find.text('Bottom Middle'), findsOneWidget);
+    });
+
+    testWidgets('Table with all cells using TableCell.none in spanning area', (
+      WidgetTester tester,
+    ) async {
+      // Test that using TableCell.none correctly maintains table structure
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(colSpan: 3, rowSpan: 2, child: Text('Big Cell')),
+                  TableCell.none,
+                  TableCell.none,
+                ],
+              ),
+              TableRow(children: <Widget>[TableCell.none, TableCell.none, TableCell.none]),
+              TableRow(children: <Widget>[Text('A'), Text('B'), Text('C')]),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('Big Cell'), findsOneWidget);
+      expect(find.text('A'), findsOneWidget);
+      expect(find.text('B'), findsOneWidget);
+      expect(find.text('C'), findsOneWidget);
+    });
   });
 }

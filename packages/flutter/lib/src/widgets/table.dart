@@ -145,19 +145,85 @@ class Table extends RenderObjectWidget {
        }()),
        assert(() {
          if (children.isNotEmpty) {
-           final int cellCount = children.first.children.length;
-           if (children.any((TableRow row) => row.children.length != cellCount)) {
-             throw FlutterError(
-               'Table contains irregular row lengths.\n'
-               'Every TableRow in a Table must have the same number of children, so that every cell is filled. '
-               'Otherwise, the table will contain holes.',
-             );
+           final int expectedColumnCount = children.first.children.length;
+           final int expectedRowCount = children.length;
+
+           // Check if the first row has cells before using it as a reference
+           if (expectedColumnCount == 0) {
+             throw FlutterError.fromParts(<DiagnosticsNode>[
+               ErrorSummary('Empty first TableRow.'),
+               ErrorDescription(
+                 'The first TableRow in the table has no cells. '
+                 'It must contain at least one child widget to define the '
+                 "table's column count.",
+               ),
+             ]);
            }
-           if (children.any((TableRow row) => row.children.isEmpty)) {
-             throw FlutterError(
-               'One or more TableRow have no children.\n'
-               'Every TableRow in a Table must have at least one child, so there is no empty row. ',
-             );
+
+           for (int y = 0; y < children.length; y++) {
+             final TableRow row = children[y];
+             final List<Widget> cellList = row.children;
+             final int cellCount = cellList.length;
+
+             // Check if rowSpan or colSpan exceeds the table bounds
+             for (int x = 0; x < cellCount; x++) {
+               if (cellList[x] is TableCell) {
+                 final TableCell cell = cellList[x] as TableCell;
+                 // Check if colSpan exceeds available columns
+                 if (x + cell.colSpan > expectedColumnCount) {
+                   throw FlutterError.fromParts(<DiagnosticsNode>[
+                     ErrorSummary('Invalid TableCell.colSpan.'),
+                     ErrorDescription(
+                       'In row $y, the cell at column $x has a colSpan of ${cell.colSpan}, '
+                       'which extends beyond the total number of columns ($expectedColumnCount).',
+                     ),
+                     ErrorHint(
+                       'Ensure that colSpan does not exceed the remaining columns in the row.\n'
+                       'For example, if a table has $expectedColumnCount columns, '
+                       'and you are at column index $x, the maximum valid colSpan is '
+                       '${expectedColumnCount - x}.',
+                     ),
+                   ]);
+                 }
+
+                 // Check if rowSpan exceeds available rows
+                 if (y + cell.rowSpan > expectedRowCount) {
+                   throw FlutterError.fromParts(<DiagnosticsNode>[
+                     ErrorSummary('Invalid TableCell.rowSpan.'),
+                     ErrorDescription(
+                       'In row $y, the cell at column $x has a rowSpan of ${cell.rowSpan}, '
+                       'which extends beyond the total number of rows ($expectedRowCount).',
+                     ),
+                     ErrorHint(
+                       'Ensure that rowSpan does not exceed the remaining rows in the table.\n'
+                       'For example, if a table has $expectedRowCount rows, '
+                       'and you are at row index $y, the maximum valid rowSpan is '
+                       '${expectedRowCount - y}.',
+                     ),
+                   ]);
+                 }
+               }
+             }
+
+             // Check if this row has the correct number of cells
+             if (cellCount != expectedColumnCount) {
+               throw FlutterError.fromParts(<DiagnosticsNode>[
+                 ErrorSummary('Inconsistent number of table cells.'),
+                 ErrorDescription(
+                   'Row $y contains $cellCount cells, but each row in this table '
+                   'must contain exactly $expectedColumnCount, like the first row.',
+                 ),
+                 ErrorHint(
+                   'When using colSpan or rowSpan, every TableRow must still '
+                   'define the same total number of cells (including placeholder '
+                   'cells such as TableCell.none) to ensure a consistent table grid.',
+                 ),
+                 ErrorDescription(
+                   'For example, if one cell spans 3 columns, you must still include '
+                   'two TableCell.none placeholders to fill the remaining column slots in that row.',
+                 ),
+               ]);
+             }
            }
          }
          return true;
@@ -438,10 +504,54 @@ class _TableElement extends RenderObjectElement {
 /// as the [child].
 class TableCell extends StatelessWidget {
   /// Creates a widget that controls how a child of a [Table] is aligned.
-  const TableCell({super.key, this.verticalAlignment, required this.child});
+  const TableCell({
+    super.key,
+    this.colSpan = 1,
+    this.rowSpan = 1,
+    this.verticalAlignment,
+    required this.child,
+  }) : assert(colSpan >= 1, 'The colSpan of a TableCell must be at least 1.'),
+       assert(rowSpan >= 1, 'The rowSpan of a TableCell must be at least 1.');
+
+  /// Internal constructor used for [TableCell.none].
+  const TableCell._none()
+    : colSpan = 0,
+      rowSpan = 0,
+      verticalAlignment = null,
+      child = const SizedBox.shrink();
+
+  /// {@template flutter.widgets.table.none}
+  /// A table cell that acts as a structural placeholder to preserve the
+  /// table’s grid alignment.
+  ///
+  /// This cell must be used in positions covered by another cell’s [colSpan]
+  /// or [rowSpan] to make the table’s structure explicit and maintain a
+  /// consistent layout across all rows and columns.
+  /// {@endtemplate}
+  static const TableCell none = TableCell._none();
 
   /// How this cell is aligned vertically.
   final TableCellVerticalAlignment? verticalAlignment;
+
+  /// The number of columns this cell should span.
+  ///
+  /// A value greater than 1 means that this cell extends horizontally
+  /// across multiple columns.
+  ///
+  /// **Note:** When a cell spans multiple columns, you must insert
+  /// [TableCell.none] placeholders in the same row to fill the
+  /// remaining covered columns and maintain the table’s grid structure.
+  final int colSpan;
+
+  /// The number of rows this cell should span.
+  ///
+  /// A value greater than 1 means that this cell extends vertically
+  /// across multiple rows.
+  ///
+  /// **Note:** When a cell spans multiple rows, you must insert
+  /// [TableCell.none] placeholders in the affected rows below to
+  /// preserve consistent table alignment.
+  final int rowSpan;
 
   /// The child of this cell.
   final Widget child;
@@ -449,6 +559,8 @@ class TableCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _TableCell(
+      colSpan: colSpan,
+      rowSpan: rowSpan,
       verticalAlignment: verticalAlignment,
       child: Semantics(role: SemanticsRole.cell, child: child),
     );
@@ -456,15 +568,36 @@ class TableCell extends StatelessWidget {
 }
 
 class _TableCell extends ParentDataWidget<TableCellParentData> {
-  const _TableCell({this.verticalAlignment, required super.child});
-
+  const _TableCell({
+    this.verticalAlignment,
+    required this.colSpan,
+    required this.rowSpan,
+    required super.child,
+  });
   final TableCellVerticalAlignment? verticalAlignment;
+
+  final int colSpan;
+  final int rowSpan;
 
   @override
   void applyParentData(RenderObject renderObject) {
     final TableCellParentData parentData = renderObject.parentData! as TableCellParentData;
+    bool needsLayout = false;
+
     if (parentData.verticalAlignment != verticalAlignment) {
       parentData.verticalAlignment = verticalAlignment;
+      needsLayout = true;
+    }
+    if (parentData.colSpan != colSpan) {
+      parentData.colSpan = colSpan;
+      needsLayout = true;
+    }
+    if (parentData.rowSpan != rowSpan) {
+      parentData.rowSpan = rowSpan;
+      needsLayout = true;
+    }
+
+    if (needsLayout) {
       renderObject.parent?.markNeedsLayout();
     }
   }
@@ -475,9 +608,10 @@ class _TableCell extends ParentDataWidget<TableCellParentData> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(
-      EnumProperty<TableCellVerticalAlignment>('verticalAlignment', verticalAlignment),
-    );
+    properties
+      ..add(EnumProperty<TableCellVerticalAlignment>('verticalAlignment', verticalAlignment))
+      ..add(IntProperty('colSpan', colSpan))
+      ..add(IntProperty('rowSpan', rowSpan));
   }
 }
 
