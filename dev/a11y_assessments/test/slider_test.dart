@@ -20,7 +20,7 @@ void main() {
     expect(state.currentSliderValue, 60);
   });
 
-  testWidgets('slider semantics text label exists', (WidgetTester tester) async {
+  testWidgets('slider text label exists', (WidgetTester tester) async {
     await pumpsUseCase(tester, SliderUseCase());
     final Finder labelWidget = find.text('My Slider');
     expect(labelWidget, findsOneWidget);
