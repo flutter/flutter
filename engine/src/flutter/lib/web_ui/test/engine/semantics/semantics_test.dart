@@ -1582,6 +1582,7 @@ void _testContainer() {
 
     semantics().semanticsEnabled = false;
   });
+
   // Regression test for: https://github.com/flutter/flutter/issues/175180
   test('A subtree of descendant nodes are reparented together', () async {
     semantics()
@@ -1627,7 +1628,9 @@ void _testContainer() {
       </sem>
       <sem style="z-index: 1">
           <sem style="z-index: 2"></sem>
-          <sem style="z-index: 1"></sem>
+          <sem style="z-index: 1">
+              <sem></sem>
+          </sem>
       </sem>
   </sem>''');
 
@@ -1659,7 +1662,9 @@ void _testContainer() {
       <sem style="z-index: 2">
           <sem style="z-index: 3"></sem>
           <sem style="z-index: 2"></sem>
-          <sem style="z-index: 1"></sem>
+          <sem style="z-index: 1">
+              <sem></sem>
+          </sem>
       </sem>
   </sem>''');
 
