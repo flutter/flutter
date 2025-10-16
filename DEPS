@@ -8,13 +8,14 @@
 # to list the dependency's destination directory.
 
 vars = {
+  'android_git': 'https://android.googlesource.com',
   'chromium_git': 'https://chromium.googlesource.com',
   'swiftshader_git': 'https://swiftshader.googlesource.com',
   'dart_git': 'https://dart.googlesource.com',
   'flutter_git': 'https://flutter.googlesource.com',
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
-  'skia_revision': 'ea7cdbc6b986bbefcbac92fa429782e59518510f',
+  'skia_revision': '2d9df7c70b6f95b6f03b9950c7ca4a098fc2c807',
 
   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
   # See `lib/web_ui/README.md` for how to roll CanvasKit to a new version.
@@ -282,9 +283,6 @@ deps = {
   'engine/src/flutter/third_party/boringssl/src':
   'https://boringssl.googlesource.com/boringssl.git' + '@' + Var('dart_boringssl_rev'),
 
-  'engine/src/flutter/third_party/dart/third_party/perfetto/src':
-   Var('flutter_git') + "/third_party/perfetto" + '@' + Var('dart_perfetto_rev'),
-
   'engine/src/flutter/third_party/protobuf':
    Var('flutter_git') + '/third_party/protobuf' + '@' + Var('dart_libprotobuf_rev'),
 
@@ -299,10 +297,13 @@ deps = {
   # WARNING: Unused Dart dependencies in the list below till "WARNING:" marker are removed automatically - see create_updated_flutter_deps.py.
 
   'engine/src/flutter/third_party/dart/third_party/binaryen/src':
-   Var('chromium_git') + '/external/github.com/WebAssembly/binaryen.git@1d2e23d5e55788091a51420ba3a9889d4efe7509',
+   Var('chromium_git') + '/external/github.com/WebAssembly/binaryen.git' + '@' + Var('dart_binaryen_rev'),
 
   'engine/src/flutter/third_party/dart/third_party/devtools':
    {'dep_type': 'cipd', 'packages': [{'package': 'dart/third_party/flutter/devtools', 'version': 'git_revision:0327830448901920f739259364c3f2f624df5a03'}]},
+
+  'engine/src/flutter/third_party/dart/third_party/perfetto/src':
+   Var('android_git') + '/platform/external/perfetto' + '@' + Var('dart_perfetto_rev'),
 
   'engine/src/flutter/third_party/dart/third_party/pkg/ai':
    Var('dart_git') + '/ai.git' + '@' + Var('dart_ai_rev'),
