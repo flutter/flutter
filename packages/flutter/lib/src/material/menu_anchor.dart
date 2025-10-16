@@ -2228,7 +2228,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
   void _handleTogglingInteraction() {
     _clearHoverOpenTimer();
     if (!_buttonFocusNode.hasPrimaryFocus) {
-      if (!_anchorState!._menuScopeNode.hasFocus && _menuController.isOpen) {
+      if (!_anchorState!._menuScopeNode.hasFocus && _animationStatus.isForwardOrCompleted) {
         _menuController.close();
       }
       return;
