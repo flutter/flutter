@@ -50,7 +50,7 @@ void main() {
     await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/lifecycle',
       message,
-      (_) {},
+      (ByteData? data) {},
     );
   }
 
