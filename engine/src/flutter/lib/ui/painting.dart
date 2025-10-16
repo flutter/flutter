@@ -5288,7 +5288,7 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
         return false;
       });
 
-      shader._samplers.removeWhere((ref) {
+      shader._samplers.removeWhere((WeakReference<ImageSamplerSlot> ref) {
         final ImageSamplerSlot? slot = ref.target;
         if (slot == null) {
           return true;
