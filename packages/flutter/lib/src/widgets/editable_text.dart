@@ -4247,6 +4247,7 @@ class EditableTextState extends State<EditableText>
   TextSelectionOverlay _createSelectionOverlay() {
     final EditableTextContextMenuBuilder? contextMenuBuilder = widget.contextMenuBuilder;
     final TextSelectionOverlay selectionOverlay = TextSelectionOverlay(
+      groupId: widget.groupId,
       clipboardStatus: clipboardStatus,
       context: context,
       value: _value,

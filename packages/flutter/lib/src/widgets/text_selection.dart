@@ -347,6 +347,7 @@ class TextSelectionOverlay {
     ClipboardStatusNotifier? clipboardStatus,
     this.contextMenuBuilder,
     required TextMagnifierConfiguration magnifierConfiguration,
+    this.groupId,
   }) : _handlesVisible = handlesVisible,
        _value = value {
     assert(debugMaybeDispatchCreated('widgets', 'TextSelectionOverlay', this));
@@ -381,6 +382,7 @@ class TextSelectionOverlay {
       onSelectionHandleTapped: onSelectionHandleTapped,
       dragStartBehavior: dragStartBehavior,
       toolbarLocation: renderObject.lastSecondaryTapDownPosition,
+      groupId: groupId,
     );
   }
 
@@ -409,6 +411,9 @@ class TextSelectionOverlay {
   ///
   /// If not provided, no context menu will be built.
   final WidgetBuilder? contextMenuBuilder;
+
+  /// {@macro flutter.widgets.SelectionOverlay.groupId}
+  final Object? groupId;
 
   /// Retrieve current value.
   @visibleForTesting
@@ -1084,6 +1089,7 @@ class SelectionOverlay {
     )
     Offset? toolbarLocation,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
+    this.groupId,
   }) : _startHandleType = startHandleType,
        _lineHeightAtStart = lineHeightAtStart,
        _endHandleType = endHandleType,
@@ -1096,6 +1102,15 @@ class SelectionOverlay {
 
   /// {@macro flutter.widgets.SelectionOverlay.context}
   final BuildContext context;
+
+  /// {@template flutter.widgets.SelectionOverlay.groupId}
+  /// The group identifier for the [TapRegion] of this selection overlay.
+  ///
+  /// Widgets with the same group identifier share the same tap region. The
+  /// group identifier provided here will be shared amongst the selection handles,
+  /// selection toolbar, and spell check toolbar.
+  /// {@endtemplate}
+  final Object? groupId;
 
   final ValueNotifier<MagnifierInfo> _magnifierInfo = ValueNotifier<MagnifierInfo>(
     MagnifierInfo.empty,
@@ -1650,6 +1665,7 @@ class SelectionOverlay {
       context: context,
       contextMenuBuilder: (BuildContext context) {
         return _SelectionToolbarWrapper(
+          groupId: groupId,
           visibility: toolbarVisible,
           layerLink: toolbarLayerLink,
           offset: -renderBox.localToGlobal(Offset.zero),
@@ -1671,6 +1687,7 @@ class SelectionOverlay {
       context: context,
       contextMenuBuilder: (BuildContext context) {
         return _SelectionToolbarWrapper(
+          groupId: groupId,
           layerLink: toolbarLayerLink,
           offset: -renderBox.localToGlobal(Offset.zero),
           child: builder(context),
@@ -1779,8 +1796,8 @@ class SelectionOverlay {
       );
     }
     return TapRegion(
-      groupId: SelectableRegion,
-      child: TextFieldTapRegion(child: ExcludeSemantics(child: handle)),
+      groupId: groupId,
+      child: ExcludeSemantics(child: handle),
     );
   }
 
@@ -1810,8 +1827,8 @@ class SelectionOverlay {
       );
     }
     return TapRegion(
-      groupId: SelectableRegion,
-      child: TextFieldTapRegion(child: ExcludeSemantics(child: handle)),
+      groupId: groupId,
+      child: ExcludeSemantics(child: handle),
     );
   }
 
@@ -1848,6 +1865,7 @@ class SelectionOverlay {
     );
 
     return _SelectionToolbarWrapper(
+      groupId: groupId,
       visibility: toolbarVisible,
       layerLink: toolbarLayerLink,
       offset: -editingRegion.topLeft,
@@ -1896,6 +1914,7 @@ class SelectionOverlay {
 class _SelectionToolbarWrapper extends StatefulWidget {
   const _SelectionToolbarWrapper({
     this.visibility,
+    this.groupId,
     required this.layerLink,
     required this.offset,
     required this.child,
@@ -1905,6 +1924,7 @@ class _SelectionToolbarWrapper extends StatefulWidget {
   final Offset offset;
   final LayerLink layerLink;
   final ValueListenable<bool>? visibility;
+  final Object? groupId;
 
   @override
   State<_SelectionToolbarWrapper> createState() => _SelectionToolbarWrapperState();
@@ -1954,18 +1974,16 @@ class _SelectionToolbarWrapperState extends State<_SelectionToolbarWrapper>
   @override
   Widget build(BuildContext context) {
     return TapRegion(
-      groupId: SelectableRegion,
-      child: TextFieldTapRegion(
-        child: Directionality(
-          textDirection: Directionality.of(this.context),
-          child: FadeTransition(
-            opacity: _opacity,
-            child: CompositedTransformFollower(
-              link: widget.layerLink,
-              showWhenUnlinked: false,
-              offset: widget.offset,
-              child: widget.child,
-            ),
+      groupId: widget.groupId,
+      child: Directionality(
+        textDirection: Directionality.of(this.context),
+        child: FadeTransition(
+          opacity: _opacity,
+          child: CompositedTransformFollower(
+            link: widget.layerLink,
+            showWhenUnlinked: false,
+            offset: widget.offset,
+            child: widget.child,
           ),
         ),
       ),

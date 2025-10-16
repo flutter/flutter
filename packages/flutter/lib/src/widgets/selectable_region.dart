@@ -1274,6 +1274,7 @@ class SelectableRegionState extends State<SelectableRegion>
     final SelectionPoint? start = _selectionDelegate.value.startSelectionPoint;
     final SelectionPoint? end = _selectionDelegate.value.endSelectionPoint;
     _selectionOverlay = SelectionOverlay(
+      groupId: SelectableRegion,
       context: context,
       debugRequiredFor: widget,
       startHandleType: start?.handleType ?? TextSelectionHandleType.collapsed,
