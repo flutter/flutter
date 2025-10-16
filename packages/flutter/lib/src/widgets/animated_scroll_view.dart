@@ -1438,14 +1438,14 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   /// items will still appear for `duration` and during that time
   /// `builder` must construct its widget as needed.
   ///
-  /// This method's semantics are the same as Dart's [List.clear] method: it
-  /// removes all the items in the list including the ones that are in inserting
-  /// process and excluding the ones that are already in removal process.
+  /// This method removes all items from the list. Items that are in the
+  /// process of being inserted will also be removed. Items that are already in
+  /// the process of being removed will be excluded.
   void removeAllItems(AnimatedRemovedItemBuilder builder, {Duration duration = _kDuration}) {
     assert(_itemsCount >= 0);
     assert(_itemsCount - _outgoingItems.length >= 0);
-    final int notOutGoingTotalCount = _itemsCount - _outgoingItems.length;
-    for (int i = notOutGoingTotalCount - 1; i >= 0; i--) {
+    final int visibleItemCount = _itemsCount - _outgoingItems.length;
+    for (int i = visibleItemCount - 1; i >= 0; i--) {
       removeItem(i, builder, duration: duration);
     }
   }
