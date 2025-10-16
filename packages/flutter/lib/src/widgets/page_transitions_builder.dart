@@ -86,3 +86,72 @@ abstract class PageTransitionsBuilder {
     Widget child,
   );
 }
+
+// Slides the page upwards and fades it in, starting from 1/4 screen
+// below the top. The transition is intended to match the default for
+// Android O.
+class _FadeUpwardsPageTransition extends StatelessWidget {
+  _FadeUpwardsPageTransition({
+    required Animation<double> routeAnimation, // The route's linear 0.0 - 1.0 animation.
+    required this.child,
+  }) : _positionAnimation = routeAnimation.drive(_bottomUpTween.chain(_fastOutSlowInTween)),
+       _opacityAnimation = routeAnimation.drive(_easeInTween);
+
+  // Fractional offset from 1/4 screen below the top to fully on screen.
+  static final Tween<Offset> _bottomUpTween = Tween<Offset>(
+    begin: const Offset(0.0, 0.25),
+    end: Offset.zero,
+  );
+  static final Animatable<double> _fastOutSlowInTween = CurveTween(curve: Curves.fastOutSlowIn);
+  static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
+
+  final Animation<Offset> _positionAnimation;
+  final Animation<double> _opacityAnimation;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return SlideTransition(
+      position: _positionAnimation,
+      // TODO(ianh): tell the transform to be un-transformed for hit testing
+      child: FadeTransition(opacity: _opacityAnimation, child: child),
+    );
+  }
+}
+
+/// A page transition builder that animates incoming pages by fading and
+/// sliding them upwards.
+///
+/// This transition combines two animations:
+/// - A fade-in effect using an ease-in curve
+/// - An upward slide starting from 25% below the top of the screen
+///
+/// The resulting animation creates a smooth entrance effect where the new
+/// page appears to rise up while simultaneously becoming visible.
+///
+/// See also:
+///
+///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android P.
+///  * [ZoomPageTransitionsBuilder], which defines the default page transition
+///    that's similar to the one provided in Android Q.
+///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
+///    transition that matches native iOS page transitions.
+///  * [PredictiveBackPageTransitionsBuilder], which defines a page
+///    transition that allows peeking behind the current route on Android U and
+///    above.
+class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
+  /// Constructs a page transition animation that slides the page up.
+  const FadeUpwardsPageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T>? route,
+    BuildContext? context,
+    Animation<double> animation,
+    Animation<double>? secondaryAnimation,
+    Widget child,
+  ) {
+    return _FadeUpwardsPageTransition(routeAnimation: animation, child: child);
+  }
+}
