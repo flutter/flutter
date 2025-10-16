@@ -116,9 +116,8 @@ public final class FlutterEngineManifestFlags {
    * Looks up a Flag by its metaDataKey.
    *
    * @param key The manifest meta-data key.
-   * @return The Flag, or null if not found.
+   * @return The {@link Flag}, or null if not found.
    */
-  // TODO(camsim99): optimize this with a Map if this becomes a performance issue.
   public static Flag getFlagByMetaDataKey(String key) {
     for (Flag flag : ALL_FLAGS) {
       System.out.println(flag.metaDataKey);
