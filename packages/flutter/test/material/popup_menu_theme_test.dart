@@ -102,7 +102,7 @@ void main() {
         return const TextStyle(color: Color(0xfffffff6), fontSize: 17.0);
       }),
       enableFeedback: false,
-      mouseCursor: MaterialStateMouseCursor.clickable,
+      mouseCursor: WidgetStateMouseCursor.clickable,
       position: PopupMenuPosition.over,
       iconColor: const Color(0xfffffff8),
       iconSize: 31.0,

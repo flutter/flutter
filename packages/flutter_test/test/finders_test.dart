@@ -1655,6 +1655,18 @@ void main() {
         expect(finder.found, orderedEquals(expected));
       });
     });
+
+    group('first and last', () {
+      test('describes first correctly', () {
+        final _FakeFinder finder = _FakeFinder();
+        expect(finder.first.toString(describeSelf: true), contains('(ignoring all but first)'));
+      });
+
+      test('describes last correctly', () {
+        final _FakeFinder finder = _FakeFinder();
+        expect(finder.last.toString(describeSelf: true), contains('(ignoring all but last)'));
+      });
+    });
   });
 }
 
