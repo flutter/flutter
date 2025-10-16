@@ -1239,6 +1239,10 @@ void main() {
       expect(mockCanvas.paints.single.isAntiAlias, isFalse);
     });
 
+    // This test verifies how `ColoredBox.isAntiAlias` affects rendering.
+    // The first row uses `isAntiAlias: true`, showing gaps between the white backgrounds.
+    // The second row uses `isAntiAlias: false`, demonstrating no gaps between the white backgrounds.
+    // The third row contains three tilted boxes with `isAntiAlias` set to true, false, and false, respectively.
     testWidgets('ColoredBox golden test - anti-aliasing and rotation variations', (
       WidgetTester tester,
     ) async {
