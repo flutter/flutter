@@ -45,6 +45,12 @@ void main() {
     );
   });
 
+  Future<void> setAppLifecycleState(AppLifecycleState state) async {
+    final ByteData? message = const StringCodec().encodeMessage(state.toString());
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+  }
+
   group('SelectableRegion', () {
     testWidgets('mouse selection single click sends correct events', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
@@ -253,6 +259,10 @@ void main() {
             ),
           ),
         );
+        // The selection only dismisses when unfocused if the app
+        // was currently active.
+        await setAppLifecycleState(AppLifecycleState.resumed);
+        await tester.pumpAndSettle();
 
         final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
           find.descendant(of: find.text(text), matching: find.byType(RichText)),
@@ -988,12 +998,6 @@ void main() {
     testWidgets(
       'selection is not cleared when app loses focus on desktop',
       (WidgetTester tester) async {
-        Future<void> setAppLifecycleState(AppLifecycleState state) async {
-          final ByteData? message = const StringCodec().encodeMessage(state.toString());
-          await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-              .handlePlatformMessage('flutter/lifecycle', message, (_) {});
-        }
-
         final FocusNode focusNode = FocusNode();
         final GlobalKey selectableKey = GlobalKey();
         addTearDown(focusNode.dispose);
@@ -6541,9 +6545,6 @@ class RenderSelectionSpy extends RenderProxyBox with Selectable, SelectionRegist
   Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
 
   @override
-  bool hitTestSelf(Offset position) => true;
-
-  @override
   void performLayout() => size = computeDryLayout(constraints);
 
   @override
@@ -6607,9 +6608,6 @@ class RenderSelectAll extends RenderProxyBox with Selectable, SelectionRegistran
   RenderSelectAll(SelectionRegistrar? registrar) {
     this.registrar = registrar;
   }
-
-  @override
-  bool hitTestSelf(Offset position) => true;
 
   @override
   List<Rect> get boundingBoxes => <Rect>[paintBounds];
