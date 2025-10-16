@@ -76,12 +76,12 @@ public class SettingsChannelTest {
         config4.generationNumber,
         queue.getConfiguration(config4.generationNumber).generationNumber);
 
-    SentConfiguration config6 = new SentConfiguration(mock(DisplayMetrics.class));
-    final BasicMessageChannel.Reply replyFor4 =
+    final BasicMessageChannel.Reply replyFor5 =
         queue.enqueueConfiguration(new SentConfiguration(mock(DisplayMetrics.class)));
-    final BasicMessageChannel.Reply replyFor5 = queue.enqueueConfiguration(config6);
-    replyFor4.reply(null);
+    final SentConfiguration config6 = new SentConfiguration(mock(DisplayMetrics.class));
+    final BasicMessageChannel.Reply replyFor6 = queue.enqueueConfiguration(config6);
     replyFor5.reply(null);
+    replyFor6.reply(null);
     assertEquals(
         config6.generationNumber,
         queue.getConfiguration(config6.generationNumber).generationNumber);
