@@ -66,23 +66,21 @@ const List<double> _kDisabledDarkGradientOpacities = <double>[0.08, 0.14];
 /// deselected. The values are of type `T`, the type parameter of the
 /// [CupertinoRadio] class. Enums are commonly used for this purpose.
 ///
-/// The radio button itself does not maintain any state. Instead, selecting the
-/// radio invokes the [onChanged] callback, passing [value] as a parameter. If
-/// [groupValue] and [value] match, this radio will be selected. Most widgets
-/// will respond to [onChanged] by calling [State.setState] to update the
-/// radio button's [groupValue].
+/// This widget typically has a [RadioGroup] ancestor, which takes in a
+/// [RadioGroup.groupValue], and the [CupertinoRadio] under it with matching
+/// [value] will be selected.
 ///
 /// {@tool dartpad}
 /// Here is an example of CupertinoRadio widgets wrapped in CupertinoListTiles.
 ///
-/// The currently selected character is passed into `groupValue`, which is
+/// The currently selected character is passed into `RadioGroup.groupValue`, which is
 /// maintained by the example's `State`. In this case, the first [CupertinoRadio]
 /// will start off selected because `_character` is initialized to
 /// `SingingCharacter.lafayette`.
 ///
 /// If the second radio button is pressed, the example's state is updated
 /// with `setState`, updating `_character` to `SingingCharacter.jefferson`.
-/// This causes the buttons to rebuild with the updated `groupValue`, and
+/// This causes the buttons to rebuild with the updated `RadioGroup.groupValue`, and
 /// therefore the selection of the second button.
 ///
 /// ** See code in examples/api/lib/cupertino/radio/cupertino_radio.0.dart **

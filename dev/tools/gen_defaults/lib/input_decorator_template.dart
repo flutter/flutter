@@ -36,7 +36,7 @@ class _${blockName}DefaultsM3 extends InputDecorationThemeData {
   // see https://github.com/flutter/flutter/pull/125905.
 
   @override
-  TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
+  TextStyle? get hintStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
       return TextStyle(color: ${componentColor('md.comp.filled-text-field.disabled.supporting-text')});
     }
@@ -52,7 +52,7 @@ class _${blockName}DefaultsM3 extends InputDecorationThemeData {
   });
 
   @override
-  BorderSide? get activeIndicatorBorder => MaterialStateBorderSide.resolveWith((Set<WidgetState> states) {
+  BorderSide? get activeIndicatorBorder => WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
       return ${border('md.comp.filled-text-field.disabled.active-indicator')};
     }
@@ -75,7 +75,7 @@ class _${blockName}DefaultsM3 extends InputDecorationThemeData {
     });
 
   @override
-  BorderSide? get outlineBorder => MaterialStateBorderSide.resolveWith((Set<WidgetState> states) {
+  BorderSide? get outlineBorder => WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
       return ${border('md.comp.outlined-text-field.disabled.outline')};
     }
@@ -147,7 +147,7 @@ class _${blockName}DefaultsM3 extends InputDecorationThemeData {
   });
 
   @override
-  TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
+  TextStyle? get labelStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
     final TextStyle textStyle = ${textStyle("md.comp.filled-text-field.label-text")} ?? const TextStyle();
     if (states.contains(WidgetState.disabled)) {
       return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.disabled.label-text')});
@@ -171,7 +171,7 @@ class _${blockName}DefaultsM3 extends InputDecorationThemeData {
   });
 
   @override
-  TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
+  TextStyle? get floatingLabelStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
     final TextStyle textStyle = ${textStyle("md.comp.filled-text-field.label-text")} ?? const TextStyle();
     if (states.contains(WidgetState.disabled)) {
       return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.disabled.label-text')});
@@ -195,7 +195,7 @@ class _${blockName}DefaultsM3 extends InputDecorationThemeData {
   });
 
   @override
-  TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
+  TextStyle? get helperStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
     final TextStyle textStyle = ${textStyle("md.comp.filled-text-field.supporting-text")} ?? const TextStyle();
     if (states.contains(WidgetState.disabled)) {
       return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.disabled.supporting-text')});
@@ -210,7 +210,7 @@ class _${blockName}DefaultsM3 extends InputDecorationThemeData {
   });
 
   @override
-  TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
+  TextStyle? get errorStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
     final TextStyle textStyle = ${textStyle("md.comp.filled-text-field.supporting-text")} ?? const TextStyle();${componentColor('md.comp.filled-text-field.error.hover.supporting-text') == componentColor('md.comp.filled-text-field.error.supporting-text') ? '' : '''
     if (states.contains(WidgetState.focused)) {
       return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.error.focus.supporting-text')});

@@ -42,18 +42,16 @@ void main() {
     final controller = WidgetPreviewScaffoldController(
       dtdServicesOverride: fakeDtdServices,
       previews: () => [
-        WidgetPreview(
+        WidgetPreview.test(
           builder: () => throw Exception('Error!'),
-          scriptUri: '',
           previewData: Preview(),
-          packageName: '',
         ),
       ],
     );
 
     if (controller.filterBySelectedFileListenable.value) {
       // Disable filter by selected file.
-      controller.toggleFilterBySelectedFile();
+      await controller.toggleFilterBySelectedFile();
     }
     await controller.initialize();
 

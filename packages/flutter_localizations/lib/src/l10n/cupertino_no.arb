@@ -30,10 +30,10 @@
   "clearButtonLabel": "Slett",
   "cancelButtonLabel": "Avbryt",
   "backButtonLabel": "Tilbake",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "dobbelttrykk for å skjule",
+  "expansionTileCollapsedHint": "dobbelttrykk for å vise",
+  "expansionTileExpandedTapHint": "Skjul",
+  "expansionTileCollapsedTapHint": "Vis for å se mer informasjon",
+  "expandedHint": "Skjules",
+  "collapsedHint": "Vises"
 }

@@ -55,7 +55,7 @@ const double _kInnerRadius = 4.5;
 ///
 /// If the second radio button is pressed, the example's state is updated
 /// with `setState`, updating `_character` to `SingingCharacter.jefferson`.
-/// This causes the buttons to rebuild with the updated `groupValue`, and
+/// This causes the buttons to rebuild with the updated `RadioGroup.groupValue`, and
 /// therefore the selection of the second button.
 ///
 /// Requires one of its ancestors to be a [Material] widget.

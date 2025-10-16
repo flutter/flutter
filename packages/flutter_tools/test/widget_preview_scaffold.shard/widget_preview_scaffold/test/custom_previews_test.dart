@@ -71,6 +71,8 @@ WidgetPreviewerWidgetScaffolding previewsForCustomMultiPreview() {
     scriptUri: '',
     preview: BrightnessPreview(name: 'MyPreview'),
     previewFunction: () => Text('Foo'),
+    line: -1,
+    column: -1,
   );
   final controller = FakeWidgetPreviewScaffoldController();
   return WidgetPreviewerWidgetScaffolding(

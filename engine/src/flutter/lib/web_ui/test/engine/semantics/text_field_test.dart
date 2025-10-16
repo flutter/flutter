@@ -124,13 +124,27 @@ void testMain() {
         ui.SemanticsInputType.url: 'url',
         ui.SemanticsInputType.phone: 'tel',
         ui.SemanticsInputType.search: 'search',
-        ui.SemanticsInputType.email: 'email',
+        // Email uses type="text" to preserve selection APIs under semantics.
+        ui.SemanticsInputType.email: 'text',
       };
       for (final ui.SemanticsInputType type in ui.SemanticsInputType.values) {
         createTextFieldSemantics(value: 'text', inputType: type);
 
         expectSemanticsTree(owner(), '<sem><input type="${inputTypeEnumToString[type]}" /></sem>');
       }
+    });
+
+    test('email input uses type=text with inputmode=email and autocomplete=email', () {
+      createTextFieldSemantics(value: 'text', inputType: ui.SemanticsInputType.email);
+
+      final node = owner().debugSemanticsTree![0]!;
+      final textFieldRole = node.semanticRole! as SemanticTextField;
+      final inputElement = textFieldRole.editableElement as DomHTMLInputElement;
+
+      expect(inputElement.type, 'text');
+      expect(inputElement.getAttribute('inputmode'), 'email');
+      expect(inputElement.getAttribute('autocapitalize'), 'none');
+      expect(inputElement.autocomplete, 'email');
     });
 
     test('renders a disabled text field', () {

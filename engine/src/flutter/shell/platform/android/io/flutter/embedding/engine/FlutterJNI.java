@@ -803,6 +803,16 @@ public class FlutterJNI {
     }
   }
 
+  /** Invoked by native to set application locale in Android. */
+  @SuppressWarnings("unused")
+  @UiThread
+  private void setApplicationLocale(@NonNull String locale) {
+    ensureRunningOnMainThread();
+    if (accessibilityDelegate != null) {
+      accessibilityDelegate.setLocale(locale);
+    }
+  }
+
   /**
    * Invoked by native to send new custom accessibility events from Flutter to Android.
    *
@@ -1377,6 +1387,18 @@ public class FlutterJNI {
         viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
   }
 
+  @UiThread
+  @SuppressWarnings("unused")
+  @SuppressLint("NewApi")
+  public void hidePlatformView2(int viewId) {
+    ensureRunningOnMainThread();
+    if (platformViewsController2 == null) {
+      throw new RuntimeException(
+          "platformViewsController must be set before attempting to hide a platform view");
+    }
+    platformViewsController2.hidePlatformView(viewId);
+  }
+
   // ----- Start Localization Support ----
 
   /** Sets the localization plugin that is used in various localization methods. */
@@ -1631,6 +1653,13 @@ public class FlutterJNI {
         @NonNull ByteBuffer buffer,
         @NonNull String[] strings,
         @NonNull ByteBuffer[] stringAttributeArgs);
+
+    /**
+     * Sets the locale for the assistive technologies.
+     *
+     * <p>Must be called on the main thread
+     */
+    void setLocale(@NonNull String locale);
   }
 
   public interface AsyncWaitForVsyncDelegate {

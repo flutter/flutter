@@ -23,6 +23,9 @@ class _MainRegularWindowControllerDelegate
 }
 
 late final RegularWindowController controller;
+final ValueNotifier<DialogWindowController?> dialogController = ValueNotifier(
+  null,
+);
 
 void main() {
   final Completer<void> windowCreated = Completer();
@@ -38,7 +41,32 @@ void main() {
         throw ArgumentError('Message must contain a "type" field.');
       }
 
-      if (jsonMap['type'] == 'get_size') {
+      /// This helper method registers a listener on the controller,
+      /// calls [act] to perform some action on the controller, waits for
+      /// the [predicate] to be satisified, and finally cleans up the listener.
+      Future<void> awaitNotification(
+        VoidCallback act,
+        bool Function() predicate,
+      ) async {
+        final StreamController<bool> streamController = StreamController();
+        void notificationHandler() {
+          streamController.add(true);
+        }
+
+        controller.addListener(notificationHandler);
+
+        act();
+        await for (final _ in streamController.stream) {
+          if (predicate()) {
+            break;
+          }
+        }
+        controller.removeListener(notificationHandler);
+      }
+
+      if (jsonMap['type'] == 'ping') {
+        return jsonEncode({'type': 'pong'});
+      } else if (jsonMap['type'] == 'get_size') {
         return jsonEncode({
           'width': controller.contentSize.width,
           'height': controller.contentSize.height,
@@ -48,7 +76,9 @@ void main() {
           jsonMap['width'].toDouble(),
           jsonMap['height'].toDouble(),
         );
-        controller.setSize(size);
+        await awaitNotification(() {
+          controller.setSize(size);
+        }, () => controller.contentSize == size);
       } else if (jsonMap['type'] == 'set_constraints') {
         final BoxConstraints constraints = BoxConstraints(
           minWidth: jsonMap['min_width'].toDouble(),
@@ -56,37 +86,74 @@ void main() {
           maxWidth: jsonMap['max_width'].toDouble(),
           maxHeight: jsonMap['max_height'].toDouble(),
         );
-        controller.setConstraints(constraints);
+        // We assume that this will cause a resize, which the current tests do.
+        final initialSize = controller.contentSize;
+        await awaitNotification(() {
+          controller.setConstraints(constraints);
+        }, () => controller.contentSize != initialSize);
       } else if (jsonMap['type'] == 'set_fullscreen') {
-        controller.setFullscreen(true);
+        await awaitNotification(() {
+          controller.setFullscreen(true);
+        }, () => controller.isFullscreen);
       } else if (jsonMap['type'] == 'unset_fullscreen') {
-        controller.setFullscreen(false);
+        await awaitNotification(() {
+          controller.setFullscreen(false);
+        }, () => !controller.isFullscreen);
       } else if (jsonMap['type'] == 'get_fullscreen') {
         return jsonEncode({'isFullscreen': controller.isFullscreen});
       } else if (jsonMap['type'] == 'set_maximized') {
-        controller.setMaximized(true);
+        await awaitNotification(() {
+          controller.setMaximized(true);
+        }, () => controller.isMaximized);
       } else if (jsonMap['type'] == 'unset_maximized') {
-        controller.setMaximized(false);
+        await awaitNotification(() {
+          controller.setMaximized(false);
+        }, () => !controller.isMaximized);
       } else if (jsonMap['type'] == 'get_maximized') {
         return jsonEncode({'isMaximized': controller.isMaximized});
       } else if (jsonMap['type'] == 'set_minimized') {
-        controller.setMinimized(true);
+        await awaitNotification(() {
+          controller.setMinimized(true);
+        }, () => controller.isMinimized);
       } else if (jsonMap['type'] == 'unset_minimized') {
-        controller.setMinimized(false);
+        await awaitNotification(() {
+          controller.setMinimized(false);
+        }, () => !controller.isMinimized);
       } else if (jsonMap['type'] == 'get_minimized') {
         return jsonEncode({'isMinimized': controller.isMinimized});
       } else if (jsonMap['type'] == 'set_title') {
-        controller.setTitle(jsonMap['title']);
+        final String title = jsonMap['title'];
+        await awaitNotification(() {
+          controller.setTitle(title);
+        }, () => controller.title == title);
       } else if (jsonMap['type'] == 'get_title') {
         return jsonEncode({'title': controller.title});
       } else if (jsonMap['type'] == 'set_activated') {
-        controller.activate();
+        await awaitNotification(() {
+          controller.activate();
+        }, () => controller.isActivated);
       } else if (jsonMap['type'] == 'get_activated') {
         return jsonEncode({'isActivated': controller.isActivated});
+      } else if (jsonMap['type'] == 'open_dialog') {
+        if (dialogController.value != null) {
+          return jsonEncode({'result': false});
+        }
+        dialogController.value = DialogWindowController(
+          preferredSize: const Size(200, 200),
+          parent: controller,
+          delegate: MyDialogWindowControllerDelegate(
+            onDestroyed: () {
+              dialogController.value = null;
+            },
+          ),
+        );
+        return jsonEncode({'result': true});
+      } else if (jsonMap['type'] == 'close_dialog') {
+        dialogController.value?.destroy();
+        return jsonEncode({'result': true});
       } else {
         throw ArgumentError('Unknown message type: ${jsonMap['type']}');
       }
-
       return '';
     },
   );
@@ -124,38 +191,82 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class MyDialogWindowControllerDelegate extends DialogWindowControllerDelegate {
+  MyDialogWindowControllerDelegate({required this.onDestroyed});
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  final VoidCallback onDestroyed;
+
+  @override
+  void onWindowDestroyed() {
+    onDestroyed();
+    super.onWindowDestroyed();
   }
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: dialogController,
+      builder:
+          (
+            BuildContext context,
+            DialogWindowController? dialogController,
+            Widget? child,
+          ) {
+            return ViewAnchor(
+              view: dialogController != null
+                  ? DialogWindow(
+                      controller: dialogController,
+                      child: MyDialogPage(controller: dialogController),
+                    )
+                  : null,
+              child: Scaffold(
+                appBar: AppBar(
+                  backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+                  title: Text(widget.title),
+                ),
+                body: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[const Text('This is the main window.')],
+                  ),
+                ),
+              ),
+            );
+          },
+    );
+  }
+}
+
+class MyDialogPage extends StatelessWidget {
+  const MyDialogPage({super.key, required this.controller});
+
+  final DialogWindowController controller;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Text('Dialog'),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text('This is a dialog window.'),
+              ElevatedButton(
+                key: const ValueKey<String>('close_dialog'),
+                onPressed: () {
+                  controller.destroy();
+                },
+                child: Text('Close Dialog'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

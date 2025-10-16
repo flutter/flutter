@@ -32,6 +32,16 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.35 Changes
 
+### [3.35.6](https://github.com/flutter/flutter/releases/tag/3.35.6)
+
+- [flutter/175669](https://github.com/flutter/flutter/issues/175669) `flutter analyze --suggestions` supports versions up to Java 25, Gradle 9 and AGP 9, Kotlin 2.2.20.
+- [flutter/172624](https://github.com/flutter/flutter/issues/172624) Fixes an issue that could result in a corrupt pipeline cache when using the Impeller Vulkan back end.
+
+### [3.35.5](https://github.com/flutter/flutter/releases/tag/3.35.5)
+
+ - [flutter/172105](https://github.com/flutter/flutter/issues/172105) Flutter view no longer hangs after multiple transitions on iOS add-to-app.
+ - [flutter/173106](https://github.com/flutter/flutter/issues/173106) Multiple cursors display correctly.
+
 ### [3.35.4](https://github.com/flutter/flutter/releases/tag/3.35.4)
 - [flutter/173474](https://github.com/flutter/flutter/issues/173474) - On all platforms PlatformDispatchers.instance.engineId no longer returns null after hot restart.
 - [flutter/174513](https://github.com/flutter/flutter/issues/174513) - On iOS 26, fix a bug where platform view's gesture blocking fails and lets touches on Flutter views fall through to underlying platform views.

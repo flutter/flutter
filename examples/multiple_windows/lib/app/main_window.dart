@@ -12,6 +12,7 @@ import 'regular_window_content.dart';
 import 'window_settings_dialog.dart';
 import 'models.dart';
 import 'regular_window_edit_dialog.dart';
+import 'dialog_window_edit_dialog.dart';
 
 class MainWindow extends StatelessWidget {
   const MainWindow({super.key});
@@ -96,12 +97,17 @@ class _WindowsTable extends StatelessWidget {
         context: context,
         controller: regular,
       ),
+      final DialogWindowController dialog => showDialogWindowEditDialog(
+        context: context,
+        controller: dialog,
+      ),
     };
   }
 
   static String _getWindowTypeName(BaseWindowController controller) {
     return switch (controller) {
       RegularWindowController() => 'Regular',
+      DialogWindowController() => 'Dialog',
     };
   }
 
@@ -169,6 +175,25 @@ class _WindowCreatorCard extends StatelessWidget {
                     );
                   },
                   child: const Text('Regular'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton(
+                  onPressed: () async {
+                    final UniqueKey key = UniqueKey();
+                    windowManager.add(
+                      KeyedWindow(
+                        key: key,
+                        controller: DialogWindowController(
+                          delegate: CallbackDialogWindowControllerDelegate(
+                            onDestroyed: () => windowManager.remove(key),
+                          ),
+                          title: 'Modeless Dialog',
+                          preferredSize: windowSettings.dialogSize,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Modeless Dialog'),
                 ),
                 const SizedBox(height: 8),
                 Container(
