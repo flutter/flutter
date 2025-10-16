@@ -66,8 +66,6 @@ public final class FlutterEngineManifestFlags {
   public static final Flag ENABLE_SURFACE_CONTROL = new Flag("EnableSurfaceControl", true);
   public static final Flag ENABLE_FLUTTER_GPU = new Flag("EnableFlutterGPU", true);
   public static final Flag IMPELLER_LAZY_SHADER_MODE = new Flag("ImpellerLazyShaderMode", true);
-  public static final Flag IMPELLER_LAZY_SHADER_INITIALIZATION =
-      new Flag("ImpellerLazyShaderInitialization", true);
   public static final Flag IMPELLER_ANTIALIAS_LINES = new Flag("ImpellerAntialiasLines", true);
   public static final Flag VM_SNAPSHOT_DATA = new Flag("VmSnapshotData", true);
   public static final Flag ISOLATE_SNAPSHOT_DATA = new Flag("IsolateSnapshotData", true);
@@ -106,7 +104,6 @@ public final class FlutterEngineManifestFlags {
               ENABLE_SURFACE_CONTROL,
               ENABLE_FLUTTER_GPU,
               IMPELLER_LAZY_SHADER_MODE,
-              IMPELLER_LAZY_SHADER_INITIALIZATION,
               IMPELLER_ANTIALIAS_LINES,
               VM_SNAPSHOT_DATA,
               ISOLATE_SNAPSHOT_DATA,
