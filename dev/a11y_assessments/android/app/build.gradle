@@ -33,7 +33,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace "com.example.a11y_assessments"
+    namespace = "com.example.a11y_assessments"
     compileSdk = flutter.compileSdkVersion
 
     // Flutter's CI installs the NDK at a non-standard path.
@@ -81,13 +81,13 @@ android {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.release
+            signingConfig = signingConfigs.release
         }
     }
 }
 
 flutter {
-    source '../..'
+    source = '../..'
 }
 
 dependencies {}
