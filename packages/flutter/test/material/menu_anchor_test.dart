@@ -4522,12 +4522,163 @@ void main() {
         semantics.dispose();
       });
 
+      testWidgets('Animated SubmenuButton expanded/collapsed state', (WidgetTester tester) async {
+        final SemanticsTester semantics = SemanticsTester(tester);
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Center(
+              child: SubmenuButton(
+                style: SubmenuButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
+                menuChildren: <Widget>[
+                  MenuItemButton(
+                    style: MenuItemButton.styleFrom(fixedSize: const Size(120.0, 36.0)),
+                    child: const Text('Item 0'),
+                    onPressed: () {},
+                  ),
+                ],
+                child: const Text('ABC'),
+              ),
+            ),
+          ),
+        );
+
+        // Test expanded state.
+        await tester.tap(find.text('ABC'));
+        await tester.pump();
+        var expandedMatcher = hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 2,
+                    rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 3,
+                        rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 4,
+                            flags: <SemanticsFlag>[
+                              if (kIsWeb) SemanticsFlag.isButton,
+                              SemanticsFlag.isFocused,
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable,
+                              SemanticsFlag.hasExpandedState,
+                              SemanticsFlag.isExpanded,
+                            ],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                            label: 'ABC',
+                            rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+                          ),
+                          TestSemantics(
+                            id: 6,
+                            rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 64.0),
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                id: 7,
+                                rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
+                                flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                                children: <TestSemantics>[
+                                  TestSemantics(
+                                    id: 8,
+                                    label: 'Item 0',
+                                    rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
+                                    flags: <SemanticsFlag>[
+                                      if (kIsWeb) SemanticsFlag.isButton,
+                                      SemanticsFlag.hasEnabledState,
+                                      SemanticsFlag.isEnabled,
+                                      SemanticsFlag.isFocusable,
+                                    ],
+                                    actions: <SemanticsAction>[
+                                      SemanticsAction.tap,
+                                      SemanticsAction.focus,
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreTransform: true,
+        );
+
+        expect(semantics, expandedMatcher);
+
+        await tester.pumpAndSettle();
+
+        expect(semantics, expandedMatcher);
+
+        // Test collapsed state.
+        await tester.tap(find.text('ABC'));
+        await tester.pump();
+
+        var collapsedMatcher = hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 2,
+                    rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 3,
+                        rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 4,
+                            flags: <SemanticsFlag>[
+                              if (kIsWeb) SemanticsFlag.isButton,
+                              SemanticsFlag.hasExpandedState,
+                              SemanticsFlag.isFocused,
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable,
+                            ],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                            label: 'ABC',
+                            rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreTransform: true,
+        );
+        expect(semantics, collapsedMatcher);
+
+        await tester.pumpAndSettle();
+        expect(semantics, collapsedMatcher);
+        semantics.dispose();
+      });
+
       testWidgets('SubmenuButton expanded/collapsed state', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           MaterialApp(
             home: Center(
               child: SubmenuButton(
+                animated: true,
                 style: SubmenuButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
                 menuChildren: <Widget>[
                   MenuItemButton(
@@ -5764,105 +5915,6 @@ void main() {
 
       // Item should not have been pressed
       expect(itemPressed, false);
-    });
-
-    testWidgets('Submenu semantics are excluded during closing', (WidgetTester tester) async {
-      final SemanticsTester semantics = SemanticsTester(tester);
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: MenuBar(
-              children: <Widget>[
-                SubmenuButton(
-                  animated: true,
-                  focusNode: focusNode,
-                  controller: controller,
-                  menuChildren: <Widget>[
-                    MenuItemButton(onPressed: () {}, child: const Text('Submenu Item')),
-                  ],
-                  child: const Text('Submenu'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-
-      focusNode.requestFocus();
-      await tester.pump();
-
-      // Open the submenu and wait for animation to complete
-      controller.open();
-      await tester.pump();
-      await tester.pumpAndSettle();
-
-      expect(find.text('Submenu Item'), findsOneWidget);
-
-      // Close the submenu
-      controller.close();
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
-
-      expect(
-        semantics,
-        hasSemantics(
-          ignoreRect: true,
-          ignoreTransform: true,
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics(
-                id: 1,
-                textDirection: TextDirection.ltr,
-                children: <TestSemantics>[
-                  TestSemantics(
-                    id: 2,
-                    children: <TestSemantics>[
-                      TestSemantics(
-                        id: 3,
-                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            id: 4,
-                            children: <TestSemantics>[
-                              TestSemantics(
-                                id: 5,
-                                flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                                children: <TestSemantics>[
-                                  TestSemantics(
-                                    id: 6,
-                                    flags: <SemanticsFlag>[
-                                      SemanticsFlag.isFocused,
-                                      SemanticsFlag.hasEnabledState,
-                                      SemanticsFlag.isEnabled,
-                                      SemanticsFlag.isFocusable,
-                                      SemanticsFlag.hasExpandedState,
-                                    ],
-                                    actions: <SemanticsAction>[
-                                      SemanticsAction.tap,
-                                      SemanticsAction.focus,
-                                    ],
-                                    label: 'Submenu',
-                                    textDirection: TextDirection.ltr,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      );
-
-      semantics.dispose();
     });
 
     testWidgets('Menu items can be focused during opening animation', (WidgetTester tester) async {
