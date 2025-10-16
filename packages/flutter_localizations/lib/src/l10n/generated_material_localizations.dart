@@ -14490,7 +14490,7 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get tabLabelRaw => r'$tabIndex/$tabCount fitxa';
 
   @override
-  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
   String get timePickerDialHelpText => 'Hautatu ordua';
