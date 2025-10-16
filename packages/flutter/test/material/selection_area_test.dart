@@ -162,6 +162,9 @@ void main() {
 
       expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
     },
+    // TODO(Renzo-Olivares): Remove this test when the web context menu
+    // for Android and iOS is re-enabled.
+    // See: https://github.com/flutter/flutter/issues/177123.
     // [intended] Android and iOS use the flutter rendered menu on the web.
     skip:
         !kIsWeb ||
