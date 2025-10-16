@@ -257,6 +257,7 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
         if (index < 0 || index >= uniform.floatCount) {
           throw IndexError.withLength(index, uniform.floatCount);
         }
+        result += index;
         break;
       }
       result += uniform.floatCount;
