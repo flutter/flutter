@@ -5145,6 +5145,24 @@ void main() {
     expect(tester.getRect(findMenuPanels()).width, 800.0 - reservedPadding.horizontal);
   });
 
+  testWidgets('MenuAnchor does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final MenuController menuController = MenuController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: MenuAnchor(menuChildren: const <Widget>[Text('X')], controller: menuController),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(MenuAnchor)), Size.zero);
+    menuController.open();
+    await tester.pump();
+    expect(find.text('X'), findsOne);
+  });
+
   testWidgets('Layout updates when reserved padding changes', (WidgetTester tester) async {
     const EdgeInsetsGeometry reservedPadding = EdgeInsets.symmetric(horizontal: 13.0);
 
