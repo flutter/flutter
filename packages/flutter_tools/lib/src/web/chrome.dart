@@ -247,7 +247,7 @@ class ChromiumLauncher {
       '--disable-search-engine-choice-screen',
       '--no-sandbox',
 
-      if (headless) ...<String>['--headless', '--disable-gpu', '--window-size=2400,1800'],
+      if (headless) ...<String>['--headless', '--window-size=2400,1800'],
       ...webBrowserFlags,
       url,
     ];
