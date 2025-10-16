@@ -220,15 +220,13 @@ class SkMatrixAdapter : public SkiaAdapterBase {
   void TransformRectFast(const TestTransform& transform,
                          const TestRect& in,
                          TestRect& out) const override {
-    out.sk_rect =
-        transform.sk_matrix.mapRect(in.sk_rect, SkApplyPerspectiveClip::kNo);
+    out.sk_rect = transform.sk_matrix.mapRect(in.sk_rect);
   }
 
   void TransformAndClipRect(const TestTransform& transform,
                             const TestRect& in,
                             TestRect& out) const override {
-    out.sk_rect =
-        transform.sk_matrix.mapRect(in.sk_rect, SkApplyPerspectiveClip::kYes);
+    out.sk_rect = transform.sk_matrix.mapRect(in.sk_rect);
   }
 
   int CountClippedCorners(const TestTransform& transform,
@@ -311,7 +309,7 @@ class SkM44Adapter : public SkiaAdapterBase {
     // clang-format off
     out.sk_rect = transform.sk_m44
                       .asM33()
-                      .mapRect(in.sk_rect, SkApplyPerspectiveClip::kNo);
+                      .mapRect(in.sk_rect);
     // clang-format on
   }
 
@@ -321,7 +319,7 @@ class SkM44Adapter : public SkiaAdapterBase {
     // clang-format off
     out.sk_rect = transform.sk_m44
                       .asM33()
-                      .mapRect(in.sk_rect, SkApplyPerspectiveClip::kYes);
+                      .mapRect(in.sk_rect);
     // clang-format on
   }
 
