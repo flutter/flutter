@@ -952,4 +952,26 @@ transforms:
       - kind: 'rename'
         newName: 'markForComplete'
 
+  # Changes made in https://github.com/flutter/flutter/pull/174491
+  - title: "Migrate to 'findItemIndexCallback'"
+    date: 2025-10-16
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: 'separated'
+      inClass: 'ListView'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'findChildIndexCallback'
+        newName: 'findItemIndexCallback'
+  - title: "Migrate to 'findItemIndexCallback'"
+    date: 2025-10-16
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: 'separated'
+      inClass: 'SliverList'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'findChildIndexCallback'
+        newName: 'findItemIndexCallback'
+
 # Before adding a new fix: read instructions at the top of this file.
