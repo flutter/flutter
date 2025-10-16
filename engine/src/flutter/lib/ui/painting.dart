@@ -4043,6 +4043,24 @@ class ColorFilter implements ImageFilter {
       _matrix = null,
       _type = _kTypeSrgbToLinearGamma;
 
+  /// Creates a color filter that applies the given saturation to the RGB
+  /// channels.
+  factory ColorFilter.saturation(double saturation) {
+    const double rLuminance = 0.2126;
+    const double gLuminance = 0.7152;
+    const double bLuminance = 0.0722;
+    final double invSat = 1 - saturation;
+
+    return ColorFilter.matrix(<double>[
+      // dart format off
+      invSat * rLuminance + saturation, invSat * gLuminance,              invSat * bLuminance,              0, 0,
+      invSat * rLuminance,              invSat * gLuminance + saturation, invSat * bLuminance,              0, 0,
+      invSat * rLuminance,              invSat * gLuminance,              invSat * bLuminance + saturation, 0, 0,
+      0,                                0,                                0,                                1, 0,
+      // dart format on
+    ]);
+  }
+
   final Color? _color;
   final BlendMode? _blendMode;
   final List<double>? _matrix;
@@ -5204,6 +5222,7 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   }
 
   String? _debugName;
+  final List<WeakReference<FragmentShader>> _shaders = <WeakReference<FragmentShader>>[];
 
   /// Creates a fragment program from the asset with key [assetKey].
   ///
@@ -5249,6 +5268,55 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
     if (result.isNotEmpty) {
       throw result; // ignore: only_throw_errors
     }
+
+    // Update all the named bindings.
+    program._shaders.removeWhere((WeakReference<FragmentShader> shaderReference) {
+      final FragmentShader? shader = shaderReference.target;
+      if (shader == null) {
+        return true;
+      }
+
+      shader._reinitialize();
+      shader._slots.removeWhere((WeakReference<UniformFloatSlot> slotReference) {
+        final UniformFloatSlot? slot = slotReference.target;
+        if (slot == null) {
+          return true;
+        }
+
+        slot._shaderIndex = program._getUniformFloatIndex(slot.name, slot.index);
+        return false;
+      });
+
+      return false;
+    });
+  }
+
+  int _getUniformFloatIndex(String name, int index) {
+    if (index < 0) {
+      throw ArgumentError('Index `$index` out of bounds for `$name`.');
+    }
+
+    int offset = 0;
+    bool found = false;
+    const int sizeOfFloat = 4;
+    for (final dynamic entryDynamic in _uniformInfo) {
+      final Map<String, Object> entry = entryDynamic as Map<String, Object>;
+      final int sizeInFloats = (entry['size'] as int? ?? 0) ~/ sizeOfFloat;
+      if (entry['name'] == name) {
+        if (index + 1 > sizeInFloats) {
+          throw ArgumentError('Index `$index` out of bounds for `$name`.');
+        }
+        found = true;
+        break;
+      }
+      offset += sizeInFloats;
+    }
+
+    if (!found) {
+      throw ArgumentError('No uniform named "$name".');
+    }
+
+    return offset + index;
   }
 
   @pragma('vm:entry-point')
@@ -5257,6 +5325,9 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   @pragma('vm:entry-point')
   late int _samplerCount;
 
+  @pragma('vm:entry-point')
+  late List<dynamic> _uniformInfo;
+
   @Native<Void Function(Handle)>(symbol: 'FragmentProgram::Create')
   external void _constructor();
 
@@ -5264,7 +5335,52 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   external String _initFromAsset(String assetKey);
 
   /// Returns a fresh instance of [FragmentShader].
-  FragmentShader fragmentShader() => FragmentShader._(this, debugName: _debugName);
+  FragmentShader fragmentShader() {
+    final FragmentShader result = FragmentShader._(this, debugName: _debugName);
+    _shaders.removeWhere((WeakReference<FragmentShader> ref) => ref.target == null);
+    _shaders.add(WeakReference<FragmentShader>(result));
+    return result;
+  }
+}
+
+/// A binding to a uniform of type float. Calling [set] on this object updates
+/// a float uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader) {
+///   shader.getUniformFloat('uColor', 0).set(1.0);
+///   shader.getUniformFloat('uColor', 1).set(0.0);
+///   shader.getUniformFloat('uColor', 2).set(0.0);
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformFloat] - How [UniformFloatSlot] instances are acquired.
+///
+base class UniformFloatSlot {
+  UniformFloatSlot._(this._shader, this.name, this.index, this._shaderIndex);
+
+  /// Set the float value of the bound uniform.
+  void set(double val) {
+    _shader.setFloat(_shaderIndex, val);
+  }
+
+  /// VisibleForTesting: This is the index one would use with
+  /// [FragmentShader.setFloat] for this uniform.
+  int get shaderIndex {
+    return _shaderIndex;
+  }
+
+  final FragmentShader _shader;
+  int _shaderIndex;
+
+  /// The name of the bound uniform.
+  final String name;
+
+  /// The offset into the bound uniform. For example, 1 for `.y` or 2 for `.b`.
+  final int index;
 }
 
 /// A [Shader] generated from a [FragmentProgram].
@@ -5281,16 +5397,21 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
 /// are required to exist simultaneously, they must be obtained from two
 /// different calls to [FragmentProgram.fragmentShader].
 base class FragmentShader extends Shader {
-  FragmentShader._(FragmentProgram program, {String? debugName})
-    : _debugName = debugName,
-      super._() {
-    _floats = _constructor(program, program._uniformFloatCount, program._samplerCount);
+  FragmentShader._(this._program, {String? debugName}) : _debugName = debugName, super._() {
+    _floats = _constructor(_program, _program._uniformFloatCount, _program._samplerCount);
   }
+
+  final FragmentProgram _program;
 
   final String? _debugName;
 
   static final Float32List _kEmptyFloat32List = Float32List(0);
   Float32List _floats = _kEmptyFloat32List;
+  final List<WeakReference<UniformFloatSlot>> _slots = <WeakReference<UniformFloatSlot>>[];
+
+  void _reinitialize() {
+    _floats = _constructor(_program, _program._uniformFloatCount, _program._samplerCount);
+  }
 
   /// Sets the float uniform at [index] to [value].
   ///
@@ -5338,6 +5459,38 @@ base class FragmentShader extends Shader {
   void setFloat(int index, double value) {
     assert(!debugDisposed, 'Tried to accesss uniforms on a disposed Shader: $this');
     _floats[index] = value;
+  }
+
+  /// Access the float binding for uniform named [name] with optional offset
+  /// [index]. Example [index] values: 1 for 'foo.y', 2 for 'foo.b'.
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform float uScale;
+  /// uniform sampler2D uTexture;
+  /// uniform vec2 uMagnitude;
+  /// uniform vec4 uColor;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   shader.getUniformFloat('uScale');
+  ///   shader.getUniformFloat('uMagnitude', 0);
+  ///   shader.getUniformFloat('uMagnitude', 1);
+  ///   shader.getUniformFloat('uColor', 0);
+  ///   shader.getUniformFloat('uColor', 1);
+  ///   shader.getUniformFloat('uColor', 2);
+  ///   shader.getUniformFloat('uColor', 3);
+  /// }
+  /// ```
+  UniformFloatSlot getUniformFloat(String name, [int? index]) {
+    index ??= 0;
+    final int shaderIndex = _program._getUniformFloatIndex(name, index);
+    final UniformFloatSlot result = UniformFloatSlot._(this, name, index, shaderIndex);
+    _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
+    _slots.add(WeakReference<UniformFloatSlot>(result));
+    return result;
   }
 
   /// Sets the sampler uniform at [index] to [image].

@@ -35,7 +35,7 @@ Depending on the platform you are making changes for, you may be interested in a
 - Make sure to exclude the `out` directory from any backup scripts, as many large binary
   artifacts are generated. This is also generally true for all of the directories outside
   of the `engine/src/flutter` directory.
-- See [gclient bootstrap](https://github.com/flutter/flutter/tree/main/engine#gclient-bootstrap)
+- See [gclient bootstrap](Setting-up-the-Engine-development-environment.md#gclient-bootstrap)
   section for details on how to setup `gclient`.
 
 ## Updating the engine
