@@ -47,8 +47,11 @@ void main() {
 
   Future<void> setAppLifecycleState(AppLifecycleState state) async {
     final ByteData? message = const StringCodec().encodeMessage(state.toString());
-    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/lifecycle',
+      message,
+      (_) {},
+    );
   }
 
   group('SelectableRegion', () {
