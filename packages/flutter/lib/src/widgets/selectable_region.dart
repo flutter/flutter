@@ -303,18 +303,21 @@ class SelectableRegion extends StatefulWidget {
   }) {
     final bool canCopy = selectionGeometry.status == SelectionStatus.uncollapsed;
     final bool canSelectAll = selectionGeometry.hasContent;
-    final bool platformCanShare = switch (defaultTargetPlatform) {
-      TargetPlatform.android => selectionGeometry.status == SelectionStatus.uncollapsed,
-      TargetPlatform.macOS ||
-      TargetPlatform.fuchsia ||
-      TargetPlatform.linux ||
-      TargetPlatform.windows => false,
-      // TODO(bleroux): the share button should be shown on iOS but the share
-      // functionality requires some changes on the engine side because, on iPad,
-      // it needs an anchor for the popup.
-      // See: https://github.com/flutter/flutter/issues/141775.
-      TargetPlatform.iOS => false,
-    };
+    // The share button is not supported on the web.
+    final bool platformCanShare =
+        !kIsWeb &&
+        switch (defaultTargetPlatform) {
+          TargetPlatform.android => selectionGeometry.status == SelectionStatus.uncollapsed,
+          TargetPlatform.macOS ||
+          TargetPlatform.fuchsia ||
+          TargetPlatform.linux ||
+          TargetPlatform.windows => false,
+          // TODO(bleroux): the share button should be shown on iOS but the share
+          // functionality requires some changes on the engine side because, on iPad,
+          // it needs an anchor for the popup.
+          // See: https://github.com/flutter/flutter/issues/141775.
+          TargetPlatform.iOS => false,
+        };
     final bool canShare = onShare != null && platformCanShare;
 
     // On Android, the share button is before the select all button.
@@ -410,7 +413,7 @@ class SelectableRegionState extends State<SelectableRegion>
   SelectedContent? _lastSelectedContent;
 
   /// Whether the native browser context menu is enabled.
-  // TODO(Renzo-Olivares): Re-enable web context menu for android
+  // TODO(Renzo-Olivares): Re-enable web context menu for Android
   // and iOS when they are in a more usable state.
   bool get _webContextMenuEnabled =>
       kIsWeb &&
