@@ -558,8 +558,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Autocomplete<String>(
-              optionsViewOpenDirection:
-                  OptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
+              // ignore: avoid_redundant_argument_values
+              optionsViewOpenDirection: OptionsViewOpenDirection.down,
               optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
             ),
           ),
@@ -593,6 +593,91 @@ void main() {
       await tester.enterText(find.byType(RawAutocomplete<String>), 'a');
       await tester.pump();
       expect(find.text('aa').hitTestable(), findsOneWidget);
+    });
+
+    testWidgets('automatic: open in the direction with more space', (WidgetTester tester) async {
+      final GlobalKey fieldKey = GlobalKey();
+      final GlobalKey optionsKey = GlobalKey();
+      late StateSetter setState;
+      Alignment alignment = Alignment.topCenter;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return Align(
+                  alignment: alignment,
+                  child: Autocomplete<String>(
+                    optionsViewOpenDirection: OptionsViewOpenDirection.mostSpace,
+                    optionsBuilder: (TextEditingValue textEditingValue) => <String>['a', 'b', 'c'],
+                    fieldViewBuilder:
+                        (
+                          BuildContext context,
+                          TextEditingController controller,
+                          FocusNode focusNode,
+                          VoidCallback onFieldSubmitted,
+                        ) {
+                          return TextField(
+                            key: fieldKey,
+                            controller: controller,
+                            focusNode: focusNode,
+                          );
+                        },
+                    optionsViewBuilder:
+                        (
+                          BuildContext context,
+                          AutocompleteOnSelected<String> onSelected,
+                          Iterable<String> options,
+                        ) {
+                          return Material(
+                            child: ListView(
+                              key: optionsKey,
+                              children: options.map((String option) => Text(option)).toList(),
+                            ),
+                          );
+                        },
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Show the options. It should open downwards since there is more space.
+      await tester.tap(find.byKey(fieldKey));
+      await tester.pump();
+
+      expect(
+        tester.getBottomLeft(find.byKey(fieldKey)),
+        offsetMoreOrLessEquals(tester.getTopLeft(find.byKey(optionsKey))),
+      );
+
+      // Move the field to the bottom.
+      setState(() {
+        alignment = Alignment.bottomCenter;
+      });
+      await tester.pump();
+
+      // The options should now open upwards, since there is more space above.
+      expect(
+        tester.getTopLeft(find.byKey(fieldKey)),
+        offsetMoreOrLessEquals(tester.getBottomLeft(find.byKey(optionsKey))),
+      );
+
+      // Move the field to the center.
+      setState(() {
+        alignment = Alignment.center;
+      });
+      await tester.pump();
+
+      // Show the options. It should open downwards since there is more space.
+      expect(
+        tester.getBottomLeft(find.byKey(fieldKey)),
+        offsetMoreOrLessEquals(tester.getTopLeft(find.byKey(optionsKey))),
+      );
     });
   });
 
