@@ -37,7 +37,7 @@ executable("testing") {
 
   deps = [
     "$dart_src/runtime:libdart_jit",
-    "$dart_src/runtime/bin:dart_io_api",
+    "$dart_src/runtime/bin:common_embedder_dart_io",
     "//flutter/assets",
     "//flutter/common",
     "//flutter/flow",
