@@ -704,18 +704,19 @@ class DrivenScrollActivity extends ScrollActivity {
     required TickerProvider vsync,
   }) : assert(duration > Duration.zero) {
     _completer = Completer<void>();
-    _controller =
-        AnimationController.unbounded(
-            value: from,
-            debugLabel: objectRuntimeType(this, 'DrivenScrollActivity'),
-            vsync: vsync,
-          )
-          ..addListener(_tick)
-          ..animateTo(
-            to,
-            duration: duration,
-            curve: curve,
-          ).whenComplete(_end); // won't trigger if we dispose _controller before it completes.
+    _controller = AnimationController.unbounded(
+      value: from,
+      debugLabel: objectRuntimeType(this, 'DrivenScrollActivity'),
+      vsync: vsync,
+    );
+    // no cascade, ensures _controller is initialized before _tick is invoked.
+    _controller
+      ..addListener(_tick)
+      ..animateTo(
+        to,
+        duration: duration,
+        curve: curve,
+      ).whenComplete(_end); // won't trigger if we dispose _controller before it completes.
   }
 
   /// Creates an activity that drives a scroll view through an animation
@@ -726,15 +727,16 @@ class DrivenScrollActivity extends ScrollActivity {
     required TickerProvider vsync,
   }) {
     _completer = Completer<void>();
-    _controller =
-        AnimationController.unbounded(
-            debugLabel: objectRuntimeType(this, 'DrivenScrollActivity'),
-            vsync: vsync,
-          )
-          ..addListener(_tick)
-          ..animateWith(
-            simulation,
-          ).whenComplete(_end); // won't trigger if we dispose _controller before it completes.
+    _controller = AnimationController.unbounded(
+      debugLabel: objectRuntimeType(this, 'DrivenScrollActivity'),
+      vsync: vsync,
+    );
+    // no cascade, ensures _controller is initialized before _tick is invoked.
+    _controller
+      ..addListener(_tick)
+      ..animateWith(
+        simulation,
+      ).whenComplete(_end); // won't trigger if we dispose _controller before it completes.
   }
 
   late final Completer<void> _completer;
