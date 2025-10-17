@@ -80,6 +80,7 @@ sealed class ProxyRule {
         logger.printError('$_kLogEntryPrefix Header "$_kValue" must be a String. Found ${value.runtimeType}');
         continue;
       }
+      }
       result[name] = value;
     }
     return result;
