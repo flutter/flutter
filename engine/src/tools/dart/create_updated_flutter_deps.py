@@ -180,8 +180,7 @@ def Main(argv):
     if k not in ('dart_revision', 'dart_git') and k.startswith('dart_'):
       dart_key = k[len('dart_'):]
       if dart_key in dart_vars:
-        updated_revision = dart_vars[dart_key].lstrip('@') if dart_key in dart_vars else v
-        updated_vars[k] = updated_revision
+        updated_vars[k] = dart_vars[dart_key].lstrip('@')
 
   new_dart_deps = ComputeDartDeps(flutter_vars, flutter_deps, dart_deps)
 
@@ -208,7 +207,7 @@ def Main(argv):
     elif lines[i].startswith("  # WARNING: Unused Dart dependencies"):
       updatedfile.write('\n')
       i = i + 1
-      while i < len(lines) and (lines[i].startswith("  # WARNING: end of dart dependencies") == 0):
+      while i < len(lines) and not lines[i].startswith("  # WARNING: end of dart dependencies"):
         i = i + 1
 
       for dep_path, dep_source in new_dart_deps.items():
