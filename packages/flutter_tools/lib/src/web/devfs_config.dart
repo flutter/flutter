@@ -59,35 +59,7 @@ class WebDevServerConfig {
 
     final headers = <String, String>{};
     if (headersList != null) {
-      for (final Object? item in headersList) {
-        if (item is YamlMap) {
-          final YamlMap headerMap = item;
-          if (!headerMap.containsKey(_kName) || !headerMap.containsKey(_kValue)) {
-            throwToolExit(
-              '$_kLogEntryPrefix Each header entry must contain "$_kName" and "$_kValue" keys.',
-            );
-          }
-
-          final Object? name = headerMap[_kName];
-          if (name is! String) {
-            throwToolExit(
-              '$_kLogEntryPrefix Header "$_kName" must be a non-null String. Found ${name.runtimeType}',
-            );
-          }
-
-          final Object? value = headerMap[_kValue];
-          if (value is! String) {
-            throwToolExit(
-              '$_kLogEntryPrefix Header "$_kValue" must be a non-null String. Found ${value.runtimeType}',
-            );
-          }
-          headers[name] = value;
-        } else {
-          throwToolExit(
-            '$_kLogEntryPrefix Each header entry must be a map. Found ${item.runtimeType}',
-          );
-        }
-      }
+      headers.addAll(getHeaders(headersList));
     }
 
     final YamlList? proxyList = _validateType<YamlList>(value: yaml[_kProxy], fieldName: _kProxy);
@@ -214,6 +186,41 @@ HttpsConfig:
   $_kCertPath: $certPath
   $_kCertKeyPath: $certKeyPath''';
   }
+}
+
+/// Parses the headers from a [YamlList] into a map of header key-value pairs.
+///
+/// Each entry in the list should be a map with keys [_kName] and [_kValue].
+Map<String, String> getHeaders(YamlList headersList) {
+  final headers = <String, String>{};
+  for (final Object? item in headersList) {
+    if (item is YamlMap) {
+      final YamlMap headerMap = item;
+      if (!headerMap.containsKey(_kName) || !headerMap.containsKey(_kValue)) {
+        throwToolExit(
+          '$_kLogEntryPrefix Each header entry must contain "$_kName" and "$_kValue" keys.',
+        );
+      }
+
+      final Object? name = headerMap[_kName];
+      if (name is! String) {
+        throwToolExit(
+          '$_kLogEntryPrefix Header "$_kName" must be a non-null String. Found ${name.runtimeType}',
+        );
+      }
+
+      final Object? value = headerMap[_kValue];
+      if (value is! String) {
+        throwToolExit(
+          '$_kLogEntryPrefix Header "$_kValue" must be a non-null String. Found ${value.runtimeType}',
+        );
+      }
+      headers[name] = value;
+    } else {
+      throwToolExit('$_kLogEntryPrefix Each header entry must be a map. Found ${item.runtimeType}');
+    }
+  }
+  return headers;
 }
 
 /// Finds a free port or validates the provided port is within the valid range
