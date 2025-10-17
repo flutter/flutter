@@ -414,8 +414,8 @@ class SelectableRegionState extends State<SelectableRegion>
 
   /// Whether the native browser context menu is enabled.
   // TODO(Renzo-Olivares): Re-enable web context menu for Android
-  // and iOS when they are in a more usable state.
-  // See: https://github.com/flutter/flutter/issues/177123.
+  // and iOS when https://github.com/flutter/flutter/issues/177123
+  // is resolved.
   bool get _webContextMenuEnabled =>
       kIsWeb &&
       BrowserContextMenu.enabled &&
