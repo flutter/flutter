@@ -18,6 +18,8 @@ import 'slider_theme.dart';
 import 'slider_value_indicator_shape.dart';
 import 'theme.dart';
 
+const String _kEllipsis = '\u2026';
+
 /// Base class for [Slider] tick mark shapes.
 ///
 /// Create a subclass of this if you would like a custom slider tick mark shape.
@@ -874,36 +876,16 @@ class _ValueIndicatorTextProcessor {
       return;
     }
 
-    // Text exceeds maxLines, create painter with ellipsis.
-    final String labelText = _originalPainter.text?.toPlainText() ?? '';
-    _textPainter = _createTextPainterWithEllipsis(
-      originalPainter: _originalPainter,
-      originalText: labelText,
+    // If text exceeds maxLines, create painter with ellipsis
+    // using TextPainter's built-in API.
+    _textPainter = TextPainter(
+      text: _originalPainter.text,
+      textDirection: _originalPainter.textDirection,
+      textScaleFactor: textScaleFactor,
       maxLines: maxLines,
-      textScaleFactor: textScaleFactor,
-    );
-    _createdNewPainter = true;
-  }
-
-  /// Creates a TextPainter with ellipsis when text exceeds maxLines.
-  // TODO(huycozy): Use TextPainter built-in API for ellipsis.
-  //  See https://github.com/flutter/flutter/issues/175251
-  //  Blocked by https://github.com/flutter/flutter/issues/50168
-  TextPainter _createTextPainterWithEllipsis({
-    required TextPainter originalPainter,
-    required String originalText,
-    required int maxLines,
-    required double textScaleFactor,
-  }) {
-    final List<String> lines = originalText.split('\n');
-    final List<String> visibleLines = lines.take(maxLines - 1).toList();
-    visibleLines.add('${lines[maxLines - 1]}...');
-
-    return TextPainter(
-      text: TextSpan(text: visibleLines.join('\n'), style: originalPainter.text?.style),
-      textDirection: originalPainter.textDirection,
-      textScaleFactor: textScaleFactor,
+      ellipsis: _kEllipsis,
     )..layout();
+    _createdNewPainter = true;
   }
 
   /// Disposes resources if a new TextPainter was created.
