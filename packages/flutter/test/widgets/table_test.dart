@@ -1025,4 +1025,37 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('Table reuse the semantics nodes for cell wrappers', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Table(
+            children: <TableRow>[
+              TableRow(children: <Widget>[TextField(focusNode: focusNode)]),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final SemanticsNode textFieldSemanticsNode = find.semantics
+        .byFlag(SemanticsFlag.isTextField)
+        .evaluate()
+        .first;
+    final int? cellWrapperId = textFieldSemanticsNode.parent?.id;
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    final SemanticsNode textFieldSemanticsNodeNew = find.semantics
+        .byFlag(SemanticsFlag.isTextField)
+        .evaluate()
+        .first;
+
+    final int? cellWrapperIdAfterUIchanges = textFieldSemanticsNodeNew.parent?.id;
+    expect(cellWrapperIdAfterUIchanges, cellWrapperId);
+  });
 }
