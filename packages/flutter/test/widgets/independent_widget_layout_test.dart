@@ -4,8 +4,8 @@
 
 import 'dart:ui' show FlutterView;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class ScheduledFrameTrackingPlatformDispatcher extends TestPlatformDispatcher {
