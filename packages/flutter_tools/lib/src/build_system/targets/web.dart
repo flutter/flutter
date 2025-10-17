@@ -279,6 +279,10 @@ class Dart2JSTarget extends Dart2WebTarget {
 class Dart2WasmTarget extends Dart2WebTarget {
   Dart2WasmTarget(this.compilerConfig, this._analytics);
 
+  static const String kDynamicModuleMetadata = 'main.dyndata';
+  static const String kDynamicModuleMainDill = 'dynmain.dart.dill';
+  static const String kDynamicModuleMainOptDill = 'dynmain.dart.opt.dill';
+
   @override
   final WasmCompilerConfig compilerConfig;
 
@@ -319,9 +323,25 @@ class Dart2WasmTarget extends Dart2WebTarget {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
     }
+    if (compilerConfig.dynamicModuleEntryPoint != null &&
+        compilerConfig.dynamicModuleInterface == null) {
+      throw ArgumentError(
+        'Must provide `dynamic-module-interface` if `dynamic-module-entrypoint` is provided.',
+      );
+    }
     final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Artifacts artifacts = environment.artifacts;
-    final File outputWasmFile = environment.buildDir.childFile('main.dart.wasm');
+    File outputWasmFile;
+    File dartEntryPointFile;
+    if (compilerConfig.dynamicModuleEntryPoint != null) {
+      dartEntryPointFile = environment.projectDir.childFile(
+        compilerConfig.dynamicModuleEntryPoint!,
+      );
+      outputWasmFile = environment.buildDir.childFile('${dartEntryPointFile.basename}.wasm');
+    } else {
+      dartEntryPointFile = environment.buildDir.childFile('main.dart');
+      outputWasmFile = environment.buildDir.childFile('main.dart.wasm');
+    }
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
     final String platformBinariesPath = artifacts
         .getHostArtifact(HostArtifact.webPlatformKernelFolder)
@@ -347,9 +367,16 @@ class Dart2WasmTarget extends Dart2WebTarget {
       for (final String dartDefine in dartDefines) '-D$dartDefine',
       '--extra-compiler-option=--depfile=${depFile.path}',
       ...compilerConfig.toCommandOptions(buildMode),
+      if (compilerConfig.dynamicModuleInterface != null) ...<String>[
+        '--extra-compiler-option=--dynamic-module-main=${environment.buildDir.childFile(kDynamicModuleMainDill).path}',
+        '--extra-compiler-option=--dynamic-module-metadata=${environment.buildDir.childFile(kDynamicModuleMetadata).path}',
+        '--extra-compiler-option=--dynamic-module-interface=${environment.projectDir.childFile(compilerConfig.dynamicModuleInterface!).path}',
+        '--extra-compiler-option=--dynamic-module-type=${compilerConfig.dynamicModuleEntryPoint != null ? 'submodule' : 'main'}',
+        '-O0',
+      ],
       '-o',
       outputWasmFile.path,
-      environment.buildDir.childFile('main.dart').path, // dartfile
+      dartEntryPointFile.path, // dartfile
     ];
 
     final processUtils = ProcessUtils(
@@ -385,25 +412,39 @@ class Dart2WasmTarget extends Dart2WebTarget {
   @override
   Iterable<File> buildFiles(Environment environment) => compilerConfig.dryRun
       ? const <File>[]
-      : environment.buildDir
-            .listSync(recursive: true)
-            .whereType<File>()
-            .where(
-              (File file) => switch (file.basename) {
-                'main.dart.wasm' || 'main.dart.mjs' => true,
-                'main.dart.wasm.map' => compilerConfig.sourceMaps,
-                _ => false,
-              },
-            );
+      : environment.buildDir.listSync(recursive: true).whereType<File>().where((File file) {
+        if (file.basename.endsWith('.dart.wasm') || file.basename.endsWith('.dart.mjs')) {
+          return true;
+        }
+        if (file.basename.endsWith('.dart.wasm.map')) {
+          return compilerConfig.sourceMaps;
+        }
+        if (compilerConfig.dynamicModuleInterface != null) {
+          if (const <String>{
+            kDynamicModuleMetadata,
+            kDynamicModuleMainOptDill,
+            kDynamicModuleMainDill,
+          }.contains(file.basename)) {
+            return true;
+          }
+        }
+
+        return false;
+      });
 
   @override
   Iterable<String> get buildPatternStems => compilerConfig.dryRun
       ? const <String>[]
       : <String>[
-          'main.dart.wasm',
-          'main.dart.mjs',
-          if (compilerConfig.sourceMaps) 'main.dart.wasm.map',
-        ];
+    '*.dart.wasm',
+    '*.dart.mjs',
+    if (compilerConfig.sourceMaps) '*.dart.wasm.map',
+    if (compilerConfig.dynamicModuleInterface != null) ...<String>[
+      kDynamicModuleMetadata,
+      kDynamicModuleMainDill,
+      kDynamicModuleMainOptDill,
+    ],
+  ];
 
   void _handleDryRunResult(Environment environment, RunResult runResult) {
     final int exitCode = runResult.exitCode;
@@ -451,6 +492,14 @@ class Dart2WasmTarget extends Dart2WebTarget {
       Event.flutterWasmDryRun(result: result, exitCode: exitCode, findingsSummary: findingsSummary),
     );
   }
+    @override
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    if (compilerConfig.dynamicModuleInterface != null)
+      Source.pattern('{PROJECT_DIR}/${compilerConfig.dynamicModuleInterface!}'),
+    if (compilerConfig.dynamicModuleEntryPoint != null)
+      Source.pattern('{PROJECT_DIR}/${compilerConfig.dynamicModuleEntryPoint!}'),
+  ];
 }
 
 /// Unpacks the dart2js or dart2wasm compilation and resources to a given
@@ -502,6 +551,9 @@ class WebReleaseBundle extends Target {
 
   @override
   List<String> get depfiles => const <String>['flutter_assets.d', 'web_resources.d'];
+
+  @override
+  String get buildKey => compileTargets.map((Dart2WebTarget e) => e.buildKey).join(':');
 
   @override
   Future<void> build(Environment environment) async {
