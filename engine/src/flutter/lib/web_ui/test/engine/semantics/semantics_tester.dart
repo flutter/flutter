@@ -87,6 +87,7 @@ class SemanticsTester {
     ui.SemanticsRole? role,
     List<String>? controlsNodes,
     ui.SemanticsValidationResult validationResult = ui.SemanticsValidationResult.none,
+    ui.SemanticsHitTestBehavior? hitTestBehavior,
     ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
     ui.Locale? locale,
   }) {
@@ -218,6 +219,7 @@ class SemanticsTester {
       role: role ?? ui.SemanticsRole.none,
       controlsNodes: controlsNodes,
       validationResult: validationResult,
+      hitTestBehavior: hitTestBehavior,
       inputType: inputType,
       locale: locale,
     );

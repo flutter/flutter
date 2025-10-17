@@ -270,6 +270,7 @@ class SemanticsNodeUpdate {
     required this.role,
     required this.controlsNodes,
     required this.validationResult,
+    this.hitTestBehavior,
     required this.inputType,
     required this.locale,
   });
@@ -381,6 +382,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.SemanticsValidationResult validationResult;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final ui.SemanticsHitTestBehavior? hitTestBehavior;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.SemanticsInputType inputType;
@@ -581,7 +585,36 @@ abstract class SemanticRole {
   ///
   /// This boolean decides whether to set the `pointer-events` CSS property to
   /// `all` or to `none` on the semantics [element].
+  ///
+  /// The decision follows a multi-tier policy:
+  ///
+  /// **Tier 1: Explicit Behaviors** - Behaviors attached to this role can
+  /// override pointer event handling (e.g., [Tappable], [SemanticTextField]).
+  /// These take highest precedence as they represent interactive elements.
+  ///
+  /// **Tier 2: Framework Declaration** - When the framework provides explicit
+  /// [ui.SemanticsHitTestBehavior], it will be respected here. This allows
+  /// declarative control over pointer event handling from the framework layer.
+  ///
+  /// **Tier 3: Route-Scoped Containers** - Containers with [scopesRoute] set
+  /// (like dialogs, bottom sheets) accept pointer events to act as barriers,
+  /// preventing clicks from escaping to underlying modal barriers. This is
+  /// the current fix for issue #149001.
+  ///
+  /// **Tier 4: Default Transparent** - Leaf nodes without interactive behaviors
+  /// default to transparent, allowing pointer events to pass through to elements
+  /// behind them.
+  ///
+  /// This multi-tier approach ensures:
+  /// - Interactive elements always receive clicks (Tier 1)
+  /// - Future framework control via explicit declarations (Tier 2)
+  /// - Backward compatibility during framework transition (Tier 3)
+  /// - Correct default behavior for non-interactive elements (Tier 4)
   bool get acceptsPointerEvents {
+    // TIER 1: Check if any behavior explicitly accepts pointer events.
+    // Interactive behaviors (Tappable, SemanticTextField, SemanticIncrementable)
+    // override this to return true, ensuring buttons, text fields, and other
+    // interactive elements always receive pointer events.
     final behaviors = _behaviors;
     if (behaviors != null) {
       for (final behavior in behaviors) {
@@ -590,14 +623,54 @@ abstract class SemanticRole {
         }
       }
     }
-    // Ignore pointer events on all container nodes, unless they define a route scope.
-    // Route-scoped containers (like dialogs) need to accept pointer events to prevent
-    // clicks from escaping to the underlying barrier.
+
+    // TIER 2: Check framework's explicit hit test behavior.
+    // When the framework adds a hitTestBehavior field to SemanticsConfiguration,
+    // this tier enables declarative hit-test control.
+    final hitTestBehavior = semanticsObject.hitTestBehavior;
+    if (hitTestBehavior != null) {
+      return _shouldAcceptPointerEventsFromBehavior(hitTestBehavior);
+    }
+
+    // TIER 3: Route-scoped containers accept pointer events as a fallback.
+    // This fixes the dialog dismissal bug (issue #149001) by ensuring that
+    // dialog containers act as barriers, preventing clicks on empty space
+    // from passing through to the modal barrier underneath.
+    //
+    // This tier provides backward compatibility:
+    // - Works with current framework (no changes needed)
+    // - Supports third-party modal libraries, such as awesome_dialog
+    // - Handles custom user widgets with scopesRoute
+    //
+    // When Tier 2 is implemented, this serves as graceful degradation for
+    // widgets that haven't been updated to use explicit hitTestBehavior.
     if (semanticsObject.hasChildren) {
       return semanticsObject.scopesRoute;
     }
 
+    // TIER 4: Leaf nodes default to transparent.
+    // Non-interactive leaf nodes (like empty space in dialogs) should not
+    // intercept pointer events. This prevents them from blocking clicks meant
+    // for underlying elements.
+    //
+    // Interactive leaf nodes are already handled by Tier 1 via their behaviors:
+    // - Buttons, links, checkables → Tappable behavior
+    // - Text fields → SemanticTextField role
+    // - Sliders → SemanticIncrementable role
     return false;
+  }
+
+  bool _shouldAcceptPointerEventsFromBehavior(ui.SemanticsHitTestBehavior behavior) {
+    switch (behavior) {
+      case ui.SemanticsHitTestBehavior.opaque:
+        // Absorb pointer events, blocking them from reaching elements behind.
+        // Used by modal surfaces like dialogs, bottom sheets, drawers.
+        return true;
+      case ui.SemanticsHitTestBehavior.transparent:
+        // Pass through pointer events to elements behind.
+        // Used for non-interactive decorative elements.
+        return false;
+    }
   }
 
   /// Semantic behaviors provided by this role, if any.
@@ -1469,6 +1542,17 @@ class SemanticsObject {
     _dirtyFields |= _validationResultIndex;
   }
 
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  ui.SemanticsHitTestBehavior? get hitTestBehavior => _hitTestBehavior;
+  ui.SemanticsHitTestBehavior? _hitTestBehavior;
+
+  static const int _hitTestBehaviorIndex = 1 << 28;
+
+  bool get isHitTestBehaviorDirty => _isDirty(_hitTestBehaviorIndex);
+  void _markHitTestBehaviorDirty() {
+    _dirtyFields |= _hitTestBehaviorIndex;
+  }
+
   /// A unique permanent identifier of the semantics node in the tree.
   final int id;
 
@@ -1779,6 +1863,11 @@ class SemanticsObject {
     if (_validationResult != update.validationResult) {
       _validationResult = update.validationResult;
       _markValidationResultDirty();
+    }
+
+    if (_hitTestBehavior != update.hitTestBehavior) {
+      _hitTestBehavior = update.hitTestBehavior;
+      _markHitTestBehaviorDirty();
     }
 
     role = update.role;

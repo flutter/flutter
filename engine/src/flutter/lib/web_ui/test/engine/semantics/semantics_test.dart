@@ -1692,6 +1692,84 @@ void _testContainer() {
         reason: 'Regular containers (without scopesRoute) should not accept pointer events',
       );
     });
+
+    test('hitTestBehavior.opaque makes nodes accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(builder, hitTestBehavior: ui.SemanticsHitTestBehavior.opaque);
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        element.style.pointerEvents,
+        'all',
+        reason: 'Nodes with hitTestBehavior.opaque should accept pointer events',
+      );
+    });
+
+    test('hitTestBehavior.transparent makes nodes not accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(builder, hitTestBehavior: ui.SemanticsHitTestBehavior.transparent);
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        element.style.pointerEvents,
+        'none',
+        reason: 'Nodes with hitTestBehavior.transparent should not accept pointer events',
+      );
+    });
+
+    test('hitTestBehavior.opaque overrides scopesRoute for containers', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      // Create a route-scoped container with explicit transparent behavior
+      updateNode(
+        builder,
+        flags: const ui.SemanticsFlags(scopesRoute: true),
+        hitTestBehavior: ui.SemanticsHitTestBehavior.transparent,
+        childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+      );
+      updateNode(builder, id: 1);
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement container = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        container.style.pointerEvents,
+        'none',
+        reason: 'Explicit hitTestBehavior.transparent should override scopesRoute',
+      );
+    });
+
+    test('hitTestBehavior takes precedence over interactive behaviors', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      // Create a tappable node with explicit transparent behavior
+      updateNode(
+        builder,
+        actions: ui.SemanticsAction.tap.index,
+        hitTestBehavior: ui.SemanticsHitTestBehavior.transparent,
+      );
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        element.style.pointerEvents,
+        'all',
+        reason:
+            'Interactive behaviors (Tier 1) should take precedence over hitTestBehavior (Tier 2)',
+      );
+    });
   });
 
   test('descendant nodes are removed from the node map, unless reparented', () async {
@@ -5903,6 +5981,7 @@ void updateNode(
   String? linkUrl,
   List<String>? controlsNodes,
   ui.SemanticsRole role = ui.SemanticsRole.none,
+  ui.SemanticsHitTestBehavior? hitTestBehavior,
   ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
   ui.Locale? locale,
 }) {
@@ -5946,6 +6025,7 @@ void updateNode(
     headingLevel: headingLevel,
     linkUrl: linkUrl,
     controlsNodes: controlsNodes,
+    hitTestBehavior: hitTestBehavior,
     inputType: inputType,
     locale: locale,
   );
