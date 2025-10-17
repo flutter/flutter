@@ -55,7 +55,7 @@ void main() {
     }
 
     RenderBox getCheckboxListTileRenderer() {
-      return tester.renderObject<RenderBox>(find.byType(CheckboxListTile));
+      return tester.renderObject<RenderBox>(find.byType(Checkbox));
     }
 
     await tester.pumpWidget(buildFrame(null));
@@ -92,7 +92,7 @@ void main() {
     }
 
     RenderBox getCheckboxListTileRenderer() {
-      return tester.renderObject<RenderBox>(find.byType(CheckboxListTile));
+      return tester.renderObject<RenderBox>(find.byType(Checkbox));
     }
 
     await tester.pumpWidget(buildFrame(null));
@@ -136,17 +136,17 @@ void main() {
       );
     }
 
-    RenderBox getCheckboxListTileRenderer() {
-      return tester.renderObject<RenderBox>(find.byType(CheckboxListTile));
+    RenderBox getCheckboxRenderer() {
+      return tester.renderObject<RenderBox>(find.byType(Checkbox));
     }
 
     await tester.pumpWidget(buildFrame(const Color(0xFF000000), null));
     await tester.pumpAndSettle();
-    expect(getCheckboxListTileRenderer(), paints..path(color: const Color(0xFF000000)));
+    expect(getCheckboxRenderer(), paints..path(color: const Color(0xFF000000)));
 
     await tester.pumpWidget(buildFrame(const Color(0xFF000000), const Color(0xFFFFFFFF)));
     await tester.pumpAndSettle();
-    expect(getCheckboxListTileRenderer(), paints..path(color: const Color(0xFFFFFFFF)));
+    expect(getCheckboxRenderer(), paints..path(color: const Color(0xFFFFFFFF)));
   });
 
   testWidgets('CheckboxListTile can autofocus unless disabled.', (WidgetTester tester) async {
@@ -324,7 +324,10 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..rect(color: tileColor));
+    expect(
+      find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+      paints..path(color: tileColor),
+    );
   });
 
   testWidgets('CheckboxListTile respects selectedTileColor', (WidgetTester tester) async {
@@ -344,7 +347,10 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..rect(color: selectedTileColor));
+    expect(
+      find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+      paints..path(color: selectedTileColor),
+    );
   });
 
   testWidgets('CheckboxListTile selected item text Color', (WidgetTester tester) async {
