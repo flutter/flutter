@@ -854,7 +854,7 @@ TEST_P(AiksTest, MultipleColorWithShadowCache) {
 
   std::array<DlColor, 4> colors{DlColor::kRed(), DlColor::kGreen(),
                                 DlColor::kBlue(), DlColor::kRed()};
-  for (DlColor color : colors) {
+  for (const auto& color : colors) {
     ASSERT_TRUE(RenderTextInCanvasSkia(
         GetContext(), builder, "A", kFontFixture,
         TextRenderOptions{
