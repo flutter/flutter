@@ -1,6 +1,5 @@
 # RBE for Flutter Engine Developers
 
-g
 ## Overview
 
 This is documentation on setting up RBE for building the Flutter engine. It is
@@ -9,21 +8,21 @@ including cloudtop instances.
 
 ## Getting started
 
-The first step is to add an entry to the `.gclient` file. The entry to add is
-`"use_rbe": True` in the `custom_vars` section. It should look like this:
+The first step is ensure RBE is enabled in `.gclient` file. Add the entry
+`"use_rbe": True` in the `custom_vars` section if it is not already present.
+
+> **TIP**: If your `.gclient` file was copied from `engine/scripts/rbe.gclient`,
+> the entry will already be present.
+
+`.gclient` should look like this:
 
 ```
 solutions = [
   {
-    "managed": False,
-    "name": "src/flutter",
-    "url": "git@github.com:zanderso/engine.git",
-    "custom_deps": {},
+    # ...
     "custom_vars": {
       "use_rbe": True,
     },
-    "deps_file": "DEPS",
-    "safesync_url": "",
   },
 ]
 ```
@@ -37,12 +36,6 @@ cipd auth-login
 ```
 
 After authentication successfully, run `gclient sync -D`.
-
-## Running an RBE build
-
-In the engine repo, all RBE builds must be initiated through the `et` tool whose
-entrypoint is the script `//flutter/bin/et`. This is so that the local RBE
-proxy is correctly initialized and shut down around invocations of `ninja`.
 
 ### gcloud
 
@@ -59,13 +52,17 @@ return `/usr/bin/python3`.
 gcloud init --project flutter-rbe-prod
 ```
 
-If you get an error from `bootstrap` about not being able to find `Application
-Default Credentials` you may need to execute the following to create the default
-credentials:
+Execute the following to create application default credentials:
 
 ```sh
 gcloud auth application-default login
 ```
+
+## Running an RBE build
+
+In the engine repo, all RBE builds must be initiated through the `et` tool whose
+entrypoint is the script `//flutter/bin/et`. This is so that the local RBE
+proxy is correctly initialized and shut down around invocations of `ninja`.
 
 ### Listing builds
 
@@ -152,6 +149,18 @@ Check your `${HOME}/.config/gcloud/application_default_credentials.json` to see 
 ```shell
 gcloud auth application-default login
 ```
+
+### Too many open files
+
+For developers on a macOS device, if you get the following error while running
+`et build`:
+
+```shell
+ninja: fatal: pipe: Too many open files
+```
+
+Increase the maximum number of open files on your machine with the instructions
+[here](go/building-chrome-mac#configure-your-mac-for-remote-execution).
 
 ### Slow builds
 
