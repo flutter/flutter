@@ -29,5 +29,11 @@
   "shareButtonLabel": "Бөлүшүү…",
   "clearButtonLabel": "Тазалоо",
   "cancelButtonLabel": "Токтотуу",
-  "backButtonLabel": "Артка"
+  "backButtonLabel": "Артка",
+  "expansionTileExpandedHint": "жыйыштыруу үчүн эки жолу таптаңыз",
+  "expansionTileCollapsedHint": "жайып көрсөтүү үчүн эки жолу таптаңыз",
+  "expansionTileExpandedTapHint": "Жыйыштыруу",
+  "expansionTileCollapsedTapHint": "Толук маалымат алуу үчүн жайып көрүңүз",
+  "expandedHint": "Жыйыштырылды",
+  "collapsedHint": "Жайылып көрсөтүлдү"
 }

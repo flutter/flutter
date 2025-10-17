@@ -19,6 +19,7 @@
 namespace flutter {
 namespace testing {
 
+[[maybe_unused]]
 static const std::string kEmojiFontFile =
 #if FML_OS_MACOSX
     "Apple Color Emoji.ttc";
@@ -26,6 +27,7 @@ static const std::string kEmojiFontFile =
     "NotoColorEmoji.ttf";
 #endif
 
+[[maybe_unused]]
 static const std::string kEmojiFontName =
 #if FML_OS_MACOSX
     "Apple Color Emoji";

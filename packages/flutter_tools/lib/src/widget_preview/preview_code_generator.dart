@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:analyzer/dart/constant/value.dart';
-import 'package:analyzer/dart/element/element2.dart' as analyzer;
-import 'package:analyzer/dart/element/element2.dart';
+import 'package:analyzer/dart/element/element.dart' as analyzer;
+import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:code_builder/code_builder.dart' as cb;
@@ -29,11 +29,23 @@ class PreviewCodeGenerator {
   /// project.
   final FlutterProject widgetPreviewScaffoldProject;
 
-  static const _kBuilderType = 'Builder';
-  static const _kBuilderLibraryUri = 'package:flutter/widgets.dart';
-  static const _kBuilderProperty = 'builder';
+  static const _kBuildMultiWidgetPreview = 'buildMultiWidgetPreview';
+  static const _kBuildWidgetPreview = 'buildWidgetPreview';
+  static const _kBuildWidgetPreviewError = 'buildWidgetPreviewError';
+  static const _kColumn = 'column';
+  static const _kDependencyHasErrors = 'dependencyHasErrors';
+  static const _kLine = 'line';
   static const _kListType = 'List';
+  static const _kPackageName = 'packageName';
+  static const _kPackageUri = 'packageUri';
+  static const _kPreview = 'preview';
+  static const _kPreviewFunction = 'previewFunction';
+  static const _kPreviewFunctionName = 'functionName';
   static const _kPreviewsFunctionName = 'previews';
+  static const _kScriptUri = 'scriptUri';
+  static const _kTransform = 'transform';
+  static const _kTransformedPreview = 'transformedPreview';
+  static const _kUtilsUri = 'utils.dart';
   static const _kWidgetPreviewClass = 'WidgetPreview';
   static const _kWidgetPreviewLibraryUri = 'widget_preview.dart';
 
@@ -90,15 +102,17 @@ class PreviewCodeGenerator {
   void populatePreviewsInGeneratedPreviewScaffold(PreviewDependencyGraph previews) {
     final emitter = cb.DartEmitter.scoped(useNullSafetySyntax: true);
     final lib = cb.Library(
-      (cb.LibraryBuilder b) => b.body.addAll(<cb.Spec>[
-        cb.Method(
-          (cb.MethodBuilder b) => _buildGeneratedPreviewMethod(
-            allocator: emitter.allocator,
-            previews: previews,
-            builder: b,
+      (cb.LibraryBuilder b) => b
+        ..ignoreForFile.add('implementation_imports')
+        ..body.addAll(<cb.Spec>[
+          cb.Method(
+            (cb.MethodBuilder b) => _buildGeneratedPreviewMethod(
+              allocator: emitter.allocator,
+              previews: previews,
+              builder: b,
+            ),
           ),
-        ),
-      ]),
+        ]),
     );
     final File generatedPreviewFile = fs.file(
       widgetPreviewScaffoldProject.directory.uri.resolve(getGeneratedPreviewFilePath(fs)),
@@ -116,7 +130,6 @@ class PreviewCodeGenerator {
     required cb.Allocator allocator,
     required cb.MethodBuilder builder,
   }) {
-    final previewExpressions = <cb.Expression>[];
     // Sort the entries by URI so that the code generator assigns import prefixes in a
     // deterministic manner, mainly for testing purposes. This also results in previews being
     // displayed in the same order across platforms with differing path styles.
@@ -124,24 +137,17 @@ class PreviewCodeGenerator {
       ..sort((_PreviewMappingEntry a, _PreviewMappingEntry b) {
         return a.key.uri.toString().compareTo(b.key.uri.toString());
       });
-    for (final _PreviewMappingEntry(
-          key: (path: String _, :Uri uri),
-          value: LibraryPreviewNode libraryDetails,
-        )
-        in sortedPreviews) {
-      for (final PreviewDetails preview in libraryDetails.previews) {
-        previewExpressions.add(
-          _buildPreviewWidget(
-            allocator: allocator,
-            preview: preview,
-            uri: uri,
-            libraryDetails: libraryDetails,
-          ),
-        );
-      }
-    }
+
     builder
-      ..body = cb.literalList(previewExpressions).code
+      ..body = cb.literalList([
+        for (final libraryPreviews in sortedPreviews)
+          for (final preview in libraryPreviews.value.previews)
+            _buildPreviews(
+              preview: preview,
+              uri: libraryPreviews.key.uri,
+              libraryDetails: libraryPreviews.value,
+            ),
+      ]).code
       ..name = _kPreviewsFunctionName
       ..returns =
           (cb.TypeReferenceBuilder()
@@ -152,101 +158,46 @@ class PreviewCodeGenerator {
               .build();
   }
 
-  cb.Expression _buildPreviewWidget({
-    required cb.Allocator allocator,
+  cb.Expression _buildPreviews({
     required PreviewDetails preview,
     required Uri uri,
     required LibraryPreviewNode libraryDetails,
   }) {
-    cb.Expression previewWidget;
-    // TODO(bkonyi): clean up the error related code.
-    if (libraryDetails.hasErrors) {
-      previewWidget = cb.refer('Text', 'package:flutter/material.dart').newInstance(<cb.Expression>[
-        cb.literalString('$uri has errors!'),
-      ]);
-    } else if (libraryDetails.dependencyHasErrors) {
-      previewWidget = cb.refer('Text', 'package:flutter/material.dart').newInstance(<cb.Expression>[
-        cb.literalString('Dependency of $uri has errors!'),
-      ]);
-    } else {
-      previewWidget = cb.refer(preview.functionName, uri.toString()).call(<cb.Expression>[]);
-
-      if (preview.isBuilder) {
-        previewWidget = cb.refer(_kBuilderType, _kBuilderLibraryUri).newInstance(
-          <cb.Expression>[],
-          <String, cb.Expression>{_kBuilderProperty: previewWidget},
-        );
-      }
-
-      if (preview.hasWrapper) {
-        previewWidget = preview.wrapper.toExpression().call(<cb.Expression>[previewWidget]);
-      }
+    final args = <String, cb.Expression>{
+      _kPackageName: cb.literalString(preview.packageName!),
+      _kScriptUri: cb.literalString(preview.scriptUri.toString()),
+      _kLine: cb.literalNum(preview.line),
+      _kColumn: cb.literalNum(preview.column),
+    };
+    // TODO(bkonyi): improve the error related code.
+    if (libraryDetails.hasErrors || libraryDetails.dependencyHasErrors) {
+      return cb.refer(_kBuildWidgetPreviewError, _kUtilsUri).call([], {
+        ...args,
+        _kPackageUri: cb.literalString(uri.toString()),
+        _kPreviewFunctionName: cb.literalString(preview.functionName),
+        _kDependencyHasErrors: cb.literalBool(libraryDetails.dependencyHasErrors),
+      });
     }
 
-    previewWidget = cb.Method((cb.MethodBuilder previewBuilder) {
-      previewBuilder.body = previewWidget.code;
-    }).closure;
+    final cb.Expression previewWidget = cb
+        .refer(preview.functionName, uri.toString())
+        .call(<cb.Expression>[]);
 
-    return cb.refer(_kWidgetPreviewClass, _kWidgetPreviewLibraryUri).newInstance(
-      <cb.Expression>[],
-      <String, cb.Expression>{
-        // TODO(bkonyi): try to display the preview name, even if the preview can't be displayed.
-        if (!libraryDetails.dependencyHasErrors &&
-            !libraryDetails.hasErrors) ...<String, cb.Expression>{
-          if (preview.packageName != null)
-            PreviewDetails.kPackageName: cb.literalString(preview.packageName!),
-          ...?_generateCodeFromAnalyzerExpression(
-            allocator: allocator,
-            key: PreviewDetails.kName,
-            object: preview.name,
-          ),
-          ...?_generateCodeFromAnalyzerExpression(
-            allocator: allocator,
-            key: PreviewDetails.kSize,
-            object: preview.size,
-          ),
-          ...?_generateCodeFromAnalyzerExpression(
-            allocator: allocator,
-            key: PreviewDetails.kTextScaleFactor,
-            object: preview.textScaleFactor,
-          ),
-          ...?_generateCodeFromAnalyzerExpression(
-            allocator: allocator,
-            key: PreviewDetails.kTheme,
-            object: preview.theme,
-            isCallback: true,
-          ),
-          ...?_generateCodeFromAnalyzerExpression(
-            allocator: allocator,
-            key: PreviewDetails.kBrightness,
-            object: preview.brightness,
-          ),
-          ...?_generateCodeFromAnalyzerExpression(
-            allocator: allocator,
-            key: PreviewDetails.kLocalizations,
-            object: preview.localizations,
-            isCallback: true,
-          ),
-        },
-        _kBuilderProperty: previewWidget,
-      },
-    );
-  }
+    args.addAll({
+      _kPreviewFunction: cb.Method((builder) => builder.body = previewWidget.code).closure,
+    });
 
-  Map<String, cb.Expression>? _generateCodeFromAnalyzerExpression({
-    required cb.Allocator allocator,
-    required String key,
-    required DartObject? object,
-    bool isCallback = false,
-  }) {
-    if (object == null || object.isNull) {
-      return null;
+    if (preview.isMultiPreview) {
+      return cb.refer(_kBuildMultiWidgetPreview, _kUtilsUri).call([], {
+        ...args,
+        _kPreview: preview.previewAnnotation.toExpression(),
+      }).spread;
     }
-    cb.Expression expression = object.toExpression();
-    if (isCallback) {
-      expression = expression.call(<cb.Expression>[]);
-    }
-    return <String, cb.Expression>{key: expression};
+
+    return cb.refer(_kBuildWidgetPreview, _kUtilsUri).call([], {
+      ...args,
+      _kTransformedPreview: preview.previewAnnotation.toExpression().property(_kTransform).call([]),
+    });
   }
 }
 
@@ -259,7 +210,7 @@ extension on DartObject {
       DartType(isDartCoreInt: true) => cb.literalNum(toIntValue()!),
       DartType(isDartCoreString: true) => cb.literalString(toStringValue()!),
       DartType(isDartCoreNull: true) => cb.literalNull,
-      InterfaceType(element3: EnumElement()) => _createEnumInstance(this),
+      InterfaceType(element: EnumElement()) => _createEnumInstance(this),
       InterfaceType() => _createInstance(type, this),
       FunctionType() => _createTearoff(toFunctionValue()!),
       _ => throw UnsupportedError('Unexpected DartObject type: $runtimeType'),
@@ -291,10 +242,10 @@ extension on DartObject {
     final ConstructorInvocation constructorInvocation = object.constructorInvocation!;
     final ConstructorElement constructor = constructorInvocation.constructor;
     final cb.Expression type = cb.refer(
-      dartType.element3.name3!,
-      _elementToLibraryIdentifier(dartType.element3),
+      dartType.element.name!,
+      _elementToLibraryIdentifier(dartType.element),
     );
-    final String? name = constructor.name3 == 'new' ? null : constructor.name3;
+    final String? name = constructor.name == 'new' ? null : constructor.name;
 
     final List<cb.Expression> positionalArguments = constructorInvocation.positionalArguments
         .map((e) => e.toExpression())

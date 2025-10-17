@@ -20,38 +20,6 @@ import 'colors.dart';
 import 'predictive_back_page_transitions_builder.dart';
 import 'theme.dart';
 
-// Slides the page upwards and fades it in, starting from 1/4 screen
-// below the top. The transition is intended to match the default for
-// Android O.
-class _FadeUpwardsPageTransition extends StatelessWidget {
-  _FadeUpwardsPageTransition({
-    required Animation<double> routeAnimation, // The route's linear 0.0 - 1.0 animation.
-    required this.child,
-  }) : _positionAnimation = routeAnimation.drive(_bottomUpTween.chain(_fastOutSlowInTween)),
-       _opacityAnimation = routeAnimation.drive(_easeInTween);
-
-  // Fractional offset from 1/4 screen below the top to fully on screen.
-  static final Tween<Offset> _bottomUpTween = Tween<Offset>(
-    begin: const Offset(0.0, 0.25),
-    end: Offset.zero,
-  );
-  static final Animatable<double> _fastOutSlowInTween = CurveTween(curve: Curves.fastOutSlowIn);
-  static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
-
-  final Animation<Offset> _positionAnimation;
-  final Animation<double> _opacityAnimation;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return SlideTransition(
-      position: _positionAnimation,
-      // TODO(ianh): tell the transform to be un-transformed for hit testing
-      child: FadeTransition(opacity: _opacityAnimation, child: child),
-    );
-  }
-}
-
 // This transition is intended to match the default for Android P.
 class _OpenUpwardsPageTransition extends StatefulWidget {
   const _OpenUpwardsPageTransition({
@@ -593,95 +561,6 @@ class _FadeForwardsPageTransition extends StatelessWidget {
         child,
       ),
     );
-  }
-}
-
-/// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
-/// transition animation.
-///
-/// Apps can configure the map of builders for [ThemeData.pageTransitionsTheme]
-/// to customize the default [MaterialPageRoute] page transition animation
-/// for different platforms.
-///
-/// See also:
-///
-///  * [FadeUpwardsPageTransitionsBuilder], which defines a page transition
-///    that's similar to the one provided by Android O.
-///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
-///    that's similar to the one provided by Android P.
-///  * [ZoomPageTransitionsBuilder], which defines the default page transition
-///    that's similar to the one provided in Android Q.
-///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
-///    transition that matches native iOS page transitions.
-///  * [FadeForwardsPageTransitionsBuilder], which defines a page transition
-///    that's similar to the one provided by Android U.
-abstract class PageTransitionsBuilder {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const PageTransitionsBuilder();
-
-  /// Provides a secondary transition to the previous route.
-  ///
-  /// {@macro flutter.widgets.delegatedTransition}
-  DelegatedTransitionBuilder? get delegatedTransition => null;
-
-  /// {@macro flutter.widgets.TransitionRoute.transitionDuration}
-  ///
-  /// Defaults to 300 milliseconds.
-  Duration get transitionDuration => const Duration(milliseconds: 300);
-
-  /// {@macro flutter.widgets.TransitionRoute.reverseTransitionDuration}
-  ///
-  /// Defaults to 300 milliseconds.
-  Duration get reverseTransitionDuration => transitionDuration;
-
-  /// Wraps the child with one or more transition widgets which define how [route]
-  /// arrives on and leaves the screen.
-  ///
-  /// The [MaterialPageRoute.buildTransitions] method looks up the
-  /// current [PageTransitionsTheme] with `Theme.of(context).pageTransitionsTheme`
-  /// and delegates to this method with a [PageTransitionsBuilder] based
-  /// on the theme's [ThemeData.platform].
-  Widget buildTransitions<T>(
-    PageRoute<T> route,
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  );
-}
-
-/// Used by [PageTransitionsTheme] to define a vertically fading
-/// [MaterialPageRoute] page transition animation that looks like
-/// the default page transition used on Android O.
-///
-/// The animation fades the new page in while translating it upwards,
-/// starting from about 25% below the top of the screen.
-///
-/// See also:
-///
-///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
-///    that's similar to the one provided by Android P.
-///  * [ZoomPageTransitionsBuilder], which defines the default page transition
-///    that's similar to the one provided in Android Q.
-///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
-///    transition that matches native iOS page transitions.
-///  * [PredictiveBackPageTransitionsBuilder], which defines a page
-///    transition that allows peeking behind the current route on Android U and
-///    above.
-class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
-  /// Constructs a page transition animation that slides the page up.
-  const FadeUpwardsPageTransitionsBuilder();
-
-  @override
-  Widget buildTransitions<T>(
-    PageRoute<T>? route,
-    BuildContext? context,
-    Animation<double> animation,
-    Animation<double>? secondaryAnimation,
-    Widget child,
-  ) {
-    return _FadeUpwardsPageTransition(routeAnimation: animation, child: child);
   }
 }
 

@@ -19,11 +19,8 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
-import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.file.Directory
-import org.gradle.api.plugins.PluginContainer
 import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
@@ -101,7 +98,6 @@ class FlutterPlugin : Plugin<Project> {
             repositories.maven {
                 url = uri(repository!!)
             }
-            maybeAddAndroidStudioNativeConfiguration(plugins, dependencies)
         }
 
         project.apply {
@@ -329,23 +325,19 @@ class FlutterPlugin : Plugin<Project> {
     }
 
     private fun addTaskForLockfileGeneration(rootProject: Project) {
-        try {
-            rootProject.tasks.register("generateLockfiles") {
-                doLast {
-                    rootProject.subprojects.forEach { subproject ->
-                        val gradlew: String =
-                            getExecutableNameForPlatform("${rootProject.projectDir}/gradlew")
-                        val execOps = rootProject.serviceOf<ExecOperations>()
-                        execOps.exec {
-                            workingDir(rootProject.projectDir)
-                            executable(gradlew)
-                            args(":${subproject.name}:dependencies", "--write-locks")
-                        }
+        rootProject.tasks.register("generateLockfiles") {
+            doLast {
+                rootProject.subprojects.forEach { subproject ->
+                    val gradlew: String =
+                        getExecutableNameForPlatform("${rootProject.projectDir}/gradlew")
+                    val execOps = rootProject.serviceOf<ExecOperations>()
+                    execOps.exec {
+                        workingDir(rootProject.projectDir)
+                        executable(gradlew)
+                        args(":${subproject.name}:dependencies", "--write-locks")
                     }
                 }
             }
-        } catch (e: TaskInstantiationException) {
-            // ignored
         }
     }
 
@@ -432,14 +424,7 @@ class FlutterPlugin : Plugin<Project> {
                         filename += "-${FlutterPluginUtils.buildModeFor(variant.buildType)}"
                         projectToAddTasksTo.copy {
                             from(File("$outputDirectoryStr/${output.outputFileName}"))
-                            into(
-                                File(
-                                    "${
-                                        projectToAddTasksTo.layout.buildDirectory.dir("outputs/flutter-apk")
-                                            .get()
-                                    }"
-                                )
-                            )
+                            into(projectToAddTasksTo.layout.buildDirectory.dir("outputs/flutter-apk"))
                             rename { "$filename.apk" }
                         }
                     }
@@ -687,7 +672,6 @@ class FlutterPlugin : Plugin<Project> {
                     localEngineSrcPath = flutterPlugin.localEngineSrcPath
                     targetPath = FlutterPluginUtils.getFlutterTarget(project)
                     verbose = FlutterPluginUtils.isProjectVerbose(project)
-                    fastStart = FlutterPluginUtils.isProjectFastStart(project)
                     fileSystemRoots = fileSystemRootsValue
                     fileSystemScheme = fileSystemSchemeValue
                     trackWidgetCreation = trackWidgetCreationValue
@@ -829,19 +813,4 @@ class FlutterPlugin : Plugin<Project> {
      * This property is set by Android Studio when it invokes a Gradle task.
      */
     private fun isInvokedFromAndroidStudio(): Boolean = project?.hasProperty("android.injected.invoked.from.ide") == true
-
-    private fun shouldAddAndroidStudioNativeConfiguration(plugins: PluginContainer): Boolean =
-        plugins.hasPlugin("com.android.application") && isInvokedFromAndroidStudio()
-
-    private fun maybeAddAndroidStudioNativeConfiguration(
-        plugins: PluginContainer,
-        dependencies: DependencyHandler
-    ) {
-        if (shouldAddAndroidStudioNativeConfiguration(plugins)) {
-            dependencies.add("compileOnly", "io.flutter:flutter_embedding_debug:$engineVersion")
-            dependencies.add("compileOnly", "io.flutter:armeabi_v7a_debug:$engineVersion")
-            dependencies.add("compileOnly", "io.flutter:arm64_v8a_debug:$engineVersion")
-            dependencies.add("compileOnly", "io.flutter:x86_64_debug:$engineVersion")
-        }
-    }
 }

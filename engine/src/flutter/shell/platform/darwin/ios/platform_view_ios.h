@@ -13,6 +13,7 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
 #import "flutter/shell/platform/darwin/ios/ios_context.h"
 #import "flutter/shell/platform/darwin/ios/ios_external_view_embedder.h"
@@ -111,6 +112,9 @@ class PlatformViewIOS final : public PlatformView {
                        flutter::CustomAccessibilityActionUpdates actions) override;
 
   // |PlatformView|
+  void SetApplicationLocale(std::string locale) override;
+
+  // |PlatformView|
   std::unique_ptr<VsyncWaiter> CreateVSyncWaiter() override;
 
   // |PlatformView|
@@ -137,6 +141,7 @@ class PlatformViewIOS final : public PlatformView {
   AccessibilityBridge* GetAccessibilityBridge() { return accessibility_bridge_.get(); }
 
  private:
+  void ApplyLocaleToOwnerController();
   /// Smart pointer for use with objective-c observers.
   /// This guarantees we remove the observer.
   class ScopedObserver {
@@ -152,6 +157,7 @@ class PlatformViewIOS final : public PlatformView {
   };
 
   __weak FlutterViewController* owner_controller_;
+  std::string application_locale_;
   // Since the `ios_surface_` is created on the platform thread but
   // used on the raster thread we need to protect it with a mutex.
   std::mutex ios_surface_mutex_;
