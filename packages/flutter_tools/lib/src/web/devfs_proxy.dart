@@ -72,12 +72,13 @@ sealed class ProxyRule {
       final Object? name = item[_kName];
       final Object? value = item[_kValue];
       if (name is! String || name.isEmpty) {
-        logger.printError('$_kLogEntryPrefix Header "$_kName" must be a non-null String. Found ${name.runtimeType}');
+        logger.printError('$_kLogEntryPrefix Header "$_kName" must be a non-empty String. Found ${name.runtimeType}');
         continue;
       }
       if (value is! String) {
-        logger.printError('$_kLogEntryPrefix Header "$_kValue" must be a non-null String. Found ${value.runtimeType}');
+        logger.printError('$_kLogEntryPrefix Header "$_kValue" must be a String. Found ${value.runtimeType}');
         continue;
+      }
       }
       result[name] = value;
     }
