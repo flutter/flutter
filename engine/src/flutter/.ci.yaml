@@ -552,6 +552,8 @@ targets:
     recipe: engine_v2/builder
     timeout: 120
     properties:
+      # TODO(#177172): dashboard super unhealthy
+      bringup: true
       config_name: windows_unopt
 
   #          _________________[WARNING]_______________________
