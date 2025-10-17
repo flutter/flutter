@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:yaml/yaml.dart';
+import 'package:meta/meta.dart';
 import '../base/logger.dart';
 
 /// Represents a rule for proxying requests based on a specific pattern.
@@ -72,11 +73,11 @@ sealed class ProxyRule {
       final Object? name = item[_kName];
       final Object? value = item[_kValue];
       if (name is! String || name.isEmpty) {
-        logger.printError('$_kLogEntryPrefix Header "$_kName" must be a non-null String. Found ${name.runtimeType}');
+        logger.printError('$_kLogEntryPrefix Header "$_kName" must be a non-empty String. Found ${name.runtimeType}');
         continue;
       }
       if (value is! String) {
-        logger.printError('$_kLogEntryPrefix Header "$_kValue" must be a non-null String. Found ${value.runtimeType}');
+        logger.printError('$_kLogEntryPrefix Header "$_kValue" must be a String. Found ${value.runtimeType}');
         continue;
       }
       result[name] = value;
@@ -110,6 +111,15 @@ class RegexProxyRule implements ProxyRule {
   final String? _replacement;
   final Map<String, String> _headers;
 
+  @protected
+  String buildToString(String typeKey) {
+    final base = '{$typeKey: ${_pattern.pattern}, ${ProxyRule._kTarget}: $_target, ${ProxyRule._kReplace}: ${_replacement ?? 'null'}';
+    if (_headers.isEmpty) {
+      return '$base}';
+    }
+    return '$base, ${ProxyRule._kHeaders}: $_headers}';
+  }
+
   @override
   bool matches(String path) {
     return _pattern.hasMatch(path);
@@ -140,11 +150,7 @@ class RegexProxyRule implements ProxyRule {
 
   @override
   String toString() {
-    final base = '{${ProxyRule._kRegex}: ${_pattern.pattern}, ${ProxyRule._kTarget}: $_target, ${ProxyRule._kReplace}: ${_replacement ?? 'null'}';
-    if (_headers.isEmpty) {
-      return '$base}';
-    }
-    return '$base, ${ProxyRule._kHeaders}: $_headers}';
+    return buildToString(ProxyRule._kRegex);
   }
 
   /// Checks if the given [yaml] can be handled by this rule.
@@ -207,11 +213,7 @@ class PrefixProxyRule extends RegexProxyRule {
 
   @override
   String toString() {
-    final base = '{${ProxyRule._kPrefix}: ${_pattern.pattern}, ${ProxyRule._kTarget}: $_target, ${ProxyRule._kReplace}: ${_replacement ?? 'null'}';
-    if (headers.isEmpty) {
-      return '$base}';
-    }
-    return '$base, ${ProxyRule._kHeaders}: $headers}';
+    return buildToString(ProxyRule._kPrefix);
   }
 
   /// Checks if the given [yaml] can be handled by this rule.
