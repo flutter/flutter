@@ -515,10 +515,10 @@ class ResidentWebRunner extends ResidentRunner {
           try {
             await _vmService.service.callMethod(hotRestartMethod);
           } on vmservice.RPCError catch (e) {
-            // DWDS throws an RPC error with kServerError code when there are no
+            // DWDS throws an RPC error with kIsolateCannotReload code when there are no
             // browser clients currently connected during a hot restart operation.
             if (e.callingMethod == hotRestartMethod &&
-                e.code == vmservice.RPCErrorKind.kServerError.code) {
+                e.code == vmservice.RPCErrorKind.kIsolateCannotReload.code) {
               return _handleNoClientsAvailable(status);
             }
             // Re-throw other RPC errors
@@ -540,10 +540,10 @@ class ResidentWebRunner extends ResidentRunner {
           try {
             report = await _vmService.service.reloadSources(vm.isolates!.first.id!);
           } on vmservice.RPCError catch (e) {
-            // DWDS throws an RPC error with kServerError code when there are no
+            // DWDS throws an RPC error with kIsolateCannotReload code when there are no
             // browser clients currently connected during a hot reload operation.
             if (e.callingMethod == hotReloadMethod &&
-                e.code == vmservice.RPCErrorKind.kServerError.code) {
+                e.code == vmservice.RPCErrorKind.kIsolateCannotReload.code) {
               return _handleNoClientsAvailable(status);
             }
             // Re-throw other RPC errors
