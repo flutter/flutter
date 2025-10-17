@@ -2427,6 +2427,39 @@ class SemanticsObject {
     return true;
   }
 
+  /// Recursively visits the tree rooted at `this` node in depth-first fashion
+  /// in traversal order but can skip a subtree.
+  void _visitDepthFirstInTraversalOrderCanSkipSubtree(
+    bool Function(SemanticsObject) searchSubtree,
+  ) {
+    final bool shouldSearchSubtree = searchSubtree(this);
+
+    if (!shouldSearchSubtree) {
+      return;
+    }
+
+    final Int32List? childrenInTraversalOrder = _childrenInTraversalOrder;
+
+    if (childrenInTraversalOrder == null) {
+      return;
+    }
+
+    for (final int childId in childrenInTraversalOrder) {
+      final SemanticsObject? child = owner._semanticsTree[childId];
+
+      assert(
+        child != null,
+        'visitDepthFirstInTraversalOrder must only be called after the node '
+        'tree has been established. However, child #$childId does not have its '
+        'SemanticsNode created at the time this method was called.',
+      );
+
+      child!._visitDepthFirstInTraversalOrder(searchSubtree);
+    }
+
+    return;
+  }
+
   @override
   String toString() {
     String result = super.toString();
@@ -2898,17 +2931,21 @@ class EngineSemanticsOwner {
     for (final SemanticsObject detachmentRoot in _detachments) {
       // A detached node may or may not have some of its descendants reattached
       // elsewhere. Walk the descendant tree and find all descendants that were
-      // reattached to a parent. Those descendants need to be removed.
-      detachmentRoot.visitDepthFirstInTraversalOrder((SemanticsObject node) {
+      // *NOT* reattached to a parent. Those descendants need to be removed.
+      detachmentRoot._visitDepthFirstInTraversalOrderCanSkipSubtree((SemanticsObject node) {
         final SemanticsObject? parent = _attachments[node.id];
         if (parent == null) {
           // Was not reparented and is removed permanently from the tree.
           removals.add(node);
+          // Keep searching the subtree.
+          return true;
         } else {
           assert(node._parent == parent);
           assert(node.element.parentNode == parent.element);
+          // Skip this subtree here because if this node is reparented, the subtree
+          // is reparented with it. They won't be added to removal.
+          return false;
         }
-        return true;
       });
     }
 
