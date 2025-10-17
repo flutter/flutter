@@ -1898,6 +1898,11 @@ class SemanticsProperties extends DiagnosticableTree {
   /// this node can act as a parent for other nodes that reference this identifier
   /// in their [traversalChildIdentifier]. This allows assistive technologies
   /// to navigate the UI in the correct logical order.
+  ///
+  /// The `traversalParentIdentifier` must hold a unique value in the semantics
+  /// tree. This unique identifier serves as the only reference for its traversal
+  /// children. To graft other nodes as the traversal children of this node,
+  /// assign this same value to their `traversalChildIdentifier`.
   /// {@endtemplate}
   final Object? traversalParentIdentifier;
 
@@ -1915,6 +1920,11 @@ class SemanticsProperties extends DiagnosticableTree {
   /// this node should be treated as a child of another node that has this same
   /// identifier as its [traversalParentIdentifier]. This allows assistive technologies
   /// to navigate the UI in the correct logical order.
+  ///
+  /// The `traversalChildIdentifier` value may be duplicated across multiple
+  /// semantics nodes. To establish one or more nodes as the traversal children
+  /// of a parent node, assign this identifier the same value as the parent's
+  /// `traversalParentIdentifier`.
   /// {@endtemplate}
   final Object? traversalChildIdentifier;
 
@@ -4716,6 +4726,7 @@ class SemanticsOwner extends ChangeNotifier {
       // _traversalParentNodes map for later grafting. Similarly, add the node
       // to the _traversalChildNodes map if it is a traversal child.
       if (isTraversalParent) {
+        assert(!_traversalParentNodes.containsKey(node._traversalParentIdentifier));
         _traversalParentNodes[node.traversalParentIdentifier!] = node;
       } else if (isTraversalChild) {
         _traversalChildNodes[node.traversalChildIdentifier!] ??= <SemanticsNode>{};
