@@ -35,7 +35,7 @@ external void paragraphStyleSetTextDirection(ParagraphStyleHandle handle, int te
   symbol: 'paragraphStyle_setMaxLines',
   isLeaf: true,
 )
-external void paragraphStyleSetMaxLines(ParagraphStyleHandle handle, int maxLines);
+external void paragraphStyleSetMaxLines(ParagraphStyleHandle handle, double maxLines);
 
 @Native<Void Function(ParagraphStyleHandle, Float)>(
   symbol: 'paragraphStyle_setHeight',

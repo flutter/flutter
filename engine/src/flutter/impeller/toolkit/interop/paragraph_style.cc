@@ -41,7 +41,7 @@ void ParagraphStyle::SetTextDirection(txt::TextDirection direction) {
   style_.text_direction = direction;
 }
 
-void ParagraphStyle::SetMaxLines(size_t max_lines) {
+void ParagraphStyle::SetMaxLines(double max_lines) {
   style_.max_lines = max_lines;
 }
 

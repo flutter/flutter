@@ -28,7 +28,7 @@ class ParagraphGenerator {
 
   /// Randomizes the given [text] and creates a paragraph with a unique
   /// font-size so that the engine doesn't reuse a cached ruler.
-  ui.Paragraph generate(String text, {int? maxLines, bool hasEllipsis = false}) {
+  ui.Paragraph generate(String text, {double? maxLines, bool hasEllipsis = false}) {
     final ui.ParagraphBuilder builder =
         ui.ParagraphBuilder(
             ui.ParagraphStyle(
