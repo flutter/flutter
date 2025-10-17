@@ -314,6 +314,8 @@ void sendSemanticsUpdate() {
     controlsNodes: null,
     inputType: SemanticsInputType.none,
     locale: null,
+    minValue: '0',
+    maxValue: '0',
   );
   _semanticsUpdate(builder.build());
 }
