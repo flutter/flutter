@@ -1944,6 +1944,9 @@ class SelectableRegionState extends State<SelectableRegion>
         // To match the native web behavior, this selectable region is
         // unfocused when tapping outside of it causing the selection to
         // be dismissed.
+        //
+        // Tapping outside the selectable region does not unfocus
+        // the region on non-web platforms.
         if (kIsWeb) {
           _focusNode.unfocus();
         }
