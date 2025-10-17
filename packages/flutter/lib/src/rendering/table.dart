@@ -722,14 +722,17 @@ class RenderTable extends RenderBox {
             (rawChildrens.single.role != SemanticsRole.cell &&
                 rawChildrens.single.role != SemanticsRole.columnHeader);
 
-        final SemanticsNode cell = addCellWrapper
-            ? (_cachedCells[_Index(y, x)] ??
-                  (_cachedCells[_Index(y, x)] = SemanticsNode()
-                    ..updateWith(
-                      config: SemanticsConfiguration()..role = SemanticsRole.cell,
-                      childrenInInversePaintOrder: rawChildrens,
-                    )))
-            : rawChildrens.single;
+        late final SemanticsNode cell;
+        if (!addCellWrapper) {
+          cell = rawChildrens.single;
+        } else {
+          final _Index index = _Index(y, x);
+          cell = _cachedCells.putIfAbsent(index, () => SemanticsNode())
+            ..updateWith(
+              config: SemanticsConfiguration()..role = SemanticsRole.cell,
+              childrenInInversePaintOrder: rawChildrens,
+            );
+        }
 
         final double cellWidth = x == _columns - 1
             ? rowBox.width - _columnLefts!.elementAt(x)
