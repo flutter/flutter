@@ -1899,10 +1899,11 @@ class SemanticsProperties extends DiagnosticableTree {
   /// in their [traversalChildIdentifier]. This allows assistive technologies
   /// to navigate the UI in the correct logical order.
   ///
-  /// The `traversalParentIdentifier` must hold a unique value in the semantics
-  /// tree. This unique identifier serves as the only reference for its traversal
-  /// children. To graft other nodes as the traversal children of this node,
-  /// assign this same value to their `traversalChildIdentifier`.
+  /// The `traversalParentIdentifier` must be unique in the semantics. No two
+  /// semantics node can have the same `traversalParentIdentifier`. This unique
+  /// identifier serves as the only reference for its traversal children. To
+  /// graft other nodes as the traversal children of this node, assign this same
+  /// value to their `traversalChildIdentifier`.
   /// {@endtemplate}
   final Object? traversalParentIdentifier;
 
@@ -4726,7 +4727,11 @@ class SemanticsOwner extends ChangeNotifier {
       // _traversalParentNodes map for later grafting. Similarly, add the node
       // to the _traversalChildNodes map if it is a traversal child.
       if (isTraversalParent) {
-        assert(!_traversalParentNodes.containsKey(node._traversalParentIdentifier));
+        assert(
+          !_traversalParentNodes.containsKey(node._traversalParentIdentifier) ||
+              _traversalParentNodes[node.traversalParentIdentifier!] == node,
+          'The traversalParentIdentifier must be unique. No two semantics nodes can share the same traversalParentIdentifier.',
+        );
         _traversalParentNodes[node.traversalParentIdentifier!] = node;
       } else if (isTraversalChild) {
         _traversalChildNodes[node.traversalChildIdentifier!] ??= <SemanticsNode>{};
