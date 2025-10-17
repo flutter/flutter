@@ -178,6 +178,9 @@ class _OpenUpwardsPageTransition extends StatefulWidget {
     end: const Offset(0.0, -0.025),
   );
 
+  // The scrim color that obscures the old page during the transition.
+  static const Color _scrimColor = Color(0xFF000000);
+
   // The scrim obscures the old page by becoming increasingly opaque.
   static final Tween<double> _scrimOpacityTween = Tween<double>(begin: 0.0, end: 0.25);
 
@@ -259,10 +262,10 @@ class _OpenUpwardsPageTransitionState extends State<_OpenUpwardsPageTransition> 
             .animate(_secondaryTranslationCurvedAnimation);
 
         return AnimatedBuilder(
-          animation: widget.animation,
+          animation: Listenable.merge(<Listenable>[widget.animation, widget.secondaryAnimation]),
           builder: (BuildContext context, Widget? child) {
             return ColoredBox(
-              color: const Color(0xFF000000).withOpacity(opacityAnimation.value),
+              color: _OpenUpwardsPageTransition._scrimColor.withOpacity(opacityAnimation.value),
               child: Align(
                 alignment: Alignment.bottomLeft,
                 child: ClipRect(
@@ -271,26 +274,19 @@ class _OpenUpwardsPageTransitionState extends State<_OpenUpwardsPageTransition> 
                     child: OverflowBox(
                       alignment: Alignment.bottomLeft,
                       maxHeight: size.height,
-                      child: child,
+                      child: FractionalTranslation(
+                        translation: secondaryTranslationAnimation.value,
+                        child: FractionalTranslation(
+                          translation: primaryTranslationAnimation.value,
+                          child: widget.child,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
             );
           },
-          child: AnimatedBuilder(
-            animation: widget.secondaryAnimation,
-            child: FractionalTranslation(
-              translation: primaryTranslationAnimation.value,
-              child: widget.child,
-            ),
-            builder: (BuildContext context, Widget? child) {
-              return FractionalTranslation(
-                translation: secondaryTranslationAnimation.value,
-                child: child,
-              );
-            },
-          ),
         );
       },
     );
