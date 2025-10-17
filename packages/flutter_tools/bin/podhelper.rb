@@ -70,7 +70,7 @@ def flutter_additional_ios_build_settings(target)
   if Dir.exist?(support_files_dir)
     Dir.glob(File.join(support_files_dir, '*.xcconfig')).each do |xcfile|
       File.foreach(xcfile) do |line|
-        if line =~ /EXCLUDED_ARCHS.*arm64/
+        if line =~ /^\s*EXCLUDED_ARCHS\b/ && line.include?('arm64')
           abort "The pod `#{target.name}` config in #{xcfile} excludes the arm64 simulator architecture.\n" \
             "This prevents running on arm64 simulators (iOS 26+). Remove `EXCLUDED_ARCHS[sdk=iphonesimulator*] = arm64` from the podspec/pod_target_xcconfig or update the pod to a version that supports arm64 simulators."
         end
