@@ -6,6 +6,7 @@ package io.flutter.embedding.engine.image;
 
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+//noinspection ExifInterface
 import android.media.ExifInterface;
 import androidx.annotation.NonNull;
 import io.flutter.Log;

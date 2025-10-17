@@ -4,6 +4,7 @@
 
 package io.flutter.embedding.engine.image;
 
+//noinspection ExifInterface
 import android.media.ExifInterface;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
