@@ -363,4 +363,9 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
   ui.UniformFloatSlot getUniformFloat(String name, [int? index]) {
     throw UnsupportedError('getUniformFloat is not supported on the web.');
   }
+
+  @override
+  ui.ImageSamplerSlot getImageSampler(String name) {
+    throw UnsupportedError('getImageSampler is not supported on the web.');
+  }
 }

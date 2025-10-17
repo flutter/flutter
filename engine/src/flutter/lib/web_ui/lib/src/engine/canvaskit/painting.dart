@@ -406,4 +406,9 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
   ui.UniformFloatSlot getUniformFloat(String name, [int? index]) {
     throw UnsupportedError('getUniformFloat is not supported on the web.');
   }
+
+  @override
+  ui.ImageSamplerSlot getImageSampler(String name) {
+    throw UnsupportedError('getImageSampler is not supported on the web.');
+  }
 }
