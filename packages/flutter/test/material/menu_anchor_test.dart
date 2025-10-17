@@ -2172,39 +2172,42 @@ void main() {
       expect(find.text('Item 0'), findsOneWidget);
     });
 
-    testWidgets('Throws if non-zero hoverOpenDelay is applied to MenuBar items', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: MenuBar(
-              children: <Widget>[
-                SubmenuButton(
-                  hoverOpenDelay: const Duration(milliseconds: 1),
-                  menuChildren: <Widget>[
-                    MenuItemButton(onPressed: () {}, child: const Text('Item 0')),
-                  ],
-                  child: const Text('Submenu'),
-                ),
-              ],
+    testWidgets(
+      'Throws if non-zero hoverOpenDelay is applied to MenuBar items',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: MenuBar(
+                children: <Widget>[
+                  SubmenuButton(
+                    hoverOpenDelay: const Duration(milliseconds: 1),
+                    menuChildren: <Widget>[
+                      MenuItemButton(onPressed: () {}, child: const Text('Item 0')),
+                    ],
+                    child: const Text('Submenu'),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      // Should throw because MenuBar items cannot have a hoverOpenDelay
-      expect(
-        tester.takeException(),
-        isA<FlutterError>().having(
-          (FlutterError e) => e.message,
-          'message',
-          contains(
-            'A non-zero hoverOpenDelay was used in a top-level SubmenuButton situated in a MenuBar',
+        // Should throw because MenuBar items cannot have a hoverOpenDelay
+        expect(
+          tester.takeException(),
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains(
+              'A non-zero hoverOpenDelay was used in a top-level SubmenuButton situated in a MenuBar',
+            ),
           ),
-        ),
-      );
-    });
+        );
+      },
+      experimentalLeakTesting: LeakTesting.settings
+          .withIgnoredAll(), // leaking by design because of exception
+    );
 
     testWidgets('scrolling does not trigger hover traversal', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/150911.
@@ -4545,7 +4548,7 @@ void main() {
         // Test expanded state.
         await tester.tap(find.text('ABC'));
         await tester.pump();
-        final Matcher expandedMatcher = hasSemantics(
+        var expandedMatcher = hasSemantics(
           TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
@@ -4625,7 +4628,7 @@ void main() {
         await tester.tap(find.text('ABC'));
         await tester.pump();
 
-        final Matcher collapsedMatcher = hasSemantics(
+        var collapsedMatcher = hasSemantics(
           TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
