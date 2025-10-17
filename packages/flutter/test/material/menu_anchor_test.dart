@@ -19,6 +19,8 @@ void main() {
   final List<TestMenu> opened = <TestMenu>[];
   final List<TestMenu> closed = <TestMenu>[];
   final GlobalKey menuItemKey = GlobalKey();
+  const Set<TargetPlatform> apple = <TargetPlatform>{TargetPlatform.macOS, TargetPlatform.iOS};
+  final Set<TargetPlatform> nonApple = TargetPlatform.values.toSet().difference(apple);
 
   void onPressed(TestMenu item) {
     selected.add(item);
@@ -1492,12 +1494,19 @@ void main() {
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 10"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
       expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 10"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
@@ -1530,20 +1539,25 @@ void main() {
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 111"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 112"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 113"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 113"))'));
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
 
       // Since this is a leaf off of a vertical menu, moving left should
       // return to this menu's parent button.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
       expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
 
       // Moving left while in a first-level submenu should focus the
@@ -1573,7 +1587,7 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump();
       expect(focusedMenu, equals('SubmenuButton(Text("Menu 2"))'));
-    });
+    }, variant: TargetPlatformVariant(nonApple));
 
     testWidgets('keyboard directional traversal works in RTL mode', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1597,22 +1611,29 @@ void main() {
       await tester.pump();
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-      expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pump();
       expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 10"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
       expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
 
+      // Wrap around to first item.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 10"))'));
+
+      // Wrap around to last item.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
@@ -1628,37 +1649,50 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump();
       expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+      expect(find.text(TestMenu.subSubMenu110.label), findsNothing);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+      expect(find.text(TestMenu.subSubMenu110.label), findsOneWidget);
 
       // Move up, should close the submenu.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 10"))'));
+      expect(find.text(TestMenu.subSubMenu110.label), findsNothing);
 
       // Move down, should reopen the submenu.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pump();
       expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+      expect(find.text(TestMenu.subSubMenu110.label), findsOneWidget);
 
-      // Open the next submenu again.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 111"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 112"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 113"))'));
 
+      // Wrap around to first item.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 113"))'));
+      await tester.pump();
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
 
       // Since this is a leaf off of a vertical menu, moving right should
       // return to this menu's parent button.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
       expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
 
       // Moving left while in a first-level submenu should focus the
@@ -1674,6 +1708,7 @@ void main() {
       // Pressing arrowup from a top-level menubar anchor should focus the last
       // item in that anchor's submenu.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
@@ -1682,12 +1717,657 @@ void main() {
 
       // Enter the submenu.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
 
       // Move to next top-level menu button.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pump();
       expect(focusedMenu, equals('SubmenuButton(Text("Menu 2"))'));
+    }, variant: TargetPlatformVariant(nonApple));
+
+    testWidgets(
+      '[Cupertino] keyboard directional traversal works without wrapping',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: MenuBar(
+                controller: controller,
+                children: createTestMenus(onPressed: onPressed, onOpen: onOpen, onClose: onClose),
+              ),
+            ),
+          ),
+        );
+
+        listenForFocusChanges();
+
+        // Have to open a menu initially to start things going.
+        await tester.tap(find.text(TestMenu.mainMenu0.label));
+        await tester.pumpAndSettle();
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.pump();
+        expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 10"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 10"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        await tester.pump();
+        expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+
+        // Open the next submenu.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
+
+        // Go back, close the submenu.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pump();
+        expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+
+        // Move up, should close the submenu.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 10"))'));
+
+        // Move down, should reopen the submenu.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+
+        // Open the next submenu again.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 111"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 112"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 113"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 113"))'));
+
+        // Since this is a leaf off of a vertical menu, moving left should
+        // return to this menu's parent button.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pump();
+        expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+
+        // Moving left while in a first-level submenu should focus the
+        // previous top-level menubar anchor.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pump();
+        expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.pump();
+        expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
+
+        // Pressing arrowup from a top-level menubar anchor should focus the last
+        // item in that anchor's submenu.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+        await tester.pump();
+
+        // Enter the submenu.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
+
+        // Move to next top-level menu button.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.pump();
+        expect(focusedMenu, equals('SubmenuButton(Text("Menu 2"))'));
+      },
+      variant: const TargetPlatformVariant(apple),
+    );
+
+    testWidgets(
+      '[Cupertino] keyboard directional traversal works in RTL mode without wrapping',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Material(
+                child: MenuBar(
+                  controller: controller,
+                  children: createTestMenus(onPressed: onPressed, onOpen: onOpen, onClose: onClose),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        listenForFocusChanges();
+
+        // Have to open a menu initially to start things going.
+        await tester.tap(find.text(TestMenu.mainMenu0.label));
+        await tester.pump();
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pump();
+        expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 10"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        await tester.pump();
+        expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+
+        // Open the next submenu.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
+
+        // Go back, close the submenu.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.pump();
+        expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+        expect(find.text(TestMenu.subSubMenu110.label), findsNothing);
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+        await tester.pump();
+        expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+        expect(find.text(TestMenu.subSubMenu110.label), findsOneWidget);
+
+        // Move up, should close the submenu.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 10"))'));
+        expect(find.text(TestMenu.subSubMenu110.label), findsNothing);
+
+        // Move down, should reopen the submenu.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+        expect(find.text(TestMenu.subSubMenu110.label), findsOneWidget);
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 111"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 112"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 113"))'));
+
+        // Since this is a leaf off of a vertical menu, moving right should
+        // return to this menu's parent button.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.pump();
+        expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+
+        // Moving left while in a first-level submenu should focus the
+        // previous top-level menubar anchor.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.pump();
+        expect(focusedMenu, equals('SubmenuButton(Text("Menu 0"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pump();
+        expect(focusedMenu, equals('SubmenuButton(Text("Menu 1"))'));
+
+        // Pressing arrowup from a top-level menubar anchor should focus the last
+        // item in that anchor's submenu.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        await tester.pump();
+        expect(focusedMenu, equals('SubmenuButton(Text("Sub Menu 11"))'));
+
+        // Enter the submenu.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pump();
+        expect(focusedMenu, equals('MenuItemButton(Text("Sub Sub Menu 110"))'));
+
+        // Move to next top-level menu button.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pump();
+        expect(focusedMenu, equals('SubmenuButton(Text("Menu 2"))'));
+      },
+      variant: const TargetPlatformVariant(apple),
+    );
+
+    testWidgets('ArrowDown key from open root anchor focuses first menu item', (
+      WidgetTester tester,
+    ) async {
+      final FocusNode anchorFocus = FocusNode(debugLabel: 'Anchor Focus');
+      addTearDown(anchorFocus.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuAnchor(
+              controller: controller,
+              childFocusNode: anchorFocus,
+              menuChildren: <Widget>[
+                MenuItemButton(onPressed: () {}, child: const Text('Item 0')),
+                MenuItemButton(onPressed: () {}, child: const Text('Item 1')),
+              ],
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                return ElevatedButton(
+                  focusNode: anchorFocus,
+                  onPressed: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                  child: child,
+                );
+              },
+              child: const Text('Anchor'),
+            ),
+          ),
+        ),
+      );
+
+      listenForFocusChanges();
+
+      anchorFocus.requestFocus();
+      await tester.pump();
+
+      // Nothing should happen if the menu is closed.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+
+      expect(focusedMenu, equals('Anchor Focus'));
+
+      controller.open();
+      await tester.pump();
+
+      expect(find.text('Item 1'), findsOneWidget);
+      expect(focusedMenu, equals('Anchor Focus'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+
+      expect(focusedMenu, equals('MenuItemButton(Text("Item 0"))'));
+    });
+
+    testWidgets('ArrowUp key from open root anchor focuses last menu item', (
+      WidgetTester tester,
+    ) async {
+      final FocusNode anchorFocus = FocusNode(debugLabel: 'Anchor Focus');
+      addTearDown(anchorFocus.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuAnchor(
+              controller: controller,
+              childFocusNode: anchorFocus,
+              menuChildren: <Widget>[
+                MenuItemButton(onPressed: () {}, child: const Text('Item 0')),
+                MenuItemButton(onPressed: () {}, child: const Text('Item 1')),
+              ],
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                return ElevatedButton(
+                  focusNode: anchorFocus,
+                  onPressed: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                  child: child,
+                );
+              },
+              child: const Text('Anchor'),
+            ),
+          ),
+        ),
+      );
+
+      listenForFocusChanges();
+
+      anchorFocus.requestFocus();
+      await tester.pump();
+
+      // Nothing should happen if the menu is closed.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+
+      controller.open();
+      await tester.pump();
+
+      expect(find.text('Item 0'), findsOneWidget);
+      expect(focusedMenu, equals('Anchor Focus'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+
+      expect(focusedMenu, equals('MenuItemButton(Text("Item 1"))'));
+    });
+
+    testWidgets('Home key from MenuAnchor overlay focuses first sibling', (
+      WidgetTester tester,
+    ) async {
+      final FocusNode focusNode = FocusNode(debugLabel: TestMenu.anchorButton.label);
+      addTearDown(focusNode.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuAnchor(
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                return TextButton(
+                  focusNode: focusNode,
+                  onPressed: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                  child: Text(TestMenu.anchorButton.label),
+                );
+              },
+              menuChildren: <Widget>[
+                MenuItemButton(onPressed: () {}, child: Text(TestMenu.mainMenu0.label)),
+                MenuItemButton(onPressed: () {}, child: Text(TestMenu.mainMenu1.label)),
+                MenuItemButton(onPressed: () {}, child: Text(TestMenu.mainMenu2.label)),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      listenForFocusChanges();
+
+      focusNode.requestFocus();
+      await tester.pump();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.home);
+      await tester.pump();
+
+      expect(focusedMenu, equals(TestMenu.anchorButton.label));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+
+      expect(focusedMenu, equals(TestMenu.anchorButton.label));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+
+      expect(focusedMenu, equals('MenuItemButton(Text("${TestMenu.mainMenu1.label}"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.home);
+      await tester.pump();
+
+      expect(focusedMenu, equals('MenuItemButton(Text("${TestMenu.mainMenu0.label}"))'));
+    });
+
+    testWidgets('Home key from SubmenuButton focuses first sibling', (WidgetTester tester) async {
+      final FocusNode buttonFocus = FocusNode(debugLabel: TestMenu.mainMenu2.label);
+      addTearDown(buttonFocus.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                MenuBar(
+                  controller: controller,
+                  children: <Widget>[
+                    SubmenuButton(
+                      menuChildren: <Widget>[
+                        MenuItemButton(onPressed: () {}, child: Text(TestMenu.mainMenu0.label)),
+                        MenuItemButton(onPressed: () {}, child: Text(TestMenu.mainMenu1.label)),
+                        SubmenuButton(
+                          focusNode: buttonFocus,
+                          menuChildren: <Widget>[
+                            MenuItemButton(onPressed: () {}, child: Text(TestMenu.subMenu00.label)),
+                            MenuItemButton(onPressed: () {}, child: Text(TestMenu.subMenu01.label)),
+                            MenuItemButton(onPressed: () {}, child: Text(TestMenu.subMenu02.label)),
+                          ],
+                          child: Text(TestMenu.mainMenu2.label),
+                        ),
+                        MenuItemButton(onPressed: () {}, child: Text(TestMenu.mainMenu3.label)),
+                      ],
+                      child: const Text('Menu'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      listenForFocusChanges();
+
+      await tester.tap(find.text('Menu'));
+      await tester.pump();
+
+      // First, test from open submenu
+      buttonFocus.requestFocus();
+      await tester.pump();
+
+      expect(find.text(TestMenu.subMenu00.label), findsOneWidget);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.home);
+      await tester.pump();
+
+      expect(focusedMenu, equals('MenuItemButton(Text("${TestMenu.mainMenu0.label}"))'));
+      expect(find.text(TestMenu.subMenu00.label), findsNothing);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+
+      expect(focusedMenu, equals(TestMenu.mainMenu2.label));
+      expect(find.text(TestMenu.subMenu00.label), findsOneWidget);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+
+      expect(focusedMenu, equals(TestMenu.mainMenu2.label));
+      expect(find.text(TestMenu.subMenu00.label), findsNothing);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.home);
+      await tester.pump();
+
+      expect(focusedMenu, equals('MenuItemButton(Text("${TestMenu.mainMenu0.label}"))'));
+    });
+
+    testWidgets('End key from MenuAnchor overlay focuses last sibling', (
+      WidgetTester tester,
+    ) async {
+      final FocusNode focusNode = FocusNode(debugLabel: TestMenu.anchorButton.label);
+      addTearDown(focusNode.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuAnchor(
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                return TextButton(
+                  focusNode: focusNode,
+                  onPressed: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                  child: Text(TestMenu.anchorButton.label),
+                );
+              },
+              menuChildren: <Widget>[
+                MenuItemButton(onPressed: () {}, child: Text(TestMenu.mainMenu0.label)),
+                MenuItemButton(onPressed: () {}, child: Text(TestMenu.mainMenu1.label)),
+                MenuItemButton(onPressed: () {}, child: Text(TestMenu.mainMenu2.label)),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      listenForFocusChanges();
+
+      focusNode.requestFocus();
+      await tester.pump();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.end);
+      await tester.pump();
+
+      expect(focusedMenu, equals(TestMenu.anchorButton.label));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+
+      expect(focusedMenu, equals(TestMenu.anchorButton.label));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+
+      expect(focusedMenu, equals('MenuItemButton(Text("${TestMenu.mainMenu1.label}"))'));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.end);
+      await tester.pump();
+
+      expect(focusedMenu, equals('MenuItemButton(Text("${TestMenu.mainMenu2.label}"))'));
+    });
+
+    testWidgets('End key from SubmenuButton focuses last sibling', (WidgetTester tester) async {
+      final FocusNode buttonFocus = FocusNode(debugLabel: TestMenu.mainMenu2.label);
+      addTearDown(buttonFocus.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                MenuBar(
+                  controller: controller,
+                  children: <Widget>[
+                    SubmenuButton(
+                      menuChildren: <Widget>[
+                        MenuItemButton(onPressed: () {}, child: Text(TestMenu.mainMenu0.label)),
+                        MenuItemButton(onPressed: () {}, child: Text(TestMenu.mainMenu1.label)),
+                        SubmenuButton(
+                          focusNode: buttonFocus,
+                          menuChildren: <Widget>[
+                            MenuItemButton(onPressed: () {}, child: Text(TestMenu.subMenu00.label)),
+                            MenuItemButton(onPressed: () {}, child: Text(TestMenu.subMenu01.label)),
+                            MenuItemButton(onPressed: () {}, child: Text(TestMenu.subMenu02.label)),
+                          ],
+                          child: Text(TestMenu.mainMenu2.label),
+                        ),
+                        MenuItemButton(onPressed: () {}, child: Text(TestMenu.mainMenu3.label)),
+                      ],
+                      child: const Text('Menu'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      listenForFocusChanges();
+
+      await tester.tap(find.text('Menu'));
+      await tester.pump();
+
+      // First, test from open submenu
+      buttonFocus.requestFocus();
+      await tester.pump();
+
+      expect(find.text(TestMenu.subMenu00.label), findsOneWidget);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.end);
+      await tester.pump();
+
+      expect(focusedMenu, equals('MenuItemButton(Text("${TestMenu.mainMenu3.label}"))'));
+      expect(find.text(TestMenu.subMenu00.label), findsNothing);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+
+      expect(focusedMenu, equals(TestMenu.mainMenu2.label));
+      expect(find.text(TestMenu.subMenu00.label), findsOneWidget);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+
+      expect(focusedMenu, equals(TestMenu.mainMenu2.label));
+      expect(find.text(TestMenu.subMenu00.label), findsNothing);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.end);
+      await tester.pump();
+
+      expect(focusedMenu, equals('MenuItemButton(Text("${TestMenu.mainMenu3.label}"))'));
     });
 
     testWidgets('MenuAnchor tab traversal works', (WidgetTester tester) async {
@@ -1825,9 +2505,7 @@ void main() {
       expect(focusedMenu, equals(TestMenu.anchorButton.label));
       expect(find.text('start'), findsOneWidget);
 
-      // Directional traversal doesn't work until a menu item is focused.
-      // To start focusing, hover over the first menu item.
-      await hoverOver(tester, find.text('start'));
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("start"))'));
 
@@ -1927,9 +2605,7 @@ void main() {
       expect(focusedMenu, equals(TestMenu.anchorButton.label));
       expect(find.text('start'), findsOneWidget);
 
-      // Directional traversal doesn't work until a menu item is focused.
-      // To start focusing, hover over the first menu item.
-      await hoverOver(tester, find.text('start'));
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("start"))'));
 
@@ -2075,8 +2751,9 @@ void main() {
       await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
 
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
+      // Wraps around to first item.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 11"))'));
     });
 
     testWidgets('scrolling does not trigger hover traversal', (WidgetTester tester) async {
@@ -2347,12 +3024,55 @@ void main() {
       await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Submenu item 1"))'));
     });
+
+    testWidgets('MenuAnchor accepts custom overlay actions', (WidgetTester tester) async {
+      bool customActionInvoked = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuAnchor(
+              controller: controller,
+              overlayActions: <Type, Action<Intent>>{
+                DoNothingIntent: CallbackAction<DoNothingIntent>(
+                  onInvoke: (DoNothingIntent intent) {
+                    customActionInvoked = true;
+                    return null;
+                  },
+                ),
+              },
+              menuChildren: <Widget>[
+                Builder(
+                  builder: (BuildContext context) {
+                    return MenuItemButton(
+                      closeOnActivate: false,
+                      onPressed: () {
+                        // Invoke the custom action when this menu item is pressed.
+                        Actions.invoke<DoNothingIntent>(context, const DoNothingIntent());
+                      },
+                      child: const Text('Item 0'),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pump();
+
+      expect(find.text('Item 0'), findsOneWidget);
+      expect(customActionInvoked, isFalse);
+
+      await tester.tap(find.text('Item 0'));
+      await tester.pumpAndSettle();
+
+      expect(customActionInvoked, isTrue);
+    });
   });
 
   group('Accelerators', () {
-    const Set<TargetPlatform> apple = <TargetPlatform>{TargetPlatform.macOS, TargetPlatform.iOS};
-    final Set<TargetPlatform> nonApple = TargetPlatform.values.toSet().difference(apple);
-
     test('Accelerator markers are stripped properly', () {
       const Map<String, String> expected = <String, String>{
         'Plain String': 'Plain String',
@@ -4454,6 +5174,7 @@ void main() {
               ],
             ),
             ignoreTransform: true,
+            ignoreId: true,
           ),
         );
 
@@ -4504,6 +5225,7 @@ void main() {
               ],
             ),
             ignoreTransform: true,
+            ignoreId: true,
           ),
         );
 
