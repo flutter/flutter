@@ -1113,7 +1113,7 @@ Information about project "Runner":
     });
 
     testUsingContext(
-      'podhelper.rb aborts when EXCLUDED_ARCHS without SDK specifier excludes arm64',
+      'podhelper.rb aborts when EXCLUDED_ARCHS excludes arm64',
       () async {
         final Directory podSupportDir = fs.directory('ios/Pods/Target Support Files/MyPlugin');
         podSupportDir.createSync(recursive: true);
