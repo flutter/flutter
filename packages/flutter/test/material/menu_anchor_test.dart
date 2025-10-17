@@ -4545,7 +4545,7 @@ void main() {
         // Test expanded state.
         await tester.tap(find.text('ABC'));
         await tester.pump();
-        var expandedMatcher = hasSemantics(
+        final Matcher expandedMatcher = hasSemantics(
           TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
@@ -4625,7 +4625,7 @@ void main() {
         await tester.tap(find.text('ABC'));
         await tester.pump();
 
-        var collapsedMatcher = hasSemantics(
+        final Matcher collapsedMatcher = hasSemantics(
           TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
