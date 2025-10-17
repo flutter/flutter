@@ -368,13 +368,12 @@ TEST_F(WindowManagerTest, DialogCanNeverBeFullscreen) {
   IsolateScope isolate_scope(isolate());
 
   DialogWindowCreationRequest creation_request{
-      .preferred_size =
-          {
-              .has_preferred_view_size = true,
-              .preferred_view_width = 800,
-              .preferred_view_height = 600,
-          },
-  };
+      .preferred_size = {.has_preferred_view_size = true,
+                         .preferred_view_width = 800,
+                         .preferred_view_height = 600},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Hello World",
+      .parent_or_null = nullptr};
 
   const int64_t view_id =
       InternalFlutterWindows_WindowManager_CreateDialogWindow(
