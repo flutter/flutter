@@ -551,6 +551,8 @@ targets:
   - name: Windows windows_unopt
     recipe: engine_v2/builder
     timeout: 120
+    # TODO(#177172): dashboard super unhealthy
+    bringup: true
     properties:
       config_name: windows_unopt
 
