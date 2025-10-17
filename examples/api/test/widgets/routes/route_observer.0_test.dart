@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter_api_samples/widgets/routes/route_observer.0.dart' as example;
+import 'package:flutter_api_samples/widgets/routes/route_observer.0.dart' show RouteObserverExample;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('RouteObserver notifies RouteAware widget', (WidgetTester tester) async {
@@ -35,5 +37,25 @@ void main() {
     // Check the RouteObserver logs after the route is popped again.
     expect(find.text('didPush'), findsOneWidget);
     expect(find.text('didPopNext'), findsNWidgets(2));
+
+    // Check if any overflow or layout exceptions occurred.
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('RouteObserver example renders without overflow on small screens', (
+    WidgetTester tester,
+  ) async {
+    // Set the screen size to a smaller value.
+    tester.binding.window.physicalSizeTestValue = const Size(200, 200);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
+
+    // Build the RouteObserver example widget.
+    await tester.pumpWidget(const example.RouteObserverApp());
+    await tester.pumpAndSettle();
+
+    // Verify there are no layout exceptions.
+    expect(tester.takeException(), isNull);
   });
 }
