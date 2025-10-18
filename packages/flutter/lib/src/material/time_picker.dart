@@ -1931,7 +1931,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                     children: <Widget>[
                       Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: <Widget>[
                             Padding(
                               padding: const EdgeInsets.only(bottom: 10),
@@ -1964,7 +1964,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                       _TimeSelectorSeparator(timeOfDayFormat: timeOfDayFormat),
                       Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: <Widget>[
                             Padding(
                               padding: const EdgeInsets.only(bottom: 10),
