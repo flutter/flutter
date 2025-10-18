@@ -4203,6 +4203,8 @@ base class _ColorFilter extends NativeFieldWrapperClass1 {
 /// See also:
 ///
 ///  * [BackdropFilter], a widget that applies [ImageFilter] to its rendering.
+///  * [ClipRect], a widget that limits the area affected by the [ImageFilter]
+///    when used with [BackdropFilter].
 ///  * [ImageFiltered], a widget that applies [ImageFilter] to its children.
 ///  * [SceneBuilder.pushBackdropFilter], which is the low-level API for using
 ///    this class as a backdrop filter.
