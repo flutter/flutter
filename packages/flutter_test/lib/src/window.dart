@@ -431,6 +431,83 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
+  double get lineHeightScaleFactor =>
+      _lineHeightScaleFactorTestValue ?? _platformDispatcher.lineHeightScaleFactor;
+  double? _lineHeightScaleFactorTestValue;
+
+  /// Hides the real line height scale factor and reports the given
+  /// [lineHeightScaleFactorTestValue] instead.
+  // ignore: avoid_setters_without_getters
+  set lineHeightScaleFactorTestValue(double lineHeightScaleFactorTestValue) {
+    _lineHeightScaleFactorTestValue = lineHeightScaleFactorTestValue;
+    onMetricsChanged?.call();
+  }
+
+  /// Deletes any existing test line height scale factor and returns to using
+  /// the real line height scale factor.
+  void clearLineHeightScaleFactorTestValue() {
+    _lineHeightScaleFactorTestValue = null;
+    onMetricsChanged?.call();
+  }
+
+  @override
+  double get letterSpacing => _letterSpacingTestValue ?? _platformDispatcher.letterSpacing;
+  double? _letterSpacingTestValue;
+
+  /// Hides the real letter spacing and reports the given
+  /// [letterSpacingTestValue] instead.
+  /// ignore: avoid_setters_without_getters
+  set letterSpacingTestValue(double letterSpacingTestValue) {
+    _letterSpacingTestValue = letterSpacingTestValue;
+    onMetricsChanged?.call();
+  }
+
+  /// Deletes any existing test letter spacing and returns to using the real
+  /// letter spacing.
+  void clearLetterSpacingTestValue() {
+    _letterSpacingTestValue = null;
+    onMetricsChanged?.call();
+  }
+
+  @override
+  double get wordSpacing => _wordSpacingTestValue ?? _platformDispatcher.wordSpacing;
+  double? _wordSpacingTestValue;
+
+  /// Hides the real word spacing and reports the given
+  /// [wordSpacingTestValue] instead.
+  /// ignore: avoid_setters_without_getters
+  set wordSpacingTestValue(double wordSpacingTestValue) {
+    _wordSpacingTestValue = wordSpacingTestValue;
+    onMetricsChanged?.call();
+  }
+
+  /// Deletes any existing test word spacing and returns to using the real
+  /// word spacing.
+  void clearWordSpacingTestValue() {
+    _wordSpacingTestValue = null;
+    onMetricsChanged?.call();
+  }
+
+  @override
+  double get paragraphSpacing => _paragraphSpacingTestValue ?? _platformDispatcher.paragraphSpacing;
+  double? _paragraphSpacingTestValue;
+
+  /// Hides the real paragraph spacing and reports the given
+  /// [paragraphSpacingTestValue] instead.
+  /// ignore: avoid_setters_without_getters
+  set paragraphSpacingTestValue(double paragraphSpacingTestValue) {
+    _paragraphSpacingTestValue = paragraphSpacingTestValue;
+    onMetricsChanged?.call();
+  }
+
+  /// Deletes any existing test paragraph spacing and returns to using the real
+  /// paragraph spacing.
+  void clearParagraphSpacingTestValue() {
+    _paragraphSpacingTestValue = null;
+    onMetricsChanged?.call();
+  }
+
+  @override
   FrameCallback? get onBeginFrame => _platformDispatcher.onBeginFrame;
   @override
   set onBeginFrame(FrameCallback? callback) {

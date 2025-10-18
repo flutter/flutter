@@ -89,6 +89,14 @@ abstract class PlatformDispatcher {
 
   void setApplicationLocale(Locale locale) {}
 
+  double get lineHeightScaleFactor;
+
+  double get letterSpacing;
+
+  double get wordSpacing;
+
+  double get paragraphSpacing;
+
   AccessibilityFeatures get accessibilityFeatures;
 
   VoidCallback? get onAccessibilityFeaturesChanged;

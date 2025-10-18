@@ -1071,6 +1071,10 @@ class EditableText extends StatefulWidget {
   final bool enableSuggestions;
 
   /// The text style to use for the editable text.
+  ///
+  /// This [style]s [TextStyle.fontWeight], [TextStyle.height], [TextStyle.letterSpacing],
+  /// and [TextStyle.wordSpacing] will be overriden by text spacing values from the nearest
+  /// [MediaQuery] ancestor, regardless of its [TextStyle.inherit] value.
   final TextStyle style;
 
   /// Controls the undo state of the current editable text.
@@ -3234,9 +3238,26 @@ class EditableTextState extends State<EditableText>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _style = MediaQuery.boldTextOf(context)
-        ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
-        : widget.style;
+    // Apply platform settings to text style.
+    final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOf(context);
+    final double? letterSpacing = MediaQuery.maybeLetterSpacingOf(context);
+    final double? wordSpacing = MediaQuery.maybeWordSpacingOf(context);
+    final bool boldText = MediaQuery.boldTextOf(context);
+    if (!boldText &&
+        lineHeightScaleFactor == null &&
+        letterSpacing == null &&
+        wordSpacing == null) {
+      _style = widget.style;
+    } else {
+      _style = widget.style.merge(
+        TextStyle(
+          height: lineHeightScaleFactor,
+          letterSpacing: letterSpacing,
+          wordSpacing: wordSpacing,
+          fontWeight: boldText ? FontWeight.bold : null,
+        ),
+      );
+    }
 
     final AutofillGroupState? newAutofillGroup = AutofillGroup.maybeOf(context);
     if (currentAutofillScope != newAutofillGroup) {
@@ -3376,11 +3397,28 @@ class EditableTextState extends State<EditableText>
     }
 
     if (widget.style != oldWidget.style) {
+      // Apply platform settings to text style.
+      final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOf(context);
+      final double? letterSpacing = MediaQuery.maybeLetterSpacingOf(context);
+      final double? wordSpacing = MediaQuery.maybeWordSpacingOf(context);
+      final bool boldText = MediaQuery.boldTextOf(context);
+      if (!boldText &&
+          lineHeightScaleFactor == null &&
+          letterSpacing == null &&
+          wordSpacing == null) {
+        _style = widget.style;
+      } else {
+        _style = widget.style.merge(
+          TextStyle(
+            height: lineHeightScaleFactor,
+            letterSpacing: letterSpacing,
+            wordSpacing: wordSpacing,
+            fontWeight: boldText ? FontWeight.bold : null,
+          ),
+        );
+      }
       // The _textInputConnection will pick up the new style when it attaches in
       // _openInputConnection.
-      _style = MediaQuery.boldTextOf(context)
-          ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
-          : widget.style;
       if (_hasInputConnection) {
         _textInputConnection!.setStyle(
           fontFamily: _style.fontFamily,

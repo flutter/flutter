@@ -29,6 +29,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _addBrightnessMediaQueryListener();
     HighContrastSupport.instance.addListener(_updateHighContrast);
     _addFontSizeObserver();
+    _addTypographySettingsObserver();
     _addLocaleChangedListener();
     registerHotRestartListener(dispose);
     _appLifecycleState.addListener(_setAppLifecycleState);
@@ -80,6 +81,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   void dispose() {
     _removeBrightnessMediaQueryListener();
     _disconnectFontSizeObserver();
+    _disconnectTypographySettingsObserver();
     _removeLocaleChangedListener();
     HighContrastSupport.instance.removeListener(_updateHighContrast);
     _appLifecycleState.removeListener(_setAppLifecycleState);
@@ -755,6 +757,18 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     }
   }
 
+  @override
+  double get lineHeightScaleFactor => configuration.lineHeightScaleFactor;
+
+  @override
+  double get letterSpacing => configuration.letterSpacing;
+
+  @override
+  double get wordSpacing => configuration.wordSpacing;
+
+  @override
+  double get paragraphSpacing => configuration.paragraphSpacing;
+
   /// Additional accessibility features that may be enabled by the platform.
   @override
   ui.AccessibilityFeatures get accessibilityFeatures => configuration.accessibilityFeatures;
@@ -1016,6 +1030,152 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   void _disconnectFontSizeObserver() {
     _fontSizeObserver?.disconnect();
     _fontSizeObserver = null;
+  }
+
+  /// Watches for resize changes on an off-screen invisible element to
+  /// recalculate [typographySettings].
+  ///
+  /// Updates [typographySettings] with the new value.
+  DomResizeObserver? _typographySettingsObserver;
+  DomElement? _typographyMeasurementElement;
+
+  /// Updates [lineHeightScaleFactor] and invokes [onPlatformConfigurationChanged] and
+  /// [onMetricsChanged] callbacks if [lineHeightScaleFactor] changed.
+  void _updateLineHeightScaleFactor(double value) {
+    if (configuration.lineHeightScaleFactor != value) {
+      configuration = configuration.copyWith(lineHeightScaleFactor: value);
+      invokeOnPlatformConfigurationChanged();
+      invokeOnMetricsChanged();
+    }
+  }
+
+  /// Updates [letterSpacing] and invokes [onPlatformConfigurationChanged] and
+  /// [onMetricsChanged] callbacks if [letterSpacing] changed.
+  void _updateLetterSpacing(double value) {
+    if (configuration.letterSpacing != value) {
+      configuration = configuration.copyWith(letterSpacing: value);
+      invokeOnPlatformConfigurationChanged();
+      invokeOnMetricsChanged();
+    }
+  }
+
+  /// Updates [wordSpacing] and invokes [onPlatformConfigurationChanged] and
+  /// [onMetricsChanged] callbacks if [wordSpacing] changed.
+  void _updateWordSpacing(double value) {
+    if (configuration.wordSpacing != value) {
+      configuration = configuration.copyWith(wordSpacing: value);
+      invokeOnPlatformConfigurationChanged();
+      invokeOnMetricsChanged();
+    }
+  }
+
+  /// Updates [paragraphSpacing] and invokes [onPlatformConfigurationChanged] and
+  /// [onMetricsChanged] callbacks if [paragraphSpacing] changed.
+  void _updateParagraphSpacing(double value) {
+    if (configuration.paragraphSpacing != value) {
+      configuration = configuration.copyWith(paragraphSpacing: value);
+      invokeOnPlatformConfigurationChanged();
+      invokeOnMetricsChanged();
+    }
+  }
+
+  /// Set the callback function for updating [typographySettings] based on
+  /// the sizing changes of an off-screen element with text.
+  void _addTypographySettingsObserver() {
+    _typographyMeasurementElement = createDomHTMLParagraphElement();
+    _typographyMeasurementElement!.text = 'flutter typography measurement';
+    // The element should be hidden from screen readers.
+    _typographyMeasurementElement!.setAttribute('aria-hidden', 'true');
+    final DomCSSStyleDeclaration style = _typographyMeasurementElement!.style;
+    style.position = 'absolute';
+    // The element should be off-screen and not visible.
+    style.top = '-9999px';
+    style.left = '-9999px';
+    style.visibility = 'hidden';
+    // The element should be sensitive to letter-spacing, word-spacing,
+    // and line-height changes.
+    style.width = 'auto';
+    style.height = 'auto';
+    style.whiteSpace = 'nowrap';
+    // Set text spacing properties defaults.
+    const double spacingDefault = 100.0;
+    style.lineHeight = '${spacingDefault}px';
+    style.letterSpacing = '${spacingDefault}px';
+    style.wordSpacing = '${spacingDefault}px';
+    style.margin = '0px 0px ${spacingDefault}px 0px';
+    domDocument.body!.append(_typographyMeasurementElement!);
+    final double? typographyMeasurementElementFontSize = parseFontSize(
+      _typographyMeasurementElement!,
+    )?.toDouble();
+    final double defaultLineHeightFactor = spacingDefault / typographyMeasurementElementFontSize!;
+
+    _typographySettingsObserver = createDomResizeObserver((
+      List<DomResizeObserverEntry> entries,
+      DomResizeObserver observer,
+    ) {
+      final double? lineHeight = parseNumericStyleProperty(
+        _typographyMeasurementElement!,
+        'line-height',
+      )?.toDouble();
+      final double? fontSize = parseFontSize(_typographyMeasurementElement!)?.toDouble();
+      final double? computedLineHeightScaleFactor = fontSize != null && lineHeight != null
+          ? lineHeight / fontSize
+          : null;
+      final double? computedWordSpacing = parseNumericStyleProperty(
+        _typographyMeasurementElement!,
+        'word-spacing',
+      )?.toDouble();
+      final double? computedLetterSpacing = parseNumericStyleProperty(
+        _typographyMeasurementElement!,
+        'letter-spacing',
+      )?.toDouble();
+      // There is no direct CSS property for paragraph spacing,
+      // so on the web this feature is usually implemented
+      // by extension authors by leveraging `margin-bottom` on
+      // the `p` element.
+      final double? computedParagraphSpacing = parseNumericStyleProperty(
+        _typographyMeasurementElement!,
+        'margin-bottom',
+      )?.toDouble();
+
+      // if (computedLineHeightScaleFactor == defaultLineHeightFactor) {
+      //   _updateLineHeightScaleFactor();
+      // }
+      // if (computedLetterSpacing == spacingDefault) {
+      //   _updateLetterSpacing();
+      // }
+      // if (computedWordSpacing == spacingDefault) {
+      //   _updateWordSpacing();
+      // }
+      // if (computedParagraphSpacing == spacingDefault) {
+      //   _updateParagraphSpacing();
+      // }
+
+      if (computedLineHeightScaleFactor != null &&
+          computedLineHeightScaleFactor != defaultLineHeightFactor) {
+        _updateLineHeightScaleFactor(computedLineHeightScaleFactor);
+      }
+      if (computedLetterSpacing != null && computedLetterSpacing != spacingDefault) {
+        _updateLetterSpacing(computedLetterSpacing);
+      }
+      if (computedWordSpacing != null && computedWordSpacing != spacingDefault) {
+        _updateWordSpacing(computedWordSpacing);
+      }
+      if (computedParagraphSpacing != null && computedParagraphSpacing != spacingDefault) {
+        _updateParagraphSpacing(computedParagraphSpacing);
+      }
+    });
+
+    _typographySettingsObserver!.observe(_typographyMeasurementElement!);
+  }
+
+  /// Remove the observer for typography changes on the off-screen
+  /// typography measurement element.
+  void _disconnectTypographySettingsObserver() {
+    _typographySettingsObserver?.disconnect();
+    _typographySettingsObserver = null;
+    _typographyMeasurementElement?.remove();
+    _typographyMeasurementElement = null;
   }
 
   void _setAppLifecycleState(ui.AppLifecycleState state) {
@@ -1674,6 +1834,10 @@ class PlatformConfiguration {
     this.locales = const <ui.Locale>[],
     this.defaultRouteName = '/',
     this.systemFontFamily,
+    this.lineHeightScaleFactor = 1.0,
+    this.letterSpacing = 0.0,
+    this.wordSpacing = 0.0,
+    this.paragraphSpacing = 0.0,
   });
 
   PlatformConfiguration copyWith({
@@ -1685,6 +1849,10 @@ class PlatformConfiguration {
     List<ui.Locale>? locales,
     String? defaultRouteName,
     String? systemFontFamily,
+    double? lineHeightScaleFactor,
+    double? letterSpacing,
+    double? wordSpacing,
+    double? paragraphSpacing,
   }) {
     return PlatformConfiguration(
       accessibilityFeatures: accessibilityFeatures ?? this.accessibilityFeatures,
@@ -1695,6 +1863,10 @@ class PlatformConfiguration {
       locales: locales ?? this.locales,
       defaultRouteName: defaultRouteName ?? this.defaultRouteName,
       systemFontFamily: systemFontFamily ?? this.systemFontFamily,
+      lineHeightScaleFactor: lineHeightScaleFactor ?? this.lineHeightScaleFactor,
+      letterSpacing: letterSpacing ?? this.letterSpacing,
+      wordSpacing: wordSpacing ?? this.wordSpacing,
+      paragraphSpacing: paragraphSpacing ?? this.paragraphSpacing,
     );
   }
 
@@ -1706,6 +1878,10 @@ class PlatformConfiguration {
   final List<ui.Locale> locales;
   final String defaultRouteName;
   final String? systemFontFamily;
+  final double lineHeightScaleFactor;
+  final double letterSpacing;
+  final double wordSpacing;
+  final double paragraphSpacing;
 }
 
 /// Helper class to hold navigation target information for AT focus restoration
