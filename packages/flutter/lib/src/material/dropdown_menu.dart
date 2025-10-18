@@ -151,7 +151,7 @@ enum DropdownMenuCloseBehavior {
 ///   The [DropdownMenu] uses a [TextField] as the "anchor".
 /// * [TextField], which is a text input widget that uses an [InputDecoration].
 /// * [DropdownMenuEntry], which is used to build the [MenuItemButton] in the [DropdownMenu] list.
-class DropdownMenu<T> extends StatefulWidget {
+class DropdownMenu<T extends Object> extends StatefulWidget {
   /// Creates a const [DropdownMenu].
   ///
   /// The leading and trailing icons in the text field can be customized by using
@@ -386,7 +386,12 @@ class DropdownMenu<T> extends StatefulWidget {
 
   /// The callback is called when a selection is made.
   ///
-  /// Defaults to null. If null, only the text field is updated.
+  /// The callback receives the selected entry's value of type `T` when the user
+  /// chooses an item. It may also be invoked with `null` to indicate that the
+  /// selection was cleared / that no item was chosen.
+  ///
+  /// Defaults to null. If this callback itself is null, the widget still updates
+  /// the text field with the selected label.
   final ValueChanged<T?>? onSelected;
 
   /// Defines the keyboard focus for this widget.
@@ -606,7 +611,7 @@ class DropdownMenu<T> extends StatefulWidget {
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
 }
 
-class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
+class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
   final GlobalKey _anchorKey = GlobalKey();
   final GlobalKey _leadingKey = GlobalKey();
   late List<GlobalKey> buttonItemKeys;
@@ -1443,7 +1448,6 @@ class _RenderDropdownMenuBody extends RenderBox
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    final BoxConstraints constraints = this.constraints;
     double maxWidth = 0.0;
     double? maxHeight;
     RenderBox? child = firstChild;
@@ -1455,22 +1459,17 @@ class _RenderDropdownMenuBody extends RenderBox
     );
 
     while (child != null) {
-      if (child == firstChild) {
-        final Size childSize = child.getDryLayout(innerConstraints);
-        maxHeight ??= childSize.height;
-        final _DropdownMenuBodyParentData childParentData =
-            child.parentData! as _DropdownMenuBodyParentData;
-        assert(child.parentData == childParentData);
-        child = childParentData.nextSibling;
-        continue;
-      }
       final Size childSize = child.getDryLayout(innerConstraints);
+
+      // The first child is the TextField, which doesn't contribute to the
+      // menu's width calculation.
+      if (child != firstChild) {
+        maxWidth = math.max(maxWidth, childSize.width);
+      }
+
       final _DropdownMenuBodyParentData childParentData =
           child.parentData! as _DropdownMenuBodyParentData;
-      childParentData.offset = Offset.zero;
-      maxWidth = math.max(maxWidth, childSize.width);
       maxHeight ??= childSize.height;
-      assert(child.parentData == childParentData);
       child = childParentData.nextSibling;
     }
 
