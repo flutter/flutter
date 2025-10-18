@@ -23,6 +23,7 @@ import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import io.flutter.embedding.engine.FlutterEngineManifestFlags;
 import java.io.StringReader;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,7 +60,7 @@ public class ApplicationInfoLoaderTest {
     when(context.getPackageName()).thenReturn("");
     when(packageManager.getApplicationInfo(anyString(), anyInt())).thenReturn(applicationInfo);
     if (networkPolicyXml != null) {
-      metadata.putInt(ApplicationInfoLoader.NETWORK_POLICY_METADATA_KEY, 5);
+      metadata.putInt(FlutterEngineManifestFlags.NETWORK_POLICY.metaDataKey, 5);
       doAnswer(invocationOnMock -> createMockResourceParser(networkPolicyXml))
           .when(resources)
           .getXml(5);
@@ -70,10 +71,11 @@ public class ApplicationInfoLoaderTest {
   @Test
   public void itGeneratesCorrectApplicationInfoWithCustomValues() throws Exception {
     Bundle bundle = new Bundle();
-    bundle.putString(ApplicationInfoLoader.PUBLIC_AOT_SHARED_LIBRARY_NAME, "testaot");
-    bundle.putString(ApplicationInfoLoader.PUBLIC_VM_SNAPSHOT_DATA_KEY, "testvmsnapshot");
-    bundle.putString(ApplicationInfoLoader.PUBLIC_ISOLATE_SNAPSHOT_DATA_KEY, "testisolatesnapshot");
-    bundle.putString(ApplicationInfoLoader.PUBLIC_FLUTTER_ASSETS_DIR_KEY, "testassets");
+    bundle.putString(FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME.metaDataKey, "testaot");
+    bundle.putString(FlutterEngineManifestFlags.VM_SNAPSHOT_DATA.metaDataKey, "testvmsnapshot");
+    bundle.putString(
+        FlutterEngineManifestFlags.ISOLATE_SNAPSHOT_DATA.metaDataKey, "testisolatesnapshot");
+    bundle.putString(FlutterEngineManifestFlags.FLUTTER_ASSETS_DIR.metaDataKey, "testassets");
     Context context = generateMockContext(bundle, null);
     FlutterApplicationInfo info = ApplicationInfoLoader.load(context);
     assertNotNull(info);

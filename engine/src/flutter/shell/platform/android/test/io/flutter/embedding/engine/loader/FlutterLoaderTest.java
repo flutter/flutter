@@ -208,7 +208,7 @@ public class FlutterLoaderTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
     Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.LeakVM", false);
+    metaData.putBoolean("io.flutter.embedding.android.leakVm", false);
     ctx.getApplicationInfo().metaData = metaData;
 
     FlutterLoader.Settings settings = new FlutterLoader.Settings();
@@ -298,7 +298,7 @@ public class FlutterLoaderTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
     Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.EnableImpeller", true);
+    metaData.putBoolean("io.flutter.embedding.android.enableImpeller", true);
     ctx.getApplicationInfo().metaData = metaData;
 
     FlutterLoader.Settings settings = new FlutterLoader.Settings();
@@ -327,7 +327,7 @@ public class FlutterLoaderTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
     Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.EnableFlutterGPU", true);
+    metaData.putBoolean("io.flutter.embedding.android.enableFlutterGpu", true);
     ctx.getApplicationInfo().metaData = metaData;
 
     FlutterLoader.Settings settings = new FlutterLoader.Settings();
@@ -336,7 +336,7 @@ public class FlutterLoaderTest {
     flutterLoader.ensureInitializationComplete(ctx, null);
     shadowOf(getMainLooper()).idle();
 
-    final String enableImpellerArg = "--enable-flutter-gpu";
+    final String enableFlutterGpuArg = "--enable-flutter-gpu";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
         .init(
@@ -348,7 +348,7 @@ public class FlutterLoaderTest {
             anyLong(),
             anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
-    assertTrue(arguments.contains(enableImpellerArg));
+    assertTrue(arguments.contains(enableFlutterGpuArg));
   }
 
   @Test
@@ -356,7 +356,7 @@ public class FlutterLoaderTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
     Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.EnableSurfaceControl", true);
+    metaData.putBoolean("io.flutter.embedding.android.enableSurfaceControl", true);
     ctx.getApplicationInfo().metaData = metaData;
 
     FlutterLoader.Settings settings = new FlutterLoader.Settings();
@@ -385,7 +385,7 @@ public class FlutterLoaderTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
     Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.ImpellerLazyShaderInitialization", true);
+    metaData.putBoolean("io.flutter.embedding.android.impellerLazyShaderMode", true);
     ctx.getApplicationInfo().metaData = metaData;
 
     FlutterLoader.Settings settings = new FlutterLoader.Settings();
@@ -394,7 +394,7 @@ public class FlutterLoaderTest {
     flutterLoader.ensureInitializationComplete(ctx, null);
     shadowOf(getMainLooper()).idle();
 
-    final String shaderModeArg = "--impeller-lazy-shader-mode";
+    final String shaderModeArg = "--impeller-lazy-shader-mode=true";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
         .init(
@@ -446,9 +446,11 @@ public class FlutterLoaderTest {
 
     for (Path testPath : pathsToTest) {
       String path = testPath.toString();
-      String aotSharedLibraryNameArg = FlutterLoader.aotSharedLibraryNameFlag + path;
-      String[] args = {aotSharedLibraryNameArg};
-      flutterLoader.ensureInitializationComplete(ctx, args);
+      Bundle metaData = new Bundle();
+      metaData.putString("io.flutter.embedding.android.aotSharedLibraryName", path);
+      ctx.getApplicationInfo().metaData = metaData;
+
+      flutterLoader.ensureInitializationComplete(ctx, null);
 
       ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
       verify(mockFlutterJNI)
@@ -467,8 +469,7 @@ public class FlutterLoaderTest {
       // mode, actualArgs would contain the default arguments for AOT shared library name on top
       // of aotSharedLibraryNameArg.
       String canonicalTestPath = testPath.toFile().getCanonicalPath();
-      String canonicalAotSharedLibraryNameArg =
-          FlutterLoader.aotSharedLibraryNameFlag + canonicalTestPath;
+      String canonicalAotSharedLibraryNameArg = "--aot-shared-library-name=" + canonicalTestPath;
       assertTrue(
           "Args sent to FlutterJni.init incorrectly did not include path " + path,
           actualArgs.contains(canonicalAotSharedLibraryNameArg));
@@ -523,9 +524,11 @@ public class FlutterLoaderTest {
 
     for (Path testPath : pathsToTest) {
       String path = testPath.toString();
-      String aotSharedLibraryNameArg = FlutterLoader.aotSharedLibraryNameFlag + path;
-      String[] args = {aotSharedLibraryNameArg};
-      flutterLoader.ensureInitializationComplete(ctx, args);
+      Bundle metaData = new Bundle();
+      metaData.putString("io.flutter.embedding.android.aotSharedLibraryName", path);
+      ctx.getApplicationInfo().metaData = metaData;
+
+      flutterLoader.ensureInitializationComplete(ctx, null);
 
       ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
       verify(mockFlutterJNI)
@@ -544,8 +547,7 @@ public class FlutterLoaderTest {
       // mode, actualArgs would contain the default arguments for AOT shared library name on top
       // of aotSharedLibraryNameArg.
       String canonicalTestPath = testPath.toFile().getCanonicalPath();
-      String canonicalAotSharedLibraryNameArg =
-          FlutterLoader.aotSharedLibraryNameFlag + canonicalTestPath;
+      String canonicalAotSharedLibraryNameArg = "--aot-shared-library-name=" + canonicalTestPath;
       assertFalse(
           "Args sent to FlutterJni.init incorrectly included canonical path " + canonicalTestPath,
           actualArgs.contains(canonicalAotSharedLibraryNameArg));
@@ -572,8 +574,11 @@ public class FlutterLoaderTest {
 
     String invalidFilePath = "my\0file.so";
 
-    String[] args = {FlutterLoader.aotSharedLibraryNameFlag + invalidFilePath};
-    flutterLoader.ensureInitializationComplete(ctx, args);
+    Bundle metaData = new Bundle();
+    metaData.putString("io.flutter.embedding.android.aotSharedLibraryName", invalidFilePath);
+    ctx.getApplicationInfo().metaData = metaData;
+
+    flutterLoader.ensureInitializationComplete(ctx, null);
 
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI)
@@ -592,7 +597,7 @@ public class FlutterLoaderTest {
     // mode, actualArgs would contain the default arguments for AOT shared library name on top
     // of aotSharedLibraryNameArg.
     for (String arg : actualArgs) {
-      if (arg.startsWith(FlutterLoader.aotSharedLibraryNameFlag)) {
+      if (arg.startsWith("--aot-shared-library-name=")) {
         fail();
       }
     }
@@ -620,9 +625,11 @@ public class FlutterLoaderTest {
     when(flutterLoader.getFileFromPath(spySymlinkFile.getPath())).thenReturn(spySymlinkFile);
     doReturn(realSoFile.getCanonicalPath()).when(spySymlinkFile).getCanonicalPath();
 
-    String symlinkArg = FlutterLoader.aotSharedLibraryNameFlag + spySymlinkFile.getPath();
-    String[] args = {symlinkArg};
-    flutterLoader.ensureInitializationComplete(ctx, args);
+    Bundle metaData = new Bundle();
+    metaData.putString(
+        "io.flutter.embedding.android.aotSharedLibraryName", spySymlinkFile.getPath());
+    ctx.getApplicationInfo().metaData = metaData;
+    flutterLoader.ensureInitializationComplete(ctx, null);
 
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI)
@@ -638,12 +645,14 @@ public class FlutterLoaderTest {
     List<String> actualArgs = Arrays.asList(shellArgsCaptor.getValue());
 
     String canonicalSymlinkCanonicalizedPath = realSoFile.getCanonicalPath();
+    String aotSharedLibraryNameFlag = "--aot-shared-library-name=";
+    String symlinkAotSharedLibraryNameArg = aotSharedLibraryNameFlag + spySymlinkFile.getPath();
     String canonicalAotSharedLibraryNameArg =
-        FlutterLoader.aotSharedLibraryNameFlag + canonicalSymlinkCanonicalizedPath;
+        aotSharedLibraryNameFlag + canonicalSymlinkCanonicalizedPath;
     assertFalse(
         "Args sent to FlutterJni.init incorrectly included absolute symlink path: "
             + spySymlinkFile.getAbsolutePath(),
-        actualArgs.contains(symlinkArg));
+        actualArgs.contains(symlinkAotSharedLibraryNameArg));
     assertTrue(
         "Args sent to FlutterJni.init incorrectly did not include canonicalized path of symlink: "
             + canonicalSymlinkCanonicalizedPath,
@@ -674,15 +683,17 @@ public class FlutterLoaderTest {
     List<File> unsafeFiles = Arrays.asList(nonSoFile, fileJustOutsideInternalStorage);
     Files.deleteIfExists(spySymlinkFile.toPath());
 
-    String symlinkArg = FlutterLoader.aotSharedLibraryNameFlag + spySymlinkFile.getAbsolutePath();
-    String[] args = {symlinkArg};
+    Bundle metaData = new Bundle();
+    metaData.putString(
+        "io.flutter.embedding.android.aotSharedLibraryName", spySymlinkFile.getAbsolutePath());
+    ctx.getApplicationInfo().metaData = metaData;
 
     for (File unsafeFile : unsafeFiles) {
       // Simulate a symlink since some filesystems do not support symlinks.
       when(flutterLoader.getFileFromPath(spySymlinkFile.getPath())).thenReturn(spySymlinkFile);
       doReturn(unsafeFile.getCanonicalPath()).when(spySymlinkFile).getCanonicalPath();
 
-      flutterLoader.ensureInitializationComplete(ctx, args);
+      flutterLoader.ensureInitializationComplete(ctx, null);
 
       ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
       verify(mockFlutterJNI)
@@ -698,8 +709,11 @@ public class FlutterLoaderTest {
       List<String> actualArgs = Arrays.asList(shellArgsCaptor.getValue());
 
       String canonicalSymlinkCanonicalizedPath = unsafeFile.getCanonicalPath();
+      String aotSharedLibraryNameFlag = "--aot-shared-library-name=";
+      String symlinkAotSharedLibraryNameArg =
+          aotSharedLibraryNameFlag + spySymlinkFile.getAbsolutePath();
       String canonicalAotSharedLibraryNameArg =
-          FlutterLoader.aotSharedLibraryNameFlag + canonicalSymlinkCanonicalizedPath;
+          aotSharedLibraryNameFlag + canonicalSymlinkCanonicalizedPath;
       assertFalse(
           "Args sent to FlutterJni.init incorrectly included canonicalized path of symlink: "
               + canonicalSymlinkCanonicalizedPath,
@@ -707,7 +721,7 @@ public class FlutterLoaderTest {
       assertFalse(
           "Args sent to FlutterJni.init incorrectly included absolute path of symlink: "
               + spySymlinkFile.getAbsolutePath(),
-          actualArgs.contains(symlinkArg));
+          actualArgs.contains(symlinkAotSharedLibraryNameArg));
 
       // Clean up created files.
       spySymlinkFile.delete();

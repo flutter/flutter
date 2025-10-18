@@ -1,0 +1,125 @@
+package io.flutter.embedding.engine;
+
+import java.util.*;
+
+/**
+ * Arguments that can be delivered to the Flutter shell when it is created via the app manifest.
+ *
+ * <p>The term "shell" refers to the native code that adapts Flutter to different platforms.
+ * Flutter's Android Java code initializes a native "shell" and passes these arguments to that
+ * native shell when it is initialized. See {@link
+ * io.flutter.embedding.engine.loader.FlutterLoader#ensureInitializationComplete(Context, String[])}
+ * for more information.
+ */
+public final class FlutterEngineManifestFlags {
+
+  private FlutterEngineManifestFlags() {}
+
+  /** Represents a manifest flag and whether it is allowed in release mode. */
+  public static class Flag {
+    public final String commandLineArgument;
+    public final String metaDataKey;
+    public final boolean allowedInRelease;
+
+    private String packageName = "io.flutter.embedding.android.";
+
+    public Flag(String commandLineArgument, boolean allowedInRelease) {
+      this.commandLineArgument = commandLineArgument;
+      this.metaDataKey =
+          packageName + FlutterEngineCommandLineFlags.toManifestMetadataName(commandLineArgument);
+      this.allowedInRelease = allowedInRelease;
+    }
+
+    public boolean hasValue() {
+      return commandLineArgument.endsWith("=");
+    }
+  }
+
+  // Can also be set by command line. Command line takes precendence IMO
+  // TODO(camsim99): note this in the docs.
+
+  // Manifest flags allowed in release mode:
+
+  public static final Flag ENABLE_SOFTWARE_RENDERING =
+      new Flag(FlutterEngineCommandLineFlags.ENABLE_SOFTWARE_RENDERING, true);
+  public static final Flag SKIA_DETERMINISTIC_RENDERING =
+      new Flag(FlutterEngineCommandLineFlags.SKIA_DETERMINISTIC_RENDERING, true);
+  public static final Flag AOT_SHARED_LIBRARY_NAME =
+      new Flag(FlutterEngineCommandLineFlags.AOT_SHARED_LIBRARY_NAME, true);
+  public static final Flag FLUTTER_ASSETS_DIR =
+      new Flag(FlutterEngineCommandLineFlags.FLUTTER_ASSETS_DIR, true);
+  public static final Flag OLD_GEN_HEAP_SIZE =
+      new Flag(FlutterEngineCommandLineFlags.OLD_GEN_HEAP_SIZE, true);
+  public static final Flag ENABLE_IMPELLER =
+      new Flag(FlutterEngineCommandLineFlags.ENABLE_IMPELLER, true);
+  public static final Flag IMPELLER_BACKEND =
+      new Flag(FlutterEngineCommandLineFlags.IMPELLER_BACKEND, true);
+  public static final Flag DISABLE_MERGED_PLATFORM_UI_THREAD =
+      new Flag(FlutterEngineCommandLineFlags.DISABLE_MERGED_PLATFORM_UI_THREAD, true);
+  public static final Flag ENABLE_SURFACE_CONTROL =
+      new Flag(FlutterEngineCommandLineFlags.ENABLE_SURFACE_CONTROL, true);
+  public static final Flag ENABLE_FLUTTER_GPU =
+      new Flag(FlutterEngineCommandLineFlags.ENABLE_FLUTTER_GPU, true);
+  public static final Flag IMPELLER_LAZY_SHADER_MODE =
+      new Flag(FlutterEngineCommandLineFlags.IMPELLER_LAZY_SHADER_MODE, true);
+  public static final Flag IMPELLER_ANTIALIAS_LINES =
+      new Flag(FlutterEngineCommandLineFlags.IMPELLER_ANTIALIAS_LINES, true);
+  public static final Flag VM_SNAPSHOT_DATA =
+      new Flag(FlutterEngineCommandLineFlags.VM_SNAPSHOT_DATA, true);
+  public static final Flag ISOLATE_SNAPSHOT_DATA =
+      new Flag(FlutterEngineCommandLineFlags.ISOLATE_SNAPSHOT_DATA, true);
+
+  // Manifest flags NOT allowed in release mode:
+
+  public static final Flag USE_TEST_FONTS =
+      new Flag(FlutterEngineCommandLineFlags.USE_TEST_FONTS, false);
+  public static final Flag VM_SERVICE_PORT =
+      new Flag(FlutterEngineCommandLineFlags.VM_SERVICE_PORT, false);
+  public static final Flag ENABLE_VULKAN_VALIDATION =
+      new Flag(FlutterEngineCommandLineFlags.ENABLE_VULKAN_VALIDATION, false);
+  public static final Flag ENABLE_OPENGL_GPU_TRACING =
+      new Flag(FlutterEngineCommandLineFlags.ENABLE_OPENGL_GPU_TRACING, false);
+  public static final Flag ENABLE_VULKAN_GPU_TRACING =
+      new Flag(FlutterEngineCommandLineFlags.ENABLE_VULKAN_GPU_TRACING, false);
+  public static final Flag LEAK_VM = new Flag(FlutterEngineCommandLineFlags.LEAK_VM, false);
+
+  public static final List<Flag> ALL_FLAGS =
+      Collections.unmodifiableList(
+          Arrays.asList(
+              VM_SERVICE_PORT,
+              USE_TEST_FONTS,
+              ENABLE_SOFTWARE_RENDERING,
+              SKIA_DETERMINISTIC_RENDERING,
+              AOT_SHARED_LIBRARY_NAME,
+              FLUTTER_ASSETS_DIR,
+              OLD_GEN_HEAP_SIZE,
+              ENABLE_IMPELLER,
+              ENABLE_VULKAN_VALIDATION,
+              IMPELLER_BACKEND,
+              ENABLE_OPENGL_GPU_TRACING,
+              ENABLE_VULKAN_GPU_TRACING,
+              DISABLE_MERGED_PLATFORM_UI_THREAD,
+              ENABLE_SURFACE_CONTROL,
+              ENABLE_FLUTTER_GPU,
+              IMPELLER_LAZY_SHADER_MODE,
+              IMPELLER_ANTIALIAS_LINES,
+              VM_SNAPSHOT_DATA,
+              ISOLATE_SNAPSHOT_DATA,
+              LEAK_VM));
+
+  /**
+   * Looks up a Flag by its metaDataKey.
+   *
+   * @param key The manifest meta-data key.
+   * @return The {@link Flag}, or null if not found.
+   */
+  public static Flag getFlagByMetaDataKey(String key) {
+    for (Flag flag : ALL_FLAGS) {
+      System.out.println(flag.metaDataKey);
+      if (flag.metaDataKey.equals(key)) {
+        return flag;
+      }
+    }
+    return null;
+  }
+}

@@ -21,6 +21,7 @@ import io.flutter.plugin.common.BasicMessageChannel.Reply;
 import io.flutter.plugin.common.StringCodec;
 import java.util.ArrayList;
 
+// TODO(camsim99): Rework after Intent support is removed.
 public class MainActivity extends AppCompatActivity {
     private static FlutterEngine flutterEngine;
 
@@ -31,34 +32,12 @@ public class MainActivity extends AppCompatActivity {
     private static final String PING = "ping";
     private BasicMessageChannel<String> messageChannel;
 
-    private String[] getArgsFromIntent(Intent intent) {
-        // Before adding more entries to this list, consider that arbitrary
-        // Android applications can generate intents with extra data and that
-        // there are many security-sensitive args in the binary.
-        ArrayList<String> args = new ArrayList<>();
-        if (intent.getBooleanExtra("trace-startup", false)) {
-            args.add("--trace-startup");
-        }
-        if (intent.getBooleanExtra("start-paused", false)) {
-            args.add("--start-paused");
-        }
-        if (intent.getBooleanExtra("enable-dart-profiling", false)) {
-            args.add("--enable-dart-profiling");
-        }
-        if (!args.isEmpty()) {
-            String[] argsArray = new String[args.size()];
-            return args.toArray(argsArray);
-        }
-        return null;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        String[] args = getArgsFromIntent(getIntent());
         if (flutterEngine == null) {
-            flutterEngine = new FlutterEngine(this, args);
+            flutterEngine = new FlutterEngine(this);
             flutterEngine.getDartExecutor().executeDartEntrypoint(
                 DartEntrypoint.createDefault()
             );
