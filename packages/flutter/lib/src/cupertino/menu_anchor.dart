@@ -5,7 +5,6 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
-import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -21,11 +20,11 @@ import 'colors.dart';
 import 'dialog.dart';
 import 'theme.dart';
 
+// Dismiss is handled by RawMenuAnchor
 const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivator, Intent>{
   SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
   SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
   SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
-  SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
   SingleActivator(LogicalKeyboardKey.arrowUp): _FocusUpIntent(),
   SingleActivator(LogicalKeyboardKey.arrowDown): _FocusDownIntent(),
   SingleActivator(LogicalKeyboardKey.home): _FocusFirstIntent(),
@@ -48,42 +47,33 @@ bool get _isCupertino {
 // The font size at which text scales linearly on the iOS 18.5 simulator.
 const double _kCupertinoMobileBaseFontSize = 17.0;
 
-/// The width of a Cupertino menu
-// Measured on:
-//  - iPadOS 18.5 Simulator
-//    - iPad Pro 11-inch
-//    - iPad Pro 13-inch
-//  - iOS 18.5 Simulator
-//   - iPhone 16 Pro
-enum _CupertinoMenuWidth {
-  iPadOS(points: 262),
-  iPadOSAccessible(points: 343),
-  iOS(points: 250),
-  iOSAccessible(points: 370);
+/// The CupertinoMenuAnchor layout policy changes depending on whether the user is using
+/// a "regular" font size vs a "large" font size. This is a spectrum. There are
+/// many "regular" font sizes and many "large" font sizes. But depending on which
+/// policy is currently being used, a menu is laid out differently.
+///
+/// Empirically, the jump from one policy to the other occurs at the following text
+/// scale factors:
+/// * Max "regular" scale factor ≈ 23/17 ≈ 1.352... (6 units)
+/// * Min "accessible" scale factor   ≈ 28/17 ≈ 1.647... (11 units)
+///
+/// The following constant represents a division in text scale factor beyond which
+/// we want to change how the menu is laid out.
+///
+/// This explanation was ported from CupertinoDialog.
+const double _kMinimumAccessibleNormalizedTextScale = 11;
 
-  const _CupertinoMenuWidth({required this.points});
+/// The minimum normalized text scale factor supported on iOS.
+const double _kMinimumTextScaleFactor = 1 - 3 / _kCupertinoMobileBaseFontSize;
 
-  // Determines the appropriate menu width based on screen width and
-  // accessibility mode.
-  //
-  // An screen width threshold of 600 points is used to differentiate
-  // between mobile and tablet devices.
-  factory _CupertinoMenuWidth.fromScreenWidth({
-    required double screenWidth,
-    required bool isAccessibilityModeEnabled,
-  }) {
-    final bool isMobile = screenWidth < _kMenuWidthMobileWidthThreshold;
-    return switch ((isMobile, isAccessibilityModeEnabled)) {
-      (false, false) => _CupertinoMenuWidth.iPadOS,
-      (false, true) => _CupertinoMenuWidth.iPadOSAccessible,
-      (true, false) => _CupertinoMenuWidth.iOS,
-      (true, true) => _CupertinoMenuWidth.iOSAccessible,
-    };
-  }
+/// The minimum normalized text scale factor supported on iOS.
+const double _kMaximumTextScaleFactor = 1 + 36 / _kCupertinoMobileBaseFontSize;
 
-  final double points;
-  static const double _kMenuWidthMobileWidthThreshold = 768;
-}
+/// The font family for menu items at smaller text scales.
+const String _kBodyFont = 'CupertinoSystemText';
+
+/// The font family for menu items at larger text scales.
+const String _kDisplayFont = 'CupertinoSystemDisplay';
 
 /// Returns an integer that represents the current text scale factor normalized
 /// to the base font size.
@@ -110,130 +100,97 @@ double _normalizeTextScale(TextScaler textScaler) {
   return textScaler.scale(_kCupertinoMobileBaseFontSize) - _kCupertinoMobileBaseFontSize;
 }
 
-// TODO(davidhicks980): Consider moving dynamic type information to a separate Cupertino library.
-// Obtained from https://developer.apple.com/design/human-interface-guidelines/typography#Specifications
-enum _DynamicTypeSet {
-  body(
-    xSmall: TextStyle(fontSize: 14.0, height: 19.0 / 14.0, letterSpacing: -0.41),
-    small: TextStyle(fontSize: 15.0, height: 20.0 / 15.0, letterSpacing: -0.41),
-    medium: TextStyle(fontSize: 16.0, height: 21.0 / 16.0, letterSpacing: -0.41),
-    large: TextStyle(fontSize: 17.0, height: 22.0 / 17.0, letterSpacing: -0.41),
-    xLarge: TextStyle(fontSize: 19.0, height: 24.0 / 19.0, letterSpacing: -0.41),
-    xxLarge: TextStyle(fontSize: 21.0, height: 26.0 / 21.0, letterSpacing: -0.8),
-    xxxLarge: TextStyle(
-      fontSize: 23.0,
-      height: 29.0 / 23.0,
-      letterSpacing: 0.38,
-      fontFamily: 'CupertinoSystemDisplay',
-    ),
-    ax1: TextStyle(
-      fontSize: 28.0,
-      height: 34.0 / 28.0,
-      letterSpacing: 0.38,
-      fontFamily: 'CupertinoSystemDisplay',
-    ),
-    ax2: TextStyle(
-      fontSize: 33.0,
-      height: 40.0 / 33.0,
-      letterSpacing: 0.38,
-      fontFamily: 'CupertinoSystemDisplay',
-    ),
-    ax3: TextStyle(
-      fontSize: 40.0,
-      height: 48.0 / 40.0,
-      letterSpacing: 0.38,
-      fontFamily: 'CupertinoSystemDisplay',
-    ),
-    ax4: TextStyle(
-      fontSize: 47.0,
-      height: 56.0 / 47.0,
-      letterSpacing: 0.38,
-      fontFamily: 'CupertinoSystemDisplay',
-    ),
-    ax5: TextStyle(
-      fontSize: 53.0,
-      height: 62.0 / 53.0,
-      letterSpacing: 0.38,
-      fontFamily: 'CupertinoSystemDisplay',
-    ),
-  ),
+// Accessibility mode on iOS is determined by the text scale factor that the
+// user has selected.
+bool _isAccessibilityModeEnabled(BuildContext context) {
+  final TextScaler? textScaler = MediaQuery.maybeTextScalerOf(context);
+  if (textScaler == null) {
+    return false;
+  }
 
-  subhead(
-    xSmall: TextStyle(
-      fontSize: 12.0,
-      height: 16.0 / 12.0,
-      letterSpacing: -0.025,
-      fontFamily: 'CupertinoSystemText',
-    ),
-    small: TextStyle(
-      fontSize: 13.0,
-      height: 18.0 / 13.0,
-      letterSpacing: -0.025,
-      fontFamily: 'CupertinoSystemText',
-    ),
-    medium: TextStyle(
-      fontSize: 14.0,
-      height: 19.0 / 14.0,
-      letterSpacing: -0.025,
-      fontFamily: 'CupertinoSystemText',
-    ),
-    large: TextStyle(
-      fontSize: 15.0,
-      height: 20.0 / 15.0,
-      letterSpacing: -0.2,
-      fontFamily: 'CupertinoSystemText',
-    ),
-    xLarge: TextStyle(
-      fontSize: 17.0,
-      height: 22.0 / 17.0,
-      letterSpacing: -0.41,
-      fontFamily: 'CupertinoSystemText',
-    ),
-    xxLarge: TextStyle(
-      fontSize: 19.0,
-      height: 24.0 / 19.0,
-      letterSpacing: -0.68,
-      fontFamily: 'CupertinoSystemText',
-    ),
+  return _normalizeTextScale(textScaler) >= _kMinimumAccessibleNormalizedTextScale;
+}
+
+/// The width of a Cupertino menu
+// Measured on:
+//  - iPadOS 18.5 Simulator
+//    - iPad Pro 11-inch
+//    - iPad Pro 13-inch
+//  - iOS 18.5 Simulator
+//   - iPhone 16 Pro
+enum _CupertinoMenuWidth {
+  iPadOS(points: 262),
+  iPadOSAccessible(points: 343),
+  iOS(points: 250),
+  iOSAccessible(points: 370);
+
+  const _CupertinoMenuWidth({required this.points});
+
+  // Determines the appropriate menu width based on screen width and
+  // accessibility mode.
+  //
+  // A screen width threshold of 768 points is used to differentiate
+  // between mobile and tablet devices.
+  factory _CupertinoMenuWidth.fromScreenWidth({
+    required double screenWidth,
+    required bool isAccessibilityModeEnabled,
+  }) {
+    final bool isMobile = screenWidth < _kMenuWidthMobileWidthThreshold;
+    return switch ((isMobile, isAccessibilityModeEnabled)) {
+      (false, false) => _CupertinoMenuWidth.iPadOS,
+      (false, true) => _CupertinoMenuWidth.iPadOSAccessible,
+      (true, false) => _CupertinoMenuWidth.iOS,
+      (true, true) => _CupertinoMenuWidth.iOSAccessible,
+    };
+  }
+
+  static const double _kMenuWidthMobileWidthThreshold = 768;
+  final double points;
+}
+
+// TODO(davidhicks980): DynamicType should be moved to the Cupertino theming library when available.
+// Obtained from https://developer.apple.com/design/human-interface-guidelines/typography#Specifications
+enum _DynamicTypeStyle {
+  body(
+    xSmall: TextStyle(fontSize: 14, height: 19 / 14, letterSpacing: -0.41, fontFamily: _kBodyFont),
+    small: TextStyle(fontSize: 15, height: 20 / 15, letterSpacing: -0.41, fontFamily: _kBodyFont),
+    medium: TextStyle(fontSize: 16, height: 21 / 16, letterSpacing: -0.41, fontFamily: _kBodyFont),
+    large: TextStyle(fontSize: 17, height: 22 / 17, letterSpacing: -0.41, fontFamily: _kBodyFont),
+    xLarge: TextStyle(fontSize: 19, height: 24 / 19, letterSpacing: -0.41, fontFamily: _kBodyFont),
+    xxLarge: TextStyle(fontSize: 21, height: 26 / 21, letterSpacing: -0.8, fontFamily: _kBodyFont),
     xxxLarge: TextStyle(
-      fontSize: 21.0,
-      height: 28.0 / 21.0,
+      fontSize: 23,
+      height: 29 / 23,
+      letterSpacing: 0.38,
+      fontFamily: _kDisplayFont,
+    ),
+    ax1: TextStyle(fontSize: 28, height: 34 / 28, letterSpacing: 0.38, fontFamily: _kDisplayFont),
+    ax2: TextStyle(fontSize: 33, height: 40 / 33, letterSpacing: 0.38, fontFamily: _kDisplayFont),
+    ax3: TextStyle(fontSize: 40, height: 48 / 40, letterSpacing: 0.38, fontFamily: _kDisplayFont),
+    ax4: TextStyle(fontSize: 47, height: 56 / 47, letterSpacing: 0.38, fontFamily: _kDisplayFont),
+    ax5: TextStyle(fontSize: 53, height: 62 / 53, letterSpacing: 0.38, fontFamily: _kDisplayFont),
+  ),
+  subhead(
+    xSmall: TextStyle(fontSize: 12, height: 16 / 12, letterSpacing: -0.025, fontFamily: _kBodyFont),
+    small: TextStyle(fontSize: 13, height: 18 / 13, letterSpacing: -0.025, fontFamily: _kBodyFont),
+    medium: TextStyle(fontSize: 14, height: 19 / 14, letterSpacing: -0.025, fontFamily: _kBodyFont),
+    large: TextStyle(fontSize: 15, height: 20 / 15, letterSpacing: -0.2, fontFamily: _kBodyFont),
+    xLarge: TextStyle(fontSize: 17, height: 22 / 17, letterSpacing: -0.41, fontFamily: _kBodyFont),
+    xxLarge: TextStyle(fontSize: 19, height: 24 / 19, letterSpacing: -0.68, fontFamily: _kBodyFont),
+    xxxLarge: TextStyle(
+      fontSize: 21,
+      height: 28 / 21,
       letterSpacing: -0.68,
-      fontFamily: 'CupertinoSystemText',
+      fontFamily: _kBodyFont,
     ),
-    ax1: TextStyle(
-      fontSize: 25.0,
-      height: 31.0 / 25.0,
-      letterSpacing: 0.38,
-      fontFamily: 'CupertinoSystemDisplay',
-    ),
-    ax2: TextStyle(
-      fontSize: 30.0,
-      height: 37.0 / 30.0,
-      letterSpacing: 0.38,
-      fontFamily: 'CupertinoSystemDisplay',
-    ),
-    ax3: TextStyle(
-      fontSize: 36.0,
-      height: 43.0 / 36.0,
-      letterSpacing: 0.38,
-      fontFamily: 'CupertinoSystemDisplay',
-    ),
-    ax4: TextStyle(
-      fontSize: 42.0,
-      height: 50.0 / 42.0,
-      letterSpacing: 0.38,
-      fontFamily: 'CupertinoSystemDisplay',
-    ),
-    ax5: TextStyle(
-      fontSize: 49.0,
-      height: 58.0 / 49.0,
-      letterSpacing: 0.38,
-      fontFamily: 'CupertinoSystemDisplay',
-    ),
+    ax1: TextStyle(fontSize: 25, height: 31 / 25, letterSpacing: 0.38, fontFamily: _kDisplayFont),
+    ax2: TextStyle(fontSize: 30, height: 37 / 30, letterSpacing: 0.38, fontFamily: _kDisplayFont),
+    ax3: TextStyle(fontSize: 36, height: 43 / 36, letterSpacing: 0.38, fontFamily: _kDisplayFont),
+    ax4: TextStyle(fontSize: 42, height: 50 / 42, letterSpacing: 0.38, fontFamily: _kDisplayFont),
+    ax5: TextStyle(fontSize: 49, height: 58 / 49, letterSpacing: 0.38, fontFamily: _kDisplayFont),
   );
 
-  const _DynamicTypeSet({
+  const _DynamicTypeStyle({
     required this.xSmall,
     required this.small,
     required this.medium,
@@ -288,30 +245,28 @@ enum _DynamicTypeSet {
   }
 }
 
-/// The CupertinoMenuAnchor layout policy changes depending on whether the user is using
-/// a "regular" font size vs a "large" font size. This is a spectrum. There are
-/// many "regular" font sizes and many "large" font sizes. But depending on which
-/// policy is currently being used, a menu is laid out differently.
-///
-/// Empirically, the jump from one policy to the other occurs at the following text
-/// scale factors:
-/// * Max "regular" scale factor ≈ 23/17 ≈ 1.352...
-/// * Min "large" scale factor   ≈ 28/17 ≈ 1.647...
-///
-/// The following constant represents a division in text scale factor beyond which
-/// we want to change how the menu is laid out.
-///
-/// This explanation was ported from CupertinoDialog.
-const double _kMaxRegularTextScaleUnits = 6;
+double _computeSquaredDistanceToRect(Offset point, Rect rect) {
+  final double dx = point.dx - ui.clampDouble(point.dx, rect.left, rect.right);
+  final double dy = point.dy - ui.clampDouble(point.dy, rect.top, rect.bottom);
+  return dx * dx + dy * dy;
+}
 
-// Accessibility mode on iOS is determined by the text scale factor that the
-// user has selected.
-bool _isAccessibilityModeEnabled(BuildContext context) {
-  final TextScaler? textScaler = MediaQuery.maybeTextScalerOf(context);
-  if (textScaler == null) {
-    return false;
+/// Returns the nearest multiple of [to] to [value].
+/// ```dart
+/// print(quantize(3.15, to: 0));    // 3.15
+/// print(quantize(3.15, to: 1));    // 3
+/// print(quantize(3.15, to: 0.1));  // 3.2
+/// print(quantize(3.15, to: 0.01)); // 3.15
+/// print(quantize(3.15, to: 0.25)); // 3.25
+/// print(quantize(3.15, to: 0.5));  // 3.0
+/// print(quantize(-3.15, to: 0.5)); // -3.0
+/// print(quantize(-3.15, to: 0.1)); // -3.2
+/// ```
+double _quantize(double value, {required double to}) {
+  if (to == 0) {
+    return value;
   }
-  return _normalizeTextScale(textScaler) > _kMaxRegularTextScaleUnits;
+  return (value / to).round() * to;
 }
 
 /// Mix [CupertinoMenuEntryMixin] in to define how a menu item should be drawn
@@ -388,15 +343,10 @@ typedef CupertinoMenuAnimationStatusChangedCallback = void Function(AnimationSta
 ///        child: const Text('Item 1'),
 ///      )
 ///    ],
-///    builder: (
-///      BuildContext context,
-///      CupertinoMenuController controller,
-///      Widget? child,
-///    ) {
+///    builder: (BuildContext context, MenuController controller, Widget? child) {
 ///      return CupertinoButton.filled(
 ///        onPressed: () {
-///          if (controller,.
-///              case MenuStatus.opening || MenuStatus.opened) {
+///          if (controller.isOpen) {
 ///            controller.close();
 ///          } else {
 ///            controller.open();
@@ -418,31 +368,37 @@ class CupertinoMenuAnchor extends StatefulWidget {
   /// Creates a [CupertinoMenuAnchor].
   const CupertinoMenuAnchor({
     super.key,
-    required this.menuChildren,
-    this.builder,
-    this.child,
     this.controller,
-    this.childFocusNode,
     this.onOpen,
     this.onClose,
     this.onAnimationStatusChange,
-    this.constraints,
-    this.menuAlignment,
     this.alignment,
     this.alignmentOffset,
+    this.menuAlignment,
+    this.constraints,
     this.constrainCrossAxis = false,
-    this.enablePan = true,
     this.consumeOutsideTaps = false,
+    this.enableSwipe = true,
+    this.longPressToOpenDuration = Duration.zero,
     this.useRootOverlay = false,
     this.overlayPadding = const EdgeInsets.all(8),
+    required this.menuChildren,
+    this.builder,
+    this.child,
+    this.childFocusNode,
   });
-
-  /// {@macro flutter.widgets.RawMenuAnchor.useRootOverlay}
-  final bool useRootOverlay;
 
   /// An optional controller that allows opening and closing of the menu from
   /// other widgets.
   final MenuController? controller;
+
+  /// A callback invoked when the menu is opened while having an
+  /// [AnimationStatus] of [AnimationStatus.dismissed] or [AnimationStatus.reverse].
+  final VoidCallback? onOpen;
+
+  /// A callback invoked when the menu is closed while having an
+  /// [AnimationStatus] of [AnimationStatus.complete] or [AnimationStatus.forward].
+  final VoidCallback? onClose;
 
   /// A callback that is invoked when the status of the menu changes.
   ///
@@ -450,16 +406,10 @@ class CupertinoMenuAnchor extends StatefulWidget {
   /// [AnimationStatus] changes.
   final CupertinoMenuAnimationStatusChangedCallback? onAnimationStatusChange;
 
-  /// The [childFocusNode] attribute is the optional [FocusNode] also associated
-  /// the [child] or [builder] widget that opens the menu.
+  /// The point on the anchor surface that attaches to the menu.
   ///
-  /// The focus node should be attached to the widget that should receive focus
-  /// if keyboard focus traversal moves the focus off of the submenu with the
-  /// arrow keys.
-  ///
-  /// If not supplied, then focus will not traverse from the menu to the
-  /// controlling button after the menu opens.
-  final FocusNode? childFocusNode;
+  /// This value is ignored if the menu is opened with an explicit position.
+  final AlignmentGeometry? alignment;
 
   /// The offset of the menu relative to the alignment origin determined by
   /// [alignment] and the ambient [Directionality].
@@ -477,43 +427,8 @@ class CupertinoMenuAnchor extends StatefulWidget {
   /// This value is ignored if the menu is opened with an explicit position.
   final ui.Offset? alignmentOffset;
 
-  /// Whether or not a tap event that closes the menu will be permitted to
-  /// continue on to the gesture arena.
-  ///
-  /// If false, then tapping outside of a menu when the menu is open will both
-  /// close the menu, and allow the tap to participate in the gesture arena. If
-  /// true, then it will only close the menu, and the tap event will be
-  /// consumed.
-  ///
-  /// Defaults to false.
-  final bool consumeOutsideTaps;
-
-  /// A callback invoked when the menu is opened while having an
-  /// [AnimationStatus] of [AnimationStatus.dismissed] or [AnimationStatus.reverse].
-  final VoidCallback? onOpen;
-
-  /// A callback invoked when the menu is closed while having an
-  /// [AnimationStatus] of [AnimationStatus.complete] or [AnimationStatus.forward].
-  final VoidCallback? onClose;
-
-  /// A list of menu items to display in the menu.
-  final List<Widget> menuChildren;
-
-  /// The widget that this [CupertinoMenuAnchor] surrounds.
-  ///
-  /// Typically, this is a button that calls [MenuController.open] when pressed.
-  ///
-  /// If not supplied, then the [CupertinoMenuAnchor] will be the size that its parent
-  /// allocates for it.
-  final RawMenuAnchorChildBuilder? builder;
-
-  /// An optional child to be passed to the [builder].
-  ///
-  /// Supply this child if there is a portion of the widget tree built in
-  /// [builder] that doesn't depend on the `controller` or `context` supplied to
-  /// the [builder]. It will be more efficient, since Flutter doesn't then need
-  /// to rebuild this child when those change.
-  final Widget? child;
+  /// The point on the menu surface that attaches to the anchor.
+  final AlignmentGeometry? menuAlignment;
 
   /// The constraints to apply to the menu scrollable.
   final BoxConstraints? constraints;
@@ -529,38 +444,82 @@ class CupertinoMenuAnchor extends StatefulWidget {
   /// Defaults to false.
   final bool constrainCrossAxis;
 
-  /// The point on the anchor surface that attaches to the menu.
+  /// Whether or not a tap event that closes the menu will be permitted to
+  /// continue on to the gesture arena.
   ///
-  /// This value is ignored if the menu is opened with an explicit position.
-  final AlignmentGeometry? alignment;
+  /// If false, then tapping outside of a menu when the menu is open will both
+  /// close the menu, and allow the tap to participate in the gesture arena. If
+  /// true, then it will only close the menu, and the tap event will be
+  /// consumed.
+  ///
+  /// Defaults to false.
+  final bool consumeOutsideTaps;
 
-  /// The point on the menu surface that attaches to the anchor.
-  final AlignmentGeometry? menuAlignment;
-
-  /// Whether or not panning is enabled on the menu.
+  /// Whether or not swiping is enabled on the menu.
   ///
-  /// When panning is enabled, an [ImmediateMultiDragGestureRecognizer] is added
-  /// around the menu button and menu items. The
-  /// [ImmediateMultiDragGestureRecognizer] allows for users to press, move, and
-  /// activate adjacent menu items in a single gesture. Panning also scales the
-  /// menu panel when users drag their pointer away from the menu.
+  /// When swiping is enabled, a [MultiDragGestureRecognizer] is added around
+  /// the menu button and menu items. The [MultiDragGestureRecognizer] allows
+  /// for users to press, move, and activate adjacent menu items in a single
+  /// gesture. Swiping also scales the menu panel when users drag their
+  /// pointer away from the menu.
   ///
-  /// Disabling panning can be useful if the menu pan effects interfere with
-  /// another pan gesture, such as in the case of dragging a menu anchor around
-  /// the screen.
+  /// Disabling swiping can be useful if the menu swipe effects interfere with
+  /// another swipe gesture, such as in the case of dragging a menu anchor
+  /// around the screen.
   ///
   /// Defaults to true.
-  final bool enablePan;
+  final bool enableSwipe;
+
+  /// The duration after which a long-press on the anchor button will open the
+  /// menu.
+  ///
+  /// When a menu is opened via long-press, the menu can be swiped in the same
+  /// gesture to select and activate menu items.
+  ///
+  /// When the inner menu button is disabled, [longPressToOpenDuration] should
+  /// be set to [Duration.zero] to prevent the menu from opening on long-press.
+  ///
+  /// Defaults to [Duration.zero], which disables the behavior.
+  final Duration longPressToOpenDuration;
+
+  /// {@macro flutter.widgets.RawMenuAnchor.useRootOverlay}
+  final bool useRootOverlay;
 
   /// The padding to subtract from the overlay when positioning the menu.
   final EdgeInsetsGeometry overlayPadding;
 
-  static _AnchorScope? _maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_AnchorScope>();
-  }
+  /// A list of menu items to display in the menu.
+  final List<Widget> menuChildren;
+
+  /// The widget that this [CupertinoMenuAnchor] surrounds.
+  ///
+  /// Typically, this is a button that calls [MenuController.open] when pressed.
+  ///
+  /// If null, the [CupertinoMenuAnchor] will be the size that its parent
+  /// allocates for it.
+  final RawMenuAnchorChildBuilder? builder;
+
+  /// An optional child to be passed to the [builder].
+  ///
+  /// Supply this child if there is a portion of the widget tree built in
+  /// [builder] that doesn't depend on the `controller` or `context` supplied to
+  /// the [builder]. It will be more efficient, since Flutter doesn't then need
+  /// to rebuild this child when those change.
+  final Widget? child;
+
+  /// The [childFocusNode] attribute is the optional [FocusNode] also associated
+  /// the [child] or [builder] widget that opens the menu.
+  ///
+  /// The focus node should be attached to the widget that should receive focus
+  /// if keyboard focus traversal moves the focus off of the submenu with the
+  /// arrow keys.
+  ///
+  /// If not supplied, then focus will not traverse from the menu to the
+  /// controlling button after the menu opens.
+  final FocusNode? childFocusNode;
 
   static bool? maybeHasLeadingOf(BuildContext context) {
-    return _maybeOf(context)?.hasLeading;
+    return context.dependOnInheritedWidgetOfExactType<_AnchorScope>()?.hasLeading;
   }
 
   @override
@@ -587,7 +546,12 @@ class CupertinoMenuAnchor extends StatefulWidget {
       ),
     );
     properties.add(
-      FlagProperty('enablePan', value: enablePan, ifTrue: 'pan enabled', ifFalse: 'pan disabled'),
+      FlagProperty(
+        'enableSwipe',
+        value: enableSwipe,
+        ifTrue: 'swipe enabled',
+        ifFalse: 'swipe disabled',
+      ),
     );
     properties.add(
       FlagProperty(
@@ -604,6 +568,8 @@ class CupertinoMenuAnchor extends StatefulWidget {
 }
 
 class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerProviderStateMixin {
+  static const Tolerance springTolerance = Tolerance(velocity: 0.1, distance: 0.1);
+
   /// Approximated using settling duration calculation (see
   /// https://github.com/flutter/flutter/pull/164411#issuecomment-2691969477)
   /// with a settling duration of 500 ms, an initialVelocity of 0.5, and a bounce of 0.2,
@@ -623,22 +589,21 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
     damping: 30.7,
   );
 
-  static const Tolerance springTolerance = Tolerance(velocity: 0.1, distance: 0.1);
   late final AnimationController _animationController;
-  final FocusScopeNode menuScopeNode = FocusScopeNode(debugLabel: 'Menu Scope');
-  final ValueNotifier<double> _panDistanceNotifier = ValueNotifier<double>(0);
+  final FocusScopeNode _menuScopeNode = FocusScopeNode(debugLabel: 'Menu Scope');
+  final ValueNotifier<double> _swipeDistanceNotifier = ValueNotifier<double>(0);
 
   bool _hasLeadingWidget = false;
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
   MenuController? _internalMenuController;
-  bool get isClosing => !animationStatus.isForwardOrCompleted;
-  bool get enablePan =>
-      widget.enablePan &&
-      switch (animationStatus) {
+  bool get isOpening => _animationStatus.isForwardOrCompleted;
+  bool get enableSwipe =>
+      widget.enableSwipe &&
+      switch (_animationStatus) {
         AnimationStatus.forward || AnimationStatus.completed || AnimationStatus.dismissed => true,
         AnimationStatus.reverse => false,
       };
-  AnimationStatus animationStatus = AnimationStatus.dismissed;
+  AnimationStatus _animationStatus = AnimationStatus.dismissed;
 
   @override
   void initState() {
@@ -671,26 +636,54 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
 
   @override
   void dispose() {
+    _menuScopeNode.dispose();
     _animationController
       ..stop()
       ..dispose();
     _internalMenuController = null;
-    _panDistanceNotifier.dispose();
+    _swipeDistanceNotifier.dispose();
     super.dispose();
   }
 
   void _resolveHasLeading() {
     _hasLeadingWidget = widget.menuChildren.any((Widget element) {
-      if (element case CupertinoMenuEntryMixin(:final bool hasLeading)) {
-        return hasLeading;
-      } else {
-        return false;
-      }
+      return switch (element) {
+        CupertinoMenuEntryMixin(hasLeading: true) => true,
+        _ => false,
+      };
     });
   }
 
+  void _handleAnimationStatusChange(AnimationStatus status) {
+    setState(() {
+      _animationStatus = status;
+    });
+
+    widget.onAnimationStatusChange?.call(status);
+  }
+
+  void _handleSwipeDistanceChange(double distance) {
+    if (!_menuController.isOpen) {
+      return;
+    }
+
+    // Because we are triggering a nested ticker, it's easiest to pass a
+    // listenable down the tree. Otherwise, it would be more idiomatic to use
+    // an inherited widget.
+    _swipeDistanceNotifier.value = distance;
+  }
+
+  void _handleAnchorSwipeStart() {
+    // If widget.anchorPressActivationDuration becomes zero while a press is
+    // active, do not open the menu.
+    if (isOpening || widget.longPressToOpenDuration == Duration.zero) {
+      return;
+    }
+    _menuController.open();
+  }
+
   void _handleCloseRequested(VoidCallback hideMenu) {
-    if (animationStatus case AnimationStatus.reverse || AnimationStatus.dismissed) {
+    if (_animationStatus case AnimationStatus.reverse || AnimationStatus.dismissed) {
       return;
     }
 
@@ -709,14 +702,12 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
           ),
         )
         .whenComplete(hideMenu);
-
-    widget.childFocusNode?.requestFocus();
   }
 
   void _handleOpenRequested(ui.Offset? position, VoidCallback showOverlay) {
     showOverlay();
 
-    if (animationStatus case AnimationStatus.completed || AnimationStatus.forward) {
+    if (_animationStatus case AnimationStatus.completed || AnimationStatus.forward) {
       return;
     }
 
@@ -724,38 +715,20 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
       SpringSimulation(forwardSpring, _animationController.value, 1, 0.5),
     );
 
-    FocusScope.of(context).setFirstFocus(menuScopeNode);
-  }
-
-  void _handleAnimationStatusChange(AnimationStatus status) {
-    setState(() {
-      animationStatus = status;
-    });
-    widget.onAnimationStatusChange?.call(status);
-  }
-
-  void _handlePanChange(double distance) {
-    if (!_menuController.isOpen) {
-      return;
-    }
-
-    // Because we are triggering a nested ticker, it's easiest to pass a
-    // listenable down the tree. Otherwise, it would be more idiomatic to use
-    // an inherited widget.
-    _panDistanceNotifier.value = distance;
+    FocusScope.of(context).setFirstFocus(_menuScopeNode);
   }
 
   Widget _buildMenuOverlay(BuildContext childContext, RawMenuOverlayInfo info) {
     return ExcludeSemantics(
-      excluding: isClosing,
+      excluding: !isOpening,
       child: IgnorePointer(
-        ignoring: isClosing,
+        ignoring: !isOpening,
         child: ExcludeFocus(
-          excluding: isClosing,
+          excluding: !isOpening,
           child: _MenuOverlay(
             constrainCrossAxis: widget.constrainCrossAxis,
             visibilityAnimation: _animationController.view,
-            panDistanceListenable: _panDistanceNotifier,
+            swipeDistanceListenable: _swipeDistanceNotifier,
             alignmentOffset: widget.alignmentOffset ?? Offset.zero,
             constraints: widget.constraints,
             consumeOutsideTaps: widget.consumeOutsideTaps,
@@ -765,7 +738,7 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
             anchorRect: info.anchorRect,
             anchorPosition: info.position,
             tapRegionGroupId: info.tapRegionGroupId,
-            focusScopeNode: menuScopeNode,
+            focusScopeNode: _menuScopeNode,
             overlayInsets: widget.overlayPadding,
             children: widget.menuChildren,
           ),
@@ -775,22 +748,27 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
   }
 
   Widget _buildChild(BuildContext context, MenuController controller, Widget? child) {
-    // The anchor can initiate a pan gesture, but should not be included in the
-    // pan area.
-    return _PanSurface(
-      includeInPanArea: false,
-      child:
-          widget.builder?.call(context, _menuController, widget.child) ??
-          widget.child ??
-          const SizedBox.shrink(),
+    final Widget anchor =
+        widget.builder?.call(context, _menuController, widget.child) ??
+        widget.child ??
+        const SizedBox.shrink();
+
+    if (widget.longPressToOpenDuration == Duration.zero || !enableSwipe) {
+      return anchor;
+    }
+
+    return _SwipeSurface(
+      onStart: _handleAnchorSwipeStart,
+      delay: widget.longPressToOpenDuration,
+      child: anchor,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return _PanRegion(
-      onPanDistanceChanged: _handlePanChange,
-      enabled: enablePan,
+    return _SwipeRegion(
+      onDistanceChanged: _handleSwipeDistanceChange,
+      enabled: enableSwipe,
       child: _AnchorScope(
         hasLeading: _hasLeadingWidget,
         child: RawMenuAnchor(
@@ -839,7 +817,7 @@ class _MenuOverlay extends StatefulWidget {
     required this.alignment,
     required this.menuAlignment,
     required this.visibilityAnimation,
-    required this.panDistanceListenable,
+    required this.swipeDistanceListenable,
   });
 
   final List<Widget> children;
@@ -856,7 +834,7 @@ class _MenuOverlay extends StatefulWidget {
   final AlignmentGeometry? alignment;
   final AlignmentGeometry? menuAlignment;
   final Animation<double> visibilityAnimation;
-  final ValueListenable<double> panDistanceListenable;
+  final ValueListenable<double> swipeDistanceListenable;
 
   @override
   State<_MenuOverlay> createState() => _MenuOverlayState();
@@ -871,7 +849,7 @@ class _MenuOverlayState extends State<_MenuOverlay>
     _FocusLastIntent: _FocusLastAction(),
   };
   final ScrollController _scrollController = ScrollController();
-  late final AnimationController _panAnimationController;
+  late final AnimationController _swipeAnimationController;
   late final ProxyAnimation _scaleAnimation = ProxyAnimation(kAlwaysCompleteAnimation);
   final ProxyAnimation _fadeAnimation = ProxyAnimation(kAlwaysCompleteAnimation);
   final ProxyAnimation _sizeAnimation = ProxyAnimation(kAlwaysCompleteAnimation);
@@ -882,26 +860,26 @@ class _MenuOverlayState extends State<_MenuOverlay>
   _CompatAnimationBehavior? _animationBehavior;
   ui.TextDirection? _textDirection;
 
-  // The actual distance the user has panned away from the menu.
-  double _panTargetDistance = 0;
+  // The actual distance the user has swiped away from the menu.
+  double _swipeTargetDistance = 0;
 
-  // The effective distance the user has panned away from the menu, after
+  // The effective distance the user has swiped away from the menu, after
   // applying velocity and deceleration.
-  double _panCurrentDistance = 0;
+  double _swipeCurrentDistance = 0;
 
-  // The accumulated velocity of the pan gesture, used to determine how fast
-  // the menu scales to _panTargetDistance
-  double _panVelocity = 0;
+  // The accumulated velocity of the swipe gesture, used to determine how fast
+  // the menu scales to _swipeTargetDistance
+  double _swipeVelocity = 0;
 
-  // A ticker used to drive the pan animation.
-  Ticker? _panTicker;
+  // A ticker used to drive the swipe animation.
+  Ticker? _swipeTicker;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _panAnimationController = AnimationController.unbounded(value: 1, vsync: this);
-    widget.panDistanceListenable.addListener(_handlePanDistanceChanged);
+    _swipeAnimationController = AnimationController.unbounded(value: 1, vsync: this);
+    widget.swipeDistanceListenable.addListener(_handleSwipeDistanceChanged);
     _resolveChildren();
   }
 
@@ -911,18 +889,18 @@ class _MenuOverlayState extends State<_MenuOverlay>
     final ui.TextDirection newTextDirection = Directionality.of(context);
     if (_textDirection != newTextDirection) {
       _textDirection = newTextDirection;
-      _resolveLayout();
+      _resolvePosition();
     }
 
     _resolveMotion();
   }
 
   @override
-  void didUpdateWidget(covariant _MenuOverlay oldWidget) {
+  void didUpdateWidget(_MenuOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.panDistanceListenable != widget.panDistanceListenable) {
-      oldWidget.panDistanceListenable.removeListener(_handlePanDistanceChanged);
-      widget.panDistanceListenable.addListener(_handlePanDistanceChanged);
+    if (oldWidget.swipeDistanceListenable != widget.swipeDistanceListenable) {
+      oldWidget.swipeDistanceListenable.removeListener(_handleSwipeDistanceChanged);
+      widget.swipeDistanceListenable.addListener(_handleSwipeDistanceChanged);
     }
 
     if (oldWidget.visibilityAnimation != widget.visibilityAnimation) {
@@ -935,7 +913,7 @@ class _MenuOverlayState extends State<_MenuOverlay>
         oldWidget.alignment != widget.alignment ||
         oldWidget.menuAlignment != widget.menuAlignment ||
         oldWidget.overlaySize != widget.overlaySize) {
-      _resolveLayout();
+      _resolvePosition();
     }
 
     if (oldWidget.children != widget.children) {
@@ -952,11 +930,11 @@ class _MenuOverlayState extends State<_MenuOverlay>
   @override
   void dispose() {
     _scrollController.dispose();
-    widget.panDistanceListenable.removeListener(_handlePanDistanceChanged);
-    _panTicker
+    widget.swipeDistanceListenable.removeListener(_handleSwipeDistanceChanged);
+    _swipeTicker
       ?..stop()
       ..dispose();
-    _panAnimationController
+    _swipeAnimationController
       ..stop()
       ..dispose();
     _scaleAnimation.parent = null;
@@ -1017,7 +995,7 @@ class _MenuOverlayState extends State<_MenuOverlay>
       case _CompatAnimationBehavior.normal:
         _scaleAnimation.parent = _AnimationProduct(
           first: widget.visibilityAnimation,
-          next: _panAnimationController.view.drive(Tween<double>(begin: 0.8, end: 1)),
+          next: _swipeAnimationController.view.drive(Tween<double>(begin: 0.8, end: 1)),
         );
         _sizeAnimation.parent = widget.visibilityAnimation.drive(Tween<double>(begin: 0.8, end: 1));
         _fadeAnimation.parent = widget.visibilityAnimation.drive(
@@ -1025,8 +1003,8 @@ class _MenuOverlayState extends State<_MenuOverlay>
         );
 
       case _CompatAnimationBehavior.reduced:
-        // Pan scaling works with reduced motion.
-        _scaleAnimation.parent = _panAnimationController.view.drive(
+        // Swipe scaling works with reduced motion.
+        _scaleAnimation.parent = _swipeAnimationController.view.drive(
           Tween<double>(begin: 0.8, end: 1),
         );
         _sizeAnimation.parent = kAlwaysCompleteAnimation;
@@ -1045,7 +1023,7 @@ class _MenuOverlayState extends State<_MenuOverlay>
   //
   // Layout needs to be resolved outside of the layout delegate because the
   // ScaleTransition widget is dependent on the attachment point alignment.
-  void _resolveLayout() {
+  void _resolvePosition() {
     final ui.Offset anchorMidpoint;
     if (widget.anchorPosition != null) {
       anchorMidpoint = widget.anchorRect.topLeft + widget.anchorPosition!;
@@ -1055,7 +1033,10 @@ class _MenuOverlayState extends State<_MenuOverlay>
 
     final double xMidpointRatio = anchorMidpoint.dx / widget.overlaySize.width;
     final double yMidpointRatio = anchorMidpoint.dy / widget.overlaySize.height;
-    final double defaultVerticalAlignment = yMidpointRatio < 0.5 ? 1 : -1;
+
+    // Slightly favor placing the menu below the anchor when it is near the vertical
+    // center of the screen.
+    final double defaultVerticalAlignment = yMidpointRatio < 0.55 ? 1 : -1;
     final double defaultHorizontalAlignment = switch (xMidpointRatio) {
       < 0.4 => -1.0, // Left
       > 0.6 => 1.0, // Right
@@ -1098,29 +1079,29 @@ class _MenuOverlayState extends State<_MenuOverlay>
     MenuController.maybeOf(context)!.close();
   }
 
-  void _handlePanDistanceChanged() {
-    _panTargetDistance = ui.clampDouble(widget.panDistanceListenable.value, 0, 150);
-    if (_panCurrentDistance == _panTargetDistance) {
+  void _handleSwipeDistanceChanged() {
+    _swipeTargetDistance = ui.clampDouble(widget.swipeDistanceListenable.value, 0, 150);
+    if (_swipeCurrentDistance == _swipeTargetDistance) {
       return;
     }
 
-    _panTicker ??= createTicker(_updatePanScale);
-    if (!_panTicker!.isActive) {
-      _panTicker!.start();
+    _swipeTicker ??= createTicker(_updateSwipeScale);
+    if (!_swipeTicker!.isActive) {
+      _swipeTicker!.start();
     }
   }
 
   // The menu will scale between 80% and 100% of its size based on the distance
   // the user has dragged their pointer away from the menu edges.
-  void _updatePanScale(Duration elapsed) {
+  void _updateSwipeScale(Duration elapsed) {
     const double maxVelocity = 20.0;
     const double minVelocity = 8;
-    const double maxPanDistance = 150;
+    const double maxSwipeDistance = 150;
     const double accelerationRate = 0.12;
 
     // The distance below which velocity begins to decelerate.
     //
-    // When the pan distance to target is less than this value, the animation
+    // When the swipe distance to target is less than this value, the animation
     // velocity reduces proportionally to create smooth arrival at the target.
     // Higher values mean the animation begins to decelerate sooner, resulting to
     // a smoother animation curve.
@@ -1131,10 +1112,10 @@ class _MenuOverlayState extends State<_MenuOverlay>
     const double remainingDistanceSnapThreshold = 1.0;
 
     // When the user's pointer is within this distance of the menu edges, the
-    // pan animation will terminate.
+    // swipe animation will terminate.
     const double terminationDistanceThreshold = 5.0;
 
-    final double distance = _panTargetDistance - _panCurrentDistance;
+    final double distance = _swipeTargetDistance - _swipeCurrentDistance;
     final double absoluteDistance = distance.abs();
 
     // As the distance between the current position and the target position increases,
@@ -1145,22 +1126,22 @@ class _MenuOverlayState extends State<_MenuOverlay>
     // and smoothes the end of the animation.
     final double proximityFactor = math.min(absoluteDistance / decelerationDistanceThreshold, 1.0);
 
-    _panVelocity += accelerationRate * proximityFactor;
-    _panVelocity = ui.clampDouble(_panVelocity, minVelocity, maxVelocity);
+    _swipeVelocity += accelerationRate * proximityFactor;
+    _swipeVelocity = ui.clampDouble(_swipeVelocity, minVelocity, maxVelocity);
 
-    final double finalVelocity = _panVelocity * proximityFactor;
+    final double finalVelocity = _swipeVelocity * proximityFactor;
     final double distanceReduction = distance.sign * finalVelocity;
-    _panCurrentDistance += distanceReduction;
+    _swipeCurrentDistance += distanceReduction;
 
     if (absoluteDistance < remainingDistanceSnapThreshold) {
-      _panCurrentDistance = _panTargetDistance;
-      _panVelocity = 0;
-      if (_panTargetDistance < terminationDistanceThreshold) {
-        _panTicker!.stop();
+      _swipeCurrentDistance = _swipeTargetDistance;
+      _swipeVelocity = 0;
+      if (_swipeTargetDistance < terminationDistanceThreshold) {
+        _swipeTicker!.stop();
       }
     }
 
-    _panAnimationController.value = 1 - _panCurrentDistance / maxPanDistance;
+    _swipeAnimationController.value = 1 - _swipeCurrentDistance / maxSwipeDistance;
   }
 
   @override
@@ -1171,54 +1152,63 @@ class _MenuOverlayState extends State<_MenuOverlay>
     } else {
       final bool isAccessibilityModeEnabled = _isAccessibilityModeEnabled(context);
       final double screenWidth = MediaQuery.widthOf(context);
-      final _CupertinoMenuWidth desiredMenuWidth = _CupertinoMenuWidth.fromScreenWidth(
+      final _CupertinoMenuWidth menuWidth = _CupertinoMenuWidth.fromScreenWidth(
         isAccessibilityModeEnabled: isAccessibilityModeEnabled,
         screenWidth: screenWidth,
       );
-      constraints = BoxConstraints.tightFor(width: desiredMenuWidth.points);
+      constraints = BoxConstraints.tightFor(width: menuWidth.points);
     }
-
-    Widget child = ConstrainedBox(
-      constraints: constraints,
-      child: _PanSurface(
-        includeInPanArea: true,
-        child: TapRegion(
-          groupId: widget.tapRegionGroupId,
-          consumeOutsideTaps: widget.consumeOutsideTaps,
-          onTapOutside: _handleOutsideTap,
-          // A custom shadow painter is used to make the underlying colors
-          // appear more vibrant. This is achieved by removing the shadow
-          // underlying the popup surface using a save layer combined with a
-          // clear blend mode.
-          //
-          // From my (davidhicks980) understanding and testing, it is
-          // impossible to achieve the appearance of an iOS backdrop using
-          // only guassian blur, linear color filter, and shadows, because the
-          // iOS popup surface does not linearly transform underlying colors.
-          // A custom shader would need to be used to achieve the same effect.
-          child: CustomPaint(
-            painter: _ShadowPainter(
-              brightness: CupertinoTheme.brightnessOf(context),
-              repaint: _fadeAnimation,
-            ),
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              alwaysIncludeSemantics: true,
-              child: CupertinoPopupSurface(
-                // The FadeTransition widget needs to wrap Semantics so
-                // that the semantics widget senses that the menu is the
-                // same opacity as the menu items. Otherwise, "a menu
-                // cannot be empty" error is thrown due to the menu items
-                // being transparent while the menu semantics are still
-                // present.
-                child: Semantics.fromProperties(
-                  explicitChildNodes: true,
-                  properties: const SemanticsProperties(scopesRoute: true, namesRoute: true),
-                  child: PrimaryScrollController(
-                    controller: _scrollController,
-                    child: SingleChildScrollView(
-                      clipBehavior: Clip.none,
-                      child: Column(children: _children),
+    Widget child = _SwipeSurface(
+      child: TapRegion(
+        groupId: widget.tapRegionGroupId,
+        consumeOutsideTaps: widget.consumeOutsideTaps,
+        onTapOutside: _handleOutsideTap,
+        // A custom shadow painter is used to make the underlying colors
+        // appear more vibrant. This is achieved by removing the shadow
+        // underlying the popup surface using a save layer combined with a
+        // clear blend mode.
+        //
+        // From my (davidhicks980) understanding and testing, it is
+        // impossible to achieve the appearance of an iOS backdrop using
+        // only Gaussian blur, linear color filter, and shadows, because the
+        // iOS popup surface does not linearly transform underlying colors.
+        // A custom shader would need to be used to achieve the same effect.
+        child: Actions(
+          actions: _actions,
+          child: Shortcuts(
+            shortcuts: _kMenuTraversalShortcuts,
+            child: FocusScope(
+              node: widget.focusScopeNode,
+              descendantsAreFocusable: true,
+              descendantsAreTraversable: true,
+              canRequestFocus: true,
+              child: CustomPaint(
+                painter: _ShadowPainter(
+                  brightness: CupertinoTheme.maybeBrightnessOf(context) ?? ui.Brightness.light,
+                  repaint: _fadeAnimation,
+                ),
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  alwaysIncludeSemantics: true,
+                  child: CupertinoPopupSurface(
+                    // The FadeTransition widget needs to wrap Semantics so
+                    // that the semantics widget senses that the menu is the
+                    // same opacity as the menu items. Otherwise, "a menu
+                    // cannot be empty" error is thrown due to the menu items
+                    // being transparent while the menu semantics are still
+                    // present.
+                    child: Semantics(
+                      explicitChildNodes: true,
+                      scopesRoute: true,
+                      namesRoute: true,
+                      child: ConstrainedBox(
+                        constraints: constraints,
+                        child: SingleChildScrollView(
+                          clipBehavior: Clip.none,
+                          primary: true,
+                          child: Column(mainAxisSize: MainAxisSize.min, children: _children),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -1239,20 +1229,6 @@ class _MenuOverlayState extends State<_MenuOverlay>
         child: child,
       );
     }
-
-    child = Actions(
-      actions: _actions,
-      child: Shortcuts(
-        shortcuts: _kMenuTraversalShortcuts,
-        child: FocusScope(
-          node: widget.focusScopeNode,
-          descendantsAreFocusable: true,
-          descendantsAreTraversable: true,
-          canRequestFocus: true,
-          child: child,
-        ),
-      ),
-    );
 
     return ConstrainedBox(
       constraints: BoxConstraints.loose(widget.overlaySize),
@@ -1674,20 +1650,37 @@ class _RenderMenuLayout extends RenderShiftedBox {
   }
 
   // Finds the closest screen to the anchor point.
+  //
+  // This is slightly different than the algorithms for PopupMenuButton and
+  // MenuAnchor, since those widgets calculate the closest screen based on the
+  // center of the overlay.
   Rect _findClosestScreen(Size parentSize, Offset point, Set<Rect> avoidBounds) {
     final Iterable<ui.Rect> screens = DisplayFeatureSubScreen.subScreensInBounds(
       Offset.zero & parentSize,
       avoidBounds,
     );
 
-    Rect closest = screens.first;
-    for (final ui.Rect screen in screens.skip(1)) {
-      if ((screen.center - point).distanceSquared < (closest.center - point).distanceSquared) {
+    Rect? closest;
+    double closestSquaredDistance = 0;
+    for (final ui.Rect screen in screens) {
+      if (screen.contains(point)) {
+        return screen;
+      }
+
+      if (closest == null) {
         closest = screen;
+        closestSquaredDistance = _computeSquaredDistanceToRect(point, closest);
+        continue;
+      }
+
+      final double squaredDistance = _computeSquaredDistanceToRect(point, screen);
+      if (squaredDistance < closestSquaredDistance) {
+        closest = screen;
+        closestSquaredDistance = squaredDistance;
       }
     }
 
-    return closest;
+    return closest!;
   }
 }
 
@@ -1707,7 +1700,7 @@ class _FocusUpAction extends ContextAction<DirectionalFocusIntent> {
     final FocusTraversalPolicy policy =
         FocusTraversalGroup.maybeOf(context!) ?? ReadingOrderTraversalPolicy();
     if (_isCupertino && !kIsWeb) {
-      // Don't wrap on iOS or MacOS.
+      // Don't wrap on iOS or macOS.
       policy.inDirection(primaryFocus!, intent.direction);
       return;
     }
@@ -1733,7 +1726,7 @@ class _FocusDownAction extends ContextAction<DirectionalFocusIntent> {
     final FocusTraversalPolicy policy =
         FocusTraversalGroup.maybeOf(context!) ?? ReadingOrderTraversalPolicy();
     if (_isCupertino && !kIsWeb) {
-      // Don't wrap on iOS or MacOS.
+      // Don't wrap on iOS or macOS.
       policy.inDirection(primaryFocus!, intent.direction);
       return;
     }
@@ -1791,7 +1784,7 @@ class _FocusLastAction extends ContextAction<_FocusLastIntent> {
 
 /// A horizontal divider used to separate [CupertinoMenuItem]s
 ///
-/// The default thickess of the divider is 1 physical pixel.
+/// The default thickness of the divider is 1 physical pixel.
 ///
 // This is class may be made public in the future, but is currently private to
 // avoid API churn.
@@ -1814,7 +1807,7 @@ class _CupertinoMenuDivider extends StatelessWidget {
   //
   // Colors were also compared atop a red, green, and blue backgrounds.
   static const CupertinoDynamicColor overlayColor = CupertinoDynamicColor.withBrightness(
-    color: Color.fromRGBO(140, 140, 140, 0.5),
+    color: Color.fromRGBO(140, 140, 140, 0.3),
     darkColor: Color.fromRGBO(255, 255, 255, 0.25),
   );
 
@@ -1823,8 +1816,8 @@ class _CupertinoMenuDivider extends StatelessWidget {
   ///
   /// This color is used to make the divider more opaque.
   static const CupertinoDynamicColor color = CupertinoDynamicColor.withBrightness(
-    color: Color.fromRGBO(0, 0, 0, 0.24),
-    darkColor: Color.fromRGBO(255, 255, 255, 0.3),
+    color: Color.fromRGBO(0, 0, 0, 0.25),
+    darkColor: Color.fromRGBO(255, 255, 255, 0.25),
   );
 
   @override
@@ -1902,13 +1895,12 @@ class _AliasedLinePainter extends CustomPainter {
 ///    ],
 ///    builder: (
 ///      BuildContext context,
-///      CupertinoMenuController controller,
+///      MenuController controller,
 ///      Widget? child,
 ///    ) {
 ///      return CupertinoButton.filled(
 ///        onPressed: () {
-///          if (controller.menuStatus
-///              case MenuStatus.opening || MenuStatus.opened) {
+///          if (controller.isOpen) {
 ///            controller.close();
 ///          } else {
 ///            controller.open();
@@ -1951,14 +1943,9 @@ class _AliasedLinePainter extends CustomPainter {
 /// The [requestFocusOnHover] parameter, when true, focuses the menu item when
 /// the item is hovered.
 ///
-/// The [panActivationDelay] parameter can be provided to activate the menu item
-/// after a delay when the user pans over the menu item. By default, the menu
-/// item will not activate when panned over.
-///
-///
 /// ## Visuals
 /// The [decoration] parameter can be used to change the background color of the
-/// menu item when hovered, focused, pressed, or panned. If these parameters are
+/// menu item when hovered, focused, pressed, or swiped. If these parameters are
 /// not set, the menu item will use [CupertinoMenuItem.defaultDecoration].
 ///
 /// The [isDestructiveAction] parameter should be set to true if the menu item
@@ -2001,7 +1988,6 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
     this.onPressed,
     this.decoration,
     this.mouseCursor,
-    this.panActivationDelay,
     this.statesController,
     this.behavior = HitTestBehavior.opaque,
     this.requestCloseOnActivate = true,
@@ -2059,13 +2045,6 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
-
-  /// The delay between a user's pointer entering a menu item during a pan and
-  /// the menu item being tapped.
-  ///
-  /// Defaults to null, meaning the menu item will not activate when panned
-  /// over.
-  final Duration? panActivationDelay;
 
   /// The decoration to paint behind the menu item.
   ///
@@ -2138,14 +2117,12 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
 
   /// The default [Color] applied to a [CupertinoMenuItem]'s [subtitle]
   /// widget, if a subtitle is provided.
-  // A custom blend mode is applied to the subtitle to mimick the visual effect of
-  // the iOS menu subtitle. As a result, the defaultSubtitleStyle color does not match the
-  // reported color on the iOS 18.5 simulator.
-  static const Color defaultSubtitleTextColor = CupertinoDynamicColor.withBrightnessAndContrast(
+  // A custom blend mode is applied to the subtitle to mimic the visual effect
+  // of the iOS menu subtitle. As a result, the defaultSubtitleStyle color does
+  // not match the reported color on the iOS 18.5 simulator.
+  static const Color defaultSubtitleTextColor = CupertinoDynamicColor.withBrightness(
     color: Color.from(alpha: 0.55, red: 0, green: 0, blue: 0),
     darkColor: Color.from(alpha: 0.4, red: 1, green: 1, blue: 1),
-    highContrastColor: Color.from(alpha: 0.8, red: 0, green: 0, blue: 0),
-    darkHighContrastColor: Color.from(alpha: 0.8, red: 1, green: 1, blue: 1),
   );
 
   /// The decoration of a [CupertinoMenuItem] when pressed.
@@ -2157,41 +2134,33 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
   // Light mode on black               rgb(177, 177, 177)
   // Light mode on white               rgb(225, 225, 225)
   //
-  // Blend mode is used to mimick the visual effect of the iOS
+  // Blend mode is used to mimic the visual effect of the iOS
   // menu item. As a result, the default pressed color does not match the
   // reported colors on the iOS 18.5 simulator.
   static const WidgetStateProperty<BoxDecoration> defaultDecoration =
       WidgetStateProperty<BoxDecoration>.fromMap(<WidgetStatesConstraint, BoxDecoration>{
         WidgetState.dragged: BoxDecoration(
-          color: CupertinoDynamicColor.withBrightnessAndContrast(
+          color: CupertinoDynamicColor.withBrightness(
             color: Color.fromRGBO(50, 50, 50, 0.1),
             darkColor: Color.fromRGBO(255, 255, 255, 0.1),
-            highContrastColor: Color.fromRGBO(50, 50, 50, 0.2),
-            darkHighContrastColor: Color.fromRGBO(255, 255, 255, 0.2),
           ),
         ),
         WidgetState.pressed: BoxDecoration(
-          color: CupertinoDynamicColor.withBrightnessAndContrast(
+          color: CupertinoDynamicColor.withBrightness(
             color: Color.fromRGBO(50, 50, 50, 0.1),
             darkColor: Color.fromRGBO(255, 255, 255, 0.1),
-            highContrastColor: Color.fromRGBO(50, 50, 50, 0.2),
-            darkHighContrastColor: Color.fromRGBO(255, 255, 255, 0.2),
           ),
         ),
         WidgetState.focused: BoxDecoration(
-          color: CupertinoDynamicColor.withBrightnessAndContrast(
+          color: CupertinoDynamicColor.withBrightness(
             color: Color.fromRGBO(50, 50, 50, 0.075),
             darkColor: Color.fromRGBO(255, 255, 255, 0.075),
-            highContrastColor: Color.fromRGBO(50, 50, 50, 0.15),
-            darkHighContrastColor: Color.fromRGBO(255, 255, 255, 0.15),
           ),
         ),
         WidgetState.hovered: BoxDecoration(
-          color: CupertinoDynamicColor.withBrightnessAndContrast(
+          color: CupertinoDynamicColor.withBrightness(
             color: Color.fromRGBO(50, 50, 50, 0.05),
             darkColor: Color.fromRGBO(255, 255, 255, 0.05),
-            highContrastColor: Color.fromRGBO(50, 50, 50, 0.1),
-            darkHighContrastColor: Color.fromRGBO(255, 255, 255, 0.1),
           ),
         ),
         WidgetState.any: BoxDecoration(),
@@ -2229,7 +2198,7 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
       color = defaultTextColor;
     }
 
-    return _DynamicTypeSet.body
+    return _DynamicTypeStyle.body
         .resolveTextStyle(textScaler)
         .copyWith(
           // Font size will be scaled by TextScaler.
@@ -2240,7 +2209,7 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
 
   TextStyle _resolveDefaultSubtitleStyle(BuildContext context, TextScaler textScaler) {
     final bool isDark = CupertinoTheme.maybeBrightnessOf(context) == Brightness.dark;
-    return _DynamicTypeSet.subhead
+    return _DynamicTypeStyle.subhead
         .resolveTextStyle(textScaler)
         .copyWith(
           // Font size will be scaled by TextScaler.
@@ -2306,11 +2275,10 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
     }
 
     return MediaQuery.withClampedTextScaling(
-      minScaleFactor: 1 - 3 / 17,
-      maxScaleFactor: 1 + 36 / 17,
+      minScaleFactor: _kMinimumTextScaleFactor,
+      maxScaleFactor: _kMaximumTextScaleFactor,
       child: _CupertinoMenuItemInteractionHandler(
         mouseCursor: mouseCursor ?? defaultCursor,
-        panActivationDelay: panActivationDelay,
         requestFocusOnHover: requestFocusOnHover,
         onPressed: onPressed != null ? () => _handleSelect(context) : null,
         onHover: onHover,
@@ -2378,9 +2346,6 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
     properties.add(DiagnosticsProperty<FocusNode?>('focusNode', focusNode, defaultValue: null));
     properties.add(FlagProperty('enabled', value: onPressed != null, ifFalse: 'DISABLED'));
 
-    if (panActivationDelay != null) {
-      properties.add(DiagnosticsProperty<Duration>('panActivationDelay', panActivationDelay));
-    }
     if (subtitle != null) {
       properties.add(DiagnosticsProperty<Widget?>('subtitle', subtitle));
     }
@@ -2439,24 +2404,6 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final BoxConstraints? _constraints;
 
-  /// Returns the nearest multiple of [to] to [value].
-  /// ```dart
-  /// print(quantize(3.15, to: 0));    // 3.14
-  /// print(quantize(3.15, to: 1));    // 3
-  /// print(quantize(3.15, to: 0.1));  // 3.2
-  /// print(quantize(3.15, to: 0.01)); // 3.15
-  /// print(quantize(3.15, to: 0.25)); // 3.25
-  /// print(quantize(3.15, to: 0.5));  // 3.0
-  /// print(quantize(-3.15, to: 0.5)); // -3.0
-  /// print(quantize(-3.15, to: 0.1)); // -3.2
-  /// ```
-  static double _quantize(double value, {required double to}) {
-    if (to == 0) {
-      return value;
-    }
-    return (value / to).round() * to;
-  }
-
   // Tested across all iOS dynamic type sizes on iOS and iPadOS 18.5 simulators.
   // Expected values deviate by no more than 1 physical pixel.
   double _resolveLeadingWidth(TextScaler textScaler, double pixelRatio, double lineHeight) {
@@ -2502,10 +2449,12 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final TextDirection textDirection = Directionality.maybeOf(context) ?? TextDirection.ltr;
     final TextScaler textScaler = MediaQuery.maybeTextScalerOf(context) ?? TextScaler.noScaling;
     final double pixelRatio = MediaQuery.maybeDevicePixelRatioOf(context) ?? 1.0;
-    final TextStyle dynamicBodyText = _DynamicTypeSet.body.resolveTextStyle(textScaler);
-    final double lineHeight = dynamicBodyText.fontSize! * (dynamicBodyText.height ?? 1.0);
+    final TextStyle dynamicBodyText = _DynamicTypeStyle.body.resolveTextStyle(textScaler);
+    assert(dynamicBodyText.fontSize != null && dynamicBodyText.height != null);
+    final double lineHeight = dynamicBodyText.fontSize! * dynamicBodyText.height!;
     final bool showLeadingWidget =
         leading != null || (CupertinoMenuAnchor.maybeHasLeadingOf(context) ?? false);
 
@@ -2546,24 +2495,20 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
         padding: resolvedPadding,
         child: Stack(
           children: <Widget>[
-            Positioned.directional(
-              textDirection: Directionality.maybeOf(context) ?? TextDirection.ltr,
-              start: 0,
-              top: 0,
-              bottom: 0,
-              width: resolvedLeadingWidth,
-              child: leading != null
-                  ? ColoredBox(
-                      color: CupertinoColors.systemBlue,
-                      child: _AlignMidpoint(
-                        alignment:
-                            _leadingAlignment ??
-                            _resolveLeadingAlignment(resolvedLeadingWidth, textScaler),
-                        child: leading,
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-            ),
+            if (showLeadingWidget)
+              Positioned.directional(
+                textDirection: textDirection,
+                start: 0,
+                top: 0,
+                bottom: 0,
+                width: resolvedLeadingWidth,
+                child: _AlignMidpoint(
+                  alignment:
+                      _leadingAlignment ??
+                      _resolveLeadingAlignment(resolvedLeadingWidth, textScaler),
+                  child: leading,
+                ),
+              ),
             Padding(
               padding: EdgeInsetsDirectional.only(
                 start: resolvedLeadingWidth,
@@ -2578,25 +2523,22 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
                       children: <Widget>[child, const SizedBox(height: 1), subtitle!],
                     ),
             ),
-            Positioned.directional(
-              textDirection: Directionality.maybeOf(context) ?? TextDirection.ltr,
-              end: 0,
-              top: 0,
-              bottom: 0,
-              width: resolvedTrailingWidth,
-              child: trailing != null
-                  // On native platform, the trailing widget is constrained to a
-                  // maximum height of minimumHeight - 12 and a maximum width of
-                  // resolvedTrailingWidth - 20. However, because the trailing
-                  // width is customizable on Flutter, the maximum width is not
-                  // set.
-                  ? _AlignMidpoint(
-                      alignment:
-                          _trailingAlignment ?? _resolveTrailingAlignment(resolvedTrailingWidth),
-                      child: trailing,
-                    )
-                  : const SizedBox.shrink(),
-            ),
+            if (trailing != null)
+              // On iOS, the trailing widget is constrained to a maximum height
+              // of minimumHeight - 12 and a maximum width of
+              // resolvedTrailingWidth - 20. These constraints were omitted for
+              // more flexibility.
+              Positioned.directional(
+                textDirection: textDirection,
+                end: 0,
+                top: 0,
+                bottom: 0,
+                width: resolvedTrailingWidth,
+                child: _AlignMidpoint(
+                  alignment: _trailingAlignment ?? _resolveTrailingAlignment(resolvedTrailingWidth),
+                  child: trailing,
+                ),
+              ),
           ],
         ),
       ),
@@ -2723,8 +2665,8 @@ class _RenderAlignMidpoint extends RenderPositionedBox {
 ///
 /// * [CupertinoMenuItem], a Cupertino-style menu item.
 /// * [CupertinoMenuAnchor], a widget that creates a Cupertino-style popup menu.
-/// * [CupertinoMenuEntryMixin], a mixin that can be used to specify the
-///   dividers that should flank a custom menu item.
+/// * [CupertinoMenuEntryMixin], a mixin that can be used to control whether
+///   dividers are shown before or after a menu item.
 class CupertinoLargeMenuDivider extends StatelessWidget with CupertinoMenuEntryMixin {
   /// Creates a large horizontal divider for a [CupertinoMenuAnchor].
   const CupertinoLargeMenuDivider({super.key, this.color = defaultColor});
@@ -2769,7 +2711,6 @@ class _CupertinoMenuItemInteractionHandler extends StatefulWidget {
     required this.focusNode,
     required this.autofocus,
     required this.requestFocusOnHover,
-    required this.panActivationDelay,
     required this.behavior,
     required this.statesController,
     required this.mouseCursor,
@@ -2783,7 +2724,6 @@ class _CupertinoMenuItemInteractionHandler extends StatefulWidget {
   final FocusNode? focusNode;
   final bool autofocus;
   final bool requestFocusOnHover;
-  final Duration? panActivationDelay;
   final HitTestBehavior behavior;
   final WidgetStatesController? statesController;
   final WidgetStateProperty<BoxDecoration> decoration;
@@ -2796,12 +2736,11 @@ class _CupertinoMenuItemInteractionHandler extends StatefulWidget {
 }
 
 class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItemInteractionHandler>
-    implements _PanTarget {
+    implements _SwipeTarget {
   late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
     ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleActivation),
     ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: _handleActivation),
   };
-  Timer? _longPanPressTimer;
 
   // If a focus node isn't given to the widget, then we have to manage our own.
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
@@ -2832,11 +2771,11 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
     }
   }
 
-  bool get isPanned => _isPanned;
-  bool _isPanned = false;
-  set isPanned(bool value) {
-    if (_isPanned != value) {
-      _isPanned = value;
+  bool get isSwiped => _isSwiped;
+  bool _isSwiped = false;
+  set isSwiped(bool value) {
+    if (_isSwiped != value) {
+      _isSwiped = value;
       _statesController.update(WidgetState.dragged, value);
     }
   }
@@ -2901,9 +2840,7 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
 
     if (widget.onPressed != oldWidget.onPressed) {
       if (widget.onPressed == null) {
-        isEnabled = isHovered = isPressed = isPanned = isFocused = false;
-        _longPanPressTimer?.cancel();
-        _longPanPressTimer = null;
+        isEnabled = isHovered = isPressed = isSwiped = isFocused = false;
       } else {
         isEnabled = true;
       }
@@ -2911,47 +2848,39 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
   }
 
   @override
-  bool didPanEnter() {
+  bool didSwipeEnter() {
     if (!isEnabled) {
       return false;
     }
 
-    if (widget.panActivationDelay != null) {
-      _longPanPressTimer ??= Timer(widget.panActivationDelay!, () {
-        assert(_longPanPressTimer?.isActive == false);
-        assert(mounted);
-        assert(isEnabled);
-        _longPanPressTimer = null;
-        _handleActivation();
-      });
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+        HapticFeedback.selectionClick();
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.macOS:
+        break;
     }
 
-    isPanned = true;
+    isSwiped = true;
     return true;
   }
 
   @override
-  void didPanLeave({bool pointerUp = false}) {
-    _longPanPressTimer?.cancel();
-    _longPanPressTimer = null;
-    if (pointerUp) {
-      assert(mounted);
-      assert(isPanned);
-      assert(isEnabled);
+  void didSwipeLeave({bool pointerUp = false}) {
+    if (isEnabled && pointerUp) {
       _handleActivation();
     }
 
-    isPanned = false;
+    isSwiped = false;
   }
 
   @override
   void dispose() {
     _internalStatesController?.dispose();
     _internalStatesController = null;
-
-    _longPanPressTimer?.cancel();
-    _longPanPressTimer = null;
-
     _internalFocusNode?.dispose();
     _internalFocusNode = null;
     super.dispose();
@@ -2963,7 +2892,7 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
   }
 
   void _handleActivation([Intent? intent]) {
-    isPanned = isPressed = false;
+    isSwiped = isPressed = false;
     widget.onPressed?.call();
   }
 
@@ -3003,7 +2932,7 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
     }
   }
 
-  void _dismissMenu() {
+  void _handleDismissMenu() {
     Actions.invoke(context, const DismissIntent());
   }
 
@@ -3052,10 +2981,9 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
 
     return MergeSemantics(
       child: Semantics.fromProperties(
-        container: true,
         properties: SemanticsProperties(
           enabled: isEnabled,
-          onDismiss: isEnabled ? _dismissMenu : null,
+          onDismiss: isEnabled ? _handleDismissMenu : null,
         ),
         child: MetaData(
           metaData: this,
@@ -3084,123 +3012,114 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
   }
 }
 
-/// Called when a [_PanTarget] is entered or exited.
-///
-/// The `position` describes the global position of the pointer.
-///
-/// The `onTarget` parameter is true when the pointer is on a [_PanTarget].
-typedef _CupertinoPanUpdateCallback = void Function(DragUpdateDetails position, {bool onTarget});
+abstract class _SwipeSurfaceData {
+  ui.Rect computeRect();
+}
 
-class _PanRegionScope extends InheritedWidget {
-  const _PanRegionScope({required super.child, required this.state});
-  final _PanRegionState? state;
+abstract class _SwipeRegionProvider {
+  void attachSurface(_SwipeSurfaceData surface);
+  void detachSurface(_SwipeSurfaceData surface);
+  void beginSwipe(PointerDownEvent event, {Duration delay = Duration.zero, VoidCallback? onStart});
+}
+
+class _SwipeScope extends InheritedWidget {
+  const _SwipeScope({required super.child, required this.state});
+  final _SwipeRegionProvider state;
 
   @override
-  bool updateShouldNotify(_PanRegionScope oldWidget) {
+  bool updateShouldNotify(_SwipeScope oldWidget) {
     return state != oldWidget.state;
   }
 }
 
-class _PanRegion extends StatefulWidget {
-  const _PanRegion({this.enabled = true, required this.onPanDistanceChanged, required this.child});
+class _SwipeRegion extends StatefulWidget {
+  const _SwipeRegion({this.enabled = true, required this.onDistanceChanged, required this.child});
 
   final bool enabled;
-  final ValueChanged<double> onPanDistanceChanged;
+  final ValueChanged<double> onDistanceChanged;
   final Widget child;
 
-  static _PanRegionState _of(BuildContext context) {
-    final _PanRegionState? result = context
-        .dependOnInheritedWidgetOfExactType<_PanRegionScope>()
-        ?.state;
-    assert(result != null, 'No PanRegion found in context');
-    return result!;
-  }
-
-  /// Creates a [ImmediateMultiDragGestureRecognizer] to recognize the start of
-  /// a pan gesture.
-  ImmediateMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
-    return ImmediateMultiDragGestureRecognizer(
-      allowedButtonsFilter: (int button) => button == kPrimaryButton,
-    )..onStart = onStart;
+  static _SwipeRegionProvider of(BuildContext context) {
+    final _SwipeScope? scope = context.dependOnInheritedWidgetOfExactType<_SwipeScope>();
+    assert(scope != null, 'No SwipeRegion found in context');
+    return scope!.state;
   }
 
   @override
-  State<_PanRegion> createState() => _PanRegionState();
+  State<_SwipeRegion> createState() => _SwipeRegionState();
 }
 
-class _PanRegionState extends State<_PanRegion> {
-  final Set<_RenderPanSurface> _surfaces = <_RenderPanSurface>{};
-  ImmediateMultiDragGestureRecognizer? _recognizer;
-  bool get isPanning => _position != null;
+class _SwipeRegionState extends State<_SwipeRegion> implements _SwipeRegionProvider {
+  final Set<_SwipeSurfaceData> _surfaces = <_SwipeSurfaceData>{};
+  MultiDragGestureRecognizer? _recognizer;
+  bool get _isSwiping => _position != null;
   ui.Offset? _position;
 
-  void attachChild(_RenderPanSurface surface) {
+  @override
+  void attachSurface(_SwipeSurfaceData surface) {
     _surfaces.add(surface);
   }
 
-  void detachChild(_RenderPanSurface surface) {
+  @override
+  void detachSurface(_SwipeSurfaceData surface) {
     _surfaces.remove(surface);
   }
 
-  ui.Rect get panArea {
-    ui.Rect? combined;
-    if (_surfaces.isEmpty) {
-      return Rect.zero;
+  @override
+  void beginSwipe(PointerDownEvent event, {Duration delay = Duration.zero, VoidCallback? onStart}) {
+    if (_isSwiping) {
+      assert(_recognizer != null);
+      return;
     }
 
-    for (final _RenderPanSurface surface in _surfaces) {
-      if (combined == null) {
-        combined = surface.rect;
-      } else {
-        combined = combined.expandToInclude(surface.rect);
+    if (_recognizer != null && _recognizer!.onStart == onStart) {
+      bool delayMatches = true;
+      if (_recognizer case final DelayedMultiDragGestureRecognizer recognizer) {
+        delayMatches = recognizer.delay == delay;
+      }
+      if (delayMatches) {
+        _recognizer!.addPointer(event);
+        return;
       }
     }
-    return combined!;
-  }
 
-  double calculateSquaredDistance(Rect rect, Offset position) {
-    if (rect.contains(position)) {
-      return 0;
+    _recognizer?.dispose();
+    _recognizer = null;
+
+    Drag handleStart(Offset position) {
+      onStart?.call();
+      return _createSwipeHandle(position);
     }
 
-    final double x = math.max((position.dx - rect.center.dx).abs() - rect.width / 2, 0.0);
-    final double y = math.max((position.dy - rect.center.dy).abs() - rect.height / 2, 0.0);
-
-    // Find the squared distance from the edge of the menu panel to the pointer.
-    final double squaredDistance = x * x + y * y;
-    return squaredDistance;
-  }
-
-  void routePointer(PointerDownEvent event) {
-    assert(!isPanning);
-    assert(_recognizer != null || !widget.enabled);
-    _recognizer?.addPointer(event);
-  }
-
-  void _resolveGesture() {
-    if (widget.enabled) {
-      _recognizer ??= widget.createRecognizer(_beginPan);
-      _recognizer!.gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
+    // Use a MultiDragGestureRecognizer instead of a SwipeGestureRecognizer
+    // since the latter does not support delayed recognition.
+    if (delay == Duration.zero) {
+      _recognizer = ImmediateMultiDragGestureRecognizer(
+        allowedButtonsFilter: (int button) => button == kPrimaryButton,
+      )..onStart = handleStart;
     } else {
-      if (isPanning) {
-        _completePan();
-      }
-      _recognizer?.dispose();
-      _recognizer = null;
+      _recognizer = DelayedMultiDragGestureRecognizer(
+        delay: delay,
+        allowedButtonsFilter: (int button) => button == kPrimaryButton,
+      )..onStart = handleStart;
     }
+
+    _recognizer!.gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
+    _recognizer!.addPointer(event);
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _resolveGesture();
-  }
-
-  @override
-  void didUpdateWidget(_PanRegion oldWidget) {
+  void didUpdateWidget(_SwipeRegion oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.enabled != oldWidget.enabled) {
-      _resolveGesture();
+      if (!widget.enabled) {
+        if (_isSwiping) {
+          _position = null;
+          widget.onDistanceChanged(0);
+        }
+        _recognizer?.dispose();
+        _recognizer = null;
+      }
     }
   }
 
@@ -3211,19 +3130,63 @@ class _PanRegionState extends State<_PanRegion> {
     super.dispose();
   }
 
+  void _handleSwipeEnd(DragEndDetails position) {
+    _completeSwipe();
+  }
+
+  void _handleSwipeCancel() {
+    _completeSwipe();
+  }
+
+  void _handleSwipeUpdate(DragUpdateDetails updateDetails, {bool onTarget = false}) {
+    _position = _position! + updateDetails.delta;
+
+    // We can't merge rects because the root menu anchor may not be contiguous.
+    double minimumSquaredDistance = double.maxFinite;
+    for (final _SwipeSurfaceData surface in _surfaces) {
+      final double squaredDistance = _computeSquaredDistanceToRect(
+        _position!,
+        surface.computeRect(),
+      );
+
+      if (squaredDistance.floor() == 0) {
+        widget.onDistanceChanged(0);
+        return;
+      }
+
+      minimumSquaredDistance = math.min(squaredDistance, minimumSquaredDistance);
+    }
+
+    final double distance = minimumSquaredDistance == 0 ? 0 : math.sqrt(minimumSquaredDistance);
+    widget.onDistanceChanged(distance);
+  }
+
+  Drag _createSwipeHandle(ui.Offset position) {
+    assert(!_isSwiping, 'A new swipe should not begin while a swipe is active.');
+    _position = position;
+    return _SwipeHandle(
+      router: this,
+      viewId: View.of(context).viewId,
+      initialPosition: position,
+      onSwipeUpdate: _handleSwipeUpdate,
+      onSwipeEnd: _handleSwipeEnd,
+      onSwipeCanceled: _handleSwipeCancel,
+    );
+  }
+
   void _disposeInactiveRecognizer() {
-    if (!isPanning && _recognizer != null) {
+    if (!_isSwiping && _recognizer != null) {
       _recognizer!.dispose();
       _recognizer = null;
     }
   }
 
-  void _completePan() {
+  void _completeSwipe() {
     _position = null;
-    widget.onPanDistanceChanged(0);
+    widget.onDistanceChanged(0);
     if (mounted) {
       setState(() {
-        // Rebuild to notify that the pan has ended.
+        // Rebuild to notify that the swipe has ended.
       });
     } else {
       // If the widget is not mounted, safely dispose of the recognizer.
@@ -3231,120 +3194,83 @@ class _PanRegionState extends State<_PanRegion> {
     }
   }
 
-  void _handlePanEnd(DragEndDetails position) {
-    _completePan();
+  @override
+  Widget build(BuildContext context) {
+    return _SwipeScope(state: this, child: widget.child);
   }
+}
 
-  void _handlePanCancel() {
-    _completePan();
-  }
+/// An area that can initiate swiping.
+///
+/// This widget registers with the nearest [_SwipeRegion] and exposes its position
+/// as a [ui.Rect]. This [_SwipeSurface] will route [PointerDownEvent]s to its
+/// [_SwipeRegion]. If a routed [PointerDownEvent] results in a swipe gesture, the
+/// [_SwipeRegion] will use the combined [ui.Rect] of all registered [_SwipeSurface]s
+/// to calculate the swiping distance.
+class _SwipeSurface extends SingleChildRenderObjectWidget {
+  /// Creates a swipe surface that registers with a parent [_SwipeRegion].
+  const _SwipeSurface({required super.child, this.delay = Duration.zero, this.onStart});
 
-  void _handlePanUpdate(DragUpdateDetails updateDetails, {bool onTarget = false}) {
-    _position = _position! + updateDetails.delta;
-    if (onTarget) {
-      // If the pointer is on a target, reset the distance to 0.
-      widget.onPanDistanceChanged(0);
-      return;
-    }
+  /// The delay before recognizing a swipe gesture.
+  final Duration delay;
+  final VoidCallback? onStart;
 
-    // We can't merge rects because the root menu anchor may not be contiguous.
-    double minSquaredDistance = double.infinity;
-    for (final _RenderPanSurface surface in _surfaces) {
-      final double squaredDistance = calculateSquaredDistance(surface.rect, _position!);
-      minSquaredDistance = math.min(squaredDistance, minSquaredDistance);
-    }
-
-    final double distance = math.sqrt(minSquaredDistance);
-    widget.onPanDistanceChanged(distance);
-  }
-
-  Drag? _beginPan(ui.Offset position) {
-    assert(!isPanning, 'A new pan should not begin while a pan is active.');
-    _position = position;
-    return _PanHandler(
-      router: this,
-      viewId: View.of(context).viewId,
-      initialPosition: position,
-      onPanUpdate: _handlePanUpdate,
-      onPanEnd: _handlePanEnd,
-      onPanCanceled: _handlePanCancel,
+  @override
+  _RenderSwipenableSurface createRenderObject(BuildContext context) {
+    return _RenderSwipenableSurface(
+      region: _SwipeRegion.of(context),
+      delay: delay,
+      onStart: onStart,
     );
   }
 
   @override
-  Widget build(BuildContext context) {
-    return _PanRegionScope(state: this, child: widget.child);
-  }
-}
-
-/// An area that can initiate panning.
-///
-/// This widget registers with the nearest [_PanRegion] and exposes it's position
-/// as a [ui.Rect]. This [_PanSurface] will route [PointerDownEvent]s to its
-/// [_PanRegion]. If a routed [PointerDownEvent] results in a pan gesture, the
-/// [_PanRegion] will use the combined [ui.Rect] of all registered [_PanSurface]s
-/// to calculate the panning distance.
-class _PanSurface extends SingleChildRenderObjectWidget {
-  /// Creates a pan surface that registers with a parent [_PanRegion].
-  const _PanSurface({required super.child, required this.includeInPanArea});
-  final bool includeInPanArea;
-
-  @override
-  _RenderPanSurface createRenderObject(BuildContext context) {
-    return _RenderPanSurface(region: _PanRegion._of(context), includeInPanArea: includeInPanArea);
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, _RenderPanSurface renderObject) {
+  void updateRenderObject(BuildContext context, _RenderSwipenableSurface renderObject) {
     renderObject
-      ..region = _PanRegion._of(context)
-      ..includeInPanArea = includeInPanArea;
+      ..region = _SwipeRegion.of(context)
+      ..delay = delay
+      ..onStart = onStart;
   }
 }
 
-class _RenderPanSurface extends RenderMetaData {
-  _RenderPanSurface({required _PanRegionState region, required bool includeInPanArea})
-    : _region = region,
-      _includeInPanArea = includeInPanArea;
+class _RenderSwipenableSurface extends RenderProxyBox implements _SwipeSurfaceData {
+  _RenderSwipenableSurface({
+    required _SwipeRegionProvider region,
+    required this.delay,
+    required this.onStart,
+  }) : _region = region;
 
-  _PanRegionState get region => _region;
-  _PanRegionState _region;
-  set region(_PanRegionState value) {
+  _SwipeRegionProvider get region => _region;
+  _SwipeRegionProvider _region;
+  set region(_SwipeRegionProvider value) {
     if (_region != value) {
-      _region.detachChild(this);
+      _region.detachSurface(this);
       _region = value;
-      _region.attachChild(this);
-      markNeedsPaint();
+      _region.attachSurface(this);
     }
   }
 
-  bool get includeInPanArea => _includeInPanArea;
-  bool _includeInPanArea = true;
-  set includeInPanArea(bool value) {
-    if (_includeInPanArea != value) {
-      _includeInPanArea = value;
-      markNeedsPaint();
-    }
-  }
+  Duration delay;
+  VoidCallback? onStart;
 
-  ui.Rect get rect => _panRect;
-  ui.Rect _panRect = Rect.zero;
+  @override
+  ui.Rect computeRect() => localToGlobal(Offset.zero) & size;
 
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    _region.attachChild(this);
+    _region.attachSurface(this);
   }
 
   @override
   void detach() {
-    _region.detachChild(this);
+    _region.detachSurface(this);
     super.detach();
   }
 
   @override
   void dispose() {
-    _region.detachChild(this);
+    _region.detachSurface(this);
     super.dispose();
   }
 
@@ -3352,58 +3278,47 @@ class _RenderPanSurface extends RenderMetaData {
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent) {
-      _region.routePointer(event);
+      _region.beginSwipe(event, delay: delay, onStart: onStart);
     }
-  }
-
-  @override
-  void paint(PaintingContext context, ui.Offset offset) {
-    super.paint(context, offset);
-    if (!includeInPanArea) {
-      return;
-    }
-
-    // Calculate the rect of this surface in the global coordinate system.
-    _panRect = localToGlobal(Offset.zero) & size;
   }
 }
 
 /// Mix into [State] to receive callbacks when a pointer enters or leaves while
 /// down. The [StatefulWidget] this class is mixed into must be a descendant of
-/// a [_PanRegion].
+/// a [_SwipeRegion].
 @optionalTypeArgs
-abstract class _PanTarget {
-  /// Called when a pointer enters the [_PanTarget]. Return true if the pointer
-  /// should be considered "on" the [_PanTarget], and false otherwise (for
-  /// example, when the [_PanTarget] is disabled).
-  bool didPanEnter();
+abstract class _SwipeTarget {
+  /// Called when a pointer enters the [_SwipeTarget]. Return true if the pointer
+  /// should be considered "on" the [_SwipeTarget], and false otherwise (for
+  /// example, when the [_SwipeTarget] is disabled).
+  bool didSwipeEnter();
 
-  /// Called when the pan is ended or canceled. If `pointerUp` is true,
-  /// then the pointer was removed from the screen while over this [_PanTarget].
-  void didPanLeave({required bool pointerUp});
+  /// Called when the swipe is ended or canceled. If `pointerUp` is true,
+  /// then the pointer was removed from the screen while over this [_SwipeTarget].
+  void didSwipeLeave({required bool pointerUp});
 }
 
-/// Handles panning events for a [_PanRegion].
+/// Handles swiping events for a [_SwipeRegion].
 // This class was adapted from _DragAvatar.
-class _PanHandler extends Drag {
-  /// Creates a [_PanHandler] that handles panning events for a [_PanRegion].
-  _PanHandler({
+class _SwipeHandle extends Drag {
+  /// Creates a [_SwipeHandle] that handles swiping events for a [_SwipeRegion].
+  _SwipeHandle({
     required Offset initialPosition,
     required this.viewId,
     required this.router,
-    required this.onPanEnd,
-    required this.onPanUpdate,
-    required this.onPanCanceled,
+    required this.onSwipeEnd,
+    required this.onSwipeUpdate,
+    required this.onSwipeCanceled,
   }) : _position = initialPosition {
-    _updatePan();
+    _updateSwipe();
   }
 
   final int viewId;
-  final List<_PanTarget> _enteredTargets = <_PanTarget>[];
-  final _CupertinoPanUpdateCallback onPanUpdate;
-  final GestureDragEndCallback onPanEnd;
-  final GestureDragCancelCallback onPanCanceled;
-  final _PanRegionState router;
+  final List<_SwipeTarget> _enteredTargets = <_SwipeTarget>[];
+  final GestureDragUpdateCallback onSwipeUpdate;
+  final GestureDragEndCallback onSwipeEnd;
+  final GestureDragCancelCallback onSwipeCanceled;
+  final _SwipeRegionState router;
   Offset _position;
 
   @override
@@ -3411,68 +3326,63 @@ class _PanHandler extends Drag {
     final Offset oldPosition = _position;
     _position += details.delta;
     if (_position != oldPosition) {
-      _updatePan();
-      onPanUpdate.call(details, onTarget: _enteredTargets.isNotEmpty);
+      _updateSwipe();
+      onSwipeUpdate.call(details);
     }
   }
 
   @override
   void end(DragEndDetails details) {
     _leaveAllEntered(pointerUp: true);
-    onPanEnd.call(details);
+    onSwipeEnd.call(details);
   }
 
   @override
   void cancel() {
     _leaveAllEntered();
-    onPanCanceled();
+    onSwipeCanceled();
   }
 
-  void _updatePan() {
+  void _updateSwipe() {
     final HitTestResult result = HitTestResult();
     WidgetsBinding.instance.hitTestInView(result, _position, viewId);
     // Look for the RenderBoxes that corresponds to the hit target
-    final List<_PanTarget> targets = <_PanTarget>[];
+    final List<_SwipeTarget> targets = <_SwipeTarget>[];
     for (final HitTestEntry entry in result.path) {
-      if (entry.target case RenderMetaData(:final _PanTarget metaData)) {
+      if (entry.target case RenderMetaData(:final _SwipeTarget metaData)) {
         targets.add(metaData);
       }
     }
 
-    bool listsMatch = false;
-    if (targets.length >= _enteredTargets.length && _enteredTargets.isNotEmpty) {
-      listsMatch = true;
+    if (_enteredTargets.isNotEmpty && targets.length >= _enteredTargets.length) {
+      bool listsMatch = true;
       for (int i = 0; i < _enteredTargets.length; i++) {
         if (targets[i] != _enteredTargets[i]) {
           listsMatch = false;
           break;
         }
       }
-    }
 
-    // If everything is the same, bail early.
-    if (listsMatch) {
-      return;
+      if (listsMatch) {
+        return;
+      }
     }
 
     // Leave old targets.
     _leaveAllEntered();
 
     // Enter new targets.
-    for (final _PanTarget? target in targets) {
-      if (target != null) {
-        _enteredTargets.add(target);
-        if (target.didPanEnter()) {
-          HapticFeedback.selectionClick();
-          return;
-        }
+    for (final _SwipeTarget target in targets) {
+      _enteredTargets.add(target);
+      if (target.didSwipeEnter()) {
+        return;
       }
     }
   }
 
   void _leaveAllEntered({bool pointerUp = false}) {
     for (int i = 0; i < _enteredTargets.length; i += 1) {
-      _enteredTargets[i].didPanLeave(pointerUp: pointerUp);
+      _enteredTargets[i].didSwipeLeave(pointerUp: pointerUp);
     }
     _enteredTargets.clear();
   }
