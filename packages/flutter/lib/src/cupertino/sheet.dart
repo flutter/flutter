@@ -160,37 +160,30 @@ Future<T?> showCupertinoSheet<T>({
 
   final WidgetBuilder? effectivePageBuilder = builder ?? pageBuilder;
   final WidgetBuilder widgetBuilder;
-  final GlobalKey<NavigatorState> nestedNavigatorKey = GlobalKey<NavigatorState>();
   if (!useNestedNavigation) {
     widgetBuilder = effectivePageBuilder!;
   } else {
     widgetBuilder = (BuildContext context) {
-      return NavigatorPopHandler(
-        onPopWithResult: (T? result) {
-          nestedNavigatorKey.currentState!.maybePop();
+      return Navigator(
+        initialRoute: '/',
+        onGenerateInitialRoutes: (NavigatorState navigator, String initialRouteName) {
+          return <Route<void>>[
+            CupertinoPageRoute<void>(
+              builder: (BuildContext context) {
+                return PopScope(
+                  canPop: false,
+                  onPopInvokedWithResult: (bool didPop, Object? result) {
+                    if (didPop) {
+                      return;
+                    }
+                    Navigator.of(context, rootNavigator: true).pop(result);
+                  },
+                  child: effectivePageBuilder!(context),
+                );
+              },
+            ),
+          ];
         },
-        child: Navigator(
-          key: nestedNavigatorKey,
-          initialRoute: '/',
-          onGenerateInitialRoutes: (NavigatorState navigator, String initialRouteName) {
-            return <Route<void>>[
-              CupertinoPageRoute<void>(
-                builder: (BuildContext context) {
-                  return PopScope(
-                    canPop: false,
-                    onPopInvokedWithResult: (bool didPop, Object? result) {
-                      if (didPop) {
-                        return;
-                      }
-                      Navigator.of(context, rootNavigator: true).pop(result);
-                    },
-                    child: effectivePageBuilder!(context),
-                  );
-                },
-              ),
-            ];
-          },
-        ),
       );
     };
   }
