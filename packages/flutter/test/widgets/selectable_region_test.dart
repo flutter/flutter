@@ -6446,6 +6446,56 @@ void main() {
       },
       skip: !kIsWeb, // [intended] This test verifies web behavior.
     );
+
+    testWidgets(
+      'uses contextMenuBuilder by default on Android and iOS web',
+      (WidgetTester tester) async {
+        final UniqueKey contextMenu = UniqueKey();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              selectionControls: materialTextSelectionHandleControls,
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    return SizedBox.shrink(key: contextMenu);
+                  },
+              child: const Text('How are you?'),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(contextMenu), findsNothing);
+
+        // Show the toolbar by longpressing.
+        final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(
+          find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)),
+        );
+        final TestGesture gesture = await tester.startGesture(
+          textOffsetToPosition(paragraph1, 6),
+        ); // at the 'r'
+        addTearDown(gesture.removePointer);
+        await tester.pump(const Duration(milliseconds: 500));
+        // `are` is selected.
+        expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(contextMenu), findsOneWidget);
+      },
+      // TODO(Renzo-Olivares): Remove this test when the web context menu
+      // for Android and iOS is re-enabled.
+      // See: https://github.com/flutter/flutter/issues/177123.
+      // [intended] Android and iOS use the flutter rendered menu on the web.
+      skip:
+          !kIsWeb ||
+          !<TargetPlatform>{
+            TargetPlatform.android,
+            TargetPlatform.iOS,
+          }.contains(defaultTargetPlatform),
+    );
   });
 
   testWidgets('Multiple selectables on a single line should be in screen order', (

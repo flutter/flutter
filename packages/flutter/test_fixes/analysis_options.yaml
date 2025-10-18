@@ -1,1 +1,10 @@
 # This ensures that parent analysis options do not accidentally break the fix tests.
+
+linter:
+  rules:
+    # Since these test cases live inside the `flutter` package, the
+    # lint `deprecated_member_use_from_same_package` is required in
+    # order to trigger them. Customer code (which lives outside of the
+    # `flutter` package) will be triggered by the analyzer warning
+    # `deprecated_member_use`, which is enabled by default.
+    - deprecated_member_use_from_same_package
