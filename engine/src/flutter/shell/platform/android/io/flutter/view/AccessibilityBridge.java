@@ -825,7 +825,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       result.addAction(AccessibilityNodeInfo.ACTION_SET_TEXT);
     }
 
-    if (semanticsNode.hasFlag(Flag.IS_BUTTON)) {
+    if (semanticsNode.shouldBeTreatedAsButton()) {
       result.setClassName("android.widget.Button");
     }
     if (semanticsNode.hasFlag(Flag.IS_IMAGE)) {
@@ -2502,6 +2502,19 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         Log.e(TAG, "Attempted to check hadFlag but had no previous config.");
       }
       return (previousFlags & flag.value) != 0;
+    }
+
+    private boolean shouldBeTreatedAsButton() {
+      if (hasFlag(Flag.IS_BUTTON)) {
+        return true;
+      }
+      if (linkUrl != null && !linkUrl.isEmpty()) {
+        // This will be represented as link through URLSpan.
+        return false;
+      }
+      // In Android, a link must be accompanied with a URL; otherwise,
+      // it should be treated as a button.
+      return hasFlag(Flag.IS_LINK);
     }
 
     private boolean didScroll() {
