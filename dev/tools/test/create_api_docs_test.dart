@@ -619,6 +619,7 @@ const String testVersionInfo =
   "frameworkRevision": "0000000000000000000000000000000000000000",
   "frameworkCommitDate": "2021-07-28 13:03:40 -0700",
   "engineRevision": "0000000000000000000000000000000000000001",
+  "engineContentHash": "70fb28dde094789120421d4e807a9c37a0131296",
   "dartSdkVersion": "2.14.0 (build 2.14.0-360.0.dev)",
   "flutterRoot": "/home/user/flutter"
 }

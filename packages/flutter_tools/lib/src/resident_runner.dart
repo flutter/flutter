@@ -1233,6 +1233,27 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   @override
   Future<void> runSourceGenerators() async {
+    _environment ??= Environment(
+      artifacts: globals.artifacts!,
+      logger: globals.logger,
+      cacheDir: globals.cache.getRoot(),
+      engineVersion: globals.flutterVersion.engineRevision,
+      contentHash: globals.flutterVersion.engineContentHash,
+      fileSystem: globals.fs,
+      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+      outputDir: globals.fs.directory(getBuildDirectory()),
+      processManager: globals.processManager,
+      platform: globals.platform,
+      analytics: globals.analytics,
+      projectDir: globals.fs.currentDirectory,
+      packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
+      generateDartPluginRegistry: generateDartPluginRegistry,
+      defines: <String, String>{
+        // Needed for Dart plugin registry generation.
+        kTargetFile: mainPath,
+      },
+    );
+
     final compositeTarget = CompositeTarget(<Target>[
       globals.buildTargets.generateLocalizationsTarget,
       globals.buildTargets.dartPluginRegistrantTarget,
