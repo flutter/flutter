@@ -301,7 +301,7 @@ class ChromiumLauncher {
           'Found ARM Chrome installation at $chromeExecutable, forcing native launch.',
         );
         // If so, force Chrome to launch natively.
-        args.insertAll(0, <String>['/usr/bin/arch', '-arm64']);
+        // args.insertAll(0, <String>['/usr/bin/arch', '-arm64']);
       }
     }
 
