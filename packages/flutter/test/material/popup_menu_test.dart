@@ -4825,6 +4825,83 @@ void main() {
 
     checkPopupMenu(popupMenuTheme2);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/177003
+  group('PopupMenu semantics label for mismatched platforms', () {
+    Future<void> testPopupMenuSemanticsLabel({
+      required WidgetTester tester,
+      required TargetPlatform themePlatform,
+      required Matcher expected,
+    }) async {
+      const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: themePlatform),
+          home: Scaffold(
+            body: Builder(
+              builder: (BuildContext context) {
+                return OutlinedButton(
+                  onPressed: () {
+                    showMenu<void>(
+                      context: context,
+                      position: RelativeRect.fill,
+                      items: const <PopupMenuItem<void>>[PopupMenuItem<void>(child: Text('foo'))],
+                    );
+                  },
+                  child: const Text('open'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      final Finder popupFinder = find.bySemanticsLabel(localizations.popupMenuLabel);
+      expect(popupFinder, expected);
+    }
+
+    testWidgets(
+      'Semantics label is null by default on Apple platforms',
+      (WidgetTester tester) async {
+        // When someone sets theme.platform to TargetPlatform.android on an Apple device,
+        // assistive technology like VoiceOver should work correctly by having
+        // a null semantics label value by default.
+        await testPopupMenuSemanticsLabel(
+          tester: tester,
+          themePlatform: TargetPlatform.android,
+          expected: findsNothing,
+        );
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.iOS,
+        TargetPlatform.macOS,
+      }),
+    );
+
+    testWidgets(
+      'Semantics label is non-null by default on non-Apple platforms',
+      (WidgetTester tester) async {
+        // When someone sets theme.platform to TargetPlatform.iOS on a non-Apple device,
+        // assistive technologies (Talk Back/NVDA/JAWS...) should work correctly
+        // by having a non-null semantics label value by default.
+        await testPopupMenuSemanticsLabel(
+          tester: tester,
+          themePlatform: TargetPlatform.iOS,
+          expected: findsOneWidget,
+        );
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.fuchsia,
+        TargetPlatform.linux,
+        TargetPlatform.windows,
+      }),
+    );
+  });
 }
 
 Matcher overlaps(Rect other) => OverlapsMatcher(other);
