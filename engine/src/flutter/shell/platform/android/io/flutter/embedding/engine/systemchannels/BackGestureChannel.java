@@ -11,7 +11,6 @@ import androidx.annotation.RequiresApi;
 import io.flutter.Build.API_LEVELS;
 import io.flutter.Log;
 import io.flutter.embedding.engine.dart.DartExecutor;
-import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.StandardMethodCodec;
 import java.util.Arrays;
@@ -45,12 +44,7 @@ public class BackGestureChannel {
   // Provide a default handler that returns an empty response to any messages
   // on this channel.
   private final MethodChannel.MethodCallHandler defaultHandler =
-      new MethodChannel.MethodCallHandler() {
-        @Override
-        public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
-          result.success(null);
-        }
-      };
+      (call, result) -> result.success(null);
 
   /**
    * Initiates a back gesture event.

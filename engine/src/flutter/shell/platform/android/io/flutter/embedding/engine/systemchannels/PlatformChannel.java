@@ -14,7 +14,7 @@ import io.flutter.plugin.common.JSONMethodCodec;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -226,7 +226,8 @@ public class PlatformChannel {
   /** Informs Flutter of a change in the SystemUI overlays. */
   public void systemChromeChanged(boolean overlaysAreVisible) {
     Log.v(TAG, "Sending 'systemUIChange' message.");
-    channel.invokeMethod("SystemChrome.systemUIChange", Arrays.asList(overlaysAreVisible));
+    channel.invokeMethod(
+        "SystemChrome.systemUIChange", Collections.singletonList(overlaysAreVisible));
   }
 
   // TODO(mattcarroll): add support for IntDef annotations, then add @ScreenOrientation
@@ -481,7 +482,7 @@ public class PlatformChannel {
      * application.
      *
      * <p>{@link SystemUiMode#IMMERSIVE} refers to a fullscreen experience that restores system bars
-     * upon swiping from the edge of the viewport. This swipe gesture is not recived by the
+     * upon swiping from the edge of the viewport. This swipe gesture is not received by the
      * application.
      *
      * <p>{@link SystemUiMode#IMMERSIVE_STICKY} refers to a fullscreen experience that restores
@@ -672,7 +673,7 @@ public class PlatformChannel {
     EDGE_TO_EDGE("SystemUiMode.edgeToEdge");
 
     /**
-     * Returns the SystemUiMode for the provied encoded value. @throws NoSuchFieldException if any
+     * Returns the SystemUiMode for the provided encoded value. @throws NoSuchFieldException if any
      * of the given encoded overlay names are invalid.
      */
     @NonNull
@@ -687,7 +688,7 @@ public class PlatformChannel {
 
     @NonNull private String encodedName;
 
-    /** Returens the encoded {@link SystemUiMode} */
+    /** Returns the encoded {@link SystemUiMode} */
     SystemUiMode(@NonNull String encodedName) {
       this.encodedName = encodedName;
     }

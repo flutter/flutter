@@ -79,7 +79,7 @@ import java.util.Set;
  * {@link FlutterRenderer} and then attach a {@link RenderSurface}. Consider using a {@link
  * io.flutter.embedding.android.FlutterView} as a {@link RenderSurface}.
  *
- * <p>Instatiating the first {@code FlutterEngine} per process will also load the Flutter engine's
+ * <p>Instantiating the first {@code FlutterEngine} per process will also load the Flutter engine's
  * native library and start the Dart VM. Subsequent {@code FlutterEngine}s will run on the same VM
  * instance but will have their own Dart <a
  * href="https://api.dartlang.org/stable/dart-isolate/Isolate-class.html">Isolate</a> when the

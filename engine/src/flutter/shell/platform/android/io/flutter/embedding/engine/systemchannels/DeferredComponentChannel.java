@@ -90,7 +90,7 @@ public class DeferredComponentChannel {
   }
 
   /**
-   * Sets the DeferredComponentManager to exectue method channel calls with.
+   * Sets the DeferredComponentManager to execute method channel calls with.
    *
    * @param deferredComponentManager the DeferredComponentManager to use.
    */
