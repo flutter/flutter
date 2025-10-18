@@ -244,6 +244,7 @@ class SemanticsNodeUpdate {
     required this.platformViewId,
     required this.scrollChildren,
     required this.scrollIndex,
+    required this.traversalParent,
     required this.scrollPosition,
     required this.scrollExtentMax,
     required this.scrollExtentMin,
@@ -262,6 +263,7 @@ class SemanticsNodeUpdate {
     this.tooltip,
     this.textDirection,
     required this.transform,
+    required this.hitTestTransform,
     required this.childrenInTraversalOrder,
     required this.childrenInHitTestOrder,
     required this.additionalActions,
@@ -303,6 +305,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final int scrollIndex;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final int? traversalParent;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final double scrollPosition;
@@ -357,6 +362,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final Float32List transform;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final Float32List hitTestTransform;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final Int32List childrenInTraversalOrder;
@@ -610,7 +618,7 @@ abstract class SemanticRole {
     element.style
       ..position = 'absolute'
       ..overflow = 'visible';
-    element.setAttribute('id', '$kFlutterSemanticNodePrefix${semanticsObject.id}');
+    element.setAttribute('id', getIdAttribute(semanticsObject.id));
 
     // The root node has some properties that other nodes do not.
     if (semanticsObject.id == 0 && !configuration.debugShowSemanticsNodes) {
@@ -685,6 +693,11 @@ abstract class SemanticRole {
   /// Convenience getter for the [Focusable] behavior, if any.
   Focusable? get focusable => _focusable;
   Focusable? _focusable;
+
+  /// Convenience method to get the node id with prefix.
+  static String getIdAttribute(int semanticsId) {
+    return '$kFlutterSemanticNodePrefix$semanticsId';
+  }
 
   /// Adds generic focus management features.
   void addFocusManagement() {
@@ -794,6 +807,10 @@ abstract class SemanticRole {
     if (semanticsObject.isLocaleDirty) {
       semanticsObject.owner.addOneTimePostUpdateCallback(_updateLocale);
     }
+
+    if (semanticsObject.isTraversalParentDirty) {
+      semanticsObject.owner.addOneTimePostUpdateCallback(_updateTraversalParent);
+    }
   }
 
   void _updateIdentifier() {
@@ -813,7 +830,7 @@ abstract class SemanticRole {
           if (semanticNodeId == null) {
             continue;
           }
-          elementIds.add('$kFlutterSemanticNodePrefix$semanticNodeId');
+          elementIds.add(getIdAttribute(semanticNodeId));
         }
         if (elementIds.isNotEmpty) {
           setAttribute('aria-controls', elementIds.join(' '));
@@ -832,6 +849,32 @@ abstract class SemanticRole {
       return;
     }
     setAttribute('lang', locale);
+  }
+
+  void _updateTraversalParent() {
+    // Set up aria-owns relationship for traversal order.
+    if (semanticsObject.traversalParent != -1) {
+      final SemanticsObject? parent =
+          semanticsObject.owner._semanticsTree[semanticsObject.traversalParent!];
+      if (parent != null && parent.semanticRole != null) {
+        final List<String> children = parent.element.getAttribute('aria-owns')?.split(' ') ?? [];
+        children.add(getIdAttribute(semanticsObject.id));
+        parent.element.setAttribute('aria-owns', children.join(' '));
+      }
+    }
+    // Clean up aria-owns relationship.
+    else if (semanticsObject._previousTraversalParent != null &&
+        semanticsObject._previousTraversalParent != -1) {
+      final SemanticsObject? parent =
+          semanticsObject.owner._semanticsTree[semanticsObject._previousTraversalParent!];
+      if (parent != null) {
+        final List<String>? children = parent.element.getAttribute('aria-owns')?.split(' ');
+        if (children != null) {
+          children.removeWhere((String child) => child == getIdAttribute(semanticsObject.id));
+          parent.element.setAttribute('aria-owns', children.join(' '));
+        }
+      }
+    }
   }
 
   /// Applies the current [SemanticsObject.validationResult] to the DOM managed
@@ -1506,6 +1549,20 @@ class SemanticsObject {
     _dirtyFields |= _localeIndex;
   }
 
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  int? get traversalParent => _traversalParent;
+  int? _traversalParent;
+  int? _previousTraversalParent;
+
+  static const int _traversalParentIndex = 1 << 29;
+
+  /// Whether the [traversalParent] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isTraversalParentDirty => _isDirty(_traversalParentIndex);
+  void _markTraversalParentDirty() {
+    _dirtyFields |= _traversalParentIndex;
+  }
+
   /// Bitfield showing which fields have been updated but have not yet been
   /// applied to the DOM.
   ///
@@ -1691,6 +1748,12 @@ class SemanticsObject {
     if (_scrollIndex != update.scrollIndex) {
       _scrollIndex = update.scrollIndex;
       _markScrollIndexDirty();
+    }
+
+    if (_traversalParent != update.traversalParent) {
+      _previousTraversalParent = _traversalParent;
+      _traversalParent = update.traversalParent;
+      _markTraversalParentDirty();
     }
 
     if (_scrollExtentMax != update.scrollExtentMax) {
