@@ -4704,7 +4704,15 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: SizedBox.shrink(child: DropdownButton<String>(value: 'a')),
+            child: SizedBox.shrink(
+              child: DropdownButton<String>(
+                value: 'a',
+                onChanged: (_) {},
+                items: const <DropdownMenuItem<String>>[
+                  DropdownMenuItem<String>(value: 'a', child: Text('a')),
+                ],
+              ),
+            ),
           ),
         ),
       ),
