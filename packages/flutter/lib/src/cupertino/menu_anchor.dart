@@ -2732,8 +2732,8 @@ class _CupertinoMenuItemInteractionHandler extends StatefulWidget {
   final bool requestFocusOnHover;
   final HitTestBehavior behavior;
   final WidgetStatesController? statesController;
-  final WidgetStateProperty<BoxDecoration> decoration;
   final WidgetStateProperty<MouseCursor> mouseCursor;
+  final WidgetStateProperty<BoxDecoration> decoration;
   final Widget child;
 
   @override
@@ -3018,6 +3018,21 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
   }
 }
 
+/// Mix into [State] to receive callbacks when a pointer enters or leaves while
+/// down. The [StatefulWidget] this class is mixed into must be a descendant of
+/// a [_SwipeRegion].
+@optionalTypeArgs
+abstract class _SwipeTarget {
+  /// Called when a pointer enters the [_SwipeTarget]. Return true if the pointer
+  /// should be considered "on" the [_SwipeTarget], and false otherwise (for
+  /// example, when the [_SwipeTarget] is disabled).
+  bool didSwipeEnter();
+
+  /// Called when the swipe is ended or canceled. If `pointerUp` is true,
+  /// then the pointer was removed from the screen while over this [_SwipeTarget].
+  void didSwipeLeave({required bool pointerUp});
+}
+
 abstract class _SwipeSurfaceData {
   ui.Rect computeRect();
 }
@@ -3190,11 +3205,7 @@ class _SwipeRegionState extends State<_SwipeRegion> implements _SwipeRegionProvi
   void _completeSwipe() {
     _position = null;
     widget.onDistanceChanged(0);
-    if (mounted) {
-      setState(() {
-        // Rebuild to notify that the swipe has ended.
-      });
-    } else {
+    if (!mounted) {
       // If the widget is not mounted, safely dispose of the recognizer.
       _disposeInactiveRecognizer();
     }
@@ -3287,21 +3298,6 @@ class _RenderSwipenableSurface extends RenderProxyBox implements _SwipeSurfaceDa
       _region.beginSwipe(event, delay: delay, onStart: onStart);
     }
   }
-}
-
-/// Mix into [State] to receive callbacks when a pointer enters or leaves while
-/// down. The [StatefulWidget] this class is mixed into must be a descendant of
-/// a [_SwipeRegion].
-@optionalTypeArgs
-abstract class _SwipeTarget {
-  /// Called when a pointer enters the [_SwipeTarget]. Return true if the pointer
-  /// should be considered "on" the [_SwipeTarget], and false otherwise (for
-  /// example, when the [_SwipeTarget] is disabled).
-  bool didSwipeEnter();
-
-  /// Called when the swipe is ended or canceled. If `pointerUp` is true,
-  /// then the pointer was removed from the screen while over this [_SwipeTarget].
-  void didSwipeLeave({required bool pointerUp});
 }
 
 /// Handles swiping events for a [_SwipeRegion].
