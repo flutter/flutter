@@ -1,10 +1,10 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
 import 'package:flutter/cupertino.dart';
 
-/// Flutter code sample for a [CupertinoMenuAnchor] that shows a basic menu.
+/// Flutter code sample for a [CupertinoMenuAnchor] that shows a menu with 3
+/// items.
 void main() => runApp(const CupertinoMenuAnchorApp());
 
 class CupertinoMenuAnchorApp extends StatelessWidget {
@@ -13,7 +13,6 @@ class CupertinoMenuAnchorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: Brightness.light, primaryColor: Color(0xFF007AFF)),
       home: CupertinoPageScaffold(
         navigationBar: CupertinoNavigationBar(middle: Text('CupertinoMenuAnchor Example')),
         child: CupertinoMenuAnchorExample(),
@@ -30,7 +29,8 @@ class CupertinoMenuAnchorExample extends StatefulWidget {
 }
 
 class _CupertinoMenuAnchorExampleState extends State<CupertinoMenuAnchorExample> {
-  // Optional: Create a focus node to control the menu button.
+  // Optional: Create a focus node to allow focus traversal between the menu
+  // button and the menu overlay.
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
   String _pressedItem = '';
   AnimationStatus _status = AnimationStatus.dismissed;
@@ -45,6 +45,7 @@ class _CupertinoMenuAnchorExampleState extends State<CupertinoMenuAnchorExample>
   Widget build(BuildContext context) {
     return Center(
       child: Column(
+        spacing: 20,
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           CupertinoMenuAnchor(
@@ -60,7 +61,6 @@ class _CupertinoMenuAnchorExampleState extends State<CupertinoMenuAnchorExample>
                   });
                 },
                 subtitle: const Text('Subtitle'),
-                panActivationDelay: const Duration(milliseconds: 500),
                 child: const Text('Regular Item'),
               ),
               CupertinoMenuItem(
@@ -71,10 +71,10 @@ class _CupertinoMenuAnchorExampleState extends State<CupertinoMenuAnchorExample>
                 },
                 decoration: const WidgetStateProperty<BoxDecoration>.fromMap(
                   <WidgetStatesConstraint, BoxDecoration>{
-                    WidgetState.dragged: BoxDecoration(color: Color(0x400000FF)),
-                    WidgetState.pressed: BoxDecoration(color: Color(0x4000FF00)),
-                    WidgetState.hovered: BoxDecoration(color: Color(0x40FF0000)),
-                    WidgetState.focused: BoxDecoration(color: Color(0x4000FFFF)),
+                    WidgetState.dragged: BoxDecoration(color: Color(0xAEE48500)),
+                    WidgetState.pressed: BoxDecoration(color: Color(0xA6E3002A)),
+                    WidgetState.hovered: BoxDecoration(color: Color(0xA90069DA)),
+                    WidgetState.focused: BoxDecoration(color: Color(0x9B00C8BE)),
                     WidgetState.any: BoxDecoration(color: Color(0x00000000)),
                   },
                 ),
@@ -92,7 +92,8 @@ class _CupertinoMenuAnchorExampleState extends State<CupertinoMenuAnchorExample>
               ),
             ],
             builder: (BuildContext context, MenuController controller, Widget? child) {
-              return CupertinoButton.filled(
+              return CupertinoButton(
+                sizeStyle: CupertinoButtonSize.medium,
                 focusNode: _buttonFocusNode,
                 onPressed: () {
                   if (_status.isForwardOrCompleted) {
@@ -101,18 +102,14 @@ class _CupertinoMenuAnchorExampleState extends State<CupertinoMenuAnchorExample>
                     controller.open();
                   }
                 },
-                child: const Text('OPEN MENU'),
+                child: Text(_status.isForwardOrCompleted ? 'Close Menu' : 'Open Menu'),
               );
             },
           ),
-          if (_pressedItem.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 20),
-              child: Text(
-                'You Pressed: $_pressedItem',
-                style: CupertinoTheme.of(context).textTheme.textStyle,
-              ),
-            ),
+          Text(
+            _pressedItem.isEmpty ? 'No items pressed' : 'You Pressed: $_pressedItem',
+            style: CupertinoTheme.of(context).textTheme.textStyle,
+          ),
         ],
       ),
     );

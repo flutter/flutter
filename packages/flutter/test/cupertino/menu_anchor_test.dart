@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
@@ -10,6 +11,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../widgets/semantics_tester.dart';
 
 void main() {
   const Duration kMenuOpenDuration = Duration(milliseconds: 900);
@@ -1300,7 +1303,7 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
     addTearDown(gesture.removePointer);
 
     controller.open();
@@ -4787,7 +4790,7 @@ void main() {
         );
 
         final TestGesture gesture = await tester.createGesture(
-          kind: PointerDeviceKind.mouse,
+          kind: ui.PointerDeviceKind.mouse,
           pointer: 1,
         );
 
@@ -6540,7 +6543,7 @@ void main() {
       controller.open();
       await tester.pumpAndSettle();
 
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
       addTearDown(gesture.removePointer);
 
       // (Tag.a, true)
@@ -6704,7 +6707,7 @@ void main() {
       controller.open();
       await tester.pumpAndSettle();
 
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
       addTearDown(gesture.removePointer);
 
       // (Tag.a, true)
@@ -6907,6 +6910,7 @@ void main() {
                                         actions: <SemanticsAction>[
                                           SemanticsAction.tap,
                                           SemanticsAction.dismiss,
+                                          SemanticsAction.focus,
                                         ],
                                         label: 'a',
                                         textDirection: TextDirection.ltr,
