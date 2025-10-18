@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 #include <filesystem>
 #include <fstream>
-#include "flutter/third_party/abseil-cpp/absl/status/statusor.h"
 #include "flutter/third_party/re2/re2/re2.h"
 #include "flutter/tools/licenses_cpp/src/license_checker.h"
 #include "gtest/gtest.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace fs = std::filesystem;
 

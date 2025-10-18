@@ -8,8 +8,8 @@
 #include <iosfwd>
 #include <string_view>
 #include <vector>
-#include "flutter/third_party/abseil-cpp/absl/status/status.h"
 #include "flutter/tools/licenses_cpp/src/data.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 class LicenseChecker {
  public:
