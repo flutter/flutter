@@ -669,11 +669,13 @@ void main() {
         ..entries['foo.frag'] = AssetBundleEntry(
           DevFSByteContent(<int>[1, 2, 3, 4]),
           kind: AssetKind.shader,
+          platforms: const <String>{},
           transformers: const <AssetTransformerEntry>[],
         )
         ..entries['not.frag'] = AssetBundleEntry(
           DevFSByteContent(<int>[1, 2, 3, 4]),
           kind: AssetKind.regular,
+          platforms: const <String>{},
           transformers: const <AssetTransformerEntry>[],
         );
 
@@ -730,6 +732,7 @@ void main() {
         ..entries['FontManifest.json'] = AssetBundleEntry(
           DevFSByteContent(<int>[1, 2, 3, 4]),
           kind: AssetKind.regular,
+          platforms: const <String>{},
           transformers: const <AssetTransformerEntry>[],
         );
 
@@ -819,6 +822,7 @@ void main() {
         ..entries['asset.txt'] = AssetBundleEntry(
           DevFSByteContent(<int>[1, 2, 3, 4]),
           kind: AssetKind.regular,
+          platforms: const <String>{},
           transformers: const <AssetTransformerEntry>[
             AssetTransformerEntry(package: 'increment', args: <String>[]),
           ],
@@ -898,6 +902,7 @@ void main() {
         ..entries['asset.txt'] = AssetBundleEntry(
           DevFSByteContent(<int>[1, 2, 3, 4]),
           kind: AssetKind.regular,
+          platforms: const <String>{},
           transformers: const <AssetTransformerEntry>[
             AssetTransformerEntry(package: 'increment', args: <String>[]),
           ],
