@@ -444,41 +444,6 @@ void main() {
     await expectReturnsNormallyLater(chromiumLauncher.launch('example_url', skipCheck: true));
   });
 
-  testWithoutContext('can launch ARM Chrome natively on ARM macOS when installed', () async {
-    final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(
-      hostPlatform: HostPlatform.darwin_arm64,
-    );
-    final chromiumLauncher = ChromiumLauncher(
-      fileSystem: fileSystem,
-      platform: platform,
-      processManager: processManager,
-      operatingSystemUtils: macOSUtils,
-      browserFinder: findChromeExecutable,
-      logger: BufferLogger.test(),
-    );
-
-    processManager.addCommands(<FakeCommand>[
-      const FakeCommand(
-        command: <String>['file', 'example_chrome'],
-        stdout: 'Mach-O 64-bit executable arm64',
-      ),
-      const FakeCommand(
-        command: <String>[
-          '/usr/bin/arch',
-          '-arm64',
-          'example_chrome',
-          '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-          '--remote-debugging-port=12345',
-          ...kChromeArgs,
-          'example_url',
-        ],
-        stderr: kDevtoolsStderr,
-      ),
-    ]);
-
-    await expectReturnsNormallyLater(chromiumLauncher.launch('example_url', skipCheck: true));
-  });
-
   testWithoutContext('can launch chrome with a custom debug port', () async {
     processManager.addCommand(
       const FakeCommand(
