@@ -4590,7 +4590,7 @@ TEST_F(EmbedderTest, ExternalTextureGLRefreshedTooOften) {
         res->width = res->height = 100;
         return res;
       });
-  EmbedderExternalTextureGL texture(1, callback);
+  EmbedderExternalTextureGLSkia texture(1, callback);
 
   auto skia_surface = surface.GetOnscreenSurface();
   DlSkCanvasAdapter canvas(skia_surface->getCanvas());

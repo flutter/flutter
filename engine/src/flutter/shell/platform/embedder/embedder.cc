@@ -20,10 +20,13 @@
 #include "flutter/fml/thread.h"
 #include "third_party/dart/runtime/bin/elf_loader.h"
 #include "third_party/dart/runtime/include/dart_native_api.h"
+
+#ifndef SLIMPELLER
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GpuTypes.h"
 #include "third_party/skia/include/gpu/ganesh/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
+#endif
 
 #if !defined(FLUTTER_NO_EXPORT)
 #if FML_OS_WIN
@@ -55,6 +58,7 @@ extern const intptr_t kPlatformStrongDillSize;
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 #include "flutter/shell/platform/embedder/embedder_external_texture_resolver.h"
+#include "flutter/shell/platform/embedder/embedder_gl_dispatch_table.h"
 #include "flutter/shell/platform/embedder/embedder_platform_message_response.h"
 #include "flutter/shell/platform/embedder/embedder_render_target.h"
 #include "flutter/shell/platform/embedder/embedder_render_target_skia.h"
@@ -70,9 +74,11 @@ extern const intptr_t kPlatformStrongDillSize;
 // Note: the IMPELLER_SUPPORTS_RENDERING may be defined even when the
 // embedder/BUILD.gn variable impeller_supports_rendering is disabled.
 #ifdef SHELL_ENABLE_GL
-#include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
+#ifndef SLIMPELLER
+#include "flutter/shell/platform/embedder/embedder_external_texture_gl_skia.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLTypes.h"
+#endif
 #ifdef IMPELLER_SUPPORTS_RENDERING
 #include "flutter/shell/platform/embedder/embedder_render_target_impeller.h"  // nogncheck
 #include "flutter/shell/platform/embedder/embedder_surface_gl_impeller.h"  // nogncheck
@@ -286,6 +292,7 @@ static const flutter::DlIRect FlutterRectToDlIRect(FlutterRect flutter_rect) {
 #define GL_BGRA8_EXT 0x93A1
 #endif
 
+#ifndef SLIMPELLER
 static std::optional<SkColorType> FlutterFormatToSkColorType(uint32_t format) {
   switch (format) {
     case GL_BGRA8_EXT:
@@ -298,6 +305,7 @@ static std::optional<SkColorType> FlutterFormatToSkColorType(uint32_t format) {
       return std::nullopt;
   }
 }
+#endif
 
 #endif
 
@@ -468,7 +476,7 @@ InferOpenGLPlatformViewCreationCallback(
   bool fbo_reset_after_present =
       SAFE_ACCESS(open_gl_config, fbo_reset_after_present, false);
 
-  flutter::EmbedderSurfaceGLSkia::GLDispatchTable gl_dispatch_table = {
+  flutter::GLDispatchTable gl_dispatch_table = {
       gl_make_current,                     // gl_make_current_callback
       gl_clear_current,                    // gl_clear_current_callback
       gl_present,                          // gl_present_callback
@@ -497,6 +505,7 @@ InferOpenGLPlatformViewCreationCallback(
               view_embedder             // external view embedder
           );
         }
+#ifndef SLIMPELLER
         return std::make_unique<flutter::PlatformViewEmbedder>(
             shell,                   // delegate
             shell.GetTaskRunners(),  // task runners
@@ -506,6 +515,11 @@ InferOpenGLPlatformViewCreationCallback(
             platform_dispatch_table,  // embedder platform dispatch table
             view_embedder             // external view embedder
         );
+#else
+        FML_LOG(ERROR) << "This Flutter Engine does not support the Skia "
+                          "rendering backend.";
+        return std::unique_ptr<flutter::PlatformViewEmbedder>();
+#endif
       });
 #else   // SHELL_ENABLE_GL
   FML_LOG(ERROR) << "This Flutter Engine does not support OpenGL rendering.";
@@ -694,17 +708,19 @@ InferVulkanPlatformViewCreationCallback(
               std::move(external_view_embedder)  // external view embedder
           );
         });
-  } else {
-    flutter::EmbedderSurfaceVulkan::VulkanDispatchTable vulkan_dispatch_table =
-        {
+  }
+#ifndef SLIMPELLER
+  else {
+    flutter::EmbedderSurfaceVulkanSkia::VulkanDispatchTable
+        vulkan_dispatch_table = {
             .get_instance_proc_address =
                 reinterpret_cast<PFN_vkGetInstanceProcAddr>(proc_addr),
             .get_next_image = vulkan_get_next_image,
             .present_image = vulkan_present_image_callback,
         };
 
-    std::unique_ptr<flutter::EmbedderSurfaceVulkan> embedder_surface =
-        std::make_unique<flutter::EmbedderSurfaceVulkan>(
+    std::unique_ptr<flutter::EmbedderSurfaceVulkanSkia> embedder_surface =
+        std::make_unique<flutter::EmbedderSurfaceVulkanSkia>(
             config->vulkan.version, vk_instance,
             config->vulkan.enabled_instance_extension_count,
             config->vulkan.enabled_instance_extensions,
@@ -730,16 +746,18 @@ InferVulkanPlatformViewCreationCallback(
           );
         });
   }
+#endif
 #else
-  flutter::EmbedderSurfaceVulkan::VulkanDispatchTable vulkan_dispatch_table = {
-      .get_instance_proc_address =
-          reinterpret_cast<PFN_vkGetInstanceProcAddr>(proc_addr),
-      .get_next_image = vulkan_get_next_image,
-      .present_image = vulkan_present_image_callback,
-  };
+  flutter::EmbedderSurfaceVulkanSkia::VulkanDispatchTable
+      vulkan_dispatch_table = {
+          .get_instance_proc_address =
+              reinterpret_cast<PFN_vkGetInstanceProcAddr>(proc_addr),
+          .get_next_image = vulkan_get_next_image,
+          .present_image = vulkan_present_image_callback,
+      };
 
-  std::unique_ptr<flutter::EmbedderSurfaceVulkan> embedder_surface =
-      std::make_unique<flutter::EmbedderSurfaceVulkan>(
+  std::unique_ptr<flutter::EmbedderSurfaceVulkanSkia> embedder_surface =
+      std::make_unique<flutter::EmbedderSurfaceVulkanSkia>(
           config->vulkan.version, vk_instance,
           config->vulkan.enabled_instance_extension_count,
           config->vulkan.enabled_instance_extensions,
@@ -768,6 +786,8 @@ InferVulkanPlatformViewCreationCallback(
   FML_LOG(ERROR) << "This Flutter Engine does not support Vulkan rendering.";
   return nullptr;
 #endif  // SHELL_ENABLE_VULKAN
+  FML_LOG(ERROR) << "No idea how we got here.";
+  return nullptr;
 }
 
 static flutter::Shell::CreateCallback<flutter::PlatformView>
@@ -843,6 +863,7 @@ InferPlatformViewCreationCallback(
   return nullptr;
 }
 
+#ifndef SLIMPELLER
 static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
     GrDirectContext* context,
     const FlutterBackingStoreConfig& config,
@@ -1118,6 +1139,8 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
 #endif
 }
 
+#endif
+
 #if defined(SHELL_ENABLE_GL) && defined(IMPELLER_SUPPORTS_RENDERING)
 static std::optional<impeller::PixelFormat> FlutterFormatToImpellerPixelFormat(
     uint32_t format) {
@@ -1297,6 +1320,8 @@ MakeRenderTargetFromBackingStoreImpeller(
 #endif
 }
 
+#ifndef SLIMPELLER
+
 static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
     GrDirectContext* context,
     const FlutterBackingStoreConfig& config,
@@ -1372,6 +1397,8 @@ MakeRenderTargetFromSkSurface(FlutterBackingStore backing_store,
                                        std::move(on_release), nullptr, nullptr);
 }
 
+#endif
+
 static std::unique_ptr<flutter::EmbedderRenderTarget>
 CreateEmbedderRenderTarget(
     const FlutterCompositor* compositor,
@@ -1419,11 +1446,13 @@ CreateEmbedderRenderTarget(
     case kFlutterBackingStoreTypeOpenGL: {
       switch (backing_store.open_gl.type) {
         case kFlutterOpenGLTargetTypeTexture: {
+#ifndef SLIMPELLER
           auto skia_surface = MakeSkSurfaceFromBackingStore(
               context, config, &backing_store.open_gl.texture);
           render_target = MakeRenderTargetFromSkSurface(
               backing_store, std::move(skia_surface),
               collect_callback.Release());
+#endif
           break;
         }
         case kFlutterOpenGLTargetTypeFramebuffer: {
@@ -1433,11 +1462,13 @@ CreateEmbedderRenderTarget(
                 &backing_store.open_gl.framebuffer);
             break;
           } else {
+#ifndef SLIMPELLER
             auto skia_surface = MakeSkSurfaceFromBackingStore(
                 context, config, &backing_store.open_gl.framebuffer);
             render_target = MakeRenderTargetFromSkSurface(
                 backing_store, std::move(skia_surface),
                 collect_callback.Release());
+#endif
             break;
           }
         }
@@ -1467,12 +1498,14 @@ CreateEmbedderRenderTarget(
             FML_LOG(ERROR) << "Unimplemented";
             break;
           } else {
+#ifndef SLIMPELLER
             auto skia_surface = MakeSkSurfaceFromBackingStore(
                 context, config, &backing_store.open_gl.surface);
 
             render_target = MakeRenderTargetFromSkSurface(
                 backing_store, std::move(skia_surface),
                 collect_callback.Release(), on_make_current, on_clear_current);
+#endif
             break;
           }
         }
@@ -1481,17 +1514,21 @@ CreateEmbedderRenderTarget(
     }
 
     case kFlutterBackingStoreTypeSoftware: {
+#ifndef SLIMPELLER
       auto skia_surface = MakeSkSurfaceFromBackingStore(
           context, config, &backing_store.software);
       render_target = MakeRenderTargetFromSkSurface(
           backing_store, std::move(skia_surface), collect_callback.Release());
+#endif
       break;
     }
     case kFlutterBackingStoreTypeSoftware2: {
+#ifndef SLIMPELLER
       auto skia_surface = MakeSkSurfaceFromBackingStore(
           context, config, &backing_store.software2);
       render_target = MakeRenderTargetFromSkSurface(
           backing_store, std::move(skia_surface), collect_callback.Release());
+#endif
       break;
     }
     case kFlutterBackingStoreTypeMetal: {
@@ -1500,10 +1537,12 @@ CreateEmbedderRenderTarget(
             backing_store, collect_callback.Release(), aiks_context, config,
             &backing_store.metal);
       } else {
+#ifndef SLIMPELLER
         auto skia_surface = MakeSkSurfaceFromBackingStore(context, config,
                                                           &backing_store.metal);
         render_target = MakeRenderTargetFromSkSurface(
             backing_store, std::move(skia_surface), collect_callback.Release());
+#endif
       }
       break;
     }
@@ -1512,10 +1551,12 @@ CreateEmbedderRenderTarget(
         FML_LOG(ERROR) << "Unimplemented";
         break;
       } else {
+#ifndef SLIMPELLER
         auto skia_surface = MakeSkSurfaceFromBackingStore(
             context, config, &backing_store.vulkan);
         render_target = MakeRenderTargetFromSkSurface(
             backing_store, std::move(skia_surface), collect_callback.Release());
+#endif
         break;
       }
     }
@@ -2301,7 +2342,8 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   external_texture_resolver = std::make_unique<ExternalTextureResolver>();
 
 #ifdef SHELL_ENABLE_GL
-  flutter::EmbedderExternalTextureGL::ExternalTextureCallback
+#ifndef SLIMPELLER
+  flutter::EmbedderExternalTextureGLSkia::ExternalTextureCallback
       external_texture_callback;
   if (config->type == kOpenGL) {
     const FlutterOpenGLRendererConfig* open_gl_config = &config->open_gl;
@@ -2322,6 +2364,7 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
           std::make_unique<ExternalTextureResolver>(external_texture_callback);
     }
   }
+#endif
 #endif
 #ifdef SHELL_ENABLE_METAL
   flutter::EmbedderExternalTextureMetal::ExternalTextureCallback
