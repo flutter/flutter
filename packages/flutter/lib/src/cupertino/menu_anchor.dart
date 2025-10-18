@@ -518,6 +518,11 @@ class CupertinoMenuAnchor extends StatefulWidget {
   /// controlling button after the menu opens.
   final FocusNode? childFocusNode;
 
+  /// Returns whether any ancestor [CupertinoMenuAnchor] has menu items with
+  /// leading widgets.
+  ///
+  /// This can be used by menu items to determine whether they need to
+  /// allocate space for a leading widget to align with sibling menu items.
   static bool? maybeHasLeadingOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_AnchorScope>()?.hasLeading;
   }
@@ -1946,7 +1951,7 @@ class _AliasedLinePainter extends CustomPainter {
 /// ## Visuals
 /// The [decoration] parameter can be used to change the background color of the
 /// menu item when hovered, focused, pressed, or swiped. If these parameters are
-/// not set, the menu item will use [CupertinoMenuItem.defaultDecoration].
+/// not set, the menu item will use [CupertinoMenuItem._defaultDecoration].
 ///
 /// The [isDestructiveAction] parameter should be set to true if the menu item
 /// will perform a destructive action, and will color the text of the menu item
@@ -2048,7 +2053,7 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
 
   /// The decoration to paint behind the menu item.
   ///
-  /// If null, defaults to [CupertinoMenuItem.defaultDecoration].
+  /// If null, defaults to [CupertinoMenuItem._defaultDecoration].
   final WidgetStateProperty<BoxDecoration>? decoration;
 
   /// The mouse cursor to display on hover.
@@ -2102,7 +2107,8 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
   @override
   bool get allowTrailingSeparator => true;
 
-  static final WidgetStateProperty<MouseCursor> defaultCursor =
+  /// The default mouse cursor for a [CupertinoMenuItem].
+  static final WidgetStateProperty<MouseCursor> _defaultCursor =
       WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
         return !states.contains(WidgetState.disabled) && kIsWeb
             ? SystemMouseCursors.click
@@ -2110,7 +2116,7 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
       });
 
   // Obtained from the iOS 18.5 simulator debug view.
-  static const Color defaultTextColor = CupertinoDynamicColor.withBrightness(
+  static const Color _defaultTextColor = CupertinoDynamicColor.withBrightness(
     color: Color.from(alpha: 0.96, red: 0, green: 0, blue: 0),
     darkColor: Color.from(alpha: 0.96, red: 1, green: 1, blue: 1),
   );
@@ -2120,7 +2126,7 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
   // A custom blend mode is applied to the subtitle to mimic the visual effect
   // of the iOS menu subtitle. As a result, the defaultSubtitleStyle color does
   // not match the reported color on the iOS 18.5 simulator.
-  static const Color defaultSubtitleTextColor = CupertinoDynamicColor.withBrightness(
+  static const Color _defaultSubtitleTextColor = CupertinoDynamicColor.withBrightness(
     color: Color.from(alpha: 0.55, red: 0, green: 0, blue: 0),
     darkColor: Color.from(alpha: 0.4, red: 1, green: 1, blue: 1),
   );
@@ -2137,7 +2143,7 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
   // Blend mode is used to mimic the visual effect of the iOS
   // menu item. As a result, the default pressed color does not match the
   // reported colors on the iOS 18.5 simulator.
-  static const WidgetStateProperty<BoxDecoration> defaultDecoration =
+  static const WidgetStateProperty<BoxDecoration> _defaultDecoration =
       WidgetStateProperty<BoxDecoration>.fromMap(<WidgetStatesConstraint, BoxDecoration>{
         WidgetState.dragged: BoxDecoration(
           color: CupertinoDynamicColor.withBrightness(
@@ -2195,7 +2201,7 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
     } else if (isDestructiveAction) {
       color = CupertinoColors.systemRed;
     } else {
-      color = defaultTextColor;
+      color = _defaultTextColor;
     }
 
     return _DynamicTypeStyle.body
@@ -2222,7 +2228,7 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
             // For light mode: plusDarker is used on iOS to achieve a darker color.
             // HardLight is used as an approximation.
             ..blendMode = isDark ? BlendMode.plus : BlendMode.hardLight
-            ..color = CupertinoDynamicColor.resolve(defaultSubtitleTextColor, context),
+            ..color = CupertinoDynamicColor.resolve(_defaultSubtitleTextColor, context),
         );
   }
 
@@ -2278,14 +2284,14 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
       minScaleFactor: _kMinimumTextScaleFactor,
       maxScaleFactor: _kMaximumTextScaleFactor,
       child: _CupertinoMenuItemInteractionHandler(
-        mouseCursor: mouseCursor ?? defaultCursor,
+        mouseCursor: mouseCursor ?? _defaultCursor,
         requestFocusOnHover: requestFocusOnHover,
         onPressed: onPressed != null ? () => _handleSelect(context) : null,
         onHover: onHover,
         onFocusChange: onFocusChange,
         autofocus: autofocus,
         focusNode: focusNode,
-        decoration: decoration ?? defaultDecoration,
+        decoration: decoration ?? _defaultDecoration,
         statesController: statesController,
         behavior: behavior,
         child: DefaultTextStyle.merge(
