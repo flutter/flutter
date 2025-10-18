@@ -2967,9 +2967,9 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
 
   @override
   Widget build(BuildContext context) {
-    if (isEnabled && gestures == null) {
+    if (isEnabled) {
       final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
-      gestures = <Type, GestureRecognizerFactory>{
+      gestures ??= <Type, GestureRecognizerFactory>{
         TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
           () => TapGestureRecognizer(),
           (TapGestureRecognizer instance) {
