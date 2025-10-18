@@ -2691,7 +2691,7 @@ class CupertinoLargeMenuDivider extends StatelessWidget with CupertinoMenuEntryM
   @override
   bool get hasLeading => false;
 
-  /// Color for a transparent [CupertinoLargeMenuDivider].
+  /// Default color for a [CupertinoLargeMenuDivider].
   // The following colors were measured from debug mode on the iOS 18.5 simulator,
   static const CupertinoDynamicColor defaultColor = CupertinoDynamicColor.withBrightness(
     color: Color.fromRGBO(0, 0, 0, 0.08),
