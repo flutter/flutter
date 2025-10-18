@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ffi' as ffi;
 
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
@@ -49,6 +50,8 @@ const kWindowsEdgeExecutable = r'Microsoft\Edge\Application\msedge.exe';
 const _kGlibcError = 'Inconsistency detected by ld.so';
 
 typedef BrowserFinder = String Function(Platform, FileSystem);
+
+final bool _isMacosArm = ffi.Abi.current() == ffi.Abi.macosArm64;
 
 /// Find the chrome executable on the current platform.
 ///
@@ -246,6 +249,13 @@ class ChromiumLauncher {
       // See: https://github.com/flutter/flutter/issues/153928
       '--disable-search-engine-choice-screen',
       '--no-sandbox',
+
+      // SwiftShader support on ARM macs is disabled until they upgrade to a newer
+      // version of LLVM, see https://issuetracker.google.com/issues/165000222. In
+      // headless Chrome, the default is to use SwiftShader as a software renderer
+      // for WebGL contexts. In order to work around this limitation, we can force
+      // GPU rendering with this flag.
+      if (_isMacosArm) '--use-angle=metal',
 
       if (headless) ...<String>['--headless', '--window-size=2400,1800'],
       ...webBrowserFlags,
