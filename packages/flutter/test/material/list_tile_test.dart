@@ -4717,7 +4717,16 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          body: Center(child: SizedBox.shrink(child: ListTile())),
+          body: Center(
+            child: SizedBox.shrink(
+              child: ListTile(
+                title: Text('title'),
+                leading: Icon(Icons.add),
+                trailing: Icon(Icons.remove),
+                subtitle: Text('subTitle'),
+              ),
+            ),
+          ),
         ),
       ),
     );
