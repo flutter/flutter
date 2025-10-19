@@ -574,3 +574,224 @@ class OutlineInputBorder extends InputBorder {
   @override
   int get hashCode => Object.hash(borderSide, borderRadius, gapPadding);
 }
+
+/// Draws a rounded superellipse around an [InputDecorator]'s container.
+///
+/// This border is similar to [OutlineInputBorder], but uses a superellipse
+/// shape instead of a traditional rounded rectangle, providing a smoother,
+/// more aesthetically pleasing appearance commonly seen in iOS design.
+///
+/// When the input decorator's label is floating, for example because its
+/// input child has the focus, the label appears in a gap in the border outline.
+///
+/// The input decorator's "container" is the optionally filled area above the
+/// decorator's helper, error, and counter.
+///
+/// {@tool dartpad}
+/// This sample shows how to use [RoundedSuperellipseInputBorder] with different
+/// configurations to create text fields with smooth, iOS-style borders.
+///
+/// ** See code in examples/api/lib/material/rounded_superellipse_input_border/rounded_superellipse_input_border.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [OutlineInputBorder], the traditional rounded rectangle border.
+///  * [RoundedSuperellipseBorder], which defines the superellipse shape.
+///  * [UnderlineInputBorder], the default [InputDecorator] border which
+///    draws a horizontal line at the bottom of the input decorator's container.
+///  * [InputDecoration], which is used to configure an [InputDecorator].
+class RoundedSuperellipseInputBorder extends InputBorder {
+  /// Creates a rounded superellipse outline border for an [InputDecorator].
+  ///
+  /// If the [borderSide] parameter is [BorderSide.none], it will not draw a
+  /// border. However, it will still define a shape (which you can see if
+  /// [InputDecoration.filled] is true).
+  ///
+  /// If an application does not specify a [borderSide] parameter of
+  /// value [BorderSide.none], the input decorator substitutes its own, using
+  /// [copyWith], based on the current theme and [InputDecorator.isFocused].
+  ///
+  /// The [borderRadius] parameter defaults to a value where all four corners
+  /// have a circular radius of 4.0.
+  ///
+  /// See also:
+  ///
+  ///  * [InputDecoration.floatingLabelBehavior], which should be set to
+  ///    [FloatingLabelBehavior.never] when the [borderSide] is
+  ///    [BorderSide.none]. If let as [FloatingLabelBehavior.auto], the label
+  ///    will extend beyond the container as if the border were still being
+  ///    drawn.
+  const RoundedSuperellipseInputBorder({
+    super.borderSide = const BorderSide(),
+    this.borderRadius = const BorderRadius.all(Radius.circular(4.0)),
+    this.gapPadding = 4.0,
+  }) : assert(gapPadding >= 0.0);
+
+  /// Horizontal padding on either side of the border's
+  /// [InputDecoration.labelText] width gap.
+  ///
+  /// This value is used by the [paint] method to compute the actual gap width.
+  final double gapPadding;
+
+  /// The radii of the border's rounded rectangle corners.
+  final BorderRadius borderRadius;
+
+  @override
+  bool get isOutline => true;
+
+  @override
+  RoundedSuperellipseInputBorder copyWith({
+    BorderSide? borderSide,
+    BorderRadius? borderRadius,
+    double? gapPadding,
+  }) {
+    return RoundedSuperellipseInputBorder(
+      borderSide: borderSide ?? this.borderSide,
+      borderRadius: borderRadius ?? this.borderRadius,
+      gapPadding: gapPadding ?? this.gapPadding,
+    );
+  }
+
+  @override
+  EdgeInsetsGeometry get dimensions {
+    return EdgeInsets.all(borderSide.width);
+  }
+
+  @override
+  RoundedSuperellipseInputBorder scale(double t) {
+    return RoundedSuperellipseInputBorder(
+      borderSide: borderSide.scale(t),
+      borderRadius: borderRadius * t,
+      gapPadding: gapPadding * t,
+    );
+  }
+
+  @override
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
+    if (a is RoundedSuperellipseInputBorder) {
+      return RoundedSuperellipseInputBorder(
+        borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t)!,
+        borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
+        gapPadding: a.gapPadding,
+      );
+    }
+    return super.lerpFrom(a, t);
+  }
+
+  @override
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
+    if (b is RoundedSuperellipseInputBorder) {
+      return RoundedSuperellipseInputBorder(
+        borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t)!,
+        borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
+        gapPadding: b.gapPadding,
+      );
+    }
+    return super.lerpTo(b, t);
+  }
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+    final RSuperellipse borderRect = borderRadius.resolve(textDirection).toRSuperellipse(rect);
+    final RSuperellipse adjustedRect = borderRect.deflate(borderSide.width);
+    return Path()..addRSuperellipse(adjustedRect);
+  }
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    return Path()..addRSuperellipse(borderRadius.resolve(textDirection).toRSuperellipse(rect));
+  }
+
+  @override
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, {TextDirection? textDirection}) {
+    canvas.drawRSuperellipse(borderRadius.resolve(textDirection).toRSuperellipse(rect), paint);
+  }
+
+  @override
+  bool get preferPaintInterior => true;
+
+  Path _gapBorderPath(RSuperellipse center, double outerWidth, double start, double extent) {
+    // Create a continuous path for the border with a gap in the top edge.
+    // This approach avoids visual seams by constructing a single path.
+
+    final Path outerPath = Path()..addRSuperellipse(center);
+
+    // If there's no meaningful gap, return the full outline
+    if (start <= 0 && extent <= 0) {
+      return outerPath;
+    }
+
+    // Create a rectangle that represents the gap area
+    // The gap is on the top edge, so we create a rect that covers the gap region
+    final double gapLeft = start;
+    final double gapRight = start + extent;
+
+    // Create a path that excludes the gap area by combining with a difference operation
+    // We'll subtract a small rectangle at the top where the gap should be
+    final Path gapRect = Path()
+      ..addRect(
+        Rect.fromLTRB(
+          clampDouble(gapLeft, center.left, center.right),
+          center.top - 1.0, // Extend slightly beyond to ensure clean cut
+          clampDouble(gapRight, center.left, center.right),
+          center.top + 1.0, // Small height to only affect top edge
+        ),
+      );
+
+    return Path.combine(PathOperation.difference, outerPath, gapRect);
+  }
+
+  /// Draw a rounded superellipse around [rect] using [borderRadius].
+  ///
+  /// The [borderSide] defines the line's color and weight.
+  ///
+  /// The top side of the rounded superellipse may be interrupted by a single gap
+  /// if [gapExtent] is non-null. In that case the gap begins at
+  /// `gapStart - gapPadding` (assuming that the [textDirection] is [TextDirection.ltr]).
+  /// The gap's width is `(gapPadding + gapExtent + gapPadding) * gapPercentage`.
+  @override
+  void paint(
+    Canvas canvas,
+    Rect rect, {
+    double? gapStart,
+    double gapExtent = 0.0,
+    double gapPercentage = 0.0,
+    TextDirection? textDirection,
+  }) {
+    assert(gapPercentage >= 0.0 && gapPercentage <= 1.0);
+
+    final Paint paint = borderSide.toPaint();
+    final RSuperellipse outer = borderRadius.toRSuperellipse(rect);
+    final RSuperellipse center = outer.deflate(borderSide.width / 2.0);
+
+    if (gapStart == null || gapExtent <= 0.0 || gapPercentage == 0.0) {
+      canvas.drawRSuperellipse(center, paint);
+    } else {
+      final double extent = lerpDouble(0.0, gapExtent + gapPadding * 2.0, gapPercentage)!;
+      final double start = switch (textDirection!) {
+        TextDirection.rtl => gapStart + gapPadding - extent,
+        TextDirection.ltr => gapStart - gapPadding,
+      };
+      final Path path = _gapBorderPath(center, outer.width, math.max(0.0, start), extent);
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is RoundedSuperellipseInputBorder &&
+        other.borderSide == borderSide &&
+        other.borderRadius == borderRadius &&
+        other.gapPadding == gapPadding;
+  }
+
+  @override
+  int get hashCode => Object.hash(borderSide, borderRadius, gapPadding);
+}
