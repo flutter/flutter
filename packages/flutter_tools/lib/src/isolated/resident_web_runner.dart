@@ -519,8 +519,14 @@ class ResidentWebRunner extends ResidentRunner {
           } on vmservice.RPCError catch (e) {
             // DWDS throws an RPC error with kIsolateCannotReload code when there are no
             // browser clients currently connected during a hot restart operation.
+
+            // TODO(61757): Remove this temporary workaround once vm_service is fixed.
+            // There's a bug in vm_service where it re-encodes RPCErrors as kServerError
+            // instead of preserving the original error code. Until that's fixed, we need
+            // to check for both kIsolateCannotReload and kServerError for this method.
             if (e.callingMethod == hotRestartMethod &&
-                e.code == vmservice.RPCErrorKind.kIsolateCannotReload.code) {
+                (e.code == vmservice.RPCErrorKind.kIsolateCannotReload.code ||
+                    e.code == vmservice.RPCErrorKind.kServerError.code)) {
               return _handleNoClientsAvailable(status);
             }
             // Re-throw other RPC errors
@@ -544,8 +550,14 @@ class ResidentWebRunner extends ResidentRunner {
           } on vmservice.RPCError catch (e) {
             // DWDS throws an RPC error with kIsolateCannotReload code when there are no
             // browser clients currently connected during a hot reload operation.
+            // TODO(yjessy): Remove this temporary workaround once vm_service is fixed.
+            // There's a bug in vm_service where it re-encodes RPCErrors as kServerError
+            // instead of preserving the original error code. Until that's fixed, we need
+            // to check for both kIsolateCannotReload and kServerError for this method.
+            // See https://github.com/dart-lang/sdk/issues/61757
             if (e.callingMethod == hotReloadMethod &&
-                e.code == vmservice.RPCErrorKind.kIsolateCannotReload.code) {
+                (e.code == vmservice.RPCErrorKind.kIsolateCannotReload.code ||
+                    e.code == vmservice.RPCErrorKind.kServerError.code)) {
               return _handleNoClientsAvailable(status);
             }
             // Re-throw other RPC errors
