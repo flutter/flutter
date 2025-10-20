@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:js_interop';
 import 'dart:ui' as ui;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 import '../web.dart' as web;
@@ -250,7 +251,12 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   @override
-  int get hashCode => Object.hash(url, scale, webHtmlElementStrategy, headers);
+  int get hashCode => Object.hash(
+    url,
+    scale,
+    webHtmlElementStrategy,
+    const MapEquality<String, String>().hash(headers),
+  );
 
   @override
   String toString() =>
