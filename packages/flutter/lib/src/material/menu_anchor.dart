@@ -172,9 +172,9 @@ class _MenuAnchorScope extends InheritedWidget {
 // those two values. The curve is applied first, and then the result is linearly
 // interpolated between begin and end.
 //
-// This differs from an Interval in that an Interval changes the duration over
-// which the curve is applied, whereas this changes the output range of the
-// curve.
+// This differs from an `Interval` in that an Interval changes the duration over
+// which the curve is applied, whereas `_TweenCurve` changes the output range of
+// the curve.
 class _TweenCurve extends Curve {
   const _TweenCurve(this.begin, this.end, {required this.curve})
     : assert(begin >= 0.0),
@@ -3194,7 +3194,7 @@ class _MenuItemLabel extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              leadingIcon ?? const SizedBox.shrink(),
+              ?leadingIcon,
               if (child != null)
                 Expanded(
                   child: ClipRect(
@@ -3214,7 +3214,7 @@ class _MenuItemLabel extends StatelessWidget {
       leadings = Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          leadingIcon ?? const SizedBox.shrink(),
+          ?leadingIcon,
           if (child != null)
             Padding(
               padding: leadingIcon != null
