@@ -30,17 +30,17 @@ import 'android_sdk.dart';
 // Please see the README before changing any of these values.
 
 // See https://gradle.org/releases
-const templateDefaultGradleVersion = '8.12';
+const templateDefaultGradleVersion = '8.13';
 
 // When bumping, also update:
 //  * AGP version constants in packages/flutter_tools/gradle/build.gradle.kts
 //  * AGP test constants in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 // See https://mvnrepository.com/artifact/com.android.tools.build/gradle
-const templateAndroidGradlePluginVersion = '8.9.1';
-const templateAndroidGradlePluginVersionForModule = '8.9.1';
+const templateAndroidGradlePluginVersion = '8.11.0';
+const templateAndroidGradlePluginVersionForModule = '8.11.0';
 
 // See https://kotlinlang.org/docs/releases.html#release-details
-const templateKotlinGradlePluginVersion = '2.1.0';
+const templateKotlinGradlePluginVersion = '2.2.0';
 
 // The Flutter Gradle Plugin is only applied to app projects, and modules that
 // are built from source using (`include_flutter.groovy`). The remaining
