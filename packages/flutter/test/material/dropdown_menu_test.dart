@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -144,26 +145,26 @@ void main() {
     const Color defaultOverlayColor = Color(0xffffff00);
 
     final ButtonStyle customButtonStyle = ButtonStyle(
-      backgroundColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.focused)) {
+      backgroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.focused)) {
           return focusedBackgroundColor;
         }
         return defaultBackgroundColor;
       }),
-      foregroundColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.focused)) {
+      foregroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.focused)) {
           return focusedForegroundColor;
         }
         return defaultForegroundColor;
       }),
-      iconColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.focused)) {
+      iconColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.focused)) {
           return focusedIconColor;
         }
         return defaultIconColor;
       }),
-      overlayColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.focused)) {
+      overlayColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.focused)) {
           return focusedOverlayColor;
         }
         return defaultOverlayColor;
@@ -950,6 +951,32 @@ void main() {
 
     final double menuWidth = tester.getSize(findMenuItemButton('Flutter')).width;
     expect(dropdownWidth, menuWidth);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/176501
+  testWidgets('_RenderDropdownMenuBody.computeDryLayout does not access this.constraints', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: _TestDryLayout(
+              child: DropdownMenu<int>(
+                dropdownMenuEntries: <DropdownMenuEntry<int>>[
+                  DropdownMenuEntry<int>(value: 1, label: 'One'),
+                  DropdownMenuEntry<int>(value: 2, label: 'Two'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The test passes if no exception is thrown during the layout phase.
+    expect(tester.takeException(), isNull);
+    expect(find.byType(DropdownMenu<int>), findsOneWidget);
   });
 
   testWidgets(
@@ -3807,7 +3834,7 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/151686.
-  testWidgets('Setting DropdownMenu.requestFocusOnTap to false makes TextField read only', (
+  testWidgets('Setting DropdownMenu.requestFocusOnTap to false makes TextField a button', (
     WidgetTester tester,
   ) async {
     const String label = 'Test';
@@ -3838,6 +3865,7 @@ void main() {
         isEnabled: true,
         label: 'Test',
         textDirection: TextDirection.ltr,
+        hasExpandedState: true,
       ),
     );
 
@@ -3845,16 +3873,20 @@ void main() {
 
     expect(
       tester.getSemantics(find.byType(TextField)),
-      matchesSemantics(
-        hasFocusAction: true,
-        isTextField: true,
-        isFocusable: true,
-        hasEnabledState: true,
-        isEnabled: true,
-        label: 'Test',
-        isReadOnly: true,
-        textDirection: TextDirection.ltr,
-      ),
+      kIsWeb
+          ? matchesSemantics(isButton: true, hasExpandedState: true)
+          : matchesSemantics(
+              isButton: true,
+              hasExpandedState: true,
+              hasFocusAction: true,
+              isTextField: true,
+              isFocusable: true,
+              hasEnabledState: true,
+              isEnabled: true,
+              label: 'Test',
+              isReadOnly: true,
+              textDirection: TextDirection.ltr,
+            ),
     );
   });
 
@@ -4426,36 +4458,34 @@ void main() {
                       id: 3,
                       flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
-                        TestSemantics(
-                          id: 5,
-                          inputType: SemanticsInputType.text,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.isTextField,
-                            SemanticsFlag.isFocusable,
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isEnabled,
-                            SemanticsFlag.isReadOnly,
-                          ],
-                          actions: <SemanticsAction>[SemanticsAction.focus],
-                          textDirection: TextDirection.ltr,
-                          currentValueLength: 0,
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              id: 6,
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.hasSelectedState,
-                                SemanticsFlag.isButton,
-                                SemanticsFlag.hasEnabledState,
-                                SemanticsFlag.isEnabled,
-                                SemanticsFlag.isFocusable,
-                              ],
-                              actions: <SemanticsAction>[
-                                SemanticsAction.tap,
-                                SemanticsAction.focus,
-                              ],
-                            ),
-                          ],
-                        ),
+                        if (kIsWeb)
+                          TestSemantics(
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isButton,
+                              SemanticsFlag.hasExpandedState,
+                            ],
+                            actions: <SemanticsAction>[SemanticsAction.expand],
+                          )
+                        else
+                          TestSemantics(
+                            id: 5,
+                            inputType: SemanticsInputType.text,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocusable,
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isReadOnly,
+                              SemanticsFlag.isButton,
+                              SemanticsFlag.hasExpandedState,
+                            ],
+                            actions: <SemanticsAction>[
+                              SemanticsAction.focus,
+                              SemanticsAction.expand,
+                            ],
+                            textDirection: TextDirection.ltr,
+                            currentValueLength: 0,
+                          ),
                       ],
                     ),
                   ],
@@ -4740,6 +4770,217 @@ void main() {
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.cursorHeight, cursorHeight);
   });
+
+  testWidgets('DropdownMenu accepts a MenuController', (WidgetTester tester) async {
+    final MenuController menuController = MenuController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            menuController: menuController,
+            dropdownMenuEntries: menuChildren,
+          ),
+        ),
+      ),
+    );
+    expect(findMenuItemButton('Item 0').hitTestable(), findsNothing);
+    menuController.open();
+    await tester.pumpAndSettle();
+    expect(findMenuItemButton('Item 0').hitTestable(), findsOne);
+    menuController.close();
+    await tester.pumpAndSettle();
+    expect(findMenuItemButton('Item 0').hitTestable(), findsNothing);
+  });
+
+  group('DropdownMenu.decorationBuilder', () {
+    const String labelText = 'labelText';
+    InputDecoration buildDecorationWithSuffixIcon(BuildContext context, MenuController controller) {
+      return InputDecoration(
+        labelText: labelText,
+        suffixIcon: controller.isOpen
+            ? const Icon(Icons.arrow_drop_up)
+            : const Icon(Icons.arrow_drop_down),
+      );
+    }
+
+    InputDecoration buildDecoration(BuildContext context, MenuController controller) {
+      return const InputDecoration(labelText: labelText);
+    }
+
+    testWidgets('Decoration properties set by decorationBuilder are applied', (
+      WidgetTester tester,
+    ) async {
+      final MenuController menuController = MenuController();
+      const InputDecoration decoration = InputDecoration(
+        labelText: labelText,
+        helperText: 'helperText',
+        hintText: 'hintText',
+        filled: true,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              menuController: menuController,
+              dropdownMenuEntries: menuChildren,
+              decorationBuilder: (BuildContext context, MenuController controller) {
+                return decoration;
+              },
+            ),
+          ),
+        ),
+      );
+
+      final TextField textField = tester.firstWidget(find.byType(TextField));
+      final InputDecoration effectiveDecoration = textField.decoration!;
+
+      expect(effectiveDecoration.labelText, decoration.labelText);
+      expect(effectiveDecoration.helperText, decoration.helperText);
+      expect(effectiveDecoration.hintText, decoration.hintText);
+      expect(effectiveDecoration.filled, decoration.filled);
+    });
+
+    testWidgets('Custom decorationBuilder can replace default suffixIcon', (
+      WidgetTester tester,
+    ) async {
+      final MenuController menuController = MenuController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              menuController: menuController,
+              dropdownMenuEntries: menuChildren,
+              decorationBuilder: buildDecorationWithSuffixIcon,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.arrow_drop_down), findsNWidgets(2));
+      expect(find.byType(IconButton), findsNothing);
+    });
+
+    testWidgets('Custom decorationBuilder is called when the menu opens and closes', (
+      WidgetTester tester,
+    ) async {
+      final MenuController menuController = MenuController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              menuController: menuController,
+              dropdownMenuEntries: menuChildren,
+              decorationBuilder: buildDecorationWithSuffixIcon,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.arrow_drop_down), findsNWidgets(2));
+      expect(find.byIcon(Icons.arrow_drop_up), findsNothing);
+
+      // Open the menu.
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+
+      // Check that the custom decorationBuilder updated the icon.
+      expect(find.byIcon(Icons.arrow_drop_down), findsNothing);
+      expect(find.byIcon(Icons.arrow_drop_up), findsNWidgets(2));
+    });
+
+    testWidgets(
+      'Default IconButton is used when decorationBuilder does not set InputDecoration.suffixIcon',
+      (WidgetTester tester) async {
+        final MenuController menuController = MenuController();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                menuController: menuController,
+                dropdownMenuEntries: menuChildren,
+                decorationBuilder: buildDecoration,
+              ),
+            ),
+          ),
+        );
+
+        expect(find.byType(IconButton), findsNWidgets(2));
+      },
+    );
+
+    testWidgets('Passing label and decorationBuilder throws', (WidgetTester tester) async {
+      final MenuController menuController = MenuController();
+      await expectLater(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                menuController: menuController,
+                dropdownMenuEntries: menuChildren,
+                label: const Text('Label'),
+                decorationBuilder: buildDecoration,
+              ),
+            ),
+          ),
+        );
+      }, throwsAssertionError);
+    });
+
+    testWidgets('Passing hintText and decorationBuilder throws', (WidgetTester tester) async {
+      final MenuController menuController = MenuController();
+      await expectLater(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                menuController: menuController,
+                dropdownMenuEntries: menuChildren,
+                hintText: 'hintText',
+                decorationBuilder: buildDecoration,
+              ),
+            ),
+          ),
+        );
+      }, throwsAssertionError);
+    });
+
+    testWidgets('Passing helperText and decorationBuilder throws', (WidgetTester tester) async {
+      final MenuController menuController = MenuController();
+      await expectLater(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                menuController: menuController,
+                dropdownMenuEntries: menuChildren,
+                hintText: 'hintText',
+                decorationBuilder: buildDecoration,
+              ),
+            ),
+          ),
+        );
+      }, throwsAssertionError);
+    });
+
+    testWidgets('Passing errorText and decorationBuilder throws', (WidgetTester tester) async {
+      final MenuController menuController = MenuController();
+      await expectLater(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                menuController: menuController,
+                dropdownMenuEntries: menuChildren,
+                errorText: 'errorText',
+                decorationBuilder: buildDecoration,
+              ),
+            ),
+          ),
+        );
+      }, throwsAssertionError);
+    });
+  });
 }
 
 enum TestMenu {
@@ -4761,4 +5002,30 @@ enum ShortMenu {
 
   const ShortMenu(this.label);
   final String label;
+}
+
+// A helper widget that creates a render object designed to call `getDryLayout`
+// on its child during its own `performLayout` phase. This is used to test
+// that a child's `computeDryLayout` implementation is valid.
+class _TestDryLayout extends SingleChildRenderObjectWidget {
+  const _TestDryLayout({super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderTestDryLayout();
+  }
+}
+
+class _RenderTestDryLayout extends RenderProxyBox {
+  @override
+  void performLayout() {
+    if (child == null) {
+      size = constraints.smallest;
+      return;
+    }
+
+    child!.getDryLayout(constraints);
+    child!.layout(constraints, parentUsesSize: true);
+    size = child!.size;
+  }
 }

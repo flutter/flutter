@@ -38,12 +38,9 @@ void main() {
           theme: ThemeData(
             useMaterial3: false,
             scrollbarTheme: ScrollbarThemeData(
-              trackVisibility: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.hovered)) {
-                  return true;
-                }
-                return false;
-              }),
+              trackVisibility: WidgetStateProperty.resolveWith(
+                (Set<WidgetState> states) => states.contains(WidgetState.hovered),
+              ),
             ),
           ),
           home: ScrollConfiguration(
@@ -387,12 +384,9 @@ void main() {
           theme: ThemeData(
             colorScheme: const ColorScheme.light(),
             scrollbarTheme: ScrollbarThemeData(
-              trackVisibility: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.hovered)) {
-                  return true;
-                }
-                return false;
-              }),
+              trackVisibility: WidgetStateProperty.resolveWith(
+                (Set<WidgetState> states) => states.contains(WidgetState.hovered),
+              ),
             ),
           ),
           home: ScrollConfiguration(
@@ -492,12 +486,9 @@ void main() {
         final ScrollController scrollController = ScrollController();
         final ThemeData theme = appTheme.copyWith(
           scrollbarTheme: ScrollbarThemeData(
-            trackVisibility: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.hovered)) {
-                return true;
-              }
-              return false;
-            }),
+            trackVisibility: WidgetStateProperty.resolveWith(
+              (Set<WidgetState> states) => states.contains(WidgetState.hovered),
+            ),
           ),
         );
         return (
@@ -671,7 +662,7 @@ void main() {
     'ScrollbarThemeData.trackVisibility test',
     (WidgetTester tester) async {
       final ScrollController scrollController = ScrollController();
-      bool? getTrackVisibility(Set<MaterialState> states) {
+      bool? getTrackVisibility(Set<WidgetState> states) {
         return true;
       }
 
@@ -789,12 +780,9 @@ ScrollbarThemeData _scrollbarTheme({
     thickness: thickness ?? WidgetStateProperty.resolveWith(_getThickness),
     trackVisibility:
         trackVisibility ??
-        WidgetStateProperty.resolveWith((Set<MaterialState> states) {
-          if (states.contains(MaterialState.hovered)) {
-            return true;
-          }
-          return false;
-        }),
+        WidgetStateProperty.resolveWith(
+          (Set<WidgetState> states) => states.contains(WidgetState.hovered),
+        ),
     thumbVisibility: thumbVisibility,
     radius: radius,
     thumbColor: thumbColor ?? WidgetStateProperty.resolveWith(_getThumbColor),
@@ -806,34 +794,34 @@ ScrollbarThemeData _scrollbarTheme({
   );
 }
 
-double? _getThickness(Set<MaterialState> states) {
-  if (states.contains(MaterialState.hovered)) {
+double? _getThickness(Set<WidgetState> states) {
+  if (states.contains(WidgetState.hovered)) {
     return 20.0;
   }
   return 10.0;
 }
 
-bool? _getThumbVisibility(Set<MaterialState> states) => true;
+bool? _getThumbVisibility(Set<WidgetState> states) => true;
 
-Color? _getThumbColor(Set<MaterialState> states) {
-  if (states.contains(MaterialState.dragged)) {
+Color? _getThumbColor(Set<WidgetState> states) {
+  if (states.contains(WidgetState.dragged)) {
     return Colors.red;
   }
-  if (states.contains(MaterialState.hovered)) {
+  if (states.contains(WidgetState.hovered)) {
     return Colors.blue;
   }
   return Colors.green;
 }
 
-Color? _getTrackColor(Set<MaterialState> states) {
-  if (states.contains(MaterialState.hovered)) {
+Color? _getTrackColor(Set<WidgetState> states) {
+  if (states.contains(WidgetState.hovered)) {
     return Colors.black;
   }
   return null;
 }
 
-Color? _getTrackBorderColor(Set<MaterialState> states) {
-  if (states.contains(MaterialState.hovered)) {
+Color? _getTrackBorderColor(Set<WidgetState> states) {
+  if (states.contains(WidgetState.hovered)) {
     return Colors.yellow;
   }
   return null;

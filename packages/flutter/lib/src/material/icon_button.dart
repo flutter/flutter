@@ -745,7 +745,9 @@ class IconButton extends StatelessWidget {
       if (style != null) {
         adjustedStyle = style!.merge(adjustedStyle);
       }
-
+      if (adjustedStyle.iconColor == null) {
+        adjustedStyle = adjustedStyle.copyWith(iconColor: adjustedStyle.foregroundColor);
+      }
       Widget effectiveIcon = icon;
       if ((isSelected ?? false) && selectedIcon != null) {
         effectiveIcon = selectedIcon!;
