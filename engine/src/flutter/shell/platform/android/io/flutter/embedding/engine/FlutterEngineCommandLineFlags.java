@@ -58,7 +58,7 @@ public class FlutterEngineCommandLineFlags {
   public static final String PROFILE_MICROTASKS = "--profile-microtasks";
 
   /** Dumps SKP files that trigger shader compilations. */
-  public static final String DUMP_SHADER_SKP_ON_SHADER_COMPILATION =
+  public static final String DUMP_SKP_ON_SHADER_COMPILATION =
       "--dump-skp-on-shader-compilation";
 
   /** Removes all persistent cache files for debugging. */
@@ -170,7 +170,7 @@ public class FlutterEngineCommandLineFlags {
               TRACE_SYSTRACE,
               TRACE_TO_FILE,
               PROFILE_MICROTASKS,
-              DUMP_SHADER_SKP_ON_SHADER_COMPILATION,
+              DUMP_SKP_ON_SHADER_COMPILATION,
               PURGE_PERSISTENT_CACHE,
               VERBOSE_LOGGING,
               DART_FLAGS,
