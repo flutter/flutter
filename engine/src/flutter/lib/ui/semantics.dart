@@ -1158,29 +1158,53 @@ enum Tristate {
 
 /// Describes how a semantic node should behave during hit testing.
 ///
-/// This enum is used by the web engine to determine whether semantic elements
-/// should accept or pass through pointer events via the CSS `pointer-events`
-/// property.
+/// This enum allows the framework to communicate pointer event handling
+/// behavior to the platform's accessibility layer. Different platforms
+/// may implement this behavior differently based on their accessibility
+/// infrastructure.
 ///
 /// See also:
 ///  * [SemanticsUpdateBuilder.updateNode], which accepts this enum.
 enum SemanticsHitTestBehavior {
+  /// Defer to the platform's default hit test behavior inference.
+  ///
+  /// When set to defer, the platform will infer the appropriate behavior
+  /// based on the semantic node's properties such as interactive behaviors,
+  /// route scoping, etc.
+  ///
+  /// This is the default value and provides backward compatibility.
+  defer,
+
   /// The semantic element is opaque to hit testing, consuming any pointer
   /// events within its bounds and preventing them from reaching elements
-  /// behind it.
+  /// behind it in Z-order (siblings and ancestors).
+  ///
+  /// Children of this node can still receive pointer events normally.
+  /// Only elements that are visually behind this node (lower in the stacking
+  /// order) will be blocked from receiving events.
   ///
   /// This is typically used for modal surfaces like dialogs, bottom sheets,
-  /// and drawers that should block interaction with content behind them.
+  /// and drawers that should block interaction with content behind them while
+  /// still allowing interaction with their own content.
   ///
-  /// On the web, this results in `pointer-events: all` CSS property.
+  /// Platform implementations:
+  ///  * On the web, this results in `pointer-events: all` CSS property.
   opaque,
 
-  /// The semantic element is transparent to hit testing, allowing pointer
-  /// events to pass through to elements behind it.
+  /// The semantic element is transparent to hit testing.
   ///
-  /// This is the default behavior for non-interactive semantic nodes.
+  /// In the framework's hit testing model, transparent nodes receive hit test
+  /// events themselves but do not block siblings or children behind them from
+  /// also receiving events.
   ///
-  /// On the web, this results in `pointer-events: none` CSS property.
+  /// Platform implementations:
+  ///  * On the web, this currently results in `pointer-events: none` CSS
+  ///    property, which prevents the element from receiving events entirely.
+  ///    This is a simplified implementation of the framework's transparent
+  ///    behavior.
+  ///
+  /// This is the default behavior for non-interactive semantic nodes when the
+  /// platform infers behavior.
   transparent,
 }
 
@@ -1821,11 +1845,16 @@ abstract class SemanticsUpdateBuilder {
   /// errors to the user, such as embedding validation error text in the label.
   ///
   /// The `hitTestBehavior` describes how this node should behave during hit
-  /// testing. If null, the platform will infer appropriate behavior based on
-  /// other semantic properties. This is primarily used by the web platform to
-  /// control CSS `pointer-events` property. For example, modal surfaces like
-  /// dialogs can set this to [SemanticsHitTestBehavior.opaque] to block
-  /// pointer events from reaching content behind them.
+  /// testing. When set to [SemanticsHitTestBehavior.defer] (the default), the
+  /// platform will infer appropriate behavior based on other semantic properties
+  /// of the node itself (not inherited from parent). Different platforms may
+  /// implement this differently.
+  ///
+  /// For example, modal surfaces like dialogs can set this to
+  /// [SemanticsHitTestBehavior.opaque] to block pointer events from reaching
+  /// content behind them, while non-interactive decorative elements can set it
+  /// to [SemanticsHitTestBehavior.transparent] to allow pointer events to pass
+  /// through.
   ///
   /// See also:
   ///
@@ -1949,7 +1978,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     SemanticsRole role = SemanticsRole.none,
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
-    SemanticsHitTestBehavior? hitTestBehavior,
+    SemanticsHitTestBehavior hitTestBehavior = SemanticsHitTestBehavior.defer,
     required SemanticsInputType inputType,
     required Locale? locale,
   }) {
@@ -1998,7 +2027,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       role.index,
       controlsNodes,
       validationResult.index,
-      hitTestBehavior?.index ?? -1,
+      hitTestBehavior.index,
       inputType.index,
       locale?.toLanguageTag() ?? '',
     );

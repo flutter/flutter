@@ -669,7 +669,7 @@ class LocaleStringAttribute extends StringAttribute {
 
 enum SemanticsValidationResult { none, valid, invalid }
 
-enum SemanticsHitTestBehavior { opaque, transparent }
+enum SemanticsHitTestBehavior { defer, opaque, transparent }
 
 class SemanticsUpdateBuilder {
   SemanticsUpdateBuilder();
@@ -712,7 +712,7 @@ class SemanticsUpdateBuilder {
     SemanticsRole role = SemanticsRole.none,
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
-    SemanticsHitTestBehavior? hitTestBehavior,
+    SemanticsHitTestBehavior hitTestBehavior = SemanticsHitTestBehavior.defer,
     required SemanticsInputType inputType,
     required Locale? locale,
   }) {

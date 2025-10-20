@@ -270,7 +270,7 @@ class SemanticsNodeUpdate {
     required this.role,
     required this.controlsNodes,
     required this.validationResult,
-    this.hitTestBehavior,
+    this.hitTestBehavior = ui.SemanticsHitTestBehavior.defer,
     required this.inputType,
     required this.locale,
   });
@@ -384,7 +384,7 @@ class SemanticsNodeUpdate {
   final ui.SemanticsValidationResult validationResult;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final ui.SemanticsHitTestBehavior? hitTestBehavior;
+  final ui.SemanticsHitTestBehavior hitTestBehavior;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.SemanticsInputType inputType;
@@ -586,35 +586,32 @@ abstract class SemanticRole {
   /// This boolean decides whether to set the `pointer-events` CSS property to
   /// `all` or to `none` on the semantics [element].
   ///
-  /// The decision follows a multi-tier policy:
+  /// The decision follows a three-tier policy:
   ///
-  /// **Tier 1: Explicit Behaviors** - Behaviors attached to this role can
-  /// override pointer event handling (e.g., [Tappable], [SemanticTextField]).
-  /// These take highest precedence as they represent interactive elements.
+  /// **Tier 1: Interactive Behaviors** - Interactive elements (buttons, text
+  /// fields, sliders, etc.) always accept pointer events, regardless of explicit
+  /// [ui.SemanticsHitTestBehavior]. This ensures accessibility requirements are
+  /// met - interactive elements must be clickable.
   ///
-  /// **Tier 2: Framework Declaration** - When the framework provides explicit
-  /// [ui.SemanticsHitTestBehavior], it will be respected here. This allows
-  /// declarative control over pointer event handling from the framework layer.
+  /// **Tier 2: Framework Declaration** - When the framework provides an explicit
+  /// [ui.SemanticsHitTestBehavior] (other than `defer`), it takes precedence
+  /// over inference. This allows the framework to declaratively control pointer
+  /// event handling for non-interactive elements.
   ///
-  /// **Tier 3: Route-Scoped Containers** - Containers with [scopesRoute] set
-  /// (like dialogs, bottom sheets) accept pointer events to act as barriers,
-  /// preventing clicks from escaping to underlying modal barriers. This is
-  /// the current fix for issue #149001.
+  /// **Tier 3: Engine Inference** - When [ui.SemanticsHitTestBehavior.defer] is
+  /// set (the default) and the element is not interactive, the engine infers the
+  /// appropriate behavior based on:
+  /// - Route-scoped containers (dialogs, bottom sheets)
+  /// - Default transparent for non-interactive leaf nodes
   ///
-  /// **Tier 4: Default Transparent** - Leaf nodes without interactive behaviors
-  /// default to transparent, allowing pointer events to pass through to elements
-  /// behind them.
-  ///
-  /// This multi-tier approach ensures:
-  /// - Interactive elements always receive clicks (Tier 1)
-  /// - Future framework control via explicit declarations (Tier 2)
-  /// - Backward compatibility during framework transition (Tier 3)
-  /// - Correct default behavior for non-interactive elements (Tier 4)
+  /// This approach ensures interactive elements always work, while allowing
+  /// framework control and providing intelligent fallback inference for backward
+  /// compatibility.
   bool get acceptsPointerEvents {
-    // TIER 1: Check if any behavior explicitly accepts pointer events.
-    // Interactive behaviors (Tappable, SemanticTextField, SemanticIncrementable)
-    // override this to return true, ensuring buttons, text fields, and other
-    // interactive elements always receive pointer events.
+    // TIER 1: Interactive Behaviors
+    // Check if any interactive behavior requires pointer events.
+    // This takes highest precedence to ensure buttons, text fields, etc.
+    // are always clickable, even if explicit hitTestBehavior is set.
     final behaviors = _behaviors;
     if (behaviors != null) {
       for (final behavior in behaviors) {
@@ -624,42 +621,25 @@ abstract class SemanticRole {
       }
     }
 
-    // TIER 2: Check framework's explicit hit test behavior.
-    // When the framework adds a hitTestBehavior field to SemanticsConfiguration,
-    // this tier enables declarative hit-test control.
     final hitTestBehavior = semanticsObject.hitTestBehavior;
-    if (hitTestBehavior != null) {
+
+    // TIER 2: Framework Declaration
+    // If framework provides explicit behavior (not defer), respect it.
+    if (hitTestBehavior != ui.SemanticsHitTestBehavior.defer) {
       return _shouldAcceptPointerEventsFromBehavior(hitTestBehavior);
     }
 
-    // TIER 3: Route-scoped containers accept pointer events as a fallback.
-    // This fixes the dialog dismissal bug (issue #149001) by ensuring that
-    // dialog containers act as barriers, preventing clicks on empty space
-    // from passing through to the modal barrier underneath.
-    //
-    // This tier provides backward compatibility:
-    // - Works with current framework (no changes needed)
-    // - Supports third-party modal libraries, such as awesome_dialog
-    // - Handles custom user widgets with scopesRoute
-    //
-    // When Tier 2 is implemented, this serves as graceful degradation for
-    // widgets that haven't been updated to use explicit hitTestBehavior.
-    if (semanticsObject.hasChildren) {
-      return semanticsObject.scopesRoute;
-    }
-
-    // TIER 4: Leaf nodes default to transparent.
-    // Non-interactive leaf nodes (like empty space in dialogs) should not
-    // intercept pointer events. This prevents them from blocking clicks meant
-    // for underlying elements.
-    //
-    // Interactive leaf nodes are already handled by Tier 1 via their behaviors:
-    // - Buttons, links, checkables → Tappable behavior
-    // - Text fields → SemanticTextField role
-    // - Sliders → SemanticIncrementable role
-    return false;
+    // TIER 3: Engine Inference
+    // When framework defers to engine, infer based on semantic properties.
+    return _inferAcceptsPointerEvents();
   }
 
+  /// Determines if pointer events should be accepted based on framework's
+  /// explicit hit test behavior.
+  ///
+  /// This method should only be called with [ui.SemanticsHitTestBehavior.opaque]
+  /// or [ui.SemanticsHitTestBehavior.transparent]. The [ui.SemanticsHitTestBehavior.defer]
+  /// case is handled separately by [_inferAcceptsPointerEvents].
   bool _shouldAcceptPointerEventsFromBehavior(ui.SemanticsHitTestBehavior behavior) {
     switch (behavior) {
       case ui.SemanticsHitTestBehavior.opaque:
@@ -670,7 +650,32 @@ abstract class SemanticRole {
         // Pass through pointer events to elements behind.
         // Used for non-interactive decorative elements.
         return false;
+      case ui.SemanticsHitTestBehavior.defer:
+        // This case should never be reached because defer is handled in
+        // acceptsPointerEvents before calling this method.
+        assert(false, 'defer should be handled by _inferAcceptsPointerEvents');
+        return false; // Unreachable in debug; defensive in release
     }
+  }
+
+  /// Infers whether pointer events should be accepted based on semantic properties.
+  ///
+  /// This method is called when [ui.SemanticsHitTestBehavior.defer] is set
+  /// and the element has no interactive behaviors, providing backward-compatible
+  /// inference logic for non-interactive elements.
+  bool _inferAcceptsPointerEvents() {
+    // Route-scoped containers accept pointer events.
+    // This fixes the dialog dismissal bug (issue #149001) by ensuring that
+    // dialog containers act as barriers, preventing clicks on empty space
+    // from passing through to the modal barrier underneath.
+    if (semanticsObject.hasChildren) {
+      return semanticsObject.scopesRoute;
+    }
+
+    // Leaf nodes default to transparent.
+    // Non-interactive leaf nodes (like empty space) should not intercept
+    // pointer events.
+    return false;
   }
 
   /// Semantic behaviors provided by this role, if any.
@@ -1543,8 +1548,8 @@ class SemanticsObject {
   }
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  ui.SemanticsHitTestBehavior? get hitTestBehavior => _hitTestBehavior;
-  ui.SemanticsHitTestBehavior? _hitTestBehavior;
+  ui.SemanticsHitTestBehavior get hitTestBehavior => _hitTestBehavior;
+  ui.SemanticsHitTestBehavior _hitTestBehavior = ui.SemanticsHitTestBehavior.defer;
 
   static const int _hitTestBehaviorIndex = 1 << 28;
 

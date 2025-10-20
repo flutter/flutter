@@ -87,7 +87,7 @@ class SemanticsTester {
     ui.SemanticsRole? role,
     List<String>? controlsNodes,
     ui.SemanticsValidationResult validationResult = ui.SemanticsValidationResult.none,
-    ui.SemanticsHitTestBehavior? hitTestBehavior,
+    ui.SemanticsHitTestBehavior hitTestBehavior = ui.SemanticsHitTestBehavior.defer,
     ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
     ui.Locale? locale,
   }) {
