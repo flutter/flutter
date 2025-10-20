@@ -14,9 +14,11 @@ import com.flutter.gradle.FlutterPluginUtils.getCompileSdkFromProject
 import com.flutter.gradle.FlutterPluginUtils.isBuiltAsApp
 import com.flutter.gradle.FlutterPluginUtils.supportsBuildMode
 import com.flutter.gradle.NativePluginLoaderReflectionBridge
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import java.io.File
+import com.android.build.gradle.internal.dsl.BuildType as dslBuildType
 
 /**
  * Handles interactions with the flutter plugins (not Gradle plugins) used by the Flutter project,
@@ -181,7 +183,8 @@ class PluginHandler(
             // However, only copy if the plugin is also an app project, since library projects
             // cannot have applicationIdSuffix and other app-specific properties.
             if (isBuiltAsApp(pluginProject)) {
-                getAndroidExtension(pluginProject).buildTypes.addAll(getAndroidExtension(project).buildTypes)
+                (getAndroidExtension(pluginProject).buildTypes as NamedDomainObjectContainer<dslBuildType>)
+                    .addAll(getAndroidExtension(project).buildTypes as NamedDomainObjectContainer<dslBuildType>)
             } else {
                 // For library projects, create compatible build types without app-specific properties
                 getAndroidExtension(project).buildTypes.forEach { appBuildType ->
