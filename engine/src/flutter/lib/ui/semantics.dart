@@ -1193,15 +1193,16 @@ enum SemanticsHitTestBehavior {
 
   /// The semantic element is transparent to hit testing.
   ///
-  /// In the framework's hit testing model, transparent nodes receive hit test
-  /// events themselves but do not block siblings or children behind them from
-  /// also receiving events.
+  /// Transparent nodes do not receive hit test events and allow events to pass
+  /// through to elements behind them.
+  ///
+  /// Note: This differs from the framework's `HitTestBehavior.translucent`,
+  /// which receives events while also allowing pass-through. Web's binary
+  /// `pointer-events` property (all or none) cannot support true translucent
+  /// behavior.
   ///
   /// Platform implementations:
-  ///  * On the web, this currently results in `pointer-events: none` CSS
-  ///    property, which prevents the element from receiving events entirely.
-  ///    This is a simplified implementation of the framework's transparent
-  ///    behavior.
+  ///  * On the web, this results in `pointer-events: none` CSS property.
   ///
   /// This is the default behavior for non-interactive semantic nodes when the
   /// platform infers behavior.

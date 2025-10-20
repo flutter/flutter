@@ -586,50 +586,34 @@ abstract class SemanticRole {
   /// This boolean decides whether to set the `pointer-events` CSS property to
   /// `all` or to `none` on the semantics [element].
   ///
-  /// The decision follows a three-tier policy:
+  /// The decision follows a two-tier policy:
   ///
-  /// **Tier 1: Interactive Behaviors** - Interactive elements (buttons, text
-  /// fields, sliders, etc.) always accept pointer events, regardless of explicit
-  /// [ui.SemanticsHitTestBehavior]. This ensures accessibility requirements are
-  /// met - interactive elements must be clickable.
+  /// **Tier 1: Framework Declaration** - When the framework provides an explicit
+  /// [ui.SemanticsHitTestBehavior] (other than `defer`), it takes absolute
+  /// precedence. The engine executes what the framework declares, even if it
+  /// makes an interactive element non-clickable. The framework layer is
+  /// responsible for ensuring valid semantic configurations.
   ///
-  /// **Tier 2: Framework Declaration** - When the framework provides an explicit
-  /// [ui.SemanticsHitTestBehavior] (other than `defer`), it takes precedence
-  /// over inference. This allows the framework to declaratively control pointer
-  /// event handling for non-interactive elements.
-  ///
-  /// **Tier 3: Engine Inference** - When [ui.SemanticsHitTestBehavior.defer] is
-  /// set (the default) and the element is not interactive, the engine infers the
-  /// appropriate behavior based on:
+  /// **Tier 2: Engine Inference** - When [ui.SemanticsHitTestBehavior.defer] is
+  /// set (the default), the engine infers the appropriate behavior based on:
+  /// - Interactive behaviors (buttons, text fields, sliders, etc.)
   /// - Route-scoped containers (dialogs, bottom sheets)
   /// - Default transparent for non-interactive leaf nodes
   ///
-  /// This approach ensures interactive elements always work, while allowing
-  /// framework control and providing intelligent fallback inference for backward
-  /// compatibility.
+  /// This approach allows framework full control when specified, with intelligent
+  /// fallback inference for backward compatibility.
   bool get acceptsPointerEvents {
-    // TIER 1: Interactive Behaviors
-    // Check if any interactive behavior requires pointer events.
-    // This takes highest precedence to ensure buttons, text fields, etc.
-    // are always clickable, even if explicit hitTestBehavior is set.
-    final behaviors = _behaviors;
-    if (behaviors != null) {
-      for (final behavior in behaviors) {
-        if (behavior.acceptsPointerEvents) {
-          return true;
-        }
-      }
-    }
-
     final hitTestBehavior = semanticsObject.hitTestBehavior;
 
-    // TIER 2: Framework Declaration
-    // If framework provides explicit behavior (not defer), respect it.
+    // TIER 1: Framework Declaration
+    // If framework provides explicit behavior (not defer), respect it absolutely.
+    // The framework is responsible for ensuring valid configurations (e.g., not
+    // making buttons transparent).
     if (hitTestBehavior != ui.SemanticsHitTestBehavior.defer) {
       return _shouldAcceptPointerEventsFromBehavior(hitTestBehavior);
     }
 
-    // TIER 3: Engine Inference
+    // TIER 2: Engine Inference
     // When framework defers to engine, infer based on semantic properties.
     return _inferAcceptsPointerEvents();
   }
@@ -660,10 +644,22 @@ abstract class SemanticRole {
 
   /// Infers whether pointer events should be accepted based on semantic properties.
   ///
-  /// This method is called when [ui.SemanticsHitTestBehavior.defer] is set
-  /// and the element has no interactive behaviors, providing backward-compatible
-  /// inference logic for non-interactive elements.
+  /// This method is called when [ui.SemanticsHitTestBehavior.defer] is set,
+  /// providing backward-compatible inference logic.
   bool _inferAcceptsPointerEvents() {
+    // Check if any interactive behavior requires pointer events.
+    // Interactive behaviors (Tappable, SemanticTextField, SemanticIncrementable)
+    // override this to return true, ensuring buttons, text fields, and other
+    // interactive elements receive pointer events when framework defers.
+    final behaviors = _behaviors;
+    if (behaviors != null) {
+      for (final behavior in behaviors) {
+        if (behavior.acceptsPointerEvents) {
+          return true;
+        }
+      }
+    }
+
     // Route-scoped containers accept pointer events.
     // This fixes the dialog dismissal bug (issue #149001) by ensuring that
     // dialog containers act as barriers, preventing clicks on empty space

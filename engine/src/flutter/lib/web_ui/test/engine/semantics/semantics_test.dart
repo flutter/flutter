@@ -1765,9 +1765,9 @@ void _testContainer() {
       )!;
       expect(
         element.style.pointerEvents,
-        'all',
+        'none',
         reason:
-            'Interactive behaviors (Tier 1) should take precedence over hitTestBehavior (Tier 2)',
+            'Framework declaration (Tier 1) should take precedence over interactive behaviors (Tier 2)',
       );
     });
   });
