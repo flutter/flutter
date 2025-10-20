@@ -45,6 +45,7 @@ class PreviewPubspecBuilder {
   ///   - stack_trace, which is used to generate terse stack traces for displaying errors thrown
   ///     by widgets being previewed.
   ///   - url_launcher, which is used to open a browser to the preview documentation.
+  ///   - web, which is used to access query parameters provided by the IDE.
   static const _kWidgetPreviewScaffoldDeps = <String>[
     'dtd',
     'flutter_lints',
@@ -53,6 +54,7 @@ class PreviewPubspecBuilder {
     'path',
     'stack_trace',
     'url_launcher',
+    'web',
   ];
 
   /// Maps asset URIs to relative paths for the widget preview project to

@@ -29,7 +29,6 @@ import 'list_tile.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'page.dart';
-import 'page_transitions_theme.dart';
 import 'progress_indicator.dart';
 import 'scaffold.dart';
 import 'scrollbar.dart';

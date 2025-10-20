@@ -73,28 +73,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:36v3"},
           {"dependency": "android_virtual_device", "version": "android_36_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8719362231152674241"},
-          {"dependency": "open_jdk", "version": "version:21"}
-        ]
-      os: Ubuntu
-      cores: "8"
-      device_type: none
-      kvm: "1"
-
-  # linux_android_emu_vulkan_stable temporarily depends on an API 35 AVD while all
-  # other linux_android_emu test targets depend on an API 36 AVD due to a potential issue with
-  # virtual display on API 36: https://github.com/flutter/flutter/issues/170024.
-  linux_android_emu_vulkan_stable:
-    properties:
-      contexts: >-
-        [
-          "android_virtual_device"
-        ]
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:36v3"},
-          {"dependency": "android_virtual_device", "version": "android_35_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8733065022087935185"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8701084295319811169"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       os: Ubuntu
@@ -1688,8 +1667,9 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Linux_android_emu_vulkan_stable android_engine_vulkan_tests
+  - name: Linux_android_emu_unstable android_engine_vulkan_tests
     recipe: flutter/flutter_drone
+    bringup: true
     timeout: 60
     properties:
       shard: android_engine_vulkan_tests
@@ -3386,7 +3366,6 @@ targets:
       task_name: routing_test
 
   - name: Linux_pixel_7pro service_extensions_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/174113
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3716,8 +3695,9 @@ targets:
     properties:
       task_name: basic_material_app_macos__compile
 
-  - name: Mac build_ios_framework_module_test
+  - name: Mac_x64 build_ios_framework_module_test
     recipe: devicelab/devicelab_drone
+    bringup: true
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3728,6 +3708,7 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: build_ios_framework_module_test
+      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4972,7 +4953,6 @@ targets:
 
   - name: Mac_ios channels_integration_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true # TODO(vashworth): Remove once https://github.com/flutter/flutter/issues/174444 is fixed.
     presubmit: false
     timeout: 60
     properties:
@@ -5160,7 +5140,6 @@ targets:
 
   - name: Mac_arm64_ios integration_test_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true # TODO(vashworth): Remove once https://github.com/flutter/flutter/issues/174444 is fixed.
     presubmit: false
     timeout: 60
     properties:
@@ -5309,7 +5288,6 @@ targets:
 
   - name: Mac_ios native_assets_ios
     recipe: devicelab/devicelab_drone
-    bringup: true # TODO(vashworth): Remove once https://github.com/flutter/flutter/issues/174444 is fixed.
     presubmit: false
     timeout: 60
     properties:
@@ -5445,7 +5423,6 @@ targets:
 
   - name: Mac_ios wide_gamut_ios
     recipe: devicelab/devicelab_drone
-    bringup: true # TODO(vashworth): Remove once https://github.com/flutter/flutter/issues/174444 is fixed.
     presubmit: false
     timeout: 60
     properties:
@@ -5556,7 +5533,6 @@ targets:
 
   - name: Mac_ios spell_check_test
     recipe: devicelab/devicelab_drone
-    bringup: true # TODO(vashworth): Remove once https://github.com/flutter/flutter/issues/174444 is fixed.
     presubmit: false
     timeout: 60
     properties:
@@ -7010,7 +6986,6 @@ targets:
   - name: Windows windowing_test
     recipe: devicelab/devicelab_drone
     presubmit: true
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -7020,6 +6995,17 @@ targets:
       tags: >
         ["devicelab", "hostonly", "windows"]
       task_name: windowing_test_windows
+
+  - name: Linux windowing_test
+    recipe: devicelab/devicelab_drone
+    presubmit: true
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: windowing_test_linux
+
 
   - name: Windows flutter_tool_startup__windows
     recipe: devicelab/devicelab_drone
