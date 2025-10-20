@@ -2121,7 +2121,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
               }
 
               if (_buttonFocusNode.hasPrimaryFocus) {
-                _handleTogglingInteraction();
+                _handleFocusChange();
               } else {
                 _buttonFocusNode.requestFocus();
               }
@@ -2221,11 +2221,6 @@ class _SubmenuButtonState extends State<SubmenuButton> {
   }
 
   void _handleFocusChange() {
-    _handleTogglingInteraction();
-  }
-
-  // Handles interactions that could open or close the menu.
-  void _handleTogglingInteraction() {
     _clearHoverOpenTimer();
     if (!_buttonFocusNode.hasPrimaryFocus) {
       if (!_anchorState!._menuScopeNode.hasFocus && _animationStatus.isForwardOrCompleted) {
@@ -2363,8 +2358,8 @@ class _SubmenuDirectionalFocusAction extends DirectionalFocusAction {
               // the menu.
               return;
             }
-            _parent?._menuController.close();
             _parent?._focusButton();
+            _parent?._menuController.close();
           } else {
             // If focus is not on a submenu button, closing the anchor this item
             // presides in will close the menu and focus the anchor button.
