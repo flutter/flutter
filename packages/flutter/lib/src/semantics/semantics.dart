@@ -4686,6 +4686,14 @@ class SemanticsOwner extends ChangeNotifier {
             node._dirty = false; // Do not send update for this node, as it's now part of its parent
           }
         }
+
+        // Clean up the dirty entry in owner._traversalParentNodes map because it
+        // will be updated later.
+        _traversalParentNodes.removeWhere((Object key, SemanticsNode oldNode) => node == oldNode);
+        // Clean up the node from the value set in owner._traversalChildNodes.
+        for (final Set<SemanticsNode> childSet in _traversalChildNodes.values) {
+          childSet.removeWhere((SemanticsNode oldNode) => node == oldNode);
+        }
       }
     }
 
