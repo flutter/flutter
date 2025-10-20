@@ -51,7 +51,7 @@ Set the `OldGenHeapSize` flag to 322 MB:
     <application ...>
         <meta-data
             android:name="io.flutter.embedding.android.OldGenHeapSize"
-            android:value="322" />
+            android:value="322" /> <!-- the int `322` will also work -->
             ...
     </application>
 </manifest>
@@ -61,7 +61,7 @@ Set software rendering:
     ```xml
     <meta-data
             android:name="io.flutter.embedding.android.EnableSoftwareRendering"
-            android:value="true" />
+            android:value="true" /> <!-- the boolean `true` will also work -->
     ```
 Set extra Dart VM flags:
     ```xml
