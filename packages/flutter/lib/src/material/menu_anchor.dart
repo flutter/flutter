@@ -3270,7 +3270,7 @@ class _MenuItemLabel extends StatelessWidget {
 
 // Positions the menu in the view while trying to keep as much as possible
 // visible in the view.
-class _MenuLayout extends SingleChildRenderObjectWidget {
+class _MenuLayout extends SingleChildLayoutDelegate {
   const _MenuLayout({
     required this.anchorRect,
     required this.textDirection,
@@ -3283,7 +3283,6 @@ class _MenuLayout extends SingleChildRenderObjectWidget {
     required this.parentOrientation,
     required this.reservedPadding,
     required this.heightFactor,
-    required super.child,
   });
 
   // Rectangle of underlying button, relative to the overlay's dimensions.
@@ -3318,180 +3317,10 @@ class _MenuLayout extends SingleChildRenderObjectWidget {
   // How close to the edge of the safe area the menu will be placed.
   final EdgeInsetsGeometry reservedPadding;
 
-  // The height animation factor, from 0.0 to 1.0.
+  // The factor by which the height of the menu is scaled.
   final double heightFactor;
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _RenderMenuLayout(
-      anchorRect: anchorRect,
-      textDirection: textDirection,
-      alignment: alignment,
-      alignmentOffset: alignmentOffset,
-      menuPosition: menuPosition,
-      menuPadding: menuPadding,
-      avoidBounds: avoidBounds,
-      orientation: orientation,
-      parentOrientation: parentOrientation,
-      reservedPadding: reservedPadding,
-      heightFactor: heightFactor,
-    );
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, _RenderMenuLayout renderObject) {
-    renderObject
-      ..anchorRect = anchorRect
-      ..textDirection = textDirection
-      ..alignment = alignment
-      ..alignmentOffset = alignmentOffset
-      ..menuPosition = menuPosition
-      ..menuPadding = menuPadding
-      ..avoidBounds = avoidBounds
-      ..orientation = orientation
-      ..parentOrientation = parentOrientation
-      ..reservedPadding = reservedPadding
-      ..heightFactor = heightFactor;
-  }
-}
-
-class _RenderMenuLayout extends RenderShiftedBox {
-  _RenderMenuLayout({
-    required Rect anchorRect,
-    required TextDirection textDirection,
-    required AlignmentGeometry alignment,
-    required Offset alignmentOffset,
-    required Offset? menuPosition,
-    required EdgeInsetsGeometry menuPadding,
-    required Set<Rect> avoidBounds,
-    required Axis orientation,
-    required Axis parentOrientation,
-    required EdgeInsetsGeometry reservedPadding,
-    required double heightFactor,
-    RenderBox? child,
-  }) : _anchorRect = anchorRect,
-       _textDirection = textDirection,
-       _alignment = alignment,
-       _alignmentOffset = alignmentOffset,
-       _menuPosition = menuPosition,
-       _menuPadding = menuPadding,
-       _avoidBounds = avoidBounds,
-       _orientation = orientation,
-       _parentOrientation = parentOrientation,
-       _reservedPadding = reservedPadding,
-       _heightFactor = heightFactor,
-       super(child);
-
-  Rect _anchorRect;
-  Rect get anchorRect => _anchorRect;
-  set anchorRect(Rect value) {
-    if (_anchorRect == value) {
-      return;
-    }
-    _anchorRect = value;
-    markNeedsLayout();
-  }
-
-  TextDirection _textDirection;
-  TextDirection get textDirection => _textDirection;
-  set textDirection(TextDirection value) {
-    if (_textDirection == value) {
-      return;
-    }
-    _textDirection = value;
-    markNeedsLayout();
-  }
-
-  AlignmentGeometry _alignment;
-  AlignmentGeometry get alignment => _alignment;
-  set alignment(AlignmentGeometry value) {
-    if (_alignment == value) {
-      return;
-    }
-    _alignment = value;
-    markNeedsLayout();
-  }
-
-  Offset _alignmentOffset;
-  Offset get alignmentOffset => _alignmentOffset;
-  set alignmentOffset(Offset value) {
-    if (_alignmentOffset == value) {
-      return;
-    }
-    _alignmentOffset = value;
-    markNeedsLayout();
-  }
-
-  Offset? _menuPosition;
-  Offset? get menuPosition => _menuPosition;
-  set menuPosition(Offset? value) {
-    if (_menuPosition == value) {
-      return;
-    }
-    _menuPosition = value;
-    markNeedsLayout();
-  }
-
-  EdgeInsetsGeometry _menuPadding;
-  EdgeInsetsGeometry get menuPadding => _menuPadding;
-  set menuPadding(EdgeInsetsGeometry value) {
-    if (_menuPadding == value) {
-      return;
-    }
-    _menuPadding = value;
-    markNeedsLayout();
-  }
-
-  Set<Rect> _avoidBounds;
-  Set<Rect> get avoidBounds => _avoidBounds;
-  set avoidBounds(Set<Rect> value) {
-    if (setEquals(_avoidBounds, value)) {
-      return;
-    }
-    _avoidBounds = value;
-    markNeedsLayout();
-  }
-
-  Axis _orientation;
-  Axis get orientation => _orientation;
-  set orientation(Axis value) {
-    if (_orientation == value) {
-      return;
-    }
-    _orientation = value;
-    markNeedsLayout();
-  }
-
-  Axis _parentOrientation;
-  Axis get parentOrientation => _parentOrientation;
-  set parentOrientation(Axis value) {
-    if (_parentOrientation == value) {
-      return;
-    }
-    _parentOrientation = value;
-    markNeedsLayout();
-  }
-
-  EdgeInsetsGeometry _reservedPadding;
-  EdgeInsetsGeometry get reservedPadding => _reservedPadding;
-  set reservedPadding(EdgeInsetsGeometry value) {
-    if (_reservedPadding == value) {
-      return;
-    }
-    _reservedPadding = value;
-    markNeedsLayout();
-  }
-
-  double _heightFactor;
-  double get heightFactor => _heightFactor;
-  set heightFactor(double value) {
-    if (_heightFactor == value) {
-      return;
-    }
-    _heightFactor = value;
-    markNeedsLayout();
-  }
-
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     // The menu can be at most the size of the overlay minus the view padding
     // in each direction.
@@ -3499,97 +3328,29 @@ class _RenderMenuLayout extends RenderShiftedBox {
   }
 
   @override
-  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
-    final RenderBox? child = this.child;
-    if (child == null) {
-      return null;
-    }
-
-    final BoxConstraints childConstraints = getConstraintsForChild(constraints);
-    final double? result = child.getDryBaseline(childConstraints, baseline);
-    if (result == null) {
-      return null;
-    }
-
-    return result +
-        _positionChild(
-          constraints.biggest,
-          childConstraints.isTight
-              ? childConstraints.smallest
-              : child.getDryLayout(childConstraints),
-        ).dy;
-  }
-
-  @override
-  double computeMinIntrinsicWidth(double height) {
-    final double width = BoxConstraints.tightForFinite(height: height).maxWidth;
-    if (width.isFinite) {
-      return width;
-    }
-    return 0.0;
-  }
-
-  @override
-  double computeMaxIntrinsicWidth(double height) {
-    final double width = BoxConstraints.tightForFinite(height: height).maxWidth;
-    if (width.isFinite) {
-      return width;
-    }
-    return 0.0;
-  }
-
-  @override
-  double computeMinIntrinsicHeight(double width) {
-    final double height = BoxConstraints.tightForFinite(width: width).maxHeight;
-    if (height.isFinite) {
-      return height;
-    }
-    return 0.0;
-  }
-
-  @override
-  double computeMaxIntrinsicHeight(double width) {
-    final double height = BoxConstraints.tightForFinite(width: width).maxHeight;
-    if (height.isFinite) {
-      return height;
-    }
-    return 0.0;
-  }
-
-  @override
-  Size computeDryLayout(covariant BoxConstraints constraints) {
-    return constraints.biggest;
-  }
-
-  @override
-  void performLayout() {
-    final BoxConstraints constraints = this.constraints;
-    if (child != null) {
-      size = constraints.biggest;
-      final BoxConstraints childConstraints = getConstraintsForChild(constraints);
-      assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
-      final Size drySize = child!.getDryLayout(childConstraints);
-      child!.layout(
-        childConstraints.copyWith(maxHeight: drySize.height * _heightFactor),
-        parentUsesSize: true,
-      );
-      final Offset childPosition = Offset.lerp(
-        _positionChild(size, Size(drySize.width, 0)),
-        _positionChild(size, drySize),
-        _heightFactor,
-      )!;
-      final BoxParentData childParentData = child!.parentData! as BoxParentData;
-      childParentData.offset = childPosition;
-    } else {
-      size = constraints.smallest;
-    }
-  }
-
-  Offset _positionChild(Size size, Size childSize) {
+  Offset getPositionForChild(Size size, Size childSize) {
     // size: The size of the overlay.
     // childSize: The size of the menu, when fully open, as determined by
     // getConstraintsForChild.
     final Rect overlayRect = Offset.zero & size;
+    final double inverseHeightFactor = heightFactor > 0.01 ? 1 / heightFactor : 0;
+    final Size finalSize = Size(childSize.width, childSize.height * inverseHeightFactor);
+
+    final ui.Offset finalPosition = _positionChild(finalSize, overlayRect);
+    final double fullHeight = finalSize.height;
+    // If the menu sits above the anchor when fully open, grow upward:
+    // keep the bottom (attachment) fixed by shifting the top-left during animation.
+    final bool growsUp = finalPosition.dy + finalSize.height <= anchorRect.center.dy;
+    if (growsUp) {
+      final double dy = fullHeight - childSize.height;
+      return Offset(finalPosition.dx, finalPosition.dy + dy);
+    }
+
+    final Offset initialPosition = Offset(finalPosition.dx, anchorRect.bottom);
+    return Offset.lerp(initialPosition, finalPosition, heightFactor)!;
+  }
+
+  ui.Offset _positionChild(ui.Size childSize, ui.Rect overlayRect) {
     double x;
     double y;
     if (menuPosition == null) {
@@ -3688,6 +3449,21 @@ class _RenderMenuLayout extends RenderShiftedBox {
       }
     }
     return Offset(x, y);
+  }
+
+  @override
+  bool shouldRelayout(_MenuLayout oldDelegate) {
+    return anchorRect != oldDelegate.anchorRect ||
+        textDirection != oldDelegate.textDirection ||
+        alignment != oldDelegate.alignment ||
+        alignmentOffset != oldDelegate.alignmentOffset ||
+        menuPosition != oldDelegate.menuPosition ||
+        menuPadding != oldDelegate.menuPadding ||
+        orientation != oldDelegate.orientation ||
+        parentOrientation != oldDelegate.parentOrientation ||
+        reservedPadding != oldDelegate.reservedPadding ||
+        heightFactor != oldDelegate.heightFactor ||
+        !setEquals(avoidBounds, oldDelegate.avoidBounds);
   }
 
   Rect _closestScreen(Iterable<Rect> screens, Offset point) {
@@ -3993,15 +3769,20 @@ class _Submenu extends StatelessWidget {
             },
             child: Shortcuts(
               shortcuts: _kMenuTraversalShortcuts,
-              child: FadeTransition(
-                opacity: fadeAnimation,
-                alwaysIncludeSemantics: true,
-                child: _MenuPanel(
-                  menuStyle: menuStyle,
-                  clipBehavior: clipBehavior,
-                  orientation: anchor._orientation,
-                  crossAxisUnconstrained: crossAxisUnconstrained,
-                  children: menuChildren,
+              child: SizeTransition(
+                sizeFactor: heightAnimation,
+                axisAlignment: -1.0,
+                fixedCrossAxisSizeFactor: 1,
+                child: FadeTransition(
+                  opacity: fadeAnimation,
+                  alwaysIncludeSemantics: true,
+                  child: _MenuPanel(
+                    menuStyle: menuStyle,
+                    clipBehavior: clipBehavior,
+                    orientation: anchor._orientation,
+                    crossAxisUnconstrained: crossAxisUnconstrained,
+                    children: menuChildren,
+                  ),
                 ),
               ),
             ),
@@ -4018,18 +3799,20 @@ class _Submenu extends StatelessWidget {
           animation: heightAnimation,
           builder: (BuildContext context, Widget? child) {
             final MediaQueryData mediaQuery = MediaQuery.of(context);
-            return _MenuLayout(
-              anchorRect: anchorRect,
-              textDirection: textDirection,
-              avoidBounds: DisplayFeatureSubScreen.avoidBounds(mediaQuery).toSet(),
-              menuPadding: resolvedPadding,
-              alignment: alignment,
-              alignmentOffset: alignmentOffset,
-              menuPosition: menuPosition.position,
-              orientation: anchor._orientation,
-              parentOrientation: anchor._parent?._orientation ?? Axis.horizontal,
-              reservedPadding: reservedPadding,
-              heightFactor: heightAnimation.value,
+            return CustomSingleChildLayout(
+              delegate: _MenuLayout(
+                anchorRect: anchorRect,
+                textDirection: textDirection,
+                avoidBounds: DisplayFeatureSubScreen.avoidBounds(mediaQuery).toSet(),
+                menuPadding: resolvedPadding,
+                alignment: alignment,
+                alignmentOffset: alignmentOffset,
+                menuPosition: menuPosition.position,
+                orientation: anchor._orientation,
+                parentOrientation: anchor._parent?._orientation ?? Axis.horizontal,
+                reservedPadding: reservedPadding,
+                heightFactor: heightAnimation.value,
+              ),
               child: menuPanel,
             );
           },

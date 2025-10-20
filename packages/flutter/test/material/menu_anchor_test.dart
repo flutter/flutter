@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
+import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -5605,7 +5606,10 @@ void main() {
         500: 160,
       };
 
-      final Finder panel = findMenuPanels().last;
+      final Finder panel = find.descendant(
+        of: find.byType(MenuAnchor),
+        matching: find.byType(SizeTransition),
+      );
       for (final int key in animatedHeights.keys) {
         final double height = tester.getSize(panel).height;
         expect(height, closeTo(animatedHeights[key]!, 1.0), reason: 'at t=$key');
@@ -5646,7 +5650,10 @@ void main() {
       };
 
       double getHeight() {
-        final Finder panel = findMenuPanels().last;
+        final Finder panel = find.descendant(
+          of: find.byType(MenuAnchor),
+          matching: find.byType(SizeTransition),
+        );
         return tester.getSize(panel).height;
       }
 
