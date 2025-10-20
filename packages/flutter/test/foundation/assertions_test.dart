@@ -24,7 +24,9 @@ void main() {
   });
 
   test('debugPrintStack', () {
+    String stackTraceString = '';
     final List<String> log = captureOutput(() {
+      stackTraceString = StackTrace.current.toString();
       final FlutterErrorDetails details = FlutterErrorDetails(
         exception: 'Example exception',
         stack: StackTrace.current,
@@ -43,6 +45,11 @@ void main() {
     expect(log[2], contains('Example exception'));
 
     final String joined = log.join('\n');
+    print('<' * 20);
+    print(joined);
+    print('>' * 20);
+    print(stackTraceString);
+    print('<' * 20);
 
     expect(joined, contains('captureOutput'));
     expect(joined, contains('\nExample information\n'));
