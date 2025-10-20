@@ -50,17 +50,7 @@ def IsMac():
 
 
 def GetFuchsiaSDKPath():
-  # host_os references the gn host_os
-  # https://gn.googlesource.com/gn/+/main/docs/reference.md#var_host_os
-  host_os = ''
-  if IsLinux():
-    host_os = 'linux'
-  elif IsMac():
-    host_os = 'mac'
-  else:
-    host_os = 'windows'
-
-  return os.path.join(_src_root_dir, 'fuchsia', 'sdk', host_os)
+  return os.path.join(_src_root_dir, 'third_party', 'fuchsia-sdk', 'sdk')
 
 
 def RemoveDirectoryIfExists(path):

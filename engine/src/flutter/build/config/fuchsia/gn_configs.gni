@@ -8,7 +8,7 @@
 
 # Path to the fuchsia SDK. This is intended for use in other templates &
 # rules to reference the contents of the fuchsia SDK.
-fuchsia_sdk = "//fuchsia/sdk/$host_os"
+fuchsia_sdk = "//third_party/fuchsia-sdk/sdk"
 
 declare_args() {
   # Specify a readelf_exec path to use. If not specified, the host's system
