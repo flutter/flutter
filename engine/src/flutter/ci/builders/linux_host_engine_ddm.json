@@ -18,7 +18,7 @@
                     "base_path": "out/ci/host_debug_ddm/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/ci/host_debug_ddm/zip_archives/linux-x64/artifacts.zip"
+                        "out/ci/host_debug_ddm/zip_archives/linux-x64-ddm/artifacts.zip"
                     ],
                     "realm": "production"
                 }
