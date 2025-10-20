@@ -968,18 +968,6 @@ class ResidentWebRunner extends ResidentRunner {
       _registeredMethodsForService.remove(serviceName);
     }
   }
-
-  /// Checks if the given JSON response indicates no clients are available.
-  /// Returns an [OperationResult] if no clients are available, otherwise returns null.
-  OperationResult? _checkNoClientsAvailable(Map<String, dynamic>? json, Status status) {
-    if (json != null && json['noClientsAvailable'] == true) {
-      _logger.printTrace('No browser clients currently connected');
-      status.stop();
-      _logger.printStatus(kNoClientConnectedMessage);
-      return OperationResult.ok;
-    }
-    return null;
-  }
 }
 
 Uri _httpUriFromWebsocketUri(Uri websocketUri) {
