@@ -8,12 +8,6 @@ namespace impeller {
 
 namespace {
 
-// A minimal radius, below which the corner is treated as a sharp corner.
-//
-// Radii too small will cause `ratio` to be too large, which may lead to NaNs in
-// the computation. 1e-4 pixel is small enough to be visually negligible.
-constexpr Scalar kMinRadius = 1e-4f;
-
 // Return the value that splits the range from `left` to `right` into two
 // portions whose ratio equals to `ratio_left` : `ratio_right`.
 Scalar Split(Scalar left, Scalar right, Scalar ratio_left, Scalar ratio_right) {
@@ -153,7 +147,9 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
    *        ←-------- a ---------→
    */
 
-  if (radius <= kMinRadius) {
+  if (radius <= kEhCloseEnough) {
+    // Corners with really small radii are treated as sharp corners, since they
+    // might lead to NaNs due to `ratio` being too large.
     return RoundSuperellipseParam::Octant{
         .offset = center,
 
