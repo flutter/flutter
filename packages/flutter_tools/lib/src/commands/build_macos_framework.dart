@@ -304,14 +304,18 @@ end
     );
     final Directory flutterFrameworkCopy = modeDirectory.childDirectory(flutterFrameworkFileName);
 
-    try {
-      // Copy xcframework engine cache framework to mode directory.
-      copyDirectory(
-        globals.fs.directory(engineCacheFlutterFrameworkDirectory),
-        flutterFrameworkCopy,
-        followLinks: false,
-      );
-    } finally {
+    // Copy xcframework engine cache framework to mode directory.
+    final ProcessResult result = await globals.processManager.run(<String>[
+      'rsync',
+      '-av',
+      '--delete',
+      '--filter',
+      '- .DS_Store/',
+      '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+      globals.fs.directory(engineCacheFlutterFrameworkDirectory).path,
+      flutterFrameworkCopy.path,
+    ]);
+    if (result.exitCode != 0) {
       status.stop();
     }
   }
