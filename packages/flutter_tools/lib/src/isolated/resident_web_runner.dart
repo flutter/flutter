@@ -510,9 +510,29 @@ class ResidentWebRunner extends ResidentRunner {
         } else {
           final DateTime reloadStart = _systemClock.now();
           final vmservice.VM vm = await _vmService.service.getVM();
-          final vmservice.ReloadReport report = await _vmService.service.reloadSources(
-            vm.isolates!.first.id!,
-          );
+          final String hotReloadMethod =
+              _registeredMethodsForService['reloadSources'] ?? 'reloadSources';
+
+          // Check if there are any isolates available
+          if (vm.isolates == null || vm.isolates!.isEmpty) {
+            _logger.printTrace('No isolates available for hot reload');
+            return _handleNoClientsAvailable(status);
+          }
+
+          vmservice.ReloadReport report;
+          try {
+            report = await _vmService.service.reloadSources(vm.isolates!.first.id!);
+          } on vmservice.RPCError catch (e) {
+            // DWDS throws an RPC error with kIsolateCannotReload code when there are no
+            // browser clients currently connected during a hot reload operation.
+            if (e.callingMethod == hotReloadMethod &&
+                e.code == vmservice.RPCErrorKind.kIsolateCannotReload.code) {
+              return _handleNoClientsAvailable(status);
+            }
+            // Re-throw other RPC errors
+            rethrow;
+          }
+
           reloadDuration = _systemClock.now().difference(reloadStart);
           final contents = ReloadReportContents.fromReloadReport(report);
           final bool success = contents.success ?? false;
