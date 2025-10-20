@@ -532,7 +532,13 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Center(
-          child: SizedBox.shrink(child: NavigationDrawer(children: <Widget>[])),
+          child: SizedBox.shrink(
+            child: NavigationDrawer(
+              children: <Widget>[
+                NavigationDrawerDestination(icon: Icon(Icons.inbox), label: Text('Inbox')),
+              ],
+            ),
+          ),
         ),
       ),
     );
