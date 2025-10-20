@@ -518,7 +518,8 @@ class ResidentWebRunner extends ResidentRunner {
             // DWDS throws an RPC error with kServerError code when there are no
             // browser clients currently connected during a hot restart operation.
             if (e.callingMethod == hotRestartMethod &&
-                e.code == vmservice.RPCErrorKind.kServerError.code) {
+                (e.code == vmservice.RPCErrorKind.kIsolateCannotReload.code ||
+                    e.code == vmservice.RPCErrorKind.kServerError.code)) {
               return _handleNoClientsAvailable(status);
             }
             // Re-throw other RPC errors
