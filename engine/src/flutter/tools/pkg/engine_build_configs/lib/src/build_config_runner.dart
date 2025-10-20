@@ -523,9 +523,7 @@ final class BuildRunner extends Runner {
         pid: result.pid, // pid,
       );
     }
-    if (okMessage == null) {
-      okMessage = bootstrapResult.stdout.trim();
-    }
+    okMessage ??= bootstrapResult.stdout.trim();
     eventHandler(
       RunnerResult(
         '${build.name}: RBE ${shutdown ? 'shutdown' : 'startup'}',
