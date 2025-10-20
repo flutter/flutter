@@ -5593,13 +5593,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     if (entry.currentState == _RouteLifecycle.pop) {
       _flushHistoryUpdates(rearrangeOverlay: false);
       assert(() {
-        if (kDebugMode) {
-          final bool hasPresentRoute = _history.any(_RouteEntry.isPresentPredicate);
-          if (!hasPresentRoute) {
-            debugPrint(
-              'Tried to pop a route on an empty stack. Ensure there is at least one route before calling Navigator.pop().',
-            );
-          }
+        final bool hasPresentRoute = _history.any(_RouteEntry.isPresentPredicate);
+        if (!hasPresentRoute) {
+          debugPrint(
+            'Tried to pop a route on an empty stack. Ensure there is at least one route before calling Navigator.pop().',
+          );
         }
         return true;
       }());
