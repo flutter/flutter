@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 import 'binding.dart';
@@ -171,7 +172,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   @override
-  int get hashCode => Object.hash(url, scale, headers);
+  int get hashCode => Object.hash(url, scale, const MapEquality<String, String>().hash(headers));
 
   @override
   String toString() =>
