@@ -165,6 +165,16 @@ class _MenuAnchorScope extends InheritedWidget {
   }
 }
 
+// A curve that linearly interpolates between two values over a given curve.
+//
+// For example, `_TweenCurve(0.2, 0.8, curve: Curves.easeIn)` will produce a
+// curve that starts at 0.2, ends at 0.8, and follows the easeIn curve between
+// those two values. The curve is applied first, and then the result is linearly
+// interpolated between begin and end.
+//
+// This differs from an Interval in that an Interval changes the duration over
+// which the curve is applied, whereas this changes the output range of the
+// curve.
 class _TweenCurve extends Curve {
   const _TweenCurve(this.begin, this.end, {required this.curve})
     : assert(begin >= 0.0),
