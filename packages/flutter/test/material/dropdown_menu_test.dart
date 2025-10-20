@@ -4717,6 +4717,7 @@ void main() {
   });
 
   testWidgets('DropdownMenu does not crash at zero area', (WidgetTester tester) async {
+    final Size temp = tester.view.physicalSize;
     tester.view.physicalSize = Size.zero;
     final TextEditingController controller = TextEditingController(text: 'I');
     addTearDown(controller.dispose);
@@ -4737,6 +4738,7 @@ void main() {
     controller.selection = const TextSelection.collapsed(offset: 0);
     await tester.pump();
     expect(find.byType(MenuItemButton), findsWidgets);
+    tester.view.physicalSize = temp;
   });
 }
 
