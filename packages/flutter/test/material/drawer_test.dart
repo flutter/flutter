@@ -1059,4 +1059,19 @@ void main() {
       expect(material.clipBehavior, Clip.hardEdge);
     });
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/6537
+  testWidgets('Drawer and DrawerHeader do not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Drawer(child: DrawerHeader(child: Text('X'))),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Drawer)), Size.zero);
+    expect(tester.getSize(find.byType(DrawerHeader)), Size.zero);
+  });
 }

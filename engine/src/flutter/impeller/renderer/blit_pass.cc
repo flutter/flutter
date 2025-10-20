@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 #include "impeller/renderer/blit_pass.h"
+
+#include <format>
 #include <memory>
 #include <utility>
 
-#include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 
@@ -39,18 +40,18 @@ bool BlitPass::AddCopy(std::shared_ptr<Texture> source,
 
   if (source->GetTextureDescriptor().sample_count !=
       destination->GetTextureDescriptor().sample_count) {
-    VALIDATION_LOG << SPrintF(
-        "The source sample count (%d) must match the destination sample count "
-        "(%d) for blits.",
+    VALIDATION_LOG << std::format(
+        "The source sample count ({}) must match the destination sample count "
+        "({}) for blits.",
         static_cast<int>(source->GetTextureDescriptor().sample_count),
         static_cast<int>(destination->GetTextureDescriptor().sample_count));
     return false;
   }
   if (source->GetTextureDescriptor().format !=
       destination->GetTextureDescriptor().format) {
-    VALIDATION_LOG << SPrintF(
-        "The source pixel format (%s) must match the destination pixel format "
-        "(%s) "
+    VALIDATION_LOG << std::format(
+        "The source pixel format ({}) must match the destination pixel format "
+        "({}) "
         "for blits.",
         PixelFormatToString(source->GetTextureDescriptor().format),
         PixelFormatToString(destination->GetTextureDescriptor().format));

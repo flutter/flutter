@@ -4,7 +4,6 @@
 
 import 'dart:math';
 
-import 'package:crypto/crypto.dart';
 import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -18,6 +17,7 @@ import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
 import '../../flutter_plugins.dart';
 import '../../globals.dart' as globals;
+import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../../web/bootstrap.dart';
 import '../../web/compile.dart';
@@ -29,6 +29,7 @@ import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'localizations.dart';
+import 'native_assets.dart';
 
 /// Generates an entry point for a web target.
 // Keep this in sync with build_runner/resident_web_runner.dart
@@ -478,7 +479,11 @@ class WebReleaseBundle extends Target {
   String get name => 'web_release_bundle';
 
   @override
-  List<Target> get dependencies => <Target>[...compileTargets, templatedFilesTarget];
+  List<Target> get dependencies => <Target>[
+    ...compileTargets,
+    templatedFilesTarget,
+    const DartBuild(specifiedTargetPlatform: TargetPlatform.web_javascript),
+  ];
 
   Iterable<String> get buildPatternStems =>
       compileTargets.expand((Dart2WebTarget target) => target.buildPatternStems);
@@ -518,9 +523,11 @@ class WebReleaseBundle extends Target {
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
 
+    final DartHooksResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile depfile = await copyAssets(
       environment,
       environment.outputDir.childDirectory('assets'),
+      dartHookResult: dartHookResult,
       targetPlatform: TargetPlatform.web_javascript,
       buildMode: buildMode,
     );
@@ -800,38 +807,15 @@ class WebServiceWorker extends Target {
         )
         .toList();
 
-    final urlToHash = <String, String>{};
-    for (final file in contents) {
-      // Do not force caching of source maps.
-      if (file.path.endsWith('main.dart.js.map') || file.path.endsWith('.part.js.map')) {
-        continue;
-      }
-      final url = environment.fileSystem.path
-          .toUri(environment.fileSystem.path.relative(file.path, from: environment.outputDir.path))
-          .toString();
-      final hash = md5.convert(await file.readAsBytes()).toString();
-      urlToHash[url] = hash;
-      // Add an additional entry for the base URL.
-      if (url == 'index.html') {
-        urlToHash['/'] = hash;
-      }
-    }
-
     final File serviceWorkerFile = environment.outputDir.childFile('flutter_service_worker.js');
     final depfile = Depfile(contents, <File>[serviceWorkerFile]);
     final String fileGeneratorsPath = environment.artifacts.getArtifactPath(
       Artifact.flutterToolsFileGenerators,
     );
-    final String serviceWorker = generateServiceWorker(fileGeneratorsPath, urlToHash, <String>[
-      'main.dart.js',
-      if (compileConfigs.any(
-        (WebCompilerConfig config) => config is WasmCompilerConfig && !config.dryRun,
-      )) ...<String>['main.dart.wasm', 'main.dart.mjs'],
-      'index.html',
-      'flutter_bootstrap.js',
-      if (urlToHash.containsKey('assets/AssetManifest.bin.json')) 'assets/AssetManifest.bin.json',
-      if (urlToHash.containsKey('assets/FontManifest.json')) 'assets/FontManifest.json',
-    ], serviceWorkerStrategy: environment.serviceWorkerStrategy);
+    final String serviceWorker = generateServiceWorker(
+      fileGeneratorsPath,
+      serviceWorkerStrategy: environment.serviceWorkerStrategy,
+    );
     serviceWorkerFile.writeAsStringSync(serviceWorker);
     environment.depFileService.writeToFile(
       depfile,

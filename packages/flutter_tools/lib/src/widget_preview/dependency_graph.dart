@@ -11,9 +11,9 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/constant/value.dart';
-import 'package:analyzer/dart/element/element2.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/diagnostic/diagnostic.dart';
-import 'package:analyzer/error/error.dart';
+import 'package:analyzer/source/line_info.dart';
 
 import '../base/logger.dart';
 import 'preview_details.dart';
@@ -33,18 +33,25 @@ typedef PreviewDependencyGraph = Map<PreviewPath, LibraryPreviewNode>;
 /// Visitor which detects previews and extracts [PreviewDetails] for later code
 /// generation.
 class _PreviewVisitor extends RecursiveAstVisitor<void> {
-  _PreviewVisitor({required LibraryElement2 lib})
-    : packageName = lib.uri.scheme == 'package' ? lib.uri.pathSegments.first : null,
-      _context = lib.session.analysisContext;
+  _PreviewVisitor({required LibraryElement lib})
+    : packageName = lib.uri.scheme == 'package' ? lib.uri.pathSegments.first : null;
 
   late final String? packageName;
 
   final previewEntries = <PreviewDetails>[];
 
-  final AnalysisContext _context;
   FunctionDeclaration? _currentFunction;
   ConstructorDeclaration? _currentConstructor;
   MethodDeclaration? _currentMethod;
+
+  late Uri _currentScriptUri;
+  late CompilationUnit _currentUnit;
+
+  void findPreviewsInResolvedUnitResult(ResolvedUnitResult unit) {
+    _currentScriptUri = unit.file.toUri();
+    _currentUnit = unit.unit;
+    _currentUnit.visitChildren(this);
+  }
 
   /// Handles previews defined on top-level functions.
   @override
@@ -82,63 +89,73 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitAnnotation(Annotation node) {
-    final previewsToProcess = <DartObject>[];
-    if (node.isMultiPreview) {
-      previewsToProcess.addAll(node.findMultiPreviewPreviewNodes(context: _context));
-    } else if (node.isPreview) {
-      final DartObject? evaluatedAnnotation = node.elementAnnotation!.computeConstantValue();
-      if (evaluatedAnnotation == null) {
-        return;
-      }
-      previewsToProcess.add(evaluatedAnnotation);
-    } else {
+    final bool isMultiPreview = node.isMultiPreview;
+    // Skip non-preview annotations.
+    if (!node.isPreview && !isMultiPreview) {
       return;
     }
-
-    for (final preview in previewsToProcess) {
-      if (_currentFunction != null &&
-          !hasRequiredParams(_currentFunction!.functionExpression.parameters)) {
-        final TypeAnnotation? returnTypeAnnotation = _currentFunction!.returnType;
-        if (returnTypeAnnotation is NamedType) {
-          final Token returnType = returnTypeAnnotation.name;
-          if (returnType.isWidget || returnType.isWidgetBuilder) {
-            previewEntries.add(
-              PreviewDetails(
-                packageName: packageName,
-                functionName: _currentFunction!.name.toString(),
-                isBuilder: returnType.isWidgetBuilder,
-                previewAnnotation: preview,
-              ),
-            );
-          }
+    // The preview annotations must only have constant arguments.
+    final DartObject? preview = node.elementAnnotation!.computeConstantValue();
+    if (preview == null) {
+      return;
+    }
+    final LineInfo lineInfo = _currentUnit.lineInfo;
+    final CharacterLocation location = lineInfo.getLocation(node.offset);
+    final int line = location.lineNumber;
+    final int column = location.columnNumber;
+    if (_currentFunction != null &&
+        !hasRequiredParams(_currentFunction!.functionExpression.parameters)) {
+      final TypeAnnotation? returnTypeAnnotation = _currentFunction!.returnType;
+      if (returnTypeAnnotation is NamedType) {
+        final Token returnType = returnTypeAnnotation.name;
+        if (returnType.isWidget || returnType.isWidgetBuilder) {
+          previewEntries.add(
+            PreviewDetails(
+              scriptUri: _currentScriptUri,
+              line: line,
+              column: column,
+              packageName: packageName,
+              functionName: _currentFunction!.name.toString(),
+              isBuilder: returnType.isWidgetBuilder,
+              previewAnnotation: preview,
+              isMultiPreview: isMultiPreview,
+            ),
+          );
         }
-      } else if (_currentConstructor != null &&
-          !hasRequiredParams(_currentConstructor!.parameters)) {
-        final returnType = _currentConstructor!.returnType as SimpleIdentifier;
-        final Token? name = _currentConstructor!.name;
-        previewEntries.add(
-          PreviewDetails(
-            packageName: packageName,
-            functionName: '$returnType${name == null ? '' : '.$name'}',
-            isBuilder: false,
-            previewAnnotation: preview,
-          ),
-        );
-      } else if (_currentMethod != null && !hasRequiredParams(_currentMethod!.parameters)) {
-        final TypeAnnotation? returnTypeAnnotation = _currentMethod!.returnType;
-        if (returnTypeAnnotation is NamedType) {
-          final Token returnType = returnTypeAnnotation.name;
-          if (returnType.isWidget || returnType.isWidgetBuilder) {
-            final parentClass = _currentMethod!.parent! as ClassDeclaration;
-            previewEntries.add(
-              PreviewDetails(
-                packageName: packageName,
-                functionName: '${parentClass.name}.${_currentMethod!.name}',
-                isBuilder: returnType.isWidgetBuilder,
-                previewAnnotation: preview,
-              ),
-            );
-          }
+      }
+    } else if (_currentConstructor != null && !hasRequiredParams(_currentConstructor!.parameters)) {
+      final returnType = _currentConstructor!.returnType as SimpleIdentifier;
+      final Token? name = _currentConstructor!.name;
+      previewEntries.add(
+        PreviewDetails(
+          scriptUri: _currentScriptUri,
+          line: line,
+          column: column,
+          packageName: packageName,
+          functionName: '$returnType${name == null ? '' : '.$name'}',
+          isBuilder: false,
+          previewAnnotation: preview,
+          isMultiPreview: isMultiPreview,
+        ),
+      );
+    } else if (_currentMethod != null && !hasRequiredParams(_currentMethod!.parameters)) {
+      final TypeAnnotation? returnTypeAnnotation = _currentMethod!.returnType;
+      if (returnTypeAnnotation is NamedType) {
+        final Token returnType = returnTypeAnnotation.name;
+        if (returnType.isWidget || returnType.isWidgetBuilder) {
+          final parentClass = _currentMethod!.parent! as ClassDeclaration;
+          previewEntries.add(
+            PreviewDetails(
+              scriptUri: _currentScriptUri,
+              line: line,
+              column: column,
+              packageName: packageName,
+              functionName: '${parentClass.name}.${_currentMethod!.name}',
+              isBuilder: returnType.isWidgetBuilder,
+              previewAnnotation: preview,
+              isMultiPreview: isMultiPreview,
+            ),
+          );
         }
       }
     }
@@ -190,7 +207,7 @@ final class LibraryPreviewNode {
   bool get hasErrors => errors.isNotEmpty;
 
   /// The set of errors found in this library.
-  final errors = <AnalysisError>[];
+  final errors = <Diagnostic>[];
 
   /// Determines the set of errors found in this library.
   ///
@@ -199,8 +216,8 @@ final class LibraryPreviewNode {
     errors.clear();
     for (final String file in files) {
       errors.addAll(
-        ((await context.currentSession.getErrors(file)) as ErrorsResult).errors
-            .where((AnalysisError error) => error.severity == Severity.error)
+        ((await context.currentSession.getErrors(file)) as ErrorsResult).diagnostics
+            .where((error) => error.severity == Severity.error)
             .toList(),
       );
     }
@@ -210,9 +227,7 @@ final class LibraryPreviewNode {
   void findPreviews({required ResolvedLibraryResult lib}) {
     // Iterate over the compilation unit's AST to find previews.
     final visitor = _PreviewVisitor(lib: lib.element);
-    for (final ResolvedUnitResult libUnit in lib.units) {
-      libUnit.unit.visitChildren(visitor);
-    }
+    lib.units.forEach(visitor.findPreviewsInResolvedUnitResult);
     previews
       ..clear()
       ..addAll(visitor.previewEntries);

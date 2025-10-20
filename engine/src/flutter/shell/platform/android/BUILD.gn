@@ -29,7 +29,7 @@ source_set("image_generator") {
 
   deps = [
     "//flutter/fml",
-    "//flutter/lib/ui:ui",
+    "//flutter/lib/ui",
     "//flutter/skia",
   ]
 
@@ -259,6 +259,15 @@ android_java_sources = [
   "io/flutter/embedding/engine/dart/PlatformTaskQueue.java",
   "io/flutter/embedding/engine/deferredcomponents/DeferredComponentManager.java",
   "io/flutter/embedding/engine/deferredcomponents/PlayStoreDeferredComponentManager.java",
+  "io/flutter/embedding/engine/image/BitmapMetadataReader.java",
+  "io/flutter/embedding/engine/image/ExifMetadataReader.java",
+  "io/flutter/embedding/engine/image/FlutterImageDecoder.java",
+  "io/flutter/embedding/engine/image/ImageDecoderDefaultImpl.java",
+  "io/flutter/embedding/engine/image/ImageDecoderHeifApi36Impl.java",
+  "io/flutter/embedding/engine/image/ImageDecoderHeifPre36Impl.java",
+  "io/flutter/embedding/engine/image/ImageUtils.java",
+  "io/flutter/embedding/engine/image/MediaMetadataReader.java",
+  "io/flutter/embedding/engine/image/Metadata.java",
   "io/flutter/embedding/engine/loader/ApplicationInfoLoader.java",
   "io/flutter/embedding/engine/loader/FlutterApplicationInfo.java",
   "io/flutter/embedding/engine/loader/FlutterLoader.java",
@@ -366,6 +375,7 @@ android_java_sources = [
   "io/flutter/util/TraceSection.java",
   "io/flutter/util/ViewUtils.java",
   "io/flutter/view/AccessibilityBridge.java",
+  "io/flutter/view/AccessibilityStringBuilder.java",
   "io/flutter/view/AccessibilityViewEmbedder.java",
   "io/flutter/view/FlutterCallbackInformation.java",
   "io/flutter/view/FlutterRunArguments.java",

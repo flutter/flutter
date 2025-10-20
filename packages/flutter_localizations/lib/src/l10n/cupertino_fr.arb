@@ -29,5 +29,11 @@
   "shareButtonLabel": "Partager…",
   "clearButtonLabel": "Effacer",
   "cancelButtonLabel": "Annuler",
-  "backButtonLabel": "Retour"
+  "backButtonLabel": "Retour",
+  "expansionTileExpandedHint": "appuyez deux fois pour réduire",
+  "expansionTileCollapsedHint": "appuyez deux fois pour développer",
+  "expansionTileExpandedTapHint": "Réduire",
+  "expansionTileCollapsedTapHint": "Développer pour en savoir plus",
+  "expandedHint": "Réduit",
+  "collapsedHint": "Développé"
 }

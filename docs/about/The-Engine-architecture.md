@@ -14,7 +14,7 @@ Flutter Engine sits in this stack, highlights API boundaries, and identifies the
 repositories where the individual pieces live. The legend below clarifies some
 of the terminology commonly used to describe the pieces of a Flutter app.
 
-<img src="https://raw.githubusercontent.com/flutter/flutter/main/engine/src/flutter/docs/app_anatomy.svg?sanitize=true" alt="Flutter Architecture Diagram" width="40%"/>
+<img src="https://raw.githubusercontent.com/flutter/flutter/main/docs/engine/app_anatomy.svg?sanitize=true" alt="Flutter Architecture Diagram" width="40%"/>
 
 #### Dart App
 
@@ -70,7 +70,7 @@ library called `dart:ui` to provide low-level access to Skia features and the
 shell. The shells can also communicate directly to Dart code via [Platform
 Channels](https://flutter.io/platform-channels/) which bypass the engine.
 
-![Flutter Architecture Diagram](https://github.com/flutter/flutter/tree/main/engine/src/flutter/docs/flutter_overview.svg?sanitize=true)
+![Flutter Architecture Diagram](https://github.com/flutter/flutter/tree/main/docs/engine/flutter_overview.svg?sanitize=true)
 
 ## Threading
 

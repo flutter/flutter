@@ -20,7 +20,6 @@ import 'dropdown.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
-import 'material_state.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
@@ -1040,9 +1039,9 @@ class DataTable extends StatelessWidget {
     final WidgetStateProperty<Color?>? effectiveDataRowColor =
         dataRowColor ?? dataTableTheme.dataRowColor ?? theme.dataTableTheme.dataRowColor;
     final WidgetStateProperty<Color?> defaultRowColor = WidgetStateProperty.resolveWith((
-      Set<MaterialState> states,
+      Set<WidgetState> states,
     ) {
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return theme.colorScheme.primary.withOpacity(0.08);
       }
       return null;
@@ -1087,14 +1086,14 @@ class DataTable extends StatelessWidget {
         final bool isSelected = index > 0 && rows[index - 1].selected;
         final bool isDisabled =
             index > 0 && anyRowSelectable && rows[index - 1].onSelectChanged == null;
-        final Set<MaterialState> states = <MaterialState>{
-          if (isSelected) MaterialState.selected,
-          if (isDisabled) MaterialState.disabled,
+        final Set<WidgetState> states = <WidgetState>{
+          if (isSelected) WidgetState.selected,
+          if (isDisabled) WidgetState.disabled,
         };
         final Color? resolvedDataRowColor = index > 0
             ? (rows[index - 1].color ?? effectiveDataRowColor)?.resolve(states)
             : null;
-        final Color? resolvedHeadingRowColor = effectiveHeadingRowColor?.resolve(<MaterialState>{});
+        final Color? resolvedHeadingRowColor = effectiveHeadingRowColor?.resolve(<WidgetState>{});
         final Color? rowColor = index > 0 ? resolvedDataRowColor : resolvedHeadingRowColor;
         final BorderSide borderSide = Divider.createBorderSide(
           context,
@@ -1139,7 +1138,7 @@ class DataTable extends StatelessWidget {
       );
       rowIndex = 1;
       for (final DataRow row in rows) {
-        final Set<MaterialState> states = <MaterialState>{if (row.selected) MaterialState.selected};
+        final Set<WidgetState> states = <WidgetState>{if (row.selected) WidgetState.selected};
         tableRows[rowIndex].children[0] = _buildCheckbox(
           context: context,
           checked: row.selected,
@@ -1186,8 +1185,8 @@ class DataTable extends StatelessWidget {
         tableColumns[displayColumnIndex] = const IntrinsicColumnWidth();
       }
 
-      final Set<MaterialState> headerStates = <MaterialState>{
-        if (column.onSort == null) MaterialState.disabled,
+      final Set<WidgetState> headerStates = <WidgetState>{
+        if (column.onSort == null) WidgetState.disabled,
       };
       tableRows[0].children[displayColumnIndex] = _buildHeadingCell(
         context: context,
@@ -1214,7 +1213,7 @@ class DataTable extends StatelessWidget {
       );
       rowIndex = 1;
       for (final DataRow row in rows) {
-        final Set<MaterialState> states = <MaterialState>{if (row.selected) MaterialState.selected};
+        final Set<WidgetState> states = <WidgetState>{if (row.selected) WidgetState.selected};
         final DataCell cell = row.cells[dataColumnIndex];
         tableRows[rowIndex].children[displayColumnIndex] = _buildDataCell(
           context: context,
