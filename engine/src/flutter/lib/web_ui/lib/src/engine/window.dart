@@ -131,6 +131,14 @@ class EngineFlutterView implements ui.FlutterView {
     semantics.updateSemantics(update);
   }
 
+  /// Sets locale for this view.
+  ///
+  /// This is typically called from the framework side after it resolve
+  /// the application locale.
+  void setLocale(ui.Locale locale) {
+    embeddingStrategy.setLocale(locale);
+  }
+
   late final GlobalHtmlAttributes _globalHtmlAttributes = GlobalHtmlAttributes(
     rootElement: dom.rootElement,
     hostElement: embeddingStrategy.hostElement,

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:ui/src/engine/dom.dart';
+import 'package:ui/ui.dart' as ui;
 
 import 'custom_element_embedding_strategy.dart';
 import 'full_page_embedding_strategy.dart';
@@ -25,6 +26,12 @@ abstract class EmbeddingStrategy {
       return FullPageEmbeddingStrategy();
     }
   }
+
+  /// Sets locale for the embedded view.
+  ///
+  /// This is typically called from the framework side after it resolve
+  /// the application locale.
+  void setLocale(ui.Locale locale);
 
   /// The DOM element in which the Flutter view is embedded.
   /// This element is the direct parent element of the <flutter-view> element.
