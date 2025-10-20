@@ -166,7 +166,12 @@ class _MenuAnchorScope extends InheritedWidget {
 }
 
 class _TweenCurve extends Curve {
-  const _TweenCurve(this.begin, this.end, {required this.curve});
+  const _TweenCurve(this.begin, this.end, {required this.curve})
+    : assert(begin >= 0.0),
+      assert(begin <= 1.0),
+      assert(end >= 0.0),
+      assert(end <= 1.0),
+      assert(end >= begin);
 
   final double begin;
   final double end;
@@ -174,11 +179,6 @@ class _TweenCurve extends Curve {
 
   @override
   double transformInternal(double t) {
-    assert(begin >= 0.0);
-    assert(begin <= 1.0);
-    assert(end >= 0.0);
-    assert(end <= 1.0);
-    assert(end >= begin);
     t = curve.transform(t);
     return ui.lerpDouble(begin, end, t)!;
   }
@@ -372,7 +372,7 @@ class MenuAnchor extends StatefulWidget {
   /// Defaults to false.
   final bool useRootOverlay;
 
-  /// Whether the menu should open and close with an animation.
+  /// Whether this widget should open or close a submenu with an animation.
   ///
   /// Defaults to false.
   final bool animated;
