@@ -59,6 +59,7 @@ import java.util.Set;
 
   // Standard FlutterPlugin
   @NonNull private final FlutterEngine flutterEngine;
+  @NonNull private final Context appContext;
   @NonNull private final FlutterPlugin.FlutterPluginBinding pluginBinding;
 
   // ActivityAware
@@ -100,6 +101,7 @@ import java.util.Set;
       @NonNull FlutterLoader flutterLoader,
       @Nullable FlutterEngineGroup group) {
     this.flutterEngine = flutterEngine;
+    this.appContext = appContext;
     pluginBinding =
         new FlutterPlugin.FlutterPluginBinding(
             appContext,
@@ -326,6 +328,20 @@ import java.util.Set;
 
   private void attachToActivityInternal(@NonNull Activity activity, @NonNull Lifecycle lifecycle) {
     this.activityPluginBinding = new FlutterEngineActivityPluginBinding(activity, lifecycle);
+
+    // Set rendering mode of PlatformViewsController if set via the manifest.
+    ApplicationInfo applicationInfo =
+        applicationContext
+            .getPackageManager()
+            .getApplicationInfo(applicationContext.getPackageName(), PackageManager.GET_META_DATA);
+    Bundle applicationMetaData = applicationInfo.metaData;
+    final boolean useSoftwareRenderingFromManifest =
+        applicationMetaData
+            .get(FlutterEngineManifestFlags.ENABLE_SOFTWARE_RENDERING.metaDataKey)
+            .toBoolean();
+    final boolean useSoftwareRendering =
+        useSoftwareRenderingFromManifest != null ? useSoftwareRenderingFromManifest : false;
+    flutterEngine.getPlatformViewsController().setSoftwareRendering(useSoftwareRendering);
 
     // Activate the PlatformViewsController. This must happen before any plugins attempt
     // to use it, otherwise an error stack trace will appear that says there is no
