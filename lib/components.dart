@@ -169,7 +169,7 @@ class _ComponentsPageState extends State<ComponentsPage> {
                    color: Colors.deepPurple.shade200,
                    alignment: Alignment.center,
                    child: const Text(
-                     'Este espaço está limitado\na no máximo 250x100 pixels.\nO conteúdo não pode ultrapassar\nesses limites.',
+                     'Este espaço está limitado\ na no máximo 250x100 pixels.\nO conteúdo não pode ultrapassar\nesses limites.',
                      textAlign: TextAlign.center,
                      style: TextStyle(color: Colors.white),
                    ),
@@ -439,14 +439,14 @@ class _ComponentsPageState extends State<ComponentsPage> {
            ),
            TextField(
              decoration: const InputDecoration(
-               labelText: 'Digite algo...',
+               labelText: 'Escreva aqui...',
                border: OutlineInputBorder(),
                prefixIcon: Icon(Icons.edit),
              ),
              onChanged: (v) => setState(() => _txt = v),
            ),
            const SizedBox(height: 8),
-           Text('Você digitou: $_txt'),
+           Text('Você escreveu: $_txt'),
            const SizedBox(height: 24),
          ],
        ),
