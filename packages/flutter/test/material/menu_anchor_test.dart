@@ -5246,6 +5246,7 @@ void main() {
   });
 
   testWidgets('MenuAnchor does not crash at zero area', (WidgetTester tester) async {
+    final Size temp = tester.view.physicalSize;
     tester.view.physicalSize = Size.zero;
     final MenuController menuController = MenuController();
     await tester.pumpWidget(
@@ -5261,6 +5262,7 @@ void main() {
     menuController.open();
     await tester.pump();
     expect(find.text('X'), findsOne);
+    tester.view.physicalSize = temp;
   });
 }
 
