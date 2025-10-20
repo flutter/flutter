@@ -39,7 +39,7 @@ class ErrorBuilderExample extends StatelessWidget {
           //   exception,
           //   stackTrace,
           // );
-          return const Text('😢');
+          return const Text('Image failed to load');
         },
       ),
     );
