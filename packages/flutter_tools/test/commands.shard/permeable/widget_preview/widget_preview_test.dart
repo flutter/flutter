@@ -335,6 +335,8 @@ List<_i1.WidgetPreview> previews() => [
       _i2.buildWidgetPreview(
         packageName: 'flutter_project',
         scriptUri: 'STRIPPED',
+        line: 4,
+        column: 1,
         previewFunction: () => _i3.preview(),
         transformedPreview: const _i4.Preview(name: 'preview').transform(),
       )

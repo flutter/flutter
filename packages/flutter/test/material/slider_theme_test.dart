@@ -61,7 +61,7 @@ void main() {
       rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
       showValueIndicator: ShowValueIndicator.always,
       valueIndicatorTextStyle: TextStyle(color: Colors.black),
-      mouseCursor: MaterialStateMouseCursor.clickable,
+      mouseCursor: WidgetStateMouseCursor.clickable,
       allowedInteraction: SliderInteraction.tapOnly,
       padding: EdgeInsets.all(1.0),
       thumbSize: WidgetStatePropertyAll<Size>(Size(20, 20)),

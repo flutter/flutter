@@ -7,6 +7,7 @@ library;
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -17,6 +18,7 @@ import 'icon_button.dart';
 import 'icons.dart';
 import 'input_border.dart';
 import 'input_decorator.dart';
+import 'material_localizations.dart';
 import 'material_state.dart';
 import 'menu_anchor.dart';
 import 'menu_button_theme.dart';
@@ -149,7 +151,7 @@ enum DropdownMenuCloseBehavior {
 ///   The [DropdownMenu] uses a [TextField] as the "anchor".
 /// * [TextField], which is a text input widget that uses an [InputDecoration].
 /// * [DropdownMenuEntry], which is used to build the [MenuItemButton] in the [DropdownMenu] list.
-class DropdownMenu<T> extends StatefulWidget {
+class DropdownMenu<T extends Object> extends StatefulWidget {
   /// Creates a const [DropdownMenu].
   ///
   /// The leading and trailing icons in the text field can be customized by using
@@ -384,7 +386,12 @@ class DropdownMenu<T> extends StatefulWidget {
 
   /// The callback is called when a selection is made.
   ///
-  /// Defaults to null. If null, only the text field is updated.
+  /// The callback receives the selected entry's value of type `T` when the user
+  /// chooses an item. It may also be invoked with `null` to indicate that the
+  /// selection was cleared / that no item was chosen.
+  ///
+  /// Defaults to null. If this callback itself is null, the widget still updates
+  /// the text field with the selected label.
   final ValueChanged<T?>? onSelected;
 
   /// Defines the keyboard focus for this widget.
@@ -604,7 +611,7 @@ class DropdownMenu<T> extends StatefulWidget {
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
 }
 
-class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
+class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
   final GlobalKey _anchorKey = GlobalKey();
   final GlobalKey _leadingKey = GlobalKey();
   late List<GlobalKey> buttonItemKeys;
@@ -1129,18 +1136,26 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         final Widget trailingButton = widget.showTrailingIcon
             ? Padding(
                 padding: isCollapsed ? EdgeInsets.zero : const EdgeInsets.all(4.0),
-                child: IconButton(
-                  focusNode: _trailingIconButtonFocusNode,
-                  isSelected: controller.isOpen,
-                  constraints: widget.inputDecorationTheme?.suffixIconConstraints,
-                  padding: isCollapsed ? EdgeInsets.zero : null,
-                  icon: widget.trailingIcon ?? const Icon(Icons.arrow_drop_down),
-                  selectedIcon: widget.selectedTrailingIcon ?? const Icon(Icons.arrow_drop_up),
-                  onPressed: !widget.enabled
-                      ? null
-                      : () {
-                          handlePressed(controller);
-                        },
+                child: ExcludeSemantics(
+                  // When the text field is treated as a button (i.e., it can
+                  // not be focused), the trailing button should become part of
+                  // the text field button by excluding semantics. Otherwise,
+                  // it will inappropriately announce whether this icon button
+                  // is selected or not.
+                  excluding: !canRequestFocus(),
+                  child: IconButton(
+                    focusNode: _trailingIconButtonFocusNode,
+                    isSelected: controller.isOpen,
+                    constraints: widget.inputDecorationTheme?.suffixIconConstraints,
+                    padding: isCollapsed ? EdgeInsets.zero : null,
+                    icon: widget.trailingIcon ?? const Icon(Icons.arrow_drop_down),
+                    selectedIcon: widget.selectedTrailingIcon ?? const Icon(Icons.arrow_drop_up),
+                    onPressed: !widget.enabled
+                        ? null
+                        : () {
+                            handlePressed(controller);
+                          },
+                  ),
                 ),
               )
             : const SizedBox.shrink();
@@ -1150,48 +1165,77 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           child: widget.leadingIcon ?? const SizedBox.shrink(),
         );
 
-        final Widget textField = TextField(
-          key: _anchorKey,
-          enabled: widget.enabled,
-          mouseCursor: effectiveMouseCursor,
-          focusNode: widget.focusNode,
-          canRequestFocus: canRequestFocus(),
-          enableInteractiveSelection: canRequestFocus(),
-          readOnly: !canRequestFocus(),
-          keyboardType: widget.keyboardType,
-          textAlign: widget.textAlign,
-          textAlignVertical: TextAlignVertical.center,
-          maxLines: widget.maxLines,
-          textInputAction: widget.textInputAction,
-          cursorHeight: widget.cursorHeight,
-          style: effectiveTextStyle,
-          controller: _effectiveTextEditingController,
-          onEditingComplete: _handleEditingComplete,
-          onTap: !widget.enabled
+        final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+        final bool isButton = !canRequestFocus();
+        final Widget textField = Semantics(
+          button: isButton,
+          // This is set specificly for iOS because iOS does not have any native
+          // APIs to show whether the menu is expanded or collapsed.
+          hint: Theme.of(context).platform == TargetPlatform.iOS
+              ? _controller.isOpen
+                    ? localizations.collapsedHint
+                    : localizations.expandedHint
+              : null,
+          expanded: _controller.isOpen,
+          onExpand: _controller.isOpen
               ? null
               : () {
-                  handlePressed(controller, focusForKeyboard: !canRequestFocus());
+                  _controller.open();
                 },
-          onChanged: (String text) {
-            controller.open();
-            setState(() {
-              filteredEntries = widget.dropdownMenuEntries;
-              _enableFilter = widget.enableFilter;
-              _enableSearch = widget.enableSearch;
-            });
-          },
-          inputFormatters: widget.inputFormatters,
-          decoration: InputDecoration(
-            label: widget.label,
-            hintText: widget.hintText,
-            helperText: widget.helperText,
-            errorText: widget.errorText,
-            prefixIcon: widget.leadingIcon != null
-                ? SizedBox(key: _leadingKey, child: widget.leadingIcon)
-                : null,
-            suffixIcon: widget.showTrailingIcon ? trailingButton : null,
-          ).applyDefaults(effectiveInputDecorationTheme),
-          restorationId: widget.restorationId,
+          onCollapse: !_controller.isOpen
+              ? null
+              : () {
+                  _controller.close();
+                },
+          child: ExcludeSemantics(
+            // When both `isTextField` and `isButton` are true, this widget will
+            // still be treated as a text field on web. So excluding the semantics
+            // of the `TextField` on web is needed.
+            excluding: isButton && kIsWeb,
+            child: TextField(
+              key: _anchorKey,
+              enabled: widget.enabled,
+              mouseCursor: effectiveMouseCursor,
+              focusNode: widget.focusNode,
+              canRequestFocus: canRequestFocus(),
+              enableInteractiveSelection: canRequestFocus(),
+              readOnly: !canRequestFocus(),
+              keyboardType: widget.keyboardType,
+              textAlign: widget.textAlign,
+              textAlignVertical: TextAlignVertical.center,
+              maxLines: widget.maxLines,
+              textInputAction: widget.textInputAction,
+              cursorHeight: widget.cursorHeight,
+              style: effectiveTextStyle,
+              controller: _effectiveTextEditingController,
+              onEditingComplete: _handleEditingComplete,
+              onTap: !widget.enabled
+                  ? null
+                  : () {
+                      handlePressed(controller, focusForKeyboard: !canRequestFocus());
+                    },
+              onChanged: (String text) {
+                controller.open();
+                setState(() {
+                  filteredEntries = widget.dropdownMenuEntries;
+                  _enableFilter = widget.enableFilter;
+                  _enableSearch = widget.enableSearch;
+                });
+              },
+              inputFormatters: widget.inputFormatters,
+              decoration: InputDecoration(
+                label: widget.label,
+                hintText: widget.hintText,
+                helperText: widget.helperText,
+                errorText: widget.errorText,
+                prefixIcon: widget.leadingIcon != null
+                    ? SizedBox(key: _leadingKey, child: widget.leadingIcon)
+                    : null,
+                suffixIcon: widget.showTrailingIcon ? trailingButton : null,
+              ).applyDefaults(effectiveInputDecorationTheme),
+              restorationId: widget.restorationId,
+            ),
+          ),
         );
 
         // If [expandedInsets] is not null, the width of the text field should depend
@@ -1404,7 +1448,6 @@ class _RenderDropdownMenuBody extends RenderBox
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    final BoxConstraints constraints = this.constraints;
     double maxWidth = 0.0;
     double? maxHeight;
     RenderBox? child = firstChild;
@@ -1416,22 +1459,17 @@ class _RenderDropdownMenuBody extends RenderBox
     );
 
     while (child != null) {
-      if (child == firstChild) {
-        final Size childSize = child.getDryLayout(innerConstraints);
-        maxHeight ??= childSize.height;
-        final _DropdownMenuBodyParentData childParentData =
-            child.parentData! as _DropdownMenuBodyParentData;
-        assert(child.parentData == childParentData);
-        child = childParentData.nextSibling;
-        continue;
-      }
       final Size childSize = child.getDryLayout(innerConstraints);
+
+      // The first child is the TextField, which doesn't contribute to the
+      // menu's width calculation.
+      if (child != firstChild) {
+        maxWidth = math.max(maxWidth, childSize.width);
+      }
+
       final _DropdownMenuBodyParentData childParentData =
           child.parentData! as _DropdownMenuBodyParentData;
-      childParentData.offset = Offset.zero;
-      maxWidth = math.max(maxWidth, childSize.width);
       maxHeight ??= childSize.height;
-      assert(child.parentData == childParentData);
       child = childParentData.nextSibling;
     }
 
