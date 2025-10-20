@@ -10,6 +10,9 @@ import java.util.*;
  * native shell when it is initialized. See {@link
  * io.flutter.embedding.engine.loader.FlutterLoader#ensureInitializationComplete(Context, String[])}
  * for more information.
+ *
+ * <p>If the same flag is provided both via command line arguments and via AndroidManifest.xml
+ * meta-data, the command line value takes precedence at runtime.
  */
 public final class FlutterEngineManifestFlags {
 
@@ -34,9 +37,6 @@ public final class FlutterEngineManifestFlags {
       return commandLineArgument.endsWith("=");
     }
   }
-
-  // Can also be set by command line. Command line takes precendence IMO
-  // TODO(camsim99): note this in the docs.
 
   // Manifest flags allowed in release mode:
 

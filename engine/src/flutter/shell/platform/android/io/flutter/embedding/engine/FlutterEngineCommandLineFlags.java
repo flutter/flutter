@@ -19,9 +19,10 @@ import java.util.*;
  *
  * <p>All of these flags map to flag listed in shell/common/switches.cc. Some of these flags can
  * also be set via manifest metadata in AndroidManifest.xml. See {@link FlutterEngineManifestFlags}
- * for the full list of such available flags.
+ * for the full list of such available flags. If the same flag is provided both via command line
+ * arguments and via AndroidManifest.xml meta-data, the command line value takes precedence at
+ * runtime.
  */
-// @SuppressWarnings({"WeakerAccess", "unused"}) TODO(camsim99): See if we need these
 public class FlutterEngineCommandLineFlags {
 
   /** Measures startup time and switches to an endless trace buffer. */
@@ -58,8 +59,7 @@ public class FlutterEngineCommandLineFlags {
   public static final String PROFILE_MICROTASKS = "--profile-microtasks";
 
   /** Dumps SKP files that trigger shader compilations. */
-  public static final String DUMP_SKP_ON_SHADER_COMPILATION =
-      "--dump-skp-on-shader-compilation";
+  public static final String DUMP_SKP_ON_SHADER_COMPILATION = "--dump-skp-on-shader-compilation";
 
   /** Removes all persistent cache files for debugging. */
   public static final String PURGE_PERSISTENT_CACHE = "--purge-persistent-cache";
