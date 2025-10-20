@@ -36,6 +36,16 @@ FLUTTER_ASSERT_ARC
 }
 @end
 
+// This class is not referenced in test because it's a test itself. The implementation
+// verifies that sceneLifeCycleDelegate is a readonly property.
+@interface TestSceneLifecycleProvider : NSObject <FlutterSceneLifeCycleProvider>
+@end
+@implementation TestSceneLifecycleProvider
+- (FlutterPluginSceneLifeCycleDelegate*)sceneLifeCycleDelegate {
+  return [[FlutterPluginSceneLifeCycleDelegate alloc] init];
+}
+@end
+
 @interface FlutterSceneLifecycleTest : XCTestCase
 @end
 
