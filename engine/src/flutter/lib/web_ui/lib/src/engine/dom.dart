@@ -279,6 +279,7 @@ extension type DomHTMLDocument._(JSObject _) implements DomDocument {
   external DomFontFaceSet? get fonts;
   external DomHTMLHeadElement? get head;
   external DomHTMLBodyElement? get body;
+  external DomElement get documentElement;
   external String? title;
 
   @JS('getElementsByTagName')
