@@ -50,6 +50,6 @@
                     "flutter/build/archives:artifacts"
                 ]
             }
-        },
-    ],
+        }
+    ]
 }
