@@ -4807,6 +4807,40 @@ void main() {
       return const InputDecoration(labelText: labelText);
     }
 
+    testWidgets('Decoration properties set by decorationBuilder are applied', (
+      WidgetTester tester,
+    ) async {
+      final MenuController menuController = MenuController();
+      const InputDecoration decoration = InputDecoration(
+        labelText: labelText,
+        helperText: 'helperText',
+        hintText: 'hintText',
+        filled: true,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              menuController: menuController,
+              dropdownMenuEntries: menuChildren,
+              decorationBuilder: (BuildContext context, MenuController controller) {
+                return decoration;
+              },
+            ),
+          ),
+        ),
+      );
+
+      final TextField textField = tester.firstWidget(find.byType(TextField));
+      final InputDecoration effectiveDecoration = textField.decoration!;
+
+      expect(effectiveDecoration.labelText, decoration.labelText);
+      expect(effectiveDecoration.helperText, decoration.helperText);
+      expect(effectiveDecoration.hintText, decoration.hintText);
+      expect(effectiveDecoration.filled, decoration.filled);
+    });
+
     testWidgets('Custom decorationBuilder can replace default suffixIcon', (
       WidgetTester tester,
     ) async {
