@@ -157,7 +157,7 @@ void main() {
       phase: EnginePhase.build,
     );
 
-    expect(tester.renderObject(find.byType(CustomPaint)).debugNeedsPaint, true);
+    expect(tester.renderObject(find.byType(CustomPaint).last).debugNeedsPaint, true);
   });
 
   testWidgets('tab semantics role test', (WidgetTester tester) async {
@@ -9277,5 +9277,49 @@ void main() {
       (focus: true, index: 2), // Third tab gains focus
       (focus: false, index: 2), // Third tab loses focus
     ]);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/141269.
+  testWidgets('Ink features are painted on inner Material', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: DefaultTabController(
+              length: 10,
+              child: TabBar(
+                isScrollable: true,
+                tabs: <Widget>[for (int i = 1; i <= 10; i++) Tab(text: 'Tab $i')],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Material), findsNWidgets(2));
+
+    // Material outside the TabBar.
+    final MaterialInkController outerMaterial = Material.of(tester.element(find.byType(TabBar)));
+    // Material directly wrapping the TabBar.
+    final MaterialInkController innerMaterial = Material.of(
+      tester.firstElement(
+        find.descendant(of: find.byType(TabBar), matching: find.byType(Semantics)),
+      ),
+    );
+
+    expect(outerMaterial, isNot(same(innerMaterial)));
+    expect((outerMaterial as dynamic).debugInkFeatures, isNull);
+    expect((innerMaterial as dynamic).debugInkFeatures, isNull);
+
+    // Hover over the first tab to trigger the ink highlight.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: tester.getCenter(find.text('Tab 1')));
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+
+    // Only the inner Material should have ink features.
+    expect((outerMaterial as dynamic).debugInkFeatures, isNull);
+    expect((innerMaterial as dynamic).debugInkFeatures, hasLength(1));
   });
 }
