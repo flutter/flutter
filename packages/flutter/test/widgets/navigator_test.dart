@@ -5219,6 +5219,36 @@ void main() {
       skip: isBrowser, // [intended] only non-web Android supports predictive back.
     );
 
+    testWidgets('pop() on an empty stack prints a debug warning', (WidgetTester tester) async {
+      final List<String> debugMessages = <String>[];
+
+      final DebugPrintCallback oldDebugPrint = debugPrint;
+      debugPrint = (String? message, {int? wrapWidth}) {
+        if (message != null) {
+          debugMessages.add(message);
+        }
+      };
+
+      await tester.pumpWidget(MaterialApp(home: Container()));
+
+      final NavigatorState navigator = tester.state(find.byType(Navigator));
+      navigator.pop();
+      await tester.pump(); // Pump again to ensure all async framework work is complete
+
+      debugPrint = oldDebugPrint;
+
+      const String expectedMessage =
+          'Tried to pop a route on an empty stack. Ensure there is at least one route before calling Navigator.pop().';
+
+      expect(
+        debugMessages,
+        contains(expectedMessage),
+        reason: 'The expected debug warning for popping an empty stack was not found.',
+      );
+
+      expect(find.byType(Container), findsOneWidget);
+    });
+
     testWidgets(
       'navigating around a single Navigator with system back',
       (WidgetTester tester) async {
