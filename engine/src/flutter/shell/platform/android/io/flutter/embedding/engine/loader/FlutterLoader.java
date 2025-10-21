@@ -44,6 +44,9 @@ public class FlutterLoader {
   static final String SNAPSHOT_ASSET_PATH_KEY = "snapshot-asset-path";
   static final String AOT_VMSERVICE_SHARED_LIBRARY_NAME = "aot-vmservice-shared-library-name";
 
+  // Flag set for generating GeneratedPluginRegistrant.java.
+  static final String FLUTTER_EMBEDDING_KEY = "flutterEmbedding";
+
   // Resource names used for components of the precompiled snapshot.
   private static final String DEFAULT_LIBRARY = "libflutter.so";
   private static final String DEFAULT_KERNEL_BLOB = "kernel_blob.bin";
@@ -305,6 +308,12 @@ public class FlutterLoader {
 
       if (applicationMetaData != null) {
         for (String metadataKey : applicationMetaData.keySet()) {
+          if (metadataKey.equals(FLUTTER_EMBEDDING_KEY)) {
+            // Metadata key used for GeneratedPluginRegistrant.java generation; skip adding shell
+            // argument.
+            continue;
+          }
+
           FlutterEngineManifestFlags.Flag flag =
               FlutterEngineManifestFlags.getFlagByMetaDataKey(metadataKey);
           if (flag != null) {
@@ -357,6 +366,7 @@ public class FlutterLoader {
                 }
                 arg += value;
               }
+              Log.e("CAMILLE", "Adding manifest flag: " + arg);
               shellArgs.add(arg);
             }
           } else {

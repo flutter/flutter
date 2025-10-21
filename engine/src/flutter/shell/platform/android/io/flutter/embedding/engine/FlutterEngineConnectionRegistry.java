@@ -10,6 +10,8 @@ import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -330,18 +332,23 @@ import java.util.Set;
     this.activityPluginBinding = new FlutterEngineActivityPluginBinding(activity, lifecycle);
 
     // Set rendering mode of PlatformViewsController if set via the manifest.
-    ApplicationInfo applicationInfo =
-        applicationContext
-            .getPackageManager()
-            .getApplicationInfo(applicationContext.getPackageName(), PackageManager.GET_META_DATA);
-    Bundle applicationMetaData = applicationInfo.metaData;
-    final boolean useSoftwareRenderingFromManifest =
-        applicationMetaData
-            .get(FlutterEngineManifestFlags.ENABLE_SOFTWARE_RENDERING.metaDataKey)
-            .toBoolean();
-    final boolean useSoftwareRendering =
-        useSoftwareRenderingFromManifest != null ? useSoftwareRenderingFromManifest : false;
-    flutterEngine.getPlatformViewsController().setSoftwareRendering(useSoftwareRendering);
+    try {
+      ApplicationInfo applicationInfo =
+          appContext
+              .getPackageManager()
+              .getApplicationInfo(appContext.getPackageName(), PackageManager.GET_META_DATA);
+      Bundle applicationMetaData = applicationInfo.metaData;
+      final Boolean useSoftwareRenderingFromManifest =
+          (Boolean)
+              applicationMetaData.get(
+                  FlutterEngineManifestFlags.ENABLE_SOFTWARE_RENDERING.metaDataKey);
+      final boolean useSoftwareRendering =
+          useSoftwareRenderingFromManifest != null ? useSoftwareRenderingFromManifest : false;
+      flutterEngine.getPlatformViewsController().setSoftwareRendering(useSoftwareRendering);
+    } catch (PackageManager.NameNotFoundException e) {
+      Log.e(TAG, "Could not find ApplicationInfo when attempting to read manifest metadata.", e);
+      return;
+    }
 
     // Activate the PlatformViewsController. This must happen before any plugins attempt
     // to use it, otherwise an error stack trace will appear that says there is no
