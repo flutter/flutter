@@ -41,13 +41,12 @@ static NSString *_kPing = @"ping";
   for (int index = 1; index <= 50; index++) {
       if (index == 10) {
         _flutterViewController = [[FlutterViewController alloc] init];
-        _flutterViewController.isAutoResizable = true;
+        _flutterViewController.autoResizable = true;
         [self addChildViewController:_flutterViewController];
         [stackView addArrangedSubview:_flutterViewController.view];
         [_flutterViewController didMoveToParentViewController:self];
       } else {
           UILabel *label = [[UILabel alloc] init];
-          // Swift: label.text = "Hello from iOS \(index)"
           label.text = [NSString stringWithFormat:@"Hello from iOS %d", index];
           [stackView addArrangedSubview:label];
       }

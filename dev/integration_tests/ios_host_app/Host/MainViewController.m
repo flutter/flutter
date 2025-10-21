@@ -9,6 +9,7 @@
 #import "FullScreenViewController.h"
 #import "HybridViewController.h"
 #import "NativeViewController.h"
+#import "DynamicResizingViewController.h"
 
 @interface MainViewController ()
 
@@ -44,6 +45,7 @@
   self.flutterViewWarmButton = [self addButton:@"Flutter View (Warm)" action:@selector(showFlutterViewWarm)];
   [self addButton:@"Hybrid View (Warm)" action:@selector(showHybridView)];
   [self addButton:@"Dual Flutter View (Cold)" action:@selector(showDualView)];
+  [self addButton:@"Dynamic Content Resizing" action:@selector(showContentResizingView)];
 }
 
 - (FlutterEngine *)engine {
@@ -52,6 +54,13 @@
 
 - (FlutterBasicMessageChannel*)reloadMessageChannel {
   return [(AppDelegate *)[[UIApplication sharedApplication] delegate] reloadMessageChannel];
+}
+
+- (void)showContentResizingView {
+  DynamicResizingViewController *resizingViewController =
+      [[DynamicResizingViewController alloc] init];
+  [self.navigationController pushViewController:resizingViewController
+                                       animated:YES];
 }
 
 - (void)showDualView {
