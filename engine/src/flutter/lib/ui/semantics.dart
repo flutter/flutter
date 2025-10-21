@@ -1172,6 +1172,9 @@ enum SemanticsHitTestBehavior {
   /// based on the semantic node's properties such as interactive behaviors,
   /// route scoping, etc.
   ///
+  /// On the web, the default inferred behavior is `transparent` for
+  /// non-interactive semantic nodes, allowing pointer events to pass through.
+  ///
   /// This is the default value and provides backward compatibility.
   defer,
 
@@ -1203,9 +1206,6 @@ enum SemanticsHitTestBehavior {
   ///
   /// Platform implementations:
   ///  * On the web, this results in `pointer-events: none` CSS property.
-  ///
-  /// This is the default behavior for non-interactive semantic nodes when the
-  /// platform infers behavior.
   transparent,
 }
 

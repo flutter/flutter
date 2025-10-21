@@ -600,7 +600,7 @@ abstract class SemanticRole {
   /// - Route-scoped containers (dialogs, bottom sheets)
   /// - Default transparent for non-interactive leaf nodes
   ///
-  /// This approach allows framework full control when specified, with intelligent
+  /// This approach allows framework full control when specified, with reasonable
   /// fallback inference for backward compatibility.
   bool get acceptsPointerEvents {
     final hitTestBehavior = semanticsObject.hitTestBehavior;
@@ -610,7 +610,18 @@ abstract class SemanticRole {
     // The framework is responsible for ensuring valid configurations (e.g., not
     // making buttons transparent).
     if (hitTestBehavior != ui.SemanticsHitTestBehavior.defer) {
-      return _shouldAcceptPointerEventsFromBehavior(hitTestBehavior);
+      switch (hitTestBehavior) {
+        case ui.SemanticsHitTestBehavior.opaque:
+          // Absorb pointer events, blocking them from reaching elements behind.
+          // Used by modal surfaces like dialogs, bottom sheets, drawers.
+          return true;
+        case ui.SemanticsHitTestBehavior.transparent:
+          // Pass through pointer events to elements behind.
+          // Used for non-interactive decorative elements.
+          return false;
+        case ui.SemanticsHitTestBehavior.defer:
+          break;
+      }
     }
 
     // TIER 2: Engine Inference
@@ -618,35 +629,10 @@ abstract class SemanticRole {
     return _inferAcceptsPointerEvents();
   }
 
-  /// Determines if pointer events should be accepted based on framework's
-  /// explicit hit test behavior.
-  ///
-  /// This method should only be called with [ui.SemanticsHitTestBehavior.opaque]
-  /// or [ui.SemanticsHitTestBehavior.transparent]. The [ui.SemanticsHitTestBehavior.defer]
-  /// case is handled separately by [_inferAcceptsPointerEvents].
-  bool _shouldAcceptPointerEventsFromBehavior(ui.SemanticsHitTestBehavior behavior) {
-    switch (behavior) {
-      case ui.SemanticsHitTestBehavior.opaque:
-        // Absorb pointer events, blocking them from reaching elements behind.
-        // Used by modal surfaces like dialogs, bottom sheets, drawers.
-        return true;
-      case ui.SemanticsHitTestBehavior.transparent:
-        // Pass through pointer events to elements behind.
-        // Used for non-interactive decorative elements.
-        return false;
-      case ui.SemanticsHitTestBehavior.defer:
-        // This case should never be reached because defer is handled in
-        // acceptsPointerEvents before calling this method.
-        assert(false, 'defer should be handled by _inferAcceptsPointerEvents');
-        return false; // Unreachable in debug; defensive in release
-    }
-  }
-
   /// Infers whether pointer events should be accepted based on semantic properties.
-  ///
-  /// This method is called when [ui.SemanticsHitTestBehavior.defer] is set,
-  /// providing backward-compatible inference logic.
   bool _inferAcceptsPointerEvents() {
+    assert(semanticsObject.hitTestBehavior == ui.SemanticsHitTestBehavior.defer);
+
     // Check if any interactive behavior requires pointer events.
     // Interactive behaviors (Tappable, SemanticTextField, SemanticIncrementable)
     // override this to return true, ensuring buttons, text fields, and other
@@ -660,10 +646,15 @@ abstract class SemanticRole {
       }
     }
 
-    // Route-scoped containers accept pointer events.
+    // Route-scoped containers accept pointer events as a fallback.
     // This fixes the dialog dismissal bug (issue #149001) by ensuring that
     // dialog containers act as barriers, preventing clicks on empty space
     // from passing through to the modal barrier underneath.
+    //
+    // Note: Ideally, the framework should explicitly set
+    // SemanticsHitTestBehavior.opaque for dialogs instead of relying on this
+    // engine-side inference. This fallback exists for backward compatibility
+    // and cases where framework doesn't specify the behavior.
     if (semanticsObject.hasChildren) {
       return semanticsObject.scopesRoute;
     }
