@@ -237,8 +237,6 @@ class _TweenAnimationBuilderState<T extends Object?>
 ///  * [AnimationController.repeat], the underlying mechanism.
 class RepeatingTweenAnimationBuilder<T extends Object> extends StatefulWidget {
   /// Creates a widget that repeats a tween animation.
-  ///
-  /// The [tween], [duration], and [builder] arguments must not be null.
   RepeatingTweenAnimationBuilder({
     super.key,
     required this.tween,
@@ -334,12 +332,12 @@ class _RepeatingTweenAnimationBuilderState<T extends Object>
   void didUpdateWidget(RepeatingTweenAnimationBuilder<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Update duration if changed
+    // Update the duration if it changed.
     if (widget.duration != oldWidget.duration) {
       _controller.duration = widget.duration;
     }
 
-    // Update animation if curve or tween changed
+    // Update the animation if the curve or the tween changed.
     final bool tweenChanged =
         widget.tween.runtimeType != oldWidget.tween.runtimeType ||
         widget.tween.begin != oldWidget.tween.begin ||
@@ -369,7 +367,7 @@ class _RepeatingTweenAnimationBuilderState<T extends Object>
 
   @override
   Widget build(BuildContext context) {
-    // If no animation needed (begin equals end), just build with static value
+    // If no animation needed (begin equals end), just build with static value.
     if (widget.tween.begin == widget.tween.end) {
       return widget.builder(context, _animation.value, widget.child);
     }
