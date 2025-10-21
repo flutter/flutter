@@ -758,16 +758,16 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   @override
-  double get lineHeightScaleFactor => configuration.lineHeightScaleFactor;
+  double? get lineHeightScaleFactor => configuration.lineHeightScaleFactor;
 
   @override
-  double get letterSpacing => configuration.letterSpacing;
+  double? get letterSpacing => configuration.letterSpacing;
 
   @override
-  double get wordSpacing => configuration.wordSpacing;
+  double? get wordSpacing => configuration.wordSpacing;
 
   @override
-  double get paragraphSpacing => configuration.paragraphSpacing;
+  double? get paragraphSpacing => configuration.paragraphSpacing;
 
   /// Additional accessibility features that may be enabled by the platform.
   @override
@@ -1041,9 +1041,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// Updates [lineHeightScaleFactor] and invokes [onPlatformConfigurationChanged] and
   /// [onMetricsChanged] callbacks if [lineHeightScaleFactor] changed.
-  void _updateLineHeightScaleFactor(double value) {
+  void _updateLineHeightScaleFactor(double? value) {
     if (configuration.lineHeightScaleFactor != value) {
-      configuration = configuration.copyWith(lineHeightScaleFactor: value);
+      configuration = configuration.apply(lineHeightScaleFactor: value);
       invokeOnPlatformConfigurationChanged();
       invokeOnMetricsChanged();
     }
@@ -1051,9 +1051,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// Updates [letterSpacing] and invokes [onPlatformConfigurationChanged] and
   /// [onMetricsChanged] callbacks if [letterSpacing] changed.
-  void _updateLetterSpacing(double value) {
+  void _updateLetterSpacing(double? value) {
     if (configuration.letterSpacing != value) {
-      configuration = configuration.copyWith(letterSpacing: value);
+      configuration = configuration.apply(letterSpacing: value);
       invokeOnPlatformConfigurationChanged();
       invokeOnMetricsChanged();
     }
@@ -1061,9 +1061,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// Updates [wordSpacing] and invokes [onPlatformConfigurationChanged] and
   /// [onMetricsChanged] callbacks if [wordSpacing] changed.
-  void _updateWordSpacing(double value) {
+  void _updateWordSpacing(double? value) {
     if (configuration.wordSpacing != value) {
-      configuration = configuration.copyWith(wordSpacing: value);
+      configuration = configuration.apply(wordSpacing: value);
       invokeOnPlatformConfigurationChanged();
       invokeOnMetricsChanged();
     }
@@ -1071,9 +1071,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// Updates [paragraphSpacing] and invokes [onPlatformConfigurationChanged] and
   /// [onMetricsChanged] callbacks if [paragraphSpacing] changed.
-  void _updateParagraphSpacing(double value) {
+  void _updateParagraphSpacing(double? value) {
     if (configuration.paragraphSpacing != value) {
-      configuration = configuration.copyWith(paragraphSpacing: value);
+      configuration = configuration.apply(paragraphSpacing: value);
       invokeOnPlatformConfigurationChanged();
       invokeOnMetricsChanged();
     }
@@ -1138,18 +1138,18 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         'margin-bottom',
       )?.toDouble();
 
-      // if (computedLineHeightScaleFactor == defaultLineHeightFactor) {
-      //   _updateLineHeightScaleFactor();
-      // }
-      // if (computedLetterSpacing == spacingDefault) {
-      //   _updateLetterSpacing();
-      // }
-      // if (computedWordSpacing == spacingDefault) {
-      //   _updateWordSpacing();
-      // }
-      // if (computedParagraphSpacing == spacingDefault) {
-      //   _updateParagraphSpacing();
-      // }
+      if (computedLineHeightScaleFactor == defaultLineHeightFactor) {
+        _updateLineHeightScaleFactor(null);
+      }
+      if (computedLetterSpacing == spacingDefault) {
+        _updateLetterSpacing(null);
+      }
+      if (computedWordSpacing == spacingDefault) {
+        _updateWordSpacing(null);
+      }
+      if (computedParagraphSpacing == spacingDefault) {
+        _updateParagraphSpacing(null);
+      }
 
       if (computedLineHeightScaleFactor != null &&
           computedLineHeightScaleFactor != defaultLineHeightFactor) {
@@ -1834,11 +1834,53 @@ class PlatformConfiguration {
     this.locales = const <ui.Locale>[],
     this.defaultRouteName = '/',
     this.systemFontFamily,
-    this.lineHeightScaleFactor = 1.0,
-    this.letterSpacing = 0.0,
-    this.wordSpacing = 0.0,
-    this.paragraphSpacing = 0.0,
+    this.lineHeightScaleFactor,
+    this.letterSpacing,
+    this.wordSpacing,
+    this.paragraphSpacing,
   });
+
+  static const Object _noOverridePlaceholder = Object();
+
+  PlatformConfiguration apply({
+    ui.AccessibilityFeatures? accessibilityFeatures,
+    bool? alwaysUse24HourFormat,
+    bool? semanticsEnabled,
+    ui.Brightness? platformBrightness,
+    double? textScaleFactor,
+    List<ui.Locale>? locales,
+    String? defaultRouteName,
+    Object? systemFontFamily = _noOverridePlaceholder,
+    Object? lineHeightScaleFactor = _noOverridePlaceholder,
+    Object? letterSpacing = _noOverridePlaceholder,
+    Object? wordSpacing = _noOverridePlaceholder,
+    Object? paragraphSpacing = _noOverridePlaceholder,
+  }) {
+    return PlatformConfiguration(
+      accessibilityFeatures: accessibilityFeatures ?? this.accessibilityFeatures,
+      alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
+      semanticsEnabled: semanticsEnabled ?? this.semanticsEnabled,
+      platformBrightness: platformBrightness ?? this.platformBrightness,
+      textScaleFactor: textScaleFactor ?? this.textScaleFactor,
+      locales: locales ?? this.locales,
+      defaultRouteName: defaultRouteName ?? this.defaultRouteName,
+      systemFontFamily: systemFontFamily == _noOverridePlaceholder
+          ? this.systemFontFamily
+          : systemFontFamily as String?,
+      lineHeightScaleFactor: lineHeightScaleFactor == _noOverridePlaceholder
+          ? this.lineHeightScaleFactor
+          : lineHeightScaleFactor as double?,
+      letterSpacing: letterSpacing == _noOverridePlaceholder
+          ? this.letterSpacing
+          : letterSpacing as double?,
+      wordSpacing: wordSpacing == _noOverridePlaceholder
+          ? this.wordSpacing
+          : wordSpacing as double?,
+      paragraphSpacing: paragraphSpacing == _noOverridePlaceholder
+          ? this.paragraphSpacing
+          : paragraphSpacing as double?,
+    );
+  }
 
   PlatformConfiguration copyWith({
     ui.AccessibilityFeatures? accessibilityFeatures,
@@ -1878,10 +1920,10 @@ class PlatformConfiguration {
   final List<ui.Locale> locales;
   final String defaultRouteName;
   final String? systemFontFamily;
-  final double lineHeightScaleFactor;
-  final double letterSpacing;
-  final double wordSpacing;
-  final double paragraphSpacing;
+  final double? lineHeightScaleFactor;
+  final double? letterSpacing;
+  final double? wordSpacing;
+  final double? paragraphSpacing;
 }
 
 /// Helper class to hold navigation target information for AT focus restoration

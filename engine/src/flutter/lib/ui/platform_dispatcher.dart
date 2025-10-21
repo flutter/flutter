@@ -1124,7 +1124,7 @@ class PlatformDispatcher {
   /// The system-reported height of the text, as a multiple of the font size.
   ///
   /// If this value changes, [onMetricsChanged] will be called.
-  double get lineHeightScaleFactor => _configuration.lineHeightScaleFactor;
+  double? get lineHeightScaleFactor => _configuration.lineHeightScaleFactor;
 
   /// The system-reported amount of additional space (in logical pixels)
   /// to add between each letter.
@@ -1132,7 +1132,7 @@ class PlatformDispatcher {
   /// A negative value can be used to bring the letters closer.
   ///
   /// If this value changes, [onMetricsChanged] will be called.
-  double get letterSpacing => _configuration.letterSpacing;
+  double? get letterSpacing => _configuration.letterSpacing;
 
   /// The system-reported amount of additional space (in logical pixels)
   /// to add between each sequence of white-space (i.e. between each word).
@@ -1140,13 +1140,13 @@ class PlatformDispatcher {
   /// A negative value can be used to bring the words closer.
   ///
   /// If this value changes, [onMetricsChanged] will be called.
-  double get wordSpacing => _configuration.wordSpacing;
+  double? get wordSpacing => _configuration.wordSpacing;
 
   /// The system-reported amount of additional space (in logical pixels)
   /// to add between each paragraph in text.
   ///
   /// If this value changes, [onMetricsChanged] will be called.
-  double get paragraphSpacing => _configuration.paragraphSpacing;
+  double? get paragraphSpacing => _configuration.paragraphSpacing;
 
   /// The system-reported text scale.
   ///
@@ -1838,10 +1838,10 @@ class _PlatformConfiguration {
     this.defaultRouteName,
     this.systemFontFamily,
     this.configurationId,
-    this.lineHeightScaleFactor = 1.0,
-    this.letterSpacing = 0.0,
-    this.wordSpacing = 0.0,
-    this.paragraphSpacing = 0.0,
+    this.lineHeightScaleFactor,
+    this.letterSpacing,
+    this.wordSpacing,
+    this.paragraphSpacing,
   });
 
   _PlatformConfiguration copyWith({
@@ -1922,23 +1922,23 @@ class _PlatformConfiguration {
   final int? configurationId;
 
   /// The system-reported height of the text, as a multiple of the font size.
-  final double lineHeightScaleFactor;
+  final double? lineHeightScaleFactor;
 
   /// The system-reported amount of additional space (in logical pixels)
   /// to add between each letter.
   ///
   /// A negative value can be used to bring the letters closer.
-  final double letterSpacing;
+  final double? letterSpacing;
 
   /// The system-reported amount of additional space (in logical pixels)
   /// to add between each sequence of white-space (i.e. between each word).
   ///
   /// A negative value can be used to bring the words closer.
-  final double wordSpacing;
+  final double? wordSpacing;
 
   /// The system-reported amount of additional space (in logical pixels)
   /// to add between each paragraph in text.
-  final double paragraphSpacing;
+  final double? paragraphSpacing;
 }
 
 /// An immutable view configuration.
