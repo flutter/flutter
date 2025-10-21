@@ -63,14 +63,14 @@ void main() {
   });
 
   testWidgets(
-    'Text respects MediaQueryData.lineHeightScaleFactor, MediaQueryData.letterSpacing, MediaQueryData.wordSpacing, MediaQueryData.paragraphSpacing',
+    'Text respects MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, MediaQueryData.wordSpacingOverride, MediaQueryData.paragraphSpacing',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const MediaQuery(
           data: MediaQueryData(
-            lineHeightScaleFactor: 2.0,
-            letterSpacing: 2.0,
-            wordSpacing: 2.0,
+            lineHeightScaleFactorOverride: 2.0,
+            letterSpacingOverride: 2.0,
+            wordSpacingOverride: 2.0,
             paragraphSpacing: 2.0,
           ),
           child: Center(child: Text('Hello', textDirection: TextDirection.ltr)),

@@ -758,13 +758,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   @override
-  double? get lineHeightScaleFactor => configuration.lineHeightScaleFactor;
+  double? get lineHeightScaleFactorOverride => configuration.lineHeightScaleFactorOverride;
 
   @override
-  double? get letterSpacing => configuration.letterSpacing;
+  double? get letterSpacingOverride => configuration.letterSpacingOverride;
 
   @override
-  double? get wordSpacing => configuration.wordSpacing;
+  double? get wordSpacingOverride => configuration.wordSpacingOverride;
 
   @override
   double? get paragraphSpacing => configuration.paragraphSpacing;
@@ -1039,31 +1039,31 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   DomResizeObserver? _typographySettingsObserver;
   DomElement? _typographyMeasurementElement;
 
-  /// Updates [lineHeightScaleFactor] and invokes [onPlatformConfigurationChanged] and
-  /// [onMetricsChanged] callbacks if [lineHeightScaleFactor] changed.
-  void _updateLineHeightScaleFactor(double? value) {
-    if (configuration.lineHeightScaleFactor != value) {
-      configuration = configuration.apply(lineHeightScaleFactor: value);
+  /// Updates [lineHeightScaleFactorOverride] and invokes [onPlatformConfigurationChanged] and
+  /// [onMetricsChanged] callbacks if [lineHeightScaleFactorOverride] changed.
+  void _updateLineHeightScaleFactorOverride(double? value) {
+    if (configuration.lineHeightScaleFactorOverride != value) {
+      configuration = configuration.apply(lineHeightScaleFactorOverride: value);
       invokeOnPlatformConfigurationChanged();
       invokeOnMetricsChanged();
     }
   }
 
-  /// Updates [letterSpacing] and invokes [onPlatformConfigurationChanged] and
-  /// [onMetricsChanged] callbacks if [letterSpacing] changed.
-  void _updateLetterSpacing(double? value) {
-    if (configuration.letterSpacing != value) {
-      configuration = configuration.apply(letterSpacing: value);
+  /// Updates [letterSpacingOverride] and invokes [onPlatformConfigurationChanged] and
+  /// [onMetricsChanged] callbacks if [letterSpacingOverride] changed.
+  void _updateLetterSpacingOverride(double? value) {
+    if (configuration.letterSpacingOverride != value) {
+      configuration = configuration.apply(letterSpacingOverride: value);
       invokeOnPlatformConfigurationChanged();
       invokeOnMetricsChanged();
     }
   }
 
-  /// Updates [wordSpacing] and invokes [onPlatformConfigurationChanged] and
-  /// [onMetricsChanged] callbacks if [wordSpacing] changed.
-  void _updateWordSpacing(double? value) {
-    if (configuration.wordSpacing != value) {
-      configuration = configuration.apply(wordSpacing: value);
+  /// Updates [wordSpacingOverride] and invokes [onPlatformConfigurationChanged] and
+  /// [onMetricsChanged] callbacks if [wordSpacingOverride] changed.
+  void _updateWordSpacingOverride(double? value) {
+    if (configuration.wordSpacingOverride != value) {
+      configuration = configuration.apply(wordSpacingOverride: value);
       invokeOnPlatformConfigurationChanged();
       invokeOnMetricsChanged();
     }
@@ -1139,13 +1139,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       )?.toDouble();
 
       if (computedLineHeightScaleFactor == defaultLineHeightFactor) {
-        _updateLineHeightScaleFactor(null);
+        _updateLineHeightScaleFactorOverride(null);
       }
       if (computedLetterSpacing == spacingDefault) {
-        _updateLetterSpacing(null);
+        _updateLetterSpacingOverride(null);
       }
       if (computedWordSpacing == spacingDefault) {
-        _updateWordSpacing(null);
+        _updateWordSpacingOverride(null);
       }
       if (computedParagraphSpacing == spacingDefault) {
         _updateParagraphSpacing(null);
@@ -1153,13 +1153,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
       if (computedLineHeightScaleFactor != null &&
           computedLineHeightScaleFactor != defaultLineHeightFactor) {
-        _updateLineHeightScaleFactor(computedLineHeightScaleFactor);
+        _updateLineHeightScaleFactorOverride(computedLineHeightScaleFactor);
       }
       if (computedLetterSpacing != null && computedLetterSpacing != spacingDefault) {
-        _updateLetterSpacing(computedLetterSpacing);
+        _updateLetterSpacingOverride(computedLetterSpacing);
       }
       if (computedWordSpacing != null && computedWordSpacing != spacingDefault) {
-        _updateWordSpacing(computedWordSpacing);
+        _updateWordSpacingOverride(computedWordSpacing);
       }
       if (computedParagraphSpacing != null && computedParagraphSpacing != spacingDefault) {
         _updateParagraphSpacing(computedParagraphSpacing);
@@ -1834,9 +1834,9 @@ class PlatformConfiguration {
     this.locales = const <ui.Locale>[],
     this.defaultRouteName = '/',
     this.systemFontFamily,
-    this.lineHeightScaleFactor,
-    this.letterSpacing,
-    this.wordSpacing,
+    this.lineHeightScaleFactorOverride,
+    this.letterSpacingOverride,
+    this.wordSpacingOverride,
     this.paragraphSpacing,
   });
 
@@ -1851,9 +1851,9 @@ class PlatformConfiguration {
     List<ui.Locale>? locales,
     String? defaultRouteName,
     Object? systemFontFamily = _noOverridePlaceholder,
-    Object? lineHeightScaleFactor = _noOverridePlaceholder,
-    Object? letterSpacing = _noOverridePlaceholder,
-    Object? wordSpacing = _noOverridePlaceholder,
+    Object? lineHeightScaleFactorOverride = _noOverridePlaceholder,
+    Object? letterSpacingOverride = _noOverridePlaceholder,
+    Object? wordSpacingOverride = _noOverridePlaceholder,
     Object? paragraphSpacing = _noOverridePlaceholder,
   }) {
     return PlatformConfiguration(
@@ -1867,15 +1867,15 @@ class PlatformConfiguration {
       systemFontFamily: systemFontFamily == _noOverridePlaceholder
           ? this.systemFontFamily
           : systemFontFamily as String?,
-      lineHeightScaleFactor: lineHeightScaleFactor == _noOverridePlaceholder
-          ? this.lineHeightScaleFactor
-          : lineHeightScaleFactor as double?,
-      letterSpacing: letterSpacing == _noOverridePlaceholder
-          ? this.letterSpacing
-          : letterSpacing as double?,
-      wordSpacing: wordSpacing == _noOverridePlaceholder
-          ? this.wordSpacing
-          : wordSpacing as double?,
+      lineHeightScaleFactorOverride: lineHeightScaleFactorOverride == _noOverridePlaceholder
+          ? this.lineHeightScaleFactorOverride
+          : lineHeightScaleFactorOverride as double?,
+      letterSpacingOverride: letterSpacingOverride == _noOverridePlaceholder
+          ? this.letterSpacingOverride
+          : letterSpacingOverride as double?,
+      wordSpacingOverride: wordSpacingOverride == _noOverridePlaceholder
+          ? this.wordSpacingOverride
+          : wordSpacingOverride as double?,
       paragraphSpacing: paragraphSpacing == _noOverridePlaceholder
           ? this.paragraphSpacing
           : paragraphSpacing as double?,
@@ -1891,9 +1891,9 @@ class PlatformConfiguration {
     List<ui.Locale>? locales,
     String? defaultRouteName,
     String? systemFontFamily,
-    double? lineHeightScaleFactor,
-    double? letterSpacing,
-    double? wordSpacing,
+    double? lineHeightScaleFactorOverride,
+    double? letterSpacingOverride,
+    double? wordSpacingOverride,
     double? paragraphSpacing,
   }) {
     return PlatformConfiguration(
@@ -1905,9 +1905,10 @@ class PlatformConfiguration {
       locales: locales ?? this.locales,
       defaultRouteName: defaultRouteName ?? this.defaultRouteName,
       systemFontFamily: systemFontFamily ?? this.systemFontFamily,
-      lineHeightScaleFactor: lineHeightScaleFactor ?? this.lineHeightScaleFactor,
-      letterSpacing: letterSpacing ?? this.letterSpacing,
-      wordSpacing: wordSpacing ?? this.wordSpacing,
+      lineHeightScaleFactorOverride:
+          lineHeightScaleFactorOverride ?? this.lineHeightScaleFactorOverride,
+      letterSpacingOverride: letterSpacingOverride ?? this.letterSpacingOverride,
+      wordSpacingOverride: wordSpacingOverride ?? this.wordSpacingOverride,
       paragraphSpacing: paragraphSpacing ?? this.paragraphSpacing,
     );
   }
@@ -1920,9 +1921,9 @@ class PlatformConfiguration {
   final List<ui.Locale> locales;
   final String defaultRouteName;
   final String? systemFontFamily;
-  final double? lineHeightScaleFactor;
-  final double? letterSpacing;
-  final double? wordSpacing;
+  final double? lineHeightScaleFactorOverride;
+  final double? letterSpacingOverride;
+  final double? wordSpacingOverride;
   final double? paragraphSpacing;
 }
 
