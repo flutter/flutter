@@ -1458,6 +1458,8 @@ class ListView extends BoxScrollView {
       'Use findItemIndexCallback instead. '
       'findChildIndexCallback returns child indices (which include separators), '
       'while findItemIndexCallback returns item indices (which do not). '
+      'If you were multiplying results by 2 to account for separators, '
+      'you can remove that workaround when migrating to findItemIndexCallback. '
       'This feature was deprecated after v3.37.0-1.0.pre.',
     )
     ChildIndexGetter? findChildIndexCallback,
