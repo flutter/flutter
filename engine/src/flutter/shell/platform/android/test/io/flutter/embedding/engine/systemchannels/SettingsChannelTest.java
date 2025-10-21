@@ -55,6 +55,7 @@ public class SettingsChannelTest {
     assertEquals(
         config1.generationNumber,
         queue.getConfiguration(config1.generationNumber).generationNumber);
+    // Can get the same configuration more than once.
     assertEquals(
         config2.generationNumber,
         queue.getConfiguration(config2.generationNumber).generationNumber);
