@@ -169,15 +169,6 @@ abstract interface class RenderAbstractViewport extends RenderObject {
   ///
   ///  * [RevealedOffset], which describes the return value of this method.
   RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect? rect, Axis? axis});
-
-  /// The default value for the cache extent of the viewport.
-  ///
-  /// This default assumes [CacheExtentStyle.pixel].
-  ///
-  /// See also:
-  ///
-  ///  * [RenderViewportBase.cacheExtent] for a definition of the cache extent.
-  static const double defaultCacheExtent = 250.0;
 }
 
 /// Return value for [RenderAbstractViewport.getOffsetToReveal].
@@ -311,16 +302,15 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     AxisDirection axisDirection = AxisDirection.down,
     required AxisDirection crossAxisDirection,
     required ViewportOffset offset,
-    double? cacheExtent,
+    double cacheExtent = 0,
     CacheExtentStyle cacheExtentStyle = CacheExtentStyle.pixel,
     SliverPaintOrder paintOrder = SliverPaintOrder.firstIsTop,
     Clip clipBehavior = Clip.hardEdge,
   }) : assert(axisDirectionToAxis(axisDirection) != axisDirectionToAxis(crossAxisDirection)),
-       assert(cacheExtent != null || cacheExtentStyle == CacheExtentStyle.pixel),
        _axisDirection = axisDirection,
        _crossAxisDirection = crossAxisDirection,
        _offset = offset,
-       _cacheExtent = cacheExtent ?? RenderAbstractViewport.defaultCacheExtent,
+       _cacheExtent = cacheExtent,
        _cacheExtentStyle = cacheExtentStyle,
        _paintOrder = paintOrder,
        _clipBehavior = clipBehavior;
