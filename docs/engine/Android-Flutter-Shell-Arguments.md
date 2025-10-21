@@ -60,7 +60,7 @@ Set the `OldGenHeapSize` flag to 322 MB:
 Set software rendering:
     ```xml
     <meta-data
-            android:name="io.flutter.embedding.android.enableSoftwareRendering"
+            android:name="io.flutter.embedding.android.enableFlutterGpu"
             android:value="true" />
     ```
 
