@@ -934,7 +934,7 @@ class ResidentWebRunner extends ResidentRunner {
             DebugConnectionInfo(
               wsUri: websocketUri,
               devToolsUri: Uri.tryParse(debugConnection.devToolsUri ?? ''),
-              // TODO(bkonyi): surface DTD URI once it's visible from DWDS
+              dtdUri: Uri.tryParse(debugConnection.dtdUri ?? ''),
             ),
           );
         }),
