@@ -711,9 +711,9 @@ class Text extends StatelessWidget {
       effectiveTextStyle = defaultTextStyle.style.merge(style);
     }
     final bool boldText = MediaQuery.boldTextOf(context);
-    final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOf(context);
-    final double? letterSpacing = MediaQuery.maybeLetterSpacingOf(context);
-    final double? wordSpacing = MediaQuery.maybeWordSpacingOf(context);
+    final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(context);
+    final double? letterSpacing = MediaQuery.maybeLetterSpacingOverrideOf(context);
+    final double? wordSpacing = MediaQuery.maybeWordSpacingOverrideOf(context);
     if (boldText || lineHeightScaleFactor != null || letterSpacing != null || wordSpacing != null) {
       effectiveTextStyle = effectiveTextStyle!.merge(
         TextStyle(

@@ -326,9 +326,12 @@ void testMain() {
       await waitForResizeObserver();
       expect(root.contains(style), isTrue);
       expect(isCalled, isTrue);
-      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactor, expectedLineHeightScaleFactor);
-      expect(ui.PlatformDispatcher.instance.letterSpacing, expectedLetterSpacing);
-      expect(ui.PlatformDispatcher.instance.wordSpacing, expectedWordSpacing);
+      expect(
+        ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride,
+        expectedLineHeightScaleFactor,
+      );
+      expect(ui.PlatformDispatcher.instance.letterSpacingOverride, expectedLetterSpacing);
+      expect(ui.PlatformDispatcher.instance.wordSpacingOverride, expectedWordSpacing);
       expect(ui.PlatformDispatcher.instance.paragraphSpacing, expectedParagraphSpacing);
 
       isCalled = false;
@@ -337,9 +340,9 @@ void testMain() {
       await waitForResizeObserver();
       expect(root.contains(style), isFalse);
       expect(isCalled, isTrue);
-      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactor, null);
-      expect(ui.PlatformDispatcher.instance.letterSpacing, null);
-      expect(ui.PlatformDispatcher.instance.wordSpacing, null);
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, null);
+      expect(ui.PlatformDispatcher.instance.letterSpacingOverride, null);
+      expect(ui.PlatformDispatcher.instance.wordSpacingOverride, null);
       expect(ui.PlatformDispatcher.instance.paragraphSpacing, null);
 
       isCalled = false;
@@ -348,9 +351,12 @@ void testMain() {
       await waitForResizeObserver();
       expect(root.contains(style), isTrue);
       expect(isCalled, isTrue);
-      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactor, expectedLineHeightScaleFactor);
-      expect(ui.PlatformDispatcher.instance.letterSpacing, expectedLetterSpacing);
-      expect(ui.PlatformDispatcher.instance.wordSpacing, expectedWordSpacing);
+      expect(
+        ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride,
+        expectedLineHeightScaleFactor,
+      );
+      expect(ui.PlatformDispatcher.instance.letterSpacingOverride, expectedLetterSpacing);
+      expect(ui.PlatformDispatcher.instance.wordSpacingOverride, expectedWordSpacing);
       expect(ui.PlatformDispatcher.instance.paragraphSpacing, expectedParagraphSpacing);
     });
 

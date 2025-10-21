@@ -3239,9 +3239,9 @@ class EditableTextState extends State<EditableText>
     super.didChangeDependencies();
 
     // Apply platform settings to text style.
-    final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOf(context);
-    final double? letterSpacing = MediaQuery.maybeLetterSpacingOf(context);
-    final double? wordSpacing = MediaQuery.maybeWordSpacingOf(context);
+    final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(context);
+    final double? letterSpacing = MediaQuery.maybeLetterSpacingOverrideOf(context);
+    final double? wordSpacing = MediaQuery.maybeWordSpacingOverrideOf(context);
     final bool boldText = MediaQuery.boldTextOf(context);
     if (!boldText &&
         lineHeightScaleFactor == null &&
@@ -3398,9 +3398,9 @@ class EditableTextState extends State<EditableText>
 
     if (widget.style != oldWidget.style) {
       // Apply platform settings to text style.
-      final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOf(context);
-      final double? letterSpacing = MediaQuery.maybeLetterSpacingOf(context);
-      final double? wordSpacing = MediaQuery.maybeWordSpacingOf(context);
+      final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(context);
+      final double? letterSpacing = MediaQuery.maybeLetterSpacingOverrideOf(context);
+      final double? wordSpacing = MediaQuery.maybeWordSpacingOverrideOf(context);
       final bool boldText = MediaQuery.boldTextOf(context);
       if (!boldText &&
           lineHeightScaleFactor == null &&
