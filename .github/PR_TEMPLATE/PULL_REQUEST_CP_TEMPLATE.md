@@ -7,18 +7,18 @@ What is the link to the issue this cherry-pick is addressing?
 https://github.com/flutter/flutter/issues/< Replace with issue link here >
 
 ### Impact Description:
-What is the impact (ex. visual jank on Samsung phones, app crash, cannot ship an iOS app)? 
-Does it impact development (ex. flutter doctor crashes when Android Studio is installed), 
-or the shipping production app (the app crashes on launch). 
-This information is for domain experts and release engineers to understand the consequences of saying yes or no to the cherry pick. 
+What is the impact (ex. visual jank on Samsung phones, app crash, cannot ship an iOS app)?
+Does it impact development (ex. flutter doctor crashes when Android Studio is installed),
+or the shipping production app (the app crashes on launch).
+This information is for domain experts and release engineers to understand the consequences of saying yes or no to the cherry pick.
 
 < Replace with impact description here >
 
 ### Changelog Description:
-Explain this cherry pick: 
+Explain this cherry pick:
 * In one line that is accessible to most Flutter developers.
 * That describes the state prior to the fix.
-* That includes what platforms are impacted. 
+* That includes what platforms are impacted.
 See [best practices](https://github.com/flutter/flutter/blob/main/docs/releases/Hotfix-Documentation-Best-Practices.md) for examples.
 
 < Replace with changelog description here >
