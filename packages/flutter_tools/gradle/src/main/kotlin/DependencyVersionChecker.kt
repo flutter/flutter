@@ -97,7 +97,7 @@ object DependencyVersionChecker {
     // Java error and warn should align with packages/flutter_tools/lib/src/android/gradle_utils.dart.
     @VisibleForTesting internal val warnJavaVersion: JavaVersion = JavaVersion.VERSION_17
 
-    @VisibleForTesting internal val errorJavaVersion: JavaVersion = JavaVersion.VERSION_11
+    @VisibleForTesting internal val errorJavaVersion: JavaVersion = JavaVersion.VERSION_17
 
     @VisibleForTesting internal val warnAGPVersion: AndroidPluginVersion = AndroidPluginVersion(8, 6, 0)
 

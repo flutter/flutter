@@ -887,6 +887,91 @@ public class AccessibilityBridgeTest {
 
   @Test
   @Config(minSdk = API_LEVELS.FLUTTER_MIN)
+  public void itSetsDefaultLocale() {
+    AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    View mockRootView = mock(View.class);
+    Context context = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(context);
+    when(context.getPackageName()).thenReturn("test");
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(
+            /* rootAccessibilityView= */ mockRootView,
+            /* accessibilityChannel= */ mockChannel,
+            /* accessibilityManager= */ mockManager,
+            /* contentResolver= */ null,
+            /* accessibilityViewEmbedder= */ mockViewEmbedder,
+            /* platformViewsAccessibilityDelegate= */ null);
+
+    ViewParent mockParent = mock(ViewParent.class);
+    when(mockRootView.getParent()).thenReturn(mockParent);
+    when(mockManager.isEnabled()).thenReturn(true);
+
+    TestSemanticsNode root = new TestSemanticsNode();
+    root.id = 0;
+    root.label = "label";
+
+    accessibilityBridge.setLocale("es-MX");
+    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    SpannableString actual = (SpannableString) nodeInfo.getContentDescription();
+    assertEquals(actual.toString(), "label");
+    Object[] objectSpans = actual.getSpans(0, actual.length(), Object.class);
+    assertEquals(objectSpans.length, 1);
+    LocaleSpan localeSpan = (LocaleSpan) objectSpans[0];
+    assertEquals(localeSpan.getLocale().toLanguageTag(), "es-MX");
+    assertEquals(actual.getSpanStart(localeSpan), 0);
+    assertEquals(actual.getSpanEnd(localeSpan), actual.length());
+  }
+
+  @Test
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN)
+  public void itPrioritizesSectionLocale() {
+    AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    View mockRootView = mock(View.class);
+    Context context = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(context);
+    when(context.getPackageName()).thenReturn("test");
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(
+            /* rootAccessibilityView= */ mockRootView,
+            /* accessibilityChannel= */ mockChannel,
+            /* accessibilityManager= */ mockManager,
+            /* contentResolver= */ null,
+            /* accessibilityViewEmbedder= */ mockViewEmbedder,
+            /* platformViewsAccessibilityDelegate= */ null);
+
+    ViewParent mockParent = mock(ViewParent.class);
+    when(mockRootView.getParent()).thenReturn(mockParent);
+    when(mockManager.isEnabled()).thenReturn(true);
+
+    TestSemanticsNode root = new TestSemanticsNode();
+    root.id = 0;
+    root.label = "label";
+    // Sets both section locale and main locale.
+    root.locale = "fr-FR";
+    accessibilityBridge.setLocale("es-MX");
+
+    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    SpannableString actual = (SpannableString) nodeInfo.getContentDescription();
+    assertEquals(actual.toString(), "label");
+    Object[] objectSpans = actual.getSpans(0, actual.length(), Object.class);
+    assertEquals(objectSpans.length, 1);
+    LocaleSpan localeSpan = (LocaleSpan) objectSpans[0];
+    // Prioritizes section locale over main locale.
+    assertEquals(localeSpan.getLocale().toLanguageTag(), "fr-FR");
+    assertEquals(actual.getSpanStart(localeSpan), 0);
+    assertEquals(actual.getSpanEnd(localeSpan), actual.length());
+  }
+
+  @Test
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN)
   public void itSetsTextCorrectly() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
     AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
@@ -2269,6 +2354,36 @@ public class AccessibilityBridgeTest {
     verify(mockChannel).dispatchSemanticsAction(0, AccessibilityBridge.Action.COLLAPSE);
   }
 
+  @Config(sdk = API_LEVELS.API_28)
+  @TargetApi(API_LEVELS.API_28)
+  @Test
+  public void itSetsHeadingWhenHeadingLevelIsPositive() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode headingNode = new TestSemanticsNode();
+    headingNode.headingLevel = 2;
+    headingNode.label = "Level 2 heading";
+    TestSemanticsUpdate headingUpdate = headingNode.toUpdate();
+    headingUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo headingInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertTrue(headingInfo.isHeading());
+  }
+
+  @Config(sdk = API_LEVELS.API_28)
+  @TargetApi(API_LEVELS.API_28)
+  @Test
+  public void itDoesNotSetHeadingWhenHeadingLevelIsZero() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode nonHeadingNode = new TestSemanticsNode();
+    nonHeadingNode.headingLevel = 0;
+    nonHeadingNode.label = "Not a heading";
+    TestSemanticsUpdate nonHeadingUpdate = nonHeadingNode.toUpdate();
+    nonHeadingUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nonHeadingInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertFalse(nonHeadingInfo.isHeading());
+  }
+
   AccessibilityBridge setUpBridge() {
     return setUpBridge(null, null, null, null, null, null);
   }
@@ -2402,6 +2517,7 @@ public class AccessibilityBridgeTest {
     String tooltip = null;
     String linkUrl = null;
     String locale = null;
+    int headingLevel = 0;
     int textDirection = 0;
     float left = 0.0f;
     float top = 0.0f;
@@ -2477,6 +2593,7 @@ public class AccessibilityBridgeTest {
         strings.add(locale);
         bytes.putInt(strings.size() - 1);
       }
+      bytes.putInt(headingLevel);
       bytes.putInt(textDirection);
       bytes.putFloat(left);
       bytes.putFloat(top);

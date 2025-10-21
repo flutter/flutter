@@ -802,7 +802,9 @@ class _AmPmButton extends StatelessWidget {
     final TextScaler buttonTextScaler = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 2.0);
 
     return Semantics(
-      checked: selected,
+      // Platform-specific semantics vary slightly here on iOS.
+      selected: defaultTargetPlatform == TargetPlatform.iOS ? selected : null,
+      checked: defaultTargetPlatform == TargetPlatform.iOS ? null : selected,
       inMutuallyExclusiveGroup: true,
       button: true,
       child: Padding(
@@ -3786,7 +3788,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   TextStyle get helpTextStyle {
-    return MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
+    return WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
       final TextStyle textStyle = _textTheme.labelMedium!;
       return textStyle.copyWith(color: _colors.onSurfaceVariant);
     });
@@ -3895,7 +3897,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   TextStyle get hourMinuteTextStyle {
-    return MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
+    return WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
       // TODO(tahatesser): Update this when https://github.com/flutter/flutter/issues/131247 is fixed.
       // This is using the correct text style from Material 3 spec.
       // https://m3.material.io/components/time-pickers/specs#fd0b6939-edab-4058-82e1-93d163945215
