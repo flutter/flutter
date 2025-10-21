@@ -656,6 +656,10 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     clearSemanticsEnabledTestValue();
     clearTextScaleFactorTestValue();
     clearNativeSpellCheckServiceDefined();
+    clearLineHeightScaleFactorTestValue();
+    clearLetterSpacingTestValue();
+    clearWordSpacingTestValue();
+    clearParagraphSpacingTestValue();
     resetBrieflyShowPassword();
     resetSupportsShowingSystemContextMenu();
     resetInitialLifecycleState();
