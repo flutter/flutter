@@ -32,8 +32,11 @@ import 'selection_container.dart';
 /// The text style to apply to descendant [Text] widgets which don't have an
 /// explicit style.
 ///
-/// A [MediaQuery] ancestor of a [Text] widget may still override the text spacing
-/// properties of the [TextStyle] set by this [DefaultTextStyle] widget.
+/// A [MediaQuery] ancestor of a [Text] widget may still override the
+/// [TextStyle.height], [TextStyle.letterSpacing], and [TextStyle.wordSpacing] of
+/// the [TextStyle] set by this [DefaultTextStyle] widget through its
+/// [MediaQueryData.lineHeightScaleFactorOverride], [MediaQueryData.letterSpacingOverride],
+/// and [MediaQueryData.wordSpacingOverride] members.
 ///
 /// {@tool dartpad}
 /// This example shows how to use [DefaultTextStyle.merge] to create a default
@@ -584,7 +587,8 @@ class Text extends StatelessWidget {
   /// replace the closest enclosing [DefaultTextStyle].
   ///
   /// This [style]s [TextStyle.fontWeight], [TextStyle.height], [TextStyle.letterSpacing],
-  /// and [TextStyle.wordSpacing] will be overriden by text spacing values from the nearest
+  /// and [TextStyle.wordSpacing] will be overriden by [MediaQueryData.lineHeightScaleFactorOverride],
+  /// [MediaQueryData.letterSpacingOverride], and [MediaQueryData.wordSpacingOverride] from the nearest
   /// [MediaQuery] ancestor, regardless of its [TextStyle.inherit] value.
   final TextStyle? style;
 
