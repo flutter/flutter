@@ -91,7 +91,9 @@ In general the flow chart for team assignment is as follows, stopping as soon as
     - `go_router`, `go_router_builder`
     - `google_fonts`
     - `two_dimensional_scrollables`
-  - If it's about `flutter_svg` or `vector_graphics`, add `team-engine`.
+  - Apply `team-engine` if it's about:
+    - `flutter_svg`
+    - `vector_graphics`
   - Otherwise, add `team-ecosystem`.
 - If none of the above apply, add `will need additional triage`.
 
