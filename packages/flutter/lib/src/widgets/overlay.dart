@@ -1846,7 +1846,7 @@ class OverlayPortal extends StatefulWidget {
   /// exception is the [CompositedTransformFollower] widget, whose [RenderObject]
   /// only establishes the paint transform when composited. Putting a
   /// [CompositedTransformFollower] between the [OverlayPortal] and the [Overlay]
-  /// may resulting in an incorrect child paint transform being provided to the
+  /// may result in an incorrect child paint transform being provided to the
   /// `overlayChildBuilder` and will cause an assertion in debug mode.
   ///
   /// The [overlayLocation] sets which [Overlay] this widget attaches the widget
