@@ -1124,7 +1124,7 @@ class PlatformDispatcher {
   /// The system-reported height of the text, as a multiple of the font size.
   ///
   /// If this value changes, [onMetricsChanged] will be called.
-  double? get lineHeightScaleFactor => _configuration.lineHeightScaleFactor;
+  double? get lineHeightScaleFactorOverride => _configuration.lineHeightScaleFactorOverride;
 
   /// The system-reported amount of additional space (in logical pixels)
   /// to add between each letter.
@@ -1132,7 +1132,7 @@ class PlatformDispatcher {
   /// A negative value can be used to bring the letters closer.
   ///
   /// If this value changes, [onMetricsChanged] will be called.
-  double? get letterSpacing => _configuration.letterSpacing;
+  double? get letterSpacingOverride => _configuration.letterSpacingOverride;
 
   /// The system-reported amount of additional space (in logical pixels)
   /// to add between each sequence of white-space (i.e. between each word).
@@ -1140,7 +1140,7 @@ class PlatformDispatcher {
   /// A negative value can be used to bring the words closer.
   ///
   /// If this value changes, [onMetricsChanged] will be called.
-  double? get wordSpacing => _configuration.wordSpacing;
+  double? get wordSpacingOverride => _configuration.wordSpacingOverride;
 
   /// The system-reported amount of additional space (in logical pixels)
   /// to add between each paragraph in text.
@@ -1838,9 +1838,9 @@ class _PlatformConfiguration {
     this.defaultRouteName,
     this.systemFontFamily,
     this.configurationId,
-    this.lineHeightScaleFactor,
-    this.letterSpacing,
-    this.wordSpacing,
+    this.lineHeightScaleFactorOverride,
+    this.letterSpacingOverride,
+    this.wordSpacingOverride,
     this.paragraphSpacing,
   });
 
@@ -1854,9 +1854,9 @@ class _PlatformConfiguration {
     String? defaultRouteName,
     String? systemFontFamily,
     int? configurationId,
-    double? lineHeightScaleFactor,
-    double? letterSpacing,
-    double? wordSpacing,
+    double? lineHeightScaleFactorOverride,
+    double? letterSpacingOverride,
+    double? wordSpacingOverride,
     double? paragraphSpacing,
   }) {
     return _PlatformConfiguration(
@@ -1869,9 +1869,10 @@ class _PlatformConfiguration {
       defaultRouteName: defaultRouteName ?? this.defaultRouteName,
       systemFontFamily: systemFontFamily ?? this.systemFontFamily,
       configurationId: configurationId ?? this.configurationId,
-      lineHeightScaleFactor: lineHeightScaleFactor ?? this.lineHeightScaleFactor,
-      letterSpacing: letterSpacing ?? this.letterSpacing,
-      wordSpacing: wordSpacing ?? this.wordSpacing,
+      lineHeightScaleFactorOverride:
+          lineHeightScaleFactorOverride ?? this.lineHeightScaleFactorOverride,
+      letterSpacingOverride: letterSpacingOverride ?? this.letterSpacingOverride,
+      wordSpacingOverride: wordSpacingOverride ?? this.wordSpacingOverride,
       paragraphSpacing: paragraphSpacing ?? this.paragraphSpacing,
     );
   }
@@ -1922,19 +1923,19 @@ class _PlatformConfiguration {
   final int? configurationId;
 
   /// The system-reported height of the text, as a multiple of the font size.
-  final double? lineHeightScaleFactor;
+  final double? lineHeightScaleFactorOverride;
 
   /// The system-reported amount of additional space (in logical pixels)
   /// to add between each letter.
   ///
   /// A negative value can be used to bring the letters closer.
-  final double? letterSpacing;
+  final double? letterSpacingOverride;
 
   /// The system-reported amount of additional space (in logical pixels)
   /// to add between each sequence of white-space (i.e. between each word).
   ///
   /// A negative value can be used to bring the words closer.
-  final double? wordSpacing;
+  final double? wordSpacingOverride;
 
   /// The system-reported amount of additional space (in logical pixels)
   /// to add between each paragraph in text.

@@ -16652,16 +16652,16 @@ void main() {
   });
 
   testWidgets(
-    'EditableText respects MediaQueryData.lineHeightScaleFactor, MediaQueryData.letterSpacing, and MediaQueryData.wordSpacing',
+    'EditableText respects MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, and MediaQueryData.wordSpacingOverride',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
             data: const MediaQueryData(
-              lineHeightScaleFactor: 2.0,
-              letterSpacing: 2.0,
-              wordSpacing: 2.0,
+              lineHeightScaleFactorOverride: 2.0,
+              letterSpacingOverride: 2.0,
+              wordSpacingOverride: 2.0,
             ),
             child: EditableText(
               controller: controller,

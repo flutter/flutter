@@ -431,60 +431,60 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  double? get lineHeightScaleFactor =>
-      _lineHeightScaleFactorTestValue ?? _platformDispatcher.lineHeightScaleFactor;
-  double? _lineHeightScaleFactorTestValue;
+  double? get lineHeightScaleFactorOverride =>
+      _lineHeightScaleFactorOverrideTestValue ?? _platformDispatcher.lineHeightScaleFactorOverride;
+  double? _lineHeightScaleFactorOverrideTestValue;
 
   /// Hides the real line height scale factor and reports the given
-  /// [lineHeightScaleFactorTestValue] instead.
+  /// [lineHeightScaleFactorOverrideTestValue] instead.
   // ignore: avoid_setters_without_getters
-  set lineHeightScaleFactorTestValue(double lineHeightScaleFactorTestValue) {
-    _lineHeightScaleFactorTestValue = lineHeightScaleFactorTestValue;
+  set lineHeightScaleFactorOverrideTestValue(double lineHeightScaleFactorOverrideTestValue) {
+    _lineHeightScaleFactorOverrideTestValue = lineHeightScaleFactorOverrideTestValue;
     onMetricsChanged?.call();
   }
 
   /// Deletes any existing test line height scale factor and returns to using
   /// the real line height scale factor.
-  void clearLineHeightScaleFactorTestValue() {
-    _lineHeightScaleFactorTestValue = null;
+  void clearLineHeightScaleFactorOverrideTestValue() {
+    _lineHeightScaleFactorOverrideTestValue = null;
     onMetricsChanged?.call();
   }
 
   @override
-  double? get letterSpacing => _letterSpacingTestValue ?? _platformDispatcher.letterSpacing;
-  double? _letterSpacingTestValue;
+  double? get letterSpacingOverride => _letterSpacingOverrideTestValue ?? _platformDispatcher.letterSpacingOverride;
+  double? _letterSpacingOverrideTestValue;
 
   /// Hides the real letter spacing and reports the given
-  /// [letterSpacingTestValue] instead.
+  /// [letterSpacingOverrideTestValue] instead.
   /// ignore: avoid_setters_without_getters
-  set letterSpacingTestValue(double letterSpacingTestValue) {
-    _letterSpacingTestValue = letterSpacingTestValue;
+  set letterSpacingOverrideTestValue(double letterSpacingOverrideTestValue) {
+    _letterSpacingOverrideTestValue = letterSpacingOverrideTestValue;
     onMetricsChanged?.call();
   }
 
   /// Deletes any existing test letter spacing and returns to using the real
   /// letter spacing.
-  void clearLetterSpacingTestValue() {
-    _letterSpacingTestValue = null;
+  void clearLetterSpacingOverrideTestValue() {
+    _letterSpacingOverrideTestValue = null;
     onMetricsChanged?.call();
   }
 
   @override
-  double? get wordSpacing => _wordSpacingTestValue ?? _platformDispatcher.wordSpacing;
-  double? _wordSpacingTestValue;
+  double? get wordSpacingOverride => _wordSpacingOverrideTestValue ?? _platformDispatcher.wordSpacingOverride;
+  double? _wordSpacingOverrideTestValue;
 
   /// Hides the real word spacing and reports the given
-  /// [wordSpacingTestValue] instead.
+  /// [wordSpacingOverrideTestValue] instead.
   /// ignore: avoid_setters_without_getters
-  set wordSpacingTestValue(double wordSpacingTestValue) {
-    _wordSpacingTestValue = wordSpacingTestValue;
+  set wordSpacingOverrideTestValue(double wordSpacingOverrideTestValue) {
+    _wordSpacingOverrideTestValue = wordSpacingOverrideTestValue;
     onMetricsChanged?.call();
   }
 
   /// Deletes any existing test word spacing and returns to using the real
   /// word spacing.
-  void clearWordSpacingTestValue() {
-    _wordSpacingTestValue = null;
+  void clearWordSpacingOverrideTestValue() {
+    _wordSpacingOverrideTestValue = null;
     onMetricsChanged?.call();
   }
 
@@ -656,9 +656,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     clearSemanticsEnabledTestValue();
     clearTextScaleFactorTestValue();
     clearNativeSpellCheckServiceDefined();
-    clearLineHeightScaleFactorTestValue();
-    clearLetterSpacingTestValue();
-    clearWordSpacingTestValue();
+    clearLineHeightScaleFactorOverrideTestValue();
+    clearLetterSpacingOverrideTestValue();
+    clearWordSpacingOverrideTestValue();
     clearParagraphSpacingTestValue();
     resetBrieflyShowPassword();
     resetSupportsShowingSystemContextMenu();
