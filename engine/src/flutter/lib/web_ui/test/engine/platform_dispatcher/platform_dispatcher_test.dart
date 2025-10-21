@@ -337,10 +337,10 @@ void testMain() {
       await waitForResizeObserver();
       expect(root.contains(style), isFalse);
       expect(isCalled, isTrue);
-      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactor, 1.0);
-      expect(ui.PlatformDispatcher.instance.letterSpacing, 0.0);
-      expect(ui.PlatformDispatcher.instance.wordSpacing, 0.0);
-      expect(ui.PlatformDispatcher.instance.paragraphSpacing, 0.0);
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactor, null);
+      expect(ui.PlatformDispatcher.instance.letterSpacing, null);
+      expect(ui.PlatformDispatcher.instance.wordSpacing, null);
+      expect(ui.PlatformDispatcher.instance.paragraphSpacing, null);
 
       isCalled = false;
 
