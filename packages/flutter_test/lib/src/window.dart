@@ -430,16 +430,36 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     _brieflyShowPasswordTestValue = null;
   }
 
+  /// The system-reported height of the text, as a multiple of the font size.
+  ///
+  /// Defaults to the value provided by [PlatformDispatcher.lineHeightScaleFactorOverride].
+  /// This can only be set in a test environment to emulate different platform
+  /// configurations. A standard [PlatformDispatcher] is not mutable from the
+  /// framework.
+  ///
+  /// Setting this value to `null` will force [lineHeightScaleFactorOverride] to return
+  /// `null`. If you want to have the value default to the platform
+  /// [lineHeightScaleFactorOverride], use [clearLineHeightScaleFactorOverrideTestValue].
+  ///
+  /// See also:
+  ///
+  ///   * [PlatformDispatcher.lineHeightScaleFactorOverride] for the standard implementation
+  ///   * [clearLineHeightScaleFactorOverrideTestValue] to reset this value specifically
+  ///   * [clearAllTestValues] to reset all test values for this view
   @override
-  double? get lineHeightScaleFactorOverride =>
-      _lineHeightScaleFactorOverrideTestValue ?? _platformDispatcher.lineHeightScaleFactorOverride;
+  double? get lineHeightScaleFactorOverride => _forceLineHeightScaleFactorOverrideToBeNull
+      ? null : _lineHeightScaleFactorOverrideTestValue ?? _platformDispatcher.lineHeightScaleFactorOverride;
   double? _lineHeightScaleFactorOverrideTestValue;
+  bool _forceLineHeightScaleFactorOverrideToBeNull = false;
 
   /// Hides the real line height scale factor and reports the given
   /// [lineHeightScaleFactorOverrideTestValue] instead.
   // ignore: avoid_setters_without_getters
-  set lineHeightScaleFactorOverrideTestValue(double lineHeightScaleFactorOverrideTestValue) {
+  set lineHeightScaleFactorOverrideTestValue(double? lineHeightScaleFactorOverrideTestValue) {
     _lineHeightScaleFactorOverrideTestValue = lineHeightScaleFactorOverrideTestValue;
+    if (lineHeightScaleFactorOverrideTestValue == null) {
+      _forceLineHeightScaleFactorOverrideToBeNull = true;
+    }
     onMetricsChanged?.call();
   }
 
@@ -447,18 +467,42 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// the real line height scale factor.
   void clearLineHeightScaleFactorOverrideTestValue() {
     _lineHeightScaleFactorOverrideTestValue = null;
+    _forceLineHeightScaleFactorOverrideToBeNull = false;
     onMetricsChanged?.call();
   }
 
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each letter.
+  ///
+  /// A negative value can be used to bring the letters closer.
+  ///
+  /// Defaults to the value provided by [PlatformDispatcher.letterSpacingOverride].
+  /// This can only be set in a test environment to emulate different platform
+  /// configurations. A standard [PlatformDispatcher] is not mutable from the
+  /// framework.
+  ///
+  /// Setting this value to `null` will force [letterSpacingOverride] to return
+  /// `null`. If you want to have the value default to the platform
+  /// [letterSpacingOverride], use [clearLetterSpacingOverrideTestValue].
+  ///
+  /// See also:
+  ///
+  ///   * [PlatformDispatcher.letterSpacingOverride] for the standard implementation
+  ///   * [clearLetterSpacingOverrideTestValue] to reset this value specifically
+  ///   * [clearAllTestValues] to reset all test values for this view
   @override
-  double? get letterSpacingOverride => _letterSpacingOverrideTestValue ?? _platformDispatcher.letterSpacingOverride;
+  double? get letterSpacingOverride => _forceLetterSpacingOverrideToBeNull ? null : _letterSpacingOverrideTestValue ?? _platformDispatcher.letterSpacingOverride;
   double? _letterSpacingOverrideTestValue;
+  bool _forceLetterSpacingOverrideToBeNull = false;
 
   /// Hides the real letter spacing and reports the given
   /// [letterSpacingOverrideTestValue] instead.
   /// ignore: avoid_setters_without_getters
-  set letterSpacingOverrideTestValue(double letterSpacingOverrideTestValue) {
+  set letterSpacingOverrideTestValue(double? letterSpacingOverrideTestValue) {
     _letterSpacingOverrideTestValue = letterSpacingOverrideTestValue;
+    if (letterSpacingOverrideTestValue == null) {
+      _forceLetterSpacingOverrideToBeNull = true;
+    }
     onMetricsChanged?.call();
   }
 
@@ -466,18 +510,42 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// letter spacing.
   void clearLetterSpacingOverrideTestValue() {
     _letterSpacingOverrideTestValue = null;
+    _forceLetterSpacingOverrideToBeNull = false;
     onMetricsChanged?.call();
   }
 
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each sequence of white-space (i.e. between each word).
+  ///
+  /// A negative value can be used to bring the words closer.
+  ///
+  /// Defaults to the value provided by [PlatformDispatcher.wordSpacingOverride].
+  /// This can only be set in a test environment to emulate different platform
+  /// configurations. A standard [PlatformDispatcher] is not mutable from the
+  /// framework.
+  ///
+  /// Setting this value to `null` will force [wordSpacingOverride] to return
+  /// `null`. If you want to have the value default to the platform
+  /// [wordSpacingOverride], use [clearWordSpacingOverrideTestValue].
+  ///
+  /// See also:
+  ///
+  ///   * [PlatformDispatcher.wordSpacingOverride] for the standard implementation
+  ///   * [clearWordSpacingOverrideTestValue] to reset this value specifically
+  ///   * [clearAllTestValues] to reset all test values for this view
   @override
-  double? get wordSpacingOverride => _wordSpacingOverrideTestValue ?? _platformDispatcher.wordSpacingOverride;
+  double? get wordSpacingOverride => _forceWordSpacingOverrideToBeNull ? null : _wordSpacingOverrideTestValue ?? _platformDispatcher.wordSpacingOverride;
   double? _wordSpacingOverrideTestValue;
+  bool _forceWordSpacingOverrideToBeNull = false;
 
   /// Hides the real word spacing and reports the given
   /// [wordSpacingOverrideTestValue] instead.
   /// ignore: avoid_setters_without_getters
-  set wordSpacingOverrideTestValue(double wordSpacingOverrideTestValue) {
+  set wordSpacingOverrideTestValue(double? wordSpacingOverrideTestValue) {
     _wordSpacingOverrideTestValue = wordSpacingOverrideTestValue;
+    if (wordSpacingOverrideTestValue == null) {
+      _forceWordSpacingOverrideToBeNull = true;
+    }
     onMetricsChanged?.call();
   }
 
@@ -485,18 +553,40 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// word spacing.
   void clearWordSpacingOverrideTestValue() {
     _wordSpacingOverrideTestValue = null;
+    _forceWordSpacingOverrideToBeNull = false;
     onMetricsChanged?.call();
   }
 
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each paragraph in text.
+  ///
+  /// Defaults to the value provided by [PlatformDispatcher.paragraphSpacing].
+  /// This can only be set in a test environment to emulate different platform
+  /// configurations. A standard [PlatformDispatcher] is not mutable from the
+  /// framework.
+  ///
+  /// Setting this value to `null` will force [paragraphSpacing] to return
+  /// `null`. If you want to have the value default to the platform
+  /// [paragraphSpacing], use [clearParagraphSpacingTestValue].
+  ///
+  /// See also:
+  ///
+  ///   * [PlatformDispatcher.paragraphSpacing] for the standard implementation
+  ///   * [clearParagraphSpacingTestValue] to reset this value specifically
+  ///   * [clearAllTestValues] to reset all test values for this view
   @override
-  double? get paragraphSpacing => _paragraphSpacingTestValue ?? _platformDispatcher.paragraphSpacing;
+  double? get paragraphSpacing => _forceParagraphSpacingToBeNull ? null : _paragraphSpacingTestValue ?? _platformDispatcher.paragraphSpacing;
   double? _paragraphSpacingTestValue;
+  bool _forceParagraphSpacingToBeNull = false;
 
   /// Hides the real paragraph spacing and reports the given
   /// [paragraphSpacingTestValue] instead.
   /// ignore: avoid_setters_without_getters
-  set paragraphSpacingTestValue(double paragraphSpacingTestValue) {
+  set paragraphSpacingTestValue(double? paragraphSpacingTestValue) {
     _paragraphSpacingTestValue = paragraphSpacingTestValue;
+    if (paragraphSpacingTestValue == null) {
+      _forceParagraphSpacingToBeNull = true;
+    }
     onMetricsChanged?.call();
   }
 
@@ -504,6 +594,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// paragraph spacing.
   void clearParagraphSpacingTestValue() {
     _paragraphSpacingTestValue = null;
+    _forceParagraphSpacingToBeNull = false;
     onMetricsChanged?.call();
   }
 
