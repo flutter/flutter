@@ -5030,7 +5030,7 @@ void main() {
 
       expect(textFieldFocusNode.hasFocus, isFalse);
 
-      // Tap on DropdownMenu to request focus on a TextField.
+      // Tap on DropdownMenu to request focus on the TextField.
       await tester.tap(find.byType(DropdownMenu<TestMenu>));
       await tester.pumpAndSettle();
       expect(textFieldFocusNode.hasFocus, isTrue);
