@@ -826,6 +826,7 @@ void main() {
     );
     void handler(RunnerEvent event) {}
     final bool runResult = await buildRunner.run(handler);
+    expect(runResult, isTrue);
 
     int? reproxyStatusIndex;
     int? bootstrapShutdownIndex;
@@ -838,7 +839,7 @@ void main() {
         bootstrapShutdownIndex = i;
       }
     }
-    expect(reproxyStatusIndex!, lessThan(bootstrapShutdownIndex!));
+    expect(reproxyStatusIndex, lessThan(bootstrapShutdownIndex!));
   });
 }
 
