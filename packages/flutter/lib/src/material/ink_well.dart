@@ -442,9 +442,9 @@ class InkResponse extends StatelessWidget {
   ///  * [WidgetState.hovered].
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
+  /// {@endtemplate}
   ///
   /// If this property is null, [WidgetStateMouseCursor.adaptiveClickable] will be used.
-  /// {@endtemplate}
   final MouseCursor? mouseCursor;
 
   /// Whether this ink response should be clipped its bounds.
