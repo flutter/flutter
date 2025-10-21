@@ -39,12 +39,11 @@ class XCDeviceEventNotification {
 enum XCDeviceEvent { attach, detach }
 
 enum XCDeviceEventInterface {
-  usb(name: 'usb', connectionInterface: DeviceConnectionInterface.attached),
-  wifi(name: 'wifi', connectionInterface: DeviceConnectionInterface.wireless);
+  usb(connectionInterface: DeviceConnectionInterface.attached),
+  wifi(connectionInterface: DeviceConnectionInterface.wireless);
 
-  const XCDeviceEventInterface({required this.name, required this.connectionInterface});
+  const XCDeviceEventInterface({required this.connectionInterface});
 
-  final String name;
   final DeviceConnectionInterface connectionInterface;
 }
 

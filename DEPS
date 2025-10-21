@@ -15,7 +15,7 @@ vars = {
   'flutter_git': 'https://flutter.googlesource.com',
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
-  'skia_revision': 'ed4294faecdee11b26dedc9f130d9a3c3ea3f9d7',
+  'skia_revision': '19bff385f7e8a1b33237787d7672f72c4de4f760',
 
   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
   # See `lib/web_ui/README.md` for how to roll CanvasKit to a new version.
@@ -529,7 +529,7 @@ deps = {
   Var('chromium_git') + '/external/github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator' + '@' + 'c788c52156f3ef7bc7ab769cb03c110a53ac8fcb',
 
   'engine/src/flutter/third_party/abseil-cpp':
-  Var('flutter_git') + '/third_party/abseil-cpp.git' + '@' + '3ff870f957d511627690f4d3601987ce40d0d97c',
+  Var('flutter_git') + '/third_party/abseil-cpp.git' + '@' + '4cfd6e189be5108a2904c170fea64aa6eba6e9ff',
 
    # Dart packages
   'engine/src/flutter/third_party/pkg/archive':
@@ -804,7 +804,7 @@ deps = {
 
   # Get the SDK from https://chrome-infra-packages.appspot.com/p/fuchsia/sdk/core at the 'latest' tag
   # Get the toolchain from https://chrome-infra-packages.appspot.com/p/fuchsia/clang at the 'goma' tag
-  'engine/src/fuchsia/sdk/linux': {
+  'engine/src/third_party/fuchsia-sdk/sdk': {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/linux-amd64',
