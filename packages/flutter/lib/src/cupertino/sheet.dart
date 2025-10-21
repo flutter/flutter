@@ -610,7 +610,8 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
        scrollableBuilder = null;
   // Need to add assert for either builder or scrollableBuilder.
 
-  /// The scrollable version.
+  /// Creates a page route that displays an iOS styled sheet that is expected to
+  /// have scrollable content that spans the whole sheet.
   CupertinoSheetRoute.scrollable({
     super.settings,
     this.scrollableBuilder,
@@ -970,7 +971,7 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
   }
 
   void _handleScroll(DragUpdateDetails details) {
-    if (widget.scrollController == null && widget.scrollController?.hasClients != true) {
+    if (widget.scrollController == null || widget.scrollController?.hasClients != true) {
       return;
     }
     final double newPosition = widget.scrollController!.offset + (details.primaryDelta! * -1);
