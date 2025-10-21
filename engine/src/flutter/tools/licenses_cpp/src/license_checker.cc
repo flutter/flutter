@@ -37,6 +37,8 @@ const std::array<std::string_view, 9> kLicenseFileNames = {
 const std::array<std::string_view, 2> kThirdPartyIgnore = {"pkg",
                                                            "vulkan-deps"};
 
+const char* kRootPackageName = "flutter";
+
 RE2 kHeaderLicense(LicenseChecker::kHeaderLicenseRegex);
 
 std::vector<fs::path> GetGitRepos(std::string_view dir) {
@@ -146,22 +148,11 @@ struct Package {
   bool is_root_package;
 };
 
-/// This makes sure trailing slashes on paths are treated the same.
-/// Example:
-///   f("/foo/") == f("/foo") == "foo"
-std::string GetDirFilename(const fs::path& working_dir) {
-  std::string result = working_dir.filename();
-  if (result.empty()) {
-    result = working_dir.parent_path().filename();
-  }
-  return result;
-}
-
 Package GetPackage(const Data& data,
                    const fs::path& working_dir,
                    const fs::path& relative_path) {
   Package result = {
-      .name = GetDirFilename(working_dir),
+      .name = kRootPackageName,
       .license_file = FindLicense(data, working_dir, "."),
       .is_root_package = true,
   };
