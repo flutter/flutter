@@ -1817,9 +1817,6 @@ class _RenderBaselineAlignedStack extends RenderBox
     assert(constraints.hasTightWidth);
     final RenderBox? placeholder = _placeholderChild;
     final RenderBox editableText = _editableTextChild;
-
-    final _BaselineAlignedStackParentData editableTextParentData =
-        editableText.parentData! as _BaselineAlignedStackParentData;
     final _BaselineAlignedStackParentData? placeholderParentData =
         placeholder?.parentData as _BaselineAlignedStackParentData?;
 
@@ -1841,9 +1838,7 @@ class _RenderBaselineAlignedStack extends RenderBox
         ? editableTextBaselineValue - placeholderBaselineValue
         : 0.0;
 
-    final double offsetYAdjustment = math.max(0, placeholderY);
-    editableTextParentData.offset = Offset(0, offsetYAdjustment);
-    placeholderParentData?.offset = Offset(0, placeholderY + offsetYAdjustment);
+    placeholderParentData?.offset = Offset(0.0, placeholderY);
   }
 
   @override
