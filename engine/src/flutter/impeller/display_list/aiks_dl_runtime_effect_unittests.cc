@@ -10,6 +10,7 @@
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/effects/dl_runtime_effect.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
+#include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/display_list/dl_runtime_effect_impeller.h"
 
 namespace impeller {
@@ -133,6 +134,96 @@ TEST_P(AiksTest, RuntimeEffectWithInvalidSamplerDoesNotCrash) {
 
   DisplayListBuilder builder;
   builder.DrawPaint(paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, ComposePaintRuntimeOuter) {
+  DisplayListBuilder builder;
+  DlPaint background;
+  background.setColor(DlColor(1.0, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
+  builder.DrawPaint(background);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kGreen());
+  float matrix[] = {
+      0, 1, 0, 0, 0,  //
+      1, 0, 0, 0, 0,  //
+      0, 0, 1, 0, 0,  //
+      0, 0, 0, 1, 0   //
+  };
+  [[maybe_unused]] std::shared_ptr<DlImageFilter> color_filter =
+      DlImageFilter::MakeColorFilter(DlColorFilter::MakeMatrix(matrix));
+
+  auto runtime_stages =
+      OpenAssetAsRuntimeStage("runtime_stage_filter_warp.frag.iplr");
+
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(runtime_stage);
+  ASSERT_TRUE(runtime_stage->IsDirty());
+
+  std::vector<std::shared_ptr<DlColorSource>> sampler_inputs = {
+      nullptr,
+  };
+  auto uniform_data = std::make_shared<std::vector<uint8_t>>();
+  uniform_data->resize(sizeof(Vector2));
+
+  [[maybe_unused]] auto runtime_filter = DlImageFilter::MakeRuntimeEffect(
+      DlRuntimeEffectImpeller::Make(runtime_stage), sampler_inputs,
+      uniform_data);
+
+  paint.setImageFilter(
+      DlImageFilter::MakeCompose(runtime_filter, color_filter));
+  auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
+  builder.DrawImage(image, DlPoint(100.0, 100.0),
+                    DlImageSampling::kNearestNeighbor, &paint);
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, ComposePaintRuntimeInner) {
+  DisplayListBuilder builder;
+  DlPaint background;
+  background.setColor(DlColor(1.0, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
+  builder.DrawPaint(background);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kGreen());
+  float matrix[] = {
+      0, 1, 0, 0, 0,  //
+      1, 0, 0, 0, 0,  //
+      0, 0, 1, 0, 0,  //
+      0, 0, 0, 1, 0   //
+  };
+  [[maybe_unused]] std::shared_ptr<DlImageFilter> color_filter =
+      DlImageFilter::MakeColorFilter(DlColorFilter::MakeMatrix(matrix));
+
+  auto runtime_stages =
+      OpenAssetAsRuntimeStage("runtime_stage_filter_warp.frag.iplr");
+
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(runtime_stage);
+  ASSERT_TRUE(runtime_stage->IsDirty());
+
+  std::vector<std::shared_ptr<DlColorSource>> sampler_inputs = {
+      nullptr,
+  };
+  auto uniform_data = std::make_shared<std::vector<uint8_t>>();
+  uniform_data->resize(sizeof(Vector2));
+
+  [[maybe_unused]] auto runtime_filter = DlImageFilter::MakeRuntimeEffect(
+      DlRuntimeEffectImpeller::Make(runtime_stage), sampler_inputs,
+      uniform_data);
+
+  paint.setImageFilter(
+      DlImageFilter::MakeCompose(color_filter, runtime_filter));
+  auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
+  builder.DrawImage(image, DlPoint(100.0, 100.0),
+                    DlImageSampling::kNearestNeighbor, &paint);
+  builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
