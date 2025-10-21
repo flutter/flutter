@@ -45,7 +45,7 @@ class CkCanvas implements LayerCanvas {
   @override
   void clipPath(ui.Path path, {bool doAntiAlias = true}) {
     skCanvas.clipPath(
-      ((path as LazyPath).builtPath as CkPath).skiaObject,
+      ((path as LazyPath).builtPath as CkPath).skiaPath,
       _clipOpIntersect,
       doAntiAlias,
     );
@@ -62,7 +62,7 @@ class CkCanvas implements LayerCanvas {
     final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
     translate(offset.dx, offset.dy);
     skCanvas.clipPath(
-      ((path as LazyPath).builtPath as CkPath).skiaObject,
+      ((path as LazyPath).builtPath as CkPath).skiaPath,
       _clipOpIntersect,
       doAntiAlias,
     );
@@ -226,7 +226,7 @@ class CkCanvas implements LayerCanvas {
   @override
   void drawPath(ui.Path path, ui.Paint paint) {
     final skPaint = (paint as CkPaint).toSkPaint();
-    skCanvas.drawPath(((path as LazyPath).builtPath as CkPath).skiaObject, skPaint);
+    skCanvas.drawPath(((path as LazyPath).builtPath as CkPath).skiaPath, skPaint);
     skPaint.delete();
   }
 
@@ -268,7 +268,7 @@ class CkCanvas implements LayerCanvas {
     final skPaint = (paint as CkPaint).toSkPaint();
     final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
     translate(offset.dx, offset.dy);
-    skCanvas.drawPath(((path as LazyPath).builtPath as CkPath).skiaObject, skPaint);
+    skCanvas.drawPath(((path as LazyPath).builtPath as CkPath).skiaPath, skPaint);
     translate(-offset.dx, -offset.dy);
     skPaint.delete();
   }

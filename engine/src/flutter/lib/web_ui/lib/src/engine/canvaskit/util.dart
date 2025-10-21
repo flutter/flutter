@@ -170,7 +170,7 @@ void drawSkShadow(
   final SkTonalColors tonalColors = canvasKit.computeTonalColors(inTonalColors);
 
   skCanvas.drawShadow(
-    path.skiaObject,
+    path.skiaPath,
     Float32List(3)..[2] = devicePixelRatio * elevation,
     Float32List(3)
       ..[0] = 0

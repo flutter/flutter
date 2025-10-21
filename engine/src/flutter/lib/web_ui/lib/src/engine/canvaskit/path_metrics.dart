@@ -25,7 +25,7 @@ class CkContourMeasureIter implements DisposablePathMetricIterator {
   CkContourMeasureIter(this._metrics) {
     _ref = UniqueRef<SkContourMeasureIter>(
       this,
-      SkContourMeasureIter(_metrics._path.skiaObject, _metrics._forceClosed, 1.0),
+      SkContourMeasureIter(_metrics._path.skiaPath, _metrics._forceClosed, 1.0),
       'Iterator<PathMetric>',
     );
   }

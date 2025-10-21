@@ -787,8 +787,8 @@ void _toSkRectTests() {
   });
 }
 
-SkPath _testClosedSkPath() {
-  return SkPath()
+SkPathBuilder _testClosedSkPath() {
+  return SkPathBuilder()
     ..moveTo(10, 10)
     ..lineTo(20, 10)
     ..lineTo(20, 20)
@@ -797,26 +797,26 @@ SkPath _testClosedSkPath() {
 }
 
 void _pathTests() {
-  late SkPath path;
+  late SkPathBuilder pathBuilder;
 
   setUp(() {
-    path = SkPath();
+    pathBuilder = SkPathBuilder();
   });
 
   test('setFillType', () {
-    path.setFillType(canvasKit.FillType.Winding);
+    pathBuilder.setFillType(canvasKit.FillType.Winding);
   });
 
   test('addArc', () {
-    path.addArc(toSkRect(const ui.Rect.fromLTRB(10, 20, 30, 40)), 1, 5);
+    pathBuilder.addArc(toSkRect(const ui.Rect.fromLTRB(10, 20, 30, 40)), 1, 5);
   });
 
   test('addOval', () {
-    path.addOval(toSkRect(const ui.Rect.fromLTRB(10, 20, 30, 40)), false, 1);
+    pathBuilder.addOval(toSkRect(const ui.Rect.fromLTRB(10, 20, 30, 40)), false, 1);
   });
 
   test('addPath', () {
-    path.addPath(_testClosedSkPath(), 1, 0, 0, 0, 1, 0, 0, 0, 0, false);
+    pathBuilder.addPath(_testClosedSkPath().snapshot(), 1, 0, 0, 0, 1, 0, 0, 0, 0, false);
   });
 
   test('addPoly', () {
@@ -824,7 +824,7 @@ void _pathTests() {
       ui.Offset.zero,
       ui.Offset(10, 10),
     ]);
-    path.addPoly(encodedPoints.toTypedArray(), true);
+    pathBuilder.addPolygon(encodedPoints.toTypedArray(), true);
     free(encodedPoints);
   });
 
@@ -833,19 +833,19 @@ void _pathTests() {
       const ui.Rect.fromLTRB(10, 10, 20, 20),
       const ui.Radius.circular(3),
     );
-    path.addRRect(toSkRRect(rrect), false);
+    pathBuilder.addRRect(toSkRRect(rrect), false);
   });
 
   test('addRect', () {
-    path.addRect(toSkRect(const ui.Rect.fromLTRB(1, 2, 3, 4)));
+    pathBuilder.addRect(toSkRect(const ui.Rect.fromLTRB(1, 2, 3, 4)));
   });
 
   test('arcTo', () {
-    path.arcToOval(toSkRect(const ui.Rect.fromLTRB(1, 2, 3, 4)), 5, 40, false);
+    pathBuilder.arcToOval(toSkRect(const ui.Rect.fromLTRB(1, 2, 3, 4)), 5, 40, false);
   });
 
   test('overloaded arcTo (used for arcToPoint)', () {
-    path.arcToRotated(1, 2, 3, false, true, 4, 5);
+    pathBuilder.arcToRotated(1, 2, 3, false, true, 4, 5);
   });
 
   test('close', () {
@@ -853,92 +853,100 @@ void _pathTests() {
   });
 
   test('conicTo', () {
-    path.conicTo(1, 2, 3, 4, 5);
+    pathBuilder.conicTo(1, 2, 3, 4, 5);
   });
 
   test('contains', () {
-    final SkPath testPath = _testClosedSkPath();
+    final SkPath testPath = _testClosedSkPath().snapshot();
     expect(testPath.contains(15, 15), isTrue);
     expect(testPath.contains(100, 100), isFalse);
   });
 
   test('cubicTo', () {
-    path.cubicTo(1, 2, 3, 4, 5, 6);
+    pathBuilder.cubicTo(1, 2, 3, 4, 5, 6);
   });
 
   test('getBounds', () {
-    final SkPath testPath = _testClosedSkPath();
+    final SkPath testPath = _testClosedSkPath().snapshot();
     final ui.Rect bounds = fromSkRect(testPath.getBounds());
     expect(bounds, const ui.Rect.fromLTRB(10, 10, 20, 20));
   });
 
   test('lineTo', () {
-    path.lineTo(10, 10);
+    pathBuilder.lineTo(10, 10);
   });
 
   test('moveTo', () {
-    path.moveTo(10, 10);
+    pathBuilder.moveTo(10, 10);
   });
 
   test('quadTo', () {
-    path.quadTo(10, 10, 20, 20);
+    pathBuilder.quadTo(10, 10, 20, 20);
   });
 
   test('rArcTo', () {
-    path.rArcTo(10, 20, 30, false, true, 40, 50);
+    pathBuilder.rArcTo(10, 20, 30, false, true, 40, 50);
   });
 
   test('rConicTo', () {
-    path.rConicTo(1, 2, 3, 4, 5);
+    pathBuilder.rConicTo(1, 2, 3, 4, 5);
   });
 
   test('rCubicTo', () {
-    path.rCubicTo(1, 2, 3, 4, 5, 6);
+    pathBuilder.rCubicTo(1, 2, 3, 4, 5, 6);
   });
 
   test('rLineTo', () {
-    path.rLineTo(10, 10);
+    pathBuilder.rLineTo(10, 10);
   });
 
   test('rMoveTo', () {
-    path.rMoveTo(10, 10);
+    pathBuilder.rMoveTo(10, 10);
   });
 
   test('rQuadTo', () {
-    path.rQuadTo(10, 10, 20, 20);
+    pathBuilder.rQuadTo(10, 10, 20, 20);
   });
 
   test('reset', () {
-    final SkPath testPath = _testClosedSkPath();
-    expect(fromSkRect(testPath.getBounds()), const ui.Rect.fromLTRB(10, 10, 20, 20));
-    testPath.reset();
-    expect(fromSkRect(testPath.getBounds()), ui.Rect.zero);
+    final SkPathBuilder testPathBuilder = _testClosedSkPath();
+    expect(
+      fromSkRect(testPathBuilder.snapshot().getBounds()),
+      const ui.Rect.fromLTRB(10, 10, 20, 20),
+    );
+    testPathBuilder.reset();
+    expect(fromSkRect(testPathBuilder.snapshot().getBounds()), ui.Rect.zero);
   });
 
   test('toSVGString', () {
-    expect(_testClosedSkPath().toSVGString(), 'M10 10L20 10L20 20L10 20L10 10Z');
+    expect(_testClosedSkPath().snapshot().toSVGString(), 'M10 10L20 10L20 20L10 20L10 10Z');
   });
 
   test('isEmpty', () {
-    expect(SkPath().isEmpty(), isTrue);
+    expect(SkPathBuilder().isEmpty(), isTrue);
+    expect(SkPathBuilder().snapshot().isEmpty(), isTrue);
     expect(_testClosedSkPath().isEmpty(), isFalse);
   });
 
   test('copy', () {
-    final SkPath original = _testClosedSkPath();
+    final SkPath original = _testClosedSkPath().snapshot();
     final SkPath copy = original.copy();
     expect(fromSkRect(original.getBounds()), fromSkRect(copy.getBounds()));
   });
 
   test('transform', () {
-    path = _testClosedSkPath();
-    path.transform(2, 0, 10, 0, 2, 10, 0, 0, 0);
-    final ui.Rect transformedBounds = fromSkRect(path.getBounds());
+    pathBuilder = _testClosedSkPath();
+    pathBuilder.transform(2, 0, 10, 0, 2, 10, 0, 0, 0);
+    final ui.Rect transformedBounds = fromSkRect(pathBuilder.snapshot().getBounds());
     expect(transformedBounds, const ui.Rect.fromLTRB(30, 30, 50, 50));
   });
 
   test('SkContourMeasureIter/SkContourMeasure', () {
-    final SkContourMeasureIter iter = SkContourMeasureIter(_testClosedSkPath(), false, 1.0);
+    final SkContourMeasureIter iter = SkContourMeasureIter(
+      _testClosedSkPath().snapshot(),
+      false,
+      1.0,
+    );
     final SkContourMeasure measure1 = iter.next()!;
     expect(measure1.length(), 40);
     expect(measure1.getPosTan(5), Float32List.fromList(<double>[15, 10, 1, 0]));
@@ -975,8 +983,9 @@ void _pathTests() {
 
   test('SkPath.toCmds and CanvasKit.Path.MakeFromCmds', () {
     const ui.Rect rect = ui.Rect.fromLTRB(0, 0, 10, 10);
-    final SkPath path = SkPath();
-    path.addRect(toSkRect(rect));
+    final SkPathBuilder pathBuilder = SkPathBuilder();
+    pathBuilder.addRect(toSkRect(rect));
+    final SkPath path = pathBuilder.snapshot();
     expect(path.toCmds(), <num>[
       0, 0, 0, // moveTo
       1, 10, 0, // lineTo
@@ -1082,11 +1091,12 @@ void _canvasTests() {
 
   test('clipPath', () {
     canvas.clipPath(
-      SkPath()
-        ..moveTo(10.9, 10.9)
-        ..lineTo(19.1, 10.9)
-        ..lineTo(19.1, 19.1)
-        ..lineTo(10.9, 19.1),
+      (SkPathBuilder()
+            ..moveTo(10.9, 10.9)
+            ..lineTo(19.1, 10.9)
+            ..lineTo(19.1, 19.1)
+            ..lineTo(10.9, 19.1))
+          .snapshot(),
       canvasKit.ClipOp.Intersect,
       true,
     );
@@ -1208,7 +1218,7 @@ void _canvasTests() {
   });
 
   test('drawPath', () {
-    canvas.drawPath(_testClosedSkPath(), SkPaint());
+    canvas.drawPath(_testClosedSkPath().snapshot(), SkPaint());
   });
 
   test('drawPoints', () {
@@ -1237,7 +1247,7 @@ void _canvasTests() {
       const double ambientAlpha = 0.039;
       const double spotAlpha = 0.25;
 
-      final SkPath path = _testClosedSkPath();
+      final SkPath path = _testClosedSkPath().snapshot();
       final ui.Rect bounds = fromSkRect(path.getBounds());
       final double shadowX = (bounds.left + bounds.right) / 2.0;
       final double shadowY = bounds.top - 600.0;

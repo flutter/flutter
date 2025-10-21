@@ -1289,8 +1289,32 @@ final SkFloat32List _sharedSkColor3 = mallocFloat32List(4);
 
 @JS('window.flutterCanvasKit.Path')
 extension type SkPath._(JSObject _) implements JSObject {
-  external SkPath();
-  external SkPath.from(SkPath other);
+  external void setFillType(SkFillType fillType);
+
+  @JS('getBounds')
+  external JSFloat32Array _getBounds();
+  Float32List getBounds() => _getBounds().toDart;
+
+  external bool contains(double x, double y);
+
+  external String toSVGString();
+  external bool isEmpty();
+  external SkPath copy();
+
+  /// Serializes the path into a list of commands.
+  ///
+  /// The list can be used to create a new [SkPath] using
+  /// [CanvasKit.Path.MakeFromCmds].
+  @JS('toCmds')
+  external JSAny _toCmds();
+  List<dynamic> toCmds() => _toCmds().toObjectShallow as List<dynamic>;
+
+  external void delete();
+}
+
+@JS('window.flutterCanvasKit.PathBuilder')
+extension type SkPathBuilder._(JSObject _) implements JSObject {
+  external SkPathBuilder([SkPath skPath]);
 
   external void setFillType(SkFillType fillType);
 
@@ -1318,9 +1342,9 @@ extension type SkPath._(JSObject _) implements JSObject {
     bool extendPath,
   );
 
-  @JS('addPoly')
-  external void _addPoly(JSFloat32Array points, bool close);
-  void addPoly(Float32List points, bool close) => _addPoly(points.toJS, close);
+  @JS('addPolygon')
+  external void _addPolygon(JSFloat32Array points, bool close);
+  void addPolygon(Float32List points, bool close) => _addPolygon(points.toJS, close);
 
   @JS('addRRect')
   external void _addRRect(JSFloat32Array rrect, bool counterClockWise);
@@ -1357,12 +1381,7 @@ extension type SkPath._(JSObject _) implements JSObject {
 
   external void close();
   external void conicTo(double x1, double y1, double x2, double y2, double w);
-  external bool contains(double x, double y);
   external void cubicTo(double x1, double y1, double x2, double y2, double x3, double y3);
-
-  @JS('getBounds')
-  external JSFloat32Array _getBounds();
-  Float32List getBounds() => _getBounds().toDart;
 
   external void lineTo(double x, double y);
   external void moveTo(double x, double y);
@@ -1382,9 +1401,9 @@ extension type SkPath._(JSObject _) implements JSObject {
   external void rMoveTo(double x, double y);
   external void rQuadTo(double x1, double y1, double x2, double y2);
   external void reset();
-  external String toSVGString();
+
   external bool isEmpty();
-  external SkPath copy();
+
   external void transform(
     double scaleX,
     double skewX,
@@ -1397,13 +1416,7 @@ extension type SkPath._(JSObject _) implements JSObject {
     double pers2,
   );
 
-  /// Serializes the path into a list of commands.
-  ///
-  /// The list can be used to create a new [SkPath] using
-  /// [CanvasKit.Path.MakeFromCmds].
-  @JS('toCmds')
-  external JSAny _toCmds();
-  List<dynamic> toCmds() => _toCmds().toObjectShallow as List<dynamic>;
+  external SkPath snapshot();
 
   external void delete();
 }
