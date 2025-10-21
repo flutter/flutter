@@ -602,7 +602,7 @@ abstract class SemanticRole {
   ///
   /// This approach allows framework full control when specified, with reasonable
   /// fallback inference for backward compatibility.
-  bool get acceptsPointerEvents {
+  bool get shouldAcceptPointerEvents {
     final hitTestBehavior = semanticsObject.hitTestBehavior;
 
     // TIER 1: Framework Declaration
@@ -646,22 +646,6 @@ abstract class SemanticRole {
       }
     }
 
-    // Route-scoped containers accept pointer events as a fallback.
-    // This fixes the dialog dismissal bug (issue #149001) by ensuring that
-    // dialog containers act as barriers, preventing clicks on empty space
-    // from passing through to the modal barrier underneath.
-    //
-    // Note: Ideally, the framework should explicitly set
-    // SemanticsHitTestBehavior.opaque for dialogs instead of relying on this
-    // engine-side inference. This fallback exists for backward compatibility
-    // and cases where framework doesn't specify the behavior.
-    if (semanticsObject.hasChildren) {
-      return semanticsObject.scopesRoute;
-    }
-
-    // Leaf nodes default to transparent.
-    // Non-interactive leaf nodes (like empty space) should not intercept
-    // pointer events.
     return false;
   }
 
@@ -1879,7 +1863,7 @@ class SemanticsObject {
     // Apply updates to the DOM.
     _updateRole();
 
-    if (semanticRole!.acceptsPointerEvents) {
+    if (semanticRole!.shouldAcceptPointerEvents) {
       element.style.pointerEvents = 'all';
     } else {
       element.style.pointerEvents = 'none';

@@ -72,7 +72,7 @@ class SemanticIncrementable extends SemanticRole {
   }
 
   @override
-  bool get acceptsPointerEvents => true;
+  bool get shouldAcceptPointerEvents => true;
 
   @override
   bool focusAsRouteDefault() {

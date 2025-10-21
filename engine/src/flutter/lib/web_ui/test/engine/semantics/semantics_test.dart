@@ -1628,52 +1628,9 @@ void _testContainer() {
       );
     });
 
-    test('route-scoped containers accept pointer events', () async {
+    test('non-interactive containers do not accept pointer events', () async {
       final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-      // Create a route-scoped container (like a dialog) with children
-      updateNode(
-        builder,
-        flags: const ui.SemanticsFlags(scopesRoute: true),
-        childrenInTraversalOrder: Int32List.fromList(<int>[1, 2]),
-        childrenInHitTestOrder: Int32List.fromList(<int>[1, 2]),
-      );
-      updateNode(builder, id: 1);
-      updateNode(builder, id: 2);
-
-      owner().updateSemantics(builder.build());
-
-      final DomElement routeContainer = owner().semanticsHost.querySelector(
-        '#${kFlutterSemanticNodePrefix}0',
-      )!;
-      expect(
-        routeContainer.style.pointerEvents,
-        'all',
-        reason:
-            'Route-scoped containers (like dialogs) should accept pointer events to prevent clicks from escaping to the barrier',
-      );
-
-      final DomElement child1 = owner().semanticsHost.querySelector(
-        '#${kFlutterSemanticNodePrefix}1',
-      )!;
-      expect(
-        child1.style.pointerEvents,
-        'none',
-        reason: 'Non-interactive leaf nodes should not accept pointer events',
-      );
-
-      final DomElement child2 = owner().semanticsHost.querySelector(
-        '#${kFlutterSemanticNodePrefix}2',
-      )!;
-      expect(
-        child2.style.pointerEvents,
-        'none',
-        reason: 'Non-interactive leaf nodes should not accept pointer events',
-      );
-    });
-
-    test('regular containers do not accept pointer events', () async {
-      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-      // Create a regular container (NOT route-scoped) with children
+      // Create a container with children but no explicit hitTestBehavior
       updateNode(
         builder,
         childrenInTraversalOrder: Int32List.fromList(<int>[1]),
@@ -1689,7 +1646,8 @@ void _testContainer() {
       expect(
         container.style.pointerEvents,
         'none',
-        reason: 'Regular containers (without scopesRoute) should not accept pointer events',
+        reason:
+            'Non-interactive containers should not accept pointer events when hitTestBehavior is defer',
       );
     });
 
@@ -1722,30 +1680,6 @@ void _testContainer() {
         element.style.pointerEvents,
         'none',
         reason: 'Nodes with hitTestBehavior.transparent should not accept pointer events',
-      );
-    });
-
-    test('hitTestBehavior.opaque overrides scopesRoute for containers', () async {
-      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-      // Create a route-scoped container with explicit transparent behavior
-      updateNode(
-        builder,
-        flags: const ui.SemanticsFlags(scopesRoute: true),
-        hitTestBehavior: ui.SemanticsHitTestBehavior.transparent,
-        childrenInTraversalOrder: Int32List.fromList(<int>[1]),
-        childrenInHitTestOrder: Int32List.fromList(<int>[1]),
-      );
-      updateNode(builder, id: 1);
-
-      owner().updateSemantics(builder.build());
-
-      final DomElement container = owner().semanticsHost.querySelector(
-        '#${kFlutterSemanticNodePrefix}0',
-      )!;
-      expect(
-        container.style.pointerEvents,
-        'none',
-        reason: 'Explicit hitTestBehavior.transparent should override scopesRoute',
       );
     });
 

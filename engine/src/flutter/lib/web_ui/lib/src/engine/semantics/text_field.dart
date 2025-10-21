@@ -208,7 +208,7 @@ class SemanticTextField extends SemanticRole {
   }
 
   @override
-  bool get acceptsPointerEvents => true;
+  bool get shouldAcceptPointerEvents => true;
 
   /// The element used for editing, e.g. `<input>`, `<textarea>`, which is
   /// different from the host [element].
