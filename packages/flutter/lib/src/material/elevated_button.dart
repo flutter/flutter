@@ -343,9 +343,7 @@ class ElevatedButton extends ButtonStyleButton {
   /// * `maximumSize` - Size.infinite
   /// * `side` - null
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
-  /// * `mouseCursor`
-  ///   * enabled - WidgetStateMouseCursor.adaptiveClickable
-  ///   * disabled - SystemMouseCursors.basic
+  /// * `mouseCursor` - WidgetStateMouseCursor.adaptiveClickable
   /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
@@ -398,9 +396,7 @@ class ElevatedButton extends ButtonStyleButton {
   /// * `maximumSize` - Size.infinite
   /// * `side` - null
   /// * `shape` - StadiumBorder()
-  /// * `mouseCursor`
-  ///   * enabled - WidgetStateMouseCursor.adaptiveClickable
-  ///   * disabled - SystemMouseCursors.basic
+  /// * `mouseCursor` - WidgetStateMouseCursor.adaptiveClickable
   /// * `visualDensity` - Theme.visualDensity
   /// * `tapTargetSize` - Theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
@@ -431,7 +427,7 @@ class ElevatedButton extends ButtonStyleButton {
             maximumSize: Size.infinite,
             shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
             enabledMouseCursor: WidgetStateMouseCursor.adaptiveClickable,
-            disabledMouseCursor: SystemMouseCursors.basic,
+            disabledMouseCursor: WidgetStateMouseCursor.adaptiveClickable,
             visualDensity: theme.visualDensity,
             tapTargetSize: theme.materialTapTargetSize,
             animationDuration: kThemeChangeDuration,

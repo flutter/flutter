@@ -298,9 +298,7 @@ class OutlinedButton extends ButtonStyleButton {
   /// * `maximumSize` - Size.infinite
   /// * `side` - BorderSide(width: 1, color: Theme.colorScheme.onSurface(0.12))
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
-  /// * `mouseCursor`
-  ///   * enabled - WidgetStateMouseCursor.adaptiveClickable
-  ///   * disabled - SystemMouseCursors.basic
+  /// * `mouseCursor` - WidgetStateMouseCursor.adaptiveClickable
   /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
@@ -337,9 +335,7 @@ class OutlinedButton extends ButtonStyleButton {
   ///   * disabled - BorderSide(color: Theme.colorScheme.onSurface(0.12))
   ///   * others - BorderSide(color: Theme.colorScheme.outline)
   /// * `shape` - StadiumBorder()
-  /// * `mouseCursor`
-  ///   * enabled - WidgetStateMouseCursor.adaptiveClickable
-  ///   * disabled - SystemMouseCursors.basic
+  /// * `mouseCursor` - WidgetStateMouseCursor.adaptiveClickable
   /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
@@ -369,7 +365,7 @@ class OutlinedButton extends ButtonStyleButton {
             side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
             shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
             enabledMouseCursor: WidgetStateMouseCursor.adaptiveClickable,
-            disabledMouseCursor: SystemMouseCursors.basic,
+            disabledMouseCursor: WidgetStateMouseCursor.adaptiveClickable,
             visualDensity: theme.visualDensity,
             tapTargetSize: theme.materialTapTargetSize,
             animationDuration: kThemeChangeDuration,
