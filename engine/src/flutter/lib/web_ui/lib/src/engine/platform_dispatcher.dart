@@ -1033,9 +1033,11 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   /// Watches for resize changes on an off-screen invisible element to
-  /// recalculate [typographySettings].
+  /// recalculate [lineHeightScaleFactorOverride], [letterSpacingOverride],
+  /// [wordSpacingOverride], and [paragraphSpacing].
   ///
-  /// Updates [typographySettings] with the new value.
+  /// Updates [lineHeightScaleFactorOverride], [letterSpacingOverride],
+  /// [wordSpacingOverride], and [paragraphSpacing] with the new values.
   DomResizeObserver? _typographySettingsObserver;
   DomElement? _typographyMeasurementElement;
 
@@ -1079,8 +1081,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     }
   }
 
-  /// Set the callback function for updating [typographySettings] based on
-  /// the sizing changes of an off-screen element with text.
+  /// Set the callback function for updating [lineHeightScaleFactorOverride],
+  /// [letterSpacingOverride], [wordSpacingOverride], and [paragraphSpacing]
+  /// based on the sizing changes of an off-screen element with text.
   void _addTypographySettingsObserver() {
     _typographyMeasurementElement = createDomHTMLParagraphElement();
     _typographyMeasurementElement!.text = 'flutter typography measurement';
