@@ -1041,44 +1041,44 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   DomResizeObserver? _typographySettingsObserver;
   DomElement? _typographyMeasurementElement;
 
-  /// Updates [lineHeightScaleFactorOverride] and invokes [onPlatformConfigurationChanged] and
-  /// [onMetricsChanged] callbacks if [lineHeightScaleFactorOverride] changed.
-  void _updateLineHeightScaleFactorOverride(double? value) {
+  /// Updates [lineHeightScaleFactorOverride] and return true if
+  /// [lineHeightScaleFactorOverride] changed. If not then returns false.
+  bool _updateLineHeightScaleFactorOverride(double? value) {
     if (configuration.lineHeightScaleFactorOverride != value) {
       configuration = configuration.apply(lineHeightScaleFactorOverride: value);
-      invokeOnPlatformConfigurationChanged();
-      invokeOnMetricsChanged();
+      return true;
     }
+    return false;
   }
 
-  /// Updates [letterSpacingOverride] and invokes [onPlatformConfigurationChanged] and
-  /// [onMetricsChanged] callbacks if [letterSpacingOverride] changed.
-  void _updateLetterSpacingOverride(double? value) {
+  /// Updates [letterSpacingOverride] and return true if
+  /// [letterSpacingOverride] changed. If not then returns false.
+  bool _updateLetterSpacingOverride(double? value) {
     if (configuration.letterSpacingOverride != value) {
       configuration = configuration.apply(letterSpacingOverride: value);
-      invokeOnPlatformConfigurationChanged();
-      invokeOnMetricsChanged();
+      return true;
     }
+    return false;
   }
 
-  /// Updates [wordSpacingOverride] and invokes [onPlatformConfigurationChanged] and
-  /// [onMetricsChanged] callbacks if [wordSpacingOverride] changed.
-  void _updateWordSpacingOverride(double? value) {
+  /// Updates [wordSpacingOverride] and returns true if
+  /// [wordSpacingOverride] changed. If not then returns false.
+  bool _updateWordSpacingOverride(double? value) {
     if (configuration.wordSpacingOverride != value) {
       configuration = configuration.apply(wordSpacingOverride: value);
-      invokeOnPlatformConfigurationChanged();
-      invokeOnMetricsChanged();
+      return true;
     }
+    return false;
   }
 
-  /// Updates [paragraphSpacing] and invokes [onPlatformConfigurationChanged] and
-  /// [onMetricsChanged] callbacks if [paragraphSpacing] changed.
-  void _updateParagraphSpacing(double? value) {
+  /// Updates [paragraphSpacing] and returns true if
+  /// [paragraphSpacing] changed. If not then returns false.
+  bool _updateParagraphSpacing(double? value) {
     if (configuration.paragraphSpacing != value) {
       configuration = configuration.apply(paragraphSpacing: value);
-      invokeOnPlatformConfigurationChanged();
-      invokeOnMetricsChanged();
+      return true;
     }
+    return false;
   }
 
   /// Set the callback function for updating [lineHeightScaleFactorOverride],
@@ -1141,31 +1141,46 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         'margin-bottom',
       )?.toDouble();
 
+      bool computedLineHeightScaleFactorChanged = false;
+      bool computedLetterSpacingChanged = false;
+      bool computedWordSpacingChanged = false;
+      bool computedParagraphSpacingChanged = false;
+
       if (computedLineHeightScaleFactor == defaultLineHeightFactor) {
-        _updateLineHeightScaleFactorOverride(null);
+        computedLineHeightScaleFactorChanged = _updateLineHeightScaleFactorOverride(null);
       }
       if (computedLetterSpacing == spacingDefault) {
-        _updateLetterSpacingOverride(null);
+        computedLetterSpacingChanged = _updateLetterSpacingOverride(null);
       }
       if (computedWordSpacing == spacingDefault) {
-        _updateWordSpacingOverride(null);
+        computedWordSpacingChanged = _updateWordSpacingOverride(null);
       }
       if (computedParagraphSpacing == spacingDefault) {
-        _updateParagraphSpacing(null);
+        computedParagraphSpacingChanged = _updateParagraphSpacing(null);
       }
 
       if (computedLineHeightScaleFactor != null &&
           computedLineHeightScaleFactor != defaultLineHeightFactor) {
-        _updateLineHeightScaleFactorOverride(computedLineHeightScaleFactor);
+        computedLineHeightScaleFactorChanged = _updateLineHeightScaleFactorOverride(
+          computedLineHeightScaleFactor,
+        );
       }
       if (computedLetterSpacing != null && computedLetterSpacing != spacingDefault) {
-        _updateLetterSpacingOverride(computedLetterSpacing);
+        computedLetterSpacingChanged = _updateLetterSpacingOverride(computedLetterSpacing);
       }
       if (computedWordSpacing != null && computedWordSpacing != spacingDefault) {
-        _updateWordSpacingOverride(computedWordSpacing);
+        computedWordSpacingChanged = _updateWordSpacingOverride(computedWordSpacing);
       }
       if (computedParagraphSpacing != null && computedParagraphSpacing != spacingDefault) {
-        _updateParagraphSpacing(computedParagraphSpacing);
+        computedParagraphSpacingChanged = _updateParagraphSpacing(computedParagraphSpacing);
+      }
+
+      if (computedLineHeightScaleFactorChanged ||
+          computedLetterSpacingChanged ||
+          computedWordSpacingChanged ||
+          computedParagraphSpacingChanged) {
+        invokeOnPlatformConfigurationChanged();
+        invokeOnMetricsChanged();
       }
     });
 
