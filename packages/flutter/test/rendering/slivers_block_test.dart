@@ -127,7 +127,6 @@ void main() {
     final root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
-      cacheExtent: 0.0,
       children: <RenderSliver>[inner = childManager.createRenderObject()],
     );
     layout(root);
@@ -202,7 +201,7 @@ void main() {
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       children: <RenderSliver>[inner = childManager.createRenderObject()],
-      cacheExtent: 0.0,
+
     );
     layout(root);
 

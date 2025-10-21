@@ -18,6 +18,7 @@ import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
+import 'gesture_detector.dart';
 import 'media_query.dart';
 import 'notification_listener.dart';
 import 'primary_scroll_controller.dart';
@@ -475,16 +476,20 @@ abstract class ScrollView extends StatelessWidget {
           return true;
       }
     }());
-    final ScrollCacheExtent? effectiveScrollCacheExtent =
-        scrollCacheExtent ?? (cacheExtent != null ? ScrollCacheExtent.pixels(cacheExtent!) : null);
+    final ScrollCacheExtent effectiveScrollCacheExtent =
+        scrollCacheExtent ??
+        (cacheExtent == null
+            ? const ScrollCacheExtent.viewport(RawGestureDetector.kDefaultSemanticsScrollFactor)
+            : ScrollCacheExtent.pixels(cacheExtent!));
+
     if (shrinkWrap) {
       return ShrinkWrappingViewport(
         axisDirection: axisDirection,
         offset: offset,
         slivers: slivers,
+        scrollCacheExtent: effectiveScrollCacheExtent,
         paintOrder: paintOrder,
         clipBehavior: clipBehavior,
-        scrollCacheExtent: effectiveScrollCacheExtent,
       );
     }
     return Viewport(

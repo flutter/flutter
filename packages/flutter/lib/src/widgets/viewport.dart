@@ -79,7 +79,6 @@ class Viewport extends MultiChildRenderObjectWidget {
     this.clipBehavior = Clip.hardEdge,
     List<Widget> slivers = const <Widget>[],
   }) : assert(center == null || slivers.where((Widget child) => child.key == center).length == 1),
-       assert(cacheExtentStyle != CacheExtentStyle.viewport || cacheExtent != null),
        super(children: slivers);
 
   /// The direction in which the [offset]'s [ViewportOffset.pixels] increases.
@@ -133,6 +132,8 @@ class Viewport extends MultiChildRenderObjectWidget {
   final Key? center;
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
+  ///
+  /// defaults to 0.0.
   ///
   /// See also:
   ///

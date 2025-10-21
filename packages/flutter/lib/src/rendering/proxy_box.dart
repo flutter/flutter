@@ -4199,7 +4199,9 @@ class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
   }
 
   /// The fraction of the dimension of this render box to use when
-  /// scrolling. For example, if this is 0.8 and the box is 200 pixels
+  /// scrolling.
+  ///
+  /// For example, if this is 0.8 and the box is 200 pixels
   /// wide, then when a left-scroll action is received from the
   /// accessibility system, it will translate into a 160 pixel
   /// leftwards drag.

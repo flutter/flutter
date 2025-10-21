@@ -1330,6 +1330,13 @@ class RawGestureDetector extends StatefulWidget {
     this.semantics,
   });
 
+  /// The default value for the semantics scroll factor.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderSemanticsGestureHandler.scrollFactor] for a definition of the scroll factor.
+  static const double kDefaultSemanticsScrollFactor = 0.8;
+
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
@@ -1715,7 +1722,8 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
       ..onTap = _getTapHandler(renderObject, recognizers)
       ..onLongPress = _getLongPressHandler(renderObject, recognizers)
       ..onHorizontalDragUpdate = _getHorizontalDragUpdateHandler(renderObject, recognizers)
-      ..onVerticalDragUpdate = _getVerticalDragUpdateHandler(renderObject, recognizers);
+      ..onVerticalDragUpdate = _getVerticalDragUpdateHandler(renderObject, recognizers)
+      ..scrollFactor = RawGestureDetector.kDefaultSemanticsScrollFactor;
   }
 
   GestureTapCallback? _getTapHandler(
