@@ -426,10 +426,19 @@ abstract class WidgetStateMouseCursor extends MouseCursor
     return SystemMouseCursors.click;
   }
 
-  /// A platform-adaptive mouse cursor for clickable widgets.
+  /// A platform-adaptive mouse cursor for clickable widgets, which resolves
+  /// differently based on the widget's state and the platform.
   ///
-  /// On web platforms when the widget is not disabled, this cursor resolves to
-  /// [SystemMouseCursors.click]. Otherwise, it resolves to [SystemMouseCursors.basic].
+  /// On web platforms, this cursor resolves to [SystemMouseCursors.click] by
+  /// default. If the widget is disabled, it resolves to
+  /// [SystemMouseCursors.basic].
+  ///
+  /// On non-web platforms, this cursor always resolves to
+  /// [SystemMouseCursors.basic].
+  ///
+  /// This cursor is commonly used for interactive widgets like buttons. The
+  /// difference in behavior across platforms reflects native conventions (e.g.,
+  /// web uses a hand pointer for buttons, while desktop platforms do not).
   static const WidgetStateMouseCursor adaptiveClickable = WidgetStateMouseCursor.resolveWith(
     _adaptiveClickable,
     debugDescription: 'WidgetStateMouseCursor(adaptiveClickable)',
