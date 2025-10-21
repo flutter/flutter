@@ -448,7 +448,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   ///   * [clearAllTestValues] to reset all test values for this view
   @override
   double? get lineHeightScaleFactorOverride => _forceLineHeightScaleFactorOverrideToBeNull
-      ? null : _lineHeightScaleFactorOverrideTestValue ?? _platformDispatcher.lineHeightScaleFactorOverride;
+      ? null
+      : _lineHeightScaleFactorOverrideTestValue ??
+            _platformDispatcher.lineHeightScaleFactorOverride;
   double? _lineHeightScaleFactorOverrideTestValue;
   bool _forceLineHeightScaleFactorOverrideToBeNull = false;
 
@@ -491,7 +493,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   ///   * [clearLetterSpacingOverrideTestValue] to reset this value specifically
   ///   * [clearAllTestValues] to reset all test values for this view
   @override
-  double? get letterSpacingOverride => _forceLetterSpacingOverrideToBeNull ? null : _letterSpacingOverrideTestValue ?? _platformDispatcher.letterSpacingOverride;
+  double? get letterSpacingOverride => _forceLetterSpacingOverrideToBeNull
+      ? null
+      : _letterSpacingOverrideTestValue ?? _platformDispatcher.letterSpacingOverride;
   double? _letterSpacingOverrideTestValue;
   bool _forceLetterSpacingOverrideToBeNull = false;
 
@@ -534,7 +538,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   ///   * [clearWordSpacingOverrideTestValue] to reset this value specifically
   ///   * [clearAllTestValues] to reset all test values for this view
   @override
-  double? get wordSpacingOverride => _forceWordSpacingOverrideToBeNull ? null : _wordSpacingOverrideTestValue ?? _platformDispatcher.wordSpacingOverride;
+  double? get wordSpacingOverride => _forceWordSpacingOverrideToBeNull
+      ? null
+      : _wordSpacingOverrideTestValue ?? _platformDispatcher.wordSpacingOverride;
   double? _wordSpacingOverrideTestValue;
   bool _forceWordSpacingOverrideToBeNull = false;
 
@@ -575,7 +581,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   ///   * [clearParagraphSpacingTestValue] to reset this value specifically
   ///   * [clearAllTestValues] to reset all test values for this view
   @override
-  double? get paragraphSpacing => _forceParagraphSpacingToBeNull ? null : _paragraphSpacingTestValue ?? _platformDispatcher.paragraphSpacing;
+  double? get paragraphSpacing => _forceParagraphSpacingToBeNull
+      ? null
+      : _paragraphSpacingTestValue ?? _platformDispatcher.paragraphSpacing;
   double? _paragraphSpacingTestValue;
   bool _forceParagraphSpacingToBeNull = false;
 
