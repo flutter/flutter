@@ -10,7 +10,7 @@ https://github.com/flutter/flutter/issues/< Replace with issue link here >
 What is the impact (ex. visual jank on Samsung phones, app crash, cannot ship an iOS app)? 
 Does it impact development (ex. flutter doctor crashes when Android Studio is installed), 
 or the shipping production app (the app crashes on launch). 
-This information is for domain experts and release engineers to understand the consiquences of saying yes or no to the cherry pick. 
+This information is for domain experts and release engineers to understand the consequences of saying yes or no to the cherry pick. 
 
 < Replace with impact description here >
 
