@@ -727,29 +727,39 @@ TEST_P(DisplayListTest, CanDrawBoundedBlur) {
   auto callback = [&]() {
     static float sigma = 20;
     static float ctm_scale = 1;
+    static float rotate_degree = 0;
     static bool use_bounds = true;
 
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::SliderFloat("Sigma", &sigma, 0, 100);
     ImGui::SliderFloat("Scale", &ctm_scale, 0, 10);
+    ImGui::SliderFloat("Rotate", &rotate_degree, -200, 200);
     ImGui::NewLine();
     ImGui::Checkbox("Bounded blur", &use_bounds);
     ImGui::End();
 
     flutter::DisplayListBuilder builder;
 
-    Vector2 scale = ctm_scale * GetContentScale();
-    builder.Scale(scale.x, scale.y);
+    Matrix content_scale_transform = Matrix::MakeScale(GetContentScale());
+    Matrix transform =
+        Matrix::MakeScale(Vector2(ctm_scale, ctm_scale)) *
+        Matrix::MakeRotationZ(Radians(rotate_degree / 180.0f * kPi));
+    Matrix inverse_transform = transform.Invert();
+
+    builder.Transform(transform * content_scale_transform);
 
     // Draw from top right to bottom left.
     static PlaygroundPoint blur_point_a(Point(410, 110), 10, Color::White());
     static PlaygroundPoint blur_point_b(Point(150, 320), 10, Color::White());
-    auto [p1, p2] = DrawPlaygroundLine(blur_point_a, blur_point_b);
+    auto [p1_global, p2_global] =
+        DrawPlaygroundLine(blur_point_a, blur_point_b);
+    Point p1 = inverse_transform * p1_global;
+    Point p2 = inverse_transform * p2_global;
     DlRect bounds = DlRect::MakeLTRB(p2.x, p1.y, p1.x, p2.y);
 
     builder.DrawImage(DlImageImpeller::Make(texture), DlPoint(0, 0),
                       flutter::DlImageSampling::kNearestNeighbor, nullptr);
-    builder.ClipRect(bounds.Scale(1 / ctm_scale));
+    builder.ClipRect(bounds);
     builder.Save();
 
     flutter::DlPaint save_paint;
