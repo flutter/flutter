@@ -918,6 +918,12 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
         missingModule: missingModule,
       );
     }
+  } else if (message.toLowerCase().contains('has been modified since')) {
+    return _XCResultIssueHandlingResult(
+      requiresProvisioningProfile: false,
+      hasProvisioningProfileIssue: false,
+      modifiedPrecompiledSource: true,
+    );
   }
   return _XCResultIssueHandlingResult(
     requiresProvisioningProfile: false,
@@ -937,6 +943,7 @@ Future<bool> _handleIssues(
   var requiresProvisioningProfile = false;
   var hasProvisioningProfileIssue = false;
   var issueDetected = false;
+  var modifiedPrecompiledSource = false;
   String? missingPlatform;
   final duplicateModules = <String>[];
   final missingModules = <String>[];
@@ -962,6 +969,7 @@ Future<bool> _handleIssues(
       if (handlingResult.missingModule != null) {
         missingModules.add(handlingResult.missingModule!);
       }
+      modifiedPrecompiledSource = handlingResult.modifiedPrecompiledSource;
       issueDetected = true;
     }
   } else if (xcResult != null) {
@@ -1032,6 +1040,13 @@ Future<bool> _handleIssues(
         );
       }
     }
+  } else if (modifiedPrecompiledSource) {
+    logger.printError(
+      '════════════════════════════════════════════════════════════════════════════════\n'
+      'A precompiled file has been changed since last built. Please run "flutter clean" to clear '
+      'the cache.\n\n'
+      '════════════════════════════════════════════════════════════════════════════════',
+    );
   }
   return issueDetected;
 }
@@ -1169,6 +1184,7 @@ class _XCResultIssueHandlingResult {
     this.missingPlatform,
     this.duplicateModule,
     this.missingModule,
+    this.modifiedPrecompiledSource = false,
   });
 
   /// An issue indicates that user didn't provide the provisioning profile.
@@ -1186,6 +1202,10 @@ class _XCResultIssueHandlingResult {
   /// An issue indicates a module was imported but not found, potentially due
   /// to it being Swift Package Manager compatible only.
   final String? missingModule;
+
+  /// An issue indicates that a source file, such as a header in the Flutter framework, has
+  /// changed since last built. This requires "flutter clean" to resolve.
+  final bool modifiedPrecompiledSource;
 }
 
 const _kResultBundlePath = 'temporary_xcresult_bundle';
