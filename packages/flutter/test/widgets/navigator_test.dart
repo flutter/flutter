@@ -5219,34 +5219,44 @@ void main() {
       skip: isBrowser, // [intended] only non-web Android supports predictive back.
     );
 
-    testWidgets('pop() on an empty stack prints a debug warning', (WidgetTester tester) async {
-      final List<String> debugMessages = <String>[];
-
-      final DebugPrintCallback oldDebugPrint = debugPrint;
-      debugPrint = (String? message, {int? wrapWidth}) {
-        if (message != null) {
-          debugMessages.add(message);
-        }
-      };
-
-      await tester.pumpWidget(MaterialApp(home: Container()));
-
+    testWidgets('pop() on an empty stack throws an AssertionError in debug mode', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(const MaterialApp(home: Text('Home')));
       final NavigatorState navigator = tester.state(find.byType(Navigator));
+
       navigator.pop();
-      await tester.pump(); // Pump again to ensure all async framework work is complete
+      await tester.pumpAndSettle();
 
-      debugPrint = oldDebugPrint;
+      dynamic caughtException;
+      try {
+        navigator.pop();
+      } catch (e) {
+        caughtException = e;
+      }
 
-      const String expectedMessage =
-          'Tried to pop a route on an empty stack. Ensure there is at least one route before calling Navigator.pop().';
+      await tester.pump();
+      tester.takeException();
 
       expect(
-        debugMessages,
-        contains(expectedMessage),
-        reason: 'The expected debug warning for popping an empty stack was not found.',
+        caughtException,
+        isA<AssertionError>(),
+        reason: 'Popping an empty stack should synchronously throw an AssertionError.',
       );
 
-      expect(find.byType(Container), findsOneWidget);
+      const String essentialMessage = 'Tried to pop a route on an empty stack.';
+
+      expect(
+        caughtException.toString(),
+        contains(essentialMessage),
+        reason: 'The captured AssertionError message did not contain the essential warning text.',
+      );
+
+      expect(
+        tester.takeException(),
+        isNull,
+        reason: 'No other exceptions should remain in the test harness.',
+      );
     });
 
     testWidgets(
