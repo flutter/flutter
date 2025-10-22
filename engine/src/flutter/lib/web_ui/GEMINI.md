@@ -6,7 +6,7 @@ This document describes how to build the engine and run tests for the Flutter We
 
 `felt` is a command-line tool for building and testing the Flutter web engine. To use it, you need to add `FLUTTER_ROOT/engine/src/flutter/lib/web_ui/dev` to your `PATH`.
 
-Before building the engine, ensure your dependencies are up to date by running the following command from the root of your Flutter checkout (`~/Projects/flutter`):
+Before building the engine, ensure your dependencies are up to date by running the following command from the root of your Flutter checkout:
 
 ```bash
 gclient sync -D
@@ -71,6 +71,12 @@ Run tests that use the `dart2wasm` compiler:
 
 ```bash
 felt test --compiler dart2wasm
+```
+
+Run tests on Chrome using the CanvasKit renderer:
+
+```bash
+felt test --browser chrome --renderer canvaskit
 ```
 
 ### Generating Golden Files
