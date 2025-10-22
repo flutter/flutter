@@ -29,6 +29,9 @@
 - (void)flutterViewAccessibilityDidCall;
 @end
 
+@interface FlutterAutoResizeLayoutConstraint : NSLayoutConstraint
+@end
+
 @interface FlutterView : UIView
 
 - (instancetype)init NS_UNAVAILABLE;
@@ -42,6 +45,9 @@
 
 - (UIScreen*)screen;
 - (MTLPixelFormat)pixelFormat;
+- (void)setIntrinsicContentSize:(CGSize)size;
+- (void)resetIntrinsicContentSize;
+@property(nonatomic, assign, readwrite) BOOL autoResizable;
 
 @end
 

@@ -182,6 +182,7 @@ extern CFTimeInterval display_link_target;
 - (instancetype)init {
   if (self = [super init]) {
     _preferredDevice = MTLCreateSystemDefaultDevice();
+    self.contentsGravity = kCAGravityTop;
     self.device = self.preferredDevice;
     self.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _availableTextures = [[NSMutableSet alloc] init];
@@ -253,6 +254,7 @@ extern CFTimeInterval display_link_target;
     _front = nil;
     _totalTextures = 0;
     _drawableSize = drawableSize;
+    NSLog(@"drawableSize %f", drawableSize.height);
   }
 }
 
@@ -404,6 +406,14 @@ extern CFTimeInterval display_link_target;
 }
 
 - (void)presentOnMainThread:(FlutterTexture*)texture {
+  if (texture.texture.width != _drawableSize.width ||
+      texture.texture.height != _drawableSize.height) {
+    // This texture was created with an old size, but the view has since been
+    // resized. Do not present this stale frame to avoid distortion. The texture
+    // will be correctly recycled on the next frame.
+    return;
+  }
+  
   // This is needed otherwise frame gets skipped on touch begin / end. Go figure.
   // Might also be placebo
   [self setNeedsDisplay];

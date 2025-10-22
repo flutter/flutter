@@ -254,6 +254,13 @@ FLUTTER_DARWIN_EXPORT
  */
 @property(nonatomic, readonly) BOOL engineAllowHeadlessExecution;
 
+/**
+ * Controls whether the created view can be sized based on its content.
+ *
+ * Default is `NO`.
+ */
+@property(nonatomic, getter=isAutoResizable) BOOL autoResizable;
+
 @end
 
 NS_ASSUME_NONNULL_END

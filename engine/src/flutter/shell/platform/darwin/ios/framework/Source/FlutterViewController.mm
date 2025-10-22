@@ -102,6 +102,8 @@ typedef struct MouseState {
  */
 @property(nonatomic, assign) BOOL shouldIgnoreViewportMetricsUpdatesDuringRotation;
 
+@property(nonatomic, strong) NSTimer* viewportUpdateDebounceTimer;
+
 /**
  * Keyboard animation properties
  */
@@ -130,6 +132,8 @@ typedef struct MouseState {
 /// With this VSyncClient, it can correct the delivery frame rate of touch events to let it keep
 /// the same with frame rate of rendering.
 @property(nonatomic, strong) VSyncClient* touchRateCorrectionVSyncClient;
+
+@property(nonatomic, assign) CGSize sizeBeforeAutoResized;
 
 /*
  * Mouse and trackpad gesture recognizers
@@ -169,6 +173,8 @@ typedef struct MouseState {
 // Synthesize properties with an overridden getter/setter.
 @synthesize viewOpaque = _viewOpaque;
 @synthesize displayingFlutterUI = _displayingFlutterUI;
+
+@synthesize autoResizable = _autoResizable;
 
 // TODO(dkwingsmt): https://github.com/flutter/flutter/issues/138168
 // No backing ivar is currently required; when multiple views are supported, we'll need to
@@ -1458,6 +1464,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   bool firstViewBoundsUpdate = !_viewportMetrics.physical_width;
   _viewportMetrics.device_pixel_ratio = scale;
   [self setViewportMetricsSize];
+  [self updateAutoResizeConstraints];
   [self setViewportMetricsPaddings];
   [self updateViewportMetricsIfNeeded];
 
@@ -1484,6 +1491,58 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
                        }
                      }];
   }
+}
+
+- (BOOL)isAutoResizable {
+  return _autoResizable;
+}
+
+- (void)setAutoResizable:(BOOL)value {
+  _autoResizable = value;
+  self.flutterView.autoResizable = value;
+  self.flutterView.contentMode = UIViewContentModeCenter;
+}
+
+- (void)updateAutoResizeConstraints {
+  if (!self.isAutoResizable) {
+    return;
+  }
+
+  // When viewDidLayoutSubviews is called (which is where this method is called),
+  // the view has finished laying out its subviews and has applied any auto layout constraints.
+  // Therefore, we're able to use the frame to determine what size is allowed by layout constraints.
+  // However, we're only able to use this value if Flutter hasn't already applied any
+  // FlutterAutoResizeLayoutConstraint constraints. Once Flutter applies constraints, that will
+  // determine the frame. This imposes a limitation on content resizing that layout constraints
+  // updated after an auto-resize has been applied may not work properly.
+  BOOL hasBeenAutoResized = NO;
+  for (NSLayoutConstraint* constraint in self.view.constraints) {
+    if ([constraint isKindOfClass:[FlutterAutoResizeLayoutConstraint class]]) {
+      hasBeenAutoResized = YES;
+      break;
+    }
+  }
+  if (!hasBeenAutoResized) {
+    self.sizeBeforeAutoResized = self.view.frame.size;
+  }
+
+  CGFloat maxWidth = self.sizeBeforeAutoResized.width;
+  CGFloat maxHeight = self.sizeBeforeAutoResized.height;
+  CGFloat minWidth = self.sizeBeforeAutoResized.width;
+  CGFloat minHeight = self.sizeBeforeAutoResized.height;
+
+  // maxWidth or maxHeight may be 0 when the width/height are ambiguous.
+  if (maxWidth == 0) {
+    maxWidth = DBL_MAX;
+  }
+  if (maxHeight == 0) {
+    maxHeight = DBL_MAX;
+  }
+  _viewportMetrics.physical_min_width_constraint = minWidth * _viewportMetrics.device_pixel_ratio;
+  _viewportMetrics.physical_max_width_constraint = maxWidth * _viewportMetrics.device_pixel_ratio;
+  _viewportMetrics.physical_min_height_constraint = minHeight * _viewportMetrics.device_pixel_ratio;
+  _viewportMetrics.physical_max_height_constraint = maxHeight * _viewportMetrics.device_pixel_ratio;
+
 }
 
 - (void)viewSafeAreaInsetsDidChange {
@@ -2195,6 +2254,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 - (void)traitCollectionDidChange:(UITraitCollection*)previousTraitCollection {
   [super traitCollectionDidChange:previousTraitCollection];
   [self onUserSettingsChanged:nil];
+
+  if (self.isAutoResizable) {
+      [self.flutterView resetIntrinsicContentSize];
+    }
 }
 
 - (void)onUserSettingsChanged:(NSNotification*)notification {
