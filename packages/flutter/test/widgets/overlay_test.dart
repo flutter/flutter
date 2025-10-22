@@ -1997,7 +1997,10 @@ class FakeBuildContext extends BuildContext {
   }
 
   @override
-  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect}) {
+  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({
+    Object? aspect,
+    bool trackForCleanup = false,
+  }) {
     throw UnimplementedError();
   }
 
