@@ -166,7 +166,7 @@ void fl_accessible_node_set_text_direction(FlAccessibleNode* node,
                                            FlutterTextDirection direction);
 
 /**
- * fl_accessible_node_dispatch_action:
+ * fl_accessible_node_perform_action:
  * @node: an #FlAccessibleNode.
  * @action: the action being dispatched.
  * @data: (allow-none): data associated with the action.
