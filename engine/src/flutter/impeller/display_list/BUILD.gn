@@ -114,6 +114,7 @@ template("display_list_unittests_component") {
     deps += [
       ":display_list",
       "../playground:playground_test",
+      "//flutter/display_list/testing:display_list_testing",
       "//flutter/impeller/golden_tests:screenshot",
       "//flutter/txt",
     ]
