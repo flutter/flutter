@@ -147,6 +147,10 @@ static const CGFloat kStandardTimeOut = 60.0;
 
   NSLog(@"Flutter view height: %f", flutterViewSize.height);
   XCTAssertTrue(flutterViewSize.height == 200);
+
+  // Back navigation.
+  [app.navigationBars[@"Dual Flutter Views"].buttons[@"Flutter iOS Demos Home"] tap];
+  XCTAssertTrue([app.navigationBars[@"Flutter iOS Demos Home"] waitForExistenceWithTimeout:kStandardTimeOut]);
 }
 
 - (void)waitForAndTapElement:(XCUIElement *)element {
