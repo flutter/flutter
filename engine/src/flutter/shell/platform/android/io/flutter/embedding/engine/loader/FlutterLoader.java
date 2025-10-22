@@ -368,6 +368,13 @@ public class FlutterLoader {
               }
               Log.e("CAMILLE", "Adding manifest flag: " + arg);
               shellArgs.add(arg);
+            } else {
+              // Manifest flag is not allowed in release builds.
+              Log.w(
+                  TAG,
+                  "Flag with metadata key "
+                      + metadataKey
+                      + " is not allowed in release builds and will be ignored. Please remove this flag from your release build manifest.");
             }
           } else {
             // Manifest flag was not recognized.
