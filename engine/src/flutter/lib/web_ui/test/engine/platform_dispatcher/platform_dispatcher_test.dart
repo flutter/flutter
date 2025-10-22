@@ -356,7 +356,7 @@ void testMain() {
       expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, null);
       expect(ui.PlatformDispatcher.instance.letterSpacingOverride, null);
       expect(ui.PlatformDispatcher.instance.wordSpacingOverride, null);
-      expect(ui.PlatformDispatcher.instance.paragraphSpacing, null);
+      expect(ui.PlatformDispatcher.instance.paragraphSpacing, 0.0);
 
       isCalled = false;
 

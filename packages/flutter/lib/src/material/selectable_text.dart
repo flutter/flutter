@@ -799,7 +799,7 @@ class _SelectableTextState extends State<SelectableText>
       contextMenuBuilder: widget.contextMenuBuilder,
     );
     final double? paragraphSpacing = MediaQuery.maybeParagraphSpacingOf(context);
-    if (paragraphSpacing != null) {
+    if (paragraphSpacing != null && paragraphSpacing != 0.0) {
       editable = Padding(
         padding: EdgeInsets.only(bottom: paragraphSpacing),
         child: editable,
