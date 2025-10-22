@@ -1901,6 +1901,7 @@ abstract class SemanticsUpdateBuilder {
     SemanticsRole role = SemanticsRole.none,
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+    SemanticsHitTestBehavior hitTestBehavior = SemanticsHitTestBehavior.defer,
     required SemanticsInputType inputType,
     required Locale? locale,
   });
