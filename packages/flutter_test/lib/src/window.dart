@@ -571,30 +571,20 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// configurations. A standard [PlatformDispatcher] is not mutable from the
   /// framework.
   ///
-  /// Setting this value to `null` will force [paragraphSpacing] to return
-  /// `null`. If you want to have the value default to the platform
-  /// [paragraphSpacing], use [clearParagraphSpacingTestValue].
-  ///
   /// See also:
   ///
   ///   * [PlatformDispatcher.paragraphSpacing] for the standard implementation
   ///   * [clearParagraphSpacingTestValue] to reset this value specifically
   ///   * [clearAllTestValues] to reset all test values for this view
   @override
-  double? get paragraphSpacing => _forceParagraphSpacingToBeNull
-      ? null
-      : _paragraphSpacingTestValue ?? _platformDispatcher.paragraphSpacing;
+  double get paragraphSpacing => _paragraphSpacingTestValue ?? _platformDispatcher.paragraphSpacing;
   double? _paragraphSpacingTestValue;
-  bool _forceParagraphSpacingToBeNull = false;
 
   /// Hides the real paragraph spacing and reports the given
   /// [paragraphSpacingTestValue] instead.
   /// ignore: avoid_setters_without_getters
   set paragraphSpacingTestValue(double? paragraphSpacingTestValue) {
     _paragraphSpacingTestValue = paragraphSpacingTestValue;
-    if (paragraphSpacingTestValue == null) {
-      _forceParagraphSpacingToBeNull = true;
-    }
     onMetricsChanged?.call();
   }
 
@@ -602,7 +592,6 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// paragraph spacing.
   void clearParagraphSpacingTestValue() {
     _paragraphSpacingTestValue = null;
-    _forceParagraphSpacingToBeNull = false;
     onMetricsChanged?.call();
   }
 
