@@ -37,8 +37,6 @@ const std::array<std::string_view, 9> kLicenseFileNames = {
 const std::array<std::string_view, 2> kThirdPartyIgnore = {"pkg",
                                                            "vulkan-deps"};
 
-const char* kRootPackageName = "flutter";
-
 RE2 kHeaderLicense(LicenseChecker::kHeaderLicenseRegex);
 
 std::vector<fs::path> GetGitRepos(std::string_view dir) {
@@ -150,9 +148,10 @@ struct Package {
 
 Package GetPackage(const Data& data,
                    const fs::path& working_dir,
-                   const fs::path& relative_path) {
+                   const fs::path& relative_path,
+                   const LicenseChecker::Flags& flags) {
   Package result = {
-      .name = kRootPackageName,
+      .name = flags.root_package_name,
       .license_file = FindLicense(data, working_dir, "."),
       .is_root_package = true,
   };
@@ -406,7 +405,7 @@ absl::Status ProcessFile(const fs::path& working_dir_path,
     return absl::OkStatus();
   }
 
-  Package package = GetPackage(data, working_dir_path, relative_path);
+  Package package = GetPackage(data, working_dir_path, relative_path, flags);
   if (package.license_file.has_value()) {
     auto [_, is_new_item] =
         seen_license_files->insert(package.license_file.value());
@@ -562,7 +561,8 @@ std::vector<absl::Status> LicenseChecker::Run(
               "secondary license path mixmatch at ", relative_path.string())));
         } else {
           fs::path full_path = data.secondary_dir / entry;
-          Package package = GetPackage(data, working_dir_path, relative_path);
+          Package package =
+              GetPackage(data, working_dir_path, relative_path, flags);
           absl::StatusOr<MMapFile> file = MMapFile::Make(full_path.string());
           if (file.ok()) {
             state.license_map.Add(
