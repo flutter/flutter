@@ -469,6 +469,10 @@ abstract class ScrollView extends StatelessWidget {
         axisDirection: axisDirection,
         offset: offset,
         slivers: slivers,
+        cacheExtent: cacheExtent ?? RawGestureDetector.kDefaultSemanticsScrollFactor,
+        cacheExtentStyle: cacheExtent == null
+          ? CacheExtentStyle.viewport
+          : CacheExtentStyle.pixel,
         paintOrder: paintOrder,
         clipBehavior: clipBehavior,
       );

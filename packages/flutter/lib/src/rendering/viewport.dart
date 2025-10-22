@@ -1855,6 +1855,8 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
     required super.offset,
     super.paintOrder,
     super.clipBehavior,
+    super.cacheExtent,
+    super.cacheExtentStyle,
     List<RenderSliver>? children,
   }) {
     addAll(children);
