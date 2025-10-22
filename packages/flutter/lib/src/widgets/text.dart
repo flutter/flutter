@@ -804,7 +804,7 @@ class Text extends StatelessWidget {
       );
     }
     final double? paragraphSpacing = MediaQuery.maybeParagraphSpacingOf(context);
-    if (paragraphSpacing != null) {
+    if (paragraphSpacing != null && paragraphSpacing != 0.0) {
       result = Padding(
         padding: EdgeInsets.only(bottom: paragraphSpacing),
         child: result,
