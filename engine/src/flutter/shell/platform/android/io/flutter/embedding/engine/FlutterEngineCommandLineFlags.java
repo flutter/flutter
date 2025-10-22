@@ -195,10 +195,10 @@ public class FlutterEngineCommandLineFlags {
               ENABLE_VULKAN_GPU_TRACING,
               LEAK_VM));
 
-  /**
-   * Converts a command line flag string to camel case that can be used as a manifest metadata name
-   * if the flag is configurable by manifest. See {@link FlutterEngineManifestFlags} for the list of
-   * flags for such available flags.
+/**
+ * Converts a command line flag string to camel case that can be used as a manifest metadata name
+ * if the flag is configurable by manifest. See {@link FlutterEngineManifestFlags} for the list of
+ * flags for such available flags.
   *
   * <p>Examples:
   * <ul>
@@ -206,9 +206,9 @@ public class FlutterEngineCommandLineFlags {
   *   <li><code>"--dart-flags="</code> → <code>"dartFlags"</code></li>
   * </ul>
   *
-   * @param flag the command line flag (e.g., "--trace-startup")
+  * @param flag the command line flag (e.g., "--trace-startup")
   * @return the camel case version (e.g., "traceStartup")
-   */
+  */
   @NonNull
   public static String toManifestMetadataName(@NonNull String flag) {
     // Remove leading dashes.
