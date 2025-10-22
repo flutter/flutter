@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/xcode_build_settings.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -1111,119 +1112,174 @@ Information about project "Runner":
       fs.file(xcodebuild).createSync(recursive: true);
     });
 
-    testUsingContext(
-      'podhelper.rb aborts when EXCLUDED_ARCHS excludes arm64',
-      () async {
-        final Directory podSupportDir = fs.directory('ios/Pods/Target Support Files/MyPlugin');
-        podSupportDir.createSync(recursive: true);
+    group('arm simulator architecture check', () {
+      late FakeProcessManager fakeProcessManager;
+      late XcodeProjectInterpreter xcodeProjectInterpreter;
+      late Xcode xcode;
 
-        final File xcfile = podSupportDir.childFile('MyPlugin-Debug.xcconfig');
-        xcfile.writeAsStringSync('EXCLUDED_ARCHS = i386 arm64\n');
-
-        final String podhelperPath = fs.path.join(
-          Cache.flutterRoot!,
-          'packages',
-          'flutter_tools',
-          'bin',
-          'podhelper.rb',
+      setUp(() {
+        fakeProcessManager = FakeProcessManager.empty();
+        xcodeProjectInterpreter = XcodeProjectInterpreter.test(
+          processManager: fakeProcessManager,
+          version: Version(26, 0, 0),
         );
-
-        const rubyScript = r'''
-              class MockTarget
-                def platform_name; :ios; end
-                def name; 'MyPlugin'; end
-                def deployment_target; '13.0'; end
-              end
-              require ARGV[0]
-              target = MockTarget.new
-              flutter_additional_ios_build_settings(target)
-              ''';
-
-        fakeProcessManager.addCommand(
-          FakeCommand(
-            command: <String>['ruby', '-e', rubyScript, podhelperPath],
-            workingDirectory: fs.path.join('ios'),
-            exitCode: 1,
-            stderr:
-                'The pod `MyPlugin` config in ${xcfile.path} excludes the arm64 simulator architecture.',
-          ),
+        xcode = Xcode.test(
+          processManager: fakeProcessManager,
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
         );
+      });
 
-        final ProcessResult result = await fakeProcessManager.run(<String>[
-          'ruby',
-          '-e',
-          rubyScript,
-          podhelperPath,
-        ], workingDirectory: fs.path.join('ios'));
+      testUsingContext(
+        'throws ToolExit when a plugin excludes arm64 on Xcode 26+',
+        () async {
+          const BuildInfo buildInfo = BuildInfo.debug;
+          final FlutterProject project = FlutterProject.fromDirectoryTest(
+            fs.directory('path/to/project'),
+          );
+          final Directory podXcodeProject =
+              project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
+                ..createSync(recursive: true);
+          final String buildDirectory = fs.path.absolute('build', 'ios');
 
-        expect(result.exitCode, 1);
-        expect(result.stderr.toString(), contains('excludes the arm64 simulator architecture'));
-        expect(result.stderr.toString(), contains('The pod `MyPlugin`'));
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        Artifacts: () => localIosArtifacts,
-        Platform: () => macOS,
-        FileSystem: () => fs,
-        ProcessManager: () => fakeProcessManager,
-        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-      },
-    );
-    testUsingContext(
-      'podhelper.rb succeeds when xcconfig does not exclude arm64',
-      () async {
-        final Directory podSupportDir = fs.directory('ios/Pods/Target Support Files/MyGoodPlugin');
-        podSupportDir.createSync(recursive: true);
+          fakeProcessManager.addCommands(<FakeCommand>[
+            kWhichSysctlCommand,
+            kARMCheckCommand,
+            FakeCommand(
+              command: <String>[
+                '/usr/bin/arch',
+                '-arm64e',
+                'xcrun',
+                'xcodebuild',
+                '-alltargets',
+                '-sdk',
+                'iphonesimulator',
+                '-project',
+                podXcodeProject.path,
+                '-showBuildSettings',
+                'BUILD_DIR=$buildDirectory',
+                'OBJROOT=$buildDirectory',
+              ],
+              stdout: '''
+Build settings for action build and target bad_plugin:
+    EXCLUDED_ARCHS = i386 arm64
 
-        final File xcfile = podSupportDir.childFile('MyGoodPlugin-Debug.xcconfig');
-        xcfile.writeAsStringSync('EXCLUDED_ARCHS[sdk=iphonesimulator*] = i386\n');
+Build settings for action build and target good_plugin:
+    EXCLUDED_ARCHS = i386
+''',
+            ),
+          ]);
 
-        final String podhelperPath = fs.path.join(
-          Cache.flutterRoot!,
-          'packages',
-          'flutter_tools',
-          'bin',
-          'podhelper.rb',
-        );
+          await expectLater(
+            () => updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo),
+            throwsToolExit(
+              message:
+                  'The plugin  - bad_plugin is excluding the arm64 architecture, which is a requirement for Xcode 26. Please file an issue with the plugin to support arm64.',
+            ),
+          );
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        },
+        overrides: <Type, Generator>{
+          Artifacts: () => localIosArtifacts,
+          Platform: () => macOS,
+          FileSystem: () => fs,
+          ProcessManager: () => fakeProcessManager,
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          Xcode: () => xcode,
+        },
+      );
+      testUsingContext(
+        'succeeds when no plugins exclude arm64 on Xcode 26+',
+        () async {
+          const BuildInfo buildInfo = BuildInfo.debug;
+          final FlutterProject project = FlutterProject.fromDirectoryTest(
+            fs.directory('path/to/project'),
+          );
+          final Directory podXcodeProject =
+              project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
+                ..createSync(recursive: true);
+          final String buildDirectory = fs.path.absolute('build', 'ios');
 
-        const rubyScript = r'''
-              class MockTarget
-                def platform_name; :ios; end
-                def name; 'MyGoodPlugin'; end
-                def deployment_target; '13.0'; end
-                def build_configurations; []; end # Needs an empty array to iterate over
-              end
-              require ARGV[0]
-              target = MockTarget.new
-              flutter_additional_ios_build_settings(target)
-              ''';
+          fakeProcessManager.addCommands(<FakeCommand>[
+            kWhichSysctlCommand,
+            kARMCheckCommand,
+            FakeCommand(
+              command: <String>[
+                '/usr/bin/arch',
+                '-arm64e',
+                'xcrun',
+                'xcodebuild',
+                '-alltargets',
+                '-sdk',
+                'iphonesimulator',
+                '-project',
+                podXcodeProject.path,
+                '-showBuildSettings',
+                'BUILD_DIR=$buildDirectory',
+                'OBJROOT=$buildDirectory',
+              ],
+              stdout: '''
+Build settings for action build and target good_plugin:
+    EXCLUDED_ARCHS = i386
+''',
+            ),
+          ]);
 
-        fakeProcessManager.addCommand(
-          FakeCommand(
-            command: <String>['ruby', '-e', rubyScript, podhelperPath],
-            workingDirectory: fs.path.join('ios'),
-          ),
-        );
+          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
 
-        final ProcessResult result = await fakeProcessManager.run(<String>[
-          'ruby',
-          '-e',
-          rubyScript,
-          podhelperPath,
-        ], workingDirectory: fs.path.join('ios'));
+          final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+          expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386'));
+          expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7'));
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        },
+        overrides: <Type, Generator>{
+          Artifacts: () => localIosArtifacts,
+          Platform: () => macOS,
+          FileSystem: () => fs,
+          ProcessManager: () => fakeProcessManager,
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          Xcode: () => xcode,
+        },
+      );
 
-        expect(result.exitCode, 0, reason: 'Script should have succeeded');
-        expect(result.stderr, isEmpty, reason: 'There should be no error output');
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        Artifacts: () => localIosArtifacts,
-        Platform: () => macOS,
-        FileSystem: () => fs,
-        ProcessManager: () => fakeProcessManager,
-        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
-      },
-    );
+      testUsingContext(
+        'succeeds and skips check on Xcode 16 even if a plugin excludes arm64',
+        () async {
+          xcodeProjectInterpreter = XcodeProjectInterpreter.test(
+            processManager: fakeProcessManager,
+            version: Version(16, 0, 0),
+          );
+          xcode = Xcode.test(
+            processManager: fakeProcessManager,
+            xcodeProjectInterpreter: xcodeProjectInterpreter,
+          );
+
+          const BuildInfo buildInfo = BuildInfo.debug;
+          final FlutterProject project = FlutterProject.fromDirectoryTest(
+            fs.directory('path/to/project'),
+          );
+          project.ios.hostAppRoot
+              .childDirectory('Pods')
+              .childDirectory('Pods.xcodeproj')
+              .createSync(recursive: true);
+
+          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+
+          final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+          expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386'));
+          expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7'));
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        },
+        overrides: <Type, Generator>{
+          Artifacts: () => localIosArtifacts,
+          Platform: () => macOS,
+          FileSystem: () => fs,
+          ProcessManager: () => fakeProcessManager,
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          Xcode: () => xcode,
+        },
+      );
+    });
+
     void testUsingOsxContext(String description, dynamic Function() testMethod) {
       testUsingContext(
         description,

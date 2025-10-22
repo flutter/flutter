@@ -5,6 +5,7 @@
 /// @docImport 'ios/mac.dart';
 library;
 
+import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -18,6 +19,7 @@ import 'convert.dart';
 import 'features.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
+import 'globals.dart';
 import 'ios/code_signing.dart';
 import 'ios/plist_parser.dart';
 import 'ios/xcode_build_settings.dart' as xcode;
@@ -474,6 +476,67 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
 
   /// True if the app project uses Swift.
   bool get isSwift => appDelegateSwift.existsSync();
+
+  /// Xcode 26 no longer allows you to build x86-only architecture for the simulator
+  Future<void> checkForPluginsExcludingArmSimulator() async {
+    final Directory podXcodeProject = hostAppRoot
+        .childDirectory('Pods')
+        .childDirectory('Pods.xcodeproj');
+    if (!podXcodeProject.existsSync()) {
+      return;
+    }
+
+    final XcodeProjectInterpreter? xcodeProjectInterpreter = globals.xcodeProjectInterpreter;
+    if (xcodeProjectInterpreter == null) {
+      return;
+    }
+    final String? buildSettings = await xcodeProjectInterpreter.pluginsBuildSettingsOutput(
+      podXcodeProject,
+    );
+
+    if (buildSettings == null || buildSettings.isEmpty) {
+      return;
+    }
+
+    final offendingPlugins = <String>[];
+    final targetRegex = RegExp(r'Build settings for action build and target ([^:]+):');
+    final excludedArchRegex = RegExp(r'EXCLUDED_ARCHS.*arm64');
+
+    final List<String> targetSections = buildSettings.split(RegExp(r'\n\s*\n'));
+
+    for (final section in targetSections) {
+      if (section.trim().isEmpty) {
+        continue;
+      }
+      final Match? targetMatch = targetRegex.firstMatch(section);
+      if (targetMatch != null) {
+        final String currentTarget = targetMatch.group(1)!.trim();
+        if (excludedArchRegex.hasMatch(section)) {
+          // The "Pods-Runner" target will inherit the exclusion if any dependency has it.
+          // We only want to report the root-cause plugins.
+          if (!currentTarget.startsWith('Pods-')) {
+            offendingPlugins.add(currentTarget);
+          }
+        }
+      }
+    }
+
+    if (offendingPlugins.isNotEmpty) {
+      if (offendingPlugins.length == 1) {
+        final String name = offendingPlugins.single;
+        throwToolExit(
+          'The plugin  - $name is excluding the arm64 architecture, which is a requirement for Xcode 26. Please file an issue with the plugin to support arm64.',
+        );
+      }
+
+      final String list = offendingPlugins.map((String n) => '  - $n').join('\n');
+      throwToolExit(
+        'The following plugins are excluding the arm64 architecture, which is a requirement for Xcode 26:\n'
+        '$list\n'
+        'Please file issues with these plugins to support arm64.',
+      );
+    }
+  }
 
   @override
   bool existsSync() {

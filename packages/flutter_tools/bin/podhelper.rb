@@ -65,33 +65,11 @@ def flutter_additional_ios_build_settings(target)
   # Bundles are com.apple.product-type.bundle, frameworks are com.apple.product-type.framework.
   target_is_resource_bundle = target.respond_to?(:product_type) && target.product_type == 'com.apple.product-type.bundle'
 
-  # Detect pod-level EXCLUDED_ARCHS for the simulator written to Target Support Files xcconfig.
-  support_files_dir = File.join('Pods', 'Target Support Files', target.name)
-  if Dir.exist?(support_files_dir)
-    Dir.glob(File.join(support_files_dir, '*.xcconfig')).each do |xcfile|
-      File.foreach(xcfile) do |line|
-        if line =~ /^\s*EXCLUDED_ARCHS\b/ && line.include?('arm64')
-          abort "The pod `#{target.name}` config in #{xcfile} excludes the arm64 simulator architecture.\n" \
-            "This prevents running on arm64 simulators (iOS 26+). Remove `EXCLUDED_ARCHS[sdk=iphonesimulator*] = arm64` from the podspec/pod_target_xcconfig or update the pod to a version that supports arm64 simulators."
-        end
-      end
-    end
-  end
-
   target.build_configurations.each do |build_configuration|
     # Build both x86_64 and arm64 simulator archs for all dependencies. If a single plugin does not support arm64 simulators,
     # the app and all frameworks will fall back to x86_64. Unfortunately that case is not detectable in this script.
     # Therefore all pods must have a x86_64 slice available, or linking a x86_64 app will fail.
     build_configuration.build_settings['ONLY_ACTIVE_ARCH'] = 'NO' if build_configuration.type == :debug
-
-    # Xcode 16 and later require all simulator code to be built for arm64 on Apple Silicon Macs.
-    # Starting with Xcode 26, Rosetta for simulators is no longer available.
-    excluded_simulator_archs = build_configuration.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]']
-    if excluded_simulator_archs&.include?('arm64')
-      raise "The `#{target.name}` pod failed to build for simulator.\n" \
-        "It is not compatible with iOS 18 and later simulators on Apple Silicon Macs because it excludes the `arm64` simulator architecture.\n" \
-        "To fix this, you will need to update the pod to a version that supports arm64 simulators, or contact the author of the pod to request an update.\n" \
-    end
 
     # Workaround https://github.com/CocoaPods/CocoaPods/issues/11402, do not sign resource bundles.
     if target_is_resource_bundle
