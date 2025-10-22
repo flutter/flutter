@@ -95,6 +95,7 @@ typedef TwoDimensionalIndexedWidgetBuilder =
 ///     required super.delegate,
 ///     required super.mainAxis,
 ///     super.cacheExtent,
+///     super.cacheExtentStyle,
 ///     super.clipBehavior = Clip.hardEdge,
 ///   });
 ///
@@ -109,6 +110,7 @@ typedef TwoDimensionalIndexedWidgetBuilder =
 ///       delegate: delegate,
 ///       childManager: context as TwoDimensionalChildManager,
 ///       cacheExtent: cacheExtent,
+///       cacheExtentStyle: cacheExtentStyle,
 ///       clipBehavior: clipBehavior,
 ///     );
 ///   }
@@ -123,6 +125,7 @@ typedef TwoDimensionalIndexedWidgetBuilder =
 ///       ..mainAxis = mainAxis
 ///       ..delegate = delegate
 ///       ..cacheExtent = cacheExtent
+///       ..cacheExtentStyle = cacheExtentStyle
 ///       ..clipBehavior = clipBehavior;
 ///   }
 /// }
@@ -683,9 +686,9 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   }
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
-  CacheExtentStyle get cacheExtentStyle => _cacheExtentStyle;
-  CacheExtentStyle _cacheExtentStyle;
-  set cacheExtentStyle(CacheExtentStyle value) {
+  CacheExtentStyle get cacheExtentStyle => _cacheExtentStyle ?? CacheExtentStyle.viewport;
+  CacheExtentStyle? _cacheExtentStyle;
+  set cacheExtentStyle(CacheExtentStyle? value) {
     if (value == _cacheExtentStyle) {
       return;
     }
