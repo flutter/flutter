@@ -217,9 +217,10 @@ class _TweenAnimationBuilderState<T extends Object?>
   }
 }
 
-/// Widget that animates a [Tween] value and repeats indefinitely.
+/// Widget that animates an [Animatable] value and repeats indefinitely.
 ///
-/// The animation continuously cycles from [Tween.begin] to [Tween.end].
+/// The animation continuously cycles from the [Animatable] evaluated at 0.0 to
+/// the value at 1.0.
 /// When [reverse] is true, the animation reverses direction when it reaches
 /// the end. When [paused] is true, the animation stops at its current value.
 ///
@@ -236,34 +237,37 @@ class _TweenAnimationBuilderState<T extends Object?>
 ///  * [TweenAnimationBuilder], which animates a tween value once.
 ///  * [AnimationController.repeat], the underlying mechanism.
 class RepeatingTweenAnimationBuilder<T extends Object> extends StatefulWidget {
-  /// Creates a widget that repeats a tween animation.
-  RepeatingTweenAnimationBuilder({
+  /// Creates a widget that repeats an animatable animation.
+  const RepeatingTweenAnimationBuilder({
     super.key,
-    required this.tween,
+    required this.animatable,
     required this.duration,
     this.curve = Curves.linear,
     this.reverse = false,
     this.paused = false,
     required this.builder,
     this.child,
-  }) : assert(tween.begin != null, 'Tween.begin must not be null'),
-       assert(tween.end != null, 'Tween.end must not be null');
+  });
 
-  /// The tween to animate.
+  /// The animatable to drive repeatedly.
   ///
-  /// The animation continuously cycles from [Tween.begin] to [Tween.end].
+  /// The animation continuously cycles from the value returned by evaluating
+  /// [animatable] at 0.0 to the value returned at 1.0.
+  /// In most cases this will be a [Tween] or [TweenSequence], but any
+  /// [Animatable] that produces values of type [T] is accepted.
   ///
   /// ## Ownership
   ///
-  /// The [RepeatingTweenAnimationBuilder] takes ownership of the provided [Tween]
-  /// and may mutate it. Once a [Tween] instance has been passed to
-  /// [RepeatingTweenAnimationBuilder] its properties should not be accessed or
-  /// changed to avoid interference with the [RepeatingTweenAnimationBuilder].
+  /// The [RepeatingTweenAnimationBuilder] takes ownership of the provided
+  /// [Animatable] and may mutate it. Once an [Animatable] instance has been
+  /// passed to [RepeatingTweenAnimationBuilder] its properties should not be
+  /// accessed or changed to avoid interference with the
+  /// [RepeatingTweenAnimationBuilder].
   ///
-  /// It is good practice to never store a [Tween] provided to a
+  /// It is good practice to never store an [Animatable] provided to a
   /// [RepeatingTweenAnimationBuilder] in an instance variable to avoid accidental
-  /// modifications of the [Tween].
-  final Tween<T> tween;
+  /// modifications of the [Animatable].
+  final Animatable<T> animatable;
 
   /// The duration of the animation.
   final Duration duration;
@@ -314,10 +318,12 @@ class _RepeatingTweenAnimationBuilderState<T extends Object>
   void initState() {
     super.initState();
     _controller = AnimationController(duration: widget.duration, vsync: this);
+    final T startValue = widget.animatable.transform(0.0);
+    final T endValue = widget.animatable.transform(1.0);
     _updateAnimation();
 
-    // Start the animation if not paused and begin != end.
-    if (!widget.paused && widget.tween.begin != widget.tween.end) {
+    // Start the animation if not paused and the animation spans different values.
+    if (!widget.paused && startValue != endValue) {
       _controller.repeat(reverse: widget.reverse);
     }
   }
@@ -325,29 +331,35 @@ class _RepeatingTweenAnimationBuilderState<T extends Object>
   void _updateAnimation() {
     _curvedAnimation?.dispose();
     _curvedAnimation = CurvedAnimation(parent: _controller, curve: widget.curve);
-    _animation = widget.tween.animate(_curvedAnimation!);
+    _animation = widget.animatable.animate(_curvedAnimation!);
   }
 
   @override
   void didUpdateWidget(RepeatingTweenAnimationBuilder<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    final T oldStartValue = oldWidget.animatable.transform(0.0);
+    final T oldEndValue = oldWidget.animatable.transform(1.0);
+    final bool wasAnimating = oldStartValue != oldEndValue;
+
     // Update the duration if it changed.
     if (widget.duration != oldWidget.duration) {
       _controller.duration = widget.duration;
     }
 
-    // Update the animation if the curve or the tween changed.
-    final bool tweenChanged =
-        widget.tween.runtimeType != oldWidget.tween.runtimeType ||
-        widget.tween.begin != oldWidget.tween.begin ||
-        widget.tween.end != oldWidget.tween.end;
-    if (widget.curve != oldWidget.curve || tweenChanged) {
+    final T startValue = widget.animatable.transform(0.0);
+    final T endValue = widget.animatable.transform(1.0);
+
+    // Update the animation if the curve or the animatable changed.
+    final bool animatableChanged =
+        !identical(widget.animatable, oldWidget.animatable) ||
+        startValue != oldStartValue ||
+        endValue != oldEndValue;
+    if (widget.curve != oldWidget.curve || animatableChanged) {
       _updateAnimation();
     }
 
-    final bool shouldAnimate = widget.tween.begin != widget.tween.end;
-    final bool wasAnimating = oldWidget.tween.begin != oldWidget.tween.end;
+    final bool shouldAnimate = startValue != endValue;
 
     if (!shouldAnimate || widget.paused) {
       _controller.stop(canceled: false);
