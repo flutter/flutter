@@ -148,6 +148,7 @@ abstract class TwoDimensionalViewport extends RenderObjectWidget {
     required this.delegate,
     required this.mainAxis,
     this.cacheExtent,
+    this.cacheExtentStyle,
     this.clipBehavior = Clip.hardEdge,
   }) : assert(
          verticalAxisDirection == AxisDirection.down || verticalAxisDirection == AxisDirection.up,
@@ -213,6 +214,9 @@ abstract class TwoDimensionalViewport extends RenderObjectWidget {
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
   final double? cacheExtent;
+
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
+  final CacheExtentStyle? cacheExtentStyle;
 
   /// {@macro flutter.material.Material.clipBehavior}
   final Clip clipBehavior;
@@ -519,6 +523,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     required Axis mainAxis,
     required TwoDimensionalChildManager childManager,
     double? cacheExtent,
+    CacheExtentStyle? cacheExtentStyle,
     Clip clipBehavior = Clip.hardEdge,
   }) : assert(
          verticalAxisDirection == AxisDirection.down || verticalAxisDirection == AxisDirection.up,
@@ -537,6 +542,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
        _delegate = delegate,
        _mainAxis = mainAxis,
        _cacheExtent = cacheExtent ?? RenderAbstractViewport.defaultCacheExtent,
+       _cacheExtentStyle = cacheExtentStyle ?? CacheExtentStyle.pixel,
        _clipBehavior = clipBehavior {
     assert(() {
       _debugDanglingKeepAlives = <RenderBox>[];
@@ -673,6 +679,17 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       return;
     }
     _cacheExtent = value;
+    markNeedsLayout();
+  }
+
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
+  CacheExtentStyle get cacheExtentStyle => _cacheExtentStyle;
+  CacheExtentStyle _cacheExtentStyle;
+  set cacheExtentStyle(CacheExtentStyle value) {
+    if (value == _cacheExtentStyle) {
+      return;
+    }
+    _cacheExtentStyle = value;
     markNeedsLayout();
   }
 
