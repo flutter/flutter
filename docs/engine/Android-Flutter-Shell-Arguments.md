@@ -37,14 +37,14 @@ Note: If a flag is specified both on the command line and in the manifest, the c
 takes precedence at runtime.
 
 ## How to set engine flags in the manifest
-All manifest metadata keys must be prefixed with the package name `io.flutter.embedding.android`.
+All manifest metadata keys must be prefixed with the package name `io.flutter.embedding.android` and are suffixed with the camel case of the flag you wish to set.
 
 For flags that take values, set the numeric or string value (without the leading `--flag=` prefix). For boolean flags, use `android:value="true"` to enable; omit or set `false` to disable.
 
 Note: Manifest-provided values are overridden by command-line flags if both are present.
 
 ### Examples
-Set the `OldGenHeapSize` flag to 322 MB:
+Set the `--old-gen-heap-size=` flag to 322 MB:
 ```xml
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.myapp">
@@ -57,7 +57,7 @@ Set the `OldGenHeapSize` flag to 322 MB:
 </manifest>
 ```
 
-Set software rendering:
+Set the `--enable-flutter-gpu` flag:
     ```xml
     <meta-data
             android:name="io.flutter.embedding.android.enableFlutterGpu"
@@ -78,7 +78,7 @@ Kotlin:
 class MyApp : Application() {
     override fun onCreate() {
         super.onCreate()
-        val loader = io.flutter.FlutterInjector.instance().flutterLoader()
+        val loader = FlutterInjector.instance().flutterLoader()
         loader.startInitialization(this)
         val args = arrayOf(
             "--trace-startup",
