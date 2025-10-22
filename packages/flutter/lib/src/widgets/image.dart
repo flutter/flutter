@@ -1154,10 +1154,10 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
     _isPaused = !TickerMode.of(context) || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
 
-    if (!_isPaused || !_hasReceivedFirstFrame) {
-      _listenToStream();
-    } else {
+    if (_isPaused && _hasReceivedFirstFrame) {
       _stopListeningToStream(keepStreamAlive: true);
+    } else {
+      _listenToStream();
     }
 
     super.didChangeDependencies();
@@ -1173,7 +1173,9 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _imageStream!.removeListener(oldListener);
     }
     if (widget.image != oldWidget.image) {
+      _hasReceivedFirstFrame = false;
       _resolveImage();
+      _listenToStream();
     }
   }
 
@@ -1242,10 +1244,6 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
-    if (_hasReceivedFirstFrame && _isPaused) {
-      _stopListeningToStream(keepStreamAlive: true);
-      return;
-    }
     _hasReceivedFirstFrame = true;
     setState(() {
       _replaceImage(info: imageInfo);
@@ -1255,6 +1253,9 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _frameNumber = _frameNumber == null ? 0 : _frameNumber! + 1;
       _wasSynchronouslyLoaded = _wasSynchronouslyLoaded | synchronousCall;
     });
+    if (_isPaused) {
+      _stopListeningToStream(keepStreamAlive: true);
+    }
   }
 
   void _handleImageChunk(ImageChunkEvent event) {
@@ -1268,10 +1269,12 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
   void _replaceImage({required ImageInfo? info}) {
     final ImageInfo? oldImageInfo = _imageInfo;
-    SchedulerBinding.instance.addPostFrameCallback(
-      (_) => oldImageInfo?.dispose(),
-      debugLabel: 'Image.disposeOldInfo',
-    );
+    if (oldImageInfo != null) {
+      SchedulerBinding.instance.addPostFrameCallback(
+        (Duration duration) => oldImageInfo.dispose(),
+        debugLabel: 'Image.disposeOldInfo',
+      );
+    }
     _imageInfo = info;
   }
 
@@ -1310,11 +1313,10 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       return;
     }
 
+    _isListeningToStream = true;
     _imageStream!.addListener(_getListener());
     _completerHandle?.dispose();
     _completerHandle = null;
-
-    _isListeningToStream = true;
   }
 
   /// Stops listening to the image stream, if this state object has attached a
