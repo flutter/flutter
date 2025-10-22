@@ -309,7 +309,6 @@ end
       '--delete',
       '--filter',
       '- .DS_Store/',
-      '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
       globals.fs.directory(engineCacheFlutterFrameworkDirectory).path,
       modeDirectory.path,
     ]);
