@@ -119,7 +119,6 @@ public final class FlutterEngineManifestFlags {
    */
   public static Flag getFlagByMetaDataKey(String key) {
     for (Flag flag : ALL_FLAGS) {
-      System.out.println(flag.metaDataKey);
       if (flag.metaDataKey.equals(key)) {
         return flag;
       }
