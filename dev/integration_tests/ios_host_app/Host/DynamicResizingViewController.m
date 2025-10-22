@@ -4,7 +4,6 @@
 
 #import <Flutter/Flutter.h>
 
-#import "AppDelegate.h"
 #import "DynamicResizingViewController.h"
 
 @interface DynamicResizingViewController ()
@@ -18,55 +17,62 @@ static NSString *_kPing = @"ping";
   FlutterBasicMessageChannel *_messageChannel;
 }
 
-- (FlutterEngine *)engine {
-  return [(AppDelegate *)[[UIApplication sharedApplication] delegate] engine];
-}
-
-- (FlutterBasicMessageChannel *)reloadMessageChannel {
-  return [(AppDelegate *)[[UIApplication sharedApplication] delegate]
-      reloadMessageChannel];
-}
-
 - (void)viewDidLoad {
-  [super viewDidLoad];
-  self.title = @"Dynamically Resizable Flutter";
+    [super viewDidLoad];
 
-  UIScrollView *scrollView = [[UIScrollView alloc] init];
-  scrollView.userInteractionEnabled = YES;
-  UIStackView *stackView = [[UIStackView alloc] init];
-  stackView.axis = UILayoutConstraintAxisVertical;
-  stackView.distribution = UIStackViewDistributionFill;
-  stackView.translatesAutoresizingMaskIntoConstraints = NO;
+    self.view.backgroundColor = [UIColor systemBackgroundColor];
+    self.title = @"Scrollable Stack";
 
-  for (int index = 1; index <= 50; index++) {
+    UIScrollView *scrollView = [[UIScrollView alloc] init];
+    scrollView.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.view addSubview:scrollView];
+
+    UIStackView *stackView = [[UIStackView alloc] init];
+    stackView.translatesAutoresizingMaskIntoConstraints = NO;
+    stackView.axis = UILayoutConstraintAxisVertical;
+    stackView.spacing = 10;
+    [scrollView addSubview:stackView];
+
+    [NSLayoutConstraint activateConstraints:@[
+      [scrollView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
+      [scrollView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
+      [scrollView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+      [scrollView.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor]
+    ]];
+
+    [NSLayoutConstraint activateConstraints:@[
+      [stackView.topAnchor constraintEqualToAnchor:scrollView.contentLayoutGuide.topAnchor],
+      [stackView.leadingAnchor constraintEqualToAnchor:scrollView.contentLayoutGuide.leadingAnchor],
+      [stackView.trailingAnchor constraintEqualToAnchor:scrollView.contentLayoutGuide.trailingAnchor],
+      [stackView.bottomAnchor constraintEqualToAnchor:scrollView.contentLayoutGuide.bottomAnchor],
+
+      [stackView.widthAnchor constraintEqualToAnchor:scrollView.frameLayoutGuide.widthAnchor]
+    ]];
+
+    for (int index = 1; index <= 50; index++) {
       if (index == 10) {
         _flutterViewController = [[FlutterViewController alloc] init];
         [_flutterViewController setInitialRoute:@"resize"];
-//        _flutterViewController.autoResizable = true;
+        _flutterViewController.autoResizable = true;
         [self addChildViewController:_flutterViewController];
         [stackView addArrangedSubview:_flutterViewController.view];
+        _flutterViewController.view.translatesAutoresizingMaskIntoConstraints = NO;
+        _flutterViewController.view.accessibilityIdentifier = @"flutter_view";
+        NSLayoutConstraint *heightConstraint = [_flutterViewController.view.heightAnchor
+                                                    constraintEqualToConstant:200];
+        heightConstraint.active = YES;
         [_flutterViewController didMoveToParentViewController:self];
       } else {
-          UILabel *label = [[UILabel alloc] init];
-          label.text = [NSString stringWithFormat:@"Hello from iOS %d", index];
-          [stackView addArrangedSubview:label];
+        UILabel *label = [[UILabel alloc] init];
+        label.text = [NSString stringWithFormat:@"     Hello from iOS %d     ", index];
+        label.backgroundColor = (index % 2 == 0) ? [UIColor systemGray5Color] : [UIColor systemGray3Color];
+        label.translatesAutoresizingMaskIntoConstraints = NO;
+
+        [label.heightAnchor constraintEqualToConstant:44].active = YES;
+
+        [stackView addArrangedSubview:label];
       }
-  }
-  [scrollView addSubview:stackView];
-  [[self reloadMessageChannel] sendMessage:@"resize"];
-  [scrollView layoutIfNeeded];
-  [self.view addSubview:scrollView];
-
-  [self.view addSubview:stackView];
-  self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc]
-                                              initWithTitle:@"Back"
-                                                      style:UIBarButtonItemStylePlain
-                                                     target:nil
-                                           action:nil];
-}
-
-- (void)didTapIncrementButton {
-  [_messageChannel sendMessage:_kPing];
+    }
 }
 
 @end

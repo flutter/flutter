@@ -13,11 +13,6 @@ class _ResizeAppState extends State<ResizeApp> {
   int _counter = 1;
   void _incrementCounter() {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
       if (_counter > 40) {
         _counter = 1;
       }
@@ -27,20 +22,6 @@ class _ResizeAppState extends State<ResizeApp> {
 
   @override
   Widget build(BuildContext context) {
-    // return Text(
-    //   "Hello from Flutter",
-    //   textDirection: TextDirection.ltr,
-    //   style: TextStyle(color: Colors.pink),
-    // );
-    // return const Center(
-    //   heightFactor: 1,
-    //   child: Text(
-    //     "Hello from Flutter",
-    //     textDirection: TextDirection.ltr,
-    //     style: TextStyle(color: Colors.pink),
-    //   ),
-    // );
-
     return Center(
       heightFactor: 1,
       child: Directionality(
@@ -50,17 +31,12 @@ class _ResizeAppState extends State<ResizeApp> {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(8.0, 50, 8.0, 8.0),
-              child: ElevatedButton(
+              child: Semantics(
+                  label: "Add to list",
+                  child: ElevatedButton(
                 onPressed: _incrementCounter,
                 child: Text("Add to list"),
-                // style: ButtonStyle(
-                //   splashFactory:
-                //       NoSplash.splashFactory, // Removes the ripple effect
-                //   overlayColor: MaterialStateProperty.all(
-                //     Colors.transparent,
-                //   ), // Removes hover/press overlay
-                // ),
-              ),
+              )),
             ),
             for (int i = 0; i < _counter; i++)
               Text(
