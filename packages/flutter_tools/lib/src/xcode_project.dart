@@ -500,7 +500,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
 
     final offendingPlugins = <String>[];
     final targetRegex = RegExp(r'Build settings for action build and target ([^:]+):');
-    final excludedArchRegex = RegExp(r'EXCLUDED_ARCHS.*arm64');
+    final excludedArchRegex = RegExp(r'EXCLUDED_ARCHS\s*=\s*.*\barm64\b');
 
     final List<String> targetSections = buildSettings.split(RegExp(r'\n\s*\n'));
 
@@ -523,7 +523,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       if (offendingPlugins.length == 1) {
         final String name = offendingPlugins.single;
         throwToolExit(
-          'The plugin  - $name is excluding the arm64 architecture, which is a requirement for Xcode 26. Please file an issue with the plugin to support arm64.',
+          'The plugin "$name" is excluding the arm64 architecture, which is a requirement for Xcode 26. Please file an issue with the plugin to support arm64.',
         );
       }
 
