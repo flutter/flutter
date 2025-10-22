@@ -313,7 +313,7 @@ TEST_F(LicenseCheckerTest, CanIgnoreLicenseFiles) {
       LicenseChecker::Run(temp_path->string(), ss, *data);
   EXPECT_EQ(errors.size(), 0u) << errors[0];
 
-  EXPECT_EQ(ss.str(), R"output(flutter
+  EXPECT_EQ(ss.str(), R"output(engine
 
 Copyright Test
 )output");
@@ -337,7 +337,7 @@ TEST_F(LicenseCheckerTest, SimpleWritesFileLicensesFile) {
       LicenseChecker::Run(temp_path->string(), ss, *data);
   EXPECT_EQ(errors.size(), 0u) << errors[0];
 
-  EXPECT_EQ(ss.str(), R"output(flutter
+  EXPECT_EQ(ss.str(), R"output(engine
 
 Copyright Test
 )output");
@@ -363,11 +363,11 @@ TEST_F(LicenseCheckerTest, SimpleWritesTwoFileLicensesFiles) {
       LicenseChecker::Run(temp_path->string(), ss, *data);
   EXPECT_EQ(errors.size(), 0u);
 
-  EXPECT_EQ(ss.str(), R"output(flutter
+  EXPECT_EQ(ss.str(), R"output(engine
 
 C Copyright Test
 --------------------------------------------------------------------------------
-flutter
+engine
 
 Copyright Test
 )output");
@@ -393,7 +393,7 @@ TEST_F(LicenseCheckerTest, SimpleWritesDuplicateFileLicensesFiles) {
       LicenseChecker::Run(temp_path->string(), ss, *data);
   EXPECT_EQ(errors.size(), 0u);
 
-  EXPECT_EQ(ss.str(), R"output(flutter
+  EXPECT_EQ(ss.str(), R"output(engine
 
 Copyright Test
 )output");
@@ -421,7 +421,7 @@ TEST_F(LicenseCheckerTest, FileLicenseMultiplePackages) {
       LicenseChecker::Run(temp_path->string(), ss, *data);
   EXPECT_EQ(errors.size(), 0u);
 
-  EXPECT_EQ(ss.str(), R"output(flutter
+  EXPECT_EQ(ss.str(), R"output(engine
 foobar
 
 Copyright Test
@@ -448,11 +448,11 @@ TEST_F(LicenseCheckerTest, SimpleDirectoryLicense) {
       LicenseChecker::Run(temp_path->string(), ss, *data);
   EXPECT_EQ(errors.size(), 0u);
 
-  EXPECT_EQ(ss.str(), R"output(flutter
+  EXPECT_EQ(ss.str(), R"output(engine
 
 Copyright Test
 --------------------------------------------------------------------------------
-flutter
+engine
 
 Test License
 v2.0
@@ -539,11 +539,11 @@ TEST_F(LicenseCheckerTest, OnlyPrintMatch) {
       LicenseChecker::Run(temp_path->string(), ss, *data);
   EXPECT_EQ(errors.size(), 0u) << errors[0];
 
-  EXPECT_EQ(ss.str(), R"output(flutter
+  EXPECT_EQ(ss.str(), R"output(engine
 
 Copyright Test
 --------------------------------------------------------------------------------
-flutter
+engine
 
 Test License
 v2.0
@@ -578,7 +578,7 @@ void main() {
       LicenseChecker::Run(temp_path->string(), ss, *data);
   EXPECT_EQ(errors.size(), 0u) << errors[0];
 
-  EXPECT_EQ(ss.str(), R"output(flutter
+  EXPECT_EQ(ss.str(), R"output(engine
 
 Copyright Test
 )output");
@@ -622,7 +622,7 @@ TEST_F(LicenseCheckerTest, NoticesFile) {
   absl::StatusOr<Data> data = MakeTestData(/*include_filter_text=*/"NOTICES");
   ASSERT_TRUE(data.ok());
 
-  std::string notices = R"notices(flutter
+  std::string notices = R"notices(engine
 foobar
 
 Copyright Test
@@ -654,7 +654,7 @@ TEST_F(LicenseCheckerTest, NoticesFileUnknownLicense) {
   absl::StatusOr<Data> data = MakeTestData(/*include_filter_text=*/"NOTICES");
   ASSERT_TRUE(data.ok());
 
-  std::string notices = R"notices(flutter
+  std::string notices = R"notices(engine
 foobar
 
 Copyright Test
@@ -813,11 +813,11 @@ TEST_F(LicenseCheckerTest, WorkingDirectoryTrailingSlash) {
       LicenseChecker::Run(working_dir, ss, *data);
   EXPECT_EQ(errors.size(), 0u) << (errors.empty() ? "" : errors[0].message());
 
-  EXPECT_EQ(ss.str(), R"output(flutter
+  EXPECT_EQ(ss.str(), R"output(engine
 
 Copyright Test
 --------------------------------------------------------------------------------
-flutter
+engine
 
 Test License
 v2.0
@@ -847,7 +847,7 @@ v2.0
       LicenseChecker::Run(temp_path->string(), ss, *data);
   EXPECT_EQ(errors.size(), 0u) << errors[0];
 
-  EXPECT_EQ(ss.str(), R"output(flutter
+  EXPECT_EQ(ss.str(), R"output(engine
 
 Test License
 v2.0
@@ -977,5 +977,30 @@ foobar
 
 Test License
 v3.0
+)output");
+}
+
+TEST_F(LicenseCheckerTest, OverrideRootPackageName) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  fs::current_path(*temp_path);
+  ASSERT_TRUE(WriteFile(kHeader, *temp_path / "main.cc").ok());
+  Repo repo;
+  repo.Add(*temp_path / "main.cc");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  LicenseChecker::Flags flags = {.root_package_name = "testroot"};
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data, flags);
+  EXPECT_EQ(errors.size(), 0u) << errors[0];
+
+  EXPECT_EQ(ss.str(), R"output(testroot
+
+Copyright Test
 )output");
 }
