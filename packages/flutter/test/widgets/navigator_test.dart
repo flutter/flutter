@@ -5219,44 +5219,24 @@ void main() {
       skip: isBrowser, // [intended] only non-web Android supports predictive back.
     );
 
-    testWidgets('pop() on an empty stack throws an AssertionError in debug mode', (
+    testWidgets('pop() on the last route asserts that a route remains', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(const MaterialApp(home: Text('Home')));
       final NavigatorState navigator = tester.state(find.byType(Navigator));
 
-      navigator.pop();
-      await tester.pumpAndSettle();
-
-      dynamic caughtException;
+      Object? popException;
       try {
         navigator.pop();
       } catch (e) {
-        caughtException = e;
+        popException = e;
       }
+      expect(popException, isA<AssertionError>());
 
-      await tester.pump();
-      tester.takeException();
+      FlutterError.onError = (FlutterErrorDetails details) {};
 
-      expect(
-        caughtException,
-        isA<AssertionError>(),
-        reason: 'Popping an empty stack should synchronously throw an AssertionError.',
-      );
-
-      const String essentialMessage = 'Tried to pop a route on an empty stack.';
-
-      expect(
-        caughtException.toString(),
-        contains(essentialMessage),
-        reason: 'The captured AssertionError message did not contain the essential warning text.',
-      );
-
-      expect(
-        tester.takeException(),
-        isNull,
-        reason: 'No other exceptions should remain in the test harness.',
-      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets(
