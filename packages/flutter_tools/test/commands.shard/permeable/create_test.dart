@@ -3389,7 +3389,7 @@ void main() {
       projectDir.path,
     ]);
 
-    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle');
+    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle.kts');
 
     expect(buildGradleFile.existsSync(), true);
 
@@ -3466,7 +3466,7 @@ void main() {
       projectDir.path,
     ]);
 
-    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle');
+    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle.kts');
 
     expect(buildGradleFile.existsSync(), true);
 
@@ -3492,7 +3492,7 @@ void main() {
       projectDir.path,
     ]);
 
-    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle');
+    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle.kts');
 
     expect(buildGradleFile.existsSync(), true);
 
@@ -3519,7 +3519,7 @@ void main() {
       projectDir.path,
     ]);
 
-    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle');
+    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle.kts');
 
     expect(buildGradleFile.existsSync(), true);
 
