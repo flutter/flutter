@@ -679,22 +679,42 @@ class MediaQueryData {
   final bool supportsShowingSystemContextMenu;
 
   /// The height of the text, as a multiple of the font size.
+  ///
+  /// See also:
+  ///
+  ///  * [Text], [SelectableText], and [EditableText], all of whose
+  ///  [TextStyle.height] is overriden by [lineHeightScaleFactorOverride].
   final double? lineHeightScaleFactorOverride;
 
   /// The amount of space (in logical pixels) to add between each letter
   /// in a piece of text.
   ///
   /// A negative value can be used to bring the letters closer.
+  ///
+  /// See also:
+  ///
+  ///  * [Text], [SelectableText], and [EditableText], all of whose
+  ///  [TextStyle.letterSpacing] is overriden by [letterSpacingOverride].
   final double? letterSpacingOverride;
 
   /// The amount of space (in logical pixels) to add at each sequence of
   /// white-space (i.e. between each word) in a piece of text.
   ///
   /// A negative value can be used to bring the words closer.
+  ///
+  /// See also:
+  ///
+  ///  * [Text], [SelectableText], and [EditableText], all of whose
+  ///  [TextStyle.wordSpacing] is overriden by [wordSpacingOverride].
   final double? wordSpacingOverride;
 
   /// The amount of space (in logical pixels) to add between each paragraph
   /// in a piece of text.
+  ///
+  /// See also:
+  ///
+  ///  * [Text], and [SelectableText], which are both informed by
+  ///  [paragraphSpacing].
   final double paragraphSpacing;
 
   /// The orientation of the media (e.g., whether the device is in landscape or
