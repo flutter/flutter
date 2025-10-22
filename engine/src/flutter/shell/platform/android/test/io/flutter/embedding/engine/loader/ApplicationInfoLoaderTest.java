@@ -60,7 +60,7 @@ public class ApplicationInfoLoaderTest {
     when(context.getPackageName()).thenReturn("");
     when(packageManager.getApplicationInfo(anyString(), anyInt())).thenReturn(applicationInfo);
     if (networkPolicyXml != null) {
-      metadata.putInt(FlutterEngineManifestFlags.NETWORK_POLICY.metaDataKey, 5);
+      metadata.putInt(ApplicationInfoLoader.NETWORK_POLICY_METADATA_KEY, 5);
       doAnswer(invocationOnMock -> createMockResourceParser(networkPolicyXml))
           .when(resources)
           .getXml(5);
