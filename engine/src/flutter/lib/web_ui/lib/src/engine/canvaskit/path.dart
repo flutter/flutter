@@ -24,8 +24,7 @@ class CkPath implements DisposablePath {
   }
 
   factory CkPath.fromSkPath(SkPath skPath, ui.PathFillType fillType) {
-    skPath.setFillType(toSkFillType(fillType));
-    return CkPath._(SkPathBuilder(skPath), fillType);
+    return CkPath._(SkPathBuilder(skPath)..setFillType(toSkFillType(fillType)), fillType);
   }
 
   CkPath._(SkPathBuilder nativeObject, this._fillType) {
@@ -35,7 +34,11 @@ class CkPath implements DisposablePath {
   late final UniqueRef<SkPathBuilder> _ref;
 
   SkPathBuilder get _skiaPathBuilder => _ref.nativeObject;
-  SkPath get skiaPath => _ref.nativeObject.snapshot();
+
+  /// Returns an [SkPath] snapshot of the current path state.
+  ///
+  /// It is the responsibility of the caller to delete the returned [SkPath].
+  SkPath snapshotSkPath() => _skiaPathBuilder.snapshot();
 
   ui.PathFillType _fillType;
 
@@ -80,8 +83,9 @@ class CkPath implements DisposablePath {
       skMatrix[5] += offset.dy;
     }
     final CkPath otherPath = path as CkPath;
+    final SkPath otherSkPath = otherPath._skiaPathBuilder.snapshot();
     _skiaPathBuilder.addPath(
-      otherPath.skiaPath,
+      otherSkPath,
       skMatrix[0],
       skMatrix[1],
       skMatrix[2],
@@ -93,6 +97,7 @@ class CkPath implements DisposablePath {
       skMatrix[8],
       false,
     );
+    otherSkPath.delete();
   }
 
   @override
@@ -165,7 +170,11 @@ class CkPath implements DisposablePath {
 
   @override
   bool contains(ui.Offset point) {
-    return skiaPath.contains(point.dx, point.dy);
+    // TODO: Use `_skiaPathBuilder.contains` when it becomes available in CanvasKit.
+    final SkPath skPath = snapshotSkPath();
+    final bool result = skPath.contains(point.dx, point.dy);
+    skPath.delete();
+    return result;
   }
 
   @override
@@ -185,9 +194,9 @@ class CkPath implements DisposablePath {
       skMatrix[2] += offset.dx;
       skMatrix[5] += offset.dy;
     }
-    final CkPath otherPath = path as CkPath;
+    final SkPath otherSkPath = (path as CkPath).snapshotSkPath();
     _skiaPathBuilder.addPath(
-      otherPath.skiaPath,
+      otherSkPath,
       skMatrix[0],
       skMatrix[1],
       skMatrix[2],
@@ -199,10 +208,17 @@ class CkPath implements DisposablePath {
       skMatrix[8],
       true,
     );
+    otherSkPath.delete();
   }
 
   @override
-  ui.Rect getBounds() => fromSkRect(skiaPath.getBounds());
+  ui.Rect getBounds() {
+    // TODO: Use `_skiaPathBuilder.getBounds` when it becomes available in CanvasKit.
+    final SkPath skPath = snapshotSkPath();
+    final ui.Rect result = fromSkRect(skPath.getBounds());
+    skPath.delete();
+    return result;
+  }
 
   @override
   void lineTo(double x, double y) {
@@ -266,7 +282,7 @@ class CkPath implements DisposablePath {
   @override
   void reset() {
     // Only reset the local field. Skia will reset its internal state via
-    // SkPath.reset() below.
+    // SkPathBuilder.reset() below.
     _fillType = ui.PathFillType.nonZero;
     _skiaPathBuilder.reset();
   }
@@ -275,7 +291,9 @@ class CkPath implements DisposablePath {
   CkPath shift(ui.Offset offset) {
     // `SkPath.transform` mutates the existing path, so create a copy and call
     // `transform` on the copy.
-    final CkPath shiftedPath = CkPath.fromSkPath(skiaPath, _fillType);
+    final SkPath skPath = snapshotSkPath();
+    final CkPath shiftedPath = CkPath.fromSkPath(skPath, _fillType);
+    skPath.delete();
     shiftedPath._skiaPathBuilder.transform(1.0, 0.0, offset.dx, 0.0, 1.0, offset.dy, 0.0, 0.0, 1.0);
     return shiftedPath;
   }
@@ -283,17 +301,31 @@ class CkPath implements DisposablePath {
   static CkPath combine(ui.PathOperation operation, ui.Path uiPath1, ui.Path uiPath2) {
     final CkPath path1 = uiPath1 as CkPath;
     final CkPath path2 = uiPath2 as CkPath;
-    final SkPath newPath = canvasKit.Path.MakeFromOp(
-      path1.skiaPath,
-      path2.skiaPath,
+
+    final SkPath skPath1 = path1.snapshotSkPath();
+    final SkPath skPath2 = path2.snapshotSkPath();
+
+    final SkPath combinedSkPath = canvasKit.Path.MakeFromOp(
+      skPath1,
+      skPath2,
       toSkPathOp(operation),
     );
-    return CkPath.fromSkPath(newPath, path1._fillType);
+
+    final CkPath combinedPath = CkPath.fromSkPath(combinedSkPath, path1._fillType);
+
+    skPath1.delete();
+    skPath2.delete();
+    combinedSkPath.delete();
+
+    return combinedPath;
   }
 
   @override
   CkPath transform(Float64List matrix4) {
-    final CkPath transformedPath = CkPath.fromSkPath(skiaPath, _fillType);
+    final SkPath skPath = snapshotSkPath();
+    final CkPath transformedPath = CkPath.fromSkPath(skPath, _fillType);
+    skPath.delete();
+
     final Float32List m = toSkMatrixFromFloat64(matrix4);
     transformedPath._skiaPathBuilder.transform(
       m[0],
@@ -311,7 +343,10 @@ class CkPath implements DisposablePath {
 
   @override
   String toSvgString() {
-    return skiaPath.toSVGString();
+    final SkPath skPath = snapshotSkPath();
+    final String result = skPath.toSVGString();
+    skPath.delete();
+    return result;
   }
 
   /// Return `true` if this path contains no segments.
