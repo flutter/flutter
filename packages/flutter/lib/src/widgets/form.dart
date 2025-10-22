@@ -250,7 +250,7 @@ class FormState extends State<Form> {
     _hasInteractedByUser = _fields.any(
       (FormFieldState<dynamic> field) => field._hasInteractedByUser.value,
     );
-    _hasError = _fields.any((FormFieldState<dynamic> field) => field.hasError);
+    _hasError => _fields.any((FormFieldState<dynamic> field) => field.hasError);
     _forceRebuild();
   }
 

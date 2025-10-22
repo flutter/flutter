@@ -857,7 +857,7 @@ void main() {
                   child: FormField<String>(
                     initialValue: 'foo',
                     autovalidateMode: AutovalidateMode.onUserInteractionIfError,
-                    builder: (FormFieldState<String> state) {
+                    builder:(state) {
                       formFieldState = state;
                       return Container();
                     },
@@ -1076,7 +1076,6 @@ void main() {
 
       // Clear the input (invalid) → submit form manually → error should show.
       await tester.enterText(find.byType(TextFormField), '');
-      formState.currentState!.validate();
       await tester.pump();
       expect(find.text('Required'), findsOneWidget);
 
@@ -1084,6 +1083,7 @@ void main() {
       await tester.enterText(find.byType(TextFormField), 'baz');
       await tester.pump();
       expect(find.text('Required'), findsNothing); // error gone after correction
+      formState.currentState!.validate();
 
       // Resetting should clear error again.
       formState.currentState!.reset();
