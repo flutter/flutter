@@ -857,7 +857,7 @@ void main() {
                   child: FormField<String>(
                     initialValue: 'foo',
                     autovalidateMode: AutovalidateMode.onUserInteractionIfError,
-                    builder:(FormFieldState<String>  state) {
+                    builder:(FormFieldState<String> state) {
                       formFieldState = state;
                       return Container();
                     },
@@ -970,8 +970,7 @@ void main() {
       Widget builder() {
         return MaterialApp(
           home: Directionality(
-            textDirection: TextDirection.ltr,Consistently failed across all 3 executions.
-flaky: false
+            textDirection: TextDirection.ltr,
             child: Center(
               child: Material(
                 child: Form(
