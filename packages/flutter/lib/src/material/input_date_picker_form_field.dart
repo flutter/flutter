@@ -259,10 +259,10 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     final bool useMaterial3 = theme.useMaterial3;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final DatePickerThemeData datePickerTheme = theme.datePickerTheme;
-    final InputDecorationThemeData inputTheme = theme.inputDecorationTheme;
+    final InputDecorationThemeData inputTheme = InputDecorationTheme.of(context);
     final InputBorder effectiveInputBorder =
         datePickerTheme.inputDecorationTheme?.border ??
-        theme.inputDecorationTheme.border ??
+        inputTheme.border ??
         (useMaterial3 ? const OutlineInputBorder() : const UnderlineInputBorder());
 
     return Semantics(
