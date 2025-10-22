@@ -170,11 +170,7 @@ class CkPath implements DisposablePath {
 
   @override
   bool contains(ui.Offset point) {
-    // TODO: Use `_skiaPathBuilder.contains` when it becomes available in CanvasKit.
-    final SkPath skPath = snapshotSkPath();
-    final bool result = skPath.contains(point.dx, point.dy);
-    skPath.delete();
-    return result;
+    return _skiaPathBuilder.contains(point.dx, point.dy);
   }
 
   @override
@@ -212,13 +208,7 @@ class CkPath implements DisposablePath {
   }
 
   @override
-  ui.Rect getBounds() {
-    // TODO: Use `_skiaPathBuilder.getBounds` when it becomes available in CanvasKit.
-    final SkPath skPath = snapshotSkPath();
-    final ui.Rect result = fromSkRect(skPath.getBounds());
-    skPath.delete();
-    return result;
-  }
+  ui.Rect getBounds() => fromSkRect(_skiaPathBuilder.getBounds());
 
   @override
   void lineTo(double x, double y) {

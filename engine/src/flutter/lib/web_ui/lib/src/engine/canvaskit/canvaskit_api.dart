@@ -1318,6 +1318,12 @@ extension type SkPathBuilder._(JSObject _) implements JSObject {
 
   external void setFillType(SkFillType fillType);
 
+  @JS('getBounds')
+  external JSFloat32Array _getBounds();
+  Float32List getBounds() => _getBounds().toDart;
+
+  external bool contains(double x, double y);
+
   @JS('addArc')
   external void _addArc(JSFloat32Array oval, double startAngleDegrees, double sweepAngleDegrees);
   void addArc(Float32List oval, double startAngleDegrees, double sweepAngleDegrees) =>
