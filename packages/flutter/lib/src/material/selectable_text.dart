@@ -798,6 +798,8 @@ class _SelectableTextState extends State<SelectableText>
       autofillHints: null,
       contextMenuBuilder: widget.contextMenuBuilder,
     );
+    // TODO(Renzo-Olivares): Update this logic to inform paragraphs within
+    // this widgets text about paragraph spacing https://github.com/flutter/flutter/issues/177408.
     final double? paragraphSpacing = MediaQuery.maybeParagraphSpacingOf(context);
     if (paragraphSpacing != null && paragraphSpacing != 0.0) {
       editable = Padding(
