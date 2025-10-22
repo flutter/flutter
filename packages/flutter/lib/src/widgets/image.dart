@@ -888,8 +888,9 @@ class Image extends StatefulWidget {
   /// the exception by providing a replacement widget, or rethrow the exception.
   ///
   /// {@tool dartpad}
-  /// The following sample uses [errorBuilder] to show a '😢' in place of the
-  /// image that fails to load, and prints the error to the console.
+  /// The following sample uses [errorBuilder] to show 'Image
+  /// failed to load' in place of the image that fails to load, and prints
+  /// the error to the console.
   ///
   /// ** See code in examples/api/lib/widgets/image/image.error_builder.0.dart **
   /// {@end-tool}
