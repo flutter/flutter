@@ -299,7 +299,9 @@ end
       platform: TargetPlatform.darwin,
       mode: buildInfo.mode,
     );
-
+    if (!modeDirectory.existsSync()) {
+      modeDirectory.createSync(recursive: true);
+    }
     // Copy xcframework engine cache framework to mode directory.
     final ProcessResult result = await globals.processManager.run(<String>[
       'rsync',
