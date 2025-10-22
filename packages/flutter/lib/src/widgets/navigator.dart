@@ -185,7 +185,7 @@ abstract class Route<T> extends _RoutePlaceholder {
   NavigatorState? _navigator;
 
   bool get _installed => _navigator != null;
-  bool _installedBy(NavigatorState state) => _navigator == state;
+  bool _isInstalledIn(NavigatorState state) => _navigator == state;
 
   /// The settings for this route.
   ///
@@ -3295,7 +3295,7 @@ class _RouteEntry extends RouteTransitionRecord {
   /// refuses to be popped.
   bool handlePop({required NavigatorState navigator, required Route<dynamic>? previousPresent}) {
     assert(navigator._debugLocked);
-    assert(route._installedBy(navigator));
+    assert(route._isInstalledIn(navigator));
     currentState = _RouteLifecycle.popping;
     if (route._popCompleter.isCompleted) {
       // This is a page-based route popped through the Navigator.pop. The
@@ -3325,7 +3325,7 @@ class _RouteEntry extends RouteTransitionRecord {
     required Route<dynamic>? previousPresent,
   }) {
     assert(navigator._debugLocked);
-    if (route._installedBy(navigator)) {
+    if (route._isInstalledIn(navigator)) {
       currentState = _RouteLifecycle.removing;
     } else {
       // This route is still waiting to be added while a top-most push or pop
@@ -4489,7 +4489,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         case _RouteLifecycle.remove:
           // Routes that are not yet added (_installed == false) will exit as if
           // they have never been on the navigator. They shouldn't announce
-          // their presents.
+          // their presence.
           if (!seenTopActiveRoute && entry.route._installed) {
             if (poppedRoute != null) {
               entry.handleDidPopNext(poppedRoute);
@@ -5321,7 +5321,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @optionalTypeArgs
   void replace<T extends Object?>({required Route<dynamic> oldRoute, required Route<T> newRoute}) {
     assert(!_debugLocked);
-    assert(oldRoute._installedBy(this));
+    assert(oldRoute._isInstalledIn(this));
     _replaceEntry(
       _RouteEntry(newRoute, pageBased: false, initialState: _RouteLifecycle.replace),
       oldRoute,
@@ -5343,7 +5343,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     required RestorableRouteBuilder<T> newRouteBuilder,
     Object? arguments,
   }) {
-    assert(oldRoute._installedBy(this));
+    assert(oldRoute._isInstalledIn(this));
     assert(
       _debugIsStaticCallback(newRouteBuilder),
       'The provided routeBuilder must be a static function.',
@@ -5408,7 +5408,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     required Route<T> newRoute,
   }) {
     assert(!newRoute._installed);
-    assert(anchorRoute._installedBy(this));
+    assert(anchorRoute._isInstalledIn(this));
     _replaceEntryBelow(
       _RouteEntry(newRoute, pageBased: false, initialState: _RouteLifecycle.replace),
       anchorRoute,
@@ -5431,7 +5431,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     required RestorableRouteBuilder<T> newRouteBuilder,
     Object? arguments,
   }) {
-    assert(anchorRoute._installedBy(this));
+    assert(anchorRoute._isInstalledIn(this));
     assert(
       _debugIsStaticCallback(newRouteBuilder),
       'The provided routeBuilder must be a static function.',
@@ -5521,7 +5521,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     if (lastEntry == null) {
       return false;
     }
-    assert(lastEntry.route._installedBy(this));
+    assert(lastEntry.route._isInstalledIn(this));
 
     // TODO(justinmc): When the deprecated willPop method is removed, delete
     // this code and use only popDisposition, below.
@@ -5642,7 +5642,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       _debugLocked = true;
       return true;
     }());
-    assert(route._installedBy(this));
+    assert(route._isInstalledIn(this));
     final bool wasCurrent = route.isCurrent;
     final _RouteEntry entry = _history.firstWhere(_RouteEntry.isRoutePredicate(route));
     entry.complete(result, isReplaced: false, imperativeRemoval: true);
@@ -5667,7 +5667,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       _debugLocked = true;
       return true;
     }());
-    assert(anchorRoute._installedBy(this));
+    assert(anchorRoute._isInstalledIn(this));
     final int anchorIndex = _history.indexWhere(_RouteEntry.isRoutePredicate(anchorRoute));
     assert(anchorIndex >= 0, 'This Navigator does not contain the specified anchorRoute.');
     assert(
