@@ -857,7 +857,7 @@ void main() {
                   child: FormField<String>(
                     initialValue: 'foo',
                     autovalidateMode: AutovalidateMode.onUserInteractionIfError,
-                    builder:(state) {
+                    builder:(FormFieldState<String>  state) {
                       formFieldState = state;
                       return Container();
                     },
@@ -970,7 +970,8 @@ void main() {
       Widget builder() {
         return MaterialApp(
           home: Directionality(
-            textDirection: TextDirection.ltr,
+            textDirection: TextDirection.ltr,Consistently failed across all 3 executions.
+flaky: false
             child: Center(
               child: Material(
                 child: Form(
@@ -1094,6 +1095,7 @@ void main() {
       await tester.enterText(find.byType(TextFormField), 'baz');
       await tester.pump();
       expect(find.text('Required'), findsNothing);
+
       // Check the behavior of a manual validate when the text is already valid.
       // This should *confirm* the error is cleared, not re-introduce it.
       formState.currentState!.validate();
