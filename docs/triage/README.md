@@ -238,8 +238,8 @@ For more guidance on reviewing PRs, see [Tree Hygiene](../contributing/Tree-hygi
 
 In addition, consider these issues that fall under another team's triage, but are things the ecosystem team might want to be aware of:
  * [`a: plugins` issues](https://github.com/flutter/flutter/issues?q=is%3Aopen+label%3A%22a%3A+plugins%22+-label%3Ateam-ecosystem+-label%3Atriaged-ecosystem)
- * [`package` issues](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Apackage%20-label%3Ateam-ecosystem%20-label%3Atriaged-ecosystem%20-label%3A%22p%3A%20go_router%22%20sort%3Acreated-desc)
- * [Package regressions](https://github.com/flutter/flutter/issues?q=is%3Aopen%20is%3Aissue%20-label%3A%22p%3A%20go_router%22%20label%3Apackage%20label%3A%22c%3A%20regression%22%20sort%3Acreated-desc)
+ * [`package` issues](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Apackage%20-label%3Ateam-ecosystem%20-label%3Atriaged-ecosystem%20sort%3Acreated-desc)
+ * [Package regressions](https://github.com/flutter/flutter/issues?q=is%3Aopen%20is%3Aissue%20label%3Apackage%20label%3A%22c%3A%20regression%22%20sort%3Acreated-desc)
 
 
 ### Engine team (`team-engine`)
