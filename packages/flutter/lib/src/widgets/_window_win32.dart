@@ -23,6 +23,7 @@ import 'package:flutter/rendering.dart';
 
 import '../foundation/_features.dart';
 import '_window.dart';
+import '_window_positioner.dart';
 
 /// A Win32 window handle.
 ///
@@ -166,6 +167,18 @@ class WindowingOwnerWin32 extends WindowingOwner {
       title: title,
       parent: parent,
     );
+  }
+
+  @internal
+  @override
+  TooltipWindowController createTooltipWindowController({
+    required TooltipWindowControllerDelegate delegate,
+    required BoxConstraints preferredConstraints,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required BaseWindowController parent,
+  }) {
+    throw UnimplementedError('Tooltip windows are not yet implemented on Linux.');
   }
 
   /// Register a new [WindowsMessageHandler].
