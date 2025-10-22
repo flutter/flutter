@@ -1542,7 +1542,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   _viewportMetrics.physical_max_width_constraint = maxWidth * _viewportMetrics.device_pixel_ratio;
   _viewportMetrics.physical_min_height_constraint = minHeight * _viewportMetrics.device_pixel_ratio;
   _viewportMetrics.physical_max_height_constraint = maxHeight * _viewportMetrics.device_pixel_ratio;
-
 }
 
 - (void)viewSafeAreaInsetsDidChange {
@@ -2256,8 +2255,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [self onUserSettingsChanged:nil];
 
   if (self.isAutoResizable) {
-      [self.flutterView resetIntrinsicContentSize];
-    }
+    [self.flutterView resetIntrinsicContentSize];
+  }
 }
 
 - (void)onUserSettingsChanged:(NSNotification*)notification {

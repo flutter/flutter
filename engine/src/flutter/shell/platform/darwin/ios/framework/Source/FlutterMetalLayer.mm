@@ -413,7 +413,7 @@ extern CFTimeInterval display_link_target;
     // will be correctly recycled on the next frame.
     return;
   }
-  
+
   // This is needed otherwise frame gets skipped on touch begin / end. Go figure.
   // Might also be placebo
   [self setNeedsDisplay];

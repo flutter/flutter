@@ -682,7 +682,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         latch->Wait();
       }
     }
-    
+
     self.hadPlatformViews = NO;
     return background_frame->Submit();
   }
@@ -777,8 +777,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
                compositionOrder = self.compositionOrder,                  //
                unusedLayers = std::move(unusedLayers),                    //
                surfaceFrames = std::move(surfaceFrames),                  //
-               latch
-  ]() mutable {
+               latch]() mutable {
     [self performSubmit:platformViewLayers
         currentCompositionParams:currentCompositionParams
               viewsToRecomposite:viewsToRecomposite
