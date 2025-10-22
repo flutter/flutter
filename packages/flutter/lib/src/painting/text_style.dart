@@ -1435,7 +1435,7 @@ class TextStyle with Diagnosticable {
               fontStyle: strutStyle.fontStyle,
               forceStrutHeight: strutStyle.forceStrutHeight,
             ),
-      maxLines: maxLines,
+      maxLines: maxLines?.ceil(),
       ellipsis: ellipsis,
       locale: locale,
     );

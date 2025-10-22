@@ -1922,7 +1922,7 @@ extension type SkParagraphStyleProperties._(JSObject _) implements JSObject {
   external set textDirection(SkTextDirection? value);
   external set heightMultiplier(double? value);
   external set textHeightBehavior(SkTextHeightBehavior? value);
-  external set maxLines(double? value);
+  external set maxLines(int? value);
   external set ellipsis(String? value);
   external set textStyle(SkTextStyleProperties? value);
   external set strutStyle(SkStrutStyleProperties? strutStyle);

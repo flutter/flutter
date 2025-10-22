@@ -1937,7 +1937,7 @@ class TextStyle {
 Int32List _encodeParagraphStyle(
   TextAlign? textAlign,
   TextDirection? textDirection,
-  double? maxLines,
+  int? maxLines,
   String? fontFamily,
   double? fontSize,
   double? height,
@@ -2068,7 +2068,7 @@ class ParagraphStyle {
   ParagraphStyle({
     TextAlign? textAlign,
     TextDirection? textDirection,
-    double? maxLines,
+    int? maxLines,
     String? fontFamily,
     double? fontSize,
     double? height,

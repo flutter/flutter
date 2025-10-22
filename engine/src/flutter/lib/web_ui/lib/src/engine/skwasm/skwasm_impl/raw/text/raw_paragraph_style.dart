@@ -31,11 +31,11 @@ external void paragraphStyleSetTextAlign(ParagraphStyleHandle handle, int textAl
 )
 external void paragraphStyleSetTextDirection(ParagraphStyleHandle handle, int textDirection);
 
-@Native<Void Function(ParagraphStyleHandle, Float)>(
+@Native<Void Function(ParagraphStyleHandle, Size)>(
   symbol: 'paragraphStyle_setMaxLines',
   isLeaf: true,
 )
-external void paragraphStyleSetMaxLines(ParagraphStyleHandle handle, double maxLines);
+external void paragraphStyleSetMaxLines(ParagraphStyleHandle handle, int maxLines);
 
 @Native<Void Function(ParagraphStyleHandle, Float)>(
   symbol: 'paragraphStyle_setHeight',
