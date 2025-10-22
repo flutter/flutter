@@ -5572,6 +5572,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @optionalTypeArgs
   void pop<T extends Object?>([T? result]) {
     assert(!_debugLocked);
+    assert(
+      () {
+        final bool hasPresentRoute = _history.any(_RouteEntry.isPresentPredicate);
+        return hasPresentRoute;
+      }(),
+      'Tried to pop a route on an empty stack. Ensure there is at least one route before calling Navigator.pop().',
+    );
     assert(() {
       _debugLocked = true;
       return true;
@@ -5592,15 +5599,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }
     if (entry.currentState == _RouteLifecycle.pop) {
       _flushHistoryUpdates(rearrangeOverlay: false);
-      assert(() {
-        final bool hasPresentRoute = _history.any(_RouteEntry.isPresentPredicate);
-        if (!hasPresentRoute) {
-          debugPrint(
-            'Tried to pop a route on an empty stack. Ensure there is at least one route before calling Navigator.pop().',
-          );
-        }
-        return true;
-      }());
     }
     assert(entry.currentState == _RouteLifecycle.idle || entry.route._popCompleter.isCompleted);
     assert(() {
