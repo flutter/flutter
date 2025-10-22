@@ -1312,7 +1312,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           bottomSheetTheme: BottomSheetThemeData(
-            dragHandleColor: MaterialStateColor.resolveWith((Set<WidgetState> states) {
+            dragHandleColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
               if (states.contains(WidgetState.hovered)) {
                 return hoveringColor;
               }
@@ -2888,6 +2888,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(FocusScope.of(tester.element(find.text('BottomSheet'))).hasFocus, false);
     expect(focusNode.hasFocus, true);
+  });
+
+  testWidgets('BottomSheet does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: BottomSheet(
+                onClosing: () {},
+                builder: (BuildContext context) => const Text('X'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(BottomSheet)), Size.zero);
   });
 }
 
