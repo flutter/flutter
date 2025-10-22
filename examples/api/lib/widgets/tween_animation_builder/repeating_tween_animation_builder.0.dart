@@ -49,7 +49,7 @@ class _RepeatingTweenAnimationBuilderExampleState
         elevation: 0,
       ),
       body: RepeatingTweenAnimationBuilder<double>(
-        tween: Tween<double>(begin: 0.0, end: 1.0),
+        animatable: Tween<double>(begin: 0.0, end: 1.0),
         duration: const Duration(seconds: 4),
         paused: _isPaused,
         reverse: _isReversing,
@@ -89,7 +89,7 @@ class _RepeatingTweenAnimationBuilderExampleState
             ),
           ),
           RepeatingTweenAnimationBuilder<double>(
-            tween: Tween<double>(begin: 0.8, end: 1.0),
+            animatable: Tween<double>(begin: 0.8, end: 1.0),
             duration: const Duration(seconds: 2),
             paused: _isPaused,
             reverse: true,

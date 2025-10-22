@@ -402,7 +402,7 @@ void main() {
       await tester.pumpWidget(
         RepeatingTweenAnimationBuilder<double>(
           duration: duration,
-          tween: Tween<double>(begin: 0.0, end: 1.0),
+          animatable: Tween<double>(begin: 0.0, end: 1.0),
           builder: (BuildContext context, double value, Widget? child) {
             values.add(value);
             return const Placeholder();
@@ -430,7 +430,7 @@ void main() {
       await tester.pumpWidget(
         RepeatingTweenAnimationBuilder<double>(
           duration: const Duration(milliseconds: 100),
-          tween: Tween<double>(begin: 0, end: 1),
+          animatable: Tween<double>(begin: 0, end: 1),
           reverse: true,
           builder: (BuildContext context, double value, Widget? child) {
             values.add(value);
@@ -464,7 +464,7 @@ void main() {
       Widget buildWidget({required bool paused}) {
         return RepeatingTweenAnimationBuilder<int>(
           duration: const Duration(seconds: 1),
-          tween: IntTween(begin: 0, end: 100),
+          animatable: IntTween(begin: 0, end: 100),
           paused: paused,
           builder: (BuildContext context, int value, Widget? child) {
             values.add(value);
@@ -493,7 +493,7 @@ void main() {
       await tester.pumpWidget(
         RepeatingTweenAnimationBuilder<int>(
           duration: const Duration(seconds: 1),
-          tween: IntTween(begin: 100, end: 100),
+          animatable: IntTween(begin: 100, end: 100),
           builder: (BuildContext context, int value, Widget? child) {
             values.add(value);
             return const Placeholder();
@@ -515,7 +515,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: RepeatingTweenAnimationBuilder<double>(
             duration: const Duration(seconds: 1),
-            tween: Tween<double>(begin: 0.0, end: 1.0),
+            animatable: Tween<double>(begin: 0.0, end: 1.0),
             builder: (BuildContext context, double value, Widget? child) {
               receivedChild = child;
               return child ?? const Placeholder();
@@ -529,59 +529,33 @@ void main() {
       expect(find.text('Child'), findsOneWidget);
     });
 
-    testWidgets('RepeatingTweenAnimationBuilder validates non-null begin and end values', (
+    testWidgets('Supports animatables without explicit begin/end', (
       WidgetTester tester,
     ) async {
-      // Test with null begin value - should throw assertion error.
-      expect(
-        () => RepeatingTweenAnimationBuilder<double>(
-          duration: const Duration(seconds: 1),
-          tween: Tween<double>(end: 1.0), // begin is null.
-          builder: (BuildContext context, double value, Widget? child) {
-            return const Placeholder();
-          },
-        ),
-        throwsAssertionError,
-      );
+      final List<double> values = <double>[];
 
-      // Test with null end value - should throw assertion error.
-      expect(
-        () => RepeatingTweenAnimationBuilder<double>(
-          duration: const Duration(seconds: 1),
-          tween: Tween<double>(begin: 0.0), // end is null.
-          builder: (BuildContext context, double value, Widget? child) {
-            return const Placeholder();
-          },
-        ),
-        throwsAssertionError,
-      );
-
-      // Test with both null - should also throw assertion error
-      expect(
-        () => RepeatingTweenAnimationBuilder<double>(
-          duration: const Duration(seconds: 1),
-          tween: Tween<double>(), // Both begin and end are null.
-          builder: (BuildContext context, double value, Widget? child) {
-            return const Placeholder();
-          },
-        ),
-        throwsAssertionError,
-      );
-
-      // Test with both begin and end non-null - should work fine.
       await tester.pumpWidget(
         RepeatingTweenAnimationBuilder<double>(
-          duration: const Duration(seconds: 1),
-          tween: Tween<double>(begin: 0.0, end: 1.0),
+          duration: const Duration(milliseconds: 100),
+          animatable: CurveTween(curve: Curves.easeIn),
           builder: (BuildContext context, double value, Widget? child) {
+            values.add(value);
             return const Placeholder();
           },
         ),
       );
 
-      // Should build without errors.
-      expect(find.byType(Placeholder), findsOneWidget);
-      expect(tester.takeException(), isNull);
+      expect(values, isNotEmpty);
+      expect(values.first, 0.0);
+
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(values.last, greaterThan(0.0));
+
+      await tester.pump(const Duration(milliseconds: 49));
+      expect(values.last, greaterThan(0.9));
+
+      await tester.pump(const Duration(milliseconds: 10));
+      expect(values.last, lessThan(0.2));
     });
   });
 }

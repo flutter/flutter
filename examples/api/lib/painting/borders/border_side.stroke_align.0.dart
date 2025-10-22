@@ -29,7 +29,7 @@ class StrokeAlignExample extends StatelessWidget {
     return Material(
       child: Center(
         child: RepeatingTweenAnimationBuilder<double>(
-          tween: Tween<double>(begin: -1.0, end: 1.0),
+          animatable: Tween<double>(begin: -1.0, end: 1.0),
           duration: const Duration(seconds: 1),
           reverse: true,
           builder: (BuildContext context, double strokeAlign, Widget? child) {
