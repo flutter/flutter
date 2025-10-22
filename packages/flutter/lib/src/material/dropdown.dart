@@ -1328,6 +1328,10 @@ class DropdownButton<T> extends StatefulWidget {
 
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// this button's [items].
+  ///
+  /// {@macro flutter.material.InkWell.mouseCursor}
+  ///
+  /// If this property is null, [WidgetStateMouseCursor.adaptiveClickable] will be used.
   final MouseCursor? dropdownMenuItemMouseCursor;
 
   final InputDecoration? _inputDecoration;
