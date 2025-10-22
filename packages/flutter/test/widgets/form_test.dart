@@ -857,7 +857,7 @@ void main() {
                   child: FormField<String>(
                     initialValue: 'foo',
                     autovalidateMode: AutovalidateMode.onUserInteractionIfError,
-                    builder:(FormFieldState<String> state) {
+                    builder: (FormFieldState<String> state) {
                       formFieldState = state;
                       return Container();
                     },
@@ -1064,7 +1064,7 @@ void main() {
         );
       }
 
-     await tester.pumpWidget(builder());
+      await tester.pumpWidget(builder());
 
       // No error text is visible yet. (Initial valid state)
       expect(find.text('Required'), findsNothing);
@@ -1089,7 +1089,6 @@ void main() {
       // Verify error is shown
       expect(find.text('Required'), findsOneWidget);
 
-
       // Now user interacts again with valid text ('baz') → validation auto-runs and clears the error.
       await tester.enterText(find.byType(TextFormField), 'baz');
       await tester.pump();
@@ -1100,7 +1099,6 @@ void main() {
       formState.currentState!.validate();
       await tester.pump();
       expect(find.text('Required'), findsNothing);
-
 
       // Resetting should clear form (already cleared, but a safety check).
       formState.currentState!.reset();
