@@ -354,7 +354,7 @@ abstract class ParagraphStyle {
   factory ParagraphStyle({
     TextAlign? textAlign,
     TextDirection? textDirection,
-    double? maxLines,
+    int? maxLines,
     String? fontFamily,
     double? fontSize,
     double? height,

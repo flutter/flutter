@@ -1175,7 +1175,7 @@ class ParagraphStyle
   //----------------------------------------------------------------------------
   /// @see      ImpellerParagraphStyleSetMaxLines
   ///
-  ParagraphStyle& SetMaxLines(float max_lines) {
+  ParagraphStyle& SetMaxLines(uint32_t max_lines) {
     gGlobalProcTable.ImpellerParagraphStyleSetMaxLines(Get(), max_lines);
     return *this;
   }

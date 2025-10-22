@@ -709,7 +709,7 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
   SkwasmParagraphStyle({
     ui.TextAlign? textAlign,
     ui.TextDirection? textDirection,
-    double? maxLines,
+    int? maxLines,
     String? fontFamily,
     double? fontSize,
     double? height,
@@ -812,7 +812,7 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
   final ui.TextDirection? _textDirection;
   final ui.FontWeight? _fontWeight;
   final ui.FontStyle? _fontStyle;
-  final double? _maxLines;
+  final int? _maxLines;
   final String? _fontFamily;
   final double? _fontSize;
   final double? _height;
