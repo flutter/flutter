@@ -21,7 +21,7 @@ static NSString *_kPing = @"ping";
     [super viewDidLoad];
 
     self.view.backgroundColor = [UIColor systemBackgroundColor];
-    self.title = @"Scrollable Stack";
+    self.title = @"Dynamic Content Resizing";
 
     UIScrollView *scrollView = [[UIScrollView alloc] init];
     scrollView.translatesAutoresizingMaskIntoConstraints = NO;
