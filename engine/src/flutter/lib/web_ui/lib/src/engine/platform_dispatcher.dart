@@ -1146,34 +1146,20 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       bool computedWordSpacingChanged = false;
       bool computedParagraphSpacingChanged = false;
 
-      if (computedLineHeightScaleFactor == defaultLineHeightFactor) {
-        computedLineHeightScaleFactorChanged = _updateLineHeightScaleFactorOverride(null);
-      }
-      if (computedLetterSpacing == spacingDefault) {
-        computedLetterSpacingChanged = _updateLetterSpacingOverride(null);
-      }
-      if (computedWordSpacing == spacingDefault) {
-        computedWordSpacingChanged = _updateWordSpacingOverride(null);
-      }
-      if (computedParagraphSpacing == spacingDefault) {
-        computedParagraphSpacingChanged = _updateParagraphSpacing(null);
-      }
-
-      if (computedLineHeightScaleFactor != null &&
-          computedLineHeightScaleFactor != defaultLineHeightFactor) {
-        computedLineHeightScaleFactorChanged = _updateLineHeightScaleFactorOverride(
-          computedLineHeightScaleFactor,
-        );
-      }
-      if (computedLetterSpacing != null && computedLetterSpacing != spacingDefault) {
-        computedLetterSpacingChanged = _updateLetterSpacingOverride(computedLetterSpacing);
-      }
-      if (computedWordSpacing != null && computedWordSpacing != spacingDefault) {
-        computedWordSpacingChanged = _updateWordSpacingOverride(computedWordSpacing);
-      }
-      if (computedParagraphSpacing != null && computedParagraphSpacing != spacingDefault) {
-        computedParagraphSpacingChanged = _updateParagraphSpacing(computedParagraphSpacing);
-      }
+      computedLineHeightScaleFactorChanged = _updateLineHeightScaleFactorOverride(
+        computedLineHeightScaleFactor == defaultLineHeightFactor
+            ? null
+            : computedLineHeightScaleFactor,
+      );
+      computedLetterSpacingChanged = _updateLetterSpacingOverride(
+        computedLetterSpacing == spacingDefault ? null : computedLetterSpacing,
+      );
+      computedWordSpacingChanged = _updateWordSpacingOverride(
+        computedWordSpacing == spacingDefault ? null : computedWordSpacing,
+      );
+      computedParagraphSpacingChanged = _updateParagraphSpacing(
+        computedParagraphSpacing == spacingDefault ? null : computedParagraphSpacing,
+      );
 
       if (computedLineHeightScaleFactorChanged ||
           computedLetterSpacingChanged ||
