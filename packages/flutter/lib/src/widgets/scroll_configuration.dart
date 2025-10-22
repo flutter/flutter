@@ -167,6 +167,15 @@ class ScrollBehavior {
         assert(details.controller != null);
         return RawScrollbar(controller: details.controller, child: child);
       case TargetPlatform.android:
+        return RawScrollbar(
+          controller: details.controller,
+          thumbColor: const Color(0x00000000),
+          trackColor: const Color(0x00000000),
+          thickness: 0,
+          radius: Radius.zero,
+          interactive: false,
+          child: child,
+        );
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
         return child;

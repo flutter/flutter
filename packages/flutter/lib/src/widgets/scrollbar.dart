@@ -1941,6 +1941,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     return false;
   }
 
+  // TODO(camsim99): perhaps this is where we can determine whether or not to reveal the scrollbar?
   bool _handleScrollNotification(ScrollNotification notification) {
     if (!widget.notificationPredicate(notification)) {
       return false;
