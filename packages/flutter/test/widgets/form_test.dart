@@ -1064,28 +1064,44 @@ void main() {
         );
       }
 
-      await tester.pumpWidget(builder());
+     await tester.pumpWidget(builder());
 
-      // No error text is visible yet.
+      // No error text is visible yet. (Initial valid state)
       expect(find.text('Required'), findsNothing);
 
-      // User types valid input → still no error.
+      // User types valid input 'bar' → autovalidate is disabled → still no error.
       await tester.enterText(find.byType(TextFormField), 'bar');
       await tester.pump();
       expect(find.text('Required'), findsNothing);
 
-      // Clear the input (invalid) → submit form manually → error should show.
+      // -----------------------------------------------------------------------
+      // 1. GENERATE THE ERROR (This is where the mode is activated)
+      // -----------------------------------------------------------------------
+
+      // Clear the input (invalid)
       await tester.enterText(find.byType(TextFormField), '');
-      await tester.pump();
+      await tester.pump(); // Pump 1: Process the text change
+
+      // Manually submit form to show the initial error (AutovalidateMode is now active)
+      formState.currentState!.validate();
+      await tester.pump(); // Pump 2: Render the error
+
+      // Verify error is shown
       expect(find.text('Required'), findsOneWidget);
 
-      // Now user interacts again → validation should re-run.
+
+      // Now user interacts again with valid text ('baz') → validation auto-runs and clears the error.
       await tester.enterText(find.byType(TextFormField), 'baz');
       await tester.pump();
-      expect(find.text('Required'), findsNothing); // error gone after correction
+      expect(find.text('Required'), findsNothing);
+      // Check the behavior of a manual validate when the text is already valid.
+      // This should *confirm* the error is cleared, not re-introduce it.
       formState.currentState!.validate();
+      await tester.pump();
+      expect(find.text('Required'), findsNothing);
 
-      // Resetting should clear error again.
+
+      // Resetting should clear form (already cleared, but a safety check).
       formState.currentState!.reset();
       await tester.pump();
       expect(find.text('Required'), findsNothing);
