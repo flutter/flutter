@@ -95,7 +95,7 @@ abstract class PlatformDispatcher {
 
   double? get wordSpacingOverride;
 
-  double? get paragraphSpacing;
+  double get paragraphSpacing;
 
   AccessibilityFeatures get accessibilityFeatures;
 

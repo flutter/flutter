@@ -1146,7 +1146,7 @@ class PlatformDispatcher {
   /// to add between each paragraph in text.
   ///
   /// If this value changes, [onMetricsChanged] will be called.
-  double? get paragraphSpacing => _configuration.paragraphSpacing;
+  double get paragraphSpacing => _configuration.paragraphSpacing;
 
   /// The system-reported text scale.
   ///
@@ -1841,7 +1841,7 @@ class _PlatformConfiguration {
     this.lineHeightScaleFactorOverride,
     this.letterSpacingOverride,
     this.wordSpacingOverride,
-    this.paragraphSpacing,
+    this.paragraphSpacing = 0.0,
   });
 
   _PlatformConfiguration copyWith({
@@ -1939,7 +1939,7 @@ class _PlatformConfiguration {
 
   /// The system-reported amount of additional space (in logical pixels)
   /// to add between each paragraph in text.
-  final double? paragraphSpacing;
+  final double paragraphSpacing;
 }
 
 /// An immutable view configuration.
