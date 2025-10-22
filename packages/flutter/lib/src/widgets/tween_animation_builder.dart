@@ -367,11 +367,6 @@ class _RepeatingTweenAnimationBuilderState<T extends Object>
 
   @override
   Widget build(BuildContext context) {
-    // If no animation needed (begin equals end), just build with static value.
-    if (widget.tween.begin == widget.tween.end) {
-      return widget.builder(context, _animation.value, widget.child);
-    }
-
     return AnimatedBuilder(
       animation: _animation,
       builder: (BuildContext context, Widget? child) {
