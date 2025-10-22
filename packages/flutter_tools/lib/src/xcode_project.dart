@@ -512,8 +512,6 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       if (targetMatch != null) {
         final String currentTarget = targetMatch.group(1)!.trim();
         if (excludedArchRegex.hasMatch(section)) {
-          // The "Pods-Runner" target will inherit the exclusion if any dependency has it.
-          // We only want to report the root-cause plugins.
           if (!currentTarget.startsWith('Pods-')) {
             offendingPlugins.add(currentTarget);
           }
