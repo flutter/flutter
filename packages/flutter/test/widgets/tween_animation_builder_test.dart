@@ -410,15 +410,15 @@ void main() {
         ),
       );
 
-      // Initial value should be 0.0
+      // Initial value should be 0.0.
       expect(values.last, 0.0);
 
       // Pump to a frame just before the end of the first cycle.
       await tester.pump(const Duration(milliseconds: 99));
-      // The value should be very close to 1.0
+      // The value should be very close to 1.0.
       expect(values.last, moreOrLessEquals(0.99));
 
-      // Pump past the cycle boundary (1ms to complete the cycle + 50ms into the next).
+      // Pump past the cycle boundary (1ms to complete the cycle + 50ms into the next cycle).
       await tester.pump(const Duration(milliseconds: 51));
       // The animation should have wrapped around and be at the halfway point of the next cycle.
       expect(values.last, moreOrLessEquals(0.5));
@@ -439,16 +439,16 @@ void main() {
         ),
       );
 
-      // Let it run long enough to reverse
+      // Let it run long enough to reverse.
       for (int i = 0; i < 20; i++) {
         await tester.pump(const Duration(milliseconds: 20));
       }
 
-      // Should have both increasing and decreasing values
+      // Should have both increasing and decreasing values.
       expect(values.first, 0.0);
       expect(values.any((double v) => v == 1.0), isTrue, reason: 'Should reach max');
 
-      // Check for reversing pattern - values should decrease after reaching 1
+      // Check for reversing pattern - values should decrease after reaching 1.
       bool foundReverse = false;
       for (int i = 1; i < values.length; i++) {
         if (values[i] < values[i - 1] && values[i - 1] > 0.5 && values[i] < 0.9) {
@@ -473,19 +473,19 @@ void main() {
         );
       }
 
-      // Start animated
+      // Start animated.
       await tester.pumpWidget(buildWidget(paused: false));
       await tester.pump(const Duration(milliseconds: 500));
       expect(values, <int>[0, 50]);
-      // Pause mid-animation
+      // Pause mid-animation.
       await tester.pumpWidget(buildWidget(paused: true));
       final int pausedValue = values.last;
       await tester.pump(const Duration(seconds: 2));
-      expect(values.last, pausedValue); // Should stay paused
-      // Resume animation
+      expect(values.last, pausedValue); // Should stay paused.
+      // Resume animation.
       await tester.pumpWidget(buildWidget(paused: false));
       await tester.pump(const Duration(milliseconds: 400));
-      expect(values.last, greaterThan(pausedValue)); // Should resume from where it paused
+      expect(values.last, greaterThan(pausedValue)); // Should resume from where it paused.
     });
 
     testWidgets('Does not animate when begin equals end', (WidgetTester tester) async {
@@ -503,7 +503,7 @@ void main() {
       expect(values, <int>[100]);
 
       await tester.pump(const Duration(seconds: 2));
-      expect(values, <int>[100]); // Should not repeat when there's no animation
+      expect(values, <int>[100]); // Should not repeat when there's no animation.
     });
 
     testWidgets('Passes child to builder correctly', (WidgetTester tester) async {
@@ -532,11 +532,11 @@ void main() {
     testWidgets('RepeatingTweenAnimationBuilder validates non-null begin and end values', (
       WidgetTester tester,
     ) async {
-      // Test with null begin value - should throw assertion error
+      // Test with null begin value - should throw assertion error.
       expect(
         () => RepeatingTweenAnimationBuilder<double>(
           duration: const Duration(seconds: 1),
-          tween: Tween<double>(end: 1.0), // begin is null
+          tween: Tween<double>(end: 1.0), // begin is null.
           builder: (BuildContext context, double value, Widget? child) {
             return const Placeholder();
           },
@@ -544,11 +544,11 @@ void main() {
         throwsAssertionError,
       );
 
-      // Test with null end value - should throw assertion error
+      // Test with null end value - should throw assertion error.
       expect(
         () => RepeatingTweenAnimationBuilder<double>(
           duration: const Duration(seconds: 1),
-          tween: Tween<double>(begin: 0.0), // end is null
+          tween: Tween<double>(begin: 0.0), // end is null.
           builder: (BuildContext context, double value, Widget? child) {
             return const Placeholder();
           },
@@ -560,7 +560,7 @@ void main() {
       expect(
         () => RepeatingTweenAnimationBuilder<double>(
           duration: const Duration(seconds: 1),
-          tween: Tween<double>(), // both begin and end are null
+          tween: Tween<double>(), // Both begin and end are null.
           builder: (BuildContext context, double value, Widget? child) {
             return const Placeholder();
           },
@@ -568,7 +568,7 @@ void main() {
         throwsAssertionError,
       );
 
-      // Test with both begin and end non-null - should work fine
+      // Test with both begin and end non-null - should work fine.
       await tester.pumpWidget(
         RepeatingTweenAnimationBuilder<double>(
           duration: const Duration(seconds: 1),
@@ -579,7 +579,7 @@ void main() {
         ),
       );
 
-      // Should build without errors
+      // Should build without errors.
       expect(find.byType(Placeholder), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
