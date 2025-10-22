@@ -233,7 +233,7 @@ class MediaQueryData {
     this.lineHeightScaleFactorOverride,
     this.letterSpacingOverride,
     this.wordSpacingOverride,
-    this.paragraphSpacing,
+    this.paragraphSpacing = 0.0,
   }) : _textScaleFactor = textScaleFactor,
        _textScaler = textScaler,
        assert(
@@ -695,7 +695,7 @@ class MediaQueryData {
 
   /// The amount of space (in logical pixels) to add between each paragraph
   /// in a piece of text.
-  final double? paragraphSpacing;
+  final double paragraphSpacing;
 
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
@@ -1951,6 +1951,17 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
   static double? maybeWordSpacingOverrideOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.wordSpacingOverride)?.wordSpacingOverride;
+
+  /// Returns the [MediaQueryData.paragraphSpacing] for the nearest
+  /// [MediaQuery] ancestor or 0.0, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.paragraphSpacing] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
+  static double paragraphSpacingOf(BuildContext context) =>
+      _of(context, _MediaQueryAspect.paragraphSpacing).paragraphSpacing;
 
   /// Returns the [MediaQueryData.paragraphSpacing] for the nearest
   /// [MediaQuery] ancestor or null, if no such ancestor exists.
