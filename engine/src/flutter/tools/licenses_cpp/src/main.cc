@@ -37,7 +37,10 @@ ABSL_FLAG(bool,
           treat_unmatched_comments_as_errors,
           false,
           "Whether unmatched comments are considered errors.");
-ABSL_FLAG(std::string, root_package, "flutter", "Name of the root package.");
+ABSL_FLAG(std::optional<std::string>,
+          root_package,
+          std::nullopt,
+          "Name of the root package.");
 
 namespace {
 int Run(std::string_view working_dir,

@@ -146,12 +146,26 @@ struct Package {
   bool is_root_package;
 };
 
+/// This makes sure trailing slashes on paths are treated the same.
+/// Example:
+///   f("/foo/") == f("/foo") == "foo"
+std::string GetDirFilename(const fs::path& working_dir) {
+  std::string result = working_dir.filename();
+  if (result.empty()) {
+    result = working_dir.parent_path().filename();
+  }
+  return result;
+}
+
 Package GetPackage(const Data& data,
                    const fs::path& working_dir,
                    const fs::path& relative_path,
                    const LicenseChecker::Flags& flags) {
+  std::string root_package_name = flags.root_package_name.has_value()
+                                      ? flags.root_package_name.value()
+                                      : GetDirFilename(working_dir);
   Package result = {
-      .name = flags.root_package_name,
+      .name = root_package_name,
       .license_file = FindLicense(data, working_dir, "."),
       .is_root_package = true,
   };
