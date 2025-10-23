@@ -76,35 +76,6 @@ final ShapeBorder _defaultM3DialogShape = RoundedRectangleBorder(
   borderRadius: BorderRadius.circular(28.0),
 );
 
-Future<void> _pumpDialogWithTheme({
-  required WidgetTester tester,
-  required Widget dialog,
-  required TargetPlatform themePlatform,
-}) async {
-  await tester.pumpWidget(
-    MaterialApp(
-      theme: ThemeData(platform: themePlatform),
-      home: Material(
-        child: Builder(
-          builder: (BuildContext context) {
-            return Center(
-              child: ElevatedButton(
-                child: const Text('X'),
-                onPressed: () {
-                  showDialog<void>(context: context, builder: (BuildContext context) => dialog);
-                },
-              ),
-            );
-          },
-        ),
-      ),
-    ),
-  );
-
-  await tester.tap(find.text('X'));
-  await tester.pumpAndSettle();
-}
-
 void main() {
   final ThemeData material3Theme = ThemeData(brightness: Brightness.dark);
   final ThemeData material2Theme = ThemeData(useMaterial3: false, brightness: Brightness.dark);
@@ -3212,97 +3183,98 @@ void main() {
     expect(tester.getSize(find.byType(AlertDialog)).isEmpty, isTrue);
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/176566
-  testWidgets(
-    'AlertDialog semantic label and namesRoute should be omitted on '
-    'iOS/macOS platforms, regardless of theme platform',
-    (WidgetTester tester) async {
-      // Regression test for VoiceOver accessibility when theme platform differs from device platform.
-      // When users set theme.platform to TargetPlatform.android on an iOS/macOS device,
-      // VoiceOver should still work correctly by not having a label and namesRoute flag
-      // in the the Dialog title's semantics.
+  // Regression test for https://github.com/flutter/flutter/issues/177001
+  group('Dialog semantics for mismatched platforms', () {
+    Future<void> pumpDialogWithTheme({
+      required WidgetTester tester,
+      required Widget dialog,
+      required TargetPlatform themePlatform,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: themePlatform),
+          home: Material(
+            child: Builder(
+              builder: (BuildContext context) {
+                return Center(
+                  child: ElevatedButton(
+                    child: const Text('X'),
+                    onPressed: () {
+                      showDialog<void>(context: context, builder: (BuildContext context) => dialog);
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('AlertDialog', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
 
-      // Test with Android theme on Apple platforms.
-      await _pumpDialogWithTheme(
+      final bool isIOSorMacOS =
+          defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS;
+
+      // Test with theme.platform = Android on different real platforms.
+      await pumpDialogWithTheme(
         tester: tester,
         themePlatform: TargetPlatform.android,
         dialog: const AlertDialog(title: Text('Title'), content: Text('Y'), actions: <Widget>[]),
       );
 
-      // On iOS/macOS, the semantic label should not be added,
-      // and namesRoute flag should not exist.
-      expect(
-        semantics,
-        isNot(
+      // Dismiss the first dialog.
+      Navigator.of(tester.element(find.text('Title'))).pop();
+      await tester.pumpAndSettle();
+
+      // Test with theme.platform = iOS on different real platforms.
+      await pumpDialogWithTheme(
+        tester: tester,
+        themePlatform: TargetPlatform.iOS,
+        dialog: const AlertDialog(title: Text('Title'), content: Text('Y'), actions: <Widget>[]),
+      );
+
+      if (isIOSorMacOS) {
+        // On iOS/macOS, semantic label should be omitted and namesRoute flag should not exist.
+        expect(
+          semantics,
+          isNot(
+            includesNodeWith(
+              label: localizations.alertDialogLabel,
+              flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
+            ),
+          ),
+        );
+      } else {
+        // On other platforms, semantic label should be added and namesRoute should exist.
+        expect(
+          semantics,
           includesNodeWith(
             label: localizations.alertDialogLabel,
             flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
           ),
-        ),
-      );
+        );
+      }
 
       semantics.dispose();
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    }),
-  );
+    }, variant: TargetPlatformVariant.all());
 
-  // Regression test for https://github.com/flutter/flutter/issues/176566
-  testWidgets(
-    'AlertDialog semantic label and namesRoute should be present on '
-    'Android/Fuchsia/Linux/Windows platforms, regardless of theme platform',
-    (WidgetTester tester) async {
-      // When users set theme.platform to TargetPlatform.iOS on an Android device,
-      // TalkBack should still work correctly by having a label and namesRoute flag
-      // in the Dialog title's semantics.
+    testWidgets('SimpleDialog', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
 
-      // Test with iOS theme but on non-Apple platforms.
-      await _pumpDialogWithTheme(
-        tester: tester,
-        themePlatform: TargetPlatform.iOS,
-        dialog: const AlertDialog(title: Text('Title'), content: Text('Y'), actions: <Widget>[]),
-      );
+      final bool isIOSorMacOS =
+          defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS;
 
-      // On Android and other platforms, the default semantic label should be added
-      // and namesRoute should also exist, although it is false as label is non-null.
-      expect(
-        semantics,
-        includesNodeWith(
-          label: localizations.alertDialogLabel,
-          flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
-        ),
-      );
-
-      semantics.dispose();
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.android,
-      TargetPlatform.fuchsia,
-      TargetPlatform.linux,
-      TargetPlatform.windows,
-    }),
-  );
-
-  // Regression test for https://github.com/flutter/flutter/issues/176566
-  testWidgets(
-    'SimpleDialog semantic label and namesRoute should be omitted on '
-    'iOS/macOS platforms, regardless of theme platform',
-    (WidgetTester tester) async {
-      // Regression test for VoiceOver accessibility when theme platform differs from device platform.
-      // When users set theme.platform to TargetPlatform.android on an iOS/macOS device,
-      // VoiceOver should still work correctly by not having a label and namesRoute flag
-      // in the the Dialog title's semantics.
-      final SemanticsTester semantics = SemanticsTester(tester);
-      const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
-
-      // Test with Android theme on Apple platforms.
-      await _pumpDialogWithTheme(
+      // Test with theme.platform = Android on different real platforms.
+      await pumpDialogWithTheme(
         tester: tester,
         themePlatform: TargetPlatform.android,
         dialog: const SimpleDialog(
@@ -3314,39 +3286,12 @@ void main() {
         ),
       );
 
-      // On iOS/macOS, the semantic label should not be added,
-      // and namesRoute flag should not exist.
-      expect(
-        semantics,
-        isNot(
-          includesNodeWith(
-            label: localizations.dialogLabel,
-            flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
-          ),
-        ),
-      );
+      // Dismiss the first dialog.
+      Navigator.of(tester.element(find.text('Title'))).pop();
+      await tester.pumpAndSettle();
 
-      semantics.dispose();
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    }),
-  );
-
-  // Regression test for https://github.com/flutter/flutter/issues/176566
-  testWidgets(
-    'SimpleDialog semantic label/namesRoute should be present on '
-    'Android/Fuchsia/Linux/Windows platforms, regardless of theme platform',
-    (WidgetTester tester) async {
-      // When users set theme.platform to TargetPlatform.iOS on an Android device,
-      // TalkBack should still work correctly by having a label and namesRoute flag
-      // in the Dialog title's semantics.
-      final SemanticsTester semantics = SemanticsTester(tester);
-      const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
-
-      // Test with iOS theme but on non-Apple platforms.
-      await _pumpDialogWithTheme(
+      // Test with theme.platform = iOS on different real platforms.
+      await pumpDialogWithTheme(
         tester: tester,
         themePlatform: TargetPlatform.iOS,
         dialog: const SimpleDialog(
@@ -3358,25 +3303,31 @@ void main() {
         ),
       );
 
-      // On Android and other platforms, the default semantic label should be added
-      // and namesRoute should also exist, although it is false as label is non-null.
-      expect(
-        semantics,
-        includesNodeWith(
-          label: localizations.dialogLabel,
-          flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
-        ),
-      );
+      if (isIOSorMacOS) {
+        // On iOS/macOS, semantic label should be omitted and namesRoute flag should not exist.
+        expect(
+          semantics,
+          isNot(
+            includesNodeWith(
+              label: localizations.dialogLabel,
+              flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
+            ),
+          ),
+        );
+      } else {
+        // On other platforms, semantic label should be added and namesRoute should exist.
+        expect(
+          semantics,
+          includesNodeWith(
+            label: localizations.dialogLabel,
+            flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
+          ),
+        );
+      }
 
       semantics.dispose();
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.android,
-      TargetPlatform.fuchsia,
-      TargetPlatform.linux,
-      TargetPlatform.windows,
-    }),
-  );
+    }, variant: TargetPlatformVariant.all());
+  });
 }
 
 @pragma('vm:entry-point')
