@@ -32,20 +32,22 @@ class CanvasKitRenderer extends Renderer {
 
   static Rasterizer _createRasterizer() {
     if (configuration.canvasKitForceMultiSurfaceRasterizer || isSafari || isFirefox) {
-      return MultiSurfaceRasterizer();
+      return MultiSurfaceRasterizer(
+        (OnscreenCanvasProvider canvasProvider) => CkOnscreenSurface(canvasProvider),
+      );
     }
-    return OffscreenCanvasRasterizer();
+    return OffscreenCanvasRasterizer(
+      (OffscreenCanvasProvider canvasProvider) => CkOffscreenSurface(canvasProvider),
+    );
   }
 
   @override
   void debugResetRasterizer() {
     rasterizer = _createRasterizer();
+    pictureToImageSurface = rasterizer.createPictureToImageSurface();
   }
 
-  /// A surface used specifically for `Picture.toImage` when software rendering
-  /// is supported.
-  final Surface pictureToImageSurface = Surface();
-
+  @override
   @override
   Future<void> initialize() async {
     _initialized ??= () async {
@@ -59,6 +61,7 @@ class CanvasKitRenderer extends Renderer {
         windowFlutterCanvasKit = canvasKit;
       }
       rasterizer = _createRasterizer();
+      pictureToImageSurface = rasterizer.createPictureToImageSurface();
       _instance = this;
       await super.initialize();
     }();
