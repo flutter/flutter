@@ -94,8 +94,8 @@ DlPath DlPath::MakePoly(const DlPoint pts[],
                         int count,
                         bool close,
                         DlPathFillType fill_type) {
-  return DlPath(
-      SkPath::Polygon(ToSkPoints(pts), count, close, ToSkFillType(fill_type)));
+  return DlPath(SkPath::Polygon({ToSkPoints(pts), count}, close,
+                                ToSkFillType(fill_type)));
 }
 
 DlPath DlPath::MakeArc(const DlRect& bounds,

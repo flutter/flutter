@@ -110,7 +110,7 @@ FLUTTER_ASSERT_ARC
   }
 
   SkRect rect;
-  rect.setBounds(quad, 4);
+  rect.setBounds({quad, 4});
   // If this UIFocusItemContainer's coordinateSpace is a UIScrollView, offset
   // the rect by `contentOffset` because the contentOffset translation is
   // incorporated into the paint transform at different node depth in UIKit
