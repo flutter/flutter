@@ -670,9 +670,7 @@ void main() {
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget = Localizations(
         locale: const Locale('en', 'us'),
-        delegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultWidgetsLocalizations.delegate,
-        ],
+        delegates: const <LocalizationsDelegate<dynamic>>[DefaultWidgetsLocalizations.delegate],
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
