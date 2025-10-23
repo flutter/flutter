@@ -42,6 +42,8 @@ extension type CSSStyleDeclaration._(JSObject _) implements JSObject {
   external String get height;
   external set width(String value);
   external String get width;
+  external set pointerEvents(String value);
+  external String get pointerEvents;
 }
 
 extension type CSSStyleSheet._(JSObject _) implements JSObject {

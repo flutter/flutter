@@ -471,6 +471,25 @@ void runTests() {
     expect(imgElement.style.height, '100%');
   });
 
+  testWidgets('Creates an <img> with pointer-events: none', (WidgetTester tester) async {
+    final TestImgElement testImg = TestImgElement();
+    testImg.src = _uniqueUrl(tester.testDescription);
+
+    final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter();
+    final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+
+    await tester.pumpWidget(Image(image: imageProvider));
+    streamCompleter.setData(
+      imageInfo: WebImageInfo(testImg.getMock() as web_shim.HTMLImageElement),
+    );
+    await tester.pumpAndSettle();
+    final FakePlatformView imgElementPlatformView = fakePlatformViewRegistry.views.single;
+    expect(imgElementPlatformView.htmlElement, isA<web.HTMLImageElement>());
+    final web.HTMLImageElement imgElement =
+        imgElementPlatformView.htmlElement as web.HTMLImageElement;
+    expect(imgElement.style.pointerEvents, 'none');
+  });
+
   group('RenderWebImage', () {
     testWidgets('BoxFit.contain centers and sizes the image correctly', (
       WidgetTester tester,
