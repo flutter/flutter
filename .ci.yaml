@@ -7005,7 +7005,7 @@ targets:
         ["devicelab", "hostonly", "linux"]
       task_name: windowing_test_linux
 
-  - name: MacOS windowing_test
+  - name: Mac windowing_test
     recipe: devicelab/devicelab_drone
     presubmit: true
     bringup: true
