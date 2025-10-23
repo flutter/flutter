@@ -1473,10 +1473,11 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         FlutterTimeline.finishSync();
       }
 
+      final RenderObject? rootNode = this.rootNode;
       assert(() {
         assert(nodesToProcess.isEmpty || rootNode != null);
         if (rootNode != null) {
-          _RenderObjectSemantics.debugCheckForParentData(rootNode!);
+          _RenderObjectSemantics.debugCheckForParentData(rootNode);
         }
         return true;
       }());
@@ -5375,6 +5376,10 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   // form nodes if the parent has explicitChildNode = true.
   bool _containsIncompleteFragment = false;
 
+  // Whether the semantics information in [cachedSemanticsNode] is up-to-date.
+  //
+  // When this flag is false, the cached semantics node must not be presented to
+  // the platform a11y system until it's updated or removed from the tree.
   bool built = false;
 
   /// The cached node created directly by this Object.
@@ -5499,7 +5504,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     return _blocksPreviousSibling!;
   }
 
-  bool shouldDrop(SemanticsNode node) => node.isInvisible;
+  static bool shouldDrop(SemanticsNode node) => node.isInvisible;
 
   void markNeedsBuild() {
     built = false;
@@ -5578,47 +5583,48 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
     // Construct tree for nodes that will form semantics nodes.
     _children.clear();
-    if (contributesToSemanticsTree) {
-      _marksConflictsInMergeGroup(mergeUp, isMergeUp: true);
-      siblingMergeGroups.forEach(_marksConflictsInMergeGroup);
+    if (!contributesToSemanticsTree) {
+      return;
+    }
+    _marksConflictsInMergeGroup(mergeUp, isMergeUp: true);
+    siblingMergeGroups.forEach(_marksConflictsInMergeGroup);
 
-      final Iterable<SemanticsConfiguration> mergeUpConfigs = mergeUp
-          .map<SemanticsConfiguration?>((_SemanticsFragment fragment) => fragment.configToMergeUp)
-          .whereType<SemanticsConfiguration>();
-      configProvider.absorbAll(mergeUpConfigs);
-      // merge up fragments below this object will not be visible to parent
-      // because they are either absorbed or will form a semantics node.
-      mergeUp.clear();
-      mergeUp.add(this);
-      for (final _RenderObjectSemantics childSemantics
-          in result.$1.whereType<_RenderObjectSemantics>()) {
-        assert(childSemantics.contributesToSemanticsTree);
-        if (childSemantics.shouldFormSemanticsNode) {
-          _children.add(childSemantics);
-        } else {
-          _children.addAll(childSemantics._children);
-          siblingMergeGroups.addAll(childSemantics.siblingMergeGroups);
-        }
+    final Iterable<SemanticsConfiguration> mergeUpConfigs = mergeUp
+        .map<SemanticsConfiguration?>((_SemanticsFragment fragment) => fragment.configToMergeUp)
+        .whereType<SemanticsConfiguration>();
+    configProvider.absorbAll(mergeUpConfigs);
+    // merge up fragments below this object will not be visible to parent
+    // because they are either absorbed or will form a semantics node.
+    mergeUp.clear();
+    mergeUp.add(this);
+    for (final _RenderObjectSemantics childSemantics
+        in result.$1.whereType<_RenderObjectSemantics>()) {
+      assert(childSemantics.contributesToSemanticsTree);
+      if (childSemantics.shouldFormSemanticsNode) {
+        _children.add(childSemantics);
+      } else {
+        _children.addAll(childSemantics._children);
+        siblingMergeGroups.addAll(childSemantics.siblingMergeGroups);
       }
+    }
 
-      final Set<SemanticsTag>? tags = parentData?.tagsForChildren;
-      if (tags != null) {
-        assert(tags.isNotEmpty);
-        configProvider.updateConfig((SemanticsConfiguration config) {
-          tags.forEach(config.addTagForChildren);
-        });
-      }
+    final Set<SemanticsTag>? tags = parentData?.tagsForChildren;
+    if (tags != null) {
+      assert(tags.isNotEmpty);
+      configProvider.updateConfig((SemanticsConfiguration config) {
+        tags.forEach(config.addTagForChildren);
+      });
+    }
 
-      if (blocksUserAction != configProvider.effective.isBlockingUserActions) {
-        configProvider.updateConfig((SemanticsConfiguration config) {
-          config.isBlockingUserActions = blocksUserAction;
-        });
-      }
-      if (localeForChildren != configProvider.effective.locale) {
-        configProvider.updateConfig((SemanticsConfiguration config) {
-          config.locale = localeForChildren;
-        });
-      }
+    if (blocksUserAction != configProvider.effective.isBlockingUserActions) {
+      configProvider.updateConfig((SemanticsConfiguration config) {
+        config.isBlockingUserActions = blocksUserAction;
+      });
+    }
+    if (localeForChildren != configProvider.effective.locale) {
+      configProvider.updateConfig((SemanticsConfiguration config) {
+        config.locale = localeForChildren;
+      });
     }
   }
 
@@ -5919,10 +5925,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   }
 
   /// Builds the semantics subtree under the [cachedSemanticsNode].
-  void _buildSemanticsSubtree({
-    required Set<int> usedSemanticsIds,
-    List<SemanticsNode>? semanticsNodes,
-  }) {
+  void _buildSemanticsSubtree({required Set<int> usedSemanticsIds}) {
     final List<SemanticsNode> children = <SemanticsNode>[];
     for (final _RenderObjectSemantics child in _children) {
       assert(child.shouldFormSemanticsNode);
@@ -5959,7 +5962,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     _updateSemanticsNodeGeometry();
 
     _mergeSiblingGroup(usedSemanticsIds);
-    _buildSemanticsSubtree(semanticsNodes: semanticsNodes, usedSemanticsIds: usedSemanticsIds);
+    _buildSemanticsSubtree(usedSemanticsIds: usedSemanticsIds);
   }
 
   SemanticsNode _createSemanticsNode() {
@@ -6044,9 +6047,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   }
 
   /// Updates the semantics geometry of the cached semantics node.
-  ///
-  /// Returns true if geometry changes that may result in children's geometries
-  /// change as well.
   void _updateSemanticsNodeGeometry() {
     final SemanticsNode node = cachedSemanticsNode!;
     final _SemanticsGeometry nodeGeometry = geometry!;
@@ -6262,7 +6262,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       final String semanticsNodeStatus;
       if (built) {
         semanticsNodeStatus = 'formed ${cachedSemanticsNode?.id}';
-      } else if (!built && shouldFormSemanticsNode) {
+      } else if (shouldFormSemanticsNode) {
         semanticsNodeStatus = 'needs build';
       } else {
         semanticsNodeStatus = 'no semantics node';
@@ -6350,14 +6350,13 @@ final class _SemanticsGeometry {
     required _RenderObjectSemantics parent,
     required _RenderObjectSemantics child,
   }) {
-    final Matrix4 transform = parentTransform?.clone() ?? Matrix4.identity();
     Matrix4? parentToCommonAncestorTransform;
     RenderObject childRenderObject = child.renderObject;
     RenderObject parentRenderObject = parent.renderObject;
 
     final List<RenderObject> childToCommonAncestor = <RenderObject>[childRenderObject];
 
-    // Find the common ancestor.
+    // Find the common ancestor, and the path(s) to the common ancestor.
     while (!identical(childRenderObject, parentRenderObject)) {
       final int fromDepth = childRenderObject.depth;
       final int toDepth = parentRenderObject.depth;
@@ -6383,38 +6382,61 @@ final class _SemanticsGeometry {
         parentRenderObject = toParent;
       }
     }
-
-    // Calculate transform.
     assert(childToCommonAncestor.length >= 2);
-    for (int i = childToCommonAncestor.length - 1; i > 0; i -= 1) {
-      childToCommonAncestor[i].applyPaintTransform(childToCommonAncestor[i - 1], transform);
-    }
 
-    if (parentToCommonAncestorTransform != null) {
+    // Calculate clips and transform.
+
+    Rect? paintClipRect;
+    Rect? semanticsClipRect;
+    final Matrix4 transform;
+    if (parentToCommonAncestorTransform == null) {
+      // This is most common case, i.e. parent is the common ancestor.
+      transform = Matrix4.identity();
+      paintClipRect = parentPaintClipRect;
+      semanticsClipRect = parentSemanticsClipRect;
+      // Travrese from `parent`'s render object to `child`'s.
+      for (int i = childToCommonAncestor.length - 1; i > 0; i -= 1) {
+        final RenderObject nodeParent = childToCommonAncestor[i];
+        final RenderObject node = childToCommonAncestor[i - 1];
+
+        final Rect? localPaintClipInParent = _transformRect(
+          nodeParent.describeApproximatePaintClip(node),
+          transform, // paint transform from nodeParent to parent
+          MatrixUtils.transformRect,
+        );
+        final Rect? localSemanticsClipInParent = _transformRect(
+          nodeParent.describeSemanticsClip(node),
+          transform, // paint transform from nodeParent to parent
+          MatrixUtils.transformRect,
+        );
+        paintClipRect = _intersectRects(paintClipRect, localPaintClipInParent);
+        if (localSemanticsClipInParent != null) {
+          semanticsClipRect = localSemanticsClipInParent;
+        } else if (semanticsClipRect != null) {
+          semanticsClipRect = _intersectRects(semanticsClipRect, localPaintClipInParent);
+        }
+        nodeParent.applyPaintTransform(node, transform);
+      }
+
+      if (paintClipRect != null || semanticsClipRect != null) {
+        final Matrix4 inverted = Matrix4.zero()..copyInverse(transform);
+        semanticsClipRect = _transformRect(semanticsClipRect, inverted, MatrixUtils.transformRect);
+        paintClipRect = _transformRect(paintClipRect, inverted, MatrixUtils.transformRect);
+      }
+      if (parentTransform != null) {
+        MatrixUtils.multiplyInPlace(parentTransform, transform);
+      }
+    } else {
+      transform = parentTransform?.clone() ?? Matrix4.identity();
       if (parentToCommonAncestorTransform.invert() != 0) {
+        for (int i = childToCommonAncestor.length - 1; i > 0; i -= 1) {
+          childToCommonAncestor[i].applyPaintTransform(childToCommonAncestor[i - 1], transform);
+        }
         transform.multiply(parentToCommonAncestorTransform);
       } else {
         transform.setZero();
       }
-    }
 
-    // Calculate clips.
-    Rect? paintClipRect;
-    Rect? semanticsClipRect;
-    if (childToCommonAncestor.last == parent.renderObject) {
-      // This is most common case, i.e. parent is the common ancestor.
-      paintClipRect = parentPaintClipRect;
-      semanticsClipRect = parentSemanticsClipRect;
-      assert(parentToCommonAncestorTransform == null);
-      for (int i = childToCommonAncestor.length - 1; i > 0; i -= 1) {
-        (paintClipRect, semanticsClipRect) = _computeClipRect(
-          childToCommonAncestor[i],
-          childToCommonAncestor[i - 1],
-          semanticsClipRect,
-          paintClipRect,
-        );
-      }
-    } else {
       // Otherwise we have to find the closest ancestor RenderObject that
       // has up-to-date semantics geometry and compute the clip rects from there.
       //
@@ -6465,14 +6487,18 @@ final class _SemanticsGeometry {
   }
 
   /// From parent to child coordinate system.
-  static Rect? _transformRect(Rect? rect, Matrix4 transform) {
+  static Rect? _transformRect(
+    Rect? rect,
+    Matrix4 transform, [
+    Rect Function(Matrix4, Rect) apply = MatrixUtils.inverseTransformRect,
+  ]) {
     if (rect == null) {
       return null;
     }
     if (rect.isEmpty || transform.isZero()) {
       return Rect.zero;
     }
-    return MatrixUtils.inverseTransformRect(transform, rect);
+    return apply(transform, rect);
   }
 
   // A matrix used to store transient transform data.
