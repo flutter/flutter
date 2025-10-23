@@ -602,7 +602,7 @@ abstract class SemanticRole {
   ///
   /// This approach allows framework full control when specified, with reasonable
   /// fallback inference for backward compatibility.
-  bool get shouldAcceptPointerEvents {
+  bool get acceptsPointerEvents {
     final hitTestBehavior = semanticsObject.hitTestBehavior;
 
     // TIER 1: Framework Declaration
@@ -640,7 +640,7 @@ abstract class SemanticRole {
     final behaviors = _behaviors;
     if (behaviors != null) {
       for (final behavior in behaviors) {
-        if (behavior.acceptsPointerEvents) {
+        if (behavior.shouldAcceptPointerEvents) {
           return true;
         }
       }
@@ -1066,7 +1066,7 @@ abstract class SemanticBehavior {
   ///
   /// This boolean decides whether to set the `pointer-events` CSS property to
   /// `all` or to `none` on [SemanticsObject.element].
-  bool get acceptsPointerEvents => false;
+  bool get shouldAcceptPointerEvents => false;
 
   /// Called immediately after the [semanticsObject] updates some of its fields.
   ///
@@ -1863,7 +1863,7 @@ class SemanticsObject {
     // Apply updates to the DOM.
     _updateRole();
 
-    if (semanticRole!.shouldAcceptPointerEvents) {
+    if (semanticRole!.acceptsPointerEvents) {
       element.style.pointerEvents = 'all';
     } else {
       element.style.pointerEvents = 'none';

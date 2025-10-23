@@ -33,7 +33,7 @@ class SemanticPlatformView extends SemanticRole {
   /// This is so that the platform views are not obscured by semantic elements
   /// and can be reached by inspecting the web page.
   @override
-  bool get shouldAcceptPointerEvents => false;
+  bool get acceptsPointerEvents => false;
 
   @override
   void update() {
