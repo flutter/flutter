@@ -88,6 +88,12 @@ const maxKnownAndSupportedKgpVersion = '2.2.20';
 @visibleForTesting
 const maxKnownAndSupportedAgpVersion = '9.0';
 
+// Update this when new versions of AGP with Kotlin support come out.
+//
+// Supported here means supported by the tooling for
+// flutter analyze --suggestions and does not imply broader flutter support.
+const maxKnownAgpVersionWithFullKotlinSupport = '8.7.2';
+
 // Update this when new versions of AGP come out.
 const maxKnownAgpVersion = '9.0';
 
@@ -650,7 +656,6 @@ bool validateAgpAndKgp(Logger logger, {required String? kgpV, required String? a
       'AGP version ($agpV) older than oldest supported $oldestConsideredAgpVersion.',
     );
   }
-  const maxKnownAgpVersionWithFullKotlinSupport = '8.11.1';
 
   if (isWithinVersionRange(
         kgpV,

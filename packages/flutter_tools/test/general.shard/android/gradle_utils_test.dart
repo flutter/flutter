@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/base/common.dart' show ToolExit;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/base/version_range.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -1002,8 +1003,7 @@ pluginManagement {
         KgpAgpTestData(
           true,
           kgpVersion: templateKotlinGradlePluginVersion,
-          // TODO(reidbaker): Replace with templateAndroidGradlePluginVersion
-          agpVersion: '8.7.2',
+          agpVersion: templateAndroidGradlePluginVersion,
         ),
 
         // Kotlin version at the edge of support window.
@@ -1197,6 +1197,38 @@ pluginManagement {
         });
       }
     });
+  });
+
+  testWithoutContext('agp versions validation', () {
+    // testWithoutContext('Ensure templateAndroidGradlePluginVersion <= maxKnownAgpVersionWithFullKotlinSupport',
+    //         () {
+    //       final Version? parsedTemplateAndroidGradlePluginVersion = Version.parse(templateAndroidGradlePluginVersion);
+    //       final Version? parsedMaxKnownAgpVersionWithFullKotlinSupport = Version.parse(maxKnownAgpVersionWithFullKotlinSupport);
+    //       expect(parsedTemplateAndroidGradlePluginVersion! <= parsedMaxKnownAgpVersionWithFullKotlinSupport!, isTrue);
+    //     });
+    //
+    // testWithoutContext('Ensure maxKnownAndSupportedAgpVersion <= maxKnownAgpVersion',
+    //         () {
+    //       final Version? parsedMaxKnownAndSupportedAgpVersion = Version.parse(maxKnownAndSupportedAgpVersion);
+    //       final Version? parsedMaxKnownAgpVersion = Version.parse(maxKnownAgpVersion);
+    //       expect(parsedMaxKnownAndSupportedAgpVersion! <= parsedMaxKnownAgpVersion!, isTrue);
+    //     });
+    //
+    // testWithoutContext('Ensure MaxKnownAgpVersionWithFullKotlinSupport < parsedMaxKnownAgpVersion',
+    //         () {
+    //       final Version? parsedMaxKnownAgpVersionWithFullKotlinSupport = Version.parse(maxKnownAgpVersionWithFullKotlinSupport);
+    //       final Version? parsedMaxKnownAgpVersion = Version.parse(maxKnownAgpVersion);
+    //       expect(parsedMaxKnownAgpVersionWithFullKotlinSupport! < parsedMaxKnownAgpVersion!, isTrue);
+    //     });
+
+    final Version? parsedTemplateAndroidGradlePluginVersion = Version.parse(templateAndroidGradlePluginVersion);
+    final Version? parsedMaxKnownAgpVersionWithFullKotlinSupport = Version.parse(maxKnownAgpVersionWithFullKotlinSupport);
+    final Version? parsedMaxKnownAndSupportedAgpVersion = Version.parse(maxKnownAndSupportedAgpVersion);
+    final Version? parsedMaxKnownAgpVersion = Version.parse(maxKnownAgpVersion);
+
+    expect(parsedTemplateAndroidGradlePluginVersion! <= parsedMaxKnownAgpVersionWithFullKotlinSupport!, isTrue);
+    expect(parsedMaxKnownAndSupportedAgpVersion! <= parsedMaxKnownAgpVersion!, isTrue);
+    expect(parsedMaxKnownAgpVersionWithFullKotlinSupport < parsedMaxKnownAgpVersion, isTrue);
   });
 
   group('getGradleVersionForAndroidPlugin', () {
