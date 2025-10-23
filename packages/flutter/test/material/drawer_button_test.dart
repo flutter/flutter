@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show PointerDeviceKind;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RendererBinding;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -285,6 +288,102 @@ void main() {
     expect(find.byType(Drawer), findsNothing);
     // The custom callback is called, setting customCallbackWasCalled to true.
     expect(customCallbackWasCalled, true);
+  });
+
+  testWidgets('DrawerButton has expected default mouse cursor on hover', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: Material(child: DrawerButton())));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(1000, 1000));
+    addTearDown(gesture.removePointer);
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+
+    await gesture.moveTo(tester.getCenter(find.byType(DrawerButton)));
+    await tester.pumpAndSettle();
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+  });
+
+  testWidgets('EndDrawerButton has expected default mouse cursor on hover', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: Material(child: EndDrawerButton())));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(1000, 1000));
+    addTearDown(gesture.removePointer);
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+
+    await gesture.moveTo(tester.getCenter(find.byType(EndDrawerButton)));
+    await tester.pumpAndSettle();
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+  });
+
+  testWidgets('DrawerButton has expected mouse cursor when explicitly configured', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DrawerButton(
+            style: ButtonStyle(
+              mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: tester.getCenter(find.byType(DrawerButton)));
+    addTearDown(gesture.removePointer);
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.cell,
+    );
+  });
+
+  testWidgets('EndDrawerButton has expected mouse cursor when explicitly configured', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: EndDrawerButton(
+            style: ButtonStyle(
+              mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: tester.getCenter(find.byType(EndDrawerButton)));
+    addTearDown(gesture.removePointer);
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.cell,
+    );
   });
 
   testWidgets('DrawerButton does not crash at zero area', (WidgetTester tester) async {

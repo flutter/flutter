@@ -287,7 +287,7 @@ abstract interface class ChipAttributes {
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
   ///
-  /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
+  /// If this property is null, [WidgetStateMouseCursor.adaptiveClickable] will be used.
   MouseCursor? get mouseCursor;
 }
 
