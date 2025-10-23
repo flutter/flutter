@@ -5733,7 +5733,7 @@ class SemanticsConfiguration {
   }
 
   /// Whether the owning [RenderObject] and its subtree
-  /// can hold the a11y focus (different from input focus).
+  /// is blocked in the a11y focus (different from input focus).
   bool get blockSubTreeAccessibilityFocus => _flags.blockAccessibilityFocus;
   set blockSubTreeAccessibilityFocus(bool value) {
     _flags = _flags.copyWith(blockAccessibilityFocus: value);

@@ -833,7 +833,7 @@ void main() {
 
     semantics.dispose();
   });
-  testWidgets('blockSubTreeAccessibilityFocus flag value is applied the to subtree,', (
+  testWidgets('blockSubTreeAccessibilityFocus flag value is applied to the subtree,', (
     WidgetTester tester,
   ) async {
     final SemanticsTester semantics = SemanticsTester(tester);
