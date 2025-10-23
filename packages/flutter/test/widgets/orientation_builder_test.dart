@@ -7,7 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('OrientationBuilder', () {
-    testWidgets('OrientationBuilder determines orientation from constraints', (WidgetTester tester) async {
+    testWidgets('OrientationBuilder determines orientation from constraints', (
+      WidgetTester tester,
+    ) async {
       Orientation? orientation;
 
       await tester.pumpWidget(
@@ -36,14 +38,14 @@ void main() {
       expect(orientation, Orientation.portrait);
     });
 
-    testWidgets('OrientationBuilder reports landscape when width > height', (WidgetTester tester) async {
+    testWidgets('OrientationBuilder reports landscape when width > height', (
+      WidgetTester tester,
+    ) async {
       Orientation? orientation;
 
       await tester.pumpWidget(
         MediaQuery(
-          data: const MediaQueryData(
-            size: Size(600.0, 800.0),
-          ),
+          data: const MediaQueryData(size: Size(600.0, 800.0)),
           child: Center(
             child: SizedBox(
               // Widget constraints are landscape (200 wide, 100 tall)
@@ -69,9 +71,7 @@ void main() {
 
       Widget buildTestWidget({required double width, required double height}) {
         return MediaQuery(
-          data: const MediaQueryData(
-            size: Size(800.0, 600.0),
-          ),
+          data: const MediaQueryData(size: Size(800.0, 600.0)),
           child: Center(
             child: SizedBox(
               width: width,

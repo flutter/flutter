@@ -7,7 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('DeviceOrientationBuilder', () {
-    testWidgets('DeviceOrientationBuilder uses MediaQuery orientation', (WidgetTester tester) async {
+    testWidgets('DeviceOrientationBuilder uses MediaQuery orientation', (
+      WidgetTester tester,
+    ) async {
       Orientation? deviceOrientation;
 
       await tester.pumpWidget(
@@ -37,7 +39,9 @@ void main() {
       expect(deviceOrientation, Orientation.landscape);
     });
 
-    testWidgets('DeviceOrientationBuilder reports portrait when device is portrait', (WidgetTester tester) async {
+    testWidgets('DeviceOrientationBuilder reports portrait when device is portrait', (
+      WidgetTester tester,
+    ) async {
       Orientation? deviceOrientation;
 
       await tester.pumpWidget(
@@ -67,14 +71,14 @@ void main() {
       expect(deviceOrientation, Orientation.portrait);
     });
 
-    testWidgets('DeviceOrientationBuilder rebuilds when MediaQuery orientation changes', (WidgetTester tester) async {
+    testWidgets('DeviceOrientationBuilder rebuilds when MediaQuery orientation changes', (
+      WidgetTester tester,
+    ) async {
       Orientation? deviceOrientation;
 
       Widget buildTestWidget({required Size size}) {
         return MediaQuery(
-          data: MediaQueryData(
-            size: size,
-          ),
+          data: MediaQueryData(size: size),
           child: DeviceOrientationBuilder(
             builder: (BuildContext context, Orientation o) {
               deviceOrientation = o;
@@ -93,7 +97,9 @@ void main() {
       expect(deviceOrientation, Orientation.landscape);
     });
 
-    testWidgets('DeviceOrientationBuilder differs from OrientationBuilder', (WidgetTester tester) async {
+    testWidgets('DeviceOrientationBuilder differs from OrientationBuilder', (
+      WidgetTester tester,
+    ) async {
       Orientation? layoutOrientation;
       Orientation? deviceOrientation;
 
@@ -136,12 +142,21 @@ void main() {
       // This demonstrates the key difference:
       // - OrientationBuilder reports based on widget constraints (portrait)
       // - DeviceOrientationBuilder reports based on device orientation (landscape)
-      expect(layoutOrientation, Orientation.portrait,
-          reason: 'OrientationBuilder should use widget constraints');
-      expect(deviceOrientation, Orientation.landscape,
-          reason: 'DeviceOrientationBuilder should use MediaQuery orientation');
-      expect(layoutOrientation, isNot(equals(deviceOrientation)),
-          reason: 'The two builders can report different orientations');
+      expect(
+        layoutOrientation,
+        Orientation.portrait,
+        reason: 'OrientationBuilder should use widget constraints',
+      );
+      expect(
+        deviceOrientation,
+        Orientation.landscape,
+        reason: 'DeviceOrientationBuilder should use MediaQuery orientation',
+      );
+      expect(
+        layoutOrientation,
+        isNot(equals(deviceOrientation)),
+        reason: 'The two builders can report different orientations',
+      );
     });
   });
 }
