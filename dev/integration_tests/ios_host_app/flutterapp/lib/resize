@@ -41,7 +41,7 @@ class _ResizeAppState extends State<ResizeApp> {
             for (int i = 0; i < _counter; i++)
               Text(
                 "Hello from Flutter $i",
-                style: TextStyle(color: Colors.pink),
+                style: TextStyle(color: Colors.pink, fontSize: 30),
               ),
           ],
         ),
