@@ -229,6 +229,7 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
     SemanticsRole role = SemanticsRole.none,
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+    ui.SemanticsHitTestBehavior hitTestBehavior = ui.SemanticsHitTestBehavior.defer,
     required ui.SemanticsInputType inputType,
     required ui.Locale? locale,
   }) {
