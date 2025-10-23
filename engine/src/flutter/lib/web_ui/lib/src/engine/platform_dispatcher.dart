@@ -1089,13 +1089,14 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _typographyMeasurementElement!.text = 'flutter typography measurement';
     // The element should be hidden from screen readers.
     _typographyMeasurementElement!.setAttribute('aria-hidden', 'true');
-    const double spacingDefault = 100.0;
+    const double spacingDefault = 9999.0;
     _typographyMeasurementElement!.style
-      ..position = 'absolute'
-      // The element should be off-screen and not visible.
-      ..top = '-9999px'
-      ..left = '-9999px'
+      // The element should be positioned off-screen above
+      // the window and not visible.
+      ..position = 'fixed'
+      ..bottom = '100%'
       ..visibility = 'hidden'
+      ..opacity = '0'
       ..pointerEvents = 'none'
       // The element should be sensitive to letter-spacing, word-spacing,
       // and line-height changes.
