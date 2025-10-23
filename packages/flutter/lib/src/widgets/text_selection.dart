@@ -29,6 +29,7 @@ import 'inherited_theme.dart';
 import 'magnifier.dart';
 import 'overlay.dart';
 import 'scrollable.dart';
+import 'selectable_region.dart';
 import 'tap_region.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
@@ -1798,7 +1799,10 @@ class SelectionOverlay {
         cursorWidth: cursorWidth,
       );
     }
-    return TextFieldTapRegion(child: ExcludeSemantics(child: handle));
+    return TapRegion(
+      groupId: SelectableRegion,
+      child: TextFieldTapRegion(child: ExcludeSemantics(child: handle)),
+    );
   }
 
   Widget _buildEndHandle(BuildContext context) {
@@ -1827,7 +1831,10 @@ class SelectionOverlay {
         dragStartBehavior: dragStartBehavior,
       );
     }
-    return TextFieldTapRegion(child: ExcludeSemantics(child: handle));
+    return TapRegion(
+      groupId: SelectableRegion,
+      child: TextFieldTapRegion(child: ExcludeSemantics(child: handle)),
+    );
   }
 
   // Build the toolbar via TextSelectionControls.
@@ -1968,16 +1975,19 @@ class _SelectionToolbarWrapperState extends State<_SelectionToolbarWrapper>
 
   @override
   Widget build(BuildContext context) {
-    return TextFieldTapRegion(
-      child: Directionality(
-        textDirection: Directionality.of(this.context),
-        child: FadeTransition(
-          opacity: _opacity,
-          child: CompositedTransformFollower(
-            link: widget.layerLink,
-            showWhenUnlinked: false,
-            offset: widget.offset,
-            child: widget.child,
+    return TapRegion(
+      groupId: SelectableRegion,
+      child: TextFieldTapRegion(
+        child: Directionality(
+          textDirection: Directionality.of(this.context),
+          child: FadeTransition(
+            opacity: _opacity,
+            child: CompositedTransformFollower(
+              link: widget.layerLink,
+              showWhenUnlinked: false,
+              offset: widget.offset,
+              child: widget.child,
+            ),
           ),
         ),
       ),
