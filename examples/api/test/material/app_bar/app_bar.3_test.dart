@@ -11,7 +11,7 @@ void main() {
     WidgetTester tester,
   ) async {
     Material getMaterial() => tester.widget<Material>(
-      find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
+      find.descendant(of: find.byType(AppBar), matching: find.byType(Material)).first,
     );
 
     await tester.pumpWidget(const example.AppBarApp());

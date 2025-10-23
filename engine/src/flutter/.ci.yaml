@@ -542,6 +542,7 @@ targets:
       # Don't run this on release branches
       - master
     properties:
+      release_build: "true"
       add_recipes_cq: "true"
       config_name: windows_arm_host_engine
     drone_dimensions:
@@ -550,6 +551,8 @@ targets:
   - name: Windows windows_unopt
     recipe: engine_v2/builder
     timeout: 120
+    # TODO(#177172): dashboard super unhealthy
+    bringup: true
     properties:
       config_name: windows_unopt
 
