@@ -857,7 +857,11 @@ void _pathTests() {
   });
 
   test('contains', () {
-    final SkPath testPath = _testClosedSkPath().snapshot();
+    final SkPathBuilder testPathBuilder = _testClosedSkPath();
+    expect(testPathBuilder.contains(15, 15), isTrue);
+    expect(testPathBuilder.contains(100, 100), isFalse);
+
+    final SkPath testPath = testPathBuilder.snapshot();
     expect(testPath.contains(15, 15), isTrue);
     expect(testPath.contains(100, 100), isFalse);
   });
@@ -910,12 +914,15 @@ void _pathTests() {
 
   test('reset', () {
     final SkPathBuilder testPathBuilder = _testClosedSkPath();
-    expect(
-      fromSkRect(testPathBuilder.snapshot().getBounds()),
-      const ui.Rect.fromLTRB(10, 10, 20, 20),
-    );
+    final SkPath testPath = testPathBuilder.snapshot();
+    expect(fromSkRect(testPathBuilder.getBounds()), const ui.Rect.fromLTRB(10, 10, 20, 20));
+    expect(fromSkRect(testPath.getBounds()), const ui.Rect.fromLTRB(10, 10, 20, 20));
+
     testPathBuilder.reset();
-    expect(fromSkRect(testPathBuilder.snapshot().getBounds()), ui.Rect.zero);
+
+    final SkPath testPathAfterReset = testPathBuilder.snapshot();
+    expect(fromSkRect(testPathBuilder.getBounds()), ui.Rect.zero);
+    expect(fromSkRect(testPathAfterReset.getBounds()), ui.Rect.zero);
   });
 
   test('toSVGString', () {
@@ -925,7 +932,9 @@ void _pathTests() {
   test('isEmpty', () {
     expect(SkPathBuilder().isEmpty(), isTrue);
     expect(SkPathBuilder().snapshot().isEmpty(), isTrue);
+
     expect(_testClosedSkPath().isEmpty(), isFalse);
+    expect(_testClosedSkPath().snapshot().isEmpty(), isFalse);
   });
 
   test('copy', () {
@@ -937,8 +946,13 @@ void _pathTests() {
   test('transform', () {
     pathBuilder = _testClosedSkPath();
     pathBuilder.transform(2, 0, 10, 0, 2, 10, 0, 0, 0);
-    final ui.Rect transformedBounds = fromSkRect(pathBuilder.snapshot().getBounds());
-    expect(transformedBounds, const ui.Rect.fromLTRB(30, 30, 50, 50));
+
+    final ui.Rect transformedPathBuilderBounds = fromSkRect(pathBuilder.getBounds());
+    expect(transformedPathBuilderBounds, const ui.Rect.fromLTRB(30, 30, 50, 50));
+
+    final SkPath path = pathBuilder.snapshot();
+    final ui.Rect transformedPathBounds = fromSkRect(path.getBounds());
+    expect(transformedPathBounds, const ui.Rect.fromLTRB(30, 30, 50, 50));
   });
 
   test('SkContourMeasureIter/SkContourMeasure', () {

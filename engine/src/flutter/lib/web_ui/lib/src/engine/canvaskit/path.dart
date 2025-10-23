@@ -23,8 +23,18 @@ class CkPath implements DisposablePath {
     return CkPath._(skPathBuilder, ui.PathFillType.nonZero);
   }
 
+  factory CkPath.from(CkPath other) {
+    final SkPath skPath = other.snapshotSkPath();
+    final SkPathBuilder skPathBuilder = SkPathBuilder(skPath);
+    skPath.delete();
+
+    return CkPath._(skPathBuilder, other._fillType);
+  }
+
   factory CkPath.fromSkPath(SkPath skPath, ui.PathFillType fillType) {
-    return CkPath._(SkPathBuilder(skPath)..setFillType(toSkFillType(fillType)), fillType);
+    final SkPathBuilder skPathBuilder = SkPathBuilder(skPath);
+    skPathBuilder.setFillType(toSkFillType(fillType));
+    return CkPath._(skPathBuilder, fillType);
   }
 
   CkPath._(SkPathBuilder nativeObject, this._fillType) {
@@ -83,7 +93,7 @@ class CkPath implements DisposablePath {
       skMatrix[5] += offset.dy;
     }
     final CkPath otherPath = path as CkPath;
-    final SkPath otherSkPath = otherPath._skiaPathBuilder.snapshot();
+    final SkPath otherSkPath = otherPath.snapshotSkPath();
     _skiaPathBuilder.addPath(
       otherSkPath,
       skMatrix[0],
@@ -279,11 +289,7 @@ class CkPath implements DisposablePath {
 
   @override
   CkPath shift(ui.Offset offset) {
-    // `SkPath.transform` mutates the existing path, so create a copy and call
-    // `transform` on the copy.
-    final SkPath skPath = snapshotSkPath();
-    final CkPath shiftedPath = CkPath.fromSkPath(skPath, _fillType);
-    skPath.delete();
+    final CkPath shiftedPath = CkPath.from(this);
     shiftedPath._skiaPathBuilder.transform(1.0, 0.0, offset.dx, 0.0, 1.0, offset.dy, 0.0, 0.0, 1.0);
     return shiftedPath;
   }
@@ -312,9 +318,7 @@ class CkPath implements DisposablePath {
 
   @override
   CkPath transform(Float64List matrix4) {
-    final SkPath skPath = snapshotSkPath();
-    final CkPath transformedPath = CkPath.fromSkPath(skPath, _fillType);
-    skPath.delete();
+    final CkPath transformedPath = CkPath.from(this);
 
     final Float32List m = toSkMatrixFromFloat64(matrix4);
     transformedPath._skiaPathBuilder.transform(

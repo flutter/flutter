@@ -23,7 +23,11 @@ class CkPathMetrics extends IterableBase<ui.PathMetric> implements DisposablePat
 
 class CkContourMeasureIter implements DisposablePathMetricIterator {
   CkContourMeasureIter(this._metrics) {
-    _skPathRef = UniqueRef(this, _metrics._path.snapshotSkPath(), 'SkContourMeasureIter:SkPath');
+    _skPathRef = UniqueRef<SkPath>(
+      this,
+      _metrics._path.snapshotSkPath(),
+      'SkContourMeasureIter:SkPath',
+    );
     _ref = UniqueRef<SkContourMeasureIter>(
       this,
       SkContourMeasureIter(_skPathRef.nativeObject, _metrics._forceClosed, 1.0),
