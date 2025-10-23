@@ -4,6 +4,7 @@
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
+import 'package:ui/src/engine/display.dart';
 import 'package:ui/src/engine/web_paragraph/paragraph.dart';
 import 'package:ui/ui.dart';
 import 'package:web_engine_tester/golden_tester.dart';
@@ -980,5 +981,74 @@ Future<void> testMain() async {
     paragraph.paint(canvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_black_and_white_background.png', region: region);
+  });
+
+  test('Pixels', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final region = Rect.fromLTWH(0, 0, 1000, 500);
+    final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
+    final Paint whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 15,
+      color: const Color(0xFF000000),
+    );
+    final WebTextStyle style15 = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 15,
+      foreground: blackPaint,
+    );
+    final WebTextStyle style30 = WebTextStyle(
+      foreground: blackPaint,
+      background: whitePaint,
+      fontSize: 30,
+      fontFamily: 'Roboto',
+    );
+    final WebTextStyle style50 = WebTextStyle(
+      foreground: blackPaint,
+      background: whitePaint,
+      fontSize: 50,
+      fontFamily: 'Roboto',
+    );
+    final WebTextStyle style100 = WebTextStyle(
+      foreground: blackPaint,
+      background: whitePaint,
+      fontSize: 100,
+      fontFamily: 'Roboto',
+    );
+    final WebTextStyle style250 = WebTextStyle(
+      foreground: blackPaint,
+      background: whitePaint,
+      fontSize: 250,
+      fontFamily: 'Roboto',
+    );
+
+    {
+      final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+
+      builder.pushStyle(style30);
+      builder.addText('SsWwTt 30px');
+      builder.pop();
+      final WebParagraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: 800));
+      paragraph.paint(canvas, Offset(100, 100));
+    }
+    /*
+    {
+      final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+
+      builder.pushStyle(style15);
+      builder.addText('SsWwTt ');
+      builder.pop();
+      final WebParagraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: 800));
+      paragraph.paint(canvas, Offset(20, 20));
+    }
+    */
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('pixels.png', region: region);
   });
 }
