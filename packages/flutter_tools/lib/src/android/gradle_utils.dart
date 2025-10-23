@@ -683,8 +683,6 @@ bool validateAgpAndKgp(Logger logger, {required String? kgpV, required String? a
   // Continuous KGP version handling is prefered in case an emergency patch to a
   // past release is shipped this code will assume the version range that is closest.
 
-  // When documenting a new KGP and AGP compatibility max, be sure to update the
-  // maxKnownAgpVersionWithFullKotlinSupport with the new AGP max.
   // Documented max is 2.2.20
   if (isWithinVersionRange(kgpV, min: '2.2.20', max: '2.2.29')) {
     // Documented max is 8.11.1
