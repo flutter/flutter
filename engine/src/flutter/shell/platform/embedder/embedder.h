@@ -1705,6 +1705,11 @@ typedef struct {
   /// heading; higher values (1, 2, …) indicate the heading rank, with lower
   /// numbers being higher-level headings.
   int32_t heading_level;
+  /// An identifier for the semantics node in native accessibility hierarchy.
+  /// This value should not be exposed to the users of the app.
+  /// This is usually used for UI testing with tools that work by querying the
+  /// native accessibility, like UI Automator, XCUITest, or Appium.
+  const char* identifier;
 } FlutterSemanticsNode2;
 
 /// `FlutterSemanticsCustomAction` ID used as a sentinel to signal the end of a
