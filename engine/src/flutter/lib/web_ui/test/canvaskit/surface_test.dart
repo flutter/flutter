@@ -7,6 +7,10 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+import 'dart:js_interop';
+
+import 'package:ui/src/engine/configuration.dart';
+
 import 'common.dart';
 
 void main() {
@@ -106,6 +110,26 @@ void testMain() {
       expect(canvasSize.height, 7.5);
       // Skip on wasm since same() doesn't work for JSValues.
     }, skip: isWasm);
+
+    test('CkOnscreenSurface falls back to software rendering', () async {
+      CkSurface.debugForceGLFailure = true;
+      final CkOnscreenSurface surface = CkOnscreenSurface(OnscreenCanvasProvider());
+      await surface.initialized;
+
+      expect(surface.supportsWebGl, isFalse);
+      expect(surface.skSurface, isNotNull);
+      CkSurface.debugForceGLFailure = false;
+    });
+
+    test('CkOffscreenSurface falls back to software rendering', () async {
+      CkSurface.debugForceGLFailure = true;
+      final CkOffscreenSurface surface = CkOffscreenSurface(OffscreenCanvasProvider());
+      await surface.initialized;
+
+      expect(surface.supportsWebGl, isFalse);
+      expect(surface.skSurface, isNotNull);
+      CkSurface.debugForceGLFailure = false;
+    });
 
     test('does not recreate surface if size is the same', () async {
       final OnscreenSurfaceProvider surfaceProvider = OnscreenSurfaceProvider(

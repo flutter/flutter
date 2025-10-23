@@ -31,11 +31,44 @@ abstract class CkSurface extends Surface {
   SkSurface? get skSurface => _skSurface;
   SkSurface? _skSurface;
 
-  /// The underlying GL context.
+  /// Whether or not WebGl is supported.
+  ///
+  /// This defaults to true unless `canvasKitForceCpuOnly` is set to true or
+  /// `webGLVersion` is -1. If Skia fails to create a GrContext, this will be
+  /// set to false.
+  @visibleForTesting
+  bool get supportsWebGl {
+    if (configuration.canvasKitForceCpuOnly) {
+      _fallbackToSoftwareReason = 'canvasKitForceCpuOnly is set to true';
+      return false;
+    }
+    if (webGLVersion == -1) {
+      _fallbackToSoftwareReason = 'webGLVersion is -1';
+      return false;
+    }
+    if (_failedToCreateGrContext) {
+      _fallbackToSoftwareReason = 'failed to create GrContext';
+      return false;
+    }
+    return true;
+  }
+
+  String? _fallbackToSoftwareReason;
+
+  /// When true, the surface will fail to create a GL context and fall back to
+  /// software rendering. This is useful for testing.
+  @visibleForTesting
+  static bool debugForceGLFailure = false;
+
+  bool _failedToCreateGrContext = false;
+
+  static bool _didWarnAboutWebGlInitializationFailure = false;
+
+  /// The underlying GL context. Returns -1 if the context is not initialized.
   @override
   @visibleForTesting
   int get glContext => _glContext;
-  late int _glContext;
+  int _glContext = -1;
 
   /// The canvas object that this surface is rendering to.
   @visibleForTesting
@@ -70,8 +103,27 @@ abstract class CkSurface extends Surface {
     recreateContextForCanvas(newCanvas);
   }
 
+  void _recreateSkSurface() {
+    if (supportsWebGl) {
+      try {
+        _recreateWebGlSkSurface();
+      } catch (e) {
+        _failedToCreateGrContext = true;
+        _fallbackToSoftwareReason = 'failed to create GrContext';
+        _recreateSoftwareSkSurface();
+      }
+    } else {
+      _recreateSoftwareSkSurface();
+    }
+  }
+
   /// Creates the GL context and the Skia `GrContext`.
   void _createGrContext() {
+    if (debugForceGLFailure) {
+      _failedToCreateGrContext = true;
+      _fallbackToSoftwareReason = 'debugForceGLFailure is true';
+      return;
+    }
     final SkWebGLContextOptions options = SkWebGLContextOptions(
       antialias: _kUsingMSAA ? 1 : 0,
       majorVersion: webGLVersion.toDouble(),
@@ -79,7 +131,8 @@ abstract class CkSurface extends Surface {
     _glContext = _getGlContext(options);
     _grContext = canvasKit.MakeGrContext(_glContext.toDouble());
     if (_grContext == null) {
-      throw Exception('Failed to initialize CanvasKit GrContext.');
+      _failedToCreateGrContext = true;
+      _fallbackToSoftwareReason = 'failed to create GrContext';
     }
   }
 
@@ -94,25 +147,44 @@ abstract class CkSurface extends Surface {
   /// This method is responsible for creating the `SkGrContext` and the
   /// `SkSurface`.
   void _createSkiaObjects() {
-    _createGrContext();
-    _recreateSkSurface(const BitmapSize(1, 1));
+    if (supportsWebGl) {
+      _createGrContext();
+    }
+    _recreateSkSurface();
   }
 
-  void _recreateSkSurface(BitmapSize size) {
+  void _recreateWebGlSkSurface() {
     _skSurface?.dispose();
     _skSurface = canvasKit.MakeOnScreenGLSurface(
       _grContext!,
-      size.width.toDouble(),
-      size.height.toDouble(),
+      _currentSize.width.toDouble(),
+      _currentSize.height.toDouble(),
       SkColorSpaceSRGB,
       0,
       0,
     );
-
     if (_skSurface == null) {
       throw Exception('Failed to initialize CanvasKit SkSurface.');
     }
   }
+
+  void _recreateSoftwareSkSurface() {
+    if (!_didWarnAboutWebGlInitializationFailure) {
+      _didWarnAboutWebGlInitializationFailure = true;
+      printWarning(
+        'WARNING: Falling back to CPU-only rendering. Reason: $_fallbackToSoftwareReason',
+      );
+    }
+    _skSurface?.dispose();
+    _skSurface = _createSoftwareSkSurface();
+    if (_skSurface == null) {
+      throw Exception('Failed to initialize CanvasKit SkSurface.');
+    }
+  }
+
+  /// Creates an SkSurface for software rendering. This is used when WebGl is not
+  /// supported or when it fails to initialize.
+  SkSurface _createSoftwareSkSurface();
 
   double _currentDevicePixelRatio = -1;
 
@@ -128,7 +200,7 @@ abstract class CkSurface extends Surface {
     _currentDevicePixelRatio = devicePixelRatio;
     _currentSize = size;
     _canvasProvider.resizeCanvas(canvas, size);
-    _recreateSkSurface(size);
+    _recreateSkSurface();
   }
 
   @override
@@ -185,6 +257,11 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   }
 
   @override
+  SkSurface _createSoftwareSkSurface() {
+    return canvasKit.MakeOffscreenSWCanvasSurface(canvas as DomOffscreenCanvas);
+  }
+
+  @override
   Future<List<DomImageBitmap>> rasterizeToImageBitmaps(List<ui.Picture> pictures) async {
     await _initialized.future;
     final List<DomImageBitmap> bitmaps = <DomImageBitmap>[];
@@ -219,6 +296,11 @@ class CkOnscreenSurface extends CkSurface implements OnscreenSurface {
   @override
   int _getGlContext(SkWebGLContextOptions options) {
     return canvasKit.GetWebGLContext(canvas as DomHTMLCanvasElement, options).toInt();
+  }
+
+  @override
+  SkSurface _createSoftwareSkSurface() {
+    return canvasKit.MakeSWCanvasSurface(canvas as DomHTMLCanvasElement);
   }
 
   final DomElement _hostElement = createDomElement('flt-canvas-container');
