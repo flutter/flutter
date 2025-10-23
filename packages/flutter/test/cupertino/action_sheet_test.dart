@@ -1773,20 +1773,32 @@ void main() {
                           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           children: <TestSemantics>[
                             TestSemantics(
-                              flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
+                                SemanticsFlag.isFocusable,
+                              ],
+                              actions: <SemanticsAction>[
+                                SemanticsAction.tap,
+                                SemanticsAction.focus,
+                              ],
                               label: 'One',
                             ),
                             TestSemantics(
-                              flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
+                                SemanticsFlag.isFocusable,
+                              ],
+                              actions: <SemanticsAction>[
+                                SemanticsAction.tap,
+                                SemanticsAction.focus,
+                              ],
                               label: 'Two',
                             ),
                           ],
                         ),
                         TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                          actions: <SemanticsAction>[SemanticsAction.tap],
+                          flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.isFocusable],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                           label: 'Cancel',
                         ),
                       ],
