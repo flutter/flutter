@@ -41,18 +41,21 @@ class TextShadowCache {
     bool is_single_glyph;
     Font font;
     Rational rounded_sigma;
+    Color color;
 
     TextShadowCacheKey(Scalar p_max_basis,
                        int64_t p_identifier,
                        bool p_is_single_glyph,
                        const Font& p_font,
-                       Sigma p_sigma);
+                       Sigma p_sigma,
+                       Color p_color);
 
     struct Hash {
       std::size_t operator()(const TextShadowCacheKey& key) const {
         return fml::HashCombine(key.max_basis, key.identifier,
                                 key.is_single_glyph, key.font.GetHash(),
-                                key.rounded_sigma.GetHash());
+                                key.rounded_sigma.GetHash(),
+                                key.color.ToARGB());
       }
     };
 
@@ -63,7 +66,7 @@ class TextShadowCache {
                lhs.identifier == rhs.identifier &&
                lhs.is_single_glyph == rhs.is_single_glyph &&
                lhs.font.IsEqual(rhs.font) &&
-               lhs.rounded_sigma == rhs.rounded_sigma;
+               lhs.rounded_sigma == rhs.rounded_sigma && lhs.color == rhs.color;
       }
     };
   };

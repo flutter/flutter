@@ -144,6 +144,7 @@ name: my_app
     webDevFS.result = ConnectionResult(appConnection, debugConnection, debugConnection.vmService);
     debugConnection.uri = 'ws://127.0.0.1/abcd/';
     debugConnection.devToolsUri = 'http://127.0.0.1/abcd/';
+    debugConnection.dtdUri = 'ws://127.0.0.1/efgh/';
     chromeConnection.tabs.add(chromeTab);
   }
 
@@ -260,6 +261,7 @@ name: my_app
       expect(appConnection.ranMain, true);
       expect(logger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));
       expect(debugConnectionInfo.wsUri.toString(), 'ws://127.0.0.1/abcd/');
+      expect(debugConnectionInfo.dtdUri.toString(), 'ws://127.0.0.1/efgh/');
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -963,7 +965,7 @@ name: my_app
       expect(debugConnectionInfo, isNotNull);
 
       final OperationResult result = await residentWebRunner.restart();
-      expect(logger.statusText, contains('Recompile complete. No client connected.'));
+      expect(logger.statusText, contains(kNoClientConnectedMessage));
       expect(result.code, 0);
     },
     overrides: <Type, Generator>{
@@ -1166,7 +1168,7 @@ name: my_app
 
       expect(result.code, 0);
       expect(result.isOk, isTrue);
-      expect(logger.statusText, contains('Recompile complete. No client connected.'));
+      expect(logger.statusText, contains(kNoClientConnectedMessage));
     },
     overrides: <Type, Generator>{
       Analytics: () => fakeAnalytics,
@@ -2028,6 +2030,9 @@ class FakeDebugConnection extends Fake implements DebugConnection {
 
   @override
   late String devToolsUri;
+
+  @override
+  late String dtdUri;
 
   final completer = Completer<void>();
   var didClose = false;
