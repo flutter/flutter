@@ -1247,19 +1247,35 @@ class _MenuOverlayState extends State<_MenuOverlay>
             final ui.Rect anchorRect = widget.anchorPosition != null
                 ? _attachmentPoint & Size.zero
                 : widget.anchorRect;
-            return _MenuLayout(
-              constrainCrossAxis: widget.constrainCrossAxis,
-              anchorRect: anchorRect,
-              padding: widget.overlayInsets.resolve(Directionality.of(context)),
-              attachmentPoint: _attachmentPoint,
-              menuAlignment: _menuAlignment,
-              heightFactor: value,
+            final List<ui.DisplayFeature>? displayFeatures = MediaQuery.maybeDisplayFeaturesOf(
+              context,
+            );
+            return CustomSingleChildLayout(
+              delegate: _MenuLayoutDelegate(
+                anchorRect: anchorRect,
+                attachmentPoint: _attachmentPoint,
+                menuAlignment: _menuAlignment,
+                padding: widget.overlayInsets.resolve(_textDirection),
+                heightFactor: value,
+                avoidBounds: displayFeatures != null ? avoidBounds(displayFeatures) : <Rect>{},
+              ),
               child: child,
             );
           },
         ),
       ),
     );
+  }
+
+  static Set<ui.Rect> avoidBounds(List<ui.DisplayFeature> displayFeatures) {
+    final Set<ui.Rect> bounds = <ui.Rect>{};
+    for (final ui.DisplayFeature feature in displayFeatures) {
+      if (feature.bounds.shortestSide > 0 ||
+          feature.state == ui.DisplayFeatureState.postureHalfOpened) {
+        bounds.add(feature.bounds);
+      }
+    }
+    return bounds;
   }
 }
 
@@ -1305,270 +1321,65 @@ class _ShadowPainter extends CustomPainter {
   bool shouldRebuildSemantics(_ShadowPainter oldDelegate) => false;
 }
 
-// Positions the menu in the view while trying to keep as much as possible
-// visible in the view.
-class _MenuLayout extends SingleChildRenderObjectWidget {
-  const _MenuLayout({
+class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
+  const _MenuLayoutDelegate({
     required this.anchorRect,
     required this.menuAlignment,
-    required this.constrainCrossAxis,
     required this.padding,
     required this.attachmentPoint,
     required this.heightFactor,
-    required super.child,
+    required this.avoidBounds,
   });
 
-  // Rectangle anchoring the menu. If the menu was opened at a specific point,
-  // this will be a zero-size rect at that point.
+  // Rectangle anchoring the menu
   final ui.Rect anchorRect;
-
-  // Whether to constrain the menu surface to the cross axis.
-  final bool constrainCrossAxis;
-
-  // The padding to subtract from the overlay when positioning the menu.
-  final EdgeInsets padding;
-
-  // The resolved alignment of the menu attachment point relative to the menu surface.
-  final Alignment menuAlignment;
 
   // The offset of the menu from the top-left corner of the overlay.
   final ui.Offset attachmentPoint;
 
+  // The resolved alignment of the menu attachment point relative to the menu surface.
+  final Alignment menuAlignment;
+
+  // Unsafe bounds used when constraining and positioning the menu.
+  //
+  // Used to prevent the menu from being obstructed by system UI.
+  final EdgeInsets padding;
+
   // The factor by which to multiply the height of the child.
   final double heightFactor;
 
-  Set<ui.Rect> avoidBounds(List<ui.DisplayFeature> displayFeatures) {
-    return displayFeatures
-        .where((ui.DisplayFeature d) {
-          return d.bounds.shortestSide > 0 || d.state == ui.DisplayFeatureState.postureHalfOpened;
-        })
-        .map((ui.DisplayFeature d) => d.bounds)
-        .toSet();
-  }
+  // List of rectangles that the menu should not overlap. Unusable screen area.
+  final Set<Rect> avoidBounds;
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
-    final List<ui.DisplayFeature>? displayFeatures = MediaQuery.maybeDisplayFeaturesOf(context);
-    return _RenderMenuLayout(
-      anchorRect: anchorRect,
-      menuAlignment: menuAlignment,
-      avoidBounds: displayFeatures != null ? avoidBounds(displayFeatures) : <Rect>{},
-      constrainCrossAxis: constrainCrossAxis,
-      padding: padding,
-      attachmentPoint: attachmentPoint,
-      heightFactor: heightFactor,
-    );
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, _RenderMenuLayout renderObject) {
-    final List<ui.DisplayFeature>? displayFeatures = MediaQuery.maybeDisplayFeaturesOf(context);
-    renderObject
-      ..anchorRect = anchorRect
-      ..menuAlignment = menuAlignment
-      ..avoidBounds = displayFeatures != null ? avoidBounds(displayFeatures) : <Rect>{}
-      ..constrainCrossAxis = constrainCrossAxis
-      ..padding = padding
-      ..attachmentPoint = attachmentPoint
-      ..heightFactor = heightFactor;
-  }
-}
-
-class _RenderMenuLayout extends RenderShiftedBox {
-  _RenderMenuLayout({
-    required Rect anchorRect,
-    required ui.Offset attachmentPoint,
-    required Set<Rect> avoidBounds,
-    required bool constrainCrossAxis,
-    required EdgeInsets padding,
-    required Alignment menuAlignment,
-    required double heightFactor,
-    RenderBox? child,
-  }) : _anchorRect = anchorRect,
-       _attachmentPoint = attachmentPoint,
-       _avoidBounds = avoidBounds,
-       _constrainCrossAxis = constrainCrossAxis,
-       _padding = padding,
-       _menuAlignment = menuAlignment,
-       _heightFactor = heightFactor,
-       super(child);
-
-  Rect get anchorRect => _anchorRect;
-  Rect _anchorRect;
-  set anchorRect(Rect value) {
-    if (_anchorRect == value) {
-      return;
-    }
-    _anchorRect = value;
-    markNeedsLayout();
-  }
-
-  ui.Offset get attachmentPoint => _attachmentPoint;
-  ui.Offset _attachmentPoint;
-  set attachmentPoint(ui.Offset value) {
-    if (_attachmentPoint == value) {
-      return;
-    }
-    _attachmentPoint = value;
-    markNeedsLayout();
-  }
-
-  Set<Rect> get avoidBounds => _avoidBounds;
-  Set<Rect> _avoidBounds;
-  set avoidBounds(Set<Rect> value) {
-    if (setEquals(_avoidBounds, value)) {
-      return;
-    }
-    _avoidBounds = value;
-    markNeedsLayout();
-  }
-
-  bool get constrainCrossAxis => _constrainCrossAxis;
-  bool _constrainCrossAxis;
-  set constrainCrossAxis(bool value) {
-    if (_constrainCrossAxis == value) {
-      return;
-    }
-    _constrainCrossAxis = value;
-    markNeedsLayout();
-  }
-
-  EdgeInsets get padding => _padding;
-  EdgeInsets _padding;
-  set padding(EdgeInsets value) {
-    if (_padding == value) {
-      return;
-    }
-    _padding = value;
-    markNeedsLayout();
-  }
-
-  Alignment get menuAlignment => _menuAlignment;
-  Alignment _menuAlignment;
-  set menuAlignment(Alignment value) {
-    if (_menuAlignment == value) {
-      return;
-    }
-    _menuAlignment = value;
-    markNeedsLayout();
-  }
-
-  double get heightFactor => _heightFactor;
-  double _heightFactor;
-  set heightFactor(double value) {
-    if (_heightFactor == value) {
-      return;
-    }
-    _heightFactor = value;
-    markNeedsLayout();
-  }
-
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    // The menu can be at most the size of the overlay minus the view padding
-    // in each direction.
+    // The menu can be at most the size of the overlay.
     return BoxConstraints.loose(constraints.biggest);
   }
 
   @override
-  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
-    final RenderBox? child = this.child;
-    if (child == null) {
-      return null;
+  Offset getPositionForChild(Size size, Size childSize) {
+    final double inverseHeightFactor = heightFactor > 0.01 ? 1 / heightFactor : 0;
+    final Size finalSize = Size(childSize.width, childSize.height * inverseHeightFactor);
+    final ui.Offset desiredPosition = attachmentPoint - menuAlignment.alongSize(childSize);
+    final ui.Rect screen = _findClosestScreen(size, anchorRect.center, avoidBounds);
+    final ui.Offset finalPosition = _positionChild(
+      padding.deflateRect(screen),
+      finalSize,
+      desiredPosition,
+      anchorRect,
+    );
+    final double fullHeight = finalSize.height;
+    // If the menu sits above the anchor when fully open, grow upward:
+    // keep the bottom (attachment) fixed by shifting the top-left during animation.
+    final bool growsUp = finalPosition.dy + finalSize.height <= anchorRect.center.dy;
+    if (growsUp) {
+      final double dy = fullHeight - childSize.height;
+      return Offset(finalPosition.dx, finalPosition.dy + dy);
     }
-    final BoxConstraints childConstraints = getConstraintsForChild(constraints);
-    final double? result = child.getDryBaseline(childConstraints, baseline);
-    if (result == null) {
-      return null;
-    }
 
-    final Size drySize = childConstraints.isTight
-        ? childConstraints.smallest
-        : child.getDryLayout(childConstraints);
-    final ui.Offset position = attachmentPoint - menuAlignment.alongSize(drySize);
-
-    return result +
-        _positionChild(
-          padding.deflateRect(Offset.zero & constraints.biggest),
-          drySize,
-          position,
-          anchorRect,
-        ).dy;
-  }
-
-  @override
-  double computeMinIntrinsicWidth(double height) {
-    final double width = BoxConstraints.tightForFinite(height: height).maxWidth;
-    if (width.isFinite) {
-      return width;
-    }
-    return 0.0;
-  }
-
-  @override
-  double computeMaxIntrinsicWidth(double height) {
-    final double width = BoxConstraints.tightForFinite(height: height).maxWidth;
-    if (width.isFinite) {
-      return width;
-    }
-    return 0.0;
-  }
-
-  @override
-  double computeMinIntrinsicHeight(double width) {
-    final double height = BoxConstraints.tightForFinite(width: width).maxHeight;
-    if (height.isFinite) {
-      return height;
-    }
-    return 0.0;
-  }
-
-  @override
-  double computeMaxIntrinsicHeight(double width) {
-    final double height = BoxConstraints.tightForFinite(width: width).maxHeight;
-    if (height.isFinite) {
-      return height;
-    }
-    return 0.0;
-  }
-
-  @override
-  Size computeDryLayout(covariant BoxConstraints constraints) {
-    return constraints.biggest;
-  }
-
-  @override
-  void performLayout() {
-    final BoxConstraints constraints = this.constraints;
-    if (child != null) {
-      size = constraints.biggest;
-      final BoxConstraints childConstraints = getConstraintsForChild(constraints);
-      assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
-      final Size drySize = child!.getDryLayout(childConstraints);
-      child!.layout(
-        childConstraints.copyWith(maxHeight: drySize.height * _heightFactor),
-        parentUsesSize: true,
-      );
-
-      final ui.Offset position = attachmentPoint - menuAlignment.alongSize(drySize);
-      final ui.Rect screen = _findClosestScreen(size, anchorRect.center, avoidBounds);
-      final Rect paddedScreen = padding.deflateRect(screen);
-
-      final ui.Offset startPosition = _positionChild(
-        paddedScreen,
-        Size(drySize.width, 0),
-        position,
-        anchorRect,
-      );
-
-      final ui.Offset endPosition = _positionChild(paddedScreen, drySize, position, anchorRect);
-
-      final ui.Offset lerpPosition = Offset.lerp(startPosition, endPosition, _heightFactor)!;
-
-      final BoxParentData childParentData = child!.parentData! as BoxParentData;
-      childParentData.offset = lerpPosition;
-    } else {
-      size = constraints.smallest;
-    }
+    final Offset initialPosition = Offset(finalPosition.dx, anchorRect.bottom);
+    return Offset.lerp(initialPosition, finalPosition, heightFactor)!;
   }
 
   Offset _positionChild(Rect screen, Size childSize, Offset position, ui.Rect anchor) {
@@ -1656,9 +1467,9 @@ class _RenderMenuLayout extends RenderShiftedBox {
 
   // Finds the closest screen to the anchor point.
   //
-  // This is slightly different than the algorithms for PopupMenuButton and
-  // MenuAnchor, since those widgets calculate the closest screen based on the
-  // center of the overlay.
+  // This algorithm is different than the algorithms for PopupMenuButton and MenuAnchor,
+  // since those widgets calculate the closest screen based on the center of the
+  // overlay.
   Rect _findClosestScreen(Size parentSize, Offset point, Set<Rect> avoidBounds) {
     final Iterable<ui.Rect> screens = DisplayFeatureSubScreen.subScreensInBounds(
       Offset.zero & parentSize,
@@ -1686,6 +1497,16 @@ class _RenderMenuLayout extends RenderShiftedBox {
     }
 
     return closest!;
+  }
+
+  @override
+  bool shouldRelayout(_MenuLayoutDelegate oldDelegate) {
+    return menuAlignment != oldDelegate.menuAlignment ||
+        attachmentPoint != oldDelegate.attachmentPoint ||
+        anchorRect != oldDelegate.anchorRect ||
+        padding != oldDelegate.padding ||
+        heightFactor != oldDelegate.heightFactor ||
+        !setEquals(avoidBounds, oldDelegate.avoidBounds);
   }
 }
 
@@ -3088,6 +2909,10 @@ class _SwipeRegionState extends State<_SwipeRegion> implements _SwipeRegionProvi
 
   @override
   void beginSwipe(PointerDownEvent event, {Duration delay = Duration.zero, VoidCallback? onStart}) {
+    if (!widget.enabled) {
+      return;
+    }
+
     if (_isSwiping) {
       assert(_recognizer != null);
       return;

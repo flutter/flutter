@@ -1417,18 +1417,18 @@ void main() {
 
   testWidgets('Swipe can be disabled', (WidgetTester tester) async {
     await changeSurfaceSize(tester, const Size(1000, 1000));
-    Widget buildWidget({required bool enablePan}) {
+    Widget buildWidget({required bool enableSwipe}) {
       return App(
         CupertinoMenuAnchor(
           controller: controller,
-          enableSwipe: enablePan,
+          enableSwipe: enableSwipe,
           menuChildren: <Widget>[MenuItem.tag(Tag.a)],
           child: const AnchorButton(Tag.anchor),
         ),
       );
     }
 
-    await tester.pumpWidget(buildWidget(enablePan: false));
+    await tester.pumpWidget(buildWidget(enableSwipe: false));
 
     final TestGesture gesture = await tester.createGesture(pointer: 0);
     addTearDown(gesture.removePointer);
@@ -6895,10 +6895,6 @@ void main() {
                                   TestSemantics(
                                     id: 6,
                                     flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                                    actions: <SemanticsAction>[
-                                      SemanticsAction.scrollUp,
-                                      SemanticsAction.scrollToOffset,
-                                    ],
                                     children: <TestSemantics>[
                                       TestSemantics(
                                         id: 7,
