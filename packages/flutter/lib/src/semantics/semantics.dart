@@ -3844,8 +3844,24 @@ class SemanticsNode with DiagnosticableTreeMixin {
     final Int32List childrenInTraversalOrder;
     final Int32List childrenInHitTestOrder;
     if (!hasChildren || mergeAllDescendantsIntoThisNode) {
-      if (_isTraversalParent) {
-        childrenInTraversalOrder = _childrenIdInTraversalOrder();
+      if (_isTraversalParent && !kIsWeb) {
+        // If the current node is a traversal parent node but it has no
+        // children in hit-test order, it means childrenIntraversalOrder will
+        // only contain its traversalChildren in _traversalChildNodes map.
+        if (owner != null && owner!._traversalChildNodes.containsKey(traversalParentIdentifier)) {
+          final Set<SemanticsNode> traversalChildren =
+              owner!._traversalChildNodes[traversalParentIdentifier]!;
+          int index = 0;
+          childrenInTraversalOrder = Int32List(traversalChildren.length);
+          for (final SemanticsNode node in traversalChildren) {
+            if (node.attached) {
+              childrenInTraversalOrder[index] = node.id;
+              index += 1;
+            }
+          }
+        } else {
+          childrenInTraversalOrder = _kEmptyChildList;
+        }
         childrenInHitTestOrder = _kEmptyChildList;
       } else {
         childrenInTraversalOrder = _kEmptyChildList;
