@@ -59,8 +59,11 @@ struct PathData* Data(SkPath* path) {
   data->verbs = new uint8_t[verb_count];
   data->verb_count = verb_count;
 
-  path->getVerbs(data->verbs, verb_count);
-  path->getPoints(reinterpret_cast<SkPoint*>(data->points), point_count);
+  SkSpan<uint8_t> outVerbs(data->verbs, verb_count);
+  path->getVerbs(outVerbs);
+  SkSpan<SkPoint> outPoints(reinterpret_cast<SkPoint*>(data->points),
+                            point_count);
+  path->getPoints(outPoints);
   return data;
 }
 
