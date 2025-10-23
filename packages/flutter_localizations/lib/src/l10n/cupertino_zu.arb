@@ -29,5 +29,11 @@
   "shareButtonLabel": "Yabelana...",
   "clearButtonLabel": "Sula",
   "cancelButtonLabel": "Khansela",
-  "backButtonLabel": "Emuva"
+  "backButtonLabel": "Emuva",
+  "expansionTileExpandedHint": "thepha kabili ukuze ugoqe",
+  "expansionTileCollapsedHint": "Thepha kabili ukuze unwebe",
+  "expansionTileExpandedTapHint": "Goqa",
+  "expansionTileCollapsedTapHint": "Nweba ukuze uthole imininingwane eyengeziwe",
+  "expandedHint": "Kugoqiwe",
+  "collapsedHint": "Kunwetshiwe"
 }

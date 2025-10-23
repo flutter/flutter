@@ -21,8 +21,6 @@ FLUTTER_ASSERT_ARC
 namespace flutter {
 namespace {
 
-constexpr int32_t kSemanticObjectIdInvalid = -1;
-
 class DefaultIosDelegate : public AccessibilityBridge::IosDelegate {
  public:
   bool IsFlutterViewControllerPresentingModalViewController(
@@ -49,7 +47,6 @@ AccessibilityBridge::AccessibilityBridge(
     : view_controller_(view_controller),
       platform_view_(platform_view),
       platform_views_controller_(platform_views_controller),
-      last_focused_semantics_object_id_(kSemanticObjectIdInvalid),
       objects_([[NSMutableDictionary alloc] init]),
       previous_routes_({}),
       ios_delegate_(ios_delegate ? std::move(ios_delegate)
@@ -271,7 +268,8 @@ static SemanticsObject* CreateObject(const flutter::SemanticsNode& node,
     // Text fields are backed by objects that implement UITextInput.
     return [[TextInputSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id];
   } else if (!node.flags.isInMutuallyExclusiveGroup &&
-             (node.flags.hasToggledState || node.flags.hasCheckedState)) {
+             (node.flags.isToggled != flutter::SemanticsTristate::kNone ||
+              node.flags.isChecked != flutter::SemanticsCheckState::kNone)) {
     return [[FlutterSwitchSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id];
   } else if (node.flags.hasImplicitScrolling) {
     return [[FlutterScrollableSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id];
@@ -302,8 +300,10 @@ SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid,
       flutter::SemanticsNode node = nodeEntry->second;
       if (object.node.flags.isTextField != node.flags.isTextField ||
           object.node.flags.isReadOnly != node.flags.isReadOnly ||
-          object.node.flags.hasCheckedState != node.flags.hasCheckedState ||
-          object.node.flags.hasToggledState != node.flags.hasToggledState ||
+          (object.node.flags.isChecked == flutter::SemanticsCheckState::kNone) !=
+              (node.flags.isChecked == flutter::SemanticsCheckState::kNone) ||
+          ((object.node.flags.isToggled == flutter::SemanticsTristate::kNone) !=
+           (node.flags.isToggled == flutter::SemanticsTristate::kNone)) ||
           object.node.flags.hasImplicitScrolling != node.flags.hasImplicitScrolling
 
       ) {

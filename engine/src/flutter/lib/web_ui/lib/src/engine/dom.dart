@@ -896,8 +896,18 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   set fillStyle(Object? style) => _fillStyle = style?.toJSAnyShallow;
 
   external String font;
+  external String fontWeight;
   external String direction;
+  external String letterSpacing;
+  external String wordSpacing;
+  external String textRendering;
+  external String fontKerning;
+  external String fontVariantCaps;
   external set lineWidth(num? value);
+
+  @JS('setLineDash')
+  external void _setLineDash(JSFloat32Array? value);
+  void setLineDash(Float32List? value) => _setLineDash(value?.toJS);
 
   @JS('strokeStyle')
   external set _strokeStyle(JSAny? value);
@@ -993,6 +1003,7 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   external void rect(num x, num y, num width, num height);
   external void resetTransform();
   external void restore();
+  external void reset();
   external void setTransform(num a, num b, num c, num d, num e, num f);
   external void transform(num a, num b, num c, num d, num e, num f);
 
@@ -1039,7 +1050,16 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   external void strokeText(String text, num x, num y);
   external set globalAlpha(num? value);
 
-  external void fillTextCluster(DomTextCluster textCluster, double x, double y);
+  @JS('fillTextCluster')
+  external void _fillTextCluster(JSAny? textCluster, double x, double y, [JSAny? options]);
+
+  void fillTextCluster(DomTextCluster textCluster, double x, double y, [Object? options]) {
+    if (options == null) {
+      return _fillTextCluster(textCluster.toJSAnyDeep, x, y);
+    } else {
+      return _fillTextCluster(textCluster.toJSAnyDeep, x, y, options.toJSAnyDeep);
+    }
+  }
 }
 
 @JS('ImageBitmapRenderingContext')
@@ -2607,9 +2627,16 @@ extension JSArrayExtension on JSArray<JSAny?> {
 
 @JS('TextCluster')
 extension type DomTextCluster._(JSObject _) implements JSObject {
-  // TODO(jlavrova): This has been renamed to `start` in the spec.
-  // See: https://github.com/fserb/canvas2D/blob/master/spec/enhanced-textmetrics.md
-  external int get begin;
+  @JS('begin')
+  external int? _begin;
+  @JS('start')
+  external int _start;
+  // The proposal had this `begin` then renamed it to `start`. Some versions of Chrome still have
+  // the old name.
+  //
+  // `_begin` can be removed once this feature is launched in a stable Chrome release.
+  int get start => _begin ?? _start;
+
   external int get end;
   external double get x;
   external double get y;

@@ -819,6 +819,12 @@ class FakeFlutterFeatures extends FeatureFlags {
   bool get isWindowingEnabled => _enabled;
 
   @override
+  bool get isLLDBDebuggingEnabled => _enabled;
+
+  @override
+  bool get isUISceneMigrationEnabled => _enabled;
+
+  @override
   final List<Feature> allFeatures;
 
   @override

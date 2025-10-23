@@ -2108,17 +2108,17 @@ void main() {
     const Color defaultColor = Color(0x00000004);
     const Color selectedColor = Color(0x00000005);
 
-    Color getIconColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    Color getIconColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedColor;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverColor;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedColor;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return selectedColor;
       }
       return defaultColor;
@@ -2133,7 +2133,7 @@ void main() {
               body: Center(
                 child: IconButton(
                   style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.resolveWith<Color>(getIconColor),
+                    foregroundColor: WidgetStateProperty.resolveWith<Color>(getIconColor),
                   ),
                   isSelected: isSelected,
                   onPressed: () {
@@ -2761,6 +2761,37 @@ void main() {
     expect(getOverlayColor(tester), paints..rect(color: overlayColor));
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/174511.
+  testWidgets('IconButton.color takes precedence over ambient IconButtonThemeData.iconColor', (
+    WidgetTester tester,
+  ) async {
+    const Color iconButtonColor = Color(0xFFFF1234);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          iconButtonTheme: const IconButtonThemeData(
+            style: ButtonStyle(
+              iconColor: WidgetStateColor.fromMap(<WidgetStatesConstraint, Color>{
+                WidgetState.any: Colors.purple,
+              }),
+            ),
+          ),
+        ),
+        home: Material(
+          child: Center(
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.add, size: 64),
+              color: iconButtonColor,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(_iconStyle(tester, Icons.add)?.color, iconButtonColor);
+  });
+
   group('IconTheme tests in Material 3', () {
     testWidgets('IconTheme overrides default values in M3', (WidgetTester tester) async {
       // Theme's IconTheme
@@ -3027,7 +3058,9 @@ void main() {
       ),
     );
 
-    final Offset topLeft = tester.getTopLeft(find.byType(ColoredBox));
+    final Offset topLeft = tester.getTopLeft(
+      find.descendant(of: find.byType(Center), matching: find.byType(ColoredBox)),
+    );
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(topLeft);
@@ -3434,7 +3467,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(home: Center(child: iconButton)));
 
-    expect(controller.value, <MaterialState>{});
+    expect(controller.value, <WidgetState>{});
     expect(count, 0);
 
     final Offset center = tester.getCenter(find.byType(Icon));
@@ -3443,42 +3476,42 @@ void main() {
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(controller.value, <WidgetState>{WidgetState.hovered});
     expect(count, 1);
 
     await gesture.moveTo(Offset.zero);
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{});
+    expect(controller.value, <WidgetState>{});
     expect(count, 2);
 
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(controller.value, <WidgetState>{WidgetState.hovered});
     expect(count, 3);
 
     await gesture.down(center);
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
+    expect(controller.value, <WidgetState>{WidgetState.hovered, WidgetState.pressed});
     expect(count, 4);
 
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(controller.value, <WidgetState>{WidgetState.hovered});
     expect(count, 5);
 
     await gesture.moveTo(Offset.zero);
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{});
+    expect(controller.value, <WidgetState>{});
     expect(count, 6);
 
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
+    expect(controller.value, <WidgetState>{WidgetState.hovered, WidgetState.pressed});
     expect(count, 8); // adds hovered and pressed - two changes
   }
 

@@ -294,6 +294,7 @@ void main() {
         matchesSemantics(
           label: 'Enter Date',
           isTextField: true,
+          isFocusable: true,
           hasEnabledState: true,
           isEnabled: true,
           isFocused: true,
@@ -505,6 +506,21 @@ void main() {
 
       expect(selectedDate, DateTime(2025, DateTime.april, 21));
     });
+  });
+
+  testWidgets('InputDatePickerFormField does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: InputDatePickerFormField(firstDate: DateTime(2020), lastDate: DateTime(2030)),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(InputDatePickerFormField)), Size.zero);
   });
 }
 

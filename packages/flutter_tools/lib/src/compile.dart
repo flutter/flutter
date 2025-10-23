@@ -16,6 +16,7 @@ import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
+import 'base/process.dart';
 import 'build_info.dart';
 import 'convert.dart';
 
@@ -463,6 +464,7 @@ class _CompileExpressionToJsRequest extends _CompilationRequest {
   _CompileExpressionToJsRequest(
     super.completer,
     this.libraryUri,
+    this.scriptUri,
     this.line,
     this.column,
     this.jsModules,
@@ -472,6 +474,7 @@ class _CompileExpressionToJsRequest extends _CompilationRequest {
   );
 
   final String? libraryUri;
+  final String? scriptUri;
   final int line;
   final int column;
   final Map<String, String>? jsModules;
@@ -505,6 +508,7 @@ abstract class ResidentCompiler {
     required Artifacts artifacts,
     required Platform platform,
     required FileSystem fileSystem,
+    required ShutdownHooks shutdownHooks,
     bool testCompilation,
     bool trackWidgetCreation,
     String packagesPath,
@@ -589,6 +593,7 @@ abstract class ResidentCompiler {
   /// compilation result and a number of errors.
   Future<CompilerOutput?> compileExpressionToJs(
     String libraryUri,
+    String scriptUri,
     int line,
     int column,
     Map<String, String> jsModules,
@@ -625,6 +630,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     required this.artifacts,
     required Platform platform,
     required FileSystem fileSystem,
+    required ShutdownHooks shutdownHooks,
     this.testCompilation = false,
     this.trackWidgetCreation = true,
     this.packagesPath,
@@ -642,6 +648,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     @visibleForTesting StdoutHandler? stdoutHandler,
   }) : _logger = logger,
        _processManager = processManager,
+       _shutdownHooks = shutdownHooks,
        _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger, fileSystem: fileSystem),
        _platform = platform,
        dartDefines = dartDefines ?? const <String>[],
@@ -654,6 +661,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final ProcessManager _processManager;
   final Artifacts artifacts;
   final Platform _platform;
+  final ShutdownHooks _shutdownHooks;
 
   final bool testCompilation;
   final BuildMode buildMode;
@@ -906,7 +914,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
 
     unawaited(
       _server?.exitCode.then((int code) {
-        if (code != 0) {
+        // The frontend server exits with a 253 error code when we shutdown due to a signal.
+        // Don't treat this as an error if we're in the middle of the shutdown sequence.
+        if (code != 0 && !_shutdownHooks.isShuttingDown) {
           throwToolExit('The Dart compiler exited unexpectedly.');
         }
       }),
@@ -994,6 +1004,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   @override
   Future<CompilerOutput?> compileExpressionToJs(
     String libraryUri,
+    String scriptUri,
     int line,
     int column,
     Map<String, String> jsModules,
@@ -1010,6 +1021,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       _CompileExpressionToJsRequest(
         completer,
         libraryUri,
+        scriptUri,
         line,
         column,
         jsModules,
@@ -1031,23 +1043,23 @@ class DefaultResidentCompiler implements ResidentCompiler {
       return null;
     }
 
-    final String inputKey = Uuid().generateV4();
     server.stdin
-      ..writeln('compile-expression-to-js $inputKey')
-      ..writeln(request.libraryUri ?? '')
-      ..writeln(request.line)
-      ..writeln(request.column);
-    request.jsModules?.forEach((String k, String v) {
-      server.stdin.writeln('$k:$v');
-    });
-    server.stdin.writeln(inputKey);
-    request.jsFrameValues?.forEach((String k, String v) {
-      server.stdin.writeln('$k:$v');
-    });
-    server.stdin
-      ..writeln(inputKey)
-      ..writeln(request.moduleName ?? '')
-      ..writeln(request.expression ?? '');
+      ..writeln('JSON_INPUT')
+      ..writeln(
+        json.encode({
+          'type': 'COMPILE_EXPRESSION_JS',
+          'data': {
+            'expression': request.expression,
+            'libraryUri': request.libraryUri,
+            'scriptUri': request.scriptUri,
+            'line': request.line,
+            'column': request.column,
+            'jsModules': request.jsModules,
+            'jsFrameValues': request.jsFrameValues,
+            'moduleName': request.moduleName,
+          },
+        }),
+      );
 
     return _stdoutHandler.compilerOutput?.future;
   }

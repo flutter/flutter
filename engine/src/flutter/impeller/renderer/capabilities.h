@@ -126,6 +126,13 @@ class Capabilities {
   /// @brief The minimum alignment of uniform value offsets in bytes.
   virtual size_t GetMinimumUniformAlignment() const = 0;
 
+  /// @brief The minimum alignment of storage buffer value offsets in bytes.
+  virtual size_t GetMinimumStorageBufferAlignment() const;
+
+  /// @brief Whether the host buffer should use separate device buffers
+  /// for indexes from other data.
+  virtual bool NeedsPartitionedHostBuffer() const = 0;
+
  protected:
   Capabilities();
 
@@ -174,6 +181,8 @@ class CapabilitiesBuilder {
 
   CapabilitiesBuilder& SetMinimumUniformAlignment(size_t value);
 
+  CapabilitiesBuilder& SetNeedsPartitionedHostBuffer(bool value);
+
   std::unique_ptr<Capabilities> Build();
 
  private:
@@ -188,6 +197,7 @@ class CapabilitiesBuilder {
   bool supports_device_transient_textures_ = false;
   bool supports_triangle_fan_ = false;
   bool supports_extended_range_formats_ = false;
+  bool needs_partitioned_host_buffer_ = false;
   std::optional<PixelFormat> default_color_format_ = std::nullopt;
   std::optional<PixelFormat> default_stencil_format_ = std::nullopt;
   std::optional<PixelFormat> default_depth_stencil_format_ = std::nullopt;

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -210,12 +211,45 @@ class FakeDevice extends Fake implements Device {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
+  @override
+  DartDevelopmentService get dds => FakeDartDevelopmentService();
+
   var wasDisposed = false;
 
   @override
   Future<void> dispose() async {
     wasDisposed = true;
   }
+}
+
+class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
+  @override
+  late Future<void> done;
+
+  @override
+  Uri? uri;
+
+  @override
+  Uri? devToolsUri;
+
+  @override
+  Uri? dtdUri;
+
+  @override
+  Future<void> startDartDevelopmentService(
+    Uri vmServiceUri, {
+    int? ddsPort,
+    FlutterDevice? device,
+    bool? ipv6,
+    bool? disableServiceAuthCodes,
+    bool enableDevTools = false,
+    bool cacheStartupProfile = false,
+    String? google3WorkspaceRoot,
+    Uri? devToolsServerAddress,
+  }) async {}
+
+  @override
+  Future<void> shutdown() async {}
 }
 
 class TestFlutterDevice extends FlutterDevice {
@@ -242,7 +276,6 @@ class TestFlutterDevice extends FlutterDevice {
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
     int? hostVmServicePort,
-    required bool allowExistingDdsInstance,
   }) async {
     throw exception;
   }

@@ -123,7 +123,7 @@ bool TextureContents::Render(const ContentContext& renderer,
 
   auto texture_coords =
       Rect::MakeSize(texture_->GetSize()).Project(source_rect_);
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 
   std::array<VS::PerVertexData, 4> vertices = {
       VS::PerVertexData{destination_rect_.GetLeftTop(),
@@ -135,7 +135,7 @@ bool TextureContents::Render(const ContentContext& renderer,
       VS::PerVertexData{destination_rect_.GetRightBottom(),
                         texture_coords.GetRightBottom()},
   };
-  auto vertex_buffer = CreateVertexBuffer(vertices, host_buffer);
+  auto vertex_buffer = CreateVertexBuffer(vertices, data_host_buffer);
 
   VS::FrameInfo frame_info;
   frame_info.mvp = entity.GetShaderTransform(pass);
@@ -175,7 +175,7 @@ bool TextureContents::Render(const ContentContext& renderer,
 #endif  // IMPELLER_ENABLE_OPENGLES
 
   pass.SetVertexBuffer(vertex_buffer);
-  VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
+  VS::BindFrameInfo(pass, data_host_buffer.EmplaceUniform(frame_info));
 
   if (strict_source_rect_enabled_) {
     // For a strict source rect, shrink the texture coordinate range by half a
@@ -187,7 +187,7 @@ bool TextureContents::Render(const ContentContext& renderer,
     FSStrict::FragInfo frag_info;
     frag_info.source_rect = Vector4(strict_texture_coords.GetLTRB());
     frag_info.alpha = GetOpacity();
-    FSStrict::BindFragInfo(pass, host_buffer.EmplaceUniform((frag_info)));
+    FSStrict::BindFragInfo(pass, data_host_buffer.EmplaceUniform((frag_info)));
     FSStrict::BindTextureSampler(
         pass, texture_,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
@@ -200,7 +200,7 @@ bool TextureContents::Render(const ContentContext& renderer,
     frag_info.y_tile_mode =
         static_cast<Scalar>(sampler_descriptor_.height_address_mode);
     frag_info.alpha = GetOpacity();
-    FSExternal::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+    FSExternal::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
 
     SamplerDescriptor sampler_desc;
     // OES_EGL_image_external states that only CLAMP_TO_EDGE is valid, so
@@ -219,7 +219,7 @@ bool TextureContents::Render(const ContentContext& renderer,
   } else {
     FS::FragInfo frag_info;
     frag_info.alpha = GetOpacity();
-    FS::BindFragInfo(pass, host_buffer.EmplaceUniform((frag_info)));
+    FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform((frag_info)));
     FS::BindTextureSampler(
         pass, texture_,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(

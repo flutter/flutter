@@ -230,7 +230,7 @@ TEST_F(ImageDecoderFixtureTest, CanCreateImageDecoder) {
 /// An Image generator that pretends it can't recognize the data it was given.
 class UnknownImageGenerator : public ImageGenerator {
  public:
-  UnknownImageGenerator() : info_(SkImageInfo::MakeUnknown()){};
+  UnknownImageGenerator() : info_(SkImageInfo::MakeUnknown()) {};
   ~UnknownImageGenerator() = default;
   const SkImageInfo& GetInfo() { return info_; }
 
@@ -921,7 +921,8 @@ TEST(ImageDecoderTest, VerifySubpixelDecodingPreservesExifOrientation) {
   ASSERT_TRUE(expected_data != nullptr);
   ASSERT_FALSE(expected_data->isEmpty());
 
-  auto assert_image = [&](auto decoded_image, const std::string& decode_error) {
+  auto assert_image = [&](const auto& decoded_image,
+                          const std::string& decode_error) {
     ASSERT_EQ(decoded_image->dimensions(), SkISize::Make(300, 100));
     sk_sp<SkData> encoded =
         SkPngEncoder::Encode(nullptr, decoded_image.get(), {});

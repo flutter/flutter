@@ -2059,7 +2059,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(child._parent == this);
     assert(child.attached == attached);
     assert(child.parentData != null);
-    if (!(_isRelayoutBoundary ?? true)) {
+    if (!(child._isRelayoutBoundary ?? true)) {
       child._isRelayoutBoundary = null;
     }
     child.parentData!.detach();
@@ -4857,7 +4857,7 @@ mixin SemanticsAnnotationsMixin on RenderObject {
       config.isFocusable = _properties.focusable!;
     }
     if (_properties.focused != null) {
-      config.isFocused = _properties.focused!;
+      config.isFocused = _properties.focused;
     }
     if (_properties.inMutuallyExclusiveGroup != null) {
       config.isInMutuallyExclusiveGroup = _properties.inMutuallyExclusiveGroup!;
@@ -5005,6 +5005,12 @@ mixin SemanticsAnnotationsMixin on RenderObject {
     if (_properties.onFocus != null) {
       config.onFocus = _performFocus;
     }
+    if (_properties.onExpand != null) {
+      config.onExpand = _performExpand;
+    }
+    if (_properties.onCollapse != null) {
+      config.onCollapse = _performCollapse;
+    }
     if (_properties.customSemanticsActions != null) {
       config.customSemanticsActions = _properties.customSemanticsActions!;
     }
@@ -5092,6 +5098,14 @@ mixin SemanticsAnnotationsMixin on RenderObject {
 
   void _performFocus() {
     _properties.onFocus?.call();
+  }
+
+  void _performExpand() {
+    _properties.onExpand?.call();
+  }
+
+  void _performCollapse() {
+    _properties.onCollapse?.call();
   }
 }
 

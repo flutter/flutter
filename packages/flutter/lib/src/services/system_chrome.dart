@@ -232,7 +232,7 @@ enum SystemUiMode {
 /// the system overlays, and by [SystemChrome.setSystemUIOverlayStyle] for
 /// imperatively setting the style of the system overlays.
 @immutable
-class SystemUiOverlayStyle {
+class SystemUiOverlayStyle with Diagnosticable {
   /// Creates a new [SystemUiOverlayStyle].
   const SystemUiOverlayStyle({
     this.systemNavigationBarColor,
@@ -343,9 +343,6 @@ class SystemUiOverlayStyle {
     };
   }
 
-  @override
-  String toString() => '${objectRuntimeType(this, 'SystemUiOverlayStyle')}(${_toMap()})';
-
   /// Creates a copy of this theme with the given fields replaced with new values.
   SystemUiOverlayStyle copyWith({
     Color? systemNavigationBarColor,
@@ -399,6 +396,40 @@ class SystemUiOverlayStyle {
         other.statusBarBrightness == statusBarBrightness &&
         other.systemStatusBarContrastEnforced == systemStatusBarContrastEnforced &&
         other.systemNavigationBarIconBrightness == systemNavigationBarIconBrightness;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      DiagnosticsProperty<Color>('systemNavigationBarColor', systemNavigationBarColor),
+    );
+    properties.add(
+      DiagnosticsProperty<Color>(
+        'systemNavigationBarDividerColor',
+        systemNavigationBarDividerColor,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<Brightness>(
+        'systemNavigationBarIconBrightness',
+        systemNavigationBarIconBrightness,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<bool>(
+        'systemNavigationBarContrastEnforced',
+        systemNavigationBarContrastEnforced,
+      ),
+    );
+    properties.add(DiagnosticsProperty<Color>('statusBarColor', statusBarColor));
+    properties.add(DiagnosticsProperty<Brightness>('statusBarBrightness', statusBarBrightness));
+    properties.add(
+      DiagnosticsProperty<Brightness>('statusBarIconBrightness', statusBarIconBrightness),
+    );
+    properties.add(
+      DiagnosticsProperty<bool>('systemStatusBarContrastEnforced', systemStatusBarContrastEnforced),
+    );
   }
 }
 

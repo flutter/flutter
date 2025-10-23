@@ -18,13 +18,28 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    await gesture.moveTo(tester.getCenter(find.byType(ColoredBox)));
+    await gesture.moveTo(
+      tester.getCenter(
+        find.descendant(
+          of: find.byType(example.MouseRegionExample),
+          matching: find.byType(ColoredBox),
+        ),
+      ),
+    );
     await tester.pump();
 
     expect(find.text('1 Entries\n0 Exits'), findsOneWidget);
     expect(find.text('The cursor is here: (400.00, 328.00)'), findsOneWidget);
 
-    await gesture.moveTo(tester.getCenter(find.byType(ColoredBox)) + const Offset(50.0, 30.0));
+    await gesture.moveTo(
+      tester.getCenter(
+            find.descendant(
+              of: find.byType(example.MouseRegionExample),
+              matching: find.byType(ColoredBox),
+            ),
+          ) +
+          const Offset(50.0, 30.0),
+    );
     await tester.pump();
 
     expect(find.text('The cursor is here: (450.00, 358.00)'), findsOneWidget);

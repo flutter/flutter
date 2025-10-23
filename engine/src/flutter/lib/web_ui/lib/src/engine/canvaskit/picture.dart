@@ -6,7 +6,7 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../scene_painting.dart';
+import '../layer/layer_painting.dart';
 import '../util.dart';
 import 'canvas.dart';
 import 'canvaskit_api.dart';
@@ -16,7 +16,7 @@ import 'renderer.dart';
 import 'surface.dart';
 
 /// Implements [ui.Picture] on top of [SkPicture].
-class CkPicture implements ScenePicture {
+class CkPicture implements LayerPicture {
   CkPicture(SkPicture skPicture) {
     _ref = UniqueRef<SkPicture>(this, skPicture, 'Picture');
   }

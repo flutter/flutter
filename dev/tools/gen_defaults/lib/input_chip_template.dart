@@ -43,15 +43,15 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   );
 
   @override
-  MaterialStateProperty<Color?>? get color =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
+  WidgetStateProperty<Color?>? get color =>
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected) && states.contains(WidgetState.disabled)) {
         return ${componentColor("$tokenGroup$variant.disabled.selected.container")};
       }
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         return ${componentColor("$tokenGroup$variant.disabled.container")};
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return ${componentColor("$tokenGroup$variant.selected.container")};
       }
       return ${componentColor("$tokenGroup$variant.container")};

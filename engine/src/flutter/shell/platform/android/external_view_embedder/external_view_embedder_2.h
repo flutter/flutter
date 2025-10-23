@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_2_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_2_H_
 
+#include <atomic>
 #include <unordered_map>
 
 #include "flutter/common/task_runners.h"
@@ -13,6 +14,7 @@
 #include "flutter/shell/platform/android/external_view_embedder/surface_pool.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
+#include "flutter/third_party/abseil-cpp/absl/container/flat_hash_set.h"
 
 namespace flutter {
 
@@ -112,6 +114,9 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   // The task runners.
   const TaskRunners task_runners_;
 
+  // If the overlay layer is currently shown.
+  std::atomic_bool overlay_layer_is_shown_{false};
+
   // The size of the root canvas.
   DlISize frame_size_;
 
@@ -132,8 +137,8 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   // mutation stack.
   std::unordered_map<int64_t, EmbeddedViewParams> view_params_;
 
-  // The number of platform views in the previous frame.
-  int64_t previous_frame_view_count_;
+  // The set of platform views that were visible in the last frame.
+  absl::flat_hash_set<int64_t> views_visible_last_frame_;
 
   // Destroys the surfaces created from the surface factory.
   // This method schedules a task on the platform thread, and waits for
@@ -145,6 +150,13 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
 
   // Whether the layer tree in the current frame has platform layers.
   bool FrameHasPlatformLayers();
+
+  // Shows the overlay layer if it has content and the previous frame did not.
+  void ShowOverlayLayerIfNeeded();
+
+  // Hides the overlay layer if it does not have content and the previous
+  // frame did have content.
+  void HideOverlayLayerIfNeeded();
 };
 
 }  // namespace flutter

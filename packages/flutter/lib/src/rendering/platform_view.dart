@@ -802,7 +802,7 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   PointerExitEventListener? get onExit => null;
 
   @override
-  MouseCursor get cursor => MouseCursor.uncontrolled;
+  MouseCursor get cursor => kIsWeb ? MouseCursor.defer : MouseCursor.uncontrolled;
 
   @override
   bool get validForMouseTracker => true;

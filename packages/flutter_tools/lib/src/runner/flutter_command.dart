@@ -281,7 +281,6 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addOption(
       'web-hostname',
-      defaultsTo: 'localhost',
       help:
           'The hostname that the web server will use to resolve an IP to serve '
           'from. The unresolved hostname is used to launch Chrome when using '
@@ -1947,7 +1946,7 @@ abstract class FlutterCommand extends Command<void> {
   /// If [includeDevicesUnsupportedByProject] is true, the tool does not filter
   /// the list by the current project support list.
   Future<Device?> findTargetDevice({bool includeDevicesUnsupportedByProject = false}) async {
-    List<Device>? deviceList = await findAllTargetDevices(
+    final List<Device>? deviceList = await findAllTargetDevices(
       includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
     );
     if (deviceList == null) {
@@ -1955,9 +1954,9 @@ abstract class FlutterCommand extends Command<void> {
     }
     if (deviceList.length > 1) {
       globals.printStatus(globals.userMessages.flutterSpecifyDevice);
-      deviceList = await globals.deviceManager!.getAllDevices();
+      final List<Device> allDevices = await globals.deviceManager!.getAllDevices();
       globals.printStatus('');
-      await Device.printDevices(deviceList, globals.logger);
+      await Device.printDevices(allDevices, globals.logger);
       return null;
     }
     return deviceList.single;
