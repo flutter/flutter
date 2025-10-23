@@ -92,7 +92,7 @@ const maxKnownAndSupportedAgpVersion = '9.0';
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const maxKnownAgpVersionWithFullKotlinSupport = '8.7.2';
+const maxKnownAgpVersionWithFullKotlinSupport = '8.11.1';
 
 // Update this when new versions of AGP come out.
 const maxKnownAgpVersion = '9.0';
