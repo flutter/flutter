@@ -1200,33 +1200,21 @@ pluginManagement {
   });
 
   testWithoutContext('agp versions validation', () {
-    // testWithoutContext('Ensure templateAndroidGradlePluginVersion <= maxKnownAgpVersionWithFullKotlinSupport',
-    //         () {
-    //       final Version? parsedTemplateAndroidGradlePluginVersion = Version.parse(templateAndroidGradlePluginVersion);
-    //       final Version? parsedMaxKnownAgpVersionWithFullKotlinSupport = Version.parse(maxKnownAgpVersionWithFullKotlinSupport);
-    //       expect(parsedTemplateAndroidGradlePluginVersion! <= parsedMaxKnownAgpVersionWithFullKotlinSupport!, isTrue);
-    //     });
-    //
-    // testWithoutContext('Ensure maxKnownAndSupportedAgpVersion <= maxKnownAgpVersion',
-    //         () {
-    //       final Version? parsedMaxKnownAndSupportedAgpVersion = Version.parse(maxKnownAndSupportedAgpVersion);
-    //       final Version? parsedMaxKnownAgpVersion = Version.parse(maxKnownAgpVersion);
-    //       expect(parsedMaxKnownAndSupportedAgpVersion! <= parsedMaxKnownAgpVersion!, isTrue);
-    //     });
-    //
-    // testWithoutContext('Ensure MaxKnownAgpVersionWithFullKotlinSupport < parsedMaxKnownAgpVersion',
-    //         () {
-    //       final Version? parsedMaxKnownAgpVersionWithFullKotlinSupport = Version.parse(maxKnownAgpVersionWithFullKotlinSupport);
-    //       final Version? parsedMaxKnownAgpVersion = Version.parse(maxKnownAgpVersion);
-    //       expect(parsedMaxKnownAgpVersionWithFullKotlinSupport! < parsedMaxKnownAgpVersion!, isTrue);
-    //     });
-
-    final Version? parsedTemplateAndroidGradlePluginVersion = Version.parse(templateAndroidGradlePluginVersion);
-    final Version? parsedMaxKnownAgpVersionWithFullKotlinSupport = Version.parse(maxKnownAgpVersionWithFullKotlinSupport);
-    final Version? parsedMaxKnownAndSupportedAgpVersion = Version.parse(maxKnownAndSupportedAgpVersion);
+    final Version? parsedTemplateAndroidGradlePluginVersion = Version.parse(
+      templateAndroidGradlePluginVersion,
+    );
+    final Version? parsedMaxKnownAgpVersionWithFullKotlinSupport = Version.parse(
+      maxKnownAgpVersionWithFullKotlinSupport,
+    );
+    final Version? parsedMaxKnownAndSupportedAgpVersion = Version.parse(
+      maxKnownAndSupportedAgpVersion,
+    );
     final Version? parsedMaxKnownAgpVersion = Version.parse(maxKnownAgpVersion);
 
-    expect(parsedTemplateAndroidGradlePluginVersion! <= parsedMaxKnownAgpVersionWithFullKotlinSupport!, isTrue);
+    expect(
+      parsedTemplateAndroidGradlePluginVersion! <= parsedMaxKnownAgpVersionWithFullKotlinSupport!,
+      isTrue,
+    );
     expect(parsedMaxKnownAndSupportedAgpVersion! <= parsedMaxKnownAgpVersion!, isTrue);
     expect(parsedMaxKnownAgpVersionWithFullKotlinSupport < parsedMaxKnownAgpVersion, isTrue);
   });
