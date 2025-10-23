@@ -30,7 +30,6 @@ struct SemanticsFlags {
   SemanticsTristate isExpanded = SemanticsTristate::kNone;
   SemanticsTristate isRequired = SemanticsTristate::kNone;
   SemanticsTristate isFocused = SemanticsTristate::kNone;
-  SemanticsTristate isAccessibilityFocusable = SemanticsTristate::kNone;
   bool isButton = false;
   bool isTextField = false;
   bool isInMutuallyExclusiveGroup = false;
@@ -47,6 +46,7 @@ struct SemanticsFlags {
   bool isLink = false;
   bool isSlider = false;
   bool isKeyboardKey = false;
+  bool blockAccessibilityFocus = false;
 };
 
 //------------------------------------------------------------------------------
@@ -69,7 +69,6 @@ class NativeSemanticsFlags
                                  int isExpanded,
                                  int isRequired,
                                  int isFocused,
-                                 int isAccessibilityFocusable,
                                  bool isButton,
                                  bool isTextField,
                                  bool isInMutuallyExclusiveGroup,
@@ -85,7 +84,8 @@ class NativeSemanticsFlags
                                  bool isReadOnly,
                                  bool isLink,
                                  bool isSlider,
-                                 bool isKeyboardKey);
+                                 bool isKeyboardKey,
+                                 bool blockAccessibilityFocus);
 
   //----------------------------------------------------------------------------
   /// Returns the c++ representataion of SemanticsFlags.

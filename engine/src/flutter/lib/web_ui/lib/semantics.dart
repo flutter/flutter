@@ -339,7 +339,6 @@ class SemanticsFlags {
     this.isExpanded = Tristate.none,
     this.isRequired = Tristate.none,
     this.isFocused = Tristate.none,
-    this.isAccessibilityFocusable = Tristate.none,
     this.isButton = false,
     this.isTextField = false,
     this.isInMutuallyExclusiveGroup = false,
@@ -356,6 +355,7 @@ class SemanticsFlags {
     this.isLink = false,
     this.isSlider = false,
     this.isKeyboardKey = false,
+    this.blockAccessibilityFocus = false,
   });
   static const SemanticsFlags none = SemanticsFlags();
   final CheckedState isChecked;
@@ -365,7 +365,6 @@ class SemanticsFlags {
   final Tristate isExpanded;
   final Tristate isRequired;
   final Tristate isFocused;
-  final Tristate isAccessibilityFocusable;
   final bool isButton;
   final bool isTextField;
   final bool isInMutuallyExclusiveGroup;
@@ -382,6 +381,7 @@ class SemanticsFlags {
   final bool isLink;
   final bool isSlider;
   final bool isKeyboardKey;
+  final bool blockAccessibilityFocus;
 
   SemanticsFlags merge(SemanticsFlags other) {
     return SemanticsFlags(
@@ -392,7 +392,6 @@ class SemanticsFlags {
       isExpanded: isExpanded.merge(other.isExpanded),
       isRequired: isRequired.merge(other.isRequired),
       isFocused: isFocused.merge(other.isFocused),
-      isAccessibilityFocusable: isAccessibilityFocusable.merge(other.isAccessibilityFocusable),
       isButton: isButton || other.isButton,
       isTextField: isTextField || other.isTextField,
       isInMutuallyExclusiveGroup: isInMutuallyExclusiveGroup || other.isInMutuallyExclusiveGroup,
@@ -409,6 +408,7 @@ class SemanticsFlags {
       isLink: isLink || other.isLink,
       isSlider: isSlider || other.isSlider,
       isKeyboardKey: isKeyboardKey || other.isKeyboardKey,
+      blockAccessibilityFocus: blockAccessibilityFocus || other.blockAccessibilityFocus,
     );
   }
 
@@ -420,7 +420,6 @@ class SemanticsFlags {
     Tristate? isExpanded,
     Tristate? isRequired,
     Tristate? isFocused,
-    Tristate? isAccessibilityFocusable,
     bool? isButton,
     bool? isTextField,
     bool? isInMutuallyExclusiveGroup,
@@ -437,6 +436,7 @@ class SemanticsFlags {
     bool? isLink,
     bool? isSlider,
     bool? isKeyboardKey,
+    bool? blockAccessibilityFocus,
   }) {
     return SemanticsFlags(
       isChecked: isChecked ?? this.isChecked,
@@ -444,7 +444,6 @@ class SemanticsFlags {
       isButton: isButton ?? this.isButton,
       isTextField: isTextField ?? this.isTextField,
       isFocused: isFocused ?? this.isFocused,
-      isAccessibilityFocusable: isAccessibilityFocusable ?? this.isAccessibilityFocusable,
       isEnabled: isEnabled ?? this.isEnabled,
       isInMutuallyExclusiveGroup: isInMutuallyExclusiveGroup ?? this.isInMutuallyExclusiveGroup,
       isHeader: isHeader ?? this.isHeader,
@@ -461,8 +460,7 @@ class SemanticsFlags {
       isLink: isLink ?? this.isLink,
       isSlider: isSlider ?? this.isSlider,
       isKeyboardKey: isKeyboardKey ?? this.isKeyboardKey,
-      isExpanded: isExpanded ?? this.isExpanded,
-      isRequired: isRequired ?? this.isRequired,
+      blockAccessibilityFocus: blockAccessibilityFocus ?? this.blockAccessibilityFocus,
     );
   }
 
@@ -478,7 +476,6 @@ class SemanticsFlags {
           isExpanded == other.isExpanded &&
           isRequired == other.isRequired &&
           isFocused == other.isFocused &&
-          isAccessibilityFocusable == other.isAccessibilityFocusable &&
           isButton == other.isButton &&
           isTextField == other.isTextField &&
           isInMutuallyExclusiveGroup == other.isInMutuallyExclusiveGroup &&
@@ -494,7 +491,8 @@ class SemanticsFlags {
           isReadOnly == other.isReadOnly &&
           isLink == other.isLink &&
           isSlider == other.isSlider &&
-          isKeyboardKey == other.isKeyboardKey;
+          isKeyboardKey == other.isKeyboardKey &&
+          blockAccessibilityFocus == other.blockAccessibilityFocus;
 
   @override
   int get hashCode => Object.hashAll([
@@ -505,7 +503,6 @@ class SemanticsFlags {
     isExpanded,
     isRequired,
     isFocused,
-    isAccessibilityFocusable,
     isButton,
     isTextField,
     isInMutuallyExclusiveGroup,
@@ -522,6 +519,7 @@ class SemanticsFlags {
     isLink,
     isSlider,
     isKeyboardKey,
+    blockAccessibilityFocus,
   ]);
 
   List<String> toStrings() {
@@ -548,8 +546,7 @@ class SemanticsFlags {
       if (isMultiline) 'isMultiline',
       if (isReadOnly) 'isReadOnly',
       if (isFocused != Tristate.none) 'isFocusable',
-      if (isAccessibilityFocusable == Tristate.isFalse) 'isNotAccessibilityFocusable',
-      if (isAccessibilityFocusable == Tristate.isTrue) 'isAccessibilityFocusable',
+      if (blockAccessibilityFocus) 'blockAccessibilityFocus',
       if (isLink) 'isLink',
       if (isSlider) 'isSlider',
       if (isKeyboardKey) 'isKeyboardKey',
@@ -571,7 +568,6 @@ class SemanticsFlags {
         isExpanded.hasConflict(other.isExpanded) ||
         isRequired.hasConflict(other.isRequired) ||
         isFocused.hasConflict(other.isFocused) ||
-        isAccessibilityFocusable.hasConflict(other.isAccessibilityFocusable) ||
         (isButton && other.isButton) ||
         (isTextField && other.isTextField) ||
         (isInMutuallyExclusiveGroup && other.isInMutuallyExclusiveGroup) ||

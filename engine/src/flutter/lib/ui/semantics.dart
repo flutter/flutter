@@ -1172,7 +1172,6 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     this.isExpanded = Tristate.none,
     this.isRequired = Tristate.none,
     this.isFocused = Tristate.none,
-    this.isAccessibilityFocusable = Tristate.none,
     this.isButton = false,
     this.isTextField = false,
     this.isInMutuallyExclusiveGroup = false,
@@ -1189,6 +1188,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     this.isLink = false,
     this.isSlider = false,
     this.isKeyboardKey = false,
+    this.blockAccessibilityFocus = false,
   }) {
     _initSemanticsFlags(
       this,
@@ -1199,7 +1199,6 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       isExpanded.value,
       isRequired.value,
       isFocused.value,
-      isAccessibilityFocusable.value,
       isButton,
       isTextField,
       isInMutuallyExclusiveGroup,
@@ -1216,6 +1215,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       isLink,
       isSlider,
       isKeyboardKey,
+      blockAccessibilityFocus,
     );
   }
 
@@ -1229,7 +1229,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       Int,
       Int,
       Int,
-      Int,
+      Bool,
       Bool,
       Bool,
       Bool,
@@ -1257,7 +1257,6 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     int isExpanded,
     int isRequired,
     int isFocused,
-    int isAccessibilityFocusable,
     bool isButton,
     bool isTextField,
     bool isInMutuallyExclusiveGroup,
@@ -1274,6 +1273,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     bool isLink,
     bool isSlider,
     bool isKeyboardKey,
+    bool blockAccessibilityFocus,
   );
 
   /// The set of semantics flags with every flag set to false.
@@ -1300,15 +1300,16 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
   /// {@macro dart.ui.semantics.isFocused}
   final Tristate isFocused;
 
-  /// If not [Tristate.none], whether this node can be focused by accessibility services.
+  /// whether this node's accessibility focus is blocked.
   ///
-  /// If [Tristate.none], the a11y focusability is determined based on
+  /// If `true`, this node is not accessibility focusable.
+  /// If `false`, the a11y focusability is determined based on
   /// the node's role and other properties, such as whether it is a button.
   ///
   /// This is for accessibility focus, which is the focus used by screen readers
   /// like TalkBack and VoiceOver. It is different from input focus, which is
   /// usually held by the element that currently responds to keyboard inputs.
-  final Tristate isAccessibilityFocusable;
+  final bool blockAccessibilityFocus;
 
   /// {@macro dart.ui.semantics.isButton}
   final bool isButton;
@@ -1368,7 +1369,6 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       isExpanded: isExpanded.merge(other.isExpanded),
       isRequired: isRequired.merge(other.isRequired),
       isFocused: isFocused.merge(other.isFocused),
-      isAccessibilityFocusable: isAccessibilityFocusable.merge(other.isAccessibilityFocusable),
       isButton: isButton || other.isButton,
       isTextField: isTextField || other.isTextField,
       isInMutuallyExclusiveGroup: isInMutuallyExclusiveGroup || other.isInMutuallyExclusiveGroup,
@@ -1385,6 +1385,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       isLink: isLink || other.isLink,
       isSlider: isSlider || other.isSlider,
       isKeyboardKey: isKeyboardKey || other.isKeyboardKey,
+      blockAccessibilityFocus: blockAccessibilityFocus || other.blockAccessibilityFocus,
     );
   }
 
@@ -1397,7 +1398,6 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     Tristate? isExpanded,
     Tristate? isRequired,
     Tristate? isFocused,
-    Tristate? isAccessibilityFocusable,
     bool? isButton,
     bool? isTextField,
     bool? isInMutuallyExclusiveGroup,
@@ -1414,6 +1414,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     bool? isLink,
     bool? isSlider,
     bool? isKeyboardKey,
+    bool? blockAccessibilityFocus,
   }) {
     return SemanticsFlags(
       isChecked: isChecked ?? this.isChecked,
@@ -1421,7 +1422,6 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       isButton: isButton ?? this.isButton,
       isTextField: isTextField ?? this.isTextField,
       isFocused: isFocused ?? this.isFocused,
-      isAccessibilityFocusable: isAccessibilityFocusable ?? this.isAccessibilityFocusable,
       isEnabled: isEnabled ?? this.isEnabled,
       isInMutuallyExclusiveGroup: isInMutuallyExclusiveGroup ?? this.isInMutuallyExclusiveGroup,
       isHeader: isHeader ?? this.isHeader,
@@ -1440,6 +1440,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       isKeyboardKey: isKeyboardKey ?? this.isKeyboardKey,
       isExpanded: isExpanded ?? this.isExpanded,
       isRequired: isRequired ?? this.isRequired,
+      blockAccessibilityFocus: blockAccessibilityFocus ?? this.blockAccessibilityFocus,
     );
   }
 
@@ -1455,7 +1456,6 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
           isExpanded == other.isExpanded &&
           isRequired == other.isRequired &&
           isFocused == other.isFocused &&
-          isAccessibilityFocusable == other.isAccessibilityFocusable &&
           isButton == other.isButton &&
           isTextField == other.isTextField &&
           isInMutuallyExclusiveGroup == other.isInMutuallyExclusiveGroup &&
@@ -1471,7 +1471,8 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
           isReadOnly == other.isReadOnly &&
           isLink == other.isLink &&
           isSlider == other.isSlider &&
-          isKeyboardKey == other.isKeyboardKey;
+          isKeyboardKey == other.isKeyboardKey &&
+          blockAccessibilityFocus == other.blockAccessibilityFocus;
 
   @override
   int get hashCode => Object.hashAll(<Object?>[
@@ -1482,7 +1483,6 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     isExpanded,
     isRequired,
     isFocused,
-    isAccessibilityFocusable,
     isButton,
     isTextField,
     isInMutuallyExclusiveGroup,
@@ -1499,6 +1499,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     isLink,
     isSlider,
     isKeyboardKey,
+    blockAccessibilityFocus,
   ]);
 
   /// Convert flags to a list of string.
@@ -1526,8 +1527,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       if (isMultiline) 'isMultiline',
       if (isReadOnly) 'isReadOnly',
       if (isFocused != Tristate.none) 'isFocusable',
-      if (isAccessibilityFocusable == Tristate.isFalse) 'isNotAccessibilityFocusable',
-      if (isAccessibilityFocusable == Tristate.isTrue) 'isAccessibilityFocusable',
+      if (blockAccessibilityFocus) 'blockAccessibilityFocus',
       if (isLink) 'isLink',
       if (isSlider) 'isSlider',
       if (isKeyboardKey) 'isKeyboardKey',
@@ -1543,6 +1543,9 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
   /// Checks if any of the boolean semantic flags are set to true
   /// in both this instance and the [other] instance.
   bool hasRepeatedFlags(SemanticsFlags other) {
+    // blockAccessibilityFocus is not checked in `hasRepeatedFlags` because
+    // two semantics nodes both with `blockAccessibilityFocus` set to true is
+    // still compatible and not conflicting.
     return isChecked.hasConflict(other.isChecked) ||
         isSelected.hasConflict(other.isSelected) ||
         isEnabled.hasConflict(other.isEnabled) ||
@@ -1551,7 +1554,6 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
         isExpanded.hasConflict(other.isExpanded) ||
         isRequired.hasConflict(other.isRequired) ||
         isFocused.hasConflict(other.isFocused) ||
-        isAccessibilityFocusable.hasConflict(other.isAccessibilityFocusable) ||
         (isButton && other.isButton) ||
         (isTextField && other.isTextField) ||
         (isInMutuallyExclusiveGroup && other.isInMutuallyExclusiveGroup) ||

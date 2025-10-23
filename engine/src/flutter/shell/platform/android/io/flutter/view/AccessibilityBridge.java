@@ -754,7 +754,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     result.setClassName("android.view.View");
     result.setSource(rootAccessibilityView, virtualViewId);
     result.setFocusable(semanticsNode.isFocusable());
-    result.setScreenReaderFocusable(semanticsNode.isScreenReaderFocusable());
     if (inputFocusedSemanticsNode != null) {
       result.setFocused(inputFocusedSemanticsNode.id == virtualViewId);
     }
@@ -2265,8 +2264,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     HAS_SELECTED_STATE(1 << 28),
     HAS_REQUIRED_STATE(1 << 29),
     IS_REQUIRED(1 << 30),
-    IS_ACCESSIBILITY_FOCUSABLE_SET(1 << 31),
-    IS_ACCESSIBILITY_FOCUSABLE(1 << 32);
+    BLOCK_ACCESSIBILITY_FOCUS(1 << 31);
 
     final int value;
 
@@ -2791,8 +2789,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (hasFlag(Flag.IS_FOCUSABLE)) {
         return true;
       }
-      if (hasFlag(Flag.IS_ACCESSIBILITY_FOCUSABLE_SET)
-          && !hasFlag(Flag.IS_ACCESSIBILITY_FOCUSABLE)) {
+      if (hasFlag(Flag.BLOCK_ACCESSIBILITY_FOCUS)) {
         return false;
       }
       // If not explicitly set as focusable, then use our legacy
@@ -2803,19 +2800,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           || (label != null && !label.isEmpty())
           || (value != null && !value.isEmpty())
           || (hint != null && !hint.isEmpty());
-    }
-    // From the Android doc
-    // https://developer.android.com/reference/android/view/accessibility/AccessibilityNodeInfo#isScreenReaderFocusable()
-    // `true` indicates the node is specifically marked as a focusable unit for screen readers.
-    // `false` indicates that it is not explicitly marked, not that the node is not
-    // a focusable unit. Screen readers should generally use other signals, such as
-    // isFocusable(), or the presence of text in a node, to determine what should
-    // receive focus.
-    private boolean isScreenReaderFocusable() {
-      if (hasFlag(Flag.IS_ACCESSIBILITY_FOCUSABLE_SET)) {
-        return hasFlag(Flag.IS_ACCESSIBILITY_FOCUSABLE);
-      }
-      return false;
     }
 
     private void collectRoutes(List<SemanticsNode> edges) {

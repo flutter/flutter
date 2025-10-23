@@ -25,7 +25,6 @@ void NativeSemanticsFlags::initSemanticsFlags(
     int isExpanded,
     int isRequired,
     int isFocused,
-    int isAccessibilityFocusable,
     bool isButton,
     bool isTextField,
     bool isInMutuallyExclusiveGroup,
@@ -41,7 +40,8 @@ void NativeSemanticsFlags::initSemanticsFlags(
     bool isReadOnly,
     bool isLink,
     bool isSlider,
-    bool isKeyboardKey) {
+    bool isKeyboardKey,
+    bool blockAccessibilityFocus) {
   UIDartState::ThrowIfUIOperationsProhibited();
   auto native_semantics_flags = fml::MakeRefCounted<NativeSemanticsFlags>();
   native_semantics_flags->AssociateWithDartWrapper(semantics_flags_handle);
@@ -54,8 +54,6 @@ void NativeSemanticsFlags::initSemanticsFlags(
       .isExpanded = static_cast<SemanticsTristate>(isExpanded),
       .isRequired = static_cast<SemanticsTristate>(isRequired),
       .isFocused = static_cast<SemanticsTristate>(isFocused),
-      .isAccessibilityFocusable =
-          static_cast<SemanticsTristate>(isAccessibilityFocusable),
       .isButton = isButton,
       .isTextField = isTextField,
       .isInMutuallyExclusiveGroup = isInMutuallyExclusiveGroup,
@@ -72,6 +70,7 @@ void NativeSemanticsFlags::initSemanticsFlags(
       .isLink = isLink,
       .isSlider = isSlider,
       .isKeyboardKey = isKeyboardKey,
+      .blockAccessibilityFocus = blockAccessibilityFocus,
   };
 }
 
