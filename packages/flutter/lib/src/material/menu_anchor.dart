@@ -2131,7 +2131,8 @@ class _SubmenuButtonState extends State<SubmenuButton> {
               }
 
               if (_buttonFocusNode.hasPrimaryFocus) {
-                _handleFocusChange();
+                _clearHoverOpenTimer();
+                _maybeOpenMenuOnHoverOrFocus();
               } else {
                 _buttonFocusNode.requestFocus();
               }
@@ -2239,6 +2240,10 @@ class _SubmenuButtonState extends State<SubmenuButton> {
       return;
     }
 
+    _maybeOpenMenuOnHoverOrFocus();
+  }
+
+  void _maybeOpenMenuOnHoverOrFocus() {
     if (!_isOpenOnFocusEnabled) {
       return;
     }
@@ -2256,8 +2261,8 @@ class _SubmenuButtonState extends State<SubmenuButton> {
       }
 
       if (_parent?._orientation == Axis.horizontal) {
-        // Top-level (horizontal) buttons in a menubar will stay open if we
-        // don't prevent it.
+        // Top-level (horizontal) buttons in a menubar will try to reopen when
+        // closed, since focus returns to their button.
         return;
       }
     }
