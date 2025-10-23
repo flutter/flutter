@@ -208,7 +208,13 @@ class SemanticTextField extends SemanticRole {
   }
 
   @override
-  bool get acceptsPointerEvents => true;
+  bool get acceptsPointerEvents {
+    return switch (semanticsObject.hitTestBehavior) {
+      ui.SemanticsHitTestBehavior.opaque => true,
+      ui.SemanticsHitTestBehavior.transparent => false,
+      _ => true,
+    };
+  }
 
   /// The element used for editing, e.g. `<input>`, `<textarea>`, which is
   /// different from the host [element].

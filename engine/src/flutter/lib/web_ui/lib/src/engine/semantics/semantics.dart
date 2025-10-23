@@ -586,47 +586,25 @@ abstract class SemanticRole {
   /// This boolean decides whether to set the `pointer-events` CSS property to
   /// `all` or to `none` on the semantics [element].
   ///
-  /// The decision follows a two-tier policy:
-  ///
-  /// **Tier 1: Framework Declaration** - When the framework provides an explicit
-  /// [ui.SemanticsHitTestBehavior] (other than `defer`), it takes absolute
-  /// precedence. The engine executes what the framework declares, even if it
-  /// makes an interactive element non-clickable. The framework layer is
-  /// responsible for ensuring valid semantic configurations.
-  ///
-  /// **Tier 2: Engine Inference** - When [ui.SemanticsHitTestBehavior.defer] is
-  /// set (the default), the engine infers the appropriate behavior based on:
-  /// - Interactive behaviors (buttons, text fields, sliders, etc.)
-  /// - Route-scoped containers (dialogs, bottom sheets)
-  /// - Default transparent for non-interactive leaf nodes
-  ///
-  /// This approach allows framework full control when specified, with reasonable
-  /// fallback inference for backward compatibility.
+  /// The behavior is determined by [ui.SemanticsHitTestBehavior]:
+  /// - `opaque`: Accepts pointer events (blocks elements behind)
+  /// - `transparent`: Rejects pointer events (passes through)
+  /// - `defer`: Infers based on semantic properties (interactive behaviors, etc.)
   bool get acceptsPointerEvents {
     final hitTestBehavior = semanticsObject.hitTestBehavior;
 
-    // TIER 1: Framework Declaration
-    // If framework provides explicit behavior (not defer), respect it absolutely.
-    // The framework is responsible for ensuring valid configurations (e.g., not
-    // making buttons transparent).
-    if (hitTestBehavior != ui.SemanticsHitTestBehavior.defer) {
-      switch (hitTestBehavior) {
-        case ui.SemanticsHitTestBehavior.opaque:
-          // Absorb pointer events, blocking them from reaching elements behind.
-          // Used by modal surfaces like dialogs, bottom sheets, drawers.
-          return true;
-        case ui.SemanticsHitTestBehavior.transparent:
-          // Pass through pointer events to elements behind.
-          // Used for non-interactive decorative elements.
-          return false;
-        case ui.SemanticsHitTestBehavior.defer:
-          break;
-      }
+    switch (hitTestBehavior) {
+      case ui.SemanticsHitTestBehavior.opaque:
+        // Absorb pointer events, blocking them from reaching elements behind.
+        // Used by modal surfaces like dialogs, bottom sheets, drawers.
+        return true;
+      case ui.SemanticsHitTestBehavior.transparent:
+        // Pass through pointer events to elements behind.
+        // Used for non-interactive decorative elements.
+        return false;
+      case ui.SemanticsHitTestBehavior.defer:
+        return _inferAcceptsPointerEvents();
     }
-
-    // TIER 2: Engine Inference
-    // When framework defers to engine, infer based on semantic properties.
-    return _inferAcceptsPointerEvents();
   }
 
   /// Infers whether pointer events should be accepted based on semantic properties.
