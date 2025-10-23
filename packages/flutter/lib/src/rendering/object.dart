@@ -6419,9 +6419,14 @@ final class _SemanticsGeometry {
       }
 
       if (paintClipRect != null || semanticsClipRect != null) {
-        final Matrix4 inverted = Matrix4.zero()..copyInverse(transform);
-        semanticsClipRect = _transformRect(semanticsClipRect, inverted, MatrixUtils.transformRect);
-        paintClipRect = _transformRect(paintClipRect, inverted, MatrixUtils.transformRect);
+        final Matrix4 inverted = transform.clone();
+        final bool hasInverse = inverted.invert() != 0.0;
+        semanticsClipRect = hasInverse
+            ? _transformRect(semanticsClipRect, inverted, MatrixUtils.transformRect)
+            : null;
+        paintClipRect = hasInverse
+            ? _transformRect(paintClipRect, inverted, MatrixUtils.transformRect)
+            : null;
       }
       if (parentTransform != null) {
         MatrixUtils.multiplyInPlace(parentTransform, transform);
