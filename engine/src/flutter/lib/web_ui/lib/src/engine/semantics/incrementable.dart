@@ -74,7 +74,6 @@ class SemanticIncrementable extends SemanticRole {
   @override
   bool get acceptsPointerEvents {
     return switch (semanticsObject.hitTestBehavior) {
-      ui.SemanticsHitTestBehavior.opaque => true,
       ui.SemanticsHitTestBehavior.transparent => false,
       _ => true,
     };
