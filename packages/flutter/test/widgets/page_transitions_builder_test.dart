@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -502,6 +503,469 @@ void main() {
       // Back to page 1.
       expect(find.text('Page 1'), isOnstage);
       expect(find.text('Page 2'), findsNothing);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
+  testWidgets('FadeForwardsPageTransitionsBuilder test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Navigator(
+          onGenerateRoute: (RouteSettings settings) {
+            return _CustomPageRoute<void>(
+              settings: settings,
+              transitionsBuilder: const FadeForwardsPageTransitionsBuilder(),
+              builder: (BuildContext context) {
+                if (settings.name == '/') {
+                  return ColoredBox(
+                    color: const Color(0xFF2196F3),
+                    child: Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).pushNamed('/second');
+                        },
+                        child: const Text(
+                          'Page 1',
+                          style: TextStyle(color: Color(0xFFFFFFFF), fontSize: 24),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                return const ColoredBox(
+                  color: Color(0xFF4CAF50),
+                  child: Center(
+                    child: Text('Page 2', style: TextStyle(color: Color(0xFFFFFFFF), fontSize: 24)),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    final Offset widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
+
+    await tester.tap(find.text('Page 1'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+
+    Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+
+    // Horizontal transition: Page 2 should be to the right of Page 1.
+    expect(widget1TopLeft.dx < widget2TopLeft.dx, true);
+    // Vertical position should be the same.
+    expect(widget1TopLeft.dy == widget2TopLeft.dy, true);
+
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), isOnstage);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+
+    widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+
+    // Page 2 starts to move to the right during reverse transition.
+    expect(widget1TopLeft.dx < widget2TopLeft.dx, true);
+
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Page 1'), isOnstage);
+    expect(find.text('Page 2'), findsNothing);
+  });
+
+  testWidgets(
+    'FadeForwardsPageTransitionsBuilder test with Material PageTransitionsTheme',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: const Material(child: Text('Page 1')),
+          theme: ThemeData(
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+              },
+            ),
+          ),
+          routes: <String, WidgetBuilder>{
+            '/next': (BuildContext context) {
+              return const Material(child: Text('Page 2'));
+            },
+          },
+        ),
+      );
+
+      final Offset widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
+
+      tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1));
+
+      Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+
+      // Horizontal transition: Page 2 should be to the right of Page 1.
+      expect(widget1TopLeft.dx < widget2TopLeft.dx, true);
+      // Vertical position should be the same.
+      expect(widget1TopLeft.dy == widget2TopLeft.dy, true);
+
+      await tester.pumpAndSettle();
+
+      // Page 2 covers page 1.
+      expect(find.text('Page 1'), findsNothing);
+      expect(find.text('Page 2'), isOnstage);
+
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1));
+
+      widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+
+      // Page 2 starts to move to the right during reverse transition.
+      expect(widget1TopLeft.dx < widget2TopLeft.dx, true);
+
+      await tester.pumpAndSettle();
+
+      // Back to page 1.
+      expect(find.text('Page 1'), isOnstage);
+      expect(find.text('Page 2'), findsNothing);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
+  testWidgets(
+    'Default background color in FadeForwardsPageTransitionsBuilder',
+    (WidgetTester tester) async {
+      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
+          ),
+        ),
+        '/b': (BuildContext context) => const Text('page b'),
+      };
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+              },
+            ),
+            colorScheme: ThemeData().colorScheme.copyWith(surface: Colors.pink),
+          ),
+          routes: routes,
+        ),
+      );
+
+      Finder findFadeForwardsPageTransition() {
+        return find.descendant(
+          of: find.byType(MaterialApp),
+          matching: find.byWidgetPredicate(
+            (Widget w) => '${w.runtimeType}' == '_FadeForwardsPageTransition',
+          ),
+        );
+      }
+
+      expect(findFadeForwardsPageTransition(), findsOneWidget);
+
+      await tester.tap(find.text('push'));
+      await tester.pump(const Duration(milliseconds: 400));
+
+      final Finder coloredBoxFinder = find.byType(ColoredBox).last;
+      expect(coloredBoxFinder, findsOneWidget);
+      final ColoredBox coloredBox = tester.widget<ColoredBox>(coloredBoxFinder);
+      expect(coloredBox.color, const Color(0xFF000000));
+
+      await tester.pumpAndSettle();
+      expect(find.text('page b'), findsOneWidget);
+      expect(findFadeForwardsPageTransition(), findsOneWidget);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
+  testWidgets(
+    'Override background color in FadeForwardsPageTransitionBuilder',
+    (WidgetTester tester) async {
+      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
+          ),
+        ),
+        '/b': (BuildContext context) => const Text('page b'),
+      };
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                TargetPlatform.android: FadeForwardsPageTransitionsBuilder(
+                  backgroundColor: Colors.lightGreen,
+                ),
+              },
+            ),
+            colorScheme: ThemeData().colorScheme.copyWith(surface: Colors.pink),
+          ),
+          routes: routes,
+        ),
+      );
+
+      Finder findFadeForwardsPageTransition() {
+        return find.descendant(
+          of: find.byType(MaterialApp),
+          matching: find.byWidgetPredicate(
+            (Widget w) => '${w.runtimeType}' == '_FadeForwardsPageTransition',
+          ),
+        );
+      }
+
+      expect(findFadeForwardsPageTransition(), findsOneWidget);
+
+      await tester.tap(find.text('push'));
+      await tester.pump(const Duration(milliseconds: 400));
+
+      final Finder coloredBoxFinder = find.byType(ColoredBox).last;
+      expect(coloredBoxFinder, findsOneWidget);
+      final ColoredBox coloredBox = tester.widget<ColoredBox>(coloredBoxFinder);
+      expect(coloredBox.color, Colors.lightGreen);
+
+      await tester.pumpAndSettle();
+      expect(find.text('page b'), findsOneWidget);
+      expect(findFadeForwardsPageTransition(), findsOneWidget);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
+  group('FadeForwardsPageTransitionsBuilder transitions', () {
+    testWidgets(
+      'opacity fades out during forward secondary animation',
+      (WidgetTester tester) async {
+        final AnimationController controller = AnimationController(
+          duration: const Duration(milliseconds: 100),
+          vsync: const TestVSync(),
+        );
+        addTearDown(controller.dispose);
+        final Animation<double> animation = Tween<double>(begin: 1, end: 0).animate(controller);
+        final Animation<double> secondaryAnimation = Tween<double>(
+          begin: 0,
+          end: 1,
+        ).animate(controller);
+
+        await tester.pumpWidget(
+          Builder(
+            builder: (BuildContext context) {
+              return const FadeForwardsPageTransitionsBuilder().delegatedTransition!(
+                context,
+                animation,
+                secondaryAnimation,
+                false,
+                const SizedBox(),
+              )!;
+            },
+          ),
+        );
+
+        final RenderAnimatedOpacity? renderOpacity = tester
+            .element(find.byType(SizedBox))
+            .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+
+        // Since secondary animation is forward, transition will be reverse between duration 0 to 0.25.
+        controller.value = 0.0;
+        await tester.pump();
+        expect(renderOpacity?.opacity.value, 1.0);
+
+        controller.value = 0.25;
+        await tester.pump();
+        expect(renderOpacity?.opacity.value, 0.0);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+
+    testWidgets(
+      'opacity fades in during reverse secondary animaation',
+      (WidgetTester tester) async {
+        final AnimationController controller = AnimationController(
+          duration: const Duration(milliseconds: 100),
+          vsync: const TestVSync(),
+        );
+        addTearDown(controller.dispose);
+        final Animation<double> animation = Tween<double>(begin: 0, end: 1).animate(controller);
+        final Animation<double> secondaryAnimation = Tween<double>(
+          begin: 1,
+          end: 0,
+        ).animate(controller);
+
+        await tester.pumpWidget(
+          Builder(
+            builder: (BuildContext context) {
+              return const FadeForwardsPageTransitionsBuilder().delegatedTransition!(
+                context,
+                animation,
+                secondaryAnimation,
+                false,
+                const SizedBox(),
+              )!;
+            },
+          ),
+        );
+
+        final RenderAnimatedOpacity? renderOpacity = tester
+            .element(find.byType(SizedBox))
+            .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+
+        // Since secondary animation is reverse, transition will be forward between duration 0.75 to 1.0.
+        controller.value = 0.75;
+        await tester.pump();
+        expect(renderOpacity?.opacity.value, 0.0);
+
+        controller.value = 1.0;
+        await tester.pump();
+        expect(renderOpacity?.opacity.value, 1.0);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+
+    testWidgets(
+      'FadeForwardsPageTransitionBuilder does not use ColoredBox for non-opaque routes',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(
+              pageTransitionsTheme: const PageTransitionsTheme(
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  TargetPlatform.android: FadeForwardsPageTransitionsBuilder(
+                    backgroundColor: Colors.lightGreen,
+                  ),
+                },
+              ),
+            ),
+            home: Builder(
+              builder: (BuildContext context) {
+                return Material(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder<void>(
+                          opaque: false,
+                          pageBuilder: (_, _, _) {
+                            return Material(
+                              child: TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute<void>(builder: (_) => const Text('page b')),
+                                  );
+                                },
+                                child: const Text('push b'),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    child: const Text('push a'),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('push a'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('push b'));
+        await tester.pump(const Duration(milliseconds: 400));
+
+        void findColoredBox() {
+          expect(
+            find.byWidgetPredicate((Widget w) => w is ColoredBox && w.color == Colors.lightGreen),
+            findsNothing,
+          );
+        }
+
+        // Check that ColoredBox is not used for non-opaque route.
+        findColoredBox();
+
+        await tester.pumpAndSettle();
+
+        Navigator.pop(tester.element(find.text('page b')));
+
+        await tester.pumpAndSettle(const Duration(milliseconds: 400));
+
+        // Check that ColoredBox is not used for non-opaque route
+        findColoredBox();
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+  });
+
+  testWidgets(
+    'FadeForwardsPageTransitionBuilder default duration is 800ms',
+    (WidgetTester tester) async {
+      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
+          ),
+        ),
+        '/b': (BuildContext context) => const Text('page b'),
+      };
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+              },
+            ),
+          ),
+          routes: routes,
+        ),
+      );
+
+      Finder findFadeForwardsPageTransition() {
+        return find.descendant(
+          of: find.byType(MaterialApp),
+          matching: find.byWidgetPredicate(
+            (Widget w) => '${w.runtimeType}' == '_FadeForwardsPageTransition',
+          ),
+        );
+      }
+
+      expect(findFadeForwardsPageTransition(), findsOneWidget);
+
+      await tester.tap(find.text('push'));
+      await tester.pump(const Duration(milliseconds: 799));
+      expect(find.text('page b'), findsNothing);
+      ColoredBox coloredBox = tester.widget(find.byType(ColoredBox).last);
+      expect(
+        coloredBox.color,
+        isNot(Colors.transparent),
+      ); // Color is not transparent during animation.
+
+      await tester.pump(const Duration(milliseconds: 801));
+      expect(find.text('page b'), findsOneWidget);
+      coloredBox = tester.widget(find.byType(ColoredBox).last);
+      expect(coloredBox.color, Colors.transparent); // Color is transparent during animation.
     },
     variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
