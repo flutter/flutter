@@ -194,8 +194,8 @@ class Checkbox extends StatefulWidget {
   /// When [value] is null and [tristate] is true, [WidgetState.selected] is
   /// included as a state.
   ///
-  /// If null, then the value of [CheckboxThemeData.mouseCursor] is used. If
-  /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
+  /// If this property is null, the value of [CheckboxThemeData.mouseCursor] is used.
+  /// If that is also null, [WidgetStateMouseCursor.adaptiveClickable] is used.
   final MouseCursor? mouseCursor;
 
   /// The color to use when this checkbox is checked.
@@ -530,7 +530,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
         WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
           return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
               checkboxTheme.mouseCursor?.resolve(states) ??
-              WidgetStateMouseCursor.clickable.resolve(states);
+              WidgetStateMouseCursor.adaptiveClickable.resolve(states);
         });
 
     // Colors need to be resolved in selected and non selected states separately
