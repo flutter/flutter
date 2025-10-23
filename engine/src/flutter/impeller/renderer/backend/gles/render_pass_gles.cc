@@ -189,6 +189,38 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
   gl.StencilMaskSeparate(GL_BACK, 0xFFFFFFFF);
 }
 
+static void EncodeViewport(const ProcTableGLES& gl,
+                           const RenderPassData& pass_data,
+                           const std::optional<Viewport>& command_viewport,
+                           const ISize& target_size,
+                           std::optional<Viewport>& current_viewport) {
+  auto new_viewport = command_viewport.value_or(pass_data.viewport);
+
+  if (current_viewport.has_value() &&
+      current_viewport.value() == new_viewport) {
+    // The viewport is the same as the last command. Skip an unnecessary call.
+    return;
+  }
+
+  current_viewport = new_viewport;
+
+  gl.Viewport(new_viewport.rect.GetX(),  // x
+              target_size.height - new_viewport.rect.GetY() -
+                  new_viewport.rect.GetHeight(),  // y
+              new_viewport.rect.GetWidth(),       // width
+              new_viewport.rect.GetHeight()       // height
+  );
+  if (pass_data.depth_attachment) {
+    if (gl.DepthRangef.IsAvailable()) {
+      gl.DepthRangef(new_viewport.depth_range.z_near,
+                     new_viewport.depth_range.z_far);
+    } else {
+      gl.DepthRange(new_viewport.depth_range.z_near,
+                    new_viewport.depth_range.z_far);
+    }
+  }
+}
+
 [[nodiscard]] bool EncodeCommandsInReactor(
     const RenderPassData& pass_data,
     const ReactorGLES& reactor,
@@ -303,24 +335,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
   // is bottom left origin, so we convert the coordinates here.
   ISize target_size = pass_data.color_attachment->GetSize();
 
-  //--------------------------------------------------------------------------
-  /// Setup the viewport.
-  ///
-  const auto& viewport = pass_data.viewport;
-  gl.Viewport(viewport.rect.GetX(),  // x
-              target_size.height - viewport.rect.GetY() -
-                  viewport.rect.GetHeight(),  // y
-              viewport.rect.GetWidth(),       // width
-              viewport.rect.GetHeight()       // height
-  );
-  if (pass_data.depth_attachment) {
-    if (gl.DepthRangef.IsAvailable()) {
-      gl.DepthRangef(viewport.depth_range.z_near, viewport.depth_range.z_far);
-    } else {
-      gl.DepthRange(viewport.depth_range.z_near, viewport.depth_range.z_far);
-    }
-  }
-
+  std::optional<Viewport> current_viewport;
   CullMode current_cull_mode = CullMode::kNone;
   WindingOrder current_winding_order = WindingOrder::kClockwise;
   gl.FrontFace(GL_CW);
@@ -372,23 +387,12 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     //--------------------------------------------------------------------------
     /// Setup the viewport.
     ///
-    if (command.viewport.has_value()) {
-      gl.Viewport(viewport.rect.GetX(),  // x
-                  target_size.height - viewport.rect.GetY() -
-                      viewport.rect.GetHeight(),  // y
-                  viewport.rect.GetWidth(),       // width
-                  viewport.rect.GetHeight()       // height
-      );
-      if (pass_data.depth_attachment) {
-        if (gl.DepthRangef.IsAvailable()) {
-          gl.DepthRangef(viewport.depth_range.z_near,
-                         viewport.depth_range.z_far);
-        } else {
-          gl.DepthRange(viewport.depth_range.z_near,
-                        viewport.depth_range.z_far);
-        }
-      }
-    }
+    EncodeViewport(gl,                //
+                   pass_data,         //
+                   command.viewport,  //
+                   target_size,       //
+                   current_viewport   //
+    );
 
     //--------------------------------------------------------------------------
     /// Setup the scissor rect.
