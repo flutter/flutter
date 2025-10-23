@@ -45,8 +45,8 @@ object FlutterPluginConstants {
     /** When split is enabled, multiple APKs are generated per each ABI. */
     @JvmStatic val DEFAULT_PLATFORMS =
         listOf(
-            PLATFORM_ARM32,
+            //PLATFORM_ARM32,
             PLATFORM_ARM64,
-            PLATFORM_X86_64
+            //PLATFORM_X86_64
         )
 }
