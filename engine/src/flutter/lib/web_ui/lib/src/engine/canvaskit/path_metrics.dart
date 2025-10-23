@@ -2,35 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
 import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-class CkPathMetrics extends IterableBase<ui.PathMetric> implements DisposablePathMetrics {
-  CkPathMetrics(this._path, this._forceClosed);
-
-  final CkPath _path;
-  final bool _forceClosed;
-
-  /// The [CkPath.isEmpty] case is special-cased to avoid booting the WASM machinery just to find out there are no contours.
-  @override
-  late final DisposablePathMetricIterator iterator = _path.isEmpty
-      ? const CkPathMetricIteratorEmpty._()
-      : CkContourMeasureIter(this);
-}
-
 class CkContourMeasureIter implements DisposablePathMetricIterator {
-  CkContourMeasureIter(this._metrics) {
-    _skPathRef = UniqueRef<SkPath>(
-      this,
-      _metrics._path.snapshotSkPath(),
-      'SkContourMeasureIter:SkPath',
-    );
+  CkContourMeasureIter(this._path, this._forceClosed) {
+    // TODO: Can we get rid of the UniqueRef here?
     _ref = UniqueRef<SkContourMeasureIter>(
       this,
-      SkContourMeasureIter(_skPathRef.nativeObject, _metrics._forceClosed, 1.0),
+      SkContourMeasureIter(_path.skiaObject, _forceClosed, 1.0),
       'CkContourMeasureIter:SkContourMeasureIter',
     );
   }
@@ -38,19 +20,13 @@ class CkContourMeasureIter implements DisposablePathMetricIterator {
   @override
   void dispose() {
     _ref.dispose();
-    _skPathRef.dispose();
   }
 
-  final CkPathMetrics _metrics;
+  final CkPath _path;
+  final bool _forceClosed;
   late final UniqueRef<SkContourMeasureIter> _ref;
-  late final UniqueRef<SkPath> _skPathRef;
 
   SkContourMeasureIter get skiaObject => _ref.nativeObject;
-
-  /// A monotonically increasing counter used to generate [ui.PathMetric.contourIndex].
-  ///
-  /// CanvasKit does not supply the contour index. We have to add it ourselves.
-  int _contourIndexCounter = 0;
 
   @override
   CkContourMeasure get current {
@@ -75,21 +51,17 @@ class CkContourMeasureIter implements DisposablePathMetricIterator {
       return false;
     }
 
-    _current = CkContourMeasure(_metrics, skContourMeasure, _contourIndexCounter);
-    _contourIndexCounter += 1;
+    _current = CkContourMeasure(_path.fillType, skContourMeasure);
     return true;
   }
 }
 
 class CkContourMeasure implements DisposablePathMetric {
-  CkContourMeasure(this._metrics, SkContourMeasure skiaObject, this.contourIndex) {
+  CkContourMeasure(this._fillType, SkContourMeasure skiaObject) {
     _ref = UniqueRef<SkContourMeasure>(this, skiaObject, 'PathMetric');
   }
 
-  /// The path metrics used to create this measure.
-  ///
-  /// This is used to resurrect the object if it is deleted prematurely.
-  final CkPathMetrics _metrics;
+  final ui.PathFillType _fillType;
 
   late final UniqueRef<SkContourMeasure> _ref;
 
@@ -101,14 +73,10 @@ class CkContourMeasure implements DisposablePathMetric {
   }
 
   @override
-  final int contourIndex;
-
-  @override
   CkPath extractPath(double start, double end, {bool startWithMoveTo = true}) {
     final SkPath skPath = skiaObject.getSegment(start, end, startWithMoveTo);
-    final CkPath extractedCkPath = CkPath.fromSkPath(skPath, _metrics._path.fillType);
-    skPath.delete();
-    return extractedCkPath;
+    skPath.setFillType(toSkFillType(_fillType));
+    return CkPath(skPath);
   }
 
   @override
@@ -129,7 +97,7 @@ class CkContourMeasure implements DisposablePathMetric {
 }
 
 class CkPathMetricIteratorEmpty implements DisposablePathMetricIterator {
-  const CkPathMetricIteratorEmpty._();
+  const CkPathMetricIteratorEmpty();
 
   @override
   CkContourMeasure get current {

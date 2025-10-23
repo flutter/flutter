@@ -228,13 +228,13 @@ class PlatformViewEmbedder {
                   '${rrect.bottom}px ${rrect.left}px '
                   'round ${rrect.blRadiusX}px)';
             } else {
-              final LayerPath path = ui.Path() as LayerPath;
+              final LazyPath path = ui.Path() as LazyPath;
               path.addRRect(mutator.rrect!);
-              clipView.style.clipPath = 'path("${path.toSvgString()}")';
+              clipView.style.clipPath = 'path("${path.builtPath.toSvgString()}")';
+              path.dispose();
             }
           } else if (mutator.path != null) {
-            final LayerPath path = (mutator.path! as LazyPath).builtPath as LayerPath;
-            clipView.style.clipPath = 'path("${path.toSvgString()}")';
+            clipView.style.clipPath = 'path("${mutator.path!.builtPath.toSvgString()}")';
           }
           _resetAnchor(clipView);
           head = clipView;
@@ -700,7 +700,8 @@ class Mutator {
   const Mutator.clipRect(ui.Rect rect) : this._(MutatorType.clipRect, rect, null, null, null, null);
   const Mutator.clipRRect(ui.RRect rrect)
     : this._(MutatorType.clipRRect, null, rrect, null, null, null);
-  const Mutator.clipPath(ui.Path path) : this._(MutatorType.clipPath, null, null, path, null, null);
+  const Mutator.clipPath(LazyPath path)
+    : this._(MutatorType.clipPath, null, null, path, null, null);
   const Mutator.transform(Matrix4 matrix)
     : this._(MutatorType.transform, null, null, null, matrix, null);
   const Mutator.opacity(int alpha) : this._(MutatorType.opacity, null, null, null, null, alpha);
@@ -710,7 +711,7 @@ class Mutator {
   final MutatorType type;
   final ui.Rect? rect;
   final ui.RRect? rrect;
-  final ui.Path? path;
+  final LazyPath? path;
   final Matrix4? matrix;
   final int? alpha;
 
@@ -768,7 +769,7 @@ class MutatorsStack extends Iterable<Mutator> {
     pushClipRRect(rsuperellipse.toApproximateRRect());
   }
 
-  void pushClipPath(ui.Path path) {
+  void pushClipPath(LazyPath path) {
     _mutators.add(Mutator.clipPath(path));
   }
 
