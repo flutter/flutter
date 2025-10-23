@@ -12,6 +12,7 @@ import 'base/bot_detector.dart';
 import 'base/common.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
+import 'base/utils.dart';
 import 'convert.dart';
 import 'resident_runner.dart';
 
@@ -66,23 +67,24 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       _processStartCompleter.complete();
 
       final devToolsCompleter = Completer<Uri>();
-      _devToolsProcess!.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((
-        String line,
-      ) {
-        final Match? dtdMatch = _serveDtdPattern.firstMatch(line);
-        if (dtdMatch != null) {
-          final String uri = dtdMatch[1]!;
-          dtdUri = Uri.parse(uri);
-        }
-        final Match? devToolsMatch = _serveDevToolsPattern.firstMatch(line);
-        if (devToolsMatch != null) {
-          final String url = devToolsMatch[1]!;
-          devToolsCompleter.complete(Uri.parse(url));
-        }
-      });
+      _devToolsProcess!.stdout
+          .transformWithCallSite(utf8.decoder)
+          .transformWithCallSite(const LineSplitter())
+          .listen((String line) {
+            final Match? dtdMatch = _serveDtdPattern.firstMatch(line);
+            if (dtdMatch != null) {
+              final String uri = dtdMatch[1]!;
+              dtdUri = Uri.parse(uri);
+            }
+            final Match? devToolsMatch = _serveDevToolsPattern.firstMatch(line);
+            if (devToolsMatch != null) {
+              final String url = devToolsMatch[1]!;
+              devToolsCompleter.complete(Uri.parse(url));
+            }
+          });
       _devToolsProcess!.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
+          .transformWithCallSite(utf8.decoder)
+          .transformWithCallSite(const LineSplitter())
           .listen(_logger.printError);
 
       final bool runningOnBot = await _botDetector.isRunningOnBot;

@@ -12,6 +12,7 @@ import 'package:file/file.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
+import 'package:stack_trace/stack_trace.dart';
 
 import '../convert.dart';
 import 'platform.dart';
@@ -578,5 +579,37 @@ extension UriExtension on Uri {
   /// Returns this [Uri] with its query parameters removed.
   Uri withoutQueryParameters() {
     return Uri(scheme: scheme, userInfo: userInfo, host: host, port: port, path: this.path);
+  }
+}
+
+extension StackTraceTransform<T> on Stream<T> {
+  /// A custom implementation of [transform] that captures the
+  /// stack trace at the point of invocation.
+  Stream<S> transformWithCallSite<S>(StreamTransformer<T, S> transformer) {
+    // Don't include this frame with the stack trace as it adds no value.
+    final callSiteTrace = Trace.current(1);
+
+    // Create a new controller to manage the output stream.
+    // We use a sync controller for minimal latency, and pass through
+    // pause/resume events.
+    final controller = StreamController<S>(sync: true);
+    controller.onListen = () {
+      // Listen to the original stream with the original transformer.
+      final StreamSubscription<S> subscription = transform<S>(transformer).listen(
+        (e) => controller.add(e),
+        onError: (Object e, StackTrace s) {
+          // Report the error with the call site trace.
+          controller.addError(e, callSiteTrace);
+        },
+        onDone: controller.close,
+      );
+
+      // Handle pause, resume, and cancellation by forwarding to the subscription.
+      controller.onPause = () => subscription.pause();
+      controller.onResume = () => subscription.resume();
+      controller.onCancel = () => subscription.cancel();
+    };
+
+    return controller.stream;
   }
 }

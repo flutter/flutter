@@ -16,6 +16,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
+import '../base/utils.dart';
 import '../convert.dart';
 
 /// An environment variable used to override the location of Google Chrome.
@@ -303,9 +304,12 @@ class ChromiumLauncher {
     while (true) {
       final Process process = await _processManager.start(args);
 
-      process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
-        _logger.printTrace('[CHROME]: $line');
-      });
+      process.stdout
+          .transformWithCallSite(utf8.decoder)
+          .transformWithCallSite(const LineSplitter())
+          .listen((String line) {
+            _logger.printTrace('[CHROME]: $line');
+          });
 
       // Wait until the DevTools are listening before trying to connect. This is
       // only required for flutter_test --platform=chrome and not flutter run.
@@ -313,8 +317,8 @@ class ChromiumLauncher {
       var shouldRetry = false;
       final errors = <String>[];
       await process.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
+          .transformWithCallSite(utf8.decoder)
+          .transformWithCallSite(const LineSplitter())
           .map((String line) {
             _logger.printTrace('[CHROME]: $line');
             errors.add('[CHROME]:$line');
