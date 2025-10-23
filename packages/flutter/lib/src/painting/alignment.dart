@@ -56,9 +56,11 @@ abstract class AlignmentGeometry {
 
   /// The top corner on the "start" edge.
   ///
+  /// {@template flutter.painting.alignment.directional.start}
   /// This can be used to indicate an offset from the left in [TextDirection.ltr]
   /// text and an offset from the right in [TextDirection.rtl] text without having
   /// to be aware of the current text direction.
+  /// {@endtemplate}
   ///
   /// See also:
   ///
@@ -67,9 +69,11 @@ abstract class AlignmentGeometry {
 
   /// The top corner on the "end" edge.
   ///
+  /// {@template flutter.painting.alignment.directional.end}
   /// This can be used to indicate an offset from the right in [TextDirection.ltr]
   /// text and an offset from the left in [TextDirection.rtl] text without having
   /// to be aware of the current text direction.
+  /// {@endtemplate}
   ///
   /// See also:
   ///
@@ -99,9 +103,7 @@ abstract class AlignmentGeometry {
 
   /// The center point along the "start" edge.
   ///
-  /// This can be used to indicate an offset from the left in [TextDirection.ltr]
-  /// text and an offset from the right in [TextDirection.rtl] text without having
-  /// to be aware of the current text direction.
+  /// {@macro flutter.painting.alignment.directional.start}
   ///
   /// See also:
   ///
@@ -110,9 +112,7 @@ abstract class AlignmentGeometry {
 
   /// The center point along the "end" edge.
   ///
-  /// This can be used to indicate an offset from the right in [TextDirection.ltr]
-  /// text and an offset from the left in [TextDirection.rtl] text without having
-  /// to be aware of the current text direction.
+  /// {@macro flutter.painting.alignment.directional.end}
   ///
   /// See also:
   ///
@@ -142,9 +142,7 @@ abstract class AlignmentGeometry {
 
   /// The bottom corner on the "start" edge.
   ///
-  /// This can be used to indicate an offset from the left in [TextDirection.ltr]
-  /// text and an offset from the right in [TextDirection.rtl] text without having
-  /// to be aware of the current text direction.
+  /// {@macro flutter.painting.alignment.directional.start}
   ///
   /// See also:
   ///
@@ -153,9 +151,7 @@ abstract class AlignmentGeometry {
 
   /// The bottom corner on the "end" edge.
   ///
-  /// This can be used to indicate an offset from the right in [TextDirection.ltr]
-  /// text and an offset from the left in [TextDirection.rtl] text without having
-  /// to be aware of the current text direction.
+  /// {@macro flutter.painting.alignment.directional.end}
   ///
   /// See also:
   ///
