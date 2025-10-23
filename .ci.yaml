@@ -7012,7 +7012,7 @@ targets:
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "hostonly", "macos"]
+        ["devicelab", "hostonly", "mac"]
       task_name: windowing_test_macos
 
 
