@@ -1173,7 +1173,7 @@ Build settings for action build and target good_plugin:
             () => updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo),
             throwsToolExit(
               message:
-                  'The plugin  - bad_plugin is excluding the arm64 architecture, which is a requirement for Xcode 26. Please file an issue with the plugin to support arm64.',
+                  'The plugin bad_plugin is excluding the arm64 architecture, which is a requirement for Xcode 26. Please file an issue with the plugin to support arm64.',
             ),
           );
           expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -1781,6 +1781,21 @@ flutter:
     });
 
     group('CoreDevice', () {
+      late FakeProcessManager fakeProcessManager;
+      late XcodeProjectInterpreter xcodeProjectInterpreter;
+      late Xcode xcode;
+
+      setUp(() {
+        fakeProcessManager = FakeProcessManager.empty();
+        xcodeProjectInterpreter = XcodeProjectInterpreter.test(
+          processManager: fakeProcessManager,
+          version: Version(26, 0, 0),
+        );
+        xcode = Xcode.test(
+          processManager: fakeProcessManager,
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
+        );
+      });
       testUsingContext(
         'sets CONFIGURATION_BUILD_DIR when configurationBuildDir is set',
         () async {
@@ -1807,6 +1822,7 @@ flutter:
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          Xcode: () => xcode,
         },
       );
 
@@ -1831,6 +1847,7 @@ flutter:
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          Xcode: () => xcode,
         },
       );
     });
