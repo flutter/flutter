@@ -5576,36 +5576,41 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       _debugLocked = true;
       return true;
     }());
-    final _RouteEntry entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
-    if (entry.pageBased && widget.onPopPage != null) {
-      if (widget.onPopPage!(entry.route, result)) {
-        if (entry.currentState.index <= _RouteLifecycle.idle.index) {
-          // The entry may have been disposed if the pop finishes synchronously.
-          assert(entry.route._popCompleter.isCompleted);
-          entry.currentState = _RouteLifecycle.pop;
+
+    try {
+      final _RouteEntry entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
+      if (entry.pageBased && widget.onPopPage != null) {
+        if (widget.onPopPage!(entry.route, result)) {
+          if (entry.currentState.index <= _RouteLifecycle.idle.index) {
+            // The entry may have been disposed if the pop finishes synchronously.
+            assert(entry.route._popCompleter.isCompleted);
+            entry.currentState = _RouteLifecycle.pop;
+          }
+          entry.route.onPopInvokedWithResult(true, result);
         }
-        entry.route.onPopInvokedWithResult(true, result);
+      } else {
+        entry.pop<T>(result, imperativeRemoval: true);
+        assert(entry.currentState == _RouteLifecycle.pop);
       }
-    } else {
-      entry.pop<T>(result, imperativeRemoval: true);
-      assert(entry.currentState == _RouteLifecycle.pop);
+      if (entry.currentState == _RouteLifecycle.pop) {
+        _flushHistoryUpdates(rearrangeOverlay: false);
+        assert(
+          () {
+            final bool hasPresentRoute = _history.any(_RouteEntry.isPresentPredicate);
+            return hasPresentRoute;
+          }(),
+          'Tried to pop a route on an empty stack. Ensure there is at least one route before calling Navigator.pop().',
+        );
+      }
+      assert(entry.currentState == _RouteLifecycle.idle || entry.route._popCompleter.isCompleted);
+
+      _afterNavigation(entry.route);
+    } finally {
+      assert(() {
+        _debugLocked = false;
+        return true;
+      }());
     }
-    if (entry.currentState == _RouteLifecycle.pop) {
-      _flushHistoryUpdates(rearrangeOverlay: false);
-      assert(
-        () {
-          final bool hasPresentRoute = _history.any(_RouteEntry.isPresentPredicate);
-          return hasPresentRoute;
-        }(),
-        'Tried to pop a route on an empty stack. Ensure there is at least one route before calling Navigator.pop().',
-      );
-    }
-    assert(entry.currentState == _RouteLifecycle.idle || entry.route._popCompleter.isCompleted);
-    assert(() {
-      _debugLocked = false;
-      return true;
-    }());
-    _afterNavigation(entry.route);
   }
 
   /// Calls [pop] repeatedly until the predicate returns true.
