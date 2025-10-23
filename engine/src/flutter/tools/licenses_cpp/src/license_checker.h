@@ -15,6 +15,7 @@ class LicenseChecker {
  public:
   struct Flags {
     bool treat_unmatched_comments_as_errors = false;
+    std::optional<std::string> root_package_name;
   };
 
   static const char* kHeaderLicenseRegex;
