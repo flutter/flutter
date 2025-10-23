@@ -194,8 +194,10 @@ void CanvasPath::addArc(double left,
 }
 
 void CanvasPath::addPolygon(const tonic::Float32List& points, bool close) {
-  sk_path_.addPoly(reinterpret_cast<const SkPoint*>(points.data()),
-                   points.num_elements() / 2, close);
+  SkSpan<const SkPoint> ptsSpan = {
+      reinterpret_cast<const SkPoint*>(points.data()),
+      points.num_elements() / 2};
+  sk_path_.addPoly(ptsSpan, close);
   resetVolatility();
 }
 
