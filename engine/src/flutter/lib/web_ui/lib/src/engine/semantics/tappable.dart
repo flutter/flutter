@@ -51,7 +51,7 @@ class Tappable extends SemanticBehavior {
   }
 
   @override
-  bool get acceptsPointerEvents => true;
+  bool get shouldAcceptPointerEvents => true;
 
   DomEventListener? _clickListener;
   bool _isListening = false;

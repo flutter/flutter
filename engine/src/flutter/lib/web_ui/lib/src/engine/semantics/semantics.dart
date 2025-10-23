@@ -270,6 +270,7 @@ class SemanticsNodeUpdate {
     required this.role,
     required this.controlsNodes,
     required this.validationResult,
+    this.hitTestBehavior = ui.SemanticsHitTestBehavior.defer,
     required this.inputType,
     required this.locale,
   });
@@ -381,6 +382,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.SemanticsValidationResult validationResult;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final ui.SemanticsHitTestBehavior hitTestBehavior;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.SemanticsInputType inputType;
@@ -581,20 +585,46 @@ abstract class SemanticRole {
   ///
   /// This boolean decides whether to set the `pointer-events` CSS property to
   /// `all` or to `none` on the semantics [element].
+  ///
+  /// The behavior is determined by [ui.SemanticsHitTestBehavior]:
+  /// - `opaque`: Accepts pointer events (blocks elements behind)
+  /// - `transparent`: Rejects pointer events (passes through)
+  /// - `defer`: Infers based on semantic properties (interactive behaviors, etc.)
   bool get acceptsPointerEvents {
+    final hitTestBehavior = semanticsObject.hitTestBehavior;
+
+    switch (hitTestBehavior) {
+      case ui.SemanticsHitTestBehavior.opaque:
+        // Absorb pointer events, blocking them from reaching elements behind.
+        // Used by modal surfaces like dialogs, bottom sheets, drawers.
+        return true;
+      case ui.SemanticsHitTestBehavior.transparent:
+        // Pass through pointer events to elements behind.
+        // Used for non-interactive decorative elements.
+        return false;
+      case ui.SemanticsHitTestBehavior.defer:
+        return _inferAcceptsPointerEvents();
+    }
+  }
+
+  /// Infers whether pointer events should be accepted based on semantic properties.
+  bool _inferAcceptsPointerEvents() {
+    assert(semanticsObject.hitTestBehavior == ui.SemanticsHitTestBehavior.defer);
+
+    // Check if any interactive behavior requires pointer events.
+    // Interactive behaviors (Tappable, SemanticTextField, SemanticIncrementable)
+    // override this to return true, ensuring buttons, text fields, and other
+    // interactive elements receive pointer events when framework defers.
     final behaviors = _behaviors;
     if (behaviors != null) {
       for (final behavior in behaviors) {
-        if (behavior.acceptsPointerEvents) {
+        if (behavior.shouldAcceptPointerEvents) {
           return true;
         }
       }
     }
-    // Ignore pointer events on all container nodes.
-    if (semanticsObject.hasChildren) {
-      return false;
-    }
-    return true;
+
+    return false;
   }
 
   /// Semantic behaviors provided by this role, if any.
@@ -1014,7 +1044,7 @@ abstract class SemanticBehavior {
   ///
   /// This boolean decides whether to set the `pointer-events` CSS property to
   /// `all` or to `none` on [SemanticsObject.element].
-  bool get acceptsPointerEvents => false;
+  bool get shouldAcceptPointerEvents => false;
 
   /// Called immediately after the [semanticsObject] updates some of its fields.
   ///
@@ -1466,6 +1496,17 @@ class SemanticsObject {
     _dirtyFields |= _validationResultIndex;
   }
 
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  ui.SemanticsHitTestBehavior get hitTestBehavior => _hitTestBehavior;
+  ui.SemanticsHitTestBehavior _hitTestBehavior = ui.SemanticsHitTestBehavior.defer;
+
+  static const int _hitTestBehaviorIndex = 1 << 28;
+
+  bool get isHitTestBehaviorDirty => _isDirty(_hitTestBehaviorIndex);
+  void _markHitTestBehaviorDirty() {
+    _dirtyFields |= _hitTestBehaviorIndex;
+  }
+
   /// A unique permanent identifier of the semantics node in the tree.
   final int id;
 
@@ -1776,6 +1817,11 @@ class SemanticsObject {
     if (_validationResult != update.validationResult) {
       _validationResult = update.validationResult;
       _markValidationResultDirty();
+    }
+
+    if (_hitTestBehavior != update.hitTestBehavior) {
+      _hitTestBehavior = update.hitTestBehavior;
+      _markHitTestBehaviorDirty();
     }
 
     role = update.role;
