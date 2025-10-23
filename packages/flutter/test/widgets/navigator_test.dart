@@ -5226,16 +5226,28 @@ void main() {
       final NavigatorState navigator = tester.state(find.byType(Navigator));
 
       Object? popException;
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterError.onError = (_) {}; // Suppress expected framework error logs
+
       try {
-        navigator.pop();
+        navigator.pop(); // Trigger the expected AssertionError
       } catch (e) {
         popException = e;
+      } finally {
+        FlutterError.onError = originalOnError;
       }
+
       expect(popException, isA<AssertionError>());
+      expect(
+        (popException! as AssertionError).message,
+        contains('Tried to pop a route on an empty stack'),
+      );
 
-      FlutterError.onError = (FlutterErrorDetails details) {};
-
+      // Clean up the widget tree
+      await tester.pumpWidget(const SizedBox());
       await tester.pumpAndSettle();
+
+      // Verify no lingering exceptions from improper cleanup
       expect(tester.takeException(), isNull);
     });
 
