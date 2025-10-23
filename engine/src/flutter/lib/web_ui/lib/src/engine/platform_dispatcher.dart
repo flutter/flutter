@@ -1089,23 +1089,24 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _typographyMeasurementElement!.text = 'flutter typography measurement';
     // The element should be hidden from screen readers.
     _typographyMeasurementElement!.setAttribute('aria-hidden', 'true');
-    final DomCSSStyleDeclaration style = _typographyMeasurementElement!.style;
-    style.position = 'absolute';
-    // The element should be off-screen and not visible.
-    style.top = '-9999px';
-    style.left = '-9999px';
-    style.visibility = 'hidden';
-    // The element should be sensitive to letter-spacing, word-spacing,
-    // and line-height changes.
-    style.width = 'auto';
-    style.height = 'auto';
-    style.whiteSpace = 'nowrap';
-    // Set text spacing properties defaults.
     const double spacingDefault = 100.0;
-    style.lineHeight = '${spacingDefault}px';
-    style.letterSpacing = '${spacingDefault}px';
-    style.wordSpacing = '${spacingDefault}px';
-    style.margin = '0px 0px ${spacingDefault}px 0px';
+    _typographyMeasurementElement!.style
+      ..position = 'absolute'
+      // The element should be off-screen and not visible.
+      ..top = '-9999px'
+      ..left = '-9999px'
+      ..visibility = 'hidden'
+      ..pointerEvents = 'none'
+      // The element should be sensitive to letter-spacing, word-spacing,
+      // and line-height changes.
+      ..width = 'auto'
+      ..height = 'auto'
+      ..whiteSpace = 'nowrap'
+      // Set text spacing properties defaults.
+      ..lineHeight = '${spacingDefault}px'
+      ..letterSpacing = '${spacingDefault}px'
+      ..wordSpacing = '${spacingDefault}px'
+      ..margin = '0px 0px ${spacingDefault}px 0px';
     domDocument.body!.append(_typographyMeasurementElement!);
     final double? typographyMeasurementElementFontSize = parseFontSize(
       _typographyMeasurementElement!,
