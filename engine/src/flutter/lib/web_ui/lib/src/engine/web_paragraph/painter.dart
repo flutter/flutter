@@ -38,6 +38,27 @@ abstract class Painter {
 
   /// Paints the decorations previously filled by [fillDecorations].
   void paintDecorations(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
+
+  /// Adjust the _paintCanvas scale based on device pixel ratio
+  double adjustCanvas(ui.Canvas canvas, double width, double height) {
+    if (width == 0 || height == 0) {
+      return 1.0;
+    }
+
+    final double zoomFactor = ui.window.devicePixelRatio;
+    _paintCanvas.width = (width * zoomFactor).ceilToDouble();
+    _paintCanvas.height = (height * zoomFactor).ceilToDouble();
+    paintContext.scale(zoomFactor, zoomFactor);
+
+    WebParagraphDebug.log(
+      'adjustPaintCanvas: ${_paintCanvas.width}x${_paintCanvas.height} @ $zoomFactor',
+    );
+    return zoomFactor;
+  }
+
+  void clearCanvas(ui.Rect sourceRect) {
+    paintContext.clearRect(0, 0, _paintCanvas.width!.ceil(), _paintCanvas.height!.ceil());
+  }
 }
 
 // TODO(jlavrova): precalculate the size of the canvas based on the text to be painted
@@ -81,7 +102,7 @@ class CanvasKitPainter extends Painter {
 
       paintContext.reset();
       paintContext.lineWidth = thickness;
-      paintContext.strokeStyle = block.style.decorationColor!.toCssString();
+      paintContext.strokeStyle = block.style.getDecorationColor().toCssString();
 
       switch (block.style.decorationStyle!) {
         case ui.TextDecorationStyle.wavy:

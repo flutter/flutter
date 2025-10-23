@@ -53,6 +53,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
          height: height,
          locale: locale,
          color: color,
+         background: ui.Paint()..color = const ui.Color(0x00000000),
        ),
        textDirection = textDirection ?? ui.TextDirection.ltr,
        textAlign = textAlign ?? ui.TextAlign.start;
@@ -341,6 +342,12 @@ class WebTextStyle implements ui.TextStyle {
     return foreground != null
         ? foreground!.color
         : (color != null ? color! : const ui.Color(0xFFFFFFFF));
+  }
+
+  ui.Color getDecorationColor() {
+    //print('foreground: ${foreground == null ? 'null' : foreground!.color.toCssString()}');
+    //print('color: ${color == null ? 'null' : color!.toCssString()}');
+    return decorationColor != null ? decorationColor! : getForegroundColor();
   }
 
   String _debugPaintToString(ui.Paint? paint) {
