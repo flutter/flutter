@@ -4825,6 +4825,15 @@ void main() {
 
     checkPopupMenu(popupMenuTheme2);
   });
+
+  testWidgets('PopupMenuDivider does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: PopupMenuDivider())),
+      ),
+    );
+    expect(tester.getSize(find.byType(PopupMenuDivider)), Size.zero);
+  });
 }
 
 Matcher overlaps(Rect other) => OverlapsMatcher(other);
