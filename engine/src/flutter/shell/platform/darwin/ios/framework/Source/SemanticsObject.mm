@@ -789,9 +789,8 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (BOOL)accessibilityRespondsToUserInteraction {
-  // If isAccessibilityFocusable has a value, use it. otherwise fall back to the default logic.
-  if (self.node.flags.isAccessibilityFocusable != flutter::SemanticsTristate::kNone) {
-    return self.node.flags.isAccessibilityFocusable == flutter::SemanticsTristate::kTrue;
+  if (self.node.flags.blockAccessibilityFocus) {
+    return false;
   }
 
   // Return true only if the node contains actions other than system actions.

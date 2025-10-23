@@ -540,6 +540,7 @@ void main() {
   testWidgets('Semantics widget supports all flags', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     // Checked state and toggled state are mutually exclusive.
+    // Focused and blockAccessibilityFocus are mutually exclusive.
     await tester.pumpWidget(
       Semantics(
         key: const Key('a'),
@@ -558,7 +559,6 @@ void main() {
         readOnly: true,
         focused: true,
         focusable: true,
-        accessibilityFocusable: true,
         inMutuallyExclusiveGroup: true,
         header: true,
         obscured: true,
@@ -578,7 +578,6 @@ void main() {
       isExpanded: Tristate.isTrue,
       isRequired: Tristate.isTrue,
       isFocused: Tristate.isTrue,
-      isAccessibilityFocusable: Tristate.isTrue,
       isButton: true,
       isTextField: true,
       isInMutuallyExclusiveGroup: true,
@@ -643,7 +642,6 @@ void main() {
         readOnly: true,
         focused: true,
         focusable: true,
-        accessibilityFocusable: true,
         inMutuallyExclusiveGroup: true,
         header: true,
         obscured: true,
@@ -835,7 +833,7 @@ void main() {
 
     semantics.dispose();
   });
-  testWidgets('accessibilityFocusable flag value is passed from parent to subtree,', (
+  testWidgets('blockSubTreeAccessibilityFocus flag value is applied to the subtree,', (
     WidgetTester tester,
   ) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -843,19 +841,19 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        accessibilityFocusable: true,
+        blockSubTreeAccessibilityFocus: true,
         child: Column(
           children: <Widget>[
-            // If the child has a value for accessibilityFocusable, It's valid.
+            // If the child set blockSubTreeAccessibilityFocus to `false`, it's still blcok because its parent.
             Semantics(
               container: true,
-              accessibilityFocusable: false,
+              blockSubTreeAccessibilityFocus: false,
               customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
                 const CustomSemanticsAction(label: 'action1'): () {},
               },
               child: const SizedBox(width: 10, height: 10),
             ),
-            // If the child doesn't have a value for accessibilityFocusable, it will use the parent data.
+            // If the child doesn't have a value for accessibilityFocusable, it will also use the parent data.
             Semantics(
               container: true,
               customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
@@ -875,16 +873,16 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               id: 1,
-              flags: SemanticsFlags(isAccessibilityFocusable: Tristate.isTrue),
+              flags: SemanticsFlags(blockAccessibilityFocus: true),
               children: <TestSemantics>[
                 TestSemantics(
                   id: 2,
-                  flags: SemanticsFlags(isAccessibilityFocusable: Tristate.isFalse),
+                  flags: SemanticsFlags(blockAccessibilityFocus: true),
                   actions: <SemanticsAction>[SemanticsAction.customAction],
                 ),
                 TestSemantics(
                   id: 3,
-                  flags: SemanticsFlags(isAccessibilityFocusable: Tristate.isTrue),
+                  flags: SemanticsFlags(blockAccessibilityFocus: true),
                   actions: <SemanticsAction>[SemanticsAction.customAction],
                 ),
               ],
@@ -906,7 +904,7 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        accessibilityFocusable: false,
+        blockSubTreeAccessibilityFocus: false,
         focused: true,
         customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
           const CustomSemanticsAction(label: 'action1'): () {},
