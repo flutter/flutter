@@ -4860,7 +4860,7 @@ mixin SemanticsAnnotationsMixin on RenderObject {
       config.isFocused = _properties.focused;
     }
     if (_properties.blockSubTreeAccessibilityFocus != null) {
-      config.blockSubTreeAccessibilityFocus = _properties.blockSubTreeAccessibilityFocus;
+      config.blockSubTreeAccessibilityFocus = _properties.blockSubTreeAccessibilityFocus!;
     }
     if (_properties.inMutuallyExclusiveGroup != null) {
       config.isInMutuallyExclusiveGroup = _properties.inMutuallyExclusiveGroup!;
