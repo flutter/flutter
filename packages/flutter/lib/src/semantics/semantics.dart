@@ -4767,6 +4767,12 @@ class SemanticsOwner extends ChangeNotifier {
       assert(
         node.parent?._dirty != true || node._isTraversalParent,
       ); // could be null (no parent) or false (not dirty)
+
+      // The traversalParentNode is added to updatedVisitedNodes for later
+      // grafting; its traversalChildren should be grafted to its children in
+      // the traversal order. This grafting process is skipped on web because
+      // the traversal order will be handled in the web engine.
+      final bool needUpdateTraversalParent = !kIsWeb && node._isTraversalParent;
       // The _serialize() method marks the node as not dirty, and
       // recurses through the tree to do a deep serialization of all
       // contiguous dirty nodes. This means that when we return here,
@@ -4777,7 +4783,7 @@ class SemanticsOwner extends ChangeNotifier {
       // calls reset() on its SemanticsNode if onlyChanges isn't set,
       // which happens e.g. when the node is no longer contributing
       // semantics).
-      if ((node._dirty || node._isTraversalParent) && node.attached) {
+      if ((node._dirty || needUpdateTraversalParent) && node.attached) {
         node._addToUpdate(builder, customSemanticsActionIds);
       }
     }
