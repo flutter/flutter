@@ -15,7 +15,6 @@ void main() {
           data: const MediaQueryData(
             size: Size(800.0, 600.0),
             // Device is in landscape orientation
-            devicePixelRatio: 1.0,
           ),
           child: Center(
             child: SizedBox(
@@ -46,7 +45,6 @@ void main() {
           data: const MediaQueryData(
             size: Size(600.0, 800.0),
             // Device is in portrait orientation
-            devicePixelRatio: 1.0,
           ),
           child: Center(
             child: SizedBox(
@@ -76,7 +74,6 @@ void main() {
         return MediaQuery(
           data: MediaQueryData(
             size: size,
-            devicePixelRatio: 1.0,
           ),
           child: DeviceOrientationBuilder(
             builder: (BuildContext context, Orientation o) {
@@ -105,7 +102,6 @@ void main() {
           data: const MediaQueryData(
             size: Size(800.0, 600.0),
             // Device orientation is landscape
-            devicePixelRatio: 1.0,
           ),
           child: Center(
             child: SizedBox(
