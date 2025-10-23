@@ -7005,6 +7005,16 @@ targets:
         ["devicelab", "hostonly", "linux"]
       task_name: windowing_test_linux
 
+  - name: MacOS windowing_test
+    recipe: devicelab/devicelab_drone
+    presubmit: true
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "macos"]
+      task_name: windowing_test_macos
+
 
   - name: Windows flutter_tool_startup__windows
     recipe: devicelab/devicelab_drone
