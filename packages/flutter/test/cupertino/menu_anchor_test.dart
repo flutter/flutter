@@ -1446,7 +1446,7 @@ void main() {
     await gesture.moveTo(menuRect.topLeft - const Offset(200, 200));
     await tester.pump();
 
-    // Scale should remain 1.0 when panning is disabled
+    // Scale should remain 1.0 when swiping is disabled
     expect(getScale(tester), moreOrLessEquals(1.0, epsilon: 0.001));
 
     await gesture.moveTo(menuRect.bottomRight + const Offset(200, 200));
@@ -1455,11 +1455,11 @@ void main() {
     // Scale should still remain 1.0
     expect(getScale(tester), moreOrLessEquals(1.0, epsilon: 0.001));
 
-    // Move to menu item and verify no special pan behavior occurs
+    // Move to menu item and verify no special swipe behavior occurs
     await gesture.moveTo(tester.getCenter(find.text(Tag.a.text)));
     await tester.pump(const Duration(milliseconds: 500));
 
-    // Menu should still be open since pan is disabled
+    // Menu should still be open since swipe is disabled
     expect(controller.isOpen, isTrue);
 
     await gesture.up();
