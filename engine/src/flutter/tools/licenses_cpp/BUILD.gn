@@ -18,9 +18,9 @@ source_set("licenses") {
     "src/mmap_file.h",
   ]
   public_deps = [
-    "//flutter/third_party/abseil-cpp/absl/log:initialize",
-    "//flutter/third_party/abseil-cpp/absl/status:statusor",
     "//flutter/third_party/re2",
+    "//third_party/abseil-cpp/absl/log:initialize",
+    "//third_party/abseil-cpp/absl/status:statusor",
   ]
 }
 
@@ -28,9 +28,9 @@ executable("licenses_cpp") {
   sources = [ "src/main.cc" ]
   deps = [
     ":licenses",
-    "//flutter/third_party/abseil-cpp/absl/flags:flag",
-    "//flutter/third_party/abseil-cpp/absl/flags:parse",
-    "//flutter/third_party/abseil-cpp/absl/status:statusor",
+    "//third_party/abseil-cpp/absl/flags:flag",
+    "//third_party/abseil-cpp/absl/flags:parse",
+    "//third_party/abseil-cpp/absl/status:statusor",
   ]
 }
 
@@ -41,11 +41,11 @@ executable("license_file_compare") {
     "src/mmap_file.h",
   ]
   deps = [
-    "//flutter/third_party/abseil-cpp/absl/flags:flag",
-    "//flutter/third_party/abseil-cpp/absl/flags:parse",
-    "//flutter/third_party/abseil-cpp/absl/log:initialize",
-    "//flutter/third_party/abseil-cpp/absl/status:statusor",
     "//flutter/third_party/re2",
+    "//third_party/abseil-cpp/absl/flags:flag",
+    "//third_party/abseil-cpp/absl/flags:parse",
+    "//third_party/abseil-cpp/absl/log:initialize",
+    "//third_party/abseil-cpp/absl/status:statusor",
   ]
 }
 
