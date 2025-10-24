@@ -381,6 +381,11 @@ TEST_P(AiksTest, CanRenderClippedBlur) {
 
 TEST_P(AiksTest, ComposePaintBlurOuter) {
   DisplayListBuilder builder;
+
+  DlPaint background;
+  background.setColor(DlColor(1.0, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
+  builder.DrawPaint(background);
+
   DlPaint paint;
   paint.setColor(DlColor::kGreen());
   float matrix[] = {
@@ -402,6 +407,11 @@ TEST_P(AiksTest, ComposePaintBlurOuter) {
 
 TEST_P(AiksTest, ComposePaintBlurInner) {
   DisplayListBuilder builder;
+
+  DlPaint background;
+  background.setColor(DlColor(1.0, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
+  builder.DrawPaint(background);
+
   DlPaint paint;
   paint.setColor(DlColor::kGreen());
   float matrix[] = {

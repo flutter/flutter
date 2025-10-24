@@ -173,6 +173,9 @@ TEST_P(AiksTest, ComposePaintRuntimeOuter) {
       DlRuntimeEffectImpeller::Make(runtime_stage), sampler_inputs,
       uniform_data);
 
+  builder.Translate(50, 50);
+  builder.Scale(0.7, 0.7);
+
   paint.setImageFilter(
       DlImageFilter::MakeCompose(runtime_filter, color_filter));
   auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
@@ -195,10 +198,10 @@ TEST_P(AiksTest, ComposePaintRuntimeInner) {
       runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
-  Scalar xoffset = 0;
-  Scalar yoffset = 0;
-  Scalar xscale = 1;
-  Scalar yscale = 1;
+  Scalar xoffset = 50;
+  Scalar yoffset = 50;
+  Scalar xscale = 0.7;
+  Scalar yscale = 0.7;
   bool compare = false;
 
   auto callback = [&]() -> sk_sp<DisplayList> {
