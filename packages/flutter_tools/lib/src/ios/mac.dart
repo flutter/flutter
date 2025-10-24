@@ -10,11 +10,13 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
+import '../base/fingerprint.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/project_migrator.dart';
 import '../base/utils.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../darwin/darwin.dart';
@@ -270,6 +272,19 @@ Future<XcodeBuildResult> buildXcodeProject({
       'file version field before submitting to the App Store.',
     );
   }
+  final XcodeSdk sdk;
+  if (environmentType == EnvironmentType.physical) {
+    sdk = XcodeSdk.IPhoneOS;
+  } else {
+    sdk = XcodeSdk.IPhoneSimulator;
+  }
+  final String buildDirectoryPath = getIosBuildDirectory();
+  final Directory buildDirectory = globals.fs.directory(buildDirectoryPath);
+  final bool incrementalBuild =
+      buildDirectory.existsSync() &&
+      buildDirectory.listSync().any(
+        (FileSystemEntity entity) => entity.basename.contains(sdk.platformName),
+      );
 
   Map<String, String>? autoSigningConfigs;
 
@@ -310,7 +325,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       );
     }
   }
-  await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
+  await processPodsIfNeeded(project.ios, buildDirectoryPath, buildInfo.mode);
   if (configOnly) {
     return XcodeBuildResult(success: true);
   }
@@ -321,6 +336,25 @@ Future<XcodeBuildResult> buildXcodeProject({
     '-configuration',
     configuration,
   ];
+
+  final Version? xcodeVersion = globals.xcode?.currentVersion;
+  // Check the public headers before checking Xcode version so headers fingerprinter is created
+  // regardless of Xcode version.
+  if (publicHeadersChanged(
+        environmentType: environmentType,
+        mode: buildInfo.mode,
+        buildDirectory: buildDirectoryPath,
+        artifacts: globals.artifacts,
+        fileSystem: globals.fs,
+        logger: globals.logger,
+      ) &&
+      incrementalBuild &&
+      (xcodeVersion != null && xcodeVersion >= Version(26, 0, 0))) {
+    // Xcode 26 changed the way headers are pre-compiled and will throw an error if the headers
+    // have changed since the last time they were compiled. To avoid this error, clean before
+    // building if headers have changed.
+    buildCommands.addAll(<String>['clean', 'build']);
+  }
 
   if (globals.logger.isVerbose) {
     // An environment variable to be passed to xcode_backend.sh determining
@@ -351,7 +385,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       scheme,
       if (buildAction !=
           XcodeBuildAction.archive) // dSYM files aren't copied to the archive if BUILD_DIR is set.
-        'BUILD_DIR=${globals.fs.path.absolute(getIosBuildDirectory())}',
+        'BUILD_DIR=${globals.fs.path.absolute(buildDirectoryPath)}',
     ]);
   }
 
@@ -373,20 +407,14 @@ Future<XcodeBuildResult> buildXcodeProject({
       return XcodeBuildResult(success: false);
     }
   } else {
-    if (environmentType == EnvironmentType.physical) {
-      buildCommands.addAll(<String>['-sdk', XcodeSdk.IPhoneOS.platformName]);
-    } else {
-      buildCommands.addAll(<String>['-sdk', XcodeSdk.IPhoneSimulator.platformName]);
-    }
+    buildCommands.addAll(<String>['-sdk', sdk.platformName]);
   }
 
   buildCommands.add('-destination');
   if (deviceID != null) {
     buildCommands.add('id=$deviceID');
-  } else if (environmentType == EnvironmentType.physical) {
-    buildCommands.add(XcodeSdk.IPhoneOS.genericPlatform);
   } else {
-    buildCommands.add(XcodeSdk.IPhoneSimulator.genericPlatform);
+    buildCommands.add(sdk.genericPlatform);
   }
 
   if (activeArch != null) {
@@ -626,6 +654,52 @@ Future<XcodeBuildResult> buildXcodeProject({
       xcResult: xcResult,
     );
   }
+}
+
+/// Check if the Flutter framework's public headers have changed since last built.
+bool publicHeadersChanged({
+  BuildMode? mode,
+  EnvironmentType? environmentType,
+  required String buildDirectory,
+  required Artifacts? artifacts,
+  required FileSystem fileSystem,
+  required Logger logger,
+}) {
+  final String? basePath = artifacts?.getArtifactPath(
+    Artifact.flutterFramework,
+    platform: TargetPlatform.ios,
+    mode: mode,
+    environmentType: environmentType,
+  );
+  if (basePath == null) {
+    return false;
+  }
+  final Directory headersDirectory = fileSystem.directory(
+    fileSystem.path.join(basePath, 'Headers'),
+  );
+  if (!headersDirectory.existsSync()) {
+    return false;
+  }
+  final List<String> files = headersDirectory
+      .listSync()
+      .map<String>((FileSystemEntity header) => header.path)
+      .toList();
+
+  final String fingerprintPath = fileSystem.path.join(
+    buildDirectory,
+    'framework_public_headers.fingerprint',
+  );
+  final fingerprinter = Fingerprinter(
+    fingerprintPath: fingerprintPath,
+    paths: files,
+    fileSystem: fileSystem,
+    logger: logger,
+  );
+  final bool headersChanged = !fingerprinter.doesFingerprintMatch();
+  if (headersChanged) {
+    fingerprinter.writeFingerprint();
+  }
+  return headersChanged;
 }
 
 /// Extended attributes applied by Finder can cause code signing errors. Remove them.
