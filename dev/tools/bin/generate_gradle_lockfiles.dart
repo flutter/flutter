@@ -173,7 +173,7 @@ void main(List<String> arguments) {
 
     print('Processing ${androidDirectory.path}');
 
-    File ignoreFile = androidDirectory.childFile(ignoreFileName);
+    final File ignoreFile = androidDirectory.childFile(ignoreFileName);
     if (ignoreLocking) {
       print('Writing ignore file in ${androidDirectory.path}');
       ignoreFile.writeAsStringSync('1');
