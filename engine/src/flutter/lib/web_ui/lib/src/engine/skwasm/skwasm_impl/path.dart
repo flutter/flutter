@@ -14,7 +14,8 @@ enum PathDirection { clockwise, counterClockwise }
 
 enum PathArcSize { small, large }
 
-class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements LayerPath, DisposablePath {
+class SkwasmPath extends SkwasmObjectWrapper<RawPath>
+    implements DisposablePath, DisposablePathBuilder {
   factory SkwasmPath() {
     return SkwasmPath.fromHandle(pathCreate());
   }
@@ -28,6 +29,9 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements LayerPath, Disp
   static final SkwasmFinalizationRegistry<RawPath> _registry = SkwasmFinalizationRegistry<RawPath>(
     (PathHandle handle) => pathDispose(handle),
   );
+
+  @override
+  SkwasmPath build() => this;
 
   @override
   ui.PathFillType get fillType => ui.PathFillType.values[pathGetFillType(handle)];
@@ -179,16 +183,16 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements LayerPath, Disp
   }
 
   @override
-  void addPath(ui.Path path, ui.Offset offset, {Float64List? matrix4}) {
+  void addPath(DisposablePath path, ui.Offset offset, {Float64List? matrix4}) {
     _addPath(path, offset, false, matrix4: matrix4);
   }
 
   @override
-  void extendWithPath(ui.Path path, ui.Offset offset, {Float64List? matrix4}) {
+  void extendWithPath(DisposablePath path, ui.Offset offset, {Float64List? matrix4}) {
     _addPath(path, offset, true, matrix4: matrix4);
   }
 
-  void _addPath(ui.Path path, ui.Offset offset, bool extend, {Float64List? matrix4}) {
+  void _addPath(DisposablePath path, ui.Offset offset, bool extend, {Float64List? matrix4}) {
     assert(path is SkwasmPath);
     withStackScope((StackScope s) {
       final Pointer<Float> convertedMatrix = s.convertMatrix4toSkMatrix(
@@ -210,15 +214,14 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements LayerPath, Disp
   bool contains(ui.Offset point) => pathContains(handle, point.dx, point.dy);
 
   @override
-  ui.Path shift(ui.Offset offset) =>
-      transform(Matrix4.translationValues(offset.dx, offset.dy, 0.0).toFloat64());
+  void shiftInPlace(ui.Offset offset) {
+    transformInPlace(Matrix4.translationValues(offset.dx, offset.dy, 0.0).toFloat64());
+  }
 
   @override
-  ui.Path transform(Float64List matrix4) {
+  void transformInPlace(Float64List matrix4) {
     return withStackScope((StackScope s) {
-      final PathHandle newPathHandle = pathCopy(handle);
-      pathTransform(newPathHandle, s.convertMatrix4toSkMatrix(matrix4));
-      return SkwasmPath.fromHandle(newPathHandle);
+      pathTransform(handle, s.convertMatrix4toSkMatrix(matrix4));
     });
   }
 
@@ -235,8 +238,8 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements LayerPath, Disp
       SkwasmPath.fromHandle(pathCombine(operation.index, path1.handle, path2.handle));
 
   @override
-  SkwasmPathMetrics computeMetrics({bool forceClosed = false}) {
-    return SkwasmPathMetrics(path: this, forceClosed: forceClosed);
+  SkwasmPathMetricIterator getMetricsIterator({bool forceClosed = false}) {
+    return SkwasmPathMetricIterator(this, forceClosed);
   }
 
   @override
@@ -254,6 +257,9 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements LayerPath, Disp
 class SkwasmPathConstructors implements DisposablePathConstructors {
   @override
   SkwasmPath createNew() => SkwasmPath();
+
+  @override
+  DisposablePathBuilder fromPath(DisposablePath path) => SkwasmPath.from(path as SkwasmPath);
 
   @override
   SkwasmPath combinePaths(ui.PathOperation operation, DisposablePath path1, DisposablePath path2) {
