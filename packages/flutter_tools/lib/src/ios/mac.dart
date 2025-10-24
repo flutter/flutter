@@ -1044,7 +1044,7 @@ Future<bool> _handleIssues(
     logger.printError(
       '════════════════════════════════════════════════════════════════════════════════\n'
       'A precompiled file has been changed since last built. Please run "flutter clean" to clear '
-      'the cache.\n\n'
+      'the cache.\n'
       '════════════════════════════════════════════════════════════════════════════════',
     );
   }
