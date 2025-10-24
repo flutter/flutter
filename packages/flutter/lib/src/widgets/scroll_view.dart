@@ -2023,6 +2023,7 @@ class GridView extends BoxScrollView {
     double mainAxisSpacing = 0.0,
     double crossAxisSpacing = 0.0,
     double childAspectRatio = 1.0,
+    double? mainAxisExtent,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
@@ -2039,6 +2040,7 @@ class GridView extends BoxScrollView {
          mainAxisSpacing: mainAxisSpacing,
          crossAxisSpacing: crossAxisSpacing,
          childAspectRatio: childAspectRatio,
+         mainAxisExtent: mainAxisExtent,
        ),
        childrenDelegate = SliverChildListDelegate(
          children,
@@ -2075,6 +2077,7 @@ class GridView extends BoxScrollView {
     double mainAxisSpacing = 0.0,
     double crossAxisSpacing = 0.0,
     double childAspectRatio = 1.0,
+    double? mainAxisExtent,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
@@ -2091,6 +2094,7 @@ class GridView extends BoxScrollView {
          mainAxisSpacing: mainAxisSpacing,
          crossAxisSpacing: crossAxisSpacing,
          childAspectRatio: childAspectRatio,
+         mainAxisExtent: mainAxisExtent,
        ),
        childrenDelegate = SliverChildListDelegate(
          children,
