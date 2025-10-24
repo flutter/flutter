@@ -5599,7 +5599,7 @@ void main() {
   });
 
   testWidgets(
-    'SelectableText respects MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, MediaQueryData.wordSpacingOverride, and MediaQueryData.paragraphSpacing',
+    'SelectableText respects MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, MediaQueryData.wordSpacingOverride, and MediaQueryData.paragraphSpacingOverride',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const Directionality(
@@ -5609,7 +5609,7 @@ void main() {
               lineHeightScaleFactorOverride: 2.0,
               letterSpacingOverride: 2.0,
               wordSpacingOverride: 2.0,
-              paragraphSpacing: 2.0,
+              paragraphSpacingOverride: 2.0,
             ),
             child: SelectableText('hello world'),
           ),
