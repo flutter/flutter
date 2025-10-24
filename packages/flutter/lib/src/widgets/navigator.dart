@@ -3696,6 +3696,7 @@ class _History extends Iterable<_RouteEntry> with ChangeNotifier {
 class NavigatorState extends State<Navigator> with TickerProviderStateMixin, RestorationMixin {
   late GlobalKey<OverlayState> _overlayKey;
   final _History _history = _History();
+  bool _debugPushingRoute = false;
 
   /// A set for entries that are waiting to dispose until their subtrees are
   /// disposed.
@@ -5598,29 +5599,44 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       _debugLocked = true;
       return true;
     }());
-    final _RouteEntry entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
-    if (entry.pageBased && widget.onPopPage != null) {
-      if (widget.onPopPage!(entry.route, result)) {
-        if (entry.currentState.index <= _RouteLifecycle.idle.index) {
-          // The entry may have been disposed if the pop finishes synchronously.
-          assert(entry.route._popCompleter.isCompleted);
-          entry.currentState = _RouteLifecycle.pop;
+    try {
+      final _RouteEntry entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
+      if (entry.pageBased && widget.onPopPage != null) {
+        if (widget.onPopPage!(entry.route, result)) {
+          if (entry.currentState.index <= _RouteLifecycle.idle.index) {
+            // The entry may have been disposed if the pop finishes synchronously.
+            assert(entry.route._popCompleter.isCompleted);
+            entry.currentState = _RouteLifecycle.pop;
+          }
+          entry.route.onPopInvokedWithResult(true, result);
         }
-        entry.route.onPopInvokedWithResult(true, result);
+      } else {
+        entry.pop<T>(result, imperativeRemoval: true);
+        assert(entry.currentState == _RouteLifecycle.pop);
       }
-    } else {
-      entry.pop<T>(result, imperativeRemoval: true);
-      assert(entry.currentState == _RouteLifecycle.pop);
+      if (entry.currentState == _RouteLifecycle.pop) {
+        _flushHistoryUpdates(rearrangeOverlay: false);
+        // Only check for present routes if we're not in the middle of pushing
+        // a new route that would restore the history chain
+        assert(() {
+          if (!_debugPushingRoute) {
+            final bool hasPresentRoute = _history.any(_RouteEntry.isPresentPredicate);
+            if (!hasPresentRoute) {
+              throw FlutterError(
+                'Navigator operation requested with no present routes. Ensure there is at least one route before calling Navigator.pop().',
+              );
+            }
+          }
+          return true;
+        }());
+      }
+    } finally {
+      assert(() {
+        _debugLocked = false;
+        return true;
+      }());
     }
-    if (entry.currentState == _RouteLifecycle.pop) {
-      _flushHistoryUpdates(rearrangeOverlay: false);
-    }
-    assert(entry.currentState == _RouteLifecycle.idle || entry.route._popCompleter.isCompleted);
-    assert(() {
-      _debugLocked = false;
-      return true;
-    }());
-    _afterNavigation(entry.route);
+    _afterNavigation(null);
   }
 
   /// Calls [pop] repeatedly until the predicate returns true.
