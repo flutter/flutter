@@ -86,8 +86,8 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
     contents.SetTextureInputs(texture_inputs);
     contents.SetGeometry(&geom);
     Entity offset_entity = entity.Clone();
-    offset_entity.SetTransform(
-        entity.GetTransform().Translate(snapshot_origin));
+    offset_entity.SetTransform(entity.GetTransform() *
+                               Matrix::MakeTranslation(snapshot_origin));
     return contents.Render(renderer, offset_entity, pass);
   };
 
@@ -101,9 +101,9 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
   Entity sub_entity;
   sub_entity.SetContents(std::move(contents));
   sub_entity.SetBlendMode(entity.GetBlendMode());
-  sub_entity.SetTransform(entity.GetTransform() *
-                          Matrix::MakeTranslation(-1.0f * snapshot_origin) *
+  sub_entity.SetTransform(Matrix::MakeTranslation(-1.0f * snapshot_origin) *
                           input_snapshot->transform);
+
   return sub_entity;
 }
 

@@ -261,6 +261,12 @@ TEST_P(AiksTest, ComposePaintRuntimeInner) {
     green.setColor(DlColor::kGreen());
     builder.DrawLine({100, 100}, {200, 100}, green);
     builder.DrawLine({100, 100}, {100, 200}, green);
+    if (compare) {
+      builder.DrawLine({800, 100}, {900, 100}, green);
+      builder.DrawLine({800, 100}, {800, 200}, green);
+      builder.DrawLine({100, 800}, {200, 800}, green);
+      builder.DrawLine({100, 800}, {100, 900}, green);
+    }
 
     return builder.Build();
   };
