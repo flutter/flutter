@@ -1698,16 +1698,16 @@ class _BaselineAlignedStack
   const _BaselineAlignedStack({
     required this.editableTextBaseline,
     required this.placeholderBaseline,
-    required this.editableText,
     required this.textAlignVertical,
+    required this.editableText,
     this.placeholder,
   });
 
   final TextBaseline editableTextBaseline;
   final TextBaseline placeholderBaseline;
   final TextAlignVertical textAlignVertical;
-  final Widget? placeholder;
   final Widget editableText;
+  final Widget? placeholder;
 
   @override
   Iterable<_BaselineAlignedStackSlot> get slots => _BaselineAlignedStackSlot.values;
