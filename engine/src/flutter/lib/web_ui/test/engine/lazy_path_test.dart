@@ -301,8 +301,7 @@ void testMain() {
     expect(constructors.createdPathBuilders, hasLength(1));
     final disposablePathBuilder = constructors.createdPathBuilders.single;
 
-    // The builder is disposed immediately.
-    expect(disposablePathBuilder.isDisposed, isTrue);
+    expect(disposablePathBuilder.isDisposed, isFalse);
     expect(disposablePathBuilder.apiCallCount, 20);
 
     expect(disposablePathBuilder.builtPaths, hasLength(1));
@@ -330,8 +329,7 @@ void testMain() {
     expect(constructors.createdPathBuilders.length, 2);
     final resurrectedPathBuilder = constructors.createdPathBuilders.last;
 
-    // The builder is disposed immediately.
-    expect(resurrectedPathBuilder.isDisposed, isTrue);
+    expect(resurrectedPathBuilder.isDisposed, isFalse);
     expect(resurrectedPathBuilder.apiCallCount, 20);
 
     expect(resurrectedPathBuilder.builtPaths, hasLength(1));
