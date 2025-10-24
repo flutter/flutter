@@ -6392,9 +6392,7 @@ final class _SemanticsGeometry {
     if (parentToCommonAncestorTransform == null) {
       // This is most common case, i.e. parent is the common ancestor.
       transform = Matrix4.identity();
-      paintClipRect = parentPaintClipRect;
-      semanticsClipRect = parentSemanticsClipRect;
-      // Travrese from `parent`'s render object to `child`'s.
+      // Traverse from `parent`'s render object to `child`'s.
       for (int i = childToCommonAncestor.length - 1; i > 0; i -= 1) {
         final RenderObject nodeParent = childToCommonAncestor[i];
         final RenderObject node = childToCommonAncestor[i - 1];
@@ -6410,13 +6408,16 @@ final class _SemanticsGeometry {
           MatrixUtils.transformRect,
         );
         paintClipRect = _intersectRects(paintClipRect, localPaintClipInParent);
-        if (localSemanticsClipInParent != null) {
-          semanticsClipRect = localSemanticsClipInParent;
-        } else if (semanticsClipRect != null) {
-          semanticsClipRect = _intersectRects(semanticsClipRect, localPaintClipInParent);
-        }
+        semanticsClipRect =
+            localSemanticsClipInParent ??
+            semanticsClipRect?.intersect(localPaintClipInParent ?? semanticsClipRect);
         nodeParent.applyPaintTransform(node, transform);
       }
+
+      // Apply the paint / semantics clipping from parent.
+      semanticsClipRect =
+          semanticsClipRect ?? _intersectRects(paintClipRect, parentSemanticsClipRect);
+      paintClipRect = _intersectRects(paintClipRect, parentPaintClipRect);
 
       if (paintClipRect != null || semanticsClipRect != null) {
         final Matrix4 inverted = transform.clone();
@@ -6428,6 +6429,7 @@ final class _SemanticsGeometry {
             ? _transformRect(paintClipRect, inverted, MatrixUtils.transformRect)
             : null;
       }
+
       if (parentTransform != null) {
         MatrixUtils.multiplyInPlace(parentTransform, transform);
       }
