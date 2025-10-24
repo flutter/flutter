@@ -480,10 +480,12 @@ class LazyPath implements ui.Path, Collectable {
   @override
   set fillType(ui.PathFillType fillType) {
     _fillType = fillType;
+    _cachedBuilder?.fillType = fillType;
     _invalidateCachedPath();
   }
 
   DisposablePath? _cachedPath;
+  DisposablePathBuilder? _cachedBuilder;
   final List<PathCommand> _commands;
 
   DisposablePath get builtPath {
@@ -491,10 +493,8 @@ class LazyPath implements ui.Path, Collectable {
       return _cachedPath!;
     }
 
-    final DisposablePathBuilder builder = _createPathBuilder();
-    _cachedPath = builder.build();
-    // Immediately dispose the builder as it's no longer needed.
-    builder.dispose();
+    _cachedBuilder ??= _createPathBuilder();
+    _cachedPath = _cachedBuilder!.build();
 
     EnginePlatformDispatcher.instance.frameArena.add(this);
     return _cachedPath!;
@@ -517,6 +517,9 @@ class LazyPath implements ui.Path, Collectable {
 
   void _addCommand(PathCommand command) {
     _commands.add(command);
+    if (_cachedBuilder != null) {
+      command.apply(_cachedBuilder!);
+    }
     _invalidateCachedPath();
   }
 
@@ -714,11 +717,9 @@ class LazyPath implements ui.Path, Collectable {
   void dispose() {
     _cachedPath?.dispose();
     _cachedPath = null;
+    _cachedBuilder?.dispose();
+    _cachedBuilder = null;
   }
-
-  // String toSvgString() {
-  //   return builtPath.toSvgString();
-  // }
 }
 
 class LazyPathMetrics extends IterableBase<ui.PathMetric> implements ui.PathMetrics {
