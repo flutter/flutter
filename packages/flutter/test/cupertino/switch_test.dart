@@ -259,7 +259,7 @@ void main() {
       ),
     );
 
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(56.0, 0.0));
     expect(value, isTrue);
     await tester.pump();
 
@@ -353,21 +353,21 @@ void main() {
 
     expect(value, isFalse);
 
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-48.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-56.0, 0.0));
 
     expect(value, isFalse);
 
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(48.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(56.0, 0.0));
 
     expect(value, isTrue);
 
     await tester.pump();
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(48.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(56.0, 0.0));
 
     expect(value, isTrue);
 
     await tester.pump();
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-48.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-56.0, 0.0));
 
     expect(value, isFalse);
   });
@@ -397,16 +397,16 @@ void main() {
     );
 
     expect(value, isFalse);
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-56.0, 0.0));
     expect(value, isFalse);
 
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(56.0, 0.0));
     expect(value, isTrue);
     await tester.pump();
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(56.0, 0.0));
     expect(value, isTrue);
     await tester.pump();
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-56.0, 0.0));
     expect(value, isFalse);
 
     await tester.pumpWidget(
@@ -436,7 +436,7 @@ void main() {
     // We have to execute the drag in two frames because the first update will
     // just set the start position.
     await gesture.moveBy(const Offset(20.0, 0.0));
-    await gesture.moveBy(const Offset(20.0, 0.0));
+    await gesture.moveBy(const Offset(36.0, 0.0));
     expect(value, isFalse);
     await gesture.up();
     expect(value, isTrue);
@@ -444,14 +444,14 @@ void main() {
 
     gesture = await tester.startGesture(switchRect.center);
     await gesture.moveBy(const Offset(20.0, 0.0));
-    await gesture.moveBy(const Offset(20.0, 0.0));
+    await gesture.moveBy(const Offset(36.0, 0.0));
     expect(value, isTrue);
     await gesture.up();
     await tester.pump();
 
     gesture = await tester.startGesture(switchRect.center);
     await gesture.moveBy(const Offset(-20.0, 0.0));
-    await gesture.moveBy(const Offset(-20.0, 0.0));
+    await gesture.moveBy(const Offset(-36.0, 0.0));
     expect(value, isTrue);
     await gesture.up();
     expect(value, isFalse);
@@ -484,21 +484,21 @@ void main() {
 
     expect(value, isFalse);
 
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(56.0, 0.0));
 
     expect(value, isFalse);
 
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-56.0, 0.0));
 
     expect(value, isTrue);
 
     await tester.pump();
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-56.0, 0.0));
 
     expect(value, isTrue);
 
     await tester.pump();
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(56.0, 0.0));
 
     expect(value, isFalse);
   });
@@ -535,9 +535,7 @@ void main() {
     TestGesture gesture = await tester.startGesture(
       tester.getRect(find.byType(CupertinoSwitch)).center,
     );
-    await gesture.moveBy(const Offset(kTouchSlop + 0.1, 0.0));
-    await tester.pump();
-    await gesture.moveBy(const Offset(-kTouchSlop + 5.1, 0.0));
+    await gesture.moveBy(const Offset(21.0, 0.0));
     await tester.pump();
     await gesture.up();
     await tester.pump();
@@ -551,7 +549,7 @@ void main() {
 
     // Move past the middle.
     gesture = await tester.startGesture(tester.getRect(find.byType(CupertinoSwitch)).center);
-    await gesture.moveBy(const Offset(kTouchSlop + 0.1, 0.0));
+    await gesture.moveBy(const Offset(36.0, 0.0));
     await tester.pump();
     await gesture.up();
     await tester.pump();
@@ -565,7 +563,7 @@ void main() {
 
     // Now move back to the left, the revert animation should play.
     gesture = await tester.startGesture(tester.getRect(find.byType(CupertinoSwitch)).center);
-    await gesture.moveBy(const Offset(-kTouchSlop - 0.1, 0.0));
+    await gesture.moveBy(const Offset(-36.0, 0.0));
     await tester.pump();
     await gesture.up();
     await tester.pump();
@@ -616,7 +614,7 @@ void main() {
 
     // Move to the right, not past the middle.
     TestGesture gesture = await tester.startGesture(switchRect.center);
-    await dragBy(gesture, const Offset(9, 0));
+    await dragBy(gesture, const Offset(35, 0));
     expect(position.value, 0);
     expect(value, false);
     await tester.pumpAndSettle();
@@ -629,7 +627,7 @@ void main() {
 
     // Move to the right, past the middle.
     gesture = await tester.startGesture(switchRect.center);
-    await dragBy(gesture, const Offset(11, 0));
+    await dragBy(gesture, const Offset(36, 0));
     expect(position.value, 0);
     expect(value, false);
     await tester.pumpAndSettle();
@@ -642,7 +640,7 @@ void main() {
 
     // Move to the left, not past the middle.
     gesture = await tester.startGesture(switchRect.center);
-    await dragBy(gesture, const Offset(-9, 0));
+    await dragBy(gesture, const Offset(-35, 0));
     expect(position.value, 1);
     expect(value, true);
     await tester.pumpAndSettle();
@@ -655,7 +653,7 @@ void main() {
 
     // Move to the left, past the middle.
     gesture = await tester.startGesture(switchRect.center);
-    await dragBy(gesture, const Offset(-11, 0));
+    await dragBy(gesture, const Offset(-36, 0));
     expect(position.value, 1);
     expect(value, true);
     await tester.pumpAndSettle();
@@ -792,7 +790,7 @@ void main() {
         ..rrect()
         ..rrect(color: inactiveThumbColor),
     );
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-56.0, 0.0));
     await tester.pump();
     expect(
       find.byType(CupertinoSwitch),

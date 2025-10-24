@@ -35,6 +35,15 @@ const List<BoxShadow> _kSwitchBoxShadows = <BoxShadow>[
   BoxShadow(color: Color(0x26000000), offset: Offset(0, 3), blurRadius: 8.0),
   BoxShadow(color: Color(0x0F000000), offset: Offset(0, 3), blurRadius: 1.0),
 ];
+// The drag distance (as a fraction of the track width) beyond which the switch
+// must be dragged to commit the state change.
+// This threshold is used when the user is dragging to a new state.
+const double _kDragCommitThreshold = 0.7;
+// The drag distance (as a fraction of the track width) past which the user must
+// drag back to reverse a state change that has already been visually committed
+// during the drag.
+// This threshold is used when the user is dragging back to the original state.
+const double _kDragReverseThreshold = 0.2;
 
 // Label sizes and padding taken from xcode inspector.
 // See https://github.com/flutter/flutter/issues/4830#issuecomment-528495360.
@@ -474,9 +483,13 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
     with TickerProviderStateMixin, ToggleableStateMixin {
   final _SwitchPainter _painter = _SwitchPainter();
 
-  // The fractional position of the thumb during a drag.
-  double _dragPosition = 0;
-  // The transient value of the switch determined by _dragPosition during a
+  // The global position where the user first touched the screen. This value to
+  // calculate the initial drag delta.
+  Offset _dragStartPosition = Offset.zero;
+  // The cumulative horizontal drag delta, normalized as a fraction of the
+  // track width.
+  double _dragDelta = 0;
+  // The transient value of the switch determined by _dragDelta during a
   // drag.
   bool? _dragValue;
 
@@ -560,23 +573,44 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
     return trackInnerLength;
   }
 
+  void _handleOnTapDown(TapDownDetails details) {
+    if (isInteractive) {
+      _dragStartPosition = details.globalPosition;
+    }
+  }
+
   void _handleDragStart(DragStartDetails details) {
     if (isInteractive) {
       reactionController.forward();
-      _dragPosition = positionController.value;
+
+      if (_dragStartPosition != Offset.zero) {
+        final double delta = (details.globalPosition - _dragStartPosition).dx / _kTrackWidth;
+        _dragDelta = switch (Directionality.of(context)) {
+          TextDirection.rtl => -delta,
+          TextDirection.ltr => delta,
+        };
+      }
+
       _dragValue = value;
     }
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
     if (isInteractive) {
-      final double delta = details.primaryDelta! / _trackInnerLength;
-      _dragPosition += switch (Directionality.of(context)) {
+      final double delta = details.primaryDelta! / _kTrackWidth;
+      _dragDelta += switch (Directionality.of(context)) {
         TextDirection.rtl => -delta,
         TextDirection.ltr => delta,
       };
 
-      final bool currentDragValue = _dragPosition >= 0.5;
+      final bool isValueChanged = widget.value != _dragValue;
+      final bool currentDragValue = widget.value
+          ? (isValueChanged
+                ? _dragDelta > -_kDragReverseThreshold
+                : _dragDelta >= -_kDragCommitThreshold)
+          : (isValueChanged
+                ? _dragDelta > _kDragReverseThreshold
+                : _dragDelta >= _kDragCommitThreshold);
 
       if (_dragValue != currentDragValue) {
         _emitVibration();
@@ -603,6 +637,11 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
         _needsPositionAnimation = true;
       });
     }
+
+    _dragStartPosition = Offset.zero;
+    _dragDelta = 0;
+    _dragValue = null;
+
     reactionController.reverse();
   }
 
@@ -712,6 +751,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
       toggled: widget.value,
       child: GestureDetector(
         excludeFromSemantics: true,
+        onTapDown: _handleOnTapDown,
         onHorizontalDragStart: _handleDragStart,
         onHorizontalDragUpdate: _handleDragUpdate,
         onHorizontalDragEnd: _handleDragEnd,
