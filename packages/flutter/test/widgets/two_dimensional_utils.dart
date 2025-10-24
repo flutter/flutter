@@ -244,13 +244,19 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
     maxRowIndex = builderDelegate.maxYIndex ?? 5;
     maxColumnIndex = builderDelegate.maxXIndex ?? 5;
 
-    final int leadingColumn = math.max(((horizontalPixels - horizontalCacheExtent) / 200).floor(), 0);
+    final int leadingColumn = math.max(
+      ((horizontalPixels - horizontalCacheExtent) / 200).floor(),
+      0,
+    );
     final int leadingRow = math.max(((verticalPixels - verticalCacheExtent) / 200).floor(), 0);
     final int trailingColumn = math.min(
       ((horizontalPixels + viewportWidth + horizontalCacheExtent) / 200).ceil(),
       maxColumnIndex,
     );
-    final int trailingRow = math.min(((verticalPixels + viewportHeight + verticalCacheExtent) / 200).ceil(), maxRowIndex);
+    final int trailingRow = math.min(
+      ((verticalPixels + viewportHeight + verticalCacheExtent) / 200).ceil(),
+      maxRowIndex,
+    );
 
     double xLayoutOffset = (leadingColumn * 200) - horizontalOffset.pixels;
     for (int column = leadingColumn; column <= trailingColumn; column++) {
