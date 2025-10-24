@@ -178,7 +178,11 @@ TEST_P(AiksTest, ComposePaintRuntimeOuter) {
   auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
   builder.DrawImage(image, DlPoint(100.0, 100.0),
                     DlImageSampling::kNearestNeighbor, &paint);
-  builder.Restore();
+
+  DlPaint green;
+  green.setColor(DlColor::kGreen());
+  builder.DrawLine({100, 100}, {200, 100}, green);
+  builder.DrawLine({100, 100}, {100, 200}, green);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -223,7 +227,11 @@ TEST_P(AiksTest, ComposePaintRuntimeInner) {
   auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
   builder.DrawImage(image, DlPoint(100.0, 100.0),
                     DlImageSampling::kNearestNeighbor, &paint);
-  builder.Restore();
+
+  DlPaint green;
+  green.setColor(DlColor::kGreen());
+  builder.DrawLine({100, 100}, {200, 100}, green);
+  builder.DrawLine({100, 100}, {100, 200}, green);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }

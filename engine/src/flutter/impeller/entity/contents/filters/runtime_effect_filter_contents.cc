@@ -41,7 +41,7 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
     return std::nullopt;
   }
 
-  auto input_snapshot =
+  std::optional<Snapshot> input_snapshot =
       inputs[0]->GetSnapshot("RuntimeEffectContents", renderer, entity);
   if (!input_snapshot.has_value()) {
     return std::nullopt;
@@ -70,12 +70,13 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
   Size size = Size(input_snapshot->texture->GetSize());
   memcpy(uniforms_->data(), &size, sizeof(Size));
 
+  Point snapshot_origin = input_coverage.GetOrigin();
   //----------------------------------------------------------------------------
   /// Create AnonymousContents for rendering.
   ///
   RenderProc render_proc =
-      [input_snapshot, runtime_stage = runtime_stage_, uniforms = uniforms_,
-       texture_inputs = texture_input_copy,
+      [snapshot_origin, input_snapshot, runtime_stage = runtime_stage_,
+       uniforms = uniforms_, texture_inputs = texture_input_copy,
        input_coverage](const ContentContext& renderer, const Entity& entity,
                        RenderPass& pass) -> bool {
     RuntimeEffectContents contents;
@@ -84,7 +85,10 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
     contents.SetUniformData(uniforms);
     contents.SetTextureInputs(texture_inputs);
     contents.SetGeometry(&geom);
-    return contents.Render(renderer, entity, pass);
+    Entity offset_entity = entity.Clone();
+    offset_entity.SetTransform(
+        entity.GetTransform().Translate(snapshot_origin));
+    return contents.Render(renderer, offset_entity, pass);
   };
 
   CoverageProc coverage_proc =
@@ -97,7 +101,9 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
   Entity sub_entity;
   sub_entity.SetContents(std::move(contents));
   sub_entity.SetBlendMode(entity.GetBlendMode());
-  sub_entity.SetTransform(input_snapshot->transform);
+  sub_entity.SetTransform(entity.GetTransform() *
+                          Matrix::MakeTranslation(-1.0f * snapshot_origin) *
+                          input_snapshot->transform);
   return sub_entity;
 }
 
