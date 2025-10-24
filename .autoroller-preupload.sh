@@ -33,4 +33,5 @@ ninja -C "$PROFILE_PATH" licenses_cpp
   --working_dir="$WORKING_DIR" \
   --licenses_path="$LICENSES_PATH" \
   --data_dir="$DATA_PATH" \
+  --root_package="flutter" \
   --v=1

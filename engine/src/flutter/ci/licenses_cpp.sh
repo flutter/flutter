@@ -81,6 +81,7 @@ fi
   --working_dir "$WORKING_DIR" \
   --data_dir "$DATA_DIR" \
   --licenses_path "$LICENSES_OUTPUT_PATH" \
+  --root_package "flutter" \
   --v $VERBOSITY
 
 if ! git diff \

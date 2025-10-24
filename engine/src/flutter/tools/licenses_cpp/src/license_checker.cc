@@ -161,9 +161,13 @@ std::string GetDirFilename(const fs::path& working_dir) {
 
 Package GetPackage(const Data& data,
                    const fs::path& working_dir,
-                   const fs::path& relative_path) {
+                   const fs::path& relative_path,
+                   const LicenseChecker::Flags& flags) {
+  std::string root_package_name = flags.root_package_name.has_value()
+                                      ? flags.root_package_name.value()
+                                      : GetDirFilename(working_dir);
   Package result = {
-      .name = GetDirFilename(working_dir),
+      .name = root_package_name,
       .license_file = FindLicense(data, working_dir, "."),
       .is_root_package = true,
   };
@@ -417,7 +421,7 @@ absl::Status ProcessFile(const fs::path& working_dir_path,
     return absl::OkStatus();
   }
 
-  Package package = GetPackage(data, working_dir_path, relative_path);
+  Package package = GetPackage(data, working_dir_path, relative_path, flags);
   if (package.license_file.has_value()) {
     auto [_, is_new_item] =
         seen_license_files->insert(package.license_file.value());
@@ -573,7 +577,8 @@ std::vector<absl::Status> LicenseChecker::Run(
               "secondary license path mixmatch at ", relative_path.string())));
         } else {
           fs::path full_path = data.secondary_dir / entry;
-          Package package = GetPackage(data, working_dir_path, relative_path);
+          Package package =
+              GetPackage(data, working_dir_path, relative_path, flags);
           absl::StatusOr<MMapFile> file = MMapFile::Make(full_path.string());
           if (file.ok()) {
             state.license_map.Add(
