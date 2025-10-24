@@ -169,7 +169,7 @@ TEST_P(AiksTest, ComposePaintRuntimeOuter) {
   auto uniform_data = std::make_shared<std::vector<uint8_t>>();
   uniform_data->resize(sizeof(Vector2));
 
-  [[maybe_unused]] auto runtime_filter = DlImageFilter::MakeRuntimeEffect(
+  auto runtime_filter = DlImageFilter::MakeRuntimeEffect(
       DlRuntimeEffectImpeller::Make(runtime_stage), sampler_inputs,
       uniform_data);
 
