@@ -147,8 +147,13 @@ static const CGFloat kStandardTimeOut = 60.0;
 
   [self waitForAndTapElement:app.otherElements[@"Add to list"]];
 
+  XCUIElement *flutterView2 = app.otherElements[@"flutter_view"];
 
-  NSLog(@"Flutter view height: %f", flutterViewSize.height);
+  CGRect flutterViewFrame2 = flutterView2.frame;
+  CGSize flutterViewSize2 = flutterViewFrame2.size;
+
+
+  NSLog(@"Flutter view height: %f", flutterViewSize2.height);
 //  XCTAssertTrue(flutterViewSize.height == 200);
 
   // Back navigation.
