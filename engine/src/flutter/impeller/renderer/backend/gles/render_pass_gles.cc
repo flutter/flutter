@@ -213,10 +213,10 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
 #endif  // IMPELLER_DEBUG
 
   TextureGLES& color_gles = TextureGLES::Cast(*pass_data.color_attachment);
-  const bool is_default_fbo = color_gles.IsWrapped();
+  const bool is_wrapped_fbo = color_gles.IsWrapped();
 
   std::optional<GLuint> fbo = 0;
-  if (is_default_fbo) {
+  if (is_wrapped_fbo) {
     if (color_gles.GetFBO().has_value()) {
       // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
       gl.BindFramebuffer(GL_FRAMEBUFFER, *color_gles.GetFBO());
@@ -524,7 +524,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
 
   if (pass_data.resolve_attachment &&
       !gl.GetCapabilities()->SupportsImplicitResolvingMSAA() &&
-      !is_default_fbo) {
+      !is_wrapped_fbo) {
     FML_DCHECK(pass_data.resolve_attachment != pass_data.color_attachment);
     // Perform multisample resolve via blit.
     // Create and bind a resolve FBO.
@@ -570,6 +570,10 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     gl.BindFramebuffer(GL_FRAMEBUFFER, fbo.value());
   }
 
+  GLint framebuffer_id = 0;
+  gl.GetIntegerv(GL_FRAMEBUFFER_BINDING, &framebuffer_id);
+  const bool is_default_fbo = framebuffer_id == 0;
+
   if (gl.DiscardFramebufferEXT.IsAvailable()) {
     std::array<GLenum, 3> attachments;
     size_t attachment_count = 0;
@@ -583,6 +587,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
       attachments[attachment_count++] =
           (is_default_fbo ? GL_COLOR_EXT : GL_COLOR_ATTACHMENT0);
     }
+
     if (pass_data.discard_depth_attachment && angle_safe) {
       attachments[attachment_count++] =
           (is_default_fbo ? GL_DEPTH_EXT : GL_DEPTH_ATTACHMENT);
