@@ -292,7 +292,7 @@ PRs are reviewed weekly across the framework, packages, and engine repositories:
 
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22a%3A+text+input%22%2Cteam-text-input%2Cfyi-text-input+sort%3Aupdated-asc+label%3AP0+)
 - [PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+sort%3Acreated-desc+draft%3Afalse+label%3A%22a%3A+text+input%22%2Cteam-text-input%2Cfyi-text-input+)
-- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aopen%20is%3Aissue%20label%3Ateam-text-input%2Cfyi-text-input%20no%3Aassignee%20-label%3Atriaged-text-input)
+- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aopen%20is%3Aissue%20label%3Ateam-text-input%2Cfyi-text-input%20no%3Aassignee%20-label%3Atriaged-text-input%20-label%3A%22waiting%20for%20customer%20response%22)
 
 ### Flutter Tool team (`team-tool`)
 
