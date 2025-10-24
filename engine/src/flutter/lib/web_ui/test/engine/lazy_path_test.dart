@@ -304,8 +304,15 @@ void testMain() {
     expect(disposablePathBuilder.isDisposed, isFalse);
     expect(disposablePathBuilder.apiCallCount, 20);
 
+    // No path has been built because `getBounds()` doesn't require a path to be built.
+    expect(disposablePathBuilder.builtPaths, isEmpty);
+
+    // Force building the path.
+    final builtPath = path.builtPath;
+
     expect(disposablePathBuilder.builtPaths, hasLength(1));
     final disposablePath = disposablePathBuilder.builtPaths.single;
+    expect(identical(disposablePath, builtPath), isTrue);
     expect(disposablePath.isDisposed, isFalse);
 
     final metrics = path.computeMetrics();
@@ -324,7 +331,7 @@ void testMain() {
     expect(disposablePath.metricsIterators, hasLength(1));
     expect(disposableMetricsIterator.isDisposed, isTrue);
 
-    path.getBounds();
+    path.contains(Offset.zero);
 
     expect(constructors.createdPathBuilders.length, 2);
     final resurrectedPathBuilder = constructors.createdPathBuilders.last;
@@ -332,10 +339,8 @@ void testMain() {
     expect(resurrectedPathBuilder.isDisposed, isFalse);
     expect(resurrectedPathBuilder.apiCallCount, 20);
 
-    expect(resurrectedPathBuilder.builtPaths, hasLength(1));
-    final resurrectedPath = resurrectedPathBuilder.builtPaths.single;
-    expect(resurrectedPath.isDisposed, isFalse);
-
+    // No path has been built because `getBounds()` doesn't require a path to be built.
+    expect(resurrectedPathBuilder.builtPaths, isEmpty);
     expect(metrics.iterator.moveNext(), isFalse);
 
     EnginePlatformDispatcher.instance.frameArena.collect();
