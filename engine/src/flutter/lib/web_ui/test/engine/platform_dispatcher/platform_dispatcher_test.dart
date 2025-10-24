@@ -332,7 +332,7 @@ void testMain() {
       );
       expect(ui.PlatformDispatcher.instance.letterSpacingOverride, expectedLetterSpacing);
       expect(ui.PlatformDispatcher.instance.wordSpacingOverride, expectedWordSpacing);
-      expect(ui.PlatformDispatcher.instance.paragraphSpacing, expectedParagraphSpacing);
+      expect(ui.PlatformDispatcher.instance.paragraphSpacingOverride, expectedParagraphSpacing);
 
       isCalled = false;
 
@@ -343,7 +343,7 @@ void testMain() {
       expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, null);
       expect(ui.PlatformDispatcher.instance.letterSpacingOverride, null);
       expect(ui.PlatformDispatcher.instance.wordSpacingOverride, null);
-      expect(ui.PlatformDispatcher.instance.paragraphSpacing, 0.0);
+      expect(ui.PlatformDispatcher.instance.paragraphSpacingOverride, null);
 
       isCalled = false;
 
@@ -357,7 +357,7 @@ void testMain() {
       );
       expect(ui.PlatformDispatcher.instance.letterSpacingOverride, expectedLetterSpacing);
       expect(ui.PlatformDispatcher.instance.wordSpacingOverride, expectedWordSpacing);
-      expect(ui.PlatformDispatcher.instance.paragraphSpacing, expectedParagraphSpacing);
+      expect(ui.PlatformDispatcher.instance.paragraphSpacingOverride, expectedParagraphSpacing);
     });
 
     test('disposes all its views', () {

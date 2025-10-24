@@ -800,8 +800,8 @@ class _SelectableTextState extends State<SelectableText>
     );
     // TODO(Renzo-Olivares): Update this logic to inform paragraphs within
     // this widgets text about paragraph spacing https://github.com/flutter/flutter/issues/177408.
-    final double? paragraphSpacing = MediaQuery.maybeParagraphSpacingOf(context);
-    if (paragraphSpacing != null && paragraphSpacing.abs() > precisionErrorTolerance) {
+    final double? paragraphSpacing = MediaQuery.maybeParagraphSpacingOverrideOf(context);
+    if (paragraphSpacing != null) {
       editable = Padding(
         padding: EdgeInsets.only(bottom: paragraphSpacing),
         child: editable,
