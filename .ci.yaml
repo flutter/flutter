@@ -1690,6 +1690,7 @@ targets:
 
   - name: Linux_android_emu_vulkan_stable android_engine_vulkan_tests
     recipe: flutter/flutter_drone
+    bringup: true
     timeout: 60
     properties:
       shard: android_engine_vulkan_tests
@@ -3715,28 +3716,6 @@ targets:
     properties:
       task_name: basic_material_app_macos__compile
 
-  - name: Mac_x64 build_ios_framework_module_test
-    recipe: devicelab/devicelab_drone
-    bringup: true
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
-      task_name: build_ios_framework_module_test
-      test_timeout_secs: "2700"
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
-
   - name: Mac_arm64 build_ios_framework_module_test
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4309,7 +4288,6 @@ targets:
 
   - name: Mac module_uiscene_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -7006,7 +6984,6 @@ targets:
   - name: Windows windowing_test
     recipe: devicelab/devicelab_drone
     presubmit: true
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -7026,6 +7003,16 @@ targets:
       tags: >
         ["devicelab", "hostonly", "linux"]
       task_name: windowing_test_linux
+
+  - name: Mac windowing_test
+    recipe: devicelab/devicelab_drone
+    presubmit: true
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: windowing_test_macos
 
 
   - name: Windows flutter_tool_startup__windows

@@ -9,7 +9,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
@@ -2191,6 +2190,19 @@ public class AccessibilityBridgeTest {
   }
 
   @Test
+  public void itAddsButtonClassToLinkWithoutURL() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.addFlag(AccessibilityBridge.Flag.IS_LINK);
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+
+    assertEquals(nodeInfo.getClassName(), "android.widget.Button");
+  }
+
+  @Test
   public void itAddsClickActionToSliderNodeInfo() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
 
@@ -2203,66 +2215,6 @@ public class AccessibilityBridgeTest {
     assertEquals(nodeInfo.isClickable(), true);
     List<AccessibilityNodeInfo.AccessibilityAction> actions = nodeInfo.getActionList();
     assertTrue(actions.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK));
-  }
-
-  @Test
-  public void itAddsCollectionInfo() {
-    AccessibilityBridge accessibilityBridge = setUpBridge();
-
-    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
-    testSemanticsNode.addFlag(AccessibilityBridge.Flag.HAS_IMPLICIT_SCROLLING);
-    // test with 1 scrollChild
-    testSemanticsNode.scrollChildren = 1;
-    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
-    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
-    assertNull(nodeInfo.getCollectionInfo());
-    // test with 2 scrollChildren
-    testSemanticsNode.scrollChildren = 2;
-    testSemanticsUpdate = testSemanticsNode.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
-    nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
-    AccessibilityNodeInfo.CollectionInfo collectionInfo = nodeInfo.getCollectionInfo();
-    assertNotNull(collectionInfo);
-
-    boolean rowCount = collectionInfo.getRowCount() == testSemanticsNode.scrollChildren;
-    boolean colCount = collectionInfo.getColumnCount() == 1; // 1 column for a list
-    boolean isHierarchical =
-        !collectionInfo.isHierarchical(); // this should currently always be false
-    assertTrue(rowCount && colCount && isHierarchical);
-  }
-
-  @Test
-  public void itAddsCollectionItemInfo() {
-    AccessibilityBridge accessibilityBridge = setUpBridge();
-
-    TestSemanticsNode parentTestSemanticsNode = new TestSemanticsNode();
-    parentTestSemanticsNode.addFlag(AccessibilityBridge.Flag.HAS_IMPLICIT_SCROLLING);
-    parentTestSemanticsNode.scrollChildren = 2;
-    parentTestSemanticsNode.id = 0;
-    // add children to parentTestSemanticsNode
-    TestSemanticsNode childNode1 = new TestSemanticsNode();
-    childNode1.id = 1;
-    childNode1.label = "Test 1";
-    TestSemanticsNode childNode2 = new TestSemanticsNode();
-    childNode2.id = 2;
-    childNode2.label = "Test 2";
-    parentTestSemanticsNode.addChild(childNode1);
-    parentTestSemanticsNode.addChild(childNode2);
-    TestSemanticsUpdate testSemanticsUpdate = parentTestSemanticsNode.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
-    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(1);
-    AccessibilityNodeInfo.CollectionItemInfo itemInfo = nodeInfo.getCollectionItemInfo();
-    assertNotNull(itemInfo);
-
-    boolean rowIndex = itemInfo.getRowIndex() == 0; // first item in the list
-    boolean rowSpan = itemInfo.getRowSpan() == 1;
-    boolean colIndex = itemInfo.getColumnIndex() == 0; // only a single column
-    boolean colSpan = itemInfo.getColumnSpan() == 1;
-    // Note: isHeading() is deprecated, and since this test node doesn't have IS_HEADER flag,
-    // we expect it to not be a heading. The heading state is set during CollectionItemInfo
-    // construction.
-    assertTrue(rowIndex && rowSpan && colIndex && colSpan);
   }
 
   @Config(sdk = API_LEVELS.API_36)
