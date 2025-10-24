@@ -5599,8 +5599,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       _debugLocked = true;
       return true;
     }());
+
+    _RouteEntry? entry;
     try {
-      final _RouteEntry entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
+      entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
       if (entry.pageBased && widget.onPopPage != null) {
         if (widget.onPopPage!(entry.route, result)) {
           if (entry.currentState.index <= _RouteLifecycle.idle.index) {
@@ -5636,7 +5638,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         return true;
       }());
     }
-    _afterNavigation(null);
+    _afterNavigation(entry.route);
   }
 
   /// Calls [pop] repeatedly until the predicate returns true.
