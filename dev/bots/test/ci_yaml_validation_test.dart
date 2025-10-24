@@ -162,8 +162,8 @@ final class _CiYamlTarget {
 final class _CiYaml {
   _CiYaml({required this.targets, required this.platforms});
 
-  List<_CiYamlTarget> targets;
-  Set<String> platforms;
+  final List<_CiYamlTarget> targets;
+  final Set<String> platforms;
 
   /// Parses a list of targets from the provided `.ci.yaml` file [path].
   static _CiYaml parse(String path) {
