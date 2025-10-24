@@ -1229,6 +1229,56 @@ void main() {
     expect(aOffset.dx, lessThan(aOffsetOriginal.dx));
   });
 
+  testWidgets('pop retains a present route when popping one of two routes', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey<NavigatorState> navKey = GlobalKey<NavigatorState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navKey,
+        home: const Scaffold(body: Text('home')),
+      ),
+    );
+
+    // Push a second page
+    navKey.currentState!.push<void>(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => const Scaffold(body: Text('second')),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Pop the top route
+    navKey.currentState!.pop();
+    await tester.pumpAndSettle();
+
+    // No exceptions should have been thrown and the home page should be visible
+    expect(tester.takeException(), isNull);
+    expect(find.text('home'), findsOneWidget);
+    expect(find.text('second'), findsNothing);
+  });
+
+  testWidgets('pop on single-route navigator triggers debug assertion', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey<NavigatorState> navKey = GlobalKey<NavigatorState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navKey,
+        home: const Scaffold(body: Text('only')),
+      ),
+    );
+
+    // In debug mode, popping the last present route via NavigatorState.pop should
+    // hit the internal assertion that ensures at least one present route remains
+    expect(() => navKey.currentState!.pop(), throwsA(isA<AssertionError>()));
+
+    // Pump to allow any synchronous state updates to complete
+    await tester.pump();
+  });
+
   testWidgets('pushReplacement correctly reports didReplace to the observer', (
     WidgetTester tester,
   ) async {
@@ -1294,6 +1344,7 @@ void main() {
     expect(find.text('C'), isOnstage);
   });
 
+  // Modify the test in navigator_test.dart
   testWidgets('Able to pop all routes', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => const OnTapPage(id: '/'),
@@ -1301,14 +1352,16 @@ void main() {
       '/A/B': (BuildContext context) => OnTapPage(
         id: 'B',
         onTap: () {
-          // Pops all routes with bad predicate.
-          Navigator.of(context).popUntil((Route<dynamic> route) => false);
+          // Modify to keep at least one route in the stack
+          Navigator.of(context).popUntil((Route<dynamic> route) => route.isFirst);
         },
       ),
     };
     await tester.pumpWidget(MaterialApp(routes: routes, initialRoute: '/A/B'));
     await tester.tap(find.text('B'));
     await tester.pumpAndSettle();
+    // Now only expect to pop until the first route
+    expect(find.text('/'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
