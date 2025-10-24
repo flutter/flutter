@@ -337,17 +337,18 @@ Future<XcodeBuildResult> buildXcodeProject({
     configuration,
   ];
 
-  final Version? xcodeVersion = globals.xcode?.currentVersion;
   // Check the public headers before checking Xcode version so headers fingerprinter is created
   // regardless of Xcode version.
-  if (publicHeadersChanged(
-        environmentType: environmentType,
-        mode: buildInfo.mode,
-        buildDirectory: buildDirectoryPath,
-        artifacts: globals.artifacts,
-        fileSystem: globals.fs,
-        logger: globals.logger,
-      ) &&
+  final bool headersChanged = publicHeadersChanged(
+    environmentType: environmentType,
+    mode: buildInfo.mode,
+    buildDirectory: buildDirectoryPath,
+    artifacts: globals.artifacts,
+    fileSystem: globals.fs,
+    logger: globals.logger,
+  );
+  final Version? xcodeVersion = globals.xcode?.currentVersion;
+  if (headersChanged &&
       incrementalBuild &&
       (xcodeVersion != null && xcodeVersion >= Version(26, 0, 0))) {
     // Xcode 26 changed the way headers are pre-compiled and will throw an error if the headers

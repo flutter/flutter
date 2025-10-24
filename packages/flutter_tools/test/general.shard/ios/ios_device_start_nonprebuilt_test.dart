@@ -465,9 +465,6 @@ void main() {
               .childDirectory('Headers')
               .childFile('FlutterPlugin.h')
               .createSync(recursive: true);
-          // fileSystem
-          //     .file('build/ios/framework_public_headers.fingerprint')
-          //     .createSync(recursive: true);
 
           processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
           processManager.addCommand(
