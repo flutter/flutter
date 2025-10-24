@@ -169,8 +169,9 @@ void drawSkShadow(
 
   final SkTonalColors tonalColors = canvasKit.computeTonalColors(inTonalColors);
 
+  final SkPath skPath = path.snapshotSkPath();
   skCanvas.drawShadow(
-    path.skiaObject,
+    skPath,
     Float32List(3)..[2] = devicePixelRatio * elevation,
     Float32List(3)
       ..[0] = 0
@@ -181,4 +182,5 @@ void drawSkShadow(
     tonalColors.spot,
     flags.toDouble(),
   );
+  skPath.delete();
 }
