@@ -127,8 +127,8 @@ enum _MediaQueryAspect {
   /// Specifies the aspect corresponding to [MediaQueryData.wordSpacingOverride].
   wordSpacingOverride,
 
-  /// Specifies the aspect corresponding to [MediaQueryData.paragraphSpacing].
-  paragraphSpacing,
+  /// Specifies the aspect corresponding to [MediaQueryData.paragraphSpacingOverride].
+  paragraphSpacingOverride,
 }
 
 /// Information about a piece of media (e.g., a window).
@@ -233,7 +233,7 @@ class MediaQueryData {
     this.lineHeightScaleFactorOverride,
     this.letterSpacingOverride,
     this.wordSpacingOverride,
-    this.paragraphSpacing = 0.0,
+    this.paragraphSpacingOverride,
   }) : _textScaleFactor = textScaleFactor,
        _textScaler = textScaler,
        assert(
@@ -338,7 +338,9 @@ class MediaQueryData {
           platformData?.letterSpacingOverride ?? view.platformDispatcher.letterSpacingOverride,
       wordSpacingOverride =
           platformData?.wordSpacingOverride ?? view.platformDispatcher.wordSpacingOverride,
-      paragraphSpacing = platformData?.paragraphSpacing ?? view.platformDispatcher.paragraphSpacing;
+      paragraphSpacingOverride =
+          platformData?.paragraphSpacingOverride ??
+          view.platformDispatcher.paragraphSpacingOverride;
 
   static TextScaler _textScalerFromView(ui.FlutterView view, MediaQueryData? platformData) {
     return platformData?.textScaler ?? SystemTextScaler._(view.platformDispatcher);
@@ -714,8 +716,8 @@ class MediaQueryData {
   /// See also:
   ///
   ///  * [Text], and [SelectableText], which are both informed by
-  ///  [paragraphSpacing].
-  final double paragraphSpacing;
+  ///  [paragraphSpacingOverride].
+  final double? paragraphSpacingOverride;
 
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
@@ -758,7 +760,7 @@ class MediaQueryData {
     double? lineHeightScaleFactorOverride,
     double? letterSpacingOverride,
     double? wordSpacingOverride,
-    double? paragraphSpacing,
+    double? paragraphSpacingOverride,
   }) {
     assert(textScaleFactor == null || textScaler == null);
     if (textScaleFactor != null) {
@@ -790,7 +792,7 @@ class MediaQueryData {
           lineHeightScaleFactorOverride ?? this.lineHeightScaleFactorOverride,
       letterSpacingOverride: letterSpacingOverride ?? this.letterSpacingOverride,
       wordSpacingOverride: wordSpacingOverride ?? this.wordSpacingOverride,
-      paragraphSpacing: paragraphSpacing ?? this.paragraphSpacing,
+      paragraphSpacingOverride: paragraphSpacingOverride ?? this.paragraphSpacingOverride,
     );
   }
 
@@ -993,7 +995,7 @@ class MediaQueryData {
         other.lineHeightScaleFactorOverride == lineHeightScaleFactorOverride &&
         other.letterSpacingOverride == letterSpacingOverride &&
         other.wordSpacingOverride == wordSpacingOverride &&
-        other.paragraphSpacing == paragraphSpacing;
+        other.paragraphSpacingOverride == paragraphSpacingOverride;
   }
 
   @override
@@ -1020,7 +1022,7 @@ class MediaQueryData {
       lineHeightScaleFactorOverride,
       letterSpacingOverride,
       wordSpacingOverride,
-      paragraphSpacing,
+      paragraphSpacingOverride,
     ),
   );
 
@@ -1049,7 +1051,7 @@ class MediaQueryData {
       'lineHeightScaleFactorOverride: $lineHeightScaleFactorOverride',
       'letterSpacingOverride: $letterSpacingOverride',
       'wordSpacingOverride: $wordSpacingOverride',
-      'paragraphSpacing: $paragraphSpacing',
+      'paragraphSpacingOverride: $paragraphSpacingOverride',
     ];
     return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
   }
@@ -1972,27 +1974,16 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static double? maybeWordSpacingOverrideOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.wordSpacingOverride)?.wordSpacingOverride;
 
-  /// Returns the [MediaQueryData.paragraphSpacing] for the nearest
-  /// [MediaQuery] ancestor or 0.0, if no such ancestor exists.
-  ///
-  /// Use of this method will cause the given [context] to rebuild any time that
-  /// the [MediaQueryData.paragraphSpacing] property of the ancestor [MediaQuery]
-  /// changes.
-  ///
-  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
-  static double paragraphSpacingOf(BuildContext context) =>
-      _of(context, _MediaQueryAspect.paragraphSpacing).paragraphSpacing;
-
-  /// Returns the [MediaQueryData.paragraphSpacing] for the nearest
+  /// Returns the [MediaQueryData.paragraphSpacingOverride] for the nearest
   /// [MediaQuery] ancestor or null, if no such ancestor exists.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
-  /// the [MediaQueryData.paragraphSpacing] property of the ancestor [MediaQuery]
+  /// the [MediaQueryData.paragraphSpacingOverride] property of the ancestor [MediaQuery]
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
-  static double? maybeParagraphSpacingOf(BuildContext context) =>
-      _maybeOf(context, _MediaQueryAspect.paragraphSpacing)?.paragraphSpacing;
+  static double? maybeParagraphSpacingOverrideOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.paragraphSpacingOverride)?.paragraphSpacingOverride;
 
   @override
   bool updateShouldNotify(MediaQuery oldWidget) => data != oldWidget.data;
@@ -2053,8 +2044,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
               data.letterSpacingOverride != oldWidget.data.letterSpacingOverride,
             _MediaQueryAspect.wordSpacingOverride =>
               data.wordSpacingOverride != oldWidget.data.wordSpacingOverride,
-            _MediaQueryAspect.paragraphSpacing =>
-              data.paragraphSpacing != oldWidget.data.paragraphSpacing,
+            _MediaQueryAspect.paragraphSpacingOverride =>
+              data.paragraphSpacingOverride != oldWidget.data.paragraphSpacingOverride,
           },
     );
   }
