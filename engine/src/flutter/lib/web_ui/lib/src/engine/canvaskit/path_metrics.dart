@@ -8,25 +8,17 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 class CkContourMeasureIter implements DisposablePathMetricIterator {
-  CkContourMeasureIter(this._path, this._forceClosed) {
-    // TODO: Can we get rid of the UniqueRef here?
-    _ref = UniqueRef<SkContourMeasureIter>(
-      this,
-      SkContourMeasureIter(_path.skiaObject, _forceClosed, 1.0),
-      'CkContourMeasureIter:SkContourMeasureIter',
-    );
-  }
+  CkContourMeasureIter(this._path, bool forceClosed)
+    : skiaObject = SkContourMeasureIter(_path.skiaObject, forceClosed, 1.0);
 
   @override
   void dispose() {
-    _ref.dispose();
+    skiaObject.delete();
   }
 
   final CkPath _path;
-  final bool _forceClosed;
-  late final UniqueRef<SkContourMeasureIter> _ref;
 
-  SkContourMeasureIter get skiaObject => _ref.nativeObject;
+  final SkContourMeasureIter skiaObject;
 
   @override
   CkContourMeasure get current {

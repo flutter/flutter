@@ -57,14 +57,9 @@ class CkPathBuilder implements DisposablePathBuilder {
     return CkPathBuilder._(skPathBuilder, fillType);
   }
 
-  CkPathBuilder._(SkPathBuilder nativeObject, this._fillType) {
-    // TODO: The lifecycle of CkPathBuilder is managed by LazyPath, so there's no need for UniqueRef here.
-    _ref = UniqueRef<SkPathBuilder>(this, nativeObject, 'PathBuilder');
-  }
+  CkPathBuilder._(this._skiaPathBuilder, this._fillType);
 
-  late final UniqueRef<SkPathBuilder> _ref;
-
-  SkPathBuilder get _skiaPathBuilder => _ref.nativeObject;
+  final SkPathBuilder _skiaPathBuilder;
 
   @override
   CkPath build() {
@@ -73,7 +68,7 @@ class CkPathBuilder implements DisposablePathBuilder {
 
   @override
   void dispose() {
-    _ref.dispose();
+    _skiaPathBuilder.delete();
   }
 
   ui.PathFillType _fillType;
