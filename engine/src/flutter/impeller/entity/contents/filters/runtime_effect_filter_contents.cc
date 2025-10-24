@@ -93,7 +93,7 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
 
   CoverageProc coverage_proc =
       [coverage](const Entity& entity) -> std::optional<Rect> {
-    return coverage.TransformBounds(entity.GetTransform());
+    return coverage;
   };
 
   auto contents = AnonymousContents::Make(render_proc, coverage_proc);
