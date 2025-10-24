@@ -488,31 +488,30 @@ class LazyPath implements ui.Path, Collectable {
   DisposablePathBuilder? _cachedBuilder;
   final List<PathCommand> _commands;
 
-  DisposablePath get builtPath {
-    if (_cachedPath != null) {
-      return _cachedPath!;
+  DisposablePathBuilder get _builtPathBuilder {
+    if (_cachedBuilder != null) {
+      return _cachedBuilder!;
     }
 
-    _cachedBuilder ??= _createPathBuilder();
-    _cachedPath = _cachedBuilder!.build();
+    final DisposablePathBuilder builder = initializer();
+    builder.fillType = _fillType;
+    for (final command in _commands) {
+      command.apply(builder);
+    }
 
+    _cachedBuilder = builder;
     EnginePlatformDispatcher.instance.frameArena.add(this);
+    return builder;
+  }
+
+  DisposablePath get builtPath {
+    _cachedPath ??= _builtPathBuilder.build();
     return _cachedPath!;
   }
 
   void _invalidateCachedPath() {
     _cachedPath?.dispose();
     _cachedPath = null;
-  }
-
-  /// Creates a [DisposablePathBuilder] and replays all recorded commands on it.
-  DisposablePathBuilder _createPathBuilder() {
-    final DisposablePathBuilder builder = initializer();
-    builder.fillType = _fillType;
-    for (final command in _commands) {
-      command.apply(builder);
-    }
-    return builder;
   }
 
   void _addCommand(PathCommand command) {
@@ -676,8 +675,7 @@ class LazyPath implements ui.Path, Collectable {
 
   @override
   bool contains(ui.Offset point) {
-    // TODO: Can be done without creating the path. Creating the path builder is enough.
-    return builtPath.contains(point);
+    return _builtPathBuilder.contains(point);
   }
 
   @override
@@ -700,8 +698,7 @@ class LazyPath implements ui.Path, Collectable {
 
   @override
   ui.Rect getBounds() {
-    // TODO: Can be done without creating the path. Creating the path builder is enough.
-    return builtPath.getBounds();
+    return _builtPathBuilder.getBounds();
   }
 
   @override
