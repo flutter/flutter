@@ -731,6 +731,9 @@ template("component") {
       if (defined(invoker.include_dirs)) {
         include_dirs = invoker.include_dirs
       }
+      if (defined(invoker.inputs)) {
+        inputs = invoker.inputs
+      }
       if (defined(invoker.ldflags)) {
         ldflags = invoker.ldflags
       }
@@ -821,6 +824,9 @@ template("component") {
       }
       if (defined(invoker.include_dirs)) {
         include_dirs = invoker.include_dirs
+      }
+      if (defined(invoker.inputs)) {
+        inputs = invoker.inputs
       }
       if (defined(invoker.ldflags)) {
         ldflags = invoker.ldflags

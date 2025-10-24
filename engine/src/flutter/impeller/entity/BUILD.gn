@@ -243,7 +243,7 @@ impeller_component("entity") {
     "../renderer",
     "../typographer",
     "//flutter/display_list",
-    "//flutter/third_party/abseil-cpp/absl/container:flat_hash_map",
+    "//third_party/abseil-cpp/absl/container:flat_hash_map",
   ]
 
   deps = [ "//flutter/fml" ]
