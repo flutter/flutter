@@ -13,7 +13,6 @@ import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'device_port_forwarder.dart';
@@ -363,9 +362,7 @@ class DesktopLogReader extends DeviceLogReader {
 
   @override
   Stream<String> get logLines {
-    return _inputController.stream
-        .transformWithCallSite(utf8.decoder)
-        .transformWithCallSite(const LineSplitter());
+    return _inputController.stream.transform(utf8LineDecoder);
   }
 
   @override

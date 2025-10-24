@@ -13,7 +13,6 @@ import 'base/common.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/utils.dart';
-import 'convert.dart';
 import 'resident_runner.dart';
 
 /// An implementation of the devtools launcher that uses `dart devtools` to
@@ -67,25 +66,19 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       _processStartCompleter.complete();
 
       final devToolsCompleter = Completer<Uri>();
-      _devToolsProcess!.stdout
-          .transformWithCallSite(utf8.decoder)
-          .transformWithCallSite(const LineSplitter())
-          .listen((String line) {
-            final Match? dtdMatch = _serveDtdPattern.firstMatch(line);
-            if (dtdMatch != null) {
-              final String uri = dtdMatch[1]!;
-              dtdUri = Uri.parse(uri);
-            }
-            final Match? devToolsMatch = _serveDevToolsPattern.firstMatch(line);
-            if (devToolsMatch != null) {
-              final String url = devToolsMatch[1]!;
-              devToolsCompleter.complete(Uri.parse(url));
-            }
-          });
-      _devToolsProcess!.stderr
-          .transformWithCallSite(utf8.decoder)
-          .transformWithCallSite(const LineSplitter())
-          .listen(_logger.printError);
+      _devToolsProcess!.stdout.transform(utf8LineDecoder).listen((String line) {
+        final Match? dtdMatch = _serveDtdPattern.firstMatch(line);
+        if (dtdMatch != null) {
+          final String uri = dtdMatch[1]!;
+          dtdUri = Uri.parse(uri);
+        }
+        final Match? devToolsMatch = _serveDevToolsPattern.firstMatch(line);
+        if (devToolsMatch != null) {
+          final String url = devToolsMatch[1]!;
+          devToolsCompleter.complete(Uri.parse(url));
+        }
+      });
+      _devToolsProcess!.stderr.transform(utf8LineDecoder).listen(_logger.printError);
 
       final bool runningOnBot = await _botDetector.isRunningOnBot;
       devToolsProcessExit = _devToolsProcess!.exitCode.then((int exitCode) {

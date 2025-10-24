@@ -300,8 +300,7 @@ class DwarfSymbolizationService {
     StreamSubscription<void>? subscription;
     subscription = input
         .cast<List<int>>()
-        .transformWithCallSite(const Utf8Decoder())
-        .transformWithCallSite(const LineSplitter())
+        .transform(utf8LineDecoder)
         .transformWithCallSite(unitSymbolsTransformer(unitSymbols))
         .listen(
           (String line) {

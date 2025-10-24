@@ -588,28 +588,19 @@ extension StackTraceTransform<T> on Stream<T> {
   Stream<S> transformWithCallSite<S>(StreamTransformer<T, S> transformer) {
     // Don't include this frame with the stack trace as it adds no value.
     final callSiteTrace = Trace.current(1);
-
-    // Create a new controller to manage the output stream.
-    // We use a sync controller for minimal latency, and pass through
-    // pause/resume events.
-    final controller = StreamController<S>(sync: true);
-    controller.onListen = () {
-      // Listen to the original stream with the original transformer.
-      final StreamSubscription<S> subscription = transform<S>(transformer).listen(
-        (e) => controller.add(e),
-        onError: (Object e, StackTrace s) {
-          // Report the error with the call site trace.
-          controller.addError(e, callSiteTrace);
+    return transform(transformer).transform(
+      StreamTransformer.fromHandlers(
+        handleData: (data, sink) {
+          sink.add(data);
         },
-        onDone: controller.close,
-      );
-
-      // Handle pause, resume, and cancellation by forwarding to the subscription.
-      controller.onPause = () => subscription.pause();
-      controller.onResume = () => subscription.resume();
-      controller.onCancel = () => subscription.cancel();
-    };
-
-    return controller.stream;
+        handleError: (error, stackTrace, sink) {
+          sink.addError(error, callSiteTrace);
+        },
+      ),
+    );
   }
 }
+
+final utf8LineDecoder = StreamTransformer<List<int>, String>.fromBind(
+  (stream) => stream.transformWithCallSite(utf8.decoder).transform(const LineSplitter()),
+);
