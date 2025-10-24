@@ -16,7 +16,7 @@ void main() {
     Material appBarMaterial = tester.widget<Material>(
       find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
     );
-    expect(appBarMaterial.color, Colors.redAccent[700]!.withOpacity(.85));
+    expect(appBarMaterial.color, Colors.redAccent[700]!.withValues(alpha: .85));
     final TestGesture gesture = await tester.startGesture(
       tester.getCenter(find.byType(CustomScrollView)),
     );
@@ -26,7 +26,7 @@ void main() {
     appBarMaterial = tester.widget<Material>(
       find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
     );
-    expect(appBarMaterial.color, Colors.green[800]!.withOpacity(.85));
+    expect(appBarMaterial.color, Colors.green[800]!.withValues(alpha: .85));
     await gesture.up();
     await tester.pumpAndSettle();
 
