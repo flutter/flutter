@@ -1840,7 +1840,7 @@ void main() {
       await tester.pump();
       expect(image1.debugGetOpenHandleStackTraces()!.length, 0);
       expect(image2.debugGetOpenHandleStackTraces()!.length, 0);
-    });
+    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
   }
 
   testWidgets(
