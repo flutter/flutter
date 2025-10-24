@@ -16,6 +16,7 @@ dependencies:
   process: any
   process_runner: any
   pub_semver: any
+  xml: ^6.5.0
   yaml: any
 
   collection: any

@@ -327,14 +327,20 @@ class FlutterPlugin : Plugin<Project> {
     private fun addTaskForLockfileGeneration(rootProject: Project) {
         rootProject.tasks.register("generateLockfiles") {
             doLast {
+                val projectProperties: List<String> = rootProject.properties
+                    .filterKeys { key -> key.startsWith("local-engine") }
+                    .map { (key, value) -> "-P$key=$value" }
+
                 rootProject.subprojects.forEach { subproject ->
                     val gradlew: String =
                         getExecutableNameForPlatform("${rootProject.projectDir}/gradlew")
                     val execOps = rootProject.serviceOf<ExecOperations>()
+                    val allArgs = listOf(":${subproject.name}:dependencies", "--write-locks") + projectProperties
                     execOps.exec {
                         workingDir(rootProject.projectDir)
                         executable(gradlew)
-                        args(":${subproject.name}:dependencies", "--write-locks")
+                        // 4. Pass the combined list to the exec action
+                        args(allArgs)
                     }
                 }
             }
