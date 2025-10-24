@@ -260,12 +260,15 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
   /// If [showTrailingIcon] is false, the trailing icon will not be shown.
   final Widget? trailingIcon;
 
-  /// Specifies if the [DropdownMenu] should show a [trailingIcon].
+  /// Specifies if the [DropdownMenu] should show the [trailingIcon].
   ///
   /// If [trailingIcon] is set, [DropdownMenu] will use that trailing icon,
   /// otherwise a default trailing icon will be created.
   ///
   /// If [showTrailingIcon] is false, [trailingIconFocusNode] must be null.
+  ///
+  /// If a value is provided for [decorationBuilder] and the resulting [InputDecoration.suffixIcon]
+  /// is not null, [showTrailingIcon] has no effect.
   ///
   /// Defaults to true.
   final bool showTrailingIcon;
