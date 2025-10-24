@@ -5621,13 +5621,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// }
   /// ```
   /// {@end-tool}
-  void popUntil(RoutePredicate predicate) {
+  void popUntil<T extends Object?>(RoutePredicate predicate, [ T? result ]) {
     _RouteEntry? candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     while (candidate != null) {
       if (predicate(candidate.route)) {
         return;
       }
-      pop();
+      pop(result);
       candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     }
   }
