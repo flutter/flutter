@@ -1791,7 +1791,7 @@ class IconWithRandomColor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color randomColor = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
+    final Color randomColor = Color((Random().nextDouble() * 0xFFFFFF).toInt());
     return Icon(icon, color: randomColor);
   }
 }
