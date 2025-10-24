@@ -66,6 +66,7 @@ template("embedder_source_set") {
       "embedder_external_view.h",
       "embedder_external_view_embedder.cc",
       "embedder_external_view_embedder.h",
+      "embedder_gl_dispatch_table.h",
       "embedder_include.c",
       "embedder_include2.c",
       "embedder_layers.cc",
@@ -115,12 +116,14 @@ template("embedder_source_set") {
     ]
 
     if (embedder_enable_gl) {
-      sources += [
-        "embedder_external_texture_gl.cc",
-        "embedder_external_texture_gl.h",
-        "embedder_surface_gl_skia.cc",
-        "embedder_surface_gl_skia.h",
-      ]
+      if (!slimpeller) {
+        sources += [
+          "embedder_external_texture_gl_skia.cc",
+          "embedder_external_texture_gl_skia.h",
+          "embedder_surface_gl_skia.cc",
+          "embedder_surface_gl_skia.h",
+        ]
+      }
 
       if (impeller_supports_rendering) {
         sources += [
@@ -166,10 +169,12 @@ template("embedder_source_set") {
     }
 
     if (embedder_enable_vulkan) {
-      sources += [
-        "embedder_surface_vulkan.cc",
-        "embedder_surface_vulkan.h",
-      ]
+      if (!slimpeller) {
+        sources += [
+          "embedder_surface_vulkan_skia.cc",
+          "embedder_surface_vulkan_skia.h",
+        ]
+      }
 
       if (impeller_supports_rendering) {
         sources += [

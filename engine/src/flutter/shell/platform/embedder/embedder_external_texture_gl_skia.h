@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_GL_H_
-#define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_GL_H_
+#ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_GL_SKIA_H_
+#define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_GL_SKIA_H_
 
 #include "flutter/common/graphics/texture.h"
 #include "flutter/fml/macros.h"
@@ -12,15 +12,15 @@
 
 namespace flutter {
 
-class EmbedderExternalTextureGL : public flutter::Texture {
+class EmbedderExternalTextureGLSkia : public flutter::Texture {
  public:
   using ExternalTextureCallback = std::function<
       std::unique_ptr<FlutterOpenGLTexture>(int64_t, size_t, size_t)>;
 
-  EmbedderExternalTextureGL(int64_t texture_identifier,
-                            const ExternalTextureCallback& callback);
+  EmbedderExternalTextureGLSkia(int64_t texture_identifier,
+                                const ExternalTextureCallback& callback);
 
-  ~EmbedderExternalTextureGL();
+  ~EmbedderExternalTextureGLSkia();
 
  private:
   const ExternalTextureCallback& external_texture_callback_;
@@ -57,9 +57,9 @@ class EmbedderExternalTextureGL : public flutter::Texture {
   // |flutter::Texture|
   void OnTextureUnregistered() override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(EmbedderExternalTextureGL);
+  FML_DISALLOW_COPY_AND_ASSIGN(EmbedderExternalTextureGLSkia);
 };
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_GL_H_
+#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_GL_SKIA_H_
