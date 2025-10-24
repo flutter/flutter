@@ -198,7 +198,7 @@ void main() {
     );
   });
 
-  Widget selectableTextBuilder({String text = '', int? maxLines = 1, int? minLines}) {
+  Widget selectableTextBuilder({String text = '', double? maxLines = 1, int? minLines}) {
     return boilerplate(
       child: SelectableText(
         text,
