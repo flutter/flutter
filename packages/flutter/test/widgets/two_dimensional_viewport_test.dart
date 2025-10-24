@@ -2012,12 +2012,14 @@ void main() {
       );
       addTearDown(delegate.dispose);
 
-      await tester.pumpWidget(simpleBuilderTest(
-        delegate: delegate,
-        cacheExtent: 1.0,
-        cacheExtentStyle: CacheExtentStyle.viewport,
-        useCacheExtent: true,
-      ));
+      await tester.pumpWidget(
+        simpleBuilderTest(
+          delegate: delegate,
+          cacheExtent: 1.0,
+          cacheExtentStyle: CacheExtentStyle.viewport,
+          useCacheExtent: true,
+        ),
+      );
       await tester.pumpAndSettle();
 
       final RenderTwoDimensionalViewport viewport = getViewport(tester, childKeys.values.first);
