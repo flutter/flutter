@@ -4,7 +4,6 @@
 
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -3485,7 +3484,7 @@ void main() {
               return TextButton(
                 onPressed: () => Navigator.push(
                   context,
-                  CupertinoPageRoute<void>(
+                  MaterialPageRoute<void>(
                     builder: (BuildContext context) =>
                         Scaffold(appBar: AppBar(title: const Text('Second Page'))),
                   ),
@@ -3526,7 +3525,7 @@ void main() {
                 return TextButton(
                   onPressed: () => Navigator.push(
                     context,
-                    CupertinoPageRoute<void>(
+                    MaterialPageRoute<void>(
                       builder: (BuildContext context) => Scaffold(
                         appBar: AppBar(
                           leading: const Tooltip(message: 'Hello', child: Text('World')),
