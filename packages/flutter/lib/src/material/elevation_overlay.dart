@@ -101,7 +101,7 @@ abstract final class ElevationOverlay {
     if (elevation > 0.0 &&
         theme.applyElevationOverlayColor &&
         theme.brightness == Brightness.dark &&
-        color.withOpacity(1.0) == theme.colorScheme.surface.withOpacity(1.0)) {
+        color == theme.colorScheme.surface) {
       return colorWithOverlay(color, theme.colorScheme.onSurface, elevation);
     }
     return color;
