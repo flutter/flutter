@@ -57,9 +57,6 @@ class Viewport extends MultiChildRenderObjectWidget {
   ///
   /// The viewport listens to the [offset], which means you do not need to
   /// rebuild this widget when the [offset] changes.
-  ///
-  /// The [cacheExtent] must be specified if the [cacheExtentStyle] is
-  /// not [CacheExtentStyle.pixel].
   Viewport({
     super.key,
     this.axisDirection = AxisDirection.down,
@@ -67,13 +64,12 @@ class Viewport extends MultiChildRenderObjectWidget {
     this.anchor = 0.0,
     required this.offset,
     this.center,
-    this.cacheExtent,
+    this.cacheExtent = 0.0,
     this.cacheExtentStyle = CacheExtentStyle.pixel,
     this.paintOrder = SliverPaintOrder.firstIsTop,
     this.clipBehavior = Clip.hardEdge,
     List<Widget> slivers = const <Widget>[],
   }) : assert(center == null || slivers.where((Widget child) => child.key == center).length == 1),
-       assert(cacheExtentStyle != CacheExtentStyle.viewport || cacheExtent != null),
        super(children: slivers);
 
   /// The direction in which the [offset]'s [ViewportOffset.pixels] increases.
@@ -128,10 +124,12 @@ class Viewport extends MultiChildRenderObjectWidget {
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
   ///
+  /// defaults to 0.0.
+  ///
   /// See also:
   ///
   ///  * [cacheExtentStyle], which controls the units of the [cacheExtent].
-  final double? cacheExtent;
+  final double cacheExtent;
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
   final CacheExtentStyle cacheExtentStyle;
@@ -367,6 +365,8 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
     required this.offset,
     this.paintOrder = SliverPaintOrder.firstIsTop,
     this.clipBehavior = Clip.hardEdge,
+    this.cacheExtent = 0.0,
+    this.cacheExtentStyle = CacheExtentStyle.pixel,
     List<Widget> slivers = const <Widget>[],
   }) : super(children: slivers);
 
@@ -408,6 +408,16 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
+  ///
+  /// See also:
+  ///
+  ///  * [cacheExtentStyle], which controls the units of the [cacheExtent].
+  final double cacheExtent;
+
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
+  final CacheExtentStyle cacheExtentStyle;
+
   @override
   RenderShrinkWrappingViewport createRenderObject(BuildContext context) {
     return RenderShrinkWrappingViewport(
@@ -416,6 +426,8 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
           crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection),
       offset: offset,
       paintOrder: paintOrder,
+      cacheExtent: cacheExtent,
+      cacheExtentStyle: cacheExtentStyle,
       clipBehavior: clipBehavior,
     );
   }
@@ -427,6 +439,8 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
       ..crossAxisDirection =
           crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection)
       ..offset = offset
+      ..cacheExtent = cacheExtent
+      ..cacheExtentStyle = cacheExtentStyle
       ..paintOrder = paintOrder
       ..clipBehavior = clipBehavior;
   }
