@@ -1272,8 +1272,8 @@ void main() {
     );
 
     // In debug mode, popping the last present route via NavigatorState.pop should
-    // hit the internal assertion that ensures at least one present route remains
-    expect(() => navKey.currentState!.pop(), throwsA(isA<AssertionError>()));
+    // throw a FlutterError because no routes would remain on the stack.
+    expect(() => navKey.currentState!.pop(), throwsA(isA<FlutterError>()));
 
     // Pump to allow any synchronous state updates to complete
     await tester.pump();
