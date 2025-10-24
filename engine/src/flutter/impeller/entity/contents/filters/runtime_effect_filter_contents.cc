@@ -101,8 +101,8 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
   Entity sub_entity;
   sub_entity.SetContents(std::move(contents));
   sub_entity.SetBlendMode(entity.GetBlendMode());
-  sub_entity.SetTransform(Matrix::MakeTranslation(-1.0f * snapshot_origin) *
-                          input_snapshot->transform);
+  sub_entity.SetTransform(input_snapshot->transform *
+                          Matrix::MakeTranslation(-1.0f * snapshot_origin));
 
   return sub_entity;
 }
