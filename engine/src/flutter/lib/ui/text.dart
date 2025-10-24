@@ -1306,9 +1306,17 @@ enum TextAlign {
 /// A horizontal line used for aligning text.
 enum TextBaseline {
   /// The horizontal line used to align the bottom of glyphs for alphabetic characters.
+  ///
+  /// This baseline is often used for alphabetical scripts like Latin, Greek,
+  /// Cyrillic, etc.
+  ///
+  /// Characters with descenders (like 'p', 'g', or 'y') extend below this line.
   alphabetic,
 
   /// The horizontal line used to align ideographic characters.
+  ///
+  /// This baseline is often used for scripts with uniform square heights,
+  /// like Chinese, Japanese, Korean, etc.
   ideographic,
 }
 
