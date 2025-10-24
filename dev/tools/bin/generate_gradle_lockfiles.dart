@@ -43,7 +43,6 @@ void main(List<String> arguments) {
     ..addFlag(
       'ignore-locking',
       help: 'Generate ignore file to disable gradle dependency locking.',
-      defaultsTo: false,
     );
 
   ArgResults args;
@@ -63,7 +62,7 @@ void main(List<String> arguments) {
   // Skip android subdirectories specified in the ./config/lockfile_exclusion.yaml file.
   final bool useExclusion = (args['exclusion'] as bool?) ?? true;
 
-  final bool ignoreLocking = (args['ignore-locking'] as bool?) ??  false;
+  final bool ignoreLocking = (args['ignore-locking'] as bool?) ?? false;
 
   const FileSystem fileSystem = LocalFileSystem();
 
