@@ -807,7 +807,7 @@ class Text extends StatelessWidget {
     // TODO(Renzo-Olivares): Update this logic to inform paragraphs within
     // this widgets text about paragraph spacing https://github.com/flutter/flutter/issues/177408.
     final double? paragraphSpacing = MediaQuery.maybeParagraphSpacingOf(context);
-    if (paragraphSpacing != null && paragraphSpacing != 0.0) {
+    if (paragraphSpacing != null && paragraphSpacing.abs() > precisionErrorTolerance) {
       result = Padding(
         padding: EdgeInsets.only(bottom: paragraphSpacing),
         child: result,
