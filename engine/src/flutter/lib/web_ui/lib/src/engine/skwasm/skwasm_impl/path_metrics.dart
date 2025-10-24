@@ -2,22 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
 import 'dart:ffi';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
-
-class SkwasmPathMetrics extends IterableBase<ui.PathMetric> implements DisposablePathMetrics {
-  SkwasmPathMetrics({required this.path, required this.forceClosed});
-
-  SkwasmPath path;
-  bool forceClosed;
-
-  @override
-  late DisposablePathMetricIterator iterator = SkwasmPathMetricIterator(path, forceClosed);
-}
 
 class SkwasmPathMetricIterator extends SkwasmObjectWrapper<RawContourMeasureIter>
     implements DisposablePathMetricIterator {
@@ -29,7 +18,6 @@ class SkwasmPathMetricIterator extends SkwasmObjectWrapper<RawContourMeasureIter
       );
 
   SkwasmPathMetric? _current;
-  int _nextIndex = 0;
 
   @override
   DisposablePathMetric get current {
@@ -50,8 +38,7 @@ class SkwasmPathMetricIterator extends SkwasmObjectWrapper<RawContourMeasureIter
       _current = null;
       return false;
     } else {
-      _current = SkwasmPathMetric(measureHandle, _nextIndex);
-      _nextIndex++;
+      _current = SkwasmPathMetric(measureHandle);
       return true;
     }
   }
@@ -59,11 +46,8 @@ class SkwasmPathMetricIterator extends SkwasmObjectWrapper<RawContourMeasureIter
 
 class SkwasmPathMetric extends SkwasmObjectWrapper<RawContourMeasure>
     implements DisposablePathMetric {
-  SkwasmPathMetric(ContourMeasureHandle handle, this.contourIndex)
+  SkwasmPathMetric(ContourMeasureHandle handle)
     : super(handle, (ContourMeasureHandle h) => contourMeasureDispose(h), 'PathMetric');
-
-  @override
-  final int contourIndex;
 
   @override
   DisposablePath extractPath(double start, double end, {bool startWithMoveTo = true}) {
@@ -71,7 +55,7 @@ class SkwasmPathMetric extends SkwasmObjectWrapper<RawContourMeasure>
   }
 
   @override
-  ui.Tangent? getTangentForOffset(double distance) {
+  ui.Tangent getTangentForOffset(double distance) {
     return withStackScope((StackScope scope) {
       final Pointer<Float> outPosition = scope.allocFloatArray(4);
       final outTangent = Pointer<Float>.fromAddress(outPosition.address + sizeOf<Float>() * 2);
