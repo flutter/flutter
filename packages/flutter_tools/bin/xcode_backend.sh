@@ -16,11 +16,25 @@ set -euo pipefail
 # Needed because if it is set, cd may print the path it changed to.
 unset CDPATH
 
+function follow_links() (
+  cd -P "$(dirname -- "$1")"
+  file="$PWD/$(basename -- "$1")"
+  while [[ -h "$file" ]]; do
+    cd -P "$(dirname -- "$file")"
+    file="$(readlink -- "$file")"
+    cd -P "$(dirname -- "$file")"
+    file="$PWD/$(basename -- "$file")"
+  done
+  echo "$file"
+)
+
 # Run `dart xcode_backend.dart` with the dart from the Flutter SDK.
-# The FLUTTER_ROOT environment variable is required.
+# Prefer the FLUTTER_ROOT environment variable if set, otherwise fallback
+# to path resolution via symlink canonicalization.
 if [[ -z "$FLUTTER_ROOT" ]]; then
-  echo "error: FLUTTER_ROOT must be set."
-  exit 1
+  PROG_NAME="$(follow_links "${BASH_SOURCE[0]}")"
+  BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
+  FLUTTER_ROOT="$BIN_DIR/../../.."
 fi
 
 DART="$FLUTTER_ROOT/bin/dart"
