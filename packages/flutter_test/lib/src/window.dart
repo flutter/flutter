@@ -581,7 +581,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   ///   * [clearParagraphSpacingOverrideTestValue] to reset this value specifically
   ///   * [clearAllTestValues] to reset all test values for this view
   @override
-  double get paragraphSpacingOverride => _forceParagraphSpacingOverrideToBeNull
+  double? get paragraphSpacingOverride => _forceParagraphSpacingOverrideToBeNull
       ? null
       : _paragraphSpacingOverrideTestValue ?? _platformDispatcher.paragraphSpacingOverride;
   double? _paragraphSpacingOverrideTestValue;
