@@ -1146,7 +1146,7 @@ class PlatformDispatcher {
   /// to add between each paragraph in text.
   ///
   /// If this value changes, [onMetricsChanged] will be called.
-  double get paragraphSpacing => _configuration.paragraphSpacing;
+  double? get paragraphSpacingOverride => _configuration.paragraphSpacingOverride;
 
   /// The system-reported text scale.
   ///
@@ -1841,7 +1841,7 @@ class _PlatformConfiguration {
     this.lineHeightScaleFactorOverride,
     this.letterSpacingOverride,
     this.wordSpacingOverride,
-    this.paragraphSpacing = 0.0,
+    this.paragraphSpacingOverride,
   });
 
   _PlatformConfiguration copyWith({
@@ -1857,7 +1857,7 @@ class _PlatformConfiguration {
     double? lineHeightScaleFactorOverride,
     double? letterSpacingOverride,
     double? wordSpacingOverride,
-    double? paragraphSpacing,
+    double? paragraphSpacingOverride,
   }) {
     return _PlatformConfiguration(
       accessibilityFeatures: accessibilityFeatures ?? this.accessibilityFeatures,
@@ -1873,7 +1873,7 @@ class _PlatformConfiguration {
           lineHeightScaleFactorOverride ?? this.lineHeightScaleFactorOverride,
       letterSpacingOverride: letterSpacingOverride ?? this.letterSpacingOverride,
       wordSpacingOverride: wordSpacingOverride ?? this.wordSpacingOverride,
-      paragraphSpacing: paragraphSpacing ?? this.paragraphSpacing,
+      paragraphSpacingOverride: paragraphSpacingOverride ?? this.paragraphSpacingOverride,
     );
   }
 
@@ -1939,7 +1939,7 @@ class _PlatformConfiguration {
 
   /// The system-reported amount of additional space (in logical pixels)
   /// to add between each paragraph in text.
-  final double paragraphSpacing;
+  final double? paragraphSpacingOverride;
 }
 
 /// An immutable view configuration.

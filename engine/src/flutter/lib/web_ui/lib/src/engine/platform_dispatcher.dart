@@ -767,7 +767,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   double? get wordSpacingOverride => configuration.wordSpacingOverride;
 
   @override
-  double get paragraphSpacing => configuration.paragraphSpacing;
+  double? get paragraphSpacingOverride => configuration.paragraphSpacingOverride;
 
   /// Additional accessibility features that may be enabled by the platform.
   @override
@@ -1041,10 +1041,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// Watches for resize changes on an off-screen invisible element to
   /// recalculate [lineHeightScaleFactorOverride], [letterSpacingOverride],
-  /// [wordSpacingOverride], and [paragraphSpacing].
+  /// [wordSpacingOverride], and [paragraphSpacingOverride].
   ///
   /// Updates [lineHeightScaleFactorOverride], [letterSpacingOverride],
-  /// [wordSpacingOverride], and [paragraphSpacing] with the new values.
+  /// [wordSpacingOverride], and [paragraphSpacingOverride] with the new values.
   DomResizeObserver? _typographySettingsObserver;
   DomElement? _typographyMeasurementElement;
 
@@ -1078,18 +1078,18 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     return false;
   }
 
-  /// Updates [paragraphSpacing] and returns true if
-  /// [paragraphSpacing] changed. If not then returns false.
-  bool _updateParagraphSpacing(double value) {
-    if (configuration.paragraphSpacing != value) {
-      configuration = configuration.apply(paragraphSpacing: value);
+  /// Updates [paragraphSpacingOverride] and returns true if
+  /// [paragraphSpacingOverride] changed. If not then returns false.
+  bool _updateParagraphSpacingOverride(double? value) {
+    if (configuration.paragraphSpacingOverride != value) {
+      configuration = configuration.apply(paragraphSpacingOverride: value);
       return true;
     }
     return false;
   }
 
   /// Set the callback function for updating [lineHeightScaleFactorOverride],
-  /// [letterSpacingOverride], [wordSpacingOverride], and [paragraphSpacing]
+  /// [letterSpacingOverride], [wordSpacingOverride], and [paragraphSpacingOverride]
   /// based on the sizing changes of an off-screen element with text.
   void _addTypographySettingsObserver() {
     _typographyMeasurementElement = createDomHTMLParagraphElement();
@@ -1166,10 +1166,8 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       computedWordSpacingChanged = _updateWordSpacingOverride(
         computedWordSpacing == spacingDefault ? null : computedWordSpacing,
       );
-      computedParagraphSpacingChanged = _updateParagraphSpacing(
-        computedParagraphSpacing == spacingDefault || computedParagraphSpacing == null
-            ? 0.0
-            : computedParagraphSpacing,
+      computedParagraphSpacingChanged = _updateParagraphSpacingOverride(
+        computedParagraphSpacing == spacingDefault ? null : computedParagraphSpacing,
       );
 
       if (computedLineHeightScaleFactorChanged ||
@@ -1852,7 +1850,7 @@ class PlatformConfiguration {
     this.lineHeightScaleFactorOverride,
     this.letterSpacingOverride,
     this.wordSpacingOverride,
-    this.paragraphSpacing = 0.0,
+    this.paragraphSpacingOverride,
   });
 
   static const Object _noOverridePlaceholder = Object();
@@ -1869,7 +1867,7 @@ class PlatformConfiguration {
     Object? lineHeightScaleFactorOverride = _noOverridePlaceholder,
     Object? letterSpacingOverride = _noOverridePlaceholder,
     Object? wordSpacingOverride = _noOverridePlaceholder,
-    double? paragraphSpacing,
+    Object? paragraphSpacingOverride = _noOverridePlaceholder,
   }) {
     return PlatformConfiguration(
       accessibilityFeatures: accessibilityFeatures ?? this.accessibilityFeatures,
@@ -1891,7 +1889,9 @@ class PlatformConfiguration {
       wordSpacingOverride: wordSpacingOverride == _noOverridePlaceholder
           ? this.wordSpacingOverride
           : wordSpacingOverride as double?,
-      paragraphSpacing: paragraphSpacing ?? this.paragraphSpacing,
+      paragraphSpacingOverride: paragraphSpacingOverride == _noOverridePlaceholder
+          ? this.paragraphSpacingOverride
+          : paragraphSpacingOverride as double?,
     );
   }
 
@@ -1907,7 +1907,7 @@ class PlatformConfiguration {
     double? lineHeightScaleFactorOverride,
     double? letterSpacingOverride,
     double? wordSpacingOverride,
-    double? paragraphSpacing,
+    double? paragraphSpacingOverride,
   }) {
     return PlatformConfiguration(
       accessibilityFeatures: accessibilityFeatures ?? this.accessibilityFeatures,
@@ -1922,7 +1922,7 @@ class PlatformConfiguration {
           lineHeightScaleFactorOverride ?? this.lineHeightScaleFactorOverride,
       letterSpacingOverride: letterSpacingOverride ?? this.letterSpacingOverride,
       wordSpacingOverride: wordSpacingOverride ?? this.wordSpacingOverride,
-      paragraphSpacing: paragraphSpacing ?? this.paragraphSpacing,
+      paragraphSpacingOverride: paragraphSpacingOverride ?? this.paragraphSpacingOverride,
     );
   }
 
@@ -1937,7 +1937,7 @@ class PlatformConfiguration {
   final double? lineHeightScaleFactorOverride;
   final double? letterSpacingOverride;
   final double? wordSpacingOverride;
-  final double paragraphSpacing;
+  final double? paragraphSpacingOverride;
 }
 
 /// Helper class to hold navigation target information for AT focus restoration
