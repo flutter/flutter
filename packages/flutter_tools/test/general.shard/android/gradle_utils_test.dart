@@ -1214,9 +1214,27 @@ pluginManagement {
     expect(
       parsedTemplateAndroidGradlePluginVersion! <= parsedMaxKnownAgpVersionWithFullKotlinSupport!,
       isTrue,
+      reason:
+          'Template AGP version ($parsedTemplateAndroidGradlePluginVersion) '
+          'is higher than maxKnownAgpVersionWithFullKotlinSupport ($parsedMaxKnownAgpVersionWithFullKotlinSupport). '
+          'Please update the maxKnownAgpVersionWithFullKotlinSupport',
     );
-    expect(parsedMaxKnownAndSupportedAgpVersion! <= parsedMaxKnownAgpVersion!, isTrue);
-    expect(parsedMaxKnownAgpVersionWithFullKotlinSupport < parsedMaxKnownAgpVersion, isTrue);
+    expect(
+      parsedMaxKnownAndSupportedAgpVersion! <= parsedMaxKnownAgpVersion!,
+      isTrue,
+      reason:
+          'maxKnownAndSupportedAgpVersion ($parsedMaxKnownAndSupportedAgpVersion) '
+          'is higher than maxKnownAgpVersion ($parsedMaxKnownAgpVersion). '
+          'Please update the maxKnownAgpVersion',
+    );
+    expect(
+      parsedMaxKnownAgpVersionWithFullKotlinSupport < parsedMaxKnownAgpVersion,
+      isTrue,
+      reason:
+          'maxKnownAgpVersionWithFullKotlinSupport ($parsedMaxKnownAgpVersionWithFullKotlinSupport) '
+          'is higher than or equal to maxKnownAgpVersion ($parsedMaxKnownAgpVersion). '
+          'Please update the maxKnownAgpVersion',
+    );
   });
 
   group('getGradleVersionForAndroidPlugin', () {
