@@ -400,7 +400,6 @@ TEST_P(AiksTest, ComposePaintBlurOuter) {
       DlImageFilter::MakeBlur(20, 20, DlTileMode::kDecal);
   paint.setImageFilter(DlImageFilter::MakeCompose(blur, color_filter));
   builder.DrawCircle(DlPoint(400, 400), 200, paint);
-  builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -426,7 +425,6 @@ TEST_P(AiksTest, ComposePaintBlurInner) {
       DlImageFilter::MakeBlur(20, 20, DlTileMode::kDecal);
   paint.setImageFilter(DlImageFilter::MakeCompose(color_filter, blur));
   builder.DrawCircle(DlPoint(400, 400), 200, paint);
-  builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }

@@ -152,7 +152,7 @@ TEST_P(AiksTest, ComposePaintRuntimeOuter) {
       0, 0, 1, 0, 0,  //
       0, 0, 0, 1, 0   //
   };
-  [[maybe_unused]] std::shared_ptr<DlImageFilter> color_filter =
+  std::shared_ptr<DlImageFilter> color_filter =
       DlImageFilter::MakeColorFilter(DlColorFilter::MakeMatrix(matrix));
 
   auto runtime_stages =
@@ -227,7 +227,7 @@ TEST_P(AiksTest, ComposePaintRuntimeInner) {
         0, 0, 1, 0, 0,  //
         0, 0, 0, 1, 0   //
     };
-    [[maybe_unused]] std::shared_ptr<DlImageFilter> color_filter =
+    std::shared_ptr<DlImageFilter> color_filter =
         DlImageFilter::MakeColorFilter(DlColorFilter::MakeMatrix(matrix));
 
     std::vector<std::shared_ptr<DlColorSource>> sampler_inputs = {
