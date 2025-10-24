@@ -48,7 +48,6 @@ class CanvasKitRenderer extends Renderer {
   }
 
   @override
-  @override
   Future<void> initialize() async {
     _initialized ??= () async {
       if (windowFlutterCanvasKit != null) {

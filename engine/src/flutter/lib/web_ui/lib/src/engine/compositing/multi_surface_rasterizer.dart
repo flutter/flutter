@@ -40,6 +40,7 @@ class MultiSurfaceRasterizer extends Rasterizer {
       viewRasterizer.dispose();
     }
     _viewRasterizers.clear();
+    _surfaceProvider.dispose();
   }
 
   @override
@@ -82,11 +83,11 @@ class MultiSurfaceViewRasterizer extends ViewRasterizer {
     if (displayCanvases.length != pictures.length) {
       throw ArgumentError('Called rasterize() with a different number of canvases and pictures.');
     }
+    recorder?.recordRasterStart();
     final List<Future<void>> rasterizeFutures = <Future<void>>[];
     for (int i = 0; i < displayCanvases.length; i++) {
       rasterizeFutures.add(rasterizeToCanvas(displayCanvases[i] as OnscreenSurface, pictures[i]));
     }
-    recorder?.recordRasterStart();
     await Future.wait<void>(rasterizeFutures);
     recorder?.recordRasterFinish();
   }

@@ -47,7 +47,6 @@ abstract class CkSurface extends Surface {
       return false;
     }
     if (_failedToCreateGrContext) {
-      _fallbackToSoftwareReason = 'failed to create GrContext';
       return false;
     }
     return true;
@@ -109,7 +108,7 @@ abstract class CkSurface extends Surface {
         _recreateWebGlSkSurface();
       } catch (e) {
         _failedToCreateGrContext = true;
-        _fallbackToSoftwareReason = 'failed to create GrContext';
+        _fallbackToSoftwareReason = 'failed to create GrContext. Error: $e';
         _recreateSoftwareSkSurface();
       }
     } else {
@@ -132,7 +131,7 @@ abstract class CkSurface extends Surface {
     _grContext = canvasKit.MakeGrContext(_glContext.toDouble());
     if (_grContext == null) {
       _failedToCreateGrContext = true;
-      _fallbackToSoftwareReason = 'failed to create GrContext';
+      _fallbackToSoftwareReason = 'failed to create GrContext.';
     }
   }
 
@@ -192,8 +191,7 @@ abstract class CkSurface extends Surface {
   Future<void> setSize(BitmapSize size) async {
     final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
     if (_skSurface != null &&
-        _skSurface!.width() == size.width &&
-        _skSurface!.height() == size.height &&
+        _currentSize == size &&
         devicePixelRatio == _currentDevicePixelRatio) {
       return;
     }

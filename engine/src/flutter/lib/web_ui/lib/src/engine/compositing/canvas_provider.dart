@@ -13,7 +13,6 @@ import 'package:ui/ui.dart' as ui;
 /// - Resizing canvases.
 /// - Attaching `webglcontextlost` event listeners and notifying the consumer.
 abstract class CanvasProvider<C extends DomEventTarget> {
-  final Map<C, ui.VoidCallback> _contextLostCallbacks = <C, ui.VoidCallback>{};
   final Map<C, DomEventListener> _eventListeners = <C, DomEventListener>{};
 
   /// Acquires a canvas element of a given `size`.
@@ -23,17 +22,13 @@ abstract class CanvasProvider<C extends DomEventTarget> {
   C acquireCanvas(BitmapSize size, {required ui.VoidCallback onContextLost}) {
     final C canvas = _createCanvas(size);
     final DomEventListener eventListener = createDomEventListener((DomEvent event) {
-      final ui.VoidCallback? callback = _contextLostCallbacks[canvas];
-      if (callback != null) {
-        callback();
-      }
+      onContextLost();
       // The canvas is no longer usable.
       releaseCanvas(canvas);
     });
 
     _eventListeners[canvas] = eventListener;
     canvas.addEventListener('webglcontextlost', eventListener);
-    _contextLostCallbacks[canvas] = onContextLost;
     return canvas;
   }
 
@@ -49,14 +44,12 @@ abstract class CanvasProvider<C extends DomEventTarget> {
     if (listener != null) {
       canvas.removeEventListener('webglcontextlost', listener);
     }
-    _contextLostCallbacks.remove(canvas);
     detachCanvas(canvas);
   }
 
   /// Disposes of all canvases managed by this provider.
   void dispose() {
-    List<C>.from(_contextLostCallbacks.keys).forEach(releaseCanvas);
-    assert(_contextLostCallbacks.isEmpty);
+    List<C>.from(_eventListeners.keys).forEach(releaseCanvas);
     assert(_eventListeners.isEmpty);
   }
 
@@ -92,8 +85,6 @@ class OffscreenCanvasProvider extends CanvasProvider<DomOffscreenCanvas> {
 
 /// A [CanvasProvider] that manages [dom.DomHTMLCanvasElement] elements.
 class OnscreenCanvasProvider extends CanvasProvider<DomHTMLCanvasElement> {
-  OnscreenCanvasProvider();
-
   @override
   DomHTMLCanvasElement _createCanvas(BitmapSize size) {
     final DomHTMLCanvasElement canvas = createDomCanvasElement();
