@@ -26,6 +26,8 @@ void main(List<String> arguments) {
       'defined at dev/tools/bin/config/lockfile_exclusion.yaml.\n'
       'To disable this behavior, run with `--no-exclusion`.\n';
 
+  const String ignoreFileName = '.ignore-locking.md';
+
   final ArgParser argParser = ArgParser()
     ..addFlag(
       'gradle-generation',
@@ -37,6 +39,11 @@ void main(List<String> arguments) {
       help:
           'Run the script using the config file at ./configs/lockfile_exclusion.yaml to skip the specified subdirectories.',
       defaultsTo: true,
+    )
+    ..addFlag(
+      'ignore-locking',
+      help: 'Generate ignore file to disable gradle dependency locking.',
+      defaultsTo: false,
     );
 
   ArgResults args;
@@ -55,6 +62,8 @@ void main(List<String> arguments) {
 
   // Skip android subdirectories specified in the ./config/lockfile_exclusion.yaml file.
   final bool useExclusion = (args['exclusion'] as bool?) ?? true;
+
+  final bool ignoreLocking = (args['ignore-locking'] as bool?) ??  false;
 
   const FileSystem fileSystem = LocalFileSystem();
 
@@ -164,6 +173,15 @@ void main(List<String> arguments) {
 
     print('Processing ${androidDirectory.path}');
 
+    File ignoreFile = androidDirectory.childFile(ignoreFileName);
+    if (ignoreLocking) {
+      print('Writing ignore file in ${androidDirectory.path}');
+      ignoreFile.writeAsStringSync('1');
+      continue;
+    } else if (ignoreFile.existsSync()) {
+      ignoreFile.deleteSync();
+    }
+
     try {
       androidDirectory.childFile('buildscript-gradle.lockfile').deleteSync();
     } on FileSystemException {
@@ -243,7 +261,8 @@ subprojects {
     dependencyLocking {
         ignoredDependencies.add('io.flutter:*')
         lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")
-        if (!project.hasProperty('local-engine-repo')) {
+        var ignoreFile = file("${rootProject.projectDir}/.ignore-locking.md")
+        if (!ignoreFile.exists() && !project.hasProperty('local-engine-repo')) {
           lockAllConfigurations()
         }
     }
@@ -336,7 +355,8 @@ subprojects {
     dependencyLocking {
         ignoredDependencies.add("io.flutter:*")
         lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")
-        if (!project.hasProperty("local-engine-repo")) {
+        var ignoreFile = file("${rootProject.projectDir}/.ignore-locking.md")
+        if (!ignoreFile.exists() && !project.hasProperty("local-engine-repo")) {
             lockAllConfigurations()
         }
     }
