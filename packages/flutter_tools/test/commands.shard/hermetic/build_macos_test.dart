@@ -1010,4 +1010,106 @@ STDERR STUFF
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );
+
+  // Helper function to create architecture-specific build tests
+  void testMacosArchBuild({
+    required String targetArch,
+    required HostPlatform hostPlatform,
+    required bool expectOnlyActiveArch,
+  }) {
+    final String hostArchName = hostPlatform == HostPlatform.darwin_arm64 ? 'arm64' : 'x86_64';
+    final String onlyActiveArchValue = expectOnlyActiveArch ? 'YES' : 'NO';
+    final String testName = 'Build with --macos-arch=$targetArch on $hostArchName host '
+        '(ONLY_ACTIVE_ARCH=$onlyActiveArchValue)';
+
+    testUsingContext(
+      testName,
+      () async {
+        createMinimalMockProjectFiles();
+
+        final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
+        final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
+
+        fakeProcessManager.addCommands(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              '/usr/bin/env',
+              'xcrun',
+              'xcodebuild',
+              '-workspace',
+              flutterProject.macos.xcodeWorkspace!.path,
+              '-configuration',
+              'Release',
+              '-scheme',
+              'Runner',
+              '-derivedDataPath',
+              flutterBuildDir.absolute.path,
+              '-destination',
+              'platform=macOS,arch=$targetArch',
+              'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
+              'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+              '-quiet',
+              'COMPILER_INDEX_STORE_ENABLE=NO',
+              'ONLY_ACTIVE_ARCH=$onlyActiveArchValue',
+              'ARCHS=$targetArch',
+            ],
+            onRun: (_) {
+              fileSystem.file(fileSystem.path.join('macos', 'Flutter', 'ephemeral', '.app_filename'))
+                ..createSync(recursive: true)
+                ..writeAsStringSync('example.app');
+            },
+          ),
+        ]);
+
+        final command = BuildCommand(
+          androidSdk: FakeAndroidSdk(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          fileSystem: fileSystem,
+          logger: logger,
+          osUtils: FakeOperatingSystemUtils(),
+        );
+
+        await createTestCommandRunner(command).run(
+          <String>['build', 'macos', '--release', '--no-pub', '--macos-arch=$targetArch'],
+        );
+
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        Platform: () => macosPlatform,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => fakeProcessManager,
+        Pub: ThrowingPub.new,
+        FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: hostPlatform),
+      },
+    );
+  }
+
+  // Test native builds (target arch matches host arch)
+  testMacosArchBuild(
+    targetArch: 'arm64',
+    hostPlatform: HostPlatform.darwin_arm64,
+    expectOnlyActiveArch: true,
+  );
+
+  testMacosArchBuild(
+    targetArch: 'x86_64',
+    hostPlatform: HostPlatform.darwin_x64,
+    expectOnlyActiveArch: true,
+  );
+
+  // Test cross-compilation builds (target arch differs from host arch)
+  testMacosArchBuild(
+    targetArch: 'x86_64',
+    hostPlatform: HostPlatform.darwin_arm64,
+    expectOnlyActiveArch: false,
+  );
+
+  testMacosArchBuild(
+    targetArch: 'arm64',
+    hostPlatform: HostPlatform.darwin_x64,
+    expectOnlyActiveArch: false,
+  );
 }
