@@ -40,10 +40,7 @@ void main(List<String> arguments) {
           'Run the script using the config file at ./configs/lockfile_exclusion.yaml to skip the specified subdirectories.',
       defaultsTo: true,
     )
-    ..addFlag(
-      'ignore-locking',
-      help: 'Generate ignore file to disable gradle dependency locking.',
-    );
+    ..addFlag('ignore-locking', help: 'Generate ignore file to disable gradle dependency locking.');
 
   ArgResults args;
   try {
