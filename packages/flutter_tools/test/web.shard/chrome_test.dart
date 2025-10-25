@@ -537,7 +537,6 @@ void main() {
           '--remote-debugging-port=12345',
           ...kChromeArgs,
           '--headless',
-          '--disable-gpu',
           '--window-size=2400,1800',
           'example_url',
         ],
@@ -622,7 +621,6 @@ void main() {
       '--remote-debugging-port=12345',
       ...kChromeArgs,
       '--headless',
-      '--disable-gpu',
       '--window-size=2400,1800',
       'example_url',
     ];
@@ -655,7 +653,6 @@ void main() {
       '--remote-debugging-port=12345',
       ...kChromeArgs,
       '--headless',
-      '--disable-gpu',
       '--window-size=2400,1800',
       'example_url',
     ];
@@ -692,7 +689,6 @@ void main() {
             '--remote-debugging-port=12345',
             ...kChromeArgs,
             '--headless',
-            '--disable-gpu',
             '--window-size=2400,1800',
             'example_url',
           ],
