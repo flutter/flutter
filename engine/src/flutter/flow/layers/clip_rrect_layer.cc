@@ -23,4 +23,8 @@ void ClipRRectLayer::ApplyClip(LayerStateStack::MutatorContext& mutator) const {
   }
 }
 
+void ClipRRectLayer::PushClipToEmbedderStack(PrerollContext* context) const {
+  context->view_embedder->PushClipRRectToVisitedPlatformViews(clip_shape());
+}
+
 }  // namespace flutter
