@@ -16652,6 +16652,39 @@ void main() {
   });
 
   testWidgets(
+    'EditableText respects MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, and MediaQueryData.wordSpacingOverride',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(
+              lineHeightScaleFactorOverride: 2.0,
+              letterSpacingOverride: 2.0,
+              wordSpacingOverride: 2.0,
+            ),
+            child: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: const TextStyle(fontWeight: FontWeight.normal),
+              cursorColor: Colors.red,
+              backgroundCursorColor: Colors.green,
+            ),
+          ),
+        ),
+      );
+
+      controller.text = 'foo';
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      final TextStyle? resultTextStyle = state.buildTextSpan().style;
+      expect(resultTextStyle?.height, 2.0);
+      expect(resultTextStyle?.letterSpacing, 2.0);
+      expect(resultTextStyle?.wordSpacing, 2.0);
+    },
+  );
+
+  testWidgets(
     'code points are treated as single characters in obscure mode',
     (WidgetTester tester) async {
       await tester.pumpWidget(

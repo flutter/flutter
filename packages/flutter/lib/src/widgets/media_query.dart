@@ -117,6 +117,18 @@ enum _MediaQueryAspect {
 
   /// Specifies the aspect corresponding to [MediaQueryData.supportsShowingSystemContextMenu].
   supportsShowingSystemContextMenu,
+
+  /// Specifies the aspect corresponding to [MediaQueryData.lineHeightScaleFactorOverride].
+  lineHeightScaleFactorOverride,
+
+  /// Specifies the aspect corresponding to [MediaQueryData.letterSpacingOverride].
+  letterSpacingOverride,
+
+  /// Specifies the aspect corresponding to [MediaQueryData.wordSpacingOverride].
+  wordSpacingOverride,
+
+  /// Specifies the aspect corresponding to [MediaQueryData.paragraphSpacingOverride].
+  paragraphSpacingOverride,
 }
 
 /// Information about a piece of media (e.g., a window).
@@ -218,6 +230,10 @@ class MediaQueryData {
     this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop),
     this.displayFeatures = const <ui.DisplayFeature>[],
     this.supportsShowingSystemContextMenu = false,
+    this.lineHeightScaleFactorOverride,
+    this.letterSpacingOverride,
+    this.wordSpacingOverride,
+    this.paragraphSpacingOverride,
   }) : _textScaleFactor = textScaleFactor,
        _textScaler = textScaler,
        assert(
@@ -314,7 +330,17 @@ class MediaQueryData {
       displayFeatures = view.displayFeatures,
       supportsShowingSystemContextMenu =
           platformData?.supportsShowingSystemContextMenu ??
-          view.platformDispatcher.supportsShowingSystemContextMenu;
+          view.platformDispatcher.supportsShowingSystemContextMenu,
+      lineHeightScaleFactorOverride =
+          platformData?.lineHeightScaleFactorOverride ??
+          view.platformDispatcher.lineHeightScaleFactorOverride,
+      letterSpacingOverride =
+          platformData?.letterSpacingOverride ?? view.platformDispatcher.letterSpacingOverride,
+      wordSpacingOverride =
+          platformData?.wordSpacingOverride ?? view.platformDispatcher.wordSpacingOverride,
+      paragraphSpacingOverride =
+          platformData?.paragraphSpacingOverride ??
+          view.platformDispatcher.paragraphSpacingOverride;
 
   static TextScaler _textScalerFromView(ui.FlutterView view, MediaQueryData? platformData) {
     return platformData?.textScaler ?? SystemTextScaler._(view.platformDispatcher);
@@ -654,6 +680,45 @@ class MediaQueryData {
   ///    supported.
   final bool supportsShowingSystemContextMenu;
 
+  /// The height of the text, as a multiple of the font size.
+  ///
+  /// See also:
+  ///
+  ///  * [Text], [SelectableText], and [EditableText], all of whose
+  ///  [TextStyle.height] is overriden by [lineHeightScaleFactorOverride].
+  final double? lineHeightScaleFactorOverride;
+
+  /// The amount of space (in logical pixels) to add between each letter
+  /// in a piece of text.
+  ///
+  /// A negative value can be used to bring the letters closer.
+  ///
+  /// See also:
+  ///
+  ///  * [Text], [SelectableText], and [EditableText], all of whose
+  ///  [TextStyle.letterSpacing] is overriden by [letterSpacingOverride].
+  final double? letterSpacingOverride;
+
+  /// The amount of space (in logical pixels) to add at each sequence of
+  /// white-space (i.e. between each word) in a piece of text.
+  ///
+  /// A negative value can be used to bring the words closer.
+  ///
+  /// See also:
+  ///
+  ///  * [Text], [SelectableText], and [EditableText], all of whose
+  ///  [TextStyle.wordSpacing] is overriden by [wordSpacingOverride].
+  final double? wordSpacingOverride;
+
+  /// The amount of space (in logical pixels) to add between each paragraph
+  /// in a piece of text.
+  ///
+  /// See also:
+  ///
+  ///  * [Text], and [SelectableText], which are both informed by
+  ///  [paragraphSpacingOverride].
+  final double? paragraphSpacingOverride;
+
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
   Orientation get orientation {
@@ -692,6 +757,10 @@ class MediaQueryData {
     DeviceGestureSettings? gestureSettings,
     List<ui.DisplayFeature>? displayFeatures,
     bool? supportsShowingSystemContextMenu,
+    double? lineHeightScaleFactorOverride,
+    double? letterSpacingOverride,
+    double? wordSpacingOverride,
+    double? paragraphSpacingOverride,
   }) {
     assert(textScaleFactor == null || textScaler == null);
     if (textScaleFactor != null) {
@@ -719,6 +788,11 @@ class MediaQueryData {
       displayFeatures: displayFeatures ?? this.displayFeatures,
       supportsShowingSystemContextMenu:
           supportsShowingSystemContextMenu ?? this.supportsShowingSystemContextMenu,
+      lineHeightScaleFactorOverride:
+          lineHeightScaleFactorOverride ?? this.lineHeightScaleFactorOverride,
+      letterSpacingOverride: letterSpacingOverride ?? this.letterSpacingOverride,
+      wordSpacingOverride: wordSpacingOverride ?? this.wordSpacingOverride,
+      paragraphSpacingOverride: paragraphSpacingOverride ?? this.paragraphSpacingOverride,
     );
   }
 
@@ -917,7 +991,11 @@ class MediaQueryData {
         other.navigationMode == navigationMode &&
         other.gestureSettings == gestureSettings &&
         listEquals(other.displayFeatures, displayFeatures) &&
-        other.supportsShowingSystemContextMenu == supportsShowingSystemContextMenu;
+        other.supportsShowingSystemContextMenu == supportsShowingSystemContextMenu &&
+        other.lineHeightScaleFactorOverride == lineHeightScaleFactorOverride &&
+        other.letterSpacingOverride == letterSpacingOverride &&
+        other.wordSpacingOverride == wordSpacingOverride &&
+        other.paragraphSpacingOverride == paragraphSpacingOverride;
   }
 
   @override
@@ -940,6 +1018,12 @@ class MediaQueryData {
     gestureSettings,
     Object.hashAll(displayFeatures),
     supportsShowingSystemContextMenu,
+    Object.hash(
+      lineHeightScaleFactorOverride,
+      letterSpacingOverride,
+      wordSpacingOverride,
+      paragraphSpacingOverride,
+    ),
   );
 
   @override
@@ -964,6 +1048,10 @@ class MediaQueryData {
       'gestureSettings: $gestureSettings',
       'displayFeatures: $displayFeatures',
       'supportsShowingSystemContextMenu: $supportsShowingSystemContextMenu',
+      'lineHeightScaleFactorOverride: $lineHeightScaleFactorOverride',
+      'letterSpacingOverride: $letterSpacingOverride',
+      'wordSpacingOverride: $wordSpacingOverride',
+      'paragraphSpacingOverride: $paragraphSpacingOverride',
     ];
     return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
   }
@@ -1851,6 +1939,52 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
     _MediaQueryAspect.supportsShowingSystemContextMenu,
   )?.supportsShowingSystemContextMenu;
 
+  /// Returns the [MediaQueryData.lineHeightScaleFactorOverride] for the nearest
+  /// [MediaQuery] ancestor or null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.lineHeightScaleFactorOverride] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  static double? maybeLineHeightScaleFactorOverrideOf(BuildContext context) => _maybeOf(
+    context,
+    _MediaQueryAspect.lineHeightScaleFactorOverride,
+  )?.lineHeightScaleFactorOverride;
+
+  /// Returns the [MediaQueryData.letterSpacingOverride] for the nearest
+  /// [MediaQuery] ancestor or null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.letterSpacingOverride] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  static double? maybeLetterSpacingOverrideOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.letterSpacingOverride)?.letterSpacingOverride;
+
+  /// Returns the [MediaQueryData.wordSpacingOverride] for the nearest
+  /// [MediaQuery] ancestor or null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.wordSpacingOverride] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  static double? maybeWordSpacingOverrideOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.wordSpacingOverride)?.wordSpacingOverride;
+
+  /// Returns the [MediaQueryData.paragraphSpacingOverride] for the nearest
+  /// [MediaQuery] ancestor or null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.paragraphSpacingOverride] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  static double? maybeParagraphSpacingOverrideOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.paragraphSpacingOverride)?.paragraphSpacingOverride;
+
   @override
   bool updateShouldNotify(MediaQuery oldWidget) => data != oldWidget.data;
 
@@ -1904,6 +2038,14 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
             _MediaQueryAspect.supportsShowingSystemContextMenu =>
               data.supportsShowingSystemContextMenu !=
                   oldWidget.data.supportsShowingSystemContextMenu,
+            _MediaQueryAspect.lineHeightScaleFactorOverride =>
+              data.lineHeightScaleFactorOverride != oldWidget.data.lineHeightScaleFactorOverride,
+            _MediaQueryAspect.letterSpacingOverride =>
+              data.letterSpacingOverride != oldWidget.data.letterSpacingOverride,
+            _MediaQueryAspect.wordSpacingOverride =>
+              data.wordSpacingOverride != oldWidget.data.wordSpacingOverride,
+            _MediaQueryAspect.paragraphSpacingOverride =>
+              data.paragraphSpacingOverride != oldWidget.data.paragraphSpacingOverride,
           },
     );
   }

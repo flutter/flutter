@@ -5598,6 +5598,35 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets(
+    'SelectableText respects MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, MediaQueryData.wordSpacingOverride, and MediaQueryData.paragraphSpacingOverride',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: MediaQueryData(
+              lineHeightScaleFactorOverride: 2.0,
+              letterSpacingOverride: 2.0,
+              wordSpacingOverride: 2.0,
+              paragraphSpacingOverride: 2.0,
+            ),
+            child: SelectableText('hello world'),
+          ),
+        ),
+      );
+
+      final Padding padding = tester.firstWidget(find.byType(Padding));
+      expect(padding, isNotNull);
+      expect(padding.padding, const EdgeInsets.only(bottom: 2.0));
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      final TextStyle? resultTextStyle = state.buildTextSpan().style;
+      expect(resultTextStyle?.height, 2.0);
+      expect(resultTextStyle?.letterSpacing, 2.0);
+      expect(resultTextStyle?.wordSpacing, 2.0);
+    },
+  );
+
   group('context menu', () {
     // Regression test for https://github.com/flutter/flutter/issues/169001.
     testWidgets(

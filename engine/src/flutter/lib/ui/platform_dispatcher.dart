@@ -1121,6 +1121,33 @@ class PlatformDispatcher {
   /// This option is used by [showTimePicker].
   bool get alwaysUse24HourFormat => _configuration.alwaysUse24HourFormat;
 
+  /// The system-reported height of the text, as a multiple of the font size.
+  ///
+  /// If this value changes, [onMetricsChanged] will be called.
+  double? get lineHeightScaleFactorOverride => _configuration.lineHeightScaleFactorOverride;
+
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each letter.
+  ///
+  /// A negative value can be used to bring the letters closer.
+  ///
+  /// If this value changes, [onMetricsChanged] will be called.
+  double? get letterSpacingOverride => _configuration.letterSpacingOverride;
+
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each sequence of white-space (i.e. between each word).
+  ///
+  /// A negative value can be used to bring the words closer.
+  ///
+  /// If this value changes, [onMetricsChanged] will be called.
+  double? get wordSpacingOverride => _configuration.wordSpacingOverride;
+
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each paragraph in text.
+  ///
+  /// If this value changes, [onMetricsChanged] will be called.
+  double? get paragraphSpacingOverride => _configuration.paragraphSpacingOverride;
+
   /// The system-reported text scale.
   ///
   /// This establishes the text scaling factor to use when rendering text,
@@ -1811,6 +1838,10 @@ class _PlatformConfiguration {
     this.defaultRouteName,
     this.systemFontFamily,
     this.configurationId,
+    this.lineHeightScaleFactorOverride,
+    this.letterSpacingOverride,
+    this.wordSpacingOverride,
+    this.paragraphSpacingOverride,
   });
 
   _PlatformConfiguration copyWith({
@@ -1823,6 +1854,10 @@ class _PlatformConfiguration {
     String? defaultRouteName,
     String? systemFontFamily,
     int? configurationId,
+    double? lineHeightScaleFactorOverride,
+    double? letterSpacingOverride,
+    double? wordSpacingOverride,
+    double? paragraphSpacingOverride,
   }) {
     return _PlatformConfiguration(
       accessibilityFeatures: accessibilityFeatures ?? this.accessibilityFeatures,
@@ -1834,6 +1869,11 @@ class _PlatformConfiguration {
       defaultRouteName: defaultRouteName ?? this.defaultRouteName,
       systemFontFamily: systemFontFamily ?? this.systemFontFamily,
       configurationId: configurationId ?? this.configurationId,
+      lineHeightScaleFactorOverride:
+          lineHeightScaleFactorOverride ?? this.lineHeightScaleFactorOverride,
+      letterSpacingOverride: letterSpacingOverride ?? this.letterSpacingOverride,
+      wordSpacingOverride: wordSpacingOverride ?? this.wordSpacingOverride,
+      paragraphSpacingOverride: paragraphSpacingOverride ?? this.paragraphSpacingOverride,
     );
   }
 
@@ -1881,6 +1921,25 @@ class _PlatformConfiguration {
   /// configuration updates from the embedder yet. The _getScaledFontSize
   /// function should not be called in either case.
   final int? configurationId;
+
+  /// The system-reported height of the text, as a multiple of the font size.
+  final double? lineHeightScaleFactorOverride;
+
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each letter.
+  ///
+  /// A negative value can be used to bring the letters closer.
+  final double? letterSpacingOverride;
+
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each sequence of white-space (i.e. between each word).
+  ///
+  /// A negative value can be used to bring the words closer.
+  final double? wordSpacingOverride;
+
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each paragraph in text.
+  final double? paragraphSpacingOverride;
 }
 
 /// An immutable view configuration.

@@ -32,6 +32,12 @@ import 'selection_container.dart';
 /// The text style to apply to descendant [Text] widgets which don't have an
 /// explicit style.
 ///
+/// A [MediaQuery] ancestor of a [Text] widget may still override the
+/// [TextStyle.height], [TextStyle.letterSpacing], and [TextStyle.wordSpacing] of
+/// the [TextStyle] set by this [DefaultTextStyle] widget through its
+/// [MediaQueryData.lineHeightScaleFactorOverride], [MediaQueryData.letterSpacingOverride],
+/// and [MediaQueryData.wordSpacingOverride] members.
+///
 /// {@tool dartpad}
 /// This example shows how to use [DefaultTextStyle.merge] to create a default
 /// text style that inherits styling information from the current default text
@@ -579,6 +585,11 @@ class Text extends StatelessWidget {
   /// If the style's "inherit" property is true, the style will be merged with
   /// the closest enclosing [DefaultTextStyle]. Otherwise, the style will
   /// replace the closest enclosing [DefaultTextStyle].
+  ///
+  /// This [style]s [TextStyle.fontWeight], [TextStyle.height], [TextStyle.letterSpacing],
+  /// and [TextStyle.wordSpacing] will be overriden by [MediaQueryData.lineHeightScaleFactorOverride],
+  /// [MediaQueryData.letterSpacingOverride], and [MediaQueryData.wordSpacingOverride] from the nearest
+  /// [MediaQuery] ancestor, regardless of its [TextStyle.inherit] value.
   final TextStyle? style;
 
   /// {@macro flutter.painting.textPainter.strutStyle}
@@ -703,8 +714,19 @@ class Text extends StatelessWidget {
     if (style == null || style!.inherit) {
       effectiveTextStyle = defaultTextStyle.style.merge(style);
     }
-    if (MediaQuery.boldTextOf(context)) {
-      effectiveTextStyle = effectiveTextStyle!.merge(const TextStyle(fontWeight: FontWeight.bold));
+    final bool boldText = MediaQuery.boldTextOf(context);
+    final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(context);
+    final double? letterSpacing = MediaQuery.maybeLetterSpacingOverrideOf(context);
+    final double? wordSpacing = MediaQuery.maybeWordSpacingOverrideOf(context);
+    if (boldText || lineHeightScaleFactor != null || letterSpacing != null || wordSpacing != null) {
+      effectiveTextStyle = effectiveTextStyle!.merge(
+        TextStyle(
+          height: lineHeightScaleFactor,
+          letterSpacing: letterSpacing,
+          wordSpacing: wordSpacing,
+          fontWeight: boldText ? FontWeight.bold : null,
+        ),
+      );
     }
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     final TextScaler textScaler = switch ((this.textScaler, textScaleFactor)) {
@@ -779,6 +801,16 @@ class Text extends StatelessWidget {
         label: semanticsLabel,
         identifier: semanticsIdentifier,
         child: ExcludeSemantics(excluding: semanticsLabel != null, child: result),
+      );
+    }
+
+    // TODO(Renzo-Olivares): Update this logic to inform paragraphs within
+    // this widgets text about paragraph spacing https://github.com/flutter/flutter/issues/177408.
+    final double? paragraphSpacing = MediaQuery.maybeParagraphSpacingOverrideOf(context);
+    if (paragraphSpacing != null) {
+      result = Padding(
+        padding: EdgeInsets.only(bottom: paragraphSpacing),
+        child: result,
       );
     }
     return result;
