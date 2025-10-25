@@ -839,6 +839,45 @@ void main() {
       expect(find.text(errorText('foo')!), findsNothing);
     },
   );
+  testWidgets(
+    'Does not auto-validate before value changes when autovalidateMode is set to onUserInteractionIfError',
+    (WidgetTester tester) async {
+      late FormFieldState<String> formFieldState;
+
+      String? errorText(String? value) => (value == null || value.isEmpty) ? 'Required' : null;
+
+      Widget builder() {
+        return MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: FormField<String>(
+                    initialValue: 'foo',
+                    autovalidateMode: AutovalidateMode.onUserInteractionIfError,
+                    builder: (FormFieldState<String> state) {
+                      formFieldState = state;
+                      return Container();
+                    },
+                    validator: errorText,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(builder());
+
+      // The form field has no error.
+      expect(formFieldState.hasError, isFalse);
+      // No "Required" error is visible.
+      expect(find.text('Required'), findsNothing);
+    },
+  );
 
   testWidgets('auto-validate before value changes if autovalidateMode was set to always', (
     WidgetTester tester,
@@ -995,6 +1034,76 @@ void main() {
       formState.currentState!.reset();
       await tester.pump();
       expect(find.text(errorText('bar')!), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'Form with AutovalidateMode.onUserInteractionIfError only revalidates when user interacts after an error exists',
+    (WidgetTester tester) async {
+      final GlobalKey<FormState> formState = GlobalKey<FormState>();
+      String? errorText(String? value) => (value == null || value.isEmpty) ? 'Required' : null;
+
+      Widget builder() {
+        return MaterialApp(
+          theme: ThemeData(),
+          home: MediaQuery(
+            data: const MediaQueryData(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Form(
+                  key: formState,
+                  autovalidateMode: AutovalidateMode.onUserInteractionIfError,
+                  child: Material(
+                    child: TextFormField(initialValue: 'foo', validator: errorText),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(builder());
+
+      // No error text is visible yet. (Initial valid state)
+      expect(find.text('Required'), findsNothing);
+
+      // User types valid input 'bar' → autovalidate is disabled → still no error.
+      await tester.enterText(find.byType(TextFormField), 'bar');
+      await tester.pump();
+      expect(find.text('Required'), findsNothing);
+
+      // -----------------------------------------------------------------------
+      // 1. GENERATE THE ERROR (This is where the mode is activated)
+      // -----------------------------------------------------------------------
+
+      // Clear the input (invalid)
+      await tester.enterText(find.byType(TextFormField), '');
+      await tester.pump(); // Pump 1: Process the text change
+
+      // Manually submit form to show the initial error (AutovalidateMode is now active)
+      formState.currentState!.validate();
+      await tester.pump(); // Pump 2: Render the error
+
+      // Verify error is shown
+      expect(find.text('Required'), findsOneWidget);
+
+      // Now user interacts again with valid text ('baz') → validation auto-runs and clears the error.
+      await tester.enterText(find.byType(TextFormField), 'baz');
+      await tester.pump();
+      expect(find.text('Required'), findsNothing);
+
+      // Check the behavior of a manual validate when the text is already valid.
+      // This should *confirm* the error is cleared, not re-introduce it.
+      formState.currentState!.validate();
+      await tester.pump();
+      expect(find.text('Required'), findsNothing);
+
+      // Resetting should clear form (already cleared, but a safety check).
+      formState.currentState!.reset();
+      await tester.pump();
+      expect(find.text('Required'), findsNothing);
     },
   );
 
