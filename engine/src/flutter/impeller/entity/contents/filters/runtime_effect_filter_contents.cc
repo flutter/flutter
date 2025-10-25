@@ -41,7 +41,7 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
     return std::nullopt;
   }
 
-  auto input_snapshot =
+  std::optional<Snapshot> input_snapshot =
       inputs[0]->GetSnapshot("RuntimeEffectContents", renderer, entity);
   if (!input_snapshot.has_value()) {
     return std::nullopt;
@@ -70,26 +70,30 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
   Size size = Size(input_snapshot->texture->GetSize());
   memcpy(uniforms_->data(), &size, sizeof(Size));
 
+  Point snapshot_origin = input_coverage.GetOrigin();
   //----------------------------------------------------------------------------
   /// Create AnonymousContents for rendering.
   ///
   RenderProc render_proc =
-      [input_snapshot, runtime_stage = runtime_stage_, uniforms = uniforms_,
-       texture_inputs = texture_input_copy,
-       input_coverage](const ContentContext& renderer, const Entity& entity,
-                       RenderPass& pass) -> bool {
+      [snapshot_origin, input_snapshot, runtime_stage = runtime_stage_,
+       uniforms = uniforms_, texture_inputs = texture_input_copy](
+          const ContentContext& renderer, const Entity& entity,
+          RenderPass& pass) -> bool {
     RuntimeEffectContents contents;
-    FillRectGeometry geom(Rect::MakeSize(input_coverage.GetSize()));
+    FillRectGeometry geom(Rect::MakeSize(input_snapshot->texture->GetSize()));
     contents.SetRuntimeStage(runtime_stage);
     contents.SetUniformData(uniforms);
     contents.SetTextureInputs(texture_inputs);
     contents.SetGeometry(&geom);
-    return contents.Render(renderer, entity, pass);
+    Entity offset_entity = entity.Clone();
+    offset_entity.SetTransform(entity.GetTransform() *
+                               Matrix::MakeTranslation(snapshot_origin));
+    return contents.Render(renderer, offset_entity, pass);
   };
 
   CoverageProc coverage_proc =
       [coverage](const Entity& entity) -> std::optional<Rect> {
-    return coverage.TransformBounds(entity.GetTransform());
+    return coverage;
   };
 
   auto contents = AnonymousContents::Make(render_proc, coverage_proc);
@@ -97,7 +101,9 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
   Entity sub_entity;
   sub_entity.SetContents(std::move(contents));
   sub_entity.SetBlendMode(entity.GetBlendMode());
-  sub_entity.SetTransform(input_snapshot->transform);
+  sub_entity.SetTransform(input_snapshot->transform *
+                          Matrix::MakeTranslation(-1.0f * snapshot_origin));
+
   return sub_entity;
 }
 
