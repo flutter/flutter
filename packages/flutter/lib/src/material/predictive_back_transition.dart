@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -94,7 +96,7 @@ class PredictiveBackTransition extends StatelessWidget {
         ? renderObject.size.width
         : MediaQuery.widthOf(context);
 
-    final double maxShift = (width / _kDivisionFactor) - _kMargin;
+    final double maxShift = max(0, (width / _kDivisionFactor) - _kMargin);
 
     final SwipeEdge? swipeEdge = currentBackEvent?.swipeEdge;
 
@@ -112,7 +114,7 @@ class PredictiveBackTransition extends StatelessWidget {
     final double startTouchY = startBackEvent?.touchOffset?.dy ?? 0;
     final double currentTouchY = currentBackEvent?.touchOffset?.dy ?? 0;
 
-    final double yShiftMax = (height / _kDivisionFactor) - _kMargin;
+    final double yShiftMax = max(0, (height / _kDivisionFactor) - _kMargin);
 
     // Apply the decelerated gesture progress to the Y-shift so the preview is
     // more apparent at the start (matches Android docs recommendation).

@@ -4,6 +4,8 @@ import 'binding.dart';
 import 'framework.dart';
 import 'routes.dart';
 
+export 'package:flutter/services.dart' show PredictiveBackEvent;
+
 /// Phases of a predictive-back gesture.
 ///
 /// These phases describe the lifecycle of the platform back gesture as it
@@ -50,7 +52,7 @@ class PredictiveBackGestureBuilder extends StatefulWidget {
   ///    progress updates to [route].
   const PredictiveBackGestureBuilder({
     super.key,
-    required this.route,
+    this.route,
     required this.transitionBuilder,
     required this.child,
     this.updateRouteUserGestureProgress = false,
@@ -61,7 +63,7 @@ class PredictiveBackGestureBuilder extends StatefulWidget {
   ///
   /// If [updateRouteUserGestureProgress] is `true`, gesture progress/cancel/commit
   /// calls will be forwarded to this route.
-  final ModalRoute<Object?> route;
+  final ModalRoute<Object?>? route;
 
   /// Builder called when the gesture phase or events change.
   ///
@@ -98,6 +100,15 @@ class PredictiveBackGestureBuilder extends StatefulWidget {
 
 class _PredictiveBackGestureBuilderState extends State<PredictiveBackGestureBuilder>
     with WidgetsBindingObserver {
+  late ModalRoute<dynamic>? route;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    route = widget.route ?? ModalRoute.of(context);
+  }
+
   PredictiveBackPhase get phase => _phase;
   PredictiveBackPhase _phase = PredictiveBackPhase.idle;
   set phase(PredictiveBackPhase phase) {
@@ -134,7 +145,7 @@ class _PredictiveBackGestureBuilderState extends State<PredictiveBackGestureBuil
     startBackEvent = currentBackEvent = backEvent;
 
     if (widget.updateRouteUserGestureProgress) {
-      widget.route.handleStartBackGesture(progress: 1 - backEvent.progress);
+      route?.handleStartBackGesture(progress: 1 - backEvent.progress);
     }
 
     return widget.behavior;
@@ -143,7 +154,7 @@ class _PredictiveBackGestureBuilderState extends State<PredictiveBackGestureBuil
   @override
   void handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) {
     if (widget.updateRouteUserGestureProgress) {
-      widget.route.handleUpdateBackGestureProgress(progress: 1 - backEvent.progress);
+      route?.handleUpdateBackGestureProgress(progress: 1 - backEvent.progress);
     }
 
     phase = PredictiveBackPhase.update;
@@ -153,7 +164,7 @@ class _PredictiveBackGestureBuilderState extends State<PredictiveBackGestureBuil
   @override
   void handleCancelBackGesture() {
     if (widget.updateRouteUserGestureProgress) {
-      widget.route.handleCancelBackGesture();
+      route?.handleCancelBackGesture();
     }
     phase = PredictiveBackPhase.cancel;
     startBackEvent = currentBackEvent = null;
@@ -162,7 +173,7 @@ class _PredictiveBackGestureBuilderState extends State<PredictiveBackGestureBuil
   @override
   void handleCommitBackGesture() {
     if (widget.updateRouteUserGestureProgress) {
-      widget.route.handleCommitBackGesture();
+      route?.handleCommitBackGesture();
     }
     phase = PredictiveBackPhase.commit;
   }
@@ -181,7 +192,7 @@ class _PredictiveBackGestureBuilderState extends State<PredictiveBackGestureBuil
 
   @override
   Widget build(BuildContext context) {
-    final PredictiveBackPhase effectivePhase = widget.route.popGestureInProgress
+    final PredictiveBackPhase effectivePhase = route?.popGestureInProgress ?? true
         ? phase
         : PredictiveBackPhase.idle;
 
