@@ -14,11 +14,28 @@ const _kLogEntryPrefix = '[proxyMiddleware]';
 ///
 /// The new request will have the same method, headers, body, and context as the
 /// [originalRequest], but its URL will be set to [finalTargetUrl].
-shelf.Request proxyRequest(shelf.Request originalRequest, Uri finalTargetUrl) {
+/// If [injectedHeaders] are provided, they are added without overwriting existing
+/// headers (case-insensitive comparison).
+shelf.Request proxyRequest(
+  shelf.Request originalRequest,
+  Uri finalTargetUrl, {
+  Map<String, String>? injectedHeaders,
+}) {
+  final Map<String, String> mergedHeaders = <String, String>{...originalRequest.headers};
+  if (injectedHeaders != null && injectedHeaders.isNotEmpty) {
+    final Set<String> existing = mergedHeaders.keys.map((k) => k.toLowerCase()).toSet();
+    for (final MapEntry<String, String> entry in injectedHeaders.entries) {
+      final String lower = entry.key.toLowerCase();
+      if (!existing.contains(lower)) {
+        mergedHeaders[entry.key] = entry.value;
+        existing.add(lower);
+      }
+    }
+  }
   return shelf.Request(
     originalRequest.method,
     finalTargetUrl,
-    headers: originalRequest.headers,
+    headers: mergedHeaders,
     body: originalRequest.read(),
     context: originalRequest.context,
   );
@@ -50,7 +67,11 @@ Future<shelf.Response> _applyProxyRules(
     final String rewrittenPath = rule.replace(requestPath);
     final Uri finalTargetUrl = targetUri.resolve(rewrittenPath);
     try {
-      final shelf.Request proxyBackendRequest = proxyRequest(request, finalTargetUrl);
+      final shelf.Request proxyBackendRequest = proxyRequest(
+        request,
+        finalTargetUrl,
+        injectedHeaders: rule.headers,
+      );
       final shelf.Response proxyResponse = await proxyHandler(targetUri)(proxyBackendRequest);
       logger.printStatus('$_kLogEntryPrefix Matched "$requestPath". Requesting "$finalTargetUrl"');
       logger.printTrace('$_kLogEntryPrefix Matched with proxy rule: $rule');
