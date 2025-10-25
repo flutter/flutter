@@ -17,4 +17,8 @@ void ClipRectLayer::ApplyClip(LayerStateStack::MutatorContext& mutator) const {
   mutator.clipRect(clip_shape(), clip_behavior() != Clip::kHardEdge);
 }
 
+void ClipRectLayer::PushClipToEmbedderStack(PrerollContext* context) const {
+  context->view_embedder->PushClipRectToVisitedPlatformViews(clip_shape());
+}
+
 }  // namespace flutter
