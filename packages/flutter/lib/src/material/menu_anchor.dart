@@ -364,7 +364,11 @@ class _MenuAnchorState extends State<MenuAnchor> {
   void didUpdateWidget(MenuAnchor oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
-      _internalMenuController = widget.controller != null ? MenuController() : null;
+      if (widget.controller == null) {
+        _internalMenuController = MenuController();
+      } else {
+        _internalMenuController = null;
+      }
     }
   }
 
@@ -3637,16 +3641,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   }
 
   @override
-  WidgetStateProperty<MouseCursor?>? get mouseCursor {
-    return WidgetStateProperty.resolveWith(
-      (Set<WidgetState> states) {
-        if (states.contains(WidgetState.disabled)) {
-          return SystemMouseCursors.basic;
-        }
-        return SystemMouseCursors.click;
-      },
-    );
-  }
+  WidgetStateProperty<MouseCursor?>? get mouseCursor => WidgetStateMouseCursor.adaptiveClickable;
 
   @override
   WidgetStateProperty<Color?>? get overlayColor {

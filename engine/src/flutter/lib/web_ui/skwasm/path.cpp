@@ -154,7 +154,7 @@ SKWASM_EXPORT void path_addPolygon(SkPath* path,
                                    const SkPoint* points,
                                    int count,
                                    bool close) {
-  path->addPoly(points, count, close);
+  path->addPoly({points, count}, close);
 }
 
 SKWASM_EXPORT void path_addRRect(SkPath* path, const SkScalar* rrectValues) {
