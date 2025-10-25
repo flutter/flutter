@@ -4825,6 +4825,19 @@ void main() {
 
     checkPopupMenu(popupMenuTheme2);
   });
+
+  testWidgets('PopupMenuItem does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(child: PopupMenuItem<String>(child: Text('X'))),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(PopupMenuItem<String>)), Size.zero);
+  });
 }
 
 Matcher overlaps(Rect other) => OverlapsMatcher(other);
