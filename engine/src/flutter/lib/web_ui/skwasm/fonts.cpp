@@ -61,7 +61,8 @@ SKWASM_EXPORT int typefaces_filterCoveredCodePoints(SkTypeface** typefaces,
   int remainingCodePointCount = codePointCount;
   for (int typefaceIndex = 0; typefaceIndex < typefaceCount; typefaceIndex++) {
     typefaces[typefaceIndex]->unicharsToGlyphs(
-        codePoints, remainingCodePointCount, glyphPointer);
+        {codePoints, remainingCodePointCount},
+        {glyphPointer, remainingCodePointCount});
     int outputIndex = 0;
     for (int inputIndex = 0; inputIndex < remainingCodePointCount;
          inputIndex++) {

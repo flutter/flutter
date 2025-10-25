@@ -2479,178 +2479,6 @@ void main() {
     },
   );
 
-  testWidgets('Rematch selection against the first entry with the same value', (
-    WidgetTester tester,
-  ) async {
-    final TextEditingController controller = TextEditingController();
-    addTearDown(controller.dispose);
-
-    String selectionLabel = 'Initial label';
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Scaffold(
-              body: DropdownMenu<TestMenu>(
-                initialSelection: TestMenu.mainMenu0,
-                dropdownMenuEntries: <DropdownMenuEntry<TestMenu>>[
-                  DropdownMenuEntry<TestMenu>(
-                    value: TestMenu.mainMenu0,
-                    label: '$selectionLabel 0',
-                  ),
-                  DropdownMenuEntry<TestMenu>(
-                    value: TestMenu.mainMenu1,
-                    label: '$selectionLabel 1',
-                  ),
-                ],
-                controller: controller,
-              ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () => setState(() => selectionLabel = 'Updated label'),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-
-    // Open the menu
-    await tester.tap(find.byType(DropdownMenu<TestMenu>));
-    await tester.pump();
-
-    // Select the second item
-    await tester.tap(findMenuItemButton('$selectionLabel 1'));
-    await tester.pump();
-
-    // Update dropdownMenuEntries labels
-    await tester.tap(find.byType(FloatingActionButton));
-    await tester.pump();
-
-    expect(controller.text, 'Updated label 1');
-  });
-
-  testWidgets('Forget selection if its value does not map to any entry', (
-    WidgetTester tester,
-  ) async {
-    final TextEditingController controller = TextEditingController();
-    addTearDown(controller.dispose);
-
-    String selectionLabel = 'Initial label';
-    bool selectionInEntries = true;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Scaffold(
-              body: Column(
-                children: <Widget>[
-                  DropdownMenu<TestMenu>(
-                    initialSelection: TestMenu.mainMenu0,
-                    dropdownMenuEntries: <DropdownMenuEntry<TestMenu>>[
-                      DropdownMenuEntry<TestMenu>(
-                        value: TestMenu.mainMenu0,
-                        label: '$selectionLabel 0',
-                      ),
-                      if (selectionInEntries)
-                        DropdownMenuEntry<TestMenu>(
-                          value: TestMenu.mainMenu1,
-                          label: '$selectionLabel 1',
-                        ),
-                    ],
-                    controller: controller,
-                  ),
-                  ElevatedButton(
-                    onPressed: () => setState(() => selectionInEntries = !selectionInEntries),
-                    child: null,
-                  ),
-                ],
-              ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () => setState(() => selectionLabel = 'Updated label'),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-
-    // Open the menu
-    await tester.tap(find.byType(DropdownMenu<TestMenu>));
-    await tester.pump();
-
-    // Select the second item
-    await tester.tap(findMenuItemButton('$selectionLabel 1'));
-    await tester.pump();
-
-    // Update dropdownMenuEntries labels
-    await tester.tap(find.byType(FloatingActionButton));
-    // Remove second item from entires
-    await tester.tap(find.byType(ElevatedButton));
-    await tester.pump();
-
-    expect(controller.text, 'Initial label 1');
-
-    // Put second item back into entries
-    await tester.tap(find.byType(ElevatedButton));
-    await tester.pump();
-
-    expect(controller.text, 'Initial label 1');
-  });
-
-  testWidgets(
-    'Do not rematch selection if the text field was edited progrmaticlly via controller',
-    (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
-      addTearDown(controller.dispose);
-
-      String selectionLabel = 'Initial label';
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Scaffold(
-                body: Column(
-                  children: <Widget>[
-                    DropdownMenu<TestMenu>(
-                      initialSelection: TestMenu.mainMenu0,
-                      dropdownMenuEntries: <DropdownMenuEntry<TestMenu>>[
-                        DropdownMenuEntry<TestMenu>(
-                          value: TestMenu.mainMenu0,
-                          label: '$selectionLabel 0',
-                        ),
-                      ],
-                      controller: controller,
-                    ),
-                    ElevatedButton(
-                      onPressed: () => setState(() => controller.text = 'Controller Value'),
-                      child: null,
-                    ),
-                  ],
-                ),
-                floatingActionButton: FloatingActionButton(
-                  onPressed: () => setState(() => selectionLabel = 'Updated label'),
-                ),
-              );
-            },
-          ),
-        ),
-      );
-
-      // Change the text field value via controller
-      await tester.tap(find.byType(ElevatedButton));
-      await tester.pump();
-
-      // Update dropdownMenuEntries labels
-      await tester.tap(find.byType(FloatingActionButton));
-      await tester.pump();
-
-      expect(controller.text, 'Controller Value');
-    },
-  );
-
   testWidgets('The default text input field should not be focused on mobile platforms '
       'when it is tapped', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
@@ -4981,6 +4809,50 @@ void main() {
       }, throwsAssertionError);
     });
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/174609.
+  testWidgets(
+    'DropdownMenu keeps the selected item from filtered list after entries list is updated',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return DropdownMenu<TestMenu>(
+                  controller: controller,
+                  requestFocusOnTap: true,
+                  enableFilter: true,
+                  // toList() is used here to simulate list update.
+                  dropdownMenuEntries: menuChildren.toList(),
+                  onSelected: (_) {
+                    setState(() {});
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Open the menu.
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+
+      // Filter the entries to only show 'Menu 1'.
+      await tester.enterText(find.byType(TextField).first, TestMenu.mainMenu1.label);
+      await tester.pump();
+
+      // Select the 'Menu 1' item.
+      await tester.tap(findMenuItemButton(TestMenu.mainMenu1.label));
+      await tester.pumpAndSettle();
+
+      expect(controller.text, TestMenu.mainMenu1.label);
+    },
+  );
 
   testWidgets('DropdownMenu does not crash at zero area', (WidgetTester tester) async {
     tester.view.physicalSize = Size.zero;
