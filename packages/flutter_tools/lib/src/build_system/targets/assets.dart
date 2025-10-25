@@ -102,6 +102,7 @@ Future<Depfile> copyAssets(
         AssetBundleEntry(
           value,
           kind: AssetKind.regular,
+          platforms: const <String>{},
           transformers: const <AssetTransformerEntry>[],
         ),
       );
@@ -110,6 +111,17 @@ Future<Depfile> copyAssets(
 
   await Future.wait<void>(
     assetEntries.entries.map<Future<void>>((MapEntry<String, AssetBundleEntry> entry) async {
+      // Determine the current build target (e.g. "windows", "android", "ios")
+      // and compare it against the asset's declared `platforms` set from
+      // pubspec.yaml. If the asset specifies one or more platforms and the
+      // current target is not included, skip processing this asset to ensure
+      // it is not bundled for the wrong platform.
+      final String target = targetPlatform.osName;
+      final Set<String> targetPlatforms = entry.value.platforms;
+      if (targetPlatforms.isNotEmpty && !targetPlatforms.contains(target)) {
+        return;
+      }
+
       final PoolResource copyResource = await copyFilesPool.request();
       PoolResource? transformResource;
 
@@ -269,7 +281,10 @@ class CopyAssets extends Target {
   List<String> get depfiles => const <String>['flutter_assets.d'];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(
+    Environment environment, {
+    TargetPlatform targetPlatform = TargetPlatform.android,
+  }) async {
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
@@ -282,7 +297,7 @@ class CopyAssets extends Target {
       environment,
       output,
       dartHookResult: dartHookResult,
-      targetPlatform: TargetPlatform.android,
+      targetPlatform: targetPlatform,
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],
       additionalContent: <String, DevFSContent>{
