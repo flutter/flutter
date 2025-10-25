@@ -46,6 +46,8 @@ class SemanticsAction {
   static const int _kSetTextIndex = 1 << 21;
   static const int _kFocusIndex = 1 << 22;
   static const int _kScrollToOffsetIndex = 1 << 23;
+  static const int _kExpandIndex = 1 << 24;
+  static const int _kCollapseIndex = 1 << 25;
   // READ THIS:
   // - The maximum supported bit index on the web (in JS mode) is 1 << 31.
   // - If you add an action here, you MUST update the numSemanticsActions value
@@ -298,6 +300,16 @@ class SemanticsAction {
   ///      VoiceOver (iOS), moving which does not move the input focus.
   static const SemanticsAction focus = SemanticsAction._(_kFocusIndex, 'focus');
 
+  /// A request that the node should be expanded.
+  ///
+  /// For example, this action might be recognized by a dropdown.
+  static const SemanticsAction expand = SemanticsAction._(_kExpandIndex, 'expand');
+
+  /// A request that the node should be collapsed.
+  ///
+  /// For example, this action might be recognized by a dropdown.
+  static const SemanticsAction collapse = SemanticsAction._(_kCollapseIndex, 'collapse');
+
   /// The possible semantics actions.
   ///
   /// The map's key is the [index] of the action and the value is the action
@@ -327,6 +339,8 @@ class SemanticsAction {
     _kMoveCursorBackwardByWordIndex: moveCursorBackwardByWord,
     _kSetTextIndex: setText,
     _kFocusIndex: focus,
+    _kExpandIndex: expand,
+    _kCollapseIndex: collapse,
   };
 
   // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
@@ -1142,6 +1156,59 @@ enum Tristate {
   }
 }
 
+/// Describes how a semantic node should behave during hit testing.
+///
+/// This enum allows the framework to communicate pointer event handling
+/// behavior to the platform's accessibility layer. Different platforms
+/// may implement this behavior differently based on their accessibility
+/// infrastructure.
+///
+/// See also:
+///  * [SemanticsUpdateBuilder.updateNode], which accepts this enum.
+enum SemanticsHitTestBehavior {
+  /// Defer to the platform's default hit test behavior inference.
+  ///
+  /// When set to defer, the platform will infer the appropriate behavior
+  /// based on the semantic node's properties such as interactive behaviors,
+  /// route scoping, etc.
+  ///
+  /// On the web, the default inferred behavior is `transparent` for
+  /// non-interactive semantic nodes, allowing pointer events to pass through.
+  ///
+  /// This is the default value and provides backward compatibility.
+  defer,
+
+  /// The semantic element is opaque to hit testing, consuming any pointer
+  /// events within its bounds and preventing them from reaching elements
+  /// behind it in Z-order (siblings and ancestors).
+  ///
+  /// Children of this node can still receive pointer events normally.
+  /// Only elements that are visually behind this node (lower in the stacking
+  /// order) will be blocked from receiving events.
+  ///
+  /// This is typically used for modal surfaces like dialogs, bottom sheets,
+  /// and drawers that should block interaction with content behind them while
+  /// still allowing interaction with their own content.
+  ///
+  /// Platform implementations:
+  ///  * On the web, this results in `pointer-events: all` CSS property.
+  opaque,
+
+  /// The semantic element is transparent to hit testing.
+  ///
+  /// Transparent nodes do not receive hit test events and allow events to pass
+  /// through to elements behind them.
+  ///
+  /// Note: This differs from the framework's `HitTestBehavior.translucent`,
+  /// which receives events while also allowing pass-through. Web's binary
+  /// `pointer-events` property (all or none) cannot support true translucent
+  /// behavior.
+  ///
+  /// Platform implementations:
+  ///  * On the web, this results in `pointer-events: none` CSS property.
+  transparent,
+}
+
 /// Represents a collection of boolean flags that convey semantic information
 /// about a widget's accessibility state and properties.
 ///
@@ -1778,12 +1845,25 @@ abstract class SemanticsUpdateBuilder {
   /// not use this argument should use other ways to communicate validation
   /// errors to the user, such as embedding validation error text in the label.
   ///
+  /// The `hitTestBehavior` describes how this node should behave during hit
+  /// testing. When set to [SemanticsHitTestBehavior.defer] (the default), the
+  /// platform will infer appropriate behavior based on other semantic properties
+  /// of the node itself (not inherited from parent). Different platforms may
+  /// implement this differently.
+  ///
+  /// For example, modal surfaces like dialogs can set this to
+  /// [SemanticsHitTestBehavior.opaque] to block pointer events from reaching
+  /// content behind them, while non-interactive decorative elements can set it
+  /// to [SemanticsHitTestBehavior.transparent] to allow pointer events to pass
+  /// through.
+  ///
   /// See also:
   ///
   ///  * https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/heading_role
   ///  * https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-level
   ///  * [SemanticsValidationResult], that describes possible values for the
   ///    `validationResult` argument.
+  ///  * [SemanticsHitTestBehavior], which describes how hit testing behaves.
   void updateNode({
     required int id,
     required SemanticsFlags flags,
@@ -1821,6 +1901,7 @@ abstract class SemanticsUpdateBuilder {
     SemanticsRole role = SemanticsRole.none,
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+    SemanticsHitTestBehavior hitTestBehavior = SemanticsHitTestBehavior.defer,
     required SemanticsInputType inputType,
     required Locale? locale,
   });
@@ -1899,6 +1980,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     SemanticsRole role = SemanticsRole.none,
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+    SemanticsHitTestBehavior hitTestBehavior = SemanticsHitTestBehavior.defer,
     required SemanticsInputType inputType,
     required Locale? locale,
   }) {
@@ -1947,6 +2029,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       role.index,
       controlsNodes,
       validationResult.index,
+      hitTestBehavior.index,
       inputType.index,
       locale?.toLanguageTag() ?? '',
     );
@@ -1995,6 +2078,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       Handle,
       Int32,
       Int32,
+      Int32,
       Handle,
     )
   >(symbol: 'SemanticsUpdateBuilder::updateNode')
@@ -2038,6 +2122,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     int role,
     List<String>? controlsNodes,
     int validationResultIndex,
+    int hitTestBehaviorIndex,
     int inputType,
     String locale,
   );

@@ -34,6 +34,8 @@ class SemanticsAction {
   static const int _kSetTextIndex = 1 << 21;
   static const int _kFocusIndex = 1 << 22;
   static const int _kScrollToOffsetIndex = 1 << 23;
+  static const int _kExpandIndex = 1 << 24;
+  static const int _kCollapseIndex = 1 << 25;
 
   static const SemanticsAction tap = SemanticsAction._(_kTapIndex, 'tap');
   static const SemanticsAction longPress = SemanticsAction._(_kLongPressIndex, 'longPress');
@@ -89,6 +91,8 @@ class SemanticsAction {
     'moveCursorBackwardByWord',
   );
   static const SemanticsAction focus = SemanticsAction._(_kFocusIndex, 'focus');
+  static const SemanticsAction expand = SemanticsAction._(_kExpandIndex, 'expand');
+  static const SemanticsAction collapse = SemanticsAction._(_kCollapseIndex, 'collapse');
 
   static const Map<int, SemanticsAction> _kActionById = <int, SemanticsAction>{
     _kTapIndex: tap,
@@ -115,6 +119,8 @@ class SemanticsAction {
     _kMoveCursorBackwardByWordIndex: moveCursorBackwardByWord,
     _kSetTextIndex: setText,
     _kFocusIndex: focus,
+    _kExpandIndex: expand,
+    _kCollapseIndex: collapse,
   };
 
   static List<SemanticsAction> get values => _kActionById.values.toList(growable: false);
@@ -663,6 +669,8 @@ class LocaleStringAttribute extends StringAttribute {
 
 enum SemanticsValidationResult { none, valid, invalid }
 
+enum SemanticsHitTestBehavior { defer, opaque, transparent }
+
 class SemanticsUpdateBuilder {
   SemanticsUpdateBuilder();
 
@@ -704,6 +712,7 @@ class SemanticsUpdateBuilder {
     SemanticsRole role = SemanticsRole.none,
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+    SemanticsHitTestBehavior hitTestBehavior = SemanticsHitTestBehavior.defer,
     required SemanticsInputType inputType,
     required Locale? locale,
   }) {
@@ -748,6 +757,7 @@ class SemanticsUpdateBuilder {
         role: role,
         controlsNodes: controlsNodes,
         validationResult: validationResult,
+        hitTestBehavior: hitTestBehavior,
         inputType: inputType,
         locale: locale,
       ),

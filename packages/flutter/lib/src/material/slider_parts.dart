@@ -13,7 +13,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'material_state.dart';
 import 'slider.dart';
 import 'slider_theme.dart';
 import 'slider_value_indicator_shape.dart';
@@ -1027,7 +1026,7 @@ class HandleThumbShape extends SliderComponentShape {
 
     final Canvas canvas = context.canvas;
     final Size thumbSize = sliderTheme.thumbSize!.resolve(
-      <MaterialState>{},
+      <WidgetState>{},
     )!; // This is resolved in the paint method.
     final RRect rrect = RRect.fromRectAndRadius(
       Rect.fromCenter(center: center, width: thumbSize.width, height: thumbSize.height),
