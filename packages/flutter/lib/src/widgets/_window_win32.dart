@@ -23,6 +23,7 @@ import 'package:flutter/rendering.dart';
 
 import '../foundation/_features.dart';
 import '_window.dart';
+import '_window_positioner.dart';
 
 /// A Win32 window handle.
 ///
@@ -166,6 +167,20 @@ class WindowingOwnerWin32 extends WindowingOwner {
       title: title,
       parent: parent,
     );
+  }
+
+  @internal
+  @override
+  OverlayWindowController createOverlayWindowController({
+    required OverlayWindowControllerDelegate delegate,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required BoxConstraints contentSizeConstraints,
+    BaseWindowController? parent,
+    String? title,
+    bool alwaysOnTop = false,
+  }) {
+    throw UnimplementedError('Overlay windows are not yet implemented on Windows.');
   }
 
   /// Register a new [WindowsMessageHandler].
