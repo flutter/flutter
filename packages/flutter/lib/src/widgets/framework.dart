@@ -2443,8 +2443,16 @@ abstract class BuildContext {
   /// [InheritedWidget] subclasses that supports partial updates, like
   /// [InheritedModel]. It specifies what "aspect" of the inherited
   /// widget this context depends on.
+  ///
+  /// If [trackForCleanup] is true, this dependency will be tracked and
+  /// automatically removed when the widget rebuilds and no longer depends on it.
+  /// This helps prevent unnecessary rebuilds but requires careful consideration
+  /// as it changes the default behavior. Defaults to false for backward compatibility.
   /// {@endtemplate}
-  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect});
+  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({
+    Object? aspect,
+    bool trackForCleanup = false,
+  });
 
   /// Returns the nearest widget of the given [InheritedWidget] subclass `T` or
   /// null if an appropriate ancestor is not found.
@@ -4763,6 +4771,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     // We unregistered our dependencies in deactivate, but never cleared the list.
     // Since we're going to be reused, let's clear our list now.
     _dependencies?.clear();
+    _currentBuildDependencies?.clear();
     _hadUnsatisfiedDependencies = false;
     _updateInheritance();
     attachNotificationTree();
@@ -4865,6 +4874,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     // defunct, but accidentally retained Elements.
     _widget = null;
     _dependencies = null;
+    _currentBuildDependencies = null;
     _lifecycleState = _ElementLifecycle.defunct;
   }
 
@@ -5044,6 +5054,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   PersistentHashMap<Type, InheritedElement>? _inheritedElements;
   Set<InheritedElement>? _dependencies;
+  Set<InheritedElement>? _currentBuildDependencies;
   bool _hadUnsatisfiedDependencies = false;
 
   bool _debugCheckStateIsActiveForAncestorLookup() {
@@ -5074,18 +5085,30 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  InheritedWidget dependOnInheritedElement(InheritedElement ancestor, {Object? aspect}) {
+  InheritedWidget dependOnInheritedElement(
+    InheritedElement ancestor, {
+    Object? aspect,
+    bool trackForCleanup = false,
+  }) {
     (_dependencies ??= HashSet<InheritedElement>()).add(ancestor);
+    if (trackForCleanup) {
+      (_currentBuildDependencies ??= HashSet<InheritedElement>()).add(ancestor);
+    }
+
     ancestor.updateDependencies(this, aspect);
     return ancestor.widget as InheritedWidget;
   }
 
   @override
-  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect}) {
+  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({
+    Object? aspect,
+    bool trackForCleanup = false,
+  }) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     final InheritedElement? ancestor = _inheritedElements?[T];
     if (ancestor != null) {
-      return dependOnInheritedElement(ancestor, aspect: aspect) as T;
+      return dependOnInheritedElement(ancestor, aspect: aspect, trackForCleanup: trackForCleanup)
+          as T;
     }
     _hadUnsatisfiedDependencies = true;
     return null;
@@ -5100,6 +5123,19 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     return _inheritedElements?[T];
+  }
+
+  /// Called after every build to remove dependencies that are no longer used.
+  void cleanupRemovedDependencies() {
+    if (_dependencies != null && _currentBuildDependencies != null) {
+      final Set<InheritedElement> removedDependencies = _dependencies!.difference(
+        _currentBuildDependencies!,
+      );
+      for (final InheritedElement dependency in removedDependencies) {
+        dependency.removeDependent(this);
+        _dependencies!.remove(dependency);
+      }
+    }
   }
 
   /// Called in [Element.mount] and [Element.activate] to register this element in
@@ -5811,6 +5847,8 @@ abstract class ComponentElement extends Element {
   @override
   @pragma('vm:notify-debugger-on-exception')
   void performRebuild() {
+    _currentBuildDependencies?.clear();
+
     Widget built;
     try {
       assert(() {
@@ -5860,6 +5898,7 @@ abstract class ComponentElement extends Element {
       } catch (_) {}
       _child = updateChild(null, built, slot);
     }
+    cleanupRemovedDependencies();
   }
 
   /// Subclasses should override this function to actually call the appropriate
@@ -6050,7 +6089,11 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  InheritedWidget dependOnInheritedElement(Element ancestor, {Object? aspect}) {
+  InheritedWidget dependOnInheritedElement(
+    InheritedElement ancestor, {
+    Object? aspect,
+    bool trackForCleanup = false,
+  }) {
     assert(() {
       final Type targetType = ancestor.widget.runtimeType;
       if (state._debugLifecycleState == _StateLifecycle.created) {
@@ -6102,7 +6145,11 @@ class StatefulElement extends ComponentElement {
       }
       return true;
     }());
-    return super.dependOnInheritedElement(ancestor as InheritedElement, aspect: aspect);
+    return super.dependOnInheritedElement(
+      ancestor,
+      aspect: aspect,
+      trackForCleanup: trackForCleanup,
+    );
   }
 
   /// This controls whether we should call [State.didChangeDependencies] from
