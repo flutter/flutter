@@ -38,6 +38,13 @@ class TextPaint {
       if (block is PlaceholderBlock) {
         continue;
       }
+
+      // We need to adjust the canvas size to fit the block in case there is scaling or zoom involved
+      final double zoomFactor = painter.adjustCanvas(
+        canvas,
+        block.advance.width.ceilToDouble(),
+        block.advance.height.ceilToDouble(),
+      );
       // Let's calculate the sizes
       final (ui.Rect sourceRect, ui.Rect targetRect) = calculateBlock(
         layout,
@@ -47,6 +54,7 @@ class TextPaint {
           line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
         ),
         ui.Offset(x, y),
+        zoomFactor,
       );
       // Let's draw whatever has to be drawn
       switch (styleElement) {
@@ -95,6 +103,14 @@ class TextPaint {
       final int step = block.isLtr ? 1 : -1;
       for (int i = start; i != end; i += step) {
         final clusterText = layout.allClusters[i];
+        // If we have shadows, we need to make sure the canvas is big enough
+        final blockHasShadows = block.style.hasElement(StyleElements.shadows);
+        // We need to adjust the canvas size to fit the block in case there is scaling or zoom involved
+        final double zoomFactor = painter.adjustCanvas(
+          canvas,
+          clusterText.advance.width.ceilToDouble() + (blockHasShadows ? 200 : 0),
+          clusterText.advance.height.ceilToDouble() + (blockHasShadows ? 200 : 0),
+        );
         final (ui.Rect sourceRect, ui.Rect targetRect) = calculateCluster(
           layout,
           block,
@@ -105,7 +121,12 @@ class TextPaint {
             line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
           ),
           ui.Offset(x, y),
+          zoomFactor,
         );
+        if (sourceRect.width <= 0 || sourceRect.height <= 0) {
+          // Let's skip empty clusters
+          continue;
+        }
         switch (styleElement) {
           case StyleElements.shadows:
             paintContext.save();
@@ -130,33 +151,44 @@ class TextPaint {
     WebCluster webTextCluster,
     ui.Offset clusterOffset,
     ui.Offset lineOffset,
+    double zoomFactor,
   ) {
     // Define the text cluster bounds
     final pos = webTextCluster.bounds.left - webTextCluster.advance.left;
+    final double left = clusterOffset.dx + webTextCluster.advance.left + lineOffset.dx;
+    final double shift = left - left.floorToDouble();
+
+    // Define the text cluster bounds
+    // Source rect must take in account the scaling
+    final ui.Rect sourceRect = ui.Rect.fromLTWH(
+      pos, // + shift,
+      0,
+      webTextCluster.bounds.width.ceilToDouble() * zoomFactor,
+      webTextCluster.advance.height.ceilToDouble() * zoomFactor,
+    );
+    // Target rect will be scaled by the canvas transform, so we don't scale it here
     final ui.Rect zeroRect = ui.Rect.fromLTWH(
       pos,
       0,
-      webTextCluster.bounds.width,
-      webTextCluster.advance.height,
+      webTextCluster.bounds.width.ceilToDouble(),
+      webTextCluster.advance.height.ceilToDouble(),
     );
-    final ui.Rect sourceRect = zeroRect;
 
     // We shift the target rect to the correct x position inside the line and
     // the correct y position of the line itself
     // (and then to the paragraph.paint x and y)
 
-    final double left = clusterOffset.dx + webTextCluster.advance.left + lineOffset.dx;
-    final double shift = left - left.floorToDouble();
     // TODO(jlavrova): Make translation in a single operation so it's actually an integer
     final ui.Rect targetRect = zeroRect
         .translate(clusterOffset.dx + webTextCluster.advance.left, clusterOffset.dy)
-        .translate(lineOffset.dx, lineOffset.dy)
-        .translate(-shift, 0);
+        .translate(lineOffset.dx, lineOffset.dy);
 
     if (WebParagraphDebug.logging) {
       final String text = paragraph.getText1(webTextCluster.start, webTextCluster.end);
       WebParagraphDebug.log(
-        'calculateCluster "$text" webTextCluster.bounds.width=${webTextCluster.bounds.width} clusterOffset.dx=${clusterOffset.dx}+webTextCluster.advance.left=${webTextCluster.advance.left}+lineOffset.dx=${lineOffset.dx}\nsource: $sourceRect => target: $targetRect',
+        'calculateCluster "$text" bounds: ${webTextCluster.bounds} advance: ${webTextCluster.advance} shift $shift\n'
+        'clusterOffset: $clusterOffset lineOffset: $lineOffset\n'
+        'source: $sourceRect => target: $targetRect',
       );
     }
 
@@ -168,12 +200,20 @@ class TextPaint {
     TextBlock block,
     ui.Offset blockOffset,
     ui.Offset paragraphOffset,
+    double zoomFactor,
   ) {
     final ui.Rect advance = block.advance;
 
     // Define the text clusters rect (using advances, not selected rects)
+    // Source rect must take in account the scaling
+    final ui.Rect sourceRect = ui.Rect.fromLTWH(
+      0,
+      0,
+      advance.width * zoomFactor,
+      advance.height * zoomFactor,
+    );
+    // Target rect will be scaled by the canvas transform, so we don't scale it here
     final ui.Rect zeroRect = ui.Rect.fromLTWH(0, 0, advance.width, advance.height);
-    final ui.Rect sourceRect = zeroRect;
 
     // We shift the target rect to the correct x position inside the line and
     // the correct y position of the line itself
