@@ -20,6 +20,7 @@ class ClipPathLayer : public ClipShapeLayer<DlPath> {
   const DlRect clip_shape_bounds() const override;
 
   void ApplyClip(LayerStateStack::MutatorContext& mutator) const override;
+  void PushClipToEmbedderStack(PrerollContext* context) const override;
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(ClipPathLayer);
