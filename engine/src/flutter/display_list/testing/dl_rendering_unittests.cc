@@ -1321,7 +1321,7 @@ class CanvasCompareTester {
                             testP.imp_renderer());
       quickCompareToReference(backdrop_env, "backdrop");
 
-      DlBlurImageFilter dl_backdrop(5, 5, DlTileMode::kDecal);
+      DlBlurImageFilter dl_backdrop(5, 5, std::nullopt, DlTileMode::kDecal);
       auto sk_backdrop =
           SkImageFilters::Blur(5, 5, SkTileMode::kDecal, nullptr);
       RenderWith(
@@ -1597,7 +1597,8 @@ class CanvasCompareTester {
                         dl_blur_setup, testP.dl_renderer(),
                         testP.imp_renderer());
       quickCompareToReference(blur_env, "blur");
-      DlBlurImageFilter dl_filter_decal_5(5.0, 5.0, DlTileMode::kDecal);
+      DlBlurImageFilter dl_filter_decal_5(5.0, 5.0, std::nullopt,
+                                          DlTileMode::kDecal);
       auto sk_filter_decal_5 =
           SkImageFilters::Blur(5.0, 5.0, SkTileMode::kDecal, nullptr);
       BoundsTolerance blur_5_tolerance = tolerance.addBoundsPadding(4, 4);
@@ -1614,7 +1615,8 @@ class CanvasCompareTester {
                          ctx.paint.setImageFilter(&dl_filter_decal_5);
                        }));
       }
-      DlBlurImageFilter dl_filter_clamp_5(5.0, 5.0, DlTileMode::kClamp);
+      DlBlurImageFilter dl_filter_clamp_5(5.0, 5.0, std::nullopt,
+                                          DlTileMode::kClamp);
       auto sk_filter_clamp_5 =
           SkImageFilters::Blur(5.0, 5.0, SkTileMode::kClamp, nullptr);
       {

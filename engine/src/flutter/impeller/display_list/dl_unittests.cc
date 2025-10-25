@@ -591,7 +591,7 @@ TEST_P(DisplayListTest, CanDrawWithImageBlurFilter) {
     flutter::DisplayListBuilder builder;
     flutter::DlPaint paint;
 
-    auto filter = flutter::DlBlurImageFilter(sigma[0], sigma[1],
+    auto filter = flutter::DlBlurImageFilter(sigma[0], sigma[1], std::nullopt,
                                              flutter::DlTileMode::kClamp);
     paint.setImageFilter(&filter);
     builder.DrawImage(DlImageImpeller::Make(texture), DlPoint(200, 200),
@@ -680,7 +680,7 @@ TEST_P(DisplayListTest, CanDrawBackdropFilter) {
     Vector2 scale = ctm_scale * GetContentScale();
     builder.Scale(scale.x, scale.y);
 
-    auto filter = flutter::DlBlurImageFilter(sigma[0], sigma[1],
+    auto filter = flutter::DlBlurImageFilter(sigma[0], sigma[1], std::nullopt,
                                              flutter::DlTileMode::kClamp);
 
     std::optional<DlRect> bounds;
@@ -714,6 +714,57 @@ TEST_P(DisplayListTest, CanDrawBackdropFilter) {
       paint.setColor(flutter::DlColor::kRed().withAlpha(100));
       builder.DrawCircle(DlPoint(circle_center.x, circle_center.y), 100, paint);
     }
+
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(DisplayListTest, CanDrawBoundedBlur) {
+  auto texture = CreateTextureForFixture("kalimba.jpg");
+
+  auto callback = [&]() {
+    static float sigma = 20;
+    static float ctm_scale = 1;
+    static bool use_bounds = true;
+
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SliderFloat("Sigma", &sigma, 0, 100);
+    ImGui::SliderFloat("Scale", &ctm_scale, 0, 10);
+    ImGui::NewLine();
+    ImGui::Checkbox("Bounded blur", &use_bounds);
+    ImGui::End();
+
+    flutter::DisplayListBuilder builder;
+
+    Vector2 scale = ctm_scale * GetContentScale();
+    builder.Scale(scale.x, scale.y);
+
+    // Draw from top right to bottom left.
+    static PlaygroundPoint blur_point_a(Point(410, 110), 10, Color::White());
+    static PlaygroundPoint blur_point_b(Point(150, 320), 10, Color::White());
+    auto [p1, p2] = DrawPlaygroundLine(blur_point_a, blur_point_b);
+    DlRect bounds = DlRect::MakeLTRB(p2.x, p1.y, p1.x, p2.y);
+
+    builder.DrawImage(DlImageImpeller::Make(texture), DlPoint(0, 0),
+                      flutter::DlImageSampling::kNearestNeighbor, nullptr);
+    builder.ClipRect(bounds.Scale(1 / ctm_scale));
+    builder.Save();
+
+    flutter::DlPaint save_paint;
+    save_paint.setBlendMode(flutter::DlBlendMode::kSrcOver);
+
+    std::optional<DlRect> blur_bounds;
+    if (use_bounds) {
+      blur_bounds = bounds.Scale(GetContentScale());
+      blur_bounds = blur_bounds->Shift(-blur_bounds->GetOrigin());
+    }
+    auto filter = flutter::DlBlurImageFilter(sigma, sigma, blur_bounds,
+                                             flutter::DlTileMode::kDecal);
+    builder.SaveLayer(std::nullopt, &save_paint, &filter);
+    builder.Restore();
+    builder.Restore();
 
     return builder.Build();
   };
@@ -1031,7 +1082,8 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilter) {
           }
           case 1: {
             auto internal_filter =
-                flutter::DlBlurImageFilter(10, 10, flutter::DlTileMode::kDecal)
+                flutter::DlBlurImageFilter(10, 10, std::nullopt,
+                                           flutter::DlTileMode::kDecal)
                     .shared();
             auto filter = flutter::DlLocalMatrixImageFilter(filter_matrix,
                                                             internal_filter);

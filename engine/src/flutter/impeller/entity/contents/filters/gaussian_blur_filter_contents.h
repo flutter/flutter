@@ -21,6 +21,7 @@ static_assert(sizeof(GaussianBlurPipeline::FragmentShader::KernelSamples) ==
 
 struct BlurParameters {
   Point blur_uv_offset;
+  std::optional<Rect> blur_uv_bounds;
   Scalar blur_sigma;
   int blur_radius;
   int step_size;
@@ -57,10 +58,12 @@ class GaussianBlurFilterContents final : public FilterContents {
  public:
   explicit GaussianBlurFilterContents(Scalar sigma_x,
                                       Scalar sigma_y,
+                                      std::optional<Rect> bounds,
                                       Entity::TileMode tile_mode,
                                       BlurStyle mask_blur_style,
                                       const Geometry* mask_geometry = nullptr);
 
+  std::optional<Rect> GetBounds() const { return bounds_; }
   Scalar GetSigmaX() const { return sigma_.x; }
   Scalar GetSigmaY() const { return sigma_.y; }
 
@@ -114,6 +117,7 @@ class GaussianBlurFilterContents final : public FilterContents {
       const std::optional<Rect>& coverage_hint) const override;
 
   const Vector2 sigma_ = Vector2(0.0, 0.0);
+  const std::optional<Rect> bounds_ = std::nullopt;
   const Entity::TileMode tile_mode_;
   const BlurStyle mask_blur_style_;
   const Geometry* mask_geometry_ = nullptr;
