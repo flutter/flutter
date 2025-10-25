@@ -10,6 +10,8 @@
 #include <variant>
 #include <vector>
 
+#include "display_list/geometry/dl_geometry_types.h"
+#include "display_list/geometry/dl_path.h"
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/flow/surface_frame.h"
@@ -37,7 +39,11 @@ enum class MutatorType {
   kClipPath,
   kTransform,
   kOpacity,
-  kBackdropFilter
+  kBackdropFilter,
+  kBackdropClipRect,
+  kBackdropClipRRect,
+  kBackdropClipRse,
+  kBackdropClipPath,
 };
 
 // Represents an image filter mutation.
@@ -61,6 +67,42 @@ class ImageFilterMutation {
   const DlRect filter_rect_;
 };
 
+struct BackdropClipRect {
+  DlRect rect;
+  explicit BackdropClipRect(const DlRect& r) : rect(r) {}
+
+  bool operator==(const BackdropClipRect& other) const {
+    return rect == other.rect;
+  }
+};
+
+struct BackdropClipRRect {
+  DlRoundRect rrect;
+  explicit BackdropClipRRect(const DlRoundRect& r) : rrect(r) {}
+
+  bool operator==(const BackdropClipRRect& other) const {
+    return rrect == other.rrect;
+  }
+};
+
+struct BackdropClipRSE {
+  DlRoundSuperellipse rse;
+  explicit BackdropClipRSE(const DlRoundSuperellipse& r) : rse(r) {}
+
+  bool operator==(const BackdropClipRSE& other) const {
+    return rse == other.rse;
+  }
+};
+
+struct BackdropClipPath {
+  DlPath path;
+  explicit BackdropClipPath(const DlPath& r) : path(r) {}
+
+  bool operator==(const BackdropClipPath& other) const {
+    return path == other.path;
+  }
+};
+
 // Stores mutation information like clipping or kTransform.
 //
 // The `type` indicates the type of the mutation: kClipRect, kTransform and etc.
@@ -80,6 +122,15 @@ class Mutator {
   explicit Mutator(const std::shared_ptr<DlImageFilter>& filter,
                    const DlRect& filter_rect)
       : data_(ImageFilterMutation(filter, filter_rect)) {}
+
+  explicit Mutator(const BackdropClipRect& backdrop_rect)
+      : data_(backdrop_rect) {}
+  explicit Mutator(const BackdropClipRRect& backdrop_rrect)
+      : data_(backdrop_rrect) {}
+  explicit Mutator(const BackdropClipRSE& backdrop_rse)
+      : data_(backdrop_rse) {}
+  explicit Mutator(const BackdropClipPath& backdrop_path)
+      : data_(backdrop_path) {}
 
   MutatorType GetType() const {
     return static_cast<MutatorType>(data_.index());
@@ -109,6 +160,11 @@ class Mutator {
       case MutatorType::kClipPath:
       case MutatorType::kClipRRect:
       case MutatorType::kClipRSE:
+      // TODO: Figure out if this matters
+      case MutatorType::kBackdropClipRect:
+      case MutatorType::kBackdropClipRRect:
+      case MutatorType::kBackdropClipRse:
+      case MutatorType::kBackdropClipPath:
         return true;
       case MutatorType::kOpacity:
       case MutatorType::kTransform:
@@ -124,7 +180,11 @@ class Mutator {
                DlPath,
                DlMatrix,
                uint8_t,
-               ImageFilterMutation>
+               ImageFilterMutation,
+               BackdropClipRect,
+               BackdropClipRRect,
+               BackdropClipRSE,
+               BackdropClipPath>
       data_;
 };  // Mutator
 
@@ -150,6 +210,10 @@ class MutatorsStack {
   // `filter_rect` is in global coordinates.
   void PushBackdropFilter(const std::shared_ptr<DlImageFilter>& filter,
                           const DlRect& filter_rect);
+  void PushPlatformViewClipRect(const DlRect& rect);
+  void PushPlatformViewClipRRect(const DlRoundRect& rrect);
+  void PushPlatformViewClipRSE(const DlRoundSuperellipse& rse);
+  void PushPlatformViewClipPath(const DlPath& path);
 
   // Removes the `Mutator` on the top of the stack
   // and destroys it.
@@ -247,6 +311,22 @@ class EmbeddedViewParams {
   void PushImageFilter(const std::shared_ptr<DlImageFilter>& filter,
                        const DlRect& filter_rect) {
     mutators_stack_.PushBackdropFilter(filter, filter_rect);
+  }
+
+  void PushPlatformViewClipRect(const DlRect& clip_rect) {
+    mutators_stack_.PushPlatformViewClipRect(clip_rect);
+  }
+
+  void PushPlatformViewClipRRect(const DlRoundRect& clip_rrect) {
+    mutators_stack_.PushPlatformViewClipRRect(clip_rrect);
+  }
+
+  void PushPlatformViewClipRSE(const DlRoundSuperellipse& clip_rse) {
+    mutators_stack_.PushPlatformViewClipRSE(clip_rse);
+  }
+
+  void PushPlatformViewClipPath(const DlPath& clip_path) {
+    mutators_stack_.PushPlatformViewClipPath(clip_path);
   }
 
   bool operator==(const EmbeddedViewParams& other) const {
@@ -458,6 +538,11 @@ class ExternalViewEmbedder {
   virtual void PushFilterToVisitedPlatformViews(
       const std::shared_ptr<DlImageFilter>& filter,
       const DlRect& filter_rect) {}
+
+  virtual void PushClipRectToVisitedPlatformViews(const DlRect& clip_rect) {}
+  virtual void PushClipRRectToVisitedPlatformViews(const DlRoundRect& clip_rrect) {}
+  virtual void PushClipRSEToVisitedPlatformViews(const DlRoundSuperellipse& clip_rse) {}
+  virtual void PushClipPathToVisitedPlatformViews(const DlPath& clip_path) {}
 
  private:
   bool used_this_frame_ = false;
