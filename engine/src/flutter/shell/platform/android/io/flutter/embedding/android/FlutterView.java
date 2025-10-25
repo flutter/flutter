@@ -59,6 +59,7 @@ import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.FlutterRenderer.DisplayFeatureState;
 import io.flutter.embedding.engine.renderer.FlutterRenderer.DisplayFeatureType;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
+import io.flutter.embedding.engine.renderer.FlutterUiResizeListener;
 import io.flutter.embedding.engine.renderer.RenderSurface;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.plugin.common.BinaryMessenger;
@@ -76,6 +77,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Displays a Flutter UI on an Android device.
@@ -109,6 +111,9 @@ public class FlutterView extends FrameLayout
     implements MouseCursorPlugin.MouseCursorViewDelegate, KeyboardManager.ViewDelegate {
   private static final String TAG = "FlutterView";
   private static final String GBOARD_PACKAGE_NAME = "com.google.android.inputmethod.latin";
+
+  private static final int CONTENT_SIZING_MAX = 2 << 12; // 2 << 13
+  private AtomicBoolean shouldSendEngineResize = new AtomicBoolean(true);
 
   // Internal view hierarchy references.
   @Nullable private FlutterSurfaceView flutterSurfaceView;
@@ -175,6 +180,31 @@ public class FlutterView extends FrameLayout
         }
       };
 
+  private final FlutterUiResizeListener flutterUiResizeListener =
+      new FlutterUiResizeListener() {
+        @Override
+        public void resizeSurfaceView(int width, int height) {
+          boolean changed = false;
+          ViewGroup.LayoutParams surfaceParams = flutterSurfaceView.getLayoutParams();
+          if (heightMode == MeasureSpec.UNSPECIFIED) {
+            if (flutterSurfaceView.getHeight() != height) {
+              changed = true;
+              surfaceParams.height = height;
+            }
+          }
+          if (widthMode == MeasureSpec.UNSPECIFIED) {
+            if (flutterSurfaceView.getWidth() != width) {
+              changed = true;
+              surfaceParams.width = width;
+            }
+          }
+          if (changed) {
+            shouldSendEngineResize.set(false);
+            flutterSurfaceView.setLayoutParams(surfaceParams);
+          }
+        }
+      };
+
   private final FlutterUiDisplayListener flutterUiDisplayListener =
       new FlutterUiDisplayListener() {
         @Override
@@ -197,6 +227,8 @@ public class FlutterView extends FrameLayout
       };
 
   private Consumer<WindowLayoutInfo> windowInfoListener;
+  private int widthMode;
+  private int heightMode;
 
   /**
    * Constructs a {@code FlutterView} programmatically, without any XML attributes.
@@ -368,6 +400,7 @@ public class FlutterView extends FrameLayout
   }
 
   private void init() {
+    Log.setLogLevel(Log.VERBOSE);
     Log.v(TAG, "Initializing FlutterView");
 
     if (flutterSurfaceView != null) {
@@ -1111,6 +1144,7 @@ public class FlutterView extends FrameLayout
     isFlutterUiDisplayed = flutterRenderer.isDisplayingFlutterUi();
     renderSurface.attachToRenderer(flutterRenderer);
     flutterRenderer.addIsDisplayingFlutterUiListener(flutterUiDisplayListener);
+    flutterRenderer.addResizingFlutterUiListener(flutterUiResizeListener);
 
     // Initialize various components that know how to process Android View I/O
     // in a way that Flutter understands.
@@ -1488,6 +1522,13 @@ public class FlutterView extends FrameLayout
     this.delegate = delegate;
   }
 
+  @Override
+  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    widthMode = MeasureSpec.getMode(widthMeasureSpec);
+    heightMode = MeasureSpec.getMode(heightMeasureSpec);
+    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+  }
+
   private void sendViewportMetricsToFlutter() {
     if (!isAttachedToFlutterEngine()) {
       Log.w(
@@ -1496,10 +1537,27 @@ public class FlutterView extends FrameLayout
               + "FlutterView was not attached to a FlutterEngine.");
       return;
     }
-
+    if (shouldSendEngineResize.compareAndSet(false, true)) {
+      return;
+    }
     viewportMetrics.devicePixelRatio = getResources().getDisplayMetrics().density;
     viewportMetrics.physicalTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
-
+    if (heightMode == MeasureSpec.UNSPECIFIED) {
+      Log.d(TAG, "FlutterView height is set to wrap content - updating viewport metrics to max");
+      viewportMetrics.minHeight = 0;
+      viewportMetrics.maxHeight = CONTENT_SIZING_MAX;
+    } else {
+      viewportMetrics.minHeight = viewportMetrics.height;
+      viewportMetrics.maxHeight = viewportMetrics.height;
+    }
+    if (widthMode == MeasureSpec.UNSPECIFIED) {
+      Log.d(TAG, "FlutterView width is set to wrap content - updating viewport metrics to max");
+      viewportMetrics.minHeight = 0;
+      viewportMetrics.maxHeight = CONTENT_SIZING_MAX;
+    } else {
+      viewportMetrics.minWidth = viewportMetrics.width;
+      viewportMetrics.maxWidth = viewportMetrics.width;
+    }
     flutterEngine.getRenderer().setViewportMetrics(viewportMetrics);
   }
 
