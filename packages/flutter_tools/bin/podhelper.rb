@@ -19,18 +19,23 @@ def flutter_ios_podfile_setup; end
 # Same as flutter_ios_podfile_setup for macOS.
 def flutter_macos_podfile_setup; end
 
-# Determine whether the target depends on Flutter (including transitive dependency)
-def depends_on_flutter(target, engine_pod_name)
-  target.dependencies.any? do |dependency|
-    if dependency.name == engine_pod_name
-      return true
-    end
 
-    if depends_on_flutter(dependency.target, engine_pod_name)
-      return true
+# Determine whether the target depends on Flutter (including transitive dependency)
+def depends_on_flutter(target, engine_pod_name, checked_map)
+  # Return cached result if available
+  return checked_map[target.name] if checked_map.has_key?(target.name)
+
+  result = target.dependencies.any? do |dependency|
+    if dependency.name == engine_pod_name
+      true
+    elsif depends_on_flutter(dependency.target, engine_pod_name, checked_map)
+      true
     end
   end
-  return false
+
+  # Cache the result
+  checked_map[target.name] = result
+  return result
 end
 
 # Add iOS build settings to pod targets.
@@ -83,7 +88,8 @@ def flutter_additional_ios_build_settings(target)
     build_configuration.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '9.0' if force_to_arc_supported_min
 
     # Skip other updates if it does not depend on Flutter (including transitive dependency)
-    next unless depends_on_flutter(target, 'Flutter')
+    checked_map = {}
+    next unless depends_on_flutter(target, 'Flutter', checked_map)
 
     # Bitcode is deprecated, Flutter.framework bitcode blob will have been stripped.
     build_configuration.build_settings['ENABLE_BITCODE'] = 'NO'
@@ -154,7 +160,8 @@ def flutter_additional_macos_build_settings(target)
     build_configuration.build_settings['MACOSX_DEPLOYMENT_TARGET'] = '10.11' if force_to_arc_supported_min
 
     # Skip other updates if it does not depend on Flutter (including transitive dependency)
-    next unless depends_on_flutter(target, 'FlutterMacOS')
+    checked_map = {}
+    next unless depends_on_flutter(target, 'FlutterMacOS', checked_map)
 
     if local_engine
       configuration_engine_dir = File.expand_path(File.join(local_engine, 'FlutterMacOS.xcframework'), __FILE__)
