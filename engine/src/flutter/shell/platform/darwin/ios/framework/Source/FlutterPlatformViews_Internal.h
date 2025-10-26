@@ -194,4 +194,12 @@
 - (ForwardingGestureRecognizer*)recreateRecognizerWithTarget:(id)target;
 @end
 
+@interface PendingRRectClip : NSObject
+@property(nonatomic) flutter::DlRect rect;
+@property(nonatomic) CGFloat topLeftRadius;
+@property(nonatomic) CGFloat topRightRadius;
+@property(nonatomic) CGFloat bottomRightRadius;
+@property(nonatomic) CGFloat bottomLeftRadius;
+@end
+
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMVIEWS_INTERNAL_H_
