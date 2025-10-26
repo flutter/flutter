@@ -127,8 +127,7 @@ class Mutator {
       : data_(backdrop_rect) {}
   explicit Mutator(const BackdropClipRRect& backdrop_rrect)
       : data_(backdrop_rrect) {}
-  explicit Mutator(const BackdropClipRSE& backdrop_rse)
-      : data_(backdrop_rse) {}
+  explicit Mutator(const BackdropClipRSE& backdrop_rse) : data_(backdrop_rse) {}
   explicit Mutator(const BackdropClipPath& backdrop_path)
       : data_(backdrop_path) {}
 
@@ -552,8 +551,10 @@ class ExternalViewEmbedder {
       const DlRect& filter_rect) {}
 
   virtual void PushClipRectToVisitedPlatformViews(const DlRect& clip_rect) {}
-  virtual void PushClipRRectToVisitedPlatformViews(const DlRoundRect& clip_rrect) {}
-  virtual void PushClipRSEToVisitedPlatformViews(const DlRoundSuperellipse& clip_rse) {}
+  virtual void PushClipRRectToVisitedPlatformViews(
+      const DlRoundRect& clip_rrect) {}
+  virtual void PushClipRSEToVisitedPlatformViews(
+      const DlRoundSuperellipse& clip_rse) {}
   virtual void PushClipPathToVisitedPlatformViews(const DlPath& clip_path) {}
 
  private:

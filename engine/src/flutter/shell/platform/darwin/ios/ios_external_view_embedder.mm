@@ -124,7 +124,8 @@ void IOSExternalViewEmbedder::PushClipRRectToVisitedPlatformViews(const DlRoundR
 }
 
 // |ExternalViewEmbedder|
-void IOSExternalViewEmbedder::PushClipRSEToVisitedPlatformViews(const DlRoundSuperellipse& clip_rse) {
+void IOSExternalViewEmbedder::PushClipRSEToVisitedPlatformViews(
+    const DlRoundSuperellipse& clip_rse) {
   [platform_views_controller_ pushClipRSEToVisitedPlatformViews:clip_rse];
 }
 
