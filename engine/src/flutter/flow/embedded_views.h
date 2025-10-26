@@ -149,6 +149,18 @@ class Mutator {
   const ImageFilterMutation& GetFilterMutation() const {
     return std::get<ImageFilterMutation>(data_);
   }
+  const BackdropClipRect& GetBackdropClipRect() const {
+    return std::get<BackdropClipRect>(data_);
+  }
+  const BackdropClipRRect& GetBackdropClipRRect() const {
+    return std::get<BackdropClipRRect>(data_);
+  }
+  const BackdropClipRSE& GetBackdropClipRSE() const {
+    return std::get<BackdropClipRSE>(data_);
+  }
+  const BackdropClipPath& GetBackdropClipPath() const {
+    return std::get<BackdropClipPath>(data_);
+  }
   const uint8_t& GetAlpha() const { return std::get<uint8_t>(data_); }
   float GetAlphaFloat() const { return DlColor::toOpacity(GetAlpha()); }
 

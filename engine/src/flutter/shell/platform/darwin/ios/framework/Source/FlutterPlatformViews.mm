@@ -792,3 +792,6 @@ static BOOL _preparedOnce = NO;
   return YES;
 }
 @end
+
+@implementation PendingRRectClip
+@end

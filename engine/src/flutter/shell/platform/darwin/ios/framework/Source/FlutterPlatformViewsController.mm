@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #import "shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
+#include "impeller/geometry/rounding_radii.h"
+#include "display_list/geometry/dl_geometry_types.h"
 
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/display_list/utils/dl_matrix_clip_tracker.h"
@@ -496,6 +498,11 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
   DlMatrix transformMatrix;
   NSMutableArray* blurFilters = [[NSMutableArray alloc] init];
+  // NSMutableArray* pendingClipRects = [[NSMutableArray alloc] init];
+  NSMutableArray<PendingRRectClip*>* pendingClipRRects = [[NSMutableArray alloc] init];
+  // NSMutableArray* pendingClipRSE = [[NSMutableArray alloc] init];
+  // NSMutableArray* pendingClipPaths = [[NSMutableArray alloc] init];
+
   FML_DCHECK(!clipView.maskView ||
              [clipView.maskView isKindOfClass:[FlutterClippingMaskView class]]);
   if (clipView.maskView) {
@@ -505,6 +512,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   CGFloat screenScale = [UIScreen mainScreen].scale;
   auto iter = mutatorsStack.Begin();
   while (iter != mutatorsStack.End()) {
+    FML_LOG(ERROR) << "Encountered type: " << static_cast<int>((*iter)->GetType());
+
     switch ((*iter)->GetType()) {
       case flutter::MutatorType::kTransform: {
         transformMatrix = transformMatrix * (*iter)->GetMatrix();
@@ -582,8 +591,47 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         if (!filter) {
           self.canApplyBlurBackdrop = NO;
         } else {
+          if ([pendingClipRRects count] > 0) {
+            FML_LOG(ERROR) << "Pending clipRRect encountered " << pendingClipRRects[0].topLeftRadius << [pendingClipRRects count];
+            // TODO: Technically we should be using the largest corner radius, but currently
+            // we're not handling overlapping clips. We are also ignoring variable radius for each
+            // corner
+            UIVisualEffectView* backdropView = filter.backdropFilterView;
+            backdropView.layer.cornerRadius = pendingClipRRects[0].topLeftRadius;
+            backdropView.clipsToBounds = YES;
+            [pendingClipRRects removeAllObjects];
+          }
+
           [blurFilters addObject:filter];
+          FML_LOG(ERROR) << "Blur filters count " << [blurFilters count];
         }
+        break;
+      }
+      case flutter::MutatorType::kBackdropClipRect: {
+        // The frame already handles cropping into the rect so this can
+        // no-op
+        break;
+      }
+      case flutter::MutatorType::kBackdropClipRRect: {
+        PendingRRectClip* clip = [[PendingRRectClip alloc] init];
+        DlRoundRect rrect = (*iter)->GetBackdropClipRRect().rrect;
+
+        clip.rect = boundingRect;
+        impeller::RoundingRadii radii = rrect.GetRadii();
+        clip.topLeftRadius = radii.top_left.width;
+        clip.topRightRadius = radii.top_right.width;
+        clip.bottomLeftRadius = radii.bottom_left.width;
+        clip.bottomRightRadius = radii.bottom_right.width;
+        [pendingClipRRects addObject:clip];
+
+        FML_LOG(ERROR) << "Added clipRRect" << rrect.IsRect();
+      }
+      case flutter::MutatorType::kBackdropClipRse: {
+        // TODO: Pending Implementation
+        break;
+      }
+      case flutter::MutatorType::kBackdropClipPath: {
+        // TODO: Pending Implementation
         break;
       }
     }
@@ -949,6 +997,38 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
 - (void)pushVisitedPlatformViewId:(int64_t)viewId {
   self.visitedPlatformViews.push_back(viewId);
+}
+
+- (void)pushClipRectToVisitedPlatformViews:(const flutter::DlRect&)clipRect {
+  for (int64_t id : self.visitedPlatformViews) {
+    flutter::EmbeddedViewParams params = self.currentCompositionParams[id];
+    params.PushPlatformViewClipRect(clipRect);
+    self.currentCompositionParams[id] = params;
+  }
+}
+
+- (void)pushClipRRectToVisitedPlatformViews:(const flutter::DlRoundRect&)clipRRect {
+  for (int64_t id : self.visitedPlatformViews) {
+    flutter::EmbeddedViewParams params = self.currentCompositionParams[id];
+    params.PushPlatformViewClipRRect(clipRRect);
+    self.currentCompositionParams[id] = params;
+  }
+}
+
+- (void)pushClipRSEToVisitedPlatformViews:(const flutter::DlRoundSuperellipse&)clipRse {
+  for (int64_t id : self.visitedPlatformViews) {
+    flutter::EmbeddedViewParams params = self.currentCompositionParams[id];
+    params.PushPlatformViewClipRSE(clipRse);
+    self.currentCompositionParams[id] = params;
+  }
+}
+
+- (void)pushClipPathToVisitedPlatformViews:(const flutter::DlPath&)clipPath {
+  for (int64_t id : self.visitedPlatformViews) {
+    flutter::EmbeddedViewParams params = self.currentCompositionParams[id];
+    params.PushPlatformViewClipPath(clipPath);
+    self.currentCompositionParams[id] = params;
+  }
 }
 
 - (const flutter::EmbeddedViewParams&)compositionParamsForView:(int64_t)viewId {
