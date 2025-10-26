@@ -118,12 +118,12 @@ NS_ASSUME_NONNULL_BEGIN
 /// view
 - (void)pushClipRectToVisitedPlatformViews:(const flutter::DlRect&)clipRect;
 
-/// @brief Pushes the outstanding rounded rectangular clips to the mutator stack of each visited platform
-/// view
+/// @brief Pushes the outstanding rounded rectangular clips to the mutator stack of each visited
+/// platform view
 - (void)pushClipRRectToVisitedPlatformViews:(const flutter::DlRoundRect&)clipRRect;
 
-/// @brief Pushes the outstanding round super elliptical clips to the mutator stack of each visited platform
-/// view
+/// @brief Pushes the outstanding round super elliptical clips to the mutator stack of each visited
+/// platform view
 - (void)pushClipRSEToVisitedPlatformViews:(const flutter::DlRoundSuperellipse&)clipRse;
 
 /// @brief Pushes the outstanding path clips to the mutator stack of each visited platform

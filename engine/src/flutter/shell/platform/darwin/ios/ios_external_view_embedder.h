@@ -75,10 +75,12 @@ class IOSExternalViewEmbedder : public ExternalViewEmbedder {
   void PushClipRectToVisitedPlatformViews(const DlRect& clip_rect) override;
 
   // |ExternalViewEmbedder|
-  void PushClipRRectToVisitedPlatformViews(const DlRoundRect& clip_rrect) override;
+  void PushClipRRectToVisitedPlatformViews(
+      const DlRoundRect& clip_rrect) override;
 
   // |ExternalViewEmbedder|
-  void PushClipRSEToVisitedPlatformViews(const DlRoundSuperellipse& clip_rse) override;
+  void PushClipRSEToVisitedPlatformViews(
+      const DlRoundSuperellipse& clip_rse) override;
 
   // |ExternalViewEmbedder|
   void PushClipPathToVisitedPlatformViews(const DlPath& clip_path) override;

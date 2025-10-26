@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 #import "shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
-#include "impeller/geometry/rounding_radii.h"
 #include "display_list/geometry/dl_geometry_types.h"
+#include "impeller/geometry/rounding_radii.h"
 
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/display_list/utils/dl_matrix_clip_tracker.h"
@@ -585,25 +585,26 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         CGFloat blurRadius = (*iter)->GetFilterMutation().GetFilter().asBlur()->sigma_x();
         UIVisualEffectView* visualEffectView = [[UIVisualEffectView alloc]
             initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
+
+        // TODO: Technically we should be using the largest corner radius, but currently
+        // we're not handling overlapping clips. We are also ignoring variable radius for each
+        // corner
+        CGFloat cornerRadius = 0.0;
+        if ([pendingClipRRects count] > 0) {
+          cornerRadius = pendingClipRRects[0].topLeftRadius;
+          [pendingClipRRects removeAllObjects];
+        }
+        visualEffectView.layer.cornerRadius = cornerRadius;
+        visualEffectView.clipsToBounds = YES;
+
         PlatformViewFilter* filter = [[PlatformViewFilter alloc] initWithFrame:frameInClipView
                                                                     blurRadius:blurRadius
+                                                                  cornerRadius:cornerRadius
                                                               visualEffectView:visualEffectView];
         if (!filter) {
           self.canApplyBlurBackdrop = NO;
         } else {
-          if ([pendingClipRRects count] > 0) {
-            FML_LOG(ERROR) << "Pending clipRRect encountered " << pendingClipRRects[0].topLeftRadius << [pendingClipRRects count];
-            // TODO: Technically we should be using the largest corner radius, but currently
-            // we're not handling overlapping clips. We are also ignoring variable radius for each
-            // corner
-            UIVisualEffectView* backdropView = filter.backdropFilterView;
-            backdropView.layer.cornerRadius = pendingClipRRects[0].topLeftRadius;
-            backdropView.clipsToBounds = YES;
-            [pendingClipRRects removeAllObjects];
-          }
-
           [blurFilters addObject:filter];
-          FML_LOG(ERROR) << "Blur filters count " << [blurFilters count];
         }
         break;
       }
