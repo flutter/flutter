@@ -1390,7 +1390,8 @@ class EditableText extends StatefulWidget {
 
   /// {@template flutter.widgets.editableText.onChanged}
   /// Called when the user initiates a change to the TextField's
-  /// value: when they have inserted or deleted text.
+  /// value: when they have inserted or deleted text, or when they have
+  /// committed text that was being composed.
   ///
   /// This callback doesn't run when the TextField's text is changed
   /// programmatically, via the TextField's [controller]. Typically it
@@ -4530,7 +4531,7 @@ class EditableTextState extends State<EditableText>
       _bringIntoViewBySelectionState(oldTextSelection, value.selection, cause);
     }
     final String currentText = _value.text;
-    if (oldValue.text != currentText) {
+    if (oldValue.text != currentText || textCommitted) {
       try {
         widget.onChanged?.call(currentText);
       } catch (exception, stack) {

@@ -5287,7 +5287,9 @@ void main() {
     expect(render.text!.style!.fontStyle, FontStyle.italic);
   });
 
-  testWidgets('onChanged callback only invoked on text changes', (WidgetTester tester) async {
+  testWidgets('onChanged is not called when formatter prevents text change', (
+    WidgetTester tester,
+  ) async {
     // Regression test for https://github.com/flutter/flutter/issues/111651 .
     int onChangedCount = 0;
     bool preventInput = false;
@@ -5320,15 +5322,75 @@ void main() {
     );
     expect(onChangedCount, 1);
 
-    state.updateEditingValue(const TextEditingValue(text: 'a'));
+    state.updateEditingValue(
+      const TextEditingValue(text: 'a', composing: TextRange(start: 0, end: 1)),
+    );
     expect(onChangedCount, 1);
 
-    state.updateEditingValue(const TextEditingValue(text: 'ab'));
+    state.updateEditingValue(const TextEditingValue(text: 'a'));
     expect(onChangedCount, 2);
+
+    state.updateEditingValue(const TextEditingValue(text: 'ab'));
+    expect(onChangedCount, 3);
 
     preventInput = true;
     state.updateEditingValue(const TextEditingValue(text: 'abc'));
+    expect(onChangedCount, 3);
+  });
+
+  testWidgets('onChanged is called when composing text is committed', (WidgetTester tester) async {
+    // Test for https://github.com/flutter/flutter/issues/174159
+    int onChangedCount = 0;
+    String? lastChangedValue;
+
+    final Widget widget = MediaQuery(
+      data: const MediaQueryData(),
+      child: EditableText(
+        controller: controller,
+        backgroundCursorColor: Colors.red,
+        cursorColor: Colors.red,
+        focusNode: focusNode,
+        style: textStyle,
+        onChanged: (String newString) {
+          onChangedCount += 1;
+          lastChangedValue = newString;
+        },
+        textDirection: TextDirection.ltr,
+      ),
+    );
+    await tester.pumpWidget(widget);
+    final EditableTextState state = tester.firstState(find.byType(EditableText));
+
+    state.updateEditingValue(
+      const TextEditingValue(
+        text: 'てきすと',
+        composing: TextRange(start: 0, end: 4),
+        selection: TextSelection.collapsed(offset: 4),
+      ),
+    );
+    expect(onChangedCount, 1);
+    expect(lastChangedValue, 'てきすと');
+
+    state.updateEditingValue(
+      const TextEditingValue(
+        text: 'テキスト',
+        composing: TextRange(start: 0, end: 4),
+        selection: TextSelection.collapsed(offset: 4),
+      ),
+    );
     expect(onChangedCount, 2);
+    expect(lastChangedValue, 'テキスト');
+
+    state.updateEditingValue(
+      const TextEditingValue(text: 'テキスト', selection: TextSelection.collapsed(offset: 4)),
+    );
+    expect(onChangedCount, 3);
+    expect(lastChangedValue, 'テキスト');
+
+    state.updateEditingValue(
+      const TextEditingValue(text: 'テキスト', selection: TextSelection.collapsed(offset: 2)),
+    );
+    expect(onChangedCount, 3);
   });
 
   testWidgets('Formatters are skipped if text has not changed', (WidgetTester tester) async {
