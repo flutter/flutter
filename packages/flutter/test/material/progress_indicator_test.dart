@@ -1969,6 +1969,15 @@ void main() {
       paints..arc(startAngle: 1.5707963267948966, sweepAngle: 0.001),
     );
   });
+
+  testWidgets('CircularProgressIndicator does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: CircularProgressIndicator())),
+      ),
+    );
+    expect(tester.getSize(find.byType(CircularProgressIndicator)), Size.zero);
+  });
 }
 
 class _RefreshProgressIndicatorGolden extends StatefulWidget {
