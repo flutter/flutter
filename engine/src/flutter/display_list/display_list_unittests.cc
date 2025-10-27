@@ -5522,7 +5522,7 @@ TEST_F(DisplayListTest, BoundedRenderOpsDoNotReportUnbounded) {
     ASSERT_LT(blob->bounds().width(), draw_rect.GetWidth());
     ASSERT_LT(blob->bounds().height(), draw_rect.GetHeight());
 
-    auto text = DlTextImpeller::MakeFromBlob(blob);
+    auto text = DlTextImpeller::MakeFromBlob(blob, std::nullopt);
 
     // Draw once at upper left and again at lower right to fill the bounds.
     builder.DrawText(text, draw_rect.GetLeft() - blob->bounds().left(),

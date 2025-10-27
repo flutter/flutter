@@ -3873,7 +3873,7 @@ TEST_F(DisplayListRendering, DrawTextBlob) {
       CanvasCompareTester::MakeTextBlob("Testing", kRenderHeight * 0.33f);
   std::shared_ptr<DlText> skiaText = DlTextSkia::Make(blob);
 #ifdef IMPELLER_SUPPORTS_RENDERING
-  auto frame = impeller::MakeTextFrameFromTextBlobSkia(blob);
+  auto frame = impeller::MakeTextFrameFromTextBlobSkia(blob, std::nullopt);
   std::shared_ptr<DlText> impellerText = DlTextImpeller::Make(frame);
 #endif  // IMPELLER_SUPPORTS_RENDERING
   DlScalar render_y_1_3 = kRenderTop + kRenderHeight * 0.3;

@@ -22,6 +22,32 @@
 
 namespace impeller {
 
+namespace {
+SkPaint::Cap ToSkiaCap(Cap cap) {
+  switch (cap) {
+    case Cap::kButt:
+      return SkPaint::Cap::kButt_Cap;
+    case Cap::kRound:
+      return SkPaint::Cap::kRound_Cap;
+    case Cap::kSquare:
+      return SkPaint::Cap::kSquare_Cap;
+  }
+  FML_UNREACHABLE();
+}
+
+SkPaint::Join ToSkiaJoin(Join join) {
+  switch (join) {
+    case Join::kMiter:
+      return SkPaint::Join::kMiter_Join;
+    case Join::kRound:
+      return SkPaint::Join::kRound_Join;
+    case Join::kBevel:
+      return SkPaint::Join::kBevel_Join;
+  }
+  FML_UNREACHABLE();
+}
+}  // namespace
+
 static Font ToFont(const SkTextBlobRunIterator& run, AxisAlignment alignment) {
   auto& font = run.font();
   auto typeface = std::make_shared<TypefaceSkia>(font.refTypeface());
@@ -43,9 +69,19 @@ static Rect ToRect(const SkRect& rect) {
 }
 
 std::shared_ptr<TextFrame> MakeTextFrameFromTextBlobSkia(
-    const sk_sp<SkTextBlob>& blob) {
+    const sk_sp<SkTextBlob>& blob,
+    const std::optional<StrokeParameters> strokeParameters) {
   bool has_color = false;
   std::vector<TextRun> runs;
+  SkPaint stroke_paint;
+  if (strokeParameters) {
+    stroke_paint.setStroke(true);
+    stroke_paint.setStrokeWidth(strokeParameters->width);
+    stroke_paint.setStrokeCap(ToSkiaCap(strokeParameters->cap));
+    stroke_paint.setStrokeJoin(ToSkiaJoin(strokeParameters->join));
+    stroke_paint.setStrokeMiter(strokeParameters->miter_limit);
+  }
+
   for (SkTextBlobRunIterator run(blob.get()); !run.done(); run.next()) {
     SkStrikeSpec strikeSpec = SkStrikeSpec::MakeWithNoDevice(run.font());
     SkBulkGlyphMetricsAndPaths paths{strikeSpec};
@@ -65,17 +101,21 @@ std::shared_ptr<TextFrame> MakeTextFrameFromTextBlobSkia(
       case SkTextBlobRunIterator::kFull_Positioning: {
         std::vector<TextRun::GlyphPosition> positions;
         positions.reserve(run.glyphCount());
+
         for (auto i = 0u; i < run.glyphCount(); i++) {
           // kFull_Positioning has two scalars per glyph.
           const SkPoint* glyph_points = run.points();
           const SkPoint* point = glyph_points + i;
           Glyph::Type type =
               glyphs[i]->isColor() ? Glyph::Type::kBitmap : Glyph::Type::kPath;
+          uint16_t glyphIndex = glyphs[i]->getGlyphID();
+          SkRect scaled_bounds;
+          run.font().getBounds(&glyphIndex, 1, &scaled_bounds, &stroke_paint);
           positions.emplace_back(TextRun::GlyphPosition{
-              Glyph{glyphs[i]->getGlyphID(), type}, Point{
-                                                        point->x(),
-                                                        point->y(),
-                                                    }});
+              Glyph{glyphs[i]->getGlyphID(), type},
+              Point{point->x(), point->y()},
+              ToRect(scaled_bounds),
+          });
         }
         TextRun text_run(ToFont(run, alignment), positions);
         runs.emplace_back(text_run);

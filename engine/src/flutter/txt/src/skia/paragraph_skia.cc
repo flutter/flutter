@@ -68,40 +68,49 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
   void drawTextBlob(const sk_sp<SkTextBlob>& blob,
                     SkScalar x,
                     SkScalar y,
-                    const SkPaintOrID& paint) override {
+                    const SkPaintOrID& paint_variant) override {
     if (!blob) {
       return;
     }
-    size_t paint_id = std::get<PaintID>(paint);
+    size_t paint_id = std::get<PaintID>(paint_variant);
     FML_DCHECK(paint_id < dl_paints_.size());
+
+    const auto& paint = dl_paints_[paint_id];
 
 #ifdef IMPELLER_SUPPORTS_RENDERING
     if (impeller_enabled_) {
       SkTextBlobRunIterator run(blob.get());
-      if (ShouldRenderAsPath(dl_paints_[paint_id])) {
+      impeller::StrokeParameters parameters;
+      parameters.width = paint.getStrokeWidth();
+      // parameters.cap = paint.getStrokeCap();
+      // parameters.join = paint.getStrokeJoin();
+      // parameters.miter_limit = paint.getStrokeMiter();
+      if (ShouldRenderAsPath(paint)) {
         SkPath path = skia::textlayout::Paragraph::GetPath(blob.get());
         // If there is no path, this is an emoji and should be drawn as is,
         // ignoring the color source.
         if (path.isEmpty()) {
-          builder_->DrawText(DlTextImpeller::Make(
-                                 impeller::MakeTextFrameFromTextBlobSkia(blob)),
-                             x, y, dl_paints_[paint_id]);
+          builder_->DrawText(
+              DlTextImpeller::Make(
+                  impeller::MakeTextFrameFromTextBlobSkia(blob, parameters)),
+              x, y, paint);
 
           return;
         }
 
         auto transformed = path.makeTransform(SkMatrix::Translate(
             x + blob->bounds().left(), y + blob->bounds().top()));
-        builder_->DrawPath(DlPath(transformed), dl_paints_[paint_id]);
+        builder_->DrawPath(DlPath(transformed), paint);
         return;
       }
       builder_->DrawText(
-          DlTextImpeller::Make(impeller::MakeTextFrameFromTextBlobSkia(blob)),
-          x, y, dl_paints_[paint_id]);
+          DlTextImpeller::Make(
+              impeller::MakeTextFrameFromTextBlobSkia(blob, parameters)),
+          x, y, paint);
       return;
     }
 #endif  // IMPELLER_SUPPORTS_RENDERING
-    builder_->DrawText(DlTextSkia::Make(blob), x, y, dl_paints_[paint_id]);
+    builder_->DrawText(DlTextSkia::Make(blob), x, y, paint);
   }
 
   void drawTextShadow(const sk_sp<SkTextBlob>& blob,
@@ -121,8 +130,8 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
     std::shared_ptr<DlText> text;
 #if IMPELLER_SUPPORTS_RENDERING
     if (impeller_enabled_) {
-      text =
-          DlTextImpeller::Make(impeller::MakeTextFrameFromTextBlobSkia(blob));
+      text = DlTextImpeller::Make(
+          impeller::MakeTextFrameFromTextBlobSkia(blob, std::nullopt));
     } else {
       text = DlTextSkia::Make(blob);
     }

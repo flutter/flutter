@@ -64,7 +64,7 @@ TEST_P(TypographerTest, CanConvertTextBlob) {
   auto blob = SkTextBlob::MakeFromString(
       "the quick brown fox jumped over the lazy dog.", font);
   ASSERT_TRUE(blob);
-  auto frame = MakeTextFrameFromTextBlobSkia(blob);
+  auto frame = MakeTextFrameFromTextBlobSkia(blob, std::nullopt);
   ASSERT_EQ(frame->GetRunCount(), 1u);
   for (const auto& run : frame->GetRuns()) {
     ASSERT_TRUE(run.IsValid());
@@ -88,10 +88,10 @@ TEST_P(TypographerTest, CanCreateGlyphAtlas) {
   SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
   auto blob = SkTextBlob::MakeFromString("hello", sk_font);
   ASSERT_TRUE(blob);
-  auto atlas =
-      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
-                       GlyphAtlas::Type::kAlphaBitmap, Rational(1),
-                       atlas_context, MakeTextFrameFromTextBlobSkia(blob));
+  auto atlas = CreateGlyphAtlas(
+      *GetContext(), context.get(), *data_host_buffer,
+      GlyphAtlas::Type::kAlphaBitmap, Rational(1), atlas_context,
+      MakeTextFrameFromTextBlobSkia(blob, std::nullopt));
 
   ASSERT_NE(atlas, nullptr);
   ASSERT_NE(atlas->GetTexture(), nullptr);
@@ -133,7 +133,7 @@ TEST_P(TypographerTest, LazyAtlasTracksColor) {
 
   auto blob = SkTextBlob::MakeFromString("hello", sk_font);
   ASSERT_TRUE(blob);
-  auto frame = MakeTextFrameFromTextBlobSkia(blob);
+  auto frame = MakeTextFrameFromTextBlobSkia(blob, std::nullopt);
 
   ASSERT_FALSE(frame->GetAtlasType() == GlyphAtlas::Type::kColorBitmap);
 
@@ -142,7 +142,7 @@ TEST_P(TypographerTest, LazyAtlasTracksColor) {
   lazy_atlas.AddTextFrame(frame, Rational(1), {0, 0}, Matrix(), {});
 
   frame = MakeTextFrameFromTextBlobSkia(
-      SkTextBlob::MakeFromString("😀 ", emoji_font));
+      SkTextBlob::MakeFromString("😀 ", emoji_font), std::nullopt);
 
   ASSERT_TRUE(frame->GetAtlasType() == GlyphAtlas::Type::kColorBitmap);
 
@@ -169,10 +169,10 @@ TEST_P(TypographerTest, GlyphAtlasWithOddUniqueGlyphSize) {
   SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
   auto blob = SkTextBlob::MakeFromString("AGH", sk_font);
   ASSERT_TRUE(blob);
-  auto atlas =
-      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
-                       GlyphAtlas::Type::kAlphaBitmap, Rational(1),
-                       atlas_context, MakeTextFrameFromTextBlobSkia(blob));
+  auto atlas = CreateGlyphAtlas(
+      *GetContext(), context.get(), *data_host_buffer,
+      GlyphAtlas::Type::kAlphaBitmap, Rational(1), atlas_context,
+      MakeTextFrameFromTextBlobSkia(blob, std::nullopt));
   ASSERT_NE(atlas, nullptr);
   ASSERT_NE(atlas->GetTexture(), nullptr);
 
@@ -191,20 +191,20 @@ TEST_P(TypographerTest, GlyphAtlasIsRecycledIfUnchanged) {
   SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
   auto blob = SkTextBlob::MakeFromString("spooky skellingtons", sk_font);
   ASSERT_TRUE(blob);
-  auto atlas =
-      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
-                       GlyphAtlas::Type::kAlphaBitmap, Rational(1),
-                       atlas_context, MakeTextFrameFromTextBlobSkia(blob));
+  auto atlas = CreateGlyphAtlas(
+      *GetContext(), context.get(), *data_host_buffer,
+      GlyphAtlas::Type::kAlphaBitmap, Rational(1), atlas_context,
+      MakeTextFrameFromTextBlobSkia(blob, std::nullopt));
   ASSERT_NE(atlas, nullptr);
   ASSERT_NE(atlas->GetTexture(), nullptr);
   ASSERT_EQ(atlas, atlas_context->GetGlyphAtlas());
 
   // now attempt to re-create an atlas with the same text blob.
 
-  auto next_atlas =
-      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
-                       GlyphAtlas::Type::kAlphaBitmap, Rational(1),
-                       atlas_context, MakeTextFrameFromTextBlobSkia(blob));
+  auto next_atlas = CreateGlyphAtlas(
+      *GetContext(), context.get(), *data_host_buffer,
+      GlyphAtlas::Type::kAlphaBitmap, Rational(1), atlas_context,
+      MakeTextFrameFromTextBlobSkia(blob, std::nullopt));
   ASSERT_EQ(atlas, next_atlas);
   ASSERT_EQ(atlas_context->GetGlyphAtlas(), atlas);
 }
@@ -231,7 +231,7 @@ TEST_P(TypographerTest, GlyphAtlasWithLotsOfdUniqueGlyphSize) {
   size_t size_count = 8;
   std::vector<std::shared_ptr<TextFrame>> frames;
   for (size_t index = 0; index < size_count; index += 1) {
-    frames.push_back(MakeTextFrameFromTextBlobSkia(blob));
+    frames.push_back(MakeTextFrameFromTextBlobSkia(blob, std::nullopt));
     frames.back()->SetPerFrameData(Rational(6 * index, 10), {0, 0}, Matrix(),
                                    {});
   };
@@ -270,10 +270,10 @@ TEST_P(TypographerTest, GlyphAtlasTextureIsRecycledIfUnchanged) {
   SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
   auto blob = SkTextBlob::MakeFromString("spooky 1", sk_font);
   ASSERT_TRUE(blob);
-  auto atlas =
-      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
-                       GlyphAtlas::Type::kAlphaBitmap, Rational(1),
-                       atlas_context, MakeTextFrameFromTextBlobSkia(blob));
+  auto atlas = CreateGlyphAtlas(
+      *GetContext(), context.get(), *data_host_buffer,
+      GlyphAtlas::Type::kAlphaBitmap, Rational(1), atlas_context,
+      MakeTextFrameFromTextBlobSkia(blob, std::nullopt));
   auto old_packer = atlas_context->GetRectPacker();
 
   ASSERT_NE(atlas, nullptr);
@@ -285,10 +285,10 @@ TEST_P(TypographerTest, GlyphAtlasTextureIsRecycledIfUnchanged) {
   // Now create a new glyph atlas with a nearly identical blob.
 
   auto blob2 = SkTextBlob::MakeFromString("spooky 2", sk_font);
-  auto next_atlas =
-      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
-                       GlyphAtlas::Type::kAlphaBitmap, Rational(1),
-                       atlas_context, MakeTextFrameFromTextBlobSkia(blob2));
+  auto next_atlas = CreateGlyphAtlas(
+      *GetContext(), context.get(), *data_host_buffer,
+      GlyphAtlas::Type::kAlphaBitmap, Rational(1), atlas_context,
+      MakeTextFrameFromTextBlobSkia(blob2, std::nullopt));
   ASSERT_EQ(atlas, next_atlas);
   auto* second_texture = next_atlas->GetTexture().get();
 
@@ -318,9 +318,9 @@ TEST_P(TypographerTest, GlyphColorIsPartOfCacheKey) {
   // Create two frames with the same character and a different color, expect
   // that it adds a character.
   auto frame = MakeTextFrameFromTextBlobSkia(
-      SkTextBlob::MakeFromString("😂", emoji_font));
+      SkTextBlob::MakeFromString("😂", emoji_font), std::nullopt);
   auto frame_2 = MakeTextFrameFromTextBlobSkia(
-      SkTextBlob::MakeFromString("😂", emoji_font));
+      SkTextBlob::MakeFromString("😂", emoji_font), std::nullopt);
   std::vector<std::optional<GlyphProperties>> properties = {
       GlyphProperties{.color = Color::Red()},
       GlyphProperties{.color = Color::Blue()},
@@ -349,10 +349,10 @@ TEST_P(TypographerTest, GlyphColorIsIgnoredForNonEmojiFonts) {
 
   // Create two frames with the same character and a different color, but as a
   // non-emoji font the text frame constructor will ignore it.
-  auto frame =
-      MakeTextFrameFromTextBlobSkia(SkTextBlob::MakeFromString("A", sk_font));
-  auto frame_2 =
-      MakeTextFrameFromTextBlobSkia(SkTextBlob::MakeFromString("A", sk_font));
+  auto frame = MakeTextFrameFromTextBlobSkia(
+      SkTextBlob::MakeFromString("A", sk_font), std::nullopt);
+  auto frame_2 = MakeTextFrameFromTextBlobSkia(
+      SkTextBlob::MakeFromString("A", sk_font), std::nullopt);
   std::vector<std::optional<GlyphProperties>> properties = {
       GlyphProperties{},
       GlyphProperties{},
@@ -446,10 +446,10 @@ TEST_P(TypographerTest, GlyphAtlasTextureWillGrowTilMaxTextureSize) {
   SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
   auto blob = SkTextBlob::MakeFromString("A", sk_font);
   ASSERT_TRUE(blob);
-  auto atlas =
-      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
-                       GlyphAtlas::Type::kAlphaBitmap, Rational(1),
-                       atlas_context, MakeTextFrameFromTextBlobSkia(blob));
+  auto atlas = CreateGlyphAtlas(
+      *GetContext(), context.get(), *data_host_buffer,
+      GlyphAtlas::Type::kAlphaBitmap, Rational(1), atlas_context,
+      MakeTextFrameFromTextBlobSkia(blob, std::nullopt));
   // Continually append new glyphs until the glyph size grows to the maximum.
   // Note that the sizes here are more or less experimentally determined, but
   // the important expectation is that the atlas size will shrink again after
@@ -487,10 +487,10 @@ TEST_P(TypographerTest, GlyphAtlasTextureWillGrowTilMaxTextureSize) {
     add_char(sk_font_small, 'B');
     auto blob = builder.make();
 
-    atlas =
-        CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
-                         GlyphAtlas::Type::kAlphaBitmap, Rational(50 + i, 1),
-                         atlas_context, MakeTextFrameFromTextBlobSkia(blob));
+    atlas = CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
+                             GlyphAtlas::Type::kAlphaBitmap,
+                             Rational(50 + i, 1), atlas_context,
+                             MakeTextFrameFromTextBlobSkia(blob, std::nullopt));
     ASSERT_TRUE(!!atlas);
     EXPECT_EQ(atlas->GetTexture()->GetTextureDescriptor().size,
               expected_sizes[i]);
@@ -507,7 +507,7 @@ TEST_P(TypographerTest, TextFrameInitialBoundsArePlaceholder) {
   auto blob = SkTextBlob::MakeFromString(
       "the quick brown fox jumped over the lazy dog.", font);
   ASSERT_TRUE(blob);
-  auto frame = MakeTextFrameFromTextBlobSkia(blob);
+  auto frame = MakeTextFrameFromTextBlobSkia(blob, std::nullopt);
 
   EXPECT_FALSE(frame->IsFrameComplete());
 
@@ -541,7 +541,7 @@ TEST_P(TypographerTest, TextFrameInvalidationWithScale) {
   auto blob = SkTextBlob::MakeFromString(
       "the quick brown fox jumped over the lazy dog.", font);
   ASSERT_TRUE(blob);
-  auto frame = MakeTextFrameFromTextBlobSkia(blob);
+  auto frame = MakeTextFrameFromTextBlobSkia(blob, std::nullopt);
 
   EXPECT_FALSE(frame->IsFrameComplete());
 
@@ -577,7 +577,7 @@ TEST_P(TypographerTest, TextFrameAtlasGenerationTracksState) {
   auto blob = SkTextBlob::MakeFromString(
       "the quick brown fox jumped over the lazy dog.", font);
   ASSERT_TRUE(blob);
-  auto frame = MakeTextFrameFromTextBlobSkia(blob);
+  auto frame = MakeTextFrameFromTextBlobSkia(blob, std::nullopt);
 
   EXPECT_FALSE(frame->IsFrameComplete());
 
@@ -630,7 +630,7 @@ TEST_P(TypographerTest, InvalidAtlasForcesRepopulation) {
   auto blob = SkTextBlob::MakeFromString(
       "the quick brown fox jumped over the lazy dog.", font);
   ASSERT_TRUE(blob);
-  auto frame = MakeTextFrameFromTextBlobSkia(blob);
+  auto frame = MakeTextFrameFromTextBlobSkia(blob, std::nullopt);
 
   EXPECT_FALSE(frame->IsFrameComplete());
 

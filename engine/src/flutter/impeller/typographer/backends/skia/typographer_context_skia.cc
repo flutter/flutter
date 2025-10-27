@@ -394,30 +394,6 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
   return blit_pass->ConvertTextureToShaderRead(texture);
 }
 
-static Rect ComputeGlyphSize(const SkFont& font,
-                             const SubpixelGlyph& glyph,
-                             Scalar scale) {
-  SkRect scaled_bounds;
-  SkPaint glyph_paint;
-  if (glyph.properties.has_value() && glyph.properties->stroke) {
-    glyph_paint.setStroke(true);
-    glyph_paint.setStrokeWidth(glyph.properties->stroke->width * scale);
-    glyph_paint.setStrokeCap(ToSkiaCap(glyph.properties->stroke->cap));
-    glyph_paint.setStrokeJoin(ToSkiaJoin(glyph.properties->stroke->join));
-    glyph_paint.setStrokeMiter(glyph.properties->stroke->miter_limit);
-  }
-  font.getBounds(&glyph.glyph.index, 1, &scaled_bounds, &glyph_paint);
-
-  // Expand the bounds of glyphs at subpixel offsets by 2 in the x direction.
-  Scalar adjustment = 0.0;
-  if (glyph.subpixel_offset != SubpixelPosition::kSubpixel00) {
-    adjustment = 1.0;
-  }
-  return Rect::MakeLTRB(scaled_bounds.fLeft - adjustment, scaled_bounds.fTop,
-                        scaled_bounds.fRight + adjustment,
-                        scaled_bounds.fBottom);
-};
-
 std::pair<std::vector<FontGlyphPair>, std::vector<Rect>>
 TypographerContextSkia::CollectNewGlyphs(
     const std::shared_ptr<GlyphAtlas>& atlas,
@@ -478,8 +454,14 @@ TypographerContextSkia::CollectNewGlyphs(
 
         if (!font_glyph_bounds.has_value()) {
           new_glyphs.push_back(FontGlyphPair{scaled_font, subpixel_glyph});
-          auto glyph_bounds = ComputeGlyphSize(
-              sk_font, subpixel_glyph, static_cast<Scalar>(scaled_font.scale));
+
+          auto glyph_bounds = glyph_position.bounds;
+          // Expand the bounds of glyphs at subpixel offsets by 2 in the x
+          // direction.
+          if (subpixel_glyph.subpixel_offset != SubpixelPosition::kSubpixel00) {
+            glyph_bounds = glyph_bounds.Expand(1.0f, 0.0f, 1.0f, 0.0f);
+          }
+
           glyph_sizes.push_back(glyph_bounds);
 
           auto frame_bounds = FrameBounds{
