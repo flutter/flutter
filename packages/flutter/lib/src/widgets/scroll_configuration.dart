@@ -169,11 +169,9 @@ class ScrollBehavior {
       case TargetPlatform.android:
         print('buildScrollbar called');
         return RawScrollbar(
+          thumbColor: Color(0x00FFFFFF), // Color of the scrollbar thumb
+          interactive: false,
           child: child,
-          // thumbVisibility: true, // Always show the scrollbar thumb
-          thickness: 8.0, // Thickness of the scrollbar
-          radius: Radius.circular(10), // Rounded corners for the scrollbar
-          thumbColor: Color.fromARGB(255, 21, 135, 228), // Color of the scrollbar thumb
         );
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
