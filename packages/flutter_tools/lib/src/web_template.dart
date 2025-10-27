@@ -114,23 +114,30 @@ class WebTemplate {
       newContent = newContent.replaceAll(kStaticAssetsUrlPlaceholder, staticAssetsUrl);
     }
 
+    const serviceWorkerDeprecationNotice =
+        "Flutter's service worker is deprecated and will be removed in a future Flutter release.";
+
     if (serviceWorkerVersion != null) {
       newContent = newContent
           .replaceFirst(
             // Support older `var` syntax as well as new `const` syntax
             RegExp('(const|var) serviceWorkerVersion = null'),
+            '// $serviceWorkerDeprecationNotice\n'
             'const serviceWorkerVersion = "$serviceWorkerVersion"',
           )
           // This is for legacy index.html that still uses the old service
           // worker loading mechanism.
           .replaceFirst(
             "navigator.serviceWorker.register('flutter_service_worker.js')",
-            "navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion')",
+            '// $serviceWorkerDeprecationNotice\n'
+                "navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion')",
           );
     }
     newContent = newContent.replaceAll(
       '{{flutter_service_worker_version}}',
-      serviceWorkerVersion != null ? '"$serviceWorkerVersion"' : 'null',
+      serviceWorkerVersion != null
+          ? '"$serviceWorkerVersion" /* $serviceWorkerDeprecationNotice */'
+          : 'null /* $serviceWorkerDeprecationNotice */',
     );
     if (buildConfig != null) {
       newContent = newContent.replaceAll('{{flutter_build_config}}', buildConfig);
