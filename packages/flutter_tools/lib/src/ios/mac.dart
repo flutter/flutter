@@ -272,12 +272,9 @@ Future<XcodeBuildResult> buildXcodeProject({
       'file version field before submitting to the App Store.',
     );
   }
-  final XcodeSdk sdk;
-  if (environmentType == EnvironmentType.physical) {
-    sdk = XcodeSdk.IPhoneOS;
-  } else {
-    sdk = XcodeSdk.IPhoneSimulator;
-  }
+  final XcodeSdk sdk = environmentType == EnvironmentType.physical
+      ? XcodeSdk.IPhoneOS
+      : XcodeSdk.IPhoneSimulator;
   final String buildDirectoryPath = getIosBuildDirectory();
   final Directory buildDirectory = globals.fs.directory(buildDirectoryPath);
   final bool incrementalBuild =
@@ -659,8 +656,8 @@ Future<XcodeBuildResult> buildXcodeProject({
 
 /// Check if the Flutter framework's public headers have changed since last built.
 bool publicHeadersChanged({
-  BuildMode? mode,
-  EnvironmentType? environmentType,
+  required BuildMode mode,
+  required EnvironmentType environmentType,
   required String buildDirectory,
   required Artifacts? artifacts,
   required FileSystem fileSystem,

@@ -465,9 +465,8 @@ void main() {
               .childDirectory('Headers')
               .childFile('FlutterPlugin.h')
               .createSync(recursive: true);
-
-          processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
-          processManager.addCommand(
+          processManager.addCommands([
+            FakeCommand(command: _xattrArgs(flutterProject)),
             const FakeCommand(
               command: <String>[
                 'xcrun',
@@ -498,8 +497,6 @@ void main() {
                 'COMPILER_INDEX_STORE_ENABLE=NO',
               ],
             ),
-          );
-          processManager.addCommand(
             const FakeCommand(
               command: <String>[
                 'rsync',
@@ -510,8 +507,6 @@ void main() {
                 'build/ios/iphoneos',
               ],
             ),
-          );
-          processManager.addCommand(
             FakeCommand(
               command: <String>[
                 iosDeployPath,
@@ -527,8 +522,7 @@ void main() {
                 const <String>['--enable-dart-profiling'].join(' '),
               ],
             ),
-          );
-
+          ]);
           final LaunchResult launchResult = await iosDevice.startApp(
             buildableIOSApp,
             debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
@@ -578,9 +572,8 @@ void main() {
               .childDirectory('Headers')
               .childFile('FlutterPlugin.h')
               .createSync(recursive: true);
-
-          processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
-          processManager.addCommand(
+          processManager.addCommands([
+            FakeCommand(command: _xattrArgs(flutterProject)),
             const FakeCommand(
               command: <String>[
                 'xcrun',
@@ -609,7 +602,7 @@ void main() {
                 'COMPILER_INDEX_STORE_ENABLE=NO',
               ],
             ),
-          );
+          ]);
 
           await iosDevice.startApp(
             buildableIOSApp,
