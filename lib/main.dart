@@ -1,4 +1,3 @@
-...
 import 'theme.dart';
 ...
 theme: ThemeData(
@@ -17,11 +16,11 @@ theme: ThemeData(
        //
        // This works for code too, not just values: Most code changes can be
        // tested with just a hot reload.
-       colorScheme: MaterialTheme.black(),
+       colorScheme: MaterialTheme.greenScheme(),
        useMaterial3: true,
      ),
      darkTheme: ThemeData(
        colorScheme: MaterialTheme.darkScheme(),
        useMaterial3: true,
      ),
-...
+     ...
