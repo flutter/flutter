@@ -13,6 +13,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/template.dart';
+import '../base/utils.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../macos/xcode.dart';
@@ -740,8 +741,7 @@ class IOSCoreDeviceControl {
       coreDeviceLogForwarder.launchProcess = launchProcess;
 
       final StreamSubscription<String> stdoutSubscription = launchProcess.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
+          .transform(utf8LineDecoder)
           .listen((String line) {
             if (launchCompleter.isCompleted && !_ignoreLog(line)) {
               coreDeviceLogForwarder.addLog(line);
@@ -755,8 +755,7 @@ class IOSCoreDeviceControl {
           });
 
       final StreamSubscription<String> stderrSubscription = launchProcess.stderr
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
+          .transform(utf8LineDecoder)
           .listen((String line) {
             if (launchCompleter.isCompleted && !_ignoreLog(line)) {
               coreDeviceLogForwarder.addLog(line);
