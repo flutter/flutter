@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -19,6 +21,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/package_config.dart';
 
 const xcodebuild = '/usr/bin/xcodebuild';
 
@@ -1128,16 +1131,81 @@ Information about project "Runner":
         );
       });
 
+      void createFakePlugins(
+        FlutterProject flutterProject,
+        FileSystem fileSystem,
+        List<String> pluginNames,
+      ) {
+        const pluginYamlTemplate = '''
+  flutter:
+    plugin:
+      platforms:
+        ios:
+          pluginClass: PLUGIN_CLASS
+        macos:
+          pluginClass: PLUGIN_CLASS
+  ''';
+
+        final Directory fakePubCache = fileSystem.systemTempDirectory.childDirectory(
+          'fake_pub_cache',
+        );
+
+        writePackageConfigFiles(
+          directory: flutterProject.directory,
+          mainLibName: 'my_app',
+          packages: <String, String>{
+            for (final String name in pluginNames) name: fakePubCache.childDirectory(name).path,
+          },
+        );
+
+        for (final name in pluginNames) {
+          final Directory pluginDirectory = fakePubCache.childDirectory(name);
+          pluginDirectory.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync(pluginYamlTemplate.replaceAll('PLUGIN_CLASS', name));
+        }
+
+        final File graph = flutterProject.dartTool.childFile('package_graph.json')
+          ..createSync(recursive: true);
+
+        final packages = <Map<String, Object>>[
+          <String, Object>{
+            'name': 'my_app',
+            'dependencies': pluginNames,
+            'devDependencies': <String>[],
+          },
+          for (final String name in pluginNames)
+            <String, Object>{
+              'name': name,
+              'dependencies': <String>[],
+              'devDependencies': <String>[],
+            },
+        ];
+
+        graph.writeAsStringSync(
+          jsonEncode(<String, Object>{'configVersion': 1, 'packages': packages}),
+        );
+      }
+
       testUsingContext(
-        'throws ToolExit when a plugin excludes arm64 on Xcode 26+',
+        'prints Warning when a plugin excludes arm64 on Xcode 26+',
         () async {
           const BuildInfo buildInfo = BuildInfo.debug;
-          final FlutterProject project = FlutterProject.fromDirectoryTest(
-            fs.directory('path/to/project'),
-          );
+
+          final Directory projectDir = fs.directory('path/to/project')..createSync(recursive: true);
+          projectDir.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('name: my_app\n');
+
+          final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir);
+
           final Directory podXcodeProject =
               project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
                 ..createSync(recursive: true);
+          project.ios.podManifestLock.createSync(recursive: true);
+
+          createFakePlugins(project, fs, <String>['bad_plugin', 'good_plugin']);
+
           final String buildDirectory = fs.path.absolute('build', 'ios');
 
           fakeProcessManager.addCommands(<FakeCommand>[
@@ -1168,13 +1236,15 @@ Build settings for action build and target good_plugin:
             ),
           ]);
 
-          await expectLater(
-            () => updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo),
-            throwsToolExit(
-              message:
-                  'The plugin bad_plugin is excluding the arm64 architecture, which is a requirement for Xcode 26. Please file an issue with the plugin to support arm64.',
+          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+
+          expect(
+            logger.warningText,
+            contains(
+              'The following plugins are excluding the arm64 architecture, which is a requirement for Xcode 26+',
             ),
           );
+          expect(logger.warningText, contains('bad_plugin'));
           expect(fakeProcessManager, hasNoRemainingExpectations);
         },
         overrides: <Type, Generator>{
@@ -1184,18 +1254,26 @@ Build settings for action build and target good_plugin:
           ProcessManager: () => fakeProcessManager,
           XcodeProjectInterpreter: () => xcodeProjectInterpreter,
           Xcode: () => xcode,
+          Logger: () => logger,
         },
       );
       testUsingContext(
         'succeeds when no plugins exclude arm64 on Xcode 26+',
         () async {
           const BuildInfo buildInfo = BuildInfo.debug;
-          final FlutterProject project = FlutterProject.fromDirectoryTest(
-            fs.directory('path/to/project'),
-          );
+
+          final Directory projectDir = fs.directory('path/to/project')..createSync(recursive: true);
+          projectDir.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('name: my_app\n');
+
+          final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir);
+
           final Directory podXcodeProject =
               project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
                 ..createSync(recursive: true);
+          project.ios.podManifestLock.createSync(recursive: true);
+          createFakePlugins(project, fs, <String>['good_plugin']);
           final String buildDirectory = fs.path.absolute('build', 'ios');
 
           fakeProcessManager.addCommands(<FakeCommand>[

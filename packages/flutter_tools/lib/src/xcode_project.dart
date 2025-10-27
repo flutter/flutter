@@ -5,7 +5,6 @@
 /// @docImport 'ios/mac.dart';
 library;
 
-import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -26,6 +25,7 @@ import 'ios/xcodeproj.dart';
 import 'macos/swift_package_manager.dart';
 import 'macos/xcode.dart';
 import 'platform_plugins.dart';
+import 'plugins.dart';
 import 'project.dart';
 import 'template.dart';
 
@@ -497,40 +497,49 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       return;
     }
 
-    final offendingPlugins = <String>[];
-    final targetRegex = RegExp(r'Build settings for action build and target ([^:]+):');
-    final excludedArchRegex = RegExp(r'EXCLUDED_ARCHS\s*=\s*.*\barm64\b');
+    final List<Plugin> allPlugins = await findPlugins(parent);
+    final iosPluginTargetNames = <String>{
+      for (final Plugin p in allPlugins)
+        if (p.platforms.containsKey(IOSPlugin.kConfigKey)) p.name,
+    };
 
-    final List<String> targetSections = buildSettings.split(RegExp(r'\n\s*\n'));
+    final targetHeader = RegExp(
+      r'^Build settings for action build and target "?([^":\r\n]+)"?:\s*$',
+    );
+    final excludedLine = RegExp(r'^\s*EXCLUDED_ARCHS(?:\[.*\])?\s*=\s*(.+)$');
 
-    for (final section in targetSections) {
-      if (section.trim().isEmpty) {
+    final pluginsExcludingArmArch = <String>[];
+    String? currentTarget;
+
+    for (final String eachLine in buildSettings.split('\n')) {
+      final String settingsLine = eachLine.trimRight();
+
+      final RegExpMatch? headerMatch = targetHeader.firstMatch(settingsLine);
+      if (headerMatch != null) {
+        currentTarget = headerMatch.group(1)!.trim();
         continue;
       }
-      final Match? targetMatch = targetRegex.firstMatch(section);
-      if (targetMatch != null) {
-        final String currentTarget = targetMatch.group(1)!.trim();
-        if (excludedArchRegex.hasMatch(section)) {
-          if (!currentTarget.startsWith('Pods-')) {
-            offendingPlugins.add(currentTarget);
-          }
+
+      final RegExpMatch? excludedMatch = excludedLine.firstMatch(settingsLine);
+      if (excludedMatch != null && currentTarget != null) {
+        if (!iosPluginTargetNames.contains(currentTarget)) {
+          continue;
+        }
+        final String rhs = excludedMatch.group(1)!.replaceAll(';', '').trim();
+        final Set<String> tokens = rhs.split(RegExp(r'\s+')).toSet();
+        if (tokens.contains('arm64')) {
+          pluginsExcludingArmArch.add(currentTarget);
         }
       }
     }
 
-    if (offendingPlugins.isNotEmpty) {
-      if (offendingPlugins.length == 1) {
-        final String name = offendingPlugins.single;
-        throwToolExit(
-          'The plugin $name is excluding the arm64 architecture, which is a requirement for Xcode 26. Please file an issue with the plugin to support arm64.',
-        );
-      }
+    if (pluginsExcludingArmArch.isNotEmpty) {
+      final String list = pluginsExcludingArmArch.map((String n) => '  - $n').join('\n');
 
-      final String list = offendingPlugins.map((String n) => '  - $n').join('\n');
-      throwToolExit(
-        'The following plugins are excluding the arm64 architecture, which is a requirement for Xcode 26:\n'
+      globals.logger.printWarning(
+        'The following plugins are excluding the arm64 architecture, which is a requirement for Xcode 26+:\n'
         '$list\n'
-        'Please file issues with these plugins to support arm64.',
+        'Consider installing the "Universal" Xcode or file an issue with the plugins to support arm64.',
       );
     }
   }
