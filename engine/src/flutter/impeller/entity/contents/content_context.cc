@@ -295,6 +295,7 @@ struct ContentContext::Pipelines {
   Variants<SweepGradientUniformFillPipeline> sweep_gradient_uniform_fill;
   Variants<TextureDownsamplePipeline> texture_downsample;
   Variants<TextureDownsampleSoftwareDecalPipeline> texture_downsample_software_decal;
+  Variants<TextureDownsampleQuadBoundsPipeline> texture_downsample_quad_bounds;
   Variants<TexturePipeline> texture;
   Variants<TextureStrictSrcPipeline> texture_strict_src;
   Variants<TiledTexturePipeline> tiled_texture;
@@ -698,6 +699,8 @@ ContentContext::ContentContext(
     pipelines_->texture_downsample.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil);
     pipelines_->texture_downsample_software_decal.CreateDefault(
+        *context_, options_trianglestrip);
+    pipelines_->texture_downsample_quad_bounds.CreateDefault(
         *context_, options_trianglestrip);
     pipelines_->rrect_blur.CreateDefault(*context_, options_trianglestrip);
     pipelines_->rsuperellipse_blur.CreateDefault(*context_,
@@ -1409,6 +1412,11 @@ PipelineRef ContentContext::GetDownsamplePipeline(
 PipelineRef ContentContext::GetDownsampleSoftwareDecalPipeline(
     ContentContextOptions opts) const {
   return GetPipeline(this, pipelines_->texture_downsample_software_decal, opts);
+}
+
+PipelineRef ContentContext::GetDownsampleQuadBoundsPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->texture_downsample_quad_bounds, opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendColorPipeline(

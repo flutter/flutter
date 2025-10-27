@@ -52,6 +52,7 @@
 #include "impeller/entity/sweep_gradient_ssbo_fill.frag.h"
 #include "impeller/entity/sweep_gradient_uniform_fill.frag.h"
 #include "impeller/entity/texture_downsample.frag.h"
+#include "impeller/entity/texture_downsample_quad_bounds.frag.h"
 #include "impeller/entity/texture_downsample_software_decal.frag.h"
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
@@ -149,6 +150,9 @@ using TextureDownsamplePipeline = RenderPipelineHandle<TextureFillVertexShader, 
 using TextureDownsampleSoftwareDecalPipeline =
     RenderPipelineHandle<TextureFillVertexShader,
                          TextureDownsampleSoftwareDecalFragmentShader>;
+using TextureDownsampleQuadBoundsPipeline =
+    RenderPipelineHandle<TextureFillVertexShader,
+                         TextureDownsampleQuadBoundsFragmentShader>;
 using TexturePipeline = RenderPipelineHandle<TextureFillVertexShader, TextureFillFragmentShader>;
 using TextureStrictSrcPipeline = RenderPipelineHandle<TextureFillVertexShader, TextureFillStrictSrcFragmentShader>;
 using TiledTexturePipeline = RenderPipelineHandle<TextureUvFillVertexShader, TiledTextureFillFragmentShader>;

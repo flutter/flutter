@@ -66,6 +66,7 @@ impeller_shaders("entity_shaders") {
     "shaders/gradients/fast_gradient.frag",
     "shaders/texture_downsample.frag",
     "shaders/texture_downsample_software_decal.frag",
+    "shaders/texture_downsample_quad_bounds.frag",
   ]
 }
 
