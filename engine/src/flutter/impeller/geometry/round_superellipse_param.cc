@@ -147,7 +147,9 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
    *        ←-------- a ---------→
    */
 
-  if (radius <= 0) {
+  if (radius <= kEhCloseEnough) {
+    // Corners with really small radii are treated as sharp corners, since they
+    // might lead to NaNs due to `ratio` being too large.
     return RoundSuperellipseParam::Octant{
         .offset = center,
 
@@ -206,9 +208,11 @@ RoundSuperellipseParam::Quadrant ComputeQuadrant(Point center,
                                                  Size in_radii,
                                                  Size sign) {
   Point corner_vector = corner - center;
-  Size radii = in_radii.Abs();
+  Size radii = {std::min(std::abs(in_radii.width), std::abs(corner_vector.x)),
+                std::min(std::abs(in_radii.height), std::abs(corner_vector.y))};
 
-  // The prefix "norm" is short for "normalized".
+  // The prefix "norm" is short for "normalized", meaning a rounded superellipse
+  // that has a uniform radius. The quadrant is scaled from this normalized one.
   //
   // Be extra careful to avoid NaNs in cases that some coordinates of `in_radii`
   // or `corner_vector` are zero.
