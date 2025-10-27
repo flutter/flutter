@@ -2559,6 +2559,58 @@ void main() {
       );
     },
   );
+
+  testWidgets(
+    'AM/PM buttons have correct selected/checked semantics for platform variant',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/173302
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return TextButton(
+                onPressed: () {
+                  showTimePicker(
+                    context: context,
+                    initialTime: const TimeOfDay(hour: 14, minute: 0),
+                  );
+                },
+                child: const Text('Open Picker'),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Picker'));
+      await tester.pumpAndSettle();
+
+      final Finder pmButtonSemantics = find.ancestor(
+        of: find.widgetWithText(InkWell, 'PM'),
+        matching: find.byWidgetPredicate(
+          (Widget widget) => widget is Semantics && (widget.properties.button ?? false),
+        ),
+      );
+
+      final Finder amButtonSemantics = find.ancestor(
+        of: find.widgetWithText(InkWell, 'AM'),
+        matching: find.byWidgetPredicate(
+          (Widget widget) => widget is Semantics && (widget.properties.button ?? false),
+        ),
+      );
+
+      bool? getPlatformSemanticProperty(Semantics semantics) {
+        return switch (defaultTargetPlatform) {
+          TargetPlatform.iOS => semantics.properties.selected,
+          _ => semantics.properties.checked,
+        };
+      }
+
+      expect(getPlatformSemanticProperty(tester.widget<Semantics>(pmButtonSemantics)), isTrue);
+      expect(getPlatformSemanticProperty(tester.widget<Semantics>(amButtonSemantics)), isFalse);
+    },
+    variant: TargetPlatformVariant.all(),
+  );
 }
 
 final Finder findDialPaint = find.descendant(

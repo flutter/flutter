@@ -6,6 +6,7 @@
 // ignore_for_file: implementation_imports
 
 import 'package:flutter/material.dart';
+import 'dialog_window_content.dart';
 import 'regular_window_content.dart';
 import 'package:flutter/src/widgets/_window.dart';
 
@@ -32,6 +33,11 @@ class WindowContent extends StatelessWidget {
         key: windowKey,
         controller: regular,
         child: MaterialApp(home: RegularWindowContent(window: regular)),
+      ),
+      final DialogWindowController dialog => DialogWindow(
+        key: windowKey,
+        controller: dialog,
+        child: MaterialApp(home: DialogWindowContent(window: dialog)),
       ),
     };
   }

@@ -71,10 +71,17 @@ WidgetPreviewerWidgetScaffolding previewsForCustomMultiPreview() {
     scriptUri: '',
     preview: BrightnessPreview(name: 'MyPreview'),
     previewFunction: () => Text('Foo'),
+    line: -1,
+    column: -1,
   );
+  final controller = FakeWidgetPreviewScaffoldController();
   return WidgetPreviewerWidgetScaffolding(
     child: Column(
-      children: [...previews.map((e) => WidgetPreviewWidget(preview: e))],
+      children: [
+        ...previews.map(
+          (e) => WidgetPreviewWidget(preview: e, controller: controller),
+        ),
+      ],
     ),
   );
 }

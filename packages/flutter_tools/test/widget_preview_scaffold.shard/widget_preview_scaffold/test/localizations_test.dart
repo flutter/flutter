@@ -33,13 +33,13 @@ WidgetPreviewerWidgetScaffolding previewForLocalizations({
   required Key key,
   PreviewLocalizations? previewLocalizationsData,
 }) {
+  final controller = FakeWidgetPreviewScaffoldController();
   return WidgetPreviewerWidgetScaffolding(
     child: WidgetPreviewWidget(
-      preview: WidgetPreview(
-        scriptUri: '',
+      controller: controller,
+      preview: WidgetPreview.test(
         builder: () => Text('Foo', key: key),
         previewData: Preview(localizations: previewLocalizationsData),
-        packageName: '',
       ),
     ),
   );

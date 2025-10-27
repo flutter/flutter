@@ -291,8 +291,8 @@ buildscript {
 
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
-    id "com.android.application" version "8.7.0" apply false
-    id "org.jetbrains.kotlin.android" version "2.1.0" apply false
+    id "com.android.application" version "8.11.1" apply false
+    id "org.jetbrains.kotlin.android" version "2.2.20" apply false
 }
 
 include ":app"
@@ -387,8 +387,8 @@ buildscript {
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "8.7.0" apply false
-    id("org.jetbrains.kotlin.android") version "2.1.0" apply false
+    id("com.android.application") version "8.11.1" apply false
+    id("org.jetbrains.kotlin.android") version "2.2.20" apply false
 }
 
 include(":app")
@@ -399,7 +399,7 @@ distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-8.10.2-all.zip
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.14-all.zip
 ''';
 
 Iterable<Directory> discoverAndroidDirectories(Directory repoRoot) {

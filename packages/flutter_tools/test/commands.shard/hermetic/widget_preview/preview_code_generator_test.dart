@@ -297,18 +297,24 @@ List<_i1.WidgetPreview> previews() => [
       _i2.buildWidgetPreview(
         packageName: 'foo_project',
         scriptUri: 'STRIPPED',
+        line: 4,
+        column: 1,
         previewFunction: () => _i3.preview(),
         transformedPreview: const _i4.Preview().transform(),
       ),
       _i2.buildWidgetPreview(
         packageName: 'foo_project',
         scriptUri: 'STRIPPED',
+        line: 10,
+        column: 1,
         previewFunction: () => _i5.barPreview1(),
         transformedPreview: const _i4.Preview(group: 'group').transform(),
       ),
       _i2.buildWidgetPreview(
         packageName: 'foo_project',
         scriptUri: 'STRIPPED',
+        line: 13,
+        column: 1,
         previewFunction: () => _i5.barPreview2(),
         transformedPreview:
             const _i4.Preview(brightness: _i6.brightnessConstant).transform(),
@@ -316,6 +322,8 @@ List<_i1.WidgetPreview> previews() => [
       _i2.buildWidgetPreview(
         packageName: 'foo_project',
         scriptUri: 'STRIPPED',
+        line: 16,
+        column: 1,
         previewFunction: () => _i5.barPreview3(),
         transformedPreview: const _i4.Preview(
           group: 'group',
@@ -334,12 +342,16 @@ List<_i1.WidgetPreview> previews() => [
       ..._i2.buildMultiWidgetPreview(
         packageName: 'foo_project',
         scriptUri: 'STRIPPED',
+        line: 51,
+        column: 1,
         previewFunction: () => _i11.preview(),
         preview: const _i11.BrightnessPreview(name: 'Foo'),
       ),
       _i2.buildWidgetPreview(
         packageName: 'foo_project',
         scriptUri: 'STRIPPED',
+        line: 52,
+        column: 1,
         previewFunction: () => _i11.preview(),
         transformedPreview:
             const _i11.FixedSizePreview(name: 'Bar').transform(),
@@ -347,6 +359,8 @@ List<_i1.WidgetPreview> previews() => [
       _i2.buildWidgetPreviewError(
         packageName: 'foo_project',
         scriptUri: 'STRIPPED',
+        line: 6,
+        column: 1,
         packageUri: 'package:foo_project/src/error.dart',
         functionName: 'preview',
         dependencyHasErrors: false,
@@ -354,6 +368,8 @@ List<_i1.WidgetPreview> previews() => [
       _i2.buildWidgetPreviewError(
         packageName: 'foo_project',
         scriptUri: 'STRIPPED',
+        line: 6,
+        column: 1,
         packageUri: 'package:foo_project/src/transitive_error.dart',
         functionName: 'preview',
         dependencyHasErrors: true,

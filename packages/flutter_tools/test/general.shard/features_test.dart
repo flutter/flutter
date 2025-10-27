@@ -334,7 +334,7 @@ void main() {
         nativeAssets,
         allOf(<Matcher>[
           _onChannelIs('master', available: true, enabledByDefault: true),
-          _onChannelIs('stable', available: false, enabledByDefault: false),
+          _onChannelIs('stable', available: true, enabledByDefault: true),
           _onChannelIs('beta', available: true, enabledByDefault: true),
         ]),
       );

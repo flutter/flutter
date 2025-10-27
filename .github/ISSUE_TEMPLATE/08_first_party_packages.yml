@@ -42,6 +42,7 @@ body:
         - go_router
         - go_router_builder
         - google_adsense
+        - google_fonts
         - google_identity_services_web
         - google_maps_flutter
         - google_sign_in

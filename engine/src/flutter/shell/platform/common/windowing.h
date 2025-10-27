@@ -8,11 +8,12 @@
 namespace flutter {
 
 // Types of windows.
-// The value must match value from WindowType in the Dart code
-// in packages/flutter/lib/src/widgets/window.dart
 enum class WindowArchetype {
   // Regular top-level window.
   kRegular,
+
+  // Dialog window.
+  kDialog,
 };
 
 }  // namespace flutter

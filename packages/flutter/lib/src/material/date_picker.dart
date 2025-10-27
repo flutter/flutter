@@ -2395,8 +2395,10 @@ class _MonthItemGridDelegate extends SliverGridDelegate {
 
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
-    final double tileWidth =
-        (constraints.crossAxisExtent - 2 * _horizontalPadding) / DateTime.daysPerWeek;
+    final double tileWidth = math.max(
+      (constraints.crossAxisExtent - 2 * _horizontalPadding) / DateTime.daysPerWeek,
+      0.0,
+    );
     return _MonthSliverGridLayout(
       crossAxisCount: DateTime.daysPerWeek + 2,
       dayChildWidth: tileWidth,
@@ -3434,7 +3436,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
     final ThemeData theme = Theme.of(context);
     final bool useMaterial3 = theme.useMaterial3;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final InputDecorationThemeData inputTheme = theme.inputDecorationTheme;
+    final InputDecorationThemeData inputTheme = InputDecorationTheme.of(context);
     final InputBorder inputBorder =
         inputTheme.border ??
         (useMaterial3 ? const OutlineInputBorder() : const UnderlineInputBorder());

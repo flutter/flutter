@@ -670,6 +670,56 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         Pub: ThrowingPub.new,
       },
     );
+
+    testWithoutContext('parses file has been modified error', () async {
+      const buildCommands = <String>['xcrun', 'cc', 'blah'];
+      final buildResult = XcodeBuildResult(
+        success: false,
+        stdout: '',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: buildCommands,
+          appDirectory: '/blah/blah',
+          environmentType: EnvironmentType.physical,
+          buildSettings: buildSettings,
+        ),
+        xcResult: XCResult.test(
+          issues: <XCResultIssue>[
+            XCResultIssue.test(
+              message:
+                  "File 'path/to/Flutter.framework/Headers/FlutterPlugin.h' has been modified since "
+                  "the precompiled header 'path/to/Runner.build/Objects-normal/arm64/Runner-primary-Bridging-header.pch'"
+                  ' was built: size changed (was 18306, now 16886)',
+              subType: 'Error',
+            ),
+            XCResultIssue.test(
+              message:
+                  "File 'path/to/Flutter.framework/Headers/FlutterEngine.h' has been modified since "
+                  "the precompiled header 'path/to/Runner.build/Objects-normal/arm64/Runner-primary-Bridging-header.pch'"
+                  ' was built: size changed (was 18306, now 16886)',
+              subType: 'Error',
+            ),
+          ],
+        ),
+      );
+      final fs = MemoryFileSystem.test();
+      final project = FakeFlutterProject(fileSystem: fs, usesSwiftPackageManager: true);
+      project.ios.podfile.createSync(recursive: true);
+      await diagnoseXcodeBuildFailure(
+        buildResult,
+        logger: logger,
+        analytics: fakeAnalytics,
+        fileSystem: fs,
+        platform: FlutterDarwinPlatform.ios,
+        project: project,
+      );
+      expect(
+        logger.errorText,
+        contains(
+          'A precompiled file has been changed since last built. Please run "flutter clean" to '
+          'clear the cache.',
+        ),
+      );
+    });
   });
 
   group('Upgrades project.pbxproj for old asset usage', () {

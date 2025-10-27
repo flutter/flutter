@@ -289,7 +289,6 @@ group("flutter_platform_dills") {
     ":flutter_dart2js_kernel_sdk_full",
     ":flutter_dart2wasm_kernel_sdk_full",
     ":flutter_dartdevc_kernel_sdk_outline",
-    ":flutter_dartdevc_kernel_sdk_outline",
   ]
 }
 

@@ -9,7 +9,7 @@ import 'basic.dart';
 import 'framework.dart';
 
 /// A widget that describes this app in the operating system.
-class Title extends StatelessWidget {
+class Title extends StatefulWidget {
   /// Creates a widget that describes this app to the Android operating system.
   ///
   /// [title] will default to the empty string if not supplied.
@@ -32,17 +32,39 @@ class Title extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  State<Title> createState() => _TitleState();
+}
+
+class _TitleState extends State<Title> {
+  @override
+  void initState() {
+    super.initState();
+    _updateChrome();
+  }
+
+  @override
+  void didUpdateWidget(covariant Title oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.title != widget.title || oldWidget.color != widget.color) {
+      _updateChrome();
+    }
+  }
+
+  void _updateChrome() {
     SystemChrome.setApplicationSwitcherDescription(
-      ApplicationSwitcherDescription(label: title, primaryColor: color.value),
+      ApplicationSwitcherDescription(label: widget.title, primaryColor: widget.color.value),
     );
-    return child;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('title', title, defaultValue: ''));
-    properties.add(ColorProperty('color', color, defaultValue: null));
+    properties.add(StringProperty('title', widget.title, defaultValue: ''));
+    properties.add(ColorProperty('color', widget.color, defaultValue: null));
   }
 }

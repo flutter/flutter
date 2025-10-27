@@ -95,6 +95,9 @@ class _RadioGroupState<T> extends State<RadioGroup<T>> implements RadioGroupRegi
     const SingleActivator(LogicalKeyboardKey.space): VoidCallbackIntent(_toggleFocusedRadio),
   };
 
+  late final _RadioGroupShortcutManager<T> _radioGroupShortcutManager =
+      _RadioGroupShortcutManager<T>(shortcuts: _radioGroupShortcuts, state: this);
+
   final Set<RadioClient<T>> _radios = <RadioClient<T>>{};
 
   bool _debugHasScheduledSingleSelectionCheck = false;
@@ -124,6 +127,12 @@ class _RadioGroupState<T> extends State<RadioGroup<T>> implements RadioGroupRegi
 
   @override
   T? get groupValue => widget.groupValue;
+
+  @override
+  void dispose() {
+    _radioGroupShortcutManager.dispose();
+    super.dispose();
+  }
 
   @override
   void registerClient(RadioClient<T> radio) {
@@ -170,8 +179,11 @@ class _RadioGroupState<T> extends State<RadioGroup<T>> implements RadioGroupRegi
       return;
     }
     final List<FocusNode> sorted = ReadingOrderTraversalPolicy.sort(
-      _radios.map<FocusNode>((RadioClient<T> radio) => radio.focusNode),
+      _radios
+          .where((RadioClient<T> radio) => radio.enabled)
+          .map<FocusNode>((RadioClient<T> radio) => radio.focusNode),
     ).toList();
+    assert(sorted.isNotEmpty);
     final Iterable<FocusNode> nodesInEffectiveOrder = forward ? sorted : sorted.reversed;
 
     final Iterator<FocusNode> iterator = nodesInEffectiveOrder.iterator;
@@ -200,8 +212,8 @@ class _RadioGroupState<T> extends State<RadioGroup<T>> implements RadioGroupRegi
     return Semantics(
       container: true,
       role: SemanticsRole.radioGroup,
-      child: Shortcuts(
-        shortcuts: _radioGroupShortcuts,
+      child: Shortcuts.manager(
+        manager: _radioGroupShortcutManager,
         child: FocusTraversalGroup(
           policy: _SkipUnselectedRadioPolicy<T>(_radios, widget.groupValue),
           child: _RadioGroupStateScope<T>(
@@ -212,6 +224,26 @@ class _RadioGroupState<T> extends State<RadioGroup<T>> implements RadioGroupRegi
         ),
       ),
     );
+  }
+}
+
+class _RadioGroupShortcutManager<T> extends ShortcutManager {
+  _RadioGroupShortcutManager({required super.shortcuts, required this.state});
+
+  final _RadioGroupState<T> state;
+
+  @override
+  KeyEventResult handleKeypress(BuildContext context, KeyEvent event) {
+    final bool radioHasFocus = state._radios.any(
+      (RadioClient<T> radio) => radio.focusNode.hasFocus,
+    );
+    if (!radioHasFocus) {
+      // Ignore the event if no radio is focused. This prevents this handler
+      // from unintentionally consuming an event meant for a non-radio widget
+      // that currently has focus.
+      return KeyEventResult.ignored;
+    }
+    return super.handleKeypress(context, event);
   }
 }
 
@@ -269,6 +301,12 @@ mixin RadioClient<T> {
   ///
   /// Used by registry to provide additional feature such as keyboard support.
   T get radioValue;
+
+  /// Whether this radio is enabled.
+  ///
+  /// If false, the registry skips this client when handling keyboard
+  /// navigation.
+  bool get enabled;
 
   /// Focus node for this radio.
   ///

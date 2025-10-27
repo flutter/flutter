@@ -6,5 +6,5 @@ Integration tests for windowing.
 From this directory, run:
 
 ```sh
-flutter drive -t .\lib\main.dart --driver .\test_driver\windowing_test.dart
+flutter drive -t ./lib/main.dart --driver ./test_driver/main_test.dart
 ```

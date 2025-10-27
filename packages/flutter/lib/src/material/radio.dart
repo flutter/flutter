@@ -55,7 +55,7 @@ const double _kInnerRadius = 4.5;
 ///
 /// If the second radio button is pressed, the example's state is updated
 /// with `setState`, updating `_character` to `SingingCharacter.jefferson`.
-/// This causes the buttons to rebuild with the updated `groupValue`, and
+/// This causes the buttons to rebuild with the updated `RadioGroup.groupValue`, and
 /// therefore the selection of the second button.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
@@ -234,8 +234,8 @@ class Radio<T> extends StatefulWidget {
 
   /// {@macro flutter.widget.RawRadio.mouseCursor}
   ///
-  /// If null, then the value of [RadioThemeData.mouseCursor] is used.
-  /// If that is also null, then [WidgetStateMouseCursor.clickable] is used.
+  /// If null, the value of [RadioThemeData.mouseCursor] is used. If that is
+  /// also null, [WidgetStateMouseCursor.adaptiveClickable] is used.
   final MouseCursor? mouseCursor;
 
   /// {@macro flutter.widget.RawRadio.toggleable}
@@ -544,7 +544,10 @@ class _RadioState<T> extends State<Radio<T>> {
         WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
           return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
               radioTheme.mouseCursor?.resolve(states) ??
-              WidgetStateProperty.resolveAs<MouseCursor>(WidgetStateMouseCursor.clickable, states);
+              WidgetStateProperty.resolveAs<MouseCursor>(
+                WidgetStateMouseCursor.adaptiveClickable,
+                states,
+              );
         });
     return RawRadio<T>(
       value: widget.value,

@@ -19,6 +19,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../darwin/darwin.dart';
 import '../device.dart';
+import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
@@ -28,6 +29,7 @@ import '../macos/xcode.dart';
 import '../migrations/lldb_init_migration.dart';
 import '../migrations/swift_package_manager_gitignore_migration.dart';
 import '../migrations/swift_package_manager_integration_migration.dart';
+import '../migrations/uiscene_migration.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
@@ -176,6 +178,12 @@ Future<XcodeBuildResult> buildXcodeProject({
       deviceID: deviceID,
       fileSystem: globals.fs,
       environmentType: environmentType,
+    ),
+    UISceneMigration(
+      app.project,
+      globals.logger,
+      isMigrationFeatureEnabled: featureFlags.isUISceneMigrationEnabled,
+      plistParser: globals.plistParser,
     ),
   ];
 
@@ -910,6 +918,12 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
         missingModule: missingModule,
       );
     }
+  } else if (message.toLowerCase().contains('has been modified since')) {
+    return _XCResultIssueHandlingResult(
+      requiresProvisioningProfile: false,
+      hasProvisioningProfileIssue: false,
+      modifiedPrecompiledSource: true,
+    );
   }
   return _XCResultIssueHandlingResult(
     requiresProvisioningProfile: false,
@@ -929,6 +943,7 @@ Future<bool> _handleIssues(
   var requiresProvisioningProfile = false;
   var hasProvisioningProfileIssue = false;
   var issueDetected = false;
+  var modifiedPrecompiledSource = false;
   String? missingPlatform;
   final duplicateModules = <String>[];
   final missingModules = <String>[];
@@ -954,6 +969,7 @@ Future<bool> _handleIssues(
       if (handlingResult.missingModule != null) {
         missingModules.add(handlingResult.missingModule!);
       }
+      modifiedPrecompiledSource = handlingResult.modifiedPrecompiledSource;
       issueDetected = true;
     }
   } else if (xcResult != null) {
@@ -1024,6 +1040,13 @@ Future<bool> _handleIssues(
         );
       }
     }
+  } else if (modifiedPrecompiledSource) {
+    logger.printError(
+      '════════════════════════════════════════════════════════════════════════════════\n'
+      'A precompiled file has been changed since last built. Please run "flutter clean" to clear '
+      'the cache.\n'
+      '════════════════════════════════════════════════════════════════════════════════',
+    );
   }
   return issueDetected;
 }
@@ -1161,6 +1184,7 @@ class _XCResultIssueHandlingResult {
     this.missingPlatform,
     this.duplicateModule,
     this.missingModule,
+    this.modifiedPrecompiledSource = false,
   });
 
   /// An issue indicates that user didn't provide the provisioning profile.
@@ -1178,6 +1202,10 @@ class _XCResultIssueHandlingResult {
   /// An issue indicates a module was imported but not found, potentially due
   /// to it being Swift Package Manager compatible only.
   final String? missingModule;
+
+  /// An issue indicates that a source file, such as a header in the Flutter framework, has
+  /// changed since last built. This requires "flutter clean" to resolve.
+  final bool modifiedPrecompiledSource;
 }
 
 const _kResultBundlePath = 'temporary_xcresult_bundle';

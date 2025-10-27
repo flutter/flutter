@@ -1967,6 +1967,44 @@ void main() {
       expect(getDayCount(secondMonthItem), 21);
     });
   });
+
+  testWidgets('DateRangePickerDialog does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: DateRangePickerDialog(firstDate: firstDate, lastDate: lastDate),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DateRangePickerDialog)), Size.zero);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/177083.
+  testWidgets('Local InputDecorationTheme is honored', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: InputDecorationTheme(
+            data: const InputDecorationThemeData(filled: true),
+            child: DateRangePickerDialog(
+              firstDate: firstDate,
+              lastDate: lastDate,
+              currentDate: DateTime(2016, DateTime.january, 30),
+              initialEntryMode: DatePickerEntryMode.inputOnly,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final InputDecoration startDateDecoration = tester
+        .widget<TextField>(find.byType(TextField).first)
+        .decoration!;
+
+    expect(startDateDecoration.filled, isTrue);
+  });
 }
 
 class _RestorableDateRangePickerDialogTestWidget extends StatefulWidget {

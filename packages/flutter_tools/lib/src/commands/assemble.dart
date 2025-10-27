@@ -249,7 +249,7 @@ class AssembleCommand extends FlutterCommand {
       output = globals.fs.path.join(_flutterProject.directory.path, output);
     }
     final Artifacts artifacts = globals.artifacts!;
-    final result = Environment(
+    return Environment(
       outputDir: globals.fs.directory(output),
       buildDir: _flutterProject.directory
           .childDirectory('.dart_tool')
@@ -269,12 +269,14 @@ class AssembleCommand extends FlutterCommand {
       engineVersion: artifacts.usesLocalArtifacts ? null : globals.flutterVersion.engineRevision,
       generateDartPluginRegistry: true,
     );
-    return result;
   }
 
   Map<String, String> _parseDefines(List<String> values) {
     final results = <String, String>{};
     for (final chunk in values) {
+      if (chunk.isEmpty) {
+        continue;
+      }
       final int indexEquals = chunk.indexOf('=');
       if (indexEquals == -1) {
         throwToolExit('Improperly formatted define flag: $chunk');

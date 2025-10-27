@@ -30,6 +30,10 @@ class MockPlatformViewAndroidJNI : public PlatformViewAndroidJNI {
                std::vector<std::vector<uint8_t>> string_attribute_args),
               (override));
   MOCK_METHOD(void,
+              FlutterViewSetApplicationLocale,
+              (const std::string locale),
+              (override));
+  MOCK_METHOD(void,
               FlutterViewUpdateCustomAccessibilityActions,
               (std::vector<uint8_t> actions_buffer,
                std::vector<std::string> strings),
@@ -110,6 +114,7 @@ class MockPlatformViewAndroidJNI : public PlatformViewAndroidJNI {
                int32_t viewHeight,
                MutatorsStack mutators_stack),
               (override));
+  MOCK_METHOD(void, hidePlatformView2, (int32_t view_id), (override));
   MOCK_METHOD(void, onEndFrame2, (), (override));
   MOCK_METHOD(void, showOverlaySurface2, (), (override));
   MOCK_METHOD(void, hideOverlaySurface2, (), (override));
