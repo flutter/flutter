@@ -2191,8 +2191,33 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
   }
 
+  bool scrollbarRevealed = false;
+  void _revealAndroidScrollbar() {
+    scrollbarRevealed = true;
+    print('_revealAndroidScrollbar called');
+    setState(() {
+      // scrollbarPainter.color = widget.thumbColor ?? const Color(0x66BCBCBC);
+      // scrollbarPainter.trackColor = widget.trackColor ?? const Color(0x08000000);
+      // scrollbarPainter.thickness = widget.thickness ?? _kScrollbarThickness;
+      // scrollbarPainter.ignorePointer = false;
+      scrollbarPainter.color = Color(0xFFFF0000); // Change the color to red
+      scrollbarPainter.trackColor =
+          widget.trackColor ?? const Color(0x08000000); // Set track color if needed
+      scrollbarPainter.thickness =
+          widget.thickness ?? _kScrollbarThickness; // Ensure thickness is set
+      scrollbarPainter.ignorePointer = false; // Allow interaction
+    });
+  }
+
   void _receivedPointerSignal(PointerSignalEvent event) {
     _cachedController = _effectiveScrollController;
+
+    // TODO(camsim99): Fix.
+    if (event is PointerScrollEvent) {
+      if (!scrollbarRevealed) {
+        _revealAndroidScrollbar();
+      }
+    }
     // Only try to scroll if the bar absorb the hit test.
     if ((scrollbarPainter.hitTest(event.localPosition) ?? false) &&
         _cachedController != null &&
