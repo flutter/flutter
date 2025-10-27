@@ -15,6 +15,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
+import 'package:path/path.dart' as Path;
 import 'package:yaml/yaml.dart';
 
 void main(List<String> arguments) {
@@ -80,7 +81,12 @@ void main(List<String> arguments) {
     return repoRoot;
   })();
 
-  final File ignoreFile = repoRoot.childFile(ignoreFileName);
+  final File ignoreFile = repoRoot
+      .childDirectory('dev')
+      .childDirectory('tools')
+      .childDirectory('bin')
+      .childDirectory('config')
+      .childFile(ignoreFileName);
   if (ignoreLocking) {
     print('Writing ignore file in ${ignoreFile.path}');
     ignoreFile.writeAsStringSync(ignoreReason);
@@ -193,11 +199,12 @@ void main(List<String> arguments) {
     }
 
     if (gradleGeneration) {
+      final String relativeIgnorePath = Path.relative(ignoreFile.path, from: androidDirectory.path);
       // Write file content corresponding to original file language.
       if (rootBuildGradle.basename.endsWith('.kts')) {
-        rootBuildGradle.writeAsStringSync(createGradleKtsFileContent(ignoreFile.path));
+        rootBuildGradle.writeAsStringSync(createGradleKtsFileContent(relativeIgnorePath));
       } else {
-        rootBuildGradle.writeAsStringSync(createGradleFileContent(ignoreFile.path));
+        rootBuildGradle.writeAsStringSync(createGradleFileContent(relativeIgnorePath));
       }
 
       if (settingsGradle.basename.endsWith('.kts')) {

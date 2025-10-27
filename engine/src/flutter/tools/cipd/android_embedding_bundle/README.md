@@ -38,9 +38,10 @@ below explain how to fetch the license information for the dependencies.
    updated in this PR.  They will need to be updated in a follow-up
    PR.  Instead, run
    `<repo_root>/dev/tools/bin/generate_gradle_lockfiles.dart
-   --no-gradle-generation --no-exclusion --ignore-locking`.  This will
-   create a '.ignore-locking.md' file in all the projects that require
-   Gradle locking and allow tests to pass without locking.
+   --no-gradle-generation --no-exclusion --ignore-locking
+   --ignore-reaseon=<PR>`.  Replace <PR> with the PR number. This will
+   create a '.ignore-locking.md' file that will disable  Gradle locking 
+   and allow tests to pass without locking.
 1. Once the initial PR is submitted, you will need to create a
    follow-up PR that updates the Gradle Lockfiles.  Run
    `<repo_root>/dev/tools/bin/generate_gradle_lockfiles.dart
