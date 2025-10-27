@@ -1156,7 +1156,6 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   ///
   ///  * [StatefulWidget], the API documentation for which has a section on
   ///    performance considerations that are relevant here.
-  @protected
 @protected
 void setState(VoidCallback fn) {
   assert(() {
