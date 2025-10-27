@@ -250,42 +250,42 @@ String exec(String cmd, List<String> args, {String? workingDirectory}) {
 
 String createGradleFileContent(String path) {
   const String rootGradleFileContent = r'''
-  // Copyright 2014 The Flutter Authors. All rights reserved.
-  // Use of this source code is governed by a BSD-style license that can be
-  // found in the LICENSE file.
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-  // This file is auto generated.
-  // To update all the build.gradle files in the Flutter repo,
-  // See dev/tools/bin/generate_gradle_lockfiles.dart.
+// This file is auto generated.
+// To update all the build.gradle files in the Flutter repo,
+// See dev/tools/bin/generate_gradle_lockfiles.dart.
 
-  allprojects {
-      repositories {
-          google()
-          mavenCentral()
-      }
-  }
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
 
-  rootProject.layout.buildDirectory.value(rootProject.layout.buildDirectory.dir("../../build").get())
+rootProject.layout.buildDirectory.value(rootProject.layout.buildDirectory.dir("../../build").get())
 
-  subprojects {
-      project.layout.buildDirectory.value(rootProject.layout.buildDirectory.dir(project.name).get())
-  }
-  subprojects {
-      project.evaluationDependsOn(':app')
-      dependencyLocking {
-          ignoredDependencies.add('io.flutter:*')
-          lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")
-          var ignoreFile = file("<IGNORE_FILE>")
-          if (!ignoreFile.exists() && !project.hasProperty('local-engine-repo')) {
-            lockAllConfigurations()
-          }
-      }
-  }
+subprojects {
+    project.layout.buildDirectory.value(rootProject.layout.buildDirectory.dir(project.name).get())
+}
+subprojects {
+    project.evaluationDependsOn(':app')
+    dependencyLocking {
+        ignoredDependencies.add('io.flutter:*')
+        lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")
+        var ignoreFile = file("<IGNORE_FILE>")
+        if (!ignoreFile.exists() && !project.hasProperty('local-engine-repo')) {
+          lockAllConfigurations()
+        }
+    }
+}
 
-  tasks.register("clean", Delete) {
-      delete rootProject.layout.buildDirectory
-  }
-  ''';
+tasks.register("clean", Delete) {
+    delete rootProject.layout.buildDirectory
+}
+''';
   return rootGradleFileContent.replaceAll('<IGNORE_FILE>', path);
 }
 
@@ -339,50 +339,50 @@ String createGradleKtsFileContent(String path) {
   // root_app/android/build.gradle.kts).
   // After modification verify formatting with ktlint.
   const String rootGradleKtsFileContent = r'''
-  // Copyright 2014 The Flutter Authors. All rights reserved.
-  // Use of this source code is governed by a BSD-style license that can be
-  // found in the LICENSE file.
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-  // This file is auto generated.
-  // To update all the settings.gradle files in the Flutter repo,
-  // See dev/tools/bin/generate_gradle_lockfiles.dart.
+// This file is auto generated.
+// To update all the settings.gradle files in the Flutter repo,
+// See dev/tools/bin/generate_gradle_lockfiles.dart.
 
-  allprojects {
-      repositories {
-          google()
-          mavenCentral()
-      }
-  }
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
 
-  rootProject.layout.buildDirectory.value(
-      rootProject.layout.buildDirectory
-          .dir("../../build")
-          .get()
-  )
+rootProject.layout.buildDirectory.value(
+    rootProject.layout.buildDirectory
+        .dir("../../build")
+        .get()
+)
 
-  subprojects {
-      project.layout.buildDirectory.value(
-          rootProject.layout.buildDirectory
-              .dir(project.name)
-              .get()
-      )
-  }
-  subprojects {
-      project.evaluationDependsOn(":app")
-      dependencyLocking {
-          ignoredDependencies.add("io.flutter:*")
-          lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")
-          var ignoreFile = file("<IGNORE_FILE>")
-          if (!ignoreFile.exists() && !project.hasProperty("local-engine-repo")) {
-              lockAllConfigurations()
-          }
-      }
-  }
+subprojects {
+    project.layout.buildDirectory.value(
+        rootProject.layout.buildDirectory
+            .dir(project.name)
+            .get()
+    )
+}
+subprojects {
+    project.evaluationDependsOn(":app")
+    dependencyLocking {
+        ignoredDependencies.add("io.flutter:*")
+        lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")
+        var ignoreFile = file("<IGNORE_FILE>")
+        if (!ignoreFile.exists() && !project.hasProperty("local-engine-repo")) {
+            lockAllConfigurations()
+        }
+    }
+}
 
-  tasks.register<Delete>("clean") {
-      delete(rootProject.layout.buildDirectory)
-  }
-  ''';
+tasks.register<Delete>("clean") {
+    delete(rootProject.layout.buildDirectory)
+}
+''';
   return rootGradleKtsFileContent.replaceAll("<IGNORE_FILE>", path);
 }
 
