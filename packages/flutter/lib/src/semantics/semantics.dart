@@ -114,6 +114,22 @@ typedef SemanticsUpdateCallback = void Function(SemanticsUpdate update);
 typedef ChildSemanticsConfigurationsDelegate =
     ChildSemanticsConfigurationsResult Function(List<SemanticsConfiguration>);
 
+/// Controls how accessibility focus is blocked.
+///
+/// This is typically used to prevent screen readers
+/// from focusing on parts of the UI.
+enum BlockAccessibilityFocus {
+  /// Accessibility focus is **not blocked**.
+  none,
+
+  /// Blocks accessibility focus for the entire subtree.
+  blockSubtree,
+
+  /// Blocks accessibility focus for the **current node only**. Its descendants
+  /// may still be focusable.
+  blockNode,
+}
+
 final int _kUnblockedUserActions =
     SemanticsAction.didGainAccessibilityFocus.index |
     SemanticsAction.didLoseAccessibilityFocus.index;
@@ -1543,7 +1559,7 @@ class SemanticsProperties extends DiagnosticableTree {
     )
     this.focusable,
     this.focused,
-    this.blockSubTreeAccessibilityFocus,
+    this.blockAccessibilityFocus,
     this.inMutuallyExclusiveGroup,
     this.hidden,
     this.obscured,
@@ -1750,12 +1766,13 @@ class SemanticsProperties extends DiagnosticableTree {
   /// element it is reading, and is separate from input focus.
   final bool? focused;
 
-  /// If non-null, indicates that this subtree is blocked in a11y focus.
+  /// If non-null, indicates if this subtree or current nodeis blocked in a11y focus.
+  ///
   ///
   /// This is for accessibility focus, which is the focus used by screen readers
   /// like TalkBack and VoiceOver. It is different from input focus, which is
   /// usually held by the element that currently responds to keyboard inputs.
-  final bool? blockSubTreeAccessibilityFocus;
+  final BlockAccessibilityFocus? blockAccessibilityFocus;
 
   /// If non-null, whether a semantic node is in a mutually exclusive group.
   ///
@@ -6125,9 +6142,13 @@ class SemanticsConfiguration {
 
   /// Whether the owning [RenderObject] and its subtree
   /// is blocked in the a11y focus (different from input focus).
-  bool get blockSubTreeAccessibilityFocus => _flags.blockAccessibilityFocus;
-  set blockSubTreeAccessibilityFocus(bool value) {
-    _flags = _flags.copyWith(blockAccessibilityFocus: value);
+
+  BlockAccessibilityFocus _blockAccessibilityFocus = BlockAccessibilityFocus.none;
+
+  BlockAccessibilityFocus get blockAccessibilityFocus => _blockAccessibilityFocus;
+  set blockAccessibilityFocus(BlockAccessibilityFocus value) {
+    _blockAccessibilityFocus = value;
+    _flags = _flags.copyWith(blockAccessibilityFocus: value != BlockAccessibilityFocus.none);
     _hasBeenAnnotated = true;
   }
 
@@ -6443,6 +6464,10 @@ class SemanticsConfiguration {
     if (_flags.hasRepeatedFlags(other._flags)) {
       return false;
     }
+    if (_flags.blockAccessibilityFocus != other._flags.blockAccessibilityFocus) {
+      return false;
+    }
+
     if (_platformViewId != null && other._platformViewId != null) {
       return false;
     }
@@ -6586,6 +6611,7 @@ class SemanticsConfiguration {
       .._attributedValue = _attributedValue
       .._attributedDecreasedValue = _attributedDecreasedValue
       .._attributedHint = _attributedHint
+      .._blockAccessibilityFocus = _blockAccessibilityFocus
       .._hintOverrides = _hintOverrides
       .._tooltip = _tooltip
       .._flags = _flags

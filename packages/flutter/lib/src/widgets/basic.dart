@@ -15,6 +15,7 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import 'binding.dart';
@@ -3991,7 +3992,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required bool? readOnly,
     required bool? focusable,
     required bool? focused,
-    required bool? blockSubTreeAccessibilityFocus,
+    required BlockAccessibilityFocus? blockAccessibilityFocus,
     required bool? inMutuallyExclusiveGroup,
     required bool? obscured,
     required bool? multiline,
@@ -4076,7 +4077,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            readOnly: readOnly,
            focusable: focusable,
            focused: focused,
-           blockSubTreeAccessibilityFocus: blockSubTreeAccessibilityFocus,
+           blockAccessibilityFocus: blockAccessibilityFocus,
            inMutuallyExclusiveGroup: inMutuallyExclusiveGroup,
            obscured: obscured,
            multiline: multiline,
@@ -4325,7 +4326,7 @@ class SliverSemantics extends _SemanticsBase {
     super.readOnly,
     super.focusable,
     super.focused,
-    super.blockSubTreeAccessibilityFocus,
+    super.blockAccessibilityFocus,
     super.inMutuallyExclusiveGroup,
     super.obscured,
     super.multiline,
@@ -7903,7 +7904,7 @@ class Semantics extends _SemanticsBase {
     super.readOnly,
     super.focusable,
     super.focused,
-    super.blockSubTreeAccessibilityFocus,
+    super.blockAccessibilityFocus,
     super.inMutuallyExclusiveGroup,
     super.obscured,
     super.multiline,

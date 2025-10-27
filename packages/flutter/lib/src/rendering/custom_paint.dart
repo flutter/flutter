@@ -955,8 +955,8 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.focused != null) {
       config.isFocused = properties.focused;
     }
-    if (properties.blockSubTreeAccessibilityFocus != null) {
-      config.blockSubTreeAccessibilityFocus = properties.blockSubTreeAccessibilityFocus!;
+    if (properties.blockAccessibilityFocus != null) {
+      config.blockAccessibilityFocus = properties.blockAccessibilityFocus!;
     }
     if (properties.enabled != null) {
       config.isEnabled = properties.enabled;
