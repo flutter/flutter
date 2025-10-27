@@ -1125,8 +1125,8 @@ class PlatformDispatcher {
   ///
   /// This value takes precedence over any text height specified at the
   /// application level and overrides it. For example, at framework level,
-  /// in the [TextStyle] for [Text] and [EditableText] widgets, this value
-  /// overrides the existing value of [TextStyle.height].
+  /// in the [TextStyle] for [Text], [SelectableText], and [EditableText]
+  /// widgets, this value overrides the existing value of [TextStyle.height].
   ///
   /// Returns null when no override has been set by the system.
   ///
@@ -1140,8 +1140,8 @@ class PlatformDispatcher {
   ///
   /// This value takes precedence over any text letter spacing specified at the
   /// application level and overrides it. For example, at framework level,
-  /// in the [TextStyle] for [Text] and [EditableText] widgets, this value
-  /// overrides the existing value of [TextStyle.letterSpacing].
+  /// in the [TextStyle] for [Text], [SelectableText], and [EditableText]
+  /// widgets, this value overrides the existing value of [TextStyle.letterSpacing].
   ///
   /// Returns null when no override has been set by the system.
   ///
@@ -1155,8 +1155,8 @@ class PlatformDispatcher {
   ///
   /// This value takes precedence over any text word spacing specified at the
   /// application level and overrides it. For example, at framework level,
-  /// in the [TextStyle] for [Text] and [EditableText] widgets, this value
-  /// overrides the existing value of [TextStyle.wordSpacing].
+  /// in the [TextStyle] for [Text], [SelectableText], and [EditableText]
+  /// widgets, this value overrides the existing value of [TextStyle.wordSpacing].
   ///
   /// Returns null when no override has been set by the system.
   ///

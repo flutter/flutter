@@ -682,6 +682,9 @@ class MediaQueryData {
 
   /// The height of the text, as a multiple of the font size.
   ///
+  /// Returns `null` when the platform has not set an override
+  /// for text height.
+  ///
   /// See also:
   ///
   ///  * [Text], [SelectableText], and [EditableText], all of whose
@@ -692,6 +695,9 @@ class MediaQueryData {
   /// in a piece of text.
   ///
   /// A negative value can be used to bring the letters closer.
+  ///
+  /// Returns `null` when the platform has not set an override
+  /// for text letter spacing.
   ///
   /// See also:
   ///
@@ -704,6 +710,9 @@ class MediaQueryData {
   ///
   /// A negative value can be used to bring the words closer.
   ///
+  /// Returns `null` when the platform has not set an override
+  /// for text word spacing.
+  ///
   /// See also:
   ///
   ///  * [Text], [SelectableText], and [EditableText], all of whose
@@ -712,6 +721,9 @@ class MediaQueryData {
 
   /// The amount of space (in logical pixels) to add between each paragraph
   /// in a piece of text.
+  ///
+  /// Returns `null` when the platform has not set an override
+  /// for text paragraph spacing.
   ///
   /// See also:
   ///
