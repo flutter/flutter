@@ -251,8 +251,8 @@ void main() {
             );
 
             expect(
-              childAnchor.anchorPositionFor(childRect),
-              parentAnchor.anchorPositionFor(anchorRect),
+              childAnchor._anchorPositionFor(childRect),
+              parentAnchor._anchorPositionFor(anchorRect),
             );
           });
         }

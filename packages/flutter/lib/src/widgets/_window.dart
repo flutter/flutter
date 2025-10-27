@@ -670,7 +670,7 @@ mixin class TooltipWindowControllerDelegate {
 /// A tooltip window is a small window that displays brief, informative text
 /// when a user hovers over or focuses on a UI element. Tooltip windows are
 /// typically used to provide additional context or explanations for UI elements
-/// without cluttering the main interface. As such, the a may not receive input
+/// without cluttering the main interface. As such, it may not receive input
 /// focus from the user. It will however stay open when another window receives
 /// input focus.
 ///
@@ -838,6 +838,8 @@ abstract class TooltipWindowController extends BaseWindowController {
   TooltipWindowController.empty();
 
   /// The parent controller of this tooltip.
+  ///
+  /// The tooltip will be destroyed if its parent is destroyed.
   BaseWindowController get parent;
 
   /// Request change to the constraints of the window.
@@ -967,7 +969,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
-    throw UnimplementedError();
+    throw UnimplementedError(errorMessage);
   }
 
   @override
@@ -1162,13 +1164,13 @@ class DialogWindow extends StatelessWidget {
 
 @internal
 class TooltipWindow extends StatelessWidget {
-  /// Creates a dialog window widget.
+  /// Creates a tooltip window widget.
   ///
   /// The [controller] creates the native backing window into which the
   /// [child] widget is rendered.
   ///
   /// It is up to the caller to destroy the window by calling
-  /// [DialogWindowController.destroy] when the window is no longer needed.
+  /// [TooltipWindowController.destroy] when the window is no longer needed.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal

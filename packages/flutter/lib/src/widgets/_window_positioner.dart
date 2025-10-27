@@ -19,7 +19,7 @@ enum WindowPositionerAnchor {
   /// child window will be positioned relative to the center
   /// of the parent window.
   ///
-  /// If [WindowPositioner.childAnchor] is set to  [center], then the middle
+  /// If [WindowPositioner.childAnchor] is set to [center], then the middle
   /// of the child window will be positioned relative to
   /// [WindowPositioner.parentAnchor].
   ///
@@ -31,7 +31,7 @@ enum WindowPositionerAnchor {
   /// child window will be positioned relative to the top
   /// of the parent window.
   ///
-  /// If [WindowPositioner.childAnchor] is set to  [top], then the top
+  /// If [WindowPositioner.childAnchor] is set to [top], then the top
   /// of the child window will be positioned relative to
   /// [WindowPositioner.parentAnchor].
   ///
@@ -43,7 +43,7 @@ enum WindowPositionerAnchor {
   /// child window will be positioned relative to the bottom
   /// of the parent window.
   ///
-  /// If [WindowPositioner.childAnchor] is set to  [bottom], then the bottom
+  /// If [WindowPositioner.childAnchor] is set to [bottom], then the bottom
   /// of the child window will be positioned relative to
   /// [WindowPositioner.parentAnchor].
   ///
@@ -55,7 +55,7 @@ enum WindowPositionerAnchor {
   /// child window will be positioned relative to the left
   /// of the parent window.
   ///
-  /// If [WindowPositioner.childAnchor] is set to  [left], then the left
+  /// If [WindowPositioner.childAnchor] is set to [left], then the left
   /// of the child window will be positioned relative to
   /// [WindowPositioner.parentAnchor].
   ///
@@ -67,7 +67,7 @@ enum WindowPositionerAnchor {
   /// child window will be positioned relative to the right
   /// of the parent window.
   ///
-  /// If [WindowPositioner.childAnchor] is set to  [right], then the right
+  /// If [WindowPositioner.childAnchor] is set to [right], then the right
   /// of the child window will be positioned relative to
   /// [WindowPositioner.parentAnchor].
   ///
@@ -79,7 +79,7 @@ enum WindowPositionerAnchor {
   /// child window will be positioned relative to the top left
   /// of the parent window.
   ///
-  /// If [WindowPositioner.childAnchor] is set to  [topLeft], then the top left
+  /// If [WindowPositioner.childAnchor] is set to [topLeft], then the top left
   /// of the child window will be positioned relative to
   /// [WindowPositioner.parentAnchor].
   ///
@@ -91,7 +91,7 @@ enum WindowPositionerAnchor {
   /// child window will be positioned relative to the bottom left
   /// of the parent window.
   ///
-  /// If [WindowPositioner.childAnchor] is set to  [bottomLeft], then the bottom left
+  /// If [WindowPositioner.childAnchor] is set to [bottomLeft], then the bottom left
   /// of the child window will be positioned relative to
   /// [WindowPositioner.parentAnchor].
   ///
@@ -103,7 +103,7 @@ enum WindowPositionerAnchor {
   /// child window will be positioned relative to the top right
   /// of the parent window.
   ///
-  /// If [WindowPositioner.childAnchor] is set to  [topRight], then the top right
+  /// If [WindowPositioner.childAnchor] is set to [topRight], then the top right
   /// of the child window will be positioned relative to
   /// [WindowPositioner.parentAnchor].
   ///
@@ -115,13 +115,69 @@ enum WindowPositionerAnchor {
   /// child window will be positioned relative to the bottom right
   /// of the parent window.
   ///
-  /// If [WindowPositioner.childAnchor] is set to  [bottomRight], then the bottom right
+  /// If [WindowPositioner.childAnchor] is set to [bottomRight], then the bottom right
   /// of the child window will be positioned relative to
   /// [WindowPositioner.parentAnchor].
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  bottomRight,
+  bottomRight;
+
+  WindowPositionerAnchor _flipX() {
+    return switch (this) {
+      WindowPositionerAnchor.center => WindowPositionerAnchor.center,
+      WindowPositionerAnchor.top => WindowPositionerAnchor.top,
+      WindowPositionerAnchor.bottom => WindowPositionerAnchor.bottom,
+      WindowPositionerAnchor.left => WindowPositionerAnchor.right,
+      WindowPositionerAnchor.right => WindowPositionerAnchor.left,
+      WindowPositionerAnchor.topLeft => WindowPositionerAnchor.topRight,
+      WindowPositionerAnchor.bottomLeft => WindowPositionerAnchor.bottomRight,
+      WindowPositionerAnchor.topRight => WindowPositionerAnchor.topLeft,
+      WindowPositionerAnchor.bottomRight => WindowPositionerAnchor.bottomLeft,
+    };
+  }
+
+  WindowPositionerAnchor _flipY() {
+    return switch (this) {
+      WindowPositionerAnchor.center => WindowPositionerAnchor.center,
+      WindowPositionerAnchor.top => WindowPositionerAnchor.bottom,
+      WindowPositionerAnchor.bottom => WindowPositionerAnchor.top,
+      WindowPositionerAnchor.left => WindowPositionerAnchor.left,
+      WindowPositionerAnchor.right => WindowPositionerAnchor.right,
+      WindowPositionerAnchor.topLeft => WindowPositionerAnchor.bottomLeft,
+      WindowPositionerAnchor.bottomLeft => WindowPositionerAnchor.topLeft,
+      WindowPositionerAnchor.topRight => WindowPositionerAnchor.bottomRight,
+      WindowPositionerAnchor.bottomRight => WindowPositionerAnchor.topRight,
+    };
+  }
+
+  Offset _offsetFor(Size size) {
+    return switch (this) {
+      WindowPositionerAnchor.center => Offset(-size.width / 2.0, -size.height / 2.0),
+      WindowPositionerAnchor.top => Offset(-size.width / 2.0, 0.0),
+      WindowPositionerAnchor.bottom => Offset(-size.width / 2.0, -size.height),
+      WindowPositionerAnchor.left => Offset(0.0, -size.height / 2.0),
+      WindowPositionerAnchor.right => Offset(-size.width, -size.height / 2.0),
+      WindowPositionerAnchor.topLeft => Offset.zero,
+      WindowPositionerAnchor.bottomLeft => Offset(0.0, -size.height),
+      WindowPositionerAnchor.topRight => Offset(-size.width, 0.0),
+      WindowPositionerAnchor.bottomRight => Offset(-size.width, -size.height),
+    };
+  }
+
+  Offset _anchorPositionFor(Rect rect) {
+    return switch (this) {
+      WindowPositionerAnchor.center => rect.center,
+      WindowPositionerAnchor.top => rect.topCenter,
+      WindowPositionerAnchor.bottom => rect.bottomCenter,
+      WindowPositionerAnchor.left => rect.centerLeft,
+      WindowPositionerAnchor.right => rect.centerRight,
+      WindowPositionerAnchor.topLeft => rect.topLeft,
+      WindowPositionerAnchor.bottomLeft => rect.bottomLeft,
+      WindowPositionerAnchor.topRight => rect.topRight,
+      WindowPositionerAnchor.bottomRight => rect.bottomRight,
+    };
+  }
 }
 
 /// The [WindowPositionerConstraintAdjustment] how a window will adjust
@@ -267,7 +323,7 @@ class WindowPositioner {
   final WindowPositionerAnchor childAnchor;
 
   /// Specify the window position offset relative to the position of the
-  /// anchor on the anchor rectangle and the anchor on the child.\
+  /// anchor on the anchor rectangle and the anchor on the child.
   ///
   /// For example if the anchor of the anchor rectangle is at (x, y), the window
   /// has a [childAnchor] of [WindowPositionerAnchor.topLeft], and the [offset]
@@ -281,7 +337,7 @@ class WindowPositioner {
   final Offset offset;
 
   /// Defines how Flutter will adjust the position of the window if the unadjusted
-  /// position would result in the window being partly constrained by the platform..
+  /// position would result in the window being partly constrained by the platform.
   ///
   /// Whether a window is considered "constrained" is left to the platform
   /// to determine. For example, the window may be partly outside the
@@ -293,6 +349,8 @@ class WindowPositioner {
   /// 1. [WindowPositionerConstraintAdjustment.flipX] and [WindowPositionerConstraintAdjustment.flipY]
   /// 2. [WindowPositionerConstraintAdjustment.slideX] and [WindowPositionerConstraintAdjustment.slideY]
   /// 3. [WindowPositionerConstraintAdjustment.resizeX] and [WindowPositionerConstraintAdjustment.resizeY]
+  ///
+  /// The first adjustment that results in the child window being entirely inside the work area will be picked.
   ///
   /// See also:
   ///
@@ -308,46 +366,46 @@ class WindowPositioner {
   ///
   /// [parentRect] is the parent window's rectangle.
   ///
-  /// [outputRect] is the output display area where the child window will be placed.
+  /// [displayRect] is the output display area where the child window will be placed.
   ///
   /// All sizes and rectangles are in physical coordinates.
   Rect placeWindow({
     required Size childSize,
     required Rect anchorRect,
     required Rect parentRect,
-    required Rect outputRect,
+    required Rect displayRect,
   }) {
     Rect defaultResult;
     {
       final Offset result =
-          _constraintTo(parentRect, parentAnchor.anchorPositionFor(anchorRect) + offset) +
-          childAnchor.offsetFor(childSize);
+          _constrainTo(parentRect, parentAnchor._anchorPositionFor(anchorRect) + offset) +
+          childAnchor._offsetFor(childSize);
       defaultResult = result & childSize;
-      if (_rectContains(outputRect, defaultResult)) {
+      if (_rectContains(displayRect, defaultResult)) {
         return defaultResult;
       }
     }
 
     if (constraintAdjustment.contains(WindowPositionerConstraintAdjustment.flipX)) {
       final Offset result =
-          _constraintTo(
+          _constrainTo(
             parentRect,
-            parentAnchor.flipX().anchorPositionFor(anchorRect) + _flipX(offset),
+            parentAnchor._flipX()._anchorPositionFor(anchorRect) + _flipX(offset),
           ) +
-          childAnchor.flipX().offsetFor(childSize);
-      if (_rectContains(outputRect, result & childSize)) {
+          childAnchor._flipX()._offsetFor(childSize);
+      if (_rectContains(displayRect, result & childSize)) {
         return result & childSize;
       }
     }
 
     if (constraintAdjustment.contains(WindowPositionerConstraintAdjustment.flipY)) {
       final Offset result =
-          _constraintTo(
+          _constrainTo(
             parentRect,
-            parentAnchor.flipY().anchorPositionFor(anchorRect) + _flipY(offset),
+            parentAnchor._flipY()._anchorPositionFor(anchorRect) + _flipY(offset),
           ) +
-          childAnchor.flipY().offsetFor(childSize);
-      if (_rectContains(outputRect, result & childSize)) {
+          childAnchor._flipY()._offsetFor(childSize);
+      if (_rectContains(displayRect, result & childSize)) {
         return result & childSize;
       }
     }
@@ -357,24 +415,24 @@ class WindowPositioner {
       WindowPositionerConstraintAdjustment.flipY,
     })) {
       final Offset result =
-          _constraintTo(
+          _constrainTo(
             parentRect,
-            parentAnchor.flipY().flipX().anchorPositionFor(anchorRect) + _flipX(_flipY(offset)),
+            parentAnchor._flipY()._flipX()._anchorPositionFor(anchorRect) + _flipX(_flipY(offset)),
           ) +
-          childAnchor.flipY().flipX().offsetFor(childSize);
-      if (_rectContains(outputRect, result & childSize)) {
+          childAnchor._flipY()._flipX()._offsetFor(childSize);
+      if (_rectContains(displayRect, result & childSize)) {
         return result & childSize;
       }
     }
 
     {
       Offset result =
-          _constraintTo(parentRect, parentAnchor.anchorPositionFor(anchorRect) + offset) +
-          childAnchor.offsetFor(childSize);
+          _constrainTo(parentRect, parentAnchor._anchorPositionFor(anchorRect) + offset) +
+          childAnchor._offsetFor(childSize);
 
       if (constraintAdjustment.contains(WindowPositionerConstraintAdjustment.slideX)) {
-        final double leftOverhang = result.dx - outputRect.left;
-        final double rightOverhang = result.dx + childSize.width - outputRect.right;
+        final double leftOverhang = result.dx - displayRect.left;
+        final double rightOverhang = result.dx + childSize.width - displayRect.right;
         if (leftOverhang < 0.0) {
           result = result.translate(-leftOverhang, 0.0);
         } else if (rightOverhang > 0.0) {
@@ -383,8 +441,8 @@ class WindowPositioner {
       }
 
       if (constraintAdjustment.contains(WindowPositionerConstraintAdjustment.slideY)) {
-        final double topOverhang = result.dy - outputRect.top;
-        final double bottomOverhang = result.dy + childSize.height - outputRect.bottom;
+        final double topOverhang = result.dy - displayRect.top;
+        final double bottomOverhang = result.dy + childSize.height - displayRect.bottom;
         if (topOverhang < 0.0) {
           result = result.translate(0.0, -topOverhang);
         } else if (bottomOverhang > 0.0) {
@@ -392,19 +450,19 @@ class WindowPositioner {
         }
       }
 
-      if (_rectContains(outputRect, result & childSize)) {
+      if (_rectContains(displayRect, result & childSize)) {
         return result & childSize;
       }
     }
 
     {
       Offset result =
-          _constraintTo(parentRect, parentAnchor.anchorPositionFor(anchorRect) + offset) +
-          childAnchor.offsetFor(childSize);
+          _constrainTo(parentRect, parentAnchor._anchorPositionFor(anchorRect) + offset) +
+          childAnchor._offsetFor(childSize);
 
       if (constraintAdjustment.contains(WindowPositionerConstraintAdjustment.resizeX)) {
-        final double leftOverhang = result.dx - outputRect.left;
-        final double rightOverhang = result.dx + childSize.width - outputRect.right;
+        final double leftOverhang = result.dx - displayRect.left;
+        final double rightOverhang = result.dx + childSize.width - displayRect.right;
         if (leftOverhang < 0.0) {
           result = result.translate(-leftOverhang, 0.0);
           childSize = Size(childSize.width + leftOverhang, childSize.height);
@@ -415,8 +473,8 @@ class WindowPositioner {
       }
 
       if (constraintAdjustment.contains(WindowPositionerConstraintAdjustment.resizeY)) {
-        final double topOverhang = result.dy - outputRect.top;
-        final double bottomOverhang = result.dy + childSize.height - outputRect.bottom;
+        final double topOverhang = result.dy - displayRect.top;
+        final double bottomOverhang = result.dy + childSize.height - displayRect.bottom;
         if (topOverhang < 0.0) {
           result = result.translate(0.0, -topOverhang);
           childSize = Size(childSize.width, childSize.height + topOverhang);
@@ -426,7 +484,7 @@ class WindowPositioner {
         }
       }
 
-      if (_rectContains(outputRect, result & childSize)) {
+      if (_rectContains(displayRect, result & childSize)) {
         return result & childSize;
       }
     }
@@ -435,105 +493,11 @@ class WindowPositioner {
   }
 }
 
-extension on WindowPositionerAnchor {
-  WindowPositionerAnchor flipX() {
-    switch (this) {
-      case WindowPositionerAnchor.center:
-        return WindowPositionerAnchor.center;
-      case WindowPositionerAnchor.top:
-        return WindowPositionerAnchor.top;
-      case WindowPositionerAnchor.bottom:
-        return WindowPositionerAnchor.bottom;
-      case WindowPositionerAnchor.left:
-        return WindowPositionerAnchor.right;
-      case WindowPositionerAnchor.right:
-        return WindowPositionerAnchor.left;
-      case WindowPositionerAnchor.topLeft:
-        return WindowPositionerAnchor.topRight;
-      case WindowPositionerAnchor.bottomLeft:
-        return WindowPositionerAnchor.bottomRight;
-      case WindowPositionerAnchor.topRight:
-        return WindowPositionerAnchor.topLeft;
-      case WindowPositionerAnchor.bottomRight:
-        return WindowPositionerAnchor.bottomLeft;
-    }
-  }
-
-  WindowPositionerAnchor flipY() {
-    switch (this) {
-      case WindowPositionerAnchor.center:
-        return WindowPositionerAnchor.center;
-      case WindowPositionerAnchor.top:
-        return WindowPositionerAnchor.bottom;
-      case WindowPositionerAnchor.bottom:
-        return WindowPositionerAnchor.top;
-      case WindowPositionerAnchor.left:
-        return WindowPositionerAnchor.left;
-      case WindowPositionerAnchor.right:
-        return WindowPositionerAnchor.right;
-      case WindowPositionerAnchor.topLeft:
-        return WindowPositionerAnchor.bottomLeft;
-      case WindowPositionerAnchor.bottomLeft:
-        return WindowPositionerAnchor.topLeft;
-      case WindowPositionerAnchor.topRight:
-        return WindowPositionerAnchor.bottomRight;
-      case WindowPositionerAnchor.bottomRight:
-        return WindowPositionerAnchor.topRight;
-    }
-  }
-
-  Offset offsetFor(Size size) {
-    switch (this) {
-      case WindowPositionerAnchor.center:
-        return Offset(-size.width / 2.0, -size.height / 2.0);
-      case WindowPositionerAnchor.top:
-        return Offset(-size.width / 2.0, 0.0);
-      case WindowPositionerAnchor.bottom:
-        return Offset(-size.width / 2.0, -1.0 * size.height);
-      case WindowPositionerAnchor.left:
-        return Offset(0.0, -size.height / 2.0);
-      case WindowPositionerAnchor.right:
-        return Offset(-1.0 * size.width, -size.height / 2.0);
-      case WindowPositionerAnchor.topLeft:
-        return Offset.zero;
-      case WindowPositionerAnchor.bottomLeft:
-        return Offset(0.0, -1.0 * size.height);
-      case WindowPositionerAnchor.topRight:
-        return Offset(-size.width, 0.0);
-      case WindowPositionerAnchor.bottomRight:
-        return Offset(-1.0 * size.width, -1.0 * size.height);
-    }
-  }
-
-  Offset anchorPositionFor(Rect rect) {
-    switch (this) {
-      case WindowPositionerAnchor.center:
-        return rect.center;
-      case WindowPositionerAnchor.top:
-        return rect.topCenter;
-      case WindowPositionerAnchor.bottom:
-        return rect.bottomCenter;
-      case WindowPositionerAnchor.left:
-        return rect.centerLeft;
-      case WindowPositionerAnchor.right:
-        return rect.centerRight;
-      case WindowPositionerAnchor.topLeft:
-        return rect.topLeft;
-      case WindowPositionerAnchor.bottomLeft:
-        return rect.bottomLeft;
-      case WindowPositionerAnchor.topRight:
-        return rect.topRight;
-      case WindowPositionerAnchor.bottomRight:
-        return rect.bottomRight;
-    }
-  }
-}
-
 bool _rectContains(Rect r1, Rect r2) {
   return r1.left <= r2.left && r1.right >= r2.right && r1.top <= r2.top && r1.bottom >= r2.bottom;
 }
 
-Offset _constraintTo(Rect r, Offset p) {
+Offset _constrainTo(Rect r, Offset p) {
   return Offset(p.dx.clamp(r.left, r.right), p.dy.clamp(r.top, r.bottom));
 }
 

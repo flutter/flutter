@@ -178,7 +178,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
-    throw UnimplementedError('Tooltip windows are not yet implemented on Linux.');
+    throw UnimplementedError('Tooltip windows are not yet implemented on Windows.');
   }
 
   /// Register a new [WindowsMessageHandler].
