@@ -394,11 +394,8 @@ LRESULT HostWindow::HandleMessage(HWND hwnd,
         // HTCAPTION.
         GetCursorPos(&cursorPos);
         ScreenToClient(window_handle_, &cursorPos);
-        PostMessage(
-            window_handle_, WM_MOUSEMOVE, 0,
-            cursorPos.x |
-                ((static_cast<uint32_t>(static_cast<int16_t>(cursorPos.y)))
-                 << 16));
+        PostMessage(window_handle_, WM_MOUSEMOVE, 0,
+                    MAKELPARAM(cursorPos.x, cursorPos.y));
       }
       break;
     }
