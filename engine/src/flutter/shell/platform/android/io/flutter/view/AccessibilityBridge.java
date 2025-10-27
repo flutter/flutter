@@ -930,19 +930,42 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     if (shouldSetCollectionInfo(semanticsNode)) {
       if (semanticsNode.hasAction(Action.SCROLL_LEFT)
           || semanticsNode.hasAction(Action.SCROLL_RIGHT)) {
-        result.setCollectionInfo(
-            new AccessibilityNodeInfo.CollectionInfo(
-                1, // row count
-                semanticsNode.scrollChildren, // column count
-                false // hierarchical
-                ));
+        // This code will only run on devices with API level 32 or lower.
+        // The obtain method was deprecated in API 33.
+        if (Build.VERSION.SDK_INT < 33) {
+          result.setCollectionInfo(
+              AccessibilityNodeInfo.CollectionInfo.obtain(
+                  1, // row count
+                  semanticsNode.scrollChildren, // column count
+                  false // hierarchical
+                  ));
+
+        } else {
+          result.setCollectionInfo(
+              new AccessibilityNodeInfo.CollectionInfo(
+                  1, // row count
+                  semanticsNode.scrollChildren, // column count
+                  false // hierarchical
+                  ));
+        }
       } else {
-        result.setCollectionInfo(
-            new AccessibilityNodeInfo.CollectionInfo(
-                semanticsNode.scrollChildren, // row count
-                1, // column count
-                false // hierarchical
-                ));
+        // This code will only run on devices with API level 32 or lower.
+        // The obtain method was deprecated in API 33.
+        if (Build.VERSION.SDK_INT < 33) {
+          result.setCollectionInfo(
+              AccessibilityNodeInfo.CollectionInfo.obtain(
+                  semanticsNode.scrollChildren, // row count
+                  1, // column count
+                  false // hierarchical
+                  ));
+        } else {
+          result.setCollectionInfo(
+              new AccessibilityNodeInfo.CollectionInfo(
+                  semanticsNode.scrollChildren, // row count
+                  1, // column count
+                  false // hierarchical
+                  ));
+        }
       }
     }
     if (semanticsNode.scrollChildren > 0 && !shouldSetCollectionInfo(semanticsNode)) {
@@ -960,23 +983,49 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           !(parent.hasAction(Action.SCROLL_LEFT) || parent.hasAction(Action.SCROLL_RIGHT));
       int nodeIndex = scrollChildren.indexOf(semanticsNode);
       if (verticalScroll) {
-        result.setCollectionItemInfo(
-            new AccessibilityNodeInfo.CollectionItemInfo(
-                nodeIndex, // row index
-                1, // row span
-                0, // column index
-                1, // column span
-                semanticsNode.hasFlag(Flag.IS_HEADER) // is heading
-                ));
+        // This code will only run on devices with API level 32 or lower.
+        // The obtain method was deprecated in API 33.
+        if (Build.VERSION.SDK_INT < 33) {
+          result.setCollectionItemInfo(
+              AccessibilityNodeInfo.CollectionItemInfo.obtain(
+                  nodeIndex, // row index
+                  1, // row span
+                  0, // column index
+                  1, // column span
+                  semanticsNode.hasFlag(Flag.IS_HEADER) // is heading
+                  ));
+        } else {
+          result.setCollectionItemInfo(
+              new AccessibilityNodeInfo.CollectionItemInfo(
+                  nodeIndex, // row index
+                  1, // row span
+                  0, // column index
+                  1, // column span
+                  semanticsNode.hasFlag(Flag.IS_HEADER) // is heading
+                  ));
+        }
       } else {
-        result.setCollectionItemInfo(
-            new AccessibilityNodeInfo.CollectionItemInfo(
-                0, // row index
-                1, // row span
-                nodeIndex, // column index
-                1, // column span
-                semanticsNode.hasFlag(Flag.IS_HEADER) // is heading
-                ));
+        // This code will only run on devices with API level 32 or lower.
+        // The obtain method was deprecated in API 33.
+        if (Build.VERSION.SDK_INT < 33) {
+          result.setCollectionItemInfo(
+              AccessibilityNodeInfo.CollectionItemInfo.obtain(
+                  0, // row index
+                  1, // row span
+                  nodeIndex, // column index
+                  1, // column span
+                  semanticsNode.hasFlag(Flag.IS_HEADER) // is heading
+                  ));
+        } else {
+          result.setCollectionItemInfo(
+              new AccessibilityNodeInfo.CollectionItemInfo(
+                  0, // row index
+                  1, // row span
+                  nodeIndex, // column index
+                  1, // column span
+                  semanticsNode.hasFlag(Flag.IS_HEADER) // is heading
+                  ));
+        }
       }
     }
     // TODO(ianh): Once we're on SDK v23+, call addAction to
