@@ -1569,8 +1569,14 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   void updateScrollbarPainter() {
     final TextDirection textDirection = Directionality.of(context);
+
+    if (!needToHandleScrollbarReveal) {
+      scrollbarPainter.color = widget.thumbColor ?? const Color(0x66BCBCBC);
+    } else {
+      needToHandleScrollbarReveal = false;
+    }
+
     scrollbarPainter
-      ..color = widget.thumbColor ?? const Color(0x66BCBCBC)
       ..trackRadius = widget.trackRadius
       ..trackColor = _showTrack
           ? widget.trackColor ?? const Color(0x08000000)
@@ -2192,20 +2198,22 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   bool scrollbarRevealed = false;
+  bool needToHandleScrollbarReveal = false;
   void _revealAndroidScrollbar() {
     scrollbarRevealed = true;
+    needToHandleScrollbarReveal = true;
     print('_revealAndroidScrollbar called');
     setState(() {
       // scrollbarPainter.color = widget.thumbColor ?? const Color(0x66BCBCBC);
       // scrollbarPainter.trackColor = widget.trackColor ?? const Color(0x08000000);
       // scrollbarPainter.thickness = widget.thickness ?? _kScrollbarThickness;
       // scrollbarPainter.ignorePointer = false;
-      scrollbarPainter.color = Color(0xFFFF0000); // Change the color to red
-      scrollbarPainter.trackColor =
-          widget.trackColor ?? const Color(0x08000000); // Set track color if needed
-      scrollbarPainter.thickness =
-          widget.thickness ?? _kScrollbarThickness; // Ensure thickness is set
-      scrollbarPainter.ignorePointer = false; // Allow interaction
+      scrollbarPainter.color = const Color(0xFFFF0000); // Change the color to red
+      // scrollbarPainter.trackColor =
+      //     widget.trackColor ?? const Color(0x08000000); // Set track color if needed
+      // scrollbarPainter.thickness =
+      //     widget.thickness ?? _kScrollbarThickness; // Ensure thickness is set
+      // scrollbarPainter.ignorePointer = false; // Allow interaction
     });
   }
 

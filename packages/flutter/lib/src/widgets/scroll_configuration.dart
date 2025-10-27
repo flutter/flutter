@@ -170,7 +170,7 @@ class ScrollBehavior {
         print('buildScrollbar called');
         return RawScrollbar(
           child: child,
-          thumbVisibility: true, // Always show the scrollbar thumb
+          // thumbVisibility: true, // Always show the scrollbar thumb
           thickness: 8.0, // Thickness of the scrollbar
           radius: Radius.circular(10), // Rounded corners for the scrollbar
           thumbColor: Color.fromARGB(255, 21, 135, 228), // Color of the scrollbar thumb
