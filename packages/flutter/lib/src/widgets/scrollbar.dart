@@ -2213,8 +2213,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   void _receivedPointerSignal(PointerSignalEvent event) {
     _cachedController = _effectiveScrollController;
 
-    // TODO(camsim99): Fix.
-    if (event is PointerScrollEvent) {
+    // TODO(camsim99): Add trackpad.
+    if (event is PointerScrollEvent && event.kind == PointerDeviceKind.mouse) {
       if (!scrollbarRevealed) {
         _revealAndroidScrollbar();
       }
