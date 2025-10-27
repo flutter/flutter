@@ -73,7 +73,7 @@ class WebBuilder {
     if (serviceWorkerStrategy != null) {
       _logger.printWarning(
         'The --pwa-strategy option is deprecated and will be removed in a future Flutter release.\n'
-        'Fore more information, see: https://github.com/flutter/flutter/issues/156910',
+        'For more information, see: https://github.com/flutter/flutter/issues/156910',
       );
     }
 
