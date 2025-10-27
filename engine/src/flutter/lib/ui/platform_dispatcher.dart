@@ -1123,6 +1123,13 @@ class PlatformDispatcher {
 
   /// The system-reported height of the text, as a multiple of the font size.
   ///
+  /// This value takes precedence over any text height specified at the
+  /// application level and overrides it. For example, at framework level,
+  /// in the [TextStyle] for [Text] and [EditableText] widgets, this value
+  /// overrides the existing value of [TextStyle.height].
+  ///
+  /// Returns null when no override has been set by the system.
+  ///
   /// If this value changes, [onMetricsChanged] will be called.
   double? get lineHeightScaleFactorOverride => _configuration.lineHeightScaleFactorOverride;
 
@@ -1130,6 +1137,13 @@ class PlatformDispatcher {
   /// to add between each letter.
   ///
   /// A negative value can be used to bring the letters closer.
+  ///
+  /// This value takes precedence over any text letter spacing specified at the
+  /// application level and overrides it. For example, at framework level,
+  /// in the [TextStyle] for [Text] and [EditableText] widgets, this value
+  /// overrides the existing value of [TextStyle.letterSpacing].
+  ///
+  /// Returns null when no override has been set by the system.
   ///
   /// If this value changes, [onMetricsChanged] will be called.
   double? get letterSpacingOverride => _configuration.letterSpacingOverride;
@@ -1139,11 +1153,23 @@ class PlatformDispatcher {
   ///
   /// A negative value can be used to bring the words closer.
   ///
+  /// This value takes precedence over any text word spacing specified at the
+  /// application level and overrides it. For example, at framework level,
+  /// in the [TextStyle] for [Text] and [EditableText] widgets, this value
+  /// overrides the existing value of [TextStyle.wordSpacing].
+  ///
+  /// Returns null when no override has been set by the system.
+  ///
   /// If this value changes, [onMetricsChanged] will be called.
   double? get wordSpacingOverride => _configuration.wordSpacingOverride;
 
   /// The system-reported amount of additional space (in logical pixels)
   /// to add between each paragraph in text.
+  ///
+  /// This value takes precedence over any text paragraph spacing specified at
+  /// the application level and overrides it.
+  ///
+  /// Returns null when no override has been set by the system.
   ///
   /// If this value changes, [onMetricsChanged] will be called.
   double? get paragraphSpacingOverride => _configuration.paragraphSpacingOverride;

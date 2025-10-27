@@ -432,6 +432,13 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   /// The system-reported height of the text, as a multiple of the font size.
   ///
+  /// This value takes precedence over any text height specified at the
+  /// application level and overrides it. For example, at framework level,
+  /// in the [TextStyle] for [Text] and [EditableText] widgets, this value
+  /// overrides the existing value of [TextStyle.height].
+  ///
+  /// Returns null when no override has been set by the system.
+  ///
   /// Defaults to the value provided by [PlatformDispatcher.lineHeightScaleFactorOverride].
   /// This can only be set in a test environment to emulate different platform
   /// configurations. A standard [PlatformDispatcher] is not mutable from the
@@ -478,6 +485,13 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   ///
   /// A negative value can be used to bring the letters closer.
   ///
+  /// This value takes precedence over any text letter spacing specified at the
+  /// application level and overrides it. For example, at framework level,
+  /// in the [TextStyle] for [Text] and [EditableText] widgets, this value
+  /// overrides the existing value of [TextStyle.letterSpacing].
+  ///
+  /// Returns null when no override has been set by the system.
+  ///
   /// Defaults to the value provided by [PlatformDispatcher.letterSpacingOverride].
   /// This can only be set in a test environment to emulate different platform
   /// configurations. A standard [PlatformDispatcher] is not mutable from the
@@ -523,6 +537,13 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   ///
   /// A negative value can be used to bring the words closer.
   ///
+  /// This value takes precedence over any text word spacing specified at the
+  /// application level and overrides it. For example, at framework level,
+  /// in the [TextStyle] for [Text] and [EditableText] widgets, this value
+  /// overrides the existing value of [TextStyle.wordSpacing].
+  ///
+  /// Returns null when no override has been set by the system.
+  ///
   /// Defaults to the value provided by [PlatformDispatcher.wordSpacingOverride].
   /// This can only be set in a test environment to emulate different platform
   /// configurations. A standard [PlatformDispatcher] is not mutable from the
@@ -565,6 +586,11 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   /// The system-reported amount of additional space (in logical pixels)
   /// to add between each paragraph in text.
+  ///
+  /// This value takes precedence over any text paragraph spacing specified at
+  /// the application level and overrides it.
+  ///
+  /// Returns null when no override has been set by the system.
   ///
   /// Defaults to the value provided by [PlatformDispatcher.paragraphSpacingOverride].
   /// This can only be set in a test environment to emulate different platform
