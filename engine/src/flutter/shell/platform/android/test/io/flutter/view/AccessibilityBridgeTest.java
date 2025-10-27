@@ -2191,6 +2191,19 @@ public class AccessibilityBridgeTest {
   }
 
   @Test
+  public void itAddsButtonClassToLinkWithoutURL() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.addFlag(AccessibilityBridge.Flag.IS_LINK);
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+
+    assertEquals(nodeInfo.getClassName(), "android.widget.Button");
+  }
+
+  @Test
   public void itAddsClickActionToSliderNodeInfo() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
 

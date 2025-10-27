@@ -31,12 +31,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
+import io.flutter.Build.API_LEVELS;
 import io.flutter.BuildConfig;
 import io.flutter.Log;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.plugin.platform.PlatformViewsAccessibilityDelegate;
 import io.flutter.util.Predicate;
 import io.flutter.util.ViewUtils;
+import io.flutter.view.AccessibilityBridge.Flag;
 import io.flutter.view.AccessibilityStringBuilder.LocaleStringAttribute;
 import io.flutter.view.AccessibilityStringBuilder.SpellOutStringAttribute;
 import io.flutter.view.AccessibilityStringBuilder.StringAttribute;
@@ -832,7 +834,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       result.addAction(AccessibilityNodeInfo.ACTION_SET_TEXT);
     }
 
-    if (semanticsNode.hasFlag(Flag.IS_BUTTON)) {
+    if (semanticsNode.shouldBeTreatedAsButton()) {
       result.setClassName("android.widget.Button");
     }
     if (semanticsNode.hasFlag(Flag.IS_IMAGE)) {
@@ -2581,6 +2583,18 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         Log.e(TAG, "Attempted to check hadFlag but had no previous config.");
       }
       return (previousFlags & flag.value) != 0;
+    }
+
+    private boolean shouldBeTreatedAsButton() {
+      if (hasFlag(Flag.IS_BUTTON)) {
+        return true;
+      }
+      if (linkUrl != null && !linkUrl.isEmpty()) {
+        // This will be represented as link through URLSpan.
+        return false;
+      }
+      // In Android, a link is treated as a button if and only if it does not have a URL
+      return hasFlag(Flag.IS_LINK);
     }
 
     private boolean didScroll() {
