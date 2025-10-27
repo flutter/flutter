@@ -379,6 +379,56 @@ TEST_P(AiksTest, CanRenderClippedBlur) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, ComposePaintBlurOuter) {
+  DisplayListBuilder builder;
+
+  DlPaint background;
+  background.setColor(DlColor(1.0, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
+  builder.DrawPaint(background);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kGreen());
+  float matrix[] = {
+      0, 1, 0, 0, 0,  //
+      1, 0, 0, 0, 0,  //
+      0, 0, 1, 0, 0,  //
+      0, 0, 0, 1, 0   //
+  };
+  std::shared_ptr<DlImageFilter> color_filter =
+      DlImageFilter::MakeColorFilter(DlColorFilter::MakeMatrix(matrix));
+  std::shared_ptr<DlImageFilter> blur =
+      DlImageFilter::MakeBlur(20, 20, DlTileMode::kDecal);
+  paint.setImageFilter(DlImageFilter::MakeCompose(blur, color_filter));
+  builder.DrawCircle(DlPoint(400, 400), 200, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, ComposePaintBlurInner) {
+  DisplayListBuilder builder;
+
+  DlPaint background;
+  background.setColor(DlColor(1.0, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
+  builder.DrawPaint(background);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kGreen());
+  float matrix[] = {
+      0, 1, 0, 0, 0,  //
+      1, 0, 0, 0, 0,  //
+      0, 0, 1, 0, 0,  //
+      0, 0, 0, 1, 0   //
+  };
+  std::shared_ptr<DlImageFilter> color_filter =
+      DlImageFilter::MakeColorFilter(DlColorFilter::MakeMatrix(matrix));
+  std::shared_ptr<DlImageFilter> blur =
+      DlImageFilter::MakeBlur(20, 20, DlTileMode::kDecal);
+  paint.setImageFilter(DlImageFilter::MakeCompose(color_filter, blur));
+  builder.DrawCircle(DlPoint(400, 400), 200, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, ClippedBlurFilterRendersCorrectlyInteractive) {
   auto callback = [&]() -> sk_sp<DisplayList> {
     static PlaygroundPoint playground_point(Point(400, 400), 20,

@@ -91,6 +91,7 @@ impellerc("runtime_stages") {
     "interop_runtime_stage_cs.frag",
     "runtime_stage_simple.frag",
     "runtime_stage_position.frag",
+    "runtime_stage_filter_warp.frag",
     "gradient.frag",
     "uniforms_and_sampler_1.frag",
     "uniforms_and_sampler_2.frag",
