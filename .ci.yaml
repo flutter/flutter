@@ -4288,7 +4288,6 @@ targets:
 
   - name: Mac module_uiscene_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -7005,14 +7004,14 @@ targets:
         ["devicelab", "hostonly", "linux"]
       task_name: windowing_test_linux
 
-  - name: MacOS windowing_test
+  - name: Mac windowing_test
     recipe: devicelab/devicelab_drone
     presubmit: true
     bringup: true
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "hostonly", "macos"]
+        ["devicelab", "hostonly", "mac"]
       task_name: windowing_test_macos
 
 
