@@ -12,6 +12,7 @@ library;
 import 'dart:core';
 import 'dart:math' as math;
 import 'dart:ui'
+    as ui
     show
         CheckedState,
         Locale,
@@ -20,6 +21,7 @@ import 'dart:ui'
         SemanticsAction,
         SemanticsFlag,
         SemanticsFlags,
+        SemanticsHitTestBehavior,
         SemanticsInputType,
         SemanticsRole,
         SemanticsUpdate,
