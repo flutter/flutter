@@ -2214,6 +2214,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _cachedController = _effectiveScrollController;
 
     // TODO(camsim99): Add trackpad.
+    // TODO(camsim99): When you switch back to using your finger, it should unreveal scrollbar. Maybe consider adding a trackpad or mouse control.
+    // TODO(camsim99): Before I address the above, I should move this all over to Material.
     if (event is PointerScrollEvent && event.kind == PointerDeviceKind.mouse) {
       if (!scrollbarRevealed) {
         _revealAndroidScrollbar();
