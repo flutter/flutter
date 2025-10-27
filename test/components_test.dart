@@ -84,7 +84,7 @@ void main() {
     await tester.enterText(find.byType(TextField), 'Hello');
     await tester.pump();
 
-    expect(find.text('Você digitou: Hello'), findsOneWidget);
+    expect(find.text('Você digitou: Hello World'), findsOneWidget);
   });
 
   testWidgets('DropdownButton changes value on selection', (WidgetTester tester) async {
