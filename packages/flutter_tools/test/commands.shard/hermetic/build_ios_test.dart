@@ -5,6 +5,7 @@
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -314,6 +315,7 @@ void main() {
       ]),
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -350,6 +352,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -387,6 +390,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -423,6 +427,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -470,6 +475,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -508,6 +514,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -545,6 +552,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -580,6 +588,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -642,6 +651,7 @@ void main() {
       FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
       Analytics: () => fakeAnalytics,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -703,6 +713,7 @@ void main() {
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
         Pub: ThrowingPub.new,
         Analytics: () => fakeAnalytics,
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -766,6 +777,7 @@ void main() {
         ),
         Pub: ThrowingPub.new,
         Analytics: () => fakeAnalytics,
+        Artifacts: () => Artifacts.test(),
       },
     );
   });
@@ -809,6 +821,7 @@ void main() {
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -857,6 +870,7 @@ void main() {
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -910,6 +924,7 @@ void main() {
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -948,6 +963,7 @@ void main() {
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1004,6 +1020,7 @@ void main() {
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1051,6 +1068,7 @@ void main() {
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1092,6 +1110,7 @@ void main() {
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1150,6 +1169,7 @@ void main() {
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1194,6 +1214,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1236,6 +1257,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () =>
             FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1279,6 +1301,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         EnvironmentType: () => EnvironmentType.physical,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1320,6 +1343,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () =>
             FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1363,6 +1387,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () =>
             FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1413,6 +1438,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () =>
             FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
+        Artifacts: () => Artifacts.test(),
       },
     );
   });
@@ -1459,6 +1485,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1507,6 +1534,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1564,6 +1592,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1605,6 +1634,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
   });
