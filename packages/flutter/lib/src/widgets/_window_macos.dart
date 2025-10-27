@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 
 import '../foundation/_features.dart';
 import '_window.dart';
+import '_window_positioner.dart';
 import 'binding.dart';
 
 // Do not import this file in production applications or packages published
@@ -117,6 +118,18 @@ class WindowingOwnerMacOS extends WindowingOwner {
     String? title,
   }) {
     throw UnimplementedError();
+  }
+
+  @internal
+  @override
+  TooltipWindowController createTooltipWindowController({
+    required TooltipWindowControllerDelegate delegate,
+    required BoxConstraints preferredConstraints,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required BaseWindowController parent,
+  }) {
+    throw UnimplementedError('Tooltip windows are not yet implemented on MacOS.');
   }
 }
 
