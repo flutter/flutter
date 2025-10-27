@@ -100,7 +100,7 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
 ///
 /// Predictive back is only supported on Android U and above, and if this
 /// [PageTransitionsBuilder] is used by any other platform, it will fall back to
-/// [FadeForwardsPageTransitionsBuilder].
+/// [ZoomPageTransitionsBuilder].
 ///
 /// When used on Android U and above, animates along with the back gesture to
 /// reveal the destination route. Can be canceled by dragging back towards the

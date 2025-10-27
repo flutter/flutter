@@ -4377,6 +4377,34 @@ void _testLink() {
     expect(object.element.tagName.toLowerCase(), 'a');
     expect(object.element.getAttribute('href'), 'https://flutter.dev');
   });
+
+  test('a node that is both a link and a button is rendered as a link', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    const String url = 'https://flutter.dev';
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      linkUrl: url,
+      flags: const ui.SemanticsFlags(isLink: true, isButton: true),
+      label: 'link button label',
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+
+    tester.expectSemantics('<a style="display: block;">link button label</a>');
+    final SemanticsObject node = owner().debugSemanticsTree![0]!;
+    expect(node.semanticRole?.kind, EngineSemanticsRole.link);
+    expect(node.linkUrl, url);
+    expect(
+      node.semanticRole?.debugSemanticBehaviorTypes,
+      containsAll(<Type>[Focusable, Tappable, LabelAndValue]),
+    );
+
+    semantics().semanticsEnabled = false;
+  });
 }
 
 void _testTabs() {

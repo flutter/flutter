@@ -68,6 +68,12 @@ class SkwasmCallbackHandler {
   }
 }
 
+typedef RenderResult = ({
+  List<DomImageBitmap> imageBitmaps,
+  int rasterStartMicros,
+  int rasterEndMicros,
+});
+
 class SkwasmSurface {
   factory SkwasmSurface() {
     final SurfaceHandle surfaceHandle = withStackScope((StackScope scope) {
@@ -125,6 +131,10 @@ class SkwasmSurface {
     }
     skDataDispose(dataHandle);
     return ByteData.sublistView(output);
+  }
+
+  void setSkiaResourceCacheMaxBytes(int bytes) {
+    surfaceSetResourceCacheLimitBytes(handle, bytes);
   }
 
   void dispose() {

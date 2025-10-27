@@ -16,20 +16,28 @@ import '../src/common.dart';
 import 'test_data/basic_project.dart';
 import 'test_utils.dart';
 
-typedef ExpectedEvent = ({String event, FutureOr<void> Function(Map<String, Object?>)? validator});
+typedef ExpectedEvent = ({String event, FutureOr<bool> Function(Map<String, Object?>)? validator});
 
 final launchEvents = <ExpectedEvent>[
   (
+    event: 'widget_preview.initializing',
+    validator: (Map<String, Object?> params) {
+      return params.containsKey('pid');
+    },
+  ),
+  (
     event: 'widget_preview.started',
     validator: (Map<String, Object?> params) async {
-      if (params case {'uri': final String uri}) {
+      if (params case {'url': final String uri}) {
         try {
           final Response response = await get(Uri.parse(uri));
-          expect(response.statusCode, HttpStatus.ok, reason: 'Failed to retrieve widget previewer');
+          return response.statusCode == HttpStatus.ok;
+          // ignore: avoid_catches_without_on_clauses
         } catch (e) {
-          fail('Failed to access widget previewer: $e');
+          printOnFailure('Failed to access widget previewer: $e');
         }
       }
+      return false;
     },
   ),
 ];
@@ -82,7 +90,11 @@ void main() {
         if (event case [final Map<String, Object?> eventObject]) {
           final ExpectedEvent expectation = expectedEvents[nextExpectationIndex];
           if (expectation.event == eventObject['event']) {
-            await expectation.validator?.call(eventObject);
+            expect(
+              await expectation.validator?.call(eventObject['params']! as Map<String, Object?>),
+              true,
+              reason: 'Validator[$nextExpectationIndex] failed.',
+            );
             ++nextExpectationIndex;
           }
         }

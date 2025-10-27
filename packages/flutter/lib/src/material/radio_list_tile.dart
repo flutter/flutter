@@ -18,7 +18,6 @@ import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
-import 'material_state.dart';
 import 'radio.dart';
 import 'radio_theme.dart';
 import 'theme.dart';
@@ -51,7 +50,7 @@ enum _RadioType { material, adaptive }
 /// This widget does not coordinate the [selected] state and the
 /// [checked] state; to have the list tile appear selected when the
 /// radio button is the selected radio button, set [selected] to true
-/// when [value] matches [groupValue].
+/// when [value] matches [RadioGroup.groupValue].
 ///
 /// The radio button is shown on the left by default in left-to-right languages
 /// (i.e. the leading edge). This can be changed using [controlAffinity]. The
@@ -692,7 +691,7 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
     };
     final ThemeData theme = Theme.of(context);
     final RadioThemeData radioThemeData = RadioTheme.of(context);
-    final Set<MaterialState> states = <MaterialState>{if (widget.selected) MaterialState.selected};
+    final Set<WidgetState> states = <WidgetState>{if (widget.selected) WidgetState.selected};
     final Color effectiveActiveColor =
         widget.activeColor ??
         radioThemeData.fillColor?.resolve(states) ??

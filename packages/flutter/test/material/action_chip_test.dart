@@ -248,9 +248,9 @@ void main() {
     const Color disabledColor = Color(0xff00ff00);
     const Color backgroundColor = Color(0xff0000ff);
     final WidgetStateProperty<Color?> color = WidgetStateProperty.resolveWith((
-      Set<MaterialState> states,
+      Set<WidgetState> states,
     ) {
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         return disabledColor;
       }
       return backgroundColor;

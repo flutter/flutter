@@ -11,15 +11,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widget_previews.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'package:stack_trace/stack_trace.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dtd/editor_service.dart';
+import 'theme/ide_theme.dart';
+import 'theme/theme.dart';
 
 import 'controls.dart';
 import 'generated_preview.dart';
 import 'utils.dart';
 import 'widget_preview.dart';
+import 'widget_preview_inspector_service.dart';
 import 'widget_preview_scaffold_controller.dart';
 
 /// Displayed when an unhandled exception is thrown when initializing the widget
@@ -27,12 +30,16 @@ import 'widget_preview_scaffold_controller.dart';
 ///
 /// Provides users with details about the thrown exception, including the exception
 /// contents and a scrollable stack trace.
-class _WidgetPreviewErrorWidget extends StatelessWidget {
-  _WidgetPreviewErrorWidget({
+class WidgetPreviewErrorWidget extends StatelessWidget {
+  WidgetPreviewErrorWidget({
+    super.key,
+    required this.controller,
     required this.error,
     required StackTrace stackTrace,
     required this.size,
   }) : trace = Trace.from(stackTrace).terse;
+
+  final WidgetPreviewScaffoldController controller;
 
   /// The [Object] that was thrown, resulting in an unhandled exception.
   final Object error;
@@ -45,34 +52,39 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle boldStyle = fixBlurryText(
-      TextStyle(fontWeight: FontWeight.bold),
-    );
-    final TextStyle monospaceStyle = GoogleFonts.robotoMono();
-
+    final theme = Theme.of(context);
     return SizedBox(
       height: size.height,
       child: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
             Text.rich(
               TextSpan(
-                children: <TextSpan>[
+                children: [
                   TextSpan(
                     text: 'Failed to initialize widget tree: ',
-                    style: boldStyle,
+                    style: theme.boldTextStyle,
                   ),
-                  TextSpan(text: error.toString(), style: monospaceStyle),
+                  TextSpan(text: error.toString(), style: theme.fixedFontStyle),
                 ],
               ),
             ),
-            Text('Stacktrace:', style: boldStyle),
-            SelectableText.rich(
-              TextSpan(
-                children: _formatFrames(trace.frames),
-                style: monospaceStyle,
-              ),
+            Text('Stacktrace:', style: theme.boldTextStyle),
+            ValueListenableBuilder(
+              valueListenable: controller.editorServiceAvailable,
+              builder: (context, editorServiceAvailable, child) {
+                return SelectableText.rich(
+                  TextSpan(
+                    children: _formatFrames(
+                      theme,
+                      trace.frames,
+                      editorServiceAvailable,
+                    ),
+                    style: theme.fixedFontStyle,
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -80,7 +92,11 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
     );
   }
 
-  List<TextSpan> _formatFrames(List<Frame> frames) {
+  List<TextSpan> _formatFrames(
+    ThemeData theme,
+    List<Frame> frames,
+    bool editorServiceAvailable,
+  ) {
     // Figure out the longest path so we know how much to pad.
     final int longest = frames
         .map((frame) => frame.location.length)
@@ -89,19 +105,38 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
     // Print out the stack trace nicely formatted.
     return frames.map<TextSpan>((frame) {
       if (frame is UnparsedFrame) return TextSpan(text: '$frame\n');
+      // The Editor.navigateToCode service can't handle Dart core library paths,
+      // so don't allow for navigation to them. Also disable navigation if the
+      // Editor service isn't available.
+      final isLinkable =
+          (frame.uri.isScheme('file') || frame.uri.isScheme('package')) &&
+          editorServiceAvailable;
+      final style = isLinkable
+          ? theme.fixedFontLinkStyle
+          : theme.fixedFontStyle;
       return TextSpan(
-        children: <TextSpan>[
+        children: [
           TextSpan(
             text: frame.location,
-            style: linkTextStyle,
-            recognizer: TapGestureRecognizer()
-              ..onTap = () {
-                // TODO(bkonyi): notify IDEs to navigate to the source location via DTD.
-              },
+            style: style,
+            recognizer: isLinkable
+                ? (TapGestureRecognizer()
+                    ..onTap = () async {
+                      final resolvedUri = await controller.dtdServices
+                          .resolveUri(frame.uri);
+                      controller.dtdServices.navigateToCode(
+                        CodeLocation(
+                          uri: resolvedUri.toString(),
+                          line: frame.line,
+                          column: frame.column,
+                        ),
+                      );
+                    })
+                : null,
           ),
           TextSpan(text: ' ' * (longest - frame.location.length)),
           const TextSpan(text: '  '),
-          TextSpan(text: '${frame.member}\n'),
+          TextSpan(text: '${frame.member}\n', style: style),
         ],
       );
     }).toList();
@@ -118,27 +153,22 @@ class NoPreviewsDetectedWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO(bkonyi): base this on the current color theme (dark vs light)
-    final style = fixBlurryText(TextStyle(color: Colors.black));
+    final theme = Theme.of(context);
     return Center(
       child: Column(
-        children: <Widget>[
-          Text(
-            'No previews detected',
-            style: style.copyWith(fontWeight: FontWeight.bold),
-          ),
+        children: [
+          Text('No previews detected', style: theme.boldTextStyle),
           const VerticalSpacer(),
           Text('Read more about getting started with widget previews at:'),
           Text.rich(
             TextSpan(
               text: documentationUrl.toString(),
-              style: linkTextStyle,
+              style: theme.linkTextStyle,
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
                   launchUrl(documentationUrl);
                 },
             ),
-            style: style,
           ),
         ],
       ),
@@ -146,11 +176,15 @@ class NoPreviewsDetectedWidget extends StatelessWidget {
   }
 }
 
-class Preview extends StatelessWidget {
-  const Preview({super.key, required this.preview, required this.child});
+/// A wrapper that serves as the root entry for a single preview in the widget inspector.
+class PreviewWidget extends StatelessWidget {
+  const PreviewWidget({super.key, required this.preview, required this.child});
 
   final WidgetPreview preview;
   final Widget child;
+
+  @override
+  StatelessElement createElement() => PreviewWidgetElement(this);
 
   @override
   Widget build(BuildContext context) {
@@ -159,7 +193,9 @@ class Preview extends StatelessWidget {
 
   @override
   String toStringShort() {
-    final StringBuffer buffer = StringBuffer('@Preview');
+    final StringBuffer buffer = StringBuffer(
+      '@${preview.previewData.runtimeType}',
+    );
     if (preview.name != null) {
       buffer.write('(name: "${preview.name}")');
     }
@@ -173,10 +209,105 @@ class Preview extends StatelessWidget {
   }
 }
 
+/// A custom [StatelessElement] with the sole purpose of simplifying identifying
+/// selections of @Preview annotations in the widget inspector.
+class PreviewWidgetElement extends StatelessElement {
+  PreviewWidgetElement(super.widget);
+}
+
+class WidgetPreviewGroupWidget extends StatelessWidget {
+  const WidgetPreviewGroupWidget({
+    super.key,
+    required this.controller,
+    required this.group,
+  });
+
+  final WidgetPreviewScaffoldController controller;
+  final WidgetPreviewGroup group;
+
+  // Spacing values for the grid layout
+  static const _gridSpacing = 8.0;
+  static const _gridRunSpacing = 8.0;
+
+  /// The default radius of a Material 3 `Card`, as per documentation for `Card.shape`.
+  // TODO(bkonyi): inherit this from the theme.
+  static const _kCardRadius = Radius.circular(12);
+
+  Widget _buildGridViewFlex(List<WidgetPreview> previews) {
+    return Wrap(
+      spacing: WidgetPreviewGroupWidget._gridSpacing,
+      runSpacing: WidgetPreviewGroupWidget._gridRunSpacing,
+      alignment: WrapAlignment.start,
+      children: [
+        for (final WidgetPreview preview in previews)
+          WidgetPreviewWidget(controller: controller, preview: preview),
+      ],
+    );
+  }
+
+  Widget _buildVerticalListView(List<WidgetPreview> previews) {
+    return Column(
+      children: [
+        for (final preview in previews)
+          Center(
+            child: WidgetPreviewWidget(
+              controller: controller,
+              preview: preview,
+            ),
+          ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      child: ListTileTheme(
+        data: ListTileTheme.of(context).copyWith(
+          dense: true,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(_kCardRadius),
+          ),
+        ),
+        child: Theme(
+          // Prevents divider lines appearing at the top and bottom of the
+          // expanded ExpansionTile.
+          data: theme.copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            key: PageStorageKey(group.name),
+            title: Text(group.name),
+            initiallyExpanded: true,
+            children: [
+              ValueListenableBuilder<LayoutType>(
+                valueListenable: controller.layoutTypeListenable,
+                builder: (context, selectedLayout, _) {
+                  return switch (selectedLayout) {
+                    LayoutType.gridView => _buildGridViewFlex(group.previews),
+                    LayoutType.listView => _buildVerticalListView(
+                      group.previews,
+                    ),
+                  };
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class WidgetPreviewWidget extends StatefulWidget {
-  const WidgetPreviewWidget({super.key, required this.preview});
+  const WidgetPreviewWidget({
+    super.key,
+    required this.preview,
+    required this.controller,
+  });
 
   final WidgetPreview preview;
+
+  final WidgetPreviewScaffoldController controller;
 
   @override
   State<WidgetPreviewWidget> createState() => WidgetPreviewWidgetState();
@@ -252,9 +383,9 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
             child: WidgetPreviewTheming(
               theme: widget.preview.theme,
               child: EnableWidgetInspectorScope(
-                child: Preview(
+                child: PreviewWidget(
                   preview: widget.preview,
-                  child: widget.preview.builder(),
+                  child: widget.preview.previewBuilder(),
                 ),
               ),
             ),
@@ -271,7 +402,8 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
           // Catch any unhandled exceptions and display an error widget instead of taking
           // down the entire preview environment.
           errorThrownDuringTreeConstruction = true;
-          return _WidgetPreviewErrorWidget(
+          return WidgetPreviewErrorWidget(
+            controller: widget.controller,
             error: error,
             stackTrace: stackTrace,
             size: maxSizeConstraints.biggest,
@@ -288,6 +420,10 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       valueListenable:
           WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier,
       builder: (context, enableWidgetInspector, child) {
+        // Don't allow inspecting the error widget.
+        if (child is WidgetPreviewErrorWidget) {
+          return child;
+        }
         if (enableWidgetInspector) {
           return WidgetInspector(
             // TODO(bkonyi): wire up inspector controls for individual previews or
@@ -340,56 +476,97 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       child: preview,
     );
 
+    final hasName = widget.preview.name != null;
     preview = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        if (widget.preview.name != null) ...[
-          Text(
-            widget.preview.name!,
-            style: fixBlurryText(
-              TextStyle(fontSize: 16, fontWeight: FontWeight.w300),
+        if (hasName)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              widget.preview.name!,
+              style: fixBlurryText(
+                TextStyle(fontSize: 16, fontWeight: FontWeight.w300),
+              ),
             ),
           ),
-          const VerticalSpacer(),
-        ],
-        InteractiveViewerWrapper(
-          transformationController: transformationController,
-          child: preview,
-        ),
-        const VerticalSpacer(),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          // If an unhandled exception was caught and we're displaying an error
-          // widget, these controls should be disabled.
-          // TODO(bkonyi): improve layout of controls.
-          children: [
-            ZoomControls(
-              transformationController: transformationController,
-              enabled: !errorThrownDuringTreeConstruction,
-            ),
-            const SizedBox(width: 30),
-            BrightnessToggleButton(
-              enabled: !errorThrownDuringTreeConstruction,
-              brightnessListenable: brightnessListenable,
-            ),
-            const SizedBox(width: 10),
-            SoftRestartButton(
-              enabled: !errorThrownDuringTreeConstruction,
-              softRestartListenable: softRestartListenable,
-            ),
-          ],
+        Container(
+          padding: const EdgeInsets.symmetric(
+            // TODO(bkonyi): use theming or define global constants.
+            horizontal: 16.0,
+          ).add(hasName ? const EdgeInsets.only(top: 8.0) : EdgeInsets.zero),
+          decoration: hasName
+              ? BoxDecoration(
+                  border: Border(top: Divider.createBorderSide(context)),
+                )
+              : null,
+          child: Column(
+            children: [
+              InteractiveViewerWrapper(
+                transformationController: transformationController,
+                child: preview,
+              ),
+              const VerticalSpacer(),
+              Builder(
+                builder: (context) {
+                  return _WidgetPreviewControlRow(
+                    transformationController: transformationController,
+                    errorThrownDuringTreeConstruction:
+                        errorThrownDuringTreeConstruction,
+                    brightnessListenable: brightnessListenable,
+                    softRestartListenable: softRestartListenable,
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ],
     );
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Card(
+      child: Card.outlined(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
           child: preview,
         ),
       ),
+    );
+  }
+}
+
+class _WidgetPreviewControlRow extends StatelessWidget {
+  const _WidgetPreviewControlRow({
+    required this.transformationController,
+    required this.errorThrownDuringTreeConstruction,
+    required this.brightnessListenable,
+    required this.softRestartListenable,
+  });
+
+  final TransformationController transformationController;
+  final bool errorThrownDuringTreeConstruction;
+  final ValueNotifier<Brightness> brightnessListenable;
+  final ValueNotifier<bool> softRestartListenable;
+
+  @override
+  Widget build(BuildContext context) {
+    // Don't show controls if an error occurred.
+    if (errorThrownDuringTreeConstruction) {
+      return Container();
+    }
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      // If an unhandled exception was caught and we're displaying an error
+      // widget, these controls should be disabled.
+      // TODO(bkonyi): improve layout of controls.
+      children: [
+        ZoomControls(transformationController: transformationController),
+        const SizedBox(width: 30),
+        BrightnessToggleButton(brightnessListenable: brightnessListenable),
+        const SizedBox(width: 10),
+        SoftRestartButton(softRestartListenable: softRestartListenable),
+      ],
     );
   }
 }
@@ -752,21 +929,30 @@ class PreviewAssetBundle extends PlatformAssetBundle {
 /// the preview scaffold project which prevents us from being able to use hot
 /// restart to iterate on this file.
 Future<void> mainImpl() async {
+  final controller = WidgetPreviewScaffoldController(previews: previews);
+  await controller.initialize();
+  // WARNING: do not move this line. This constructor sets
+  // [WidgetInspectorService.instance] to the custom service for the widget
+  // previewer. If [WidgetsFlutterBinding.ensureInitialized()] is invoked before
+  // the custom service is set, inspector service extensions will be registered
+  // against the wrong service.
+  WidgetPreviewScaffoldInspectorService(dtdServices: controller.dtdServices);
   final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
   // Disable the injection of [WidgetInspector] into the widget tree built by
   // [WidgetsApp]. [WidgetInspector] instances will be created for each
   // individual preview so the widget inspector won't allow for users to select
   // widgets that make up the widget preview scaffolding.
   binding.debugExcludeRootWidgetInspector = true;
-  final controller = WidgetPreviewScaffoldController(previews: previews);
-  await controller.initialize();
   runWidget(
     DisableWidgetInspectorScope(
       child: binding.wrapWithDefaultView(
         // Forces the set of previews to be recalculated after a hot reload.
         HotReloadListener(
           onHotReload: controller.onHotReload,
-          child: WidgetPreviewScaffold(controller: controller),
+          child: WidgetPreviewScaffold(
+            controller: controller,
+            ideTheme: getIdeTheme(),
+          ),
         ),
       ),
     ),
@@ -774,16 +960,31 @@ Future<void> mainImpl() async {
 }
 
 class WidgetPreviewScaffold extends StatelessWidget {
-  const WidgetPreviewScaffold({super.key, required this.controller});
+  const WidgetPreviewScaffold({
+    super.key,
+    required this.controller,
+    this.ideTheme = const IdeTheme(),
+  });
 
   final WidgetPreviewScaffoldController controller;
+  final IdeTheme ideTheme;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: themeFor(
+        isDarkTheme: false,
+        ideTheme: ideTheme,
+        theme: ThemeData(),
+      ),
+      darkTheme: themeFor(
+        isDarkTheme: true,
+        ideTheme: ideTheme,
+        theme: ThemeData.dark(),
+      ),
+      themeMode: ideTheme.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: Material(
-        color: Colors.transparent,
         child: Column(
           children: [
             // Display the previewer
@@ -835,57 +1036,29 @@ class WidgetPreviews extends StatelessWidget {
 
   final WidgetPreviewScaffoldController controller;
 
-  // Spacing values for the grid layout
-  static const _gridSpacing = 8.0;
-  static const _gridRunSpacing = 8.0;
-
-  Widget _buildGridViewFlex(Iterable<WidgetPreview> previewList) {
-    return SingleChildScrollView(
-      child: Wrap(
-        spacing: _gridSpacing,
-        runSpacing: _gridRunSpacing,
-        alignment: WrapAlignment.start,
-        children: <Widget>[
-          for (final WidgetPreview preview in previewList)
-            WidgetPreviewWidget(preview: preview),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildVerticalListView(Iterable<WidgetPreview> previews) {
-    final previewList = previews.toList();
-    return ListView.builder(
-      itemCount: previewList.length,
-      itemBuilder: (context, index) {
-        final preview = previewList[index];
-        return Center(child: WidgetPreviewWidget(preview: preview));
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<Iterable<WidgetPreview>>(
+    return ValueListenableBuilder<WidgetPreviewGroups>(
       valueListenable: controller.filteredPreviewSetListenable,
-      builder: (context, previewList, _) {
-        if (previewList.isEmpty) {
+      builder: (context, previewGroups, _) {
+        if (previewGroups.isEmpty) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[NoPreviewsDetectedWidget()],
+            children: [NoPreviewsDetectedWidget()],
           );
         }
         return LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
+            final previewGroupsList = previewGroups.toList();
             return WidgetPreviewerWindowConstraints(
               constraints: constraints,
-              child: ValueListenableBuilder<LayoutType>(
-                valueListenable: controller.layoutTypeListenable,
-                builder: (context, selectedLayout, _) {
-                  return switch (selectedLayout) {
-                    LayoutType.gridView => _buildGridViewFlex(previewList),
-                    LayoutType.listView => _buildVerticalListView(previewList),
-                  };
+              child: ListView.builder(
+                itemCount: previewGroups.length,
+                itemBuilder: (context, index) {
+                  return WidgetPreviewGroupWidget(
+                    controller: controller,
+                    group: previewGroupsList[index],
+                  );
                 },
               ),
             );

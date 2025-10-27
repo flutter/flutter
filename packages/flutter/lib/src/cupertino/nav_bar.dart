@@ -2027,11 +2027,7 @@ class _NavigationBarStaticComponents {
       child: Padding(
         padding: EdgeInsetsDirectional.only(start: padding?.start ?? _kNavBarEdgePadding),
         child: MediaQuery(
-          data: MediaQueryData(
-            textScaler: MediaQuery.textScalerOf(
-              context,
-            ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kMaxScaleFactor),
-          ),
+          data: MediaQuery.of(context).copyWith(textScaler: _clampedTextScaler(context)),
           child: IconTheme.merge(data: const IconThemeData(size: 32.0), child: leadingContent),
         ),
       ),
@@ -2057,11 +2053,7 @@ class _NavigationBarStaticComponents {
     return KeyedSubtree(
       key: backChevronKey,
       child: MediaQuery(
-        data: MediaQueryData(
-          textScaler: MediaQuery.textScalerOf(
-            context,
-          ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kMaxScaleFactor),
-        ),
+        data: MediaQuery.of(context).copyWith(textScaler: _clampedTextScaler(context)),
         child: const _BackChevron(),
       ),
     );
@@ -2089,11 +2081,7 @@ class _NavigationBarStaticComponents {
     return KeyedSubtree(
       key: backLabelKey,
       child: MediaQuery(
-        data: MediaQueryData(
-          textScaler: MediaQuery.textScalerOf(
-            context,
-          ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kMaxScaleFactor),
-        ),
+        data: MediaQuery.of(context).copyWith(textScaler: _clampedTextScaler(context)),
         child: _BackLabel(specifiedPreviousTitle: previousPageTitle, route: route),
       ),
     );
@@ -2136,11 +2124,7 @@ class _NavigationBarStaticComponents {
     return KeyedSubtree(
       key: middleKey,
       child: MediaQuery(
-        data: MediaQueryData(
-          textScaler: MediaQuery.textScalerOf(
-            context,
-          ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kMaxScaleFactor),
-        ),
+        data: MediaQuery.of(context).copyWith(textScaler: _clampedTextScaler(context)),
         child: middleContent,
       ),
     );
@@ -2162,11 +2146,7 @@ class _NavigationBarStaticComponents {
       child: Padding(
         padding: EdgeInsetsDirectional.only(end: padding?.end ?? _kNavBarEdgePadding),
         child: MediaQuery(
-          data: MediaQueryData(
-            textScaler: MediaQuery.textScalerOf(
-              context,
-            ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kMaxScaleFactor),
-          ),
+          data: MediaQuery.of(context).copyWith(textScaler: _clampedTextScaler(context)),
           child: IconTheme.merge(data: const IconThemeData(size: 32.0), child: userTrailing),
         ),
       ),
@@ -2200,7 +2180,7 @@ class _NavigationBarStaticComponents {
     return KeyedSubtree(
       key: largeTitleKey,
       child: MediaQuery(
-        data: MediaQueryData(
+        data: MediaQuery.of(context).copyWith(
           textScaler: TextScaler.linear(
             _dampScaleFactor(
               MediaQuery.textScalerOf(context).scale(_kNavBarLargeTitleHeightExtension),
@@ -2223,10 +2203,16 @@ class _NavigationBarStaticComponents {
     return KeyedSubtree(
       key: navBarBottomKey,
       child: MediaQuery(
-        data: MediaQueryData(textScaler: MediaQuery.textScalerOf(context)),
+        data: MediaQuery.of(context).copyWith(textScaler: MediaQuery.textScalerOf(context)),
         child: userBottom ?? const SizedBox.shrink(),
       ),
     );
+  }
+
+  static TextScaler _clampedTextScaler(BuildContext context) {
+    return MediaQuery.textScalerOf(
+      context,
+    ).clamp(minScaleFactor: 1.0, maxScaleFactor: _kMaxScaleFactor);
   }
 }
 
