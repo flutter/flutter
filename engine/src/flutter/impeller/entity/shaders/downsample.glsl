@@ -20,7 +20,17 @@ in highp vec2 v_texture_coords;
 
 out vec4 frag_color;
 
-vec4 Sample(highp vec2 uv);
+vec4 Sample(vec2 uv) {
+#ifdef SUPPORTS_DECAL
+  return texture(texture_sampler, uv, float16_t(kDefaultMipBias));
+#else
+  if ((uv.x < 0 || uv.y < 0 || uv.x > 1 || uv.y > 1)) {
+    return vec4(0);
+  } else {
+    return texture(texture_sampler, uv, float16_t(kDefaultMipBias));
+  }
+#endif
+}
 
 void main() {
   vec4 total = vec4(0.0);

@@ -177,8 +177,6 @@ class ContentContext {
   PipelineRef GetDestinationOutBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetDestinationOverBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetDownsamplePipeline(ContentContextOptions opts) const;
-  PipelineRef GetDownsampleSoftwareDecalPipeline(ContentContextOptions opts) const;
-  PipelineRef GetDownsampleQuadBoundsPipeline(ContentContextOptions opts) const;
   PipelineRef GetDrawVerticesUberPipeline(BlendMode blend_mode, ContentContextOptions opts) const;
   PipelineRef GetFastGradientPipeline(ContentContextOptions opts) const;
   PipelineRef GetFramebufferBlendColorBurnPipeline(ContentContextOptions opts) const;
@@ -230,6 +228,7 @@ class ContentContext {
   PipelineRef GetXorBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetYUVToRGBFilterPipeline(ContentContextOptions opts) const;
 #ifdef IMPELLER_ENABLE_OPENGLES
+  PipelineRef GetDownsampleTextureGlesPipeline(ContentContextOptions opts) const;
   PipelineRef GetTiledTextureExternalPipeline(ContentContextOptions opts) const;
   PipelineRef GetTiledTextureUvExternalPipeline(ContentContextOptions opts) const;
 #endif  // IMPELLER_ENABLE_OPENGLES

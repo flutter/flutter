@@ -539,16 +539,20 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
           pass.SetCommandLabel("Gaussian blur downsample");
           auto pipeline_options = OptionsFromPass(pass);
           pipeline_options.primitive_type = PrimitiveType::kTriangleStrip;
+#ifdef IMPELLER_ENABLE_OPENGLES
+          // The GLES backend conditionally supports decal tile mode, while
+          // decal is always supported for Vulkan and Metal.
           if (renderer.GetDeviceCapabilities()
                   .SupportsDecalSamplerAddressMode() ||
               tile_mode != Entity::TileMode::kDecal) {
-            // The GLES backend conditionally supports decal tile mode, while
-            // decal is always supported for Vulkan and Metal.
             pass.SetPipeline(renderer.GetDownsamplePipeline(pipeline_options));
           } else {
             pass.SetPipeline(
-                renderer.GetDownsampleSoftwareDecalPipeline(pipeline_options));
+                renderer.GetDownsampleTextureGlesPipeline(pipeline_options));
           }
+#else
+          pass.SetPipeline(renderer.GetDownsamplePipeline(pipeline_options));
+#endif  // IMPELLER_ENABLE_OPENGLES
 
           TextureFillVertexShader::FrameInfo frame_info;
           frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
