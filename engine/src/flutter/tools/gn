@@ -439,7 +439,12 @@ def to_gn_args(args):
 
   gn_args['buildtools_path'] = '//flutter/buildtools'
 
+  if args.unoptimized and args.optimize_for_size:
+    raise Exception('--unoptimized and --optimize-for-size are mutually exclusive')
+
   gn_args['is_debug'] = args.unoptimized
+
+  gn_args['optimize_for_size'] = args.optimize_for_size
 
   gn_args.update(setup_git_versions())
 
@@ -843,6 +848,7 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['target_os'] = 'wasm'
   gn_args['target_cpu'] = 'wasm'
   gn_args['wasm_use_dwarf'] = args.wasm_use_dwarf
+  gn_args['wasm_prioritize_size'] = args.optimize_for_size
   gn_args['skia_use_angle'] = False
   gn_args['skia_use_dng_sdk'] = False
   gn_args['skia_use_expat'] = False
@@ -899,7 +905,14 @@ def parse_args(args):
   parser = argparse.ArgumentParser(description='A script to run `gn gen`.')
 
   parser.add_argument('--unoptimized', default=False, action='store_true')
-
+  parser.add_argument(
+      '--optimize-for-size',
+      default=False,
+      action='store_true',
+      help='Optimize for code size rather than speed. '
+      'Optimized builds for Windows, iOS, and Android are '
+      'always optimized for size regardless of the value of this flag.'
+  )
   parser.add_argument(
       '--enable-unittests',
       action='store_true',
