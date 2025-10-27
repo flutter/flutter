@@ -32,9 +32,6 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.os.Looper;
 import android.view.Surface;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleRegistry;
-import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.android.FlutterActivity;
@@ -925,38 +922,6 @@ public class FlutterRendererTest {
   }
 
   @Test
-  @SuppressWarnings({"deprecation", "removal"})
-  public void ImageReaderSurfaceProducerIsCreatedOnLifecycleResume() throws Exception {
-    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
-    TextureRegistry.SurfaceProducer producer =
-        flutterRenderer.createSurfaceProducer(TextureRegistry.SurfaceLifecycle.resetInBackground);
-
-    // Create a callback.
-    CountDownLatch latch = new CountDownLatch(1);
-    TextureRegistry.SurfaceProducer.Callback callback =
-        new TextureRegistry.SurfaceProducer.Callback() {
-          @Override
-          public void onSurfaceAvailable() {
-            latch.countDown();
-          }
-
-          @Override
-          public void onSurfaceDestroyed() {}
-        };
-    producer.setCallback(callback);
-
-    // Trim memory.
-    flutterRenderer.onTrimMemory(TRIM_MEMORY_BACKGROUND);
-
-    // Trigger a resume.
-    ((LifecycleRegistry) ProcessLifecycleOwner.get().getLifecycle())
-        .setCurrentState(Lifecycle.State.RESUMED);
-
-    // Verify.
-    latch.await();
-  }
-
-  @Test
   public void ImageReaderSurfaceProducerSchedulesFrameIfQueueNotEmpty() throws Exception {
     FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
@@ -1061,5 +1026,25 @@ public class FlutterRendererTest {
     Surface secondSurface = producer.getSurface();
 
     assertEquals(firstSurface, secondSurface);
+  }
+
+  @Test
+  public void restoreSurfaceProducers_restoresImageReaderSurfaceProducersAsIfApplicationResumed() {
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+    FlutterRenderer.ImageReaderSurfaceProducer imageReaderProducer1 =
+        (FlutterRenderer.ImageReaderSurfaceProducer) flutterRenderer.createSurfaceProducer();
+    FlutterRenderer.ImageReaderSurfaceProducer imageReaderProducer2 =
+        (FlutterRenderer.ImageReaderSurfaceProducer) flutterRenderer.createSurfaceProducer();
+    imageReaderProducer1.callback = mock(TextureRegistry.SurfaceProducer.Callback.class);
+    imageReaderProducer2.callback = mock(TextureRegistry.SurfaceProducer.Callback.class);
+    imageReaderProducer1.notifiedDestroy = true;
+    imageReaderProducer2.notifiedDestroy = true;
+
+    flutterRenderer.restoreSurfaceProducers();
+
+    verify(imageReaderProducer1.callback).onSurfaceAvailable();
+    verify(imageReaderProducer2.callback).onSurfaceAvailable();
+    assertFalse(imageReaderProducer1.notifiedDestroy);
+    assertFalse(imageReaderProducer2.notifiedDestroy);
   }
 }

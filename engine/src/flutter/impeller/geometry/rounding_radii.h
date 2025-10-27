@@ -84,10 +84,6 @@ struct RoundingRadii {
            bottom_left == rr.bottom_left &&  //
            bottom_right == rr.bottom_right;
   }
-
-  [[nodiscard]] constexpr bool operator!=(const RoundingRadii& rr) const {
-    return !(*this == rr);
-  }
 };
 
 }  // namespace impeller

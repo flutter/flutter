@@ -781,21 +781,16 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
     }
   }
 
-  Widget _buildOverlay(BuildContext context) {
-    final BuildContext anchorContext = _anchorKey.currentContext!;
-    final RenderBox overlay =
-        Overlay.of(anchorContext, rootOverlay: useRootOverlay).context.findRenderObject()!
-            as RenderBox;
-    final RenderBox anchorBox = anchorContext.findRenderObject()! as RenderBox;
-    final ui.Offset upperLeft = anchorBox.localToGlobal(Offset.zero, ancestor: overlay);
-    final ui.Offset bottomRight = anchorBox.localToGlobal(
-      anchorBox.size.bottomRight(Offset.zero),
-      ancestor: overlay,
-    );
+  Widget _buildOverlay(BuildContext context, OverlayChildLayoutInfo layoutInfo) {
+    final Matrix4 transform = layoutInfo.childPaintTransform;
+    final Size anchorSize = layoutInfo.childSize;
+
+    // Transform the anchor rectangle using the full transform matrix.
+    final Rect anchorRect = MatrixUtils.transformRect(transform, Offset.zero & anchorSize);
 
     final RawMenuOverlayInfo info = RawMenuOverlayInfo(
-      anchorRect: Rect.fromPoints(upperLeft, bottomRight),
-      overlaySize: overlay.size,
+      anchorRect: anchorRect,
+      overlaySize: layoutInfo.overlaySize,
       position: _menuPosition,
       tapRegionGroupId: root.menuController,
     );
@@ -823,19 +818,14 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
       ),
     );
 
-    if (useRootOverlay) {
-      return OverlayPortal.targetsRootOverlay(
-        controller: _overlayController,
-        overlayChildBuilder: _buildOverlay,
-        child: child,
-      );
-    } else {
-      return OverlayPortal(
-        controller: _overlayController,
-        overlayChildBuilder: _buildOverlay,
-        child: child,
-      );
-    }
+    return OverlayPortal.overlayChildLayoutBuilder(
+      controller: _overlayController,
+      overlayChildBuilder: _buildOverlay,
+      overlayLocation: useRootOverlay
+          ? OverlayChildLocation.rootOverlay
+          : OverlayChildLocation.nearestOverlay,
+      child: child,
+    );
   }
 
   @override
@@ -987,7 +977,7 @@ class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
 ///   [MenuController].
 /// * [SubmenuButton], a widget that has a button that manages a submenu.
 /// * [RawMenuAnchor], a widget that defines a region that has submenu.
-final class MenuController {
+class MenuController {
   // The anchor that this controller controls.
   //
   // This is set automatically when this `MenuController` is attached to an

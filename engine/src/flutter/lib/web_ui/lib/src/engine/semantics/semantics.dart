@@ -2055,14 +2055,14 @@ class SemanticsObject {
       return EngineSemanticsRole.image;
     } else if (isCheckable) {
       return EngineSemanticsRole.checkable;
+    } else if (isLink) {
+      return EngineSemanticsRole.link;
     } else if (isButton) {
       return EngineSemanticsRole.button;
     } else if (isScrollContainer) {
       return EngineSemanticsRole.scrollable;
     } else if (scopesRoute) {
       return EngineSemanticsRole.route;
-    } else if (isLink) {
-      return EngineSemanticsRole.link;
     } else if (isHeader) {
       return EngineSemanticsRole.header;
     } else if (isButtonLike) {

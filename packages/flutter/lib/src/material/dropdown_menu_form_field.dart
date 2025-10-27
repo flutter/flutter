@@ -96,7 +96,7 @@ class DropdownMenuFormField<T> extends FormField<T> {
                textAlign: textAlign,
                inputDecorationTheme: inputDecorationTheme,
                menuStyle: menuStyle,
-               controller: controller,
+               controller: state.textFieldController,
                initialSelection: state.value,
                onSelected: field.didChange,
                focusNode: focusNode,
@@ -139,7 +139,13 @@ class DropdownMenuFormField<T> extends FormField<T> {
 class _DropdownMenuFormFieldState<T> extends FormFieldState<T> {
   DropdownMenuFormField<T> get _dropdownMenuFormField => widget as DropdownMenuFormField<T>;
 
+  // The controller used to restore the selected item.
   RestorableTextEditingController? _restorableController;
+
+  // The controller used to reset the content of the DropdownMenu inner TextField.
+  TextEditingController? _localTextFieldController;
+  TextEditingController get textFieldController =>
+      _dropdownMenuFormField.controller ?? (_localTextFieldController ??= TextEditingController());
 
   @override
   void initState() {
@@ -163,11 +169,16 @@ class _DropdownMenuFormFieldState<T> extends FormFieldState<T> {
     if (oldWidget.initialValue != widget.initialValue && !hasInteractedByUser) {
       setValue(widget.initialValue);
     }
+    if (oldWidget.controller != _dropdownMenuFormField.controller) {
+      _localTextFieldController?.dispose();
+      _localTextFieldController = null;
+    }
   }
 
   @override
   void dispose() {
     _restorableController?.dispose();
+    _localTextFieldController?.dispose();
     super.dispose();
   }
 
@@ -183,6 +194,9 @@ class _DropdownMenuFormFieldState<T> extends FormFieldState<T> {
     super.reset();
     _dropdownMenuFormField.onSelected?.call(value);
     _updateRestorableController(widget.initialValue);
+    if (widget.initialValue == null) {
+      textFieldController.clear();
+    }
   }
 
   void _updateRestorableController(T? value) {

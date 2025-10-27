@@ -220,9 +220,9 @@ void main() {
       side: MaterialStatePropertyAll<BorderSide>(whiteSide),
     );
 
-    // MaterialState.all<Foo>(value) properties resolve to value
+    // WidgetState.all<Foo>(value) properties resolve to value
     // for any set of MaterialStates.
-    const Set<MaterialState> states = <MaterialState>{};
+    const Set<WidgetState> states = <WidgetState>{};
 
     expect(ButtonStyle.lerp(blackStyle, blackStyle, 0)?.side?.resolve(states), blackSide);
     expect(ButtonStyle.lerp(blackStyle, blackStyle, 0.5)?.side?.resolve(states), blackSide);
