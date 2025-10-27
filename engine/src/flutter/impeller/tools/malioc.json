@@ -6896,10 +6896,10 @@
       }
     }
   },
-  "flutter/impeller/entity/gles/texture_downsample_software_decal.frag.gles": {
+  "flutter/impeller/entity/gles/texture_downsample_gles.frag.gles": {
     "Mali-G78": {
       "core": "Mali-G78",
-      "filename": "flutter/impeller/entity/gles/texture_downsample_software_decal.frag.gles",
+      "filename": "flutter/impeller/entity/gles/texture_downsample_gles.frag.gles",
       "has_side_effects": false,
       "has_uniform_computation": true,
       "modifies_coverage": false,
@@ -6962,14 +6962,14 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 12,
+          "uniform_registers_used": 8,
           "work_registers_used": 19
         }
       }
     },
     "Mali-T880": {
       "core": "Mali-T880",
-      "filename": "flutter/impeller/entity/gles/texture_downsample_software_decal.frag.gles",
+      "filename": "flutter/impeller/entity/gles/texture_downsample_gles.frag.gles",
       "has_uniform_computation": false,
       "type": "Fragment",
       "variants": {
@@ -7008,7 +7008,7 @@
             ]
           },
           "thread_occupancy": 50,
-          "uniform_registers_used": 2,
+          "uniform_registers_used": 1,
           "work_registers_used": 6
         }
       }
@@ -10261,10 +10261,10 @@
       }
     }
   },
-  "flutter/impeller/entity/texture_downsample_software_decal.frag.vkspv": {
+  "flutter/impeller/entity/texture_downsample_gles.frag.vkspv": {
     "Mali-G78": {
       "core": "Mali-G78",
-      "filename": "flutter/impeller/entity/texture_downsample_software_decal.frag.vkspv",
+      "filename": "flutter/impeller/entity/texture_downsample_gles.frag.vkspv",
       "has_side_effects": false,
       "has_uniform_computation": true,
       "modifies_coverage": false,
@@ -10327,7 +10327,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 12,
+          "uniform_registers_used": 8,
           "work_registers_used": 17
         }
       }
