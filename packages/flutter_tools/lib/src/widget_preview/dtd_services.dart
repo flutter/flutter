@@ -17,6 +17,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../project.dart';
@@ -175,7 +176,7 @@ class DtdLauncher {
     // Wait for the DTD connection information.
     final dtdUri = Completer<Uri>();
     late final StreamSubscription<String> sub;
-    sub = _dtdProcess!.stdout.transform(const Utf8Decoder()).listen((String data) async {
+    sub = _dtdProcess!.stdout.transformWithCallSite(utf8.decoder).listen((String data) async {
       await sub.cancel();
       final jsonData = json.decode(data) as Map<String, Object?>;
       if (jsonData case {'tooling_daemon_details': {'uri': final String dtdUriString}}) {

@@ -16,7 +16,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
-import '../convert.dart';
+import '../base/utils.dart';
 
 /// An environment variable used to override the location of Google Chrome.
 const kChromeEnvironment = 'CHROME_EXECUTABLE';
@@ -303,7 +303,7 @@ class ChromiumLauncher {
     while (true) {
       final Process process = await _processManager.start(args);
 
-      process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
+      process.stdout.transform(utf8LineDecoder).listen((String line) {
         _logger.printTrace('[CHROME]: $line');
       });
 
@@ -313,8 +313,7 @@ class ChromiumLauncher {
       var shouldRetry = false;
       final errors = <String>[];
       await process.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
+          .transform(utf8LineDecoder)
           .map((String line) {
             _logger.printTrace('[CHROME]: $line');
             errors.add('[CHROME]:$line');
