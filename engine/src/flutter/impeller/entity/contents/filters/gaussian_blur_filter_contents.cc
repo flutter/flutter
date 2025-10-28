@@ -147,6 +147,15 @@ Rect MakeReferenceUVs(const Rect& reference, const Rect& rect) {
   return result.Scale(1.0f / Vector2(reference.GetSize()));
 }
 
+Quad MakeReferenceUVs(const Rect& reference, const Quad& target_quad) {
+  Matrix transform =
+      Matrix::MakeScale(Vector3(1.0f / reference.GetWidth(),
+                                1.0f / reference.GetHeight(), 1.0f)) *
+      Matrix::MakeTranslation(
+          Vector3(-reference.GetLeft(), -reference.GetTop(), 0));
+  return transform.Transform(target_quad);
+}
+
 Quad CalculateSnapshotUVs(
     const Snapshot& input_snapshot,
     const std::optional<Rect>& source_expanded_coverage_hint) {
@@ -169,19 +178,6 @@ Quad CalculateSnapshotUVs(
     }
   }
   return blur_uvs;
-}
-
-std::optional<Quad> CalculateBoundsUVs(std::optional<Rect> reference,
-                                       Quad source_bounds) {
-  if (reference.has_value()) {
-    auto uv_point = [&](const Point& p) -> Point {
-      return Point((p.x - reference->GetLeft()) / reference->GetWidth(),
-                   (p.y - reference->GetTop()) / reference->GetHeight());
-    };
-    return Quad{uv_point(source_bounds[0]), uv_point(source_bounds[1]),
-                uv_point(source_bounds[2]), uv_point(source_bounds[3])};
-  }
-  return std::nullopt;
 }
 
 Scalar CeilToDivisible(Scalar val, Scalar divisor) {
@@ -217,12 +213,12 @@ Scalar FloorToDivisible(Scalar val, Scalar divisor) {
 // See also: IPRemapCoords in convergions.glsl.
 Quad RemapQuadCoords(const Quad& input, Scalar texture_sampler_y_coord_scale) {
   if (texture_sampler_y_coord_scale < 0.0f) {
-    // Vertically flipping the quad:
+    // The 4 points need reordering, because vertically flipping the quad:
     //
     //   0   1
     //   2   3
     //
-    // Becomes:
+    // becomes:
     //
     //   2   3
     //   0   1
@@ -254,7 +250,7 @@ Quad RemapQuadCoords(const Quad& input, Scalar texture_sampler_y_coord_scale) {
 //
 // The `bounds` contains the 4 vertices of the quadrilateral, ordered as
 // [Top-Left, Top-Right, Bottom-Left, Bottom-Right] (a "Z-order" layout,
-// conforming to Rect::GetPoints()).
+// conforming to the return format of Rect::GetPoints()).
 Matrix PrecomputeQuadLineParameters(const Quad& bounds) {
   auto computeLine = [](const Point& p0, const Point& p1) -> Vector4 {
     // We are deriving the 2D line equation Ax + By + C = 0.
@@ -393,10 +389,8 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
     Quad uvs = CalculateSnapshotUVs(input_snapshot, aligned_coverage_hint);
     std::optional<Quad> blur_uv_bounds;
     if (source_bounds.has_value()) {
-      blur_uv_bounds = CalculateBoundsUVs(
-          aligned_coverage_hint,
-          RemapQuadCoords(source_bounds.value(),
-                          input_snapshot.texture->GetYCoordScale()));
+      blur_uv_bounds =
+          MakeReferenceUVs(aligned_coverage_hint, source_bounds.value());
     }
     return {
         .subpass_size = subpass_size,
@@ -436,11 +430,9 @@ DownsamplePassArgs CalculateDownsamplePassArgs(
         input, snapshot_entity, source_rect_padded, input_snapshot_size);
     std::optional<Quad> blur_uv_bounds;
     if (source_bounds.has_value()) {
-      blur_uv_bounds = CalculateBoundsUVs(
+      blur_uv_bounds = MakeReferenceUVs(
           source_rect_padded,
-          input_snapshot.transform.Invert().Transform(
-              RemapQuadCoords(source_bounds.value(),
-                              input_snapshot.texture->GetYCoordScale())));
+          input_snapshot.transform.Invert().Transform(source_bounds.value()));
     }
 
     return {
@@ -917,12 +909,9 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   std::optional<Quad> source_bounds;
   if (bounds_.has_value()) {
     Quad global_bounds = bounds_->GetTransformedPoints(effect_transform);
-    source_bounds = Quad{
-        snapshot_entity.GetTransform() * global_bounds[0],
-        snapshot_entity.GetTransform() * global_bounds[1],
-        snapshot_entity.GetTransform() * global_bounds[2],
-        snapshot_entity.GetTransform() * global_bounds[3],
-    };
+    source_bounds =
+        RemapQuadCoords(snapshot_entity.GetTransform().Transform(global_bounds),
+                        input_snapshot->texture->GetYCoordScale());
   }
 
   if (blur_info.scaled_sigma.x < kEhCloseEnough &&
