@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
 import 'package:flutter_driver/driver_extension.dart';
@@ -23,6 +24,9 @@ class _MainRegularWindowControllerDelegate
 }
 
 late final RegularWindowController controller;
+final ValueNotifier<DialogWindowController?> dialogController = ValueNotifier(
+  null,
+);
 
 void main() {
   final Completer<void> windowCreated = Completer();
@@ -53,6 +57,14 @@ void main() {
         controller.addListener(notificationHandler);
 
         act();
+
+        // On macOS, the predicate is immediately true, even though
+        // the animation is in progress and next request for state change
+        // will be ignored. Easiest way to handle this is to just wait.
+        if (defaultTargetPlatform == TargetPlatform.macOS) {
+          await Future.delayed(Duration(seconds: 1));
+        }
+
         await for (final _ in streamController.stream) {
           if (predicate()) {
             break;
@@ -61,7 +73,9 @@ void main() {
         controller.removeListener(notificationHandler);
       }
 
-      if (jsonMap['type'] == 'get_size') {
+      if (jsonMap['type'] == 'ping') {
+        return jsonEncode({'type': 'pong'});
+      } else if (jsonMap['type'] == 'get_size') {
         return jsonEncode({
           'width': controller.contentSize.width,
           'height': controller.contentSize.height,
@@ -81,7 +95,11 @@ void main() {
           maxWidth: jsonMap['max_width'].toDouble(),
           maxHeight: jsonMap['max_height'].toDouble(),
         );
-        controller.setConstraints(constraints);
+        // We assume that this will cause a resize, which the current tests do.
+        final initialSize = controller.contentSize;
+        await awaitNotification(() {
+          controller.setConstraints(constraints);
+        }, () => controller.contentSize != initialSize);
       } else if (jsonMap['type'] == 'set_fullscreen') {
         await awaitNotification(() {
           controller.setFullscreen(true);
@@ -125,6 +143,23 @@ void main() {
         }, () => controller.isActivated);
       } else if (jsonMap['type'] == 'get_activated') {
         return jsonEncode({'isActivated': controller.isActivated});
+      } else if (jsonMap['type'] == 'open_dialog') {
+        if (dialogController.value != null) {
+          return jsonEncode({'result': false});
+        }
+        dialogController.value = DialogWindowController(
+          preferredSize: const Size(200, 200),
+          parent: controller,
+          delegate: MyDialogWindowControllerDelegate(
+            onDestroyed: () {
+              dialogController.value = null;
+            },
+          ),
+        );
+        return jsonEncode({'result': true});
+      } else if (jsonMap['type'] == 'close_dialog') {
+        dialogController.value?.destroy();
+        return jsonEncode({'result': true});
       } else {
         throw ArgumentError('Unknown message type: ${jsonMap['type']}');
       }
@@ -165,38 +200,82 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class MyDialogWindowControllerDelegate extends DialogWindowControllerDelegate {
+  MyDialogWindowControllerDelegate({required this.onDestroyed});
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  final VoidCallback onDestroyed;
+
+  @override
+  void onWindowDestroyed() {
+    onDestroyed();
+    super.onWindowDestroyed();
   }
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: dialogController,
+      builder:
+          (
+            BuildContext context,
+            DialogWindowController? dialogController,
+            Widget? child,
+          ) {
+            return ViewAnchor(
+              view: dialogController != null
+                  ? DialogWindow(
+                      controller: dialogController,
+                      child: MyDialogPage(controller: dialogController),
+                    )
+                  : null,
+              child: Scaffold(
+                appBar: AppBar(
+                  backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+                  title: Text(widget.title),
+                ),
+                body: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[const Text('This is the main window.')],
+                  ),
+                ),
+              ),
+            );
+          },
+    );
+  }
+}
+
+class MyDialogPage extends StatelessWidget {
+  const MyDialogPage({super.key, required this.controller});
+
+  final DialogWindowController controller;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Text('Dialog'),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text('This is a dialog window.'),
+              ElevatedButton(
+                key: const ValueKey<String>('close_dialog'),
+                onPressed: () {
+                  controller.destroy();
+                },
+                child: Text('Close Dialog'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

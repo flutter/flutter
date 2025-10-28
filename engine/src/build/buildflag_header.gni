@@ -1,0 +1,137 @@
+# Copyright 2015 The Chromium Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generates a header with preprocessor defines specified by the build file.
+#
+# The flags are converted to function-style defines with mangled names and
+# code uses an accessor macro to access the values. This is to try to
+# minimize bugs where code checks whether something is defined or not, and
+# the proper header isn't included, meaning the answer will always be silently
+# false or might vary across the code base.
+#
+# In the GN template, specify build flags in the template as a list
+# of strings that encode key/value pairs like this:
+#
+#   flags = [ "ENABLE_FOO=1", "ENABLE_BAR=$enable_bar" ]
+#
+# The GN values "true" and "false" will be mapped to 0 and 1 for boolean
+# #if flags to be expressed naturally. This means you can't directly make a
+# define that generates C++ value of true or false for use in code. If you
+# REALLY need this, you can also use the string "(true)" and "(false)" to
+# prevent the rewriting.
+
+# To check the value of the flag in C code:
+#
+#   #include "path/to/here/header_file.h"
+#
+#   #if BUILDFLAG(ENABLE_FOO)
+#   ...
+#   #endif
+#
+#   const char kSpamServerUrl[] = BUILDFLAG(SPAM_SERVER_URL);
+#
+# There will be no #define called ENABLE_FOO so if you accidentally test for
+# that in an ifdef it will always be negative.
+#
+#
+# Template parameters
+#
+#   flags [required, list of strings]
+#       Flag values as described above.
+#
+#   header [required, string]
+#       File name for generated header. By default, this will go in the
+#       generated file directory for this target, and you would include it
+#       with:
+#         #include "<path_to_this_BUILD_file>/<header>"
+#
+#   header_dir [optional, string]
+#       Override the default location of the generated header. The string will
+#       be treated as a subdirectory of the root_gen_dir. For example:
+#         header_dir = "foo/bar"
+#       Then you can include the header as:
+#         #include "foo/bar/baz.h"
+#
+#   deps, public_deps, testonly, visibility
+#       Normal meaning.
+#
+#
+# Grit defines
+#
+# If one .grd file uses a flag, just add to the grit target:
+#
+#   defines = [
+#     "enable_doom_melon=$enable_doom_melon",
+#   ]
+#
+# If multiple .grd files use it, you'll want to put the defines in a .gni file
+# so it can be shared. Generally this .gni file should include all grit defines
+# for a given module (for some definition of "module"). Then do:
+#
+#   defines = ui_grit_defines
+#
+# If you forget to do this, the flag will be implicitly false in the .grd file
+# and those resources won't be compiled. You'll know because the resource
+# #define won't be generated and any code that uses it won't compile. If you
+# see a missing IDS_* string, this is probably the reason.
+#
+#
+# Example
+#
+#   buildflag_header("foo_buildflags") {
+#     header = "foo_buildflags.h"
+#
+#     flags = [
+#       # This uses the GN build flag enable_doom_melon as the definition.
+#       "ENABLE_DOOM_MELON=$enable_doom_melon",
+#
+#       # This force-enables the flag.
+#       "ENABLE_SPACE_LASER=true",
+#
+#       # This will expand to the quoted C string when used in source code.
+#       "SPAM_SERVER_URL=\"http://www.example.com/\"",
+#     ]
+#   }
+template("buildflag_header") {
+  action(target_name) {
+    script = "//build/write_buildflag_header.py"
+
+    if (defined(invoker.header_dir)) {
+      header_file = "${invoker.header_dir}/${invoker.header}"
+    } else {
+      # Compute the path from the root to this file.
+      header_file = rebase_path(".", "//") + "/${invoker.header}"
+    }
+
+    outputs = [ "$root_gen_dir/$header_file" ]
+
+    # Always write --flags to the file so it's not empty. Empty will confuse GN
+    # into thinking the response file isn't used.
+    response_file_contents = [ "--flags" ]
+    if (defined(invoker.flags)) {
+      response_file_contents += invoker.flags
+    }
+
+    args = [
+      "--output",
+      header_file,  # Not rebased, Python script puts it inside gen-dir.
+      "--rulename",
+      get_label_info(":$target_name", "label_no_toolchain"),
+      "--gen-dir",
+      rebase_path(root_gen_dir, root_build_dir),
+      "--definitions",
+      "{{response_file_name}}",
+    ]
+
+    forward_variables_from(invoker,
+                           [
+                             "deps",
+                             "public_deps",
+                             "testonly",
+                             "visibility",
+                           ])
+
+    public_deps = [ "//build:buildflag_header_h" ]
+  }
+}

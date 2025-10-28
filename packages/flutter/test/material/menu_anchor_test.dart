@@ -2680,6 +2680,43 @@ void main() {
       expect(closed, unorderedEquals(<TestMenu>[TestMenu.mainMenu1, TestMenu.subMenu11]));
       expect(opened, isEmpty);
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/176374.
+    testWidgets('internal controller is created when the controller is null', (
+      WidgetTester tester,
+    ) async {
+      MenuController? testController;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MenuAnchor(
+            controller: controller,
+            menuChildren: const <Widget>[],
+            builder: (BuildContext context, MenuController controller, Widget? child) {
+              testController = controller;
+              return const Text('Anchor');
+            },
+          ),
+        ),
+      );
+
+      expect(testController, equals(controller));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MenuAnchor(
+            menuChildren: const <Widget>[],
+            builder: (BuildContext context, MenuController controller, Widget? child) {
+              testController = controller;
+              return const Text('Anchor');
+            },
+          ),
+        ),
+      );
+
+      expect(testController, isNotNull);
+      expect(testController, isNot(controller));
+    });
   });
 
   group('MenuItemButton', () {
@@ -4247,7 +4284,9 @@ void main() {
     });
 
     group('Semantics', () {
-      testWidgets('MenuItemButton is not a semantic button', (WidgetTester tester) async {
+      testWidgets('MenuItemButton has platform-adaptive button semantics', (
+        WidgetTester tester,
+      ) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Directionality(
@@ -4262,7 +4301,8 @@ void main() {
           ),
         );
 
-        // The flags should not have SemanticsFlag.isButton.
+        // On web, menu items should have SemanticsFlag.isButton.
+        // On other platforms, they should NOT have the isButton flag.
         expect(
           semantics,
           hasSemantics(
@@ -4274,6 +4314,7 @@ void main() {
                   rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
                   transform: Matrix4.translationValues(356.0, 276.0, 0.0),
                   flags: <SemanticsFlag>[
+                    if (kIsWeb) SemanticsFlag.isButton,
                     SemanticsFlag.hasEnabledState,
                     SemanticsFlag.isEnabled,
                     SemanticsFlag.isFocusable,
@@ -4309,7 +4350,9 @@ void main() {
         semantics.dispose();
       }, variant: TargetPlatformVariant.desktop());
 
-      testWidgets('SubMenuButton is not a semantic button', (WidgetTester tester) async {
+      testWidgets('SubmenuButton has platform-adaptive button semantics', (
+        WidgetTester tester,
+      ) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Directionality(
@@ -4325,7 +4368,8 @@ void main() {
           ),
         );
 
-        // The flags should not have SemanticsFlag.isButton.
+        // On web, submenu buttons should have SemanticsFlag.isButton.
+        // On other platforms, they should NOT have the isButton flag.
         expect(
           semantics,
           hasSemantics(
@@ -4334,6 +4378,7 @@ void main() {
                 TestSemantics(
                   rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
                   flags: <SemanticsFlag>[
+                    if (kIsWeb) SemanticsFlag.isButton,
                     SemanticsFlag.hasEnabledState,
                     SemanticsFlag.hasExpandedState,
                   ],
@@ -4394,6 +4439,7 @@ void main() {
                             TestSemantics(
                               id: 4,
                               flags: <SemanticsFlag>[
+                                if (kIsWeb) SemanticsFlag.isButton,
                                 SemanticsFlag.isFocused,
                                 SemanticsFlag.hasEnabledState,
                                 SemanticsFlag.isEnabled,
@@ -4422,6 +4468,7 @@ void main() {
                                       label: 'Item 0',
                                       rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
                                       flags: <SemanticsFlag>[
+                                        if (kIsWeb) SemanticsFlag.isButton,
                                         SemanticsFlag.hasEnabledState,
                                         SemanticsFlag.isEnabled,
                                         SemanticsFlag.isFocusable,
@@ -4471,6 +4518,7 @@ void main() {
                             TestSemantics(
                               id: 4,
                               flags: <SemanticsFlag>[
+                                if (kIsWeb) SemanticsFlag.isButton,
                                 SemanticsFlag.hasExpandedState,
                                 SemanticsFlag.isFocused,
                                 SemanticsFlag.hasEnabledState,
@@ -5048,6 +5096,276 @@ void main() {
     });
   });
 
+  group('Mouse cursors', () {
+    testWidgets('SubmenuButton has expected default mouse cursor on hover', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: SubmenuButton(
+              menuChildren: <Widget>[
+                MenuItemButton(onPressed: () {}, child: const Text('Test menu button item')),
+              ],
+              child: const Text('Main Menu'),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: const Offset(1000, 1000));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.basic,
+      );
+
+      await gesture.moveTo(tester.getCenter(find.byType(SubmenuButton)));
+      await tester.pump();
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      );
+    });
+
+    testWidgets('MenuItemButton has expected default mouse cursor on hover', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              children: <Widget>[
+                SubmenuButton(
+                  menuChildren: <Widget>[
+                    MenuItemButton(onPressed: () {}, child: const Text('Test menu item')),
+                  ],
+                  child: const Text('File'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Open SubmenuButton.
+      await tester.tap(find.text('File'));
+      await tester.pumpAndSettle();
+
+      final Finder menuItemFinder = find.byType(MenuItemButton);
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: const Offset(1000, 1000));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.basic,
+      );
+
+      // Move to MenuItemButton.
+      await gesture.moveTo(tester.getCenter(menuItemFinder));
+      await tester.pump();
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      );
+    });
+
+    testWidgets('CheckboxMenuButton has expected default mouse cursor on hover', (
+      WidgetTester tester,
+    ) async {
+      bool? value = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: CheckboxMenuButton(
+              value: value,
+              onChanged: (bool? newValue) {
+                value = newValue;
+              },
+              child: const Text('Checkbox'),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: const Offset(1000, 1000));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.basic,
+      );
+
+      await gesture.moveTo(tester.getCenter(find.byType(CheckboxMenuButton)));
+      await tester.pump();
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      );
+    });
+
+    testWidgets('RadioMenuButton has expected default mouse cursor on hover', (
+      WidgetTester tester,
+    ) async {
+      int? groupValue = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: RadioMenuButton<int>(
+              value: 1,
+              groupValue: groupValue,
+              onChanged: (int? newValue) {
+                groupValue = newValue;
+              },
+              child: const Text('Radio'),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: const Offset(1000, 1000));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.basic,
+      );
+
+      await gesture.moveTo(tester.getCenter(find.byType(RadioMenuButton<int>)));
+      await tester.pump();
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      );
+    });
+
+    testWidgets('MenuItemButton has expected mouse cursor when explicitly configured', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuItemButton(
+              onPressed: () {},
+              style: ButtonStyle(
+                mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
+              ),
+              child: const Text('Menu Item'),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: tester.getCenter(find.byType(MenuItemButton)));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.cell,
+      );
+    });
+
+    testWidgets('CheckboxMenuButton has expected mouse cursor when explicitly configured', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: CheckboxMenuButton(
+              style: ButtonStyle(
+                mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
+              ),
+              value: true,
+              onChanged: (bool? value) {},
+              child: const Text('Menu Item'),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: tester.getCenter(find.byType(CheckboxMenuButton)));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.cell,
+      );
+    });
+
+    testWidgets('RadioMenuButton has expected mouse cursor when explicitly configured', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: RadioMenuButton<bool>(
+              style: ButtonStyle(
+                mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
+              ),
+              value: false,
+              onChanged: (bool? value) {},
+              groupValue: null,
+              child: const Text('Menu Item'),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: tester.getCenter(find.byType(RadioMenuButton<bool>)));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.cell,
+      );
+    });
+
+    testWidgets('SubmenuButton has expected mouse cursor when explicitly configured', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              children: <Widget>[
+                SubmenuButton(
+                  style: ButtonStyle(
+                    mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
+                  ),
+                  menuChildren: <Widget>[
+                    MenuItemButton(onPressed: () {}, child: const Text('Test menu item')),
+                  ],
+                  child: const Text('File'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: tester.getCenter(find.byType(SubmenuButton)));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.cell,
+      );
+    });
+  });
+
   testWidgets('Menu panel default reserved padding', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -5097,6 +5415,15 @@ void main() {
     expect(tester.getRect(findMenuPanels()).width, 800.0 - reservedPadding.horizontal);
   });
 
+  testWidgets('MenuAcceleratorLabel does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: MenuAcceleratorLabel('X'))),
+      ),
+    );
+    expect(tester.getSize(find.byType(MenuAcceleratorLabel)), Size.zero);
+  });
+
   testWidgets('Layout updates when reserved padding changes', (WidgetTester tester) async {
     const EdgeInsetsGeometry reservedPadding = EdgeInsets.symmetric(horizontal: 13.0);
 
@@ -5123,6 +5450,72 @@ void main() {
     );
 
     expect(tester.getRect(findMenuPanels()).width, 800.0 - reservedPadding.horizontal);
+  });
+
+  testWidgets('SubmenuButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: SubmenuButton(menuChildren: <Widget>[], child: null)),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SubmenuButton)), Size.zero);
+  });
+
+  testWidgets('MenuBar does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: MenuBar(children: <Widget>[Text('X')])),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(MenuBar)), Size.zero);
+  });
+
+  testWidgets('MenuItemButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: MenuItemButton())),
+      ),
+    );
+    expect(tester.getSize(find.byType(MenuItemButton)), Size.zero);
+  });
+
+  testWidgets('RadioMenuButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: RadioMenuButton<bool>(
+              value: true,
+              groupValue: true,
+              onChanged: (bool? value) {},
+              child: null,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RadioMenuButton<bool>)), Size.zero);
+  });
+
+  testWidgets('CheckboxMenuButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: CheckboxMenuButton(
+              value: true,
+              onChanged: (bool? value) {},
+              child: const Text('X'),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CheckboxMenuButton)), Size.zero);
   });
 }
 

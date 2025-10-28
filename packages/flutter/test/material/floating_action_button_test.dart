@@ -10,6 +10,7 @@ library;
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -869,7 +870,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test default cursor when disabled
@@ -1466,6 +1467,19 @@ void main() {
         expect(feedback.hapticCount, 0);
       },
     );
+  });
+
+  testWidgets('FloatingActionButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: Center(
+            child: SizedBox.shrink(child: FloatingActionButton(onPressed: () {})),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(FloatingActionButton)), Size.zero);
   });
 }
 
