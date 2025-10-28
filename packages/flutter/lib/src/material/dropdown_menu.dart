@@ -89,6 +89,18 @@ class DropdownMenuEntry<T> {
 
   /// Overrides the default label widget which is `Text(label)`.
   ///
+  /// This widget is only displayed in the open dropdown menu. When an item is
+  /// selected, the menu closes and the text field displays the plain text of
+  /// the [label].
+  ///
+  /// The dropdown menu's closed state is a text field or a read-only text field
+  /// on mobile, which can only display text.
+  /// While custom widgets like icons or images can be shown in [labelWidget]
+  /// when the menu is open, the text field will only show the [label] string upon selection.
+  ///
+  /// To control the text that appears in the text field for a selected item,
+  /// set the [label] property to a descriptive string.
+  ///
   /// {@tool dartpad}
   /// This sample shows how to override the default label [Text]
   /// widget with one that forces the menu entry to appear on one line
