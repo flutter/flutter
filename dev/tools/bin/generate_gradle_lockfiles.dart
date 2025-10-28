@@ -383,7 +383,7 @@ tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
 ''';
-  return rootGradleKtsFileContent.replaceAll("<IGNORE_FILE>", path);
+  return rootGradleKtsFileContent.replaceAll('<IGNORE_FILE>', path);
 }
 
 // Consider updating this file to reflect the latest updates to app templates
