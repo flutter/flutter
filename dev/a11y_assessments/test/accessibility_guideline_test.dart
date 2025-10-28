@@ -32,10 +32,12 @@ void main() {
       await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
 
-      // After checking the guideline for the main page.
-      // Tap every tappable target except the back button to show more use cases in the app.
-      // This is a simple implementation assuming the latter tappable target will not dispear after
-      // tapping the former tap targets, which is true in the a11y assessment app.
+      // After checking the guideline for the main page,
+      // iterate through all tappable semantic nodes on the current screen.
+      // Tap each one (excluding the back button) to navigate deeper into the app
+      // and re-run the accessibility checks. This assumes that tapping a target
+      // does not remove other tappable targets from the screen, which is true
+      // for the a11y assessment app's current structure.
       final SemanticsFinder tappables = find.semantics.byAction(SemanticsAction.tap);
       final int tappableCount = tappables.evaluate().length;
 
@@ -43,16 +45,18 @@ void main() {
         final FinderBase<SemanticsNode> tappable = tappables.at(i);
         final SemanticsNode? node = tappable.evaluate().firstOrNull;
 
-        // We do not want to tap the back button, as that will pop the page.
+        // We do not want to tap the back button, as that will pop the page
+        // and disrupt the current test flow.
         if (node == null || node.tooltip == 'Back') {
           continue;
         }
         tester.semantics.tap(tappable);
         await tester.pumpAndSettle();
 
-        // Check the guidelines again after the tap.
+        // Re-check the accessibility guidelines after the tap action.
         await expectLater(tester, meetsGuideline(textContrastGuideline));
-        // Skip tap tagert size 48*48 check for date picker.
+        // The DatePicker use case has known issues with tap target sizes
+        // So we skip these checks for this use case .
         if (useCase.name != 'DatePicker') {
           await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
           await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
