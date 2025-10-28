@@ -1006,6 +1006,7 @@ class RawScrollbar extends StatefulWidget {
     this.mainAxisMargin = 0.0,
     this.crossAxisMargin = 0.0,
     this.padding,
+    this.revealAssistiveScrollbar = false,
   }) : assert(
          !(thumbVisibility == false && (trackVisibility ?? false)),
          'A scrollbar track cannot be drawn without a scrollbar thumb.',
@@ -1338,6 +1339,14 @@ class RawScrollbar extends StatefulWidget {
   ///
   /// Defaults to null.
   final EdgeInsetsGeometry? padding;
+
+  /// Selectively reveal the scrollbar on scroll when a mouse or trackpad
+  /// is used.
+  ///
+  /// The [thumbVisibility] setting will still be respected is set to true.
+  ///
+  /// Defaults to false;
+  final bool revealAssistiveScrollbar;
 
   @override
   RawScrollbarState<RawScrollbar> createState() => RawScrollbarState<RawScrollbar>();
@@ -2198,6 +2207,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
   }
 
+  // TODO(camsim99): Implement revealAssistiveScrollbar and make it reversible
   bool scrollbarRevealed = false;
   bool needToHandleScrollbarReveal = false;
   void _revealAndroidScrollbar() {
