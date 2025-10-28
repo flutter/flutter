@@ -58,6 +58,14 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
   // transform is in order to incorporate this into sampling. We need to
   // re-rasterize the input snapshot so that the transform is absorbed into the
   // texture.
+  // We can technically render this only when the snapshot is just a translated
+  // version of the original. Unfortunately there isn't a way to test for that
+  // though. Blur with low sigmas will return a transform that doesn't scale but
+  // has a tiny offset to account for the blur radius. That's indistinguishable
+  // from `ImageFilter.compose` which slightly increase the size to account for
+  // rounding errors and add an offset. Said another way; ideally we would skip
+  // this branch for the unit test `ComposePaintRuntimeOuter`, but do it for
+  // `ComposeBackdropRuntimeOuterBlurInner`.
   if (!input_snapshot->transform.IsIdentity()) {
     Matrix inverse = input_snapshot->transform.Invert();
     Quad quad = inverse.Transform(Quad{
