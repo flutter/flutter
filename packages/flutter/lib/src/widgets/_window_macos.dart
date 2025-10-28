@@ -328,9 +328,9 @@ class DialogWindowControllerMacOS extends DialogWindowController {
     }
   }
 
-  /// Returns window handle for the current window.
+  /// Returns the window handle for this window.
   ///
-  /// The handle is a pointer to an NSWindow instance.
+  /// The handle is a pointer to an `NSWindow` instance.
   Pointer<Void> getWindowHandle() {
     _ensureNotDestroyed();
     return WindowingOwnerMacOS.getWindowHandle(rootView);
