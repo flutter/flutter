@@ -92,6 +92,33 @@ void main() {
     },
   );
 
+  testWidgets(
+    'RichText ignores MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, and MediaQueryData.wordSpacingOverride',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(
+            lineHeightScaleFactorOverride: 2.0,
+            letterSpacingOverride: 2.0,
+            wordSpacingOverride: 2.0,
+          ),
+          child: Center(
+            child: RichText(
+              text: const TextSpan(text: 'Hello'),
+              textDirection: TextDirection.ltr,
+            ),
+          ),
+        ),
+      );
+
+      final RichText text = tester.firstWidget(find.byType(RichText));
+      expect(text, isNotNull);
+      expect(text.text.style?.height, isNull);
+      expect(text.text.style?.letterSpacing, isNull);
+      expect(text.text.style?.wordSpacing, isNull);
+    },
+  );
+
   testWidgets('Text respects media query', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery.withClampedTextScaling(
