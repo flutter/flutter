@@ -2090,7 +2090,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   /// This property takes effect immediately when changed, it is not animated.
   ///
   /// See [DefaultTextStyle.maxLines] for more details.
-  final double? maxLines;
+  final num? maxLines;
 
   /// The strategy to use when calculating the width of the Text.
   ///
@@ -2119,7 +2119,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
       ),
     );
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
-    properties.add(DoubleProperty('maxLines', maxLines, defaultValue: null));
+    properties.add(DiagnosticsProperty<num>('maxLines', maxLines, defaultValue: null));
     properties.add(
       EnumProperty<TextWidthBasis>(
         'textWidthBasis',

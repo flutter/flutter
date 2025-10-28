@@ -1390,7 +1390,7 @@ class TextStyle with Diagnosticable {
     TextDirection? textDirection,
     TextScaler textScaler = TextScaler.noScaling,
     String? ellipsis,
-    double? maxLines,
+    num? maxLines,
     TextHeightBehavior? textHeightBehavior,
     Locale? locale,
     String? fontFamily,

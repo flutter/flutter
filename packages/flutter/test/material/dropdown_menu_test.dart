@@ -2993,11 +2993,11 @@ void main() {
     final TextEditingController controller = TextEditingController();
     addTearDown(controller.dispose);
 
-    Widget buildFrame({required double maxLines}) {
+    Widget buildFrame({required int maxLines}) {
       return MaterialApp(
         home: Scaffold(
           body: DropdownMenu<TestMenu>(
-            key: ValueKey<double>(maxLines),
+            key: ValueKey<int>(maxLines),
             controller: controller,
             width: 100,
             dropdownMenuEntries: TestMenu.values.map<DropdownMenuEntry<TestMenu>>((TestMenu item) {

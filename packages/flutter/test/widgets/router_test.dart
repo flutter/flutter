@@ -1498,7 +1498,7 @@ void main() {
       },
     );
     addTearDown(delegate.dispose);
-    double expectedMaxLines = 1;
+    int expectedMaxLines = 1;
     bool parserCalled = false;
     final Widget router = Router<RouteInformation>(
       routeInformationProvider: provider,
@@ -1551,7 +1551,7 @@ void main() {
       },
     );
     addTearDown(delegate.dispose);
-    const double expectedMaxLines = 1;
+    const int expectedMaxLines = 1;
     bool parserCalled = false;
     final Widget router = Router<RouteInformation>(
       routeInformationProvider: provider,
@@ -1576,7 +1576,7 @@ void main() {
     expect(parserCalled, isTrue);
 
     parserCalled = false;
-    const double newMaxLines = 2;
+    const int newMaxLines = 2;
     // This rebuild should not trigger re-parsing.
     await tester.pumpWidget(
       buildBoilerPlate(
@@ -1607,7 +1607,7 @@ void main() {
       },
     );
     addTearDown(delegate.dispose);
-    double expectedMaxLines = 1;
+    int expectedMaxLines = 1;
     bool parserCalled = false;
     final Widget router = Router<RouteInformation>(
       routeInformationProvider: provider,

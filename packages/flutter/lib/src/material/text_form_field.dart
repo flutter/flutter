@@ -136,7 +136,7 @@ class TextFormField extends FormField<String> {
     SmartQuotesType? smartQuotesType,
     bool enableSuggestions = true,
     MaxLengthEnforcement? maxLengthEnforcement,
-    double? maxLines = 1,
+    num? maxLines = 1,
     int? minLines,
     bool expands = false,
     int? maxLength,

@@ -639,7 +639,7 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
   /// See also:
   ///  * [TextField.maxLines], which specifies the maximum number of lines
   ///    the [TextField] can display.
-  final double? maxLines;
+  final num? maxLines;
 
   /// {@macro flutter.widgets.TextField.textInputAction}
   final TextInputAction? textInputAction;

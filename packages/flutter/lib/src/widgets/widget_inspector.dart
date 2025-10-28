@@ -3475,7 +3475,7 @@ class _InspectorOverlayRenderState {
   int get hashCode => Object.hash(overlayRect, selected, Object.hashAll(candidates), tooltip);
 }
 
-const double _kMaxTooltipLines = 5;
+const int _kMaxTooltipLines = 5;
 const Color _kTooltipBackgroundColor = Color.fromARGB(230, 60, 60, 60);
 const Color _kHighlightedRenderObjectFillColor = Color.fromARGB(128, 128, 128, 255);
 const Color _kHighlightedRenderObjectBorderColor = Color.fromARGB(128, 64, 64, 128);

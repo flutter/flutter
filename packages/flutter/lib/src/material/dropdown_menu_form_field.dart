@@ -63,7 +63,7 @@ class DropdownMenuFormField<T extends Object> extends FormField<T> {
     required this.dropdownMenuEntries,
     List<TextInputFormatter>? inputFormatters,
     DropdownMenuCloseBehavior closeBehavior = DropdownMenuCloseBehavior.all,
-    double maxLines = 1,
+    num maxLines = 1,
     TextInputAction? textInputAction,
     super.restorationId,
     super.onSaved,

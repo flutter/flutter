@@ -65,7 +65,7 @@ void main() {
   });
 
   final Key textFieldKey = UniqueKey();
-  Widget textFieldBuilder({double? maxLines = 1, int? minLines}) {
+  Widget textFieldBuilder({int? maxLines = 1, int? minLines}) {
     return boilerplate(
       child: TextField(
         key: textFieldKey,
@@ -4994,7 +4994,7 @@ void main() {
   });
 
   testWidgets('Multiline text when wrapped in Expanded', (WidgetTester tester) async {
-    Widget expandedTextFieldBuilder({double? maxLines = 1, int? minLines, bool expands = false}) {
+    Widget expandedTextFieldBuilder({int? maxLines = 1, int? minLines, bool expands = false}) {
       return boilerplate(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -5224,7 +5224,7 @@ void main() {
   testWidgets('Multiline hint text will wrap up to maxLines', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
 
-    Widget builder(double? maxLines, final String hintMsg) {
+    Widget builder(int? maxLines, final String hintMsg) {
       return boilerplate(
         child: TextField(
           key: textFieldKey,
@@ -5249,7 +5249,7 @@ void main() {
     expect(findHintText(hintPlaceholder), equals(hintTextBox));
     expect(hintTextBox.size, equals(oneLineHintSize));
 
-    const double maxLines = 3;
+    const int maxLines = 3;
     await tester.pumpWidget(builder(maxLines, multipleLineText));
     final Text hintTextWidget = tester.widget(find.text(multipleLineText));
     expect(hintTextWidget.maxLines, equals(maxLines));
@@ -14040,7 +14040,7 @@ void main() {
       'autocorrect: false',
       'smartDashesType: disabled',
       'smartQuotesType: disabled',
-      'maxLines: 10.0',
+      'maxLines: 10',
       'maxLength: 100',
       'maxLengthEnforcement: none',
       'textInputAction: done',

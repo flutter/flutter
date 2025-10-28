@@ -108,7 +108,7 @@ class DefaultTextStyle extends InheritedTheme {
     TextAlign? textAlign,
     bool? softWrap,
     TextOverflow? overflow,
-    double? maxLines,
+    num? maxLines,
     TextWidthBasis? textWidthBasis,
     TextHeightBehavior? textHeightBehavior,
     required Widget child,
@@ -160,7 +160,7 @@ class DefaultTextStyle extends InheritedTheme {
   ///
   /// If this is non-null, it will override even explicit null values of
   /// [Text.maxLines].
-  final double? maxLines;
+  final num? maxLines;
 
   /// The strategy to use when calculating the width of the Text.
   ///
@@ -225,7 +225,7 @@ class DefaultTextStyle extends InheritedTheme {
       ),
     );
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
-    properties.add(DoubleProperty('maxLines', maxLines, defaultValue: null));
+    properties.add(DiagnosticsProperty<num>('maxLines', maxLines, defaultValue: null));
     properties.add(
       EnumProperty<TextWidthBasis>(
         'textWidthBasis',
@@ -654,7 +654,7 @@ class Text extends StatelessWidget {
   /// an explicit number for its [DefaultTextStyle.maxLines], then the
   /// [DefaultTextStyle] value will take precedence. You can use a [RichText]
   /// widget directly to entirely override the [DefaultTextStyle].
-  final double? maxLines;
+  final num? maxLines;
 
   /// {@template flutter.widgets.Text.semanticsLabel}
   /// An alternative semantics label for this text.
@@ -808,7 +808,7 @@ class Text extends StatelessWidget {
     );
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
-    properties.add(DoubleProperty('maxLines', maxLines, defaultValue: null));
+    properties.add(DiagnosticsProperty<num>('maxLines', maxLines, defaultValue: null));
     properties.add(
       EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: null),
     );
@@ -850,7 +850,7 @@ class _SelectableTextContainer extends StatefulWidget {
   final bool softWrap;
   final TextOverflow overflow;
   final TextScaler textScaler;
-  final double? maxLines;
+  final num? maxLines;
   final Locale? locale;
   final StrutStyle? strutStyle;
   final TextWidthBasis textWidthBasis;
@@ -926,7 +926,7 @@ class _RichText extends StatelessWidget {
   final bool softWrap;
   final TextOverflow overflow;
   final TextScaler textScaler;
-  final double? maxLines;
+  final num? maxLines;
   final Locale? locale;
   final StrutStyle? strutStyle;
   final TextWidthBasis textWidthBasis;

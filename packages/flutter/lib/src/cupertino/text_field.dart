@@ -637,7 +637,7 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.maxLines}
   ///  * [expands], which determines whether the field should fill the height of
   ///    its parent.
-  final double? maxLines;
+  final num? maxLines;
 
   /// {@macro flutter.widgets.editableText.minLines}
   ///  * [expands], which determines whether the field should fill the height of
@@ -945,7 +945,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(
       DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true),
     );
-    properties.add(DoubleProperty('maxLines', maxLines, defaultValue: 1));
+    properties.add(DiagnosticsProperty<num>('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
