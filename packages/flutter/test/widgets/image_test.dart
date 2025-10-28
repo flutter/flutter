@@ -1389,6 +1389,108 @@ void main() {
     },
   );
 
+  testWidgets(
+    'initial load',
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
+    (WidgetTester tester) async {
+      final ui.Codec codec = (await tester.runAsync(() {
+        return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
+      }))!;
+
+      Future<ui.Image> nextFrame() async {
+        final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
+        return frameInfo.image;
+      }
+
+      final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter();
+      final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+      int? lastFrame;
+      int buildCount = 0;
+
+      Widget buildFrame(
+        BuildContext context,
+        Widget child,
+        int? frame,
+        bool wasSynchronouslyLoaded,
+      ) {
+        lastFrame = frame;
+        buildCount++;
+        return child;
+      }
+
+      await tester.pumpWidget(Image(image: imageProvider, frameBuilder: buildFrame));
+
+      expect(lastFrame, isNull);
+      expect(buildCount, 1);
+
+      // Pumping another frame doesn't do anything.
+      await tester.pump();
+      expect(lastFrame, isNull);
+      expect(buildCount, 1);
+
+      // When some image data comes through, it updates to show the image.
+      streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+      await tester.pump();
+      expect(lastFrame, 0);
+      expect(buildCount, 2);
+
+      // Pumping another frame doesn't do anything.
+      await tester.pump();
+      expect(lastFrame, 0);
+      expect(buildCount, 2);
+    },
+  );
+
+  testWidgets(
+    'initial load with existing image data',
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
+    (WidgetTester tester) async {
+      final ui.Codec codec = (await tester.runAsync(() {
+        return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
+      }))!;
+
+      Future<ui.Image> nextFrame() async {
+        final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
+        return frameInfo.image;
+      }
+
+      final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter();
+      final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+      int? lastFrame;
+      int buildCount = 0;
+
+      Widget buildFrame(
+        BuildContext context,
+        Widget child,
+        int? frame,
+        bool wasSynchronouslyLoaded,
+      ) {
+        lastFrame = frame;
+        buildCount++;
+        return child;
+      }
+
+      // Load a frame before even pumping the widget.
+      streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+
+      expect(lastFrame, isNull);
+      expect(buildCount, 0);
+
+      await tester.pumpWidget(Image(image: imageProvider, frameBuilder: buildFrame));
+
+      // The first frame of the image is shown in the first frame of the app.
+      expect(lastFrame, 0);
+      expect(buildCount, 1);
+
+      // Pumping another frame doesn't do anything.
+      await tester.pump();
+      expect(lastFrame, 0);
+      expect(buildCount, 1);
+    },
+  );
+
   for (final _DisableMethod disableMethod in _DisableMethod.values) {
     testWidgets(
       'image source swapping with $disableMethod',
