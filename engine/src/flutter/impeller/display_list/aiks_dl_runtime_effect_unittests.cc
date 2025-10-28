@@ -285,19 +285,11 @@ TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInner) {
       runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
-  Scalar xoffset = 50;
-  Scalar yoffset = 50;
-  Scalar xscale = 0.7;
-  Scalar yscale = 0.7;
   Scalar sigma = 20.0;
 
   auto callback = [&]() -> sk_sp<DisplayList> {
     if (AiksTest::ImGuiBegin("Controls", nullptr,
                              ImGuiWindowFlags_AlwaysAutoResize)) {
-      ImGui::SliderFloat("xoffset", &xoffset, -50, 50);
-      ImGui::SliderFloat("yoffset", &yoffset, -50, 50);
-      ImGui::SliderFloat("xscale", &xscale, 0.01, 1);
-      ImGui::SliderFloat("yscale", &yscale, 0.01, 1);
       ImGui::SliderFloat("sigma", &sigma, 0, 20);
       ImGui::End();
     }
@@ -318,9 +310,6 @@ TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInner) {
     auto runtime_filter = DlImageFilter::MakeRuntimeEffect(
         DlRuntimeEffectImpeller::Make(runtime_stage), sampler_inputs,
         uniform_data);
-
-    builder.Translate(xoffset, yoffset);
-    builder.Scale(xscale, yscale);
 
     auto backdrop_filter = DlImageFilter::MakeCompose(/*outer=*/runtime_filter,
                                                       /*inner=*/blur_filter);
