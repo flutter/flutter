@@ -10,7 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:ffi_package/ffi_package.dart';
 
 import 'marquee.dart';
-import 'resize.dart'; 
+import 'resize.dart';
 
 /// Route names. (See [main] for more details.)
 ///
