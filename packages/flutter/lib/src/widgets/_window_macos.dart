@@ -292,7 +292,7 @@ class RegularWindowControllerMacOS extends RegularWindowController {
 ///
 /// See also:
 ///
-///  * [RegularWindowController], the base class for regular windows.
+///  * [DialogWindowController], the base class for dialog windows.
 class DialogWindowControllerMacOS extends DialogWindowController {
   /// Creates a new regular window controller for macOS. When this constructor
   /// completes the FlutterView is created and framework is aware of it.
