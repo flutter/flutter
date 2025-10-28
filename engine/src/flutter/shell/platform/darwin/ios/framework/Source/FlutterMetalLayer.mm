@@ -182,7 +182,6 @@ extern CFTimeInterval display_link_target;
 - (instancetype)init {
   if (self = [super init]) {
     _preferredDevice = MTLCreateSystemDefaultDevice();
-    self.contentsGravity = kCAGravityTop;
     self.device = self.preferredDevice;
     self.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _availableTextures = [[NSMutableSet alloc] init];

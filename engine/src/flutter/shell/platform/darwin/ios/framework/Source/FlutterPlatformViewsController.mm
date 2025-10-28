@@ -672,7 +672,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
       // If the raster thread isn't merged, resize the view on the platform thread and block until
       // complete.
       auto latch = std::make_shared<fml::CountDownLatch>(1u);
-      usleep(50000);
       fml::TaskRunner::RunNowOrPostTask(self.platformTaskRunner,
                                         [self, frameSize = self.frameSize, latch]() mutable {
                                           [self performResize:frameSize];
