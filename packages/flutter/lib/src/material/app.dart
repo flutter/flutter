@@ -845,7 +845,6 @@ class MaterialScrollBehavior extends ScrollBehavior {
   TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
 
   @override
-  // TODO(camsim99): Modify this toolbar after I figure out the normal one.
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class ScrollBehavior as well.
@@ -863,7 +862,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
             // Build transparent, non-interactive scrollbar that will be revealed by default
             // if a trackpad or mouse is used to scroll.
             print('MaterialScrollBehavior buildScrollbar called');
-            return Scrollbar(thumbVisibility: false, interactive: false, child: child);
+            return Scrollbar(controller: details.controller, child: child);
           case TargetPlatform.fuchsia:
           case TargetPlatform.iOS:
             return child;

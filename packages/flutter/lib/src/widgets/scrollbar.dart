@@ -1343,7 +1343,8 @@ class RawScrollbar extends StatefulWidget {
   /// Selectively reveal the scrollbar on scroll when a mouse or trackpad
   /// is used.
   ///
-  /// The [thumbVisibility] setting will still be respected is set to true.
+  /// The [thumbVisibility] setting will still be ignored when a mouse
+  /// or trackpad is
   ///
   /// Defaults to false;
   final bool revealAssistiveScrollbar;
@@ -1375,6 +1376,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   Axis? _axis;
   final GlobalKey<RawGestureDetectorState> _gestureDetectorKey =
       GlobalKey<RawGestureDetectorState>();
+  bool _assistiveScrollbarIsVisible = false;
 
   ScrollController? get _effectiveScrollController =>
       widget.controller ?? PrimaryScrollController.maybeOf(context);
@@ -1579,12 +1581,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   void updateScrollbarPainter() {
     final TextDirection textDirection = Directionality.of(context);
 
-    if (!needToHandleScrollbarReveal) {
+    if (!widget.revealAssistiveScrollbar) {
+      // This behavior is handled based on scroll events if revealAssistiveScrollbar is true.
       scrollbarPainter
         ..color = widget.thumbColor ?? const Color(0x66BCBCBC)
         ..ignorePointer = !enableGestures;
-    } else {
-      needToHandleScrollbarReveal = false;
     }
 
     scrollbarPainter
@@ -1957,7 +1958,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     return false;
   }
 
-  // TODO(camsim99): perhaps this is where we can determine whether or not to reveal the scrollbar?
   bool _handleScrollNotification(ScrollNotification notification) {
     if (!widget.notificationPredicate(notification)) {
       return false;
@@ -2207,30 +2207,31 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
   }
 
-  // TODO(camsim99): Implement revealAssistiveScrollbar and make it reversible
-  bool scrollbarRevealed = false;
-  bool needToHandleScrollbarReveal = false;
-  void _revealAndroidScrollbar() {
-    scrollbarRevealed = true;
-    needToHandleScrollbarReveal = true;
-    print('_revealAndroidScrollbar called');
+  void _toggleAssistiveScrollbarVisibility(bool shouldRevealAssistiveScrollbar) {
+    print('_toggleAssistiveScrollbarVisibility called');
+    _assistiveScrollbarIsVisible = !_assistiveScrollbarIsVisible;
     setState(() {
-      scrollbarPainter.color = const Color(0x66BCBCBC);
-      scrollbarPainter.ignorePointer = false;
+      scrollbarPainter.color = shouldRevealAssistiveScrollbar
+          ? widget.thumbColor ?? const Color(0x66BCBCBC)
+          : const Color(0x00000000);
+      scrollbarPainter.ignorePointer = !shouldRevealAssistiveScrollbar;
     });
   }
 
   void _receivedPointerSignal(PointerSignalEvent event) {
     _cachedController = _effectiveScrollController;
 
-    // TODO(camsim99): Add trackpad.
-    // TODO(camsim99): When you switch back to using your finger, it should unreveal scrollbar. Maybe consider adding a trackpad or mouse control.
-    // TODO(camsim99): Before I address the above, I should move this all over to Material.
-    if (event is PointerScrollEvent && event.kind == PointerDeviceKind.mouse) {
-      if (!scrollbarRevealed) {
-        _revealAndroidScrollbar();
+    // TODO(camsim99): Test if this does not show the scrollbar initially. That really is my only remaining concern.
+    if (event is PointerScrollEvent && widget.revealAssistiveScrollbar) {
+      final bool trackpadOrMouseScrollDetected =
+          event.kind == PointerDeviceKind.mouse || event.kind == PointerDeviceKind.trackpad;
+      if (!_assistiveScrollbarIsVisible && trackpadOrMouseScrollDetected) {
+        _toggleAssistiveScrollbarVisibility(true);
+      } else if (_assistiveScrollbarIsVisible && !trackpadOrMouseScrollDetected) {
+        _toggleAssistiveScrollbarVisibility(false);
       }
     }
+
     // Only try to scroll if the bar absorb the hit test.
     if ((scrollbarPainter.hitTest(event.localPosition) ?? false) &&
         _cachedController != null &&

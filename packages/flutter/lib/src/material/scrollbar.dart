@@ -194,6 +194,7 @@ class _MaterialScrollbar extends RawScrollbar {
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: Duration.zero,
          notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
+         revealAssistiveScrollbar: true,
        );
 
   @override
