@@ -5599,7 +5599,7 @@ void main() {
   });
 
   testWidgets(
-    'SelectableText respects MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, MediaQueryData.wordSpacingOverride, and MediaQueryData.paragraphSpacingOverride',
+    'SelectableText respects MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, and MediaQueryData.wordSpacingOverride',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const Directionality(
@@ -5609,16 +5609,12 @@ void main() {
               lineHeightScaleFactorOverride: 2.0,
               letterSpacingOverride: 2.0,
               wordSpacingOverride: 2.0,
-              paragraphSpacingOverride: 2.0,
             ),
             child: SelectableText('hello world'),
           ),
         ),
       );
 
-      final Padding padding = tester.firstWidget(find.byType(Padding));
-      expect(padding, isNotNull);
-      expect(padding.padding, const EdgeInsets.only(bottom: 2.0));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       final TextStyle? resultTextStyle = state.buildTextSpan().style;
       expect(resultTextStyle?.height, 2.0);

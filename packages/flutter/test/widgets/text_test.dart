@@ -63,7 +63,7 @@ void main() {
   });
 
   testWidgets(
-    'Text respects MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, MediaQueryData.wordSpacingOverride, MediaQueryData.paragraphSpacingOverride',
+    'Text respects MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, and MediaQueryData.wordSpacingOverride',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const MediaQuery(
@@ -71,25 +71,20 @@ void main() {
             lineHeightScaleFactorOverride: 2.0,
             letterSpacingOverride: 2.0,
             wordSpacingOverride: 2.0,
-            paragraphSpacingOverride: 2.0,
           ),
           child: Center(child: Text('Hello', textDirection: TextDirection.ltr)),
         ),
       );
 
       RichText text = tester.firstWidget(find.byType(RichText));
-      final Padding padding = tester.firstWidget(find.byType(Padding));
       expect(text, isNotNull);
-      expect(padding, isNotNull);
       expect(text.text.style?.height, 2.0);
       expect(text.text.style?.letterSpacing, 2.0);
       expect(text.text.style?.wordSpacing, 2.0);
-      expect(padding.padding, const EdgeInsets.only(bottom: 2.0));
 
       await tester.pumpWidget(const Center(child: Text('Hello', textDirection: TextDirection.ltr)));
 
       text = tester.firstWidget(find.byType(RichText));
-      expect(find.byType(Padding), findsNothing);
       expect(text, isNotNull);
       expect(text.text.style?.height, isNull);
       expect(text.text.style?.letterSpacing, isNull);

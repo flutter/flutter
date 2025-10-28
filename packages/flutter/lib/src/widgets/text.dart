@@ -803,16 +803,6 @@ class Text extends StatelessWidget {
         child: ExcludeSemantics(excluding: semanticsLabel != null, child: result),
       );
     }
-
-    // TODO(Renzo-Olivares): Update this logic to inform paragraphs within
-    // this widgets text about paragraph spacing https://github.com/flutter/flutter/issues/177408.
-    final double? paragraphSpacing = MediaQuery.maybeParagraphSpacingOverrideOf(context);
-    if (paragraphSpacing != null) {
-      result = Padding(
-        padding: EdgeInsets.only(bottom: paragraphSpacing),
-        child: result,
-      );
-    }
     return result;
   }
 
