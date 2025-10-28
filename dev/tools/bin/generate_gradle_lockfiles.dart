@@ -15,7 +15,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
-import 'package:path/path.dart' as Path;
+import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
 void main(List<String> arguments) {
@@ -199,7 +199,7 @@ void main(List<String> arguments) {
     }
 
     if (gradleGeneration) {
-      final String relativeIgnorePath = Path.relative(ignoreFile.path, from: androidDirectory.path);
+      final String relativeIgnorePath = path.relative(ignoreFile.path, from: androidDirectory.path);
       // Write file content corresponding to original file language.
       if (rootBuildGradle.basename.endsWith('.kts')) {
         rootBuildGradle.writeAsStringSync(createGradleKtsFileContent(relativeIgnorePath));
@@ -275,7 +275,7 @@ subprojects {
     dependencyLocking {
         ignoredDependencies.add('io.flutter:*')
         lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")
-        var ignoreFile = file("<IGNORE_FILE>")
+        var ignoreFile = file("${rootProject.projectDir}/<IGNORE_FILE>")
         if (!ignoreFile.exists() && !project.hasProperty('local-engine-repo')) {
           lockAllConfigurations()
         }
@@ -372,7 +372,7 @@ subprojects {
     dependencyLocking {
         ignoredDependencies.add("io.flutter:*")
         lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")
-        var ignoreFile = file("<IGNORE_FILE>")
+        var ignoreFile = file("${rootProject.projectDir}/<IGNORE_FILE>")
         if (!ignoreFile.exists() && !project.hasProperty("local-engine-repo")) {
             lockAllConfigurations()
         }
