@@ -41,8 +41,15 @@ void main(List<String> arguments) {
           'Run the script using the config file at ./configs/lockfile_exclusion.yaml to skip the specified subdirectories.',
       defaultsTo: true,
     )
-    ..addFlag('ignore-locking', help: 'Generate ignore file to disable gradle dependency locking. A reason must be given.')
-    ..addOption('ignore-reason', help: 'Reason to disable gradle dependency locking. A reason must be given if --ignore-locking is used.');
+    ..addFlag(
+      'ignore-locking',
+      help: 'Generate ignore file to disable gradle dependency locking. A reason must be given.',
+    )
+    ..addOption(
+      'ignore-reason',
+      help:
+          'Reason to disable gradle dependency locking. A reason must be given if --ignore-locking is used.',
+    );
 
   ArgResults args;
   try {
@@ -93,7 +100,6 @@ void main(List<String> arguments) {
   } else if (ignoreFile.existsSync()) {
     ignoreFile.deleteSync();
   }
-
 
   final Iterable<Directory> androidDirectories = discoverAndroidDirectories(repoRoot);
 
@@ -237,8 +243,6 @@ void main(List<String> arguments) {
     print('Processed');
   }
 }
-
-
 
 String exec(String cmd, List<String> args, {String? workingDirectory}) {
   final ProcessResult result = Process.runSync(cmd, args, workingDirectory: workingDirectory);
