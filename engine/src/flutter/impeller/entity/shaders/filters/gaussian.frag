@@ -48,13 +48,14 @@ void main() {
 
   for (int i = 0; i < int(kernel_samples.sample_count); i++) {
     float16_t coefficient = float16_t(kernel_samples.sample_data[i].z);
-    total_color += coefficient *
-                   Sample(texture_sampler,
-                          v_texture_coords + kernel_samples.sample_data[i].xy);
+    total_color +=
+        coefficient * IPHalfPremultiply(Sample(
+                          texture_sampler,
+                          v_texture_coords + kernel_samples.sample_data[i].xy));
   }
 
   if (bounded_blur == 1.0) {
-    frag_color = IPHalfUnpremultiply(total_color);
+    frag_color = IPHalfUnpremultiplyOpaque(total_color);
   } else {
     frag_color = total_color;
   }
