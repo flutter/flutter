@@ -49,7 +49,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 #### Framework
 * Allow OverlayPortal.overlayChildLayoutBuilder to choose root Overlay by @chunhtai in https://github.com/flutter/flutter/pull/174239
-* [ Widget Preview] Add `group` property to `Preview` by @bkonyi in https://github.com/flutter/flutter/pull/174849
+* [Widget Preview] Add `group` property to `Preview` by @bkonyi in https://github.com/flutter/flutter/pull/174849
 * Fix: Use route navigator for CupertinoSheetRoute pop by @rkishan516 in https://github.com/flutter/flutter/pull/173103
 * fix(Semantics): Ensure semantics properties take priority over button's by @pedromassango in https://github.com/flutter/flutter/pull/174473
 * Fix SliverMainAxisGroup scrollOffsetCorrection by @manu-sncf in https://github.com/flutter/flutter/pull/174369
