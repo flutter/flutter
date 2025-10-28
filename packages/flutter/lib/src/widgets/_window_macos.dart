@@ -576,12 +576,11 @@ class _MacOSPlatformInterface {
         ..constraints.maxHeight = preferredConstraints.maxHeight;
     }
     try {
-        final int viewId = _createDialogWindow(PlatformDispatcher.instance.engineId!, request);
+      final int viewId = _createDialogWindow(PlatformDispatcher.instance.engineId!, request);
+      return viewId;
+    } finally {
+      _allocator.free(request);
     }
-    finally {
-        _allocator.free(request);
-    }
-    return viewId;
   }
 
   @Native<Void Function(Int64, Pointer<Void>)>(symbol: 'InternalFlutter_Window_Destroy')
