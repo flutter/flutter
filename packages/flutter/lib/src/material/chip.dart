@@ -287,7 +287,7 @@ abstract interface class ChipAttributes {
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
   ///
-  /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
+  /// If this property is null, [WidgetStateMouseCursor.adaptiveClickable] will be used.
   MouseCursor? get mouseCursor;
 }
 
@@ -1277,13 +1277,15 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         chipTheme.iconTheme ??
         theme.chipTheme.iconTheme ??
         _ChipDefaultsM3(context, widget.isEnabled).iconTheme!;
-    final Color? effectiveDeleteIconColor =
-        widget.deleteIconColor ??
-        chipTheme.deleteIconColor ??
-        theme.chipTheme.deleteIconColor ??
-        widget.iconTheme?.color ??
-        chipTheme.iconTheme?.color ??
-        chipDefaults.deleteIconColor;
+    final Color? effectiveDeleteIconColor = WidgetStateProperty.resolveAs(
+      widget.deleteIconColor ??
+          chipTheme.deleteIconColor ??
+          theme.chipTheme.deleteIconColor ??
+          widget.iconTheme?.color ??
+          chipTheme.iconTheme?.color ??
+          chipDefaults.deleteIconColor,
+      statesController.value,
+    );
     final double effectiveIconSize =
         widget.iconTheme?.size ??
         chipTheme.iconTheme?.size ??

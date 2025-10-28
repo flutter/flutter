@@ -19,6 +19,7 @@
 namespace flutter {
 namespace testing {
 
+[[maybe_unused]]
 static const std::string kEmojiFontFile =
 #if FML_OS_MACOSX
     "Apple Color Emoji.ttc";
@@ -26,6 +27,7 @@ static const std::string kEmojiFontFile =
     "NotoColorEmoji.ttf";
 #endif
 
+[[maybe_unused]]
 static const std::string kEmojiFontName =
 #if FML_OS_MACOSX
     "Apple Color Emoji";
@@ -95,9 +97,9 @@ class PainterTestBase : public CanvasTestBase<T> {
  protected:
   txt::TextStyle makeDecoratedStyle(txt::TextDecorationStyle style) {
     auto t_style = txt::TextStyle();
-    t_style.color = SK_ColorBLACK;                // default
-    t_style.font_weight = txt::FontWeight::w400;  // normal
-    t_style.font_size = 14;                       // default
+    t_style.color = SK_ColorBLACK;  // default
+    t_style.font_weight = txt::FontWeight::normal;
+    t_style.font_size = 14;  // default
     t_style.decoration = txt::TextDecoration::kUnderline;
     t_style.decoration_style = style;
     t_style.decoration_color = SK_ColorBLACK;
@@ -107,18 +109,18 @@ class PainterTestBase : public CanvasTestBase<T> {
 
   txt::TextStyle makeEmoji() {
     auto t_style = txt::TextStyle();
-    t_style.color = SK_ColorBLACK;                // default
-    t_style.font_weight = txt::FontWeight::w400;  // normal
-    t_style.font_size = 14;                       // default
+    t_style.color = SK_ColorBLACK;  // default
+    t_style.font_weight = txt::FontWeight::normal;
+    t_style.font_size = 14;  // default
     t_style.font_families.push_back(kEmojiFontName);
     return t_style;
   }
 
   txt::TextStyle makeStyle() {
     auto t_style = txt::TextStyle();
-    t_style.color = SK_ColorBLACK;                // default
-    t_style.font_weight = txt::FontWeight::w400;  // normal
-    t_style.font_size = 14;                       // default
+    t_style.color = SK_ColorBLACK;  // default
+    t_style.font_weight = txt::FontWeight::normal;
+    t_style.font_size = 14;  // default
     t_style.font_families.push_back("ahem");
     return t_style;
   }

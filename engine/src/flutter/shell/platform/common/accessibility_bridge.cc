@@ -291,6 +291,7 @@ void AccessibilityBridge::ConvertFlutterUpdate(const SemanticsNode& node,
   SetIntAttributesFromFlutterUpdate(node_data, node);
   SetIntListAttributesFromFlutterUpdate(node_data, node);
   SetStringListAttributesFromFlutterUpdate(node_data, node);
+  SetIdentifierFromFlutterUpdate(node_data, node);
   SetNameFromFlutterUpdate(node_data, node);
   SetValueFromFlutterUpdate(node_data, node);
   SetTooltipFromFlutterUpdate(node_data, node);
@@ -523,6 +524,13 @@ void AccessibilityBridge::SetStringListAttributesFromFlutterUpdate(
   }
 }
 
+void AccessibilityBridge::SetIdentifierFromFlutterUpdate(
+    ui::AXNodeData& node_data,
+    const SemanticsNode& node) {
+  node_data.AddStringAttribute(ax::mojom::StringAttribute::kIdentifier,
+                               node.identifier);
+}
+
 void AccessibilityBridge::SetNameFromFlutterUpdate(ui::AXNodeData& node_data,
                                                    const SemanticsNode& node) {
   node_data.SetName(node.label);
@@ -584,6 +592,7 @@ AccessibilityBridge::FromFlutterSemanticsNode(
 
   result.flags = flutter_node.flags2;
   result.actions = flutter_node.actions;
+  result.heading_level = flutter_node.heading_level;
   result.text_selection_base = flutter_node.text_selection_base;
   result.text_selection_extent = flutter_node.text_selection_extent;
   result.scroll_child_count = flutter_node.scroll_child_count;
@@ -622,6 +631,9 @@ AccessibilityBridge::FromFlutterSemanticsNode(
         flutter_node.custom_accessibility_actions,
         flutter_node.custom_accessibility_actions +
             flutter_node.custom_accessibility_actions_count);
+  }
+  if (flutter_node.identifier) {
+    result.identifier = std::string(flutter_node.identifier);
   }
   return result;
 }

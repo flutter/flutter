@@ -26,7 +26,6 @@ import 'list_tile.dart';
 import 'list_tile_theme.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'popup_menu_theme.dart';
 import 'text_theme.dart';
 import 'theme.dart';
@@ -346,7 +345,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// {@endtemplate}
   ///
   /// If null, then the value of [PopupMenuThemeData.mouseCursor] is used. If
-  /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
+  /// that is also null, then [WidgetStateMouseCursor.adaptiveClickable] is used.
   final MouseCursor? mouseCursor;
 
   /// The widget below this widget in the tree.
@@ -412,7 +411,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
     final PopupMenuThemeData defaults = theme.useMaterial3
         ? _PopupMenuDefaultsM3(context)
         : _PopupMenuDefaultsM2(context);
-    final Set<MaterialState> states = <MaterialState>{if (!widget.enabled) MaterialState.disabled};
+    final Set<WidgetState> states = <WidgetState>{if (!widget.enabled) WidgetState.disabled};
 
     TextStyle style = theme.useMaterial3
         ? (widget.labelTextStyle?.resolve(states) ??
@@ -641,7 +640,7 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
     final PopupMenuThemeData defaults = theme.useMaterial3
         ? _PopupMenuDefaultsM3(context)
         : _PopupMenuDefaultsM2(context);
-    final Set<MaterialState> states = <MaterialState>{if (widget.checked) MaterialState.selected};
+    final Set<WidgetState> states = <WidgetState>{if (widget.checked) WidgetState.selected};
     final WidgetStateProperty<TextStyle?>? effectiveLabelTextStyle =
         widget.labelTextStyle ?? popupMenuTheme.labelTextStyle ?? defaults.labelTextStyle;
     return IgnorePointer(
@@ -1193,7 +1192,7 @@ Future<T?> showMenu<T>({
     'Either position or positionBuilder must be provided.',
   );
 
-  switch (Theme.of(context).platform) {
+  switch (defaultTargetPlatform) {
     case TargetPlatform.iOS:
     case TargetPlatform.macOS:
       break;
@@ -1695,7 +1694,6 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   void showButtonMenu() {
     // Ensure cached render objects are initialized
     _updateCachedObjects();
-    final PopupMenuThemeData popupMenuTheme = _popupMenuTheme;
     final List<PopupMenuEntry<T>> items = widget.itemBuilder(context);
     // Only show the menu if there is something to show
     if (items.isNotEmpty) {
@@ -1703,15 +1701,15 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       _isMenuExpanded = true;
       showMenu<T?>(
         context: context,
-        elevation: widget.elevation ?? popupMenuTheme.elevation,
-        shadowColor: widget.shadowColor ?? popupMenuTheme.shadowColor,
-        surfaceTintColor: widget.surfaceTintColor ?? popupMenuTheme.surfaceTintColor,
+        elevation: widget.elevation,
+        shadowColor: widget.shadowColor,
+        surfaceTintColor: widget.surfaceTintColor,
         items: items,
         initialValue: widget.initialValue,
         positionBuilder: _positionBuilder,
-        shape: widget.shape ?? popupMenuTheme.shape,
-        menuPadding: widget.menuPadding ?? popupMenuTheme.menuPadding,
-        color: widget.color ?? popupMenuTheme.color,
+        shape: widget.shape,
+        menuPadding: widget.menuPadding,
+        color: widget.color,
         constraints: widget.constraints,
         clipBehavior: widget.clipBehavior,
         useRootNavigator: widget.useRootNavigator,
@@ -1795,23 +1793,23 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 }
 
 // This WidgetStateProperty is passed along to the menu item's InkWell which
-// resolves the property against MaterialState.disabled, MaterialState.hovered,
-// MaterialState.focused.
-class _EffectiveMouseCursor extends MaterialStateMouseCursor {
+// resolves the property against WidgetState.disabled, WidgetState.hovered,
+// WidgetState.focused.
+class _EffectiveMouseCursor extends WidgetStateMouseCursor {
   const _EffectiveMouseCursor(this.widgetCursor, this.themeCursor);
 
   final MouseCursor? widgetCursor;
   final WidgetStateProperty<MouseCursor?>? themeCursor;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
+  MouseCursor resolve(Set<WidgetState> states) {
     return WidgetStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
         themeCursor?.resolve(states) ??
-        MaterialStateMouseCursor.clickable.resolve(states);
+        WidgetStateMouseCursor.adaptiveClickable.resolve(states);
   }
 
   @override
-  String get debugDescription => 'MaterialStateMouseCursor(PopupMenuItemState)';
+  String get debugDescription => 'WidgetStateMouseCursor(PopupMenuItemState)';
 }
 
 class _PopupMenuDefaultsM2 extends PopupMenuThemeData {

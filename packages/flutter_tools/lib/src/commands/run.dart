@@ -16,6 +16,7 @@ import '../build_info.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
+import '../hook_runner.dart' show hookRunner;
 import '../ios/devices.dart';
 import '../project.dart';
 import '../resident_runner.dart';
@@ -364,10 +365,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webRenderer: webRenderer,
         webUseWasm: useWasm,
         vmserviceOutFile: stringArg('vmservice-out-file'),
-        fastStart:
-            argParser.options.containsKey('fast-start') &&
-            boolArg('fast-start') &&
-            !runningWithPrebuiltApplication,
         nativeNullAssertions: boolArg('native-null-assertions'),
         enableImpeller: enableImpeller,
         enableFlutterGpu: enableFlutterGpu,
@@ -464,17 +461,6 @@ class RunCommand extends RunCommandBase {
             'measure the startup time and the app restart time, write the '
             'results out to "refresh_benchmark.json", and exit. This flag is '
             'intended for use in generating automated flutter benchmarks.',
-      )
-      // TODO(zanderso): Off by default with investigating whether this
-      // is slower for certain use cases.
-      // See: https://github.com/flutter/flutter/issues/49499
-      ..addFlag(
-        'fast-start',
-        help:
-            'Whether to quickly bootstrap applications with a minimal app. '
-            'Currently this is only supported on Android devices. This option '
-            'cannot be paired with "--${FlutterOptions.kUseApplicationBinary}".',
-        hide: !verboseHelp,
       );
   }
 
@@ -741,6 +727,8 @@ class RunCommand extends RunCommandBase {
         stayResident: stayResident,
         analytics: globals.analytics,
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+        dartBuilder: hookRunner,
+        logger: globals.logger,
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
@@ -768,6 +756,7 @@ class RunCommand extends RunCommandBase {
           ? null
           : globals.fs.file(applicationBinaryPath),
       stayResident: stayResident,
+      dartBuilder: hookRunner,
     );
   }
 

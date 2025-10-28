@@ -1392,6 +1392,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
                 child: _BaselineAlignedStack(
                   placeholder: placeholder,
                   editableText: editableText,
+                  textAlignVertical: _textAlignVertical,
                   editableTextBaseline: textStyle.textBaseline ?? TextBaseline.alphabetic,
                   placeholderBaseline: placeholderStyle.textBaseline ?? TextBaseline.alphabetic,
                 ),
@@ -1697,14 +1698,16 @@ class _BaselineAlignedStack
   const _BaselineAlignedStack({
     required this.editableTextBaseline,
     required this.placeholderBaseline,
+    required this.textAlignVertical,
     required this.editableText,
     this.placeholder,
   });
 
   final TextBaseline editableTextBaseline;
   final TextBaseline placeholderBaseline;
-  final Widget? placeholder;
+  final TextAlignVertical textAlignVertical;
   final Widget editableText;
+  final Widget? placeholder;
 
   @override
   Iterable<_BaselineAlignedStackSlot> get slots => _BaselineAlignedStackSlot.values;
@@ -1720,6 +1723,7 @@ class _BaselineAlignedStack
   @override
   _RenderBaselineAlignedStack createRenderObject(BuildContext context) {
     return _RenderBaselineAlignedStack(
+      textAlignVertical: textAlignVertical,
       editableTextBaseline: editableTextBaseline,
       placeholderBaseline: placeholderBaseline,
     );
@@ -1728,6 +1732,7 @@ class _BaselineAlignedStack
   @override
   void updateRenderObject(BuildContext context, _RenderBaselineAlignedStack renderObject) {
     renderObject
+      ..textAlignVertical = textAlignVertical
       ..editableTextBaseline = editableTextBaseline
       ..placeholderBaseline = placeholderBaseline;
   }
@@ -1738,10 +1743,22 @@ class _BaselineAlignedStackParentData extends ContainerBoxParentData<RenderBox> 
 class _RenderBaselineAlignedStack extends RenderBox
     with SlottedContainerRenderObjectMixin<_BaselineAlignedStackSlot, RenderBox> {
   _RenderBaselineAlignedStack({
+    required TextAlignVertical textAlignVertical,
     required TextBaseline editableTextBaseline,
     required TextBaseline placeholderBaseline,
-  }) : _editableTextBaseline = editableTextBaseline,
+  }) : _textAlignVertical = textAlignVertical,
+       _editableTextBaseline = editableTextBaseline,
        _placeholderBaseline = placeholderBaseline;
+
+  TextAlignVertical get textAlignVertical => _textAlignVertical;
+  TextAlignVertical _textAlignVertical;
+  set textAlignVertical(TextAlignVertical value) {
+    if (_textAlignVertical == value) {
+      return;
+    }
+    _textAlignVertical = value;
+    markNeedsLayout();
+  }
 
   TextBaseline get editableTextBaseline => _editableTextBaseline;
   TextBaseline _editableTextBaseline;
@@ -1781,6 +1798,38 @@ class _RenderBaselineAlignedStack extends RenderBox
   }
 
   @override
+  double computeMinIntrinsicHeight(double width) {
+    return math.max(
+      _placeholderChild?.getMinIntrinsicHeight(width) ?? 0.0,
+      _editableTextChild.getMinIntrinsicHeight(width),
+    );
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    return math.max(
+      _placeholderChild?.getMaxIntrinsicHeight(width) ?? 0.0,
+      _editableTextChild.getMaxIntrinsicHeight(width),
+    );
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    return math.max(
+      _placeholderChild?.getMinIntrinsicWidth(height) ?? 0.0,
+      _editableTextChild.getMinIntrinsicWidth(height),
+    );
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    return math.max(
+      _placeholderChild?.getMaxIntrinsicWidth(height) ?? 0.0,
+      _editableTextChild.getMaxIntrinsicWidth(height),
+    );
+  }
+
+  @override
   void performLayout() {
     assert(constraints.hasTightWidth);
     final RenderBox? placeholder = _placeholderChild;
@@ -1805,13 +1854,16 @@ class _RenderBaselineAlignedStack extends RenderBox
     );
 
     assert(placeholder != null || placeholderBaselineValue == null);
-    final double placeholderY = placeholderBaselineValue != null
-        ? editableTextBaselineValue - placeholderBaselineValue
-        : 0.0;
+    final Offset baselineDiff = placeholderBaselineValue != null
+        ? Offset(0.0, editableTextBaselineValue - placeholderBaselineValue)
+        : Offset.zero;
+    final Alignment verticalAlignment = Alignment(0.0, textAlignVertical.y);
 
-    final double offsetYAdjustment = math.max(0, placeholderY);
-    editableTextParentData.offset = Offset(0, offsetYAdjustment);
-    placeholderParentData?.offset = Offset(0, placeholderY + offsetYAdjustment);
+    editableTextParentData.offset = verticalAlignment.alongOffset(
+      size - editableText.size as Offset,
+    );
+    // Baseline-align the placeholder to the editable text.
+    placeholderParentData?.offset = editableTextParentData.offset + baselineDiff;
   }
 
   @override

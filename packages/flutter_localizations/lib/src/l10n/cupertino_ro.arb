@@ -34,5 +34,11 @@
   "shareButtonLabel": "Trimiteți…",
   "clearButtonLabel": "Ștergeți",
   "cancelButtonLabel": "Anulați",
-  "backButtonLabel": "Înapoi"
+  "backButtonLabel": "Înapoi",
+  "expansionTileExpandedHint": "atingeți de două ori pentru a restrânge",
+  "expansionTileCollapsedHint": "atingeți de două ori pentru a extinde",
+  "expansionTileExpandedTapHint": "Restrângeți",
+  "expansionTileCollapsedTapHint": "Extindeți pentru mai multe detalii",
+  "expandedHint": "Restrâns",
+  "collapsedHint": "Extins"
 }

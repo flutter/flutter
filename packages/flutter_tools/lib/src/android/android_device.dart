@@ -15,6 +15,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
@@ -570,7 +571,6 @@ class AndroidDevice extends Device {
         androidBuildInfo: AndroidBuildInfo(
           debuggingOptions.buildInfo,
           targetArchs: <AndroidArch>[androidArch],
-          fastStart: debuggingOptions.fastStart,
         ),
       );
       // Package has been built, so we can get the updated application ID and
@@ -732,9 +732,6 @@ class AndroidDevice extends Device {
 
   @override
   bool get supportsHotRestart => true;
-
-  @override
-  bool get supportsFastStart => true;
 
   @override
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
@@ -1122,13 +1119,10 @@ class AdbLogReader extends DeviceLogReader {
     // We expect logcat streams to occasionally contain invalid utf-8,
     // see: https://github.com/flutter/flutter/pull/8864.
     const decoder = Utf8Decoder(reportErrors: false);
-    _adbProcess.stdout
-        .transform<String>(decoder)
-        .transform<String>(const LineSplitter())
-        .listen(_onLine);
+    _adbProcess.stdout.transform(utf8LineDecoder).listen(_onLine);
     _adbProcess.stderr
-        .transform<String>(decoder)
-        .transform<String>(const LineSplitter())
+        .transformWithCallSite(decoder)
+        .transform(const LineSplitter())
         .listen(_onLine);
     unawaited(
       _adbProcess.exitCode.whenComplete(() {

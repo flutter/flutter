@@ -69,7 +69,10 @@ void SemanticsUpdateBuilder::updateNode(
     std::string linkUrl,
     int role,
     const std::vector<std::string>& controlsNodes,
-    int validationResult) {
+    int validationResult,
+    int hitTestBehavior,
+    int inputType,
+    std::string locale) {
   FML_CHECK(scrollChildren == 0 ||
             (scrollChildren > 0 && childrenInHitTestOrder.data()))
       << "Semantics update contained scrollChildren but did not have "
@@ -125,6 +128,7 @@ void SemanticsUpdateBuilder::updateNode(
   node.role = static_cast<SemanticsRole>(role);
   node.validationResult =
       static_cast<SemanticsValidationResult>(validationResult);
+  node.locale = std::move(locale);
 
   nodes_[id] = node;
 }

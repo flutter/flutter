@@ -2,9 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/toolchain/ccache.gni")
 import("//build/toolchain/clang.gni")
 import("//build/toolchain/rbe.gni")
-import("//build/toolchain/ccache.gni")
 import("//build/toolchain/toolchain.gni")
 
 if (use_rbe) {
@@ -25,8 +25,9 @@ toolchain("fuchsia") {
   assert(target_cpu == "x64" || target_cpu == "arm64",
          "We currently only support 'x64' and 'arm64' targets for fuchsia.")
   toolchain_bin =
-      rebase_path("$buildtools_path/${host_os}-${host_cpu}/clang/bin", root_out_dir)
-  fuchsia_sdk = rebase_path("//fuchsia/sdk/$host_os", root_out_dir)
+      rebase_path("$buildtools_path/${host_os}-${host_cpu}/clang/bin",
+                  root_out_dir)
+  fuchsia_sdk = rebase_path("//third_party/fuchsia-sdk/sdk", root_out_dir)
 
   # We can't do string interpolation ($ in strings) on things with dots in
   # them. To allow us to use $cc below, for example, we create copies of

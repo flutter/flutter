@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -522,6 +523,30 @@ bool unorderedListEqual<T>(List<T>? a, List<T>? b) {
   return wordCounts.isEmpty;
 }
 
+bool paintEquals(ui.Paint? a, ui.Paint? b) {
+  if (identical(a, b)) {
+    // They are both the same instance or both null.
+    return true;
+  }
+  if (a == null || b == null) {
+    return false;
+  }
+  return a.blendMode == b.blendMode &&
+      a.color == b.color &&
+      a.colorFilter == b.colorFilter &&
+      a.filterQuality == b.filterQuality &&
+      a.imageFilter == b.imageFilter &&
+      a.invertColors == b.invertColors &&
+      a.isAntiAlias == b.isAntiAlias &&
+      a.maskFilter == b.maskFilter &&
+      a.shader == b.shader &&
+      a.strokeCap == b.strokeCap &&
+      a.strokeJoin == b.strokeJoin &&
+      a.strokeMiterLimit == b.strokeMiterLimit &&
+      a.strokeWidth == b.strokeWidth &&
+      a.style == b.style;
+}
+
 /// Extensions to [Map] that make it easier to treat it as a JSON object. The
 /// keys are `dynamic` because when JSON is deserialized from method channels
 /// it arrives as `Map<dynamic, dynamic>`.
@@ -797,4 +822,25 @@ class BitmapSize {
   bool get isEmpty => width == 0 || height == 0;
 
   static const BitmapSize zero = BitmapSize(0, 0);
+}
+
+String _generateDebugFilename(String filePrefix) {
+  final now = DateTime.now();
+  final String y = now.year.toString().padLeft(4, '0');
+  final String mo = now.month.toString().padLeft(2, '0');
+  final String d = now.day.toString().padLeft(2, '0');
+  final String h = now.hour.toString().padLeft(2, '0');
+  final String mi = now.minute.toString().padLeft(2, '0');
+  final String s = now.second.toString().padLeft(2, '0');
+  return '$filePrefix-$y-$mo-$d-$h-$mi-$s.json';
+}
+
+void downloadDebugInfo(String filePrefix, Map<String, dynamic> json) {
+  final String jsonString = const JsonEncoder.withIndent(' ').convert(json);
+  final blob = createDomBlob([jsonString], {'type': 'application/json'});
+  final url = domWindow.URL.createObjectURL(blob);
+  final element = domDocument.createElement('a');
+  element.setAttribute('href', url);
+  element.setAttribute('download', _generateDebugFilename(filePrefix));
+  element.click();
 }

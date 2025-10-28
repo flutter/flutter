@@ -27,7 +27,7 @@ import 'package:flutter/widgets.dart';
 /// class MyWidget extends StatefulWidget {
 ///   const MyWidget({super.key, required this.color, required this.child});
 ///
-///   final MaterialStateColor color;
+///   final WidgetStateColor color;
 ///   final Widget child;
 ///
 ///   @override

@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -417,15 +418,15 @@ void main() {
     const Color backgroundColor = Color(0xff0000ff);
     const Color selectedColor = Color(0xffff0000);
     final WidgetStateProperty<Color?> color = WidgetStateProperty.resolveWith((
-      Set<MaterialState> states,
+      Set<WidgetState> states,
     ) {
-      if (states.contains(MaterialState.disabled) && states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.disabled) && states.contains(WidgetState.selected)) {
         return disabledSelectedColor;
       }
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         return disabledColor;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return selectedColor;
       }
       return backgroundColor;
@@ -762,6 +763,37 @@ void main() {
     );
 
     expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
+  });
+
+  testWidgets('ChoiceChip has expected default mouse cursor on hover', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapForChip(
+        child: Center(
+          child: ChoiceChip(
+            selected: false,
+            label: const Text('Chip'),
+            onSelected: (bool value) {},
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(10, 10));
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+
+    final Offset chip = tester.getCenter(find.byType(ChoiceChip));
+    await gesture.moveTo(chip);
+    await tester.pump();
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
   });
 
   testWidgets('ChoiceChip mouse cursor behavior', (WidgetTester tester) async {
