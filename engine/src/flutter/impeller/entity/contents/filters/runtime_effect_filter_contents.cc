@@ -53,12 +53,12 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
     return std::nullopt;
   }
 
-  // If the input snapshot does not have an translation-only transform, the
+  // If the input snapshot does not have an identity transform the
   // ImageFilter.shader will not correctly render as it does not know what the
   // transform is in order to incorporate this into sampling. We need to
   // re-rasterize the input snapshot so that the transform is absorbed into the
   // texture.
-  if (maybe_input_coverage->GetSize() != coverage.GetSize()) {
+  if (!input_snapshot->transform.IsIdentity()) {
     Matrix inverse = input_snapshot->transform.Invert();
     Quad quad = inverse.Transform(Quad{
         coverage.GetLeftTop(),     //
