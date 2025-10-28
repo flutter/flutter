@@ -395,10 +395,24 @@ void main() {
   test('warns on legacy service worker patterns', () {
     const indexHtml = WebTemplate(htmlSampleLegacyVar);
     final List<WebTemplateWarning> warnings = indexHtml.getWarnings();
-    expect(warnings.length, 2);
+    expect(warnings, hasLength(2));
 
-    expect(warnings.where((WebTemplateWarning warning) => warning.lineNumber == 13), isNotEmpty);
-    expect(warnings.where((WebTemplateWarning warning) => warning.lineNumber == 16), isNotEmpty);
+    final Iterable<WebTemplateWarning> serviceWorkerWarnings = warnings.where(
+      (WebTemplateWarning warning) => warning.lineNumber == 13 || warning.lineNumber == 16,
+    );
+    expect(serviceWorkerWarnings, hasLength(2));
+    expect(
+      serviceWorkerWarnings,
+      everyElement(
+        isA<WebTemplateWarning>().having(
+          (WebTemplateWarning warning) => warning.warningText,
+          'service worker warning message',
+          contains(
+            "Flutter's service worker is deprecated and will be removed in a future Flutter release.",
+          ),
+        ),
+      ),
+    );
   });
 
   test('warns on legacy FlutterLoader.loadEntrypoint', () {
