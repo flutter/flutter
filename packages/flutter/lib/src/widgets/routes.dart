@@ -2617,6 +2617,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     return Semantics(
       scopesRoute: true,
       explicitChildNodes: true,
+      hitTestBehavior: ui.SemanticsHitTestBehavior.opaque,
       child: DisplayFeatureSubScreen(
         anchorPoint: anchorPoint,
         child: _pageBuilder(context, animation, secondaryAnimation),
