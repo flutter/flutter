@@ -575,8 +575,12 @@ class _MacOSPlatformInterface {
         ..constraints.maxWidth = preferredConstraints.maxWidth
         ..constraints.maxHeight = preferredConstraints.maxHeight;
     }
-    final int viewId = _createDialogWindow(PlatformDispatcher.instance.engineId!, request);
-    _allocator.free(request);
+    try {
+        final int viewId = _createDialogWindow(PlatformDispatcher.instance.engineId!, request);
+    }
+    finally {
+        _allocator.free(request);
+    }
     return viewId;
   }
 
