@@ -10,7 +10,7 @@ uniform sampler2D u_texture;
 out vec4 frag_color;
 
 vec2 origin = vec2(30.0, 30.0);
-float radius = 15.0;
+float radius = 30.0;
 
 void main() {
   vec2 uv = FlutterFragCoord().xy / u_size;

@@ -48,12 +48,17 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
     return std::nullopt;
   }
 
+  std::optional<Rect> maybe_input_coverage = input_snapshot->GetCoverage();
+  if (!maybe_input_coverage.has_value()) {
+    return std::nullopt;
+  }
+
   // If the input snapshot does not have an translation-only transform, the
   // ImageFilter.shader will not correctly render as it does not know what the
   // transform is in order to incorporate this into sampling. We need to
   // re-rasterize the input snapshot so that the transform is absorbed into the
   // texture.
-  if (!input_snapshot->transform.IsTranslationOnly()) {
+  if (maybe_input_coverage->GetSize() != coverage.GetSize()) {
     Matrix inverse = input_snapshot->transform.Invert();
     Quad quad = inverse.Transform(Quad{
         coverage.GetLeftTop(),     //
@@ -74,11 +79,6 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
       Entity entity;
       input_snapshot = texture_contents.RenderToSnapshot(renderer, entity);
     }
-  }
-
-  std::optional<Rect> maybe_input_coverage = input_snapshot->GetCoverage();
-  if (!maybe_input_coverage.has_value()) {
-    return std::nullopt;
   }
 
   // The shader is required to have at least one sampler, the first of
