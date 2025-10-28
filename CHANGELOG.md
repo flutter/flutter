@@ -30,6 +30,327 @@ More information and tips:
 docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
 
+## Flutter 3.38 Changes
+
+### [3.38.0-0.2.pre](https://github.com/flutter/flutter/releases/tag/3.38.0-0.2.pre)
+
+- [flutter/176462](https://github.com/flutter/flutter/issues/176462) Improves error message when building for iOS fails due to precompiled headers cache error.
+- [flutter/176206](https://github.com/flutter/flutter/issues/176206) Adds MacOS warning that wireless debugging may be slow on iOS 26 that is forwarded to DAP clients, e.g. VSCode
+- [flutter/177037](https://github.com/flutter/flutter/issues/177037) Allows some Android apps that use dynamic modules to build from Android Studio.
+- [flutter/177320](https://github.com/flutter/flutter/issues/177320) Support most recently published Android AGP/KGP.Java/Gradle dependencies.
+- [flutter/176310](https://github.com/flutter/flutter/issues/176310) For Flutter web applications run with `--machine`, ensure `app.dtd` event is emitted.
+- [flutter/177401](https://github.com/flutter/flutter/pull/177401) Fixes a macOS text input crash caused by down-casting the string argument from Any to a NSString.
+- [flutter/177308](https://github.com/flutter/flutter/pull/177308) Configures `FfiNative` resolver on dart:io.
+- [flutter/176360](https://github.com/flutter/flutter/issues/176360) Fixes accessibility events regression on Linux which makes apps not announced with screen reader.
+-[flutter/174791](https://github.com/flutter/flutter/issues/174791) Fixes Flutter web hot reload/restart crashes when the browser tab is closed, causing “Bad state: No element” errors and breaking the DWDS connection.
+- [flutter/173770](https://github.com/flutter/flutter/issues/173770) Mitigates a memory leak that occurs on Android when Activities are not kept and an Activity is exited and re-entered.
+
+### [3.38.0-0.1.pre](https://github.com/flutter/flutter/releases/tag/3.38.0-0.1.pre)
+
+#### Framework
+* Allow OverlayPortal.overlayChildLayoutBuilder to choose root Overlay by @chunhtai in https://github.com/flutter/flutter/pull/174239
+* [ Widget Preview] Add `group` property to `Preview` by @bkonyi in https://github.com/flutter/flutter/pull/174849
+* Fix: Use route navigator for CupertinoSheetRoute pop by @rkishan516 in https://github.com/flutter/flutter/pull/173103
+* fix(Semantics): Ensure semantics properties take priority over button's by @pedromassango in https://github.com/flutter/flutter/pull/174473
+* Fix SliverMainAxisGroup scrollOffsetCorrection by @manu-sncf in https://github.com/flutter/flutter/pull/174369
+* Depend on operator overload synthesis for three-way and equality comparisons. by @chinmaygarde in https://github.com/flutter/flutter/pull/174892
+* Nav bar static components respect ambient MediaQueryData by @victorsanni in https://github.com/flutter/flutter/pull/174673
+* Adjust default CupertinoCheckbox size on desktop by @victorsanni in https://github.com/flutter/flutter/pull/172502
+* Update transformHitTests documentation for clarity by @Rushikeshbhavsar20 in https://github.com/flutter/flutter/pull/174286
+* Add semanticIndexOffset argument to SliverList.builder, SliverGrid.builder, and SliverFixedExtentList.builder by @rodrigogmdias in https://github.com/flutter/flutter/pull/174856
+* chore: move engine docs out of engine/ and into docs/ by @jtmcdole in https://github.com/flutter/flutter/pull/175195
+* CupertinoContextMenu child respects available screen width by @victorsanni in https://github.com/flutter/flutter/pull/175300
+* [a11y-app] Fix form field label and error message by @bleroux in https://github.com/flutter/flutter/pull/174831
+* Engine Support for Dynamic View Resizing by @LouiseHsu in https://github.com/flutter/flutter/pull/173610
+* [web] Unskip Cupertino datepicker golden tests in Skwasm by @harryterkelsen in https://github.com/flutter/flutter/pull/174666
+* Add `CupertinoLinearActivityIndicator` by @ValentinVignal in https://github.com/flutter/flutter/pull/170108
+* Fix RadioGroup single selection check. by @ksokolovskyi in https://github.com/flutter/flutter/pull/175654
+* Fix: Update docs tool tag to sample in ImageProvider by @dixita0607 in https://github.com/flutter/flutter/pull/175256
+* [ Widget Preview ] Allow for custom `Preview` annotations, add support for runtime transformations by @bkonyi in https://github.com/flutter/flutter/pull/175535
+* [web] Cleanup opportunities post renderer unification by @mdebbar in https://github.com/flutter/flutter/pull/174659
+* Load fonts in the order addFont is called by @jiahaog in https://github.com/flutter/flutter/pull/174253
+* Fix outdated link of `intl` package to point to the correct new location  by @AbdeMohlbi in https://github.com/flutter/flutter/pull/174498
+* Add non uniform TableBorder by @korca0220 in https://github.com/flutter/flutter/pull/175773
+* fix: remove final class modifier on MenuController by @rkishan516 in https://github.com/flutter/flutter/pull/174490
+* Add an assertion for the relationship between `Visibility.maintainState` and `Visibility.maintainFocusability` by @Renzo-Olivares in https://github.com/flutter/flutter/pull/175552
+* fix: cupertino sheet broken example with programatic pop by @rkishan516 in https://github.com/flutter/flutter/pull/175709
+* Fix SliverMainAxisGroup SliverEnsureSemantics support by @manu-sncf in https://github.com/flutter/flutter/pull/175671
+* Cleans up navigator pop and remove logic by @chunhtai in https://github.com/flutter/flutter/pull/175612
+* Fix docs in `EditableText` by @Renzo-Olivares in https://github.com/flutter/flutter/pull/175787
+* Make sure that a CupertinoDesktopTextSelectionToolbarButton doesn't c… by @ahmedsameha1 in https://github.com/flutter/flutter/pull/173894
+* Implement Regular Windows for the win32 framework + add an example application for regular windows by @mattkae in https://github.com/flutter/flutter/pull/173715
+* [a11y] Add `expanded` flag support to Android. by @ksokolovskyi in https://github.com/flutter/flutter/pull/174981
+* Migrate tests and documentation to set java version to 17 by @reidbaker in https://github.com/flutter/flutter/pull/176204
+* Migrate java 11 usage to java 17 usage for templates by @reidbaker in https://github.com/flutter/flutter/pull/176203
+* Update flutter test to use SemanticsFlags by @hannah-hyj in https://github.com/flutter/flutter/pull/175987
+* Implement framework interface for the dialog window archetype by @mattkae in https://github.com/flutter/flutter/pull/176202
+* Web semantics: Fix email field selection/cursor by using type="text" + inputmode="email" by @flutter-zl in https://github.com/flutter/flutter/pull/175876
+* replace `onPop` usage with `onPopWithResult` in `navigation_bar.2.dart ` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/174841
+* Adds dart ui API for setting application level locale by @chunhtai in https://github.com/flutter/flutter/pull/175100
+* Update description in _LastFinderMixin to properly describe finding last by @FufferKS in https://github.com/flutter/flutter/pull/174232
+* Fix: Update anchorRect for overlayBuilder when anchor moves by @rkishan516 in https://github.com/flutter/flutter/pull/169814
+* Fix typo in pages.dart by @TDuffinNTU in https://github.com/flutter/flutter/pull/176438
+* Selecting an implementation widget with the on-device inspector opens the code location for the nearest project widget by @elliette in https://github.com/flutter/flutter/pull/176530
+#### Material
+* Fix table cell semantics rect alignment issues.  by @hannah-hyj in https://github.com/flutter/flutter/pull/174914
+* Fix IconButton.color overrided by IconButtomTheme by @bleroux in https://github.com/flutter/flutter/pull/174515
+* Fix DropdownMenuFormField does not clear text field content on reset … by @bleroux in https://github.com/flutter/flutter/pull/174937
+* Migrate to widget state by @ValentinVignal in https://github.com/flutter/flutter/pull/174746
+* Document Form.onChange precedence over DropdownButtonFormField.onChange by @bleroux in https://github.com/flutter/flutter/pull/175249
+* Show cursor after swipe only if TextField has focus by @Memet18 in https://github.com/flutter/flutter/pull/175044
+* Migrate to widget state by @ValentinVignal in https://github.com/flutter/flutter/pull/175242
+* Fix default overlay color in `TabBar` by @ValentinVignal in https://github.com/flutter/flutter/pull/175270
+* Allow Passing an AnimationController to CircularProgressIndicator and LinearProgressIndicator by @dkwingsmt in https://github.com/flutter/flutter/pull/174605
+* Refactor: Migrate page transition builder class to widgets by @rkishan516 in https://github.com/flutter/flutter/pull/174321
+* fix: ColorScheme will removeListener on imageStream twice if there is error loading the image. by @dkwingsmt in https://github.com/flutter/flutter/pull/174465
+* Correct documentation in PredictiveBackFullscreenPageTransitionsBuilder by @xVemu in https://github.com/flutter/flutter/pull/174362
+* feat: Enable WidgetStateColor to be used in ChipThemeData.deleteIconColor by @erickzanardo in https://github.com/flutter/flutter/pull/171646
+* Migrate to WidgetState by @ValentinVignal in https://github.com/flutter/flutter/pull/175396
+* Migrate to `WidgetPropertyResolver` by @ValentinVignal in https://github.com/flutter/flutter/pull/175397
+* Fix InputDecoration does not apply errorStyle to error by @bleroux in https://github.com/flutter/flutter/pull/174787
+* Make sure that a CloseButton doesn't crash in 0x0 environment by @ahmedsameha1 in https://github.com/flutter/flutter/pull/172902
+* [a11y] TimePicker clock is unnecessarily announced by @bleroux in https://github.com/flutter/flutter/pull/175570
+* Add `menuController` to `DropdownMenu` by @ValentinVignal in https://github.com/flutter/flutter/pull/175039
+* Correctly implement PlatformViews' cursors on Web by @dkwingsmt in https://github.com/flutter/flutter/pull/174300
+* Document how to hide counter in TextField.maxLength by @bleroux in https://github.com/flutter/flutter/pull/175797
+* Make sure that a VerticalDivider doesn't crash at 0x0 environment by @ahmedsameha1 in https://github.com/flutter/flutter/pull/174761
+* Make sure that Drawer & DrawerHeader don't crash in 0x0 environment by @ahmedsameha1 in https://github.com/flutter/flutter/pull/174772
+* Broken link in NavigationRail documentation by @srivats22 in https://github.com/flutter/flutter/pull/175852
+* feat(cupertino): Add selectableDayPredicate parameter to CupertinoDatePicker for selectable day control #171332 by @koukibadr in https://github.com/flutter/flutter/pull/171334
+* Make sure that a MaterialApp doesn't crash in 0x0 environment by @ahmedsameha1 in https://github.com/flutter/flutter/pull/173090
+* Make sure that a FlexibleSpaceBar doesn't crash in 0x0 environment by @ahmedsameha1 in https://github.com/flutter/flutter/pull/175228
+* Migrate to `WidgetStateColor` by @ValentinVignal in https://github.com/flutter/flutter/pull/175573
+* Add tests for InputDecoration borders (M3 and theme normalization) by @bleroux in https://github.com/flutter/flutter/pull/175838
+* Reapply "Update the AccessibilityPlugin::Announce method to account f… by @mattkae in https://github.com/flutter/flutter/pull/174365
+* [time_picker] refactor: Distinguish widgets for dial mode only by @Gustl22 in https://github.com/flutter/flutter/pull/173188
+* Reverts "Reapply "Update the AccessibilityPlugin::Announce method to account f… (#174365)" by @auto-submit[bot] in https://github.com/flutter/flutter/pull/176059
+* Add itemClipBehavior property for CarouselView's children by @AlsoShantanuBorkar in https://github.com/flutter/flutter/pull/175324
+* Migrate to `WidgetStateMouseCursor` by @ValentinVignal in https://github.com/flutter/flutter/pull/175981
+* Make sure that a DesktopTextSelectionToolbar doesn't crash in 0x0 env… by @ahmedsameha1 in https://github.com/flutter/flutter/pull/173928
+* Enhance input decorator padding logic for character counter in text f… by @RootHex200 in https://github.com/flutter/flutter/pull/175706
+* Migrate to `WidgetStateBorderSide` by @ValentinVignal in https://github.com/flutter/flutter/pull/176164
+* Fix docs referencing deprecated radio properties by @victorsanni in https://github.com/flutter/flutter/pull/176244
+* Migrate to `WidgetStateOutlinedBorder` by @ValentinVignal in https://github.com/flutter/flutter/pull/176270
+* Migrate to `WidgetStateTextStyle` by @ValentinVignal in https://github.com/flutter/flutter/pull/176330
+* Make sure that a DateRangePickerDialog doesn't crash in 0x0 environments by @ahmedsameha1 in https://github.com/flutter/flutter/pull/173754
+* Make sure that a DrawerButton doesn't crash in 0x0 environment by @ahmedsameha1 in https://github.com/flutter/flutter/pull/172948
+* Reapply "Update the AccessibilityPlugin::Announce method to account f… by @chunhtai in https://github.com/flutter/flutter/pull/176107
+* Fix platform specific semantics for time picker buttons by @Piinks in https://github.com/flutter/flutter/pull/176373
+* Update localization from translation console by @QuncCccccc in https://github.com/flutter/flutter/pull/176324
+* Fix Voiceover traversal for OutlinedButton.icon by @LouiseHsu in https://github.com/flutter/flutter/pull/175810
+* [material/menu_anchor.dart] Check for reserved padding updates on layout delegate.  by @davidhicks980 in https://github.com/flutter/flutter/pull/176457
+* Fix TextFormField does not inherit local InputDecorationTheme by @bleroux in https://github.com/flutter/flutter/pull/176397
+* Fix NavigatorBar lacks visual feedback by @bleroux in https://github.com/flutter/flutter/pull/175182
+* Migrate to `WidgetStateInputBorder` by @ValentinVignal in https://github.com/flutter/flutter/pull/176386
+* Fix PopupMenu does not update when PopupMenuTheme in Theme changes. by @ksokolovskyi in https://github.com/flutter/flutter/pull/175513
+* Fix InputDecoration helper/error padding is not compliant by @bleroux in https://github.com/flutter/flutter/pull/176353
+#### iOS
+* Prevent potential crash when accessing window in FlutterSceneDelegate by @vashworth in https://github.com/flutter/flutter/pull/174873
+* [ios]Do not re-add delaying recognizer on iOS 26 by @hellohuanlin in https://github.com/flutter/flutter/pull/175097
+* Adds a11y section locale support for iOS by @chunhtai in https://github.com/flutter/flutter/pull/175005
+* Filter out unexpected process logs on iOS with better regex matching. by @vashworth in https://github.com/flutter/flutter/pull/175452
+* Connect the FlutterEngine to the FlutterSceneDelegate by @vashworth in https://github.com/flutter/flutter/pull/174910
+* Do not present textures in FlutterMetalLayer if the drawable size changed and the texture's size does not match the new drawable size by @jason-simmons in https://github.com/flutter/flutter/pull/175450
+* Ignore upcoming `experimental_member_use` warnings. by @stereotype441 in https://github.com/flutter/flutter/pull/175969
+* Add scene plugin lifecycle events by @vashworth in https://github.com/flutter/flutter/pull/175866
+* Roll GN to 81b24e01 by @jason-simmons in https://github.com/flutter/flutter/pull/176119
+* Add SwiftUI support for UIScene migration by @vashworth in https://github.com/flutter/flutter/pull/176230
+* Add deeplinking for UIScene migration by @vashworth in https://github.com/flutter/flutter/pull/176303
+* Add state restoration for UIScene migration by @vashworth in https://github.com/flutter/flutter/pull/176305
+* Add an AppDelegate callback for implicit FlutterEngines by @vashworth in https://github.com/flutter/flutter/pull/176240
+* Add tooling to migrate to UIScene by @vashworth in https://github.com/flutter/flutter/pull/176427
+* Handle FlutterEngine registration when embedded in Multi-Scene apps by @vashworth in https://github.com/flutter/flutter/pull/176490
+* Add fallback for 'scene:willConnectToSession:options' by @vashworth in https://github.com/flutter/flutter/pull/176580
+#### Android
+* [Gradle 9] Removed `minSdkVersion` and only use `minSdk` by @jesswrd in https://github.com/flutter/flutter/pull/173892
+* Fix GitHub labeler platform-android typo by @jmagman in https://github.com/flutter/flutter/pull/175076
+* Update ImageReaderSurfaceProducer.MAX_IMAGES to include the maximum number of retained dequeued images by @jason-simmons in https://github.com/flutter/flutter/pull/174971
+* fix typo in test documentation #2 by @AbdeMohlbi in https://github.com/flutter/flutter/pull/174707
+* Update `build.gradle` to remove deprecation warning in `flutter\engine\src\flutter\shell\platform\android` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175305
+* Remove redundant public modifier in `PlatformViewRenderTarget.java` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175284
+* Refactor `AccessibilityBridge.java` to address linter issues by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175277
+* Remove the unnecessary semicolon at the end of the line in `ProcessTextPlugin.java` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175280
+* Replace `.size() == 0` with `isEmpty()` in `PlatformPlugin.java` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175285
+* Remove unnecessary `toString()` call in `ImageReaderPlatformViewRenderTarget.java` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175286
+* Remove  redundant `public` modifier  for interface members in MouseCursorPlugin.java by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175281
+* fix typo in test documentation by @AbdeMohlbi in https://github.com/flutter/flutter/pull/174292
+* replace ` Charset.forName("UTF-8")` with `StandardCharsets.UTF_8` to address linter issues by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175275
+* Update `buildscript classpath dependency` to fix IDE support on android studio by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175273
+* Fix linter issues about C-style array in java code  by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175497
+* Remove unnecessary public modifier in `KeyboardManager.java` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175500
+* [Android 16] Bump robolectric and java to 21 for `third_party` libraries by @ash2moon in https://github.com/flutter/flutter/pull/175550
+* Update `KeyChannelResponder.java`  to use method reference  by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175510
+* Remove unnecessary `String.valueOf` in `KeyboardManager.java` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175502
+* Remove unused imports, fix assertion order, add non null annotations to `ImageReaderPlatformViewRenderTargetTest.java` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175723
+* Simplify test asserts and use lambdas  by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175727
+* Fix wrong order of asserts arguments by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175726
+* Improve code quality in `AccessibilityBridgeTest.java` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175718
+* Fix linter issues in `VsyncWaiterTest` Capital L for long values by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175780
+* Simplify asserts in `FlutterMutatorTest` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175730
+* Use `assertNull` to simplify code by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175720
+* fix small typo in test docs by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175776
+* Change the arguments order in `assertEquals` to fix linter issues by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175719
+* Simplify/fix ordering of asserts in `TextInputPluginTest` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175784
+* refactor code to use method reference and lambdas in `DartMessengerTest.java` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175731
+* use lambda expressions /method reference to fix linter issue in `DartMessengerTest.java` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175733
+* Replace curly braces with lambdas in `KeyEventChannelTest` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175729
+* Refactor `FlutterInjectorTest` to use lambdas/method reference by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175777
+* In Gradle Flutter task, correctly replace '\ ' with ' '. by @mboetger in https://github.com/flutter/flutter/pull/175815
+* Improve code quality in `SensitiveContentPluginTest.java` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175721
+* Add warn java evaluation to android_workflow by @reidbaker in https://github.com/flutter/flutter/pull/176097
+* Clean up typos in `PlatformViewsControllerTest.java` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175725
+* fix `assertEquals` arguments are in wrong order in `FlutterJNITest.java` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175728
+* [Android] Use headingLevel for heading accessibility property by @mnayef95 in https://github.com/flutter/flutter/pull/175416
+* Set minimum supported java version to 17  by @reidbaker in https://github.com/flutter/flutter/pull/176226
+* Update Framework CI to Use NDK r28c by @jesswrd in https://github.com/flutter/flutter/pull/176214
+* Fix deprecated configureStatusBarForFullscreenFlutterExperience for Android 15+ by @alexskobozev in https://github.com/flutter/flutter/pull/175501
+#### Windows
+* Rename DisplayMonitor to DisplayManager on Win32 by @mattkae in https://github.com/flutter/flutter/pull/175619
+* [win32] Runloop should use high resolution timer and avoid deadlock by @knopp in https://github.com/flutter/flutter/pull/176023
+#### Linux
+* Warn if embedder API calls don't return success by @robert-ancell in https://github.com/flutter/flutter/pull/176184
+#### Web
+* [web] Minor simplification in flutter.js loader by @mdebbar in https://github.com/flutter/flutter/pull/174963
+* [web] Fix image and color filters equality in SkWASM. by @ksokolovskyi in https://github.com/flutter/flutter/pull/175230
+* Remove 'v' Open DevTools from help on web in profile/release mode by @danwirele in https://github.com/flutter/flutter/pull/172829
+* [web] Remove unused `sceneHost` property by @mdebbar in https://github.com/flutter/flutter/pull/174997
+* [web] Fix errors when using image filters with default values. by @ksokolovskyi in https://github.com/flutter/flutter/pull/175122
+* [reland][web] Refactor renderers to use the same frontend code #174588 by @harryterkelsen in https://github.com/flutter/flutter/pull/175392
+* Delete unused web_unicode library by @mdebbar in https://github.com/flutter/flutter/pull/174896
+* [web] Fix assertion thrown when hot restarting during animation by @mdebbar in https://github.com/flutter/flutter/pull/175856
+* web_ui: avoid crash for showPerformanceOverlay; log 'not supported' once by @muradhossin in https://github.com/flutter/flutter/pull/173518
+* [web] Remove mention of non-existent `canvaskit_lock.yaml` by @mdebbar in https://github.com/flutter/flutter/pull/176108
+* Update the test package for the web engine unit test bits. by @eyebrowsoffire in https://github.com/flutter/flutter/pull/176241
+* [web] Bump Firefox to 143.0 by @mdebbar in https://github.com/flutter/flutter/pull/176110
+* Remove references to dart:js_util by @fishythefish in https://github.com/flutter/flutter/pull/176323
+#### Tooling
+* [ Tool ] Remove leftover Android x86 deprecation warning constant by @bkonyi in https://github.com/flutter/flutter/pull/174941
+* Make every LLDB Init error message actionable by @vashworth in https://github.com/flutter/flutter/pull/174726
+* [web] Reuse chrome instance to run all flutter tests by @mdebbar in https://github.com/flutter/flutter/pull/174957
+* [ Widget Preview ] Improve `--machine` output by @bkonyi in https://github.com/flutter/flutter/pull/175003
+* Fix crash when attaching to a device with multiple active flutter apps by @chingjun in https://github.com/flutter/flutter/pull/175147
+* Deprecate Objective-C plugin template by @okorohelijah in https://github.com/flutter/flutter/pull/174003
+* [native_assets] Find more `CCompilerConfig` on Linux by @GregoryConrad in https://github.com/flutter/flutter/pull/175323
+* Roll pub packages and update lockfiles by @gmackall in https://github.com/flutter/flutter/pull/175446
+* Update gradle_utils.dart to use `constant` instead of `final` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175443
+* Update gradle_errors.dart to use constants defined in gradle_utils.dart by @AbdeMohlbi in https://github.com/flutter/flutter/pull/174760
+* fix typo in comments to mention `settings.gradle/.kts` instead of `build.gradle/.kts` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175486
+* [ Tool ] Serve DevTools from DDS, remove ResidentDevToolsHandler by @bkonyi in https://github.com/flutter/flutter/pull/174580
+* [ Widget Preview ] Don't update filtered preview set when selecting non-source files by @bkonyi in https://github.com/flutter/flutter/pull/175596
+* Remove `name` field form `SupportedPlatform` enum by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175611
+* Roll pub packages by @flutter-pub-roller-bot in https://github.com/flutter/flutter/pull/175545
+* Update maximum known Gradle version to 9.1.0 by @bc-lee in https://github.com/flutter/flutter/pull/175543
+* Fix typo in tests `README` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175788
+* Roll `package:analyzer` forward to `8.2.0`. by @stereotype441 in https://github.com/flutter/flutter/pull/175849
+* Remove comment about trailing commas from templates by @bkonyi in https://github.com/flutter/flutter/pull/175864
+* Introduce a getter for `Project` to get `gradle-wrapper.properties` directly   by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175485
+* [ Widget Preview ] Fix filter by file on Windows by @bkonyi in https://github.com/flutter/flutter/pull/175783
+* Update AGP/Java/Gradle comparison when using analyze --suggestions by @reidbaker in https://github.com/flutter/flutter/pull/175808
+* Update Flutter's templates to use dot shorthands by @loic-sharma in https://github.com/flutter/flutter/pull/175891
+* Add kotlin/kgp 2.2.* evaluation criteria.  by @reidbaker in https://github.com/flutter/flutter/pull/176094
+* Removes type annotations in templates by @Piinks in https://github.com/flutter/flutter/pull/176106
+* Update java version ranges with the top end limitation for java pre 17 by @reidbaker in https://github.com/flutter/flutter/pull/176049
+* [ Widget Preview ] Improve IDE integration support by @bkonyi in https://github.com/flutter/flutter/pull/176114
+* Add tests for `Project` getters  by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175994
+* [ Widget Preview ] Forward Widget Inspector navigation events via DTD by @bkonyi in https://github.com/flutter/flutter/pull/176218
+* Stop using deprecated analyzer 7.x.y APIs. by @scheglov in https://github.com/flutter/flutter/pull/176242
+* [native assets] Roll dependencies by @dcharkes in https://github.com/flutter/flutter/pull/176287
+* [native assets] Enable build hooks and code assets on stable by @dcharkes in https://github.com/flutter/flutter/pull/176285
+* [ Tool / l10n ] Fix issue where localization generator assumed current directory was the target project by @bkonyi in https://github.com/flutter/flutter/pull/175881
+* [ Widget Preview ] Persist "Filter by Selected File" toggle by @bkonyi in https://github.com/flutter/flutter/pull/176289
+* [ Widget Preview ] Fix resolution for workspace "hosted" dependencies by @bkonyi in https://github.com/flutter/flutter/pull/176358
+* Upgrade packages by @mraleph in https://github.com/flutter/flutter/pull/176411
+* [ Widget Preview ] Fix type error when retrieving flags from persistent preferences by @bkonyi in https://github.com/flutter/flutter/pull/176546
+* [ Widget Preview ] Fix `WidgetInspectorService` override by @bkonyi in https://github.com/flutter/flutter/pull/176550
+* Fix code style in Linux embedder template by @robert-ancell in https://github.com/flutter/flutter/pull/176256
+* [ Widget Preview ] Rework UI and theming by @bkonyi in https://github.com/flutter/flutter/pull/176581
+* [ Tool ] Output `app.dtd` and `app.devTools` in machine mode by @bkonyi in https://github.com/flutter/flutter/pull/176655
+#### Other Changes
+* Remove 'terms of use' wording from web_unicode by @mdebbar in https://github.com/flutter/flutter/pull/174939
+* [a11y-app] Fix NavigationRail leading and trailing labels by @bleroux in https://github.com/flutter/flutter/pull/174861
+* [ Device Lab ] Add regression testing for flutter/flutter#174952 by @bkonyi in https://github.com/flutter/flutter/pull/174956
+* deletes the old license checker. by @gaaclarke in https://github.com/flutter/flutter/pull/174719
+* Added note about how to compile licenses_cpp by @gaaclarke in https://github.com/flutter/flutter/pull/174947
+* [ios26]fix host engine compile error by @hellohuanlin in https://github.com/flutter/flutter/pull/174723
+* Define a concept for UniqueObjectTraits. by @chinmaygarde in https://github.com/flutter/flutter/pull/174905
+* Impeller: Convert GLProc name field and GLErrorToString to std::string_view by @DEVSOG12 in https://github.com/flutter/flutter/pull/173771
+* Bump actions/labeler from 5.0.0 to 6.0.1 in the all-github-actions group by @dependabot[bot] in https://github.com/flutter/flutter/pull/175093
+* [shell] Fix engineId not being set after hot restart by @knopp in https://github.com/flutter/flutter/pull/174451
+* update deps to point to the new SOT repo for package:coverage by @devoncarew in https://github.com/flutter/flutter/pull/175234
+* Set Gemini Code Assist `include_drafts` to false by @jmagman in https://github.com/flutter/flutter/pull/175098
+* Update Chromium sysroot to pick up RISC-V support. by @rmacnak-google in https://github.com/flutter/flutter/pull/173671
+* Add a gn --ccache argument by @robert-ancell in https://github.com/flutter/flutter/pull/174621
+* Merge the engine README into the README of the old buildroot. by @chinmaygarde in https://github.com/flutter/flutter/pull/175384
+* Update NDK Scipt to Latest Stable Part 1 by @jesswrd in https://github.com/flutter/flutter/pull/175365
+* [Impeller] Disable the render target cache when creating a snapshot in DlImageImpeller::MakeFromYUVTextures by @jason-simmons in https://github.com/flutter/flutter/pull/174912
+* [docs] Add initial version of Flutter AI rules by @johnpryan in https://github.com/flutter/flutter/pull/175011
+* [benchmarks] Allow passing --local-web-sdk and --build-mode flags to benchmarks by @harryterkelsen in https://github.com/flutter/flutter/pull/175199
+* Sync 3.35.3 and 3.35.4 notes from stable to master by @gmackall in https://github.com/flutter/flutter/pull/175461
+* Ensure that the raster thread has an EGL context before submitting the command buffer in ImageEncodingImpeller by @jason-simmons in https://github.com/flutter/flutter/pull/175102
+* chore: update content workflow to use itnernal script by @jtmcdole in https://github.com/flutter/flutter/pull/175291
+* Removes NOTICES from licenses input by @gaaclarke in https://github.com/flutter/flutter/pull/174967
+* Added a 36 device for Firebase Lab Testing by @jesswrd in https://github.com/flutter/flutter/pull/175613
+* [engine][fuchsia] Update to Fuchsia API level 28 and roll latest GN SDK by @Breakthrough in https://github.com/flutter/flutter/pull/175425
+* [engine] Cleanup Fuchsia FDIO library dependencies by @Breakthrough in https://github.com/flutter/flutter/pull/174847
+* fix(tool): Use merge-base for content hash in detached HEAD by @harryterkelsen in https://github.com/flutter/flutter/pull/175554
+* Update rules to include extension rules by @johnpryan in https://github.com/flutter/flutter/pull/175618
+* [a11y-app] Add label to TextFormField in AutoCompleteUseCase. by @ksokolovskyi in https://github.com/flutter/flutter/pull/175576
+* Update `CODEOWNERS` (for dev-tooling) by @matanlurey in https://github.com/flutter/flutter/pull/175201
+* Roll Packages from 3d5c4196d9c8 to 45c9a843859f by @stuartmorgan-g in https://github.com/flutter/flutter/pull/175794
+* Update docs/engine/contributing/Compiling-the-engine.md with macOS build steps by @orestesgaolin in https://github.com/flutter/flutter/pull/175716
+* [a11y-app] Fix Autocomplete semantics label by @bleroux in https://github.com/flutter/flutter/pull/175409
+* Updates to flutter web triage links by @mdebbar in https://github.com/flutter/flutter/pull/175791
+* Fixes SemanticsFlags.isLink mis-translated in dart ui ffi by @chunhtai in https://github.com/flutter/flutter/pull/175812
+* Add google_fonts to team-framework triage guidelines by @tirth-patel-nc in https://github.com/flutter/flutter/pull/175675
+* Put Linux firebase_release_smoke_test on bringup by @Piinks in https://github.com/flutter/flutter/pull/176043
+* [Impeller] Optimize scale translate rectangle transforms by @flar in https://github.com/flutter/flutter/pull/171841
+* Revert "[Impeller] Optimize scale translate rectangle transforms" by @flar in https://github.com/flutter/flutter/pull/176061
+* Fix link to .gclient setup instructions by @gmackall in https://github.com/flutter/flutter/pull/176046
+* [Impeller] Optimize scale translate rectangle transforms by @flar in https://github.com/flutter/flutter/pull/176123
+* Revert "[Impeller] Optimize scale translate rectangle transforms" by @flar in https://github.com/flutter/flutter/pull/176161
+* Fix name of driver file by @robert-ancell in https://github.com/flutter/flutter/pull/176186
+* Update Engine CI to use NDK r28c  by @jesswrd in https://github.com/flutter/flutter/pull/175870
+* User Invoke-Expression instead of call operator for nested Powershell scripts invocations (on Windows) by @aam in https://github.com/flutter/flutter/pull/175941
+* fix typo in `Crashes.md` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175959
+* Update changelog as on 3.35 branch by @justinmc in https://github.com/flutter/flutter/pull/176216
+* BUILD.gn: Support LTO build on Linux by @markyang92 in https://github.com/flutter/flutter/pull/176191
+* Reduce timeout for Linux web_tool_tests back to 60 by @mdebbar in https://github.com/flutter/flutter/pull/176286
+* Add verbose logs to module_uiscene_test_ios by @vashworth in https://github.com/flutter/flutter/pull/176306
+* Delete Skia-specific performance overlay implementation by @flar in https://github.com/flutter/flutter/pull/176364
+* Windowing integration tests now await change futures if a changes is expected + commenting our erroneous icon in Runner.rc for win32 by @mattkae in https://github.com/flutter/flutter/pull/176312
+* fix: delay exiting microbenchmark by @jtmcdole in https://github.com/flutter/flutter/pull/176477
+* Align flutter dependencies with ones coming from dart. by @aam in https://github.com/flutter/flutter/pull/176475
+* Starts updating the DEPS in preupload. by @gaaclarke in https://github.com/flutter/flutter/pull/176485
+* fix: support older git (ubuntu 22.04) in content hash by @jtmcdole in https://github.com/flutter/flutter/pull/176321
+* Roll vulkan-deps to a9e2ca3b by @jason-simmons in https://github.com/flutter/flutter/pull/176322
+* updates docs for flutter engine footprint by @gaaclarke in https://github.com/flutter/flutter/pull/176217
+* Bump customer tests.version to 986c4326b4e4bb4e37bc963c2cc2aaa10b943859 by @DanTup in https://github.com/flutter/flutter/pull/176594
+* Bump the customer tests to pick up an update to Zulip's tests. by @stereotype441 in https://github.com/flutter/flutter/pull/176463
+* Make it clear that you need to install clangd in VSCode intellisense c++ config by @gmackall in https://github.com/flutter/flutter/pull/176609
+* Rename UIScene integration test projects and fix Xcode compatibility by @vashworth in https://github.com/flutter/flutter/pull/176635
+* Roll Dart SDK to 3.10.0-290.1.beta by @iinozemtsev in https://github.com/flutter/flutter/pull/176629
+* [3.38] Create `release-candidate-branch.version` & `engine.version` by @camsim99 in https://github.com/flutter/flutter/pull/176746
+* Trigger an engine build for the 3.38 beta release by @camsim99 in https://github.com/flutter/flutter/pull/176842
+* [CP-Beta] fix: content hash check for LUCI_CONTEXT (#176867) by @jtmcdole in https://github.com/flutter/flutter/pull/176883
+* Update `engine.version` by @camsim99 in https://github.com/flutter/flutter/pull/176799
+* Trigger engine build, and clean up trigger file by @justinmc in https://github.com/flutter/flutter/pull/177181
+* 3.38.0 beta engine version by @justinmc in https://github.com/flutter/flutter/pull/177178
+
+#### New Contributors
+* @DEVSOG12 made their first contribution in https://github.com/flutter/flutter/pull/173771
+* @rodrigogmdias made their first contribution in https://github.com/flutter/flutter/pull/174856
+* @danwirele made their first contribution in https://github.com/flutter/flutter/pull/172829
+* @Breakthrough made their first contribution in https://github.com/flutter/flutter/pull/175425
+* @dixita0607 made their first contribution in https://github.com/flutter/flutter/pull/175256
+* @korca0220 made their first contribution in https://github.com/flutter/flutter/pull/175773
+* @tirth-patel-nc made their first contribution in https://github.com/flutter/flutter/pull/175675
+* @muradhossin made their first contribution in https://github.com/flutter/flutter/pull/173518
+* @markyang92 made their first contribution in https://github.com/flutter/flutter/pull/176191
+* @RootHex200 made their first contribution in https://github.com/flutter/flutter/pull/175706
+* @FufferKS made their first contribution in https://github.com/flutter/flutter/pull/174232
+* @alexskobozev made their first contribution in https://github.com/flutter/flutter/pull/175501
+* @TDuffinNTU made their first contribution in https://github.com/flutter/flutter/pull/176438
+
 ## Flutter 3.35 Changes
 
 ### [3.35.5](https://github.com/flutter/flutter/releases/tag/3.35.5)
