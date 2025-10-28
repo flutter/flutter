@@ -51,10 +51,15 @@ bool Manager::InitializeDisplay(GpuPreference gpu_preference) {
   // we will attempt to select GPU explicitly, via ANGLE extension
   // that allows to specify the GPU to use via LUID.
   std::optional<LUID> luid = std::nullopt;
-  if (gpu_preference == GpuPreference::LowPowerPreference) {
-    luid = GetLowPowerGpuLuid();
-  } else if (gpu_preference == GpuPreference::HighPerformancePreference) {
-    luid = GetHighPerformanceGpuLuid();
+  switch (gpu_preference) {
+    case GpuPreference::LowPowerPreference:
+      luid = GetLowPowerGpuLuid();
+      break;
+    case GpuPreference::HighPerformancePreference:
+      luid = GetHighPerformanceGpuLuid();
+      break;
+    case GpuPreference::NoPreference:
+      break;
   }
 
   // These are preferred display attributes and request ANGLE's D3D11
