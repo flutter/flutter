@@ -16306,6 +16306,15 @@ void main() {
   });
 
   group('selection behavior when receiving focus', () {
+    Future<void> setAppLifecycleState(AppLifecycleState state) async {
+      final ByteData? message = const StringCodec().encodeMessage(state.toString());
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/lifecycle',
+        message,
+        (_) {},
+      );
+    }
+
     testWidgets('tabbing between fields', (WidgetTester tester) async {
       final bool isDesktop =
           debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
@@ -16590,12 +16599,6 @@ void main() {
 
     // Regression test for https://github.com/flutter/flutter/issues/156078.
     testWidgets('when having focus regained after the app resumed', (WidgetTester tester) async {
-      Future<void> setAppLifeCycleState(AppLifecycleState state) async {
-        final ByteData? message = const StringCodec().encodeMessage(state.toString());
-        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .handlePlatformMessage('flutter/lifecycle', message, (_) {});
-      }
-
       final TextEditingController controller = TextEditingController(text: 'Flutter!');
       addTearDown(controller.dispose);
       final FocusNode focusNode = FocusNode();
@@ -16620,12 +16623,82 @@ void main() {
       expect(focusNode.hasFocus, true);
       expect(controller.selection, collapsedAtEnd('Flutter!').selection);
 
-      await setAppLifeCycleState(AppLifecycleState.inactive);
-      await setAppLifeCycleState(AppLifecycleState.resumed);
+      await setAppLifecycleState(AppLifecycleState.inactive);
+      await setAppLifecycleState(AppLifecycleState.resumed);
 
       expect(focusNode.hasFocus, true);
       expect(controller.selection, collapsedAtEnd('Flutter!').selection);
     }, variant: TargetPlatformVariant.all());
+
+    testWidgets(
+      'moving focus after the app resumed should select all the content on desktop',
+      (WidgetTester tester) async {
+        final TextEditingController controller1 = TextEditingController.fromValue(
+          collapsedAtEnd('Flutter!'),
+        );
+        addTearDown(controller1.dispose);
+        final TextEditingController controller2 = TextEditingController.fromValue(
+          collapsedAtEnd('Dart!'),
+        );
+        addTearDown(controller2.dispose);
+        final FocusNode focusNode1 = FocusNode();
+        addTearDown(focusNode1.dispose);
+        final FocusNode focusNode2 = FocusNode();
+        addTearDown(focusNode2.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Center(
+              child: Column(
+                children: <Widget>[
+                  EditableText(
+                    key: ValueKey<String>(controller1.text),
+                    controller: controller1,
+                    focusNode: focusNode1,
+                    autofocus: true,
+                    style: Typography.material2018().black.titleMedium!,
+                    cursorColor: Colors.blue,
+                    backgroundCursorColor: Colors.grey,
+                  ),
+                  EditableText(
+                    key: ValueKey<String>(controller2.text),
+                    controller: controller2,
+                    focusNode: focusNode2,
+                    style: Typography.material2018().black.titleMedium!,
+                    cursorColor: Colors.blue,
+                    backgroundCursorColor: Colors.grey,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        expect(focusNode1.hasFocus, true);
+        expect(focusNode2.hasFocus, false);
+        expect(controller1.selection, collapsedAtEnd('Flutter!').selection);
+        expect(controller2.selection, collapsedAtEnd('Dart!').selection);
+
+        // Pause and resume the application.
+        await setAppLifecycleState(AppLifecycleState.inactive);
+        await setAppLifecycleState(AppLifecycleState.resumed);
+
+        // Change focus to the second EditableText.
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pumpAndSettle();
+
+        expect(focusNode1.hasFocus, false);
+        expect(focusNode2.hasFocus, true);
+        expect(controller1.selection, collapsedAtEnd('Flutter!').selection);
+
+        // The text of the second EditableText should be entirely selected.
+        expect(
+          controller2.selection,
+          TextSelection(baseOffset: 0, extentOffset: controller2.text.length),
+        );
+      },
+      variant: TargetPlatformVariant.desktop(),
+    );
   });
 
   testWidgets('EditableText respects MediaQuery.boldText', (WidgetTester tester) async {
