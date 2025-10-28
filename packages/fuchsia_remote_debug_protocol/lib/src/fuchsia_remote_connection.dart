@@ -316,20 +316,20 @@ class FuchsiaRemoteConnection {
       }
       isolates.add(vmService.getMainIsolatesByPattern(pattern));
     }
-    final List<IsolateRef> result = await Future.wait<List<IsolateRef>>(
-      isolates,
-    ).timeout(timeout).then<List<IsolateRef>>((List<List<IsolateRef>> listOfLists) {
-      final List<List<IsolateRef>> mutableListOfLists = List<List<IsolateRef>>.from(listOfLists)
-        ..retainWhere((List<IsolateRef> list) => list.isNotEmpty);
-      // Folds the list of lists into one flat list.
-      return mutableListOfLists.fold<List<IsolateRef>>(<IsolateRef>[], (
-        List<IsolateRef> accumulator,
-        List<IsolateRef> element,
-      ) {
-        accumulator.addAll(element);
-        return accumulator;
-      });
-    });
+    final List<IsolateRef> result = await Future.wait<List<IsolateRef>>(isolates)
+        .timeout(timeout)
+        .then<List<IsolateRef>>((List<List<IsolateRef>> listOfLists) {
+          final List<List<IsolateRef>> mutableListOfLists = List<List<IsolateRef>>.from(listOfLists)
+            ..retainWhere((List<IsolateRef> list) => list.isNotEmpty);
+          // Folds the list of lists into one flat list.
+          return mutableListOfLists.fold<List<IsolateRef>>(<IsolateRef>[], (
+            List<IsolateRef> accumulator,
+            List<IsolateRef> element,
+          ) {
+            accumulator.addAll(element);
+            return accumulator;
+          });
+        });
 
     // If no VM instance anywhere has this, it's possible it hasn't spun up
     // anywhere.
@@ -557,7 +557,7 @@ class FuchsiaRemoteConnection {
     final List<int> ports = getVmServicePortFromInspectSnapshot(inspectOutputJson);
 
     if (ports.length > 1) {
-      throw StateError('More than one Flutter observatory port found');
+      throw StateError('More than one Dart VM service port found');
     }
     return ports;
   }
@@ -684,8 +684,9 @@ class _SshPortForwarder implements PortForwarder {
     // Cancel the forwarding request. See [start] for commentary about why this
     // uses the IPv4 loopback.
     final String formattedForwardingUrl = '${_localSocket.port}:$_ipv4Loopback:$_remotePort';
-    final String targetAddress =
-        _ipV6 && _interface!.isNotEmpty ? '$_remoteAddress%$_interface' : _remoteAddress;
+    final String targetAddress = _ipV6 && _interface!.isNotEmpty
+        ? '$_remoteAddress%$_interface'
+        : _remoteAddress;
     final String? sshConfigPath = _sshConfigPath;
     final List<String> command = <String>[
       'ssh',

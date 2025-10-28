@@ -81,10 +81,8 @@ class _MyHomePageState extends State<MyHomePage> {
     widgetSpanMaps[currentOffset] = bulletSourceMap;
     // Map individual bullets to a local range.
     for (final String bullet in bullets) {
-      bulletSourceMap[(
-        startOffset: currentOffset,
-        endOffset: currentOffset + bullet.length,
-      )] = TextSpan(text: bullet);
+      bulletSourceMap[(startOffset: currentOffset, endOffset: currentOffset + bullet.length)] =
+          TextSpan(text: bullet);
       currentOffset += bullet.length;
     }
 
@@ -162,12 +160,11 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ],
             anchors: TextSelectionToolbarAnchors(
-              primaryAnchor:
-                  selectionAreaKey
-                      .currentState!
-                      .selectableRegion
-                      .contextMenuAnchors
-                      .secondaryAnchor!,
+              primaryAnchor: selectionAreaKey
+                  .currentState!
+                  .selectableRegion
+                  .contextMenuAnchors
+                  .secondaryAnchor!,
             ),
           ),
         );
@@ -199,14 +196,12 @@ class _MyHomePageState extends State<MyHomePage> {
       // The selection details is covering the current entry so let's color the range red.
       final TextSpan rawSpan = entry.value;
       // Determine local ranges relative to rawSpan.
-      final int clampedLocalStart =
-          normalizedStartOffset < entryLocalRange.startOffset
-              ? entryLocalRange.startOffset
-              : normalizedStartOffset;
-      final int clampedLocalEnd =
-          normalizedEndOffset > entryLocalRange.endOffset
-              ? entryLocalRange.endOffset
-              : normalizedEndOffset;
+      final int clampedLocalStart = normalizedStartOffset < entryLocalRange.startOffset
+          ? entryLocalRange.startOffset
+          : normalizedStartOffset;
+      final int clampedLocalEnd = normalizedEndOffset > entryLocalRange.endOffset
+          ? entryLocalRange.endOffset
+          : normalizedEndOffset;
       final int startOffset = (clampedLocalStart - entryLocalRange.startOffset).abs();
       final int endOffset = startOffset + (clampedLocalEnd - clampedLocalStart).abs();
       final List<InlineSpan> beforeSelection = <InlineSpan>[];

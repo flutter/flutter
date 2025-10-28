@@ -36,10 +36,9 @@ void main() {
   testWithoutContext(
     'flutter run writes and clears pidfile appropriately',
     () async {
-      final String tempDirectory =
-          fileSystem.systemTempDirectory
-              .createTempSync('flutter_overall_experience_test.')
-              .resolveSymbolicLinksSync();
+      final String tempDirectory = fileSystem.systemTempDirectory
+          .createTempSync('flutter_overall_experience_test.')
+          .resolveSymbolicLinksSync();
       final String pidFile = fileSystem.path.join(tempDirectory, 'flutter.pid');
       final String testDirectory = fileSystem.path.join(flutterRoot, 'examples', 'hello_world');
       bool? existsDuringTest;
@@ -79,10 +78,9 @@ void main() {
   );
 
   testWithoutContext('flutter run handle SIGUSR1/2 run', () async {
-    final String tempDirectory =
-        fileSystem.systemTempDirectory
-            .createTempSync('flutter_overall_experience_test.')
-            .resolveSymbolicLinksSync();
+    final String tempDirectory = fileSystem.systemTempDirectory
+        .createTempSync('flutter_overall_experience_test.')
+        .resolveSymbolicLinksSync();
     final String pidFile = fileSystem.path.join(tempDirectory, 'flutter.pid');
     final String testDirectory = fileSystem.path.join(
       flutterRoot,
@@ -92,7 +90,7 @@ void main() {
     );
     final String testScript = fileSystem.path.join('lib', 'commands.dart');
     late int pid;
-    final List<String> command = <String>[
+    final command = <String>[
       'run',
       '-dflutter-tester',
       '--report-ready',
@@ -177,10 +175,9 @@ void main() {
   }, skip: Platform.isWindows); // [intended] Windows doesn't support sending signals.
 
   testWithoutContext('flutter run can hot reload and hot restart, handle "p" key', () async {
-    final String tempDirectory =
-        fileSystem.systemTempDirectory
-            .createTempSync('flutter_overall_experience_test.')
-            .resolveSymbolicLinksSync();
+    final String tempDirectory = fileSystem.systemTempDirectory
+        .createTempSync('flutter_overall_experience_test.')
+        .resolveSymbolicLinksSync();
     final String testDirectory = fileSystem.path.join(
       flutterRoot,
       'dev',
@@ -188,7 +185,7 @@ void main() {
       'ui',
     );
     final String testScript = fileSystem.path.join('lib', 'commands.dart');
-    final List<String> command = <String>[
+    final command = <String>[
       'run',
       '-dflutter-tester',
       '--report-ready',
@@ -291,10 +288,9 @@ void main() {
       'integration_tests',
       'ui',
     );
-    final String tempDirectory =
-        fileSystem.systemTempDirectory
-            .createTempSync('flutter_overall_experience_test.')
-            .resolveSymbolicLinksSync();
+    final String tempDirectory = fileSystem.systemTempDirectory
+        .createTempSync('flutter_overall_experience_test.')
+        .resolveSymbolicLinksSync();
     final String testScript = fileSystem.path.join('lib', 'overflow.dart');
     try {
       final ProcessTestResult result = await runFlutter(
@@ -374,7 +370,7 @@ void main() {
     // The idea is to verify that we're not outputting spurious messages.
     // WHEN EDITING THIS TEST PLEASE CAREFULLY CONSIDER WHETHER THE NEW OUTPUT IS AN IMPROVEMENT.
     final String testDirectory = fileSystem.path.join(flutterRoot, 'examples', 'hello_world');
-    final RegExp finalLine = RegExp(r'^The Flutter DevTools');
+    final finalLine = RegExp(r'^The Flutter DevTools');
     final ProcessTestResult result = await runFlutter(
       <String>['run', '-dflutter-tester'],
       testDirectory,

@@ -10,7 +10,7 @@
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_image_filter.h"
 #include "display_list/geometry/dl_geometry_types.h"
-#include "display_list/geometry/dl_path.h"
+#include "display_list/geometry/dl_path_builder.h"
 #include "display_list/image/dl_image.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 
@@ -542,7 +542,7 @@ TEST_P(AiksTest, StrokedPathWithMoveToThenCloseDrawnCorrectly) {
       // add another nearly-empty contour.
       .MoveTo(DlPoint(0, 400))
       .Close();
-  DlPath path(path_builder);
+  DlPath path = path_builder.TakePath();
 
   DisplayListBuilder builder;
   builder.Translate(50, 50);

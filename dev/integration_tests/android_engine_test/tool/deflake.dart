@@ -8,24 +8,23 @@ import 'dart:io' as io;
 import 'package:args/args.dart';
 import 'package:path/path.dart' as p;
 
-final ArgParser _argParser =
-    ArgParser()
-      ..addFlag('help', abbr: 'h', help: 'Display usage information.', negatable: false)
-      ..addFlag('verbose', abbr: 'v', help: 'Show noisy output while running', negatable: false)
-      ..addFlag(
-        'generate-initial-golden',
-        help:
-            'Whether an initial run (not part of "runs") should generate the '
-            'base golden file. If false, it is assumed the golden file wasl already generated.',
-        defaultsTo: true,
-      )
-      ..addFlag(
-        'build-app-once',
-        help:
-            'Whether to use flutter build and --use-application-binary instead of rebuilding every iteration.',
-        defaultsTo: true,
-      )
-      ..addOption('runs', abbr: 'n', help: 'How many times to run the test.', defaultsTo: '10');
+final ArgParser _argParser = ArgParser()
+  ..addFlag('help', abbr: 'h', help: 'Display usage information.', negatable: false)
+  ..addFlag('verbose', abbr: 'v', help: 'Show noisy output while running', negatable: false)
+  ..addFlag(
+    'generate-initial-golden',
+    help:
+        'Whether an initial run (not part of "runs") should generate the '
+        'base golden file. If false, it is assumed the golden file wasl already generated.',
+    defaultsTo: true,
+  )
+  ..addFlag(
+    'build-app-once',
+    help:
+        'Whether to use flutter build and --use-application-binary instead of rebuilding every iteration.',
+    defaultsTo: true,
+  )
+  ..addOption('runs', abbr: 'n', help: 'How many times to run the test.', defaultsTo: '10');
 
 /// Builds, establishes a baseline, and runs a golden-file test N number of times.
 ///

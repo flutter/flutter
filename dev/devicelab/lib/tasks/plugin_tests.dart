@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 
@@ -75,6 +77,15 @@ class PluginTest {
         await plugin.runFlutterTest();
         if (!dartOnlyPlugin) {
           await plugin.example.runNativeTests(buildTarget);
+          if (buildTarget == 'ios') {
+            bool runResult = false;
+            await testWithNewIOSSimulator('TestPluginExample', (String deviceId) async {
+              runResult = await plugin.example.runApp(options: <String>['-d', deviceId]);
+            });
+            if (!runResult) {
+              return TaskResult.failure('flutter run either failed or had an engine error.');
+            }
+          }
         }
       }
       section('Create Flutter app');
@@ -203,7 +214,8 @@ class _FlutterProject {
     // Add the Dart registration hook that the build will generate a call to.
     final File dartCode = File(path.join(rootPath, 'lib', '$name.dart'));
     content = await dartCode.readAsString();
-    content = '''
+    content =
+        '''
 $content
 
 class $dartPluginClass {
@@ -277,7 +289,8 @@ class $dartPluginClass {
     if (!pluginRegister.existsSync()) {
       pluginRegister = File(path.join(darwinDir.path, name, 'Sources', name, '$pluginClass.swift'));
     }
-    final String pluginRegisterContent = '''
+    final String pluginRegisterContent =
+        '''
 #if os(macOS)
 import FlutterMacOS
 #elseif os(iOS)
@@ -406,6 +419,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
     required String template,
     Map<String, String>? environment,
   }) async {
+    final bool isDarwin = target == 'ios' || target == 'macos';
     await inDirectory(directory, () async {
       await flutter(
         'create',
@@ -421,7 +435,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
     });
 
     final _FlutterProject project = _FlutterProject(directory, name);
-    if (template == 'plugin' && (target == 'ios' || target == 'macos')) {
+    if (template == 'plugin' && isDarwin) {
       project._reduceDarwinPluginMinimumVersion(name, target);
     }
     return project;
@@ -480,8 +494,9 @@ end
     if (!podspec.existsSync()) {
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
-    final String versionString =
-        target == 'ios' ? "s.platform = :ios, '13.0'" : "s.platform = :osx, '10.11'";
+    final String versionString = target == 'ios'
+        ? "s.platform = :ios, '13.0'"
+        : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
     if (!podspecContent.contains(versionString)) {
       throw TaskResult.failure(
@@ -638,5 +653,48 @@ s.dependency 'AppAuth', '1.6.0'
       await Future<void>.delayed(const Duration(seconds: 10));
     }
     rmTree(parent);
+  }
+
+  Future<bool> runApp({required List<String> options}) async {
+    return inDirectory(Directory(rootPath), () async {
+      final Process process = await startFlutter('run', options: options);
+      final Completer<void> stdoutDone = Completer<void>();
+      final Completer<void> stderrDone = Completer<void>();
+
+      bool engineError = false;
+
+      void onStdout(String line) {
+        print('stdout: $line');
+        if (line.contains('The Flutter DevTools debugger and profiler')) {
+          process.stdin.writeln('R');
+        }
+        if (line.contains('Restarted application')) {
+          // Do a hot restart.
+          process.stdin.writeln('q');
+        }
+        if (line.contains('ERROR:')) {
+          engineError = true;
+          // Quit the app. This makes the 'flutter run' process exit.
+          process.stdin.writeln('q');
+        }
+      }
+
+      process.stdout
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen(onStdout, onDone: stdoutDone.complete);
+
+      process.stderr
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) => print('stderr: $line'), onDone: stderrDone.complete);
+
+      await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
+      if (engineError) {
+        return false;
+      }
+      final int exitCode = await process.exitCode;
+      return exitCode == 0;
+    });
   }
 }

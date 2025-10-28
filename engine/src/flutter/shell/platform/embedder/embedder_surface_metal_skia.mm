@@ -59,7 +59,7 @@ sk_sp<GrDirectContext> EmbedderSurfaceMetalSkia::CreateResourceContext() const {
   return resource_context_;
 }
 
-GPUCAMetalLayerHandle EmbedderSurfaceMetalSkia::GetCAMetalLayer(const SkISize& frame_info) const {
+GPUCAMetalLayerHandle EmbedderSurfaceMetalSkia::GetCAMetalLayer(const DlISize& frame_info) const {
   FML_CHECK(false) << "Only rendering to MTLTexture is supported.";
   return nullptr;
 }
@@ -69,7 +69,7 @@ bool EmbedderSurfaceMetalSkia::PresentDrawable(GrMTLHandle drawable) const {
   return false;
 }
 
-GPUMTLTextureInfo EmbedderSurfaceMetalSkia::GetMTLTexture(const SkISize& frame_info) const {
+GPUMTLTextureInfo EmbedderSurfaceMetalSkia::GetMTLTexture(const DlISize& frame_info) const {
   return metal_dispatch_table_.get_texture(frame_info);
 }
 

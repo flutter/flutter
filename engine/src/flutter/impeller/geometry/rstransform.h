@@ -35,9 +35,7 @@ struct RSTransform {
 
   /// Constructs an RSTransform from the indicated origin, uniform scale,
   /// and radians rotation.
-  static constexpr RSTransform Make(Point origin,
-                                    Scalar scale,
-                                    Radians radians) {
+  static inline RSTransform Make(Point origin, Scalar scale, Radians radians) {
     auto scaled_cos_sin = Matrix::CosSin(radians) * scale;
     return {scaled_cos_sin.x, scaled_cos_sin.y, origin.x, origin.y};
   }

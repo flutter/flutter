@@ -12,7 +12,9 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import 'app.dart';
 import 'basic.dart';
+import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 
@@ -192,6 +194,14 @@ abstract class WidgetsLocalizations {
   /// list one space right in the list.
   String get reorderItemRight;
 
+  /// The semantics label used for [RawAutocomplete] when the options list goes
+  /// from empty to non-empty.
+  String get searchResultsFound => 'Search results found';
+
+  /// The semantics label used for [RawAutocomplete] when the options list goes
+  /// from non-empty to empty.
+  String get noResultsFound => 'No results found';
+
   /// Label for "copy" edit buttons and menu items.
   String get copyButtonLabel;
 
@@ -212,6 +222,9 @@ abstract class WidgetsLocalizations {
 
   /// Label for "share" edit buttons and menu items.
   String get shareButtonLabel;
+
+  /// The accessibility hint for an unselected radio button.
+  String get radioButtonUnselectedLabel;
 
   /// The `WidgetsLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
@@ -283,6 +296,12 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   String get reorderItemToStart => 'Move to the start';
 
   @override
+  String get searchResultsFound => 'Search results found';
+
+  @override
+  String get noResultsFound => 'No results found';
+
+  @override
   String get copyButtonLabel => 'Copy';
 
   @override
@@ -303,6 +322,8 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   @override
   String get shareButtonLabel => 'Share';
 
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
   @override
   TextDirection get textDirection => TextDirection.ltr;
 
@@ -352,7 +373,7 @@ class _LocalizationsScope extends InheritedWidget {
 /// {@tool snippet}
 ///
 /// This following class is defined in terms of the
-/// [Dart `intl` package](https://github.com/dart-lang/intl). Using the `intl`
+/// [Dart `intl` package](https://github.com/dart-lang/i18n/tree/main/pkgs/intl). Using the `intl`
 /// package isn't required.
 ///
 /// ```dart
@@ -457,13 +478,18 @@ class _LocalizationsScope extends InheritedWidget {
 /// resources.
 class Localizations extends StatefulWidget {
   /// Create a widget from which localizations (like translated strings) can be obtained.
-  Localizations({super.key, required this.locale, required this.delegates, this.child})
-    : assert(
-        delegates.any(
-          (LocalizationsDelegate<dynamic> delegate) =>
-              delegate is LocalizationsDelegate<WidgetsLocalizations>,
-        ),
-      );
+  Localizations({
+    super.key,
+    required this.locale,
+    required this.delegates,
+    this.child,
+    this.isApplicationLevel = false,
+  }) : assert(
+         delegates.any(
+           (LocalizationsDelegate<dynamic> delegate) =>
+               delegate is LocalizationsDelegate<WidgetsLocalizations>,
+         ),
+       );
 
   /// Overrides the inherited [Locale] or [LocalizationsDelegate]s for `child`.
   ///
@@ -525,14 +551,18 @@ class Localizations extends StatefulWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
+  /// Whether this is the main localizations widget that represents the app's
+  /// locale.
+  final bool isApplicationLevel;
+
   /// The locale of the Localizations widget for the widget tree that
   /// corresponds to [BuildContext] `context`.
   ///
   /// If no [Localizations] widget is in scope then the [Localizations.localeOf]
   /// method will throw an exception.
   static Locale localeOf(BuildContext context) {
-    final _LocalizationsScope? scope =
-        context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
+    final _LocalizationsScope? scope = context
+        .dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     assert(() {
       if (scope == null) {
         throw FlutterError(
@@ -557,16 +587,16 @@ class Localizations extends StatefulWidget {
   /// If no [Localizations] widget is in scope then this function will return
   /// null.
   static Locale? maybeLocaleOf(BuildContext context) {
-    final _LocalizationsScope? scope =
-        context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
+    final _LocalizationsScope? scope = context
+        .dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     return scope?.localizationsState.locale;
   }
 
   // There doesn't appear to be a need to make this public. See the
   // Localizations.override factory constructor.
   static List<LocalizationsDelegate<dynamic>> _delegatesOf(BuildContext context) {
-    final _LocalizationsScope? scope =
-        context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
+    final _LocalizationsScope? scope = context
+        .dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     assert(scope != null, 'a Localizations ancestor was not found');
     return List<LocalizationsDelegate<dynamic>>.of(scope!.localizationsState.widget.delegates);
   }
@@ -587,8 +617,8 @@ class Localizations extends StatefulWidget {
   /// }
   /// ```
   static T? of<T>(BuildContext context, Type type) {
-    final _LocalizationsScope? scope =
-        context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
+    final _LocalizationsScope? scope = context
+        .dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     return scope?.localizationsState.resourcesFor<T?>(type);
   }
 
@@ -609,6 +639,14 @@ class _LocalizationsState extends State<Localizations> {
 
   Locale? get locale => _locale;
   Locale? _locale;
+  set locale(Locale? locale) {
+    assert(locale != null);
+    if (_locale == locale) {
+      return;
+    }
+    WidgetsBinding.instance.platformDispatcher.setApplicationLocale(locale!);
+    _locale = locale;
+  }
 
   @override
   void initState() {
@@ -643,22 +681,20 @@ class _LocalizationsState extends State<Localizations> {
   void load(Locale locale) {
     final Iterable<LocalizationsDelegate<dynamic>> delegates = widget.delegates;
     if (delegates.isEmpty) {
-      _locale = locale;
+      this.locale = locale;
       return;
     }
 
     Map<Type, dynamic>? typeToResources;
-    final Future<Map<Type, dynamic>> typeToResourcesFuture = _loadAll(
-      locale,
-      delegates,
-    ).then<Map<Type, dynamic>>((Map<Type, dynamic> value) {
-      return typeToResources = value;
-    });
+    final Future<Map<Type, dynamic>> typeToResourcesFuture = _loadAll(locale, delegates)
+        .then<Map<Type, dynamic>>((Map<Type, dynamic> value) {
+          return typeToResources = value;
+        });
 
     if (typeToResources != null) {
       // All of the delegates' resources loaded synchronously.
       _typeToResources = typeToResources!;
-      _locale = locale;
+      this.locale = locale;
     } else {
       // - Don't rebuild the dependent widgets until the resources for the new locale
       // have finished loading. Until then the old locale will continue to be used.
@@ -669,7 +705,7 @@ class _LocalizationsState extends State<Localizations> {
         if (mounted) {
           setState(() {
             _typeToResources = value;
-            _locale = locale;
+            this.locale = locale;
           });
         }
         RendererBinding.instance.allowFirstFrame();
@@ -690,10 +726,16 @@ class _LocalizationsState extends State<Localizations> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO(chunhtai): notify engine about application locale if this is
+    // application level locale.
     if (_locale == null) {
       return const SizedBox.shrink();
     }
     return Semantics(
+      // If this is not application level, we need to explicit mark the
+      // semantics subtree with the locale.
+      localeForSubtree: widget.isApplicationLevel ? null : widget.locale,
+      container: !widget.isApplicationLevel,
       textDirection: _textDirection,
       child: _LocalizationsScope(
         key: _localizedResourcesScopeKey,
@@ -703,5 +745,215 @@ class _LocalizationsState extends State<Localizations> {
         child: Directionality(textDirection: _textDirection, child: widget.child!),
       ),
     );
+  }
+}
+
+/// A helper class used to manage localization resolution.
+///
+/// See also:
+///   * [WidgetsApp], which utilizes [LocalizationsResolver] to handle locales.
+class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
+  /// Creates a [LocalizationsResolver] that determines the best-fit locale from the set of
+  /// [supportedLocales].
+  ///
+  /// If provided, locale resolution will attempt to use [locale] as the current locale rather
+  /// than the system locale.
+  ///
+  /// Locale resolution behavior can be overridden by providing [localeListResolutionCallback]
+  /// or [localeResolutionCallback].
+  ///
+  /// The delegates set via [localizationsDelegates] collectively define all of the localized
+  /// resources for a [Localizations] widget.
+  ///
+  /// See also:
+  ///
+  ///  * [LocalizationsResolver.localeListResolutionCallback] and
+  ///    [LocalizationsResolver.localeResolutionCallback] for more details on locale resolution
+  ///    behavior.
+  ///  * [LocalizationsDelegate] for more details about providing localized resources to a
+  ///    [Localizations] widget.
+  LocalizationsResolver({
+    required Iterable<Locale> supportedLocales,
+    Locale? locale,
+    LocaleListResolutionCallback? localeListResolutionCallback,
+    LocaleResolutionCallback? localeResolutionCallback,
+    Iterable<LocalizationsDelegate<Object?>>? localizationsDelegates,
+  }) : _locale = locale,
+       _localeListResolutionCallback = localeListResolutionCallback,
+       _localeResolutionCallback = localeResolutionCallback,
+       _localizationsDelegates = localizationsDelegates,
+       _supportedLocales = supportedLocales {
+    _resolvedLocale = _resolveLocales(
+      WidgetsBinding.instance.platformDispatcher.locales,
+      supportedLocales,
+    );
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  /// Replace one or more of the properties used for localization resolution and re-resolve the
+  /// locale.
+  void update({
+    required Locale? locale,
+    required LocaleListResolutionCallback? localeListResolutionCallback,
+    required LocaleResolutionCallback? localeResolutionCallback,
+    required Iterable<LocalizationsDelegate<Object?>>? localizationsDelegates,
+    required Iterable<Locale> supportedLocales,
+  }) {
+    _locale = locale;
+    _localeListResolutionCallback = localeListResolutionCallback;
+    _localeResolutionCallback = localeResolutionCallback;
+    _localizationsDelegates = localizationsDelegates;
+    _supportedLocales = supportedLocales;
+  }
+
+  /// The currently resolved [Locale] based on the current platform locale and
+  /// the provided set of [supportedLocales].
+  Locale get locale {
+    final Locale appLocale = _locale != null
+        ? _resolveLocales(<Locale>[_locale!], supportedLocales)
+        : _resolvedLocale!;
+    assert(_debugCheckLocalizations(appLocale));
+    return appLocale;
+  }
+
+  /// {@macro flutter.widgets.widgetsApp.localizationsDelegates}
+  Iterable<LocalizationsDelegate<Object?>> get localizationsDelegates {
+    // Combine the Localizations for Widgets with the ones contributed
+    // by the localizationsDelegates parameter, if any. Only the first delegate
+    // of a particular LocalizationsDelegate.type is loaded so the
+    // localizationsDelegate parameter can be used to override
+    // WidgetsLocalizations.delegate.
+    return <LocalizationsDelegate<Object?>>[
+      ...?_localizationsDelegates,
+      DefaultWidgetsLocalizations.delegate,
+    ];
+  }
+
+  Iterable<LocalizationsDelegate<Object?>>? _localizationsDelegates;
+
+  /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
+  ///
+  /// See also:
+  ///
+  ///  * [basicLocaleListResolution], the default locale resolution algorithm.
+  LocaleListResolutionCallback? get localeListResolutionCallback => _localeListResolutionCallback;
+  LocaleListResolutionCallback? _localeListResolutionCallback;
+
+  /// {@macro flutter.widgets.LocaleResolutionCallback}
+  LocaleResolutionCallback? get localeResolutionCallback => _localeResolutionCallback;
+  LocaleResolutionCallback? _localeResolutionCallback;
+
+  /// {@macro flutter.widgets.widgetsApp.supportedLocales}
+  ///
+  /// See also:
+  ///
+  ///  * [localeResolutionCallback], an app callback that resolves the app's locale
+  ///    when the device's locale changes.
+  ///  * [localizationsDelegates], which collectively define all of the localized
+  ///    resources used by this app.
+  ///  * [basicLocaleListResolution], the default locale resolution algorithm.
+  Iterable<Locale> get supportedLocales => _supportedLocales;
+  Iterable<Locale> _supportedLocales;
+
+  Locale? _locale;
+
+  /// This is the resolved locale, and is one of the supportedLocales.
+  Locale? _resolvedLocale;
+
+  @override
+  void didChangeLocales(List<Locale>? locales) {
+    final Locale newLocale = _resolveLocales(locales, supportedLocales);
+    if (newLocale != _resolvedLocale) {
+      _resolvedLocale = newLocale;
+      notifyListeners();
+    }
+  }
+
+  Locale _resolveLocales(List<Locale>? preferredLocales, Iterable<Locale> supportedLocales) {
+    // Attempt to use localeListResolutionCallback.
+    if (localeListResolutionCallback != null) {
+      final Locale? locale = localeListResolutionCallback!(preferredLocales, supportedLocales);
+      if (locale != null) {
+        return locale;
+      }
+    }
+    // localeListResolutionCallback failed, falling back to localeResolutionCallback.
+    if (localeResolutionCallback != null) {
+      final Locale? locale = localeResolutionCallback!(
+        preferredLocales != null && preferredLocales.isNotEmpty ? preferredLocales.first : null,
+        supportedLocales,
+      );
+      if (locale != null) {
+        return locale;
+      }
+    }
+    // Both callbacks failed, falling back to default algorithm.
+    return basicLocaleListResolution(preferredLocales, supportedLocales);
+  }
+
+  @override
+  String toString() => '$LocalizationsResolver';
+
+  bool _debugCheckLocalizations(Locale locale) {
+    assert(() {
+      final Set<Type> unsupportedTypes = localizationsDelegates
+          .map<Type>((LocalizationsDelegate<dynamic> delegate) => delegate.type)
+          .toSet();
+      for (final LocalizationsDelegate<dynamic> delegate in localizationsDelegates) {
+        if (!unsupportedTypes.contains(delegate.type)) {
+          continue;
+        }
+        if (delegate.isSupported(locale)) {
+          unsupportedTypes.remove(delegate.type);
+        }
+      }
+      if (unsupportedTypes.isEmpty) {
+        return true;
+      }
+
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception:
+              "Warning: This application's locale, $locale, is not supported by all of its localization delegates.",
+          library: 'widgets',
+          informationCollector: () => <DiagnosticsNode>[
+            for (final Type unsupportedType in unsupportedTypes)
+              ErrorDescription(
+                '• A $unsupportedType delegate that supports the $locale locale was not found.',
+              ),
+            ErrorSpacer(),
+            if (unsupportedTypes.length == 1 &&
+                unsupportedTypes.single.toString() == 'CupertinoLocalizations')
+            // We previously explicitly avoided checking for this class so it's not uncommon for applications
+            // to have omitted importing the required delegate.
+            ...<DiagnosticsNode>[
+              ErrorHint(
+                'If the application is built using GlobalMaterialLocalizations.delegate, consider using '
+                'GlobalMaterialLocalizations.delegates (plural) instead, as that will automatically declare '
+                'the appropriate Cupertino localizations.',
+              ),
+              ErrorSpacer(),
+            ],
+            ErrorHint(
+              'The declared supported locales for this app are: ${supportedLocales.join(", ")}',
+            ),
+            ErrorSpacer(),
+            ErrorDescription(
+              'See https://flutter.dev/to/internationalization/ for more '
+              "information about configuring an app's locale, supportedLocales, "
+              'and localizationsDelegates parameters.',
+            ),
+          ],
+        ),
+      );
+      return true;
+    }());
+    return true;
   }
 }

@@ -5,6 +5,7 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
@@ -99,6 +100,13 @@ class SystemContextMenu extends StatefulWidget {
   /// of the input.
   ///
   /// Defaults to the result of [getDefaultItems].
+  ///
+  /// To add custom menu items, pass [IOSSystemContextMenuItemCustom] instances
+  /// in the [items] list. Each custom item requires a title and an onPressed callback.
+  ///
+  /// See also:
+  ///
+  ///  * [IOSSystemContextMenuItemCustom], which creates custom menu items.
   final List<IOSSystemContextMenuItem> items;
 
   /// Called when the system hides this context menu.
@@ -113,8 +121,29 @@ class SystemContextMenu extends StatefulWidget {
   /// Whether the current device supports showing the system context menu.
   ///
   /// Currently, this is only supported on newer versions of iOS.
+  ///
+  /// See also:
+  ///
+  ///  * [isSupportedByField], which uses this method and determines whether an
+  ///    individual [EditableTextState] supports the system context menu.
   static bool isSupported(BuildContext context) {
-    return MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false;
+    return defaultTargetPlatform == TargetPlatform.iOS &&
+        (MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false);
+  }
+
+  /// Whether the given field supports showing the system context menu.
+  ///
+  /// Currently [SystemContextMenu] is only supported with an active
+  /// [TextInputConnection]. In cases where this isn't possible, such as in a
+  /// read-only field, fall back to using a Flutter-rendered context menu like
+  /// [AdaptiveTextSelectionToolbar].
+  ///
+  /// See also:
+  ///
+  ///  * [isSupported], which is used by this method and determines whether the
+  ///    platform in general supports showing the system context menu.
+  static bool isSupportedByField(EditableTextState editableTextState) {
+    return !editableTextState.widget.readOnly && isSupported(editableTextState.context);
   }
 
   /// The default [items] for the given [EditableTextState].
@@ -134,6 +163,7 @@ class SystemContextMenu extends StatefulWidget {
       if (editableTextState.selectAllEnabled) const IOSSystemContextMenuItemSelectAll(),
       if (editableTextState.lookUpEnabled) const IOSSystemContextMenuItemLookUp(),
       if (editableTextState.searchWebEnabled) const IOSSystemContextMenuItemSearchWeb(),
+      if (editableTextState.liveTextInputEnabled) const IOSSystemContextMenuItemLiveText(),
     ];
   }
 
@@ -162,8 +192,9 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
 
     if (widget.items.isNotEmpty) {
       final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
-      final List<IOSSystemContextMenuItemData> itemDatas =
-          widget.items.map((IOSSystemContextMenuItem item) => item.getData(localizations)).toList();
+      final List<IOSSystemContextMenuItemData> itemDatas = widget.items
+          .map((IOSSystemContextMenuItem item) => item.getData(localizations))
+          .toList();
       _systemContextMenuController.showWithItems(widget.anchor, itemDatas);
     }
 
@@ -320,7 +351,7 @@ final class IOSSystemContextMenuItemSelectAll extends IOSSystemContextMenuItem {
 ///    context menu.
 ///  * [IOSSystemContextMenuItemDataLookUp], which specifies the data to be sent
 ///    to the platform for this same button.
-final class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem {
+final class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemLookUp].
   const IOSSystemContextMenuItemLookUp({this.title});
 
@@ -333,8 +364,9 @@ final class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem {
   }
 
   @override
-  String toString() {
-    return 'IOSSystemContextMenuItemLookUp(title: $title)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('title', title));
   }
 }
 
@@ -355,7 +387,7 @@ final class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem {
 ///    context menu.
 ///  * [IOSSystemContextMenuItemDataSearchWeb], which specifies the data to be
 ///    sent to the platform for this same button.
-final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem {
+final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemSearchWeb].
   const IOSSystemContextMenuItemSearchWeb({this.title});
 
@@ -370,8 +402,9 @@ final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem {
   }
 
   @override
-  String toString() {
-    return 'IOSSystemContextMenuItemSearchWeb(title: $title)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('title', title));
   }
 }
 
@@ -392,7 +425,7 @@ final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem {
 ///    context menu.
 ///  * [IOSSystemContextMenuItemDataShare], which specifies the data to be sent
 ///    to the platform for this same button.
-final class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem {
+final class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemShare].
   const IOSSystemContextMenuItemShare({this.title});
 
@@ -405,10 +438,85 @@ final class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem {
   }
 
   @override
-  String toString() {
-    return 'IOSSystemContextMenuItemShare(title: $title)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
   }
 }
 
-// TODO(justinmc): Support the "custom" type.
-// https://github.com/flutter/flutter/issues/103163
+/// Creates an instance of [IOSSystemContextMenuItem] for the
+/// system's built-in Live Text button.
+///
+/// The title and action are both handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenu], a widget that can be used to display the system
+///    context menu.
+///  * [IOSSystemContextMenuItemDataLiveText], which specifies the data to be sent
+///    to the platform for this same button.
+final class IOSSystemContextMenuItemLiveText extends IOSSystemContextMenuItem {
+  /// Creates an instance of [IOSSystemContextMenuItemLiveText].
+  const IOSSystemContextMenuItemLiveText();
+
+  @override
+  IOSSystemContextMenuItemData getData(WidgetsLocalizations localizations) {
+    return const IOSSystemContextMenuItemDataLiveText();
+  }
+}
+
+/// Creates an instance of [IOSSystemContextMenuItem] for custom action buttons
+/// defined by the developer.
+///
+/// Only supported on iOS 16.0 and above.
+///
+/// The [title] and [onPressed] callback must be provided.
+///
+/// {@tool dartpad}
+/// This example shows how to add custom menu items to the iOS system context menu.
+///
+/// ** See code in examples/api/lib/widgets/system_context_menu/system_context_menu.1.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [SystemContextMenu], a widget that can be used to display the system
+///    context menu.
+///  * [IOSSystemContextMenuItemDataCustom], which specifies the data to be sent
+///    to the platform for this button.
+@immutable
+class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagnosticable {
+  /// Creates an instance of [IOSSystemContextMenuItemCustom].
+  const IOSSystemContextMenuItemCustom({required this.title, required this.onPressed});
+
+  @override
+  final String title;
+
+  /// The callback that is called when the button is pressed.
+  final VoidCallback onPressed;
+
+  @override
+  IOSSystemContextMenuItemData getData(WidgetsLocalizations localizations) {
+    return IOSSystemContextMenuItemDataCustom(title: title, onPressed: onPressed);
+  }
+
+  @override
+  int get hashCode => Object.hash(title, onPressed);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is IOSSystemContextMenuItemCustom &&
+        other.title == title &&
+        other.onPressed == onPressed;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
+    properties.add(ObjectFlagProperty<VoidCallback>.has('onPressed', onPressed));
+  }
+}

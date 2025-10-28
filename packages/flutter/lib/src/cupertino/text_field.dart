@@ -5,6 +5,7 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
+import 'dart:math' as math;
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
@@ -207,7 +208,8 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// The [selectionHeightStyle] and [selectionWidthStyle] properties allow
   /// changing the shape of the selection highlighting. These properties default
-  /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight], respectively.
+  /// to [EditableText.defaultSelectionHeightStyle] and
+  /// [EditableText.defaultSelectionWidthStyle], respectively.
   ///
   /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
   /// [expands], [obscureText], [prefixMode], [readOnly], [scrollPadding],
@@ -283,8 +285,8 @@ class CupertinoTextField extends StatefulWidget {
     this.cursorRadius = const Radius.circular(2.0),
     this.cursorOpacityAnimates = true,
     this.cursorColor,
-    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
-    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
+    this.selectionHeightStyle,
+    this.selectionWidthStyle,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
@@ -422,8 +424,8 @@ class CupertinoTextField extends StatefulWidget {
     this.cursorRadius = const Radius.circular(2.0),
     this.cursorOpacityAnimates = true,
     this.cursorColor,
-    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
-    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
+    this.selectionHeightStyle,
+    this.selectionWidthStyle,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
@@ -731,12 +733,12 @@ class CupertinoTextField extends StatefulWidget {
   /// Controls how tall the selection highlight boxes are computed to be.
   ///
   /// See [ui.BoxHeightStyle] for details on available styles.
-  final ui.BoxHeightStyle selectionHeightStyle;
+  final ui.BoxHeightStyle? selectionHeightStyle;
 
   /// Controls how wide the selection highlight boxes are computed to be.
   ///
   /// See [ui.BoxWidthStyle] for details on available styles.
-  final ui.BoxWidthStyle selectionWidthStyle;
+  final ui.BoxWidthStyle? selectionWidthStyle;
 
   /// The appearance of the keyboard.
   ///
@@ -813,7 +815,7 @@ class CupertinoTextField extends StatefulWidget {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    if (defaultTargetPlatform == TargetPlatform.iOS && SystemContextMenu.isSupported(context)) {
+    if (SystemContextMenu.isSupportedByField(editableTextState)) {
       return SystemContextMenu.editableText(editableTextState: editableTextState);
     }
     return CupertinoAdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
@@ -1026,31 +1028,31 @@ class CupertinoTextField extends StatefulWidget {
       DiagnosticsProperty<List<String>>(
         'contentCommitMimeTypes',
         contentInsertionConfiguration?.allowedMimeTypes ?? const <String>[],
-        defaultValue:
-            contentInsertionConfiguration == null
-                ? const <String>[]
-                : kDefaultContentInsertionMimeTypes,
+        defaultValue: contentInsertionConfiguration == null
+            ? const <String>[]
+            : kDefaultContentInsertionMimeTypes,
       ),
     );
   }
 
   static final TextMagnifierConfiguration _iosMagnifierConfiguration = TextMagnifierConfiguration(
-    magnifierBuilder: (
-      BuildContext context,
-      MagnifierController controller,
-      ValueNotifier<MagnifierInfo> magnifierInfo,
-    ) {
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.android:
-        case TargetPlatform.iOS:
-          return CupertinoTextMagnifier(controller: controller, magnifierInfo: magnifierInfo);
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.macOS:
-        case TargetPlatform.windows:
-          return null;
-      }
-    },
+    magnifierBuilder:
+        (
+          BuildContext context,
+          MagnifierController controller,
+          ValueNotifier<MagnifierInfo> magnifierInfo,
+        ) {
+          switch (defaultTargetPlatform) {
+            case TargetPlatform.android:
+            case TargetPlatform.iOS:
+              return CupertinoTextMagnifier(controller: controller, magnifierInfo: magnifierInfo);
+            case TargetPlatform.fuchsia:
+            case TargetPlatform.linux:
+            case TargetPlatform.macOS:
+            case TargetPlatform.windows:
+              return null;
+          }
+        },
   );
 
   /// Returns a new [SpellCheckConfiguration] where the given configuration has
@@ -1150,10 +1152,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
 
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
-    _controller =
-        value == null
-            ? RestorableTextEditingController()
-            : RestorableTextEditingController.fromValue(value);
+    _controller = value == null
+        ? RestorableTextEditingController()
+        : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }
@@ -1185,8 +1186,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
 
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
     // When the text field is activated by something that doesn't trigger the
-    // selection overlay, we shouldn't show the handles either.
-    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar) {
+    // selection toolbar, we shouldn't show the handles either.
+    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar ||
+        !_selectionGestureDetectorBuilder.shouldShowSelectionHandles) {
       return false;
     }
 
@@ -1328,39 +1330,38 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
       builder: (BuildContext context, TextEditingValue text, Widget? child) {
         final bool hasText = text.text.isNotEmpty;
         final String? placeholderText = widget.placeholder;
-        final Widget? placeholder =
-            placeholderText == null
-                ? null
-                // Make the placeholder invisible when hasText is true.
-                : Visibility(
-                  maintainAnimation: true,
-                  maintainSize: true,
-                  maintainState: true,
-                  visible: !hasText,
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: Padding(
-                      padding: widget.padding,
-                      child: Text(
-                        placeholderText,
-                        // This is to make sure the text field is always tall enough
-                        // to accommodate the first line of the placeholder, so the
-                        // text does not shrink vertically as you type (however in
-                        // rare circumstances, the height may still change when
-                        // there's no placeholder text).
-                        maxLines: hasText ? 1 : widget.maxLines,
-                        overflow: placeholderStyle.overflow,
-                        style: placeholderStyle,
-                        textAlign: widget.textAlign,
-                      ),
+        final Widget? placeholder = placeholderText == null
+            ? null
+            // Make the placeholder invisible when hasText is true.
+            : Visibility(
+                maintainAnimation: true,
+                maintainSize: true,
+                maintainState: true,
+                visible: !hasText,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: widget.padding,
+                    child: Text(
+                      placeholderText,
+                      // This is to make sure the text field is always tall enough
+                      // to accommodate the first line of the placeholder, so the
+                      // text does not shrink vertically as you type (however in
+                      // rare circumstances, the height may still change when
+                      // there's no placeholder text).
+                      maxLines: hasText ? 1 : widget.maxLines,
+                      overflow: placeholderStyle.overflow,
+                      style: placeholderStyle,
+                      textAlign: widget.textAlign,
                     ),
                   ),
-                );
+                ),
+              );
 
         final Widget? prefixWidget =
             _shouldShowAttachment(attachment: widget.prefixMode, hasText: hasText)
-                ? widget.prefix
-                : null;
+            ? widget.prefix
+            : null;
 
         // Show user specified suffix if applicable and fall back to clear button.
         final bool showUserSuffix = _shouldShowAttachment(
@@ -1382,21 +1383,22 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
           children: <Widget>[
             // Insert a prefix at the front if the prefix visibility mode matches
             // the current text state.
-            if (prefixWidget != null) prefixWidget,
+            ?prefixWidget,
             // In the middle part, stack the placeholder on top of the main EditableText
             // if needed.
             Expanded(
-              child: Stack(
-                // Ideally this should be baseline aligned. However that comes at
-                // the cost of the ability to compute the intrinsic dimensions of
-                // this widget.
-                // See also https://github.com/flutter/flutter/issues/13715.
-                alignment: AlignmentDirectional.center,
-                textDirection: widget.textDirection,
-                children: <Widget>[if (placeholder != null) placeholder, editableText],
+              child: Directionality(
+                textDirection: widget.textDirection ?? Directionality.of(context),
+                child: _BaselineAlignedStack(
+                  placeholder: placeholder,
+                  editableText: editableText,
+                  textAlignVertical: _textAlignVertical,
+                  editableTextBaseline: textStyle.textBaseline ?? TextBaseline.alphabetic,
+                  placeholderBaseline: placeholderStyle.textBaseline ?? TextBaseline.alphabetic,
+                ),
               ),
             ),
-            if (suffixWidget != null) suffixWidget,
+            ?suffixWidget,
           ],
         );
       },
@@ -1413,15 +1415,14 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
   @override
   TextInputConfiguration get textInputConfiguration {
     final List<String>? autofillHints = widget.autofillHints?.toList(growable: false);
-    final AutofillConfiguration autofillConfiguration =
-        autofillHints != null
-            ? AutofillConfiguration(
-              uniqueIdentifier: autofillId,
-              autofillHints: autofillHints,
-              currentEditingValue: _effectiveController.value,
-              hintText: widget.placeholder,
-            )
-            : AutofillConfiguration.disabled;
+    final AutofillConfiguration autofillConfiguration = autofillHints != null
+        ? AutofillConfiguration(
+            uniqueIdentifier: autofillId,
+            autofillHints: autofillHints,
+            currentEditingValue: _effectiveController.value,
+            hintText: widget.placeholder,
+          )
+        : AutofillConfiguration.disabled;
 
     return _editableText.textInputConfiguration.copyWith(
       autofillConfiguration: autofillConfiguration,
@@ -1515,26 +1516,24 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
             : side.copyWith(color: CupertinoDynamicColor.resolve(side.color, context));
       }
 
-      resolvedBorder =
-          border.runtimeType != Border
-              ? border
-              : Border(
-                top: resolveBorderSide(border.top),
-                left: resolveBorderSide(border.left),
-                bottom: resolveBorderSide(border.bottom),
-                right: resolveBorderSide(border.right),
-              );
+      resolvedBorder = border.runtimeType != Border
+          ? border
+          : Border(
+              top: resolveBorderSide(border.top),
+              left: resolveBorderSide(border.left),
+              bottom: resolveBorderSide(border.bottom),
+              right: resolveBorderSide(border.right),
+            );
     }
 
     // Use the default disabled color only if the box decoration was not set.
     final BoxDecoration? effectiveDecoration = widget.decoration?.copyWith(
       border: resolvedBorder,
-      color:
-          enabled
-              ? decorationColor
-              : (widget.decoration == _kDefaultRoundedBorderDecoration
-                  ? disabledColor
-                  : widget.decoration?.color),
+      color: enabled
+          ? decorationColor
+          : (widget.decoration == _kDefaultRoundedBorderDecoration
+                ? disabledColor
+                : widget.decoration?.color),
     );
 
     final Color selectionColor =
@@ -1631,47 +1630,45 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
 
     return Semantics(
       enabled: enabled,
-      onTap:
-          !enabled || widget.readOnly
-              ? null
-              : () {
-                if (!controller.selection.isValid) {
-                  controller.selection = TextSelection.collapsed(offset: controller.text.length);
-                }
-                _requestKeyboard();
-              },
+      onTap: !enabled || widget.readOnly
+          ? null
+          : () {
+              if (!controller.selection.isValid) {
+                controller.selection = TextSelection.collapsed(offset: controller.text.length);
+              }
+              _requestKeyboard();
+            },
       onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
       onDidLoseAccessibilityFocus: handleDidLoseAccessibilityFocus,
-      onFocus:
-          enabled
-              ? () {
-                assert(
-                  _effectiveFocusNode.canRequestFocus,
-                  'Received SemanticsAction.focus from the engine. However, the FocusNode '
-                  'of this text field cannot gain focus. This likely indicates a bug. '
-                  'If this text field cannot be focused (e.g. because it is not '
-                  'enabled), then its corresponding semantics node must be configured '
-                  'such that the assistive technology cannot request focus on it.',
-                );
+      onFocus: enabled
+          ? () {
+              assert(
+                _effectiveFocusNode.canRequestFocus,
+                'Received SemanticsAction.focus from the engine. However, the FocusNode '
+                'of this text field cannot gain focus. This likely indicates a bug. '
+                'If this text field cannot be focused (e.g. because it is not '
+                'enabled), then its corresponding semantics node must be configured '
+                'such that the assistive technology cannot request focus on it.',
+              );
 
-                if (_effectiveFocusNode.canRequestFocus && !_effectiveFocusNode.hasFocus) {
-                  _effectiveFocusNode.requestFocus();
-                } else if (!widget.readOnly) {
-                  // If the platform requested focus, that means that previously the
-                  // platform believed that the text field did not have focus (even
-                  // though Flutter's widget system believed otherwise). This likely
-                  // means that the on-screen keyboard is hidden, or more generally,
-                  // there is no current editing session in this field. To correct
-                  // that, keyboard must be requested.
-                  //
-                  // A concrete scenario where this can happen is when the user
-                  // dismisses the keyboard on the web. The editing session is
-                  // closed by the engine, but the text field widget stays focused
-                  // in the framework.
-                  _requestKeyboard();
-                }
+              if (_effectiveFocusNode.canRequestFocus && !_effectiveFocusNode.hasFocus) {
+                _effectiveFocusNode.requestFocus();
+              } else if (!widget.readOnly) {
+                // If the platform requested focus, that means that previously the
+                // platform believed that the text field did not have focus (even
+                // though Flutter's widget system believed otherwise). This likely
+                // means that the on-screen keyboard is hidden, or more generally,
+                // there is no current editing session in this field. To correct
+                // that, keyboard must be requested.
+                //
+                // A concrete scenario where this can happen is when the user
+                // dismisses the keyboard on the web. The editing session is
+                // closed by the engine, but the text field widget stays focused
+                // in the framework.
+                _requestKeyboard();
               }
-              : null,
+            }
+          : null,
       child: TextFieldTapRegion(
         child: IgnorePointer(
           ignoring: !enabled,
@@ -1690,6 +1687,263 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
           ),
         ),
       ),
+    );
+  }
+}
+
+enum _BaselineAlignedStackSlot { placeholder, editableText }
+
+class _BaselineAlignedStack
+    extends SlottedMultiChildRenderObjectWidget<_BaselineAlignedStackSlot, RenderBox> {
+  const _BaselineAlignedStack({
+    required this.editableTextBaseline,
+    required this.placeholderBaseline,
+    required this.textAlignVertical,
+    required this.editableText,
+    this.placeholder,
+  });
+
+  final TextBaseline editableTextBaseline;
+  final TextBaseline placeholderBaseline;
+  final TextAlignVertical textAlignVertical;
+  final Widget editableText;
+  final Widget? placeholder;
+
+  @override
+  Iterable<_BaselineAlignedStackSlot> get slots => _BaselineAlignedStackSlot.values;
+
+  @override
+  Widget? childForSlot(_BaselineAlignedStackSlot slot) {
+    return switch (slot) {
+      _BaselineAlignedStackSlot.placeholder => placeholder,
+      _BaselineAlignedStackSlot.editableText => editableText,
+    };
+  }
+
+  @override
+  _RenderBaselineAlignedStack createRenderObject(BuildContext context) {
+    return _RenderBaselineAlignedStack(
+      textAlignVertical: textAlignVertical,
+      editableTextBaseline: editableTextBaseline,
+      placeholderBaseline: placeholderBaseline,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderBaselineAlignedStack renderObject) {
+    renderObject
+      ..textAlignVertical = textAlignVertical
+      ..editableTextBaseline = editableTextBaseline
+      ..placeholderBaseline = placeholderBaseline;
+  }
+}
+
+class _BaselineAlignedStackParentData extends ContainerBoxParentData<RenderBox> {}
+
+class _RenderBaselineAlignedStack extends RenderBox
+    with SlottedContainerRenderObjectMixin<_BaselineAlignedStackSlot, RenderBox> {
+  _RenderBaselineAlignedStack({
+    required TextAlignVertical textAlignVertical,
+    required TextBaseline editableTextBaseline,
+    required TextBaseline placeholderBaseline,
+  }) : _textAlignVertical = textAlignVertical,
+       _editableTextBaseline = editableTextBaseline,
+       _placeholderBaseline = placeholderBaseline;
+
+  TextAlignVertical get textAlignVertical => _textAlignVertical;
+  TextAlignVertical _textAlignVertical;
+  set textAlignVertical(TextAlignVertical value) {
+    if (_textAlignVertical == value) {
+      return;
+    }
+    _textAlignVertical = value;
+    markNeedsLayout();
+  }
+
+  TextBaseline get editableTextBaseline => _editableTextBaseline;
+  TextBaseline _editableTextBaseline;
+  set editableTextBaseline(TextBaseline value) {
+    if (_editableTextBaseline == value) {
+      return;
+    }
+    _editableTextBaseline = value;
+    markNeedsLayout();
+  }
+
+  TextBaseline get placeholderBaseline => _placeholderBaseline;
+  TextBaseline _placeholderBaseline;
+  set placeholderBaseline(TextBaseline value) {
+    if (_placeholderBaseline == value) {
+      return;
+    }
+    _placeholderBaseline = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! _BaselineAlignedStackParentData) {
+      child.parentData = _BaselineAlignedStackParentData();
+    }
+  }
+
+  RenderBox? get _placeholderChild {
+    return childForSlot(_BaselineAlignedStackSlot.placeholder);
+  }
+
+  RenderBox get _editableTextChild {
+    final RenderBox? child = childForSlot(_BaselineAlignedStackSlot.editableText);
+    assert(child != null);
+    return child!;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    return math.max(
+      _placeholderChild?.getMinIntrinsicHeight(width) ?? 0.0,
+      _editableTextChild.getMinIntrinsicHeight(width),
+    );
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    return math.max(
+      _placeholderChild?.getMaxIntrinsicHeight(width) ?? 0.0,
+      _editableTextChild.getMaxIntrinsicHeight(width),
+    );
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    return math.max(
+      _placeholderChild?.getMinIntrinsicWidth(height) ?? 0.0,
+      _editableTextChild.getMinIntrinsicWidth(height),
+    );
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    return math.max(
+      _placeholderChild?.getMaxIntrinsicWidth(height) ?? 0.0,
+      _editableTextChild.getMaxIntrinsicWidth(height),
+    );
+  }
+
+  @override
+  void performLayout() {
+    assert(constraints.hasTightWidth);
+    final RenderBox? placeholder = _placeholderChild;
+    final RenderBox editableText = _editableTextChild;
+
+    final _BaselineAlignedStackParentData editableTextParentData =
+        editableText.parentData! as _BaselineAlignedStackParentData;
+    final _BaselineAlignedStackParentData? placeholderParentData =
+        placeholder?.parentData as _BaselineAlignedStackParentData?;
+
+    size = _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.layoutChild,
+      getBaseline: ChildLayoutHelper.getBaseline,
+    );
+
+    final double editableTextBaselineValue = editableText.getDistanceToBaseline(
+      editableTextBaseline,
+    )!;
+    final double? placeholderBaselineValue = placeholder?.getDistanceToBaseline(
+      placeholderBaseline,
+    );
+
+    assert(placeholder != null || placeholderBaselineValue == null);
+    final Offset baselineDiff = placeholderBaselineValue != null
+        ? Offset(0.0, editableTextBaselineValue - placeholderBaselineValue)
+        : Offset.zero;
+    final Alignment verticalAlignment = Alignment(0.0, textAlignVertical.y);
+
+    editableTextParentData.offset = verticalAlignment.alongOffset(
+      size - editableText.size as Offset,
+    );
+    // Baseline-align the placeholder to the editable text.
+    placeholderParentData?.offset = editableTextParentData.offset + baselineDiff;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final RenderBox? placeholder = _placeholderChild;
+    final RenderBox editableText = _editableTextChild;
+
+    if (placeholder != null) {
+      final _BaselineAlignedStackParentData placeholderParentData =
+          placeholder.parentData! as _BaselineAlignedStackParentData;
+      context.paintChild(placeholder, offset + placeholderParentData.offset);
+    }
+
+    final _BaselineAlignedStackParentData editableTextParentData =
+        editableText.parentData! as _BaselineAlignedStackParentData;
+    context.paintChild(editableText, offset + editableTextParentData.offset);
+  }
+
+  @override
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    return _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.dryLayoutChild,
+      getBaseline: ChildLayoutHelper.getDryBaseline,
+    );
+  }
+
+  Size _computeSize({
+    required BoxConstraints constraints,
+    required ChildLayouter layoutChild,
+    required ChildBaselineGetter getBaseline,
+  }) {
+    double width = constraints.minWidth;
+    double height = constraints.minHeight;
+
+    final RenderBox editableText = _editableTextChild;
+    final Size editableTextSize = layoutChild(editableText, constraints);
+    final double editableTextBaselineValue = getBaseline(
+      editableText,
+      constraints,
+      editableTextBaseline,
+    )!;
+    final double editableTextDescent = editableTextSize.height - editableTextBaselineValue;
+
+    Size? placeholderSize;
+    double? placeholderBaselineValue;
+    final RenderBox? placeholder = _placeholderChild;
+    if (placeholder != null) {
+      placeholderSize = layoutChild(placeholder, constraints);
+      width = math.max(width, placeholderSize.width);
+      placeholderBaselineValue = getBaseline(placeholder, constraints, placeholderBaseline);
+      final double placeholderDescent = placeholderSize.height - placeholderBaselineValue!;
+      // The size is the sum of the placeholder's max ascent and descent and the
+      // editable text's max ascent and descent.
+      final double maxExtentBaseline =
+          math.max(editableTextBaselineValue, placeholderBaselineValue) +
+          math.max(editableTextDescent, placeholderDescent);
+      height = math.max(height, maxExtentBaseline);
+    }
+
+    height = math.max(height, editableTextSize.height);
+    width = math.max(width, editableTextSize.width);
+    final Size size = Size(width, height);
+    assert(size.isFinite);
+    return constraints.constrain(size);
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    final RenderBox editableText = _editableTextChild;
+    final _BaselineAlignedStackParentData editableTextParentData =
+        editableText.parentData! as _BaselineAlignedStackParentData;
+
+    return result.addWithPaintOffset(
+      offset: editableTextParentData.offset,
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset transformed) {
+        assert(transformed == position - editableTextParentData.offset);
+        return editableText.hitTest(result, position: transformed);
+      },
     );
   }
 }

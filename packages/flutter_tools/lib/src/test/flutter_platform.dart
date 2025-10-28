@@ -42,7 +42,7 @@ import 'watcher.dart';
 
 /// The address at which our WebSocket server resides and at which the sky_shell
 /// processes will host the VmService server.
-final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, InternetAddress>{
+final _kHosts = <InternetAddressType, InternetAddress>{
   InternetAddressType.IPv4: InternetAddress.loopbackIPv4,
   InternetAddressType.IPv6: InternetAddress.loopbackIPv6,
 };
@@ -90,7 +90,7 @@ FlutterPlatform installHook({
       return platform;
     });
   };
-  final FlutterPlatform platform = FlutterPlatform(
+  final platform = FlutterPlatform(
     flutterTesterBinPath: flutterTesterBinPath,
     debuggingOptions: debuggingOptions,
     watcher: watcher,
@@ -127,14 +127,14 @@ FlutterPlatform installHook({
 /// running.
 ///
 /// If [testConfigFile] is specified, it must follow the conventions of test
-/// configuration files as outlined in the [flutter_test] library. By default,
+/// configuration files as outlined in the `flutter_test` library. By default,
 /// the test file will be launched directly.
 ///
 /// The [packageConfigUri] argument specifies the package config location for
 /// the test file being launched. This is expected to be a file URI.
 ///
-/// The [updateGoldens] argument will set the [autoUpdateGoldens] global
-/// variable in the [flutter_test] package before invoking the test.
+/// The [updateGoldens] argument will set the `autoUpdateGoldens` global
+/// variable in the `flutter_test` package before invoking the test.
 ///
 /// The [integrationTest] argument can be specified to generate the bootstrap
 /// for integration tests.
@@ -151,10 +151,11 @@ String generateTestBootstrap({
   bool flutterTestDep = true,
   bool integrationTest = false,
 }) {
-  final String websocketUrl =
-      host.type == InternetAddressType.IPv4 ? 'ws://${host.address}' : 'ws://[${host.address}]';
+  final websocketUrl = host.type == InternetAddressType.IPv4
+      ? 'ws://${host.address}'
+      : 'ws://[${host.address}]';
 
-  final StringBuffer buffer = StringBuffer();
+  final buffer = StringBuffer();
   buffer.write('''
 $languageVersionHeader
 import 'dart:async';
@@ -327,10 +328,8 @@ class FlutterPlatform extends PlatformPlugin {
   }) {
     _testGoldenComparator = TestGoldenComparator(
       flutterTesterBinPath: flutterTesterBinPath,
-      compilerFactory:
-          () =>
-              compiler ??
-              TestCompiler(buildInfo, flutterProject, testTimeRecorder: testTimeRecorder),
+      compilerFactory: () =>
+          compiler ?? TestCompiler(buildInfo, flutterProject, testTimeRecorder: testTimeRecorder),
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
@@ -366,7 +365,7 @@ class FlutterPlatform extends PlatformPlugin {
 
   final String? integrationTestUserIdentifier;
 
-  final FontConfigManager _fontConfigManager = FontConfigManager();
+  final _fontConfigManager = FontConfigManager();
 
   /// The test compiler produces dill files for each test main.
   ///
@@ -381,7 +380,7 @@ class FlutterPlatform extends PlatformPlugin {
   // crashes, we inject an error into that stream. When the process closes,
   // we clean everything up.
 
-  int _testCount = 0;
+  var _testCount = 0;
 
   @override
   Future<RunnerSuite> load(
@@ -426,22 +425,18 @@ class FlutterPlatform extends PlatformPlugin {
 
     final int ourTestCount = _testCount;
     _testCount += 1;
-    final StreamController<dynamic> localController = StreamController<dynamic>();
-    final StreamController<dynamic> remoteController = StreamController<dynamic>();
-    final Completer<_AsyncError?> testCompleteCompleter = Completer<_AsyncError?>();
-    final _FlutterPlatformStreamSinkWrapper<dynamic> remoteSink =
-        _FlutterPlatformStreamSinkWrapper<dynamic>(
-          remoteController.sink,
-          testCompleteCompleter.future,
-        );
-    final StreamChannel<dynamic> localChannel = StreamChannel<dynamic>.withGuarantees(
+    final localController = StreamController<dynamic>();
+    final remoteController = StreamController<dynamic>();
+    final testCompleteCompleter = Completer<_AsyncError?>();
+    final remoteSink = _FlutterPlatformStreamSinkWrapper<dynamic>(
+      remoteController.sink,
+      testCompleteCompleter.future,
+    );
+    final localChannel = StreamChannel<dynamic>.withGuarantees(
       remoteController.stream,
       localController.sink,
     );
-    final StreamChannel<dynamic> remoteChannel = StreamChannel<dynamic>.withGuarantees(
-      localController.stream,
-      remoteSink,
-    );
+    final remoteChannel = StreamChannel<dynamic>.withGuarantees(localController.stream, remoteSink);
     testCompleteCompleter.complete(_startTest(path, localChannel, ourTestCount));
     return remoteChannel;
   }
@@ -526,8 +521,8 @@ class FlutterPlatform extends PlatformPlugin {
     watcher?.handleStartedDevice(uri);
   }
 
-  static const String _kEventName = 'integration_test.VmServiceProxyGoldenFileComparator';
-  static const String _kExtension = 'ext.$_kEventName';
+  static const _kEventName = 'integration_test.VmServiceProxyGoldenFileComparator';
+  static const _kExtension = 'ext.$_kEventName';
 
   Future<void> _listenToVmServiceForGoldens({required Uri uri, required String testPath}) async {
     final Uri goldensBaseUri = Uri.parse(testPath);
@@ -543,7 +538,7 @@ class FlutterPlatform extends PlatformPlugin {
       if (data == null) {
         throw StateError('Expected VM service data, but got null.');
       }
-      final int id = data['id']! as int;
+      final id = data['id']! as int;
       final Uri relativePath = Uri.parse(data['path']! as String);
       final Uint8List bytes = base64.decode(data['bytes']! as String);
 
@@ -583,9 +578,9 @@ class FlutterPlatform extends PlatformPlugin {
     outOfBandError; // error that we couldn't send to the harness that we need to send via our future
 
     // Will be run in reverse order.
-    final List<Finalizer> finalizers = <Finalizer>[];
-    bool ranFinalizers = false;
-    bool controllerSinkClosed = false;
+    final finalizers = <Finalizer>[];
+    var ranFinalizers = false;
+    var controllerSinkClosed = false;
     Future<void> finalize() async {
       if (ranFinalizers) {
         return;
@@ -678,8 +673,7 @@ class FlutterPlatform extends PlatformPlugin {
       globals.printTrace('test $ourTestCount: starting test device');
       final TestDevice testDevice = _createTestDevice(ourTestCount);
       final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Run);
-      final Completer<StreamChannel<String>> remoteChannelCompleter =
-          Completer<StreamChannel<String>>();
+      final remoteChannelCompleter = Completer<StreamChannel<String>>();
       unawaited(
         asyncGuard(
           () async {
@@ -722,7 +716,7 @@ class FlutterPlatform extends PlatformPlugin {
             // deadlock.
             eagerError: true,
           );
-          final StreamChannel<String> remoteChannel = first! as StreamChannel<String>;
+          final remoteChannel = first! as StreamChannel<String>;
 
           globals.printTrace(
             'test $ourTestCount: connected to test device, now awaiting test result',
@@ -748,7 +742,7 @@ class FlutterPlatform extends PlatformPlugin {
       ]);
     } on Exception catch (error, stackTrace) {
       Object reportedError = error;
-      StackTrace reportedStackTrace = stackTrace;
+      var reportedStackTrace = stackTrace;
       if (error is TestDeviceException) {
         reportedError = error.message;
         reportedStackTrace = error.stackTrace;
@@ -856,7 +850,7 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
 
   @override
   Future<void> get done => _done.future;
-  final Completer<void> _done = Completer<void>();
+  final _done = Completer<void>();
 
   @override
   Future<dynamic> close() {

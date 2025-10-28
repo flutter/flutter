@@ -86,38 +86,39 @@ const UInt8 PAIR = 129;
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [GeneratedPluginRegistrant registerWithRegistry:self];
   // Override point for customization after application launch.
-  FlutterViewController *flutterController =
-      (FlutterViewController *)self.window.rootViewController;
-
+  // This integration test still uses the old way of registering platform
+  // channels to test backwards compatibility after the UISceneDelegate
+  // migration.
+  id<FlutterPluginRegistrar> registrar = [self registrarForPlugin:@"platform-channel-test"];
   ExtendedReaderWriter* extendedReaderWriter = [ExtendedReaderWriter new];
   [self setupMessagingHandshakeOnChannel:
     [FlutterBasicMessageChannel messageChannelWithName:@"binary-msg"
-                                       binaryMessenger:flutterController
+                                       binaryMessenger:registrar.messenger
                                                  codec:[FlutterBinaryCodec sharedInstance]]];
   [self setupMessagingHandshakeOnChannel:
     [FlutterBasicMessageChannel messageChannelWithName:@"string-msg"
-                                       binaryMessenger:flutterController
+                                       binaryMessenger:registrar.messenger
                                                  codec:[FlutterStringCodec sharedInstance]]];
   [self setupMessagingHandshakeOnChannel:
     [FlutterBasicMessageChannel messageChannelWithName:@"json-msg"
-                                       binaryMessenger:flutterController
+                                       binaryMessenger:registrar.messenger
                                                  codec:[FlutterJSONMessageCodec sharedInstance]]];
   [self setupMessagingHandshakeOnChannel:
     [FlutterBasicMessageChannel messageChannelWithName:@"std-msg"
-                                       binaryMessenger:flutterController
+                                       binaryMessenger:registrar.messenger
                                                  codec:[FlutterStandardMessageCodec codecWithReaderWriter:extendedReaderWriter]]];
   [self setupMethodCallSuccessHandshakeOnChannel:
     [FlutterMethodChannel methodChannelWithName:@"json-method"
-                                binaryMessenger:flutterController
+                                binaryMessenger:registrar.messenger
                                           codec:[FlutterJSONMethodCodec sharedInstance]]];
   [self setupMethodCallSuccessHandshakeOnChannel:
     [FlutterMethodChannel methodChannelWithName:@"std-method"
-                                binaryMessenger:flutterController
+                                binaryMessenger:registrar.messenger
                                           codec:[FlutterStandardMethodCodec codecWithReaderWriter:extendedReaderWriter]]];
 
   [[FlutterBasicMessageChannel
       messageChannelWithName:@"std-echo"
-             binaryMessenger:flutterController
+             binaryMessenger:registrar.messenger
                        codec:[FlutterStandardMessageCodec
                                  codecWithReaderWriter:extendedReaderWriter]]
       setMessageHandler:^(id message, FlutterReply reply) {

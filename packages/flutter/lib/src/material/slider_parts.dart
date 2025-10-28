@@ -13,7 +13,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'material_state.dart';
 import 'slider.dart';
 import 'slider_theme.dart';
 import 'slider_value_indicator_shape.dart';
@@ -227,8 +226,9 @@ mixin BaseSliderTrackShape {
     bool isDiscrete = false,
   }) {
     final double thumbWidth = sliderTheme.thumbShape!.getPreferredSize(isEnabled, isDiscrete).width;
-    final double overlayWidth =
-        sliderTheme.overlayShape!.getPreferredSize(isEnabled, isDiscrete).width;
+    final double overlayWidth = sliderTheme.overlayShape!
+        .getPreferredSize(isEnabled, isDiscrete)
+        .width;
     double trackHeight = sliderTheme.trackHeight!;
     assert(overlayWidth >= 0);
     assert(trackHeight >= 0);
@@ -372,8 +372,8 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
         begin: sliderTheme.disabledSecondaryActiveTrackColor,
         end: sliderTheme.secondaryActiveTrackColor,
       );
-      final Paint secondaryTrackPaint =
-          Paint()..color = secondaryTrackColorTween.evaluate(enableAnimation)!;
+      final Paint secondaryTrackPaint = Paint()
+        ..color = secondaryTrackColorTween.evaluate(enableAnimation)!;
       final Rect secondaryTrackSegment = switch (textDirection) {
         TextDirection.rtl => Rect.fromLTRB(
           secondaryOffset.dx,
@@ -520,8 +520,8 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
         begin: sliderTheme.disabledSecondaryActiveTrackColor,
         end: sliderTheme.secondaryActiveTrackColor,
       );
-      final Paint secondaryTrackPaint =
-          Paint()..color = secondaryTrackColorTween.evaluate(enableAnimation)!;
+      final Paint secondaryTrackPaint = Paint()
+        ..color = secondaryTrackColorTween.evaluate(enableAnimation)!;
       if (isLTR) {
         context.canvas.drawRRect(
           RRect.fromLTRBAndCorners(
@@ -624,8 +624,8 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
         sliderTheme.activeTickMarkColor,
       ),
     };
-    final Paint paint =
-        Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
+    final Paint paint = Paint()
+      ..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
 
     // The tick marks are tiny circles that are the same height as the track.
     final double tickMarkRadius =
@@ -752,12 +752,12 @@ class RoundSliderThumbShape extends SliderComponentShape {
     final Tween<double> elevationTween = Tween<double>(begin: elevation, end: pressedElevation);
 
     final double evaluatedElevation = elevationTween.evaluate(activationAnimation);
-    final Path path =
-        Path()..addArc(
-          Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius),
-          0,
-          math.pi * 2,
-        );
+    final Path path = Path()
+      ..addArc(
+        Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius),
+        0,
+        math.pi * 2,
+      );
 
     bool paintShadows = true;
     assert(() {
@@ -944,19 +944,17 @@ class _DropSliderValueIndicatorPathPainter {
     final RRect borderRect = adjustedBorderRadius
         .resolve(labelPainter.textDirection)
         .toRRect(upperRect);
-    final Path trianglePath =
-        Path()
-          ..lineTo(-_triangleHeight, -_triangleHeight)
-          ..lineTo(_triangleHeight, -_triangleHeight)
-          ..close();
+    final Path trianglePath = Path()
+      ..lineTo(-_triangleHeight, -_triangleHeight)
+      ..lineTo(_triangleHeight, -_triangleHeight)
+      ..close();
     trianglePath.addRRect(borderRect);
 
     if (strokePaintColor != null) {
-      final Paint strokePaint =
-          Paint()
-            ..color = strokePaintColor
-            ..strokeWidth = 1.0
-            ..style = PaintingStyle.stroke;
+      final Paint strokePaint = Paint()
+        ..color = strokePaintColor
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke;
       canvas.drawPath(trianglePath, strokePaint);
     }
 
@@ -1027,8 +1025,9 @@ class HandleThumbShape extends SliderComponentShape {
     final Color color = colorTween.evaluate(enableAnimation)!;
 
     final Canvas canvas = context.canvas;
-    final Size thumbSize =
-        sliderTheme.thumbSize!.resolve(<MaterialState>{})!; // This is resolved in the paint method.
+    final Size thumbSize = sliderTheme.thumbSize!.resolve(
+      <WidgetState>{},
+    )!; // This is resolved in the paint method.
     final RRect rrect = RRect.fromRectAndRadius(
       Rect.fromCenter(center: center, width: thumbSize.width, height: thumbSize.height),
       Radius.circular(thumbSize.shortestSide / 2),
@@ -1186,8 +1185,8 @@ class GappedSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape 
         begin: sliderTheme.disabledSecondaryActiveTrackColor,
         end: sliderTheme.secondaryActiveTrackColor,
       );
-      final Paint secondaryTrackPaint =
-          Paint()..color = secondaryTrackColorTween.evaluate(enableAnimation)!;
+      final Paint secondaryTrackPaint = Paint()
+        ..color = secondaryTrackColorTween.evaluate(enableAnimation)!;
       if (isLTR) {
         context.canvas.drawRRect(
           RRect.fromLTRBAndCorners(
@@ -1229,10 +1228,9 @@ class GappedSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape 
       trackRect.center.dy,
     );
 
-    final bool showStopIndicator =
-        (textDirection == TextDirection.ltr)
-            ? thumbCenter.dx < stopIndicatorOffset.dx
-            : thumbCenter.dx > stopIndicatorOffset.dx;
+    final bool showStopIndicator = (textDirection == TextDirection.ltr)
+        ? thumbCenter.dx < stopIndicatorOffset.dx
+        : thumbCenter.dx > stopIndicatorOffset.dx;
     if (showStopIndicator && !isDiscrete) {
       final Rect stopIndicatorRect = Rect.fromCircle(
         center: stopIndicatorOffset,
@@ -1418,11 +1416,10 @@ class _RoundedRectSliderValueIndicatorPathPainter {
 
     final RRect rrect = RRect.fromRectAndRadius(upperRect, Radius.circular(upperRect.height / 2));
     if (strokePaintColor != null) {
-      final Paint strokePaint =
-          Paint()
-            ..color = strokePaintColor
-            ..strokeWidth = 1.0
-            ..style = PaintingStyle.stroke;
+      final Paint strokePaint = Paint()
+        ..color = strokePaintColor
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke;
       canvas.drawRRect(rrect, strokePaint);
     }
 

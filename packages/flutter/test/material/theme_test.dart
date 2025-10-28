@@ -67,7 +67,10 @@ void main() {
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(platformBrightness: Brightness.dark),
-          child: Theme(data: ThemeData(brightness: Brightness.light), child: const SizedBox()),
+          child: Theme(
+            data: ThemeData(brightness: Brightness.light),
+            child: const SizedBox(),
+          ),
         ),
       );
 
@@ -110,7 +113,10 @@ void main() {
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(platformBrightness: Brightness.dark),
-          child: Theme(data: ThemeData(brightness: Brightness.light), child: const SizedBox()),
+          child: Theme(
+            data: ThemeData(brightness: Brightness.light),
+            child: const SizedBox(),
+          ),
         ),
       );
 
@@ -756,6 +762,30 @@ void main() {
         ),
       );
       expect(CupertinoTheme.brightnessOf(context!), Brightness.light);
+    });
+
+    testWidgets('Cupertino widgets correctly get the right text theme in dark mode', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey textFieldKey = GlobalKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.dark(),
+          home: Scaffold(body: CupertinoTextField(key: textFieldKey)),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Default CupertinoTextStyle color is a CupertinoDynamicColor.
+      final CupertinoThemeData cupertinoThemeData = CupertinoTheme.of(textFieldKey.currentContext!);
+      expect(cupertinoThemeData.textTheme.textStyle.color, isA<CupertinoDynamicColor>());
+      final CupertinoDynamicColor themeTextStyleColor =
+          cupertinoThemeData.textTheme.textStyle.color! as CupertinoDynamicColor;
+
+      // The value of the textfield's color should resolve to the theme's dark color.
+      expect(state.widget.style.color?.value, equals(themeTextStyleColor.darkColor.value));
     });
 
     testWidgets('Material2 - Can override material theme', (WidgetTester tester) async {

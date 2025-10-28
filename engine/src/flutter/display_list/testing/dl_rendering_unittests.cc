@@ -8,9 +8,11 @@
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_op_flags.h"
 #include "flutter/display_list/dl_sampling_options.h"
+#include "flutter/display_list/dl_text_skia.h"
 #include "flutter/display_list/effects/color_filters/dl_matrix_color_filter.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
@@ -22,7 +24,8 @@
 #include "flutter/testing/display_list_testing.h"
 #include "flutter/testing/testing.h"
 #ifdef IMPELLER_SUPPORTS_RENDERING
-#include "flutter/impeller/typographer/backends/skia/text_frame_skia.h"
+#include "flutter/impeller/display_list/dl_text_impeller.h"  // nogncheck
+#include "flutter/impeller/typographer/backends/skia/text_frame_skia.h"  // nogncheck
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
 #include "third_party/skia/include/core/SkBBHFactory.h"
@@ -647,7 +650,7 @@ class RenderEnvironment {
     auto surface = getSurface(info.width, info.height);
     FML_DCHECK(surface != nullptr);
     auto canvas = surface->getCanvas();
-    canvas->clear(ToSk(info.bg));
+    canvas->clear(ToSkColor4f(info.bg));
 
     int restore_count = canvas->save();
     canvas->scale(info.scale, info.scale);
@@ -1250,7 +1253,7 @@ class CanvasCompareTester {
                    "saveLayer with alpha, no bounds",
                    [=](const SkSetupContext& ctx) {
                      SkPaint save_p;
-                     save_p.setColor(ToSk(alpha_layer_color));
+                     save_p.setColor(ToSkColor4f(alpha_layer_color));
                      ctx.canvas->saveLayer(nullptr, &save_p);
                    },
                    [=](const DlSetupContext& ctx) {
@@ -1264,7 +1267,7 @@ class CanvasCompareTester {
                    "saveLayer with peephole alpha, no bounds",
                    [=](const SkSetupContext& ctx) {
                      SkPaint save_p;
-                     save_p.setColor(ToSk(alpha_layer_color));
+                     save_p.setColor(ToSkColor4f(alpha_layer_color));
                      ctx.canvas->saveLayer(nullptr, &save_p);
                    },
                    [=](const DlSetupContext& ctx) {
@@ -1278,7 +1281,7 @@ class CanvasCompareTester {
                    "saveLayer with alpha and bounds",
                    [=](const SkSetupContext& ctx) {
                      SkPaint save_p;
-                     save_p.setColor(ToSk(alpha_layer_color));
+                     save_p.setColor(ToSkColor4f(alpha_layer_color));
                      ctx.canvas->saveLayer(ToSkRect(layer_bounds), &save_p);
                    },
                    [=](const DlSetupContext& ctx) {
@@ -2224,9 +2227,10 @@ class CanvasCompareTester {
                    })
                    .with_diff_clip());
     DlPathBuilder path_builder;
+    path_builder.SetFillType(DlPathFillType::kOdd);
     path_builder.AddRect(r_clip);
     path_builder.AddCircle(DlPoint(kRenderCenterX, kRenderCenterY), 1.0f);
-    DlPath path_clip(path_builder, DlPathFillType::kOdd);
+    DlPath path_clip = path_builder.TakePath();
     RenderWith(testP, env, intersect_tolerance,
                CaseParameters(
                    "Hard ClipPath inset by 15.4",
@@ -3083,7 +3087,7 @@ TEST_F(DisplayListRendering, DrawDiagonalDashedLines) {
             SkPaint p = ctx.paint;
             p.setStyle(SkPaint::kStroke_Style);
             DlScalar intervals[2] = {25.0f, 5.0f};
-            p.setPathEffect(SkDashPathEffect::Make(intervals, 2, 0.0f));
+            p.setPathEffect(SkDashPathEffect::Make({intervals, 2}, 0.0f));
             ctx.canvas->drawLine(ToSkPoint(p1), ToSkPoint(p2), p);
             ctx.canvas->drawLine(ToSkPoint(p3), ToSkPoint(p4), p);
             ctx.canvas->drawLine(ToSkPoint(p5), ToSkPoint(p6), p);
@@ -3202,7 +3206,7 @@ TEST_F(DisplayListRendering, DrawPath) {
   }
   path_builder.Close();
 
-  DlPath path = DlPath(path_builder);
+  DlPath path = path_builder.TakePath();
 
   CanvasCompareTester::RenderAll(  //
       TestParameters(
@@ -3295,7 +3299,7 @@ TEST_F(DisplayListRendering, DrawPointsAsPoints) {
             SkPaint p = ctx.paint;
             p.setStyle(SkPaint::kStroke_Style);
             auto mode = SkCanvas::kPoints_PointMode;
-            ctx.canvas->drawPoints(mode, count, ToSkPoints(points), p);
+            ctx.canvas->drawPoints(mode, {ToSkPoints(points), count}, p);
           },
           [=](const DlRenderContext& ctx) {
             auto mode = DlPointMode::kPoints;
@@ -3347,7 +3351,7 @@ TEST_F(DisplayListRendering, DrawPointsAsLines) {
             SkPaint p = ctx.paint;
             p.setStyle(SkPaint::kStroke_Style);
             auto mode = SkCanvas::kLines_PointMode;
-            ctx.canvas->drawPoints(mode, count, ToSkPoints(points), p);
+            ctx.canvas->drawPoints(mode, {ToSkPoints(points), count}, p);
           },
           [=](const DlRenderContext& ctx) {
             auto mode = DlPointMode::kLines;
@@ -3382,7 +3386,7 @@ TEST_F(DisplayListRendering, DrawPointsAsPolygon) {
             SkPaint p = ctx.paint;
             p.setStyle(SkPaint::kStroke_Style);
             auto mode = SkCanvas::kPolygon_PointMode;
-            ctx.canvas->drawPoints(mode, count1, ToSkPoints(points1), p);
+            ctx.canvas->drawPoints(mode, {ToSkPoints(points1), count1}, p);
           },
           [=](const DlRenderContext& ctx) {
             auto mode = DlPointMode::kPolygon;
@@ -3691,9 +3695,10 @@ TEST_F(DisplayListRendering, DrawAtlasNearest) {
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](const SkRenderContext& ctx) {
-            ctx.canvas->drawAtlas(ctx.image.get(), sk_xform, ToSkRects(tex),
-                                  sk_colors, 4, SkBlendMode::kSrcOver,
-                                  sk_sampling, nullptr, &ctx.paint);
+            ctx.canvas->drawAtlas(ctx.image.get(), {sk_xform, 4},
+                                  {ToSkRects(tex), 4}, {sk_colors, 4},
+                                  SkBlendMode::kSrcOver, sk_sampling, nullptr,
+                                  &ctx.paint);
           },
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawAtlas(ctx.image, dl_xform, tex, dl_colors, 4,
@@ -3750,9 +3755,10 @@ TEST_F(DisplayListRendering, DrawAtlasNearestNoPaint) {
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](const SkRenderContext& ctx) {
-            ctx.canvas->drawAtlas(ctx.image.get(), sk_xform, ToSkRects(tex),
-                                  sk_colors, 4, SkBlendMode::kSrcOver,
-                                  sk_sampling, nullptr, nullptr);
+            ctx.canvas->drawAtlas(ctx.image.get(), {sk_xform, 4},
+                                  {ToSkRects(tex), 4}, {sk_colors, 4},
+                                  SkBlendMode::kSrcOver, sk_sampling, nullptr,
+                                  nullptr);
           },
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawAtlas(ctx.image, dl_xform, tex, dl_colors, 4,
@@ -3809,9 +3815,10 @@ TEST_F(DisplayListRendering, DrawAtlasLinear) {
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](const SkRenderContext& ctx) {
-            ctx.canvas->drawAtlas(ctx.image.get(), sk_xform, ToSkRects(tex),
-                                  sk_colors, 2, SkBlendMode::kSrcOver,
-                                  sk_sampling, nullptr, &ctx.paint);
+            ctx.canvas->drawAtlas(ctx.image.get(), {sk_xform, 2},
+                                  {ToSkRects(tex), 2}, {sk_colors, 2},
+                                  SkBlendMode::kSrcOver, sk_sampling, nullptr,
+                                  &ctx.paint);
           },
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawAtlas(ctx.image, dl_xform, tex, dl_colors, 2,
@@ -3867,8 +3874,10 @@ TEST_F(DisplayListRendering, DrawTextBlob) {
 #else
   sk_sp<SkTextBlob> blob =
       CanvasCompareTester::MakeTextBlob("Testing", kRenderHeight * 0.33f);
+  std::shared_ptr<DlText> skiaText = DlTextSkia::Make(blob);
 #ifdef IMPELLER_SUPPORTS_RENDERING
   auto frame = impeller::MakeTextFrameFromTextBlobSkia(blob);
+  std::shared_ptr<DlText> impellerText = DlTextImpeller::Make(frame);
 #endif  // IMPELLER_SUPPORTS_RENDERING
   DlScalar render_y_1_3 = kRenderTop + kRenderHeight * 0.3;
   DlScalar render_y_2_3 = kRenderTop + kRenderHeight * 0.6;
@@ -3882,19 +3891,22 @@ TEST_F(DisplayListRendering, DrawTextBlob) {
           },
           [=](const DlRenderContext& ctx) {
             auto paint = ctx.paint;
-            ctx.canvas->DrawTextBlob(blob, kRenderLeft, render_y_1_3, paint);
-            ctx.canvas->DrawTextBlob(blob, kRenderLeft, render_y_2_3, paint);
-            ctx.canvas->DrawTextBlob(blob, kRenderLeft, kRenderBottom, paint);
+            ctx.canvas->DrawText(skiaText, kRenderLeft, render_y_1_3, paint);
+            ctx.canvas->DrawText(skiaText, kRenderLeft, render_y_2_3, paint);
+            ctx.canvas->DrawText(skiaText, kRenderLeft, kRenderBottom, paint);
           },
 #ifdef IMPELLER_SUPPORTS_RENDERING
           [=](const DlRenderContext& ctx) {
             auto paint = ctx.paint;
-            ctx.canvas->DrawTextFrame(frame, kRenderLeft, render_y_1_3, paint);
-            ctx.canvas->DrawTextFrame(frame, kRenderLeft, render_y_2_3, paint);
-            ctx.canvas->DrawTextFrame(frame, kRenderLeft, kRenderBottom, paint);
+            ctx.canvas->DrawText(impellerText, kRenderLeft, render_y_1_3,
+                                 paint);
+            ctx.canvas->DrawText(impellerText, kRenderLeft, render_y_2_3,
+                                 paint);
+            ctx.canvas->DrawText(impellerText, kRenderLeft, kRenderBottom,
+                                 paint);
           },
 #endif  // IMPELLER_SUPPORTS_RENDERING
-          kDrawTextBlobFlags)
+          kDrawTextFlags)
           .set_draw_text_blob(),
       // From examining the bounds differential for the "Default" case, the
       // SkTextBlob adds a padding of ~32 on the left, ~30 on the right,
@@ -3910,7 +3922,7 @@ TEST_F(DisplayListRendering, DrawShadow) {
       DlRect::MakeLTRB(kRenderLeft + 10, kRenderTop,  //
                        kRenderRight - 10, kRenderBottom - 20),
       kRenderCornerRadius, kRenderCornerRadius));
-  DlPath path(path_builder);
+  DlPath path = path_builder.TakePath();
 
   const DlColor color = DlColor::kDarkGrey();
   const DlScalar elevation = 7;
@@ -3934,7 +3946,7 @@ TEST_F(DisplayListRendering, DrawShadowTransparentOccluder) {
       DlRect::MakeLTRB(kRenderLeft + 10, kRenderTop,  //
                        kRenderRight - 10, kRenderBottom - 20),
       kRenderCornerRadius, kRenderCornerRadius));
-  DlPath path(path_builder);
+  DlPath path = path_builder.TakePath();
 
   const DlColor color = DlColor::kDarkGrey();
   const DlScalar elevation = 7;
@@ -3958,7 +3970,7 @@ TEST_F(DisplayListRendering, DrawShadowDpr) {
       DlRect::MakeLTRB(kRenderLeft + 10, kRenderTop,  //
                        kRenderRight - 10, kRenderBottom - 20),
       kRenderCornerRadius, kRenderCornerRadius));
-  DlPath path(path_builder);
+  DlPath path = path_builder.TakePath();
 
   const DlColor color = DlColor::kDarkGrey();
   const DlScalar elevation = 7;
@@ -4150,7 +4162,7 @@ TEST_F(DisplayListRendering, SaveLayerConsolidation) {
   // CF then Opacity should always work.
   // The reverse sometimes works.
   for (size_t cfi = 0; cfi < color_filters.size(); cfi++) {
-    auto color_filter = color_filters[cfi];
+    const auto& color_filter = color_filters[cfi];
     std::string cf_desc = "color filter #" + std::to_string(cfi + 1);
     DlPaint nested_paint1 = DlPaint().setColorFilter(color_filter);
 
@@ -4180,7 +4192,7 @@ TEST_F(DisplayListRendering, SaveLayerConsolidation) {
     DlPaint nested_paint1 = DlPaint().setOpacity(opacity);
 
     for (size_t ifi = 0; ifi < image_filters.size(); ifi++) {
-      auto image_filter = image_filters[ifi];
+      const auto& image_filter = image_filters[ifi];
       std::string if_desc = "image filter #" + std::to_string(ifi + 1);
       DlPaint nested_paint2 = DlPaint().setImageFilter(image_filter);
 
@@ -4196,12 +4208,12 @@ TEST_F(DisplayListRendering, SaveLayerConsolidation) {
   // CF then IF should always work.
   // The reverse might work, but we lack the infrastructure to check it.
   for (size_t cfi = 0; cfi < color_filters.size(); cfi++) {
-    auto color_filter = color_filters[cfi];
+    const auto& color_filter = color_filters[cfi];
     std::string cf_desc = "color filter #" + std::to_string(cfi + 1);
     DlPaint nested_paint1 = DlPaint().setColorFilter(color_filter);
 
     for (size_t ifi = 0; ifi < image_filters.size(); ifi++) {
-      auto image_filter = image_filters[ifi];
+      const auto& image_filter = image_filters[ifi];
       std::string if_desc = "image filter #" + std::to_string(ifi + 1);
       DlPaint nested_paint2 = DlPaint().setImageFilter(image_filter);
 
@@ -4569,7 +4581,7 @@ class DisplayListNopTest : public DisplayListRendering {
           int x = 0;
           for (DlColor color : test_dst_colors) {
             SkPaint paint;
-            paint.setColor(ToSk(color));
+            paint.setColor(ToSkColor4f(color));
             paint.setBlendMode(SkBlendMode::kSrc);
             canvas->drawRect(SkRect::MakeXYWH(x, 0, 1, 1), paint);
             x++;
@@ -4708,12 +4720,13 @@ class DisplayListNopTest : public DisplayListRendering {
     }
 
     auto sk_mode = static_cast<SkBlendMode>(mode);
-    auto sk_color_filter = SkColorFilters::Blend(ToSk(color), sk_mode);
+    auto sk_color_filter =
+        SkColorFilters::Blend(ToSkColor4f(color), nullptr, sk_mode);
     auto srgb = SkColorSpace::MakeSRGB();
     int all_flags = 0;
     if (sk_color_filter) {
       for (DlColor dst_color : test_dst_colors) {
-        SkColor4f dst_color_f = SkColor4f::FromColor(ToSk(dst_color));
+        SkColor4f dst_color_f = ToSkColor4f(dst_color);
         DlColor result = DlColor(
             sk_color_filter->filterColor4f(dst_color_f, srgb.get(), srgb.get())
                 .toSkColor());
@@ -4746,7 +4759,7 @@ class DisplayListNopTest : public DisplayListRendering {
     auto sk_mode = static_cast<SkBlendMode>(mode);
     SkPaint sk_paint;
     sk_paint.setBlendMode(sk_mode);
-    sk_paint.setColor(ToSk(color));
+    sk_paint.setColor(ToSkColor4f(color));
     for (auto& back_end : CanvasCompareTester::TestBackends) {
       auto provider = CanvasCompareTester::GetProvider(back_end);
       auto result_surface = provider->MakeOffscreenSurface(
@@ -4807,7 +4820,7 @@ class DisplayListNopTest : public DisplayListRendering {
     auto sk_mode = static_cast<SkBlendMode>(mode);
     SkPaint sk_paint;
     sk_paint.setBlendMode(sk_mode);
-    sk_paint.setColor(ToSk(color));
+    sk_paint.setColor(ToSkColor4f(color));
     sk_paint.setColorFilter(ToSk(color_filter));
     sk_paint.setImageFilter(ToSk(image_filter));
     for (auto& back_end : CanvasCompareTester::TestBackends) {

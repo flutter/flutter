@@ -19,6 +19,8 @@ import 'editable_text.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 import 'inherited_notifier.dart';
+import 'localizations.dart';
+import 'media_query.dart';
 import 'overlay.dart';
 import 'shortcuts.dart';
 import 'tap_region.dart';
@@ -106,6 +108,16 @@ enum OptionsViewOpenDirection {
   /// The top edge of the options view will align with the bottom edge
   /// of the text field built by [RawAutocomplete.fieldViewBuilder].
   down,
+
+  /// Open in the direction with the most available space within the overlay.
+  ///
+  /// The available space is calculated as the distance from the field's top
+  /// edge to the overlay's top edge (for upward opening) or from the field's
+  /// bottom edge to the overlay's bottom edge (for downward opening).
+  ///
+  /// If both directions have the same available space, the options view opens
+  /// downward.
+  mostSpace,
 }
 
 // TODO(justinmc): Mention AutocompleteCupertino when it is implemented.
@@ -211,7 +223,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// {@endtemplate}
   ///
   /// If this parameter is not null, then [textEditingController] must also be
-  /// not null.
+  /// non-null.
   final FocusNode? focusNode;
 
   /// {@template flutter.widgets.RawAutocomplete.optionsViewBuilder}
@@ -234,7 +246,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   final AutocompleteOptionsViewBuilder<T> optionsViewBuilder;
 
   /// {@template flutter.widgets.RawAutocomplete.optionsViewOpenDirection}
-  /// The direction in which to open the options-view overlay.
+  /// Determines the direction in which to open the options view.
   ///
   /// Defaults to [OptionsViewOpenDirection.down].
   /// {@endtemplate}
@@ -265,7 +277,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.RawAutocomplete.split}
   ///
-  /// If this parameter is not null, then [focusNode] must also be not null.
+  /// If this parameter is not null, then [focusNode] must also be non-null.
   final TextEditingController? textEditingController;
 
   /// {@template flutter.widgets.RawAutocomplete.initialValue}
@@ -404,6 +416,17 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     }
   }
 
+  void _announceSemantics(bool resultsAvailable) {
+    if (!MediaQuery.supportsAnnounceOf(context)) {
+      return;
+    }
+    final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
+    final String optionsHint = resultsAvailable
+        ? localizations.searchResultsFound
+        : localizations.noResultsFound;
+    SemanticsService.announce(optionsHint, localizations.textDirection);
+  }
+
   // Assigning an ID to every call of _onChangedField is necessary to avoid a
   // situation where _options is updated by an older call when multiple
   // _onChangedField calls are running simultaneously.
@@ -425,6 +448,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     // Makes sure that previous call results do not replace new ones.
     if (callId != _onChangedCallId || !shouldUpdateOptions) {
       return;
+    }
+    if (_options.isEmpty != options.isEmpty) {
+      _announceSemantics(options.isNotEmpty);
     }
     _options = options;
     _updateHighlight(_highlightedOptionIndex.value);
@@ -527,22 +553,29 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       Offset.zero & layoutInfo.overlaySize,
     );
 
-    final double optionsViewMaxHeight = switch (widget.optionsViewOpenDirection) {
-      OptionsViewOpenDirection.up => -overlayRectInField.top,
-      OptionsViewOpenDirection.down => overlayRectInField.bottom - fieldSize.height,
+    final double spaceAbove = -overlayRectInField.top;
+    final double spaceBelow = overlayRectInField.bottom - fieldSize.height;
+    final bool opensUp = switch (widget.optionsViewOpenDirection) {
+      OptionsViewOpenDirection.up => true,
+      OptionsViewOpenDirection.down => false,
+      OptionsViewOpenDirection.mostSpace => spaceAbove > spaceBelow,
     };
+
+    final double optionsViewMaxHeight = opensUp
+        ? -overlayRectInField.top
+        : overlayRectInField.bottom - fieldSize.height;
 
     final Size optionsViewBoundingBox = Size(
       fieldSize.width,
       math.max(optionsViewMaxHeight, _kMinUsableHeight),
     );
 
-    final double originY = switch (widget.optionsViewOpenDirection) {
-      OptionsViewOpenDirection.up => overlayRectInField.top,
-      OptionsViewOpenDirection.down => overlayRectInField.bottom - optionsViewBoundingBox.height,
-    };
+    final double originY = opensUp
+        ? overlayRectInField.top
+        : overlayRectInField.bottom - optionsViewBoundingBox.height;
 
-    final Matrix4 transform = layoutInfo.childPaintTransform.clone()..translate(0.0, originY);
+    final Matrix4 transform = layoutInfo.childPaintTransform.clone()
+      ..translateByDouble(0.0, originY, 0, 1);
     final Widget child = Builder(
       builder: (BuildContext context) => widget.optionsViewBuilder(context, _select, _options),
     );
@@ -553,10 +586,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
         child: ConstrainedBox(
           constraints: BoxConstraints.tight(optionsViewBoundingBox),
           child: Align(
-            alignment: switch (widget.optionsViewOpenDirection) {
-              OptionsViewOpenDirection.up => AlignmentDirectional.bottomStart,
-              OptionsViewOpenDirection.down => AlignmentDirectional.topStart,
-            },
+            alignment: opensUp ? AlignmentDirectional.bottomStart : AlignmentDirectional.topStart,
             child: TextFieldTapRegion(
               child: AutocompleteHighlightedOption(
                 highlightIndexNotifier: _highlightedOptionIndex,

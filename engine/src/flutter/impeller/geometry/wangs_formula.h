@@ -5,7 +5,6 @@
 #ifndef FLUTTER_IMPELLER_GEOMETRY_WANGS_FORMULA_H_
 #define FLUTTER_IMPELLER_GEOMETRY_WANGS_FORMULA_H_
 
-#include "impeller/geometry/path_component.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/scalar.h"
 
@@ -55,30 +54,6 @@ Scalar ComputeConicSubdivisions(Scalar scale_factor,
                                 Point p1,
                                 Point p2,
                                 Scalar w);
-
-/// Returns the minimum number of evenly spaced (in the parametric sense) line
-/// segments that the quadratic must be chopped into in order to guarantee all
-/// lines stay within a distance of "1/intolerance" pixels from the true curve.
-///
-/// The scale_factor should be the max basis XY of the current transform.
-Scalar ComputeQuadradicSubdivisions(Scalar scale_factor,
-                                    const QuadraticPathComponent& quad);
-
-/// Returns the minimum number of evenly spaced (in the parametric sense) line
-/// segments that the cubic must be chopped into in order to guarantee all lines
-/// stay within a distance of "1/intolerance" pixels from the true curve.
-///
-/// The scale_factor should be the max basis XY of the current transform.
-Scalar ComputeCubicSubdivisions(float scale_factor,
-                                const CubicPathComponent& cub);
-
-/// Returns the minimum number of evenly spaced (in the parametric sense) line
-/// segments that the conic must be chopped into in order to guarantee all lines
-/// stay within a distance of "1/intolerance" pixels from the true curve.
-///
-/// The scale_factor should be the max basis XY of the current transform.
-Scalar ComputeConicSubdivisions(float scale_factor,
-                                const ConicPathComponent& conic);
 }  // namespace impeller
 
 #endif  // FLUTTER_IMPELLER_GEOMETRY_WANGS_FORMULA_H_

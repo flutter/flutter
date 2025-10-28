@@ -22,10 +22,10 @@ class FileStorage {
     if (json == null) {
       throw Exception('File storage format invalid');
     }
-    final int version = json['version'] as int;
-    final List<Map<String, dynamic>> rawCachedFiles =
-        (json['files'] as List<dynamic>).cast<Map<String, dynamic>>();
-    final List<FileHash> cachedFiles = <FileHash>[
+    final version = json['version'] as int;
+    final List<Map<String, dynamic>> rawCachedFiles = (json['files'] as List<dynamic>)
+        .cast<Map<String, dynamic>>();
+    final cachedFiles = <FileHash>[
       for (final Map<String, dynamic> rawFile in rawCachedFiles) FileHash._fromJson(rawFile),
     ];
     return FileStorage(version, cachedFiles);
@@ -35,7 +35,7 @@ class FileStorage {
   final List<FileHash> files;
 
   List<int> toBuffer() {
-    final Map<String, Object> json = <String, Object>{
+    final json = <String, Object>{
       'version': version,
       'files': <Object>[for (final FileHash file in files) file.toJson()],
     };
@@ -98,14 +98,14 @@ class FileStore {
   final Logger _logger;
   final FileStoreStrategy _strategy;
 
-  final HashMap<String, String> previousAssetKeys = HashMap<String, String>();
-  final HashMap<String, String> currentAssetKeys = HashMap<String, String>();
+  final previousAssetKeys = HashMap<String, String>();
+  final currentAssetKeys = HashMap<String, String>();
 
   // The name of the file which stores the file hashes.
-  static const String kFileCache = '.filecache';
+  static const kFileCache = '.filecache';
 
   // The current version of the file cache storage format.
-  static const int _kVersion = 2;
+  static const _kVersion = 2;
 
   /// Read file hashes from disk.
   void initialize() {
@@ -150,11 +150,11 @@ class FileStore {
     if (!_cacheFile.existsSync()) {
       _cacheFile.createSync(recursive: true);
     }
-    final List<FileHash> fileHashes = <FileHash>[];
+    final fileHashes = <FileHash>[];
     for (final MapEntry<String, String> entry in currentAssetKeys.entries) {
       fileHashes.add(FileHash(entry.key, entry.value));
     }
-    final FileStorage fileStorage = FileStorage(_kVersion, fileHashes);
+    final fileStorage = FileStorage(_kVersion, fileHashes);
     final List<int> buffer = fileStorage.toBuffer();
     try {
       _cacheFile.writeAsBytesSync(buffer);
@@ -178,14 +178,14 @@ class FileStore {
   /// Computes a diff of the provided files and returns a list of files
   /// that were dirty.
   List<File> diffFileList(List<File> files) {
-    final List<File> dirty = <File>[];
+    final dirty = <File>[];
     switch (_strategy) {
       case FileStoreStrategy.hash:
-        for (final File file in files) {
+        for (final file in files) {
           _hashFile(file, dirty);
         }
       case FileStoreStrategy.timestamp:
-        for (final File file in files) {
+        for (final file in files) {
           _checkModification(file, dirty);
         }
     }
@@ -203,7 +203,7 @@ class FileStore {
       dirty.add(file);
       return;
     }
-    final String modifiedTime = file.lastModifiedSync().toString();
+    final modifiedTime = file.lastModifiedSync().toString();
     if (modifiedTime != previousTime) {
       dirty.add(file);
     }
@@ -211,7 +211,7 @@ class FileStore {
   }
 
   // 64k is the same sized buffer used by dart:io for `File.openRead`.
-  static final Uint8List _readBuffer = Uint8List(64 * 1024);
+  static final _readBuffer = Uint8List(64 * 1024);
 
   void _hashFile(File file, List<File> dirty) {
     final String absolutePath = file.path;
@@ -224,11 +224,11 @@ class FileStore {
       return;
     }
     final int fileBytes = file.lengthSync();
-    final Md5Hash hash = Md5Hash();
+    final hash = Md5Hash();
     RandomAccessFile? openFile;
     try {
       openFile = file.openSync();
-      int bytes = 0;
+      var bytes = 0;
       while (bytes < fileBytes) {
         final int bytesRead = openFile.readIntoSync(_readBuffer);
         hash.addChunk(_readBuffer, bytesRead);
@@ -237,8 +237,8 @@ class FileStore {
     } finally {
       openFile?.closeSync();
     }
-    final Digest digest = Digest(hash.finalize().buffer.asUint8List());
-    final String currentHash = digest.toString();
+    final digest = Digest(hash.finalize().buffer.asUint8List());
+    final currentHash = digest.toString();
     if (currentHash != previousHash) {
       dirty.add(file);
     }

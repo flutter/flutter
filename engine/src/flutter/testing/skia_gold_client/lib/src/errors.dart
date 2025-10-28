@@ -48,7 +48,7 @@ final class SkiaGoldProcessError extends Error {
   String toString() {
     return <String>[
       'Error when running Skia Gold: ${command.join(' ')}',
-      if (message != null) message!,
+      ?message,
       '',
       'stdout: $stdout',
       'stderr: $stderr',

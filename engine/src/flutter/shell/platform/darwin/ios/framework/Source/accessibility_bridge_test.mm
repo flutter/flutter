@@ -745,9 +745,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   flutter::SemanticsNode root_node;
   root_node.id = kRootNodeId;
   root_node.flags.isInMutuallyExclusiveGroup = true;
-  root_node.flags.isEnabled = true;
-  root_node.flags.hasCheckedState = true;
-  root_node.flags.hasEnabledState = true;
+  root_node.flags.isEnabled = flutter::SemanticsTristate::kTrue;
+  root_node.flags.isChecked = flutter::SemanticsCheckState::kFalse;
   nodes[root_node.id] = root_node;
   bridge->UpdateSemantics(/*nodes=*/nodes, /*actions=*/actions);
 
@@ -2391,6 +2390,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
 
     platform_view->SetOwnerViewController(mockFlutterViewController);
     platform_view->SetSemanticsEnabled(true);
+    platform_view->SetSemanticsTreeEnabled(true);
 
     OCMExpect([mockFlutterView setAccessibilityElements:[OCMArg isNil]]);
     platform_view->OnPreEngineRestart();
@@ -2399,6 +2399,41 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
     latch.Signal();
   });
   latch.Wait();
+}
+
+- (void)testWeakViewController {
+  flutter::MockDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+
+  std::unique_ptr<flutter::AccessibilityBridge> bridge;
+  @autoreleasepool {
+    id mockFlutterView = OCMClassMock([FlutterView class]);
+    id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+    OCMStub([mockFlutterViewController viewIfLoaded]).andReturn(mockFlutterView);
+    OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+
+    bridge = std::make_unique<flutter::AccessibilityBridge>(
+        /*view_controller=*/mockFlutterViewController,
+        /*platform_view=*/platform_view.get(),
+        /*platform_views_controller=*/nil);
+    XCTAssertTrue(bridge.get());
+    XCTAssertNotNil(bridge->view());
+  }
+  XCTAssertNil(bridge->view());
 }
 
 @end

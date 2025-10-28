@@ -8,9 +8,11 @@
 #include <iomanip>
 
 #include "flutter/display_list/display_list.h"
+#include "flutter/display_list/dl_canvas.h"
 #include "flutter/display_list/effects/dl_color_filters.h"
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
+#include "flutter/impeller/typographer/text_frame.h"
 
 namespace flutter::testing {
 
@@ -286,22 +288,19 @@ std::ostream& operator<<(std::ostream& os, DlImageSampling sampling) {
   }
 }
 
-static std::ostream& operator<<(std::ostream& os, const SkTextBlob* blob) {
-  if (blob == nullptr) {
-    return os << "no text";
+static std::ostream& operator<<(std::ostream& os, const flutter::DlText* text) {
+  auto blob = text->GetTextBlob();
+  if (blob != nullptr) {
+    return os << "&SkTextBlob(ID: " << blob->uniqueID() << ", " << blob->bounds() << ")";
   }
-  return os << "&SkTextBlob(ID: " << blob->uniqueID() << ", " << blob->bounds() << ")";
-}
-
-static std::ostream& operator<<(std::ostream& os,
-                                const impeller::TextFrame* frame) {
-  if (frame == nullptr) {
-    return os << "no text";
+  auto frame = text->GetTextFrame();
+  if (frame != nullptr) {
+    auto bounds = frame->GetBounds();
+    return os << "&TextFrame("
+              << bounds.GetLeft() << ", " << bounds.GetTop() << " => "
+              << bounds.GetRight() << ", " << bounds.GetBottom() << ")";
   }
-  auto bounds = frame->GetBounds();
-  return os << "&TextFrame("
-            << bounds.GetLeft() << ", " << bounds.GetTop() << " => "
-            << bounds.GetRight() << ", " << bounds.GetBottom() << ")";
+  return os << "no text";
 }
 
 std::ostream& operator<<(std::ostream& os, const DlVertexMode& mode) {
@@ -975,21 +974,12 @@ void DisplayListStreamDispatcher::drawDisplayList(
            << "opacity: " << opacity
            << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
+void DisplayListStreamDispatcher::drawText(const std::shared_ptr<DlText>& text,
                                                DlScalar x,
                                                DlScalar y) {
-  startl() << "drawTextBlob("
-           << blob.get() << ", "
+  startl() << "drawText("
+           << text.get() << ", "
            << x << ", " << y << ");" << std::endl;
-}
-
-void DisplayListStreamDispatcher::drawTextFrame(
-    const std::shared_ptr<impeller::TextFrame>& text_frame,
-    DlScalar x,
-    DlScalar y) {
-  startl() << "drawTextFrame("
-    << text_frame.get() << ", "
-    << x << ", " << y << ");" << std::endl;
 }
 
 void DisplayListStreamDispatcher::drawShadow(const DlPath& path,

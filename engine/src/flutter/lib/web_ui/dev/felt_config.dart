@@ -165,10 +165,9 @@ class FeltConfig {
       if (compileConfigsValue is String) {
         compileConfigs = <CompileConfiguration>[compileConfigsByName[compileConfigsValue]!];
       } else {
-        compileConfigs =
-            (compileConfigsValue as List<dynamic>)
-                .map((dynamic configName) => compileConfigsByName[configName as String]!)
-                .toList();
+        compileConfigs = (compileConfigsValue as List<dynamic>)
+            .map((dynamic configName) => compileConfigsByName[configName as String]!)
+            .toList();
       }
       final TestBundle bundle = TestBundle(name, testSet, compileConfigs);
       testBundles.add(bundle);
@@ -187,8 +186,9 @@ class FeltConfig {
       final List<String> browserFlags =
           (runConfigYaml['browser-flags'] as YamlList?)?.cast<String>() ?? <String>[];
       final dynamic variantNode = runConfigYaml['canvaskit-variant'];
-      final CanvasKitVariant? variant =
-          variantNode == null ? null : CanvasKitVariant.values.byName(variantNode as String);
+      final CanvasKitVariant? variant = variantNode == null
+          ? null
+          : CanvasKitVariant.values.byName(variantNode as String);
       final bool crossOriginIsolated = runConfigYaml['cross-origin-isolated'] as bool? ?? false;
       final bool forceSingleThreadedSkwasm =
           runConfigYaml['force-single-threaded-skwasm'] as bool? ?? false;

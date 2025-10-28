@@ -23,10 +23,9 @@ void _applyParentData(List<RenderBox> inlineRenderBoxes, InlineSpan span) {
     }
 
     final RenderBox box = inlineRenderBoxes[index];
-    box.parentData =
-        TextParentData()
-          ..span = span
-          ..previousSibling = previousBox;
+    box.parentData = TextParentData()
+      ..span = span
+      ..previousSibling = previousBox;
     (previousBox?.parentData as TextParentData?)?.nextSibling = box;
     index += 1;
     previousBox = box;
@@ -382,11 +381,10 @@ void main() {
       textAlign: TextAlign.left,
     );
 
-    Rect getRectForA() =>
-        paragraph
-            .getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1))
-            .single
-            .toRect();
+    Rect getRectForA() => paragraph
+        .getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1))
+        .single
+        .toRect();
 
     layout(paragraph, constraints: const BoxConstraints.tightFor(width: 100.0));
 
@@ -437,7 +435,10 @@ void main() {
 
   test('changing color does not do layout', () {
     final RenderParagraph paragraph = RenderParagraph(
-      const TextSpan(text: 'Hello', style: TextStyle(color: Color(0xFF000000))),
+      const TextSpan(
+        text: 'Hello',
+        style: TextStyle(color: Color(0xFF000000)),
+      ),
       textDirection: TextDirection.ltr,
     );
     layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0), phase: EnginePhase.paint);
@@ -1370,11 +1371,10 @@ void main() {
       expect(selection.end, 15);
 
       final Matrix4 transform = registrar.selectables[0].getTransformTo(null);
-      final double baseline =
-          MatrixUtils.transformPoint(
-            transform,
-            registrar.selectables[0].value.endSelectionPoint!.localPosition,
-          ).dx;
+      final double baseline = MatrixUtils.transformPoint(
+        transform,
+        registrar.selectables[0].value.endSelectionPoint!.localPosition,
+      ).dx;
 
       // Equivalent to sending shift + arrow-down.
       registrar.selectables[0].dispatchSelectionEvent(
@@ -1422,11 +1422,10 @@ void main() {
       expect(paragraph.selections.length, 0);
 
       final Matrix4 transform = registrar.selectables[0].getTransformTo(null);
-      final double baseline =
-          MatrixUtils.transformPoint(
-            transform,
-            Offset(registrar.selectables[0].size.width / 2, 0),
-          ).dx;
+      final double baseline = MatrixUtils.transformPoint(
+        transform,
+        Offset(registrar.selectables[0].size.width / 2, 0),
+      ).dx;
 
       // Equivalent to sending shift + arrow-down.
       registrar.selectables[0].dispatchSelectionEvent(
@@ -1491,8 +1490,8 @@ void main() {
     expect(data.hasAction(SemanticsAction.longPress), false);
     expect(data.hasAction(SemanticsAction.tap), true);
 
-    final LongPressGestureRecognizer recognizerAfter =
-        LongPressGestureRecognizer()..onLongPress = () {};
+    final LongPressGestureRecognizer recognizerAfter = LongPressGestureRecognizer()
+      ..onLongPress = () {};
     paragraph.text = TextSpan(text: 'How are you \n', recognizer: recognizerAfter);
 
     pumpFrame(phase: EnginePhase.flushSemantics);

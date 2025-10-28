@@ -33,15 +33,15 @@ println "=========================================="
 
 android {
   namespace 'io.flutter.app.test'
-  compileSdk 36
+  compileSdk = 36
 
   defaultConfig {
-    minSdkVersion 21
+    minSdk = 24
   }
 
   compileOptions {
-    sourceCompatibility JavaVersion.VERSION_11
-    targetCompatibility JavaVersion.VERSION_11
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
   }
 
   testOptions {
@@ -72,7 +72,7 @@ android {
     //noinspection RiskyLibrary,PlaySdkIndexDeprecated
     testImplementation "com.google.android.play:core:1.8.0"
     testImplementation "com.ibm.icu:icu4j:75.1"
-    testImplementation "org.robolectric:robolectric:4.14.1"
+    testImplementation "org.robolectric:robolectric:4.16"
     testImplementation "junit:junit:4.13.2"
     testImplementation "androidx.test.ext:junit:1.2.1"
 

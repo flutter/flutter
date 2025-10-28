@@ -30,9 +30,6 @@ dartdevc:
     _skwasm_stub:
       uri: "lib/_skwasm_stub/skwasm_stub.dart"
 
-    _web_unicode:
-      uri: "lib/_web_unicode/web_unicode.dart"
-
     _web_locale_keymap:
       uri: "lib/_web_locale_keymap/web_locale_keymap.dart"
 
@@ -56,9 +53,6 @@ dart2js:
     _skwasm_stub:
       uri: "lib/_skwasm_stub/skwasm_stub.dart"
 
-    _web_unicode:
-      uri: "lib/_web_unicode/web_unicode.dart"
-
     _web_locale_keymap:
       uri: "lib/_web_locale_keymap/web_locale_keymap.dart"
 
@@ -81,9 +75,6 @@ wasm:
 
     _skwasm_impl:
       uri: "lib/_skwasm_impl/skwasm_impl.dart"
-
-    _web_unicode:
-      uri: "lib/_web_unicode/web_unicode.dart"
 
     _web_locale_keymap:
       uri: "lib/_web_locale_keymap/web_locale_keymap.dart"

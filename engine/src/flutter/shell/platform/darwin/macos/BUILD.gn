@@ -51,10 +51,23 @@ _flutter_framework_headers_copy_dir =
     "$_flutter_framework_dir/Versions/A/Headers"
 
 source_set("InternalFlutterSwift") {
-  visibility = [ ":*" ]
+  # Targets should only ever depend on the framework target.
+  # This allows code in this target to use types declared in the bridging
+  # header, but defined in the framework, while avoiding linking errors.
+  visibility = [ ":flutter_framework_source" ]
   configs += [ "//flutter/shell/platform/darwin/common:config" ]
-
-  sources = [ "framework/Source/FlutterRunLoop.swift" ]
+  include_dirs = [
+    "//flutter/shell/platform/darwin/common/framework/Headers",
+    "//flutter/shell/platform/darwin/macos/framework/Headers",
+    "//flutter/shell/platform/darwin/macos/framework",  # For module.modulemap
+  ]
+  bridge_header = "InternalFlutterSwift-Bridging-Header.h"
+  sources = [
+    "framework/Source/FlutterRunLoop.swift",
+    "framework/Source/ResizeSynchronizer.swift",
+  ]
+  deps = [ "//flutter/shell/platform/darwin/common:framework_common" ]
+  public = _flutter_framework_headers + framework_common_headers
 }
 
 source_set("flutter_framework_source") {
@@ -99,8 +112,6 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterPlatformViewController.mm",
     "framework/Source/FlutterRenderer.h",
     "framework/Source/FlutterRenderer.mm",
-    "framework/Source/FlutterResizeSynchronizer.h",
-    "framework/Source/FlutterResizeSynchronizer.mm",
     "framework/Source/FlutterSurface.h",
     "framework/Source/FlutterSurface.mm",
     "framework/Source/FlutterSurfaceManager.h",
@@ -122,26 +133,30 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterViewEngineProvider.h",
     "framework/Source/FlutterViewEngineProvider.mm",
     "framework/Source/FlutterViewProvider.h",
+    "framework/Source/FlutterWindowController.h",
+    "framework/Source/FlutterWindowController.mm",
     "framework/Source/KeyCodeMap.g.mm",
   ]
 
   sources += _flutter_framework_headers
 
   deps = [
-    ":InternalFlutterSwift",
     ":macos_gpu_configuration",
-    "//flutter/flow:flow",
+    "//flutter/flow",
     "//flutter/fml",
     "//flutter/shell/platform/common:common_cpp_accessibility",
+    "//flutter/shell/platform/common:common_cpp_core",
     "//flutter/shell/platform/common:common_cpp_enums",
     "//flutter/shell/platform/common:common_cpp_input",
+    "//flutter/shell/platform/common:common_cpp_isolate_scope",
     "//flutter/shell/platform/common:common_cpp_switches",
     "//flutter/shell/platform/darwin/common:availability_version_check",
     "//flutter/shell/platform/darwin/common:framework_common",
-    "//flutter/shell/platform/darwin/graphics:graphics",
+    "//flutter/shell/platform/darwin/graphics",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/skia",
   ]
+  public_deps = [ ":InternalFlutterSwift" ]
 
   public_configs = [ "//flutter:config" ]
 
@@ -178,6 +193,21 @@ test_fixtures("flutter_desktop_darwin_fixtures") {
   fixtures = [ "//flutter/third_party/icu/common/icudtl.dat" ]
 }
 
+executable("flutter_desktop_darwin_swift_unittests") {
+  testonly = true
+  public_configs = [
+    "//flutter/shell/platform/darwin/common:config",
+    "//flutter/shell/platform/darwin/common:test_config",
+    "//flutter/shell/platform/darwin/common:swift_testing_config",
+  ]
+  sources = [ "framework/Source/ResizeSynchronizerTest.swift" ]
+  deps = [
+    ":flutter_framework_source",
+    "//flutter/shell/platform/darwin/common:swift_testing_main",
+    "//flutter/shell/platform/darwin/common:test_utils_swift",
+  ]
+}
+
 executable("flutter_desktop_darwin_unittests") {
   testonly = true
   cflags_objc = flutter_cflags_objc
@@ -200,7 +230,6 @@ executable("flutter_desktop_darwin_unittests") {
     "framework/Source/FlutterMutatorViewTest.mm",
     "framework/Source/FlutterPlatformNodeDelegateMacTest.mm",
     "framework/Source/FlutterPlatformViewControllerTest.mm",
-    "framework/Source/FlutterResizeSynchronizerTest.mm",
     "framework/Source/FlutterSurfaceManagerTest.mm",
     "framework/Source/FlutterTextInputPluginTest.mm",
     "framework/Source/FlutterTextInputSemanticsObjectTest.mm",
@@ -213,16 +242,19 @@ executable("flutter_desktop_darwin_unittests") {
     "framework/Source/KeyCodeMapTest.mm",
     "framework/Source/TestFlutterPlatformView.h",
     "framework/Source/TestFlutterPlatformView.mm",
+    "framework/source/FlutterWindowControllerTest.mm",
   ]
 
   deps = [
-    ":InternalFlutterSwift",
     ":flutter_desktop_darwin_fixtures",
     ":flutter_framework_source",
     "//flutter/fml",
     "//flutter/shell/platform/common:common_cpp_accessibility",
+    "//flutter/shell/platform/common:common_cpp_core",
     "//flutter/shell/platform/common:common_cpp_enums",
+    "//flutter/shell/platform/common:common_cpp_isolate_scope",
     "//flutter/shell/platform/darwin/common:framework_common",
+    "//flutter/shell/platform/darwin/common:test_utils_swift",
     "//flutter/shell/platform/darwin/graphics",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/embedder:embedder_test_utils",
@@ -231,7 +263,7 @@ executable("flutter_desktop_darwin_unittests") {
     "//flutter/testing:dart",
     "//flutter/testing:skia",
     "//flutter/testing:testing_lib",
-    "//flutter/third_party/ocmock:ocmock",
+    "//flutter/third_party/ocmock",
   ]
 }
 

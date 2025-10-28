@@ -4,7 +4,7 @@
 
 part of 'reporting.dart';
 
-const String _kFlutterUA = 'UA-67589403-6';
+const _kFlutterUA = 'UA-67589403-6';
 
 abstract class Usage {
   /// Create a new Usage instance; [versionOverride], [configDirOverride], and
@@ -133,15 +133,14 @@ class _DefaultUsage implements Usage {
     final FlutterVersion flutterVersion = globals.flutterVersion;
     final String version =
         versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
-    final bool suppressEnvFlag =
-        globals.platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
+    final suppressEnvFlag = globals.platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
     final String? logFilePath =
         logFile ?? globals.platform.environment['FLUTTER_ANALYTICS_LOG_FILE'];
     final bool usingLogFile = logFilePath != null && logFilePath.isNotEmpty;
 
     final AnalyticsFactory analyticsFactory = analyticsIOFactory ?? _defaultAnalyticsIOFactory;
-    bool suppressAnalytics = false;
-    bool skipAnalyticsSessionSetup = false;
+    var suppressAnalytics = false;
+    var skipAnalyticsSessionSetup = false;
     Analytics? setupAnalytics;
     if ( // To support testing, only allow other signals to suppress analytics
     // when analytics are not being shunted to a file.
@@ -168,8 +167,9 @@ class _DefaultUsage implements Usage {
             _kFlutterUA,
             settingsName,
             version,
-            documentDirectory:
-                configDirOverride != null ? globals.fs.directory(configDirOverride) : null,
+            documentDirectory: configDirOverride != null
+                ? globals.fs.directory(configDirOverride)
+                : null,
           );
         });
       } on Exception catch (e) {
@@ -191,7 +191,7 @@ class _DefaultUsage implements Usage {
       );
       // For each flutter experimental feature, record a session value in a comma
       // separated list.
-      final String enabledFeatures = allFeatures
+      final String enabledFeatures = featureFlags.allFeatures
           .where((Feature feature) {
             final String? configSetting = feature.configSetting;
             return configSetting != null && globals.config.getValue(configSetting) == true;
@@ -218,8 +218,8 @@ class _DefaultUsage implements Usage {
   final Analytics _analytics;
   final FirstRunMessenger? firstRunMessenger;
 
-  bool _printedWelcome = false;
-  bool _suppressAnalytics = false;
+  var _printedWelcome = false;
+  var _suppressAnalytics = false;
   final SystemClock _clock;
 
   @override
@@ -249,8 +249,9 @@ class _DefaultUsage implements Usage {
 
     _analytics.sendScreenView(
       command,
-      parameters:
-          CustomDimensions(localTime: formatDateTime(_clock.now())).merge(parameters).toMap(),
+      parameters: CustomDimensions(
+        localTime: formatDateTime(_clock.now()),
+      ).merge(parameters).toMap(),
     );
   }
 
@@ -271,8 +272,9 @@ class _DefaultUsage implements Usage {
       parameter,
       label: label,
       value: value,
-      parameters:
-          CustomDimensions(localTime: formatDateTime(_clock.now())).merge(parameters).toMap(),
+      parameters: CustomDimensions(
+        localTime: formatDateTime(_clock.now()),
+      ).merge(parameters).toMap(),
     );
   }
 
@@ -330,10 +332,9 @@ class LogToFileAnalytics extends AnalyticsMock {
       super(true);
 
   final File logFile;
-  final Map<String, String> _sessionValues = <String, String>{};
+  final _sessionValues = <String, String>{};
 
-  final StreamController<Map<String, dynamic>> _sendController =
-      StreamController<Map<String, dynamic>>.broadcast(sync: true);
+  final _sendController = StreamController<Map<String, dynamic>>.broadcast(sync: true);
 
   @override
   Stream<Map<String, dynamic>> get onSend => _sendController.stream;
@@ -375,11 +376,11 @@ class LogToFileAnalytics extends AnalyticsMock {
     if (!enabled) {
       return Future<void>.value();
     }
-    final Map<String, String> parameters = <String, String>{
+    final parameters = <String, String>{
       'variableName': variableName,
       'time': '$time',
-      if (category != null) 'category': category,
-      if (label != null) 'label': label,
+      'category': ?category,
+      'label': ?label,
     };
     _sendController.add(parameters);
     logFile.writeAsStringSync('timing $parameters\n', mode: FileMode.append);
@@ -398,18 +399,18 @@ class LogToFileAnalytics extends AnalyticsMock {
 /// buffered on the object and can be inspected later.
 @visibleForTesting
 class TestUsage implements Usage {
-  final List<TestUsageCommand> commands = <TestUsageCommand>[];
-  final List<TestUsageEvent> events = <TestUsageEvent>[];
-  final List<dynamic> exceptions = <dynamic>[];
-  final List<TestTimingEvent> timings = <TestTimingEvent>[];
-  int ensureAnalyticsSentCalls = 0;
-  bool _printedWelcome = false;
+  final commands = <TestUsageCommand>[];
+  final events = <TestUsageEvent>[];
+  final exceptions = <dynamic>[];
+  final timings = <TestTimingEvent>[];
+  var ensureAnalyticsSentCalls = 0;
+  var _printedWelcome = false;
 
   @override
-  bool enabled = true;
+  var enabled = true;
 
   @override
-  bool suppressAnalytics = false;
+  var suppressAnalytics = false;
 
   @override
   String get clientId => 'test-client';
@@ -534,7 +535,7 @@ class TestTimingEvent {
   String toString() => 'TestTimingEvent($category, $variableName, $duration, label:$label)';
 }
 
-bool _mapsEqual(Map<dynamic, dynamic>? a, Map<dynamic, dynamic>? b) {
+bool _mapsEqual(Map<String, String>? a, Map<String, String>? b) {
   if (a == b) {
     return true;
   }
@@ -545,8 +546,8 @@ bool _mapsEqual(Map<dynamic, dynamic>? a, Map<dynamic, dynamic>? b) {
     return false;
   }
 
-  for (final dynamic k in a.keys) {
-    final dynamic bValue = b[k];
+  for (final String k in a.keys) {
+    final String? bValue = b[k];
     if (bValue == null && !b.containsKey(k)) {
       return false;
     }

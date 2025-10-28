@@ -15,9 +15,9 @@ import '../../src/test_build_system.dart';
 
 void main() {
   testUsingContext('Include only supported sub commands', () {
-    final BufferLogger logger = BufferLogger.test();
-    final MemoryFileSystem fs = MemoryFileSystem.test();
-    final BuildCommand command = BuildCommand(
+    final logger = BufferLogger.test();
+    final fs = MemoryFileSystem.test();
+    final command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fs,

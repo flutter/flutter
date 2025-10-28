@@ -12,17 +12,15 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
-import 'package:flutter_tools/src/dart/package_map.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
+import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets_host.dart'
+    show cCompilerConfigMacOS;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:hooks/hooks.dart';
-import 'package:package_config/package_config_types.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
-import '../../../src/fakes.dart';
-import '../../../src/package_config.dart';
 import '../fake_native_assets_build_runner.dart';
 
 void main() {
@@ -32,7 +30,6 @@ void main() {
   late FileSystem fileSystem;
   late BufferLogger logger;
   late Uri projectUri;
-  late String runPackageName;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -49,13 +46,12 @@ void main() {
     );
     environment.buildDir.createSync(recursive: true);
     projectUri = environment.projectDir.uri;
-    runPackageName = environment.projectDir.basename;
   });
 
-  for (final bool flutterTester in <bool>[false, true]) {
-    final bool isArm64 = Architecture.current == Architecture.arm64;
+  for (final flutterTester in <bool>[false, true]) {
+    final isArm64 = Architecture.current == Architecture.arm64;
 
-    String testName = '';
+    var testName = '';
     if (flutterTester) {
       testName += ' flutter tester';
     }
@@ -77,168 +73,163 @@ void main() {
       dylibPathBuz = '/build/native_assets/macos/buz.framework/Versions/A/buz';
       signPathBuz = '/build/native_assets/macos/buz.framework';
     }
-    for (final BuildMode buildMode in <BuildMode>[
-      BuildMode.debug,
-      if (!flutterTester) BuildMode.release,
-    ]) {
+    for (final buildMode in <BuildMode>[BuildMode.debug, if (!flutterTester) BuildMode.release]) {
       testUsingContext(
         'build with assets $buildMode$testName',
         overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-          ProcessManager:
-              () => FakeProcessManager.list(<FakeCommand>[
-                if (flutterTester) ...<FakeCommand>[
-                  FakeCommand(
-                    command: <Pattern>[
-                      'lipo',
-                      '-create',
-                      '-output',
-                      dylibPathBar,
-                      '${isArm64 ? 'arm64' : 'x64'}/libbar.dylib',
-                    ],
-                  ),
-                  FakeCommand(
-                    command: <Pattern>['otool', '-D', dylibPathBar],
-                    stdout: <String>[
-                      '$dylibPathBar (architecture x86_64):',
-                      '@rpath/libbar.dylib',
-                      '$dylibPathBar (architecture arm64):',
-                      '@rpath/libbar.dylib',
-                    ].join('\n'),
-                  ),
-                  FakeCommand(
-                    command: <Pattern>[
-                      'lipo',
-                      '-create',
-                      '-output',
-                      dylibPathBuz,
-                      '${isArm64 ? 'arm64' : 'x64'}/libbuz.dylib',
-                    ],
-                  ),
-                  FakeCommand(
-                    command: <Pattern>['otool', '-D', dylibPathBuz],
-                    stdout: <String>[
-                      '$dylibPathBuz (architecture ${isArm64 ? 'arm64' : 'x86_64'}):',
-                      '@rpath/libbuz.dylib',
-                    ].join('\n'),
-                  ),
-                  FakeCommand(
-                    command: <Pattern>[
-                      'install_name_tool',
-                      '-id',
-                      dylibPathBar,
-                      '-change',
-                      '@rpath/libbar.dylib',
-                      dylibPathBar,
-                      '-change',
-                      '@rpath/libbuz.dylib',
-                      dylibPathBuz,
-                      dylibPathBar,
-                    ],
-                  ),
-                  FakeCommand(
-                    command: <Pattern>[
-                      'codesign',
-                      '--force',
-                      '--sign',
-                      '-',
-                      if (buildMode == BuildMode.debug) '--timestamp=none',
-                      signPathBar,
-                    ],
-                  ),
-                  FakeCommand(
-                    command: <Pattern>[
-                      'install_name_tool',
-                      '-id',
-                      dylibPathBuz,
-                      '-change',
-                      '@rpath/libbar.dylib',
-                      dylibPathBar,
-                      '-change',
-                      '@rpath/libbuz.dylib',
-                      signPathBuz,
-                      signPathBuz,
-                    ],
-                  ),
-                  FakeCommand(
-                    command: <Pattern>[
-                      'codesign',
-                      '--force',
-                      '--sign',
-                      '-',
-                      if (buildMode == BuildMode.debug) '--timestamp=none',
-                      signPathBuz,
-                    ],
-                  ),
-                ] else ...<FakeCommand>[
-                  FakeCommand(
-                    command: <Pattern>[
-                      'lipo',
-                      '-create',
-                      '-output',
-                      dylibPathBar,
-                      'arm64/libbar.dylib',
-                      'x64/libbar.dylib',
-                    ],
-                  ),
-                  FakeCommand(
-                    command: <Pattern>['otool', '-D', dylibPathBar],
-                    stdout: <String>[
-                      '$dylibPathBar (architecture x86_64):',
-                      '@rpath/libbar.dylib',
-                      '$dylibPathBar (architecture arm64):',
-                      '@rpath/libbar.dylib',
-                    ].join('\n'),
-                  ),
-                  FakeCommand(
-                    command: <Pattern>[
-                      'lipo',
-                      '-create',
-                      '-output',
-                      dylibPathBuz,
-                      'arm64/libbuz.dylib',
-                      'x64/libbuz.dylib',
-                    ],
-                  ),
-                  FakeCommand(
-                    command: <Pattern>['otool', '-D', dylibPathBuz],
-                    stdout: <String>[
-                      '$dylibPathBuz (architecture x86_64):',
-                      '@rpath/libbuz.dylib',
-                      '$dylibPathBuz (architecture arm64):',
-                      '@rpath/libbuz.dylib',
-                    ].join('\n'),
-                  ),
-                  FakeCommand(
-                    command: <Pattern>[
-                      'install_name_tool',
-                      '-id',
-                      '@rpath/bar.framework/bar',
-                      '-change',
-                      '@rpath/libbar.dylib',
-                      '@rpath/bar.framework/bar',
-                      '-change',
-                      '@rpath/libbuz.dylib',
-                      '@rpath/buz.framework/buz',
-                      dylibPathBar,
-                    ],
-                  ),
-                  FakeCommand(
-                    command: <Pattern>[
-                      'install_name_tool',
-                      '-id',
-                      '@rpath/buz.framework/buz',
-                      '-change',
-                      '@rpath/libbar.dylib',
-                      '@rpath/bar.framework/bar',
-                      '-change',
-                      '@rpath/libbuz.dylib',
-                      '@rpath/buz.framework/buz',
-                      dylibPathBuz,
-                    ],
-                  ),
+          ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+            if (flutterTester) ...<FakeCommand>[
+              FakeCommand(
+                command: <Pattern>[
+                  'lipo',
+                  '-create',
+                  '-output',
+                  dylibPathBar,
+                  '${isArm64 ? 'arm64' : 'x64'}/libbar.dylib',
                 ],
-              ]),
+              ),
+              FakeCommand(
+                command: <Pattern>['otool', '-D', dylibPathBar],
+                stdout: <String>[
+                  '$dylibPathBar (architecture x86_64):',
+                  '@rpath/libbar.dylib',
+                  '$dylibPathBar (architecture arm64):',
+                  '@rpath/libbar.dylib',
+                ].join('\n'),
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'lipo',
+                  '-create',
+                  '-output',
+                  dylibPathBuz,
+                  '${isArm64 ? 'arm64' : 'x64'}/libbuz.dylib',
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>['otool', '-D', dylibPathBuz],
+                stdout: <String>[
+                  '$dylibPathBuz (architecture ${isArm64 ? 'arm64' : 'x86_64'}):',
+                  '@rpath/libbuz.dylib',
+                ].join('\n'),
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'install_name_tool',
+                  '-id',
+                  dylibPathBar,
+                  '-change',
+                  '@rpath/libbar.dylib',
+                  dylibPathBar,
+                  '-change',
+                  '@rpath/libbuz.dylib',
+                  dylibPathBuz,
+                  dylibPathBar,
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'codesign',
+                  '--force',
+                  '--sign',
+                  '-',
+                  if (buildMode == BuildMode.debug) '--timestamp=none',
+                  signPathBar,
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'install_name_tool',
+                  '-id',
+                  dylibPathBuz,
+                  '-change',
+                  '@rpath/libbar.dylib',
+                  dylibPathBar,
+                  '-change',
+                  '@rpath/libbuz.dylib',
+                  signPathBuz,
+                  signPathBuz,
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'codesign',
+                  '--force',
+                  '--sign',
+                  '-',
+                  if (buildMode == BuildMode.debug) '--timestamp=none',
+                  signPathBuz,
+                ],
+              ),
+            ] else ...<FakeCommand>[
+              FakeCommand(
+                command: <Pattern>[
+                  'lipo',
+                  '-create',
+                  '-output',
+                  dylibPathBar,
+                  'arm64/libbar.dylib',
+                  'x64/libbar.dylib',
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>['otool', '-D', dylibPathBar],
+                stdout: <String>[
+                  '$dylibPathBar (architecture x86_64):',
+                  '@rpath/libbar.dylib',
+                  '$dylibPathBar (architecture arm64):',
+                  '@rpath/libbar.dylib',
+                ].join('\n'),
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'lipo',
+                  '-create',
+                  '-output',
+                  dylibPathBuz,
+                  'arm64/libbuz.dylib',
+                  'x64/libbuz.dylib',
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>['otool', '-D', dylibPathBuz],
+                stdout: <String>[
+                  '$dylibPathBuz (architecture x86_64):',
+                  '@rpath/libbuz.dylib',
+                  '$dylibPathBuz (architecture arm64):',
+                  '@rpath/libbuz.dylib',
+                ].join('\n'),
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'install_name_tool',
+                  '-id',
+                  '@rpath/bar.framework/bar',
+                  '-change',
+                  '@rpath/libbar.dylib',
+                  '@rpath/bar.framework/bar',
+                  '-change',
+                  '@rpath/libbuz.dylib',
+                  '@rpath/buz.framework/buz',
+                  dylibPathBar,
+                ],
+              ),
+              FakeCommand(
+                command: <Pattern>[
+                  'install_name_tool',
+                  '-id',
+                  '@rpath/buz.framework/buz',
+                  '-change',
+                  '@rpath/libbar.dylib',
+                  '@rpath/bar.framework/bar',
+                  '-change',
+                  '@rpath/libbuz.dylib',
+                  '@rpath/buz.framework/buz',
+                  dylibPathBuz,
+                ],
+              ),
+            ],
+          ]),
         },
         () async {
           if (const LocalPlatform().isWindows) {
@@ -258,8 +249,9 @@ void main() {
           final File packageConfig = environment.projectDir.childFile(
             '.dart_tool/package_config.json',
           );
-          final Uri nonFlutterTesterAssetUri =
-              environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename).uri;
+          final Uri nonFlutterTesterAssetUri = environment.buildDir
+              .childFile(InstallCodeAssets.nativeAssetsFilename)
+              .uri;
           await packageConfig.parent.create();
           await packageConfig.create();
 
@@ -277,62 +269,60 @@ void main() {
               file: Uri.file('${codeConfig.targetArchitecture}/libbuz.dylib'),
             ),
           ];
-          final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
+          final buildRunner = FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
-            onBuild:
-                (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
-                  codeAssets:
-                      buildMode == BuildMode.debug
-                          ? codeAssets(input.config.code.targetOS, input.config.code)
-                          : <CodeAsset>[],
-                ),
-            onLink:
-                (LinkInput input) =>
-                    buildMode == BuildMode.debug
-                        ? null
-                        : FakeFlutterNativeAssetsBuilderResult.fromAssets(
-                          codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
-                        ),
+            onBuild: (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
+              codeAssets: buildMode == BuildMode.debug
+                  ? codeAssets(input.config.code.targetOS, input.config.code)
+                  : <CodeAsset>[],
+            ),
+            onLink: (LinkInput input) => buildMode == BuildMode.debug
+                ? null
+                : FakeFlutterNativeAssetsBuilderResult.fromAssets(
+                    codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
+                  ),
           );
-          final Map<String, String> environmentDefines = <String, String>{
+          final environmentDefines = <String, String>{
             kBuildMode: buildMode.cliName,
             kDarwinArchs: 'arm64 x86_64',
           };
-          final TargetPlatform targetPlatform =
-              flutterTester ? TargetPlatform.tester : TargetPlatform.darwin;
-          final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+          final TargetPlatform targetPlatform = flutterTester
+              ? TargetPlatform.tester
+              : TargetPlatform.darwin;
+          final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
             environmentDefines: environmentDefines,
             targetPlatform: targetPlatform,
             projectUri: projectUri,
             fileSystem: fileSystem,
             buildRunner: buildRunner,
           );
-          final Uri nativeAssetsFileUri =
-              flutterTester
-                  ? projectUri.resolve(
-                    'build/native_assets/macos/${InstallCodeAssets.nativeAssetsFilename}',
-                  )
-                  : nonFlutterTesterAssetUri;
+          final Uri nativeAssetsFileUri = flutterTester
+              ? projectUri.resolve(
+                  'build/native_assets/macos/${InstallCodeAssets.nativeAssetsFilename}',
+                )
+              : nonFlutterTesterAssetUri;
 
           await installCodeAssets(
-            dartBuildResult: dartBuildResult,
+            dartHookResult: dartHookResult,
             environmentDefines: environmentDefines,
             targetPlatform: targetPlatform,
             projectUri: projectUri,
             fileSystem: fileSystem,
             nativeAssetsFileUri: nativeAssetsFileUri,
           );
-          final String expectedArchsBeingBuilt =
-              flutterTester ? (isArm64 ? 'arm64' : 'x64') : '[arm64, x64]';
+          final expectedArchsBeingBuilt = flutterTester
+              ? (isArm64 ? 'macos_arm64' : 'macos_x64')
+              : 'macos_arm64, macos_x64';
           expect(
             (globals.logger as BufferLogger).traceText,
             stringContainsInOrder(<String>[
-              'Building native assets for macos $expectedArchsBeingBuilt.',
-              'Building native assets for macos $expectedArchsBeingBuilt done.',
+              'Building native assets for $expectedArchsBeingBuilt.',
+              'Building native assets for $expectedArchsBeingBuilt done.',
             ]),
           );
-          final String nativeAssetsFileContent =
-              await fileSystem.file(nativeAssetsFileUri).readAsString();
+          final String nativeAssetsFileContent = await fileSystem
+              .file(nativeAssetsFileUri)
+              .readAsString();
           expect(
             nativeAssetsFileContent,
             stringContainsInOrder(<String>[
@@ -369,53 +359,66 @@ void main() {
   // randomization causing issues with what processes are invoked.
   // Exercise the parsing of the process output in this separate test.
   testUsingContext(
-    'NativeAssetsBuildRunnerImpl.cCompilerConfig',
+    'NativeAssetsBuildRunnerImpl.cCompilerConfig normal installation',
     overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[
-            const FakeCommand(
-              command: <Pattern>['xcrun', 'clang', '--version'],
-              stdout: '''
-Apple clang version 14.0.0 (clang-1400.0.29.202)
-Target: arm64-apple-darwin22.6.0
-Thread model: posix
-InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin''',
-            ),
-          ]),
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        for (final binary in <String>['clang', 'ar', 'ld'])
+          FakeCommand(
+            command: <Pattern>['xcrun', '--find', binary],
+            stdout:
+                '''
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/$binary
+''', // NOTE: explicitly test needing to trim new line
+          ),
+      ]),
     },
     () async {
       if (!const LocalPlatform().isMacOS) {
         return;
       }
 
-      final File packageConfigFile = writePackageConfigFile(
-        directory: fileSystem.directory(projectUri),
-        mainLibName: 'my_app',
-      );
-      final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-        packageConfigFile,
-        logger: environment.logger,
-      );
-      final File pubspecFile = fileSystem.file(projectUri.resolve('pubspec.yaml'));
-      await pubspecFile.writeAsString('''
-name: my_app
-''');
-      final FlutterNativeAssetsBuildRunner runner = FlutterNativeAssetsBuildRunnerImpl(
-        packageConfigFile.path,
-        packageConfig,
-        fileSystem,
-        logger,
-        runPackageName,
-        pubspecFile.path,
-      );
-      final CCompilerConfig result = (await runner.cCompilerConfig)!;
+      final CCompilerConfig result = await cCompilerConfigMacOS();
       expect(
         result.compiler,
         Uri.file(
           '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang',
         ),
       );
+      expect(
+        result.archiver,
+        Uri.file(
+          '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar',
+        ),
+      );
+      expect(
+        result.linker,
+        Uri.file(
+          '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld',
+        ),
+      );
+    },
+  );
+
+  testUsingContext(
+    'NativeAssetsBuildRunnerImpl.cCompilerConfig Nix installation',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        for (final binary in <String>['clang', 'ar', 'ld'])
+          FakeCommand(
+            command: <Pattern>['xcrun', '--find', binary],
+            stdout: '/nix/store/random-path-to-clang-wrapper/bin/$binary',
+          ),
+      ]),
+    },
+    () async {
+      if (!const LocalPlatform().isMacOS) {
+        return;
+      }
+
+      final CCompilerConfig result = await cCompilerConfigMacOS();
+      expect(result.compiler, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/clang'));
+      expect(result.archiver, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/ar'));
+      expect(result.linker, Uri.file('/nix/store/random-path-to-clang-wrapper/bin/ld'));
     },
   );
 }

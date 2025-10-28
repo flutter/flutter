@@ -17,15 +17,15 @@ import '../../src/common.dart';
 void main() {
   group('LLDBInitMigration', () {
     testWithoutContext('fails if Xcode project is not found', () async {
-      final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-      final BufferLogger testLogger = BufferLogger.test();
+      final memoryFileSystem = MemoryFileSystem();
+      final testLogger = BufferLogger.test();
 
-      final FakeXcodeProject project = FakeXcodeProject(
+      final project = FakeXcodeProject(
         platform: SupportedPlatform.ios.name,
         fileSystem: memoryFileSystem,
         logger: testLogger,
       );
-      final LLDBInitMigration migration = LLDBInitMigration(
+      final migration = LLDBInitMigration(
         project,
         BuildInfo.debug,
         testLogger,
@@ -34,14 +34,21 @@ void main() {
       );
 
       await migration.migrate();
-      expect(testLogger.errorText, contains('Xcode project not found'));
+      expect(testLogger.traceText, contains('Xcode project not found'));
+      expect(
+        testLogger.errorText,
+        contains(
+          'Running Flutter in debug mode on new iOS versions requires a LLDB Init File, but the '
+          'scheme does not have it set.',
+        ),
+      );
     });
 
     group('get scheme file', () {
       testWithoutContext('fails if Xcode project info not found', () async {
-        final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-        final BufferLogger testLogger = BufferLogger.test();
-        final FakeXcodeProject project = FakeXcodeProject(
+        final memoryFileSystem = MemoryFileSystem();
+        final testLogger = BufferLogger.test();
+        final project = FakeXcodeProject(
           platform: SupportedPlatform.ios.name,
           fileSystem: memoryFileSystem,
           logger: testLogger,
@@ -49,7 +56,7 @@ void main() {
         _createProjectFiles(project);
         project._projectInfo = null;
 
-        final LLDBInitMigration migration = LLDBInitMigration(
+        final migration = LLDBInitMigration(
           project,
           BuildInfo.debug,
           testLogger,
@@ -57,13 +64,20 @@ void main() {
           fileSystem: memoryFileSystem,
         );
         await migration.migrate();
-        expect(testLogger.errorText, contains('Unable to get Xcode project info.'));
+        expect(testLogger.traceText, contains('Unable to get Xcode project info.'));
+        expect(
+          testLogger.errorText,
+          contains(
+            'Running Flutter in debug mode on new iOS versions requires a LLDB Init File, but the '
+            'scheme does not have it set.',
+          ),
+        );
       });
 
       testWithoutContext('fails if Xcode workspace not found', () async {
-        final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-        final BufferLogger testLogger = BufferLogger.test();
-        final FakeXcodeProject project = FakeXcodeProject(
+        final memoryFileSystem = MemoryFileSystem();
+        final testLogger = BufferLogger.test();
+        final project = FakeXcodeProject(
           platform: SupportedPlatform.ios.name,
           fileSystem: memoryFileSystem,
           logger: testLogger,
@@ -71,7 +85,7 @@ void main() {
         _createProjectFiles(project);
         project.xcodeWorkspace = null;
 
-        final LLDBInitMigration migration = LLDBInitMigration(
+        final migration = LLDBInitMigration(
           project,
           BuildInfo.debug,
           testLogger,
@@ -79,13 +93,20 @@ void main() {
           fileSystem: memoryFileSystem,
         );
         await migration.migrate();
-        expect(testLogger.errorText, contains('Xcode workspace not found.'));
+        expect(testLogger.traceText, contains('Xcode workspace not found.'));
+        expect(
+          testLogger.errorText,
+          contains(
+            'Running Flutter in debug mode on new iOS versions requires a LLDB Init File, but the '
+            'scheme does not have it set.',
+          ),
+        );
       });
 
       testWithoutContext('fails if scheme not found', () async {
-        final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-        final BufferLogger testLogger = BufferLogger.test();
-        final FakeXcodeProject project = FakeXcodeProject(
+        final memoryFileSystem = MemoryFileSystem();
+        final testLogger = BufferLogger.test();
+        final project = FakeXcodeProject(
           platform: SupportedPlatform.ios.name,
           fileSystem: memoryFileSystem,
           logger: testLogger,
@@ -93,31 +114,30 @@ void main() {
         _createProjectFiles(project);
         project._projectInfo = XcodeProjectInfo(<String>[], <String>[], <String>[], testLogger);
 
-        final LLDBInitMigration migration = LLDBInitMigration(
+        final migration = LLDBInitMigration(
           project,
           BuildInfo.debug,
           testLogger,
           environmentType: EnvironmentType.physical,
           fileSystem: memoryFileSystem,
         );
-        await migration.migrate();
-        expect(
-          testLogger.errorText,
+        await expectToolExitLater(
+          migration.migrate(),
           contains('You must specify a --flavor option to select one of the available schemes.'),
         );
       });
 
       testWithoutContext('fails if scheme file not found', () async {
-        final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-        final BufferLogger testLogger = BufferLogger.test();
-        final FakeXcodeProject project = FakeXcodeProject(
+        final memoryFileSystem = MemoryFileSystem();
+        final testLogger = BufferLogger.test();
+        final project = FakeXcodeProject(
           platform: SupportedPlatform.ios.name,
           fileSystem: memoryFileSystem,
           logger: testLogger,
         );
         _createProjectFiles(project, createSchemeFile: false);
 
-        final LLDBInitMigration migration = LLDBInitMigration(
+        final migration = LLDBInitMigration(
           project,
           BuildInfo.debug,
           testLogger,
@@ -125,14 +145,21 @@ void main() {
           fileSystem: memoryFileSystem,
         );
         await migration.migrate();
-        expect(testLogger.errorText, contains('Unable to get scheme file for Runner.'));
+        expect(testLogger.traceText, contains('Unable to get scheme file for Runner.'));
+        expect(
+          testLogger.errorText,
+          contains(
+            'Running Flutter in debug mode on new iOS versions requires a LLDB Init File, but the '
+            'Runner scheme does not have it set.',
+          ),
+        );
       });
     });
 
     testWithoutContext('does nothing if both Launch and Test are already migrated', () async {
-      final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-      final BufferLogger testLogger = BufferLogger.test();
-      final FakeXcodeProject project = FakeXcodeProject(
+      final memoryFileSystem = MemoryFileSystem();
+      final testLogger = BufferLogger.test();
+      final project = FakeXcodeProject(
         platform: SupportedPlatform.ios.name,
         fileSystem: memoryFileSystem,
         logger: testLogger,
@@ -145,7 +172,7 @@ void main() {
         ),
       );
 
-      final LLDBInitMigration migration = LLDBInitMigration(
+      final migration = LLDBInitMigration(
         project,
         BuildInfo.debug,
         testLogger,
@@ -157,9 +184,9 @@ void main() {
     });
 
     testWithoutContext('prints error if only Launch action is migrated', () async {
-      final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-      final BufferLogger testLogger = BufferLogger.test();
-      final FakeXcodeProject project = FakeXcodeProject(
+      final memoryFileSystem = MemoryFileSystem();
+      final testLogger = BufferLogger.test();
+      final project = FakeXcodeProject(
         platform: SupportedPlatform.ios.name,
         fileSystem: memoryFileSystem,
         logger: testLogger,
@@ -173,7 +200,7 @@ void main() {
         ),
       );
 
-      final LLDBInitMigration migration = LLDBInitMigration(
+      final migration = LLDBInitMigration(
         project,
         BuildInfo.debug,
         testLogger,
@@ -191,9 +218,9 @@ void main() {
     });
 
     testWithoutContext('prints error if only Test action is migrated', () async {
-      final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-      final BufferLogger testLogger = BufferLogger.test();
-      final FakeXcodeProject project = FakeXcodeProject(
+      final memoryFileSystem = MemoryFileSystem();
+      final testLogger = BufferLogger.test();
+      final project = FakeXcodeProject(
         platform: SupportedPlatform.ios.name,
         fileSystem: memoryFileSystem,
         logger: testLogger,
@@ -206,7 +233,7 @@ void main() {
         ),
       );
 
-      final LLDBInitMigration migration = LLDBInitMigration(
+      final migration = LLDBInitMigration(
         project,
         BuildInfo.debug,
         testLogger,
@@ -218,7 +245,7 @@ void main() {
         testLogger.errorText,
         contains(
           'Running Flutter in debug mode on new iOS versions requires a LLDB '
-          'Init File, but the Launch action in the Runner scheme does not have it set.',
+          'Init File, but the Run action in the Runner scheme does not have it set.',
         ),
       );
     });
@@ -226,9 +253,9 @@ void main() {
     testWithoutContext(
       'print error if customLLDBInitFile already exists and does not contain flutter lldbinit',
       () async {
-        final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-        final BufferLogger testLogger = BufferLogger.test();
-        final FakeXcodeProject project = FakeXcodeProject(
+        final memoryFileSystem = MemoryFileSystem();
+        final testLogger = BufferLogger.test();
+        final project = FakeXcodeProject(
           platform: SupportedPlatform.ios.name,
           fileSystem: memoryFileSystem,
           logger: testLogger,
@@ -238,7 +265,7 @@ void main() {
           _validScheme(lldbInitFile: '\n      customLLDBInitFile = "non_flutter/.lldbinit"'),
         );
 
-        final LLDBInitMigration migration = LLDBInitMigration(
+        final migration = LLDBInitMigration(
           project,
           BuildInfo.debug,
           testLogger,
@@ -256,9 +283,9 @@ void main() {
     testWithoutContext(
       'skips if customLLDBInitFile already exists and contain flutter lldbinit',
       () async {
-        final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-        final BufferLogger testLogger = BufferLogger.test();
-        final FakeXcodeProject project = FakeXcodeProject(
+        final memoryFileSystem = MemoryFileSystem();
+        final testLogger = BufferLogger.test();
+        final project = FakeXcodeProject(
           platform: SupportedPlatform.ios.name,
           fileSystem: memoryFileSystem,
           logger: testLogger,
@@ -271,7 +298,7 @@ void main() {
           _validScheme(lldbInitFile: '\n      customLLDBInitFile = "non_flutter/.lldbinit"'),
         );
 
-        final LLDBInitMigration migration = LLDBInitMigration(
+        final migration = LLDBInitMigration(
           project,
           BuildInfo.debug,
           testLogger,
@@ -286,9 +313,9 @@ void main() {
     testWithoutContext(
       'prints error if customLLDBInitFile already exists and not both Launch and Test contain flutter lldbinit',
       () async {
-        final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-        final BufferLogger testLogger = BufferLogger.test();
-        final FakeXcodeProject project = FakeXcodeProject(
+        final memoryFileSystem = MemoryFileSystem();
+        final testLogger = BufferLogger.test();
+        final project = FakeXcodeProject(
           platform: SupportedPlatform.ios.name,
           fileSystem: memoryFileSystem,
           logger: testLogger,
@@ -304,7 +331,7 @@ void main() {
           ),
         );
 
-        final LLDBInitMigration migration = LLDBInitMigration(
+        final migration = LLDBInitMigration(
           project,
           BuildInfo.debug,
           testLogger,
@@ -322,9 +349,9 @@ void main() {
     testWithoutContext(
       'parses customLLDBInitFile if already exists and replaces Xcode build settings',
       () async {
-        final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-        final BufferLogger testLogger = BufferLogger.test();
-        final FakeXcodeProject project = FakeXcodeProject(
+        final memoryFileSystem = MemoryFileSystem();
+        final testLogger = BufferLogger.test();
+        final project = FakeXcodeProject(
           platform: SupportedPlatform.ios.name,
           fileSystem: memoryFileSystem,
           logger: testLogger,
@@ -340,7 +367,7 @@ void main() {
           ),
         );
 
-        final LLDBInitMigration migration = LLDBInitMigration(
+        final migration = LLDBInitMigration(
           project,
           BuildInfo.debug,
           testLogger,
@@ -353,9 +380,9 @@ void main() {
     );
 
     testWithoutContext('prints error if LaunchAction is missing', () async {
-      final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-      final BufferLogger testLogger = BufferLogger.test();
-      final FakeXcodeProject project = FakeXcodeProject(
+      final memoryFileSystem = MemoryFileSystem();
+      final testLogger = BufferLogger.test();
+      final project = FakeXcodeProject(
         platform: SupportedPlatform.ios.name,
         fileSystem: memoryFileSystem,
         logger: testLogger,
@@ -363,7 +390,7 @@ void main() {
       _createProjectFiles(project);
       project.xcodeProjectSchemeFile().writeAsStringSync(_missingLaunchAction);
 
-      final LLDBInitMigration migration = LLDBInitMigration(
+      final migration = LLDBInitMigration(
         project,
         BuildInfo.debug,
         testLogger,
@@ -371,13 +398,20 @@ void main() {
         fileSystem: memoryFileSystem,
       );
       await migration.migrate();
-      expect(testLogger.errorText, contains('Failed to find LaunchAction for the Scheme'));
+      expect(testLogger.traceText, contains('Failed to find LaunchAction for the Scheme'));
+      expect(
+        testLogger.errorText,
+        contains(
+          'Running Flutter in debug mode on new iOS versions requires a LLDB Init File, but the '
+          'Runner scheme does not have it set.',
+        ),
+      );
     });
 
     testWithoutContext('prints error if TestAction is missing', () async {
-      final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-      final BufferLogger testLogger = BufferLogger.test();
-      final FakeXcodeProject project = FakeXcodeProject(
+      final memoryFileSystem = MemoryFileSystem();
+      final testLogger = BufferLogger.test();
+      final project = FakeXcodeProject(
         platform: SupportedPlatform.ios.name,
         fileSystem: memoryFileSystem,
         logger: testLogger,
@@ -385,7 +419,7 @@ void main() {
       _createProjectFiles(project);
       project.xcodeProjectSchemeFile().writeAsStringSync(_missingTestAction);
 
-      final LLDBInitMigration migration = LLDBInitMigration(
+      final migration = LLDBInitMigration(
         project,
         BuildInfo.debug,
         testLogger,
@@ -393,13 +427,20 @@ void main() {
         fileSystem: memoryFileSystem,
       );
       await migration.migrate();
-      expect(testLogger.errorText, contains('Failed to find TestAction for the Scheme'));
+      expect(testLogger.traceText, contains('Failed to find TestAction for the Scheme'));
+      expect(
+        testLogger.errorText,
+        contains(
+          'Running Flutter in debug mode on new iOS versions requires a LLDB Init File, but the '
+          'Runner scheme does not have it set.',
+        ),
+      );
     });
 
     testWithoutContext('prints error if scheme file is invalid XML', () async {
-      final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-      final BufferLogger testLogger = BufferLogger.test();
-      final FakeXcodeProject project = FakeXcodeProject(
+      final memoryFileSystem = MemoryFileSystem();
+      final testLogger = BufferLogger.test();
+      final project = FakeXcodeProject(
         platform: SupportedPlatform.ios.name,
         fileSystem: memoryFileSystem,
         logger: testLogger,
@@ -409,7 +450,7 @@ void main() {
         '${_validScheme()} <an opening without a close>',
       );
 
-      final LLDBInitMigration migration = LLDBInitMigration(
+      final migration = LLDBInitMigration(
         project,
         BuildInfo.debug,
         testLogger,
@@ -417,13 +458,20 @@ void main() {
         fileSystem: memoryFileSystem,
       );
       await migration.migrate();
-      expect(testLogger.errorText, contains('Failed to parse'));
+      expect(testLogger.traceText, contains('Failed to parse'));
+      expect(
+        testLogger.errorText,
+        contains(
+          'Running Flutter in debug mode on new iOS versions requires a LLDB Init File, but the '
+          'Runner scheme does not have it set.',
+        ),
+      );
     });
 
     testWithoutContext('succeeds', () async {
-      final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-      final BufferLogger testLogger = BufferLogger.test();
-      final FakeXcodeProject project = FakeXcodeProject(
+      final memoryFileSystem = MemoryFileSystem();
+      final testLogger = BufferLogger.test();
+      final project = FakeXcodeProject(
         platform: SupportedPlatform.ios.name,
         fileSystem: memoryFileSystem,
         logger: testLogger,
@@ -431,7 +479,7 @@ void main() {
       _createProjectFiles(project);
       project.xcodeProjectSchemeFile().writeAsStringSync(_validScheme());
 
-      final LLDBInitMigration migration = LLDBInitMigration(
+      final migration = LLDBInitMigration(
         project,
         BuildInfo.debug,
         testLogger,
@@ -530,7 +578,7 @@ String _validScheme({String lldbInitFile = '', String? testLLDBInitFile}) {
 ''';
 }
 
-const String _missingTestAction = '''
+const _missingTestAction = '''
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
    LastUpgradeVersion = "1510"
@@ -568,7 +616,7 @@ const String _missingTestAction = '''
 </Scheme>
 ''';
 
-const String _missingLaunchAction = '''
+const _missingLaunchAction = '''
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
    LastUpgradeVersion = "1510"
@@ -655,7 +703,7 @@ class FakeXcodeProject extends Fake implements IosProject {
   late Directory? xcodeWorkspace = hostAppRoot.childDirectory('$hostAppProjectName.xcworkspace');
 
   @override
-  String hostAppProjectName = 'Runner';
+  var hostAppProjectName = 'Runner';
 
   @override
   File get lldbInitFile => hostAppRoot

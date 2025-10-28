@@ -82,8 +82,9 @@ class GitHubTemplateCreator {
     String doctorText,
   ) async {
     final String errorString = sanitizedCrashException(error);
-    final String title = '[tool_crash] $errorString';
-    final String body = '''
+    final title = '[tool_crash] $errorString';
+    final body =
+        '''
 ## Command
 ```sh
 $command
@@ -128,41 +129,76 @@ ${_projectMetadataInformation()}
       if (manifest.isEmpty) {
         return 'No pubspec in working directory.';
       }
-      final FlutterProjectMetadata metadata = FlutterProjectMetadata(project.metadataFile, _logger);
+      final metadata = FlutterProjectMetadata(project.metadataFile, _logger);
       final FlutterTemplateType? projectType = metadata.projectType;
-      final StringBuffer description =
-          StringBuffer()
-            ..writeln('**Type**: ${projectType == null ? 'malformed' : projectType.cliName}')
-            ..writeln('**Version**: ${manifest.appVersion}')
-            ..writeln('**Material**: ${manifest.usesMaterialDesign}')
-            ..writeln('**Android X**: ${manifest.usesAndroidX}')
-            ..writeln('**Module**: ${manifest.isModule}')
-            ..writeln('**Plugin**: ${manifest.isPlugin}')
-            ..writeln('**Android package**: ${manifest.androidPackage}')
-            ..writeln('**iOS bundle identifier**: ${manifest.iosBundleIdentifier}')
-            ..writeln('**Creation channel**: ${metadata.versionChannel}')
-            ..writeln('**Creation framework version**: ${metadata.versionRevision}');
+      final description = StringBuffer()
+        ..writeln('**Type**: ${projectType == null ? 'malformed' : projectType.cliName}')
+        ..writeln('**Version**: ${manifest.appVersion}')
+        ..writeln('**Material**: ${manifest.usesMaterialDesign}')
+        ..writeln('**Android X**: ${manifest.usesAndroidX}')
+        ..writeln('**Module**: ${manifest.isModule}')
+        ..writeln('**Plugin**: ${manifest.isPlugin}')
+        ..writeln('**Android package**: ${manifest.androidPackage}')
+        ..writeln('**iOS bundle identifier**: ${manifest.iosBundleIdentifier}')
+        ..writeln('**Creation channel**: ${metadata.versionChannel}')
+        ..writeln('**Creation framework version**: ${metadata.versionRevision}');
 
-      final File file = project.flutterPluginsFile;
+      final File file = project.flutterPluginsDependenciesFile;
       if (file.existsSync()) {
-        description.writeln('### Plugins');
-        // Format is:
-        // camera=/path/to/.pub-cache/hosted/pub.dartlang.org/camera-0.5.7+2/
-        for (final String plugin in project.flutterPluginsFile.readAsLinesSync()) {
-          final List<String> pluginParts = plugin.split('=');
-          if (pluginParts.length != 2) {
-            continue;
-          }
-          // Write the last part of the path, which includes the plugin name and version.
-          // Example: camera-0.5.7+2
-          final List<String> pathParts = _fileSystem.path.split(pluginParts[1]);
-          description.writeln(pathParts.isEmpty ? pluginParts.first : pathParts.last);
-        }
+        _writePlugins(description, file);
       }
-
       return description.toString();
     } on Exception catch (exception) {
       return exception.toString();
+    }
+  }
+
+  void _writePlugins(StringBuffer description, File file) {
+    description.writeln('### Plugins');
+    // Format is:
+    // {
+    //   "plugins": {
+    //     "ios": [
+    //       {
+    //         "path": "/path/to/.pub-cache/hosted/pub.dartlang.org/camera-0.5.7+2/",
+    //       }
+    //     ]
+    //   }
+    // }
+    final Object? json = jsonDecode(file.readAsStringSync());
+    if (json is! Map<String, Object?>) {
+      return;
+    }
+    final Object? plugins = json['plugins'];
+    if (plugins is! Map<String, Object?>) {
+      return;
+    }
+    final pluginPaths = <String>{};
+    for (final Object? pluginList in plugins.values) {
+      if (pluginList is! List<Object?>) {
+        continue;
+      }
+      for (final Object? plugin in pluginList) {
+        if (plugin is! Map<String, Object?>) {
+          continue;
+        }
+        final path = plugin['path'] as String?;
+        if (path != null) {
+          pluginPaths.add(path);
+        }
+      }
+    }
+    if (pluginPaths.isEmpty) {
+      return;
+    }
+    for (final path in pluginPaths) {
+      // Write the last part of the path, which includes the plugin name and version.
+      // Example: camera-0.5.7+2
+      final List<String> pathParts = _fileSystem.path.split(path);
+      if (pathParts.isEmpty) {
+        continue;
+      }
+      description.writeln(pathParts.last);
     }
   }
 }

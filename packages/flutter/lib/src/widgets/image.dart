@@ -18,8 +18,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
 import '../painting/_web_image_info_io.dart'
-    if (dart.library.js_util) '../painting/_web_image_info_web.dart';
-import '_web_image_io.dart' if (dart.library.js_util) '_web_image_web.dart';
+    if (dart.library.js_interop) '../painting/_web_image_info_web.dart';
+import '_web_image_io.dart' if (dart.library.js_interop) '_web_image_web.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'disposable_build_context.dart';
@@ -869,8 +869,9 @@ class Image extends StatefulWidget {
   /// the exception by providing a replacement widget, or rethrow the exception.
   ///
   /// {@tool dartpad}
-  /// The following sample uses [errorBuilder] to show a '😢' in place of the
-  /// image that fails to load, and prints the error to the console.
+  /// The following sample uses [errorBuilder] to show 'Image
+  /// failed to load' in place of the image that fails to load, and prints
+  /// the error to the console.
   ///
   /// ** See code in examples/api/lib/widgets/image/image.error_builder.0.dart **
   /// {@end-tool}
@@ -1174,10 +1175,9 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     final ImageStream newStream = provider.resolve(
       createLocalImageConfiguration(
         context,
-        size:
-            widget.width != null && widget.height != null
-                ? Size(widget.width!, widget.height!)
-                : null,
+        size: widget.width != null && widget.height != null
+            ? Size(widget.width!, widget.height!)
+            : null,
       ),
     );
     _updateSourceStream(newStream);
@@ -1191,22 +1191,21 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _imageStreamListener = ImageStreamListener(
         _handleImageFrame,
         onChunk: widget.loadingBuilder == null ? null : _handleImageChunk,
-        onError:
-            widget.errorBuilder != null || kDebugMode
-                ? (Object error, StackTrace? stackTrace) {
-                  setState(() {
-                    _lastException = error;
-                    _lastStack = stackTrace;
-                  });
-                  assert(() {
-                    if (widget.errorBuilder == null) {
-                      // ignore: only_throw_errors, since we're just proxying the error.
-                      throw error; // Ensures the error message is printed to the console.
-                    }
-                    return true;
-                  }());
-                }
-                : null,
+        onError: widget.errorBuilder != null || kDebugMode
+            ? (Object error, StackTrace? stackTrace) {
+                setState(() {
+                  _lastException = error;
+                  _lastStack = stackTrace;
+                });
+                assert(() {
+                  if (widget.errorBuilder == null) {
+                    // ignore: only_throw_errors, since we're just proxying the error.
+                    throw error; // Ensures the error message is printed to the console.
+                  }
+                  return true;
+                }());
+              }
+            : null,
       );
     }
     return _imageStreamListener!;

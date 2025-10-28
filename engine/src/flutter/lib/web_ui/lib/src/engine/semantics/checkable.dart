@@ -31,9 +31,9 @@ enum _CheckableKind {
 }
 
 _CheckableKind _checkableKindFromSemanticsFlag(SemanticsObject semanticsObject) {
-  if (semanticsObject.hasFlag(ui.SemanticsFlag.isInMutuallyExclusiveGroup)) {
+  if (semanticsObject.flags.isInMutuallyExclusiveGroup) {
     return _CheckableKind.radio;
-  } else if (semanticsObject.hasFlag(ui.SemanticsFlag.hasToggledState)) {
+  } else if (semanticsObject.flags.isToggled != ui.Tristate.none) {
     return _CheckableKind.toggle;
   } else {
     return _CheckableKind.checkbox;
@@ -102,8 +102,8 @@ class SemanticCheckable extends SemanticRole {
 
       setAttribute(
         'aria-checked',
-        (semanticsObject.hasFlag(ui.SemanticsFlag.isChecked) ||
-                semanticsObject.hasFlag(ui.SemanticsFlag.isToggled))
+        (semanticsObject.flags.isChecked == ui.CheckedState.isTrue ||
+                semanticsObject.flags.isToggled == ui.Tristate.isTrue)
             ? 'true'
             : 'false',
       );

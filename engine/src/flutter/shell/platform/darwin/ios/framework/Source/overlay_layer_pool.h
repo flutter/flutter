@@ -35,7 +35,7 @@ struct OverlayLayer {
   // Whether a frame for this layer was submitted.
   bool did_submit_last_frame;
 
-  void UpdateViewState(UIView* flutter_view, SkRect rect, int64_t view_id, int64_t overlay_id);
+  void UpdateViewState(UIView* flutter_view, DlRect rect, int64_t view_id, int64_t overlay_id);
 };
 
 /// @brief Storage for Overlay layers across frames.

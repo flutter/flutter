@@ -47,7 +47,8 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
 
   @override
-  bool isSupported() => _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
+  Future<bool> isSupported() async =>
+      _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
 
   @override
   bool get supportsFlavors => true;
@@ -70,15 +71,14 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
     required bool ipv6,
     required Logger logger,
   }) {
-    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach =
-        MdnsVMServiceDiscoveryForAttach(
-          device: this,
-          appId: appId,
-          deviceVmservicePort: filterDevicePort,
-          hostVmservicePort: expectedHostPort,
-          usesIpv6: ipv6,
-          useDeviceIPAsHost: false,
-        );
+    final mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
+      device: this,
+      appId: appId,
+      deviceVmservicePort: filterDevicePort,
+      hostVmservicePort: expectedHostPort,
+      usesIpv6: ipv6,
+      useDeviceIPAsHost: false,
+    );
 
     return DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[
       mdnsVMServiceDiscoveryForAttach,
@@ -156,10 +156,13 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
       allowDiscovery;
 
   /// Set to show ARM macOS as an iOS device target.
-  static bool allowDiscovery = false;
+  static var allowDiscovery = false;
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     if (!canListAnything) {
       return const <Device>[];
     }

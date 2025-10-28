@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 
 /// A function which takes a unique `id` and some `params` and creates an HTML
@@ -12,7 +13,23 @@ typedef ParameterizedPlatformViewFactory = Object Function(int viewId, {Object? 
 typedef PlatformViewFactory = Object Function(int viewId);
 
 /// The platform view registry for this app.
-final PlatformViewRegistry platformViewRegistry = PlatformViewRegistry();
+PlatformViewRegistry get platformViewRegistry =>
+    _platformViewRegistryOverride ?? _defaultPlatformViewRegistry;
+
+final PlatformViewRegistry _defaultPlatformViewRegistry = PlatformViewRegistry();
+
+PlatformViewRegistry? _platformViewRegistryOverride;
+
+/// Overrides the platform view registry.
+///
+/// If [value] is null, resets the value of [platformViewRegistry] back to real
+/// implementation.
+///
+/// This is intended for tests only.
+@visibleForTesting
+void debugOverridePlatformViewRegistry(PlatformViewRegistry? value) {
+  _platformViewRegistryOverride = value;
+}
 
 /// A registry for factories that create platform views.
 class PlatformViewRegistry {

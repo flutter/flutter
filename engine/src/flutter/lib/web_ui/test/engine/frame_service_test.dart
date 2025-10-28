@@ -14,12 +14,18 @@ void main() {
 
 void testMain() {
   group('FrameService', () {
-    setUp(() {
+    void resetFrameService() {
+      // Emulate a hot restart to clear listeners from previous tests.
+      debugEmulateHotRestart();
+
       FrameService.debugOverrideFrameService(null);
       expect(FrameService.instance.runtimeType, FrameService);
       EnginePlatformDispatcher.instance.onBeginFrame = null;
       EnginePlatformDispatcher.instance.onDrawFrame = null;
-    });
+    }
+
+    setUp(resetFrameService);
+    tearDownAll(resetFrameService);
 
     test('instance is valid and can be overridden', () {
       final defaultInstance = FrameService.instance;
@@ -34,22 +40,22 @@ void testMain() {
 
     test('counts frames', () async {
       final instance = FrameService.instance;
-      instance.debugResetFrameNumber();
+      instance.debugResetFrameData();
 
       final frameCompleter = Completer<void>();
       instance.onFinishedRenderingFrame = () {
         frameCompleter.complete();
       };
 
-      expect(instance.debugFrameNumber, 0);
+      expect(instance.frameData.frameNumber, 0);
       instance.scheduleFrame();
       await frameCompleter.future;
-      expect(instance.debugFrameNumber, 1);
+      expect(instance.frameData.frameNumber, 1);
     });
 
-    test('isFrameScheduled is true iff the frame is scheduled', () async {
+    test('isFrameScheduled is true if the frame is scheduled', () async {
       final instance = FrameService.instance;
-      instance.debugResetFrameNumber();
+      instance.debugResetFrameData();
 
       var frameCompleter = Completer<void>();
       instance.onFinishedRenderingFrame = () {
@@ -62,10 +68,10 @@ void testMain() {
       expect(instance.isFrameScheduled, isTrue);
       await frameCompleter.future;
       expect(instance.isFrameScheduled, isFalse);
-      expect(instance.debugFrameNumber, 1);
+      expect(instance.frameData.frameNumber, 1);
 
       // Test idempotency
-      instance.debugResetFrameNumber();
+      instance.debugResetFrameData();
       frameCompleter = Completer<void>();
       instance.scheduleFrame();
       instance.scheduleFrame();
@@ -75,7 +81,7 @@ void testMain() {
       expect(instance.isFrameScheduled, isTrue);
       await frameCompleter.future;
       expect(instance.isFrameScheduled, isFalse);
-      expect(instance.debugFrameNumber, 1);
+      expect(instance.frameData.frameNumber, 1);
     });
 
     test('onBeginFrame and onDrawFrame are called with isRenderingFrame set to true', () async {
@@ -150,6 +156,40 @@ void testMain() {
       expect(isRenderingInOnBeginFrame, isTrue);
       expect(isRenderingInOnDrawFrame, isTrue);
       expect(valueInOnFinishedRenderingFrame, isFalse);
+    });
+
+    test('Frame is cancelled after a hot restart', () async {
+      final instance = FrameService.instance;
+
+      final frameCompleter = Completer<void>();
+      instance.onFinishedRenderingFrame = () {
+        frameCompleter.complete();
+      };
+
+      expect(instance.isFrameScheduled, isFalse);
+      instance.scheduleFrame();
+      expect(instance.isFrameScheduled, isTrue);
+      // Perform a hot restart immediately after scheduling the frame.
+      debugEmulateHotRestart();
+
+      // Wait for 1 second for the frame to be rendered.
+      bool timedOut = false;
+      await frameCompleter.future.timeout(
+        const Duration(seconds: 1),
+        onTimeout: () {
+          timedOut = true;
+        },
+      );
+      // No frame should've been rendered because the animation frame callback should've been
+      // cancelled on hot restart.
+      expect(timedOut, isTrue);
+      expect(instance.frameData.frameNumber, isZero);
+      expect(frameCompleter.isCompleted, isFalse);
+      // ... and no frame is scheduled.
+      expect(instance.isFrameScheduled, isFalse);
+
+      // To avoid leaving an uncompleted completer, let's complete it.
+      frameCompleter.complete();
     });
   });
 }

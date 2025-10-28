@@ -69,11 +69,8 @@ Future<void> _testProject(
   late Directory tempDir;
   late FlutterRunTestDriver flutter;
 
-  final List<String> additionalCommandArgs =
-      useDDCLibraryBundleFormat ? <String>['--web-experimental-hot-reload'] : <String>[];
-  final String testName =
-      'Hot restart (index.html: $name)'
-      '${additionalCommandArgs.isEmpty ? '' : ' with args: $additionalCommandArgs'}';
+  final testName =
+      'Hot restart (index.html: $name), DDC library bundle format: $useDDCLibraryBundleFormat';
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('hot_restart_test.');
@@ -87,29 +84,30 @@ Future<void> _testProject(
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('$testName: hot restart works without error', () async {
-    flutter.stdout.listen(printOnFailure);
-    await flutter.run(
-      device: GoogleChromeDevice.kChromeDeviceId,
-      additionalCommandArgs: <String>['--verbose', ...additionalCommandArgs],
-    );
-    await flutter.hotRestart();
-  });
-
   testWithoutContext(
-    '$testName: newly added code executes during hot restart - canvaskit',
+    '$testName: hot restart works without error and newly added code executes',
     () async {
-      final Completer<void> completer = Completer<void>();
+      await flutter.run(
+        device: GoogleChromeDevice.kChromeDeviceId,
+        additionalCommandArgs: <String>[
+          '--verbose',
+          '--no-web-resources-cdn',
+          if (useDDCLibraryBundleFormat)
+            '--web-experimental-hot-reload'
+          else
+            '--no-web-experimental-hot-reload',
+        ],
+      );
+      // hot restart works without error
+      await flutter.hotRestart();
+
+      final completer = Completer<void>();
       final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
         printOnFailure(line);
         if (line.contains('(((((RELOAD WORKED)))))')) {
           completer.complete();
         }
       });
-      await flutter.run(
-        device: GoogleChromeDevice.kChromeDeviceId,
-        additionalCommandArgs: <String>['--verbose', ...additionalCommandArgs],
-      );
       project.uncommentHotReloadPrint();
       try {
         await flutter.hotRestart();
@@ -118,7 +116,5 @@ Future<void> _testProject(
         await subscription.cancel();
       }
     },
-    // Skipped for https://github.com/flutter/flutter/issues/110879.
-    skip: true,
   );
 }

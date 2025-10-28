@@ -132,6 +132,14 @@ declare_args() {
   # Debug build.
   is_debug = true
 
+  # Optimize for code size rather than speed.
+  # Optimized builds for Windows, iOS, and Android are
+  # always optimized for size regardless of the value of this flag.
+  optimize_for_size = false
+
+  # Whether this is a minimal linux instance without x11, etc.
+  is_minimal_linux = false
+
   # Whether we're a traditional desktop unix.
   is_desktop_linux = current_os == "linux" && current_os != "chromeos"
 
@@ -202,6 +210,7 @@ if (current_os == "win") {
   is_posix = false
   is_win = true
   is_wasm = false
+  is_qnx = false
 } else if (current_os == "mac") {
   is_android = false
   is_chromeos = false
@@ -213,6 +222,7 @@ if (current_os == "win") {
   is_posix = true
   is_win = false
   is_wasm = false
+  is_qnx = false
 } else if (current_os == "android") {
   is_android = true
   is_chromeos = false
@@ -224,6 +234,7 @@ if (current_os == "win") {
   is_posix = true
   is_win = false
   is_wasm = false
+  is_qnx = false
 } else if (current_os == "chromeos") {
   is_android = false
   is_chromeos = true
@@ -235,6 +246,7 @@ if (current_os == "win") {
   is_posix = true
   is_win = false
   is_wasm = false
+  is_qnx = false
 } else if (current_os == "nacl") {
   # current_os == "nacl" will be passed by the nacl toolchain definition.
   # It is not set by default or on the command line. We treat is as a
@@ -249,6 +261,7 @@ if (current_os == "win") {
   is_posix = true
   is_win = false
   is_wasm = false
+  is_qnx = false
 } else if (current_os == "ios") {
   is_android = false
   is_chromeos = false
@@ -260,6 +273,7 @@ if (current_os == "win") {
   is_posix = true
   is_win = false
   is_wasm = false
+  is_qnx = false
 } else if (current_os == "linux") {
   is_android = false
   is_chromeos = false
@@ -271,6 +285,7 @@ if (current_os == "win") {
   is_posix = true
   is_win = false
   is_wasm = false
+  is_qnx = false
 } else if (current_os == "fuchsia" || target_os == "fuchsia") {
   is_android = false
   is_chromeos = false
@@ -282,6 +297,7 @@ if (current_os == "win") {
   is_posix = true
   is_win = false
   is_wasm = false
+  is_qnx = false
 } else if (current_os == "wasm") {
   is_android = false
   is_chromeos = false
@@ -293,6 +309,19 @@ if (current_os == "win") {
   is_posix = false
   is_win = false
   is_wasm = true
+  is_qnx = false
+} else if (current_os == "qnx") {
+  is_android = false
+  is_chromeos = false
+  is_fuchsia = false
+  is_fuchsia_host = false
+  is_ios = false
+  is_linux = false
+  is_mac = false
+  is_posix = false
+  is_win = false
+  is_wasm = false
+  is_qnx = true
 }
 
 is_apple = is_ios || is_mac
@@ -323,7 +352,8 @@ default_library_type = "static_library"
 
 # These Sanitizers all imply using the Clang compiler. On Windows they either
 # don't work or work differently.
-using_sanitizer = !is_win && (is_asan || is_hwasan || is_lsan || is_tsan || is_msan)
+using_sanitizer =
+    !is_win && (is_asan || is_hwasan || is_lsan || is_tsan || is_msan)
 if (!is_clang && using_sanitizer) {
   is_clang = true
 }
@@ -598,6 +628,9 @@ if (custom_toolchain != "") {
   clang_win_version = ""
   host_toolchain = "//build/toolchain/wasm"
   set_default_toolchain("//build/toolchain/wasm")
+} else if (is_qnx) {
+  host_toolchain = "//build/toolchain/linux:clang_$host_cpu"
+  set_default_toolchain("//build/toolchain/qnx")
 } else {
   assert(false, "Toolchain not set because of unknown platform.")
 }
@@ -703,6 +736,9 @@ template("component") {
       if (defined(invoker.include_dirs)) {
         include_dirs = invoker.include_dirs
       }
+      if (defined(invoker.inputs)) {
+        inputs = invoker.inputs
+      }
       if (defined(invoker.ldflags)) {
         ldflags = invoker.ldflags
       }
@@ -793,6 +829,9 @@ template("component") {
       }
       if (defined(invoker.include_dirs)) {
         include_dirs = invoker.include_dirs
+      }
+      if (defined(invoker.inputs)) {
+        inputs = invoker.inputs
       }
       if (defined(invoker.ldflags)) {
         ldflags = invoker.ldflags

@@ -9,7 +9,7 @@ import '../../src/common.dart';
 
 void main() {
   testWithoutContext('DoctorResultEvent sends usage event for each sub validator', () async {
-    final TestUsage usage = TestUsage();
+    final usage = TestUsage();
     final GroupedValidator groupedValidator = FakeGroupedValidator(<DoctorValidator>[
       FakeDoctorValidator('a'),
       FakeDoctorValidator('b'),
@@ -17,7 +17,7 @@ void main() {
     ]);
     final ValidationResult result = await groupedValidator.validate();
 
-    final DoctorResultEvent doctorResultEvent = DoctorResultEvent(
+    final doctorResultEvent = DoctorResultEvent(
       validator: groupedValidator,
       result: result,
       flutterUsage: usage,
@@ -34,15 +34,15 @@ void main() {
   testWithoutContext('DoctorResultEvent does not crash if a synthetic crash result was used instead'
       ' of validation. This happens when a grouped validator throws an exception, causing subResults to never '
       ' be instantiated.', () async {
-    final TestUsage usage = TestUsage();
+    final usage = TestUsage();
     final GroupedValidator groupedValidator = FakeGroupedValidator(<DoctorValidator>[
       FakeDoctorValidator('a'),
       FakeDoctorValidator('b'),
       FakeDoctorValidator('c'),
     ]);
-    final ValidationResult result = ValidationResult.crash(Object());
+    final result = ValidationResult.crash(Object());
 
-    final DoctorResultEvent doctorResultEvent = DoctorResultEvent(
+    final doctorResultEvent = DoctorResultEvent(
       validator: groupedValidator,
       result: result,
       flutterUsage: usage,

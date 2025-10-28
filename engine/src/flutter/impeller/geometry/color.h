@@ -156,7 +156,7 @@ struct Color {
   }
 
   /// @brief Convert this color to a 32-bit representation.
-  static constexpr uint32_t ToIColor(Color color) {
+  static inline uint32_t ToIColor(Color color) {
     return (((std::lround(color.alpha * 255.0f) & 0xff) << 24) |
             ((std::lround(color.red * 255.0f) & 0xff) << 16) |
             ((std::lround(color.green * 255.0f) & 0xff) << 8) |
@@ -243,7 +243,7 @@ struct Color {
    *
    * @return constexpr std::array<u_int8, 4>
    */
-  constexpr std::array<uint8_t, 4> ToR8G8B8A8() const {
+  inline std::array<uint8_t, 4> ToR8G8B8A8() const {
     uint8_t r = std::round(red * 255.0f);
     uint8_t g = std::round(green * 255.0f);
     uint8_t b = std::round(blue * 255.0f);
@@ -256,7 +256,7 @@ struct Color {
    *
    * @return constexpr uint32_t
    */
-  constexpr uint32_t ToARGB() const {
+  inline uint32_t ToARGB() const {
     std::array<uint8_t, 4> result = ToR8G8B8A8();
     return result[3] << 24 | result[0] << 16 | result[1] << 8 | result[2];
   }

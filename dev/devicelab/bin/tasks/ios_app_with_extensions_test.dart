@@ -8,6 +8,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
+import 'package:yaml_edit/yaml_edit.dart';
 
 Future<void> main() async {
   await task(() async {
@@ -16,15 +17,25 @@ Future<void> main() async {
     final Directory tempDir = Directory.systemTemp.createTempSync(
       'flutter_ios_app_with_extensions_test.',
     );
-    final Directory projectDir = Directory(path.join(tempDir.path, 'app_with_extensions'));
+    final Directory rootDir = Directory(path.join(tempDir.path, 'app_workspace'));
+    final Directory projectDir = Directory(path.join(rootDir.path, 'app_with_extensions'));
     try {
-      mkdir(projectDir);
+      mkdirs(projectDir);
       recursiveCopy(
         Directory(
           path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_app_with_extensions'),
         ),
         projectDir,
       );
+
+      final String rootPubspec = File(
+        path.join(flutterDirectory.path, 'pubspec.yaml'),
+      ).readAsStringSync();
+      final YamlEditor yamlEditor = YamlEditor(rootPubspec);
+      yamlEditor.update(<String>['workspace'], <String>['app_with_extensions']);
+      File(path.join(rootDir.path, 'pubspec.yaml'))
+        ..createSync()
+        ..writeAsStringSync(yamlEditor.toString());
 
       section('Create release build');
 
@@ -44,7 +55,8 @@ Future<void> main() async {
       });
 
       return TaskResult.success(null);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     } finally {
       rmTree(tempDir);

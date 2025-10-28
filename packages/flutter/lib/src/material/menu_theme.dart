@@ -8,19 +8,19 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'material_state.dart';
 import 'menu_anchor.dart';
 import 'menu_style.dart';
 import 'theme.dart';
 
 // Examples can assume:
 // late Widget child;
+// late BuildContext context;
 
 /// Defines the configuration of the submenus created by the [SubmenuButton],
 /// [MenuBar], or [MenuAnchor] widgets.
 ///
 /// Descendant widgets obtain the current [MenuThemeData] object using
-/// `MenuTheme.of(context)`.
+/// [MenuTheme.of].
 ///
 /// Typically, a [MenuThemeData] is specified as part of the overall [Theme]
 /// with [ThemeData.menuTheme]. Otherwise, [MenuTheme] can be used to configure
@@ -51,7 +51,7 @@ class MenuThemeData with Diagnosticable {
   ///  * [WidgetState.disabled].
   ///  * [WidgetState.hovered].
   ///  * [WidgetState.focused].
-  final MaterialStateProperty<Widget?>? submenuIcon;
+  final WidgetStateProperty<Widget?>? submenuIcon;
 
   /// Linearly interpolate between two menu button themes.
   static MenuThemeData? lerp(MenuThemeData? a, MenuThemeData? b, double t) {
@@ -83,7 +83,7 @@ class MenuThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MenuStyle>('style', style, defaultValue: null));
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<Widget?>>(
+      DiagnosticsProperty<WidgetStateProperty<Widget?>>(
         'submenuIcon',
         submenuIcon,
         defaultValue: null,
@@ -125,16 +125,7 @@ class MenuTheme extends InheritedTheme {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return MenuTheme(
-  ///     data: const MenuThemeData(
-  ///       style: MenuStyle(
-  ///         backgroundColor: WidgetStatePropertyAll<Color>(Colors.red),
-  ///       ),
-  ///     ),
-  ///     child: child,
-  ///   );
-  /// }
+  /// MenuThemeData theme = MenuTheme.of(context);
   /// ```
   static MenuThemeData of(BuildContext context) {
     final MenuTheme? menuTheme = context.dependOnInheritedWidgetOfExactType<MenuTheme>();

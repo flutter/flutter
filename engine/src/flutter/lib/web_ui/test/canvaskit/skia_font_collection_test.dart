@@ -6,8 +6,8 @@ import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/fake_asset_manager.dart';
 import '../common/test_initialization.dart';
@@ -18,7 +18,7 @@ void main() {
 
 void testMain() {
   group('$SkiaFontCollection', () {
-    setUpUnitTests();
+    setUpUnitTests(testEnvironment: const ui_web.TestEnvironment(forceTestFonts: true));
 
     final List<String> warnings = <String>[];
     late void Function(String) oldPrintWarning;
@@ -55,8 +55,9 @@ void testMain() {
 
     test('logs a warning if one of the registered fonts is invalid', () async {
       mockHttpFetchResponseFactory = (String url) async {
-        final ByteBuffer bogusData =
-            Uint8List.fromList('this is not valid font data'.codeUnits).buffer;
+        final ByteBuffer bogusData = Uint8List.fromList(
+          'this is not valid font data'.codeUnits,
+        ).buffer;
         return MockHttpFetchResponse(
           status: 200,
           url: url,
@@ -138,7 +139,8 @@ void testMain() {
             "fonts":[{"asset":"/assets/fonts/Roboto-Regular.ttf"}]
           }
         ]
-      '''.trim(),
+      '''
+              .trim(),
         ),
       );
 

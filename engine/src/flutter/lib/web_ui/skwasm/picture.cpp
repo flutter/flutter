@@ -4,42 +4,63 @@
 
 #include "export.h"
 #include "helpers.h"
-#include "third_party/skia/include/core/SkBBHFactory.h"
-#include "third_party/skia/include/core/SkPicture.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
+#include "live_objects.h"
 #include "wrappers.h"
 
+#include "flutter/display_list/dl_builder.h"
+
+#include <cassert>
+
 using namespace Skwasm;
+using namespace flutter;
 
-SkRTreeFactory bbhFactory;
+class PictureRecorder {
+ public:
+  PictureRecorder() {};
 
-SKWASM_EXPORT SkPictureRecorder* pictureRecorder_create() {
-  return new SkPictureRecorder();
+  DisplayListBuilder* beginRecording(const DlRect& cullRect) {
+    assert(!_builder);
+    _builder = std::make_unique<DisplayListBuilder>(cullRect);
+    return _builder.get();
+  }
+
+  sk_sp<DisplayList> finishRecordingAsPicture() { return _builder->Build(); }
+
+ private:
+  std::unique_ptr<DisplayListBuilder> _builder;
+};
+
+SKWASM_EXPORT PictureRecorder* pictureRecorder_create() {
+  livePictureRecorderCount++;
+  return new PictureRecorder();
 }
 
-SKWASM_EXPORT void pictureRecorder_dispose(SkPictureRecorder* recorder) {
+SKWASM_EXPORT void pictureRecorder_dispose(PictureRecorder* recorder) {
+  livePictureRecorderCount--;
   delete recorder;
 }
 
-SKWASM_EXPORT SkCanvas* pictureRecorder_beginRecording(
-    SkPictureRecorder* recorder,
-    const SkRect* cullRect) {
-  return recorder->beginRecording(*cullRect, &bbhFactory);
+SKWASM_EXPORT DisplayListBuilder* pictureRecorder_beginRecording(
+    PictureRecorder* recorder,
+    const DlRect* cullRect) {
+  return recorder->beginRecording(*cullRect);
 }
 
-SKWASM_EXPORT SkPicture* pictureRecorder_endRecording(
-    SkPictureRecorder* recorder) {
+SKWASM_EXPORT DisplayList* pictureRecorder_endRecording(
+    PictureRecorder* recorder) {
+  livePictureCount++;
   return recorder->finishRecordingAsPicture().release();
 }
 
-SKWASM_EXPORT void picture_getCullRect(SkPicture* picture, SkRect* outRect) {
-  *outRect = picture->cullRect();
+SKWASM_EXPORT void picture_getCullRect(DisplayList* picture, DlRect* outRect) {
+  *outRect = picture->GetBounds();
 }
 
-SKWASM_EXPORT void picture_dispose(SkPicture* picture) {
+SKWASM_EXPORT void picture_dispose(DisplayList* picture) {
+  livePictureCount--;
   picture->unref();
 }
 
-SKWASM_EXPORT uint32_t picture_approximateBytesUsed(SkPicture* picture) {
-  return static_cast<uint32_t>(picture->approximateBytesUsed());
+SKWASM_EXPORT uint32_t picture_approximateBytesUsed(DisplayList* picture) {
+  return static_cast<uint32_t>(picture->bytes());
 }

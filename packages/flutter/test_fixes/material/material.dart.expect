@@ -336,6 +336,9 @@ void main() {
         (states) => const UnderlineInputBorder(),
       );
 
+  // Changes made in https://github.com/flutter/flutter/pull/162223
+  const SliderThemeData(showValueIndicator: ShowValueIndicator.onDrag);
+
   // Changes made in https://github.com/flutter/flutter/pull/166382
   Switch(activeThumbColor: Colors.red, value: false, onChanged: null);
   SwitchListTile(activeThumbColor: Colors.red, value: false, onChanged: null);

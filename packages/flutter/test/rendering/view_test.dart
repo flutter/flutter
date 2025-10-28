@@ -82,10 +82,9 @@ void main() {
   test('invokes DebugPaintCallback', () {
     final PaintPattern paintsOrangeRect = paints..rect(color: orange, rect: orangeRect);
     final PaintPattern paintsGreenRect = paints..rect(color: green, rect: greenRect);
-    final PaintPattern paintOrangeAndGreenRect =
-        paints
-          ..rect(color: orange, rect: orangeRect)
-          ..rect(color: green, rect: greenRect);
+    final PaintPattern paintOrangeAndGreenRect = paints
+      ..rect(color: orange, rect: orangeRect)
+      ..rect(color: green, rect: greenRect);
     void paintCallback(PaintingContext context, Offset offset, RenderView renderView) {
       context.canvas.drawRect(greenRect, Paint()..color = green);
     }

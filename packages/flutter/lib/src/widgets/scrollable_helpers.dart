@@ -227,13 +227,19 @@ class EdgeDraggingAutoScroller {
 
   Future<void> _scroll() async {
     final RenderBox scrollRenderBox = scrollable.context.findRenderObject()! as RenderBox;
+    final Matrix4 transform = scrollRenderBox.getTransformTo(null);
     final Rect globalRect = MatrixUtils.transformRect(
-      scrollRenderBox.getTransformTo(null),
+      transform,
       Rect.fromLTWH(0, 0, scrollRenderBox.size.width, scrollRenderBox.size.height),
     );
+    final Rect transformedDragTarget = MatrixUtils.transformRect(
+      transform,
+      _dragTargetRelatedToScrollOrigin,
+    );
+
     assert(
-      globalRect.size.width >= _dragTargetRelatedToScrollOrigin.size.width &&
-          globalRect.size.height >= _dragTargetRelatedToScrollOrigin.size.height,
+      (globalRect.size.width + precisionErrorTolerance) >= transformedDragTarget.size.width &&
+          (globalRect.size.height + precisionErrorTolerance) >= transformedDragTarget.size.height,
       'Drag target size is larger than scrollable size, which may cause bouncing',
     );
     _scrolling = true;
@@ -402,7 +408,7 @@ class ScrollAction extends ContextAction<ScrollIntent> {
       return true;
     }
     final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(context);
-    return (primaryScrollController != null) && (primaryScrollController.hasClients);
+    return (primaryScrollController != null) && primaryScrollController.hasClients;
   }
 
   /// Returns the scroll increment for a single scroll request, for use when

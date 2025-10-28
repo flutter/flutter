@@ -8,14 +8,13 @@ import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:web_engine_tester/golden_tester.dart';
 
 import '../common/matchers.dart';
+import '../common/test_data.dart';
 import 'common.dart';
-import 'test_data.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -206,23 +205,21 @@ void _pathOpTests() {
   });
 
   test('Path.combine test', () {
-    final ui.Path path1 = ui.Path();
-    expect(path1, isA<CkPath>());
+    final CkPath path1 = CkPath();
     path1.addRect(const ui.Rect.fromLTRB(0, 0, 10, 10));
     path1.addOval(const ui.Rect.fromLTRB(10, 10, 100, 100));
 
-    final ui.Path path2 = ui.Path();
-    expect(path2, isA<CkPath>());
+    final CkPath path2 = CkPath();
     path2.addRect(const ui.Rect.fromLTRB(5, 5, 15, 15));
     path2.addOval(const ui.Rect.fromLTRB(15, 15, 105, 105));
 
-    final ui.Path union = ui.Path.combine(ui.PathOperation.union, path1, path2);
+    final ui.Path union = CkPath.combine(ui.PathOperation.union, path1, path2);
     expect(union, isA<CkPath>());
     expect(union.getBounds(), const ui.Rect.fromLTRB(0, 0, 105, 105));
 
     // Smoke-test other operations.
     for (final ui.PathOperation operation in ui.PathOperation.values) {
-      final ui.Path combined = ui.Path.combine(operation, path1, path2);
+      final ui.Path combined = CkPath.combine(operation, path1, path2);
       expect(combined, isA<CkPath>());
     }
   });
@@ -616,10 +613,9 @@ void _toSkColorStopsTests() {
 
 void _toSkMatrixFromFloat32Tests() {
   test('toSkMatrixFromFloat32', () {
-    final Matrix4 matrix =
-        Matrix4.identity()
-          ..translate(1, 2, 3)
-          ..rotateZ(4);
+    final Matrix4 matrix = Matrix4.identity()
+      ..translate(1, 2, 3)
+      ..rotateZ(4);
     expect(
       toSkMatrixFromFloat32(matrix.storage),
       Float32List.fromList(<double>[
@@ -639,10 +635,9 @@ void _toSkMatrixFromFloat32Tests() {
 
 void _toSkM44FromFloat32Tests() {
   test('toSkM44FromFloat32', () {
-    final Matrix4 matrix =
-        Matrix4.identity()
-          ..translate(1, 2, 3)
-          ..rotateZ(4);
+    final Matrix4 matrix = Matrix4.identity()
+      ..translate(1, 2, 3)
+      ..rotateZ(4);
     expect(
       toSkM44FromFloat32(matrix.storage),
       Float32List.fromList(<double>[
@@ -792,8 +787,8 @@ void _toSkRectTests() {
   });
 }
 
-SkPath _testClosedSkPath() {
-  return SkPath()
+SkPathBuilder _testClosedSkPath() {
+  return SkPathBuilder()
     ..moveTo(10, 10)
     ..lineTo(20, 10)
     ..lineTo(20, 20)
@@ -802,26 +797,26 @@ SkPath _testClosedSkPath() {
 }
 
 void _pathTests() {
-  late SkPath path;
+  late SkPathBuilder pathBuilder;
 
   setUp(() {
-    path = SkPath();
+    pathBuilder = SkPathBuilder();
   });
 
   test('setFillType', () {
-    path.setFillType(canvasKit.FillType.Winding);
+    pathBuilder.setFillType(canvasKit.FillType.Winding);
   });
 
   test('addArc', () {
-    path.addArc(toSkRect(const ui.Rect.fromLTRB(10, 20, 30, 40)), 1, 5);
+    pathBuilder.addArc(toSkRect(const ui.Rect.fromLTRB(10, 20, 30, 40)), 1, 5);
   });
 
   test('addOval', () {
-    path.addOval(toSkRect(const ui.Rect.fromLTRB(10, 20, 30, 40)), false, 1);
+    pathBuilder.addOval(toSkRect(const ui.Rect.fromLTRB(10, 20, 30, 40)), false, 1);
   });
 
   test('addPath', () {
-    path.addPath(_testClosedSkPath(), 1, 0, 0, 0, 1, 0, 0, 0, 0, false);
+    pathBuilder.addPath(_testClosedSkPath().snapshot(), 1, 0, 0, 0, 1, 0, 0, 0, 0, false);
   });
 
   test('addPoly', () {
@@ -829,7 +824,7 @@ void _pathTests() {
       ui.Offset.zero,
       ui.Offset(10, 10),
     ]);
-    path.addPoly(encodedPoints.toTypedArray(), true);
+    pathBuilder.addPolygon(encodedPoints.toTypedArray(), true);
     free(encodedPoints);
   });
 
@@ -838,19 +833,19 @@ void _pathTests() {
       const ui.Rect.fromLTRB(10, 10, 20, 20),
       const ui.Radius.circular(3),
     );
-    path.addRRect(toSkRRect(rrect), false);
+    pathBuilder.addRRect(toSkRRect(rrect), false);
   });
 
   test('addRect', () {
-    path.addRect(toSkRect(const ui.Rect.fromLTRB(1, 2, 3, 4)));
+    pathBuilder.addRect(toSkRect(const ui.Rect.fromLTRB(1, 2, 3, 4)));
   });
 
   test('arcTo', () {
-    path.arcToOval(toSkRect(const ui.Rect.fromLTRB(1, 2, 3, 4)), 5, 40, false);
+    pathBuilder.arcToOval(toSkRect(const ui.Rect.fromLTRB(1, 2, 3, 4)), 5, 40, false);
   });
 
   test('overloaded arcTo (used for arcToPoint)', () {
-    path.arcToRotated(1, 2, 3, false, true, 4, 5);
+    pathBuilder.arcToRotated(1, 2, 3, false, true, 4, 5);
   });
 
   test('close', () {
@@ -858,92 +853,114 @@ void _pathTests() {
   });
 
   test('conicTo', () {
-    path.conicTo(1, 2, 3, 4, 5);
+    pathBuilder.conicTo(1, 2, 3, 4, 5);
   });
 
   test('contains', () {
-    final SkPath testPath = _testClosedSkPath();
+    final SkPathBuilder testPathBuilder = _testClosedSkPath();
+    expect(testPathBuilder.contains(15, 15), isTrue);
+    expect(testPathBuilder.contains(100, 100), isFalse);
+
+    final SkPath testPath = testPathBuilder.snapshot();
     expect(testPath.contains(15, 15), isTrue);
     expect(testPath.contains(100, 100), isFalse);
   });
 
   test('cubicTo', () {
-    path.cubicTo(1, 2, 3, 4, 5, 6);
+    pathBuilder.cubicTo(1, 2, 3, 4, 5, 6);
   });
 
   test('getBounds', () {
-    final SkPath testPath = _testClosedSkPath();
+    final SkPath testPath = _testClosedSkPath().snapshot();
     final ui.Rect bounds = fromSkRect(testPath.getBounds());
     expect(bounds, const ui.Rect.fromLTRB(10, 10, 20, 20));
   });
 
   test('lineTo', () {
-    path.lineTo(10, 10);
+    pathBuilder.lineTo(10, 10);
   });
 
   test('moveTo', () {
-    path.moveTo(10, 10);
+    pathBuilder.moveTo(10, 10);
   });
 
   test('quadTo', () {
-    path.quadTo(10, 10, 20, 20);
+    pathBuilder.quadTo(10, 10, 20, 20);
   });
 
   test('rArcTo', () {
-    path.rArcTo(10, 20, 30, false, true, 40, 50);
+    pathBuilder.rArcTo(10, 20, 30, false, true, 40, 50);
   });
 
   test('rConicTo', () {
-    path.rConicTo(1, 2, 3, 4, 5);
+    pathBuilder.rConicTo(1, 2, 3, 4, 5);
   });
 
   test('rCubicTo', () {
-    path.rCubicTo(1, 2, 3, 4, 5, 6);
+    pathBuilder.rCubicTo(1, 2, 3, 4, 5, 6);
   });
 
   test('rLineTo', () {
-    path.rLineTo(10, 10);
+    pathBuilder.rLineTo(10, 10);
   });
 
   test('rMoveTo', () {
-    path.rMoveTo(10, 10);
+    pathBuilder.rMoveTo(10, 10);
   });
 
   test('rQuadTo', () {
-    path.rQuadTo(10, 10, 20, 20);
+    pathBuilder.rQuadTo(10, 10, 20, 20);
   });
 
   test('reset', () {
-    final SkPath testPath = _testClosedSkPath();
+    final SkPathBuilder testPathBuilder = _testClosedSkPath();
+    final SkPath testPath = testPathBuilder.snapshot();
+    expect(fromSkRect(testPathBuilder.getBounds()), const ui.Rect.fromLTRB(10, 10, 20, 20));
     expect(fromSkRect(testPath.getBounds()), const ui.Rect.fromLTRB(10, 10, 20, 20));
-    testPath.reset();
-    expect(fromSkRect(testPath.getBounds()), ui.Rect.zero);
+
+    testPathBuilder.reset();
+
+    final SkPath testPathAfterReset = testPathBuilder.snapshot();
+    expect(fromSkRect(testPathBuilder.getBounds()), ui.Rect.zero);
+    expect(fromSkRect(testPathAfterReset.getBounds()), ui.Rect.zero);
   });
 
   test('toSVGString', () {
-    expect(_testClosedSkPath().toSVGString(), 'M10 10L20 10L20 20L10 20L10 10Z');
+    expect(_testClosedSkPath().snapshot().toSVGString(), 'M10 10L20 10L20 20L10 20L10 10Z');
   });
 
   test('isEmpty', () {
-    expect(SkPath().isEmpty(), isTrue);
+    expect(SkPathBuilder().isEmpty(), isTrue);
+    expect(SkPathBuilder().snapshot().isEmpty(), isTrue);
+
     expect(_testClosedSkPath().isEmpty(), isFalse);
+    expect(_testClosedSkPath().snapshot().isEmpty(), isFalse);
   });
 
   test('copy', () {
-    final SkPath original = _testClosedSkPath();
+    final SkPath original = _testClosedSkPath().snapshot();
     final SkPath copy = original.copy();
     expect(fromSkRect(original.getBounds()), fromSkRect(copy.getBounds()));
   });
 
   test('transform', () {
-    path = _testClosedSkPath();
-    path.transform(2, 0, 10, 0, 2, 10, 0, 0, 0);
-    final ui.Rect transformedBounds = fromSkRect(path.getBounds());
-    expect(transformedBounds, const ui.Rect.fromLTRB(30, 30, 50, 50));
+    pathBuilder = _testClosedSkPath();
+    pathBuilder.transform(2, 0, 10, 0, 2, 10, 0, 0, 0);
+
+    final ui.Rect transformedPathBuilderBounds = fromSkRect(pathBuilder.getBounds());
+    expect(transformedPathBuilderBounds, const ui.Rect.fromLTRB(30, 30, 50, 50));
+
+    final SkPath path = pathBuilder.snapshot();
+    final ui.Rect transformedPathBounds = fromSkRect(path.getBounds());
+    expect(transformedPathBounds, const ui.Rect.fromLTRB(30, 30, 50, 50));
   });
 
   test('SkContourMeasureIter/SkContourMeasure', () {
-    final SkContourMeasureIter iter = SkContourMeasureIter(_testClosedSkPath(), false, 1.0);
+    final SkContourMeasureIter iter = SkContourMeasureIter(
+      _testClosedSkPath().snapshot(),
+      false,
+      1.0,
+    );
     final SkContourMeasure measure1 = iter.next()!;
     expect(measure1.length(), 40);
     expect(measure1.getPosTan(5), Float32List.fromList(<double>[15, 10, 1, 0]));
@@ -980,8 +997,9 @@ void _pathTests() {
 
   test('SkPath.toCmds and CanvasKit.Path.MakeFromCmds', () {
     const ui.Rect rect = ui.Rect.fromLTRB(0, 0, 10, 10);
-    final SkPath path = SkPath();
-    path.addRect(toSkRect(rect));
+    final SkPathBuilder pathBuilder = SkPathBuilder();
+    pathBuilder.addRect(toSkRect(rect));
+    final SkPath path = pathBuilder.snapshot();
     expect(path.toCmds(), <num>[
       0, 0, 0, // moveTo
       1, 10, 0, // lineTo
@@ -1087,11 +1105,12 @@ void _canvasTests() {
 
   test('clipPath', () {
     canvas.clipPath(
-      SkPath()
-        ..moveTo(10.9, 10.9)
-        ..lineTo(19.1, 10.9)
-        ..lineTo(19.1, 19.1)
-        ..lineTo(10.9, 19.1),
+      (SkPathBuilder()
+            ..moveTo(10.9, 10.9)
+            ..lineTo(19.1, 10.9)
+            ..lineTo(19.1, 19.1)
+            ..lineTo(10.9, 19.1))
+          .snapshot(),
       canvasKit.ClipOp.Intersect,
       true,
     );
@@ -1213,7 +1232,7 @@ void _canvasTests() {
   });
 
   test('drawPath', () {
-    canvas.drawPath(_testClosedSkPath(), SkPaint());
+    canvas.drawPath(_testClosedSkPath().snapshot(), SkPaint());
   });
 
   test('drawPoints', () {
@@ -1242,7 +1261,7 @@ void _canvasTests() {
       const double ambientAlpha = 0.039;
       const double spotAlpha = 0.25;
 
-      final SkPath path = _testClosedSkPath();
+      final SkPath path = _testClosedSkPath().snapshot();
       final ui.Rect bounds = fromSkRect(path.getBounds());
       final double shadowX = (bounds.left + bounds.right) / 2.0;
       final double shadowY = bounds.top - 600.0;
@@ -1485,54 +1504,50 @@ void _paragraphTests() {
     props.textHeightBehavior = canvasKit.TextHeightBehavior.All;
     props.maxLines = 4;
     props.ellipsis = '___';
-    props.textStyle =
-        SkTextStyleProperties()
-          ..backgroundColor = Float32List.fromList(<double>[0.2, 0, 0, 0.5])
-          ..color = Float32List.fromList(<double>[0, 1, 0, 1])
-          ..foregroundColor = Float32List.fromList(<double>[1, 0, 1, 1])
-          ..decoration = 0x2
-          ..decorationThickness = 2.0
-          ..decorationColor = Float32List.fromList(<double>[13, 14, 15, 16])
-          ..decorationStyle = canvasKit.DecorationStyle.Dotted
-          ..textBaseline = canvasKit.TextBaseline.Ideographic
-          ..fontSize = 48
-          ..letterSpacing = 5
-          ..wordSpacing = 10
-          ..heightMultiplier = 1.3
-          ..halfLeading = true
-          ..locale = 'en_CA'
-          ..fontFamilies = <String>['Roboto', 'serif']
-          ..fontStyle =
-              (SkFontStyle()
-                ..slant = canvasKit.FontSlant.Upright
-                ..weight = canvasKit.FontWeight.Normal)
-          ..shadows = <SkTextShadow>[]
-          ..fontFeatures = <SkFontFeature>[
-            SkFontFeature()
-              ..name = 'pnum'
-              ..value = 1,
-            SkFontFeature()
-              ..name = 'tnum'
-              ..value = 1,
-          ];
-    props.strutStyle =
-        SkStrutStyleProperties()
-          ..fontFamilies = <String>['Roboto', 'Noto']
-          ..fontStyle =
-              (SkFontStyle()
-                ..slant = canvasKit.FontSlant.Italic
-                ..weight = canvasKit.FontWeight.Bold)
-          ..fontSize = 72
-          ..heightMultiplier = 1.5
-          ..halfLeading = true
-          ..leading = 0
-          ..strutEnabled = true
-          ..forceStrutHeight = false;
+    props.textStyle = SkTextStyleProperties()
+      ..backgroundColor = Float32List.fromList(<double>[0.2, 0, 0, 0.5])
+      ..color = Float32List.fromList(<double>[0, 1, 0, 1])
+      ..foregroundColor = Float32List.fromList(<double>[1, 0, 1, 1])
+      ..decoration = 0x2
+      ..decorationThickness = 2.0
+      ..decorationColor = Float32List.fromList(<double>[13, 14, 15, 16])
+      ..decorationStyle = canvasKit.DecorationStyle.Dotted
+      ..textBaseline = canvasKit.TextBaseline.Ideographic
+      ..fontSize = 48
+      ..letterSpacing = 5
+      ..wordSpacing = 10
+      ..heightMultiplier = 1.3
+      ..halfLeading = true
+      ..locale = 'en_CA'
+      ..fontFamilies = <String>['Roboto', 'serif']
+      ..fontStyle = (SkFontStyle()
+        ..slant = canvasKit.FontSlant.Upright
+        ..weight = canvasKit.FontWeight.Normal)
+      ..shadows = <SkTextShadow>[]
+      ..fontFeatures = <SkFontFeature>[
+        SkFontFeature()
+          ..name = 'pnum'
+          ..value = 1,
+        SkFontFeature()
+          ..name = 'tnum'
+          ..value = 1,
+      ];
+    props.strutStyle = SkStrutStyleProperties()
+      ..fontFamilies = <String>['Roboto', 'Noto']
+      ..fontStyle = (SkFontStyle()
+        ..slant = canvasKit.FontSlant.Italic
+        ..weight = canvasKit.FontWeight.Bold)
+      ..fontSize = 72
+      ..heightMultiplier = 1.5
+      ..halfLeading = true
+      ..leading = 0
+      ..strutEnabled = true
+      ..forceStrutHeight = false;
 
     final SkParagraphStyle paragraphStyle = canvasKit.ParagraphStyle(props);
     final SkParagraphBuilder builder = canvasKit.ParagraphBuilder.MakeFromFontCollection(
       paragraphStyle,
-      CanvasKitRenderer.instance.fontCollection.skFontCollection,
+      (CanvasKitRenderer.instance.fontCollection as SkiaFontCollection).skFontCollection,
     );
 
     builder.addText('Hello');
@@ -1567,9 +1582,7 @@ void _paragraphTests() {
     builder.pop();
     builder.pushStyle(canvasKit.TextStyle(SkTextStyleProperties()..halfLeading = true));
     builder.pop();
-    if (canvasKit.ParagraphBuilder.RequiresClientICU()) {
-      injectClientICU(builder);
-    }
+    builder.injectClientICUIfNeeded();
     final SkParagraph paragraph = builder.build();
     paragraph.layout(500);
 
@@ -1614,10 +1627,9 @@ void _paragraphTests() {
     expectAlmost(paragraph.getMaxIntrinsicWidth(), 263);
     expectAlmost(paragraph.getMinIntrinsicWidth(), 135);
     expectAlmost(paragraph.getMaxWidth(), 500);
-    final SkRectWithDirection rectWithDirection =
-        paragraph
-            .getRectsForRange(1, 3, canvasKit.RectHeightStyle.Tight, canvasKit.RectWidthStyle.Max)
-            .single;
+    final SkRectWithDirection rectWithDirection = paragraph
+        .getRectsForRange(1, 3, canvasKit.RectHeightStyle.Tight, canvasKit.RectWidthStyle.Max)
+        .single;
     expect(rectWithDirection.rect, hasLength(4));
     expect(paragraph.getRectsForPlaceholders(), hasLength(1));
     expect(paragraph.getLineMetrics(), hasLength(1));
@@ -1659,29 +1671,25 @@ void _paragraphTests() {
     props.heightMultiplier = 3;
     props.textAlign = canvasKit.TextAlign.Start;
     props.textDirection = canvasKit.TextDirection.LTR;
-    props.textStyle =
-        SkTextStyleProperties()
-          ..fontSize = 25
-          ..fontFamilies = <String>['Roboto']
-          ..fontStyle = (SkFontStyle()..weight = canvasKit.FontWeight.Normal);
-    props.strutStyle =
-        SkStrutStyleProperties()
-          ..strutEnabled = true
-          ..forceStrutHeight = true
-          ..fontSize = 25
-          ..fontFamilies = <String>['Roboto']
-          ..heightMultiplier = 3
-          ..fontStyle = (SkFontStyle()..weight = canvasKit.FontWeight.Normal);
+    props.textStyle = SkTextStyleProperties()
+      ..fontSize = 25
+      ..fontFamilies = <String>['Roboto']
+      ..fontStyle = (SkFontStyle()..weight = canvasKit.FontWeight.Normal);
+    props.strutStyle = SkStrutStyleProperties()
+      ..strutEnabled = true
+      ..forceStrutHeight = true
+      ..fontSize = 25
+      ..fontFamilies = <String>['Roboto']
+      ..heightMultiplier = 3
+      ..fontStyle = (SkFontStyle()..weight = canvasKit.FontWeight.Normal);
     final SkParagraphStyle paragraphStyle = canvasKit.ParagraphStyle(props);
     final SkParagraphBuilder builder = canvasKit.ParagraphBuilder.MakeFromFontCollection(
       paragraphStyle,
-      CanvasKitRenderer.instance.fontCollection.skFontCollection,
+      (CanvasKitRenderer.instance.fontCollection as SkiaFontCollection).skFontCollection,
     );
     builder.addText('hello');
 
-    if (canvasKit.ParagraphBuilder.RequiresClientICU()) {
-      injectClientICU(builder);
-    }
+    builder.injectClientICUIfNeeded();
 
     final SkParagraph paragraph = builder.build();
     paragraph.layout(500);
@@ -1750,11 +1758,10 @@ void _paragraphTests() {
     () {
       final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
 
-      final int glContext =
-          canvasKit.GetWebGLContext(
-            canvas,
-            SkWebGLContextOptions(antialias: 0, majorVersion: webGLVersion.toDouble()),
-          ).toInt();
+      final int glContext = canvasKit.GetWebGLContext(
+        canvas,
+        SkWebGLContextOptions(antialias: 0, majorVersion: webGLVersion.toDouble()),
+      ).toInt();
       final SkGrContext? grContext = canvasKit.MakeGrContext(glContext.toDouble());
       final SkSurface? surface = canvasKit.MakeRenderTarget(grContext!, 1, 1);
 

@@ -12,8 +12,6 @@
 /// @docImport 'text_theme.dart';
 library;
 
-import 'dart:ui';
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -125,7 +123,7 @@ class MaterialButton extends StatelessWidget {
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
-  /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
+  /// If this property is null, [WidgetStateMouseCursor.adaptiveClickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// Defines the button's base colors, and the defaults for the button's minimum

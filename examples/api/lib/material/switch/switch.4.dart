@@ -41,10 +41,9 @@ class _SwitchAppState extends State<SwitchApp> {
                   isMaterial = !isMaterial;
                 });
               },
-              child:
-                  isMaterial
-                      ? const Text('Show cupertino style')
-                      : const Text('Show material style'),
+              child: isMaterial
+                  ? const Text('Show cupertino style')
+                  : const Text('Show material style'),
             ),
             OutlinedButton(
               style: style,
@@ -53,10 +52,9 @@ class _SwitchAppState extends State<SwitchApp> {
                   isCustomized = !isCustomized;
                 });
               },
-              child:
-                  isCustomized
-                      ? const Text('Remove customization')
-                      : const Text('Add customization'),
+              child: isCustomized
+                  ? const Text('Remove customization')
+                  : const Text('Add customization'),
             ),
             const SizedBox(height: 20),
             const SwitchWithLabel(label: 'enabled', enabled: true),
@@ -89,14 +87,13 @@ class _SwitchWithLabelState extends State<SwitchWithLabel> {
         Container(width: 150, padding: const EdgeInsets.only(right: 20), child: Text(widget.label)),
         Switch.adaptive(
           value: active,
-          onChanged:
-              !widget.enabled
-                  ? null
-                  : (bool value) {
-                    setState(() {
-                      active = value;
-                    });
-                  },
+          onChanged: !widget.enabled
+              ? null
+              : (bool value) {
+                  setState(() {
+                    active = value;
+                  });
+                },
         ),
       ],
     );

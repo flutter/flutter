@@ -30,7 +30,7 @@ struct VertexBuffer {
   ///
   IndexType index_type = IndexType::kUnknown;
 
-  constexpr explicit operator bool() const {
+  explicit inline operator bool() const {
     return static_cast<bool>(vertex_buffer) &&
            (index_type == IndexType::kNone || static_cast<bool>(index_buffer));
   }

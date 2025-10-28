@@ -209,10 +209,15 @@ void main() {
 
   testWidgets('Slider relayout upon system fonts changes', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(home: Material(child: Slider(value: 0.0, onChanged: (double value) {}))),
+      MaterialApp(
+        home: Material(child: Slider(value: 0.0, onChanged: (double value) {})),
+      ),
     );
-    // _RenderSlider is the last render object in the tree.
-    final RenderObject renderObject = tester.allRenderObjects.last;
+    final RenderObject renderObject = tester.allRenderObjects
+        .where(
+          (RenderObject renderObject) => renderObject.runtimeType.toString() == '_RenderSlider',
+        )
+        .first;
     await verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(tester, renderObject);
   });
 
@@ -253,12 +258,11 @@ void main() {
       SystemChannels.system.codec.encodeMessage(data),
       (ByteData? data) {},
     );
-    final RenderObject renderObject = tester.renderObject(
-      find.descendant(
-        of: find.byKey(const Key('parent')),
-        matching: find.byKey(const ValueKey<String>('time-picker-dial')),
-      ),
+    final Finder customPaintFinder = find.descendant(
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
+      matching: find.byType(CustomPaint),
     );
+    final RenderObject renderObject = tester.renderObject(customPaintFinder);
     expect(renderObject.debugNeedsPaint, isTrue);
   });
 }

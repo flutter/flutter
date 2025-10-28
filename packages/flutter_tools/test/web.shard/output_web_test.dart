@@ -17,7 +17,7 @@ import '../src/common.dart';
 
 void main() {
   late Directory tempDir;
-  final BasicProjectWithUnaryMain project = BasicProjectWithUnaryMain();
+  final project = BasicProjectWithUnaryMain();
   late FlutterRunTestDriver flutter;
 
   setUp(() async {
@@ -37,7 +37,7 @@ void main() {
     await flutter.run(
       withDebugger: true,
       device: GoogleChromeDevice.kChromeDeviceId,
-      additionalCommandArgs: <String>[if (verbose) '--verbose'],
+      additionalCommandArgs: <String>[if (verbose) '--verbose', '--no-web-resources-cdn'],
     );
   }
 

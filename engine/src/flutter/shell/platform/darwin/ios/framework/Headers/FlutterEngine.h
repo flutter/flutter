@@ -412,16 +412,6 @@ FLUTTER_DARWIN_EXPORT
 @property(nonatomic, readonly) FlutterBasicMessageChannel* keyEventChannel;
 
 /**
- * The depcreated `NSURL` of the Dart VM Service for the service isolate.
- *
- * This is only set in debug and profile runtime modes, and only after the
- * Dart VM Service is ready. In release mode or before the Dart VM Service has
- * started, it returns `nil`.
- */
-@property(nonatomic, readonly, nullable)
-    NSURL* observatoryUrl FLUTTER_DEPRECATED("Use vmServiceUrl instead");
-
-/**
  * The `NSURL` of the Dart VM Service for the service isolate.
  *
  * This is only set in debug and profile runtime modes, and only after the
@@ -455,6 +445,49 @@ FLUTTER_DARWIN_EXPORT
  */
 @property(nonatomic, assign) BOOL isGpuDisabled;
 
+@end
+
+/**
+ * Exposes parts of a `FlutterEngine` for registration purposes.
+ *
+ * This is used when the engine is created implicitly to allow registering
+ * plugins, application-level method channels, platform views, etc.
+ */
+@protocol FlutterImplicitEngineBridge <NSObject>
+
+/**
+ * The `FlutterPluginRegistry` for the created `FlutterEngine`.
+ *
+ * This can be used to vend `FlutterPluginRegistrar`s for plugins.
+ */
+@property(nonatomic, readonly) NSObject<FlutterPluginRegistry>* pluginRegistry;
+
+/**
+ * The `FlutterApplicationRegistrar` for the created `FlutterEngine`.
+ *
+ * This registrar provides access to application-level services, such as the engine's
+ * `FlutterBinaryMessenger` or `FlutterTextureRegistry`.
+ */
+@property(nonatomic, readonly) NSObject<FlutterApplicationRegistrar>* applicationRegistrar;
+
+@end
+
+/**
+ * Protocol for receiving a callback when an implicit engine is initialized, such as when created by
+ * a FlutterViewController from a storyboard.
+ *
+ * This provides the engine bridge to the listener.
+ */
+@protocol FlutterImplicitEngineDelegate
+@required
+
+/**
+ * Called once the implicit `FlutterEngine` is initialized.
+ *
+ * The `FlutterImplicitEngineBridge` can then be used to register plugins,
+ * application-level method channels, platform views, etc.
+ */
+- (void)didInitializeImplicitFlutterEngine:(NSObject<FlutterImplicitEngineBridge>*)engineBridge;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -27,7 +27,7 @@ void main() {
   });
 
   testWithoutContext('IntelliJPlugins found', () async {
-    final IntelliJPlugins plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
+    final plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
 
     final Archive dartJarArchive = buildSingleFileArchive('META-INF/plugin.xml', r'''
 <idea-plugin version="2">
@@ -51,7 +51,7 @@ void main() {
       ZipEncoder().encode(flutterJarArchive)!,
     );
 
-    final List<ValidationMessage> messages = <ValidationMessage>[];
+    final messages = <ValidationMessage>[];
     plugins.validatePackage(messages, <String>['Dart', 'dart'], 'Dart', 'download-Dart');
     plugins.validatePackage(
       messages,
@@ -74,7 +74,7 @@ void main() {
   testWithoutContext(
     'IntelliJPlugins can read the package version of the flutter-intellij 50.0+/IntelliJ 2020.2+ layout',
     () async {
-      final IntelliJPlugins plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
+      final plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
 
       final Archive flutterIdeaJarArchive = buildSingleFileArchive('META-INF/plugin.xml', r'''
 <idea-plugin version="2">
@@ -94,7 +94,7 @@ Manifest-Version: 1.0
         ZipEncoder().encode(flutterIntellijJarArchive)!,
       );
 
-      final List<ValidationMessage> messages = <ValidationMessage>[];
+      final messages = <ValidationMessage>[];
       plugins.validatePackage(
         messages,
         <String>['flutter-intellij', 'flutter-intellij.jar'],
@@ -113,7 +113,7 @@ Manifest-Version: 1.0
   testWithoutContext(
     'IntelliJPlugins can read the package version of the flutter-intellij 50.0+/IntelliJ 2020.2+ layout(priority is given to packages with the same prefix as packageName)',
     () async {
-      final IntelliJPlugins plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
+      final plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
 
       final Archive flutterIdeaJarArchive = buildSingleFileArchive('META-INF/plugin.xml', r'''
 <idea-plugin version="2">
@@ -136,7 +136,7 @@ Manifest-Version: 1.0
         ZipEncoder().encode(flutterIntellijJarArchive)!,
       );
 
-      final List<ValidationMessage> messages = <ValidationMessage>[];
+      final messages = <ValidationMessage>[];
       plugins.validatePackage(
         messages,
         <String>['flutter-intellij', 'flutter-intellij.jar'],
@@ -153,9 +153,9 @@ Manifest-Version: 1.0
   );
 
   testWithoutContext('IntelliJPlugins not found displays a link to their download site', () async {
-    final IntelliJPlugins plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
+    final plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
 
-    final List<ValidationMessage> messages = <ValidationMessage>[];
+    final messages = <ValidationMessage>[];
     plugins.validatePackage(messages, <String>['Dart', 'dart'], 'Dart', 'download-Dart');
     plugins.validatePackage(
       messages,
@@ -177,7 +177,7 @@ Manifest-Version: 1.0
   });
 
   testWithoutContext('IntelliJPlugins does not crash if no plugin file found', () async {
-    final IntelliJPlugins plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
+    final plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
 
     final Archive dartJarArchive = buildSingleFileArchive('META-INF/MANIFEST.MF', r'''
 Manifest-Version: 1.0
@@ -202,7 +202,7 @@ Manifest-Version: 1.0
   testWithoutContext(
     'IntelliJPlugins can find the Dart plugin with a lowercase package name',
     () async {
-      final IntelliJPlugins plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
+      final plugins = IntelliJPlugins(_kPluginsPath, fileSystem: fileSystem);
       final Archive dartJarArchive = buildSingleFileArchive('META-INF/plugin.xml', r'''
 <idea-plugin>
   <name>Dart</name>
@@ -213,7 +213,7 @@ Manifest-Version: 1.0
         ZipEncoder().encode(dartJarArchive)!,
       );
 
-      final List<ValidationMessage> messages = <ValidationMessage>[];
+      final messages = <ValidationMessage>[];
       plugins.validatePackage(messages, <String>['Dart', 'dart'], 'Dart', 'download-Dart');
 
       expect(messages.length, equals(1));
@@ -222,10 +222,10 @@ Manifest-Version: 1.0
   );
 }
 
-const String _kPluginsPath = '/data/intellij/plugins';
+const _kPluginsPath = '/data/intellij/plugins';
 
 Archive buildSingleFileArchive(String path, String content) {
-  final Archive archive = Archive();
+  final archive = Archive();
 
   final List<int> bytes = utf8.encode(content);
   archive.addFile(ArchiveFile(path, bytes.length, bytes));

@@ -30,10 +30,9 @@ void main() {
           child: GridView.count(
             crossAxisCount: 1,
             padding: padding,
-            children:
-                List<Widget>.generate(10, (int index) {
-                  return Text('$index', key: ValueKey<int>(index));
-                }).toList(),
+            children: List<Widget>.generate(10, (int index) {
+              return Text('$index', key: ValueKey<int>(index));
+            }).toList(),
           ),
         ),
       ),

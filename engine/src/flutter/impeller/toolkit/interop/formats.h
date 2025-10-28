@@ -9,13 +9,13 @@
 
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_color.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/txt/src/txt/font_style.h"
 #include "flutter/txt/src/txt/font_weight.h"
 #include "flutter/txt/src/txt/paragraph_style.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/matrix.h"
-#include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/geometry/size.h"
@@ -94,7 +94,7 @@ constexpr flutter::DlColor ToDisplayListType(Color color) {
   );
 }
 
-constexpr SkMatrix ToSkMatrix(const Matrix& matrix) {
+inline SkMatrix ToSkMatrix(const Matrix& matrix) {
   return SkM44::ColMajor(matrix.m).asM33();
 }
 
@@ -456,28 +456,28 @@ constexpr txt::TextDecorationStyle ToTxtType(
   return txt::TextDecorationStyle::kSolid;
 }
 
-constexpr txt::FontWeight ToTxtType(ImpellerFontWeight weight) {
+constexpr int ToTxtType(ImpellerFontWeight weight) {
   switch (weight) {
     case kImpellerFontWeight100:
-      return txt::FontWeight::w100;
+      return 100;
     case kImpellerFontWeight200:
-      return txt::FontWeight::w200;
+      return 200;
     case kImpellerFontWeight300:
-      return txt::FontWeight::w300;
+      return 300;
     case kImpellerFontWeight400:
-      return txt::FontWeight::w400;
+      return 400;
     case kImpellerFontWeight500:
-      return txt::FontWeight::w500;
+      return 500;
     case kImpellerFontWeight600:
-      return txt::FontWeight::w600;
+      return 600;
     case kImpellerFontWeight700:
-      return txt::FontWeight::w700;
+      return 700;
     case kImpellerFontWeight800:
-      return txt::FontWeight::w800;
+      return 800;
     case kImpellerFontWeight900:
-      return txt::FontWeight::w900;
+      return 900;
   }
-  return txt::FontWeight::w400;
+  return txt::FontWeight::normal;
 }
 
 constexpr txt::FontStyle ToTxtType(ImpellerFontStyle style) {

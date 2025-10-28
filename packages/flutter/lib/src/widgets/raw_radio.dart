@@ -7,6 +7,8 @@ import 'package:flutter/foundation.dart';
 import 'basic.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
+import 'localizations.dart';
+import 'radio_group.dart';
 import 'ticker_provider.dart';
 import 'toggleable.dart';
 import 'widget_state.dart';
@@ -30,11 +32,9 @@ typedef RadioBuilder = Widget Function(BuildContext context, ToggleableStateMixi
 /// group cease to be selected. The values are of type `T`, the type parameter
 /// of the radio class. Enums are commonly used for this purpose.
 ///
-/// The radio button itself does not maintain any state. Instead, selecting the
-/// radio invokes the [onChanged] callback, passing [value] as a parameter. If
-/// [groupValue] and [value] match, this radio will be selected. Most widgets
-/// will respond to [onChanged] by calling [State.setState] to update the
-/// radio button's [groupValue].
+/// {@macro flutter.widget.RawRadio.groupValue}
+///
+/// If [enabled] is false, the radio will not be interactive.
 ///
 /// See also:
 ///
@@ -44,56 +44,23 @@ typedef RadioBuilder = Widget Function(BuildContext context, ToggleableStateMixi
 class RawRadio<T> extends StatefulWidget {
   /// Creates a radio button.
   ///
-  /// The radio button itself does not maintain any state. Instead, when the
-  /// radio button is selected, the widget calls the [onChanged] callback. Most
-  /// widgets that use a radio button will listen for the [onChanged] callback
-  /// and rebuild the radio button with a new [groupValue] to update the visual
-  /// appearance of the radio button.
+  /// If [enabled] is true, the [groupRegistry] must not be null.
   const RawRadio({
     super.key,
     required this.value,
-    required this.groupValue,
-    required this.onChanged,
     required this.mouseCursor,
     required this.toggleable,
     required this.focusNode,
     required this.autofocus,
+    required this.groupRegistry,
+    required this.enabled,
     required this.builder,
-  });
+  }) : assert(!enabled || groupRegistry != null, 'an enabled raw radio must have a registry');
 
   /// {@template flutter.widget.RawRadio.value}
   /// The value represented by this radio button.
   /// {@endtemplate}
   final T value;
-
-  /// {@template flutter.widget.RawRadio.groupValue}
-  /// The currently selected value for a group of radio buttons.
-  ///
-  /// This radio button is considered selected if its [value] matches the
-  /// [groupValue].
-  /// {@endtemplate}
-  final T? groupValue;
-
-  /// {@template flutter.widget.RawRadio.onChanged}
-  /// Called when the user selects this radio button.
-  ///
-  /// The radio button passes [value] as a parameter to this callback. The radio
-  /// button does not actually change state until the parent widget rebuilds the
-  /// radio button with the new [groupValue].
-  ///
-  /// If null, the radio button will be displayed as disabled.
-  ///
-  /// The provided callback will not be invoked if this radio button is already
-  /// selected and [toggleable] is not set to true.
-  ///
-  /// If the [toggleable] is set to true, tapping a already selected radio will
-  /// invoke this callback with `null` as value.
-  ///
-  /// The callback provided to [onChanged] should update the state of the parent
-  /// [StatefulWidget] using the [State.setState] method, so that the parent
-  /// gets rebuilt.
-  /// {@endtemplate}
-  final ValueChanged<T?>? onChanged;
 
   /// {@template flutter.widget.RawRadio.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
@@ -113,24 +80,24 @@ class RawRadio<T> extends StatefulWidget {
   /// Set to true if this radio button is allowed to be returned to an
   /// indeterminate state by selecting it again when selected.
   ///
-  /// To indicate returning to an indeterminate state, [onChanged] will be
-  /// called with null.
+  /// To indicate returning to an indeterminate state, [RadioGroup.onChanged]
+  /// of the [RadioGroup] above the widget tree will be called with null.
   ///
-  /// If true, [onChanged] is called with [value] when selected while
-  /// [groupValue] != [value], and with null when selected again while
-  /// [groupValue] == [value].
+  /// If true, [RadioGroup.onChanged] is called with [value] when selected while
+  /// [RadioGroup.groupValue] != [value], and with null when selected again while
+  /// [RadioGroup.groupValue] == [value].
   ///
-  /// If false, [onChanged] will be called with [value] when it is selected
-  /// while [groupValue] != [value], and only by selecting another radio button
-  /// in the group (i.e. changing the value of [groupValue]) can this radio
-  /// button be unselected.
+  /// If false, [RadioGroup.onChanged] will be called with [value] when it is
+  /// selected while [RadioGroup.groupValue] != [value], and only by selecting
+  /// another radio button in the group (i.e. changing the value of
+  /// [RadioGroup.groupValue]) can this radio button be unselected.
   ///
   /// The default is false.
   /// {@endtemplate}
   final bool toggleable;
 
   /// {@macro flutter.widgets.Focus.focusNode}
-  final FocusNode? focusNode;
+  final FocusNode focusNode;
 
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
@@ -142,61 +109,121 @@ class RawRadio<T> extends StatefulWidget {
   /// {@macro flutter.widgets.ToggleableStateMixin.buildToggleableWithChild}
   final RadioBuilder builder;
 
-  bool get _selected => value == groupValue;
+  /// Whether this widget is enabled.
+  final bool enabled;
+
+  /// {@template flutter.widget.RawRadio.groupRegistry}
+  /// The registry this radio registers to.
+  /// {@endtemplate}
+  ///
+  /// {@template flutter.widget.RawRadio.groupValue}
+  /// The radio relies on [groupRegistry] to maintains the state for selection.
+  /// If use in conjunction with a [RadioGroup] widget, use [RadioGroup.maybeOf]
+  /// to get the group registry from the context.
+  /// {@endtemplate}
+  final RadioGroupRegistry<T>? groupRegistry;
 
   @override
   State<RawRadio<T>> createState() => _RawRadioState<T>();
 }
 
 class _RawRadioState<T> extends State<RawRadio<T>>
-    with TickerProviderStateMixin, ToggleableStateMixin {
+    with TickerProviderStateMixin, ToggleableStateMixin, RadioClient<T> {
+  @override
+  FocusNode get focusNode => widget.focusNode;
+
+  @override
+  bool get enabled => isInteractive;
+
+  @override
+  T get radioValue => widget.value;
+
+  @override
+  void initState() {
+    // This has to be before the init state because the [ToggleableStateMixin]
+    // expect the [value] is up-to-date when init its state.
+    registry = widget.groupRegistry;
+    super.initState();
+  }
+
+  /// Handle selection status changed.
+  ///
+  /// if `selected` is false, nothing happens.
+  ///
+  /// if `selected` is true, select this radio. i.e. [Radio.onChanged] is called
+  /// with [Radio.value]. This also updates the group value in [RadioGroup] if it
+  /// is in use.
+  ///
+  /// if `selected` is null, unselect this radio. Same as `selected` is true
+  /// except group value is set to null.
   void _handleChanged(bool? selected) {
-    if (selected == null) {
-      widget.onChanged!(null);
+    assert(registry != null);
+    if (!(selected ?? true)) {
       return;
     }
-    if (selected) {
-      widget.onChanged!(widget.value);
+    if (selected ?? false) {
+      registry!.onChanged(widget.value);
+    } else {
+      registry!.onChanged(null);
     }
   }
 
   @override
   void didUpdateWidget(RawRadio<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget._selected != oldWidget._selected) {
-      animateToValue();
-    }
+    registry = widget.groupRegistry;
+    animateToValue(); // The registry's group value may have changed
   }
 
   @override
-  ValueChanged<bool?>? get onChanged => widget.onChanged != null ? _handleChanged : null;
+  void dispose() {
+    super.dispose();
+    registry = null;
+  }
+
+  @override
+  ValueChanged<bool?>? get onChanged => registry != null ? _handleChanged : null;
 
   @override
   bool get tristate => widget.toggleable;
 
   @override
-  bool? get value => widget._selected;
+  bool? get value => widget.value == registry?.groupValue;
+
+  @override
+  bool get isInteractive => widget.enabled;
 
   @override
   Widget build(BuildContext context) {
     final bool? accessibilitySelected;
+    String? semanticsHint;
+
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         accessibilitySelected = null;
+        semanticsHint = null;
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        accessibilitySelected = widget._selected;
+        accessibilitySelected = value;
+        // Only provide hint for unselected radio buttons to avoid duplication
+        // of the selected state announcement.
+        // Selected state is already announced by iOS via the 'selected' property.
+        if (!(value ?? false)) {
+          final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
+          semanticsHint = localizations.radioButtonUnselectedLabel;
+        }
     }
 
     return Semantics(
       inMutuallyExclusiveGroup: true,
-      checked: widget._selected,
+      checked: value,
       selected: accessibilitySelected,
+      hint: semanticsHint,
       child: buildToggleableWithChild(
-        focusNode: widget.focusNode,
+        focusNode: focusNode,
         autofocus: widget.autofocus,
         mouseCursor: widget.mouseCursor,
         child: widget.builder(context, this),

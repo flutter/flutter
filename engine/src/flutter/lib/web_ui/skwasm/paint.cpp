@@ -4,50 +4,59 @@
 
 #include "export.h"
 #include "helpers.h"
-#include "third_party/skia/include/core/SkColorFilter.h"
-#include "third_party/skia/include/core/SkImageFilter.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
-#include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/core/SkShader.h"
+#include "live_objects.h"
+
+#include "flutter/display_list/dl_paint.h"
+#include "flutter/display_list/geometry/dl_geometry_types.h"
 
 using namespace Skwasm;
+using namespace flutter;
 
-SKWASM_EXPORT SkPaint* paint_create(bool isAntiAlias,
-                                    SkBlendMode blendMode,
-                                    SkColor color,
-                                    SkPaint::Style style,
-                                    SkScalar strokeWidth,
-                                    SkPaint::Cap strokeCap,
-                                    SkPaint::Join strokeJoin,
-                                    SkScalar strokeMiterLimit) {
-  auto paint = new SkPaint();
+SKWASM_EXPORT DlPaint* paint_create(bool isAntiAlias,
+                                    DlBlendMode blendMode,
+                                    uint32_t color,
+                                    DlDrawStyle style,
+                                    DlScalar strokeWidth,
+                                    DlStrokeCap strokeCap,
+                                    DlStrokeJoin strokeJoin,
+                                    DlScalar strokeMiterLimit,
+                                    bool invertColors) {
+  livePaintCount++;
+  auto paint = new DlPaint();
   paint->setAntiAlias(isAntiAlias);
   paint->setBlendMode(blendMode);
-  paint->setStyle(style);
+  paint->setDrawStyle(style);
   paint->setStrokeWidth(strokeWidth);
   paint->setStrokeCap(strokeCap);
   paint->setStrokeJoin(strokeJoin);
-  paint->setColor(color);
+  paint->setColor(DlColor(color));
   paint->setStrokeMiter(strokeMiterLimit);
+  paint->setInvertColors(invertColors);
   return paint;
 }
 
-SKWASM_EXPORT void paint_dispose(SkPaint* paint) {
+SKWASM_EXPORT void paint_dispose(DlPaint* paint) {
+  livePaintCount--;
   delete paint;
 }
 
-SKWASM_EXPORT void paint_setShader(SkPaint* paint, SkShader* shader) {
-  paint->setShader(sk_ref_sp<SkShader>(shader));
+SKWASM_EXPORT void paint_setShader(DlPaint* paint,
+                                   sp_wrapper<DlColorSource>* shader) {
+  paint->setColorSource(shader->shared());
 }
 
-SKWASM_EXPORT void paint_setImageFilter(SkPaint* paint, SkImageFilter* filter) {
-  paint->setImageFilter(sk_ref_sp<SkImageFilter>(filter));
+SKWASM_EXPORT void paint_setImageFilter(DlPaint* paint,
+                                        sp_wrapper<DlImageFilter>* filter) {
+  paint->setImageFilter(filter->shared());
 }
 
-SKWASM_EXPORT void paint_setColorFilter(SkPaint* paint, SkColorFilter* filter) {
-  paint->setColorFilter(sk_ref_sp<SkColorFilter>(filter));
+SKWASM_EXPORT void paint_setColorFilter(
+    DlPaint* paint,
+    sp_wrapper<const DlColorFilter>* filter) {
+  paint->setColorFilter(filter->shared());
 }
 
-SKWASM_EXPORT void paint_setMaskFilter(SkPaint* paint, SkMaskFilter* filter) {
-  paint->setMaskFilter(sk_ref_sp<SkMaskFilter>(filter));
+SKWASM_EXPORT void paint_setMaskFilter(DlPaint* paint,
+                                       sp_wrapper<DlMaskFilter>* filter) {
+  paint->setMaskFilter(filter->shared());
 }

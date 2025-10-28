@@ -42,7 +42,7 @@ class DaemonEventData {
   final Stream<List<int>>? binary;
 }
 
-const String _binaryLengthKey = '_binaryLength';
+const _binaryLengthKey = '_binaryLength';
 
 enum _InputStreamParseState { json, binary }
 
@@ -81,7 +81,7 @@ class DaemonInputStreamConverter {
 
   final Stream<List<int>> inputStream;
 
-  final StreamController<DaemonMessage> _controller = StreamController<DaemonMessage>();
+  final _controller = StreamController<DaemonMessage>();
   Stream<DaemonMessage> get convertedStream => _controller.stream;
 
   // Internal states
@@ -92,14 +92,14 @@ class DaemonInputStreamConverter {
   late StreamController<List<int>> currentBinaryStream;
 
   /// Remaining length in bytes that have to be sent to the binary stream.
-  int remainingBinaryLength = 0;
+  var remainingBinaryLength = 0;
 
   /// Buffer to hold the current line of input data.
-  final BytesBuilder bytesBuilder = BytesBuilder(copy: false);
+  final bytesBuilder = BytesBuilder(copy: false);
 
   // Processes a single chunk received in the input stream.
   void _processChunk(List<int> chunk) {
-    int start = 0;
+    var start = 0;
     while (start < chunk.length) {
       switch (state) {
         case _InputStreamParseState.json:
@@ -119,7 +119,7 @@ class DaemonInputStreamConverter {
 
   /// Processes a chunk in JSON mode, and returns the number of bytes processed.
   int _processChunkInJsonMode(List<int> chunk, int start) {
-    const int LF = 10; // The '\n' character
+    const LF = 10; // The '\n' character
 
     // Search for newline character.
     final int indexOfNewLine = chunk.indexOf(LF, start);
@@ -158,10 +158,9 @@ class DaemonInputStreamConverter {
       return chunk.length;
     } else {
       final int chunkRemainingLength = chunk.length - start;
-      final int sizeToRead =
-          chunkRemainingLength < remainingBinaryLength
-              ? chunkRemainingLength
-              : remainingBinaryLength;
+      final int sizeToRead = chunkRemainingLength < remainingBinaryLength
+          ? chunkRemainingLength
+          : remainingBinaryLength;
       currentBinaryStream.add(chunk.sublist(start, start + sizeToRead));
       return sizeToRead;
     }
@@ -189,8 +188,8 @@ class DaemonStreams {
   /// Connects to a server and creates a [DaemonStreams] from the connection as the underlying streams.
   factory DaemonStreams.connect(String host, int port, {required Logger logger}) {
     final Future<Socket> socketFuture = Socket.connect(host, port);
-    final StreamController<List<int>> inputStreamController = StreamController<List<int>>();
-    final StreamController<List<int>> outputStreamController = StreamController<List<int>>();
+    final inputStreamController = StreamController<List<int>>();
+    final outputStreamController = StreamController<List<int>>();
     socketFuture.then<void>(
       (Socket socket) {
         inputStreamController.addStream(socket);
@@ -262,11 +261,11 @@ class DaemonConnection {
 
   late final StreamSubscription<DaemonMessage> _commandSubscription;
 
-  int _outgoingRequestId = 0;
-  final Map<String, Completer<Object?>> _outgoingRequestCompleters = <String, Completer<Object?>>{};
+  var _outgoingRequestId = 0;
+  final _outgoingRequestCompleters = <String, Completer<Object?>>{};
 
-  final StreamController<DaemonEventData> _events = StreamController<DaemonEventData>.broadcast();
-  final StreamController<DaemonMessage> _incomingCommands = StreamController<DaemonMessage>();
+  final _events = StreamController<DaemonEventData>.broadcast();
+  final _incomingCommands = StreamController<DaemonMessage>();
 
   /// A stream that contains all the incoming requests.
   Stream<DaemonMessage> get incomingCommands => _incomingCommands.stream;
@@ -280,14 +279,10 @@ class DaemonConnection {
   ///
   /// Returns a [Future] that resolves with the content.
   Future<Object?> sendRequest(String method, [Object? params, List<int>? binary]) async {
-    final String id = '${++_outgoingRequestId}';
-    final Completer<Object?> completer = Completer<Object?>();
+    final id = '${++_outgoingRequestId}';
+    final completer = Completer<Object?>();
     _outgoingRequestCompleters[id] = completer;
-    final Map<String, Object?> data = <String, Object?>{
-      'id': id,
-      'method': method,
-      if (params != null) 'params': params,
-    };
+    final data = <String, Object?>{'id': id, 'method': method, 'params': ?params};
     _logger.printTrace('-> Sending to daemon, id = $id, method = $method');
     _daemonStreams.send(data, binary);
     return completer.future;
@@ -295,7 +290,7 @@ class DaemonConnection {
 
   /// Sends a response to the other end of the connection.
   void sendResponse(Object id, [Object? result]) {
-    _daemonStreams.send(<String, Object?>{'id': id, if (result != null) 'result': result});
+    _daemonStreams.send(<String, Object?>{'id': id, 'result': ?result});
   }
 
   /// Sends an error response to the other end of the connection.
@@ -305,10 +300,7 @@ class DaemonConnection {
 
   /// Sends an event to the client.
   void sendEvent(String name, [Object? params, List<int>? binary]) {
-    _daemonStreams.send(<String, Object?>{
-      'event': name,
-      if (params != null) 'params': params,
-    }, binary);
+    _daemonStreams.send(<String, Object?>{'event': name, 'params': ?params}, binary);
   }
 
   /// Handles the input from the stream.
@@ -316,20 +308,29 @@ class DaemonConnection {
   /// There are three kinds of data: Request, Response, Event.
   ///
   /// Request:
+  ///
+  /// ```none
   /// {"id": <Object>. "method": <String>, "params": <optional, Object?>}
+  /// ```
   ///
   /// Response:
+  ///
+  /// ```none
   /// {"id": <Object>. "result": <optional, Object?>} for a successful response.
   /// {"id": <Object>. "error": <Object>, "stackTrace": <String>} for an error response.
+  /// ```
   ///
   /// Event:
+  ///
+  /// ```none
   /// {"event": <String>. "params": <optional, Object?>}
+  /// ```
   void _handleMessage(DaemonMessage message) {
     final Map<String, Object?> data = message.data;
     if (data['id'] != null) {
       if (data['method'] == null) {
         // This is a response to previously sent request.
-        final String id = data['id']! as String;
+        final id = data['id']! as String;
         if (data['error'] != null) {
           // This is an error response.
           _logger.printTrace('<- Error response received from daemon, id = $id');

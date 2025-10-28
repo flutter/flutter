@@ -32,10 +32,10 @@ class SizeAnalyzer {
   final Analytics _analytics;
   String? _appFilename;
 
-  static const String aotSnapshotFileName = 'aot-snapshot.json';
-  static const int tableWidth = 80;
-  static const int _kAotSizeMaxDepth = 2;
-  static const int _kZipSizeMaxDepth = 1;
+  static const aotSnapshotFileName = 'aot-snapshot.json';
+  static const tableWidth = 80;
+  static const _kAotSizeMaxDepth = 2;
+  static const _kZipSizeMaxDepth = 1;
 
   /// Analyze the [aotSnapshot] in an uncompressed output directory.
   Future<Map<String, Object?>> analyzeAotSnapshot({
@@ -90,7 +90,7 @@ class SizeAnalyzer {
     return apkAnalysisJson;
   }
 
-  /// Analyzes [apk] and [aotSnapshot] to output a [Map] object that includes
+  /// Analyzes [zipFile] and [aotSnapshot] to output a [Map] object that includes
   /// the breakdown of the both files, where the breakdown of [aotSnapshot] is placed
   /// under 'lib/arm64-v8a/$_appFilename'.
   ///
@@ -147,7 +147,7 @@ class SizeAnalyzer {
 
   _SymbolNode _parseUnzipFile(File zipFile) {
     final Archive archive = ZipDecoder().decodeBytes(zipFile.readAsBytesSync());
-    final Map<List<String>, int> pathsToSize = <List<String>, int>{};
+    final pathsToSize = <List<String>, int>{};
 
     for (final ArchiveFile archiveFile in archive.files) {
       final InputStreamBase? rawContent = archiveFile.rawContent;
@@ -159,7 +159,7 @@ class SizeAnalyzer {
   }
 
   _SymbolNode _parseDirectory(Directory directory, String relativeTo, String? excludePath) {
-    final Map<List<String>, int> pathsToSize = <List<String>, int>{};
+    final pathsToSize = <List<String>, int>{};
     for (final File file in directory.listSync(recursive: true).whereType<File>()) {
       if (excludePath != null && file.uri.pathSegments.contains(excludePath)) {
         continue;
@@ -172,10 +172,10 @@ class SizeAnalyzer {
     return _buildSymbolTree(pathsToSize);
   }
 
-  List<String> _locatedAotFilePath = <String>[];
+  var _locatedAotFilePath = <String>[];
 
   List<String> _buildNodeName(_SymbolNode start, _SymbolNode? parent) {
-    final List<String> results = <String>[start.name];
+    final results = <String>[start.name];
     while (parent != null && parent.name != 'Root') {
       results.insert(0, parent.name);
       parent = parent.parent;
@@ -184,11 +184,11 @@ class SizeAnalyzer {
   }
 
   _SymbolNode _buildSymbolTree(Map<List<String>, int> pathsToSize) {
-    final _SymbolNode rootNode = _SymbolNode('Root');
-    _SymbolNode currentNode = rootNode;
+    final rootNode = _SymbolNode('Root');
+    var currentNode = rootNode;
 
     for (final List<String> paths in pathsToSize.keys) {
-      for (final String path in paths) {
+      for (final path in paths) {
         _SymbolNode? childWithPathAsName = currentNode.childByName(path);
 
         if (childWithPathAsName == null) {
@@ -270,14 +270,13 @@ class SizeAnalyzer {
       emphasis: true,
     );
 
-    final List<_SymbolNode> sortedSymbols =
-        aotSnapshotRoot.children.toList()
-          // Remove entries like  @unknown, @shared, and @stubs as well as private dart libraries
-          //  which are not interpretable by end users.
-          ..removeWhere(
-            (_SymbolNode node) => node.name.startsWith('@') || node.name.startsWith('dart:_'),
-          )
-          ..sort((_SymbolNode a, _SymbolNode b) => b.byteSize.compareTo(a.byteSize));
+    final List<_SymbolNode> sortedSymbols = aotSnapshotRoot.children.toList()
+      // Remove entries like  @unknown, @shared, and @stubs as well as private dart libraries
+      //  which are not interpretable by end users.
+      ..removeWhere(
+        (_SymbolNode node) => node.name.startsWith('@') || node.name.startsWith('dart:_'),
+      )
+      ..sort((_SymbolNode a, _SymbolNode b) => b.byteSize.compareTo(a.byteSize));
     for (final _SymbolNode node in sortedSymbols.take(maxDirectoriesShown)) {
       // Node names will have an extra leading `package:*` name, remove it to
       // avoid extra nesting.
@@ -308,11 +307,10 @@ class SizeAnalyzer {
     required Map<String, Object?> aotSnapshotJson,
     required Map<String, Object?> precompilerTrace,
   }) {
-    Map<String, Object?> currentLevel = apkAnalysisJson;
+    var currentLevel = apkAnalysisJson;
     currentLevel['precompiler-trace'] = precompilerTrace;
     while (path.isNotEmpty) {
-      final List<Map<String, Object?>>? children =
-          currentLevel['children'] as List<Map<String, Object?>>?;
+      final children = currentLevel['children'] as List<Map<String, Object?>>?;
       final Map<String, Object?> childWithPathAsName =
           children?.firstWhere(
             (Map<String, Object?> child) => (child['n'] as String?) == path.first,
@@ -325,7 +323,7 @@ class SizeAnalyzer {
     return apkAnalysisJson;
   }
 
-  List<String> _leadingPaths = <String>[];
+  var _leadingPaths = <String>[];
 
   /// Print an entity's name with its size on the same line.
   void _printEntitySize(
@@ -349,7 +347,7 @@ class SizeAnalyzer {
     // similarly determines whether or not leading directory information needs to
     // be printed.
     final List<String> localSegments = entityName.split('/')..removeLast();
-    int i = 0;
+    var i = 0;
     while (i < _leadingPaths.length &&
         i < localSegments.length &&
         _leadingPaths[i] == localSegments[i]) {
@@ -373,7 +371,7 @@ class SizeAnalyzer {
   }
 
   String _prettyPrintBytes(int numBytes) {
-    const int kB = 1024;
+    const kB = 1024;
     const int mB = kB * 1024;
     if (numBytes < kB) {
       return '$numBytes B';
@@ -385,12 +383,12 @@ class SizeAnalyzer {
   }
 
   _SymbolNode? _parseAotSnapshot(Map<String, Object?> aotSnapshotJson) {
-    final bool isLeafNode = aotSnapshotJson['children'] == null;
+    final isLeafNode = aotSnapshotJson['children'] == null;
     if (!isLeafNode) {
       return _buildNodeWithChildren(aotSnapshotJson);
     } else {
       // TODO(peterdjlee): Investigate why there are leaf nodes with size of null.
-      final int? byteSize = aotSnapshotJson['value'] as int?;
+      final byteSize = aotSnapshotJson['value'] as int?;
       if (byteSize == null) {
         return null;
       }
@@ -403,10 +401,10 @@ class SizeAnalyzer {
     int byteSize, {
     List<_SymbolNode> children = const <_SymbolNode>[],
   }) {
-    final String name = aotSnapshotJson['n']! as String;
-    final Map<String, _SymbolNode> childrenMap = <String, _SymbolNode>{};
+    final name = aotSnapshotJson['n']! as String;
+    final childrenMap = <String, _SymbolNode>{};
 
-    for (final _SymbolNode child in children) {
+    for (final child in children) {
       childrenMap[child.name] = child;
     }
 
@@ -417,11 +415,11 @@ class SizeAnalyzer {
   /// in order to calculate the sum of its children's sizes.
   _SymbolNode? _buildNodeWithChildren(Map<String, Object?> aotSnapshotJson) {
     final List<Object?> rawChildren = aotSnapshotJson['children'] as List<Object?>? ?? <Object?>[];
-    final List<_SymbolNode> symbolNodeChildren = <_SymbolNode>[];
-    int totalByteSize = 0;
+    final symbolNodeChildren = <_SymbolNode>[];
+    var totalByteSize = 0;
 
     // Given a child, build its subtree.
-    for (final Object? child in rawChildren) {
+    for (final child in rawChildren) {
       if (child == null) {
         continue;
       }
@@ -475,7 +473,7 @@ class _SymbolNode {
   }
 
   Map<String, Object?> toJson() {
-    final List<Map<String, Object?>> childrenAsJson = <Map<String, Object?>>[
+    final childrenAsJson = <Map<String, Object?>>[
       for (final _SymbolNode child in children) child.toJson(),
     ];
 

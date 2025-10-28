@@ -168,10 +168,9 @@ void testWidgets(
     // support running tests directly from the editor (where they may have
     // access to only the test name, provided by the analysis server).
     // See https://github.com/flutter/flutter/issues/86659.
-    final String combinedDescription =
-        variationDescription.isNotEmpty
-            ? '$description (variant: $variationDescription)'
-            : description;
+    final String combinedDescription = variationDescription.isNotEmpty
+        ? '$description (variant: $variationDescription)'
+        : description;
     test(
       combinedDescription,
       () {
@@ -879,18 +878,16 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   @override
   void dispatchEvent(PointerEvent event, HitTestResult result) {
     if (event is PointerDownEvent) {
-      final RenderObject innerTarget =
-          result.path
-              .map((HitTestEntry candidate) => candidate.target)
-              .whereType<RenderObject>()
-              .first;
-      final Element? innerTargetElement =
-          binding.renderViews.contains(innerTarget)
-              ? null
-              : _lastWhereOrNull(
-                collectAllElementsFrom(binding.rootElement!, skipOffstage: true),
-                (Element element) => element.renderObject == innerTarget,
-              );
+      final RenderObject innerTarget = result.path
+          .map((HitTestEntry candidate) => candidate.target)
+          .whereType<RenderObject>()
+          .first;
+      final Element? innerTargetElement = binding.renderViews.contains(innerTarget)
+          ? null
+          : _lastWhereOrNull(
+              collectAllElementsFrom(binding.rootElement!, skipOffstage: true),
+              (Element element) => element.renderObject == innerTarget,
+            );
       if (innerTargetElement == null) {
         printToConsole('No widgets found at ${event.position}.');
         return;
@@ -961,8 +958,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           }
 
           if (descendantText != null && numberOfWithTexts < 5) {
-            final Iterable<Element> matches =
-                find.widgetWithText(widget.runtimeType, descendantText).evaluate();
+            final Iterable<Element> matches = find
+                .widgetWithText(widget.runtimeType, descendantText)
+                .evaluate();
             if (matches.length == 1) {
               printToConsole("  find.widgetWithText(${widget.runtimeType}, '$descendantText')");
               numberOfWithTexts += 1;

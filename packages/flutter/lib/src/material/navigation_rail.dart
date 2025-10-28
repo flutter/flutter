@@ -45,7 +45,7 @@ const double _kIndicatorHeight = 32;
 /// Adaptive layouts can build different instances of the [Scaffold] in order to
 /// have a navigation rail for more horizontal layouts and a bottom navigation
 /// bar for more vertical layouts. See
-/// [the adaptive_scaffold.dart sample](https://github.com/flutter/samples/blob/main/experimental/web_dashboard/lib/src/widgets/third_party/adaptive_scaffold.dart)
+/// [the adaptive_scaffold.dart sample](https://github.com/flutter/demos/blob/main/web_dashboard/lib/src/widgets/third_party/adaptive_scaffold.dart)
 /// for an example.
 ///
 /// {@tool dartpad}
@@ -109,6 +109,9 @@ class NavigationRail extends StatefulWidget {
     this.useIndicator,
     this.indicatorColor,
     this.indicatorShape,
+    this.leadingAtTop = true,
+    this.trailingAtBottom = false,
+    this.scrollable = false,
   }) : assert(selectedIndex == null || (0 <= selectedIndex && selectedIndex < destinations.length)),
        assert(elevation == null || elevation > 0),
        assert(minWidth == null || minWidth > 0),
@@ -189,8 +192,12 @@ class NavigationRail extends StatefulWidget {
 
   /// The vertical alignment for the group of [destinations] within the rail.
   ///
-  /// The [NavigationRailDestination]s are grouped together with the [trailing]
-  /// widget, between the [leading] widget and the bottom of the rail.
+  /// The [NavigationRailDestination]s are by default grouped together with the
+  /// [trailing] widget, due to [trailingAtBottom] being `false`. The [leading]
+  /// widget, can also be in the aligned group by setting [leadingAtTop] to
+  /// `false`. If these widgets are not included in the group, they are placed
+  /// at the top and bottom, respectively, of the rail and only the space
+  /// between them is considered for the alignment.
   ///
   /// The value must be between -1.0 and 1.0.
   ///
@@ -315,6 +322,35 @@ class NavigationRail extends StatefulWidget {
   /// that is null, defaults to [StadiumBorder].
   final ShapeBorder? indicatorShape;
 
+  /// Pin the [leading] widget to the top.
+  ///
+  /// If `true`, the [leading] widget is pinned to the top of the
+  /// [NavigationRail]. Otherwise it precedes directly the main group of
+  /// [destinations].
+  ///
+  /// See also [scrollable] for a description of the interplay of these
+  /// parameters.
+  final bool leadingAtTop;
+
+  /// Pin the [trailing] widget to the bottom.
+  ///
+  /// If `true`, the [trailing] widget is pinned to the bottom of the
+  /// [NavigationRail]. Otherwise it follows directly the main group of
+  /// [destinations].
+  ///
+  /// See also [scrollable] for a description of the interplay of these
+  /// parameters.
+  final bool trailingAtBottom;
+
+  /// Whether the main group of items should be scrollable when vertical space
+  /// is insufficient to show all of [destinations], [leading] and [trailing].
+  ///
+  /// If [leadingAtTop] or [trailingAtBottom] are false, [leading] or [trailing]
+  /// widgets, respectively, are part of the main group in addition to
+  /// [destinations]. Otherwise these are statical at the top or bottom,
+  /// respectively.
+  final bool scrollable;
+
   /// Returns the animation that controls the [NavigationRail.extended] state.
   ///
   /// This can be used to synchronize animations in the [leading] or [trailing]
@@ -390,10 +426,9 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     final NavigationRailThemeData navigationRailTheme = NavigationRailTheme.of(context);
-    final NavigationRailThemeData defaults =
-        Theme.of(context).useMaterial3
-            ? _NavigationRailDefaultsM3(context)
-            : _NavigationRailDefaultsM2(context);
+    final NavigationRailThemeData defaults = Theme.of(context).useMaterial3
+        ? _NavigationRailDefaultsM3(context)
+        : _NavigationRailDefaultsM2(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     final Color backgroundColor =
@@ -435,77 +470,85 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     // For backwards compatibility, in M2 the opacity of the unselected icons needs
     // to be set to the default if it isn't in the given theme. This can be removed
     // when Material 3 is the default.
-    final IconThemeData effectiveUnselectedIconTheme =
-        Theme.of(context).useMaterial3
-            ? unselectedIconTheme
-            : unselectedIconTheme.copyWith(
-              opacity: unselectedIconTheme.opacity ?? defaults.unselectedIconTheme!.opacity,
-            );
+    final IconThemeData effectiveUnselectedIconTheme = Theme.of(context).useMaterial3
+        ? unselectedIconTheme
+        : unselectedIconTheme.copyWith(
+            opacity: unselectedIconTheme.opacity ?? defaults.unselectedIconTheme!.opacity,
+          );
 
     final bool isRTLDirection = Directionality.of(context) == TextDirection.rtl;
 
-    return _ExtendedNavigationRailAnimation(
-      animation: _extendedAnimation,
-      child: Semantics(
-        explicitChildNodes: true,
-        child: Material(
-          elevation: elevation,
-          color: backgroundColor,
-          child: SafeArea(
-            right: isRTLDirection,
-            left: !isRTLDirection,
-            child: Column(
-              children: <Widget>[
-                _verticalSpacer,
-                if (widget.leading != null) ...<Widget>[widget.leading!, _verticalSpacer],
-                Expanded(
-                  child: Align(
-                    alignment: Alignment(0, groupAlignment),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        for (int i = 0; i < widget.destinations.length; i += 1)
-                          _RailDestination(
-                            minWidth: minWidth,
-                            minExtendedWidth: minExtendedWidth,
-                            extendedTransitionAnimation: _extendedAnimation,
-                            selected: widget.selectedIndex == i,
-                            icon:
-                                widget.selectedIndex == i
-                                    ? widget.destinations[i].selectedIcon
-                                    : widget.destinations[i].icon,
-                            label: widget.destinations[i].label,
-                            destinationAnimation: _destinationAnimations[i],
-                            labelType: labelType,
-                            iconTheme:
-                                widget.selectedIndex == i
-                                    ? selectedIconTheme
-                                    : effectiveUnselectedIconTheme,
-                            labelTextStyle:
-                                widget.selectedIndex == i
-                                    ? selectedLabelTextStyle
-                                    : unselectedLabelTextStyle,
-                            padding: widget.destinations[i].padding,
-                            useIndicator: useIndicator,
-                            indicatorColor: useIndicator ? indicatorColor : null,
-                            indicatorShape: useIndicator ? indicatorShape : null,
-                            onTap: () {
-                              if (widget.onDestinationSelected != null) {
-                                widget.onDestinationSelected!(i);
-                              }
-                            },
-                            indexLabel: localizations.tabLabel(
-                              tabIndex: i + 1,
-                              tabCount: widget.destinations.length,
-                            ),
-                            disabled: widget.destinations[i].disabled,
-                          ),
-                        if (widget.trailing != null) widget.trailing!,
-                      ],
-                    ),
+    Widget mainGroup = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        if (!widget.leadingAtTop && widget.leading != null) ...<Widget>[
+          widget.leading!,
+          _verticalSpacer,
+        ],
+        for (int i = 0; i < widget.destinations.length; i += 1)
+          _RailDestination(
+            minWidth: minWidth,
+            minExtendedWidth: minExtendedWidth,
+            extendedTransitionAnimation: _extendedAnimation,
+            selected: widget.selectedIndex == i,
+            icon: widget.selectedIndex == i
+                ? widget.destinations[i].selectedIcon
+                : widget.destinations[i].icon,
+            label: widget.destinations[i].label,
+            destinationAnimation: _destinationAnimations[i],
+            labelType: labelType,
+            iconTheme: widget.selectedIndex == i ? selectedIconTheme : effectiveUnselectedIconTheme,
+            labelTextStyle: widget.selectedIndex == i
+                ? selectedLabelTextStyle
+                : unselectedLabelTextStyle,
+            padding: widget.destinations[i].padding,
+            useIndicator: useIndicator,
+            indicatorColor: useIndicator ? indicatorColor : null,
+            indicatorShape: useIndicator ? indicatorShape : null,
+            onTap: () {
+              if (widget.onDestinationSelected != null) {
+                widget.onDestinationSelected!(i);
+              }
+            },
+            indexLabel: localizations.tabLabel(
+              tabIndex: i + 1,
+              tabCount: widget.destinations.length,
+            ),
+            disabled: widget.destinations[i].disabled,
+          ),
+        if (!widget.trailingAtBottom && widget.trailing != null) widget.trailing!,
+      ],
+    );
+
+    if (widget.scrollable) {
+      mainGroup = SingleChildScrollView(child: mainGroup);
+    }
+
+    return Semantics(
+      container: true,
+      child: _ExtendedNavigationRailAnimation(
+        animation: _extendedAnimation,
+        child: Semantics(
+          explicitChildNodes: true,
+          child: Material(
+            elevation: elevation,
+            color: backgroundColor,
+            child: SafeArea(
+              right: isRTLDirection,
+              left: !isRTLDirection,
+              child: Column(
+                children: <Widget>[
+                  _verticalSpacer,
+                  if (widget.leadingAtTop && widget.leading != null) ...<Widget>[
+                    widget.leading!,
+                    _verticalSpacer,
+                  ],
+                  Flexible(
+                    child: Align(alignment: Alignment(0, groupAlignment), child: mainGroup),
                   ),
-                ),
-              ],
+                  if (widget.trailingAtBottom && widget.trailing != null) widget.trailing!,
+                ],
+              ),
             ),
           ),
         ),
@@ -528,8 +571,9 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
       return AnimationController(duration: kThemeAnimationDuration, vsync: this)
         ..addListener(_rebuild);
     });
-    _destinationAnimations =
-        _destinationControllers.map((AnimationController controller) => controller.view).toList();
+    _destinationAnimations = _destinationControllers
+        .map((AnimationController controller) => controller.view)
+        .toList();
     if (widget.selectedIndex != null) {
       _destinationControllers[widget.selectedIndex!].value = 1.0;
     }
@@ -649,17 +693,15 @@ class _RailDestinationState extends State<_RailDestination> {
     bool applyXOffset = false;
 
     final Widget themedIcon = IconTheme(
-      data:
-          widget.disabled
-              ? widget.iconTheme.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.38))
-              : widget.iconTheme,
+      data: widget.disabled
+          ? widget.iconTheme.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.38))
+          : widget.iconTheme,
       child: widget.icon,
     );
     final Widget styledLabel = DefaultTextStyle(
-      style:
-          widget.disabled
-              ? widget.labelTextStyle.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.38))
-              : widget.labelTextStyle,
+      style: widget.disabled
+          ? widget.labelTextStyle.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.38))
+          : widget.labelTextStyle,
       child: widget.label,
     );
 
@@ -670,21 +712,23 @@ class _RailDestinationState extends State<_RailDestination> {
     // vertical offset is used to vertically center the indicator.
     final bool isLargeIconSize =
         widget.iconTheme.size != null && widget.iconTheme.size! > _kIndicatorHeight;
-    final double indicatorVerticalOffset =
-        isLargeIconSize ? (widget.iconTheme.size! - _kIndicatorHeight) / 2 : 0;
+    final double indicatorVerticalOffset = isLargeIconSize
+        ? (widget.iconTheme.size! - _kIndicatorHeight) / 2
+        : 0;
 
     switch (widget.labelType) {
       case NavigationRailLabelType.none:
         // Split the destination spacing across the top and bottom to keep the icon centered.
-        final Widget? spacing =
-            material3 ? const SizedBox(height: _verticalDestinationSpacingM3 / 2) : null;
+        final Widget? spacing = material3
+            ? const SizedBox(height: _verticalDestinationSpacingM3 / 2)
+            : null;
         indicatorOffset = Offset(
           widget.minWidth / 2 + destinationPadding.left,
           _verticalDestinationSpacingM3 / 2 + destinationPadding.top + indicatorVerticalOffset,
         );
         final Widget iconPart = Column(
           children: <Widget>[
-            if (spacing != null) spacing,
+            ?spacing,
             SizedBox(
               width: widget.minWidth,
               height: material3 ? null : widget.minWidth,
@@ -699,7 +743,7 @@ class _RailDestinationState extends State<_RailDestination> {
                 ),
               ),
             ),
-            if (spacing != null) spacing,
+            ?spacing,
           ],
         );
         if (widget.extendedTransitionAnimation.value == 0) {
@@ -722,12 +766,11 @@ class _RailDestinationState extends State<_RailDestination> {
             padding: widget.padding ?? EdgeInsets.zero,
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                minWidth:
-                    lerpDouble(
-                      widget.minWidth,
-                      widget.minExtendedWidth,
-                      widget.extendedTransitionAnimation.value,
-                    )!,
+                minWidth: lerpDouble(
+                  widget.minWidth,
+                  widget.minExtendedWidth,
+                  widget.extendedTransitionAnimation.value,
+                )!,
               ),
               child: ClipRect(
                 child: Row(
@@ -758,22 +801,23 @@ class _RailDestinationState extends State<_RailDestination> {
         }
       case NavigationRailLabelType.selected:
         final double appearingAnimationValue = 1 - _positionAnimation.value;
-        final double verticalPadding =
-            lerpDouble(
-              _verticalDestinationPaddingNoLabel,
-              _verticalDestinationPaddingWithLabel,
-              appearingAnimationValue,
-            )!;
-        final Interval interval =
-            widget.selected ? const Interval(0.25, 0.75) : const Interval(0.75, 1.0);
+        final double verticalPadding = lerpDouble(
+          _verticalDestinationPaddingNoLabel,
+          _verticalDestinationPaddingWithLabel,
+          appearingAnimationValue,
+        )!;
+        final Interval interval = widget.selected
+            ? const Interval(0.25, 0.75)
+            : const Interval(0.75, 1.0);
         final Animation<double> labelFadeAnimation = widget.destinationAnimation.drive(
           CurveTween(curve: interval),
         );
         final double minHeight = material3 ? 0 : widget.minWidth;
         final Widget topSpacing = SizedBox(height: material3 ? 0 : verticalPadding);
         final Widget labelSpacing = SizedBox(
-          height:
-              material3 ? lerpDouble(0, _verticalIconLabelSpacingM3, appearingAnimationValue)! : 0,
+          height: material3
+              ? lerpDouble(0, _verticalIconLabelSpacingM3, appearingAnimationValue)!
+              : 0,
         );
         final Widget bottomSpacing = SizedBox(
           height: material3 ? _verticalDestinationSpacingM3 : verticalPadding,
@@ -878,10 +922,12 @@ class _RailDestinationState extends State<_RailDestination> {
 
     final ColorScheme colors = Theme.of(context).colorScheme;
     final bool primaryColorAlphaModified = colors.primary.alpha < 255.0;
-    final Color effectiveSplashColor =
-        primaryColorAlphaModified ? colors.primary : colors.primary.withOpacity(0.12);
-    final Color effectiveHoverColor =
-        primaryColorAlphaModified ? colors.primary : colors.primary.withOpacity(0.04);
+    final Color effectiveSplashColor = primaryColorAlphaModified
+        ? colors.primary
+        : colors.primary.withOpacity(0.12);
+    final Color effectiveHoverColor = primaryColorAlphaModified
+        ? colors.primary
+        : colors.primary.withOpacity(0.04);
     return Semantics(
       container: true,
       selected: widget.selected,

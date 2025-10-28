@@ -19,12 +19,12 @@ import '../../src/testbed.dart';
 final Platform windowsPlatform = FakePlatform(operatingSystem: 'windows');
 
 void main() {
-  late Testbed testbed;
+  late TestBed testbed;
   late SourceVisitor visitor;
   late Environment environment;
 
   setUp(() {
-    testbed = Testbed(
+    testbed = TestBed(
       setup: () {
         globals.fs.directory('cache').createSync();
         final Directory outputs = globals.fs.directory('outputs')..createSync();
@@ -55,7 +55,7 @@ void main() {
     'can substitute {PROJECT_DIR}/foo',
     () => testbed.run(() {
       globals.fs.file('foo').createSync();
-      const Source fooSource = Source.pattern('{PROJECT_DIR}/foo');
+      const fooSource = Source.pattern('{PROJECT_DIR}/foo');
       fooSource.accept(visitor);
 
       expect(visitor.sources.single.path, globals.fs.path.absolute('foo'));
@@ -66,7 +66,7 @@ void main() {
     'can substitute {OUTPUT_DIR}/foo',
     () => testbed.run(() {
       globals.fs.file('foo').createSync();
-      const Source fooSource = Source.pattern('{OUTPUT_DIR}/foo');
+      const fooSource = Source.pattern('{OUTPUT_DIR}/foo');
       fooSource.accept(visitor);
 
       expect(
@@ -81,7 +81,7 @@ void main() {
     () => testbed.run(() {
       final String path = globals.fs.path.join(environment.buildDir.path, 'bar');
       globals.fs.file(path).createSync();
-      const Source barSource = Source.pattern('{BUILD_DIR}/bar');
+      const barSource = Source.pattern('{BUILD_DIR}/bar');
       barSource.accept(visitor);
 
       expect(visitor.sources.single.path, globals.fs.path.absolute(path));
@@ -93,7 +93,7 @@ void main() {
     () => testbed.run(() {
       final String path = globals.fs.path.join(environment.flutterRootDir.path, 'foo');
       globals.fs.file(path).createSync();
-      const Source barSource = Source.pattern('{FLUTTER_ROOT}/foo');
+      const barSource = Source.pattern('{FLUTTER_ROOT}/foo');
       barSource.accept(visitor);
 
       expect(visitor.sources.single.path, globals.fs.path.absolute(path));
@@ -109,7 +109,7 @@ void main() {
         'foo',
       );
       globals.fs.file(path).createSync(recursive: true);
-      const Source fizzSource = Source.artifact(
+      const fizzSource = Source.artifact(
         Artifact.windowsDesktopPath,
         platform: TargetPlatform.windows_x64,
       );
@@ -122,7 +122,7 @@ void main() {
   test(
     'can substitute {PROJECT_DIR}/*.fizz',
     () => testbed.run(() {
-      const Source fizzSource = Source.pattern('{PROJECT_DIR}/*.fizz');
+      const fizzSource = Source.pattern('{PROJECT_DIR}/*.fizz');
       fizzSource.accept(visitor);
 
       expect(visitor.sources, isEmpty);
@@ -139,7 +139,7 @@ void main() {
   test(
     'can substitute {PROJECT_DIR}/fizz.*',
     () => testbed.run(() {
-      const Source fizzSource = Source.pattern('{PROJECT_DIR}/fizz.*');
+      const fizzSource = Source.pattern('{PROJECT_DIR}/fizz.*');
       fizzSource.accept(visitor);
 
       expect(visitor.sources, isEmpty);
@@ -156,7 +156,7 @@ void main() {
   test(
     'can substitute {PROJECT_DIR}/a*bc',
     () => testbed.run(() {
-      const Source fizzSource = Source.pattern('{PROJECT_DIR}/bc*bc');
+      const fizzSource = Source.pattern('{PROJECT_DIR}/bc*bc');
       fizzSource.accept(visitor);
 
       expect(visitor.sources, isEmpty);
@@ -173,7 +173,7 @@ void main() {
   test(
     'crashes on bad substitute of two **',
     () => testbed.run(() {
-      const Source fizzSource = Source.pattern('{PROJECT_DIR}/*.*bar');
+      const fizzSource = Source.pattern('{PROJECT_DIR}/*.*bar');
 
       globals.fs.file('abcd.bar').createSync();
 
@@ -184,7 +184,7 @@ void main() {
   test(
     "can't substitute foo",
     () => testbed.run(() {
-      const Source invalidBase = Source.pattern('foo');
+      const invalidBase = Source.pattern('foo');
 
       expect(() => invalidBase.accept(visitor), throwsA(isA<InvalidPatternException>()));
     }),
@@ -193,7 +193,7 @@ void main() {
   test(
     'can substitute optional files',
     () => testbed.run(() {
-      const Source missingSource = Source.pattern('{PROJECT_DIR}/foo', optional: true);
+      const missingSource = Source.pattern('{PROJECT_DIR}/foo', optional: true);
 
       expect(globals.fs.file('foo').existsSync(), false);
       missingSource.accept(visitor);
@@ -220,7 +220,7 @@ void main() {
       expect(visitor.sources.single.path, 'c.dart');
       expect(visitor.containsNewDepfile, false);
 
-      final SourceVisitor outputVisitor = SourceVisitor(environment, false);
+      final outputVisitor = SourceVisitor(environment, false);
       outputVisitor.visitDepfile('foo.d');
 
       expect(outputVisitor.sources.single.path, 'a.dart');
@@ -264,8 +264,8 @@ void main() {
   test(
     'Non-local engine builds use the engine.stamp file as an Artifact dependency',
     () => testbed.run(() {
-      final Artifacts artifacts = Artifacts.test();
-      final Environment environment = Environment.test(
+      final artifacts = Artifacts.test();
+      final environment = Environment.test(
         globals.fs.currentDirectory,
         artifacts: artifacts,
         processManager: FakeProcessManager.any(),
@@ -275,7 +275,7 @@ void main() {
       );
       visitor = SourceVisitor(environment);
 
-      const Source fizzSource = Source.artifact(
+      const fizzSource = Source.artifact(
         Artifact.windowsDesktopPath,
         platform: TargetPlatform.windows_x64,
       );
@@ -290,7 +290,7 @@ void main() {
     () => testbed.run(() {
       final String path = globals.fs.file('.flutter-plugins-dependencies').absolute.path;
       globals.fs.file(path).createSync(recursive: true);
-      final Source pluginsSource = Source.fromProject(
+      final pluginsSource = Source.fromProject(
         (FlutterProject project) => project.flutterPluginsDependenciesFile,
       );
       pluginsSource.accept(visitor);
@@ -304,7 +304,7 @@ void main() {
     'can substitute nonexistent project file',
     () => testbed.run(() {
       final String path = globals.fs.file('.flutter-plugins-dependencies').absolute.path;
-      final Source pluginsSource = Source.fromProject(
+      final pluginsSource = Source.fromProject(
         (FlutterProject project) => project.flutterPluginsDependenciesFile,
       );
       pluginsSource.accept(visitor);
@@ -319,7 +319,7 @@ void main() {
     () => testbed.run(() {
       final String path = globals.fs.file('.flutter-plugins-dependencies').absolute.path;
       globals.fs.file(path).createSync(recursive: true);
-      final Source pluginsSource = Source.fromProject(
+      final pluginsSource = Source.fromProject(
         (FlutterProject project) => project.flutterPluginsDependenciesFile,
         optional: true,
       );
@@ -333,7 +333,7 @@ void main() {
   test(
     'skips nonexistent optional project file',
     () => testbed.run(() {
-      final Source pluginsSource = Source.fromProject(
+      final pluginsSource = Source.fromProject(
         (FlutterProject project) => project.flutterPluginsDependenciesFile,
         optional: true,
       );

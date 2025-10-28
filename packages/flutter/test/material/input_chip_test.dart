@@ -7,6 +7,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -40,7 +41,7 @@ Widget selectedInputChip({Color? checkmarkColor, bool enabled = false}) {
     isEnabled: enabled,
     // When [enabled] is true we also need to provide one of the chip
     // callbacks, otherwise the chip would have a 'disabled'
-    // [MaterialState], which is not the intention.
+    // [WidgetState], which is not the intention.
     onSelected: enabled ? (_) {} : null,
     showCheckmark: true,
     checkmarkColor: checkmarkColor,
@@ -128,15 +129,14 @@ void main() {
         child: InputChip(
           onSelected: enabled ? (bool value) {} : null,
           selected: selected,
-          color: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.disabled) &&
-                states.contains(MaterialState.selected)) {
+          color: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+            if (states.contains(WidgetState.disabled) && states.contains(WidgetState.selected)) {
               return disabledSelectedColor;
             }
-            if (states.contains(MaterialState.disabled)) {
+            if (states.contains(WidgetState.disabled)) {
               return disabledColor;
             }
-            if (states.contains(MaterialState.selected)) {
+            if (states.contains(WidgetState.selected)) {
               return selectedColor;
             }
             return backgroundColor;
@@ -214,7 +214,9 @@ void main() {
 
   testWidgets('InputChip can be tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: InputChip(label: Text('input chip')))),
+      const MaterialApp(
+        home: Material(child: InputChip(label: Text('input chip'))),
+      ),
     );
 
     await tester.tap(find.byType(InputChip));
@@ -375,7 +377,9 @@ void main() {
     checkChipMaterialClipBehavior(tester, Clip.none);
 
     await tester.pumpWidget(
-      wrapForChip(child: const InputChip(label: label, clipBehavior: Clip.antiAlias)),
+      wrapForChip(
+        child: const InputChip(label: label, clipBehavior: Clip.antiAlias),
+      ),
     );
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
@@ -429,7 +433,9 @@ void main() {
 
   testWidgets('Delete button is visible on disabled InputChip', (WidgetTester tester) async {
     await tester.pumpWidget(
-      wrapForChip(child: InputChip(isEnabled: false, label: const Text('Label'), onDeleted: () {})),
+      wrapForChip(
+        child: InputChip(isEnabled: false, label: const Text('Label'), onDeleted: () {}),
+      ),
     );
 
     // Delete button should be visible.
@@ -600,12 +606,41 @@ void main() {
     expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
   });
 
+  testWidgets('InputChip has expected default mouse cursor on hover', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapForChip(
+        child: Center(
+          child: InputChip(label: const Text('Chip'), onPressed: () {}),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(10, 10));
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+
+    final Offset chip = tester.getCenter(find.text('Chip'));
+    await gesture.moveTo(chip);
+    await tester.pump();
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+  });
+
   testWidgets('InputChip mouse cursor behavior', (WidgetTester tester) async {
     const SystemMouseCursor customCursor = SystemMouseCursors.grab;
 
     await tester.pumpWidget(
       wrapForChip(
-        child: const Center(child: InputChip(mouseCursor: customCursor, label: Text('Chip'))),
+        child: const Center(
+          child: InputChip(mouseCursor: customCursor, label: Text('Chip')),
+        ),
       ),
     );
 
@@ -680,5 +715,27 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.forbidden,
     );
+  });
+
+  testWidgets('InputChip does not crash at zero area', (WidgetTester tester) async {
+    Future<void> testChip(Widget chip) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(child: SizedBox.shrink(child: chip)),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(InputChip)), Size.zero);
+    }
+
+    await testChip(const InputChip(label: Text('X')));
+    await testChip(
+      const InputChip(
+        label: Text('X'),
+        avatar: CircleAvatar(child: Text('A')),
+      ),
+    );
+    await testChip(InputChip(label: const Text('X'), onDeleted: () {}));
   });
 }

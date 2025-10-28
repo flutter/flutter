@@ -9,19 +9,19 @@ import '../src/common.dart';
 void main() {
   group(SystemClock, () {
     test('can set a fixed time', () {
-      final SystemClock clock = SystemClock.fixed(DateTime(1991, 8, 23));
+      final clock = SystemClock.fixed(DateTime(1991, 8, 23));
       expect(clock.now(), DateTime(1991, 8, 23));
     });
 
     test('can find a time ago', () {
-      final SystemClock clock = SystemClock.fixed(DateTime(1991, 8, 23));
+      final clock = SystemClock.fixed(DateTime(1991, 8, 23));
       expect(clock.ago(const Duration(days: 10)), DateTime(1991, 8, 13));
     });
   });
 
   group('formatting', () {
     test('can round-trip formatted time', () {
-      final DateTime time = DateTime(1991, 7, 31);
+      final time = DateTime(1991, 7, 31);
       expect(time.isUtc, isFalse);
       // formatDateTime() adds a timezone offset to DateTime.toString().
       final String formattedTime = formatDateTime(time);

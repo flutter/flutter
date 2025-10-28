@@ -42,8 +42,9 @@ void doTests() {
       expect(rootChildren[2], domManager.semanticsHost);
       expect(rootChildren[3].tagName, equalsIgnoringCase('style'));
 
-      final List<DomElement> shadowChildren =
-          domManager.renderingHost.childNodes.cast<DomElement>().toList();
+      final List<DomElement> shadowChildren = domManager.renderingHost.childNodes
+          .cast<DomElement>()
+          .toList();
       expect(shadowChildren.length, 2);
       expect(shadowChildren[0], domManager.sceneHost);
       expect(shadowChildren[1].tagName, equalsIgnoringCase('style'));

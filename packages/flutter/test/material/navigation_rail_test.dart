@@ -26,10 +26,14 @@ void main() {
       ),
     );
 
-    final TextStyle actualSelectedTextStyle =
-        tester.renderObject<RenderParagraph>(find.text('Abc')).text.style!;
-    final TextStyle actualUnselectedTextStyle =
-        tester.renderObject<RenderParagraph>(find.text('Def')).text.style!;
+    final TextStyle actualSelectedTextStyle = tester
+        .renderObject<RenderParagraph>(find.text('Abc'))
+        .text
+        .style!;
+    final TextStyle actualUnselectedTextStyle = tester
+        .renderObject<RenderParagraph>(find.text('Def'))
+        .text
+        .style!;
     expect(actualSelectedTextStyle.fontSize, equals(selectedTextStyle.fontSize));
     expect(actualSelectedTextStyle.fontWeight, equals(selectedTextStyle.fontWeight));
     expect(actualUnselectedTextStyle.fontSize, equals(actualUnselectedTextStyle.fontSize));
@@ -2568,6 +2572,24 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Semantics - scrollable', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await _pumpLocalizedTestRail(tester, scrollable: true);
+
+    expect(
+      semantics,
+      hasSemantics(
+        _expectedSemantics(scrollable: true),
+        ignoreId: true,
+        ignoreTransform: true,
+        ignoreRect: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
+
   testWidgets('NavigationRailDestination padding properly applied - NavigationRailLabelType.all', (
     WidgetTester tester,
   ) async {
@@ -3076,7 +3098,6 @@ void main() {
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
       (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
     );
-
     const Rect indicatorRect = Rect.fromLTRB(12.0, 0.0, 68.0, 32.0);
     const Rect includedRect = indicatorRect;
     final Rect excludedRect = includedRect.inflate(10);
@@ -3678,10 +3699,9 @@ void main() {
 
     await buildWidget();
     await tester.pumpAndSettle();
-    final Finder transformFinder =
-        find
-            .descendant(of: find.byType(NavigationIndicator), matching: find.byType(Transform))
-            .last;
+    final Finder transformFinder = find
+        .descendant(of: find.byType(NavigationIndicator), matching: find.byType(Transform))
+        .last;
     Matrix4 transform = tester.widget<Transform>(transformFinder).transform;
     expect(transform.getColumn(0)[0], 0.0);
 
@@ -3957,6 +3977,166 @@ void main() {
     // If the widget manages to layout without throwing an overflow exception,
     // the test passes.
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('NavigationRail can scroll in low height', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery(
+              // Set Screen height with 300
+              data: MediaQuery.of(context).copyWith(size: const Size(800, 300)),
+              child: Scaffold(
+                body: Row(
+                  children: <Widget>[
+                    // Set NavigationRail height with 100
+                    SizedBox(
+                      height: 100,
+                      child: NavigationRail(
+                        selectedIndex: 0,
+                        scrollable: true,
+                        destinations: const <NavigationRailDestination>[
+                          NavigationRailDestination(
+                            icon: Icon(Icons.favorite_border),
+                            selectedIcon: Icon(Icons.favorite),
+                            label: Text('Abc'),
+                          ),
+                          NavigationRailDestination(
+                            icon: Icon(Icons.bookmark_border),
+                            selectedIcon: Icon(Icons.bookmark),
+                            label: Text('Def'),
+                          ),
+                          NavigationRailDestination(
+                            icon: Icon(Icons.star_border),
+                            selectedIcon: Icon(Icons.star),
+                            label: Text('Ghi'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Expanded(child: Text('body')),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    scrollable.position.jumpTo(500.0);
+    expect(scrollable.position.pixels, equals(500.0));
+  });
+
+  testWidgets(
+    'NavigationRail leading widget is at top and trailing widget is at last destination (defaults)',
+    (WidgetTester tester) async {
+      const Key leadingKey = Key('leading');
+      const Key trailingKey = Key('trailing');
+      tester.view.physicalSize = const Size(800, 600);
+      tester.view.devicePixelRatio = 1.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return Scaffold(
+                body: Row(
+                  children: <Widget>[
+                    SizedBox(
+                      width: 140.0,
+                      child: NavigationRail(
+                        selectedIndex: 0,
+                        extended: true,
+                        groupAlignment: 0.0,
+                        leading: const SizedBox(key: leadingKey, height: 50),
+                        trailing: const SizedBox(key: trailingKey, height: 50),
+                        destinations: const <NavigationRailDestination>[
+                          NavigationRailDestination(icon: Icon(Icons.favorite), label: Text('Abc')),
+                          NavigationRailDestination(icon: Icon(Icons.bookmark), label: Text('Def')),
+                          NavigationRailDestination(icon: Icon(Icons.star), label: Text('Ghi')),
+                        ],
+                      ),
+                    ),
+                    const Expanded(child: Text('body')),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      final Rect leadingRect = tester.getRect(find.byKey(leadingKey));
+      final Rect trailingRect = tester.getRect(find.byKey(trailingKey));
+      final Rect firstDestRect = tester.getRect(
+        find.ancestor(of: find.byIcon(Icons.favorite), matching: find.byType(Semantics)).first,
+      );
+      final Rect lastDestRect = tester.getRect(
+        find.ancestor(of: find.byIcon(Icons.star), matching: find.byType(Semantics)).first,
+      );
+
+      expect(leadingRect.top, 8);
+      expect(firstDestRect.top - leadingRect.bottom, greaterThan(100));
+      expect(trailingRect.top - lastDestRect.bottom, 0);
+      expect(trailingRect.bottom, lessThan(500));
+    },
+  );
+
+  testWidgets('NavigationRail leadingAtTop set to false and trailingAtBottom to true', (
+    WidgetTester tester,
+  ) async {
+    const Key leadingKey = Key('leading');
+    const Key trailingKey = Key('trailing');
+    tester.view.physicalSize = const Size(800, 600);
+    tester.view.devicePixelRatio = 1.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              body: Row(
+                children: <Widget>[
+                  SizedBox(
+                    width: 140.0,
+                    child: NavigationRail(
+                      selectedIndex: 0,
+                      extended: true,
+                      groupAlignment: 0.0,
+                      leadingAtTop: false,
+                      trailingAtBottom: true,
+                      leading: const SizedBox(key: leadingKey, height: 50),
+                      trailing: const SizedBox(key: trailingKey, height: 50),
+                      destinations: const <NavigationRailDestination>[
+                        NavigationRailDestination(icon: Icon(Icons.favorite), label: Text('Abc')),
+                        NavigationRailDestination(icon: Icon(Icons.bookmark), label: Text('Def')),
+                        NavigationRailDestination(icon: Icon(Icons.star), label: Text('Ghi')),
+                      ],
+                    ),
+                  ),
+                  const Expanded(child: Text('body')),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final Rect leadingRect = tester.getRect(find.byKey(leadingKey));
+    final Rect trailingRect = tester.getRect(find.byKey(trailingKey));
+    final Rect firstDestRect = tester.getRect(
+      find.ancestor(of: find.byIcon(Icons.favorite), matching: find.byType(Semantics)).first,
+    );
+    final Rect lastDestRect = tester.getRect(
+      find.ancestor(of: find.byIcon(Icons.star), matching: find.byType(Semantics)).first,
+    );
+
+    expect(leadingRect.top, greaterThan(100));
+    expect(firstDestRect.top - leadingRect.bottom, 8);
+    expect(trailingRect.top - lastDestRect.bottom, greaterThan(100));
+    expect(trailingRect.bottom, 600);
   });
 
   group('Material 2', () {
@@ -5947,9 +6127,67 @@ void main() {
       expect(updatedWidthRTL, defaultWidth + safeAreaPadding);
     });
   }); // End Material 2 group
+
+  testWidgets('NavigationRail does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: NavigationRail(
+              destinations: const <NavigationRailDestination>[
+                NavigationRailDestination(icon: Icon(Icons.abc), label: Text('X')),
+              ],
+              selectedIndex: 0,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(NavigationRail)), Size.zero);
+  });
 }
 
-TestSemantics _expectedSemantics() {
+TestSemantics _expectedSemantics({bool scrollable = false}) {
+  List<TestSemantics> destinations = <TestSemantics>[
+    TestSemantics(
+      flags: <SemanticsFlag>[
+        SemanticsFlag.hasSelectedState,
+        SemanticsFlag.isSelected,
+        SemanticsFlag.isFocusable,
+      ],
+      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+      label: 'Abc\nTab 1 of 4',
+      textDirection: TextDirection.ltr,
+    ),
+    TestSemantics(
+      flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.hasSelectedState],
+      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+      label: 'Def\nTab 2 of 4',
+      textDirection: TextDirection.ltr,
+    ),
+    TestSemantics(
+      flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.hasSelectedState],
+      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+      label: 'Ghi\nTab 3 of 4',
+      textDirection: TextDirection.ltr,
+    ),
+    TestSemantics(
+      flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.hasSelectedState],
+      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+      label: 'Jkl\nTab 4 of 4',
+      textDirection: TextDirection.ltr,
+    ),
+  ];
+
+  if (scrollable) {
+    destinations = <TestSemantics>[
+      TestSemantics(
+        flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+        children: destinations,
+      ),
+    ];
+  }
+
   return TestSemantics.root(
     children: <TestSemantics>[
       TestSemantics(
@@ -5960,43 +6198,7 @@ TestSemantics _expectedSemantics() {
               TestSemantics(
                 flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                 children: <TestSemantics>[
-                  TestSemantics(
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.hasSelectedState,
-                      SemanticsFlag.isSelected,
-                      SemanticsFlag.isFocusable,
-                    ],
-                    actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                    label: 'Abc\nTab 1 of 4',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.isFocusable,
-                      SemanticsFlag.hasSelectedState,
-                    ],
-                    actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                    label: 'Def\nTab 2 of 4',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.isFocusable,
-                      SemanticsFlag.hasSelectedState,
-                    ],
-                    actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                    label: 'Ghi\nTab 3 of 4',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  TestSemantics(
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.isFocusable,
-                      SemanticsFlag.hasSelectedState,
-                    ],
-                    actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                    label: 'Jkl\nTab 4 of 4',
-                    textDirection: TextDirection.ltr,
-                  ),
+                  TestSemantics(children: destinations),
                   TestSemantics(label: 'body', textDirection: TextDirection.ltr),
                 ],
               ),
@@ -6049,7 +6251,12 @@ Future<void> _pumpNavigationRail(
             minScaleFactor: textScaleFactor,
             maxScaleFactor: textScaleFactor,
             child: Scaffold(
-              body: Row(children: <Widget>[navigationRail, const Expanded(child: Text('body'))]),
+              body: Row(
+                children: <Widget>[
+                  navigationRail,
+                  const Expanded(child: Text('body')),
+                ],
+              ),
             ),
           );
         },
@@ -6062,6 +6269,7 @@ Future<void> _pumpLocalizedTestRail(
   WidgetTester tester, {
   NavigationRailLabelType? labelType,
   bool extended = false,
+  bool scrollable = false,
 }) async {
   await tester.pumpWidget(
     Localizations(
@@ -6079,6 +6287,7 @@ Future<void> _pumpLocalizedTestRail(
                 extended: extended,
                 destinations: _destinations(),
                 labelType: labelType,
+                scrollable: scrollable,
               ),
               const Expanded(child: Text('body')),
             ],
@@ -6143,7 +6352,14 @@ Widget _buildWidget(Widget child, {bool useMaterial3 = true, bool isRTL = false}
     theme: ThemeData(useMaterial3: useMaterial3),
     home: Directionality(
       textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
-      child: Scaffold(body: Row(children: <Widget>[child, const Expanded(child: Text('body'))])),
+      child: Scaffold(
+        body: Row(
+          children: <Widget>[
+            child,
+            const Expanded(child: Text('body')),
+          ],
+        ),
+      ),
     ),
   );
 }

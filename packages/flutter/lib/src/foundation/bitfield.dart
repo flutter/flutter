@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '_bitfield_io.dart' if (dart.library.js_util) '_bitfield_web.dart' as bitfield;
+import '_bitfield_io.dart' if (dart.library.js_interop) '_bitfield_web.dart' as bitfield;
 
 /// The largest SMI value.
 ///

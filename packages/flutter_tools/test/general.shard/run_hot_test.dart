@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -47,19 +46,17 @@ void main() {
     testUsingContext(
       'kills the test device',
       () async {
-        final HotRunner runner = HotRunner(
+        final runner = HotRunner(
           <FlutterDevice>[flutterDevice],
           target: 'main.dart',
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
           analytics: _FakeAnalytics(),
-          devtoolsHandler: createNoOpHandler,
         );
 
         await runner.run();
         await runner.cleanupAfterSignal();
         expect(flutterDevice.wasExited, true);
         expect((flutterDevice.device.dds as FakeDartDevelopmentService).wasShutdown, true);
-        expect((runner.residentDevtoolsHandler! as NoOpDevtoolsHandler).wasShutdown, true);
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -70,7 +67,7 @@ void main() {
     testUsingContext(
       'kill with a detach keeps the test device running',
       () async {
-        final HotRunner runner = HotRunner(
+        final runner = HotRunner(
           <FlutterDevice>[flutterDevice],
           target: 'main.dart',
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
@@ -91,7 +88,7 @@ void main() {
     testUsingContext(
       'kill on an attached device keeps the test device running',
       () async {
-        final HotRunner runner = HotRunner(
+        final runner = HotRunner(
           <FlutterDevice>[flutterDevice],
           target: 'main.dart',
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
@@ -161,7 +158,7 @@ class _FakeHotCompatibleFlutterDevice extends Fake implements FlutterDevice {
     wasExited = true;
   }
 
-  bool wasExited = false;
+  var wasExited = false;
 }
 
 class _FakeFlutterVmService extends Fake implements FlutterVmService {
@@ -175,7 +172,7 @@ class _FakeVmService extends Fake implements vm_service.VmService {
 }
 
 class _FakeVm extends Fake implements vm_service.VM {
-  final List<vm_service.IsolateRef> _isolates = <vm_service.IsolateRef>[];
+  final _isolates = <vm_service.IsolateRef>[];
 
   @override
   List<vm_service.IsolateRef>? get isolates => _isolates;

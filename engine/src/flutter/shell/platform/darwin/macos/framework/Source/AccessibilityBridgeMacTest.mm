@@ -99,8 +99,10 @@ TEST_F(AccessibilityBridgeMacWindowTest, SendsAccessibilityCreateNotificationFlu
   auto bridge = std::static_pointer_cast<AccessibilityBridgeMacSpy>(
       viewController.accessibilityBridge.lock());
   FlutterSemanticsNode2 root;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   root.id = 0;
-  root.flags = static_cast<FlutterSemanticsFlag>(0);
+  root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
@@ -112,6 +114,7 @@ TEST_F(AccessibilityBridgeMacWindowTest, SendsAccessibilityCreateNotificationFlu
   root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
@@ -157,9 +160,11 @@ TEST_F(AccessibilityBridgeMacWindowTest, NonZeroRootNodeId) {
       viewController.accessibilityBridge.lock());
 
   FlutterSemanticsNode2 node1;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   std::vector<int32_t> node1_children{2};
   node1.id = 1;
-  node1.flags = static_cast<FlutterSemanticsFlag>(0);
+  node1.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   node1.actions = static_cast<FlutterSemanticsAction>(0);
   node1.text_selection_base = -1;
   node1.text_selection_extent = -1;
@@ -173,10 +178,12 @@ TEST_F(AccessibilityBridgeMacWindowTest, NonZeroRootNodeId) {
   node1.children_in_traversal_order = node1_children.data();
   node1.children_in_hit_test_order = node1_children.data();
   node1.custom_accessibility_actions_count = 0;
+  node1.identifier = "";
 
   FlutterSemanticsNode2 node2;
   node2.id = 2;
-  node2.flags = static_cast<FlutterSemanticsFlag>(0);
+  node2.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   node2.actions = static_cast<FlutterSemanticsAction>(0);
   node2.text_selection_base = -1;
   node2.text_selection_extent = -1;
@@ -188,6 +195,7 @@ TEST_F(AccessibilityBridgeMacWindowTest, NonZeroRootNodeId) {
   node2.tooltip = "";
   node2.child_count = 0;
   node2.custom_accessibility_actions_count = 0;
+  node2.identifier = "";
 
   bridge->AddFlutterSemanticsNodeUpdate(node1);
   bridge->AddFlutterSemanticsNodeUpdate(node2);
@@ -220,8 +228,10 @@ TEST_F(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhe
   auto bridge = std::static_pointer_cast<AccessibilityBridgeMacSpy>(
       viewController.accessibilityBridge.lock());
   FlutterSemanticsNode2 root;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   root.id = 0;
-  root.flags = static_cast<FlutterSemanticsFlag>(0);
+  root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
@@ -233,6 +243,7 @@ TEST_F(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhe
   root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
@@ -266,8 +277,10 @@ TEST_F(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhe
   auto bridge = std::static_pointer_cast<AccessibilityBridgeMacSpy>(
       viewController.accessibilityBridge.lock());
   FlutterSemanticsNode2 root;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   root.id = 0;
-  root.flags = static_cast<FlutterSemanticsFlag>(0);
+  root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
@@ -279,6 +292,7 @@ TEST_F(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhe
   root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();

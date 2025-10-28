@@ -8,8 +8,7 @@
         "definition files."
     ],
     "luci_flags": {
-      "delay_collect_builds": true,
-      "parallel_download_builds": true
+      "upload_content_hash": true
     },
     "builds": [
         {
@@ -124,6 +123,14 @@
                     "out/docs"
                 ],
                 "script": "flutter/tools/gen_docs.py"
+            },
+            {
+                "name": "engine-stamp",
+                "parameters": [
+                    "stamp"
+                ],
+                "script": "flutter/tools/engine_tool/bin/et.dart",
+                "language": "dart"
             }
         ]
     },
@@ -151,6 +158,11 @@
         {
             "source": "out/docs/impeller-docs.zip",
             "destination": "impeller-docs.zip",
+            "realm": "production"
+        },
+        {
+            "source": "out/engine_stamp.json",
+            "destination": "engine_stamp.json",
             "realm": "production"
         }
     ]

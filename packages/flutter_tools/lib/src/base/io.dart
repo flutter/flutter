@@ -47,7 +47,6 @@ import 'dart:io'
         StdinException,
         Stdout,
         StdoutException,
-        exit,
         pid,
         stderr,
         stdin,
@@ -58,7 +57,6 @@ import 'package:meta/meta.dart';
 
 import 'async_guard.dart';
 import 'platform.dart';
-import 'process.dart';
 
 export 'dart:io'
     show
@@ -114,54 +112,6 @@ export 'dart:io'
         // stdout,           NO! Use `io.dart`
         systemEncoding;
 
-/// Exits the process with the given [exitCode].
-typedef ExitFunction = void Function(int exitCode);
-
-const ExitFunction _defaultExitFunction = io.exit;
-
-ExitFunction _exitFunction = _defaultExitFunction;
-
-/// Exits the process.
-///
-/// Throws [AssertionError] if assertions are enabled and the dart:io exit
-/// is still active when called. This may indicate exit was called in
-/// a test without being configured correctly.
-///
-/// This is analogous to the `exit` function in `dart:io`, except that this
-/// function may be set to a testing-friendly value by calling
-/// [setExitFunctionForTests] (and then restored to its default implementation
-/// with [restoreExitFunction]). The default implementation delegates to
-/// `dart:io`.
-ExitFunction get exit {
-  assert(
-    _exitFunction != io.exit || !_inUnitTest(),
-    'io.exit was called with assertions active in a unit test',
-  );
-  return _exitFunction;
-}
-
-// Whether the tool is executing in a unit test.
-bool _inUnitTest() {
-  return Zone.current[#test.declarer] != null;
-}
-
-/// Sets the [exit] function to a function that throws an exception rather
-/// than exiting the process; this is intended for testing purposes.
-@visibleForTesting
-void setExitFunctionForTests([ExitFunction? exitFunction]) {
-  _exitFunction =
-      exitFunction ??
-      (int exitCode) {
-        throw ProcessExit(exitCode, immediate: true);
-      };
-}
-
-/// Restores the [exit] function to the `dart:io` implementation.
-@visibleForTesting
-void restoreExitFunction() {
-  _exitFunction = _defaultExitFunction;
-}
-
 /// A portable version of [io.ProcessSignal].
 ///
 /// Listening on signals that don't exist on the current platform is just a
@@ -169,7 +119,7 @@ void restoreExitFunction() {
 /// non-existent signals throws an exception.
 ///
 /// This class does NOT implement io.ProcessSignal, because that class uses
-/// private fields. This means it cannot be used with, e.g., [Process.killPid].
+/// private fields. This means it cannot be used with, e.g., [io.Process.killPid].
 /// Alternative implementations of the relevant methods that take
 /// [ProcessSignal] instances are available on this class (e.g. "send").
 class ProcessSignal {
@@ -184,8 +134,8 @@ class ProcessSignal {
   static const ProcessSignal sigterm = PosixProcessSignal(io.ProcessSignal.sigterm);
   static const ProcessSignal sigusr1 = PosixProcessSignal(io.ProcessSignal.sigusr1);
   static const ProcessSignal sigusr2 = PosixProcessSignal(io.ProcessSignal.sigusr2);
-  static const ProcessSignal sigint = ProcessSignal(io.ProcessSignal.sigint);
-  static const ProcessSignal sigkill = ProcessSignal(io.ProcessSignal.sigkill);
+  static const sigint = ProcessSignal(io.ProcessSignal.sigint);
+  static const sigkill = ProcessSignal(io.ProcessSignal.sigkill);
 
   final io.ProcessSignal _delegate;
   final Platform _platform;
@@ -225,7 +175,7 @@ class ProcessSignal {
 
 /// A [ProcessSignal] that is only available on Posix platforms.
 ///
-/// Listening to a [_PosixProcessSignal] is a no-op on Windows.
+/// Listening to a [PosixProcessSignal] is a no-op on Windows.
 @visibleForTesting
 class PosixProcessSignal extends ProcessSignal {
   const PosixProcessSignal(super.wrappedSignal, {@visibleForTesting super.platform});
@@ -267,8 +217,8 @@ class Stdio {
   // These flags exist to remember when the done Futures on stdout and stderr
   // complete to avoid trying to write to a closed stream sink, which would
   // generate a [StateError].
-  bool _stdoutDone = false;
-  bool _stderrDone = false;
+  var _stdoutDone = false;
+  var _stderrDone = false;
 
   Stream<List<int>> get stdin => io.stdin;
 
@@ -325,7 +275,7 @@ class Stdio {
     if (stdin is! io.Stdin) {
       return _stdinHasTerminal = false;
     }
-    final io.Stdin ioStdin = stdin as io.Stdin;
+    final ioStdin = stdin as io.Stdin;
     if (!ioStdin.hasTerminal) {
       return _stdinHasTerminal = false;
     }
@@ -432,10 +382,10 @@ class _TestProcessInfo implements ProcessInfo {
   final FileSystem _fileSystem;
 
   @override
-  int currentRss = 1000;
+  var currentRss = 1000;
 
   @override
-  int maxRss = 2000;
+  var maxRss = 2000;
 
   @override
   File writePidFile(String pidFile) {
@@ -482,8 +432,8 @@ void resetNetworkInterfaceLister() {
   _networkInterfaceListerOverride = null;
 }
 
-/// This calls [NetworkInterface.list] from `dart:io` unless it is overridden by
-/// [setNetworkInterfaceLister] for a test. If it is overridden for a test,
+/// This calls [io.NetworkInterface.list] from `dart:io` unless it is overridden
+/// by [setNetworkInterfaceLister] for a test. If it is overridden for a test,
 /// it should be reset with [resetNetworkInterfaceLister].
 Future<List<NetworkInterface>> listNetworkInterfaces({
   bool includeLoopback = false,

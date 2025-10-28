@@ -97,7 +97,7 @@ class TextButtonTheme extends InheritedTheme {
   /// The configuration of this theme.
   final TextButtonThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [TextButtonThemeData] from the closest ancestor [TextButtonTheme].
   ///
   /// If there is no enclosing [TextButtonTheme] widget, then
   /// [ThemeData.textButtonTheme] is used.
@@ -108,8 +108,8 @@ class TextButtonTheme extends InheritedTheme {
   /// TextButtonThemeData theme = TextButtonTheme.of(context);
   /// ```
   static TextButtonThemeData of(BuildContext context) {
-    final TextButtonTheme? buttonTheme =
-        context.dependOnInheritedWidgetOfExactType<TextButtonTheme>();
+    final TextButtonTheme? buttonTheme = context
+        .dependOnInheritedWidgetOfExactType<TextButtonTheme>();
     return buttonTheme?.data ?? Theme.of(context).textButtonTheme;
   }
 

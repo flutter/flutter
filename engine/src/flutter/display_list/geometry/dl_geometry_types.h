@@ -6,7 +6,6 @@
 #define FLUTTER_DISPLAY_LIST_GEOMETRY_DL_GEOMETRY_TYPES_H_
 
 #include "flutter/impeller/geometry/matrix.h"
-#include "flutter/impeller/geometry/path.h"
 #include "flutter/impeller/geometry/rect.h"
 #include "flutter/impeller/geometry/round_rect.h"
 #include "flutter/impeller/geometry/round_superellipse.h"
@@ -21,6 +20,7 @@ using DlRadians = impeller::Radians;
 
 using DlPoint = impeller::Point;
 using DlVector2 = impeller::Vector2;
+using DlVector3 = impeller::Vector3;
 using DlIPoint = impeller::IPoint32;
 using DlSize = impeller::Size;
 using DlISize = impeller::ISize32;

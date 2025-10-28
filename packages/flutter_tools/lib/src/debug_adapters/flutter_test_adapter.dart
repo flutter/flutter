@@ -39,12 +39,12 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
   /// breakpoints, and resume.
   @override
   Future<void> launchImpl() async {
-    final FlutterLaunchRequestArguments args = this.args as FlutterLaunchRequestArguments;
+    final args = this.args as FlutterLaunchRequestArguments;
 
     final bool debug = enableDebugger;
     final String? program = args.program;
 
-    final List<String> toolArgs = <String>[
+    final toolArgs = <String>[
       'test',
       '--machine',
       if (!enableFlutterDds) '--no-dds',
@@ -64,12 +64,7 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
       toolArgs.removeRange(0, math.min(removeArgs, toolArgs.length));
     }
 
-    final List<String> processArgs = <String>[
-      ...toolArgs,
-      ...?args.toolArgs,
-      if (program != null) program,
-      ...?args.args,
-    ];
+    final processArgs = <String>[...toolArgs, ...?args.toolArgs, ?program, ...?args.args];
 
     await launchAsProcess(executable: executable, processArgs: processArgs, env: args.env);
 
@@ -89,7 +84,7 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
   /// Handles the Flutter process exiting, terminating the debug session if it has not already begun terminating.
   @override
   void handleExitCode(int code) {
-    final String codeSuffix = code == 0 ? '' : ' ($code)';
+    final codeSuffix = code == 0 ? '' : ' ($code)';
     logger?.call('Process exited ($code)');
     handleSessionTerminate(codeSuffix);
   }
@@ -136,8 +131,8 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
     // Check for valid flutter_tools JSON output (1) first.
     final Map<String, Object?>? flutterPayload =
         jsonData is List && jsonData.length == 1 && jsonData.first is Map<String, Object?>
-            ? jsonData.first as Map<String, Object?>
-            : null;
+        ? jsonData.first as Map<String, Object?>
+        : null;
     final Object? event = flutterPayload?['event'];
     final Object? params = flutterPayload?['params'];
 
@@ -154,7 +149,7 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
 
   /// Handles the test.processStarted event from Flutter that provides the VM Service URL.
   void _handleTestStartedProcess(Map<String, Object?> params) {
-    final String? vmServiceUriString = params['vmServiceUri'] as String?;
+    final vmServiceUriString = params['vmServiceUri'] as String?;
     // For no-debug mode, this event may be still sent so ignore it if we know
     // we're not debugging, or its URI is null.
     if (!enableDebugger || vmServiceUriString == null) {

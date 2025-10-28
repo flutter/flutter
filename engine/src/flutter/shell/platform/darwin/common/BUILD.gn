@@ -34,12 +34,29 @@ config("test_config") {
     _platform_path = ios_platform_path
   } else if (is_mac) {
     _platform_path = mac_platform_path
+    cflags += [ "-mmacosx-version-min=$mac_testing_deployment_target" ]
+    ldflags = [ "-mmacosx-version-min=$mac_testing_deployment_target" ]
   }
   cflags += [ "-F$_platform_path/Developer/Library/Frameworks" ]
   swiftflags = [ "-F$_platform_path/Developer/Library/Frameworks" ]
   include_dirs = [ "$_platform_path/Developer/usr/lib" ]
   framework_dirs = [ "$_platform_path/Developer/Library/Frameworks" ]
   lib_dirs = [ "$_platform_path/Developer/usr/lib" ]
+}
+
+config("swift_testing_config") {
+  if (is_ios) {
+    _platform_path = ios_platform_path
+  } else if (is_mac) {
+    _platform_path = mac_platform_path
+  }
+  _platform_framework_path =
+      rebase_path("$_platform_path/Developer/Library/Frameworks", root_out_dir)
+  ldflags = [
+    "-F$_platform_framework_path",
+    "-Wl,-rpath,@executable_path/$_platform_framework_path",
+  ]
+  frameworks = [ "Testing.framework" ]
 }
 
 source_set("common") {
@@ -107,6 +124,17 @@ config("framework_relative_headers") {
   include_dirs = [ "framework/Headers" ]
 }
 
+source_set("InternalFlutterSwiftCommon") {
+  # Targets should only ever depend on the framework target.
+  # This allows code in this target to use types declared in the bridging
+  # header, but defined in the framework, while avoiding linking errors.
+  visibility = [ ":framework_common" ]
+  configs += [ ":config" ]
+  bridge_header = "InternalFlutterSwiftCommon-Bridging-Header.h"
+  sources = [ "framework/Source/Logger.swift" ]
+  public = framework_common_headers
+}
+
 # Framework code shared between iOS and macOS.
 source_set("framework_common") {
   cflags_objc = flutter_cflags_objc
@@ -136,15 +164,58 @@ source_set("framework_common") {
   ]
 
   deps = [ "//flutter/fml" ]
+  public_deps = [ ":InternalFlutterSwiftCommon" ]
 }
 
 test_fixtures("framework_common_fixtures") {
   fixtures = []
 }
 
+# Utilities written in Swift, for use in unit tests.
+source_set("test_utils_swift") {
+  testonly = true
+  public_configs = [
+    ":config",
+    ":test_config",
+  ]
+  sources = [ "framework/Source/LoggerTestUtils.swift" ]
+  deps = [ ":framework_common" ]
+}
+
+# Implements a main entry point for Swift Testing tests.
+# To build a Swift Testing executable, add this target to `deps`.
+source_set("swift_testing_main") {
+  testonly = true
+  public_configs = [
+    ":config",
+    ":test_config",
+    ":swift_testing_config",
+  ]
+  sources = [
+    "SwiftTestingMain.swift",
+    "SwiftTestingRunner.swift",
+  ]
+}
+
+executable("framework_common_swift_unittests") {
+  testonly = true
+  public_configs = [
+    ":config",
+    ":test_config",
+    ":swift_testing_config",
+  ]
+  sources = [ "framework/Source/LoggerTest.swift" ]
+  deps = [
+    ":framework_common",
+    ":swift_testing_main",
+    ":test_utils_swift",
+  ]
+}
+
 # Unit tests for channels.
 executable("framework_common_unittests") {
   testonly = true
+  configs += [ ":test_config" ]
   cflags_objc = flutter_cflags_objc
   cflags_objcc = flutter_cflags_objcc
   ldflags = [ "-ObjC" ]
@@ -161,7 +232,7 @@ executable("framework_common_unittests") {
     ":framework_common_fixtures",
     "$dart_src/runtime:libdart_jit",
     "//flutter/testing",
-    "//flutter/third_party/ocmock:ocmock",
+    "//flutter/third_party/ocmock",
   ]
 
   public_configs = [ "//flutter:config" ]

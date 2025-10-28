@@ -16,34 +16,34 @@ namespace impeller {
 struct RoundRect {
   RoundRect() = default;
 
-  constexpr static RoundRect MakeRect(const Rect& rect) {
+  inline static RoundRect MakeRect(const Rect& rect) {
     return MakeRectRadii(rect, RoundingRadii());
   }
 
-  constexpr static RoundRect MakeOval(const Rect& rect) {
+  inline static RoundRect MakeOval(const Rect& rect) {
     return MakeRectRadii(rect, RoundingRadii::MakeRadii(rect.GetSize() * 0.5f));
   }
 
-  constexpr static RoundRect MakeRectRadius(const Rect& rect, Scalar radius) {
+  inline static RoundRect MakeRectRadius(const Rect& rect, Scalar radius) {
     return MakeRectRadii(rect, RoundingRadii::MakeRadius(radius));
   }
 
-  constexpr static RoundRect MakeRectXY(const Rect& rect,
-                                        Scalar x_radius,
-                                        Scalar y_radius) {
+  inline static RoundRect MakeRectXY(const Rect& rect,
+                                     Scalar x_radius,
+                                     Scalar y_radius) {
     return MakeRectRadii(rect,
                          RoundingRadii::MakeRadii(Size(x_radius, y_radius)));
   }
 
-  constexpr static RoundRect MakeRectXY(const Rect& rect, Size corner_radii) {
+  inline static RoundRect MakeRectXY(const Rect& rect, Size corner_radii) {
     return MakeRectRadii(rect, RoundingRadii::MakeRadii(corner_radii));
   }
 
-  constexpr static RoundRect MakeNinePatch(const Rect& rect,
-                                           Scalar left,
-                                           Scalar top,
-                                           Scalar right,
-                                           Scalar bottom) {
+  inline static RoundRect MakeNinePatch(const Rect& rect,
+                                        Scalar left,
+                                        Scalar top,
+                                        Scalar right,
+                                        Scalar bottom) {
     return MakeRectRadii(
         rect, RoundingRadii::MakeNinePatch(left, top, right, bottom));
   }
@@ -51,6 +51,7 @@ struct RoundRect {
   static RoundRect MakeRectRadii(const Rect& rect, const RoundingRadii& radii);
 
   constexpr const Rect& GetBounds() const { return bounds_; }
+
   constexpr const RoundingRadii& GetRadii() const { return radii_; }
 
   [[nodiscard]] constexpr bool IsFinite() const {
@@ -85,7 +86,7 @@ struct RoundRect {
   [[nodiscard]] bool Contains(const Point& p) const;
 
   /// @brief  Returns a new round rectangle translated by the given offset.
-  [[nodiscard]] constexpr RoundRect Shift(Scalar dx, Scalar dy) const {
+  [[nodiscard]] inline RoundRect Shift(Scalar dx, Scalar dy) const {
     // Just in case, use the factory rather than the internal constructor
     // as shifting the rectangle may increase/decrease its bit precision
     // so we should re-validate the radii to the newly located rectangle.
@@ -94,10 +95,10 @@ struct RoundRect {
 
   /// @brief  Returns a round rectangle with expanded edges. Negative expansion
   ///         results in shrinking.
-  [[nodiscard]] constexpr RoundRect Expand(Scalar left,
-                                           Scalar top,
-                                           Scalar right,
-                                           Scalar bottom) const {
+  [[nodiscard]] inline RoundRect Expand(Scalar left,
+                                        Scalar top,
+                                        Scalar right,
+                                        Scalar bottom) const {
     // Use the factory rather than the internal constructor as the changing
     // size of the rectangle requires that we re-validate the radii to the
     // newly sized rectangle.
@@ -106,8 +107,8 @@ struct RoundRect {
 
   /// @brief  Returns a round rectangle with expanded edges. Negative expansion
   ///         results in shrinking.
-  [[nodiscard]] constexpr RoundRect Expand(Scalar horizontal,
-                                           Scalar vertical) const {
+  [[nodiscard]] inline RoundRect Expand(Scalar horizontal,
+                                        Scalar vertical) const {
     // Use the factory rather than the internal constructor as the changing
     // size of the rectangle requires that we re-validate the radii to the
     // newly sized rectangle.
@@ -116,7 +117,7 @@ struct RoundRect {
 
   /// @brief  Returns a round rectangle with expanded edges. Negative expansion
   ///         results in shrinking.
-  [[nodiscard]] constexpr RoundRect Expand(Scalar amount) const {
+  [[nodiscard]] inline RoundRect Expand(Scalar amount) const {
     // Use the factory rather than the internal constructor as the changing
     // size of the rectangle requires that we re-validate the radii to the
     // newly sized rectangle.
@@ -127,16 +128,18 @@ struct RoundRect {
     return bounds_ == rr.bounds_ && radii_ == rr.radii_;
   }
 
-  [[nodiscard]] constexpr bool operator!=(const RoundRect& r) const {
-    return !(*this == r);
-  }
-
  private:
   constexpr RoundRect(const Rect& bounds, const RoundingRadii& radii)
       : bounds_(bounds), radii_(radii) {}
 
   Rect bounds_;
   RoundingRadii radii_;
+
+  // Helps with RoundRectPathSource and DiffRoundRectPathSource
+  void Dispatch(PathReceiver& receiver) const;
+
+  friend class RoundRectPathSource;
+  friend class DiffRoundRectPathSource;
 };
 
 class RoundRectPathSource : public PathSource {
@@ -161,6 +164,33 @@ class RoundRectPathSource : public PathSource {
 
  private:
   const RoundRect round_rect_;
+};
+
+class DiffRoundRectPathSource : public PathSource {
+ public:
+  explicit DiffRoundRectPathSource(const RoundRect& outer,
+                                   const RoundRect& inner);
+
+  ~DiffRoundRectPathSource();
+
+  const RoundRect& GetOuter() const { return outer_; }
+  const RoundRect& GetInner() const { return inner_; }
+
+  // |PathSource|
+  FillType GetFillType() const override;
+
+  // |PathSource|
+  Rect GetBounds() const override;
+
+  // |PathSource|
+  bool IsConvex() const override;
+
+  // |PathSource|
+  void Dispatch(PathReceiver& receiver) const override;
+
+ private:
+  const RoundRect outer_;
+  const RoundRect inner_;
 };
 
 }  // namespace impeller

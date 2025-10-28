@@ -131,7 +131,8 @@ def run_cmd( # pylint: disable=too-many-arguments
 
   for forbidden_string in forbidden_output:
     if forbidden_string in output:
-      matches = [x.group(0) for x in re.findall(f'^.*{forbidden_string}.*$', output)]
+      forbidden_escaped = re.escape(forbidden_string)
+      matches = [x.group(0) for x in re.findall(f'^.*{forbidden_escaped}.*$', output)]
       raise RuntimeError(
           f'command "{command_string}" contained forbidden string "{forbidden_string}": {matches}'
       )
@@ -430,6 +431,7 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
       make_test('embedder_proctable_unittests'),
       make_test('embedder_unittests'),
       make_test('fml_unittests'),
+      make_test('geometry_unittests'),
       make_test('no_dart_plugin_registrant_unittests'),
       make_test('runtime_unittests'),
       make_test('testing_unittests'),
@@ -462,6 +464,7 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
         # The accessibility library only supports Mac and Windows.
         make_test('accessibility_unittests'),
         make_test('availability_version_check_unittests'),
+        make_test('framework_common_swift_unittests'),
         make_test('framework_common_unittests'),
         make_test('spring_animation_unittests'),
         make_test('gpu_surface_metal_unittests'),
@@ -505,6 +508,15 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
       xvfb.stop_virtual_x(build_name)
 
   if is_mac():
+    # macOS Desktop unit tests written in Swift.
+    run_engine_executable(
+        build_dir,
+        'flutter_desktop_darwin_swift_unittests',
+        executable_filter,
+        shuffle_flags,
+        coverage=coverage
+    )
+
     # flutter_desktop_darwin_unittests uses global state that isn't handled
     # correctly by gtest-parallel.
     # https://github.com/flutter/flutter/issues/104789
@@ -598,21 +610,23 @@ def run_engine_benchmarks(build_dir, executable_filter):
 
 class FlutterTesterOptions():
 
-  def __init__(
+  def __init__( # pylint: disable=too-many-arguments
       self,
       multithreaded=False,
       enable_impeller=False,
-      enable_observatory=False,
+      enable_vm_service=False,
+      enable_microtask_profiling=False,
       expect_failure=False
   ):
     self.multithreaded = multithreaded
     self.enable_impeller = enable_impeller
-    self.enable_observatory = enable_observatory
+    self.enable_vm_service = enable_vm_service
+    self.enable_microtask_profiling = enable_microtask_profiling
     self.expect_failure = expect_failure
 
   def apply_args(self, command_args):
-    if not self.enable_observatory:
-      command_args.append('--disable-observatory')
+    if not self.enable_vm_service:
+      command_args.append('--disable-vm-service')
 
     if self.enable_impeller:
       command_args += ['--enable-impeller', '--enable-flutter-gpu']
@@ -621,6 +635,9 @@ class FlutterTesterOptions():
 
     if self.multithreaded:
       command_args.insert(0, '--force-multithreading')
+
+    if self.enable_microtask_profiling:
+      command_args.append('--profile-microtasks')
 
   def threading_description(self):
     if self.multithreaded:
@@ -857,15 +874,16 @@ def gather_dart_tests(build_dir, test_filter):
       cwd=dart_tests_dir,
   )
 
-  dart_observatory_tests = glob.glob('%s/observatory/*_test.dart' % dart_tests_dir)
+  dart_vm_service_tests = glob.glob('%s/vm_service/*_test.dart' % dart_tests_dir)
   dart_tests = glob.glob('%s/*_test.dart' % dart_tests_dir)
 
   if 'release' not in build_dir:
-    for dart_test_file in dart_observatory_tests:
-      if test_filter is not None and os.path.basename(dart_test_file) not in test_filter:
+    for dart_test_file in dart_vm_service_tests:
+      dart_test_basename = os.path.basename(dart_test_file)
+      if test_filter is not None and dart_test_basename not in test_filter:
         logger.info("Skipping '%s' due to filter.", dart_test_file)
       else:
-        logger.info("Gathering dart test '%s' with observatory enabled", dart_test_file)
+        logger.info("Gathering dart test '%s' with VM service enabled", dart_test_file)
         for multithreaded in [False, True]:
           for enable_impeller in [False, True]:
             yield gather_dart_test(
@@ -873,7 +891,9 @@ def gather_dart_tests(build_dir, test_filter):
                 FlutterTesterOptions(
                     multithreaded=multithreaded,
                     enable_impeller=enable_impeller,
-                    enable_observatory=True
+                    enable_vm_service=True,
+                    enable_microtask_profiling=dart_test_basename ==
+                    'microtask_profiling_test.dart',
                 )
             )
 

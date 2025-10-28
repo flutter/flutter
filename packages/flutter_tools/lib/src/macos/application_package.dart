@@ -5,7 +5,6 @@
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/utils.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../ios/plist_parser.dart';
@@ -91,8 +90,8 @@ abstract class MacOSApp extends ApplicationPackage {
       return null;
     }
     final Map<String, dynamic> propertyValues = globals.plistParser.parseFile(plistPath);
-    final String? id = propertyValues[PlistParser.kCFBundleIdentifierKey] as String?;
-    final String? executableName = propertyValues[PlistParser.kCFBundleExecutableKey] as String?;
+    final id = propertyValues[PlistParser.kCFBundleIdentifierKey] as String?;
+    final executableName = propertyValues[PlistParser.kCFBundleExecutableKey] as String?;
     if (id == null) {
       globals.printError(
         'Invalid prebuilt macOS app. Info.plist does not contain bundle identifier',
@@ -188,8 +187,7 @@ class BuildableMacOSApp extends MacOSApp {
   }
 
   String bundleDirectory(BuildInfo buildInfo) {
-    return sentenceCase(buildInfo.mode.cliName) +
-        (buildInfo.flavor != null ? '-${buildInfo.flavor!}' : '');
+    return buildInfo.mode.uppercaseName + (buildInfo.flavor != null ? '-${buildInfo.flavor!}' : '');
   }
 
   @override

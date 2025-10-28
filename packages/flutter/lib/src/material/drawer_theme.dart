@@ -19,7 +19,7 @@ import 'theme.dart';
 /// Defines default property values for descendant [Drawer] widgets.
 ///
 /// Descendant widgets obtain the current [DrawerThemeData] object
-/// using `DrawerTheme.of(context)`. Instances of [DrawerThemeData] can be
+/// using [DrawerTheme.of]. Instances of [DrawerThemeData] can be
 /// customized with [DrawerThemeData.copyWith].
 ///
 /// Typically a [DrawerThemeData] is specified as part of the
@@ -188,7 +188,7 @@ class DrawerTheme extends InheritedTheme {
   /// descendant [Drawer] widgets.
   final DrawerThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [DrawerThemeData] from the closest ancestor [DrawerTheme].
   ///
   /// If there is no enclosing [DrawerTheme] widget, then
   /// [ThemeData.drawerTheme] is used.

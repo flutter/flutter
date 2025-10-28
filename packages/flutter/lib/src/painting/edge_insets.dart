@@ -12,6 +12,7 @@ import 'dart:ui' as ui show ViewPadding, lerpDouble;
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
+import 'debug.dart';
 
 /// Base class for [EdgeInsets] that allows for text-direction aware
 /// resolution.
@@ -546,6 +547,66 @@ class EdgeInsets extends EdgeInsetsGeometry {
     );
   }
 
+  /// Returns a new [RRect] expanded by this [EdgeInsets], increasing each corner's
+  /// radius by the corresponding per-axis inset amounts (clamped at zero).
+  ///
+  /// The resulting rectangle's left, top, right, and bottom edges are moved outward
+  /// by the corresponding inset values. Each corner radius is also expanded by the
+  /// corresponding inset values on both axes, ensuring that the corner shape is
+  /// preserved while scaling appropriately.
+  ///
+  /// Corner radii are adjusted per-axis and clamped to be non-negative. For example,
+  /// the top-left corner radius is expanded by [left] horizontally and [top] vertically.
+  ///
+  /// See also:
+  ///
+  ///  * [deflateRRect], to deflate an [RRect] rather than inflating it.
+  ///  * [inflateRect], to inflate a [Rect] rather than an [RRect].
+  ///  * [BorderRadius], which is used to define the corner radii of an [RRect].
+  RRect inflateRRect(RRect rect) {
+    return RRect.fromLTRBAndCorners(
+      rect.left - left,
+      rect.top - top,
+      rect.right + right,
+      rect.bottom + bottom,
+      topLeft: (rect.tlRadius + Radius.elliptical(left, top)).clamp(minimum: Radius.zero),
+      topRight: (rect.trRadius + Radius.elliptical(right, top)).clamp(minimum: Radius.zero),
+      bottomRight: (rect.brRadius + Radius.elliptical(right, bottom)).clamp(minimum: Radius.zero),
+      bottomLeft: (rect.blRadius + Radius.elliptical(left, bottom)).clamp(minimum: Radius.zero),
+    );
+  }
+
+  /// Returns a new [RRect] shrunk by this [EdgeInsets], decreasing each corner's
+  /// radius by the corresponding per-axis inset amounts (clamped at zero).
+  ///
+  /// The resulting rectangle's left, top, right, and bottom edges are moved inward
+  /// by the corresponding inset values. Each corner radius is also reduced by the
+  /// corresponding inset values on both axes, maintaining the corner shape while
+  /// scaling appropriately to the new size.
+  ///
+  /// Corner radii are adjusted per-axis and clamped to be non-negative. For example,
+  /// the top-left corner radius is reduced by [left] horizontally and [top] vertically.
+  /// If either resulting dimension would be negative, the radius is clamped to zero
+  /// in that direction.
+  ///
+  /// See also:
+  ///
+  ///  * [inflateRRect], to inflate an [RRect] rather than deflating it.
+  ///  * [deflateRect], to deflate a [Rect] rather than an [RRect].
+  ///  * [BorderRadius], which is used to define the corner radii of an [RRect].
+  RRect deflateRRect(RRect rect) {
+    return RRect.fromLTRBAndCorners(
+      rect.left + left,
+      rect.top + top,
+      rect.right - right,
+      rect.bottom - bottom,
+      topLeft: (rect.tlRadius - Radius.elliptical(left, top)).clamp(minimum: Radius.zero),
+      topRight: (rect.trRadius - Radius.elliptical(right, top)).clamp(minimum: Radius.zero),
+      bottomRight: (rect.brRadius - Radius.elliptical(right, bottom)).clamp(minimum: Radius.zero),
+      bottomLeft: (rect.blRadius - Radius.elliptical(left, bottom)).clamp(minimum: Radius.zero),
+    );
+  }
+
   @override
   EdgeInsetsGeometry subtract(EdgeInsetsGeometry other) {
     if (other is EdgeInsets) {
@@ -893,7 +954,7 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
 
   @override
   EdgeInsets resolve(TextDirection? direction) {
-    assert(direction != null);
+    assert(debugCheckCanResolveTextDirection(direction, '$EdgeInsetsDirectional'));
     return switch (direction!) {
       TextDirection.rtl => EdgeInsets.fromLTRB(end, top, start, bottom),
       TextDirection.ltr => EdgeInsets.fromLTRB(start, top, end, bottom),
@@ -1005,7 +1066,7 @@ class _MixedEdgeInsets extends EdgeInsetsGeometry {
 
   @override
   EdgeInsets resolve(TextDirection? direction) {
-    assert(direction != null);
+    assert(debugCheckCanResolveTextDirection(direction, '$_MixedEdgeInsets'));
     return switch (direction!) {
       TextDirection.rtl => EdgeInsets.fromLTRB(_end + _left, _top, _start + _right, _bottom),
       TextDirection.ltr => EdgeInsets.fromLTRB(_start + _left, _top, _end + _right, _bottom),

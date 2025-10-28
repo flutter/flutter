@@ -116,13 +116,11 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
           });
         },
         treeNodeBuilder: _treeNodeBuilder,
-        treeRowExtentBuilder: (
-          TreeSliverNode<Object?> node,
-          SliverLayoutDimensions layoutDimensions,
-        ) {
-          // This gives more space to parent nodes.
-          return node.children.isNotEmpty ? 60.0 : 50.0;
-        },
+        treeRowExtentBuilder:
+            (TreeSliverNode<Object?> node, SliverLayoutDimensions layoutDimensions) {
+              // This gives more space to parent nodes.
+              return node.children.isNotEmpty ? 60.0 : 50.0;
+            },
         // No internal indentation, the custom treeNodeBuilder applies its
         // own indentation to decorate in the indented space.
         indentation: TreeSliverIndentationType.none,
@@ -132,8 +130,8 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
 
   @override
   Widget build(BuildContext context) {
-    // This example is assumes the full screen is available.
-    final Size screenSize = MediaQuery.sizeOf(context);
+    // This example assumes the full screen is available.
+    final double screenWidth = MediaQuery.widthOf(context);
     final List<Widget> selectedChildren = <Widget>[];
     if (_selectedNode != null) {
       selectedChildren.addAll(<Widget>[
@@ -148,14 +146,14 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
       body: Row(
         children: <Widget>[
           SizedBox(
-            width: screenSize.width / 2,
+            width: screenWidth / 2,
             height: double.infinity,
             child: CustomScrollView(slivers: <Widget>[_getTree()]),
           ),
           DecoratedBox(
             decoration: BoxDecoration(border: Border.all()),
             child: SizedBox(
-              width: screenSize.width / 2,
+              width: screenWidth / 2,
               height: double.infinity,
               child: Center(child: Column(children: selectedChildren)),
             ),

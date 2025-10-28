@@ -31,6 +31,9 @@ class AndroidContextDynamicImpeller : public AndroidContext {
   bool IsValid() const override { return true; }
 
   // |AndroidContext|
+  bool IsDynamicSelection() const override { return true; }
+
+  // |AndroidContext|
   AndroidRenderingAPI RenderingApi() const override;
 
   /// @brief Retrieve the GL Context if it was created, or nullptr.

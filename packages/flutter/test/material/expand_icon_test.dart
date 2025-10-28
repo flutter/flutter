@@ -6,7 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget wrap({required Widget child, ThemeData? theme}) {
-  return MaterialApp(theme: theme, home: Center(child: Material(child: child)));
+  return MaterialApp(
+    theme: theme,
+    home: Center(child: Material(child: child)),
+  );
 }
 
 void main() {
@@ -210,7 +213,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      wrap(theme: ThemeData(useMaterial3: false), child: ExpandIcon(onPressed: (bool _) {})),
+      wrap(
+        theme: ThemeData(useMaterial3: false),
+        child: ExpandIcon(onPressed: (bool _) {}),
+      ),
     );
 
     expect(

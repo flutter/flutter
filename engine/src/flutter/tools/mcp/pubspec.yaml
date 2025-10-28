@@ -1,0 +1,14 @@
+name: engine_mcp
+publish_to: none
+environment:
+  sdk: ^3.8.0-0
+resolution: workspace
+dependencies:
+  async: any
+  dart_mcp: any
+  process: any
+  process_runner: any
+  stream_channel: any
+dev_dependencies:
+  process_fakes: any
+  test: any

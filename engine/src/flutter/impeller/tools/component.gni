@@ -36,8 +36,9 @@ template("impeller_component") {
       if (!defined(invoker.cflags)) {
         cflags = []
       }
-      cflags += [ "-Wthread-safety-analysis" ]
-
+      if (is_clang) {
+        cflags += [ "-Wthread-safety-analysis" ]
+      }
       if (!defined(invoker.cflags_objc)) {
         cflags_objc = []
       }

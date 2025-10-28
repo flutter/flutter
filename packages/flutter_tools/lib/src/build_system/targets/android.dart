@@ -9,6 +9,7 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals show xcode;
+import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -46,7 +47,7 @@ abstract class AndroidAssetBundle extends Target {
       throw MissingDefineException(kBuildMode, name);
     }
 
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory outputDirectory = environment.outputDir.childDirectory('flutter_assets')
       ..createSync(recursive: true);
 
@@ -70,9 +71,11 @@ abstract class AndroidAssetBundle extends Target {
           .file(isolateSnapshotData)
           .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
     }
+    final DartHooksResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       outputDirectory,
+      dartHookResult: dartHookResult,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],
@@ -89,7 +92,11 @@ abstract class AndroidAssetBundle extends Target {
   }
 
   @override
-  List<Target> get dependencies => const <Target>[KernelSnapshot(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+    DartBuildForNative(),
+    KernelSnapshot(),
+    InstallCodeAssets(),
+  ];
 }
 
 /// An implementation of [AndroidAssetBundle] that includes dependencies on vm
@@ -207,7 +214,7 @@ class AndroidAot extends AotElfBase {
 
   @override
   Future<void> build(Environment environment) async {
-    final AOTSnapshotter snapshotter = AOTSnapshotter(
+    final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
       xcode: globals.xcode!,
@@ -226,14 +233,14 @@ class AndroidAot extends AotElfBase {
       environment.defines,
       kExtraGenSnapshotOptions,
     );
-    final List<File> outputs = <File>[]; // outputs for the depfile
-    final String manifestPath = '${output.path}${environment.platform.pathSeparator}manifest.json';
+    final outputs = <File>[]; // outputs for the depfile
+    final manifestPath = '${output.path}${environment.platform.pathSeparator}manifest.json';
     if (environment.defines[kDeferredComponents] == 'true') {
       extraGenSnapshotOptions.add('--loading_unit_manifest=$manifestPath');
       outputs.add(environment.fileSystem.file(manifestPath));
     }
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
-    final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];
 
     if (codeSizeDirectory != null) {
@@ -266,7 +273,7 @@ class AndroidAot extends AotElfBase {
         environment.fileSystem.file(manifestPath),
         environment.logger,
       );
-      for (final LoadingUnit unit in loadingUnits) {
+      for (final unit in loadingUnits) {
         outputs.add(environment.fileSystem.file(unit.path));
       }
     }
@@ -279,12 +286,12 @@ class AndroidAot extends AotElfBase {
 }
 
 // AndroidAot instances used by the bundle rules below.
-const AndroidAot androidArmProfile = AndroidAot(TargetPlatform.android_arm, BuildMode.profile);
-const AndroidAot androidArm64Profile = AndroidAot(TargetPlatform.android_arm64, BuildMode.profile);
-const AndroidAot androidx64Profile = AndroidAot(TargetPlatform.android_x64, BuildMode.profile);
-const AndroidAot androidArmRelease = AndroidAot(TargetPlatform.android_arm, BuildMode.release);
-const AndroidAot androidArm64Release = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
-const AndroidAot androidx64Release = AndroidAot(TargetPlatform.android_x64, BuildMode.release);
+const androidArmProfile = AndroidAot(TargetPlatform.android_arm, BuildMode.profile);
+const androidArm64Profile = AndroidAot(TargetPlatform.android_arm64, BuildMode.profile);
+const androidx64Profile = AndroidAot(TargetPlatform.android_x64, BuildMode.profile);
+const androidArmRelease = AndroidAot(TargetPlatform.android_arm, BuildMode.release);
+const androidArm64Release = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+const androidx64Release = AndroidAot(TargetPlatform.android_x64, BuildMode.release);
 
 /// A rule paired with [AndroidAot] that copies the produced so file and manifest.json (if present) into the output directory.
 class AndroidAotBundle extends Target {
@@ -334,8 +341,8 @@ class AndroidAotBundle extends Target {
     final File outputLibFile = buildDir.childFile('app.so');
     outputLibFile.copySync(outputDirectory.childFile('app.so').path);
 
-    final List<File> inputs = <File>[];
-    final List<File> outputs = <File>[];
+    final inputs = <File>[];
+    final outputs = <File>[];
     final File manifestFile = buildDir.childFile('manifest.json');
     if (manifestFile.existsSync()) {
       final File destinationFile = outputDirectory.childFile('manifest.json');
@@ -352,18 +359,18 @@ class AndroidAotBundle extends Target {
 }
 
 // AndroidBundleAot instances.
-const AndroidAotBundle androidArmProfileBundle = AndroidAotBundle(androidArmProfile);
-const AndroidAotBundle androidArm64ProfileBundle = AndroidAotBundle(androidArm64Profile);
-const AndroidAotBundle androidx64ProfileBundle = AndroidAotBundle(androidx64Profile);
-const AndroidAotBundle androidArmReleaseBundle = AndroidAotBundle(androidArmRelease);
-const AndroidAotBundle androidArm64ReleaseBundle = AndroidAotBundle(androidArm64Release);
-const AndroidAotBundle androidx64ReleaseBundle = AndroidAotBundle(androidx64Release);
+const androidArmProfileBundle = AndroidAotBundle(androidArmProfile);
+const androidArm64ProfileBundle = AndroidAotBundle(androidArm64Profile);
+const androidx64ProfileBundle = AndroidAotBundle(androidx64Profile);
+const androidArmReleaseBundle = AndroidAotBundle(androidArmRelease);
+const androidArm64ReleaseBundle = AndroidAotBundle(androidArm64Release);
+const androidx64ReleaseBundle = AndroidAotBundle(androidx64Release);
 
 // Rule that copies split aot library files to the intermediate dirs of each deferred component.
 class AndroidAotDeferredComponentsBundle extends Target {
-  /// Create an [AndroidAotDeferredComponentsBundle] implementation for a given [targetPlatform] and [buildMode].
+  /// Create an [AndroidAotDeferredComponentsBundle] implementation for a given [targetPlatform] and [BuildInfo.mode].
   ///
-  /// If [components] is not provided, it will be read from the pubspec.yaml manifest.
+  /// If [components] is not provided, it will be read from the `pubspec.yaml` manifest.
   AndroidAotDeferredComponentsBundle(this.dependency, {List<DeferredComponent>? components})
     : _components = components;
 
@@ -406,7 +413,7 @@ class AndroidAotDeferredComponentsBundle extends Target {
   @override
   Future<void> build(Environment environment) async {
     _components ??= FlutterProject.current().manifest.deferredComponents ?? <DeferredComponent>[];
-    final List<String> abis = <String>[_androidAbiName];
+    final abis = <String>[_androidAbiName];
     final List<LoadingUnit> generatedLoadingUnits = LoadingUnit.parseGeneratedLoadingUnits(
       environment.outputDir,
       environment.logger,
@@ -459,7 +466,7 @@ Target androidx64ReleaseDeferredComponentsBundle = AndroidAotDeferredComponentsB
 );
 
 /// A set of all target names that build deferred component apps.
-Set<String> deferredComponentsTargets = <String>{
+var deferredComponentsTargets = <String>{
   androidArmProfileDeferredComponentsBundle.name,
   androidArm64ProfileDeferredComponentsBundle.name,
   androidx64ProfileDeferredComponentsBundle.name,
@@ -482,12 +489,12 @@ Depfile copyDeferredComponentSoFiles(
   List<String> abis,
   BuildMode buildMode,
 ) {
-  final List<File> inputs = <File>[];
-  final List<File> outputs = <File>[];
-  final Set<int> usedLoadingUnits = <int>{};
+  final inputs = <File>[];
+  final outputs = <File>[];
+  final usedLoadingUnits = <int>{};
   // Copy all .so files for loading units that are paired with a deferred component.
-  for (final String abi in abis) {
-    for (final DeferredComponent component in components) {
+  for (final abi in abis) {
+    for (final component in components) {
       final Set<LoadingUnit>? loadingUnits = component.loadingUnits;
       if (loadingUnits == null || !component.assigned) {
         env.logger.printError('Deferred component require loading units to be assigned.');
@@ -520,8 +527,8 @@ Depfile copyDeferredComponentSoFiles(
     }
   }
   // Copy unused loading units, which are included in the base module.
-  for (final String abi in abis) {
-    for (final LoadingUnit unit in loadingUnits) {
+  for (final abi in abis) {
+    for (final unit in loadingUnits) {
       if (usedLoadingUnits.contains(unit.id)) {
         continue;
       }

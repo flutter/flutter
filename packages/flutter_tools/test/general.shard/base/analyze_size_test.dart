@@ -11,7 +11,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 
-const String aotSizeOutput = '''
+const aotSizeOutput = '''
 [
     {
         "l": "dart:_internal",
@@ -61,26 +61,24 @@ void main() {
   });
 
   testWithoutContext('builds APK analysis correctly', () async {
-    final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
+    final sizeAnalyzer = SizeAnalyzer(
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
       analytics: const NoOpAnalytics(),
     );
 
-    final Archive archive =
-        Archive()
-          ..addFile(ArchiveFile('AndroidManifest.xml', 100, List<int>.filled(100, 0)))
-          ..addFile(ArchiveFile('META-INF/CERT.RSA', 10, List<int>.filled(10, 0)))
-          ..addFile(ArchiveFile('META-INF/CERT.SF', 10, List<int>.filled(10, 0)))
-          ..addFile(ArchiveFile('lib/arm64-v8a/libxyzzyapp.so', 50, List<int>.filled(50, 0)))
-          ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
+    final archive = Archive()
+      ..addFile(ArchiveFile('AndroidManifest.xml', 100, List<int>.filled(100, 0)))
+      ..addFile(ArchiveFile('META-INF/CERT.RSA', 10, List<int>.filled(10, 0)))
+      ..addFile(ArchiveFile('META-INF/CERT.SF', 10, List<int>.filled(10, 0)))
+      ..addFile(ArchiveFile('lib/arm64-v8a/libxyzzyapp.so', 50, List<int>.filled(50, 0)))
+      ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
 
     final File apk = fileSystem.file('test.apk')..writeAsBytesSync(ZipEncoder().encode(archive)!);
-    final File aotSizeJson =
-        fileSystem.file('test.json')
-          ..createSync()
-          ..writeAsStringSync(aotSizeOutput);
+    final File aotSizeJson = fileSystem.file('test.json')
+      ..createSync()
+      ..writeAsStringSync(aotSizeOutput);
     final File precompilerTrace = fileSystem.file('trace.json')..writeAsStringSync('{}');
     final Map<String, dynamic> result = await sizeAnalyzer.analyzeZipSizeAndAotSnapshot(
       zipFile: apk,
@@ -90,14 +88,13 @@ void main() {
     );
 
     expect(result['type'], 'apk');
-    final List<dynamic> resultChildren = result['children'] as List<dynamic>;
-    final Map<String, dynamic> androidManifestMap = resultChildren[0] as Map<String, dynamic>;
+    final resultChildren = result['children'] as List<dynamic>;
+    final androidManifestMap = resultChildren[0] as Map<String, dynamic>;
     expect(androidManifestMap['n'], 'AndroidManifest.xml');
     expect(androidManifestMap['value'], 6);
 
-    final Map<String, Object?> metaInfMap = resultChildren[1] as Map<String, Object?>;
-    final List<Map<String, Object?>> metaInfMapChildren =
-        metaInfMap['children']! as List<Map<String, Object?>>;
+    final metaInfMap = resultChildren[1] as Map<String, Object?>;
+    final metaInfMapChildren = metaInfMap['children']! as List<Map<String, Object?>>;
     expect(metaInfMap['n'], 'META-INF');
     expect(metaInfMap['value'], 10);
     final Map<String, dynamic> certRsaMap = metaInfMapChildren[0];
@@ -107,37 +104,35 @@ void main() {
     expect(certSfMap['n'], 'CERT.SF');
     expect(certSfMap['value'], 5);
 
-    final Map<String, Object?> libMap = resultChildren[2] as Map<String, Object?>;
-    final List<Map<String, Object?>> libMapChildren =
-        libMap['children']! as List<Map<String, Object?>>;
+    final libMap = resultChildren[2] as Map<String, Object?>;
+    final libMapChildren = libMap['children']! as List<Map<String, Object?>>;
     expect(libMap['n'], 'lib');
     expect(libMap['value'], 12);
     final Map<String, Object?> arm64Map = libMapChildren[0];
-    final List<Map<String, Object?>> arn64MapChildren =
-        arm64Map['children']! as List<Map<String, Object?>>;
+    final arn64MapChildren = arm64Map['children']! as List<Map<String, Object?>>;
     expect(arm64Map['n'], 'arm64-v8a');
     expect(arm64Map['value'], 12);
     final Map<String, Object?> libAppMap = arn64MapChildren[0];
-    final List<dynamic> libAppMapChildren = libAppMap['children']! as List<dynamic>;
+    final libAppMapChildren = libAppMap['children']! as List<dynamic>;
     expect(libAppMap['n'], 'libxyzzyapp.so (Dart AOT)');
     expect(libAppMap['value'], 6);
     expect(libAppMapChildren.length, 3);
-    final Map<String, Object?> internalMap = libAppMapChildren[0] as Map<String, Object?>;
-    final List<dynamic> internalMapChildren = internalMap['children']! as List<dynamic>;
-    final Map<String, Object?> skipMap = internalMapChildren[0] as Map<String, Object?>;
+    final internalMap = libAppMapChildren[0] as Map<String, Object?>;
+    final internalMapChildren = internalMap['children']! as List<dynamic>;
+    final skipMap = internalMapChildren[0] as Map<String, Object?>;
     expect(skipMap['n'], 'skip');
     expect(skipMap['value'], 2400);
-    final Map<String, Object?> subListIterableMap = internalMapChildren[1] as Map<String, Object?>;
+    final subListIterableMap = internalMapChildren[1] as Map<String, Object?>;
     expect(subListIterableMap['n'], 'new SubListIterable.');
     expect(subListIterableMap['value'], 3560);
-    final Map<String, Object?> coreMap = libAppMapChildren[1] as Map<String, Object?>;
-    final List<dynamic> coreMapChildren = coreMap['children']! as List<dynamic>;
-    final Map<String, Object?> rangeErrorMap = coreMapChildren[0] as Map<String, Object?>;
+    final coreMap = libAppMapChildren[1] as Map<String, Object?>;
+    final coreMapChildren = coreMap['children']! as List<dynamic>;
+    final rangeErrorMap = coreMapChildren[0] as Map<String, Object?>;
     expect(rangeErrorMap['n'], 'new RangeError.range');
     expect(rangeErrorMap['value'], 3920);
-    final Map<String, Object?> stubsMap = libAppMapChildren[2] as Map<String, Object?>;
-    final List<dynamic> stubsMapChildren = stubsMap['children']! as List<dynamic>;
-    final Map<String, Object?> allocateMap = stubsMapChildren[0] as Map<String, Object?>;
+    final stubsMap = libAppMapChildren[2] as Map<String, Object?>;
+    final stubsMapChildren = stubsMap['children']! as List<dynamic>;
+    final allocateMap = stubsMapChildren[0] as Map<String, Object?>;
     expect(allocateMap['n'], 'Allocate ArgumentError');
     expect(allocateMap['value'], 4650);
     final Map<String, Object?> libFlutterMap = arn64MapChildren[1];
@@ -148,20 +143,19 @@ void main() {
   });
 
   testWithoutContext('outputs summary to command line correctly', () async {
-    final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
+    final sizeAnalyzer = SizeAnalyzer(
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
       analytics: const NoOpAnalytics(),
     );
 
-    final Archive archive =
-        Archive()
-          ..addFile(ArchiveFile('AndroidManifest.xml', 100, List<int>.filled(100, 0)))
-          ..addFile(ArchiveFile('META-INF/CERT.RSA', 10, List<int>.filled(10, 0)))
-          ..addFile(ArchiveFile('META-INF/CERT.SF', 10, List<int>.filled(10, 0)))
-          ..addFile(ArchiveFile('lib/arm64-v8a/libxyzzyapp.so', 50, List<int>.filled(50, 0)))
-          ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
+    final archive = Archive()
+      ..addFile(ArchiveFile('AndroidManifest.xml', 100, List<int>.filled(100, 0)))
+      ..addFile(ArchiveFile('META-INF/CERT.RSA', 10, List<int>.filled(10, 0)))
+      ..addFile(ArchiveFile('META-INF/CERT.SF', 10, List<int>.filled(10, 0)))
+      ..addFile(ArchiveFile('lib/arm64-v8a/libxyzzyapp.so', 50, List<int>.filled(50, 0)))
+      ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
 
     final File apk = fileSystem.file('test.apk')..writeAsBytesSync(ZipEncoder().encode(archive)!);
     final File aotSizeJson = fileSystem.file('test.json')..writeAsStringSync(aotSizeOutput);
@@ -188,7 +182,7 @@ void main() {
   });
 
   testWithoutContext('can analyze contents of output directory', () async {
-    final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
+    final sizeAnalyzer = SizeAnalyzer(
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),
@@ -229,7 +223,7 @@ void main() {
   });
 
   testWithoutContext('handles null AOT snapshot json', () async {
-    final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
+    final sizeAnalyzer = SizeAnalyzer(
       fileSystem: fileSystem,
       logger: logger,
       appFilenamePattern: RegExp(r'lib.*app\.so'),

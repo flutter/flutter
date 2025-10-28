@@ -13,227 +13,259 @@ import 'swift_package_manager_utils.dart';
 import 'test_utils.dart';
 
 void main() {
-  final List<String> platforms = <String>['ios', 'macos'];
-  for (final String platformName in platforms) {
-    final List<String> iosLanguages = <String>[if (platformName == 'ios') 'objc', 'swift'];
+  final platforms = <String>['ios', 'macos'];
+  for (final platformName in platforms) {
     final SwiftPackageManagerPlugin integrationTestPlugin =
         SwiftPackageManagerUtils.integrationTestPlugin(platformName);
 
-    for (final String iosLanguage in iosLanguages) {
-      test(
-        'Swift Package Manager integration for $platformName with $iosLanguage',
-        () async {
-          final Directory workingDirectory = fileSystem.systemTempDirectory.createTempSync(
-            'swift_package_manager_enabled.',
-          );
-          final String workingDirectoryPath = workingDirectory.path;
+    test(
+      'Swift Package Manager integration for $platformName',
+      () async {
+        final Directory workingDirectory = fileSystem.systemTempDirectory.createTempSync(
+          'swift_package_manager_enabled.',
+        );
+        final String workingDirectoryPath = workingDirectory.path;
 
-          addTearDown(() async {
-            await SwiftPackageManagerUtils.disableSwiftPackageManager(
+        addTearDown(() async {
+          await SwiftPackageManagerUtils.disableSwiftPackageManager(
+            flutterBin,
+            workingDirectoryPath,
+          );
+          ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
+        });
+
+        // Create and build an app using the CocoaPods version of
+        // integration_test.
+        await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+        final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
+          flutterBin,
+          workingDirectoryPath,
+          platform: platformName,
+          usesSwiftPackageManager: true,
+          options: <String>['--platforms=$platformName'],
+        );
+        SwiftPackageManagerUtils.addDependency(
+          appDirectoryPath: appDirectoryPath,
+          plugin: integrationTestPlugin,
+        );
+        await SwiftPackageManagerUtils.buildApp(
+          flutterBin,
+          appDirectoryPath,
+          options: <String>[platformName, '--debug', '-v'],
+          expectedLines: SwiftPackageManagerUtils.expectedLines(
+            platform: platformName,
+            appDirectoryPath: appDirectoryPath,
+            cocoaPodsPlugin: integrationTestPlugin,
+          ),
+          unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
+            platform: platformName,
+            appDirectoryPath: appDirectoryPath,
+            cocoaPodsPlugin: integrationTestPlugin,
+          ),
+        );
+        expect(
+          fileSystem.directory(appDirectoryPath).childDirectory(platformName).childFile('Podfile'),
+          exists,
+        );
+        expect(
+          fileSystem
+              .directory(appDirectoryPath)
+              .childDirectory(platformName)
+              .childDirectory('Flutter')
+              .childDirectory('ephemeral')
+              .childDirectory('Packages')
+              .childDirectory('FlutterGeneratedPluginSwiftPackage'),
+          isNot(exists),
+        );
+
+        final SwiftPackageManagerPlugin createdCocoaPodsPlugin =
+            await SwiftPackageManagerUtils.createPlugin(
               flutterBin,
               workingDirectoryPath,
+              platform: platformName,
             );
-            ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
-          });
 
-          // Create and build an app using the CocoaPods version of
-          // integration_test.
-          await SwiftPackageManagerUtils.disableSwiftPackageManager(
-            flutterBin,
-            workingDirectoryPath,
-          );
-          final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
-            flutterBin,
-            workingDirectoryPath,
-            iosLanguage: iosLanguage,
+        // Rebuild app with Swift Package Manager enabled, migrating the app and using the Swift Package Manager version of
+        // integration_test.
+        await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
+
+        // Create a SwiftPM plugin that depends on native code from another SwiftPM plugin
+        final SwiftPackageManagerPlugin createdSwiftPMPlugin =
+            await SwiftPackageManagerUtils.createPlugin(
+              flutterBin,
+              workingDirectoryPath,
+              platform: platformName,
+              usesSwiftPackageManager: true,
+            );
+        final File swiftPMPluginPackageManifest = fileSystem
+            .directory(createdSwiftPMPlugin.pluginPath)
+            .childDirectory(platformName)
+            .childDirectory(createdSwiftPMPlugin.pluginName)
+            .childFile('Package.swift');
+        final String manifestContents = swiftPMPluginPackageManifest.readAsStringSync();
+        swiftPMPluginPackageManifest.writeAsStringSync(
+          manifestContents
+              .replaceFirst(
+                'dependencies: []',
+                'dependencies: [.package(name: "${integrationTestPlugin.pluginName}", path: "../${integrationTestPlugin.pluginName}")]',
+              )
+              .replaceFirst(
+                'dependencies: []',
+                'dependencies: [.product(name: "${integrationTestPlugin.pluginName.replaceAll('_', '-')}", package: "${integrationTestPlugin.pluginName}")]',
+              ),
+        );
+        final File swiftPMPluginPodspec = fileSystem
+            .directory(createdSwiftPMPlugin.pluginPath)
+            .childDirectory(platformName)
+            .childFile('${createdSwiftPMPlugin.pluginName}.podspec');
+        final String podspecContents = swiftPMPluginPodspec.readAsStringSync();
+        swiftPMPluginPodspec.writeAsStringSync(
+          podspecContents.replaceFirst(
+            '\nend',
+            "\n  s.dependency '${integrationTestPlugin.pluginName}'\n\nend",
+          ),
+        );
+        final pluginClassFileName = '${createdSwiftPMPlugin.className}.swift';
+        final pluginClassFileImport = 'import ${integrationTestPlugin.pluginName}';
+        final File pluginClassFile = fileSystem
+            .directory(createdSwiftPMPlugin.pluginPath)
+            .childDirectory(platformName)
+            .childDirectory(createdSwiftPMPlugin.pluginName)
+            .childDirectory('Sources')
+            .childDirectory(createdSwiftPMPlugin.pluginName)
+            .childFile(pluginClassFileName);
+        final String pluginClassFileContent = pluginClassFile.readAsStringSync();
+        pluginClassFile.writeAsStringSync('$pluginClassFileImport\n$pluginClassFileContent');
+        SwiftPackageManagerUtils.addDependency(
+          appDirectoryPath: createdSwiftPMPlugin.pluginPath,
+          plugin: integrationTestPlugin,
+        );
+
+        SwiftPackageManagerUtils.addDependency(
+          appDirectoryPath: appDirectoryPath,
+          plugin: createdSwiftPMPlugin,
+        );
+
+        await SwiftPackageManagerUtils.buildApp(
+          flutterBin,
+          appDirectoryPath,
+          options: <String>[platformName, '--debug', '-v'],
+          expectedLines: SwiftPackageManagerUtils.expectedLines(
             platform: platformName,
-            usesSwiftPackageManager: true,
-            options: <String>['--platforms=$platformName'],
-          );
-          SwiftPackageManagerUtils.addDependency(
             appDirectoryPath: appDirectoryPath,
-            plugin: integrationTestPlugin,
-          );
-          await SwiftPackageManagerUtils.buildApp(
-            flutterBin,
-            appDirectoryPath,
-            options: <String>[platformName, '--debug', '-v'],
-            expectedLines: SwiftPackageManagerUtils.expectedLines(
-              platform: platformName,
-              appDirectoryPath: appDirectoryPath,
-              cocoaPodsPlugin: integrationTestPlugin,
-            ),
-            unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
-              platform: platformName,
-              appDirectoryPath: appDirectoryPath,
-              cocoaPodsPlugin: integrationTestPlugin,
-            ),
-          );
-          expect(
-            fileSystem
-                .directory(appDirectoryPath)
-                .childDirectory(platformName)
-                .childFile('Podfile'),
-            exists,
-          );
-          expect(
-            fileSystem
-                .directory(appDirectoryPath)
-                .childDirectory(platformName)
-                .childDirectory('Flutter')
-                .childDirectory('ephemeral')
-                .childDirectory('Packages')
-                .childDirectory('FlutterGeneratedPluginSwiftPackage'),
-            isNot(exists),
-          );
-
-          final SwiftPackageManagerPlugin createdCocoaPodsPlugin =
-              await SwiftPackageManagerUtils.createPlugin(
-                flutterBin,
-                workingDirectoryPath,
-                platform: platformName,
-                iosLanguage: iosLanguage,
-              );
-
-          // Rebuild app with Swift Package Manager enabled, migrating the app and using the Swift Package Manager version of
-          // integration_test.
-          await SwiftPackageManagerUtils.enableSwiftPackageManager(
-            flutterBin,
-            workingDirectoryPath,
-          );
-          await SwiftPackageManagerUtils.buildApp(
-            flutterBin,
-            appDirectoryPath,
-            options: <String>[platformName, '--debug', '-v'],
-            expectedLines: SwiftPackageManagerUtils.expectedLines(
-              platform: platformName,
-              appDirectoryPath: appDirectoryPath,
-              swiftPackageMangerEnabled: true,
-              swiftPackagePlugin: integrationTestPlugin,
-              migrated: true,
-            ),
-            unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
-              platform: platformName,
-              appDirectoryPath: appDirectoryPath,
-              swiftPackageMangerEnabled: true,
-              swiftPackagePlugin: integrationTestPlugin,
-              migrated: true,
-            ),
-          );
-
-          expect(
-            fileSystem
-                .directory(appDirectoryPath)
-                .childDirectory(platformName)
-                .childFile('Podfile'),
-            exists,
-          );
-          expect(
-            fileSystem
-                .directory(appDirectoryPath)
-                .childDirectory(platformName)
-                .childDirectory('Flutter')
-                .childDirectory('ephemeral')
-                .childDirectory('Packages')
-                .childDirectory('FlutterGeneratedPluginSwiftPackage'),
-            exists,
-          );
-
-          // Build an app using both a CocoaPods and Swift Package Manager plugin.
-          SwiftPackageManagerUtils.addDependency(
+            swiftPackageMangerEnabled: true,
+            swiftPackagePlugin: integrationTestPlugin,
+            migrated: true,
+          ),
+          unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
+            platform: platformName,
             appDirectoryPath: appDirectoryPath,
-            plugin: createdCocoaPodsPlugin,
-          );
-          await SwiftPackageManagerUtils.buildApp(
-            flutterBin,
-            appDirectoryPath,
-            options: <String>[platformName, '--debug', '-v'],
-            expectedLines: SwiftPackageManagerUtils.expectedLines(
-              platform: platformName,
-              appDirectoryPath: appDirectoryPath,
-              cocoaPodsPlugin: createdCocoaPodsPlugin,
-              swiftPackageMangerEnabled: true,
-              swiftPackagePlugin: integrationTestPlugin,
-            ),
-            unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
-              platform: platformName,
-              appDirectoryPath: appDirectoryPath,
-              cocoaPodsPlugin: createdCocoaPodsPlugin,
-              swiftPackageMangerEnabled: true,
-              swiftPackagePlugin: integrationTestPlugin,
-            ),
-          );
+            swiftPackageMangerEnabled: true,
+            swiftPackagePlugin: integrationTestPlugin,
+            migrated: true,
+          ),
+        );
 
-          expect(
-            fileSystem
-                .directory(appDirectoryPath)
-                .childDirectory(platformName)
-                .childFile('Podfile'),
-            exists,
-          );
-          expect(
-            fileSystem
-                .directory(appDirectoryPath)
-                .childDirectory(platformName)
-                .childDirectory('Flutter')
-                .childDirectory('ephemeral')
-                .childDirectory('Packages')
-                .childDirectory('FlutterGeneratedPluginSwiftPackage'),
-            exists,
-          );
+        expect(
+          fileSystem.directory(appDirectoryPath).childDirectory(platformName).childFile('Podfile'),
+          exists,
+        );
+        expect(
+          fileSystem
+              .directory(appDirectoryPath)
+              .childDirectory(platformName)
+              .childDirectory('Flutter')
+              .childDirectory('ephemeral')
+              .childDirectory('Packages')
+              .childDirectory('FlutterGeneratedPluginSwiftPackage'),
+          exists,
+        );
 
-          // Build app again but with Swift Package Manager disabled by config.
-          // App will now use CocoaPods version of integration_test plugin.
-          await SwiftPackageManagerUtils.disableSwiftPackageManager(
-            flutterBin,
-            workingDirectoryPath,
-          );
-          await SwiftPackageManagerUtils.cleanApp(flutterBin, appDirectoryPath);
-          await SwiftPackageManagerUtils.buildApp(
-            flutterBin,
-            appDirectoryPath,
-            options: <String>[platformName, '--debug', '-v'],
-            expectedLines: SwiftPackageManagerUtils.expectedLines(
-              platform: platformName,
-              appDirectoryPath: appDirectoryPath,
-              cocoaPodsPlugin: integrationTestPlugin,
-            ),
-            unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
-              platform: platformName,
-              appDirectoryPath: appDirectoryPath,
-              cocoaPodsPlugin: integrationTestPlugin,
-            ),
-          );
-
-          // Build app again but with Swift Package Manager disabled by pubspec.
-          // App will still use CocoaPods version of integration_test plugin.
-          await SwiftPackageManagerUtils.enableSwiftPackageManager(
-            flutterBin,
-            workingDirectoryPath,
-          );
-          await SwiftPackageManagerUtils.cleanApp(flutterBin, appDirectoryPath);
-          SwiftPackageManagerUtils.disableSwiftPackageManagerByPubspec(
+        // Build an app using both a CocoaPods and Swift Package Manager plugin.
+        SwiftPackageManagerUtils.addDependency(
+          appDirectoryPath: appDirectoryPath,
+          plugin: createdCocoaPodsPlugin,
+        );
+        await SwiftPackageManagerUtils.buildApp(
+          flutterBin,
+          appDirectoryPath,
+          options: <String>[platformName, '--debug', '-v'],
+          expectedLines: SwiftPackageManagerUtils.expectedLines(
+            platform: platformName,
             appDirectoryPath: appDirectoryPath,
-          );
-          await SwiftPackageManagerUtils.buildApp(
-            flutterBin,
-            appDirectoryPath,
-            options: <String>[platformName, '--debug', '-v'],
-            expectedLines: SwiftPackageManagerUtils.expectedLines(
-              platform: platformName,
-              appDirectoryPath: appDirectoryPath,
-              cocoaPodsPlugin: integrationTestPlugin,
-            ),
-            unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
-              platform: platformName,
-              appDirectoryPath: appDirectoryPath,
-              cocoaPodsPlugin: integrationTestPlugin,
-            ),
-          );
-        },
-        skip: !platform.isMacOS, // [intended] Swift Package Manager only works on macos.
-      );
-    }
+            cocoaPodsPlugin: createdCocoaPodsPlugin,
+            swiftPackageMangerEnabled: true,
+            swiftPackagePlugin: integrationTestPlugin,
+          ),
+          unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
+            platform: platformName,
+            appDirectoryPath: appDirectoryPath,
+            cocoaPodsPlugin: createdCocoaPodsPlugin,
+            swiftPackageMangerEnabled: true,
+            swiftPackagePlugin: integrationTestPlugin,
+          ),
+        );
+
+        expect(
+          fileSystem.directory(appDirectoryPath).childDirectory(platformName).childFile('Podfile'),
+          exists,
+        );
+        expect(
+          fileSystem
+              .directory(appDirectoryPath)
+              .childDirectory(platformName)
+              .childDirectory('Flutter')
+              .childDirectory('ephemeral')
+              .childDirectory('Packages')
+              .childDirectory('FlutterGeneratedPluginSwiftPackage'),
+          exists,
+        );
+
+        // Build app again but with Swift Package Manager disabled by config.
+        // App will now use CocoaPods version of integration_test plugin.
+        await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+        await SwiftPackageManagerUtils.cleanApp(flutterBin, appDirectoryPath);
+        await SwiftPackageManagerUtils.buildApp(
+          flutterBin,
+          appDirectoryPath,
+          options: <String>[platformName, '--debug', '-v'],
+          expectedLines: SwiftPackageManagerUtils.expectedLines(
+            platform: platformName,
+            appDirectoryPath: appDirectoryPath,
+            cocoaPodsPlugin: integrationTestPlugin,
+          ),
+          unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
+            platform: platformName,
+            appDirectoryPath: appDirectoryPath,
+            cocoaPodsPlugin: integrationTestPlugin,
+          ),
+        );
+
+        // Build app again but with Swift Package Manager disabled by pubspec.
+        // App will still use CocoaPods version of integration_test plugin.
+        await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
+        await SwiftPackageManagerUtils.cleanApp(flutterBin, appDirectoryPath);
+        SwiftPackageManagerUtils.disableSwiftPackageManagerByPubspec(
+          appDirectoryPath: appDirectoryPath,
+        );
+        await SwiftPackageManagerUtils.buildApp(
+          flutterBin,
+          appDirectoryPath,
+          options: <String>[platformName, '--debug', '-v'],
+          expectedLines: SwiftPackageManagerUtils.expectedLines(
+            platform: platformName,
+            appDirectoryPath: appDirectoryPath,
+            cocoaPodsPlugin: integrationTestPlugin,
+          ),
+          unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
+            platform: platformName,
+            appDirectoryPath: appDirectoryPath,
+            cocoaPodsPlugin: integrationTestPlugin,
+          ),
+        );
+      },
+      skip: !platform.isMacOS, // [intended] Swift Package Manager only works on macos.
+    );
 
     test('Build $platformName-framework with non-module app uses CocoaPods', () async {
       final Directory workingDirectory = fileSystem.systemTempDirectory.createTempSync(
@@ -253,7 +285,6 @@ void main() {
       final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
         flutterBin,
         workingDirectoryPath,
-        iosLanguage: 'swift',
         platform: platformName,
         usesSwiftPackageManager: true,
         options: <String>['--platforms=$platformName'],
@@ -330,7 +361,6 @@ void main() {
         final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
           flutterBin,
           workingDirectoryPath,
-          iosLanguage: 'swift',
           platform: platformName,
           usesSwiftPackageManager: true,
           options: <String>['--platforms=$platformName'],
@@ -340,9 +370,9 @@ void main() {
           plugin: integrationTestPlugin,
         );
 
-        final String unpackTarget = 'debug_unpack_$platformName';
-        final String bundleFlutterAssetsTarget = 'debug_${platformName}_bundle_flutter_assets';
-        final bool noCodesign = platformName == 'ios';
+        final unpackTarget = 'debug_unpack_$platformName';
+        final bundleFlutterAssetsTarget = 'debug_${platformName}_bundle_flutter_assets';
+        final noCodesign = platformName == 'ios';
         await SwiftPackageManagerUtils.buildApp(
           flutterBin,
           appDirectoryPath,
@@ -389,7 +419,6 @@ void main() {
     final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
       flutterBin,
       workingDirectoryPath,
-      iosLanguage: 'swift',
       platform: 'ios',
       usesSwiftPackageManager: true,
       options: <String>['--template=module'],
@@ -481,7 +510,6 @@ void main() {
     final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
       flutterBin,
       workingDirectoryPath,
-      iosLanguage: 'swift',
       platform: 'ios',
       usesSwiftPackageManager: true,
       options: <String>[],
@@ -520,7 +548,7 @@ void main() {
     expect(generatedManifestFile, exists);
 
     final String generatedManifest = generatedManifestFile.readAsStringSync();
-    const String expected = 'dependencies: [\n        \n    ],\n';
+    const expected = 'dependencies: [\n        \n    ],\n';
     expect(generatedManifest, contains(expected));
 
     expect(
@@ -541,11 +569,10 @@ void main() {
     expect(flutterPluginsDependenciesFile, exists);
 
     final String dependenciesString = flutterPluginsDependenciesFile.readAsStringSync();
-    final Map<String, dynamic>? dependenciesJson =
-        json.decode(dependenciesString) as Map<String, dynamic>?;
-    final Map<String, dynamic>? swiftPackageManagerEnabled =
+    final dependenciesJson = json.decode(dependenciesString) as Map<String, dynamic>?;
+    final swiftPackageManagerEnabled =
         dependenciesJson?['swift_package_manager_enabled'] as Map<String, dynamic>?;
-    final bool? swiftPackageManagerEnabledIos = swiftPackageManagerEnabled?['ios'] as bool?;
+    final swiftPackageManagerEnabledIos = swiftPackageManagerEnabled?['ios'] as bool?;
 
     expect(swiftPackageManagerEnabledIos, isFalse);
   }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
@@ -565,7 +592,6 @@ void main() {
     final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
       flutterBin,
       workingDirectoryPath,
-      iosLanguage: 'swift',
       platform: 'ios',
       usesSwiftPackageManager: true,
       options: <String>['--platforms=ios'],
@@ -606,7 +632,7 @@ void main() {
     expect(generatedManifestFile, exists);
 
     final String generatedManifest = generatedManifestFile.readAsStringSync();
-    const String expected = '''
+    const expected = '''
     platforms: [
         .iOS("15.1")
     ],
@@ -630,7 +656,6 @@ void main() {
     final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
       flutterBin,
       workingDirectoryPath,
-      iosLanguage: 'swift',
       platform: 'macos',
       usesSwiftPackageManager: true,
       options: <String>['--platforms=macos'],
@@ -671,7 +696,7 @@ void main() {
     expect(generatedManifestFile, exists);
 
     final String generatedManifest = generatedManifestFile.readAsStringSync();
-    const String expected = '''
+    const expected = '''
     platforms: [
         .macOS("15.1")
     ],
@@ -697,7 +722,6 @@ void main() {
     final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
       flutterBin,
       workingDirectoryPath,
-      iosLanguage: 'swift',
       platform: 'ios',
       usesSwiftPackageManager: true,
       options: <String>['--platforms=ios'],
@@ -731,9 +755,9 @@ void main() {
     expect(generatedManifestFile, exists);
 
     String generatedManifest = generatedManifestFile.readAsStringSync();
-    final String generatedSwiftDependency = '''
+    const generatedSwiftDependency = '''
     dependencies: [
-        .package(name: "integration_test", path: "${integrationTestPlugin.swiftPackagePlatformPath}")
+        .package(name: "integration_test", path: "../.packages/integration_test")
     ],
 ''';
 
@@ -755,7 +779,7 @@ void main() {
     expect(generatedManifestFile, exists);
 
     generatedManifest = generatedManifestFile.readAsStringSync();
-    const String emptyDependencies = 'dependencies: [\n        \n    ],\n';
+    const emptyDependencies = 'dependencies: [\n        \n    ],\n';
 
     expect(generatedManifest, isNot(contains(generatedSwiftDependency)));
     expect(generatedManifest, contains(emptyDependencies));
@@ -778,7 +802,6 @@ void main() {
     final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
       flutterBin,
       workingDirectoryPath,
-      iosLanguage: 'swift',
       platform: 'ios',
       usesSwiftPackageManager: true,
       options: <String>['--platforms=ios'],
@@ -828,9 +851,9 @@ void main() {
 
     String xcodeProject = xcodeProjectFile.readAsStringSync();
     String generatedManifest = generatedManifestFile.readAsStringSync();
-    final String generatedSwiftDependency = '''
+    const generatedSwiftDependency = '''
     dependencies: [
-        .package(name: "integration_test", path: "${integrationTestPlugin.swiftPackagePlatformPath}")
+        .package(name: "integration_test", path: "../.packages/integration_test")
     ],
 ''';
 
@@ -856,7 +879,7 @@ void main() {
 
     xcodeProject = xcodeProjectFile.readAsStringSync();
     generatedManifest = generatedManifestFile.readAsStringSync();
-    const String emptyDependencies = 'dependencies: [\n        \n    ],\n';
+    const emptyDependencies = 'dependencies: [\n        \n    ],\n';
 
     expect(xcodeProject, contains('FlutterGeneratedPluginSwiftPackage'));
     expect(generatedManifest, isNot(contains('integration_test')));

@@ -2,11 +2,18 @@ include: ../analysis_options.yaml
 
 linter:
   rules:
+    always_specify_types: false # This isn't necessary for tool code which doesn't have the same explicit readability requirements as the framework.
     avoid_catches_without_on_clauses: true
     avoid_catching_errors: false # TODO(ianh): we should refactor the tool codebase to avoid relying on this so much
+    comment_references: true
     library_private_types_in_public_api: false # Tool does not have any public API.
     no_runtimeType_toString: false # We use runtimeType for debugging in the tool.
+    omit_obvious_local_variable_types: true # Reduce overall verbosity of tool code.
+    omit_obvious_property_types: true # Reduce overall verbosity of tool code.
     only_throw_errors: true
     prefer_relative_imports: true
     public_member_api_docs: false # Tool does not have any public API.
+    specify_nonobvious_local_variable_types: true # Reduce overall verbosity of tool code.
+    specify_nonobvious_property_types: true # Reduce overall verbosity of tool code.
     unawaited_futures: true
+    unintended_html_in_doc_comment: true

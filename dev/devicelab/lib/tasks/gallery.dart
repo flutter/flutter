@@ -63,20 +63,18 @@ TaskFunction createGalleryTransitionHybridBuildTest(
   return GalleryTransitionBuildTest(
     args,
     semanticsEnabled: semanticsEnabled,
-    driverFile:
-        semanticsEnabled
-            ? 'transitions_perf_hybrid_with_semantics_test'
-            : 'transitions_perf_hybrid_test',
+    driverFile: semanticsEnabled
+        ? 'transitions_perf_hybrid_with_semantics_test'
+        : 'transitions_perf_hybrid_test',
   ).call;
 }
 
 TaskFunction createGalleryTransitionHybridTest({bool semanticsEnabled = false}) {
   return GalleryTransitionTest(
     semanticsEnabled: semanticsEnabled,
-    driverFile:
-        semanticsEnabled
-            ? 'transitions_perf_hybrid_with_semantics_test'
-            : 'transitions_perf_hybrid_test',
+    driverFile: semanticsEnabled
+        ? 'transitions_perf_hybrid_with_semantics_test'
+        : 'transitions_perf_hybrid_test',
   ).call;
 }
 

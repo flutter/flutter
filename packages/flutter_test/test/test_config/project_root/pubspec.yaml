@@ -4,6 +4,6 @@
 name: dummy
 
 environment:
-  sdk: ^3.7.0-0
+  sdk: ^3.8.0-0
 
-# PUBSPEC CHECKSUM: 0000
+# PUBSPEC CHECKSUM: 1

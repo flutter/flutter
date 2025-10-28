@@ -12,13 +12,13 @@
 #include "flutter/impeller/golden_tests/golden_digest.h"
 #include "flutter/impeller/golden_tests/metal_screenshotter.h"
 #include "flutter/impeller/golden_tests/vulkan_screenshotter.h"
-#include "flutter/third_party/abseil-cpp/absl/base/no_destructor.h"
 #include "fml/closure.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "impeller/typographer/typographer_context.h"
+#include "third_party/abseil-cpp/absl/base/no_destructor.h"
 
 #define GLFW_INCLUDE_NONE
 #include "third_party/glfw/include/GLFW/glfw3.h"
@@ -132,6 +132,11 @@ void GoldenPlaygroundTest::SetTypographerContext(
 
 void GoldenPlaygroundTest::TearDown() {
   ASSERT_FALSE(dlopen("/usr/local/lib/libMoltenVK.dylib", RTLD_NOLOAD));
+
+  auto context = GetContext();
+  if (context) {
+    context->DisposeThreadLocalCachedResources();
+  }
 }
 
 namespace {
@@ -280,6 +285,9 @@ RuntimeStage::Map GoldenPlaygroundTest::OpenAssetAsRuntimeStage(
 }
 
 std::shared_ptr<Context> GoldenPlaygroundTest::GetContext() const {
+  if (!pimpl_->screenshotter) {
+    return nullptr;
+  }
   return pimpl_->screenshotter->GetPlayground().GetContext();
 }
 

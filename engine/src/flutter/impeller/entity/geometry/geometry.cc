@@ -9,6 +9,7 @@
 
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/pipelines.h"
+#include "impeller/entity/geometry/arc_geometry.h"
 #include "impeller/entity/geometry/circle_geometry.h"
 #include "impeller/entity/geometry/cover_geometry.h"
 #include "impeller/entity/geometry/ellipse_geometry.h"
@@ -35,7 +36,7 @@ GeometryResult Geometry::ComputePositionGeometry(
       .type = generator.GetTriangleType(),
       .vertex_buffer =
           {
-              .vertex_buffer = renderer.GetTransientsBuffer().Emplace(
+              .vertex_buffer = renderer.GetTransientsDataBuffer().Emplace(
                   count * sizeof(VT), alignof(VT),
                   [&generator](uint8_t* buffer) {
                     auto vertices = reinterpret_cast<VT*>(buffer);
@@ -59,22 +60,19 @@ GeometryResult::Mode Geometry::GetResultMode() const {
 }
 
 std::unique_ptr<Geometry> Geometry::MakeFillPath(
-    const Path& path,
+    const flutter::DlPath& path,
     std::optional<Rect> inner_rect) {
   return std::make_unique<FillPathGeometry>(path, inner_rect);
 }
 
-std::unique_ptr<Geometry> Geometry::MakeStrokePath(const Path& path,
-                                                   Scalar stroke_width,
-                                                   Scalar miter_limit,
-                                                   Cap stroke_cap,
-                                                   Join stroke_join) {
+std::unique_ptr<Geometry> Geometry::MakeStrokePath(
+    const flutter::DlPath& path,
+    const StrokeParameters& stroke) {
   // Skia behaves like this.
-  if (miter_limit < 0) {
-    miter_limit = 4.0;
+  StrokeParameters parameters = stroke;
+  if (parameters.miter_limit < 0) {
+    parameters.miter_limit = 4.0;
   }
-  StrokeParameters parameters{stroke_width, stroke_cap, stroke_join,
-                              miter_limit};
   return std::make_unique<StrokePathGeometry>(path, parameters);
 }
 
@@ -105,6 +103,23 @@ std::unique_ptr<Geometry> Geometry::MakeStrokedCircle(const Point& center,
                                                       Scalar radius,
                                                       Scalar stroke_width) {
   return std::make_unique<CircleGeometry>(center, radius, stroke_width);
+}
+
+std::unique_ptr<Geometry> Geometry::MakeFilledArc(const Rect& oval_bounds,
+                                                  Degrees start,
+                                                  Degrees sweep,
+                                                  bool include_center) {
+  return std::make_unique<ArcGeometry>(
+      Arc(oval_bounds, start, sweep, include_center));
+}
+
+std::unique_ptr<Geometry> Geometry::MakeStrokedArc(
+    const Rect& oval_bounds,
+    Degrees start,
+    Degrees sweep,
+    const StrokeParameters& stroke) {
+  return std::make_unique<ArcGeometry>(Arc(oval_bounds, start, sweep, false),
+                                       stroke);
 }
 
 std::unique_ptr<Geometry> Geometry::MakeRoundRect(const Rect& rect,

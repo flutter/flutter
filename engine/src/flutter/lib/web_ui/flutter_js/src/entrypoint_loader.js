@@ -63,12 +63,19 @@ export class FlutterEntrypointLoader {
     onEntrypointLoaded ??= (engineInitializer) => {
       engineInitializer.initializeEngine(config).then((appRunner) => appRunner.runApp())
     };
+    let { entrypointBaseUrl } = config;
     const { entryPointBaseUrl } = config;
+    if (!entrypointBaseUrl && entryPointBaseUrl) {
+      console.warn(
+        '[deprecated] `entryPointBaseUrl` is deprecated and will be removed in a future release. Use `entrypointBaseUrl` instead.'
+      );
+      entrypointBaseUrl = entryPointBaseUrl;
+    }
     if (build.compileTarget === "dart2wasm") {
-      return this._loadWasmEntrypoint(build, deps, entryPointBaseUrl, onEntrypointLoaded);
+      return this._loadWasmEntrypoint(build, deps, entrypointBaseUrl, onEntrypointLoaded);
     } else {
       const mainPath = build.mainJsPath ?? "main.dart.js";
-      const entrypointUrl = resolveUrlWithSegments(entryPointBaseUrl, mainPath);
+      const entrypointUrl = resolveUrlWithSegments(entrypointBaseUrl, mainPath);
       return this._loadJSEntrypoint(entrypointUrl, onEntrypointLoaded, nonce);
     }
   }
@@ -139,7 +146,7 @@ export class FlutterEntrypointLoader {
    *
    * @param {import("./types").WasmApplicationBuild} build
    * @param {*} deps
-   * @param {string} entryPointBaseUrl
+   * @param {string} entrypointBaseUrl
    * @param {import("./types").OnEntrypointLoadedCallback} onEntrypointLoaded
    */
   async _loadWasmEntrypoint(build, deps, entrypointBaseUrl, onEntrypointLoaded) {
@@ -174,7 +181,17 @@ export class FlutterEntrypointLoader {
         importsPromise = Promise.resolve({});
       }
       const compiledDartApp = await compiledDartAppPromise;
-      const dartApp = await compiledDartApp.instantiate(await importsPromise);
+      const dartApp = await compiledDartApp.instantiate(await importsPromise, {
+        loadDynamicModule: async (wasmUri, mjsUri) => {
+          const wasmBytes = fetch(resolveUrlWithSegments(entrypointBaseUrl, wasmUri));
+          let mjsRuntimeUri = resolveUrlWithSegments(entrypointBaseUrl, mjsUri);
+          if (this._ttPolicy != null) {
+            mjsRuntimeUri = this._ttPolicy.createScriptURL(mjsRuntimeUri);
+          }
+          const mjsModule = import(mjsRuntimeUri);
+          return [await wasmBytes, await mjsModule];
+        }
+      });
       await dartApp.invokeMain();
     }
   }

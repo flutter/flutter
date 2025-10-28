@@ -121,17 +121,12 @@ class ScreenOrientation {
   //
   // See also: https://developer.mozilla.org/en-US/docs/Web/API/ScreenOrientation/lock
   static String? _deviceOrientationToLockType(String? deviceOrientation) {
-    switch (deviceOrientation) {
-      case 'DeviceOrientation.portraitUp':
-        return lockTypePortraitPrimary;
-      case 'DeviceOrientation.portraitDown':
-        return lockTypePortraitSecondary;
-      case 'DeviceOrientation.landscapeLeft':
-        return lockTypeLandscapePrimary;
-      case 'DeviceOrientation.landscapeRight':
-        return lockTypeLandscapeSecondary;
-      default:
-        return null;
-    }
+    return switch (deviceOrientation) {
+      'DeviceOrientation.portraitUp' => lockTypePortraitPrimary,
+      'DeviceOrientation.portraitDown' => lockTypePortraitSecondary,
+      'DeviceOrientation.landscapeLeft' => lockTypeLandscapePrimary,
+      'DeviceOrientation.landscapeRight' => lockTypeLandscapeSecondary,
+      _ => null,
+    };
   }
 }

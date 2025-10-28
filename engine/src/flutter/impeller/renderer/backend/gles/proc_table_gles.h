@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <string>
+#include <string_view>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/mapping.h"
@@ -19,16 +20,17 @@
 
 namespace impeller {
 
-const char* GLErrorToString(GLenum value);
+std::string_view GLErrorToString(GLenum value);
 bool GLErrorIsFatal(GLenum value);
 
 struct AutoErrorCheck {
   const PFNGLGETERRORPROC error_fn;
 
-  // TODO(135922) Change to string_view.
-  const char* name;
+  /// Name of the GL call being wrapped.
+  /// should not be stored beyond the caller's lifetime.
+  std::string_view name;
 
-  AutoErrorCheck(PFNGLGETERRORPROC error, const char* name)
+  AutoErrorCheck(PFNGLGETERRORPROC error, std::string_view name)
       : error_fn(error), name(name) {}
 
   ~AutoErrorCheck() {
@@ -80,8 +82,7 @@ struct GLProc {
   //----------------------------------------------------------------------------
   /// The name of the GL function.
   ///
-  // TODO(135922) Change to string_view.
-  const char* name = nullptr;
+  std::string_view name = {};
 
   //----------------------------------------------------------------------------
   /// The pointer to the GL function.
@@ -118,8 +119,7 @@ struct GLProc {
     FML_CHECK(IsAvailable()) << "GL function " << name << " is not available. "
                              << "This is likely due to a missing extension.";
     if (log_calls) {
-      FML_LOG(IMPORTANT) << name
-                         << BuildGLArguments(std::forward<Args>(args)...);
+      FML_LOG(IMPORTANT) << name << BuildGLArguments(args...);
     }
 #endif  // defined(IMPELLER_DEBUG) && !defined(NDEBUG)
     return function(std::forward<Args>(args)...);
@@ -266,7 +266,8 @@ void(glDepthRange)(GLdouble n, GLdouble f);
   PROC(GetQueryObjectui64vEXT);             \
   PROC(BeginQueryEXT);                      \
   PROC(EndQueryEXT);                        \
-  PROC(GetQueryObjectuivEXT);
+  PROC(GetQueryObjectuivEXT);               \
+  PROC(BlitFramebufferANGLE);
 
 enum class DebugResourceType {
   kTexture,

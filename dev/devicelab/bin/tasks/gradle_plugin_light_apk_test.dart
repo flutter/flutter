@@ -35,31 +35,6 @@ Future<void> main() async {
         checkCollectionDoesNotContain<String>(<String>[
           'lib/arm64-v8a/libapp.so',
           'lib/armeabi-v7a/libapp.so',
-          'lib/x86/libapp.so',
-          'lib/x86_64/libapp.so',
-        ], apkFiles);
-
-        section('APK content for task assembleDebug with target platform = android-x86');
-        // This is used by `flutter run`
-        await inDirectory(pluginProject.exampleAndroidPath, () {
-          return flutter(
-            'build',
-            options: <String>['apk', '--debug', '--target-platform=android-x86'],
-          );
-        });
-
-        apkFiles = await getFilesInApk(pluginProject.debugApkPath);
-
-        checkCollectionContains<String>(<String>[
-          ...flutterAssets,
-          ...debugAssets,
-          ...baseApkFiles,
-          'lib/x86/libflutter.so',
-        ], apkFiles);
-
-        checkCollectionDoesNotContain<String>(<String>[
-          'lib/armeabi-v7a/libapp.so',
-          'lib/x86/libapp.so',
           'lib/x86_64/libapp.so',
         ], apkFiles);
 
@@ -84,7 +59,6 @@ Future<void> main() async {
 
         checkCollectionDoesNotContain<String>(<String>[
           'lib/armeabi-v7a/libapp.so',
-          'lib/x86/libapp.so',
           'lib/x86_64/libapp.so',
         ], apkFiles);
 
@@ -268,7 +242,8 @@ Future<void> main() async {
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     }
   });

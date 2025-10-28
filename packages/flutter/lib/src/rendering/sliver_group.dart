@@ -116,10 +116,9 @@ class RenderSliverCrossAxisGroup extends RenderSliver
           child.parentData! as SliverPhysicalParentData;
       final SliverGeometry childLayoutGeometry = child.geometry!;
       final double remainingExtent = geometry!.scrollExtent - constraints.scrollOffset;
-      final double paintCorrection =
-          childLayoutGeometry.paintExtent > remainingExtent
-              ? childLayoutGeometry.paintExtent - remainingExtent
-              : 0.0;
+      final double paintCorrection = childLayoutGeometry.paintExtent > remainingExtent
+          ? childLayoutGeometry.paintExtent - remainingExtent
+          : 0.0;
       final double childExtent =
           child.geometry!.crossAxisExtent ??
           extentPerFlexValue * (childParentData.crossAxisFlex ?? 0);
@@ -161,10 +160,11 @@ class RenderSliverCrossAxisGroup extends RenderSliver
   }) {
     RenderSliver? child = lastChild;
     while (child != null) {
+      final Offset paintOffset = (child.parentData! as SliverPhysicalParentData).paintOffset;
       final bool isHit = result.addWithAxisOffset(
         mainAxisPosition: mainAxisPosition,
         crossAxisPosition: crossAxisPosition,
-        paintOffset: null,
+        paintOffset: paintOffset,
         mainAxisOffset: childMainAxisPosition(child),
         crossAxisOffset: childCrossAxisPosition(child),
         hitTest: child.hitTest,
@@ -224,41 +224,64 @@ class RenderSliverMainAxisGroup extends RenderSliver
   @override
   double? childScrollOffset(RenderObject child) {
     assert(child.parent == this);
+    assert(child is RenderSliver);
+    final double extentOfPinnedSlivers = _maxScrollObstructionExtentBefore(child as RenderSliver);
     final GrowthDirection growthDirection = constraints.growthDirection;
     switch (growthDirection) {
       case GrowthDirection.forward:
         double childScrollOffset = 0.0;
-        RenderSliver? current = childBefore(child as RenderSliver);
+        RenderSliver? current = childBefore(child);
         while (current != null) {
-          // If the current child is not the first child, then we need to
-          // add the scroll extent of the previous child to the current child's
-          // scroll offset.
-          if (childBefore(current) != null) {
-            childScrollOffset +=
-                childAfter(current)!.geometry!.scrollExtent + child.geometry!.scrollExtent;
-          } else if (!(childAfter(child) != null && current.geometry!.hasVisualOverflow)) {
-            childScrollOffset += current.geometry!.scrollExtent;
-          }
+          childScrollOffset += current.geometry!.scrollExtent;
           current = childBefore(current);
         }
-        return childScrollOffset;
+        return childScrollOffset - extentOfPinnedSlivers;
       case GrowthDirection.reverse:
         double childScrollOffset = 0.0;
-        RenderSliver? current = childAfter(child as RenderSliver);
+        RenderSliver? current = childAfter(child);
         while (current != null) {
           childScrollOffset -= current.geometry!.scrollExtent;
           current = childAfter(current);
         }
-        return childScrollOffset;
+        return childScrollOffset - extentOfPinnedSlivers;
+    }
+  }
+
+  double _maxScrollObstructionExtentBefore(RenderSliver child) {
+    final GrowthDirection growthDirection = child.constraints.growthDirection;
+    switch (growthDirection) {
+      case GrowthDirection.forward:
+        double pinnedExtent = 0.0;
+        RenderSliver? current = firstChild;
+        while (current != child) {
+          pinnedExtent += current!.geometry!.maxScrollObstructionExtent;
+          current = childAfter(current);
+        }
+        return pinnedExtent;
+      case GrowthDirection.reverse:
+        double pinnedExtent = 0.0;
+        RenderSliver? current = lastChild;
+        while (current != child) {
+          pinnedExtent += current!.geometry!.maxScrollObstructionExtent;
+          current = childBefore(current);
+        }
+        return pinnedExtent;
     }
   }
 
   @override
   double childMainAxisPosition(RenderSliver child) {
-    final Offset paintOffset = (child.parentData! as SliverPhysicalParentData).paintOffset;
-    return switch (constraints.axis) {
-      Axis.horizontal => paintOffset.dx,
-      Axis.vertical => paintOffset.dy,
+    final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
+    return switch (applyGrowthDirectionToAxisDirection(
+      child.constraints.axisDirection,
+      child.constraints.growthDirection,
+    )) {
+      AxisDirection.down => childParentData.paintOffset.dy,
+      AxisDirection.right => childParentData.paintOffset.dx,
+      AxisDirection.up =>
+        geometry!.paintExtent - child.geometry!.paintExtent - childParentData.paintOffset.dy,
+      AxisDirection.left =>
+        geometry!.paintExtent - child.geometry!.paintExtent - childParentData.paintOffset.dx,
     };
   }
 
@@ -271,31 +294,57 @@ class RenderSliverMainAxisGroup extends RenderSliver
     double layoutOffset = 0;
     double maxPaintExtent = 0;
     double paintOffset = constraints.overlap;
+    double maxScrollObstructionExtent = 0;
 
-    RenderSliver? child = firstChild;
+    double cacheOrigin = constraints.cacheOrigin;
+    double remainingCacheExtent = constraints.remainingCacheExtent;
+
+    final (
+      RenderSliver? leadingChild,
+      RenderSliver? Function(RenderSliver child) advance,
+    ) = switch (constraints.growthDirection) {
+      GrowthDirection.forward => (firstChild, childAfter),
+      GrowthDirection.reverse => (lastChild, childBefore),
+    };
+    RenderSliver? child = leadingChild;
     while (child != null) {
       final double beforeOffsetPaintExtent = calculatePaintOffset(
         constraints,
         from: 0.0,
         to: scrollOffset,
       );
+
+      final double childScrollOffset = math.max(0.0, constraints.scrollOffset - scrollOffset);
+      final double correctedCacheOrigin = math.max(cacheOrigin, -childScrollOffset);
+      final double cacheExtentCorrection = cacheOrigin - correctedCacheOrigin;
+
       child.layout(
         constraints.copyWith(
-          scrollOffset: math.max(0.0, constraints.scrollOffset - scrollOffset),
-          cacheOrigin: math.min(0.0, constraints.cacheOrigin + scrollOffset),
+          scrollOffset: childScrollOffset,
+          cacheOrigin: correctedCacheOrigin,
           overlap: math.max(0.0, _fixPrecisionError(paintOffset - beforeOffsetPaintExtent)),
           remainingPaintExtent: _fixPrecisionError(
             constraints.remainingPaintExtent - beforeOffsetPaintExtent,
           ),
-          remainingCacheExtent: _fixPrecisionError(
-            constraints.remainingCacheExtent -
-                calculateCacheOffset(constraints, from: 0.0, to: scrollOffset),
+          remainingCacheExtent: math.max(
+            0.0,
+            _fixPrecisionError(remainingCacheExtent + cacheExtentCorrection),
           ),
           precedingScrollExtent: scrollOffset + constraints.precedingScrollExtent,
         ),
         parentUsesSize: true,
       );
+
       final SliverGeometry childLayoutGeometry = child.geometry!;
+
+      final double? scrollOffsetCorrection = childLayoutGeometry.scrollOffsetCorrection;
+      if (scrollOffsetCorrection != null) {
+        geometry = SliverGeometry(scrollOffsetCorrection: scrollOffsetCorrection);
+        return;
+      }
+
+      assert(childLayoutGeometry.debugAssertIsValid());
+
       final double childPaintOffset = layoutOffset + childLayoutGeometry.paintOrigin;
       final SliverPhysicalParentData childParentData =
           child.parentData! as SliverPhysicalParentData;
@@ -306,8 +355,15 @@ class RenderSliverMainAxisGroup extends RenderSliver
       scrollOffset += childLayoutGeometry.scrollExtent;
       layoutOffset += childLayoutGeometry.layoutExtent;
       maxPaintExtent += childLayoutGeometry.maxPaintExtent;
+      maxScrollObstructionExtent += childLayoutGeometry.maxScrollObstructionExtent;
       paintOffset = math.max(childPaintOffset + childLayoutGeometry.paintExtent, paintOffset);
-      child = childAfter(child);
+      if (childLayoutGeometry.cacheExtent != 0.0) {
+        remainingCacheExtent = _fixPrecisionError(
+          remainingCacheExtent - childLayoutGeometry.cacheExtent - cacheExtentCorrection,
+        );
+        cacheOrigin = math.min(correctedCacheOrigin + childLayoutGeometry.cacheExtent, 0.0);
+      }
+      child = advance(child);
       assert(() {
         if (child != null && maxPaintExtent.isInfinite) {
           throw FlutterError(
@@ -328,7 +384,10 @@ class RenderSliverMainAxisGroup extends RenderSliver
       child = firstChild;
       while (child != null) {
         final SliverGeometry childLayoutGeometry = child.geometry!;
-        if (childLayoutGeometry.paintExtent > 0) {
+        final bool childIsTooLarge = childLayoutGeometry.paintExtent > remainingExtent;
+        final bool pinnedHeadersOverflow = maxScrollObstructionExtent > remainingExtent;
+        final bool childIsPinnedHeader = childLayoutGeometry.maxScrollObstructionExtent > 0;
+        if (childIsTooLarge || (pinnedHeadersOverflow && childIsPinnedHeader)) {
           final SliverPhysicalParentData childParentData =
               child.parentData! as SliverPhysicalParentData;
           childParentData.paintOffset = switch (constraints.axis) {
@@ -358,11 +417,14 @@ class RenderSliverMainAxisGroup extends RenderSliver
 
     // Update the children's paintOffset based on the direction again, which
     // must be done after obtaining the `paintExtent`.
-    child = firstChild;
+    child = leadingChild;
     while (child != null) {
       final SliverPhysicalParentData childParentData =
           child.parentData! as SliverPhysicalParentData;
-      childParentData.paintOffset = switch (constraints.axisDirection) {
+      childParentData.paintOffset = switch (applyGrowthDirectionToAxisDirection(
+        constraints.axisDirection,
+        constraints.growthDirection,
+      )) {
         AxisDirection.up => Offset(
           0.0,
           paintExtent - childParentData.paintOffset.dy - child.geometry!.paintExtent,
@@ -373,7 +435,7 @@ class RenderSliverMainAxisGroup extends RenderSliver
         ),
         AxisDirection.right || AxisDirection.down => childParentData.paintOffset,
       };
-      child = childAfter(child);
+      child = advance(child);
     }
   }
 
@@ -404,10 +466,11 @@ class RenderSliverMainAxisGroup extends RenderSliver
   }) {
     RenderSliver? child = firstChild;
     while (child != null) {
+      final Offset paintOffset = (child.parentData! as SliverPhysicalParentData).paintOffset;
       final bool isHit = result.addWithAxisOffset(
         mainAxisPosition: mainAxisPosition,
         crossAxisPosition: crossAxisPosition,
-        paintOffset: null,
+        paintOffset: paintOffset,
         mainAxisOffset: childMainAxisPosition(child),
         crossAxisOffset: childCrossAxisPosition(child),
         hitTest: child.hitTest,
@@ -424,7 +487,7 @@ class RenderSliverMainAxisGroup extends RenderSliver
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     RenderSliver? child = firstChild;
     while (child != null) {
-      if (child.geometry!.visible) {
+      if (child.geometry!.visible || child.geometry!.cacheExtent > 0.0 || child.ensureSemantics) {
         visitor(child);
       }
       child = childAfter(child);

@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 #include <vector>
 
 #include "flutter/common/constants.h"
@@ -14,6 +15,7 @@
 #include "flutter/shell/platform/common/engine_switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/macos/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
@@ -364,6 +366,10 @@ constexpr char kTextPlainFormat[] = "text/plain";
   return controller.flutterView;
 }
 
+- (NSViewController*)viewController {
+  return [_flutterEngine viewControllerForIdentifier:kFlutterImplicitViewId];
+}
+
 - (void)addMethodCallDelegate:(nonnull id<FlutterPlugin>)delegate
                       channel:(nonnull FlutterMethodChannel*)channel {
   [channel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
@@ -450,6 +456,9 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, void* user_
   // factories. Lifecycle is tied to the engine.
   FlutterPlatformViewController* _platformViewController;
 
+  // Used to manage Flutter windows created by the Dart application
+  FlutterWindowController* _windowController;
+
   // A message channel for sending user settings to the flutter engine.
   FlutterBasicMessageChannel* _settingsChannel;
 
@@ -481,7 +490,18 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, void* user_
 
   // The text input plugin that handles text editing state for text fields.
   FlutterTextInputPlugin* _textInputPlugin;
+
+  // Whether the engine is running in multi-window mode. This affects behavior
+  // when adding view controller (it will fail when calling multiple times without
+  // _multiviewEnabled).
+  BOOL _multiViewEnabled;
+
+  // View identifier for the next view to be created.
+  // Only used when multiview is enabled.
+  FlutterViewIdentifier _nextViewIdentifier;
 }
+
+@synthesize windowController = _windowController;
 
 - (instancetype)initWithName:(NSString*)labelPrefix project:(FlutterDartProject*)project {
   return [self initWithName:labelPrefix project:project allowHeadlessExecution:YES];
@@ -515,7 +535,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   _visible = NO;
   _project = project ?: [[FlutterDartProject alloc] init];
   _messengerHandlers = [[NSMutableDictionary alloc] init];
-  _binaryMessenger = [[FlutterBinaryMessengerRelay alloc] initWithParent:self];
   _pluginAppDelegates = [NSPointerArray weakObjectsPointerArray];
   _pluginRegistrars = [[NSMutableDictionary alloc] init];
   _currentMessengerConnection = 1;
@@ -526,6 +545,8 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   [_isResponseValid addObject:@YES];
   _keyboardManager = [[FlutterKeyboardManager alloc] initWithDelegate:self];
   _textInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:self];
+  _multiViewEnabled = NO;
+  _nextViewIdentifier = 1;
 
   _embedderAPI.struct_size = sizeof(FlutterEngineProcTable);
   FlutterEngineGetProcAddresses(&_embedderAPI);
@@ -547,6 +568,10 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
       [[FlutterTimeConverter alloc] initWithEngine:self], _platformViewController);
 
   [self setUpPlatformViewChannel];
+
+  _windowController = [[FlutterWindowController alloc] init];
+  _windowController.engine = self;
+
   [self setUpAccessibilityChannel];
   [self setUpNotificationCenterListeners];
   id<NSApplicationDelegate> appDelegate = [[NSApplication sharedApplication] delegate];
@@ -621,6 +646,16 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   return cocoa_task_runner_description;
 }
 
+- (void)onFocusChangeRequest:(const FlutterViewFocusChangeRequest*)request {
+  FlutterViewController* controller = [self viewControllerForIdentifier:request->view_id];
+  if (controller == nil) {
+    return;
+  }
+  if (request->state == kFocused) {
+    [controller.flutterView.window makeFirstResponder:controller.flutterView];
+  }
+}
+
 - (BOOL)runWithEntrypoint:(NSString*)entrypoint {
   if (self.running) {
     return NO;
@@ -641,6 +676,11 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   if (_project.enableImpeller ||
       std::find(switches.begin(), switches.end(), "--enable-impeller=true") != switches.end()) {
     switches.push_back("--enable-impeller=true");
+  }
+
+  if (_project.enableFlutterGPU ||
+      std::find(switches.begin(), switches.end(), "--enable-flutter-gpu=true") != switches.end()) {
+    switches.push_back("--enable-flutter-gpu=true");
   }
 
   std::transform(switches.begin(), switches.end(), std::back_inserter(argv),
@@ -673,10 +713,13 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   flutterArguments.root_isolate_create_callback = _project.rootIsolateCreateCallback;
   flutterArguments.log_message_callback = [](const char* tag, const char* message,
                                              void* user_data) {
+    std::stringstream stream;
     if (tag && tag[0]) {
-      std::cout << tag << ": ";
+      stream << tag << ": ";
     }
-    std::cout << message << std::endl;
+    stream << message;
+    std::string log = stream.str();
+    [FlutterLogger logDirect:[NSString stringWithUTF8String:log.c_str()]];
   };
 
   flutterArguments.engine_id = reinterpret_cast<int64_t>((__bridge void*)self);
@@ -726,6 +769,12 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     FlutterEngine* engine = (__bridge FlutterEngine*)user_data;
     [engine onVSync:baton];
   };
+
+  flutterArguments.view_focus_change_request_callback =
+      [](const FlutterViewFocusChangeRequest* request, void* user_data) {
+        FlutterEngine* engine = (__bridge FlutterEngine*)user_data;
+        [engine onFocusChangeRequest:request];
+      };
 
   FlutterRendererConfig rendererConfig = [_renderer createRendererConfig];
   FlutterEngineResult result = _embedderAPI.Initialize(
@@ -787,10 +836,12 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
                  forIdentifier:(FlutterViewIdentifier)viewIdentifier {
   _macOSCompositor->AddView(viewIdentifier);
   NSAssert(controller != nil, @"The controller must not be nil.");
-  NSAssert(controller.engine == nil,
-           @"The FlutterViewController is unexpectedly attached to "
-           @"engine %@ before initialization.",
-           controller.engine);
+  if (!_multiViewEnabled) {
+    NSAssert(controller.engine == nil,
+             @"The FlutterViewController is unexpectedly attached to "
+             @"engine %@ before initialization.",
+             controller.engine);
+  }
   NSAssert([_viewControllers objectForKey:@(viewIdentifier)] == nil,
            @"The requested view ID is occupied.");
   [_viewControllers setObject:controller forKey:@(viewIdentifier)];
@@ -807,6 +858,32 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 
   if (controller.viewLoaded) {
     [self viewControllerViewDidLoad:controller];
+  }
+
+  if (viewIdentifier != kFlutterImplicitViewId) {
+    // These will be overriden immediately after the FlutterView is created
+    // by actual values.
+    FlutterWindowMetricsEvent metrics{
+        .struct_size = sizeof(FlutterWindowMetricsEvent),
+        .width = 0,
+        .height = 0,
+        .pixel_ratio = 1.0,
+    };
+    bool added = false;
+    FlutterAddViewInfo info{.struct_size = sizeof(FlutterAddViewInfo),
+                            .view_id = viewIdentifier,
+                            .view_metrics = &metrics,
+                            .user_data = &added,
+                            .add_view_callback = [](const FlutterAddViewResult* r) {
+                              auto added = reinterpret_cast<bool*>(r->user_data);
+                              *added = true;
+                            }};
+    // The callback should be called synchronously from platform thread.
+    _embedderAPI.AddView(_engine, &info);
+    FML_DCHECK(added);
+    if (!added) {
+      NSLog(@"Failed to add view with ID %llu", viewIdentifier);
+    }
   }
 }
 
@@ -825,14 +902,36 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
                         engine->_embedderAPI.OnVsync(_engine, baton, timeNanos, targetTimeNanos);
                       }
                     }];
-  FML_DCHECK([_vsyncWaiters objectForKey:@(viewController.viewIdentifier)] == nil);
   @synchronized(_vsyncWaiters) {
+    FML_DCHECK([_vsyncWaiters objectForKey:@(viewController.viewIdentifier)] == nil);
     [_vsyncWaiters setObject:waiter forKey:@(viewController.viewIdentifier)];
   }
 }
 
 - (void)deregisterViewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier {
+  if (viewIdentifier != kFlutterImplicitViewId) {
+    bool removed = false;
+    FlutterRemoveViewInfo info;
+    info.struct_size = sizeof(FlutterRemoveViewInfo);
+    info.view_id = viewIdentifier;
+    info.user_data = &removed;
+    // RemoveViewCallback is not finished synchronously, the remove_view_callback
+    // is called from raster thread when the engine knows for sure that the resources
+    // associated with the view are no longer needed.
+    info.remove_view_callback = [](const FlutterRemoveViewResult* r) {
+      auto removed = reinterpret_cast<bool*>(r->user_data);
+      [FlutterRunLoop.mainRunLoop performBlock:^{
+        *removed = true;
+      }];
+    };
+    _embedderAPI.RemoveView(_engine, &info);
+    while (!removed) {
+      [[FlutterRunLoop mainRunLoop] pollFlutterMessagesOnce];
+    }
+  }
+
   _macOSCompositor->RemoveView(viewIdentifier);
+
   FlutterViewController* controller = [self viewControllerForIdentifier:viewIdentifier];
   // The controller can be nil. The engine stores only a weak ref, and this
   // method could have been called from the controller's dealloc.
@@ -844,9 +943,13 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
              @"the FlutterEngine is mocked. Please subclass these classes instead.");
   }
   [_viewControllers removeObjectForKey:@(viewIdentifier)];
+
+  FlutterVSyncWaiter* waiter = nil;
   @synchronized(_vsyncWaiters) {
+    waiter = [_vsyncWaiters objectForKey:@(viewIdentifier)];
     [_vsyncWaiters removeObjectForKey:@(viewIdentifier)];
   }
+  [waiter invalidate];
 }
 
 - (void)shutDownIfNeeded {
@@ -933,11 +1036,46 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 #pragma mark - Framework-internal methods
 
 - (void)addViewController:(FlutterViewController*)controller {
-  // FlutterEngine can only handle the implicit view for now. Adding more views
-  // throws an assertion.
-  NSAssert(self.viewController == nil,
-           @"The engine already has a view controller for the implicit view.");
-  self.viewController = controller;
+  if (!_multiViewEnabled) {
+    // When multiview is disabled, the engine will only assign views to the implicit view ID.
+    // The implicit view ID can be reused if and only if the implicit view is unassigned.
+    NSAssert(self.viewController == nil,
+             @"The engine already has a view controller for the implicit view.");
+    self.viewController = controller;
+  } else {
+    // When multiview is enabled, the engine will assign views to a self-incrementing ID.
+    // The implicit view ID can not be reused.
+    FlutterViewIdentifier viewIdentifier = _nextViewIdentifier++;
+    [self registerViewController:controller forIdentifier:viewIdentifier];
+  }
+}
+
+- (void)enableMultiView {
+  if (!_multiViewEnabled) {
+    NSAssert(self.viewController == nil,
+             @"Multiview can only be enabled before adding any view controllers.");
+    _multiViewEnabled = YES;
+  }
+}
+
+- (void)windowDidBecomeKey:(FlutterViewIdentifier)viewIdentifier {
+  FlutterViewFocusEvent event{
+      .struct_size = sizeof(FlutterViewFocusEvent),
+      .view_id = viewIdentifier,
+      .state = kFocused,
+      .direction = kUndefined,
+  };
+  _embedderAPI.SendViewFocusEvent(_engine, &event);
+}
+
+- (void)windowDidResignKey:(FlutterViewIdentifier)viewIdentifier {
+  FlutterViewFocusEvent event{
+      .struct_size = sizeof(FlutterViewFocusEvent),
+      .view_id = viewIdentifier,
+      .state = kUnfocused,
+      .direction = kUndefined,
+  };
+  _embedderAPI.SendViewFocusEvent(_engine, &event);
 }
 
 - (void)removeViewController:(nonnull FlutterViewController*)viewController {
@@ -1161,8 +1299,16 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   auto block = ^{
     // TODO(knopp): Use vsync waiter for correct view.
     // https://github.com/flutter/flutter/issues/142845
-    FlutterVSyncWaiter* waiter = [_vsyncWaiters objectForKey:@(kFlutterImplicitViewId)];
-    [waiter waitForVSync:baton];
+    FlutterVSyncWaiter* waiter =
+        [_vsyncWaiters objectForKey:[_vsyncWaiters.keyEnumerator nextObject]];
+    if (waiter != nil) {
+      [waiter waitForVSync:baton];
+    } else {
+      // Sometimes there is a vsync request right after the last view is removed.
+      // It still need to be handled, otherwise the engine will stop producing frames
+      // even if a new view is added later.
+      self.embedderAPI.OnVsync(_engine, baton, 0, 0);
+    }
   };
   if ([NSThread isMainThread]) {
     block();
@@ -1244,6 +1390,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   [FlutterMouseCursorPlugin registerWithRegistrar:[self registrarForPlugin:@"mousecursor"]
                                          delegate:self];
   [FlutterMenuPlugin registerWithRegistrar:[self registrarForPlugin:@"menu"]];
+
   _settingsChannel =
       [FlutterBasicMessageChannel messageChannelWithName:kFlutterSettingsChannel
                                          binaryMessenger:self.binaryMessenger

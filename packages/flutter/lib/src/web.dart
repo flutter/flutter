@@ -42,6 +42,8 @@ extension type CSSStyleDeclaration._(JSObject _) implements JSObject {
   external String get height;
   external set width(String value);
   external String get width;
+  external set pointerEvents(String value);
+  external String get pointerEvents;
 }
 
 extension type CSSStyleSheet._(JSObject _) implements JSObject {
@@ -107,6 +109,7 @@ extension type MouseEvent._(JSObject _) implements JSObject {
   external num get offsetX;
   external num get offsetY;
   external int get button;
+  external void preventDefault();
 }
 
 extension type Navigator._(JSObject _) implements JSObject {

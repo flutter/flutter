@@ -21,7 +21,8 @@ GeometryResult FillPathSourceGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) const {
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
+  auto& indexes_host_buffer = renderer.GetTransientsIndexesBuffer();
 
   const auto& bounding_box = GetSource().GetBounds();
   if (bounding_box.IsEmpty()) {
@@ -43,7 +44,8 @@ GeometryResult FillPathSourceGeometry::GetPositionBuffer(
       renderer.GetDeviceCapabilities().SupportsTriangleFan() &&
       supports_primitive_restart;
   VertexBuffer vertex_buffer = renderer.GetTessellator().TessellateConvex(
-      GetSource(), host_buffer, entity.GetTransform().GetMaxBasisLengthXY(),
+      GetSource(), data_host_buffer, indexes_host_buffer,
+      entity.GetTransform().GetMaxBasisLengthXY(),
       /*supports_primitive_restart=*/supports_primitive_restart,
       /*supports_triangle_fan=*/supports_triangle_fan);
 
@@ -90,16 +92,20 @@ bool FillPathSourceGeometry::CoversArea(const Matrix& transform,
   return coverage.Contains(rect);
 }
 
-FillPathGeometry::FillPathGeometry(const Path& path,
-                                   std::optional<Rect> inner_rect)
-    : FillPathSourceGeometry(inner_rect), path_(path) {}
-
 FillPathGeometry::FillPathGeometry(const flutter::DlPath& path,
                                    std::optional<Rect> inner_rect)
     : FillPathSourceGeometry(inner_rect), path_(path) {}
 
 const PathSource& FillPathGeometry::GetSource() const {
   return path_;
+}
+
+FillDiffRoundRectGeometry::FillDiffRoundRectGeometry(const RoundRect& outer,
+                                                     const RoundRect& inner)
+    : FillPathSourceGeometry(std::nullopt), source_(outer, inner) {}
+
+const PathSource& FillDiffRoundRectGeometry::GetSource() const {
+  return source_;
 }
 
 }  // namespace impeller

@@ -73,10 +73,10 @@ class BuildCommand extends FlutterCommand {
   }
 
   @override
-  final String name = 'build';
+  final name = 'build';
 
   @override
-  final String description = 'Build an executable app or install bundle.';
+  final description = 'Build an executable app or install bundle.';
 
   @override
   String get category => FlutterCommandCategory.project;

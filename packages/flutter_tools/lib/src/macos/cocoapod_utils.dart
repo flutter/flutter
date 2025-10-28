@@ -5,6 +5,7 @@
 import '../base/fingerprint.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../darwin/darwin.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../plugins.dart';
@@ -34,13 +35,6 @@ Future<void> processPodsIfNeeded(
     iosPlatform: project.ios.existsSync(),
     macOSPlatform: project.macos.existsSync(),
     forceCocoaPodsOnly: forceCocoaPodsOnly,
-
-    // TODO(matanlurey): As-per discussion on https://github.com/flutter/flutter/pull/157393
-    //  we'll assume that iOS/MacOS builds do not use or rely on the `.flutter-plugins` legacy
-    //  file being generated. A better long-term fix would be not to have a call to refreshPluginsList
-    //  at all, and instead have it implicitly run by the FlutterCommand instead. See
-    //  https://github.com/flutter/flutter/issues/157391 for details.
-    generateLegacyPlugins: false,
   );
 
   // If there are no plugins and if the project is a not module with an existing
@@ -63,19 +57,20 @@ Future<void> processPodsIfNeeded(
     }
 
     // Generate an empty Swift Package Manager manifest to invalidate fingerprinter
-    final SwiftPackageManager swiftPackageManager = SwiftPackageManager(
+    final swiftPackageManager = SwiftPackageManager(
       fileSystem: globals.localFileSystem,
       templateRenderer: globals.templateRenderer,
     );
-    final SupportedPlatform platform =
-        xcodeProject is IosProject ? SupportedPlatform.ios : SupportedPlatform.macos;
+    final FlutterDarwinPlatform platform = xcodeProject is IosProject
+        ? FlutterDarwinPlatform.ios
+        : FlutterDarwinPlatform.macos;
 
     await swiftPackageManager.generatePluginsSwiftPackage(const <Plugin>[], platform, xcodeProject);
   }
 
   // If the Xcode project, Podfile, generated plugin Swift Package, or podhelper
   // have changed since last run, pods should be updated.
-  final Fingerprinter fingerprinter = Fingerprinter(
+  final fingerprinter = Fingerprinter(
     fingerprintPath: globals.fs.path.join(buildDirectory, 'pod_inputs.fingerprint'),
     paths: <String>[
       xcodeProject.xcodeProjectInfoFile.path,

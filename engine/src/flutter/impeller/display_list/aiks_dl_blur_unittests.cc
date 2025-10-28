@@ -13,6 +13,7 @@
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 
 #include "gmock/gmock.h"
@@ -378,6 +379,56 @@ TEST_P(AiksTest, CanRenderClippedBlur) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, ComposePaintBlurOuter) {
+  DisplayListBuilder builder;
+
+  DlPaint background;
+  background.setColor(DlColor(1.0, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
+  builder.DrawPaint(background);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kGreen());
+  float matrix[] = {
+      0, 1, 0, 0, 0,  //
+      1, 0, 0, 0, 0,  //
+      0, 0, 1, 0, 0,  //
+      0, 0, 0, 1, 0   //
+  };
+  std::shared_ptr<DlImageFilter> color_filter =
+      DlImageFilter::MakeColorFilter(DlColorFilter::MakeMatrix(matrix));
+  std::shared_ptr<DlImageFilter> blur =
+      DlImageFilter::MakeBlur(20, 20, DlTileMode::kDecal);
+  paint.setImageFilter(DlImageFilter::MakeCompose(blur, color_filter));
+  builder.DrawCircle(DlPoint(400, 400), 200, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, ComposePaintBlurInner) {
+  DisplayListBuilder builder;
+
+  DlPaint background;
+  background.setColor(DlColor(1.0, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
+  builder.DrawPaint(background);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kGreen());
+  float matrix[] = {
+      0, 1, 0, 0, 0,  //
+      1, 0, 0, 0, 0,  //
+      0, 0, 1, 0, 0,  //
+      0, 0, 0, 1, 0   //
+  };
+  std::shared_ptr<DlImageFilter> color_filter =
+      DlImageFilter::MakeColorFilter(DlColorFilter::MakeMatrix(matrix));
+  std::shared_ptr<DlImageFilter> blur =
+      DlImageFilter::MakeBlur(20, 20, DlTileMode::kDecal);
+  paint.setImageFilter(DlImageFilter::MakeCompose(color_filter, blur));
+  builder.DrawCircle(DlPoint(400, 400), 200, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, ClippedBlurFilterRendersCorrectlyInteractive) {
   auto callback = [&]() -> sk_sp<DisplayList> {
     static PlaygroundPoint playground_point(Point(400, 400), 20,
@@ -566,7 +617,7 @@ static sk_sp<DisplayList> MaskBlurVariantTest(
     path_builder.LineTo(DlPoint(x + 60, y + 60));
     path_builder.Close();
 
-    builder.DrawPath(DlPath(path_builder), paint);
+    builder.DrawPath(path_builder.TakePath(), paint);
   }
 
   y += y_spacing;
@@ -623,8 +674,7 @@ static const std::map<std::string, MaskBlurTestConfig> kPaintVariations = {
     {"OuterOpaqueWithBlurImageFilter",
      {.style = DlBlurStyle::kOuter,
       .sigma = 8.0f,
-      .image_filter = DlImageFilter::MakeBlur(3, 3, DlTileMode::kClamp)}},
-};
+      .image_filter = DlImageFilter::MakeBlur(3, 3, DlTileMode::kClamp)}}};
 
 #define MASK_BLUR_VARIANT_TEST(config)                              \
   TEST_P(AiksTest, MaskBlurVariantTest##config) {                   \
@@ -662,7 +712,7 @@ TEST_P(AiksTest, GaussianBlurStyleInner) {
   path_builder.LineTo(DlPoint(100, 400));
   path_builder.Close();
 
-  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
 
   // Draw another thing to make sure the clip area is reset.
   DlPaint red;
@@ -689,7 +739,7 @@ TEST_P(AiksTest, GaussianBlurStyleOuter) {
   path_builder.LineTo(DlPoint(100, 400));
   path_builder.Close();
 
-  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
 
   // Draw another thing to make sure the clip area is reset.
   DlPaint red;
@@ -716,7 +766,7 @@ TEST_P(AiksTest, GaussianBlurStyleSolid) {
   path_builder.LineTo(DlPoint(100, 400));
   path_builder.Close();
 
-  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
 
   // Draw another thing to make sure the clip area is reset.
   DlPaint red;
@@ -923,7 +973,7 @@ TEST_P(AiksTest, GaussianBlurStyleInnerGradient) {
   path_builder.LineTo(DlPoint(300, 400));
   path_builder.LineTo(DlPoint(100, 400));
   path_builder.Close();
-  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
 
   // Draw another thing to make sure the clip area is reset.
   DlPaint red;
@@ -960,7 +1010,7 @@ TEST_P(AiksTest, GaussianBlurStyleSolidGradient) {
   path_builder.LineTo(DlPoint(300, 400));
   path_builder.LineTo(DlPoint(100, 400));
   path_builder.Close();
-  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
 
   // Draw another thing to make sure the clip area is reset.
   DlPaint red;
@@ -996,7 +1046,7 @@ TEST_P(AiksTest, GaussianBlurStyleOuterGradient) {
   path_builder.LineTo(DlPoint(300, 400));
   path_builder.LineTo(DlPoint(100, 400));
   path_builder.Close();
-  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
 
   // Draw another thing to make sure the clip area is reset.
   DlPaint red;
@@ -1271,7 +1321,7 @@ TEST_P(AiksTest, GaussianBlurSolidColorTinyMipMap) {
     auto blur_filter = DlImageFilter::MakeBlur(0.1, 0.1, DlTileMode::kClamp);
     paint.setImageFilter(blur_filter);
 
-    builder.DrawPath(DlPath(path_builder), paint);
+    builder.DrawPath(path_builder.TakePath(), paint);
 
     auto image = DisplayListToTexture(builder.Build(), {1024, 768}, renderer);
     EXPECT_TRUE(image) << " length " << i;
@@ -1362,6 +1412,58 @@ TEST_P(AiksTest, BlurGradientWithOpacity) {
   builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// The artifacts this test attempts to reproduce don't reproduce on playgrounds.
+// The test is animated as an attempt to catch any ghosting that may happen
+// when DontCare is used instead of Clear.
+// https://github.com/flutter/flutter/issues/171772
+TEST_P(AiksTest, CanRenderNestedBackdropBlur) {
+  int64_t count = 0;
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    DisplayListBuilder builder;
+
+    Scalar freq = 1.0;
+    Scalar amp = 50.0;
+    Scalar offset = amp * sin(freq * 2.0 * M_PI * count / 60.0);
+
+    // Draw some background content to be blurred.
+    DlPaint paint;
+    paint.setColor(DlColor::kCornflowerBlue());
+    builder.DrawCircle(DlPoint(100 + offset, 100), 50, paint);
+    paint.setColor(DlColor::kGreenYellow());
+    builder.DrawCircle(DlPoint(300, 200 + offset), 100, paint);
+    paint.setColor(DlColor::kDarkMagenta());
+    builder.DrawCircle(DlPoint(140, 170), 75, paint);
+    paint.setColor(DlColor::kOrangeRed());
+    builder.DrawCircle(DlPoint(180 + offset, 120 + offset), 100, paint);
+
+    // This is the first backdrop blur, simulating the navigation transition.
+    auto backdrop_filter1 = DlImageFilter::MakeBlur(15, 15, DlTileMode::kClamp);
+    builder.SaveLayer(std::nullopt, nullptr, backdrop_filter1.get());
+
+    // Draw the semi-transparent container from the second screen.
+    DlPaint transparent_paint;
+    transparent_paint.setColor(DlColor::kWhite().withAlpha(0.1 * 255));
+    builder.DrawPaint(transparent_paint);
+
+    {
+      // This is the second, nested backdrop blur.
+      auto backdrop_filter2 =
+          DlImageFilter::MakeBlur(10, 10, DlTileMode::kClamp);
+      builder.Save();
+      builder.ClipRect(DlRect::MakeXYWH(150, 150, 300, 300));
+      builder.SaveLayer(std::nullopt, nullptr, backdrop_filter2.get());
+      builder.Restore();  // Restore from SaveLayer
+      builder.Restore();  // Restore from ClipRect
+    }
+
+    builder.Restore();  // Restore from the first SaveLayer
+
+    count++;
+    return builder.Build();
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 }  // namespace testing

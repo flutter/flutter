@@ -18,7 +18,6 @@ import 'package:flutter/widgets.dart';
 import 'button_style.dart';
 import 'colors.dart';
 import 'input_decorator.dart';
-import 'material_state.dart';
 import 'theme.dart';
 
 // Examples can assume:
@@ -27,8 +26,8 @@ import 'theme.dart';
 /// Defines the visual properties of the widget displayed with [showTimePicker].
 ///
 /// Descendant widgets obtain the current [TimePickerThemeData] object using
-/// `TimePickerTheme.of(context)`. Instances of [TimePickerThemeData]
-/// can be customized with [TimePickerThemeData.copyWith].
+/// [TimePickerTheme.of]. Instances of [TimePickerThemeData] can be customized
+/// with [TimePickerThemeData.copyWith].
 ///
 /// Typically a [TimePickerThemeData] is specified as part of the overall
 /// [Theme] with [ThemeData.timePickerTheme].
@@ -66,12 +65,19 @@ class TimePickerThemeData with Diagnosticable {
     this.hourMinuteShape,
     this.hourMinuteTextColor,
     this.hourMinuteTextStyle,
-    this.inputDecorationTheme,
+    // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
+    Object? inputDecorationTheme,
     this.padding,
     this.shape,
     this.timeSelectorSeparatorColor,
     this.timeSelectorSeparatorTextStyle,
-  }) : _dayPeriodColor = dayPeriodColor;
+  }) : assert(
+         inputDecorationTheme == null ||
+             (inputDecorationTheme is InputDecorationTheme ||
+                 inputDecorationTheme is InputDecorationThemeData),
+       ),
+       _inputDecorationTheme = inputDecorationTheme,
+       _dayPeriodColor = dayPeriodColor;
 
   /// The background color of a time picker.
   ///
@@ -113,11 +119,11 @@ class TimePickerThemeData with Diagnosticable {
   /// If the segment is not selected, [Colors.transparent] is used to allow the
   /// [Dialog]'s color to be used.
   Color? get dayPeriodColor {
-    if (_dayPeriodColor == null || _dayPeriodColor is MaterialStateColor) {
+    if (_dayPeriodColor == null || _dayPeriodColor is WidgetStateColor) {
       return _dayPeriodColor;
     }
-    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    return WidgetStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return _dayPeriodColor;
       }
       // The unselected day period should match the overall picker dialog color.
@@ -267,7 +273,17 @@ class TimePickerThemeData with Diagnosticable {
   /// The input decoration theme for the [TextField]s in the time picker.
   ///
   /// If this is null, the time picker provides its own defaults.
-  final InputDecorationTheme? inputDecorationTheme;
+  // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
+  InputDecorationThemeData? get inputDecorationTheme {
+    if (_inputDecorationTheme == null) {
+      return null;
+    }
+    return _inputDecorationTheme is InputDecorationTheme
+        ? _inputDecorationTheme.data
+        : _inputDecorationTheme as InputDecorationThemeData;
+  }
+
+  final Object? _inputDecorationTheme;
 
   /// The padding around the time picker dialog when the entry mode is
   /// [TimePickerEntryMode.dial] or [TimePickerEntryMode.dialOnly].
@@ -286,7 +302,7 @@ class TimePickerThemeData with Diagnosticable {
   ///
   /// If this is null and [ThemeData.useMaterial3] is false, then defaults to the value of
   /// [hourMinuteTextColor].
-  final MaterialStateProperty<Color?>? timeSelectorSeparatorColor;
+  final WidgetStateProperty<Color?>? timeSelectorSeparatorColor;
 
   /// Used to configure the text style for the time selector separator between the hour
   /// and minute controls.
@@ -296,7 +312,7 @@ class TimePickerThemeData with Diagnosticable {
   ///
   /// If this is null and [ThemeData.useMaterial3] is false, then defaults to the value of
   /// [hourMinuteTextStyle].
-  final MaterialStateProperty<TextStyle?>? timeSelectorSeparatorTextStyle;
+  final WidgetStateProperty<TextStyle?>? timeSelectorSeparatorTextStyle;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
@@ -324,8 +340,8 @@ class TimePickerThemeData with Diagnosticable {
     InputDecorationTheme? inputDecorationTheme,
     EdgeInsetsGeometry? padding,
     ShapeBorder? shape,
-    MaterialStateProperty<Color?>? timeSelectorSeparatorColor,
-    MaterialStateProperty<TextStyle?>? timeSelectorSeparatorTextStyle,
+    WidgetStateProperty<Color?>? timeSelectorSeparatorColor,
+    WidgetStateProperty<TextStyle?>? timeSelectorSeparatorTextStyle,
   }) {
     return TimePickerThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -397,13 +413,13 @@ class TimePickerThemeData with Diagnosticable {
       inputDecorationTheme: t < 0.5 ? a?.inputDecorationTheme : b?.inputDecorationTheme,
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
-      timeSelectorSeparatorColor: MaterialStateProperty.lerp<Color?>(
+      timeSelectorSeparatorColor: WidgetStateProperty.lerp<Color?>(
         a?.timeSelectorSeparatorColor,
         b?.timeSelectorSeparatorColor,
         t,
         Color.lerp,
       ),
-      timeSelectorSeparatorTextStyle: MaterialStateProperty.lerp<TextStyle?>(
+      timeSelectorSeparatorTextStyle: WidgetStateProperty.lerp<TextStyle?>(
         a?.timeSelectorSeparatorTextStyle,
         b?.timeSelectorSeparatorTextStyle,
         t,
@@ -528,7 +544,7 @@ class TimePickerThemeData with Diagnosticable {
       ),
     );
     properties.add(
-      DiagnosticsProperty<InputDecorationTheme>(
+      DiagnosticsProperty<InputDecorationThemeData>(
         'inputDecorationTheme',
         inputDecorationTheme,
         defaultValue: null,
@@ -537,14 +553,14 @@ class TimePickerThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<Color?>>(
+      DiagnosticsProperty<WidgetStateProperty<Color?>>(
         'timeSelectorSeparatorColor',
         timeSelectorSeparatorColor,
         defaultValue: null,
       ),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<TextStyle?>>(
+      DiagnosticsProperty<WidgetStateProperty<TextStyle?>>(
         'timeSelectorSeparatorTextStyle',
         timeSelectorSeparatorTextStyle,
         defaultValue: null,
@@ -577,8 +593,8 @@ class TimePickerTheme extends InheritedTheme {
   /// TimePickerThemeData theme = TimePickerTheme.of(context);
   /// ```
   static TimePickerThemeData of(BuildContext context) {
-    final TimePickerTheme? timePickerTheme =
-        context.dependOnInheritedWidgetOfExactType<TimePickerTheme>();
+    final TimePickerTheme? timePickerTheme = context
+        .dependOnInheritedWidgetOfExactType<TimePickerTheme>();
     return timePickerTheme?.data ?? Theme.of(context).timePickerTheme;
   }
 

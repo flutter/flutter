@@ -8,7 +8,7 @@ import 'package:flutter_tools/src/base/io.dart';
 
 import '../src/common.dart';
 
-const String _kMacosAssemblePath = 'bin/macos_assemble.sh';
+const _kMacosAssemblePath = 'bin/macos_assemble.sh';
 
 void main() {
   test('macOS assemble defaults to build with no arguments', () async {

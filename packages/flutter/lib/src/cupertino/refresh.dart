@@ -358,8 +358,8 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
   /// state that gets passed into the [builder] function. Used for testing.
   @visibleForTesting
   static RefreshIndicatorMode state(BuildContext context) {
-    final _CupertinoSliverRefreshControlState state =
-        context.findAncestorStateOfType<_CupertinoSliverRefreshControlState>()!;
+    final _CupertinoSliverRefreshControlState state = context
+        .findAncestorStateOfType<_CupertinoSliverRefreshControlState>()!;
     return state.refreshState;
   }
 
@@ -508,17 +508,17 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
             // user supplied and we're always here in the middle of the sliver's
             // performLayout.
             SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
-              refreshTask =
-                  widget.onRefresh!()..whenComplete(() {
-                    if (mounted) {
-                      setState(() => refreshTask = null);
-                      // Trigger one more transition because by this time, BoxConstraint's
-                      // maxHeight might already be resting at 0 in which case no
-                      // calls to [transitionNextState] will occur anymore and the
-                      // state may be stuck in a non-inactive state.
-                      refreshState = transitionNextState();
-                    }
-                  });
+              refreshTask = widget.onRefresh!()
+                ..whenComplete(() {
+                  if (mounted) {
+                    setState(() => refreshTask = null);
+                    // Trigger one more transition because by this time, BoxConstraint's
+                    // maxHeight might already be resting at 0 in which case no
+                    // calls to [transitionNextState] will occur anymore and the
+                    // state may be stuck in a non-inactive state.
+                    refreshState = transitionNextState();
+                  }
+                });
               setState(() => hasSliverLayoutExtent = true);
             }, debugLabel: 'Refresh.transition');
           }

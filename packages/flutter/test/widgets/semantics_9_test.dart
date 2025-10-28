@@ -99,7 +99,9 @@ void main() {
             key: stackKey,
             children: <Widget>[
               Semantics(label: 'NOT#1', child: Container()),
-              BoundaryBlockSemantics(child: Semantics(label: '#2.1', child: Container())),
+              BoundaryBlockSemantics(
+                child: Semantics(label: '#2.1', child: Container()),
+              ),
               Semantics(label: '#3', child: Container()),
             ],
           ),

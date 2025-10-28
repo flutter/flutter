@@ -123,10 +123,9 @@ abstract class FlutterDriver {
   ///
   /// Resumes the application if it is currently paused (e.g. at a breakpoint).
   ///
-  /// The `dartVmServiceUrl` parameter is the URL to Dart observatory
-  /// (a.k.a. VM service). If not specified, the URL specified by the
-  /// `VM_SERVICE_URL` environment variable is used. One or the other must be
-  /// specified.
+  /// The `dartVmServiceUrl` parameter is the URL to the Dart VM service. If
+  /// not specified, the URL specified by the `VM_SERVICE_URL` environment
+  /// variable is used. One or the other must be specified.
   ///
   /// The `printCommunication` parameter determines whether the command
   /// communication between the test and the app should be printed to stdout.

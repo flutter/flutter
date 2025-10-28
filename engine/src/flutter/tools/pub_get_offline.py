@@ -45,7 +45,7 @@ ALL_PACKAGES = [
     os.path.join(ENGINE_DIR, 'tools', 'githooks'),
     os.path.join(ENGINE_DIR, 'tools', 'golden_tests_harvester'),
     os.path.join(ENGINE_DIR, 'tools', 'header_guard_check'),
-    os.path.join(ENGINE_DIR, 'tools', 'licenses'),
+    os.path.join(ENGINE_DIR, 'tools', 'mcp'),
     os.path.join(ENGINE_DIR, 'tools', 'path_ops', 'dart'),
     os.path.join(ENGINE_DIR, 'tools', 'pkg', 'engine_build_configs'),
     os.path.join(ENGINE_DIR, 'tools', 'pkg', 'engine_repo_tools'),
@@ -165,9 +165,9 @@ def main():
 
   pub_count = 0
   for package in ALL_PACKAGES:
-    if fetch_package(pubcmd, package) != 0:
-      return 1
     if not package_uses_workspace_resolution(package):
+      if fetch_package(pubcmd, package) != 0:
+        return 1
       pub_count = pub_count + check_package_config(package)
 
   if pub_count > 0:

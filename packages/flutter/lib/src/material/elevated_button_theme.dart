@@ -101,7 +101,7 @@ class ElevatedButtonTheme extends InheritedTheme {
   /// The configuration of this theme.
   final ElevatedButtonThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [ElevatedButtonThemeData] from the closest ancestor [ElevatedButtonTheme].
   ///
   /// If there is no enclosing [ElevatedButtonTheme] widget, then
   /// [ThemeData.elevatedButtonTheme] is used.
@@ -112,8 +112,8 @@ class ElevatedButtonTheme extends InheritedTheme {
   /// ElevatedButtonThemeData theme = ElevatedButtonTheme.of(context);
   /// ```
   static ElevatedButtonThemeData of(BuildContext context) {
-    final ElevatedButtonTheme? buttonTheme =
-        context.dependOnInheritedWidgetOfExactType<ElevatedButtonTheme>();
+    final ElevatedButtonTheme? buttonTheme = context
+        .dependOnInheritedWidgetOfExactType<ElevatedButtonTheme>();
     return buttonTheme?.data ?? Theme.of(context).elevatedButtonTheme;
   }
 

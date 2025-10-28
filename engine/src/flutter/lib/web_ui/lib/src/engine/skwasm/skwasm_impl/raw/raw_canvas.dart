@@ -16,7 +16,7 @@ typedef CanvasHandle = Pointer<RawCanvas>;
 @Native<Void Function(CanvasHandle)>(symbol: 'canvas_save', isLeaf: true)
 external void canvasSave(CanvasHandle canvas);
 
-@Native<Void Function(CanvasHandle, RawRect, PaintHandle, ImageFilterHandle, Int)>(
+@Native<Void Function(CanvasHandle, RawRect, PaintHandle, ImageFilterHandle)>(
   symbol: 'canvas_saveLayer',
   isLeaf: true,
 )
@@ -25,7 +25,6 @@ external void canvasSaveLayer(
   RawRect rect,
   PaintHandle paint,
   ImageFilterHandle handle,
-  int backdropTileMode,
 );
 
 @Native<Void Function(CanvasHandle)>(symbol: 'canvas_restore', isLeaf: true)
@@ -63,6 +62,9 @@ external void canvasClipPath(CanvasHandle canvas, PathHandle path, bool antialia
 
 @Native<Void Function(CanvasHandle, Int32, Int)>(symbol: 'canvas_drawColor', isLeaf: true)
 external void canvasDrawColor(CanvasHandle canvas, int color, int blendMode);
+
+@Native<Void Function(CanvasHandle, Int32)>(symbol: 'canvas_clear', isLeaf: true)
+external void canvasClear(CanvasHandle canvas, int color);
 
 @Native<Void Function(CanvasHandle, Float, Float, Float, Float, PaintHandle)>(
   symbol: 'canvas_drawLine',
@@ -256,3 +258,6 @@ external void canvasGetLocalClipBounds(CanvasHandle canvas, RawRect outRect);
 
 @Native<Void Function(CanvasHandle, RawIRect)>(symbol: 'canvas_getDeviceClipBounds', isLeaf: true)
 external void canvasGetDeviceClipBounds(CanvasHandle canvas, RawIRect outRect);
+
+@Native<Bool Function(CanvasHandle, RawRect)>(symbol: 'canvas_quickReject', isLeaf: true)
+external bool canvasQuickReject(CanvasHandle canvas, RawRect rect);

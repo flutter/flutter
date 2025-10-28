@@ -137,10 +137,9 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
     return _CupertinoTextSelectionToolbarShape(
       anchorAbove: anchorAbove,
       anchorBelow: anchorBelow,
-      shadowColor:
-          CupertinoTheme.brightnessOf(context) == Brightness.light
-              ? CupertinoColors.black.withOpacity(0.2)
-              : null,
+      shadowColor: CupertinoTheme.brightnessOf(context) == Brightness.light
+          ? CupertinoColors.black.withOpacity(0.2)
+          : null,
       child: ColoredBox(color: _kToolbarBackgroundColor.resolveFrom(context), child: child),
     );
   }
@@ -273,8 +272,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     markNeedsPaint();
   }
 
-  bool _isAbove(double childHeight) =>
-      anchorAbove.dy >= childHeight - _kToolbarArrowSize.height * 2;
+  bool _isAbove(double childHeight) => anchorAbove.dy >= childHeight - _kToolbarArrowSize.height;
 
   BoxConstraints _constraintsForChild(BoxConstraints constraints) {
     return BoxConstraints(
@@ -470,23 +468,21 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
         return true;
       }
 
-      final ui.Paint debugPaint =
-          _debugPaint ??=
-              Paint()
-                ..shader = ui.Gradient.linear(
-                  Offset.zero,
-                  const Offset(10.0, 10.0),
-                  const <Color>[
-                    CupertinoColors.transparent,
-                    Color(0xFFFF00FF),
-                    Color(0xFFFF00FF),
-                    CupertinoColors.transparent,
-                  ],
-                  const <double>[0.25, 0.25, 0.75, 0.75],
-                  TileMode.repeated,
-                )
-                ..strokeWidth = 2.0
-                ..style = PaintingStyle.stroke;
+      final ui.Paint debugPaint = _debugPaint ??= Paint()
+        ..shader = ui.Gradient.linear(
+          Offset.zero,
+          const Offset(10.0, 10.0),
+          const <Color>[
+            CupertinoColors.transparent,
+            Color(0xFFFF00FF),
+            Color(0xFFFF00FF),
+            CupertinoColors.transparent,
+          ],
+          const <double>[0.25, 0.25, 0.75, 0.75],
+          TileMode.repeated,
+        )
+        ..strokeWidth = 2.0
+        ..style = PaintingStyle.stroke;
 
       final BoxParentData childParentData = child.parentData! as BoxParentData;
       final Path clipPath = _clipPath(child, _shapeRRect(child));
@@ -662,10 +658,9 @@ class _CupertinoTextSelectionToolbarContentState
         ),
       ),
     );
-    final List<Widget> children =
-        widget.children.map((Widget child) {
-          return Center(widthFactor: 1.0, heightFactor: 1.0, child: child);
-        }).toList();
+    final List<Widget> children = widget.children.map((Widget child) {
+      return Center(widthFactor: 1.0, heightFactor: 1.0, child: child);
+    }).toList();
 
     return widget.toolbarBuilder(
       context,
@@ -731,13 +726,12 @@ abstract class _CupertinoChevronPainter extends CustomPainter {
     final Offset middlePoint = Offset(isLeft ? 0 : iconSize, iconSize / 2) + centerOffset;
     final Offset lowerPoint = Offset(iconSize / 2, iconSize) + centerOffset;
 
-    final Paint paint =
-        Paint()
-          ..color = color
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = _kToolbarChevronThickness
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round;
+    final Paint paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _kToolbarChevronThickness
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
 
     // `drawLine` is used here because it's testable. When using `drawPath`,
     // there's no way to test that the chevron points to the correct side.
@@ -1092,12 +1086,11 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox
 
       // If this is the last child on the first page, it's ok to fit without a forward button.
       // Note childCount doesn't include slotted children which come before the list ones.
-      double paginationButtonsWidth =
-          currentPage == 0
-              ? i == childCount + 1
-                  ? 0.0
-                  : _nextButton!.size.width
-              : subsequentPageButtonsWidth;
+      double paginationButtonsWidth = currentPage == 0
+          ? i == childCount + 1
+                ? 0.0
+                : _nextButton!.size.width
+          : subsequentPageButtonsWidth;
 
       // The width of the menu is set by the first page.
       child.layout(

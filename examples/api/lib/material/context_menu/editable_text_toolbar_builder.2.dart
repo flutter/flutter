@@ -59,33 +59,32 @@ class _EditableTextToolbarBuilderExampleAppState
                     anchor: editableTextState.contextMenuAnchors.primaryAnchor,
                     // getAdaptiveButtons creates the default button widgets for
                     // the current platform.
-                    children:
-                        AdaptiveTextSelectionToolbar.getAdaptiveButtons(
-                          context,
-                          // These buttons just close the menu when clicked.
-                          <ContextMenuButtonItem>[
-                            ContextMenuButtonItem(
-                              label: 'One',
-                              onPressed: () => ContextMenuController.removeAny(),
-                            ),
-                            ContextMenuButtonItem(
-                              label: 'Two',
-                              onPressed: () => ContextMenuController.removeAny(),
-                            ),
-                            ContextMenuButtonItem(
-                              label: 'Three',
-                              onPressed: () => ContextMenuController.removeAny(),
-                            ),
-                            ContextMenuButtonItem(
-                              label: 'Four',
-                              onPressed: () => ContextMenuController.removeAny(),
-                            ),
-                            ContextMenuButtonItem(
-                              label: 'Five',
-                              onPressed: () => ContextMenuController.removeAny(),
-                            ),
-                          ],
-                        ).toList(),
+                    children: AdaptiveTextSelectionToolbar.getAdaptiveButtons(
+                      context,
+                      // These buttons just close the menu when clicked.
+                      <ContextMenuButtonItem>[
+                        ContextMenuButtonItem(
+                          label: 'One',
+                          onPressed: () => ContextMenuController.removeAny(),
+                        ),
+                        ContextMenuButtonItem(
+                          label: 'Two',
+                          onPressed: () => ContextMenuController.removeAny(),
+                        ),
+                        ContextMenuButtonItem(
+                          label: 'Three',
+                          onPressed: () => ContextMenuController.removeAny(),
+                        ),
+                        ContextMenuButtonItem(
+                          label: 'Four',
+                          onPressed: () => ContextMenuController.removeAny(),
+                        ),
+                        ContextMenuButtonItem(
+                          label: 'Five',
+                          onPressed: () => ContextMenuController.removeAny(),
+                        ),
+                      ],
+                    ).toList(),
                   );
                 },
               ),

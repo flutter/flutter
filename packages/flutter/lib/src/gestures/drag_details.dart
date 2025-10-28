@@ -124,6 +124,7 @@ class DragUpdateDetails with Diagnosticable implements PositionedGestureDetails 
     this.sourceTimeStamp,
     this.delta = Offset.zero,
     this.primaryDelta,
+    this.kind,
   }) : assert(
          primaryDelta == null ||
              (primaryDelta == delta.dx && delta.dy == 0.0) ||
@@ -167,6 +168,9 @@ class DragUpdateDetails with Diagnosticable implements PositionedGestureDetails 
   ///
   /// Defaults to null if not specified in the constructor.
   final double? primaryDelta;
+
+  /// The kind of the device that initiated the event.
+  final PointerDeviceKind? kind;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

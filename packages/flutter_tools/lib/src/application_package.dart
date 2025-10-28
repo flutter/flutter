@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'flutter_application_package.dart';
+library;
+
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';

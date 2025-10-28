@@ -40,7 +40,7 @@ class LinuxDevice extends DesktopDevice {
   final Logger _logger;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   String get name => 'Linux';
@@ -109,7 +109,10 @@ class LinuxDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _linuxWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     if (!canListAnything) {
       return const <Device>[];
     }

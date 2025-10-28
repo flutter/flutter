@@ -51,6 +51,12 @@ final class Environment {
   /// Returns the current [Datetime].
   final DateTime Function() now;
 
+  /// Returns the root of the Flutter tree.
+  String get flutterRoot => p.normalize(p.join(engine.srcDir.path, '..', '..'));
+
+  /// Returns the internal "bin" folder of Flutter.
+  String get flutterBinInternal => p.join(flutterRoot, 'bin', 'internal');
+
   /// Whether it appears that the current environment supports remote builds.
   ///
   /// This is a heuristic based on the presence of certain directories in the

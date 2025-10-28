@@ -132,7 +132,6 @@ void main() {
 
     // A Material is added with the custom color.
     expect(findDestinationInk('Alarm'), findsNWidgets(2));
-    // The drawer destination Ink is the first one, the second is the indicator's one.
     final BoxDecoration destinationDecoration =
         tester.firstWidget<Ink>(findDestinationInk('Alarm')).decoration! as BoxDecoration;
     expect(destinationDecoration.color, color);
@@ -488,6 +487,63 @@ void main() {
 
     await tester.pumpAndSettle();
   });
+
+  testWidgets('NavigationDrawer can display header and footer', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    widgetSetup(tester, 3000, viewHeight: 3000);
+    final Widget widget = _buildWidget(
+      scaffoldKey,
+      NavigationDrawer(
+        header: const DrawerHeader(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 8,
+              children: <Widget>[FlutterLogo(), Text('Header')],
+            ),
+          ),
+        ),
+        footer: ListTile(
+          leading: const FlutterLogo(),
+          title: const Text('Footer'),
+          trailing: const Icon(Icons.settings),
+          onTap: () {},
+        ),
+        children: <Widget>[
+          for (int i = 0; i < 10; i++)
+            NavigationDrawerDestination(icon: const Icon(Icons.home), label: Text('Item $i')),
+        ],
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.byType(DrawerHeader), findsOneWidget);
+    expect(find.text('Header'), findsOneWidget);
+    expect(find.byType(FlutterLogo), findsNWidgets(2));
+    expect(find.byType(ListTile), findsOneWidget);
+    expect(find.text('Footer'), findsOneWidget);
+    expect(find.byIcon(Icons.settings), findsOneWidget);
+  });
+
+  testWidgets('NavigationDrawer does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: NavigationDrawer(
+              children: <Widget>[
+                NavigationDrawerDestination(icon: Icon(Icons.inbox), label: Text('Inbox')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(NavigationDrawer)), Size.zero);
+  });
 }
 
 Widget _buildWidget(GlobalKey<ScaffoldState> scaffoldKey, Widget child, {bool? useMaterial3}) {
@@ -512,7 +568,7 @@ InkWell? _getInkWell(WidgetTester tester) {
 ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
   return tester
           .firstWidget<Ink>(
-            find.descendant(of: find.byType(FadeTransition), matching: find.byType(Ink)),
+            find.descendant(of: find.byType(NavigationIndicator), matching: find.byType(Ink)),
           )
           .decoration
       as ShapeDecoration?;

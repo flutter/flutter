@@ -80,7 +80,7 @@ class EmbedderTestContextGL : public EmbedderTestContext {
 
  private:
   // |EmbedderTestContext|
-  void SetSurface(SkISize surface_size) override;
+  void SetSurface(DlISize surface_size) override;
 
   // |EmbedderTestContext|
   void SetupCompositor() override;

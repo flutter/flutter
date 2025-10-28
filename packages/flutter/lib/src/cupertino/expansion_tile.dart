@@ -7,11 +7,13 @@
 /// @docImport 'list_section.dart';
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'icons.dart';
 import 'list_tile.dart';
+import 'localizations.dart';
 import 'theme.dart';
 
 /// The curve of the animation used to expand or collapse the
@@ -56,6 +58,12 @@ enum ExpansionTileTransitionMode {
 
 /// A single-line [CupertinoListTile] with an expansion arrow icon that expands
 /// or collapses the tile to reveal or hide the [child].
+///
+/// {@tool dartpad}
+/// This example shows how to use [CupertinoExpansionTile] with different transition modes.
+///
+/// ** See code in examples/api/lib/cupertino/expansion_tile/cupertino_expansion_tile.0.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -162,12 +170,33 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
   }
 
   Widget _buildHeader(BuildContext context, Animation<double> animation) {
-    return CupertinoListTile(
-      key: _headerKey,
-      onTap: _onHeaderTap,
-      title: widget.title,
-      trailing: _buildIcon(context, animation),
-      backgroundColorActivated: CupertinoColors.transparent,
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
+    final String onTapHint = _tileController.isExpanded
+        ? localizations.expansionTileExpandedTapHint
+        : localizations.expansionTileCollapsedTapHint;
+    String? semanticsHint;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        semanticsHint = _tileController.isExpanded
+            ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
+            : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}';
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        break;
+    }
+    return Semantics(
+      hint: semanticsHint,
+      onTapHint: onTapHint,
+      child: CupertinoListTile(
+        key: _headerKey,
+        onTap: _onHeaderTap,
+        title: widget.title,
+        trailing: _buildIcon(context, animation),
+        backgroundColorActivated: CupertinoColors.transparent,
+      ),
     );
   }
 

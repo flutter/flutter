@@ -4,97 +4,123 @@
 
 #include "export.h"
 #include "helpers.h"
+#include "live_objects.h"
 
-#include "third_party/skia/include/core/SkColorFilter.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
-#include "third_party/skia/include/effects/SkImageFilters.h"
+#include "flutter/display_list/effects/dl_color_filter.h"
+#include "flutter/display_list/effects/dl_image_filter.h"
+#include "flutter/display_list/effects/dl_mask_filter.h"
 
 using namespace Skwasm;
+using namespace flutter;
 
-SKWASM_EXPORT SkImageFilter* imageFilter_createBlur(SkScalar sigmaX,
-                                                    SkScalar sigmaY,
-                                                    SkTileMode tileMode) {
-  return SkImageFilters::Blur(sigmaX, sigmaY, tileMode, nullptr).release();
+SKWASM_EXPORT sp_wrapper<DlImageFilter>*
+imageFilter_createBlur(DlScalar sigmaX, DlScalar sigmaY, DlTileMode tileMode) {
+  liveImageFilterCount++;
+  return new sp_wrapper<DlImageFilter>(
+      DlImageFilter::MakeBlur(sigmaX, sigmaY, tileMode));
 }
 
-SKWASM_EXPORT SkImageFilter* imageFilter_createDilate(SkScalar radiusX,
-                                                      SkScalar radiusY) {
-  return SkImageFilters::Dilate(radiusX, radiusY, nullptr).release();
+SKWASM_EXPORT sp_wrapper<DlImageFilter>* imageFilter_createDilate(
+    DlScalar radiusX,
+    DlScalar radiusY) {
+  liveImageFilterCount++;
+  return new sp_wrapper<DlImageFilter>(
+      DlImageFilter::MakeDilate(radiusX, radiusY));
 }
 
-SKWASM_EXPORT SkImageFilter* imageFilter_createErode(SkScalar radiusX,
-                                                     SkScalar radiusY) {
-  return SkImageFilters::Erode(radiusX, radiusY, nullptr).release();
+SKWASM_EXPORT sp_wrapper<DlImageFilter>* imageFilter_createErode(
+    DlScalar radiusX,
+    DlScalar radiusY) {
+  liveImageFilterCount++;
+  return new sp_wrapper<DlImageFilter>(
+      DlImageFilter::MakeErode(radiusX, radiusY));
 }
 
-SKWASM_EXPORT SkImageFilter* imageFilter_createMatrix(SkScalar* matrix33,
-                                                      FilterQuality quality) {
-  return SkImageFilters::MatrixTransform(createMatrix(matrix33),
-                                         samplingOptionsForQuality(quality),
-                                         nullptr)
-      .release();
+SKWASM_EXPORT sp_wrapper<DlImageFilter>* imageFilter_createMatrix(
+    DlScalar* matrix33,
+    FilterQuality quality) {
+  liveImageFilterCount++;
+  return new sp_wrapper<DlImageFilter>(DlImageFilter::MakeMatrix(
+      createDlMatrixFrom3x3(matrix33), samplingOptionsForQuality(quality)));
 }
 
-SKWASM_EXPORT SkImageFilter* imageFilter_createFromColorFilter(
-    SkColorFilter* filter) {
-  return SkImageFilters::ColorFilter(sk_ref_sp<SkColorFilter>(filter), nullptr)
-      .release();
+SKWASM_EXPORT sp_wrapper<DlImageFilter>* imageFilter_createFromColorFilter(
+    sp_wrapper<DlColorFilter>* filter) {
+  liveImageFilterCount++;
+  return new sp_wrapper<DlImageFilter>(
+      DlImageFilter::MakeColorFilter(filter->shared()));
 }
 
-SKWASM_EXPORT SkImageFilter* imageFilter_compose(SkImageFilter* outer,
-                                                 SkImageFilter* inner) {
-  return SkImageFilters::Compose(sk_ref_sp<SkImageFilter>(outer),
-                                 sk_ref_sp<SkImageFilter>(inner))
-      .release();
+SKWASM_EXPORT sp_wrapper<DlImageFilter>* imageFilter_compose(
+    sp_wrapper<DlImageFilter>* outer,
+    sp_wrapper<DlImageFilter>* inner) {
+  liveImageFilterCount++;
+  return new sp_wrapper<DlImageFilter>(
+      DlImageFilter::MakeCompose(outer->shared(), inner->shared()));
 }
 
-SKWASM_EXPORT void imageFilter_dispose(SkImageFilter* filter) {
-  filter->unref();
+SKWASM_EXPORT void imageFilter_dispose(sp_wrapper<DlImageFilter>* filter) {
+  liveImageFilterCount--;
+  delete filter;
 }
 
-SKWASM_EXPORT void imageFilter_getFilterBounds(SkImageFilter* filter,
-                                               SkIRect* inOutBounds) {
-  SkIRect outputRect =
-      filter->filterBounds(*inOutBounds, SkMatrix(),
-                           SkImageFilter::MapDirection::kForward_MapDirection);
-  *inOutBounds = outputRect;
+SKWASM_EXPORT void imageFilter_getFilterBounds(
+    sp_wrapper<DlImageFilter>* filter,
+    DlIRect* inOutBounds) {
+  auto dlFilter = filter->shared();
+  if (dlFilter == nullptr) {
+    // If there is no filter, the output bounds are the same as the input
+    // bounds.
+    return;
+  }
+  DlIRect inRect = *inOutBounds;
+  dlFilter->map_device_bounds(inRect, DlMatrix(), *inOutBounds);
 }
 
-SKWASM_EXPORT SkColorFilter* colorFilter_createMode(SkColor color,
-                                                    SkBlendMode mode) {
-  return SkColorFilters::Blend(color, mode).release();
+SKWASM_EXPORT sp_wrapper<const DlColorFilter>* colorFilter_createMode(
+    uint32_t color,
+    DlBlendMode mode) {
+  liveColorFilterCount++;
+  return new sp_wrapper<const DlColorFilter>(
+      DlColorFilter::MakeBlend(DlColor(color), mode));
 }
 
-SKWASM_EXPORT SkColorFilter* colorFilter_createMatrix(
+SKWASM_EXPORT sp_wrapper<const DlColorFilter>* colorFilter_createMatrix(
     float* matrixData  // 20 values
 ) {
-  return SkColorFilters::Matrix(matrixData).release();
+  liveColorFilterCount++;
+  return new sp_wrapper<const DlColorFilter>(
+      DlColorFilter::MakeMatrix(matrixData));
 }
 
-SKWASM_EXPORT SkColorFilter* colorFilter_createSRGBToLinearGamma() {
-  return SkColorFilters::SRGBToLinearGamma().release();
+SKWASM_EXPORT sp_wrapper<const DlColorFilter>*
+colorFilter_createSRGBToLinearGamma() {
+  liveColorFilterCount++;
+  return new sp_wrapper<const DlColorFilter>(
+      DlColorFilter::MakeSrgbToLinearGamma());
 }
 
-SKWASM_EXPORT SkColorFilter* colorFilter_createLinearToSRGBGamma() {
-  return SkColorFilters::LinearToSRGBGamma().release();
+SKWASM_EXPORT sp_wrapper<const DlColorFilter>*
+colorFilter_createLinearToSRGBGamma() {
+  liveColorFilterCount++;
+  return new sp_wrapper<const DlColorFilter>(
+      DlColorFilter::MakeLinearToSrgbGamma());
 }
 
-SKWASM_EXPORT SkColorFilter* colorFilter_compose(SkColorFilter* outer,
-                                                 SkColorFilter* inner) {
-  return SkColorFilters::Compose(sk_ref_sp<SkColorFilter>(outer),
-                                 sk_ref_sp<SkColorFilter>(inner))
-      .release();
+SKWASM_EXPORT void colorFilter_dispose(
+    sp_wrapper<const DlColorFilter>* filter) {
+  liveColorFilterCount--;
+  delete filter;
 }
 
-SKWASM_EXPORT void colorFilter_dispose(SkColorFilter* filter) {
-  filter->unref();
+SKWASM_EXPORT sp_wrapper<DlMaskFilter>* maskFilter_createBlur(
+    DlBlurStyle blurStyle,
+    DlScalar sigma) {
+  liveMaskFilterCount++;
+  return new sp_wrapper<DlMaskFilter>(DlBlurMaskFilter::Make(blurStyle, sigma));
 }
 
-SKWASM_EXPORT SkMaskFilter* maskFilter_createBlur(SkBlurStyle blurStyle,
-                                                  SkScalar sigma) {
-  return SkMaskFilter::MakeBlur(blurStyle, sigma).release();
-}
-
-SKWASM_EXPORT void maskFilter_dispose(SkMaskFilter* filter) {
-  filter->unref();
+SKWASM_EXPORT void maskFilter_dispose(sp_wrapper<DlMaskFilter>* filter) {
+  liveMaskFilterCount--;
+  delete filter;
 }

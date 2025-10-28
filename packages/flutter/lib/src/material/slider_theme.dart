@@ -14,7 +14,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'material_state.dart';
 import 'range_slider_parts.dart';
 import 'slider.dart';
 import 'slider_parts.dart';
@@ -121,16 +120,26 @@ class SliderTheme extends InheritedTheme {
 ///  * [SliderThemeData], which describes the actual configuration of a slider
 ///    theme.
 enum ShowValueIndicator {
-  /// The value indicator will only be shown for discrete sliders (sliders
+  /// The value indicator will only be shown while dragging for discrete sliders (sliders
   /// where [Slider.divisions] is non-null).
   onlyForDiscrete,
 
-  /// The value indicator will only be shown for continuous sliders (sliders
+  /// The value indicator will only be shown while dragging for continuous sliders (sliders
   /// where [Slider.divisions] is null).
   onlyForContinuous,
 
-  /// The value indicator will be shown for all types of sliders.
+  /// The value indicator is shown while dragging.
+  @Deprecated(
+    'Use ShowValueIndicator.onDrag. '
+    'This feature was deprecated after v3.28.0-1.0.pre.',
+  )
   always,
+
+  /// The value indicator is shown while dragging.
+  onDrag,
+
+  /// The value indicator is always displayed.
+  alwaysVisible,
 
   /// The value indicator will never be shown.
   never,
@@ -591,7 +600,7 @@ class SliderThemeData with Diagnosticable {
   /// {@macro flutter.material.slider.mouseCursor}
   ///
   /// If specified, overrides the default value of [Slider.mouseCursor].
-  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+  final WidgetStateProperty<MouseCursor?>? mouseCursor;
 
   /// Allowed way for the user to interact with the [Slider].
   ///
@@ -611,7 +620,7 @@ class SliderThemeData with Diagnosticable {
   /// If [SliderThemeData.thumbShape] is [HandleThumbShape], this property is used to
   /// set the size of the thumb. Otherwise, the default thumb size is 4 pixels for the
   /// width and 44 pixels for the height.
-  final MaterialStateProperty<Size?>? thumbSize;
+  final WidgetStateProperty<Size?>? thumbSize;
 
   /// The size of the gap between the active and inactive tracks of the [GappedSliderTrackShape].
   ///
@@ -622,7 +631,7 @@ class SliderThemeData with Diagnosticable {
   /// The Slider defaults to [GappedSliderTrackShape] when the track shape is
   /// not specified, and the [trackGap] can be used to adjust the gap size.
   ///
-  /// If [Slider.year2023] is false or [ThemeData.useMaterial3] is false, then
+  /// If [Slider.year2023] is true or [ThemeData.useMaterial3] is false, then
   /// the Slider track shape defaults to [RoundedRectSliderTrackShape] and the
   /// [trackGap] is ignored. In this case, set the track shape to
   /// [GappedSliderTrackShape] to use the [trackGap].
@@ -630,12 +639,12 @@ class SliderThemeData with Diagnosticable {
   /// Defaults to 6.0 pixels of gap between the active and inactive tracks.
   final double? trackGap;
 
-  /// Overrides the default value of [Slider.year2023].
+  /// Overrides the default value of [Slider.year2023] and [RangeSlider.year2023].
   ///
-  /// When true, the [Slider] will use the 2023 Material Design 3 appearance.
+  /// When true, the [Slider] and [RangeSlider] will use the 2023 Material Design 3 appearance.
   /// Defaults to true.
   ///
-  /// If this is set to false, the [Slider] will use the latest Material Design 3
+  /// If this is set to false, the [Slider] and [RangeSlider] will use the latest Material Design 3
   /// appearance, which was introduced in December 2023.
   ///
   /// If [ThemeData.useMaterial3] is false, then this property is ignored.
@@ -679,10 +688,10 @@ class SliderThemeData with Diagnosticable {
     TextStyle? valueIndicatorTextStyle,
     double? minThumbSeparation,
     RangeThumbSelector? thumbSelector,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    WidgetStateProperty<MouseCursor?>? mouseCursor,
     SliderInteraction? allowedInteraction,
     EdgeInsetsGeometry? padding,
-    MaterialStateProperty<Size?>? thumbSize,
+    WidgetStateProperty<Size?>? thumbSize,
     double? trackGap,
     bool? year2023,
   }) {
@@ -805,7 +814,7 @@ class SliderThemeData with Diagnosticable {
       mouseCursor: t < 0.5 ? a.mouseCursor : b.mouseCursor,
       allowedInteraction: t < 0.5 ? a.allowedInteraction : b.allowedInteraction,
       padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t),
-      thumbSize: MaterialStateProperty.lerp<Size?>(a.thumbSize, b.thumbSize, t, Size.lerp),
+      thumbSize: WidgetStateProperty.lerp<Size?>(a.thumbSize, b.thumbSize, t, Size.lerp),
       trackGap: lerpDouble(a.trackGap, b.trackGap, t),
       year2023: t < 0.5 ? a.year2023 : b.year2023,
     );
@@ -1100,7 +1109,7 @@ class SliderThemeData with Diagnosticable {
       ),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>(
+      DiagnosticsProperty<WidgetStateProperty<MouseCursor?>>(
         'mouseCursor',
         mouseCursor,
         defaultValue: defaultData.mouseCursor,
@@ -1121,7 +1130,7 @@ class SliderThemeData with Diagnosticable {
       ),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<Size?>>(
+      DiagnosticsProperty<WidgetStateProperty<Size?>>(
         'thumbSize',
         thumbSize,
         defaultValue: defaultData.thumbSize,

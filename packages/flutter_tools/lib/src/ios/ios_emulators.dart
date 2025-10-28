@@ -45,7 +45,7 @@ class IOSEmulator extends Emulator {
       throwToolExit('Could not find Simulator app');
     }
     Future<bool> launchSimulator(List<String> additionalArgs) async {
-      final List<String> args = <String>['open', ...additionalArgs, '-a', simulatorPath];
+      final args = <String>['open', ...additionalArgs, '-a', simulatorPath];
 
       final RunResult launchResult = await globals.processUtils.run(args);
       if (launchResult.exitCode != 0) {

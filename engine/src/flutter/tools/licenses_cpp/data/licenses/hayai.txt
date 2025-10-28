@@ -1,0 +1,5 @@
+hayai
+(?s)Copyright.*Nick Bruun.*Vlad Lazarenko.*Nicolas Pauss
+Copyright \(C\) \d+ Nick Bruun <nick@bruun.co>
+Copyright \(C\) \d+ Vlad Lazarenko <vlad@lazarenko.me>
+Copyright \(C\) \d+ Nicolas Pauss <nicolas.pauss@gmail.com>

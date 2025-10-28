@@ -36,9 +36,10 @@ TEST(FlutterPlatformNodeDelegateMac, Basics) {
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
   FlutterSemanticsNode2 root;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   root.id = 0;
-  root.flags = static_cast<FlutterSemanticsFlag>(0);
-  ;
+  root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
@@ -50,6 +51,7 @@ TEST(FlutterPlatformNodeDelegateMac, Basics) {
   root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
@@ -72,10 +74,10 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
   FlutterSemanticsNode2 root;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{.is_text_field = true, .is_read_only = true};
   root.id = 0;
-  root.flags =
-      static_cast<FlutterSemanticsFlag>(FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField |
-                                        FlutterSemanticsFlag::kFlutterSemanticsFlagIsReadOnly);
+  root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = 1;
   root.text_selection_extent = 3;
@@ -88,6 +90,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {
   root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
@@ -114,10 +117,10 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextWithoutSelectionReturnZeroRan
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
   FlutterSemanticsNode2 root;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{.is_text_field = true, .is_read_only = true};
   root.id = 0;
-  root.flags =
-      static_cast<FlutterSemanticsFlag>(FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField |
-                                        FlutterSemanticsFlag::kFlutterSemanticsFlagIsReadOnly);
+  root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
@@ -130,6 +133,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextWithoutSelectionReturnZeroRan
   root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
@@ -161,6 +165,8 @@ TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
   FlutterSemanticsNode2 root;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{};
+  root.flags2 = &flags;
   root.id = 0;
   root.label = "root";
   root.hint = "";
@@ -172,9 +178,12 @@ TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
   int32_t children[] = {1};
   root.children_in_traversal_order = children;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
   FlutterSemanticsNode2 child1;
+  FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{};
+  child1.flags2 = &child_flags;
   child1.id = 1;
   child1.label = "child 1";
   child1.hint = "";
@@ -184,6 +193,7 @@ TEST(FlutterPlatformNodeDelegateMac, CanPerformAction) {
   child1.tooltip = "";
   child1.child_count = 0;
   child1.custom_accessibility_actions_count = 0;
+  child1.identifier = "";
   bridge->AddFlutterSemanticsNodeUpdate(child1);
 
   bridge->CommitUpdates();
@@ -236,8 +246,11 @@ TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
   FlutterSemanticsNode2 root;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
+  FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{.is_text_field = true};
   root.id = 0;
-  root.flags = static_cast<FlutterSemanticsFlag>(0);
+  root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.label = "root";
   root.hint = "";
@@ -249,6 +262,7 @@ TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
   int32_t children[] = {1};
   root.children_in_traversal_order = children;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
   root.rect = {0, 0, 100, 100};  // LTRB
   root.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
   bridge->AddFlutterSemanticsNodeUpdate(root);
@@ -258,7 +272,8 @@ TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
 
   FlutterSemanticsNode2 child1;
   child1.id = 1;
-  child1.flags = FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField;
+  child1.flags2 = &child_flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   child1.actions = static_cast<FlutterSemanticsAction>(0);
   child1.label = "";
   child1.hint = "";
@@ -270,6 +285,7 @@ TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
   child1.text_selection_extent = -1;
   child1.child_count = 0;
   child1.custom_accessibility_actions_count = 0;
+  child1.identifier = "";
   child1.rect = {0, 0, rectSize, rectSize};  // LTRB
   child1.transform = {transformFactor, 0, 0, 0, transformFactor, 0, 0, 0, 1};
   bridge->AddFlutterSemanticsNodeUpdate(child1);
@@ -313,7 +329,9 @@ TEST(FlutterPlatformNodeDelegateMac, ChangingFlagsUpdatesNativeViewAccessible) {
   // Initialize ax node data.
   FlutterSemanticsNode2 root;
   root.id = 0;
-  root.flags = static_cast<FlutterSemanticsFlag>(0);
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
+  root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.label = "root";
   root.hint = "";
@@ -325,6 +343,7 @@ TEST(FlutterPlatformNodeDelegateMac, ChangingFlagsUpdatesNativeViewAccessible) {
   int32_t children[] = {1};
   root.children_in_traversal_order = children;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
   root.rect = {0, 0, 100, 100};  // LTRB
   root.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
   bridge->AddFlutterSemanticsNodeUpdate(root);
@@ -333,8 +352,10 @@ TEST(FlutterPlatformNodeDelegateMac, ChangingFlagsUpdatesNativeViewAccessible) {
   double transformFactor = 0.5;
 
   FlutterSemanticsNode2 child1;
+  FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{0};
+  child1.flags2 = &child_flags;
   child1.id = 1;
-  child1.flags = static_cast<FlutterSemanticsFlag>(0);
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   child1.actions = static_cast<FlutterSemanticsAction>(0);
   child1.label = "";
   child1.hint = "";
@@ -346,6 +367,7 @@ TEST(FlutterPlatformNodeDelegateMac, ChangingFlagsUpdatesNativeViewAccessible) {
   child1.text_selection_extent = -1;
   child1.child_count = 0;
   child1.custom_accessibility_actions_count = 0;
+  child1.identifier = "";
   child1.rect = {0, 0, rectSize, rectSize};  // LTRB
   child1.transform = {transformFactor, 0, 0, 0, transformFactor, 0, 0, 0, 1};
   bridge->AddFlutterSemanticsNodeUpdate(child1);
@@ -358,14 +380,17 @@ TEST(FlutterPlatformNodeDelegateMac, ChangingFlagsUpdatesNativeViewAccessible) {
   EXPECT_TRUE([[native_accessibility className] isEqualToString:@"AXPlatformNodeCocoa"]);
 
   // Converting child to text field should produce `FlutterTextField` native view accessible.
-  child1.flags = FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField;
+
+  FlutterSemanticsFlags child_flags_updated_1 = FlutterSemanticsFlags{.is_text_field = true};
+  child1.flags2 = &child_flags_updated_1;
   bridge->AddFlutterSemanticsNodeUpdate(child1);
   bridge->CommitUpdates();
 
   native_accessibility = child_platform_node_delegate->GetNativeViewAccessible();
   EXPECT_TRUE([native_accessibility isKindOfClass:[FlutterTextField class]]);
 
-  child1.flags = static_cast<FlutterSemanticsFlag>(0);
+  FlutterSemanticsFlags child_flags_updated_2 = FlutterSemanticsFlags{.is_text_field = false};
+  child1.flags2 = &child_flags_updated_2;
   bridge->AddFlutterSemanticsNodeUpdate(child1);
   bridge->CommitUpdates();
 

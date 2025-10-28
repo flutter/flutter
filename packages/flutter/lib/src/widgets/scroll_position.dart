@@ -838,29 +838,27 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
         target = viewport.getOffsetToReveal(object, alignment, rect: targetRect, axis: axis).offset;
         target = clampDouble(target, minScrollExtent, maxScrollExtent);
       case ScrollPositionAlignmentPolicy.keepVisibleAtEnd:
-        target =
-            viewport
-                .getOffsetToReveal(
-                  object,
-                  1.0, // Aligns to end
-                  rect: targetRect,
-                  axis: axis,
-                )
-                .offset;
+        target = viewport
+            .getOffsetToReveal(
+              object,
+              1.0, // Aligns to end
+              rect: targetRect,
+              axis: axis,
+            )
+            .offset;
         target = clampDouble(target, minScrollExtent, maxScrollExtent);
         if (target < pixels) {
           target = pixels;
         }
       case ScrollPositionAlignmentPolicy.keepVisibleAtStart:
-        target =
-            viewport
-                .getOffsetToReveal(
-                  object,
-                  0.0, // Aligns to start
-                  rect: targetRect,
-                  axis: axis,
-                )
-                .offset;
+        target = viewport
+            .getOffsetToReveal(
+              object,
+              0.0, // Aligns to start
+              rect: targetRect,
+              axis: axis,
+            )
+            .offset;
         target = clampDouble(target, minScrollExtent, maxScrollExtent);
         if (target > pixels) {
           target = pixels;
@@ -975,7 +973,10 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   /// Deprecated. Use [jumpTo] or a custom [ScrollPosition] instead.
   // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/44609
-  @Deprecated('This will lead to bugs.')
+  @Deprecated(
+    'This method bypasses scroll activity management and can cause inconsistent layouts '
+    'or scrolling behavior. Use jumpTo or a custom ScrollPosition instead.',
+  )
   void jumpToWithoutSettling(double value);
 
   /// Stop the current activity and start a [HoldScrollActivity].

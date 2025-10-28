@@ -97,6 +97,20 @@ class EngineLineMetrics implements ui.LineMetrics {
   }
 }
 
+extension FontStyleExtension on ui.FontStyle {
+  /// Converts a [ui.FontStyle] value to its CSS equivalent.
+  String toCssString() {
+    return this == ui.FontStyle.normal ? 'normal' : 'italic';
+  }
+}
+
+extension FontWeightExtension on ui.FontWeight {
+  /// Converts a [ui.FontWeight] value to its CSS equivalent.
+  String toCssString() {
+    return fontWeightIndexToCss(fontWeightIndex: index);
+  }
+}
+
 String fontWeightIndexToCss({int fontWeightIndex = 3}) {
   switch (fontWeightIndex) {
     case 0:
@@ -144,21 +158,49 @@ String textAlignToCssValue(ui.TextAlign? align, ui.TextDirection textDirection) 
     case ui.TextAlign.justify:
       return 'justify';
     case ui.TextAlign.end:
-      switch (textDirection) {
-        case ui.TextDirection.ltr:
-          return 'end';
-        case ui.TextDirection.rtl:
-          return 'left';
-      }
+      return switch (textDirection) {
+        ui.TextDirection.ltr => 'end',
+        ui.TextDirection.rtl => 'left',
+      };
     case ui.TextAlign.start:
-      switch (textDirection) {
-        case ui.TextDirection.ltr:
-          return ''; // it's the default
-        case ui.TextDirection.rtl:
-          return 'right';
-      }
+      return switch (textDirection) {
+        ui.TextDirection.ltr => '', // it's the default
+        ui.TextDirection.rtl => 'right',
+      };
     case null:
       // If align is not specified return default.
       return '';
   }
+}
+
+String fontFeatureListToCss(List<ui.FontFeature> fontFeatures) {
+  assert(fontFeatures.isNotEmpty);
+
+  // For more details, see:
+  // * https://developer.mozilla.org/en-US/docs/Web/CSS/font-feature-settings
+  final StringBuffer sb = StringBuffer();
+  final int len = fontFeatures.length;
+  for (int i = 0; i < len; i++) {
+    if (i != 0) {
+      sb.write(',');
+    }
+    final ui.FontFeature fontFeature = fontFeatures[i];
+    sb.write('"${fontFeature.feature}" ${fontFeature.value}');
+  }
+  return sb.toString();
+}
+
+String fontVariationListToCss(List<ui.FontVariation> fontVariations) {
+  assert(fontVariations.isNotEmpty);
+
+  final StringBuffer sb = StringBuffer();
+  final int len = fontVariations.length;
+  for (int i = 0; i < len; i++) {
+    if (i != 0) {
+      sb.write(',');
+    }
+    final ui.FontVariation fontVariation = fontVariations[i];
+    sb.write('"${fontVariation.axis}" ${fontVariation.value}');
+  }
+  return sb.toString();
 }

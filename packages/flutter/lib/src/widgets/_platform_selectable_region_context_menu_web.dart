@@ -17,7 +17,8 @@ const String _viewType = 'Browser__WebContextMenuViewType__';
 const String _kClassName = 'web-selectable-region-context-menu';
 // These css rules hides the dom element with the class name.
 const String _kClassSelectionRule = '.$_kClassName::selection { background: transparent; }';
-const String _kClassRule = '''
+const String _kClassRule =
+    '''
 .$_kClassName {
   color: transparent;
   user-select: text;
@@ -129,6 +130,7 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
         'mousedown',
         (web.Event event) {
           final web.MouseEvent mouseEvent = event as web.MouseEvent;
+          mouseEvent.preventDefault();
           if (mouseEvent.button != _kRightClickButton) {
             return;
           }
@@ -143,7 +145,10 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
-      children: <Widget>[const Positioned.fill(child: HtmlElementView(viewType: _viewType)), child],
+      children: <Widget>[
+        const Positioned.fill(child: HtmlElementView(viewType: _viewType)),
+        child,
+      ],
     );
   }
 }

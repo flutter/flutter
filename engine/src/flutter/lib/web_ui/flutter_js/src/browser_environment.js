@@ -58,6 +58,20 @@ const supportsWasmGC = () => {
   return WebAssembly.validate(new Uint8Array(bytes));
 }
 
+const detectWebGLVersion = () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 1;
+
+  if (canvas.getContext('webgl2') != null) {
+    return 2;
+  }
+  if (canvas.getContext('webgl') != null) {
+    return 1;
+  }
+  return -1;
+}
+
 /** @type {import("./types").BrowserEnvironment} */
 export const browserEnvironment = {
   browserEngine: browserEngine,
@@ -65,4 +79,5 @@ export const browserEnvironment = {
   hasChromiumBreakIterators: hasChromiumBreakIterators(),
   supportsWasmGC: supportsWasmGC(),
   crossOriginIsolated: window.crossOriginIsolated,
+  webGLVersion: detectWebGLVersion(),
 };

@@ -415,12 +415,13 @@ GeometryResult RoundSuperellipseGeometry::GetPositionBuffer(
   }
 
   size_t contour_length = rearranger->ContourLength();
-  BufferView vertex_buffer = renderer.GetTransientsBuffer().Emplace(
+  BufferView vertex_buffer = renderer.GetTransientsDataBuffer().Emplace(
       nullptr, sizeof(Point) * contour_length, alignof(Point));
   Point* vertex_data =
       reinterpret_cast<Point*>(vertex_buffer.GetBuffer()->OnGetContents() +
                                vertex_buffer.GetRange().offset);
   rearranger->RearrangeIntoTriangleStrip(vertex_data);
+  vertex_buffer.GetBuffer()->Flush(vertex_buffer.GetRange());
 
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
@@ -460,6 +461,16 @@ bool RoundSuperellipseGeometry::CoversArea(const Matrix& transform,
 
 bool RoundSuperellipseGeometry::IsAxisAlignedRect() const {
   return false;
+}
+
+StrokeRoundSuperellipseGeometry::StrokeRoundSuperellipseGeometry(
+    const RoundSuperellipse& round_superellipse,
+    const StrokeParameters& parameters)
+    : StrokePathSourceGeometry(parameters),
+      round_superellipse_source_(round_superellipse) {}
+
+const PathSource& StrokeRoundSuperellipseGeometry::GetSource() const {
+  return round_superellipse_source_;
 }
 
 }  // namespace impeller

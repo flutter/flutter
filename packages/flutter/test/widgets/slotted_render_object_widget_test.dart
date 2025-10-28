@@ -169,8 +169,8 @@ void main() {
 
   testWidgets(
     'duplicated key error message',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       const Widget widget1 = SizedBox(key: ValueKey<String>('widget 1'), height: 10, width: 10);
       const Widget widget2 = SizedBox(key: ValueKey<String>('widget 1'), height: 100, width: 100);

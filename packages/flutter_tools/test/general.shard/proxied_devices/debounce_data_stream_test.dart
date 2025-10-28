@@ -15,8 +15,8 @@ void main() {
     late FakeAsync fakeAsync;
     late StreamController<Uint8List> source;
     late Stream<Uint8List> output;
-    const Duration debounceDuration = Duration(seconds: 10);
-    const Duration smallDuration = Duration(milliseconds: 10);
+    const debounceDuration = Duration(seconds: 10);
+    const smallDuration = Duration(milliseconds: 10);
 
     void addToSource(int value) {
       source.add(Uint8List.fromList(<int>[value]));
@@ -38,7 +38,7 @@ void main() {
 
     testWithoutContext('forwards data normally is all data if longer than duration apart', () {
       fakeAsync.run((FakeAsync time) {
-        final List<Uint8List> outputItems = <Uint8List>[];
+        final outputItems = <Uint8List>[];
         output.listen(outputItems.add);
 
         addToSource(1);
@@ -58,7 +58,7 @@ void main() {
 
     testWithoutContext('merge data after the first if sent within duration', () {
       fakeAsync.run((FakeAsync time) {
-        final List<Uint8List> outputItems = <Uint8List>[];
+        final outputItems = <Uint8List>[];
         output.listen(outputItems.add);
 
         addToSource(1);
@@ -79,7 +79,7 @@ void main() {
       'output data in separate chunks if time between them is longer than duration',
       () {
         fakeAsync.run((FakeAsync time) {
-          final List<Uint8List> outputItems = <Uint8List>[];
+          final outputItems = <Uint8List>[];
           output.listen(outputItems.add);
 
           addToSource(1);
@@ -104,7 +104,7 @@ void main() {
 
     testWithoutContext('sends the last chunk after debounce duration', () {
       fakeAsync.run((FakeAsync time) {
-        final List<Uint8List> outputItems = <Uint8List>[];
+        final outputItems = <Uint8List>[];
         output.listen(outputItems.add);
 
         addToSource(1);
@@ -131,7 +131,7 @@ void main() {
 
     testWithoutContext('close if source stream is closed', () {
       fakeAsync.run((FakeAsync time) {
-        bool isDone = false;
+        var isDone = false;
         output.listen(dummy, onDone: () => isDone = true);
         expect(isDone, false);
         source.close();
@@ -142,8 +142,8 @@ void main() {
 
     testWithoutContext('delay close until after last chunk is sent', () {
       fakeAsync.run((FakeAsync time) {
-        final List<Uint8List> outputItems = <Uint8List>[];
-        bool isDone = false;
+        final outputItems = <Uint8List>[];
+        var isDone = false;
         output.listen(outputItems.add, onDone: () => isDone = true);
 
         addToSource(1);
@@ -171,7 +171,7 @@ void main() {
 
     testWithoutContext('close if returned stream is closed', () {
       fakeAsync.run((FakeAsync time) {
-        bool isCancelled = false;
+        var isCancelled = false;
         source.onCancel = () => isCancelled = true;
         final StreamSubscription<Uint8List> subscription = output.listen(dummy);
         expect(isCancelled, false);

@@ -214,7 +214,9 @@ class KeyRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(child: Row(mainAxisAlignment: MainAxisAlignment.center, children: keys));
+    return Expanded(
+      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: keys),
+    );
   }
 }
 

@@ -11,6 +11,7 @@ import 'src/base/template.dart';
 import 'src/base/terminal.dart';
 import 'src/base/user_messages.dart';
 import 'src/build_system/build_targets.dart';
+import 'src/build_system/targets/hook_runner_native.dart' show FlutterHookRunnerNative;
 import 'src/cache.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/assemble.dart';
@@ -33,7 +34,6 @@ import 'src/commands/generate_localizations.dart';
 import 'src/commands/ide_config.dart';
 import 'src/commands/install.dart';
 import 'src/commands/logs.dart';
-import 'src/commands/make_host_app_editable.dart';
 import 'src/commands/packages.dart';
 import 'src/commands/precache.dart';
 import 'src/commands/run.dart';
@@ -48,6 +48,7 @@ import 'src/devtools_launcher.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
+import 'src/hook_runner.dart' show FlutterHookRunner;
 import 'src/isolated/build_targets.dart';
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/native_assets/test/native_assets.dart';
@@ -66,10 +67,14 @@ Future<void> main(List<String> args) async {
   final bool veryVerbose = args.contains('-vv');
   final bool verbose = args.contains('-v') || args.contains('--verbose') || veryVerbose;
   final bool prefixedErrors = args.contains('--prefixed-errors');
-  // Support the -? Powershell help idiom.
+  // Support universal help idioms.
   final int powershellHelpIndex = args.indexOf('-?');
   if (powershellHelpIndex != -1) {
     args[powershellHelpIndex] = '-h';
+  }
+  final int slashQuestionHelpIndex = args.indexOf('/?');
+  if (slashQuestionHelpIndex != -1) {
+    args[slashQuestionHelpIndex] = '-h';
   }
 
   final bool doctor =
@@ -83,12 +88,8 @@ Future<void> main(List<String> args) async {
   final bool muteCommandLogging = (help || doctor) && !veryVerbose;
   final bool verboseHelp = help && verbose;
   final bool daemon = args.contains('daemon');
-  final bool runMachine =
-      (args.contains('--machine') && args.contains('run')) ||
-      (args.contains('--machine') && args.contains('attach')) ||
-      // `flutter widget-preview start` starts an application that requires a logger
-      // to be setup for machine mode.
-      (args.contains('widget-preview') && args.contains('start'));
+  final bool widgetPreviews = args.contains(WidgetPreviewCommand.kWidgetPreview);
+  final bool runMachine = args.contains('--machine');
 
   // Cache.flutterRoot must be set early because other features use it (e.g.
   // enginePath's initializer uses it). This can only work with the real
@@ -99,17 +100,6 @@ Future<void> main(List<String> args) async {
     userMessages: UserMessages(),
   );
 
-  // Silently add --start-paused if running with -d web-server and --web-experimental-hot-reload,
-  // and --start-paused is not already present. This is to support hot reload in web-server environment.
-  // TODO(yjessy): Remove this workaround once https://github.com/dart-lang/sdk/issues/60688 is resolved.
-
-  if (args.contains('-d') &&
-      args.contains('web-server') &&
-      args.contains('--web-experimental-hot-reload') &&
-      !args.contains('--start-paused')) {
-    args = List<String>.from(args)..add('--start-paused');
-  }
-
   await runner.run(
     args,
     () => generateCommands(verboseHelp: verboseHelp, verbose: verbose),
@@ -117,6 +107,7 @@ Future<void> main(List<String> args) async {
     muteCommandLogging: muteCommandLogging,
     verboseHelp: verboseHelp,
     overrides: <Type, Generator>{
+      FlutterHookRunner: () => FlutterHookRunnerNative(),
       // The web runner is not supported in google3 because it depends
       // on dwds.
       WebRunnerFactory: () => DwdsWebRunnerFactory(),
@@ -124,16 +115,15 @@ Future<void> main(List<String> args) async {
       TemplateRenderer: () => const MustacheTemplateRenderer(),
       // The devtools launcher is not supported in google3 because it depends on
       // devtools source code.
-      DevtoolsLauncher:
-          () => DevtoolsServerLauncher(
-            processManager: globals.processManager,
-            artifacts: globals.artifacts!,
-            logger: globals.logger,
-            botDetector: globals.botDetector,
-          ),
+      DevtoolsLauncher: () => DevtoolsServerLauncher(
+        processManager: globals.processManager,
+        artifacts: globals.artifacts!,
+        logger: globals.logger,
+        botDetector: globals.botDetector,
+      ),
       BuildTargets: () => const BuildTargetsImpl(),
       Logger: () {
-        final LoggerFactory loggerFactory = LoggerFactory(
+        final loggerFactory = LoggerFactory(
           outputPreferences: globals.outputPreferences,
           terminal: globals.terminal,
           stdio: globals.stdio,
@@ -144,6 +134,7 @@ Future<void> main(List<String> args) async {
           verbose: verbose && !muteCommandLogging,
           prefixedErrors: prefixedErrors,
           windows: globals.platform.isWindows,
+          widgetPreviews: widgetPreviews,
         );
       },
       AnsiTerminal: () {
@@ -182,6 +173,7 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
             logger: globals.logger,
             fileSystem: globals.fs,
             platform: globals.platform,
+            git: globals.git,
           ),
         ],
         suppressAnalytics: !globals.analytics.okToSend,
@@ -243,7 +235,6 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
       ),
       InstallCommand(verboseHelp: verboseHelp),
       LogsCommand(sigint: ProcessSignal.sigint, sigterm: ProcessSignal.sigterm),
-      MakeHostAppEditableCommand(),
       PackagesCommand(),
       PrecacheCommand(
         verboseHelp: verboseHelp,
@@ -276,7 +267,7 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
       SymbolizeCommand(stdio: globals.stdio, fileSystem: globals.fs),
       // Development-only commands. These are always hidden,
       IdeConfigCommand(),
-      UpdatePackagesCommand(),
+      UpdatePackagesCommand(verboseHelp: verboseHelp),
     ];
 
 /// An abstraction for instantiation of the correct logger type.
@@ -305,6 +296,7 @@ class LoggerFactory {
     required bool machine,
     required bool daemon,
     required bool windows,
+    required bool widgetPreviews,
   }) {
     Logger logger;
     if (windows) {
@@ -328,11 +320,14 @@ class LoggerFactory {
     if (prefixedErrors) {
       logger = PrefixedErrorLogger(logger);
     }
+    if (widgetPreviews) {
+      return WidgetPreviewMachineAwareLogger(logger, machine: machine, verbose: verbose);
+    }
     if (daemon) {
       return NotifyingLogger(verbose: verbose, parent: logger);
     }
     if (machine) {
-      return AppRunLogger(parent: logger);
+      return MachineOutputLogger(parent: logger);
     }
     return logger;
   }

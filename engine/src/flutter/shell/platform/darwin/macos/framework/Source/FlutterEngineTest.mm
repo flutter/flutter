@@ -4,7 +4,6 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
-#include "shell/platform/darwin/macos/framework/Source/FlutterResizeSynchronizer.h"
 
 #include <objc/objc.h>
 
@@ -18,6 +17,8 @@
 #include "flutter/shell/platform/common/accessibility_bridge.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
+#import "flutter/shell/platform/darwin/common/test_utils_swift/test_utils_swift.h"
+#import "flutter/shell/platform/darwin/macos/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppLifecycleDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterPluginMacOS.h"
@@ -210,7 +211,9 @@ TEST_F(FlutterEngineTest, CanLogToStdout) {
                     CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { signaled = YES; }));
 
   // Replace stdout stream buffer with our own.
-  StreamCapture stdout_capture(&std::cout);
+  FlutterStringOutputWriter* writer = [[FlutterStringOutputWriter alloc] init];
+  writer.expectedOutput = @"Hello logging";
+  FlutterLogger.outputWriter = writer;
 
   // Launch the test entrypoint.
   FlutterEngine* engine = GetFlutterEngine();
@@ -221,10 +224,8 @@ TEST_F(FlutterEngineTest, CanLogToStdout) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
   }
 
-  stdout_capture.Stop();
-
   // Verify hello world was written to stdout.
-  EXPECT_TRUE(stdout_capture.GetOutput().find("Hello logging") != std::string::npos);
+  EXPECT_TRUE(writer.gotExpectedOutput);
 }
 
 TEST_F(FlutterEngineTest, DISABLED_BackgroundIsBlack) {
@@ -319,8 +320,11 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   EXPECT_TRUE(enabled_called);
   // Send flutter semantics updates.
   FlutterSemanticsNode2 root;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
+  FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{0};
   root.id = 0;
-  root.flags = static_cast<FlutterSemanticsFlag>(0);
+  root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
@@ -334,10 +338,12 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   int32_t children[] = {1};
   root.children_in_traversal_order = children;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
 
   FlutterSemanticsNode2 child1;
   child1.id = 1;
-  child1.flags = static_cast<FlutterSemanticsFlag>(0);
+  child1.flags2 = &child_flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   child1.actions = static_cast<FlutterSemanticsAction>(0);
   child1.text_selection_base = -1;
   child1.text_selection_extent = -1;
@@ -349,6 +355,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   child1.tooltip = "";
   child1.child_count = 0;
   child1.custom_accessibility_actions_count = 0;
+  child1.identifier = "";
 
   FlutterSemanticsUpdate2 update;
   update.node_count = 2;
@@ -409,8 +416,11 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
   EXPECT_TRUE(enabled_called);
   // Send flutter semantics updates.
   FlutterSemanticsNode2 root;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
+  FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{0};
   root.id = 0;
-  root.flags = static_cast<FlutterSemanticsFlag>(0);
+  root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
@@ -427,7 +437,8 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
 
   FlutterSemanticsNode2 child1;
   child1.id = 1;
-  child1.flags = static_cast<FlutterSemanticsFlag>(0);
+  child1.flags2 = &child_flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   child1.actions = static_cast<FlutterSemanticsAction>(0);
   child1.text_selection_base = -1;
   child1.text_selection_extent = -1;
@@ -735,6 +746,21 @@ TEST_F(FlutterEngineTest, PublishedValueReturnsLastPublished) {
   EXPECT_EQ([engine valuePublishedByPlugin:pluginName], secondValue);
 }
 
+TEST_F(FlutterEngineTest, RegistrarForwardViewControllerLookUpToEngine) {
+  NSString* fixtures = @(flutter::testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:project];
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  id<FlutterPluginRegistrar> registrar = [engine registrarForPlugin:@"MyPlugin"];
+
+  EXPECT_EQ([registrar viewController], viewController);
+}
+
 // If a channel overrides a previous channel with the same name, cleaning
 // the previous channel should not affect the new channel.
 //
@@ -909,9 +935,9 @@ TEST_F(FlutterEngineTest, ResizeSynchronizerNotBlockingRasterThreadAfterShutdown
 
   std::thread rasterThread([&threadSynchronizer] {
     [threadSynchronizer performCommitForSize:CGSizeMake(100, 100)
+                                  afterDelay:0
                                       notify:^{
-                                      }
-                                       delay:0];
+                                      }];
   });
 
   rasterThread.join();

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
@@ -15,25 +16,25 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
-import '../convert.dart';
+import '../base/utils.dart';
 
 /// An environment variable used to override the location of Google Chrome.
-const String kChromeEnvironment = 'CHROME_EXECUTABLE';
+const kChromeEnvironment = 'CHROME_EXECUTABLE';
 
 /// An environment variable used to override the location of Microsoft Edge.
-const String kEdgeEnvironment = 'EDGE_ENVIRONMENT';
+const kEdgeEnvironment = 'EDGE_ENVIRONMENT';
 
 /// The expected executable name on linux.
-const String kLinuxExecutable = 'google-chrome';
+const kLinuxExecutable = 'google-chrome';
 
 /// The expected executable name on macOS.
-const String kMacOSExecutable = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const kMacOSExecutable = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
 /// The expected Chrome executable name on Windows.
-const String kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
+const kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
 
 /// The expected Edge executable name on Windows.
-const String kWindowsEdgeExecutable = r'Microsoft\Edge\Application\msedge.exe';
+const kWindowsEdgeExecutable = r'Microsoft\Edge\Application\msedge.exe';
 
 /// Used by [ChromiumLauncher] to detect a glibc bug and retry launching the
 /// browser.
@@ -45,7 +46,7 @@ const String kWindowsEdgeExecutable = r'Microsoft\Edge\Application\msedge.exe';
 /// When this happens Chrome spits out something like the following then exits with code 127:
 ///
 ///     Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: _dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen <= GL(dl_tls_generation)' failed!
-const String _kGlibcError = 'Inconsistency detected by ld.so';
+const _kGlibcError = 'Inconsistency detected by ld.so';
 
 typedef BrowserFinder = String Function(Platform, FileSystem);
 
@@ -64,7 +65,7 @@ String findChromeExecutable(Platform platform, FileSystem fileSystem) {
   }
   if (platform.isWindows) {
     /// The possible locations where the chrome executable can be located on windows.
-    final List<String> kWindowsPrefixes = <String>[
+    final kWindowsPrefixes = <String>[
       if (platform.environment.containsKey('LOCALAPPDATA')) platform.environment['LOCALAPPDATA']!,
       if (platform.environment.containsKey('PROGRAMFILES')) platform.environment['PROGRAMFILES']!,
       if (platform.environment.containsKey('PROGRAMFILES(X86)'))
@@ -88,7 +89,7 @@ String findEdgeExecutable(Platform platform, FileSystem fileSystem) {
   }
   if (platform.isWindows) {
     /// The possible locations where the Edge executable can be located on windows.
-    final List<String> kWindowsPrefixes = <String>[
+    final kWindowsPrefixes = <String>[
       if (platform.environment.containsKey('LOCALAPPDATA')) platform.environment['LOCALAPPDATA']!,
       if (platform.environment.containsKey('PROGRAMFILES')) platform.environment['PROGRAMFILES']!,
       if (platform.environment.containsKey('PROGRAMFILES(X86)'))
@@ -130,7 +131,7 @@ class ChromiumLauncher {
   bool get hasChromeInstance => currentCompleter.isCompleted;
 
   @visibleForTesting
-  Completer<Chromium> currentCompleter = Completer<Chromium>();
+  var currentCompleter = Completer<Chromium>();
 
   /// Whether we can locate the chrome executable.
   bool canFindExecutable() {
@@ -144,6 +145,31 @@ class ChromiumLauncher {
 
   /// The executable this launcher will use.
   String findExecutable() => _browserFinder(_platform, _fileSystem);
+
+  /// Creates a user data directory for Chrome based on provided flags or creates a temporary one.
+  ///
+  /// This method handles the creation of Chrome's user data directory in two ways:
+  /// 1. If webBrowserFlags contains a --user-data-dir flag, it uses that directory
+  /// 2. Otherwise, it creates a temporary directory in the system's temp location
+  ///
+  /// The user data directory is where Chrome stores user preferences, cookies,
+  /// and other session data. Using a temporary directory ensures a clean state
+  /// for each launch, while allowing custom directories through flags for
+  /// persistent configurations.
+  Directory _createUserDataDirectory(List<String> webBrowserFlags) {
+    if (webBrowserFlags.isNotEmpty) {
+      final String? userDataDirFlag = webBrowserFlags.firstWhereOrNull(
+        (String flag) => flag.startsWith('--user-data-dir='),
+      );
+
+      if (userDataDirFlag != null) {
+        final Directory userDataDir = _fileSystem.directory(userDataDirFlag.split('=')[1]);
+        webBrowserFlags.remove(userDataDirFlag);
+        return userDataDir;
+      }
+    }
+    return _fileSystem.systemTempDirectory.createTempSync('flutter_tools_chrome_device.');
+  }
 
   /// Launch a Chromium browser to a particular `host` page.
   ///
@@ -189,9 +215,7 @@ class ChromiumLauncher {
       }
     }
 
-    final Directory userDataDir = _fileSystem.systemTempDirectory.createTempSync(
-      'flutter_tools_chrome_device.',
-    );
+    final Directory userDataDir = _createUserDataDirectory(webBrowserFlags);
 
     if (cacheDir != null) {
       // Seed data dir with previous state.
@@ -199,7 +223,7 @@ class ChromiumLauncher {
     }
 
     final int port = debugPort ?? await _operatingSystemUtils.findFreePort();
-    final List<String> args = <String>[
+    final args = <String>[
       chromeExecutable,
       // Using a tmp directory ensures that a new instance of chrome launches
       // allowing for the remote debug port to be enabled.
@@ -221,13 +245,9 @@ class ChromiumLauncher {
       // debugging purposes.
       // See: https://github.com/flutter/flutter/issues/153928
       '--disable-search-engine-choice-screen',
+      '--no-sandbox',
 
-      if (headless) ...<String>[
-        '--headless',
-        '--disable-gpu',
-        '--no-sandbox',
-        '--window-size=2400,1800',
-      ],
+      if (headless) ...<String>['--headless', '--disable-gpu', '--window-size=2400,1800'],
       ...webBrowserFlags,
       url,
     ];
@@ -278,23 +298,22 @@ class ChromiumLauncher {
     // Keep attempting to launch the browser until one of:
     // - Chrome launched successfully, in which case we just return from the loop.
     // - The tool reached the maximum retry count, in which case we throw ToolExit.
-    const int kMaxRetries = 3;
-    int retry = 0;
+    const kMaxRetries = 3;
+    var retry = 0;
     while (true) {
       final Process process = await _processManager.start(args);
 
-      process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
+      process.stdout.transform(utf8LineDecoder).listen((String line) {
         _logger.printTrace('[CHROME]: $line');
       });
 
       // Wait until the DevTools are listening before trying to connect. This is
       // only required for flutter_test --platform=chrome and not flutter run.
-      bool hitGlibcBug = false;
-      bool shouldRetry = false;
-      final List<String> errors = <String>[];
+      var hitGlibcBug = false;
+      var shouldRetry = false;
+      final errors = <String>[];
       await process.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
+          .transform(utf8LineDecoder)
           .map((String line) {
             _logger.printTrace('[CHROME]: $line');
             errors.add('[CHROME]:$line');
@@ -482,7 +501,7 @@ class Chromium {
   final ChromeConnection chromeConnection;
   final ChromiumLauncher _chromiumLauncher;
   final Logger _logger;
-  bool _hasValidChromeConnection = false;
+  var _hasValidChromeConnection = false;
 
   /// Resolves to browser's main process' exit code, when the browser exits.
   Future<int> get onExit async => _process.exitCode;
@@ -493,7 +512,7 @@ class Chromium {
   @visibleForTesting
   Process get process => _process;
 
-  /// Gets the first [chrome] tab in order to verify that the connection to
+  /// Gets the first Chrome tab in order to verify that the connection to
   /// the Chrome debug protocol is working properly.
   ///
   /// Retries getting tabs from Chrome for a few seconds and retries finding
@@ -504,10 +523,10 @@ class Chromium {
   // (We should just keep waiting forever, and print a warning when it's
   // taking too long.)
   Future<void> _validateChromeConnection() async {
-    const Duration retryFor = Duration(seconds: 2);
-    const int attempts = 5;
+    const retryFor = Duration(seconds: 2);
+    const attempts = 5;
 
-    for (int i = 1; i <= attempts; i++) {
+    for (var i = 1; i <= attempts; i++) {
       try {
         final List<ChromeTab> tabs = await chromeConnection.getTabs(retryFor: retryFor);
 

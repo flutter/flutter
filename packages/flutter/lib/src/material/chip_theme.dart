@@ -18,7 +18,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'material_state.dart';
 import 'theme.dart';
 
 /// Applies a chip theme to descendant [RawChip]-based widgets, like [Chip],
@@ -286,7 +285,7 @@ class ChipThemeData with Diagnosticable {
   ///
   /// This property applies to [ActionChip], [Chip], [ChoiceChip],
   /// [FilterChip], [InputChip], [RawChip].
-  final MaterialStateProperty<Color?>? color;
+  final WidgetStateProperty<Color?>? color;
 
   /// Overrides the default for [ChipAttributes.backgroundColor]
   /// which is used for unselected, enabled chip backgrounds.
@@ -466,7 +465,7 @@ class ChipThemeData with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ChipThemeData copyWith({
-    MaterialStateProperty<Color?>? color,
+    WidgetStateProperty<Color?>? color,
     Color? backgroundColor,
     Color? deleteIconColor,
     Color? disabledColor,
@@ -525,7 +524,7 @@ class ChipThemeData with Diagnosticable {
       return a;
     }
     return ChipThemeData(
-      color: MaterialStateProperty.lerp<Color?>(a?.color, b?.color, t, Color.lerp),
+      color: WidgetStateProperty.lerp<Color?>(a?.color, b?.color, t, Color.lerp),
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       deleteIconColor: Color.lerp(a?.deleteIconColor, b?.deleteIconColor, t),
       disabledColor: Color.lerp(a?.disabledColor, b?.disabledColor, t),
@@ -539,16 +538,15 @@ class ChipThemeData with Diagnosticable {
       labelPadding: EdgeInsetsGeometry.lerp(a?.labelPadding, b?.labelPadding, t),
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
       side: _lerpSides(a?.side, b?.side, t),
-      shape: _lerpShapes(a?.shape, b?.shape, t),
+      shape: OutlinedBorder.lerp(a?.shape, b?.shape, t),
       labelStyle: TextStyle.lerp(a?.labelStyle, b?.labelStyle, t),
       secondaryLabelStyle: TextStyle.lerp(a?.secondaryLabelStyle, b?.secondaryLabelStyle, t),
       brightness: t < 0.5 ? a?.brightness ?? Brightness.light : b?.brightness ?? Brightness.light,
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       pressElevation: lerpDouble(a?.pressElevation, b?.pressElevation, t),
-      iconTheme:
-          a?.iconTheme != null || b?.iconTheme != null
-              ? IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t)
-              : null,
+      iconTheme: a?.iconTheme != null || b?.iconTheme != null
+          ? IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t)
+          : null,
       avatarBoxConstraints: BoxConstraints.lerp(
         a?.avatarBoxConstraints,
         b?.avatarBoxConstraints,
@@ -567,27 +565,16 @@ class ChipThemeData with Diagnosticable {
     if (a == null && b == null) {
       return null;
     }
-    if (a is MaterialStateBorderSide) {
-      a = a.resolve(<WidgetState>{});
+    if (a is WidgetStateBorderSide) {
+      a = a.resolve(const <WidgetState>{});
     }
-    if (b is MaterialStateBorderSide) {
-      b = b.resolve(<WidgetState>{});
+    if (b is WidgetStateBorderSide) {
+      b = b.resolve(const <WidgetState>{});
     }
-    if (a == null) {
-      return BorderSide.lerp(BorderSide(width: 0, color: b!.color.withAlpha(0)), b, t);
-    }
-    if (b == null) {
-      return BorderSide.lerp(BorderSide(width: 0, color: a.color.withAlpha(0)), a, t);
-    }
-    return BorderSide.lerp(a, b, t);
-  }
+    a ??= BorderSide(width: 0, color: b!.color.withAlpha(0));
+    b ??= BorderSide(width: 0, color: a.color.withAlpha(0));
 
-  // TODO(perclasson): OutlinedBorder needs a lerp method - https://github.com/flutter/flutter/issues/60555.
-  static OutlinedBorder? _lerpShapes(OutlinedBorder? a, OutlinedBorder? b, double t) {
-    if (a == null && b == null) {
-      return null;
-    }
-    return ShapeBorder.lerp(a, b, t) as OutlinedBorder?;
+    return BorderSide.lerp(a, b, t);
   }
 
   @override
@@ -655,7 +642,7 @@ class ChipThemeData with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<Color?>>('color', color, defaultValue: null),
+      DiagnosticsProperty<WidgetStateProperty<Color?>>('color', color, defaultValue: null),
     );
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('deleteIconColor', deleteIconColor, defaultValue: null));

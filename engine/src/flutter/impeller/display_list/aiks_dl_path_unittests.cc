@@ -13,9 +13,11 @@
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/display_list/effects/dl_color_filter.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/testing/testing.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/playground/widgets.h"
+#include "impeller/tessellator/path_tessellator.h"
 
 namespace impeller {
 namespace testing {
@@ -46,10 +48,11 @@ TEST_P(AiksTest, RotateColorFilteredPath) {
   paint.setColorFilter(filter);
   paint.setColor(DlColor::kBlack());
 
-  builder.DrawPath(DlPath(arrow_stem), paint);
-  builder.DrawPath(DlPath(arrow_head), paint);
+  builder.DrawPath(arrow_stem.TakePath(), paint);
+  builder.DrawPath(arrow_head.TakePath(), paint);
 
-  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+  auto dl = builder.Build();
+  ASSERT_TRUE(OpenPlaygroundHere(dl));
 }
 
 TEST_P(AiksTest, CanRenderStrokes) {
@@ -129,7 +132,7 @@ TEST_P(AiksTest, CanRenderStrokePathWithCubicLine) {
   path_builder.CubicCurveTo(DlPoint(50, 400), DlPoint(350, 0),
                             DlPoint(400, 200));
 
-  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
@@ -148,7 +151,7 @@ TEST_P(AiksTest, CanRenderQuadraticStrokeWithInstantTurn) {
   path_builder.MoveTo(DlPoint(250, 250));
   path_builder.QuadraticCurveTo(DlPoint(100, 100), DlPoint(250, 250));
 
-  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -197,8 +200,8 @@ TEST_P(AiksTest, CanRenderFilledConicPaths) {
   reference_builder.LineTo(DlPoint(350, 450));
   reference_builder.LineTo(DlPoint(400, 400));
 
-  builder.DrawPath(DlPath(path_builder), paint);
-  builder.DrawPath(DlPath(reference_builder), reference_paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
+  builder.DrawPath(reference_builder.TakePath(), reference_paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -252,8 +255,8 @@ TEST_P(AiksTest, CanRenderStrokedConicPaths) {
   reference_builder.LineTo(DlPoint(350, 450));
   reference_builder.LineTo(DlPoint(400, 400));
 
-  builder.DrawPath(DlPath(path_builder), paint);
-  builder.DrawPath(DlPath(reference_builder), reference_paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
+  builder.DrawPath(reference_builder.TakePath(), reference_paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -293,7 +296,7 @@ TEST_P(AiksTest, HairlinePath) {
 
       path_builder.MoveTo(DlPoint(100, yoffset));
       path_builder.LineTo(DlPoint(924, yoffset));
-      builder.DrawPath(DlPath(path_builder), paint);
+      builder.DrawPath(path_builder.TakePath(), paint);
     }
 
     return builder.Build();
@@ -358,10 +361,10 @@ TEST_P(AiksTest, CanRenderTightConicPath) {
   path_builder.ConicCurveTo(DlPoint(150, 450), DlPoint(200, 100), 5.0f);
 
   DlPathBuilder reference_builder;
-  ConicPathComponent component(DlPoint(300, 100),  //
-                               DlPoint(350, 450),  //
-                               DlPoint(400, 100),  //
-                               5.0f);
+  PathTessellator::Conic component{DlPoint(300, 100),  //
+                                   DlPoint(350, 450),  //
+                                   DlPoint(400, 100),  //
+                                   5.0f};
   reference_builder.MoveTo(component.p1);
   constexpr int N = 100;
   for (int i = 1; i < N; i++) {
@@ -383,8 +386,8 @@ TEST_P(AiksTest, CanRenderTightConicPath) {
   builder.DrawLine(DlPoint(100, 392.5f), DlPoint(400, 392.5f), line_paint);
 
   // Draw the two paths (direct and manually tessellated) on top of the lines.
-  builder.DrawPath(DlPath(path_builder), paint);
-  builder.DrawPath(DlPath(reference_builder), reference_paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
+  builder.DrawPath(reference_builder.TakePath(), reference_paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -401,14 +404,15 @@ TEST_P(AiksTest, CanRenderDifferencePaths) {
       .bottom_left = {25, 50},
       .bottom_right = {50, 25},
   };
-  PathBuilder path_builder;
+  DlPathBuilder path_builder;
   DlRoundRect rrect =
       DlRoundRect::MakeRectRadii(DlRect::MakeXYWH(100, 100, 200, 200), radii);
   // We use the factory method to convert the rrect and circle to a path so
   // that they use the legacy conics for legacy golden output.
-  path_builder.AddPath(DlPath::MakeRoundRect(rrect).GetPath());
-  path_builder.AddPath(DlPath::MakeCircle(DlPoint(200, 200), 50).GetPath());
-  DlPath path(path_builder, DlPathFillType::kOdd);
+  path_builder.AddPath(DlPath::MakeRoundRect(rrect));
+  path_builder.AddPath(DlPath::MakeCircle(DlPoint(200, 200), 50));
+  path_builder.SetFillType(DlPathFillType::kOdd);
+  DlPath path = path_builder.TakePath();
 
   builder.DrawImage(
       DlImageImpeller::Make(CreateTextureForFixture("boston.jpg")),
@@ -439,7 +443,7 @@ TEST_P(AiksTest, CanDrawAnOpenPath) {
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(10);
 
-  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -461,7 +465,7 @@ TEST_P(AiksTest, CanDrawAnOpenPathThatIsntARect) {
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(10);
 
-  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -499,7 +503,7 @@ TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
     path_builder.Close();
     path_builder.MoveTo(DlPoint(60, 20));
     path_builder.QuadraticCurveTo(DlPoint(60, 60), DlPoint(20, 60));
-    DlPath path(path_builder);
+    DlPath path = path_builder.TakePath();
 
     builder.Scale(scale, scale);
 
@@ -812,7 +816,7 @@ TEST_P(AiksTest, CanDrawMultiContourConvexPath) {
       // uses the legacy conics for legacy golden output.
       DlPath circle =
           DlPath::MakeCircle(DlPoint(100 + 50 * i, 100 + 50 * i), 100);
-      path_builder.AddPath(circle.GetPath());
+      path_builder.AddPath(circle);
       path_builder.Close();
     } else {
       path_builder.MoveTo(DlPoint(100.f + 50.f * i - 100, 100.f + 50.f * i));
@@ -822,7 +826,7 @@ TEST_P(AiksTest, CanDrawMultiContourConvexPath) {
       path_builder.Close();
     }
   }
-  DlPath path(path_builder);
+  DlPath path = path_builder.TakePath();
 
   DisplayListBuilder builder;
   DlPaint paint;
@@ -851,7 +855,7 @@ TEST_P(AiksTest, ArcWithZeroSweepAndBlur) {
   DlPathBuilder path_builder;
   path_builder.AddArc(DlRect::MakeXYWH(10, 10, 100, 100),  //
                       DlDegrees(0), DlDegrees(0));
-  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
 
   // Check that this empty picture can be created without crashing.
   builder.Build();
@@ -939,9 +943,9 @@ TEST_P(AiksTest, CanRenderOverlappingMultiContourPath) {
     path_builder.LineTo(DlPoint(-kTriangleHeight / 2.0f, 0));
     path_builder.LineTo(DlPoint(kTriangleHeight / 2.0f, 0));
     path_builder.Close();
-    path_builder.AddPath(rrect_path.GetPath());
+    path_builder.AddPath(rrect_path);
 
-    builder.DrawPath(DlPath(path_builder), paint);
+    builder.DrawPath(path_builder.TakePath(), paint);
   }
   builder.Translate(100, 0);
 
@@ -952,9 +956,9 @@ TEST_P(AiksTest, CanRenderOverlappingMultiContourPath) {
     path_builder.LineTo(DlPoint(0, -10));
     path_builder.LineTo(DlPoint(kTriangleHeight / 2.0f, 0));
     path_builder.Close();
-    path_builder.AddPath(rrect_path.GetPath());
+    path_builder.AddPath(rrect_path);
 
-    builder.DrawPath(DlPath(path_builder), paint);
+    builder.DrawPath(path_builder.TakePath(), paint);
   }
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -975,7 +979,7 @@ TEST_P(AiksTest, TwoContourPathWithSinglePointContour) {
   path_builder.MoveTo(DlPoint(200, 200));
   path_builder.LineTo(DlPoint(200, 200));
 
-  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(path_builder.TakePath(), paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -996,7 +1000,7 @@ TEST_P(AiksTest, StrokeCapsAndJoins) {
     path_builder.LineTo({120, 80});
     path_builder.MoveTo({180, 50});
     path_builder.LineTo({180, 50});
-    DlPath path(path_builder);
+    DlPath path = path_builder.TakePath();
 
     DlPaint paint;
     paint.setColor(DlColor::kRed());
@@ -1053,7 +1057,7 @@ TEST_P(AiksTest, StrokeCapsAndJoins) {
     path_builder.MoveTo({120, 480});  // 180 degree left turn
     path_builder.LineTo({150, 480});
     path_builder.LineTo({120, 480});
-    DlPath path(path_builder);
+    DlPath path = path_builder.TakePath();
 
     DlPaint paint;
 

@@ -25,11 +25,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationDrawerThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -51,11 +50,10 @@ void main() {
       iconTheme: MaterialStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000095))),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -119,20 +117,20 @@ void main() {
       // Test icon.
       expect(
         _iconStyle(tester, Icons.ac_unit)?.color,
-        navigationDrawerTheme.iconTheme?.resolve(<MaterialState>{})?.color,
+        navigationDrawerTheme.iconTheme?.resolve(<WidgetState>{})?.color,
       );
       expect(
         _iconStyle(tester, Icons.access_alarm)?.color,
-        navigationDrawerTheme.iconTheme?.resolve(<MaterialState>{})?.color,
+        navigationDrawerTheme.iconTheme?.resolve(<WidgetState>{})?.color,
       );
       // Test label.
       expect(
         _labelStyle(tester, 'AC'),
-        navigationDrawerTheme.labelTextStyle?.resolve(<MaterialState>{}),
+        navigationDrawerTheme.labelTextStyle?.resolve(<WidgetState>{}),
       );
       expect(
         _labelStyle(tester, 'Alarm'),
-        navigationDrawerTheme.labelTextStyle?.resolve(<MaterialState>{}),
+        navigationDrawerTheme.labelTextStyle?.resolve(<WidgetState>{}),
       );
     },
   );
@@ -286,7 +284,7 @@ Material _getMaterial(WidgetTester tester) {
 ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
   return tester
           .firstWidget<Ink>(
-            find.descendant(of: find.byType(FadeTransition), matching: find.byType(Ink)),
+            find.descendant(of: find.byType(NavigationIndicator), matching: find.byType(Ink)),
           )
           .decoration
       as ShapeDecoration?;

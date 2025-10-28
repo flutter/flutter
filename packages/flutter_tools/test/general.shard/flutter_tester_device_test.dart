@@ -42,6 +42,7 @@ void main() {
     List<String> dartEntrypointArgs = const <String>[],
     bool enableVmService = false,
     bool enableImpeller = false,
+    bool enableFlutterGpu = false,
     FlutterProject? flutterProject,
   }) => TestFlutterTesterDevice(
     platform: platform,
@@ -50,13 +51,14 @@ void main() {
     enableVmService: enableVmService,
     dartEntrypointArgs: dartEntrypointArgs,
     enableImpeller: enableImpeller,
+    enableFlutterGpu: enableFlutterGpu,
     flutterProject: flutterProject,
   );
 
   testUsingContext(
     'Missing dir error caught for FontConfigManger.dispose',
     () async {
-      final FontConfigManager fontConfigManager = FontConfigManager();
+      final fontConfigManager = FontConfigManager();
 
       final Directory fontsDirectory = fileSystem.file(fontConfigManager.fontConfigFile).parent;
       fontsDirectory.deleteSync(recursive: true);
@@ -73,7 +75,7 @@ void main() {
     'Flutter tester passes through impeller config and environment variables.',
     () async {
       processManager = FakeProcessManager.list(<FakeCommand>[]);
-      device = createDevice(enableImpeller: true);
+      device = createDevice(enableImpeller: true, enableFlutterGpu: true);
       processManager.addCommand(
         FakeCommand(
           command: const <String>[
@@ -83,6 +85,7 @@ void main() {
             '--enable-checked-mode',
             '--verify-entry-points',
             '--enable-impeller',
+            '--enable-flutter-gpu',
             '--enable-dart-profiling',
             '--non-interactive',
             '--use-test-fonts',
@@ -119,7 +122,7 @@ void main() {
       );
       processManager = FakeProcessManager.list(<FakeCommand>[]);
       final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-      device = createDevice(enableImpeller: true, flutterProject: project);
+      device = createDevice(enableImpeller: true, enableFlutterGpu: true, flutterProject: project);
       processManager.addCommand(
         FakeCommand(
           command: const <String>[
@@ -129,6 +132,7 @@ void main() {
             '--enable-checked-mode',
             '--verify-entry-points',
             '--enable-impeller',
+            '--enable-flutter-gpu',
             '--enable-dart-profiling',
             '--non-interactive',
             '--use-test-fonts',
@@ -287,19 +291,20 @@ void main() {
       ]);
       device = createDevice(enableVmService: true);
       originalDdsLauncher = ddsLauncherCallback;
-      ddsLauncherCallback = ({
-        required Uri remoteVmServiceUri,
-        Uri? serviceUri,
-        bool enableAuthCodes = true,
-        bool serveDevTools = false,
-        Uri? devToolsServerAddress,
-        bool enableServicePortFallback = false,
-        List<String> cachedUserTags = const <String>[],
-        String? dartExecutable,
-        String? google3WorkspaceRoot,
-      }) async {
-        return FakeDartDevelopmentServiceLauncher(uri: Uri.parse('http://localhost:1234'));
-      };
+      ddsLauncherCallback =
+          ({
+            required Uri remoteVmServiceUri,
+            Uri? serviceUri,
+            bool enableAuthCodes = true,
+            bool serveDevTools = false,
+            Uri? devToolsServerAddress,
+            bool enableServicePortFallback = false,
+            List<String> cachedUserTags = const <String>[],
+            String? dartExecutable,
+            String? google3WorkspaceRoot,
+          }) async {
+            return FakeDartDevelopmentServiceLauncher(uri: Uri.parse('http://localhost:1234'));
+          };
     });
 
     tearDown(() {
@@ -330,6 +335,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     required super.enableVmService,
     required List<String> dartEntrypointArgs,
     required bool enableImpeller,
+    required bool enableFlutterGpu,
     super.flutterProject,
   }) : super(
          id: 999,
@@ -345,6 +351,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
            hostVmServicePort: 1234,
            dartEntrypointArgs: dartEntrypointArgs,
            enableImpeller: enableImpeller ? ImpellerStatus.enabled : ImpellerStatus.platformDefault,
+           enableFlutterGpu: enableFlutterGpu,
          ),
          machine: false,
          host: InternetAddress.loopbackIPv6,
@@ -361,9 +368,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     CompileExpression? compileExpression,
     required Logger logger,
   }) async {
-    return FakeVmServiceHost(
-      requests: <VmServiceExpectation>[const FakeVmServiceRequest(method: '_serveObservatory')],
-    ).vmService;
+    return FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService;
   }
 
   @override

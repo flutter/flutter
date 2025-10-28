@@ -102,9 +102,9 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
     return Container(
       width: _kToolbarWidth,
       clipBehavior: Clip.hardEdge,
-      decoration: const BoxDecoration(
-        boxShadow: _kToolbarShadow,
-        borderRadius: BorderRadius.all(_kToolbarBorderRadius),
+      decoration: const ShapeDecoration(
+        shadows: _kToolbarShadow,
+        shape: RoundedSuperellipseBorder(borderRadius: BorderRadius.all(_kToolbarBorderRadius)),
       ),
       child: BackdropFilter(
         filter: ImageFilter.compose(
@@ -112,10 +112,12 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
           inner: ImageFilter.blur(sigmaX: _kToolbarBlurSigma, sigmaY: _kToolbarBlurSigma),
         ),
         child: DecoratedBox(
-          decoration: BoxDecoration(
+          decoration: ShapeDecoration(
             color: _kToolbarBackgroundColor.resolveFrom(context),
-            border: Border.all(color: _kToolbarBorderColor.resolveFrom(context)),
-            borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
+            shape: RoundedSuperellipseBorder(
+              side: BorderSide(color: _kToolbarBorderColor.resolveFrom(context)),
+              borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
+            ),
           ),
           child: Padding(padding: _kToolbarPadding, child: child),
         ),

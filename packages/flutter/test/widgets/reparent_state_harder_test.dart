@@ -30,10 +30,9 @@ class OrderSwitcherState extends State<OrderSwitcher> {
   Widget build(BuildContext context) {
     return Stack(
       textDirection: TextDirection.ltr,
-      children:
-          _aFirst
-              ? <Widget>[KeyedSubtree(child: widget.a), widget.b]
-              : <Widget>[KeyedSubtree(child: widget.b), widget.a],
+      children: _aFirst
+          ? <Widget>[KeyedSubtree(child: widget.a), widget.b]
+          : <Widget>[KeyedSubtree(child: widget.b), widget.a],
     );
   }
 }
@@ -111,7 +110,10 @@ void main() {
     await tester.pumpWidget(
       OrderSwitcher(
         key: keyRoot,
-        a: KeyedSubtree(key: keyA, child: RekeyableDummyStatefulWidgetWrapper(initialKey: keyC)),
+        a: KeyedSubtree(
+          key: keyA,
+          child: RekeyableDummyStatefulWidgetWrapper(initialKey: keyC),
+        ),
         b: KeyedSubtree(
           key: keyB,
           child: Builder(
@@ -143,8 +145,9 @@ void main() {
     expect(find.byType(DummyStatefulWidget), findsNWidgets(2));
 
     keyRoot.currentState!.switchChildren();
-    final List<State> states =
-        tester.stateList(find.byType(RekeyableDummyStatefulWidgetWrapper)).toList();
+    final List<State> states = tester
+        .stateList(find.byType(RekeyableDummyStatefulWidgetWrapper))
+        .toList();
     final RekeyableDummyStatefulWidgetWrapperState a =
         states[0] as RekeyableDummyStatefulWidgetWrapperState;
     a._setChild(null);

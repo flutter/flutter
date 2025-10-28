@@ -8,7 +8,7 @@ import 'package:yaml/yaml.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../features.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import 'gen_l10n_types.dart';
 import 'language_subtag_registry.dart';
@@ -46,7 +46,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
     String? scriptCode;
     String? countryCode;
     int length = codes.length;
-    String originalString = locale;
+    var originalString = locale;
     if (codes.length == 2) {
       scriptCode = codes[1].length >= 4 ? codes[1] : null;
       countryCode = codes[1].length < 4 ? codes[1] : null;
@@ -130,7 +130,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
 
 // See also //master/tools/gen_locale.dart in the engine repo.
 Map<String, List<String>> _parseSection(String section) {
-  final Map<String, List<String>> result = <String, List<String>>{};
+  final result = <String, List<String>>{};
   late List<String> lastHeading;
   for (final String line in section.split('\n')) {
     if (line == '') {
@@ -152,23 +152,22 @@ Map<String, List<String>> _parseSection(String section) {
   return result;
 }
 
-final Map<String, String> _languages = <String, String>{};
-final Map<String, String> _regions = <String, String>{};
-final Map<String, String> _scripts = <String, String>{};
-const String kProvincePrefix = ', Province of ';
-const String kParentheticalPrefix = ' (';
+final _languages = <String, String>{};
+final _regions = <String, String>{};
+final _scripts = <String, String>{};
+const kProvincePrefix = ', Province of ';
+const kParentheticalPrefix = ' (';
 
 /// Prepares the data for the [describeLocale] method below.
 ///
 /// The data is obtained from the official IANA registry.
 void precacheLanguageAndRegionTags() {
-  final List<Map<String, List<String>>> sections =
-      languageSubtagRegistry
-          .split('%%')
-          .skip(1)
-          .map<Map<String, List<String>>>(_parseSection)
-          .toList();
-  for (final Map<String, List<String>> section in sections) {
+  final List<Map<String, List<String>>> sections = languageSubtagRegistry
+      .split('%%')
+      .skip(1)
+      .map<Map<String, List<String>>>(_parseSection)
+      .toList();
+  for (final section in sections) {
     assert(section.containsKey('Type'), section.toString());
     final String type = section['Type']!.single;
     if (type == 'language' || type == 'region' || type == 'script') {
@@ -214,7 +213,7 @@ String describeLocale(String tag) {
     );
   }
   final String language = _languages[languageCode]!;
-  String output = language;
+  var output = language;
   String? region;
   String? script;
   if (subtags.length == 2) {
@@ -258,7 +257,7 @@ String describeLocale(String tag) {
 /// foo$bar = 'foo\$bar'
 /// ```
 String generateString(String value) {
-  const String backslash = '__BACKSLASH__';
+  const backslash = '__BACKSLASH__';
   assert(
     !value.contains(backslash),
     'Input string cannot contain the sequence: '
@@ -314,7 +313,7 @@ String generateReturnExpr(List<String> expressions, {bool isSingleStringVar = fa
       if (expression[0] != r'$') {
         return expression + string;
       }
-      final RegExp alphanumeric = RegExp(r'^([0-9a-zA-Z]|_)+$');
+      final alphanumeric = RegExp(r'^([0-9a-zA-Z]|_)+$');
       if (alphanumeric.hasMatch(expression.substring(1)) &&
           !(string.isNotEmpty && alphanumeric.hasMatch(string[0]))) {
         return '$expression$string';
@@ -340,7 +339,6 @@ class LocalizationOptions {
     this.headerFile,
     bool? useDeferredLoading,
     this.genInputsAndOutputsList,
-    bool? syntheticPackage,
     this.projectDir,
     bool? requiredResourceAttributes,
     bool? nullableGetter,
@@ -353,7 +351,6 @@ class LocalizationOptions {
        outputLocalizationFile = outputLocalizationFile ?? 'app_localizations.dart',
        outputClass = outputClass ?? 'AppLocalizations',
        useDeferredLoading = useDeferredLoading ?? false,
-       syntheticPackage = syntheticPackage ?? !featureFlags.isExplicitPackageDependenciesEnabled,
        requiredResourceAttributes = requiredResourceAttributes ?? false,
        nullableGetter = nullableGetter ?? true,
        format = format ?? true,
@@ -374,7 +371,7 @@ class LocalizationOptions {
 
   /// The `--template-arb-file` argument.
   ///
-  /// This path is relative to [arbDirectory].
+  /// This path is relative to [arbDir].
   final String templateArbFile;
 
   /// The `--output-localization-file` argument.
@@ -414,12 +411,6 @@ class LocalizationOptions {
   ///
   /// This path is relative to [arbDir].
   final String? genInputsAndOutputsList;
-
-  /// The `--synthetic-package` argument.
-  ///
-  /// Whether to generate the Dart localization files in a synthetic package
-  /// or in a custom directory.
-  final bool syntheticPackage;
 
   /// The `--project-dir` argument.
   ///
@@ -479,8 +470,8 @@ class LocalizationOptions {
 LocalizationOptions parseLocalizationsOptionsFromYAML({
   required File file,
   required Logger logger,
+  required FileSystem fileSystem,
   required String defaultArbDir,
-  required bool defaultSyntheticPackage,
 }) {
   final String contents = file.readAsStringSync();
   if (contents.trim().isEmpty) {
@@ -496,19 +487,43 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
     logger.printError('Expected ${file.path} to contain a map, instead was $yamlNode');
     throw Exception();
   }
+  const kSyntheticPackage = 'synthetic-package';
+  const kFlutterGenNotice = 'http://flutter.dev/to/flutter-gen-deprecation';
+  final bool? syntheticPackage = _tryReadBool(yamlNode, kSyntheticPackage, logger);
+  if (syntheticPackage != null) {
+    if (syntheticPackage) {
+      throwToolExit(
+        '${file.path}: Cannot enable "$kSyntheticPackage", this feature has '
+        'been removed. See $kFlutterGenNotice.',
+      );
+    } else {
+      logger.printWarning(
+        '${file.path}: The argument "$kSyntheticPackage" no longer has any '
+        'effect and should be removed. See $kFlutterGenNotice',
+      );
+    }
+  }
   return LocalizationOptions(
-    arbDir: _tryReadUri(yamlNode, 'arb-dir', logger)?.path ?? defaultArbDir,
-    outputDir: _tryReadUri(yamlNode, 'output-dir', logger)?.path,
-    templateArbFile: _tryReadUri(yamlNode, 'template-arb-file', logger)?.path,
-    outputLocalizationFile: _tryReadUri(yamlNode, 'output-localization-file', logger)?.path,
-    untranslatedMessagesFile: _tryReadUri(yamlNode, 'untranslated-messages-file', logger)?.path,
+    arbDir: _tryReadFilePath(yamlNode, 'arb-dir', logger, fileSystem) ?? defaultArbDir,
+    outputDir: _tryReadFilePath(yamlNode, 'output-dir', logger, fileSystem),
+    templateArbFile: _tryReadFilePath(yamlNode, 'template-arb-file', logger, fileSystem),
+    outputLocalizationFile: _tryReadFilePath(
+      yamlNode,
+      'output-localization-file',
+      logger,
+      fileSystem,
+    ),
+    untranslatedMessagesFile: _tryReadFilePath(
+      yamlNode,
+      'untranslated-messages-file',
+      logger,
+      fileSystem,
+    ),
     outputClass: _tryReadString(yamlNode, 'output-class', logger),
     header: _tryReadString(yamlNode, 'header', logger),
-    headerFile: _tryReadUri(yamlNode, 'header-file', logger)?.path,
+    headerFile: _tryReadFilePath(yamlNode, 'header-file', logger, fileSystem),
     useDeferredLoading: _tryReadBool(yamlNode, 'use-deferred-loading', logger),
     preferredSupportedLocales: _tryReadStringList(yamlNode, 'preferred-supported-locales', logger),
-    syntheticPackage:
-        _tryReadBool(yamlNode, 'synthetic-package', logger) ?? defaultSyntheticPackage,
     requiredResourceAttributes: _tryReadBool(yamlNode, 'required-resource-attributes', logger),
     nullableGetter: _tryReadBool(yamlNode, 'nullable-getter', logger),
     format: _tryReadBool(yamlNode, 'format', logger),
@@ -524,14 +539,20 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
   required FlutterCommand command,
   required String defaultArbDir,
 }) {
-  // TODO(matanlurey): Remove as part of https://github.com/flutter/flutter/issues/102983.
-  final bool syntheticPackage;
-  if (command.argResults!.wasParsed('synthetic-package')) {
-    // If provided explicitly, use the explicit value.
-    syntheticPackage = command.boolArg('synthetic-package');
-  } else {
-    // Otherwise, inherit from whatever the reverse of flutter config --explicit-package-dependencies.
-    syntheticPackage = !featureFlags.isExplicitPackageDependenciesEnabled;
+  const kSyntheticPackage = 'synthetic-package';
+  const kFlutterGenNotice = 'http://flutter.dev/to/flutter-gen-deprecation';
+  if (command.argResults!.wasParsed(kSyntheticPackage)) {
+    if (command.boolArg(kSyntheticPackage)) {
+      throwToolExit(
+        'Cannot enable "$kSyntheticPackage", this feature has been removed. '
+        'See $kFlutterGenNotice.',
+      );
+    } else {
+      globals.logger.printWarning(
+        'The argument "$kSyntheticPackage" no longer has any effect and should '
+        'be removed. See $kFlutterGenNotice',
+      );
+    }
   }
   return LocalizationOptions(
     arbDir: command.stringArg('arb-dir') ?? defaultArbDir,
@@ -544,7 +565,6 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
     headerFile: command.stringArg('header-file'),
     useDeferredLoading: command.boolArg('use-deferred-loading'),
     genInputsAndOutputsList: command.stringArg('gen-inputs-and-outputs-list'),
-    syntheticPackage: syntheticPackage,
     projectDir: command.stringArg('project-dir'),
     requiredResourceAttributes: command.boolArg('required-resource-attributes'),
     nullableGetter: command.boolArg('nullable-getter'),
@@ -596,8 +616,8 @@ List<String>? _tryReadStringList(YamlMap yamlMap, String key, Logger logger) {
   throw Exception();
 }
 
-// Try to read a valid `Uri` or null from `yamlMap`, otherwise throw.
-Uri? _tryReadUri(YamlMap yamlMap, String key, Logger logger) {
+// Try to read a valid file `Uri` or null from `yamlMap` to file path, otherwise throw.
+String? _tryReadFilePath(YamlMap yamlMap, String key, Logger logger, FileSystem fileSystem) {
   final String? value = _tryReadString(yamlMap, key, logger);
   if (value == null) {
     return null;
@@ -606,5 +626,5 @@ Uri? _tryReadUri(YamlMap yamlMap, String key, Logger logger) {
   if (uri == null) {
     logger.printError('"$value" must be a relative file URI');
   }
-  return uri;
+  return uri != null ? fileSystem.path.normalize(uri.path) : null;
 }

@@ -7,6 +7,7 @@ library;
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -343,8 +344,9 @@ class _BottomSheetState extends State<BottomSheet> {
   Widget build(BuildContext context) {
     final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
     final bool useMaterial3 = Theme.of(context).useMaterial3;
-    final BottomSheetThemeData defaults =
-        useMaterial3 ? _BottomSheetDefaultsM3(context) : const BottomSheetThemeData();
+    final BottomSheetThemeData defaults = useMaterial3
+        ? _BottomSheetDefaultsM3(context)
+        : const BottomSheetThemeData();
     final BoxConstraints? constraints =
         widget.constraints ?? bottomSheetTheme.constraints ?? defaults.constraints;
     final Color? color =
@@ -391,19 +393,18 @@ class _BottomSheetState extends State<BottomSheet> {
       clipBehavior: clipBehavior,
       child: NotificationListener<DraggableScrollableNotification>(
         onNotification: extentChanged,
-        child:
-            !showDragHandle
-                ? widget.builder(context)
-                : Stack(
-                  alignment: Alignment.topCenter,
-                  children: <Widget>[
-                    dragHandle!,
-                    Padding(
-                      padding: const EdgeInsets.only(top: kMinInteractiveDimension),
-                      child: widget.builder(context),
-                    ),
-                  ],
-                ),
+        child: !showDragHandle
+            ? widget.builder(context)
+            : Stack(
+                alignment: Alignment.topCenter,
+                children: <Widget>[
+                  dragHandle!,
+                  Padding(
+                    padding: const EdgeInsets.only(top: kMinInteractiveDimension),
+                    child: widget.builder(context),
+                  ),
+                ],
+              ),
       ),
     );
 
@@ -418,11 +419,11 @@ class _BottomSheetState extends State<BottomSheet> {
     return !widget.enableDrag
         ? bottomSheet
         : _BottomSheetGestureDetector(
-          onVerticalDragStart: _handleDragStart,
-          onVerticalDragUpdate: _handleDragUpdate,
-          onVerticalDragEnd: _handleDragEnd,
-          child: bottomSheet,
-        );
+            onVerticalDragStart: _handleDragStart,
+            onVerticalDragUpdate: _handleDragUpdate,
+            onVerticalDragEnd: _handleDragEnd,
+            child: bottomSheet,
+          );
   }
 }
 
@@ -606,8 +607,9 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
     if (result == null) {
       return null;
     }
-    final Size childSize =
-        childConstraints.isTight ? childConstraints.smallest : child.getDryLayout(childConstraints);
+    final Size childSize = childConstraints.isTight
+        ? childConstraints.smallest
+        : child.getDryLayout(childConstraints);
     return result + _getPositionForChild(constraints.biggest, childSize).dy;
   }
 
@@ -615,10 +617,9 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
     return BoxConstraints(
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
-      maxHeight:
-          isScrollControlled
-              ? constraints.maxHeight
-              : constraints.maxHeight * scrollControlDisabledMaxHeightRatio,
+      maxHeight: isScrollControlled
+          ? constraints.maxHeight
+          : constraints.maxHeight * scrollControlDisabledMaxHeightRatio,
     );
   }
 
@@ -682,7 +683,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   ParametricCurve<double> animationCurve = _modalBottomSheetCurve;
 
   String _getRouteLabel(MaterialLocalizations localizations) {
-    switch (Theme.of(context).platform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         return '';
@@ -1089,10 +1090,9 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
       child: Builder(
         builder: (BuildContext context) {
           final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
-          final BottomSheetThemeData defaults =
-              Theme.of(context).useMaterial3
-                  ? _BottomSheetDefaultsM3(context)
-                  : const BottomSheetThemeData();
+          final BottomSheetThemeData defaults = Theme.of(context).useMaterial3
+              ? _BottomSheetDefaultsM3(context)
+              : const BottomSheetThemeData();
           return _ModalBottomSheet<T>(
             route: this,
             backgroundColor:
@@ -1117,10 +1117,9 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
       ),
     );
 
-    final Widget bottomSheet =
-        useSafeArea
-            ? SafeArea(bottom: false, child: content)
-            : MediaQuery.removePadding(context: context, removeTop: true, child: content);
+    final Widget bottomSheet = useSafeArea
+        ? SafeArea(bottom: false, child: content)
+        : MediaQuery.removePadding(context: context, removeTop: true, child: content);
 
     return capturedThemes?.wrap(bottomSheet) ?? bottomSheet;
   }

@@ -18,7 +18,7 @@
 
 namespace impeller {
 
-using PipelineKey = uint64_t;
+using PipelineKey = int64_t;
 
 class PipelineLibrary;
 template <typename PipelineDescriptor_>
@@ -66,14 +66,14 @@ class Pipeline {
 
   PipelineFuture<T> CreateVariant(
       bool async,
-      std::function<void(T& desc)> descriptor_callback) const;
+      const std::function<void(T& desc)>& descriptor_callback) const;
 
  protected:
   const std::weak_ptr<PipelineLibrary> library_;
 
   const T desc_;
 
-  Pipeline(std::weak_ptr<PipelineLibrary> library, T desc);
+  Pipeline(std::weak_ptr<PipelineLibrary> library, const T& desc);
 
  private:
   Pipeline(const Pipeline&) = delete;
@@ -173,7 +173,7 @@ class RenderPipelineHandle : public GenericRenderPipelineHandle {
   explicit RenderPipelineHandle(const Context& context,
                                 std::optional<PipelineDescriptor> desc,
                                 bool async = true)
-      : GenericRenderPipelineHandle(context, desc, async) {}
+      : GenericRenderPipelineHandle(context, std::move(desc), async) {}
 
   explicit RenderPipelineHandle(PipelineFuture<PipelineDescriptor> future)
       : GenericRenderPipelineHandle(std::move(future)) {}

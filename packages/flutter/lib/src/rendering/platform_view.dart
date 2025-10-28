@@ -344,6 +344,13 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
 
   // This is registered as a global PointerRoute while the render object is attached.
   void _handleGlobalPointerEvent(PointerEvent event) {
+    // Don't receive pointer events if not laid out. For example, a RenderBox
+    // that is offscreen could be attached but not laid out, and in that case it
+    // should not be interactive with a pointer.
+    // See https://github.com/flutter/flutter/issues/83481.
+    if (!hasSize) {
+      return;
+    }
     if (event is! PointerDownEvent) {
       return;
     }
@@ -475,22 +482,23 @@ class RenderAppKitView extends RenderDarwinPlatformView<AppKitViewController> {
 class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   _UiKitViewGestureRecognizer(this.controller, this.gestureRecognizerFactories) {
     team = GestureArenaTeam()..captain = this;
-    _gestureRecognizers =
-        gestureRecognizerFactories.map((Factory<OneSequenceGestureRecognizer> recognizerFactory) {
-          final OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
-          gestureRecognizer.team = team;
-          // The below gesture recognizers requires at least one non-empty callback to
-          // compete in the gesture arena.
-          // https://github.com/flutter/flutter/issues/35394#issuecomment-562285087
-          if (gestureRecognizer is LongPressGestureRecognizer) {
-            gestureRecognizer.onLongPress ??= () {};
-          } else if (gestureRecognizer is DragGestureRecognizer) {
-            gestureRecognizer.onDown ??= (_) {};
-          } else if (gestureRecognizer is TapGestureRecognizer) {
-            gestureRecognizer.onTapDown ??= (_) {};
-          }
-          return gestureRecognizer;
-        }).toSet();
+    _gestureRecognizers = gestureRecognizerFactories.map((
+      Factory<OneSequenceGestureRecognizer> recognizerFactory,
+    ) {
+      final OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
+      gestureRecognizer.team = team;
+      // The below gesture recognizers requires at least one non-empty callback to
+      // compete in the gesture arena.
+      // https://github.com/flutter/flutter/issues/35394#issuecomment-562285087
+      if (gestureRecognizer is LongPressGestureRecognizer) {
+        gestureRecognizer.onLongPress ??= () {};
+      } else if (gestureRecognizer is DragGestureRecognizer) {
+        gestureRecognizer.onDown ??= (_) {};
+      } else if (gestureRecognizer is TapGestureRecognizer) {
+        gestureRecognizer.onTapDown ??= (_) {};
+      }
+      return gestureRecognizer;
+    }).toSet();
   }
 
   // We use OneSequenceGestureRecognizers as they support gesture arena teams.
@@ -549,22 +557,23 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
     this.gestureRecognizerFactories,
   ) {
     team = GestureArenaTeam()..captain = this;
-    _gestureRecognizers =
-        gestureRecognizerFactories.map((Factory<OneSequenceGestureRecognizer> recognizerFactory) {
-          final OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
-          gestureRecognizer.team = team;
-          // The below gesture recognizers requires at least one non-empty callback to
-          // compete in the gesture arena.
-          // https://github.com/flutter/flutter/issues/35394#issuecomment-562285087
-          if (gestureRecognizer is LongPressGestureRecognizer) {
-            gestureRecognizer.onLongPress ??= () {};
-          } else if (gestureRecognizer is DragGestureRecognizer) {
-            gestureRecognizer.onDown ??= (_) {};
-          } else if (gestureRecognizer is TapGestureRecognizer) {
-            gestureRecognizer.onTapDown ??= (_) {};
-          }
-          return gestureRecognizer;
-        }).toSet();
+    _gestureRecognizers = gestureRecognizerFactories.map((
+      Factory<OneSequenceGestureRecognizer> recognizerFactory,
+    ) {
+      final OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
+      gestureRecognizer.team = team;
+      // The below gesture recognizers requires at least one non-empty callback to
+      // compete in the gesture arena.
+      // https://github.com/flutter/flutter/issues/35394#issuecomment-562285087
+      if (gestureRecognizer is LongPressGestureRecognizer) {
+        gestureRecognizer.onLongPress ??= () {};
+      } else if (gestureRecognizer is DragGestureRecognizer) {
+        gestureRecognizer.onDown ??= (_) {};
+      } else if (gestureRecognizer is TapGestureRecognizer) {
+        gestureRecognizer.onTapDown ??= (_) {};
+      }
+      return gestureRecognizer;
+    }).toSet();
     _handlePointerEvent = handlePointerEvent;
   }
 
@@ -793,7 +802,7 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   PointerExitEventListener? get onExit => null;
 
   @override
-  MouseCursor get cursor => MouseCursor.uncontrolled;
+  MouseCursor get cursor => kIsWeb ? MouseCursor.defer : MouseCursor.uncontrolled;
 
   @override
   bool get validForMouseTracker => true;

@@ -78,7 +78,7 @@ class RemoveMacOSFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
     }
 
     // Embed frameworks in a script instead of using Xcode's link / embed build phases.
-    const String thinBinaryScript = r'/Flutter/ephemeral/.app_filename';
+    const thinBinaryScript = r'/Flutter/ephemeral/.app_filename';
     if (line.contains(thinBinaryScript) && !line.contains(' embed')) {
       return line.replaceFirst(
         thinBinaryScript,
