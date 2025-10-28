@@ -94,6 +94,7 @@ class CupertinoPicker extends StatefulWidget {
     required this.onSelectedItemChanged,
     required List<Widget> children,
     this.selectionOverlay = const CupertinoPickerDefaultSelectionOverlay(),
+    this.hapticFeedbackEnabled = true,
     bool looping = false,
   }) : assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(magnification > 0),
@@ -135,6 +136,7 @@ class CupertinoPicker extends StatefulWidget {
     required NullableIndexedWidgetBuilder itemBuilder,
     int? childCount,
     this.selectionOverlay = const CupertinoPickerDefaultSelectionOverlay(),
+    this.hapticFeedbackEnabled = true,
   }) : assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(magnification > 0),
        assert(itemExtent > 0),
@@ -218,6 +220,12 @@ class CupertinoPicker extends StatefulWidget {
   /// This property can be set to null to remove the overlay.
   final Widget? selectionOverlay;
 
+  /// Whether haptic feedback is enabled for the picker.
+  ///
+  /// Haptic feedback is provided when the selected item changes while scrolling.
+  /// Feedback is only provided on iOS devices.
+  final bool hapticFeedbackEnabled;
+
   @override
   State<StatefulWidget> createState() => _CupertinoPickerState();
 }
@@ -266,7 +274,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   }
 
   void _handleHapticFeedback(int index) {
-    if (!_enableHapticFeedback) {
+    if (!_enableHapticFeedback || !widget.hapticFeedbackEnabled) {
       return;
     }
     switch (defaultTargetPlatform) {
