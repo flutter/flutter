@@ -70,6 +70,7 @@ void SemanticsUpdateBuilder::updateNode(
     int role,
     const std::vector<std::string>& controlsNodes,
     int validationResult,
+    int hitTestBehavior,
     int inputType,
     std::string locale) {
   FML_CHECK(scrollChildren == 0 ||

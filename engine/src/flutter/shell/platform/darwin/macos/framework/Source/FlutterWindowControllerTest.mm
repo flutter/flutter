@@ -57,9 +57,10 @@ class FlutterWindowControllerRetainTest : public ::testing::Test {};
 
 TEST_F(FlutterWindowControllerTest, CreateRegularWindow) {
   FlutterWindowCreationRequest request{
-      .contentSize = {.has_size = true, .width = 800, .height = 600},
+      .has_size = true,
+      .size = {.width = 800, .height = 600},
       .on_close = [] {},
-      .on_size_change = [] {},
+      .notify_listeners = [] {},
   };
 
   FlutterEngine* engine = GetFlutterEngine();
@@ -80,9 +81,10 @@ TEST_F(FlutterWindowControllerTest, CreateRegularWindow) {
 
 TEST_F(FlutterWindowControllerRetainTest, WindowControllerDoesNotRetainEngine) {
   FlutterWindowCreationRequest request{
-      .contentSize = {.has_size = true, .width = 800, .height = 600},
+      .has_size = true,
+      .size = {.width = 800, .height = 600},
       .on_close = [] {},
-      .on_size_change = [] {},
+      .notify_listeners = [] {},
   };
 
   __weak FlutterEngine* weakEngine = nil;
@@ -121,9 +123,10 @@ TEST_F(FlutterWindowControllerRetainTest, WindowControllerDoesNotRetainEngine) {
 
 TEST_F(FlutterWindowControllerTest, DestroyRegularWindow) {
   FlutterWindowCreationRequest request{
-      .contentSize = {.has_size = true, .width = 800, .height = 600},
+      .has_size = true,
+      .size = {.width = 800, .height = 600},
       .on_close = [] {},
-      .on_size_change = [] {},
+      .notify_listeners = [] {},
   };
 
   FlutterEngine* engine = GetFlutterEngine();
@@ -140,9 +143,10 @@ TEST_F(FlutterWindowControllerTest, DestroyRegularWindow) {
 
 TEST_F(FlutterWindowControllerTest, InternalFlutter_Window_GetHandle) {
   FlutterWindowCreationRequest request{
-      .contentSize = {.has_size = true, .width = 800, .height = 600},
+      .has_size = true,
+      .size = {.width = 800, .height = 600},
       .on_close = [] {},
-      .on_size_change = [] {},
+      .notify_listeners = [] {},
   };
 
   FlutterEngine* engine = GetFlutterEngine();
@@ -158,9 +162,10 @@ TEST_F(FlutterWindowControllerTest, InternalFlutter_Window_GetHandle) {
 
 TEST_F(FlutterWindowControllerTest, WindowStates) {
   FlutterWindowCreationRequest request{
-      .contentSize = {.has_size = true, .width = 800, .height = 600},
+      .has_size = true,
+      .size = {.width = 800, .height = 600},
       .on_close = [] {},
-      .on_size_change = [] {},
+      .notify_listeners = [] {},
   };
 
   FlutterEngine* engine = GetFlutterEngine();

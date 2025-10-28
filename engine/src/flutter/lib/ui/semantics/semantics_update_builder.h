@@ -69,6 +69,7 @@ class SemanticsUpdateBuilder
       int role,
       const std::vector<std::string>& controlsNodes,
       int validationResult,
+      int hitTestBehavior,
       int inputType,
       std::string locale);
 

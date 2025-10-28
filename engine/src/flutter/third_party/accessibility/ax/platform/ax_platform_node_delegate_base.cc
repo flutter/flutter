@@ -12,6 +12,7 @@
 #include "ax/ax_role_properties.h"
 #include "ax/ax_tree_data.h"
 #include "base/no_destructor.h"
+#include "base/string_utils.h"
 
 #include "ax_platform_node.h"
 #include "ax_platform_node_base.h"
@@ -629,7 +630,7 @@ std::set<AXPlatformNode*> AXPlatformNodeDelegateBase::GetReverseRelations(
 }
 
 std::u16string AXPlatformNodeDelegateBase::GetAuthorUniqueId() const {
-  return std::u16string();
+  return base::UTF8ToUTF16(GetData().GetStringAttribute(ax::mojom::StringAttribute::kIdentifier));
 }
 
 const AXUniqueId& AXPlatformNodeDelegateBase::GetUniqueId() const {
