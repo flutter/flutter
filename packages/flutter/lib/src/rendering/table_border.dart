@@ -268,6 +268,9 @@ class TableBorder {
   /// single value, 100.0, which is the vertical position between the two
   /// columns (relative to the left edge of `rect`).
   ///
+  /// The [rowHeights] list contains the absolute height of each row and is used
+  /// to compute vertical border positions more efficiently during painting.
+  ///
   /// The [spannedColumnsPerRow] list defines, for each row, which column
   /// dividers should be skipped when painting (e.g., for cells that span
   /// multiple columns).
@@ -290,110 +293,150 @@ class TableBorder {
     Rect rect, {
     required Iterable<double> rows,
     required Iterable<double> columns,
+    required Float64List rowHeights,
     List<Set<int>> spannedColumnsPerRow = const <Set<int>>[],
     List<Set<int>> spannedRowsPerColumn = const <Set<int>>[],
   }) {
-    // properties can't be null
-
-    // arguments can't be null
+    // Validate row and column offsets are within the table's bounds.
     assert(rows.isEmpty || (rows.first >= 0.0 && rows.last <= rect.height));
     assert(columns.isEmpty || (columns.first >= 0.0 && columns.last <= rect.width));
+
+    // If no cells span multiple rows or columns, we can draw dividers directly.
+    final bool hasNoSpannedCells = spannedColumnsPerRow.isEmpty && spannedRowsPerColumn.isEmpty;
 
     final Paint paint = Paint();
     final Path path = Path();
 
-    // Convert to lists once for better performance
-    final List<double> rowList = rows.toList();
-    final List<double> columnList = columns.toList();
+    if (hasNoSpannedCells) {
+      // Fast path: all cells are regular, draw all dividers directly.
 
-    // Calculate row heights
-    final Float64List rowHeights = Float64List(rowList.length + 1);
-    if (rowList.isNotEmpty) {
-      rowHeights[0] = rowList.first; // Height of first row
-      for (int i = 1; i < rowList.length; i++) {
-        rowHeights[i] = rowList[i] - rowList[i - 1];
-      }
-      rowHeights[rowList.length] = rect.height - rowList.last; // Height of last row
-    }
+      // Draw all vertical dividers between columns.
+      if (columns.isNotEmpty) {
+        switch (verticalInside.style) {
+          case BorderStyle.solid:
+            paint
+              ..color = verticalInside.color
+              ..strokeWidth = verticalInside.width
+              ..style = PaintingStyle.stroke;
+            path.reset();
 
-    // Vertical inner borders (column dividers)
-    if (columnList.isNotEmpty) {
-      switch (verticalInside.style) {
-        case BorderStyle.solid:
-          paint
-            ..color = verticalInside.color
-            ..strokeWidth = verticalInside.width
-            ..style = PaintingStyle.stroke;
-
-          double yOffset = rect.top;
-
-          for (int y = 0; y < rowHeights.length; y++) {
-            final double nextY = yOffset + rowHeights[y];
-            final Set<int> hidden = y < spannedColumnsPerRow.length
-                ? spannedColumnsPerRow[y]
-                : const <int>{};
-
-            for (int x = 0; x < columnList.length; x++) {
-              if (hidden.contains(x + 1)) {
-                continue;
-              }
-              final double xPos = rect.left + columnList[x];
-              path
-                ..moveTo(xPos, yOffset)
-                ..lineTo(xPos, nextY);
+            for (final double x in columns) {
+              path.moveTo(rect.left + x, rect.top);
+              path.lineTo(rect.left + x, rect.bottom);
             }
-
-            yOffset = nextY;
-          }
-
-          canvas.drawPath(path, paint);
-          path.reset(); // Clear path for reuse
-        case BorderStyle.none:
-          break;
+            canvas.drawPath(path, paint);
+          case BorderStyle.none:
+            break;
+        }
       }
-    }
 
-    // Horizontal inner borders (row dividers)
-    if (rowList.isNotEmpty) {
-      switch (horizontalInside.style) {
-        case BorderStyle.solid:
-          paint
-            ..color = horizontalInside.color
-            ..strokeWidth = horizontalInside.width
-            ..style = PaintingStyle.stroke;
+      // Draw all horizontal dividers between rows.
+      if (rows.isNotEmpty) {
+        switch (horizontalInside.style) {
+          case BorderStyle.solid:
+            paint
+              ..color = horizontalInside.color
+              ..strokeWidth = horizontalInside.width
+              ..style = PaintingStyle.stroke;
+            path.reset();
+            for (final double y in rows) {
+              path.moveTo(rect.left, rect.top + y);
+              path.lineTo(rect.right, rect.top + y);
+            }
+            canvas.drawPath(path, paint);
+          case BorderStyle.none:
+            break;
+        }
+      }
+    } else {
+      // Slow path: handle merged (spanned) cells that hide some borders.
 
-          final List<double> columnOffsets = <double>[rect.left];
-          for (final double x in columnList) {
-            columnOffsets.add(rect.left + x);
-          }
-          columnOffsets.add(rect.right);
+      // Convert to lists once for faster indexed access.
+      final List<double> rowList = rows.toList();
+      final List<double> columnList = columns.toList();
 
-          for (int y = 0; y < rowList.length; y++) {
-            final double yPos = rect.top + rowList[y];
+      // Draw vertical dividers between columns, skipping spanned regions.
+      if (columnList.isNotEmpty) {
+        switch (verticalInside.style) {
+          case BorderStyle.solid:
+            paint
+              ..color = verticalInside.color
+              ..strokeWidth = verticalInside.width
+              ..style = PaintingStyle.stroke;
 
-            for (int x = 0; x < columnOffsets.length - 1; x++) {
-              final Set<int> hiddenRows = x < spannedRowsPerColumn.length
-                  ? spannedRowsPerColumn[x]
+            double yOffset = rect.top;
+
+            for (int y = 0; y < rowHeights.length; y++) {
+              final double nextY = yOffset + rowHeights[y];
+              final Set<int> hiddenCols = y < spannedColumnsPerRow.length
+                  ? spannedColumnsPerRow[y]
                   : const <int>{};
 
-              if (hiddenRows.contains(y + 1)) {
-                continue;
+              for (int x = 0; x < columnList.length; x++) {
+                if (hiddenCols.contains(x + 1)) {
+                  continue;
+                }
+                final double xPos = rect.left + columnList[x];
+                path
+                  ..moveTo(xPos, yOffset)
+                  ..lineTo(xPos, nextY);
               }
-              final double xStart = columnOffsets[x];
-              final double xEnd = columnOffsets[x + 1];
-              path
-                ..moveTo(xStart, yPos)
-                ..lineTo(xEnd, yPos);
-            }
-          }
 
-          canvas.drawPath(path, paint);
-        case BorderStyle.none:
-          break;
+              yOffset = nextY;
+            }
+
+            canvas.drawPath(path, paint);
+            path.reset(); // Reuse for horizontal dividers.
+          case BorderStyle.none:
+            break;
+        }
+      }
+
+      // Draw horizontal dividers between rows, skipping spanned regions.
+      if (rowList.isNotEmpty) {
+        switch (horizontalInside.style) {
+          case BorderStyle.solid:
+            paint
+              ..color = horizontalInside.color
+              ..strokeWidth = horizontalInside.width
+              ..style = PaintingStyle.stroke;
+
+            // Compute absolute column offsets including the left and right edges.
+            final int columnCount = columnList.length;
+            final Float64List columnOffsets = Float64List(columnCount + 2);
+            columnOffsets[0] = rect.left;
+            for (int i = 0; i < columnCount; i++) {
+              columnOffsets[i + 1] = rect.left + columnList[i];
+            }
+            columnOffsets[columnCount + 1] = rect.right;
+
+            for (int y = 0; y < rowList.length; y++) {
+              final double yPos = rect.top + rowList[y];
+
+              for (int x = 0; x < columnOffsets.length - 1; x++) {
+                final Set<int> hiddenRows = x < spannedRowsPerColumn.length
+                    ? spannedRowsPerColumn[x]
+                    : const <int>{};
+
+                if (hiddenRows.contains(y + 1)) {
+                  continue;
+                }
+                final double xStart = columnOffsets[x];
+                final double xEnd = columnOffsets[x + 1];
+                path
+                  ..moveTo(xStart, yPos)
+                  ..lineTo(xEnd, yPos);
+              }
+            }
+
+            canvas.drawPath(path, paint);
+          case BorderStyle.none:
+            break;
+        }
       }
     }
 
-    // Outer border
+    // Paint the outer border of the table.
     _paintTableBorder(canvas, rect);
   }
 

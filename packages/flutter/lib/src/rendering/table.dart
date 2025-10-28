@@ -1232,9 +1232,10 @@ class RenderTable extends RenderBox {
   Iterable<double>? _columnLefts;
   late double _tableWidth;
 
-  // Cache span information to avoid recomputation during paint
+  // Cached layout data used during painting to avoid recomputation.
   List<Set<int>> _cachedSpannedColumnsPerRow = const <Set<int>>[];
   List<Set<int>> _cachedSpannedRowsPerColumn = const <Set<int>>[];
+  Float64List _cachedRowHeights = Float64List(0);
 
   /// Invalidates the cached span information when the table structure changes.
   void _invalidateSpanCache() {
@@ -1327,6 +1328,21 @@ class RenderTable extends RenderBox {
       // For LTR, use the logical span information directly
       _cachedSpannedColumnsPerRow = logicalSpannedColumnsPerRow;
       _cachedSpannedRowsPerColumn = logicalSpannedRowsPerColumn;
+    }
+  }
+
+  /// Updates the cached row heights derived from the current `_rowTops`.
+  ///
+  /// These cached values are used during painting to determine the visual
+  /// height of each row without recomputing differences at draw time.
+  void _updateCachedRowHeights() {
+    if (_rowTops.length > 1) {
+      _cachedRowHeights = Float64List(_rowTops.length - 1);
+      for (int i = 0; i < _cachedRowHeights.length; i++) {
+        _cachedRowHeights[i] = _rowTops[i + 1] - _rowTops[i];
+      }
+    } else {
+      _cachedRowHeights = Float64List(0);
     }
   }
 
@@ -1468,18 +1484,19 @@ class RenderTable extends RenderBox {
       (_) => <int>{},
       growable: false,
     );
-    // Pre-create common constraint objects to reduce allocations
+    // Predefine a zero-size constraint to avoid repeated allocations.
     const BoxConstraints zeroConstraints = BoxConstraints.tightFor(width: 0, height: 0);
-    // Use typed data for better performance and memory efficiency
+    // Use typed lists for predictable memory layout and faster indexed access.
     final Float64List positions = Float64List(columns);
     final Float64List pendingRowSpanHeights = Float64List(rows);
     final Float64List rowHeights = Float64List(rows);
     final Float64List beforeBaselineDistances = Float64List(rows);
-    // Use flat arrays instead of 2D lists for better cache locality
+    // Use flat arrays instead of nested lists for better cache locality.
     final Float64List spanWidths = Float64List(rows * columns); // [row][col] = row * columns + col
     final Float64List baselines = Float64List(rows * columns); // [row][col] = row * columns + col
 
     final bool isTextDirectionRtl = textDirection == TextDirection.rtl;
+    bool hasCellSpans = false;
 
     switch (textDirection) {
       case TextDirection.rtl:
@@ -1500,7 +1517,7 @@ class RenderTable extends RenderBox {
     _rowTops.clear();
     _baselineDistance = null;
 
-    // Combined loop: compute span information AND perform first layout pass
+    // First layout pass: measure children and collect span information.
     double rowTop = 0.0;
     for (int y = 0; y < rows; y += 1) {
       double rowHeight = 0.0;
@@ -1522,15 +1539,16 @@ class RenderTable extends RenderBox {
         final int colSpan = childParentData.colSpan;
         final int rowSpan = childParentData.rowSpan;
 
-        // Compute span width once and cache it
+        // Compute the total width covered by this cell's column span.
         double spanWidth = 0.0;
         for (int i = 0; i < colSpan && (x + i) < columns; i++) {
           spanWidth += widths[x + i];
         }
         spanWidths[y * columns + x] = spanWidth;
 
-        // Mark hidden cells for spanning
+        // Mark hidden cells that are covered by a spanning cell.
         if (colSpan > 1 || rowSpan > 1) {
+          hasCellSpans = true;
           for (int dx = 0; dx < colSpan && x + dx < columns; dx++) {
             for (int dy = 0; dy < rowSpan && y + dy < rows; dy++) {
               if (dx == 0 && dy == 0) {
@@ -1543,7 +1561,7 @@ class RenderTable extends RenderBox {
 
         final bool isHiddenCell = currentRowHiddenCells.contains(x);
 
-        // Perform layout for this cell
+        // Layout the child according to its vertical alignment.
         switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
           case TableCellVerticalAlignment.baseline:
             assert(
@@ -1568,10 +1586,9 @@ class RenderTable extends RenderBox {
             } else {
               if (!isHiddenCell) {
                 rowHeight = math.max(rowHeight, child.size.height);
-                // Calculate the correct x position for colspan cells, especially for RTL
+                // Compute the visual x-position, adjusting for RTL and colspan.
                 double cellX = positions[x];
                 if (isTextDirectionRtl && colSpan > 1) {
-                  // For RTL with colspan, we need to adjust the position to account for the span
                   cellX = positions[x + colSpan - 1];
                 }
                 childParentData.offset = Offset(cellX, rowTop);
@@ -1605,13 +1622,12 @@ class RenderTable extends RenderBox {
 
       final double pendingHeightForThisRow = pendingRowSpanHeights[y];
       rowHeight = math.max(rowHeight, pendingHeightForThisRow);
-      pendingRowSpanHeights[y] = 0.0; // Reset current row
+      pendingRowSpanHeights[y] = 0.0; // Reset after use.
 
-      // Update pending heights more efficiently - subtract rowHeight from future rows
+      // Adjust pending heights for future rows by subtracting the current height.
       for (int futureY = y + 1; futureY < rows; futureY++) {
         if (pendingRowSpanHeights[futureY] > 0) {
           pendingRowSpanHeights[futureY] -= rowHeight;
-          // Ensure it doesn't go negative
           if (pendingRowSpanHeights[futureY] < 0) {
             pendingRowSpanHeights[futureY] = 0.0;
           }
@@ -1628,7 +1644,7 @@ class RenderTable extends RenderBox {
       beforeBaselineDistances[y] = beforeBaselineDistance;
     }
 
-    // Second layout pass: position children with final row heights
+    // Second layout pass: position children using final row heights.
     rowTop = 0.0;
     for (int y = 0; y < rows; y += 1) {
       _rowTops.add(rowTop);
@@ -1651,7 +1667,7 @@ class RenderTable extends RenderBox {
           child.layout(zeroConstraints);
           childParentData.offset = Offset.zero;
         } else {
-          // Calculate total height for rowSpan cells
+          // Compute the total height covered by this cell's row span.
           double spanHeight = rowHeight;
           if (rowSpan > 1) {
             spanHeight = 0.0;
@@ -1660,14 +1676,14 @@ class RenderTable extends RenderBox {
             }
           }
 
-          // Calculate the correct x position for colspan cells, especially for RTL
+          // Compute the visual x-position, adjusting for RTL and colspan.
           final int colSpan = childParentData.colSpan;
           double cellX = positions[x];
           if (isTextDirectionRtl && colSpan > 1) {
-            // For RTL with colspan, we need to adjust the position to account for the span
             cellX = positions[x + colSpan - 1];
           }
 
+          // Set the child's final offset based on vertical alignment.
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
             case TableCellVerticalAlignment.baseline:
               childParentData.offset = Offset(
@@ -1699,8 +1715,12 @@ class RenderTable extends RenderBox {
     size = constraints.constrain(Size(_tableWidth, rowTop));
     assert(_rowTops.length == rows + 1);
 
-    // Compute span information once during layout for use in paint
-    _computeSpanInformation();
+    if (hasCellSpans) {
+      // Cache row heights derived from the final row geometry.
+      _updateCachedRowHeights();
+      // Cache span metadata for use during painting.
+      _computeSpanInformation();
+    }
   }
 
   @override
@@ -1737,6 +1757,7 @@ class RenderTable extends RenderBox {
           borderRect,
           rows: const <double>[],
           columns: const <double>[],
+          rowHeights: Float64List(0),
         );
       }
       return;
@@ -1783,6 +1804,7 @@ class RenderTable extends RenderBox {
         columns: columns,
         spannedColumnsPerRow: _cachedSpannedColumnsPerRow,
         spannedRowsPerColumn: _cachedSpannedRowsPerColumn,
+        rowHeights: _cachedRowHeights,
       );
     }
   }
