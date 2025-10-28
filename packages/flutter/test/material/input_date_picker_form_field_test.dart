@@ -522,6 +522,28 @@ void main() {
     );
     expect(tester.getSize(find.byType(InputDatePickerFormField)), Size.zero);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/177088.
+  testWidgets('Local InputDecorationTheme is honored', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: InputDecorationTheme(
+              data: const InputDecorationThemeData(filled: true),
+              child: InputDatePickerFormField(
+                firstDate: DateTime(2025, DateTime.february),
+                lastDate: DateTime(2026, DateTime.may),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final InputDecoration decoration = tester.widget<TextField>(find.byType(TextField)).decoration!;
+    expect(decoration.filled, isTrue);
+  });
 }
 
 class TestCalendarDelegate extends GregorianCalendarDelegate {
