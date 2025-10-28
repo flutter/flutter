@@ -93,6 +93,42 @@ void main() {
   );
 
   testWidgets(
+    'Text.rich respects MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, and MediaQueryData.wordSpacingOverride',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(
+            lineHeightScaleFactorOverride: 2.0,
+            letterSpacingOverride: 2.0,
+            wordSpacingOverride: 2.0,
+          ),
+          child: Center(
+            child: Text.rich(TextSpan(text: 'Hello'), textDirection: TextDirection.ltr),
+          ),
+        ),
+      );
+
+      RichText text = tester.firstWidget(find.byType(RichText));
+      expect(text, isNotNull);
+      expect(text.text.style?.height, 2.0);
+      expect(text.text.style?.letterSpacing, 2.0);
+      expect(text.text.style?.wordSpacing, 2.0);
+
+      await tester.pumpWidget(
+        const Center(
+          child: Text.rich(TextSpan(text: 'Hello'), textDirection: TextDirection.ltr),
+        ),
+      );
+
+      text = tester.firstWidget(find.byType(RichText));
+      expect(text, isNotNull);
+      expect(text.text.style?.height, isNull);
+      expect(text.text.style?.letterSpacing, isNull);
+      expect(text.text.style?.wordSpacing, isNull);
+    },
+  );
+
+  testWidgets(
     'RichText ignores MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, and MediaQueryData.wordSpacingOverride',
     (WidgetTester tester) async {
       await tester.pumpWidget(
