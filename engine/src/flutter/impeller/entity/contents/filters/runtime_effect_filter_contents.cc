@@ -10,6 +10,7 @@
 #include "impeller/base/validation.h"
 #include "impeller/entity/contents/anonymous_contents.h"
 #include "impeller/entity/contents/runtime_effect_contents.h"
+#include "impeller/entity/contents/texture_contents.h"
 #include "impeller/geometry/size.h"
 
 namespace impeller {
@@ -46,11 +47,40 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
   if (!input_snapshot.has_value()) {
     return std::nullopt;
   }
+
+  // If the input snapshot does not have an translation-only transform, the
+  // ImageFilter.shader will not correctly render as it does not know what the
+  // transform is in order to incorporate this into sampling. We need to
+  // re-rasterize the input snapshot so that the transform is absorbed into the
+  // texture.
+  if (!input_snapshot->transform.IsTranslationOnly()) {
+    Matrix inverse = input_snapshot->transform.Invert();
+    Quad quad = inverse.Transform(Quad{
+        coverage.GetLeftTop(),     //
+        coverage.GetRightTop(),    //
+        coverage.GetLeftBottom(),  //
+        coverage.GetRightBottom()  //
+    });
+    TextureContents texture_contents;
+    texture_contents.SetTexture(input_snapshot->texture);
+    std::optional<Rect> bounds =
+        Rect::MakePointBounds(quad.begin(), quad.end());
+    if (bounds.has_value()) {
+      texture_contents.SetSourceRect(bounds.value());
+      texture_contents.SetDestinationRect(coverage);
+      texture_contents.SetStencilEnabled(false);
+      texture_contents.SetSamplerDescriptor(input_snapshot->sampler_descriptor);
+
+      Entity entity;
+      input_snapshot = texture_contents.RenderToSnapshot(renderer, entity);
+    }
+  }
+
   std::optional<Rect> maybe_input_coverage = input_snapshot->GetCoverage();
   if (!maybe_input_coverage.has_value()) {
     return std::nullopt;
   }
-  Rect input_coverage = maybe_input_coverage.value();
+
   // The shader is required to have at least one sampler, the first of
   // which is treated as the input and a vec2 size uniform to compute the
   // offsets. These are validated at the dart:ui layer, but to avoid crashes we
@@ -70,12 +100,12 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
   Size size = Size(input_snapshot->texture->GetSize());
   memcpy(uniforms_->data(), &size, sizeof(Size));
 
-  Point snapshot_origin = input_coverage.GetOrigin();
+  Matrix snapshot_transform = input_snapshot->transform;
   //----------------------------------------------------------------------------
   /// Create AnonymousContents for rendering.
   ///
   RenderProc render_proc =
-      [snapshot_origin, input_snapshot, runtime_stage = runtime_stage_,
+      [snapshot_transform, input_snapshot, runtime_stage = runtime_stage_,
        uniforms = uniforms_, texture_inputs = texture_input_copy](
           const ContentContext& renderer, const Entity& entity,
           RenderPass& pass) -> bool {
@@ -86,8 +116,7 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
     contents.SetTextureInputs(texture_inputs);
     contents.SetGeometry(&geom);
     Entity offset_entity = entity.Clone();
-    offset_entity.SetTransform(entity.GetTransform() *
-                               Matrix::MakeTranslation(snapshot_origin));
+    offset_entity.SetTransform(entity.GetTransform() * snapshot_transform);
     return contents.Render(renderer, offset_entity, pass);
   };
 
@@ -102,7 +131,7 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
   sub_entity.SetContents(std::move(contents));
   sub_entity.SetBlendMode(entity.GetBlendMode());
   sub_entity.SetTransform(input_snapshot->transform *
-                          Matrix::MakeTranslation(-1.0f * snapshot_origin));
+                          snapshot_transform.Invert());
 
   return sub_entity;
 }
