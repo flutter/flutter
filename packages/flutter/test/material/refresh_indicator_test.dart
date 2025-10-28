@@ -1251,4 +1251,20 @@ void main() {
       await tester.pumpAndSettle();
     }
   });
+
+  testWidgets('RefreshIndicator does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: RefreshIndicator(
+              onRefresh: refresh,
+              child: ListView(children: const <Text>[Text('X')]),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RefreshIndicator)), Size.zero);
+  });
 }
