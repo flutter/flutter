@@ -131,6 +131,7 @@ class Tooltip extends StatefulWidget {
     this.onTriggered,
     this.mouseCursor,
     this.ignorePointer,
+    this.positionDelegate,
     this.child,
   }) : assert(
          (message == null) != (richMessage == null),
@@ -331,6 +332,34 @@ class Tooltip extends StatefulWidget {
   /// handled or ignored.
   final bool? ignorePointer;
 
+  /// A custom position delegate function for computing where the tooltip should be positioned.
+  ///
+  /// If provided, this function will be called with a [TooltipPositionContext] containing
+  /// all the necessary information for positioning the tooltip. The function should return
+  /// an [Offset] indicating where to place the tooltip relative to the overlay.
+  ///
+  /// This allows for custom positioning such as left/right positioning, or any other
+  /// arbitrary positioning logic.
+  ///
+  /// Example:
+  /// ```dart
+  /// positionDelegate: (TooltipPositionContext context) {
+  ///   // Position tooltip to the right of the target
+  ///   return Offset(
+  ///     context.target.dx + context.targetSize.width / 2,
+  ///     context.target.dy - context.tooltipSize.height / 2,
+  ///   );
+  /// }
+  /// ```
+  ///
+  /// If null, the default positioning behavior is used (above or below the target).
+  ///
+  /// See also:
+  ///
+  ///  * [TooltipPositionContext], which contains the positioning parameters.
+  ///  * [TooltipPositionDelegate], the function signature for custom positioning.
+  final TooltipPositionDelegate? positionDelegate;
+
   /// Dismiss all of the tooltips that are currently shown on the screen,
   /// including those with mouse cursors currently hovering over them.
   ///
@@ -397,6 +426,13 @@ class Tooltip extends StatefulWidget {
       FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true),
     );
     properties.add(DiagnosticsProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<TooltipPositionDelegate>(
+        'positionDelegate',
+        positionDelegate,
+        defaultValue: null,
+      ),
+    );
   }
 }
 
@@ -536,6 +572,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       fadeOutDuration: _fadeOutDuration,
       hoverExitDuration:
           widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultHoverExitDuration,
+      positionDelegate: widget.positionDelegate,
       child: widget.child,
     );
   }
