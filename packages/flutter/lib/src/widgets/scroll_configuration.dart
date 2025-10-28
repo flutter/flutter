@@ -167,9 +167,9 @@ class ScrollBehavior {
         assert(details.controller != null);
         return RawScrollbar(controller: details.controller, child: child);
       case TargetPlatform.android:
-        print('buildScrollbar called');
+        print('ScrollBehavior buildScrollbar called');
         return RawScrollbar(
-          thumbColor: Color(0x00FFFFFF), // Color of the scrollbar thumb
+          thumbColor: const Color(0x00FFFFFF), // Color of the scrollbar thumb
           interactive: false,
           child: child,
         );
