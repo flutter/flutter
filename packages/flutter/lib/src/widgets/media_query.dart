@@ -724,11 +724,6 @@ class MediaQueryData {
   ///
   /// Returns `null` when the platform has not set an override
   /// for text paragraph spacing.
-  ///
-  /// See also:
-  ///
-  ///  * [Text], and [SelectableText], which are both informed by
-  ///  [paragraphSpacingOverride].
   final double? paragraphSpacingOverride;
 
   /// The orientation of the media (e.g., whether the device is in landscape or
