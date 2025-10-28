@@ -18,73 +18,6 @@ import 'text_theme.dart';
 import 'theme.dart';
 import 'tooltip_theme.dart';
 
-/// Contextual information for positioning a tooltip.
-///
-/// This immutable data class contains all the necessary information for computing
-/// the position of a tooltip relative to its target widget.
-///
-/// See also:
-///
-///  * [TooltipPositionDelegate], which uses this context to compute tooltip positions.
-@immutable
-class TooltipPositionContext {
-  /// Creates a tooltip position context.
-  const TooltipPositionContext({
-    required this.target,
-    required this.targetSize,
-    required this.tooltipSize,
-    required this.verticalOffset,
-    required this.preferBelow,
-  });
-
-  /// The center point of the target widget in the global coordinate system.
-  final Offset target;
-
-  /// The size of the target widget that triggers the tooltip.
-  final Size targetSize;
-
-  /// The size of the tooltip itself.
-  final Size tooltipSize;
-
-  /// The configured vertical offset.
-  final double verticalOffset;
-
-  /// Whether the tooltip prefers to be positioned below the target.
-  final bool preferBelow;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is TooltipPositionContext &&
-        other.target == target &&
-        other.targetSize == targetSize &&
-        other.tooltipSize == tooltipSize &&
-        other.verticalOffset == verticalOffset &&
-        other.preferBelow == preferBelow;
-  }
-
-  @override
-  int get hashCode => Object.hash(target, targetSize, tooltipSize, verticalOffset, preferBelow);
-}
-
-/// Signature for computing the position of a tooltip.
-///
-/// The [TooltipPositionContext] contains all the necessary information for
-/// positioning the tooltip, including the target location, sizes, offset, and
-/// positioning preference.
-///
-/// Returns the offset from the top left of the overlay to the top left of the tooltip.
-///
-/// See also:
-///
-///  * [TooltipPositionContext], which contains the positioning parameters.
-typedef TooltipPositionDelegate = Offset Function(TooltipPositionContext context);
-
 /// A Material Design tooltip.
 ///
 /// Tooltips provide text labels which help explain the function of a button or
@@ -623,7 +556,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
     return RawTooltip(
       key: _tooltipKey,
-      message: widget.richMessage ?? TextSpan(text: widget.message),
+      message: widget.message ?? widget.richMessage?.toPlainText() ?? '',
       tooltipBox: tooltipBox,
       verticalOffset:
           widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset,

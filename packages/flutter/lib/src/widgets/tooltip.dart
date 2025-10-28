@@ -8,19 +8,16 @@ library;
 import 'dart:async';
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'basic.dart';
-import 'container.dart';
 import 'debug.dart';
 import 'feedback.dart';
 import 'framework.dart';
 import 'media_query.dart';
 import 'overlay.dart';
 import 'selection_container.dart';
-import 'text.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
@@ -33,6 +30,73 @@ class _TooltipVisibilityScope extends InheritedWidget {
   bool updateShouldNotify(_TooltipVisibilityScope old) {
     return old.visible != visible;
   }
+}
+
+/// Signature for computing the position of a tooltip.
+///
+/// The [TooltipPositionContext] contains all the necessary information for
+/// positioning the tooltip, including the target location, sizes, offset, and
+/// positioning preference.
+///
+/// Returns the offset from the top left of the overlay to the top left of the tooltip.
+///
+/// See also:
+///
+///  * [TooltipPositionContext], which contains the positioning parameters.
+typedef TooltipPositionDelegate = Offset Function(TooltipPositionContext context);
+
+/// Contextual information for positioning a tooltip.
+///
+/// This immutable data class contains all the necessary information for computing
+/// the position of a tooltip relative to its target widget.
+///
+/// See also:
+///
+///  * [TooltipPositionDelegate], which uses this context to compute tooltip positions.
+@immutable
+class TooltipPositionContext {
+  /// Creates a tooltip position context.
+  const TooltipPositionContext({
+    required this.target,
+    required this.targetSize,
+    required this.tooltipSize,
+    required this.verticalOffset,
+    required this.preferBelow,
+  });
+
+  /// The center point of the target widget in the global coordinate system.
+  final Offset target;
+
+  /// The size of the target widget that triggers the tooltip.
+  final Size targetSize;
+
+  /// The size of the tooltip itself.
+  final Size tooltipSize;
+
+  /// The configured vertical offset.
+  final double verticalOffset;
+
+  /// Whether the tooltip prefers to be positioned below the target.
+  final bool preferBelow;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is TooltipPositionContext &&
+        other.target == target &&
+        other.targetSize == targetSize &&
+        other.tooltipSize == tooltipSize &&
+        other.verticalOffset == verticalOffset &&
+        other.preferBelow == preferBelow;
+  }
+
+  @override
+  int get hashCode => Object.hash(target, targetSize, tooltipSize, verticalOffset, preferBelow);
 }
 
 /// Overrides the visibility of descendant [RawTooltip] widgets.
@@ -185,7 +249,7 @@ class RawTooltip extends StatefulWidget {
   });
 
   ///
-  final InlineSpan message;
+  final String message;
 
   ///
   final Widget tooltipBox;
@@ -271,9 +335,6 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
   // From InheritedWidgets
   late bool _visible;
 
-  /// The plain text message for this tooltip.
-  String get _tooltipMessage => widget.message.toPlainText();
-
   Timer? _timer;
   AnimationController? _backingController;
   AnimationController get _controller {
@@ -312,7 +373,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
       case (true, false):
         _overlayController.show();
         RawTooltip._openedTooltips.add(this);
-        SemanticsService.tooltip(_tooltipMessage);
+        SemanticsService.tooltip(widget.message);
       case (true, true) || (false, false):
         break;
     }
@@ -604,13 +665,13 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     // If message is empty then no need to create a tooltip overlay to show
     // the empty black container so just return the wrapped child as is or
     // empty container if child is not specified.
-    if (_tooltipMessage.isEmpty) {
+    if (widget.message.isEmpty) {
       return widget.child ?? const SizedBox.shrink();
     }
     assert(debugCheckHasOverlay(context));
     final bool excludeFromSemantics = widget.excludeFromSemantics;
     Widget result = Semantics(
-      tooltip: excludeFromSemantics ? null : _tooltipMessage,
+      tooltip: excludeFromSemantics ? null : widget.message,
       child: widget.child,
     );
 
