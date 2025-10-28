@@ -13,7 +13,6 @@ import 'base/file_system.dart';
 const kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
 const kStaticAssetsUrlPlaceholder = r'$FLUTTER_STATIC_ASSETS_URL';
 
-
 const _kServiceWorkerDeprecationNotice =
     "Flutter's service worker is deprecated and will be removed in a future Flutter release.";
 
