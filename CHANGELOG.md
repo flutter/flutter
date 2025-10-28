@@ -49,7 +49,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 #### Framework
 * Allow OverlayPortal.overlayChildLayoutBuilder to choose root Overlay by @chunhtai in https://github.com/flutter/flutter/pull/174239
-* [ Widget Preview] Add `group` property to `Preview` by @bkonyi in https://github.com/flutter/flutter/pull/174849
+* [Widget Preview] Add `group` property to `Preview` by @bkonyi in https://github.com/flutter/flutter/pull/174849
 * Fix: Use route navigator for CupertinoSheetRoute pop by @rkishan516 in https://github.com/flutter/flutter/pull/173103
 * fix(Semantics): Ensure semantics properties take priority over button's by @pedromassango in https://github.com/flutter/flutter/pull/174473
 * Fix SliverMainAxisGroup scrollOffsetCorrection by @manu-sncf in https://github.com/flutter/flutter/pull/174369
@@ -66,7 +66,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 * Add `CupertinoLinearActivityIndicator` by @ValentinVignal in https://github.com/flutter/flutter/pull/170108
 * Fix RadioGroup single selection check. by @ksokolovskyi in https://github.com/flutter/flutter/pull/175654
 * Fix: Update docs tool tag to sample in ImageProvider by @dixita0607 in https://github.com/flutter/flutter/pull/175256
-* [ Widget Preview ] Allow for custom `Preview` annotations, add support for runtime transformations by @bkonyi in https://github.com/flutter/flutter/pull/175535
+* [Widget Preview] Allow for custom `Preview` annotations, add support for runtime transformations by @bkonyi in https://github.com/flutter/flutter/pull/175535
 * [web] Cleanup opportunities post renderer unification by @mdebbar in https://github.com/flutter/flutter/pull/174659
 * Load fonts in the order addFont is called by @jiahaog in https://github.com/flutter/flutter/pull/174253
 * Fix outdated link of `intl` package to point to the correct new location  by @AbdeMohlbi in https://github.com/flutter/flutter/pull/174498
@@ -224,10 +224,10 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 * [web] Bump Firefox to 143.0 by @mdebbar in https://github.com/flutter/flutter/pull/176110
 * Remove references to dart:js_util by @fishythefish in https://github.com/flutter/flutter/pull/176323
 #### Tooling
-* [ Tool ] Remove leftover Android x86 deprecation warning constant by @bkonyi in https://github.com/flutter/flutter/pull/174941
+* [Tool] Remove leftover Android x86 deprecation warning constant by @bkonyi in https://github.com/flutter/flutter/pull/174941
 * Make every LLDB Init error message actionable by @vashworth in https://github.com/flutter/flutter/pull/174726
 * [web] Reuse chrome instance to run all flutter tests by @mdebbar in https://github.com/flutter/flutter/pull/174957
-* [ Widget Preview ] Improve `--machine` output by @bkonyi in https://github.com/flutter/flutter/pull/175003
+* [Widget Preview] Improve `--machine` output by @bkonyi in https://github.com/flutter/flutter/pull/175003
 * Fix crash when attaching to a device with multiple active flutter apps by @chingjun in https://github.com/flutter/flutter/pull/175147
 * Deprecate Objective-C plugin template by @okorohelijah in https://github.com/flutter/flutter/pull/174003
 * [native_assets] Find more `CCompilerConfig` on Linux by @GregoryConrad in https://github.com/flutter/flutter/pull/175323
@@ -235,8 +235,8 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 * Update gradle_utils.dart to use `constant` instead of `final` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175443
 * Update gradle_errors.dart to use constants defined in gradle_utils.dart by @AbdeMohlbi in https://github.com/flutter/flutter/pull/174760
 * fix typo in comments to mention `settings.gradle/.kts` instead of `build.gradle/.kts` by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175486
-* [ Tool ] Serve DevTools from DDS, remove ResidentDevToolsHandler by @bkonyi in https://github.com/flutter/flutter/pull/174580
-* [ Widget Preview ] Don't update filtered preview set when selecting non-source files by @bkonyi in https://github.com/flutter/flutter/pull/175596
+* [Tool] Serve DevTools from DDS, remove ResidentDevToolsHandler by @bkonyi in https://github.com/flutter/flutter/pull/174580
+* [Widget Preview] Don't update filtered preview set when selecting non-source files by @bkonyi in https://github.com/flutter/flutter/pull/175596
 * Remove `name` field form `SupportedPlatform` enum by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175611
 * Roll pub packages by @flutter-pub-roller-bot in https://github.com/flutter/flutter/pull/175545
 * Update maximum known Gradle version to 9.1.0 by @bc-lee in https://github.com/flutter/flutter/pull/175543
@@ -244,31 +244,31 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 * Roll `package:analyzer` forward to `8.2.0`. by @stereotype441 in https://github.com/flutter/flutter/pull/175849
 * Remove comment about trailing commas from templates by @bkonyi in https://github.com/flutter/flutter/pull/175864
 * Introduce a getter for `Project` to get `gradle-wrapper.properties` directly   by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175485
-* [ Widget Preview ] Fix filter by file on Windows by @bkonyi in https://github.com/flutter/flutter/pull/175783
+* [Widget Preview] Fix filter by file on Windows by @bkonyi in https://github.com/flutter/flutter/pull/175783
 * Update AGP/Java/Gradle comparison when using analyze --suggestions by @reidbaker in https://github.com/flutter/flutter/pull/175808
 * Update Flutter's templates to use dot shorthands by @loic-sharma in https://github.com/flutter/flutter/pull/175891
 * Add kotlin/kgp 2.2.* evaluation criteria.  by @reidbaker in https://github.com/flutter/flutter/pull/176094
 * Removes type annotations in templates by @Piinks in https://github.com/flutter/flutter/pull/176106
 * Update java version ranges with the top end limitation for java pre 17 by @reidbaker in https://github.com/flutter/flutter/pull/176049
-* [ Widget Preview ] Improve IDE integration support by @bkonyi in https://github.com/flutter/flutter/pull/176114
+* [Widget Preview] Improve IDE integration support by @bkonyi in https://github.com/flutter/flutter/pull/176114
 * Add tests for `Project` getters  by @AbdeMohlbi in https://github.com/flutter/flutter/pull/175994
-* [ Widget Preview ] Forward Widget Inspector navigation events via DTD by @bkonyi in https://github.com/flutter/flutter/pull/176218
+* [Widget Preview] Forward Widget Inspector navigation events via DTD by @bkonyi in https://github.com/flutter/flutter/pull/176218
 * Stop using deprecated analyzer 7.x.y APIs. by @scheglov in https://github.com/flutter/flutter/pull/176242
 * [native assets] Roll dependencies by @dcharkes in https://github.com/flutter/flutter/pull/176287
 * [native assets] Enable build hooks and code assets on stable by @dcharkes in https://github.com/flutter/flutter/pull/176285
-* [ Tool / l10n ] Fix issue where localization generator assumed current directory was the target project by @bkonyi in https://github.com/flutter/flutter/pull/175881
-* [ Widget Preview ] Persist "Filter by Selected File" toggle by @bkonyi in https://github.com/flutter/flutter/pull/176289
-* [ Widget Preview ] Fix resolution for workspace "hosted" dependencies by @bkonyi in https://github.com/flutter/flutter/pull/176358
+* [Tool / l10n] Fix issue where localization generator assumed current directory was the target project by @bkonyi in https://github.com/flutter/flutter/pull/175881
+* [Widget Preview] Persist "Filter by Selected File" toggle by @bkonyi in https://github.com/flutter/flutter/pull/176289
+* [Widget Preview] Fix resolution for workspace "hosted" dependencies by @bkonyi in https://github.com/flutter/flutter/pull/176358
 * Upgrade packages by @mraleph in https://github.com/flutter/flutter/pull/176411
-* [ Widget Preview ] Fix type error when retrieving flags from persistent preferences by @bkonyi in https://github.com/flutter/flutter/pull/176546
-* [ Widget Preview ] Fix `WidgetInspectorService` override by @bkonyi in https://github.com/flutter/flutter/pull/176550
+* [Widget Preview] Fix type error when retrieving flags from persistent preferences by @bkonyi in https://github.com/flutter/flutter/pull/176546
+* [Widget Preview] Fix `WidgetInspectorService` override by @bkonyi in https://github.com/flutter/flutter/pull/176550
 * Fix code style in Linux embedder template by @robert-ancell in https://github.com/flutter/flutter/pull/176256
-* [ Widget Preview ] Rework UI and theming by @bkonyi in https://github.com/flutter/flutter/pull/176581
-* [ Tool ] Output `app.dtd` and `app.devTools` in machine mode by @bkonyi in https://github.com/flutter/flutter/pull/176655
+* [Widget Preview] Rework UI and theming by @bkonyi in https://github.com/flutter/flutter/pull/176581
+* [Tool] Output `app.dtd` and `app.devTools` in machine mode by @bkonyi in https://github.com/flutter/flutter/pull/176655
 #### Other Changes
 * Remove 'terms of use' wording from web_unicode by @mdebbar in https://github.com/flutter/flutter/pull/174939
 * [a11y-app] Fix NavigationRail leading and trailing labels by @bleroux in https://github.com/flutter/flutter/pull/174861
-* [ Device Lab ] Add regression testing for flutter/flutter#174952 by @bkonyi in https://github.com/flutter/flutter/pull/174956
+* [Device Lab] Add regression testing for flutter/flutter#174952 by @bkonyi in https://github.com/flutter/flutter/pull/174956
 * deletes the old license checker. by @gaaclarke in https://github.com/flutter/flutter/pull/174719
 * Added note about how to compile licenses_cpp by @gaaclarke in https://github.com/flutter/flutter/pull/174947
 * [ios26]fix host engine compile error by @hellohuanlin in https://github.com/flutter/flutter/pull/174723
