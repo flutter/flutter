@@ -92,7 +92,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 * Fix typo in pages.dart by @TDuffinNTU in https://github.com/flutter/flutter/pull/176438
 * Selecting an implementation widget with the on-device inspector opens the code location for the nearest project widget by @elliette in https://github.com/flutter/flutter/pull/176530
 #### Material
-* Fix table cell semantics rect alignment issues.  by @hannah-hyj in https://github.com/flutter/flutter/pull/174914
+* Fix table cell semantics rect alignment issues. by @hannah-hyj in https://github.com/flutter/flutter/pull/174914
 * Fix IconButton.color overrided by IconButtomTheme by @bleroux in https://github.com/flutter/flutter/pull/174515
 * Fix DropdownMenuFormField does not clear text field content on reset … by @bleroux in https://github.com/flutter/flutter/pull/174937
 * Migrate to widget state by @ValentinVignal in https://github.com/flutter/flutter/pull/174746
