@@ -277,7 +277,7 @@ platform_properties:
       device_os: iOS-18
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17b5045g"
+          "sdk_version": "16c5032a"
         }
 
   mac_x64_ios:
@@ -296,7 +296,7 @@ platform_properties:
       device_os: iOS-18
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17b5045g"
+          "sdk_version": "16c5032a"
         }
 
   mac_arm64_ios:
@@ -315,7 +315,7 @@ platform_properties:
       device_os: iOS-18
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17b5045g"
+          "sdk_version": "16c5032a"
         }
 
   windows:
@@ -5470,7 +5470,7 @@ targets:
       os: Mac-15.5
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17b5045g"
+          "sdk_version": "16c5032a"
         }
 
   - name: Mac_ios fullscreen_textfield_perf_ios__e2e_summary
