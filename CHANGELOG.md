@@ -42,7 +42,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 - [flutter/177401](https://github.com/flutter/flutter/pull/177401) Fixes a macOS text input crash caused by down-casting the string argument from Any to a NSString.
 - [flutter/177308](https://github.com/flutter/flutter/pull/177308) Configures `FfiNative` resolver on dart:io.
 - [flutter/176360](https://github.com/flutter/flutter/issues/176360) Fixes accessibility events regression on Linux which makes apps not announced with screen reader.
--[flutter/174791](https://github.com/flutter/flutter/issues/174791) Fixes Flutter web hot reload/restart crashes when the browser tab is closed, causing “Bad state: No element” errors and breaking the DWDS connection.
+- [flutter/174791](https://github.com/flutter/flutter/issues/174791) Fixes Flutter web hot reload/restart crashes when the browser tab is closed, causing “Bad state: No element” errors and breaking the DWDS connection.
 - [flutter/173770](https://github.com/flutter/flutter/issues/173770) Mitigates a memory leak that occurs on Android when Activities are not kept and an Activity is exited and re-entered.
 
 ### [3.38.0-0.1.pre](https://github.com/flutter/flutter/releases/tag/3.38.0-0.1.pre)
@@ -92,7 +92,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 * Fix typo in pages.dart by @TDuffinNTU in https://github.com/flutter/flutter/pull/176438
 * Selecting an implementation widget with the on-device inspector opens the code location for the nearest project widget by @elliette in https://github.com/flutter/flutter/pull/176530
 #### Material
-* Fix table cell semantics rect alignment issues.  by @hannah-hyj in https://github.com/flutter/flutter/pull/174914
+* Fix table cell semantics rect alignment issues. by @hannah-hyj in https://github.com/flutter/flutter/pull/174914
 * Fix IconButton.color overrided by IconButtomTheme by @bleroux in https://github.com/flutter/flutter/pull/174515
 * Fix DropdownMenuFormField does not clear text field content on reset … by @bleroux in https://github.com/flutter/flutter/pull/174937
 * Migrate to widget state by @ValentinVignal in https://github.com/flutter/flutter/pull/174746
@@ -146,7 +146,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 * Fix InputDecoration helper/error padding is not compliant by @bleroux in https://github.com/flutter/flutter/pull/176353
 #### iOS
 * Prevent potential crash when accessing window in FlutterSceneDelegate by @vashworth in https://github.com/flutter/flutter/pull/174873
-* [ios]Do not re-add delaying recognizer on iOS 26 by @hellohuanlin in https://github.com/flutter/flutter/pull/175097
+* [ios] Do not re-add delaying recognizer on iOS 26 by @hellohuanlin in https://github.com/flutter/flutter/pull/175097
 * Adds a11y section locale support for iOS by @chunhtai in https://github.com/flutter/flutter/pull/175005
 * Filter out unexpected process logs on iOS with better regex matching. by @vashworth in https://github.com/flutter/flutter/pull/175452
 * Connect the FlutterEngine to the FlutterSceneDelegate by @vashworth in https://github.com/flutter/flutter/pull/174910
