@@ -146,7 +146,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 * Fix InputDecoration helper/error padding is not compliant by @bleroux in https://github.com/flutter/flutter/pull/176353
 #### iOS
 * Prevent potential crash when accessing window in FlutterSceneDelegate by @vashworth in https://github.com/flutter/flutter/pull/174873
-* [ios]Do not re-add delaying recognizer on iOS 26 by @hellohuanlin in https://github.com/flutter/flutter/pull/175097
+* [ios] Do not re-add delaying recognizer on iOS 26 by @hellohuanlin in https://github.com/flutter/flutter/pull/175097
 * Adds a11y section locale support for iOS by @chunhtai in https://github.com/flutter/flutter/pull/175005
 * Filter out unexpected process logs on iOS with better regex matching. by @vashworth in https://github.com/flutter/flutter/pull/175452
 * Connect the FlutterEngine to the FlutterSceneDelegate by @vashworth in https://github.com/flutter/flutter/pull/174910
