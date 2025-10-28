@@ -953,6 +953,32 @@ void main() {
     expect(dropdownWidth, menuWidth);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/176501
+  testWidgets('_RenderDropdownMenuBody.computeDryLayout does not access this.constraints', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: _TestDryLayout(
+              child: DropdownMenu<int>(
+                dropdownMenuEntries: <DropdownMenuEntry<int>>[
+                  DropdownMenuEntry<int>(value: 1, label: 'One'),
+                  DropdownMenuEntry<int>(value: 2, label: 'Two'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The test passes if no exception is thrown during the layout phase.
+    expect(tester.takeException(), isNull);
+    expect(find.byType(DropdownMenu<int>), findsOneWidget);
+  });
+
   testWidgets(
     'Material2 - The menuHeight property can be used to show a shorter scrollable menu list instead of the complete list',
     (WidgetTester tester) async {
@@ -2450,178 +2476,6 @@ void main() {
       );
 
       expect(controller.text, 'Flutter');
-    },
-  );
-
-  testWidgets('Rematch selection against the first entry with the same value', (
-    WidgetTester tester,
-  ) async {
-    final TextEditingController controller = TextEditingController();
-    addTearDown(controller.dispose);
-
-    String selectionLabel = 'Initial label';
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Scaffold(
-              body: DropdownMenu<TestMenu>(
-                initialSelection: TestMenu.mainMenu0,
-                dropdownMenuEntries: <DropdownMenuEntry<TestMenu>>[
-                  DropdownMenuEntry<TestMenu>(
-                    value: TestMenu.mainMenu0,
-                    label: '$selectionLabel 0',
-                  ),
-                  DropdownMenuEntry<TestMenu>(
-                    value: TestMenu.mainMenu1,
-                    label: '$selectionLabel 1',
-                  ),
-                ],
-                controller: controller,
-              ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () => setState(() => selectionLabel = 'Updated label'),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-
-    // Open the menu
-    await tester.tap(find.byType(DropdownMenu<TestMenu>));
-    await tester.pump();
-
-    // Select the second item
-    await tester.tap(findMenuItemButton('$selectionLabel 1'));
-    await tester.pump();
-
-    // Update dropdownMenuEntries labels
-    await tester.tap(find.byType(FloatingActionButton));
-    await tester.pump();
-
-    expect(controller.text, 'Updated label 1');
-  });
-
-  testWidgets('Forget selection if its value does not map to any entry', (
-    WidgetTester tester,
-  ) async {
-    final TextEditingController controller = TextEditingController();
-    addTearDown(controller.dispose);
-
-    String selectionLabel = 'Initial label';
-    bool selectionInEntries = true;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Scaffold(
-              body: Column(
-                children: <Widget>[
-                  DropdownMenu<TestMenu>(
-                    initialSelection: TestMenu.mainMenu0,
-                    dropdownMenuEntries: <DropdownMenuEntry<TestMenu>>[
-                      DropdownMenuEntry<TestMenu>(
-                        value: TestMenu.mainMenu0,
-                        label: '$selectionLabel 0',
-                      ),
-                      if (selectionInEntries)
-                        DropdownMenuEntry<TestMenu>(
-                          value: TestMenu.mainMenu1,
-                          label: '$selectionLabel 1',
-                        ),
-                    ],
-                    controller: controller,
-                  ),
-                  ElevatedButton(
-                    onPressed: () => setState(() => selectionInEntries = !selectionInEntries),
-                    child: null,
-                  ),
-                ],
-              ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () => setState(() => selectionLabel = 'Updated label'),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-
-    // Open the menu
-    await tester.tap(find.byType(DropdownMenu<TestMenu>));
-    await tester.pump();
-
-    // Select the second item
-    await tester.tap(findMenuItemButton('$selectionLabel 1'));
-    await tester.pump();
-
-    // Update dropdownMenuEntries labels
-    await tester.tap(find.byType(FloatingActionButton));
-    // Remove second item from entires
-    await tester.tap(find.byType(ElevatedButton));
-    await tester.pump();
-
-    expect(controller.text, 'Initial label 1');
-
-    // Put second item back into entries
-    await tester.tap(find.byType(ElevatedButton));
-    await tester.pump();
-
-    expect(controller.text, 'Initial label 1');
-  });
-
-  testWidgets(
-    'Do not rematch selection if the text field was edited progrmaticlly via controller',
-    (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
-      addTearDown(controller.dispose);
-
-      String selectionLabel = 'Initial label';
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Scaffold(
-                body: Column(
-                  children: <Widget>[
-                    DropdownMenu<TestMenu>(
-                      initialSelection: TestMenu.mainMenu0,
-                      dropdownMenuEntries: <DropdownMenuEntry<TestMenu>>[
-                        DropdownMenuEntry<TestMenu>(
-                          value: TestMenu.mainMenu0,
-                          label: '$selectionLabel 0',
-                        ),
-                      ],
-                      controller: controller,
-                    ),
-                    ElevatedButton(
-                      onPressed: () => setState(() => controller.text = 'Controller Value'),
-                      child: null,
-                    ),
-                  ],
-                ),
-                floatingActionButton: FloatingActionButton(
-                  onPressed: () => setState(() => selectionLabel = 'Updated label'),
-                ),
-              );
-            },
-          ),
-        ),
-      );
-
-      // Change the text field value via controller
-      await tester.tap(find.byType(ElevatedButton));
-      await tester.pump();
-
-      // Update dropdownMenuEntries labels
-      await tester.tap(find.byType(FloatingActionButton));
-      await tester.pump();
-
-      expect(controller.text, 'Controller Value');
     },
   );
 
@@ -4765,6 +4619,264 @@ void main() {
     await tester.pumpAndSettle();
     expect(findMenuItemButton('Item 0').hitTestable(), findsNothing);
   });
+
+  group('DropdownMenu.decorationBuilder', () {
+    const String labelText = 'labelText';
+    InputDecoration buildDecorationWithSuffixIcon(BuildContext context, MenuController controller) {
+      return InputDecoration(
+        labelText: labelText,
+        suffixIcon: controller.isOpen
+            ? const Icon(Icons.arrow_drop_up)
+            : const Icon(Icons.arrow_drop_down),
+      );
+    }
+
+    InputDecoration buildDecoration(BuildContext context, MenuController controller) {
+      return const InputDecoration(labelText: labelText);
+    }
+
+    testWidgets('Decoration properties set by decorationBuilder are applied', (
+      WidgetTester tester,
+    ) async {
+      final MenuController menuController = MenuController();
+      const InputDecoration decoration = InputDecoration(
+        labelText: labelText,
+        helperText: 'helperText',
+        hintText: 'hintText',
+        filled: true,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              menuController: menuController,
+              dropdownMenuEntries: menuChildren,
+              decorationBuilder: (BuildContext context, MenuController controller) {
+                return decoration;
+              },
+            ),
+          ),
+        ),
+      );
+
+      final TextField textField = tester.firstWidget(find.byType(TextField));
+      final InputDecoration effectiveDecoration = textField.decoration!;
+
+      expect(effectiveDecoration.labelText, decoration.labelText);
+      expect(effectiveDecoration.helperText, decoration.helperText);
+      expect(effectiveDecoration.hintText, decoration.hintText);
+      expect(effectiveDecoration.filled, decoration.filled);
+    });
+
+    testWidgets('Custom decorationBuilder can replace default suffixIcon', (
+      WidgetTester tester,
+    ) async {
+      final MenuController menuController = MenuController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              menuController: menuController,
+              dropdownMenuEntries: menuChildren,
+              decorationBuilder: buildDecorationWithSuffixIcon,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.arrow_drop_down), findsNWidgets(2));
+      expect(find.byType(IconButton), findsNothing);
+    });
+
+    testWidgets('Custom decorationBuilder is called when the menu opens and closes', (
+      WidgetTester tester,
+    ) async {
+      final MenuController menuController = MenuController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              menuController: menuController,
+              dropdownMenuEntries: menuChildren,
+              decorationBuilder: buildDecorationWithSuffixIcon,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.arrow_drop_down), findsNWidgets(2));
+      expect(find.byIcon(Icons.arrow_drop_up), findsNothing);
+
+      // Open the menu.
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+
+      // Check that the custom decorationBuilder updated the icon.
+      expect(find.byIcon(Icons.arrow_drop_down), findsNothing);
+      expect(find.byIcon(Icons.arrow_drop_up), findsNWidgets(2));
+    });
+
+    testWidgets(
+      'Default IconButton is used when decorationBuilder does not set InputDecoration.suffixIcon',
+      (WidgetTester tester) async {
+        final MenuController menuController = MenuController();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                menuController: menuController,
+                dropdownMenuEntries: menuChildren,
+                decorationBuilder: buildDecoration,
+              ),
+            ),
+          ),
+        );
+
+        expect(find.byType(IconButton), findsNWidgets(2));
+      },
+    );
+
+    testWidgets('Passing label and decorationBuilder throws', (WidgetTester tester) async {
+      final MenuController menuController = MenuController();
+      await expectLater(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                menuController: menuController,
+                dropdownMenuEntries: menuChildren,
+                label: const Text('Label'),
+                decorationBuilder: buildDecoration,
+              ),
+            ),
+          ),
+        );
+      }, throwsAssertionError);
+    });
+
+    testWidgets('Passing hintText and decorationBuilder throws', (WidgetTester tester) async {
+      final MenuController menuController = MenuController();
+      await expectLater(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                menuController: menuController,
+                dropdownMenuEntries: menuChildren,
+                hintText: 'hintText',
+                decorationBuilder: buildDecoration,
+              ),
+            ),
+          ),
+        );
+      }, throwsAssertionError);
+    });
+
+    testWidgets('Passing helperText and decorationBuilder throws', (WidgetTester tester) async {
+      final MenuController menuController = MenuController();
+      await expectLater(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                menuController: menuController,
+                dropdownMenuEntries: menuChildren,
+                hintText: 'hintText',
+                decorationBuilder: buildDecoration,
+              ),
+            ),
+          ),
+        );
+      }, throwsAssertionError);
+    });
+
+    testWidgets('Passing errorText and decorationBuilder throws', (WidgetTester tester) async {
+      final MenuController menuController = MenuController();
+      await expectLater(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                menuController: menuController,
+                dropdownMenuEntries: menuChildren,
+                errorText: 'errorText',
+                decorationBuilder: buildDecoration,
+              ),
+            ),
+          ),
+        );
+      }, throwsAssertionError);
+    });
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/174609.
+  testWidgets(
+    'DropdownMenu keeps the selected item from filtered list after entries list is updated',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return DropdownMenu<TestMenu>(
+                  controller: controller,
+                  requestFocusOnTap: true,
+                  enableFilter: true,
+                  // toList() is used here to simulate list update.
+                  dropdownMenuEntries: menuChildren.toList(),
+                  onSelected: (_) {
+                    setState(() {});
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Open the menu.
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+
+      // Filter the entries to only show 'Menu 1'.
+      await tester.enterText(find.byType(TextField).first, TestMenu.mainMenu1.label);
+      await tester.pump();
+
+      // Select the 'Menu 1' item.
+      await tester.tap(findMenuItemButton(TestMenu.mainMenu1.label));
+      await tester.pumpAndSettle();
+
+      expect(controller.text, TestMenu.mainMenu1.label);
+    },
+  );
+
+  testWidgets('DropdownMenu does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final TextEditingController controller = TextEditingController(text: 'I');
+    addTearDown(controller.dispose);
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DropdownMenu<TestMenu>)), Size.zero);
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    await tester.pump();
+    expect(find.byType(MenuItemButton), findsWidgets);
+  });
 }
 
 enum TestMenu {
@@ -4786,4 +4898,30 @@ enum ShortMenu {
 
   const ShortMenu(this.label);
   final String label;
+}
+
+// A helper widget that creates a render object designed to call `getDryLayout`
+// on its child during its own `performLayout` phase. This is used to test
+// that a child's `computeDryLayout` implementation is valid.
+class _TestDryLayout extends SingleChildRenderObjectWidget {
+  const _TestDryLayout({super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderTestDryLayout();
+  }
+}
+
+class _RenderTestDryLayout extends RenderProxyBox {
+  @override
+  void performLayout() {
+    if (child == null) {
+      size = constraints.smallest;
+      return;
+    }
+
+    child!.getDryLayout(constraints);
+    child!.layout(constraints, parentUsesSize: true);
+    size = child!.size;
+  }
 }
