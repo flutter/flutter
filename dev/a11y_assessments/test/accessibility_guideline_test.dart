@@ -57,7 +57,7 @@ void main() {
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         // The DatePicker use case has known issues with tap target sizes
         // So we skip these checks for this use case .
-        if (useCase.name != 'DatePicker') {
+        if (useCase.name != DatePickerUseCase().name) {
           await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
           await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
           await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
