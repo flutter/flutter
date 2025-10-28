@@ -84,20 +84,14 @@ class MainWidgetState extends State<MainWidget> {
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           title: Semantics(headingLevel: 1, child: const Text('AppBar')),
           actions: <Widget>[
-            TextButton(
-              onPressed: () {},
-              style: TextButton.styleFrom(
-                foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+            for (final String label in const <String>['Action 1', 'Action 2'])
+              TextButton(
+                onPressed: () {},
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
+                child: Text(label),
               ),
-              child: const Text('Action 1'),
-            ),
-            TextButton(
-              onPressed: () {},
-              style: TextButton.styleFrom(
-                foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-              ),
-              child: const Text('Action 2'),
-            ),
           ],
         ),
       ][currentIndex],
