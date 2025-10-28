@@ -53,6 +53,8 @@ bool Manager::InitializeDisplay(GpuPreference gpu_preference) {
   std::optional<LUID> luid = std::nullopt;
   if (gpu_preference == GpuPreference::LowPowerPreference) {
     luid = GetLowPowerGpuLuid();
+  } else if (gpu_preference == GpuPreference::HighPerformancePreference) {
+    luid = GetHighPerformanceGpuLuid();
   }
 
   // These are preferred display attributes and request ANGLE's D3D11
@@ -333,32 +335,45 @@ Context* Manager::resource_context() const {
   return resource_context_.get();
 }
 
-std::optional<LUID> Manager::GetLowPowerGpuLuid() {
-  Microsoft::WRL::ComPtr<IDXGIFactory1> factory1 = nullptr;
-  Microsoft::WRL::ComPtr<IDXGIFactory6> factory6 = nullptr;
-  Microsoft::WRL::ComPtr<IDXGIAdapter1> adapter = nullptr;
+std::optional<LUID> Manager::GetGpuLuidByPreference(
+    DXGI_GPU_PREFERENCE preference) {
+  Microsoft::WRL::ComPtr<IDXGIFactory1> factory1;
   HRESULT hr = ::CreateDXGIFactory1(IID_PPV_ARGS(&factory1));
   if (FAILED(hr)) {
     return std::nullopt;
   }
+
+  Microsoft::WRL::ComPtr<IDXGIFactory6> factory6;
   hr = factory1->QueryInterface(IID_PPV_ARGS(&factory6));
   if (FAILED(hr)) {
     // No support for IDXGIFactory6, so we will not use the selected GPU.
     // We will follow with the default ANGLE selection.
     return std::nullopt;
   }
-  hr = factory6->EnumAdapterByGpuPreference(
-      0, DXGI_GPU_PREFERENCE_MINIMUM_POWER, IID_PPV_ARGS(&adapter));
-  if (FAILED(hr) || adapter == nullptr) {
+
+  Microsoft::WRL::ComPtr<IDXGIAdapter1> adapter;
+  hr = factory6->EnumAdapterByGpuPreference(0, preference,
+                                            IID_PPV_ARGS(&adapter));
+  if (FAILED(hr) || !adapter) {
     return std::nullopt;
   }
+
   // Get the LUID of the adapter.
   DXGI_ADAPTER_DESC desc;
   hr = adapter->GetDesc(&desc);
   if (FAILED(hr)) {
     return std::nullopt;
   }
-  return std::make_optional(desc.AdapterLuid);
+
+  return desc.AdapterLuid;
+}
+
+std::optional<LUID> Manager::GetLowPowerGpuLuid() {
+  return GetGpuLuidByPreference(DXGI_GPU_PREFERENCE_MINIMUM_POWER);
+}
+
+std::optional<LUID> Manager::GetHighPerformanceGpuLuid() {
+  return GetGpuLuidByPreference(DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE);
 }
 
 }  // namespace egl
