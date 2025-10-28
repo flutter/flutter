@@ -338,6 +338,55 @@ void main() {
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
     );
 
+    testWidgets(
+      'scrolling with sound disabled only triggers haptic feedback',
+      (WidgetTester tester) async {
+        final List<int> selectedItems = <int>[];
+        final List<MethodCall> systemCalls = <MethodCall>[];
+
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
+          MethodCall methodCall,
+        ) async {
+          systemCalls.add(methodCall);
+          return null;
+        });
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: CupertinoPicker(
+              soundEnabled: false,
+              itemExtent: 100.0,
+              onSelectedItemChanged: (int index) {
+                selectedItems.add(index);
+              },
+              children: List<Widget>.generate(100, (int index) {
+                return Center(
+                  child: SizedBox(width: 400.0, height: 100.0, child: Text(index.toString())),
+                );
+              }),
+            ),
+          ),
+        );
+        // Drag to almost the middle of the next item.
+        await tester.drag(
+          find.text('0'),
+          const Offset(0.0, -90.0),
+          warnIfMissed: false,
+        ); // has an IgnorePointer
+
+        // Let the scroll settle and end up in the middle of the item.
+        await tester.pumpAndSettle();
+        expect(systemCalls, hasLength(1));
+        // Check that the haptic feedback and ticking sound were triggered.
+        expect(
+          systemCalls.single,
+          isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.selectionClick'),
+        );
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
+
     testWidgets('scrolling with new behavior calls onSelectedItemChanged only when scroll ends', (
       WidgetTester tester,
     ) async {
