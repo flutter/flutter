@@ -43,11 +43,11 @@ void main() {
 
       for (int i = 0; i < tappableCount; i++) {
         final FinderBase<SemanticsNode> tappable = tappables.at(i);
-        final SemanticsNode? node = tappable.evaluate().firstOrNull;
+        final SemanticsNode node = tappable.evaluate().first;
 
         // We do not want to tap the back button, as that will pop the page
         // and disrupt the current test flow.
-        if (node == null || node.tooltip == 'Back') {
+        if (node.tooltip == 'Back') {
           continue;
         }
         tester.semantics.tap(tappable);
