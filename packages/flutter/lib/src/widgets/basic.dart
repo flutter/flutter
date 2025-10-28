@@ -4386,6 +4386,7 @@ class SliverSemantics extends _SemanticsBase {
     super.role,
     super.controlsNodes,
     super.validationResult = SemanticsValidationResult.none,
+    super.hitTestBehavior,
     super.inputType,
     super.localeForSubtree,
   }) : super(child: sliver);

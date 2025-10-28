@@ -12,7 +12,6 @@ library;
 import 'dart:core';
 import 'dart:math' as math;
 import 'dart:ui'
-    as ui
     show
         CheckedState,
         Locale,
@@ -21,7 +20,6 @@ import 'dart:ui'
         SemanticsAction,
         SemanticsFlag,
         SemanticsFlags,
-        SemanticsHitTestBehavior,
         SemanticsInputType,
         SemanticsRole,
         SemanticsUpdate,
@@ -30,6 +28,7 @@ import 'dart:ui'
         StringAttribute,
         TextDirection,
         Tristate;
+import 'dart:ui' as ui show SemanticsHitTestBehavior;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -6720,7 +6719,8 @@ class SemanticsConfiguration {
       .._role = _role
       .._controlsNodes = _controlsNodes
       .._validationResult = _validationResult
-      .._inputType = _inputType;
+      .._inputType = _inputType
+      .._hitTestBehavior = _hitTestBehavior;
   }
 }
 
