@@ -122,15 +122,13 @@ class WebTemplate {
           .replaceFirst(
             // Support older `var` syntax as well as new `const` syntax
             RegExp('(const|var) serviceWorkerVersion = null'),
-            '// $serviceWorkerDeprecationNotice\n'
-            'const serviceWorkerVersion = "$serviceWorkerVersion"',
+            'const serviceWorkerVersion = "$serviceWorkerVersion" /* $serviceWorkerDeprecationNotice */',
           )
           // This is for legacy index.html that still uses the old service
           // worker loading mechanism.
           .replaceFirst(
             "navigator.serviceWorker.register('flutter_service_worker.js')",
-            '// $serviceWorkerDeprecationNotice\n'
-                "navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion')",
+            "navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion') /* $serviceWorkerDeprecationNotice */",
           );
     }
     newContent = newContent.replaceAll(
