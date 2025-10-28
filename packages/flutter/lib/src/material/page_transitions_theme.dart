@@ -1136,3 +1136,96 @@ class _ZoomExitTransitionNoCache extends StatelessWidget {
     );
   }
 }
+
+/// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
+/// transition animation that slides and fades pages horizontally.
+///
+/// This transition uses [FadeForwardsTransitionsBuilder] from the widgets
+/// layer and automatically provides the theme's [ColorScheme.surface] color as
+/// the background color during transitions.
+///
+/// This transition combines several animations:
+/// - The new page slides in from right to left (25% horizontal translation)
+/// - The new page fades in as it slides
+/// - The old page slides out to the left while fading out
+/// - The theme's surface color fills the space between transitions
+///
+/// See also:
+///
+///  * [FadeUpwardsPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android O.
+///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android P.
+///  * [ZoomPageTransitionsBuilder], which defines the default page transition
+///    that's similar to the one provided in Android Q.
+///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
+///    transition that matches native iOS page transitions.
+///  * [PredictiveBackPageTransitionsBuilder], which defines a page
+///    transition that allows peeking behind the current route on Android.
+///  * [FadeForwardsTransitionsBuilder], the base widgets layer class that this uses.
+class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
+  /// Constructs a page transition animation that matches the transition used on
+  /// Android U.
+  ///
+  /// If [backgroundColor] is provided, it will be used during transitions.
+  /// Otherwise, the theme's [ColorScheme.surface] color will be used automatically.
+  const FadeForwardsPageTransitionsBuilder({this.backgroundColor});
+
+  /// The background color during transition between two routes.
+  ///
+  /// When a new page fades in and the old page fades out, this background color
+  /// fills the space between the two pages to avoid visual artifacts.
+  ///
+  /// If null, defaults to the current theme's [ColorScheme.surface] color.
+  final Color? backgroundColor;
+
+  @override
+  Duration get transitionDuration =>
+      const Duration(milliseconds: FadeForwardsTransitionsBuilder.kTransitionMilliseconds);
+
+  @override
+  DelegatedTransitionBuilder? get delegatedTransition =>
+      (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+        bool allowSnapshotting,
+        Widget? child,
+      ) {
+        // Get the theme's surface color if no backgroundColor was provided
+        final Color effectiveBackgroundColor =
+            backgroundColor ?? Theme.of(context).colorScheme.surface;
+
+        // Create a builder with the effective color and use its delegated transition
+        final FadeForwardsTransitionsBuilder builder = FadeForwardsTransitionsBuilder(
+          backgroundColor: effectiveBackgroundColor,
+        );
+
+        return builder.delegatedTransition!(
+          context,
+          animation,
+          secondaryAnimation,
+          allowSnapshotting,
+          child,
+        );
+      };
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    // Get the theme's surface color if no backgroundColor was provided
+    final Color effectiveBackgroundColor = backgroundColor ?? Theme.of(context).colorScheme.surface;
+
+    // Delegate to the widgets layer implementation
+    final FadeForwardsTransitionsBuilder builder = FadeForwardsTransitionsBuilder(
+      backgroundColor: effectiveBackgroundColor,
+    );
+
+    return builder.buildTransitions(route, context, animation, secondaryAnimation, child);
+  }
+}

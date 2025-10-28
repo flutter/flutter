@@ -48,7 +48,7 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
 
   @override
   Duration get transitionDuration =>
-      const Duration(milliseconds: FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds);
+      const Duration(milliseconds: FadeForwardsTransitionsBuilder.kTransitionMilliseconds);
 
   @override
   Widget buildTransitions<T>(
@@ -354,7 +354,7 @@ class _PredictiveBackSharedElementPageTransitionState
   static const Curve _kCurve = Curves.easeInOutCubicEmphasized;
   static const Interval _kCommitInterval = Interval(
     0.0,
-    _kCommitMilliseconds / FadeForwardsPageTransitionsBuilder.kTransitionMilliseconds,
+    _kCommitMilliseconds / FadeForwardsTransitionsBuilder.kTransitionMilliseconds,
     curve: _kCurve,
   );
 

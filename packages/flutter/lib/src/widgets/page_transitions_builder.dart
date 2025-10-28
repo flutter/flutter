@@ -5,8 +5,6 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
-import 'package:flutter/foundation.dart';
-
 import 'basic.dart';
 import 'dual_transition_builder.dart';
 import 'framework.dart';
@@ -350,7 +348,7 @@ class _FadeForwardsPageTransition extends StatelessWidget {
   const _FadeForwardsPageTransition({
     required this.animation,
     required this.secondaryAnimation,
-    this.backgroundColor,
+    required this.backgroundColor,
     this.child,
   });
 
@@ -358,7 +356,7 @@ class _FadeForwardsPageTransition extends StatelessWidget {
 
   final Animation<double> secondaryAnimation;
 
-  final Color? backgroundColor;
+  final Color backgroundColor;
 
   final Widget? child;
 
@@ -366,13 +364,13 @@ class _FadeForwardsPageTransition extends StatelessWidget {
   static final Animatable<Offset> _forwardTranslationTween = Tween<Offset>(
     begin: const Offset(0.25, 0.0),
     end: Offset.zero,
-  ).chain(CurveTween(curve: FadeForwardsPageTransitionsBuilder._transitionCurve));
+  ).chain(CurveTween(curve: FadeForwardsTransitionsBuilder._transitionCurve));
 
   // The old page slides back from left to right.
   static final Animatable<Offset> _backwardTranslationTween = Tween<Offset>(
     begin: Offset.zero,
     end: const Offset(0.25, 0.0),
-  ).chain(CurveTween(curve: FadeForwardsPageTransitionsBuilder._transitionCurve));
+  ).chain(CurveTween(curve: FadeForwardsTransitionsBuilder._transitionCurve));
 
   @override
   Widget build(BuildContext context) {
@@ -380,7 +378,7 @@ class _FadeForwardsPageTransition extends StatelessWidget {
       animation: animation,
       forwardBuilder: (BuildContext context, Animation<double> animation, Widget? child) {
         return FadeTransition(
-          opacity: FadeForwardsPageTransitionsBuilder._fadeInTransition.animate(animation),
+          opacity: FadeForwardsTransitionsBuilder._fadeInTransition.animate(animation),
           child: SlideTransition(
             position: _forwardTranslationTween.animate(animation),
             child: child,
@@ -391,7 +389,7 @@ class _FadeForwardsPageTransition extends StatelessWidget {
         return IgnorePointer(
           ignoring: animation.status == AnimationStatus.forward,
           child: FadeTransition(
-            opacity: FadeForwardsPageTransitionsBuilder._fadeOutTransition.animate(animation),
+            opacity: FadeForwardsTransitionsBuilder._fadeOutTransition.animate(animation),
             child: SlideTransition(
               position: _backwardTranslationTween.animate(animation),
               child: child,
@@ -399,7 +397,7 @@ class _FadeForwardsPageTransition extends StatelessWidget {
           ),
         );
       },
-      child: FadeForwardsPageTransitionsBuilder._delegatedTransition(
+      child: FadeForwardsTransitionsBuilder._delegatedTransition(
         context,
         secondaryAnimation,
         backgroundColor,
@@ -409,20 +407,20 @@ class _FadeForwardsPageTransition extends StatelessWidget {
   }
 }
 
-/// A page transition builder that animates incoming pages by sliding and fading
+/// A transition builder that animates pages by sliding and fading
 /// them in from right to left.
 ///
 /// This transition combines several animations:
 /// - The new page slides in from right to left (25% horizontal translation)
 /// - The new page fades in as it slides
 /// - The old page slides out to the left while fading out
-/// - An optional background color fills the space between transitions
+/// - A background color fills the space between transitions
 ///
 /// The resulting animation creates a smooth horizontal transition where the new
 /// page appears to push the old page off screen while both fade in and out.
 ///
 /// {@tool dartpad}
-/// This example shows how to use the fade forwards page transition.
+/// This example shows how to use the fade forwards transition.
 ///
 /// ** See code in examples/api/lib/widgets/page_transitions_builder/page_transitions_builder.1.dart **
 /// {@end-tool}
@@ -439,18 +437,18 @@ class _FadeForwardsPageTransition extends StatelessWidget {
 ///    transition that matches native iOS page transitions.
 ///  * [PredictiveBackPageTransitionsBuilder], which defines a page
 ///    transition that allows peeking behind the current route on Android.
-class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
-  /// Constructs a page transition animation that matches the transition used on
-  /// Android U.
-  const FadeForwardsPageTransitionsBuilder({this.backgroundColor});
+class FadeForwardsTransitionsBuilder extends PageTransitionsBuilder {
+  /// Constructs a transition animation with a fade and slide effect.
+  ///
+  /// The [backgroundColor] is required and specifies the color shown
+  /// behind pages during the transition.
+  const FadeForwardsTransitionsBuilder({required this.backgroundColor});
 
   /// The background color during transition between two routes.
   ///
   /// When a new page fades in and the old page fades out, this background color
-  /// helps avoid a black background between two page.
-  ///
-  /// Defaults to black color.
-  final Color? backgroundColor;
+  /// fills the space between the two pages to avoid visual artifacts.
+  final Color backgroundColor;
 
   /// The value of [transitionDuration] in milliseconds.
   ///
@@ -500,19 +498,13 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
     end: 0.0,
   ).chain(CurveTween(curve: const Interval(0.0, 0.25)));
 
-  // The default background color, used when no transition is active.
-  static const Color _defaultBackgroundColor = Color(0x00000000);
-
-  // The default surface color for light theme, used as fallback during transitions.
-  static const Color _defaultLightSurfaceColor = Color(0xFF000000);
-
-  // The default surface color for dark theme, used as fallback during transitions.
-  static const Color _defaultDarkSurfaceColor = Color(0xff121212);
+  // The transparent color used when no transition is active.
+  static const Color _transparentColor = Color(0x00000000);
 
   static Widget _delegatedTransition(
     BuildContext context,
     Animation<double> secondaryAnimation,
-    Color? backgroundColor,
+    Color backgroundColor,
     Widget? child,
   ) {
     final Widget builder = DualTransitionBuilder(
@@ -545,14 +537,7 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
     }
 
     return ColoredBox(
-      color: secondaryAnimation.isAnimating
-          // TODO(rkishan516): Fallback when animating should be surface color.
-          ? backgroundColor ??
-                switch (PlatformDispatcher.instance.platformBrightness) {
-                  Brightness.light => _defaultLightSurfaceColor,
-                  Brightness.dark => _defaultDarkSurfaceColor,
-                }
-          : _defaultBackgroundColor,
+      color: secondaryAnimation.isAnimating ? backgroundColor : _transparentColor,
       child: builder,
     );
   }

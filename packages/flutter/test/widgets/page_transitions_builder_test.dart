@@ -507,7 +507,7 @@ void main() {
     variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
 
-  testWidgets('FadeForwardsPageTransitionsBuilder test', (WidgetTester tester) async {
+  testWidgets('FadeForwardsTransitionsBuilder test', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -515,7 +515,9 @@ void main() {
           onGenerateRoute: (RouteSettings settings) {
             return _CustomPageRoute<void>(
               settings: settings,
-              transitionsBuilder: const FadeForwardsPageTransitionsBuilder(),
+              transitionsBuilder: const FadeForwardsTransitionsBuilder(
+                backgroundColor: Color(0xFF000000),
+              ),
               builder: (BuildContext context) {
                 if (settings.name == '/') {
                   return ColoredBox(
@@ -683,7 +685,7 @@ void main() {
       final Finder coloredBoxFinder = find.byType(ColoredBox).last;
       expect(coloredBoxFinder, findsOneWidget);
       final ColoredBox coloredBox = tester.widget<ColoredBox>(coloredBoxFinder);
-      expect(coloredBox.color, const Color(0xFF000000));
+      expect(coloredBox.color, Colors.pink);
 
       await tester.pumpAndSettle();
       expect(find.text('page b'), findsOneWidget);
@@ -767,7 +769,9 @@ void main() {
         await tester.pumpWidget(
           Builder(
             builder: (BuildContext context) {
-              return const FadeForwardsPageTransitionsBuilder().delegatedTransition!(
+              return const FadeForwardsTransitionsBuilder(
+                backgroundColor: Color(0xFF000000),
+              ).delegatedTransition!(
                 context,
                 animation,
                 secondaryAnimation,
@@ -811,7 +815,9 @@ void main() {
         await tester.pumpWidget(
           Builder(
             builder: (BuildContext context) {
-              return const FadeForwardsPageTransitionsBuilder().delegatedTransition!(
+              return const FadeForwardsTransitionsBuilder(
+                backgroundColor: Color(0xFF000000),
+              ).delegatedTransition!(
                 context,
                 animation,
                 secondaryAnimation,
