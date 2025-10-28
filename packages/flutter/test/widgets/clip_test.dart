@@ -398,9 +398,7 @@ void main() {
                       child: ColoredBox(
                         color: white,
                         child: RepaintBoundary(
-                          child: Center(
-                            child: Container(color: black, height: 10.0, width: 10.0),
-                          ),
+                          child: Center(child: Container(color: black, height: 10.0, width: 10.0)),
                         ),
                       ),
                     ),
@@ -470,9 +468,7 @@ void main() {
                       child: ColoredBox(
                         color: white,
                         child: RepaintBoundary(
-                          child: Center(
-                            child: Container(color: black, height: 10.0, width: 10.0),
-                          ),
+                          child: Center(child: Container(color: black, height: 10.0, width: 10.0)),
                         ),
                       ),
                     ),
@@ -506,9 +502,7 @@ void main() {
                       child: ColoredBox(
                         color: white,
                         child: RepaintBoundary(
-                          child: Center(
-                            child: Container(color: black, height: 10.0, width: 10.0),
-                          ),
+                          child: Center(child: Container(color: black, height: 10.0, width: 10.0)),
                         ),
                       ),
                     ),
@@ -547,9 +541,7 @@ void main() {
                       child: ColoredBox(
                         color: white,
                         child: RepaintBoundary(
-                          child: Center(
-                            child: Container(color: black, height: 10.0, width: 10.0),
-                          ),
+                          child: Center(child: Container(color: black, height: 10.0, width: 10.0)),
                         ),
                       ),
                     ),
@@ -583,9 +575,7 @@ void main() {
                   child: ColoredBox(
                     color: white,
                     child: RepaintBoundary(
-                      child: Center(
-                        child: Container(color: black, height: 10.0, width: 10.0),
-                      ),
+                      child: Center(child: Container(color: black, height: 10.0, width: 10.0)),
                     ),
                   ),
                 ),
@@ -644,9 +634,7 @@ void main() {
                     child: ColoredBox(
                       color: white,
                       child: RepaintBoundary(
-                        child: Center(
-                          child: Container(color: black, height: 10.0, width: 10.0),
-                        ),
+                        child: Center(child: Container(color: black, height: 10.0, width: 10.0)),
                       ),
                     ),
                   ),
@@ -686,9 +674,7 @@ void main() {
                   child: ColoredBox(
                     color: white,
                     child: RepaintBoundary(
-                      child: Center(
-                        child: Container(color: black, height: 10.0, width: 10.0),
-                      ),
+                      child: Center(child: Container(color: black, height: 10.0, width: 10.0)),
                     ),
                   ),
                 ),
@@ -749,9 +735,7 @@ void main() {
                     child: ColoredBox(
                       color: white,
                       child: RepaintBoundary(
-                        child: Center(
-                          child: Container(color: black, height: 10.0, width: 10.0),
-                        ),
+                        child: Center(child: Container(color: black, height: 10.0, width: 10.0)),
                       ),
                     ),
                   ),
