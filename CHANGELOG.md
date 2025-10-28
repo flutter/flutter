@@ -35,7 +35,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 ### [3.38.0-0.2.pre](https://github.com/flutter/flutter/releases/tag/3.38.0-0.2.pre)
 
 - [flutter/176462](https://github.com/flutter/flutter/issues/176462) Improves error message when building for iOS fails due to precompiled headers cache error.
-- [flutter/176206](https://github.com/flutter/flutter/issues/176206) Adds MacOS warning that wireless debugging may be slow on iOS 26 that is forwarded to DAP clients, e.g. VSCode
+- [flutter/176206](https://github.com/flutter/flutter/issues/176206) Adds MacOS warning that wireless debugging may be slow on iOS 26 that is forwarded to DAP clients, e.g. VSCode.
 - [flutter/177037](https://github.com/flutter/flutter/issues/177037) Allows some Android apps that use dynamic modules to build from Android Studio.
 - [flutter/177320](https://github.com/flutter/flutter/issues/177320) Support most recently published Android AGP/KGP.Java/Gradle dependencies.
 - [flutter/176310](https://github.com/flutter/flutter/issues/176310) For Flutter web applications run with `--machine`, ensure `app.dtd` event is emitted.
