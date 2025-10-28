@@ -232,6 +232,23 @@ Quad RemapQuadCoords(const Quad& input, Scalar texture_sampler_y_coord_scale) {
   }
 }
 
+Quad RotateQuadIfNecessary(const Quad& input) {
+  if (input[0].y > input[2].y) {
+    // The 4 points need reordering, because the quad is rotated 180 degrees:
+    //
+    //   3   2
+    //   1   0
+    //
+    // should be rotated to:
+    //
+    //   0   1
+    //   2   3
+    return Quad{input[3], input[2], input[1], input[0]};
+  } else {
+    return input;
+  }
+}
+
 // Precomputes the line equation parameters for a quadrilateral's bounds.
 //
 // This function takes an array of 4 vertices and returns an array of 4
@@ -280,6 +297,28 @@ Matrix PrecomputeQuadLineParameters(const Quad& bounds) {
   result.vec[1] = computeLine(topRight, botRight);  // Right
   result.vec[2] = computeLine(botRight, botLeft);   // Bottom
   result.vec[3] = computeLine(botLeft, topLeft);    // Left
+  return result;
+}
+
+Matrix ExpandQuadLineParameters(const Matrix& input,
+                                Scalar expandX,
+                                Scalar expandY) {
+  auto translateLine = [](const Vector4& v, Scalar translateX,
+                          Scalar translateY) -> Vector4 {
+    // Original line equation: Ax + By + C = 0
+    //    where v = (A, B, C, placeholder)
+    // New line equation after expansion:
+    //    A(x - translateX) + B(y - translateY) + C = 0
+    // => Ax + By + (C - A*translateX - B*translateY) = 0;
+
+    Scalar newZ = v.z - v.x * translateX - v.y * translateY;
+    return Vector4(v.x, v.y, newZ, v.w);
+  };
+  Matrix result;
+  result.vec[0] = translateLine(input.vec[0], expandX, -expandY);   // Top
+  result.vec[1] = translateLine(input.vec[1], expandX, expandY);    // Right
+  result.vec[2] = translateLine(input.vec[2], -expandX, expandY);   // Bottom
+  result.vec[3] = translateLine(input.vec[3], -expandX, -expandY);  // Left
   return result;
 }
 
@@ -625,7 +664,10 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
 
           GaussianBlurFragmentShader::FragInfo frag_info;
           frag_info.quad_line_params =
-              PrecomputeQuadLineParameters(blur_info.blur_uv_bounds.value())
+              ExpandQuadLineParameters(PrecomputeQuadLineParameters(
+                                           blur_info.blur_uv_bounds.value()),
+                                       1.0f / subpass_size.width,
+                                       1.0f / subpass_size.height)
                   .Transpose();
           GaussianBlurFragmentShader::BindFragInfo(
               pass, data_host_buffer.EmplaceUniform(frag_info));
@@ -909,9 +951,9 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   std::optional<Quad> source_bounds;
   if (bounds_.has_value()) {
     Quad global_bounds = bounds_->GetTransformedPoints(effect_transform);
-    source_bounds =
+    source_bounds = RotateQuadIfNecessary(
         RemapQuadCoords(snapshot_entity.GetTransform().Transform(global_bounds),
-                        input_snapshot->texture->GetYCoordScale());
+                        input_snapshot->texture->GetYCoordScale()));
   }
 
   if (blur_info.scaled_sigma.x < kEhCloseEnough &&
