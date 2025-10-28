@@ -5470,7 +5470,7 @@ targets:
       os: Mac-15.5
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16c5032a"
+          "sdk_version": "17a5295f"
         }
 
   - name: Mac_ios fullscreen_textfield_perf_ios__e2e_summary
