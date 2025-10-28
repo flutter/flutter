@@ -2424,6 +2424,25 @@ void main() {
     },
     variant: TargetPlatformVariant.desktop(),
   );
+
+  testWidgets('ReorderableListView does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: ReorderableListView(
+              children: const <Widget>[
+                Text(key: Key('x'), 'X'),
+                Text(key: Key('y'), 'Y'),
+              ],
+              onReorder: (_, _) {},
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ReorderableListView)), Size.zero);
+  });
 }
 
 Future<void> longPressDrag(WidgetTester tester, Offset start, Offset end) async {
