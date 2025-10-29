@@ -476,6 +476,8 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   /// True if the app project uses Swift.
   bool get isSwift => appDelegateSwift.existsSync();
 
+  /// Prints a warning if any plugin(s) are excluding `arm64` architecture.
+  ///
   /// Xcode 26 no longer allows you to build x86-only architecture for the simulator
   Future<void> checkForPluginsExcludingArmSimulator() async {
     final Directory podXcodeProject = hostAppRoot
@@ -499,16 +501,18 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
 
     final List<Plugin> allPlugins = await findPlugins(parent);
     final iosPluginTargetNames = <String>{
-      for (final Plugin p in allPlugins)
-        if (p.platforms.containsKey(IOSPlugin.kConfigKey)) p.name,
+      for (final Plugin plugin in allPlugins)
+        if (plugin.platforms.containsKey(IOSPlugin.kConfigKey)) plugin.name,
     };
+    if (iosPluginTargetNames.isEmpty) {
+      return;
+    }
 
     final targetHeader = RegExp(
       r'^Build settings for action build and target "?([^":\r\n]+)"?:\s*$',
     );
-    final excludedLine = RegExp(r'^\s*EXCLUDED_ARCHS(?:\[.*\])?\s*=\s*(.+)$');
 
-    final pluginsExcludingArmArch = <String>[];
+    final pluginsExcludingArmArch = <String>{};
     String? currentTarget;
 
     for (final String eachLine in buildSettings.split('\n')) {
@@ -520,16 +524,24 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
         continue;
       }
 
-      final RegExpMatch? excludedMatch = excludedLine.firstMatch(settingsLine);
-      if (excludedMatch != null && currentTarget != null) {
-        if (!iosPluginTargetNames.contains(currentTarget)) {
-          continue;
-        }
-        final String rhs = excludedMatch.group(1)!.replaceAll(';', '').trim();
-        final Set<String> tokens = rhs.split(RegExp(r'\s+')).toSet();
-        if (tokens.contains('arm64')) {
-          pluginsExcludingArmArch.add(currentTarget);
-        }
+      if (currentTarget == null || !iosPluginTargetNames.contains(currentTarget)) {
+        continue;
+      }
+
+      final String leftTrimmed = settingsLine.trimLeft();
+      if (!leftTrimmed.startsWith('EXCLUDED_ARCHS') || !leftTrimmed.contains('=')) {
+        continue;
+      }
+
+      final int equalsIndex = leftTrimmed.indexOf('=');
+      if (equalsIndex < 0) {
+        continue;
+      }
+      final String rhs = leftTrimmed.substring(equalsIndex + 1).replaceAll(';', ' ').trim();
+
+      final Iterable<String> tokens = rhs.split(RegExp(r'\s+')).where((t) => t.isNotEmpty);
+      if (tokens.contains('arm64')) {
+        pluginsExcludingArmArch.add(currentTarget);
       }
     }
 
@@ -537,9 +549,9 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       final String list = pluginsExcludingArmArch.map((String n) => '  - $n').join('\n');
 
       globals.logger.printWarning(
-        'The following plugins are excluding the arm64 architecture, which is a requirement for Xcode 26+:\n'
+        'The following plugin(s) are excluding the arm64 architecture, which is a requirement for Xcode 26+:\n'
         '$list\n'
-        'Consider installing the "Universal" Xcode or file an issue with the plugins to support arm64.',
+        'Consider installing the "Universal" Xcode or file an issue with the plugin(s) to support arm64.',
       );
     }
   }
