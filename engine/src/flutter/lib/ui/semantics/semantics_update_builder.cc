@@ -41,6 +41,7 @@ void SemanticsUpdateBuilder::updateNode(
     int platformViewId,
     int scrollChildren,
     int scrollIndex,
+    int traversalParent,
     double scrollPosition,
     double scrollExtentMax,
     double scrollExtentMin,
@@ -62,6 +63,7 @@ void SemanticsUpdateBuilder::updateNode(
     std::string tooltip,
     int textDirection,
     const tonic::Float64List& transform,
+    const tonic::Float64List& hitTestTransform,
     const tonic::Int32List& childrenInTraversalOrder,
     const tonic::Int32List& childrenInHitTestOrder,
     const tonic::Int32List& localContextActions,
@@ -90,6 +92,7 @@ void SemanticsUpdateBuilder::updateNode(
   node.platformViewId = platformViewId;
   node.scrollChildren = scrollChildren;
   node.scrollIndex = scrollIndex;
+  node.traversalParent = traversalParent;
   node.scrollPosition = scrollPosition;
   node.scrollExtentMax = scrollExtentMax;
   node.scrollExtentMin = scrollExtentMin;
@@ -113,6 +116,11 @@ void SemanticsUpdateBuilder::updateNode(
     scalarTransform[i] = SafeNarrow(transform.data()[i]);
   }
   node.transform = SkM44::ColMajor(scalarTransform);
+  SkScalar scalarHitTestTransform[16];
+  for (int i = 0; i < 16; ++i) {
+    scalarHitTestTransform[i] = SafeNarrow(hitTestTransform.data()[i]);
+  }
+  node.hitTestTransform = SkM44::ColMajor(scalarHitTestTransform);
   node.childrenInTraversalOrder =
       std::vector<int32_t>(childrenInTraversalOrder.data(),
                            childrenInTraversalOrder.data() +
