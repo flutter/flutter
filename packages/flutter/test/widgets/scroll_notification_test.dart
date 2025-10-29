@@ -46,7 +46,6 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(events.length, 6);
-    // user scroll do not trigger the ScrollMetricsNotification.
     expect(events[0] is ScrollStartNotification, true);
     expect(events[1] is UserScrollNotification, true);
     expect(events[2] is ScrollUpdateNotification, true);
