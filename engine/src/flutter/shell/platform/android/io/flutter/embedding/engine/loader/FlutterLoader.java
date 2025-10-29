@@ -35,6 +35,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Finds Flutter resources in an application APK and also loads Flutter's native library. */
 public class FlutterLoader {
@@ -303,89 +304,100 @@ public class FlutterLoader {
               .getApplicationInfo(
                   applicationContext.getPackageName(), PackageManager.GET_META_DATA);
       Bundle applicationMetaData = applicationInfo.metaData;
-      boolean oldGenHeapSizeSet = false;
-      boolean isLeakVMSet = false;
+      final AtomicBoolean oldGenHeapSizeSet = new AtomicBoolean(false);
+      final AtomicBoolean isLeakVMSet = new AtomicBoolean(false);
 
       if (applicationMetaData != null) {
-        for (String metadataKey : applicationMetaData.keySet()) {
-          if (metadataKey.equals(FLUTTER_EMBEDDING_KEY)) {
-            // Metadata key used for GeneratedPluginRegistrant.java generation; skip adding shell
-            // argument.
-            continue;
-          }
+        applicationMetaData.keySet().stream()
+            .filter(metadataKey -> !metadataKey.equals(FLUTTER_EMBEDDING_KEY))
+            .forEach(
+                metadataKey -> {
+                  // String metadataKey = entry.getKey();
+                  FlutterEngineManifestFlags.Flag flag =
+                      FlutterEngineManifestFlags.getFlagByMetaDataKey(metadataKey);
+                  if (flag != null) {
+                    // Only add flags that are allowed in the current build mode.
+                    if (flag.allowedInRelease || !BuildConfig.RELEASE) {
+                      if (flag == FlutterEngineManifestFlags.OLD_GEN_HEAP_SIZE) {
+                        // Mark if old gen heap size is set to track whether or not to set default
+                        // internally.
+                        oldGenHeapSizeSet.set(true);
+                      } else if (flag == FlutterEngineManifestFlags.LEAK_VM) {
+                        // Mark if leak VM is set to track whether or not to set default internally.
+                        isLeakVMSet.set(true);
+                      } else if (flag
+                          == FlutterEngineManifestFlags.DISABLE_MERGED_PLATFORM_UI_THREAD) {
+                        // The --disable-merged-platform-ui-thread flag has been disabled on
+                        // Android.
+                        throw new IllegalArgumentException(
+                            FlutterEngineManifestFlags.DISABLE_MERGED_PLATFORM_UI_THREAD.metaDataKey
+                                + " is no longer allowed.");
+                      } else if (flag == FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME) {
+                        // Perform security check for path containing application's compiled Dart
+                        // code and
+                        // potentially user-provided compiled native code.
+                        String aotSharedLibraryNameArg = applicationMetaData.getString(metadataKey);
+                        String safeAotSharedLibraryName = null;
+                        try {
+                          safeAotSharedLibraryName =
+                              getSafeAotSharedLibraryName(
+                                  applicationContext, aotSharedLibraryNameArg);
+                        } catch (IOException exception) {
+                          Log.w(
+                              TAG,
+                              "Error while validating AOT shared library name flag: "
+                                  + aotSharedLibraryNameArg,
+                              exception);
+                        }
+                        if (safeAotSharedLibraryName != null) {
+                          shellArgs.add(
+                              FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME.commandLineArgument
+                                  + safeAotSharedLibraryName);
+                        } else {
+                          // If the library path is not safe, we will skip adding this argument.
+                          Log.w(
+                              TAG,
+                              "Skipping unsafe AOT shared library name flag: "
+                                  + aotSharedLibraryNameArg
+                                  + ". Please ensure that the library is vetted and placed in your application's internal storage.");
+                        }
+                        return;
+                      }
 
-          FlutterEngineManifestFlags.Flag flag =
-              FlutterEngineManifestFlags.getFlagByMetaDataKey(metadataKey);
-          if (flag != null) {
-            // Only add flags that are allowed in the current build mode.
-            if (flag.allowedInRelease || !BuildConfig.RELEASE) {
-              if (flag == FlutterEngineManifestFlags.OLD_GEN_HEAP_SIZE) {
-                // Mark if old gen heap size is set to track whether or not to set default
-                // internally.
-                oldGenHeapSizeSet = true;
-              } else if (flag == FlutterEngineManifestFlags.LEAK_VM) {
-                // Mark if leak VM is set to track whether or not to set default internally.
-                isLeakVMSet = true;
-              } else if (flag == FlutterEngineManifestFlags.DISABLE_MERGED_PLATFORM_UI_THREAD) {
-                // The --disable-merged-platform-ui-thread flag has been disabled on Android.
-                throw new IllegalArgumentException(
-                    FlutterEngineManifestFlags.DISABLE_MERGED_PLATFORM_UI_THREAD.metaDataKey
-                        + " is no longer allowed.");
-              } else if (flag == FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME) {
-                // Perform security check for path containing application's compiled Dart code and
-                // potentially user-provided compiled native code.
-                String aotSharedLibraryNameArg = applicationMetaData.getString(metadataKey);
-                String safeAotSharedLibraryName =
-                    getSafeAotSharedLibraryName(applicationContext, aotSharedLibraryNameArg);
-                if (safeAotSharedLibraryName != null) {
-                  shellArgs.add(
-                      FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME.commandLineArgument
-                          + safeAotSharedLibraryName);
-                } else {
-                  // If the library path is not safe, we will skip adding this argument.
-                  Log.w(
-                      TAG,
-                      "Skipping unsafe AOT shared library name flag: "
-                          + aotSharedLibraryNameArg
-                          + ". Please ensure that the library is vetted and placed in your application's internal storage.");
-                }
-                continue;
-              }
-
-              // Add flag to shell args.
-              String arg = flag.commandLineArgument;
-              if (flag.hasValue()) {
-                String value = applicationMetaData.get(metadataKey).toString();
-                if (value == null) {
-                  Log.w(
-                      TAG,
-                      "Flag with metadata key "
-                          + metadataKey
-                          + " requires a value, but no value was found. Please ensure that the value is a string.");
-                  continue;
-                }
-                arg += value;
-              }
-              Log.e("CAMILLE", "Adding manifest flag: " + arg);
-              shellArgs.add(arg);
-            } else {
-              // Manifest flag is not allowed in release builds.
-              Log.w(
-                  TAG,
-                  "Flag with metadata key "
-                      + metadataKey
-                      + " is not allowed in release builds and will be ignored. Please remove this flag from your release build manifest.");
-            }
-          } else {
-            // Manifest flag was not recognized.
-            Log.w(
-                TAG,
-                "Flag with metadata key "
-                    + metadataKey
-                    + " is not recognized. Please ensure that the flag is defined in the FlutterEngineManifestFlags.");
-            continue;
-          }
-        }
+                      // Add flag to shell args.
+                      String arg = flag.commandLineArgument;
+                      if (flag.hasValue()) {
+                        Object valueObj = applicationMetaData.get(metadataKey);
+                        String value = valueObj != null ? valueObj.toString() : null;
+                        if (value == null) {
+                          Log.w(
+                              TAG,
+                              "Flag with metadata key "
+                                  + metadataKey
+                                  + " requires a value, but no value was found. Please ensure that the value is a string.");
+                          return;
+                        }
+                        arg += value;
+                      }
+                      Log.e("CAMILLE", "Adding manifest flag: " + arg);
+                      shellArgs.add(arg);
+                    } else {
+                      // Manifest flag is not allowed in release builds.
+                      Log.w(
+                          TAG,
+                          "Flag with metadata key "
+                              + metadataKey
+                              + " is not allowed in release builds and will be ignored. Please remove this flag from your release build manifest.");
+                    }
+                  } else {
+                    // Manifest flag was not recognized.
+                    Log.w(
+                        TAG,
+                        "Flag with metadata key "
+                            + metadataKey
+                            + " is not recognized. Please ensure that the flag is defined in the FlutterEngineManifestFlags.");
+                  }
+                });
       }
 
       // Add engine flags set by default internally. Some of these settings can be overridden
@@ -435,7 +447,7 @@ public class FlutterLoader {
         shellArgs.add("--log-tag=" + settings.getLogTag());
       }
 
-      if (!oldGenHeapSizeSet) {
+      if (!oldGenHeapSizeSet.get()) {
         // Default to half of total memory.
         ActivityManager activityManager =
             (ActivityManager) applicationContext.getSystemService(Context.ACTIVITY_SERVICE);
@@ -457,7 +469,7 @@ public class FlutterLoader {
 
       shellArgs.add("--prefetched-default-font-manager");
 
-      if (!isLeakVMSet) {
+      if (!isLeakVMSet.get()) {
         shellArgs.add(FlutterEngineManifestFlags.LEAK_VM.commandLineArgument + "true");
       }
 
