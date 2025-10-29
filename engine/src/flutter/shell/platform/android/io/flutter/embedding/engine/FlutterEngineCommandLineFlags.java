@@ -5,7 +5,6 @@
 package io.flutter.embedding.engine;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
 import java.util.*;
 
 /**
@@ -194,50 +193,4 @@ public class FlutterEngineCommandLineFlags {
               ENABLE_OPENGL_GPU_TRACING,
               ENABLE_VULKAN_GPU_TRACING,
               LEAK_VM));
-
-  /**
-   * Converts a command line flag string to camel case that can be used as a manifest metadata name
-   * if the flag is configurable by manifest. See {@link FlutterEngineManifestFlags} for the list of
-   * flags for such available flags.
-   *
-   * <p>Examples: " --old-gen-heap-size=" becomes "oldGenHeapSize" and "--use-test-fonts" becomes
-   * "useTestFonts".
-   *
-   * @param flag the command line flag (e.g., "--trace-startup")
-   * @return the camel case version (e.g., "traceStartup")
-   */
-  @NonNull
-  public static String toManifestMetadataName(@NonNull String flag) {
-    // Remove leading dashes.
-    String withoutDashes = flag.replaceFirst("^-+", "");
-
-    // Remove trailing '=' if present.
-    if (withoutDashes.endsWith("=")) {
-      withoutDashes = withoutDashes.substring(0, withoutDashes.length() - 1);
-    }
-
-    // Convert the rest of the flag name to camel case without dashes.
-    String[] parts = withoutDashes.split("[-_]");
-
-    StringBuilder result = new StringBuilder();
-    for (int i = 0; i < parts.length; i++) {
-      String part = parts[i];
-      if (part.isEmpty()) {
-        continue;
-      }
-
-      if (i == 0) {
-        // First part stays lowercase
-        result.append(part.toLowerCase());
-      } else {
-        // Subsequent parts are capitalized
-        result.append(Character.toUpperCase(part.charAt(0)));
-        if (part.length() > 1) {
-          result.append(part.substring(1).toLowerCase());
-        }
-      }
-    }
-
-    return result.toString();
-  }
 }
