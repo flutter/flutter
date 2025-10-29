@@ -88,6 +88,7 @@ class Contents {
     bool msaa_enabled = true;
     int32_t mip_count = 1;
     std::string_view label = "Snapshot";
+    int32_t coverage_expansion = 1;
   };
 
   //----------------------------------------------------------------------------

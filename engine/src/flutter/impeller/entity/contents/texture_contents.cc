@@ -96,7 +96,8 @@ std::optional<Snapshot> TextureContents::RenderToSnapshot(
            options.sampler_descriptor.value_or(sampler_descriptor_),
        .msaa_enabled = true,
        .mip_count = options.mip_count,
-       .label = options.label});
+       .label = options.label,
+       .coverage_expansion = options.coverage_expansion});
 }
 
 bool TextureContents::Render(const ContentContext& renderer,

@@ -72,7 +72,7 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
   // behavior. Not doing so results in a coverage leak for filters that support
   // customizing the input sampling mode. Snapshots of contents should be
   // theoretically treated as infinite size just like layers.
-  coverage = coverage->Expand(1);
+  coverage = coverage->Expand(options.coverage_expansion);
 
   if (options.coverage_limit.has_value()) {
     coverage = coverage->Intersection(*options.coverage_limit);
