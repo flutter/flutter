@@ -85,17 +85,14 @@ void main() {
       const WindowPositioner positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.topRight,
         childAnchor: WindowPositionerAnchor.topLeft,
-        constraintAdjustment: <WindowPositionerConstraintAdjustment>{
-          WindowPositionerConstraintAdjustment.slideY,
-          WindowPositionerConstraintAdjustment.resizeX,
-        },
+        constraintAdjustment: WindowPositionerConstraintAdjustment(slideY: true, resizeX: true),
       );
 
       final Rect childRect = positioner.placeWindow(
         childSize: clientChildSize,
         anchorRect: overlappingRight,
         parentRect: clientParentRect,
-        outputRect: clientDisplayArea,
+        displayRect: clientDisplayArea,
       );
 
       final Offset expectedPosition = overlappingRight.topRight;
@@ -115,16 +112,14 @@ void main() {
       const WindowPositioner positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.topRight,
         childAnchor: WindowPositionerAnchor.bottomRight,
-        constraintAdjustment: <WindowPositionerConstraintAdjustment>{
-          WindowPositionerConstraintAdjustment.slideX,
-        },
+        constraintAdjustment: WindowPositionerConstraintAdjustment(slideX: true),
       );
 
       final Rect childRect = positioner.placeWindow(
         childSize: clientChildSize,
         anchorRect: overlappingAbove,
         parentRect: clientParentRect,
-        outputRect: clientDisplayArea,
+        displayRect: clientDisplayArea,
       );
 
       final Offset expectedPosition =
@@ -147,17 +142,14 @@ void main() {
         parentAnchor: WindowPositionerAnchor.topRight,
         childAnchor: WindowPositionerAnchor.topLeft,
         offset: Offset(rectSize, 0),
-        constraintAdjustment: <WindowPositionerConstraintAdjustment>{
-          WindowPositionerConstraintAdjustment.slideY,
-          WindowPositionerConstraintAdjustment.resizeX,
-        },
+        constraintAdjustment: WindowPositionerConstraintAdjustment(slideY: true, resizeX: true),
       );
 
       final Rect childRect = positioner.placeWindow(
         childSize: clientChildSize,
         anchorRect: midRight,
         parentRect: clientParentRect,
-        outputRect: clientDisplayArea,
+        displayRect: clientDisplayArea,
       );
 
       final Offset expectedPosition = midRight.topRight;
@@ -179,16 +171,14 @@ void main() {
         parentAnchor: WindowPositionerAnchor.topRight,
         childAnchor: WindowPositionerAnchor.bottomRight,
         offset: Offset(0, -rectSize),
-        constraintAdjustment: <WindowPositionerConstraintAdjustment>{
-          WindowPositionerConstraintAdjustment.slideX,
-        },
+        constraintAdjustment: WindowPositionerConstraintAdjustment(slideX: true),
       );
 
       final Rect childRect = positioner.placeWindow(
         childSize: clientChildSize,
         anchorRect: midTop,
         parentRect: clientParentRect,
-        outputRect: clientDisplayArea,
+        displayRect: clientDisplayArea,
       );
 
       final Offset expectedPosition =
@@ -213,17 +203,14 @@ void main() {
         parentAnchor: WindowPositionerAnchor.bottomLeft,
         childAnchor: WindowPositionerAnchor.topRight,
         offset: Offset(-rectSize, rectSize),
-        constraintAdjustment: <WindowPositionerConstraintAdjustment>{
-          WindowPositionerConstraintAdjustment.resizeX,
-          WindowPositionerConstraintAdjustment.resizeY,
-        },
+        constraintAdjustment: WindowPositionerConstraintAdjustment(resizeX: true, resizeY: true),
       );
 
       final Rect childRect = positioner.placeWindow(
         childSize: clientChildSize,
         anchorRect: belowLeft,
         parentRect: clientParentRect,
-        outputRect: clientDisplayArea,
+        displayRect: clientDisplayArea,
       );
 
       final Offset expectedPosition =
@@ -234,6 +221,20 @@ void main() {
     });
 
     group('Can attach by every anchor given no constraint adjustment', () {
+      Offset anchorPositionFor(WindowPositionerAnchor anchor, Rect rect) {
+        return switch (anchor) {
+          WindowPositionerAnchor.center => rect.center,
+          WindowPositionerAnchor.top => rect.topCenter,
+          WindowPositionerAnchor.bottom => rect.bottomCenter,
+          WindowPositionerAnchor.left => rect.centerLeft,
+          WindowPositionerAnchor.right => rect.centerRight,
+          WindowPositionerAnchor.topLeft => rect.topLeft,
+          WindowPositionerAnchor.bottomLeft => rect.bottomLeft,
+          WindowPositionerAnchor.topRight => rect.topRight,
+          WindowPositionerAnchor.bottomRight => rect.bottomRight,
+        };
+      }
+
       for (final WindowPositionerAnchor parentAnchor in WindowPositionerAnchor.values) {
         for (final WindowPositionerAnchor childAnchor in WindowPositionerAnchor.values) {
           test('parent: $parentAnchor, child: $childAnchor', () {
@@ -247,12 +248,12 @@ void main() {
               childSize: childSize,
               anchorRect: anchorRect,
               parentRect: parentRect,
-              outputRect: displayArea,
+              displayRect: displayArea,
             );
 
             expect(
-              childAnchor._anchorPositionFor(childRect),
-              parentAnchor._anchorPositionFor(anchorRect),
+              anchorPositionFor(childAnchor, childRect),
+              anchorPositionFor(parentAnchor, anchorRect),
             );
           });
         }
@@ -266,9 +267,7 @@ void main() {
         parentAnchor: WindowPositionerAnchor.topRight,
         childAnchor: WindowPositionerAnchor.topLeft,
         offset: Offset(xOffset, yOffset),
-        constraintAdjustment: <WindowPositionerConstraintAdjustment>{
-          WindowPositionerConstraintAdjustment.flipX,
-        },
+        constraintAdjustment: WindowPositionerConstraintAdjustment(flipX: true),
       );
 
       final Rect anchorRect = anchorRectFor(rectangleNearRhs);
@@ -276,7 +275,7 @@ void main() {
         childSize: childSize,
         anchorRect: anchorRect,
         parentRect: parentRect,
-        outputRect: displayArea,
+        displayRect: displayArea,
       );
 
       final Offset expectedPosition =
@@ -292,9 +291,7 @@ void main() {
         parentAnchor: WindowPositionerAnchor.bottomLeft,
         childAnchor: WindowPositionerAnchor.topLeft,
         offset: Offset(xOffset, yOffset),
-        constraintAdjustment: <WindowPositionerConstraintAdjustment>{
-          WindowPositionerConstraintAdjustment.flipY,
-        },
+        constraintAdjustment: WindowPositionerConstraintAdjustment(flipY: true),
       );
 
       final Rect anchorRect = anchorRectFor(rectangleNearBottom);
@@ -302,7 +299,7 @@ void main() {
         childSize: childSize,
         anchorRect: anchorRect,
         parentRect: parentRect,
-        outputRect: displayArea,
+        displayRect: displayArea,
       );
 
       final Offset expectedPosition =
@@ -318,10 +315,7 @@ void main() {
         parentAnchor: WindowPositionerAnchor.bottomRight,
         childAnchor: WindowPositionerAnchor.topLeft,
         offset: Offset(xOffset, yOffset),
-        constraintAdjustment: <WindowPositionerConstraintAdjustment>{
-          WindowPositionerConstraintAdjustment.flipX,
-          WindowPositionerConstraintAdjustment.flipY,
-        },
+        constraintAdjustment: WindowPositionerConstraintAdjustment(flipX: true, flipY: true),
       );
 
       final Rect anchorRect = anchorRectFor(rectangleNearBothBottomRight);
@@ -329,7 +323,7 @@ void main() {
         childSize: childSize,
         anchorRect: anchorRect,
         parentRect: parentRect,
-        outputRect: displayArea,
+        displayRect: displayArea,
       );
 
       final Offset expectedPosition =
@@ -344,9 +338,7 @@ void main() {
       const WindowPositioner positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.topRight,
         childAnchor: WindowPositionerAnchor.topLeft,
-        constraintAdjustment: <WindowPositionerConstraintAdjustment>{
-          WindowPositionerConstraintAdjustment.slideX,
-        },
+        constraintAdjustment: WindowPositionerConstraintAdjustment(slideX: true),
       );
 
       final Rect anchorRect = anchorRectFor(rectangleNearRhs);
@@ -354,7 +346,7 @@ void main() {
         childSize: childSize,
         anchorRect: anchorRect,
         parentRect: parentRect,
-        outputRect: displayArea,
+        displayRect: displayArea,
       );
 
       expect(childRect.topLeft.dx, displayArea.right - childSize.width);
@@ -364,9 +356,7 @@ void main() {
       const WindowPositioner positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.topLeft,
         childAnchor: WindowPositionerAnchor.topRight,
-        constraintAdjustment: <WindowPositionerConstraintAdjustment>{
-          WindowPositionerConstraintAdjustment.slideX,
-        },
+        constraintAdjustment: WindowPositionerConstraintAdjustment(slideX: true),
       );
 
       final Rect anchorRect = anchorRectFor(rectangleNearLeftSide);
@@ -374,7 +364,7 @@ void main() {
         childSize: childSize,
         anchorRect: anchorRect,
         parentRect: parentRect,
-        outputRect: displayArea,
+        displayRect: displayArea,
       );
 
       expect(childRect.topLeft.dx, displayArea.left);
@@ -384,9 +374,7 @@ void main() {
       const WindowPositioner positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.bottomLeft,
         childAnchor: WindowPositionerAnchor.topLeft,
-        constraintAdjustment: <WindowPositionerConstraintAdjustment>{
-          WindowPositionerConstraintAdjustment.slideY,
-        },
+        constraintAdjustment: WindowPositionerConstraintAdjustment(slideY: true),
       );
 
       final Rect anchorRect = anchorRectFor(rectangleNearBottom);
@@ -394,7 +382,7 @@ void main() {
         childSize: childSize,
         anchorRect: anchorRect,
         parentRect: parentRect,
-        outputRect: displayArea,
+        displayRect: displayArea,
       );
 
       expect(childRect.topLeft.dy, displayArea.bottom - childSize.height);
@@ -404,9 +392,7 @@ void main() {
       const WindowPositioner positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.topLeft,
         childAnchor: WindowPositionerAnchor.bottomLeft,
-        constraintAdjustment: <WindowPositionerConstraintAdjustment>{
-          WindowPositionerConstraintAdjustment.slideY,
-        },
+        constraintAdjustment: WindowPositionerConstraintAdjustment(slideY: true),
       );
 
       final Rect anchorRect = anchorRectFor(rectangleNearAllSides);
@@ -414,7 +400,7 @@ void main() {
         childSize: childSize,
         anchorRect: anchorRect,
         parentRect: parentRect,
-        outputRect: displayArea,
+        displayRect: displayArea,
       );
 
       expect(childRect.topLeft.dy, displayArea.top);
@@ -424,10 +410,7 @@ void main() {
       const WindowPositioner positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.bottomLeft,
         childAnchor: WindowPositionerAnchor.topLeft,
-        constraintAdjustment: <WindowPositionerConstraintAdjustment>{
-          WindowPositionerConstraintAdjustment.slideX,
-          WindowPositionerConstraintAdjustment.slideY,
-        },
+        constraintAdjustment: WindowPositionerConstraintAdjustment(slideX: true, slideY: true),
       );
 
       final Rect anchorRect = anchorRectFor(rectangleNearBothBottomRight);
@@ -435,7 +418,7 @@ void main() {
         childSize: childSize,
         anchorRect: anchorRect,
         parentRect: parentRect,
-        outputRect: displayArea,
+        displayRect: displayArea,
       );
 
       final Offset expectedPosition = Offset(
@@ -450,9 +433,7 @@ void main() {
       const WindowPositioner positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.topRight,
         childAnchor: WindowPositionerAnchor.topLeft,
-        constraintAdjustment: <WindowPositionerConstraintAdjustment>{
-          WindowPositionerConstraintAdjustment.resizeX,
-        },
+        constraintAdjustment: WindowPositionerConstraintAdjustment(resizeX: true),
       );
 
       final Rect anchorRect = anchorRectFor(rectangleNearRhs);
@@ -460,7 +441,7 @@ void main() {
         childSize: childSize,
         anchorRect: anchorRect,
         parentRect: parentRect,
-        outputRect: displayArea,
+        displayRect: displayArea,
       );
 
       expect(childRect.width, displayArea.right - (anchorRect.left + anchorRect.width));
@@ -470,9 +451,7 @@ void main() {
       const WindowPositioner positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.topLeft,
         childAnchor: WindowPositionerAnchor.topRight,
-        constraintAdjustment: <WindowPositionerConstraintAdjustment>{
-          WindowPositionerConstraintAdjustment.resizeX,
-        },
+        constraintAdjustment: WindowPositionerConstraintAdjustment(resizeX: true),
       );
 
       final Rect anchorRect = anchorRectFor(rectangleNearLeftSide);
@@ -480,7 +459,7 @@ void main() {
         childSize: childSize,
         anchorRect: anchorRect,
         parentRect: parentRect,
-        outputRect: displayArea,
+        displayRect: displayArea,
       );
 
       expect(childRect.width, anchorRect.left - displayArea.left);
@@ -490,9 +469,7 @@ void main() {
       const WindowPositioner positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.bottomLeft,
         childAnchor: WindowPositionerAnchor.topLeft,
-        constraintAdjustment: <WindowPositionerConstraintAdjustment>{
-          WindowPositionerConstraintAdjustment.resizeY,
-        },
+        constraintAdjustment: WindowPositionerConstraintAdjustment(resizeY: true),
       );
 
       final Rect anchorRect = anchorRectFor(rectangleNearAllSides);
@@ -500,7 +477,7 @@ void main() {
         childSize: childSize,
         anchorRect: anchorRect,
         parentRect: parentRect,
-        outputRect: displayArea,
+        displayRect: displayArea,
       );
 
       expect(childRect.height, displayArea.bottom - (anchorRect.top + anchorRect.height));
@@ -510,9 +487,7 @@ void main() {
       const WindowPositioner positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.topLeft,
         childAnchor: WindowPositionerAnchor.bottomLeft,
-        constraintAdjustment: <WindowPositionerConstraintAdjustment>{
-          WindowPositionerConstraintAdjustment.resizeY,
-        },
+        constraintAdjustment: WindowPositionerConstraintAdjustment(resizeY: true),
       );
 
       final Rect anchorRect = anchorRectFor(rectangleNearAllSides);
@@ -520,7 +495,7 @@ void main() {
         childSize: childSize,
         anchorRect: anchorRect,
         parentRect: parentRect,
-        outputRect: displayArea,
+        displayRect: displayArea,
       );
 
       expect(childRect.height, anchorRect.top - displayArea.top);
@@ -530,10 +505,7 @@ void main() {
       const WindowPositioner positioner = WindowPositioner(
         parentAnchor: WindowPositionerAnchor.bottomRight,
         childAnchor: WindowPositionerAnchor.topLeft,
-        constraintAdjustment: <WindowPositionerConstraintAdjustment>{
-          WindowPositionerConstraintAdjustment.resizeX,
-          WindowPositionerConstraintAdjustment.resizeY,
-        },
+        constraintAdjustment: WindowPositionerConstraintAdjustment(resizeX: true, resizeY: true),
       );
 
       final Rect anchorRect = anchorRectFor(rectangleNearBothBottomRight);
@@ -541,7 +513,7 @@ void main() {
         childSize: childSize,
         anchorRect: anchorRect,
         parentRect: parentRect,
-        outputRect: displayArea,
+        displayRect: displayArea,
       );
 
       final Size expectedSize = Size(

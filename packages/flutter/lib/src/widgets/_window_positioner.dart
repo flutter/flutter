@@ -200,58 +200,61 @@ enum WindowPositionerAnchor {
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
-enum WindowPositionerConstraintAdjustment {
-  /// If [slideX] is specified in [WindowPositioner.constraintAdjustment]
-  /// and the window would be displayed off the screen in the X-axis, then it will be
+class WindowPositionerConstraintAdjustment {
+  const WindowPositionerConstraintAdjustment({
+    this.slideX = false,
+    this.slideY = false,
+    this.flipX = false,
+    this.flipY = false,
+    this.resizeX = false,
+    this.resizeY = false,
+  });
+
+  /// If [slideX] is `true` and the window would be displayed off the screen in the X-axis,then it will be
   /// translated in the X-direction (either negative or positive) in order
   /// to best display the window on screen.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  slideX,
+  final bool slideX;
 
-  /// If [slideY] is specified in [WindowPositioner.constraintAdjustment]
-  /// and the window would be displayed off the screen in the Y-axis, then it will be
+  /// If [slideY] is `true` and the window would be displayed off the screen in the Y-axis, then it will be
   /// translated in the Y-direction (either negative or positive) in order
   /// to best display the window on screen.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  slideY,
+  final bool slideY;
 
-  /// If [flipX] is specified in [WindowPositioner.constraintAdjustment]
-  /// and the window would be displayed off the screen in the X-axis in one direction, then
+  /// If [flipX] is `true` and the window would be displayed off the screen in the X-axis in one direction, then
   /// it will be flipped to the opposite side of its parent in order to show
   /// to best display the window on screen.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  flipX,
+  final bool flipX;
 
-  /// If [flipY] is specified in [WindowPositioner.constraintAdjustment]
-  /// and then window would be displayed off the screen in the Y-axis in one direction, then
+  /// If [flipY] is `true` and then window would be displayed off the screen in the Y-axis in one direction, then
   /// it will be flipped to the opposite side of its parent in order to show
   /// it on screen.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  flipY,
+  final bool flipY;
 
-  /// If [resizeX] is specified in [WindowPositioner.constraintAdjustment]
-  /// and the window would be displayed off the screen in the X-axis, then
+  /// If [resizeX] is `true` and the window would be displayed off the screen in the X-axis, then
   /// its width will be reduced such that it fits on screen.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  resizeX,
+  final bool resizeX;
 
-  /// If [resizeY] is specified in [WindowPositioner.constraintAdjustment]
-  /// and the window would be displayed off the screen in the Y-axis, then
+  /// If `true` and the window would be displayed off the screen in the Y-axis, then
   /// its height will be reduced such that it fits on screen.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  resizeY,
+  final bool resizeY;
 }
 
 /// The [WindowPositioner] defines how child windows are placed relative to
@@ -279,7 +282,7 @@ class WindowPositioner {
     this.parentAnchor = WindowPositionerAnchor.center,
     this.childAnchor = WindowPositionerAnchor.center,
     this.offset = Offset.zero,
-    this.constraintAdjustment = const <WindowPositionerConstraintAdjustment>{},
+    this.constraintAdjustment = const WindowPositionerConstraintAdjustment(),
   });
 
   /// Copy a [WindowPositioner] with some fields replaced.
@@ -287,7 +290,7 @@ class WindowPositioner {
     WindowPositionerAnchor? parentAnchor,
     WindowPositionerAnchor? childAnchor,
     Offset? offset,
-    Set<WindowPositionerConstraintAdjustment>? constraintAdjustment,
+    WindowPositionerConstraintAdjustment? constraintAdjustment,
   }) {
     return WindowPositioner(
       parentAnchor: parentAnchor ?? this.parentAnchor,
@@ -355,7 +358,7 @@ class WindowPositioner {
   /// See also:
   ///
   ///  * [WindowPositionerConstraintAdjustment] for details on each adjustment type.
-  final Set<WindowPositionerConstraintAdjustment> constraintAdjustment;
+  final WindowPositionerConstraintAdjustment constraintAdjustment;
 
   /// Computes the screen-space rectangle for a child window placed according to
   /// this [WindowPositioner].
@@ -386,7 +389,7 @@ class WindowPositioner {
       }
     }
 
-    if (constraintAdjustment.contains(WindowPositionerConstraintAdjustment.flipX)) {
+    if (constraintAdjustment.flipX) {
       final Offset result =
           _constrainTo(
             parentRect,
@@ -398,7 +401,7 @@ class WindowPositioner {
       }
     }
 
-    if (constraintAdjustment.contains(WindowPositionerConstraintAdjustment.flipY)) {
+    if (constraintAdjustment.flipY) {
       final Offset result =
           _constrainTo(
             parentRect,
@@ -410,10 +413,7 @@ class WindowPositioner {
       }
     }
 
-    if (constraintAdjustment.containsAll(<WindowPositionerConstraintAdjustment>{
-      WindowPositionerConstraintAdjustment.flipX,
-      WindowPositionerConstraintAdjustment.flipY,
-    })) {
+    if (constraintAdjustment.flipX && constraintAdjustment.flipY) {
       final Offset result =
           _constrainTo(
             parentRect,
@@ -430,7 +430,7 @@ class WindowPositioner {
           _constrainTo(parentRect, parentAnchor._anchorPositionFor(anchorRect) + offset) +
           childAnchor._offsetFor(childSize);
 
-      if (constraintAdjustment.contains(WindowPositionerConstraintAdjustment.slideX)) {
+      if (constraintAdjustment.slideX) {
         final double leftOverhang = result.dx - displayRect.left;
         final double rightOverhang = result.dx + childSize.width - displayRect.right;
         if (leftOverhang < 0.0) {
@@ -440,7 +440,7 @@ class WindowPositioner {
         }
       }
 
-      if (constraintAdjustment.contains(WindowPositionerConstraintAdjustment.slideY)) {
+      if (constraintAdjustment.slideY) {
         final double topOverhang = result.dy - displayRect.top;
         final double bottomOverhang = result.dy + childSize.height - displayRect.bottom;
         if (topOverhang < 0.0) {
@@ -460,7 +460,7 @@ class WindowPositioner {
           _constrainTo(parentRect, parentAnchor._anchorPositionFor(anchorRect) + offset) +
           childAnchor._offsetFor(childSize);
 
-      if (constraintAdjustment.contains(WindowPositionerConstraintAdjustment.resizeX)) {
+      if (constraintAdjustment.resizeX) {
         final double leftOverhang = result.dx - displayRect.left;
         final double rightOverhang = result.dx + childSize.width - displayRect.right;
         if (leftOverhang < 0.0) {
@@ -472,7 +472,7 @@ class WindowPositioner {
         }
       }
 
-      if (constraintAdjustment.contains(WindowPositionerConstraintAdjustment.resizeY)) {
+      if (constraintAdjustment.resizeY) {
         final double topOverhang = result.dy - displayRect.top;
         final double bottomOverhang = result.dy + childSize.height - displayRect.bottom;
         if (topOverhang < 0.0) {
