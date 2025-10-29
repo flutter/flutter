@@ -72,7 +72,7 @@ class _NavRailExampleState extends State<NavRailExample> {
               NavigationRailDestination(
                 icon: Icon(Icons.favorite_border),
                 selectedIcon: Icon(Icons.favorite),
-                padding:EdgeInsets.all(4),
+                padding: EdgeInsets.all(4),
                 label: Text('First'),
               ),
               NavigationRailDestination(
