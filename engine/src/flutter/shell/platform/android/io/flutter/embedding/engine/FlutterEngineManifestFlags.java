@@ -52,7 +52,7 @@ public final class FlutterEngineManifestFlags {
           "SkiaDeterministicRendering",
           true);
   public static final Flag AOT_SHARED_LIBRARY_NAME =
-      new Flag(FlutterEngineCommandLineFlags.AOT_SHARED_LIBRARY_NAME, "AotSharedLibraryName", true);
+      new Flag(FlutterEngineCommandLineFlags.AOT_SHARED_LIBRARY_NAME, "AOTSharedLibraryName", true);
   public static final Flag FLUTTER_ASSETS_DIR =
       new Flag(FlutterEngineCommandLineFlags.FLUTTER_ASSETS_DIR, "FlutterAssetsDir", true);
   public static final Flag OLD_GEN_HEAP_SIZE =
