@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -1174,7 +1175,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: MouseRegion(
             cursor: SystemMouseCursors.forbidden,
-            child: InkWell(mouseCursor: SystemMouseCursors.click, onTap: () {}),
+            child: InkWell(mouseCursor: SystemMouseCursors.cell, onTap: () {}),
           ),
         ),
       ),
@@ -1182,7 +1183,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      SystemMouseCursors.cell,
     );
 
     // Test default of InkWell()
@@ -1200,7 +1201,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test disabled
@@ -1233,7 +1234,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test disabled
@@ -1276,7 +1277,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
 
@@ -2587,6 +2588,20 @@ void main() {
     expect(controller.value.contains(WidgetState.pressed), isFalse);
 
     controller.dispose();
+  });
+
+  testWidgets('InkResponse does not crash in zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(child: SizedBox.shrink(child: InkResponse())),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(InkResponse)), Size.zero);
   });
 
   testWidgets('InkWell does not crash at zero area', (WidgetTester tester) async {

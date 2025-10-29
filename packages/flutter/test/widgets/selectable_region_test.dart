@@ -45,6 +45,15 @@ void main() {
     );
   });
 
+  Future<void> setAppLifecycleState(AppLifecycleState state) async {
+    final ByteData? message = const StringCodec().encodeMessage(state.toString());
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/lifecycle',
+      message,
+      (ByteData? data) {},
+    );
+  }
+
   group('SelectableRegion', () {
     testWidgets('mouse selection single click sends correct events', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
@@ -236,6 +245,56 @@ void main() {
         isTrue,
       );
     });
+
+    testWidgets(
+      'tapping outside the selectable region dismisses selection',
+      (WidgetTester tester) async {
+        const String text = 'Hello world';
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: SelectableRegion(
+                  selectionControls: materialTextSelectionControls,
+                  child: const Text(text),
+                ),
+              ),
+            ),
+          ),
+        );
+        // The selection only dismisses when unfocused if the app
+        // was currently active.
+        await setAppLifecycleState(AppLifecycleState.resumed);
+        await tester.pumpAndSettle();
+
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+          find.descendant(of: find.text(text), matching: find.byType(RichText)),
+        );
+
+        // Drag to select.
+        final Offset textTopLeft = tester.getTopLeft(find.text(text));
+        final Offset textBottomRight = tester.getBottomRight(find.text(text));
+        final TestGesture gesture = await tester.startGesture(
+          textTopLeft,
+          kind: PointerDeviceKind.mouse,
+        );
+        addTearDown(gesture.removePointer);
+        await gesture.moveTo(textBottomRight);
+        await gesture.up();
+        await tester.pump();
+
+        expect(paragraph.selections, isNotEmpty);
+
+        // Tap just outside the top-left corner of the selectable region
+        // to dismiss the selection.
+        final Rect selectableRegionRect = tester.getRect(find.byType(SelectableRegion));
+        await tester.tapAt(selectableRegionRect.topLeft - const Offset(10.0, 10.0));
+        await tester.pump();
+        expect(paragraph.selections, isEmpty);
+      },
+      // [intended] Tap outside to dismiss the selection is only supported on web.
+      skip: !kIsWeb,
+    );
 
     testWidgets('does not merge semantics node of the children', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
@@ -942,12 +1001,6 @@ void main() {
     testWidgets(
       'selection is not cleared when app loses focus on desktop',
       (WidgetTester tester) async {
-        Future<void> setAppLifecycleState(AppLifecycleState state) async {
-          final ByteData? message = const StringCodec().encodeMessage(state.toString());
-          await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-              .handlePlatformMessage('flutter/lifecycle', message, (_) {});
-        }
-
         final FocusNode focusNode = FocusNode();
         final GlobalKey selectableKey = GlobalKey();
         addTearDown(focusNode.dispose);
@@ -6392,6 +6445,56 @@ void main() {
         expect(find.text('Copy'), findsNothing);
       },
       skip: !kIsWeb, // [intended] This test verifies web behavior.
+    );
+
+    testWidgets(
+      'uses contextMenuBuilder by default on Android and iOS web',
+      (WidgetTester tester) async {
+        final UniqueKey contextMenu = UniqueKey();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              selectionControls: materialTextSelectionHandleControls,
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    return SizedBox.shrink(key: contextMenu);
+                  },
+              child: const Text('How are you?'),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(contextMenu), findsNothing);
+
+        // Show the toolbar by longpressing.
+        final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(
+          find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)),
+        );
+        final TestGesture gesture = await tester.startGesture(
+          textOffsetToPosition(paragraph1, 6),
+        ); // at the 'r'
+        addTearDown(gesture.removePointer);
+        await tester.pump(const Duration(milliseconds: 500));
+        // `are` is selected.
+        expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(contextMenu), findsOneWidget);
+      },
+      // TODO(Renzo-Olivares): Remove this test when the web context menu
+      // for Android and iOS is re-enabled.
+      // See: https://github.com/flutter/flutter/issues/177123.
+      // [intended] Android and iOS use the flutter rendered menu on the web.
+      skip:
+          !kIsWeb ||
+          !<TargetPlatform>{
+            TargetPlatform.android,
+            TargetPlatform.iOS,
+          }.contains(defaultTargetPlatform),
     );
   });
 
