@@ -65,10 +65,9 @@ class CkContourMeasure implements DisposablePathMetric {
   }
 
   @override
-  CkPath extractPath(double start, double end, {bool startWithMoveTo = true}) {
+  CkPathBuilder extractPath(double start, double end, {bool startWithMoveTo = true}) {
     final SkPath skPath = skiaObject.getSegment(start, end, startWithMoveTo);
-    skPath.setFillType(toSkFillType(_fillType));
-    return CkPath(skPath);
+    return CkPathBuilder.fromSkPath(skPath, _fillType);
   }
 
   @override
