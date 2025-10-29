@@ -647,16 +647,14 @@ class LazyPath implements ui.Path, Collectable {
 
   @override
   void addPath(ui.Path path, ui.Offset offset, {Float64List? matrix4}) {
-    // TODO(jacksongardner): Shouldn't we store a copy of `path` here? The `path` may change between
-    //                       now and when this command is executed later.
-    _addCommand(AddPathCommand(path as LazyPath, offset, matrix4: matrix4));
+    _addCommand(AddPathCommand(LazyPath.fromLazyPath(path as LazyPath), offset, matrix4: matrix4));
   }
 
   @override
   void extendWithPath(ui.Path path, ui.Offset offset, {Float64List? matrix4}) {
-    // TODO(jacksongardner): Shouldn't we store a copy of `path` here? The `path` may change between
-    //                       now and when this command is executed later.
-    _addCommand(ExtendWithPathCommand(path as LazyPath, offset, matrix4: matrix4));
+    _addCommand(
+      ExtendWithPathCommand(LazyPath.fromLazyPath(path as LazyPath), offset, matrix4: matrix4),
+    );
   }
 
   @override
