@@ -83,6 +83,12 @@ abstract class Surface {
   /// render pictures.
   Future<void> get initialized;
 
+  /// The underlying canvas used to render the pixels.
+  DomCanvasImageSource get canvasImageSource;
+
+  /// Rasterizes the given [picture] to this canvas.
+  Future<void> rasterizeToCanvas(ui.Picture picture);
+
   @visibleForTesting
   int get glContext;
 
@@ -104,9 +110,7 @@ abstract class OffscreenSurface extends Surface {
 
 /// A rendering surface that is also a `DisplayCanvas`.
 ///
-/// This surface renders pictures directly to an on-screen canvas that is
+/// This surface renders a picture directly to an on-screen canvas that is
 /// part of the DOM.
 abstract class OnscreenSurface extends Surface implements DisplayCanvas {
-  /// Renders the given list of [pictures] directly to this canvas.
-  Future<void> renderPictures(List<ui.Picture> pictures);
 }

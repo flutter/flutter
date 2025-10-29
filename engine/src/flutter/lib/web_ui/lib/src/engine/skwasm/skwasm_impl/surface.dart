@@ -230,4 +230,13 @@ class SkwasmSurface implements OffscreenSurface {
 
   @override
   Future<void> get handledContextLossEvent => _handledContextLostEvent!.future;
+
+  @override
+  DomCanvasImageSource get canvasImageSource =>
+      throw StateError('canvasImageSource is not supported for SkwasmSurface');
+
+  @override
+  Future<void> rasterizeToCanvas(ui.Picture picture) {
+    throw StateError('rasterizeToCanvas is not supported for SkwasmSurface');
+  }
 }

@@ -239,6 +239,19 @@ abstract class CkSurface extends Surface {
   }
 
   @override
+  DomCanvasImageSource get canvasImageSource => canvas as DomCanvasImageSource;
+
+  @override
+  Future<void> rasterizeToCanvas(ui.Picture picture) async {
+    await _initialized.future;
+    final CkCanvas canvas = CkCanvas.fromSkCanvas(_skSurface!.getCanvas());
+    final CkPicture ckPicture = picture as CkPicture;
+    canvas.clear(const ui.Color(0x00000000));
+    canvas.drawPicture(ckPicture);
+    _skSurface!.flush();
+  }
+
+  @override
   Future<void> triggerContextLoss();
 
   @override
@@ -263,12 +276,8 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   Future<List<DomImageBitmap>> rasterizeToImageBitmaps(List<ui.Picture> pictures) async {
     await _initialized.future;
     final List<DomImageBitmap> bitmaps = <DomImageBitmap>[];
-    final CkCanvas canvas = CkCanvas.fromSkCanvas(_skSurface!.getCanvas());
     for (final ui.Picture picture in pictures) {
-      final CkPicture ckPicture = picture as CkPicture;
-      canvas.clear(const ui.Color(0x00000000));
-      canvas.drawPicture(ckPicture);
-      _skSurface!.flush();
+      await rasterizeToCanvas(picture);
       bitmaps.add(await createImageBitmap(_canvas));
     }
     return bitmaps;
@@ -285,6 +294,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     final WebGLContext gl = (canvas as DomOffscreenCanvas).getGlContext(webGLVersion);
     gl.loseContextExtension.loseContext();
   }
+
 }
 
 /// The CanvasKit implementation of [OnscreenSurface].
@@ -305,17 +315,6 @@ class CkOnscreenSurface extends CkSurface implements OnscreenSurface {
 
   @override
   DomElement get hostElement => _hostElement;
-
-  @override
-  Future<void> renderPictures(List<ui.Picture> pictures) async {
-    await _initialized.future;
-    final CkCanvas canvas = CkCanvas.fromSkCanvas(_skSurface!.getCanvas());
-    canvas.clear(const ui.Color(0x00000000));
-    for (final ui.Picture picture in pictures) {
-      canvas.drawPicture(picture as CkPicture);
-    }
-    _skSurface!.flush();
-  }
 
   @override
   void _maybeAttachCanvasToDom() {
