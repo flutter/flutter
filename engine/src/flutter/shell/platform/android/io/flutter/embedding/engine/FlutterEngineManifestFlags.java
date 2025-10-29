@@ -30,10 +30,9 @@ public final class FlutterEngineManifestFlags {
 
     private String packageName = "io.flutter.embedding.android.";
 
-    public Flag(String commandLineArgument, boolean allowedInRelease) {
+    public Flag(String commandLineArgument, String metaDataKey, boolean allowedInRelease) {
       this.commandLineArgument = commandLineArgument;
-      this.metaDataKey =
-          packageName + FlutterEngineCommandLineFlags.toManifestMetadataName(commandLineArgument);
+      this.metaDataKey = packageName + metaDataKey;
       this.allowedInRelease = allowedInRelease;
     }
 
@@ -45,47 +44,60 @@ public final class FlutterEngineManifestFlags {
   // Manifest flags allowed in release mode:
 
   public static final Flag ENABLE_SOFTWARE_RENDERING =
-      new Flag(FlutterEngineCommandLineFlags.ENABLE_SOFTWARE_RENDERING, true);
+      new Flag(
+          FlutterEngineCommandLineFlags.ENABLE_SOFTWARE_RENDERING, "EnableSoftwareRendering", true);
   public static final Flag SKIA_DETERMINISTIC_RENDERING =
-      new Flag(FlutterEngineCommandLineFlags.SKIA_DETERMINISTIC_RENDERING, true);
+      new Flag(
+          FlutterEngineCommandLineFlags.SKIA_DETERMINISTIC_RENDERING,
+          "SkiaDeterministicRendering",
+          true);
   public static final Flag AOT_SHARED_LIBRARY_NAME =
-      new Flag(FlutterEngineCommandLineFlags.AOT_SHARED_LIBRARY_NAME, true);
+      new Flag(FlutterEngineCommandLineFlags.AOT_SHARED_LIBRARY_NAME, "AotSharedLibraryName", true);
   public static final Flag FLUTTER_ASSETS_DIR =
-      new Flag(FlutterEngineCommandLineFlags.FLUTTER_ASSETS_DIR, true);
+      new Flag(FlutterEngineCommandLineFlags.FLUTTER_ASSETS_DIR, "FlutterAssetsDir", true);
   public static final Flag OLD_GEN_HEAP_SIZE =
-      new Flag(FlutterEngineCommandLineFlags.OLD_GEN_HEAP_SIZE, true);
+      new Flag(FlutterEngineCommandLineFlags.OLD_GEN_HEAP_SIZE, "OldGenHeapSize", true);
   public static final Flag ENABLE_IMPELLER =
-      new Flag(FlutterEngineCommandLineFlags.ENABLE_IMPELLER, true);
+      new Flag(FlutterEngineCommandLineFlags.ENABLE_IMPELLER, "EnableImpeller", true);
   public static final Flag IMPELLER_BACKEND =
-      new Flag(FlutterEngineCommandLineFlags.IMPELLER_BACKEND, true);
+      new Flag(FlutterEngineCommandLineFlags.IMPELLER_BACKEND, "ImpellerBackend", true);
   public static final Flag DISABLE_MERGED_PLATFORM_UI_THREAD =
-      new Flag(FlutterEngineCommandLineFlags.DISABLE_MERGED_PLATFORM_UI_THREAD, true);
+      new Flag(
+          FlutterEngineCommandLineFlags.DISABLE_MERGED_PLATFORM_UI_THREAD,
+          "DisableMergedPlatformUIThread",
+          true);
   public static final Flag ENABLE_SURFACE_CONTROL =
-      new Flag(FlutterEngineCommandLineFlags.ENABLE_SURFACE_CONTROL, true);
+      new Flag(FlutterEngineCommandLineFlags.ENABLE_SURFACE_CONTROL, "EnableSurfaceControl", true);
   public static final Flag ENABLE_FLUTTER_GPU =
-      new Flag(FlutterEngineCommandLineFlags.ENABLE_FLUTTER_GPU, true);
+      new Flag(FlutterEngineCommandLineFlags.ENABLE_FLUTTER_GPU, "EnableFlutterGPU", true);
   public static final Flag IMPELLER_LAZY_SHADER_MODE =
-      new Flag(FlutterEngineCommandLineFlags.IMPELLER_LAZY_SHADER_MODE, true);
+      new Flag(
+          FlutterEngineCommandLineFlags.IMPELLER_LAZY_SHADER_MODE, "ImpellerLazyShaderMode", true);
   public static final Flag IMPELLER_ANTIALIAS_LINES =
-      new Flag(FlutterEngineCommandLineFlags.IMPELLER_ANTIALIAS_LINES, true);
+      new Flag(
+          FlutterEngineCommandLineFlags.IMPELLER_ANTIALIAS_LINES, "ImpellerAntialiasLines", true);
   public static final Flag VM_SNAPSHOT_DATA =
-      new Flag(FlutterEngineCommandLineFlags.VM_SNAPSHOT_DATA, true);
+      new Flag(FlutterEngineCommandLineFlags.VM_SNAPSHOT_DATA, "VmSnapshotData", true);
   public static final Flag ISOLATE_SNAPSHOT_DATA =
-      new Flag(FlutterEngineCommandLineFlags.ISOLATE_SNAPSHOT_DATA, true);
+      new Flag(FlutterEngineCommandLineFlags.ISOLATE_SNAPSHOT_DATA, "IsolateSnapshotData", true);
 
   // Manifest flags NOT allowed in release mode:
 
   public static final Flag USE_TEST_FONTS =
-      new Flag(FlutterEngineCommandLineFlags.USE_TEST_FONTS, false);
+      new Flag(FlutterEngineCommandLineFlags.USE_TEST_FONTS, "UseTestFonts", false);
   public static final Flag VM_SERVICE_PORT =
-      new Flag(FlutterEngineCommandLineFlags.VM_SERVICE_PORT, false);
+      new Flag(FlutterEngineCommandLineFlags.VM_SERVICE_PORT, "VMServicePort", false);
   public static final Flag ENABLE_VULKAN_VALIDATION =
-      new Flag(FlutterEngineCommandLineFlags.ENABLE_VULKAN_VALIDATION, false);
+      new Flag(
+          FlutterEngineCommandLineFlags.ENABLE_VULKAN_VALIDATION, "EnableVulkanValidation", false);
   public static final Flag ENABLE_OPENGL_GPU_TRACING =
-      new Flag(FlutterEngineCommandLineFlags.ENABLE_OPENGL_GPU_TRACING, false);
+      new Flag(
+          FlutterEngineCommandLineFlags.ENABLE_OPENGL_GPU_TRACING, "EnableOpenGLGPUTracing", false);
   public static final Flag ENABLE_VULKAN_GPU_TRACING =
-      new Flag(FlutterEngineCommandLineFlags.ENABLE_VULKAN_GPU_TRACING, false);
-  public static final Flag LEAK_VM = new Flag(FlutterEngineCommandLineFlags.LEAK_VM, false);
+      new Flag(
+          FlutterEngineCommandLineFlags.ENABLE_VULKAN_GPU_TRACING, "EnableVulkanGPUTracing", false);
+  public static final Flag LEAK_VM =
+      new Flag(FlutterEngineCommandLineFlags.LEAK_VM, "LeakVM", false);
 
   public static final List<Flag> ALL_FLAGS =
       Collections.unmodifiableList(
