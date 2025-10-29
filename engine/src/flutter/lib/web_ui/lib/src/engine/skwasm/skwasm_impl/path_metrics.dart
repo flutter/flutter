@@ -50,7 +50,7 @@ class SkwasmPathMetric extends SkwasmObjectWrapper<RawContourMeasure>
     : super(handle, (ContourMeasureHandle h) => contourMeasureDispose(h), 'PathMetric');
 
   @override
-  DisposablePath extractPath(double start, double end, {bool startWithMoveTo = true}) {
+  DisposablePathBuilder extractPath(double start, double end, {bool startWithMoveTo = true}) {
     return SkwasmPath.fromHandle(contourMeasureGetSegment(handle, start, end, startWithMoveTo));
   }
 
