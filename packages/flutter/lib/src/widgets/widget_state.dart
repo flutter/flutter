@@ -414,17 +414,41 @@ abstract class WidgetStateMouseCursor extends MouseCursor
   ///
   /// By default this cursor resolves to [SystemMouseCursors.click]. If the widget is
   /// disabled, the cursor resolves to [SystemMouseCursors.basic].
-  ///
-  /// This cursor is the default for many widgets.
   static const WidgetStateMouseCursor clickable = WidgetStateMouseCursor.resolveWith(
     _clickable,
     debugDescription: 'WidgetStateMouseCursor(clickable)',
   );
+
   static MouseCursor _clickable(Set<WidgetState> states) {
     if (states.contains(WidgetState.disabled)) {
       return SystemMouseCursors.basic;
     }
     return SystemMouseCursors.click;
+  }
+
+  /// A platform-adaptive mouse cursor for clickable widgets, which resolves
+  /// differently based on the widget's state and the platform.
+  ///
+  /// On web platforms, this cursor resolves to [SystemMouseCursors.click] by
+  /// default. If the widget is disabled, it resolves to
+  /// [SystemMouseCursors.basic].
+  ///
+  /// On non-web platforms, this cursor always resolves to
+  /// [SystemMouseCursors.basic].
+  ///
+  /// This cursor is commonly used for interactive widgets like buttons. The
+  /// difference in behavior across platforms reflects native conventions (e.g.,
+  /// web uses a hand pointer for buttons, while desktop platforms do not).
+  static const WidgetStateMouseCursor adaptiveClickable = WidgetStateMouseCursor.resolveWith(
+    _adaptiveClickable,
+    debugDescription: 'WidgetStateMouseCursor(adaptiveClickable)',
+  );
+
+  static MouseCursor _adaptiveClickable(Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
+      return SystemMouseCursors.basic;
+    }
+    return kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic;
   }
 
   /// A mouse cursor for widgets related to text, which resolves differently

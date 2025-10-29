@@ -15321,19 +15321,19 @@ void main() {
     await gesture.moveTo(iconArea);
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     await gesture.moveTo(prefixIconArea);
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     await gesture.moveTo(suffixIconArea);
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
 
@@ -15557,26 +15557,66 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/140607.
-  testWidgets('TextFields can inherit errorStyle color from InputDecorationThemeData.', (
+  testWidgets('TextFields can inherit errorStyle color from InputDecorationThemeData', (
     WidgetTester tester,
   ) async {
-    Widget textFieldBuilder() {
-      return MaterialApp(
-        theme: ThemeData(
-          inputDecorationTheme: const InputDecorationThemeData(
-            errorStyle: TextStyle(color: Colors.green),
-          ),
-        ),
+    const InputDecorationThemeData decorationTheme = InputDecorationThemeData(
+      errorStyle: TextStyle(color: Colors.green),
+    );
+
+    EditableTextState getEditableTextState() {
+      return tester.state<EditableTextState>(find.byType(EditableText));
+    }
+
+    // Global theme.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(inputDecorationTheme: decorationTheme),
         home: const Scaffold(
           body: TextField(decoration: InputDecoration(errorText: 'error')),
         ),
-      );
-    }
+      ),
+    );
+    expect(getEditableTextState().widget.cursorColor, Colors.green);
 
-    await tester.pumpWidget(textFieldBuilder());
-    await tester.pumpAndSettle();
-    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-    expect(state.widget.cursorColor, Colors.green);
+    // Local theme.
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: InputDecorationTheme(
+            data: decorationTheme,
+            child: TextField(decoration: InputDecoration(errorText: 'error')),
+          ),
+        ),
+      ),
+    );
+    expect(getEditableTextState().widget.cursorColor, Colors.green);
+  });
+
+  testWidgets('TextField can inherit decoration from local InputDecorationThemeData', (
+    WidgetTester tester,
+  ) async {
+    const InputDecoration decoration = InputDecoration(labelText: 'Label');
+    const InputDecorationThemeData decorationTheme = InputDecorationThemeData(
+      errorStyle: TextStyle(color: Colors.green),
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: InputDecorationTheme(
+            data: decorationTheme,
+            child: TextField(decoration: decoration),
+          ),
+        ),
+      ),
+    );
+
+    final InputDecorator decorator = tester.widget(find.byType(InputDecorator));
+    final InputDecoration expectedDecoration = decoration
+        .applyDefaults(decorationTheme)
+        .copyWith(enabled: true, hintMaxLines: 1);
+    expect(decorator.decoration, expectedDecoration);
   });
 
   group('MaxLengthEnforcement', () {

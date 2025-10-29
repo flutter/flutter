@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "Search Web",
   "shareButtonLabel": "Share",
   "pasteButtonLabel": "Paste",
-  "selectAllButtonLabel": "Select all"
+  "selectAllButtonLabel": "Select all",
+  "radioButtonUnselectedLabel": "Not selected"
 }

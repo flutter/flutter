@@ -16,6 +16,7 @@ import 'package:flutter/widgets.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'elevation_overlay.dart';
+import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -866,7 +867,7 @@ class NavigationIndicator extends StatelessWidget {
             builder: (BuildContext context, Animation<double> fadeAnimation) {
               return FadeTransition(
                 opacity: fadeAnimation,
-                child: Container(
+                child: Ink(
                   width: width,
                   height: height,
                   decoration: ShapeDecoration(
@@ -916,8 +917,6 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
   /// See [NavigationDestination.label].
   final Widget label;
 
-  static final Key _labelKey = UniqueKey();
-
   @override
   Widget build(BuildContext context) {
     return _DestinationLayoutAnimationBuilder(
@@ -927,15 +926,12 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
           children: <Widget>[
             LayoutId(
               id: _NavigationDestinationLayoutDelegate.iconId,
-              child: RepaintBoundary(key: iconKey, child: icon),
+              // The key is used by the _IndicatorInkWell to query the icon position.
+              child: KeyedSubtree(key: iconKey, child: icon),
             ),
             LayoutId(
               id: _NavigationDestinationLayoutDelegate.labelId,
-              child: FadeTransition(
-                alwaysIncludeSemantics: true,
-                opacity: animation,
-                child: RepaintBoundary(key: _labelKey, child: label),
-              ),
+              child: FadeTransition(alwaysIncludeSemantics: true, opacity: animation, child: label),
             ),
           ],
         );

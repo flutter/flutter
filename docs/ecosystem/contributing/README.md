@@ -191,6 +191,18 @@ These APIs can take a variety of forms, including specific methods to check indi
 
 *We currently have many cases of APIs that do not follow this guidance because they predate it. This is technical debt, rather than something that should be pointed to as a justification for adding new APIs that do not.*
 
+### Documentation
+
+In federated plugins, platform-specific behaviors are controlled by the platform implementation packages, so documentation about platform-specific behaviors should, when at all possible, only be in the platform implementation packages. Any cross-package platform documentation is very likely to become stale, or be misleading depending on the resolved package versions. It also does not scale to unendorsed implementations. Some best practices:
+- READMEs of app-facing packages should delegate documentation of platform-specific details to implementation package READMEs, where details can be updated in sync with the implementation, and link to those platform-specific READMEs. [`google_sign_in` configuration](https://pub.dev/packages/google_sign_in#setup) is an example of this pattern.
+- Do not make definitive statements about platform support in documentation comments in either the app-facing or platform interface packages. For example, if a parameter supports Android but not iOS it is much better to say "May not be supported on all platforms" (and if necessary include a note in the iOS README) than to say "This only works on Android", which will become incorrect if iOS support is added later and could be incorrect for any third-party unendorsed implementation.
+  - It's fine to include examples as long as the statements aren't definitive. For example, this comment from `google_sign_in`:
+    > The amount of allowable UI is up to the platform to determine, but it should be minimal. Possible examples include FedCM on the web, and One Tap on Android.
+
+    This sets expectations, without claiming that a given platform definitely will or will not behave a certain way.
+
+*We currently have cases of comments that do not follow this guidance because they predate it. This is technical debt, rather than something that should be pointed to as a justification for adding new comments that do it.*
+
 ### OS version support
 
 Whenever feasible, plugins should support the same OS versions that [Flutter supports](https://docs.flutter.dev/reference/supported-platforms). When a plugin's platform implementation is updated to require a version of Flutter that drops a previously-supported OS version, the plugin should be updated to drop that version as well (for example, updating minimim versions in native build files and removing runtime version checks for versions that are no longer supported).

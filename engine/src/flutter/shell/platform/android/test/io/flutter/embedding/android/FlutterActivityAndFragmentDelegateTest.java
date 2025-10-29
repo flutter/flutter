@@ -1614,6 +1614,16 @@ public class FlutterActivityAndFragmentDelegateTest {
     }
   }
 
+  @Test
+  public void onResume_restoresSurfaceProducers() {
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    delegate.onAttach(ctx);
+    delegate.onResume();
+
+    verify(mockFlutterEngine.getRenderer()).restoreSurfaceProducers();
+  }
+
   /**
    * Creates a mock {@link io.flutter.embedding.engine.FlutterEngine}.
    *

@@ -31,7 +31,7 @@ class TextStyle {
   TextDecorationStyle decoration_style = TextDecorationStyle::kSolid;
   // Thickness is applied as a multiplier to the default thickness of the font.
   double decoration_thickness_multiplier = 1.0;
-  FontWeight font_weight = FontWeight::w400;
+  int font_weight = FontWeight::normal;
   FontStyle font_style = FontStyle::normal;
   TextBaseline text_baseline = TextBaseline::kAlphabetic;
   bool half_leading = false;

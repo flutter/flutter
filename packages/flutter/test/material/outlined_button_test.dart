@@ -1295,7 +1295,7 @@ void main() {
     // Initially, no icons are present.
     expect(find.byIcon(Icons.favorite), findsNothing);
 
-    // Find the original OutlinedButton with no icon and get it's SemanticsNode
+    // Find the original OutlinedButton with no icon and get its SemanticsNode.
     final Finder outlinedButton = find.bySemanticsLabel('Button');
     expect(outlinedButton, findsOneWidget);
 
@@ -1308,7 +1308,7 @@ void main() {
     // Now one icon should be present.
     expect(find.byIcon(Icons.favorite), findsOneWidget);
 
-    // Check if the semantics has change
+    // Check if the semantics has change.
     final SemanticsNode semanticsNodeWithIcon = tester.getSemantics(outlinedButton);
 
     expect(semanticsNodeWithIcon, origSemanticsNode);
@@ -2111,7 +2111,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test default cursor when disabled
@@ -3046,5 +3046,34 @@ void main() {
       find.byType(OutlinedButton),
       matchesGoldenFile('outlined_button.badge.outline.png'),
     );
+  });
+
+  testWidgets('OutlinedButton.icon does not lose focus when icon is nullified', (
+    WidgetTester tester,
+  ) async {
+    Widget buildButton({required Widget? icon}) {
+      return MaterialApp(
+        home: Center(
+          child: OutlinedButton.icon(onPressed: () {}, icon: icon, label: const Text('button')),
+        ),
+      );
+    }
+
+    // Build once with an icon.
+    await tester.pumpWidget(buildButton(icon: const Icon(Icons.abc)));
+
+    FocusNode getButtonFocusNode() {
+      return Focus.of(tester.element(find.text('button')));
+    }
+
+    getButtonFocusNode().requestFocus();
+    await tester.pumpAndSettle();
+    expect(getButtonFocusNode().hasFocus, true);
+
+    // Rebuild without icon.
+    await tester.pumpWidget(buildButton(icon: null));
+
+    // The button should still be focused.
+    expect(getButtonFocusNode().hasFocus, true);
   });
 }

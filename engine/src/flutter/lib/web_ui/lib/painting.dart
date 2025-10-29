@@ -443,6 +443,7 @@ class ColorFilter implements ImageFilter {
   const factory ColorFilter.matrix(List<double> matrix) = engine.EngineColorFilter.matrix;
   const factory ColorFilter.linearToSrgbGamma() = engine.EngineColorFilter.linearToSrgbGamma;
   const factory ColorFilter.srgbToLinearGamma() = engine.EngineColorFilter.srgbToLinearGamma;
+  factory ColorFilter.saturation(double saturation) = engine.EngineColorFilter.saturation;
 }
 
 // These enum values must be kept in sync with SkBlurStyle.
@@ -992,6 +993,19 @@ abstract class FragmentProgram {
   FragmentShader fragmentShader();
 }
 
+base class UniformFloatSlot {
+  UniformFloatSlot(this.name, this.index);
+  void set(double val) {
+    throw UnsupportedError('UniformFloatSlot is not supported on the web.');
+  }
+
+  int get shaderIndex => -1;
+
+  final String name;
+
+  final int index;
+}
+
 abstract class FragmentShader implements Shader {
   void setFloat(int index, double value);
 
@@ -1002,4 +1016,6 @@ abstract class FragmentShader implements Shader {
 
   @override
   bool get debugDisposed;
+
+  UniformFloatSlot getUniformFloat(String name, [int? index]) => UniformFloatSlot(name, index ?? 0);
 }
