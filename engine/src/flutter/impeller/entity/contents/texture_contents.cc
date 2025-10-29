@@ -73,11 +73,7 @@ std::optional<Rect> TextureContents::GetCoverage(const Entity& entity) const {
 std::optional<Snapshot> TextureContents::RenderToSnapshot(
     const ContentContext& renderer,
     const Entity& entity,
-    std::optional<Rect> coverage_limit,
-    const std::optional<SamplerDescriptor>& sampler_descriptor,
-    bool msaa_enabled,
-    int32_t mip_count,
-    std::string_view label) const {
+    const SnapshotOptions& options) const {
   // Passthrough textures that have simple rectangle paths and complete source
   // rects.
   auto bounds = destination_rect_;
@@ -85,22 +81,22 @@ std::optional<Snapshot> TextureContents::RenderToSnapshot(
   if (source_rect_ == Rect::MakeSize(texture_->GetSize()) &&
       (opacity >= 1 - kEhCloseEnough || defer_applying_opacity_)) {
     auto scale = Vector2(bounds.GetSize() / Size(texture_->GetSize()));
-    return Snapshot{
-        .texture = texture_,
-        .transform = entity.GetTransform() *
-                     Matrix::MakeTranslation(bounds.GetOrigin()) *
-                     Matrix::MakeScale(scale),
-        .sampler_descriptor = sampler_descriptor.value_or(sampler_descriptor_),
-        .opacity = opacity};
+    return Snapshot{.texture = texture_,
+                    .transform = entity.GetTransform() *
+                                 Matrix::MakeTranslation(bounds.GetOrigin()) *
+                                 Matrix::MakeScale(scale),
+                    .sampler_descriptor = options.sampler_descriptor.value_or(
+                        sampler_descriptor_),
+                    .opacity = opacity};
   }
   return Contents::RenderToSnapshot(
-      renderer,                                          // renderer
-      entity,                                            // entity
-      std::nullopt,                                      // coverage_limit
-      sampler_descriptor.value_or(sampler_descriptor_),  // sampler_descriptor
-      true,                                              // msaa_enabled
-      /*mip_count=*/mip_count,
-      label);  // label
+      renderer, entity,
+      {.coverage_limit = std::nullopt,
+       .sampler_descriptor =
+           options.sampler_descriptor.value_or(sampler_descriptor_),
+       .msaa_enabled = true,
+       .mip_count = options.mip_count,
+       .label = options.label});
 }
 
 bool TextureContents::Render(const ContentContext& renderer,

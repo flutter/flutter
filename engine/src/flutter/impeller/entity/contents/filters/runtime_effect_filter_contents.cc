@@ -85,7 +85,7 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
       texture_contents.SetSamplerDescriptor(input_snapshot->sampler_descriptor);
 
       Entity entity;
-      input_snapshot = texture_contents.RenderToSnapshot(renderer, entity);
+      input_snapshot = texture_contents.RenderToSnapshot(renderer, entity, {});
     }
   }
 
