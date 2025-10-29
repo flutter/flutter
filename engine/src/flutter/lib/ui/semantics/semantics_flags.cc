@@ -41,7 +41,7 @@ void NativeSemanticsFlags::initSemanticsFlags(
     bool isLink,
     bool isSlider,
     bool isKeyboardKey,
-    bool blockAccessibilityFocus) {
+    bool isAccessibilityFocusBlocked) {
   UIDartState::ThrowIfUIOperationsProhibited();
   auto native_semantics_flags = fml::MakeRefCounted<NativeSemanticsFlags>();
   native_semantics_flags->AssociateWithDartWrapper(semantics_flags_handle);
@@ -70,7 +70,7 @@ void NativeSemanticsFlags::initSemanticsFlags(
       .isLink = isLink,
       .isSlider = isSlider,
       .isKeyboardKey = isKeyboardKey,
-      .blockAccessibilityFocus = blockAccessibilityFocus,
+      .isAccessibilityFocusBlocked = isAccessibilityFocusBlocked,
   };
 }
 

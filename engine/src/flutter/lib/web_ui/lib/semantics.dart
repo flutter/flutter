@@ -355,7 +355,7 @@ class SemanticsFlags {
     this.isLink = false,
     this.isSlider = false,
     this.isKeyboardKey = false,
-    this.blockAccessibilityFocus = false,
+    this.isAccessibilityFocusBlocked = false,
   });
   static const SemanticsFlags none = SemanticsFlags();
   final CheckedState isChecked;
@@ -381,7 +381,7 @@ class SemanticsFlags {
   final bool isLink;
   final bool isSlider;
   final bool isKeyboardKey;
-  final bool blockAccessibilityFocus;
+  final bool isAccessibilityFocusBlocked;
 
   SemanticsFlags merge(SemanticsFlags other) {
     return SemanticsFlags(
@@ -408,7 +408,7 @@ class SemanticsFlags {
       isLink: isLink || other.isLink,
       isSlider: isSlider || other.isSlider,
       isKeyboardKey: isKeyboardKey || other.isKeyboardKey,
-      blockAccessibilityFocus: blockAccessibilityFocus || other.blockAccessibilityFocus,
+      isAccessibilityFocusBlocked: isAccessibilityFocusBlocked || other.isAccessibilityFocusBlocked,
     );
   }
 
@@ -436,7 +436,7 @@ class SemanticsFlags {
     bool? isLink,
     bool? isSlider,
     bool? isKeyboardKey,
-    bool? blockAccessibilityFocus,
+    bool? isAccessibilityFocusBlocked,
   }) {
     return SemanticsFlags(
       isChecked: isChecked ?? this.isChecked,
@@ -460,7 +460,7 @@ class SemanticsFlags {
       isLink: isLink ?? this.isLink,
       isSlider: isSlider ?? this.isSlider,
       isKeyboardKey: isKeyboardKey ?? this.isKeyboardKey,
-      blockAccessibilityFocus: blockAccessibilityFocus ?? this.blockAccessibilityFocus,
+      isAccessibilityFocusBlocked: isAccessibilityFocusBlocked ?? this.isAccessibilityFocusBlocked,
     );
   }
 
@@ -492,7 +492,7 @@ class SemanticsFlags {
           isLink == other.isLink &&
           isSlider == other.isSlider &&
           isKeyboardKey == other.isKeyboardKey &&
-          blockAccessibilityFocus == other.blockAccessibilityFocus;
+          isAccessibilityFocusBlocked == other.isAccessibilityFocusBlocked;
 
   @override
   int get hashCode => Object.hashAll([
@@ -519,7 +519,7 @@ class SemanticsFlags {
     isLink,
     isSlider,
     isKeyboardKey,
-    blockAccessibilityFocus,
+    isAccessibilityFocusBlocked,
   ]);
 
   List<String> toStrings() {
@@ -546,7 +546,7 @@ class SemanticsFlags {
       if (isMultiline) 'isMultiline',
       if (isReadOnly) 'isReadOnly',
       if (isFocused != Tristate.none) 'isFocusable',
-      if (blockAccessibilityFocus) 'blockAccessibilityFocus',
+      if (isAccessibilityFocusBlocked) 'isAccessibilityFocusBlocked',
       if (isLink) 'isLink',
       if (isSlider) 'isSlider',
       if (isKeyboardKey) 'isKeyboardKey',

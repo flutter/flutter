@@ -789,7 +789,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (BOOL)accessibilityRespondsToUserInteraction {
-  if (self.node.flags.blockAccessibilityFocus) {
+  if (self.node.flags.isAccessibilityFocusBlocked) {
     return false;
   }
 

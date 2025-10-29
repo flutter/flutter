@@ -118,7 +118,7 @@ typedef ChildSemanticsConfigurationsDelegate =
 ///
 /// This is typically used to prevent screen readers
 /// from focusing on parts of the UI.
-enum BlockAccessibilityFocus {
+enum AccessiblityFocusBlockType {
   /// Accessibility focus is **not blocked**.
   none,
 
@@ -505,7 +505,7 @@ sealed class _DebugSemanticsRoleChecks {
         return FlutterError('A collapsed node cannot have a collapse action.');
       }
     }
-    if (data.flagsCollection.blockAccessibilityFocus &&
+    if (data.flagsCollection.isAccessibilityFocusBlocked &&
         data.flagsCollection.isFocused != Tristate.none) {
       return FlutterError(
         'A node that is keyboard focusable cannot be set to accessibility unfocusable',
@@ -1559,7 +1559,7 @@ class SemanticsProperties extends DiagnosticableTree {
     )
     this.focusable,
     this.focused,
-    this.blockAccessibilityFocus,
+    this.accessiblityFocusBlockType,
     this.inMutuallyExclusiveGroup,
     this.hidden,
     this.obscured,
@@ -1766,13 +1766,12 @@ class SemanticsProperties extends DiagnosticableTree {
   /// element it is reading, and is separate from input focus.
   final bool? focused;
 
-  /// If non-null, indicates if this subtree or current nodeis blocked in a11y focus.
-  ///
+  /// If non-null, indicates if this subtree or current node is blocked in a11y focus.
   ///
   /// This is for accessibility focus, which is the focus used by screen readers
   /// like TalkBack and VoiceOver. It is different from input focus, which is
   /// usually held by the element that currently responds to keyboard inputs.
-  final BlockAccessibilityFocus? blockAccessibilityFocus;
+  final AccessiblityFocusBlockType? accessiblityFocusBlockType;
 
   /// If non-null, whether a semantic node is in a mutually exclusive group.
   ///
@@ -6140,15 +6139,14 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  AccessiblityFocusBlockType _accessiblityFocusBlockType = AccessiblityFocusBlockType.none;
+
   /// Whether the owning [RenderObject] and its subtree
   /// is blocked in the a11y focus (different from input focus).
-
-  BlockAccessibilityFocus _blockAccessibilityFocus = BlockAccessibilityFocus.none;
-
-  BlockAccessibilityFocus get blockAccessibilityFocus => _blockAccessibilityFocus;
-  set blockAccessibilityFocus(BlockAccessibilityFocus value) {
-    _blockAccessibilityFocus = value;
-    _flags = _flags.copyWith(blockAccessibilityFocus: value != BlockAccessibilityFocus.none);
+  AccessiblityFocusBlockType get accessiblityFocusBlockType => _accessiblityFocusBlockType;
+  set accessiblityFocusBlockType(AccessiblityFocusBlockType value) {
+    _accessiblityFocusBlockType = value;
+    _flags = _flags.copyWith(isAccessibilityFocusBlocked: value != AccessiblityFocusBlockType.none);
     _hasBeenAnnotated = true;
   }
 
@@ -6464,7 +6462,7 @@ class SemanticsConfiguration {
     if (_flags.hasRepeatedFlags(other._flags)) {
       return false;
     }
-    if (_flags.blockAccessibilityFocus != other._flags.blockAccessibilityFocus) {
+    if (_flags.isAccessibilityFocusBlocked != other._flags.isAccessibilityFocusBlocked) {
       return false;
     }
 
@@ -6611,7 +6609,7 @@ class SemanticsConfiguration {
       .._attributedValue = _attributedValue
       .._attributedDecreasedValue = _attributedDecreasedValue
       .._attributedHint = _attributedHint
-      .._blockAccessibilityFocus = _blockAccessibilityFocus
+      .._accessiblityFocusBlockType = _accessiblityFocusBlockType
       .._hintOverrides = _hintOverrides
       .._tooltip = _tooltip
       .._flags = _flags

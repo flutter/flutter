@@ -4850,8 +4850,8 @@ mixin SemanticsAnnotationsMixin on RenderObject {
     if (_properties.focused != null) {
       config.isFocused = _properties.focused;
     }
-    if (_properties.blockAccessibilityFocus != null) {
-      config.blockAccessibilityFocus = _properties.blockAccessibilityFocus!;
+    if (_properties.accessiblityFocusBlockType != null) {
+      config.accessiblityFocusBlockType = _properties.accessiblityFocusBlockType!;
     }
     if (_properties.inMutuallyExclusiveGroup != null) {
       config.isInMutuallyExclusiveGroup = _properties.inMutuallyExclusiveGroup!;
@@ -5118,7 +5118,7 @@ final class _SemanticsParentData {
     required this.explicitChildNodes,
     required this.tagsForChildren,
     required this.localeForChildren,
-    required this.blockAccessibilityFocus,
+    required this.accessiblityFocusBlockType,
   });
 
   /// Whether [SemanticsNode]s created from this render object semantics subtree
@@ -5134,8 +5134,14 @@ final class _SemanticsParentData {
   /// [AbsorbPointer]s.
   final bool blocksUserActions;
 
-  /// Whether to block this subtree in accessibility focus.
-  final BlockAccessibilityFocus? blockAccessibilityFocus;
+  /// The **Accessibility Focus Block Type** controls how accessibility focus is blocked.
+  ///
+  /// * **none**: Accessibility focus is **not blocked**.
+  /// * **blockSubtree**: Blocks accessibility focus for the entire subtree.
+  /// * **blockNode**: Blocks accessibility focus for the **current node only**.
+  ///
+  /// Only `blockSubtree` from a parent will be propagated down.
+  final AccessiblityFocusBlockType? accessiblityFocusBlockType;
 
   /// Any immediate render object semantics that
   /// [_RenderObjectSemantics.contributesToSemanticsTree] should forms a node
@@ -5558,11 +5564,11 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     final bool blocksUserAction =
         (parentData?.blocksUserActions ?? false) || configProvider.effective.isBlockingUserActions;
 
-    BlockAccessibilityFocus blockAccessibilityFocus;
-    if (parentData?.blockAccessibilityFocus == BlockAccessibilityFocus.blockSubtree) {
-      blockAccessibilityFocus = BlockAccessibilityFocus.blockSubtree;
+    AccessiblityFocusBlockType accessiblityFocusBlockType;
+    if (parentData?.accessiblityFocusBlockType == AccessiblityFocusBlockType.blockSubtree) {
+      accessiblityFocusBlockType = AccessiblityFocusBlockType.blockSubtree;
     } else {
-      blockAccessibilityFocus = configProvider.effective.blockAccessibilityFocus;
+      accessiblityFocusBlockType = configProvider.effective.accessiblityFocusBlockType;
     }
 
     // localeForSubtree from the config overrides parentData's inherited locale.
@@ -5576,7 +5582,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
           (parentData?.mergeIntoParent ?? false) ||
           configProvider.effective.isMergingSemanticsOfDescendants,
       blocksUserActions: blocksUserAction,
-      blockAccessibilityFocus: blockAccessibilityFocus,
+      accessiblityFocusBlockType: accessiblityFocusBlockType,
       localeForChildren: localeForChildren,
       explicitChildNodes: explicitChildNodesForChildren,
       tagsForChildren: tagsForChildren,
@@ -5620,9 +5626,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
           tags.forEach(config.addTagForChildren);
         });
       }
-      if (blockAccessibilityFocus != configProvider.effective.blockAccessibilityFocus) {
+      if (accessiblityFocusBlockType != configProvider.effective.accessiblityFocusBlockType) {
         configProvider.updateConfig((SemanticsConfiguration config) {
-          config.blockAccessibilityFocus = blockAccessibilityFocus;
+          config.accessiblityFocusBlockType = accessiblityFocusBlockType;
         });
       }
 
@@ -5702,7 +5708,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       effectiveChildParentData = _SemanticsParentData(
         mergeIntoParent: childParentData.mergeIntoParent,
         blocksUserActions: childParentData.blocksUserActions,
-        blockAccessibilityFocus: childParentData.blockAccessibilityFocus,
+        accessiblityFocusBlockType: childParentData.accessiblityFocusBlockType,
         explicitChildNodes: false,
         tagsForChildren: childParentData.tagsForChildren,
         localeForChildren: childParentData.localeForChildren,

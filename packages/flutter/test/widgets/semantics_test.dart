@@ -540,7 +540,7 @@ void main() {
   testWidgets('Semantics widget supports all flags', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     // Checked state and toggled state are mutually exclusive.
-    // Focused and blockAccessibilityFocus are mutually exclusive.
+    // Focused and isAccessibilityFocusBlocked are mutually exclusive.
     await tester.pumpWidget(
       Semantics(
         key: const Key('a'),
@@ -833,7 +833,7 @@ void main() {
 
     semantics.dispose();
   });
-  testWidgets('BlockAccessibilityFocus.blockSubtree is applied to the subtree,', (
+  testWidgets('AccessiblityFocusBlockType.blockSubtree is applied to the subtree,', (
     WidgetTester tester,
   ) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -841,13 +841,13 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        blockAccessibilityFocus: BlockAccessibilityFocus.blockSubtree,
+        accessiblityFocusBlockType: AccessiblityFocusBlockType.blockSubtree,
         child: Column(
           children: <Widget>[
             // If the child set blockSubTreeAccessibilityFocus to `none`, it's still blcok because its parent.
             Semantics(
               container: true,
-              blockAccessibilityFocus: BlockAccessibilityFocus.none,
+              accessiblityFocusBlockType: AccessiblityFocusBlockType.none,
               customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
                 const CustomSemanticsAction(label: 'action1'): () {},
               },
@@ -873,16 +873,16 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               id: 1,
-              flags: SemanticsFlags(blockAccessibilityFocus: true),
+              flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
               children: <TestSemantics>[
                 TestSemantics(
                   id: 2,
-                  flags: SemanticsFlags(blockAccessibilityFocus: true),
+                  flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
                   actions: <SemanticsAction>[SemanticsAction.customAction],
                 ),
                 TestSemantics(
                   id: 3,
-                  flags: SemanticsFlags(blockAccessibilityFocus: true),
+                  flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
                   actions: <SemanticsAction>[SemanticsAction.customAction],
                 ),
               ],
@@ -898,7 +898,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('BlockAccessibilityFocus.blockNode is not applied to the subtree,', (
+  testWidgets('AccessiblityFocusBlockType.blockNode is not applied to the subtree,', (
     WidgetTester tester,
   ) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -906,12 +906,12 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        blockAccessibilityFocus: BlockAccessibilityFocus.blockNode,
+        accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
         child: Column(
           children: <Widget>[
             Semantics(
               container: true,
-              blockAccessibilityFocus: BlockAccessibilityFocus.none,
+              accessiblityFocusBlockType: AccessiblityFocusBlockType.none,
               customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
                 const CustomSemanticsAction(label: 'action1'): () {},
               },
@@ -936,16 +936,14 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               id: 1,
-              flags: SemanticsFlags(blockAccessibilityFocus: true),
+              flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
               children: <TestSemantics>[
                 TestSemantics(
                   id: 2,
-                  flags: SemanticsFlags(blockAccessibilityFocus: false),
                   actions: <SemanticsAction>[SemanticsAction.customAction],
                 ),
                 TestSemantics(
                   id: 3,
-                  flags: SemanticsFlags(blockAccessibilityFocus: false),
                   actions: <SemanticsAction>[SemanticsAction.customAction],
                 ),
               ],
@@ -961,7 +959,55 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('BlockAccessibilityFocus.blockNode doesnt merge up or merge down', (
+  testWidgets('MergeSemantics merges children with AccessiblityFocusBlockType.blockNode', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MergeSemantics(
+          child: Column(
+            children: <Widget>[
+              Semantics(
+                container: true,
+                accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
+                label: 'node1',
+                child: const SizedBox(width: 10, height: 10),
+              ),
+              Semantics(
+                container: true,
+                label: 'node2',
+                child: const SizedBox(width: 10, height: 10),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
+              label: 'node1\nnode2',
+            ),
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true,
+      ),
+    );
+    semantics.dispose();
+  });
+
+  testWidgets('AccessiblityFocusBlockType.blockNode doesnt merge up or merge down', (
     WidgetTester tester,
   ) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -972,7 +1018,7 @@ void main() {
         child: Semantics(
           label: 'root',
           child: Semantics(
-            blockAccessibilityFocus: BlockAccessibilityFocus.blockNode,
+            accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
             label: 'semantics label 0',
             child: Column(
               children: <Widget>[
@@ -992,13 +1038,12 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               id: 1,
-              flags: SemanticsFlags(blockAccessibilityFocus: false),
               label: 'root',
               children: <TestSemantics>[
                 TestSemantics(
                   id: 2,
                   label: 'semantics label 0',
-                  flags: SemanticsFlags(blockAccessibilityFocus: true),
+                  flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
                   children: <TestSemantics>[
                     TestSemantics(id: 3, label: 'semantics label 1'),
                     TestSemantics(id: 4, label: 'semantics label 2'),
@@ -1017,7 +1062,9 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('BlockAccessibilityFocus.blockSubtree doesnt merge up', (WidgetTester tester) async {
+  testWidgets('AccessiblityFocusBlockType.blockSubtree doesnt merge up', (
+    WidgetTester tester,
+  ) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1026,7 +1073,7 @@ void main() {
         child: Semantics(
           label: 'root',
           child: Semantics(
-            blockAccessibilityFocus: BlockAccessibilityFocus.blockSubtree,
+            accessiblityFocusBlockType: AccessiblityFocusBlockType.blockSubtree,
             label: 'semantics label 0',
             child: Column(
               children: <Widget>[
@@ -1046,13 +1093,12 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               id: 1,
-              flags: SemanticsFlags(blockAccessibilityFocus: false),
               label: 'root',
               children: <TestSemantics>[
                 TestSemantics(
                   id: 2,
                   label: 'semantics label 0\nsemantics label 1\nsemantics label 2',
-                  flags: SemanticsFlags(blockAccessibilityFocus: true),
+                  flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
                 ),
               ],
             ),
@@ -1073,7 +1119,7 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        blockAccessibilityFocus: BlockAccessibilityFocus.blockSubtree,
+        accessiblityFocusBlockType: AccessiblityFocusBlockType.blockSubtree,
         focused: true,
         customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
           const CustomSemanticsAction(label: 'action1'): () {},

@@ -55,7 +55,7 @@ std::unique_ptr<FlutterSemanticsFlags> ConvertToFlutterSemanticsFlags(
       .is_link = source.isLink,
       .is_slider = source.isSlider,
       .is_keyboard_key = source.isKeyboardKey,
-      .block_accessibility_focus = source.blockAccessibilityFocus,
+      .is_accessibility_focus_blocked = source.isAccessibilityFocusBlocked,
   });
 }
 
