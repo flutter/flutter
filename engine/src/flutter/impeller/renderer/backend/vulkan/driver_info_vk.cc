@@ -361,11 +361,8 @@ bool DriverInfoVK::IsKnownBadDriver() const {
   // Fall back to OpenGL ES on older Adreno devices that require additional
   // workarounds in the Impeller Vulkan back end such as disabling framebuffer
   // fetch.
-  if (adreno_gpu_.has_value()) {
-    AdrenoGPU adreno = adreno_gpu_.value();
-    if (adreno <= AdrenoGPU::kAdreno630) {
-      return true;
-    }
+  if (adreno_gpu_ && *adreno_gpu_ <= AdrenoGPU::kAdreno630) {
+    return true;
   }
 
   // Disable Maleoon series GPUs, see:
