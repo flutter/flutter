@@ -208,7 +208,7 @@ public class FlutterLoaderTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
     Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.leakVm", false);
+    metaData.putBoolean("io.flutter.embedding.android.LeakVM", false);
     ctx.getApplicationInfo().metaData = metaData;
 
     FlutterLoader.Settings settings = new FlutterLoader.Settings();
@@ -298,7 +298,7 @@ public class FlutterLoaderTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
     Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.enableImpeller", true);
+    metaData.putBoolean("io.flutter.embedding.android.EnableImpeller", true);
     ctx.getApplicationInfo().metaData = metaData;
 
     FlutterLoader.Settings settings = new FlutterLoader.Settings();
@@ -327,7 +327,7 @@ public class FlutterLoaderTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
     Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.enableFlutterGpu", true);
+    metaData.putBoolean("io.flutter.embedding.android.EnableFlutterGPU", true);
     ctx.getApplicationInfo().metaData = metaData;
 
     FlutterLoader.Settings settings = new FlutterLoader.Settings();
@@ -356,7 +356,7 @@ public class FlutterLoaderTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
     Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.enableSurfaceControl", true);
+    metaData.putBoolean("io.flutter.embedding.android.EnableSurfaceControl", true);
     ctx.getApplicationInfo().metaData = metaData;
 
     FlutterLoader.Settings settings = new FlutterLoader.Settings();
@@ -385,7 +385,7 @@ public class FlutterLoaderTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
     Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.impellerLazyShaderMode", true);
+    metaData.putBoolean("io.flutter.embedding.android.ImpellerLazyShaderMode", true);
     ctx.getApplicationInfo().metaData = metaData;
 
     FlutterLoader.Settings settings = new FlutterLoader.Settings();
@@ -447,7 +447,7 @@ public class FlutterLoaderTest {
     for (Path testPath : pathsToTest) {
       String path = testPath.toString();
       Bundle metaData = new Bundle();
-      metaData.putString("io.flutter.embedding.android.aotSharedLibraryName", path);
+      metaData.putString("io.flutter.embedding.android.AOTSharedLibraryName", path);
       ctx.getApplicationInfo().metaData = metaData;
 
       flutterLoader.ensureInitializationComplete(ctx, null);
@@ -525,7 +525,7 @@ public class FlutterLoaderTest {
     for (Path testPath : pathsToTest) {
       String path = testPath.toString();
       Bundle metaData = new Bundle();
-      metaData.putString("io.flutter.embedding.android.aotSharedLibraryName", path);
+      metaData.putString("io.flutter.embedding.android.AOTSharedLibraryName", path);
       ctx.getApplicationInfo().metaData = metaData;
 
       flutterLoader.ensureInitializationComplete(ctx, null);
@@ -575,7 +575,7 @@ public class FlutterLoaderTest {
     String invalidFilePath = "my\0file.so";
 
     Bundle metaData = new Bundle();
-    metaData.putString("io.flutter.embedding.android.aotSharedLibraryName", invalidFilePath);
+    metaData.putString("io.flutter.embedding.android.AOTSharedLibraryName", invalidFilePath);
     ctx.getApplicationInfo().metaData = metaData;
 
     flutterLoader.ensureInitializationComplete(ctx, null);
@@ -627,7 +627,7 @@ public class FlutterLoaderTest {
 
     Bundle metaData = new Bundle();
     metaData.putString(
-        "io.flutter.embedding.android.aotSharedLibraryName", spySymlinkFile.getPath());
+        "io.flutter.embedding.android.AOTSharedLibraryName", spySymlinkFile.getPath());
     ctx.getApplicationInfo().metaData = metaData;
     flutterLoader.ensureInitializationComplete(ctx, null);
 
@@ -685,7 +685,7 @@ public class FlutterLoaderTest {
 
     Bundle metaData = new Bundle();
     metaData.putString(
-        "io.flutter.embedding.android.aotSharedLibraryName", spySymlinkFile.getAbsolutePath());
+        "io.flutter.embedding.android.AOTSharedLibraryName", spySymlinkFile.getAbsolutePath());
     ctx.getApplicationInfo().metaData = metaData;
 
     for (File unsafeFile : unsafeFiles) {
