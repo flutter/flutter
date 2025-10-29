@@ -435,17 +435,6 @@ Float32List offsetListToFloat32List(List<ui.Offset> offsetList) {
   return floatList;
 }
 
-int clampInt(int value, int min, int max) {
-  assert(min <= max);
-  if (value < min) {
-    return min;
-  } else if (value > max) {
-    return max;
-  } else {
-    return value;
-  }
-}
-
 /// Prints a warning message to the console.
 ///
 /// This function can be overridden in tests. This could be useful, for example,
