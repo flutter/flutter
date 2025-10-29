@@ -14,11 +14,15 @@ float radius = 30.0;
 
 void main() {
   vec2 uv = FlutterFragCoord().xy / u_size;
+  vec2 fixed_uv = uv;
+#ifdef IMPELLER_TARGET_OPENGLES
+  fixed_uv.y = 1.0 - fixed_uv.y;
+#endif
   vec2 norm_origin = origin / u_size;
   float norm_radius = radius / max(u_size.x, u_size.y);
   if (distance(uv, norm_origin) < norm_radius) {
     frag_color = vec4(1.0, 0.0, 0.0, 1.0);
   } else {
-    frag_color = texture(u_texture, uv);
+    frag_color = texture(u_texture, fixed_uv);
   }
 }
