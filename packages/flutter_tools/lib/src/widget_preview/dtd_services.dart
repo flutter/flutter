@@ -6,24 +6,29 @@ import 'dart:async';
 
 import 'package:dtd/dtd.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../project.dart';
+import 'persistent_preferences.dart';
 
 typedef DtdService = (String, DTDServiceCallback);
 
 /// Provides services, streams, and RPC invocations to interact with the Widget Preview Scaffold.
 class WidgetPreviewDtdServices {
   WidgetPreviewDtdServices({
+    required this.fs,
     required this.logger,
     required this.shutdownHooks,
     required this.dtdLauncher,
@@ -45,16 +50,28 @@ class WidgetPreviewDtdServices {
   static const kIsWindows = 'isWindows';
   static const kHotRestartPreviewer = 'hotRestartPreviewer';
   static const kResolveUri = 'resolveUri';
+  static const kSetPreference = 'setPreference';
+  static const kGetPreference = 'getPreference';
+
+  /// Error code for RpcException thrown when attempting to load a key from
+  /// persistent preferences that doesn't have an entry.
+  static const kNoValueForKey = 200;
 
   /// The list of DTD service methods registered by the tool.
   late final services = <DtdService>[
     (kHotRestartPreviewer, _hotRestart),
     (kIsWindows, _isWindows),
     (kResolveUri, _resolveUri),
+    (kSetPreference, _setPreference),
+    (kGetPreference, _getPreference),
   ];
 
   // END KEEP SYNCED
 
+  @visibleForTesting
+  late final preferences = PersistentPreferences(fs: fs);
+
+  final FileSystem fs;
   final Logger logger;
   final ShutdownHooks shutdownHooks;
   final DtdLauncher dtdLauncher;
@@ -115,6 +132,28 @@ class WidgetPreviewDtdServices {
     final Uri? result = _packageConfig!.resolve(Uri.parse(params.asMap['uri'] as String));
     return StringResponse(result.toString()).toJson();
   }
+
+  Future<Map<String, Object?>> _setPreference(Parameters params) async {
+    final String key = params['key'].asString;
+    final Object? value = params['value'].value;
+    preferences[key] = value;
+    return const Success().toJson();
+  }
+
+  Future<Map<String, Object?>> _getPreference(Parameters params) async {
+    final String key = params['key'].asString;
+    final Object? value = preferences[key];
+    if (value == null) {
+      throw RpcException(kNoValueForKey, 'No entry for $key in preferences.');
+    }
+    if (value is String) {
+      return StringResponse(value).toJson();
+    }
+    if (value is bool) {
+      return BoolResponse(value).toJson();
+    }
+    throw UnimplementedError('Unexpected preference value: ${value.runtimeType}');
+  }
 }
 
 /// Manages the lifecycle of a Dart Tooling Daemon (DTD) instance.
@@ -137,7 +176,7 @@ class DtdLauncher {
     // Wait for the DTD connection information.
     final dtdUri = Completer<Uri>();
     late final StreamSubscription<String> sub;
-    sub = _dtdProcess!.stdout.transform(const Utf8Decoder()).listen((String data) async {
+    sub = _dtdProcess!.stdout.transformWithCallSite(utf8.decoder).listen((String data) async {
       await sub.cancel();
       final jsonData = json.decode(data) as Map<String, Object?>;
       if (jsonData case {'tooling_daemon_details': {'uri': final String dtdUriString}}) {
