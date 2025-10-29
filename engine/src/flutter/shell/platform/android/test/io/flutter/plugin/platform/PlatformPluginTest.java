@@ -33,6 +33,7 @@ import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import android.os.Build;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowInsetsController;
@@ -751,5 +752,91 @@ public class PlatformPluginTest {
     assertEquals(sendToIntent.getAction(), Intent.ACTION_SEND);
     assertEquals(sendToIntent.getType(), "text/plain");
     assertEquals(sendToIntent.getStringExtra(Intent.EXTRA_TEXT), expectedContent);
+  }
+
+  @Config(sdk = API_LEVELS.API_29)
+  @Test
+  public void vibrateHapticFeedbackWhenApiLevelIsLessThan30() {
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    Activity mockActivity = mock(Activity.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    when(mockActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.STANDARD);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.LIGHT_IMPACT);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.MEDIUM_IMPACT);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.HEAVY_IMPACT);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.SELECTION_CLICK);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.SUCCESS_NOTIFICATION);
+    verify(fakeDecorView, never()).performHapticFeedback(HapticFeedbackConstants.CONFIRM);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.WARNING_NOTIFICATION);
+    verify(fakeDecorView, times(2)).performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.ERROR_NOTIFICATION);
+    verify(fakeDecorView, never()).performHapticFeedback(HapticFeedbackConstants.REJECT);
+  }
+
+  @Config(sdk = API_LEVELS.API_30)
+  @Test
+  public void vibrateHapticFeedbackWhenApiLevelIs30() {
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    Activity mockActivity = mock(Activity.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    when(mockActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.STANDARD);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.LIGHT_IMPACT);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.MEDIUM_IMPACT);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.HEAVY_IMPACT);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.SELECTION_CLICK);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.SUCCESS_NOTIFICATION);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.CONFIRM);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.WARNING_NOTIFICATION);
+    verify(fakeDecorView, times(2)).performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.ERROR_NOTIFICATION);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.REJECT);
   }
 }
