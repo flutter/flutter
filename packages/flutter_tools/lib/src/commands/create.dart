@@ -382,11 +382,12 @@ class CreateCommand extends FlutterCommand with CreateBase {
       includeDarwin = false;
     } else {
       final bool darwinRequested = platforms.contains('darwin');
+      final bool darwinSupported = featureFlags.isIOSEnabled || featureFlags.isMacOSEnabled;
 
-      if (darwinRequested) {
+      if (darwinRequested && darwinSupported) {
         includeDarwin = true;
-        includeIos = true;
-        includeMacos = true;
+        includeIos = featureFlags.isIOSEnabled;
+        includeMacos = featureFlags.isMacOSEnabled;
       } else {
         includeDarwin = false;
         includeIos = featureFlags.isIOSEnabled && platforms.contains('ios');
@@ -718,10 +719,9 @@ Your $application code is in $relativeAppMain.
         featureFlags.isSwiftPackageManagerEnabled;
 
     if (useSwiftPackageManager) {
+      templates.add('plugin_swift_package_manager');
       if (includeDarwin) {
-        templates.add('plugin_darwin_spm');
-      } else {
-        templates.add('plugin_swift_package_manager');
+        templates.add('plugin_darwin_spm'); // Only files that differ (e.g., pluginClass.swift.tmpl)
       }
       templateContext['swiftLibraryName'] = projectName?.replaceAll('_', '-');
       templateContext['swiftToolsVersion'] = minimumSwiftToolchainVersion;
@@ -732,10 +732,9 @@ Your $application code is in $relativeAppMain.
           .supportedPackagePlatform
           .format();
     } else {
+      templates.add('plugin_cocoapods');
       if (includeDarwin) {
         templates.add('plugin_darwin_cocoapods');
-      } else {
-        templates.add('plugin_cocoapods');
       }
     }
     generatedCount += await renderMerged(

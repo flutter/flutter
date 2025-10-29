@@ -420,17 +420,16 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
 ''';
 
   Directory get ephemeralModuleDirectory => parent.directory.childDirectory('.ios');
-  Directory get _editableDirectory => parent.directory.childDirectory('ios');
+  Directory get _editableDirectory {
+    if (parent.manifest.ios?.sharedDarwinSource ?? false) {
+      return parent.directory.childDirectory('darwin');
+    }
+    return parent.directory.childDirectory('ios');
+  }
 
   /// This parent folder of `Runner.xcodeproj`.
   @override
   Directory get hostAppRoot {
-    if (parent.manifest.isModule || (parent.manifest.ios?.sharedDarwinSource ?? false)) {
-      final Directory darwinDir = parent.directory.childDirectory('darwin');
-      if (darwinDir.existsSync()) {
-        return darwinDir;
-      }
-    }
     if (!isModule || _editableDirectory.existsSync()) {
       return _editableDirectory;
     }
