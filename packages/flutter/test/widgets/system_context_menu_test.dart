@@ -1403,12 +1403,7 @@ void main() {
 
       // Assert that the platform message included a Share item.
       expect(itemsReceived, isNotEmpty);
-      expect(
-        itemsReceived.last.any(
-          (IOSSystemContextMenuItemData e) => e is IOSSystemContextMenuItemDataShare,
-        ),
-        isTrue,
-      );
+      expect(itemsReceived.last, contains(isA<IOSSystemContextMenuItemDataShare>()));
     },
     skip: kIsWeb, // [intended]
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
