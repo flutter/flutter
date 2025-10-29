@@ -81,7 +81,6 @@
     "templates/app/linux.tmpl/runner/CMakeLists.txt",
     "templates/app/linux.tmpl/runner/main.cc",
     "templates/app/linux.tmpl/runner/my_application.cc.tmpl",
-    "templates/app/linux.tmpl/runner/my_application.cc",
     "templates/app/linux.tmpl/runner/my_application.h",
     "templates/app/macos.tmpl/.gitignore",
     "templates/app/macos.tmpl/Flutter/Flutter-Debug.xcconfig",
