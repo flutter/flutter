@@ -118,7 +118,7 @@ void main() {
     lastOnSelected(selection);
     await tester.pump();
     expect(find.byKey(fieldKey), findsOneWidget);
-    expect(find.byKey(optionsKey), findsNothing);
+    expect(find.byKey(optionsKey), findsOne);
     expect(textEditingController.text, selection);
 
     // Modify the field text. The options appear again and are filtered.
@@ -236,7 +236,7 @@ void main() {
     lastOnSelected(selection);
     await tester.pump();
     expect(find.byKey(fieldKey), findsOneWidget);
-    expect(find.byKey(optionsKey), findsNothing);
+    expect(find.byKey(optionsKey), findsOne);
     expect(textEditingController.text, selection);
 
     // Modify the field text. The options appear again and are filtered.
@@ -337,7 +337,7 @@ void main() {
       await tester.tap(find.text(kOptions[2]));
       await tester.pump();
 
-      expect(find.byKey(optionsKey), findsNothing);
+      expect(find.byKey(optionsKey), findsOne);
 
       expect(textEditingController.text, equals(kOptions[2]));
     });
@@ -802,7 +802,7 @@ void main() {
     lastOnSelected(selection);
     await tester.pump();
     expect(find.byKey(fieldKey), findsOneWidget);
-    expect(find.byKey(optionsKey), findsNothing);
+    expect(find.byKey(optionsKey), findsOne);
     expect(lastUserSelected, selection);
     expect(textEditingController.text, selection.name);
 
@@ -887,7 +887,7 @@ void main() {
     lastOnFieldSubmitted();
     await tester.pump();
     expect(find.byKey(fieldKey), findsOneWidget);
-    expect(find.byKey(optionsKey), findsNothing);
+    expect(find.byKey(optionsKey), findsOne);
     expect(textEditingController.text, lastOptions.elementAt(0));
   });
 
@@ -1524,7 +1524,7 @@ void main() {
     lastOnSelected(selection);
     await tester.pump();
     expect(find.byKey(fieldKey), findsOneWidget);
-    expect(find.byKey(optionsKey), findsNothing);
+    expect(find.byKey(optionsKey), findsOne);
     expect(textEditingController.text, selection);
   });
 
@@ -2217,8 +2217,6 @@ void main() {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late AutocompleteOnSelected<String> lastOnSelected;
-    late FocusNode focusNode;
-    late TextEditingController textEditingController;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2236,12 +2234,10 @@ void main() {
                   FocusNode fieldFocusNode,
                   VoidCallback onFieldSubmitted,
                 ) {
-                  focusNode = fieldFocusNode;
-                  textEditingController = fieldTextEditingController;
                   return TextField(
                     key: fieldKey,
-                    focusNode: focusNode,
-                    controller: textEditingController,
+                    focusNode: fieldFocusNode,
+                    controller: fieldTextEditingController,
                   );
                 },
             optionsViewBuilder:
@@ -3466,4 +3462,71 @@ void main() {
     final Finder xText = find.text('X');
     expect(tester.getSize(xText).isEmpty, isTrue);
   });
+
+  testWidgets(
+    'floating menu is displayed when the field is focused and already has a selected value',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/177429.
+      const Key fieldKey = Key('field');
+      const Key optionsKey = Key('options');
+      late AutocompleteOnSelected<String> lastOnSelected;
+      late FocusNode focusNode;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: RawAutocomplete<String>(
+              optionsBuilder: (TextEditingValue textEditingValue) {
+                return kOptions.where((String option) {
+                  return option.contains(textEditingValue.text.toLowerCase());
+                });
+              },
+              fieldViewBuilder:
+                  (
+                    BuildContext context,
+                    TextEditingController fieldTextEditingController,
+                    FocusNode fieldFocusNode,
+                    VoidCallback onFieldSubmitted,
+                  ) {
+                    focusNode = fieldFocusNode;
+                    return TextField(
+                      key: fieldKey,
+                      focusNode: fieldFocusNode,
+                      controller: fieldTextEditingController,
+                    );
+                  },
+              optionsViewBuilder:
+                  (
+                    BuildContext context,
+                    AutocompleteOnSelected<String> onSelected,
+                    Iterable<String> options,
+                  ) {
+                    lastOnSelected = onSelected;
+                    return Container(key: optionsKey);
+                  },
+            ),
+          ),
+        ),
+      );
+
+      // The field is always rendered, but the options are not unless needed.
+      expect(find.byKey(fieldKey), findsOne);
+      expect(find.byKey(optionsKey), findsNothing);
+
+      await tester.enterText(find.byKey(fieldKey), kOptions[0]);
+      await tester.pumpAndSettle();
+      expect(find.byKey(optionsKey), findsOne);
+
+      lastOnSelected(kOptions[0]);
+      await tester.pump();
+      expect(find.byKey(optionsKey), findsNothing);
+
+      focusNode.unfocus();
+      await tester.pump();
+      focusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(optionsKey), findsOne);
+    },
+  );
 }
