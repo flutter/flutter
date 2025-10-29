@@ -329,7 +329,7 @@ bool CanvasPath::op(CanvasPath* path1, CanvasPath* path2, int operation) {
       Op(path1->sk_path_.snapshot(), path2->sk_path_.snapshot(),
          static_cast<SkPathOp>(operation));
   if (result) {
-    path1->sk_path_ = result.value();
+    sk_path_ = result.value();
     resetVolatility();
     return true;
   }
