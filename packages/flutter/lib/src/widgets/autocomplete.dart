@@ -481,7 +481,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       text: selectionString,
     );
     widget.onSelected?.call(nextSelection);
-    _updateOptionsViewVisibility();
+    _effectiveOptionsViewController.hide();
   }
 
   void _updateHighlight(int nextIndex) {
