@@ -722,6 +722,7 @@ Your $application code is in $relativeAppMain.
       templates.add('plugin_swift_package_manager');
       if (includeDarwin) {
         templates.add('plugin_darwin_spm');
+      }
       templateContext['swiftLibraryName'] = projectName?.replaceAll('_', '-');
       templateContext['swiftToolsVersion'] = minimumSwiftToolchainVersion;
       templateContext['iosSupportedPlatform'] = FlutterDarwinPlatform.ios.supportedPackagePlatform
