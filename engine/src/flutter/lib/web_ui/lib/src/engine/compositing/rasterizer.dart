@@ -129,7 +129,6 @@ abstract class ViewRasterizer {
   /// Disposes this rasterizer.
   void dispose() {
     viewEmbedder.dispose();
-    displayFactory.dispose();
   }
 
   /// Clears the state. Used in tests.
