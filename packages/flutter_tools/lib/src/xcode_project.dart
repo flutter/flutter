@@ -747,21 +747,22 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     if (defaultScheme == null) {
       projectInfo.reportFlavorNotFoundAndExit();
     }
-    final Map<String, String>? allBuildSettings = await buildSettingsForBuildInfo(
-      buildInfo,
-      deviceId: deviceId,
-      scheme: defaultScheme,
-      isWatch: true,
-    );
-    if (allBuildSettings != null) {
-      final String? fromBuild = allBuildSettings['INFOPLIST_KEY_WKCompanionAppBundleIdentifier'];
-      if (bundleIdentifier == fromBuild) {
-        return true;
-      }
-      if (fromBuild != null && fromBuild.contains(r'$')) {
-        final String substitutedVariable = substituteXcodeVariables(fromBuild, allBuildSettings);
-        if (substitutedVariable == bundleIdentifier) {
+    for (final String scheme in projectInfo.schemes) {
+      final Map<String, String>? allBuildSettings = await buildSettingsForBuildInfo(
+        buildInfo,
+        scheme: scheme,
+        isWatch: true,
+      );
+      if (allBuildSettings != null) {
+        final String? fromBuild = allBuildSettings['INFOPLIST_KEY_WKCompanionAppBundleIdentifier'];
+        if (bundleIdentifier == fromBuild) {
           return true;
+        }
+        if (fromBuild != null && fromBuild.contains(r'$')) {
+          final String substitutedVariable = substituteXcodeVariables(fromBuild, allBuildSettings);
+          if (substitutedVariable == bundleIdentifier) {
+            return true;
+          }
         }
       }
     }
