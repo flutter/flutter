@@ -30,9 +30,9 @@ public final class FlutterEngineManifestFlags {
 
     private String packageName = "io.flutter.embedding.android.";
 
-    public Flag(String commandLineArgument, String metaDataKey, boolean allowedInRelease) {
+    public Flag(String commandLineArgument, String metaDataName, boolean allowedInRelease) {
       this.commandLineArgument = commandLineArgument;
-      this.metaDataKey = packageName + metaDataKey;
+      this.metaDataKey = packageName + metaDataName;
       this.allowedInRelease = allowedInRelease;
     }
 
