@@ -827,7 +827,8 @@ TEST(DisplayListPath, CannotConstructFromSkiaInverseWinding) {
   sk_path.lineTo({0, 100});
   sk_path.close();
 
-  EXPECT_DEATH_IF_SUPPORTED(new DlPath(sk_path.detach()), "SkPathFillType_IsInverse");
+  EXPECT_DEATH_IF_SUPPORTED(new DlPath(sk_path.detach()),
+                            "SkPathFillType_IsInverse");
 }
 
 TEST(DisplayListPath, CannotConstructFromSkiaInverseEvenOdd) {
@@ -837,7 +838,8 @@ TEST(DisplayListPath, CannotConstructFromSkiaInverseEvenOdd) {
   sk_path.lineTo({0, 100});
   sk_path.close();
 
-  EXPECT_DEATH_IF_SUPPORTED(new DlPath(sk_path.detach()), "SkPathFillType_IsInverse");
+  EXPECT_DEATH_IF_SUPPORTED(new DlPath(sk_path.detach()),
+                            "SkPathFillType_IsInverse");
 }
 #endif
 

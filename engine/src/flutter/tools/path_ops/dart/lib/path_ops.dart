@@ -355,7 +355,8 @@ typedef _destroy_type = ffi.Void Function(ffi.Pointer<_SkPathBuilder>);
 final _DestroyType _destroyFn = _dylib.lookupFunction<_destroy_type, _DestroyType>('DestroyPath');
 
 typedef _OpType = void Function(ffi.Pointer<_SkPathBuilder>, ffi.Pointer<_SkPathBuilder>, int);
-typedef _op_type = ffi.Void Function(ffi.Pointer<_SkPathBuilder>, ffi.Pointer<_SkPathBuilder>, ffi.Int);
+typedef _op_type =
+    ffi.Void Function(ffi.Pointer<_SkPathBuilder>, ffi.Pointer<_SkPathBuilder>, ffi.Int);
 
 final _OpType _opFn = _dylib.lookupFunction<_op_type, _OpType>('Op');
 

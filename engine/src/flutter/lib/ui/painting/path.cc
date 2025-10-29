@@ -244,7 +244,8 @@ void CanvasPath::addPathWithMatrix(CanvasPath* path,
   matrix4.Release();
   matrix.setTranslateX(matrix.getTranslateX() + SafeNarrow(dx));
   matrix.setTranslateY(matrix.getTranslateY() + SafeNarrow(dy));
-  sk_path_.addPath(path->sk_path_.snapshot(), matrix, SkPath::kAppend_AddPathMode);
+  sk_path_.addPath(path->sk_path_.snapshot(), matrix,
+                   SkPath::kAppend_AddPathMode);
   resetVolatility();
 }
 
@@ -276,7 +277,8 @@ void CanvasPath::extendWithPathAndMatrix(CanvasPath* path,
   matrix4.Release();
   matrix.setTranslateX(matrix.getTranslateX() + SafeNarrow(dx));
   matrix.setTranslateY(matrix.getTranslateY() + SafeNarrow(dy));
-  sk_path_.addPath(path->sk_path_.snapshot(), matrix, SkPath::kExtend_AddPathMode);
+  sk_path_.addPath(path->sk_path_.snapshot(), matrix,
+                   SkPath::kExtend_AddPathMode);
   resetVolatility();
 }
 
@@ -297,7 +299,8 @@ bool CanvasPath::contains(double x, double y) {
 void CanvasPath::shift(Dart_Handle path_handle, double dx, double dy) {
   fml::RefPtr<CanvasPath> path = Create(path_handle);
   auto& other_mutable_path = path->sk_path_;
-  other_mutable_path = sk_path_.snapshot().makeOffset(SafeNarrow(dx), SafeNarrow(dy));
+  other_mutable_path =
+      sk_path_.snapshot().makeOffset(SafeNarrow(dx), SafeNarrow(dy));
   resetVolatility();
 }
 
@@ -322,7 +325,9 @@ tonic::Float32List CanvasPath::getBounds() {
 }
 
 bool CanvasPath::op(CanvasPath* path1, CanvasPath* path2, int operation) {
-  std::optional<SkPath> result = Op(path1->sk_path_.snapshot(), path2->sk_path_.snapshot(), static_cast<SkPathOp>(operation));
+  std::optional<SkPath> result =
+      Op(path1->sk_path_.snapshot(), path2->sk_path_.snapshot(),
+         static_cast<SkPathOp>(operation));
   if (result) {
     path1->sk_path_ = result.value();
     resetVolatility();
