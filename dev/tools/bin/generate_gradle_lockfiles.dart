@@ -41,12 +41,8 @@ void main(List<String> arguments) {
           'Run the script using the config file at ./configs/lockfile_exclusion.yaml to skip the specified subdirectories.',
       defaultsTo: true,
     )
-    ..addFlag(
-      'ignore-locking',
-      help: 'Generate ignore file to disable gradle dependency locking. A reason must be given.',
-    )
     ..addOption(
-      'ignore-reason',
+      'ignore-locking',
       help:
           'Reason to disable gradle dependency locking. A reason must be given if --ignore-locking is used.',
     );
@@ -68,8 +64,8 @@ void main(List<String> arguments) {
   // Skip android subdirectories specified in the ./config/lockfile_exclusion.yaml file.
   final bool useExclusion = (args['exclusion'] as bool?) ?? true;
 
-  final bool ignoreLocking = (args['ignore-locking'] as bool?) ?? false;
-  final String ignoreReason = (args['ignore-reason'] as String?) ?? '';
+  final bool ignoreLocking = args['ignore-locking'] != null;
+  final String ignoreReason = (args['ignore-locking'] as String?) ?? '';
 
   if (ignoreLocking && ignoreReason.isEmpty) {
     stderr.writeln('A reason must be provided for --ignore-locking.');
