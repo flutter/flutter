@@ -310,6 +310,7 @@ class TestSemantics {
     bool ignoreRect = false,
     bool ignoreTransform = false,
     bool ignoreId = false,
+    bool ignoreTraversalIdentifier = false,
     DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.inverseHitTest,
   }) {
     bool fail(String message) {
@@ -426,7 +427,14 @@ class TestSemantics {
         'expected node id $id to have scrollIndex $scrollChildren but found scrollIndex ${nodeData.scrollChildCount}.',
       );
     }
-    final int childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
+
+    final int childrenCount;
+    if (childOrder == DebugSemanticsDumpOrder.traversalOrder) {
+      childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCountInTraversalOrder;
+    } else {
+      childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
+    }
+
     if (children.length != childrenCount) {
       return fail(
         'expected node id $id to have ${children.length} child${children.length == 1 ? "" : "ren"} but found $childrenCount.',
@@ -474,7 +482,7 @@ class TestSemantics {
         'expected node id $id to have current value length $currentValueLength but found current value length ${node.currentValueLength}',
       );
     }
-    if (identifier != node.identifier) {
+    if (!ignoreTraversalIdentifier && identifier != node.identifier) {
       return fail(
         'expected node id $id to have identifier $identifier but found identifier ${node.identifier}',
       );
@@ -498,6 +506,7 @@ class TestSemantics {
         ignoreRect: ignoreRect,
         ignoreTransform: ignoreTransform,
         ignoreId: ignoreId,
+        ignoreTraversalIdentifier: ignoreTraversalIdentifier,
         childOrder: childOrder,
       );
       if (!childMatches) {
@@ -973,6 +982,7 @@ class _HasSemantics extends Matcher {
     required this.ignoreRect,
     required this.ignoreTransform,
     required this.ignoreId,
+    required this.ignoreTraversalIdentifier,
     required this.childOrder,
   });
 
@@ -980,6 +990,7 @@ class _HasSemantics extends Matcher {
   final bool ignoreRect;
   final bool ignoreTransform;
   final bool ignoreId;
+  final bool ignoreTraversalIdentifier;
   final DebugSemanticsDumpOrder childOrder;
 
   @override
@@ -990,6 +1001,7 @@ class _HasSemantics extends Matcher {
       ignoreTransform: ignoreTransform,
       ignoreRect: ignoreRect,
       ignoreId: ignoreId,
+      ignoreTraversalIdentifier: ignoreTraversalIdentifier,
       childOrder: childOrder,
     );
     if (!doesMatch) {
@@ -1051,6 +1063,7 @@ Matcher hasSemantics(
   bool ignoreRect = false,
   bool ignoreTransform = false,
   bool ignoreId = false,
+  bool ignoreTraversalIdentifier = false,
   DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
 }) {
   return _HasSemantics(
@@ -1058,6 +1071,7 @@ Matcher hasSemantics(
     ignoreRect: ignoreRect,
     ignoreTransform: ignoreTransform,
     ignoreId: ignoreId,
+    ignoreTraversalIdentifier: ignoreTraversalIdentifier,
     childOrder: childOrder,
   );
 }
