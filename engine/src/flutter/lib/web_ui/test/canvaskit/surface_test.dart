@@ -7,10 +7,6 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'dart:js_interop';
-
-import 'package:ui/src/engine/configuration.dart';
-
 import 'common.dart';
 
 void main() {
