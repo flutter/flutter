@@ -730,7 +730,13 @@ void main() {
         expect(command.usage, contains(option));
       }
 
-      expectVisible('pwa-strategy');
+      void expectHidden(String option) {
+        expect(command.argParser.options.keys, contains(option));
+        expect(command.argParser.options[option]!.hide, isTrue);
+        expect(command.usage, isNot(contains(option)));
+      }
+
+      expectHidden('pwa-strategy');
       expectVisible('web-resources-cdn');
       expectVisible('optimization-level');
       expectVisible('source-maps');
