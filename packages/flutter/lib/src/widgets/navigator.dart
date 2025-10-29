@@ -2806,6 +2806,22 @@ class Navigator extends StatefulWidget {
     Navigator.of(context).popUntil(predicate);
   }
 
+  /// Calls [pop] repeatedly on the navigator that most tightly encloses the
+  /// given context until the predicate returns true, returning the [result] to
+  /// the last popped route.
+  ///
+  /// The `T` type argument is the type of the return value of the last popped route.
+  ///
+  /// {@macro flutter.widgets.navigator.popUntil}
+  @optionalTypeArgs
+  static void popUntilWithResult<T extends Object?>(
+    BuildContext context,
+    RoutePredicate predicate,
+    T? result,
+  ) {
+    Navigator.of(context).popUntilWithResult<T>(predicate, result);
+  }
+
   /// Immediately remove `route` from the navigator that most tightly encloses
   /// the given context, and [Route.dispose] it.
   ///
@@ -5628,6 +5644,33 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         return;
       }
       pop();
+      candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+    }
+  }
+
+  /// Calls [pop] repeatedly until the predicate returns true, returning the
+  /// [result] to the last popped route.
+  ///
+  /// {@macro flutter.widgets.navigator.popUntil}
+  @optionalTypeArgs
+  void popUntilWithResult<T extends Object?>(RoutePredicate predicate, T? result) {
+    _RouteEntry? candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+
+    while (candidate != null) {
+      if (predicate(candidate.route)) {
+        return;
+      }
+      // Check what would be next if we pop this route.
+      final _RouteEntry? next = _lastRouteEntryWhereOrNull(
+        (_RouteEntry e) => _RouteEntry.isPresentPredicate(e) && e != candidate,
+      );
+
+      if (next != null && !next.route.willHandlePopInternally && predicate(next.route)) {
+        pop<T>(result);
+      } else {
+        pop();
+      }
+
       candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     }
   }
