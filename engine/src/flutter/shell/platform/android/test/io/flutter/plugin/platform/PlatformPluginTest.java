@@ -797,9 +797,9 @@ public class PlatformPluginTest {
     verify(fakeDecorView, never()).performHapticFeedback(HapticFeedbackConstants.REJECT);
   }
 
-  @Config(sdk = API_LEVELS.API_30)
+  @Config(minSdk = API_LEVELS.API_30)
   @Test
-  public void vibrateHapticFeedbackWhenApiLevelIs30() {
+  public void vibrateHapticFeedbackWhenApiLevelIsHigherOrEquals30() {
     View fakeDecorView = mock(View.class);
     Window fakeWindow = mock(Window.class);
     Activity mockActivity = mock(Activity.class);
