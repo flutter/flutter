@@ -157,7 +157,7 @@ class SystemContextMenu extends StatefulWidget {
   ///  * [EditableTextState.contextMenuButtonItems], which provides the default
   ///    [ContextMenuButtonItem]s for the Flutter-rendered context menu.
   static List<IOSSystemContextMenuItem> getDefaultItems(EditableTextState editableTextState) {
-    final List<IOSSystemContextMenuItem> items = <IOSSystemContextMenuItem>[];
+    final items = <IOSSystemContextMenuItem>[];
 
     // Use the generic Flutter-rendered context menu model as the single source of truth.
     for (final ContextMenuButtonItem button in editableTextState.contextMenuButtonItems) {
