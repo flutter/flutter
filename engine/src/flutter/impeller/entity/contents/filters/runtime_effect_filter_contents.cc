@@ -89,6 +89,9 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
       // to eliminate the padding typically given to RenderToSnapshot results.
       input_snapshot = texture_contents.RenderToSnapshot(
           renderer, entity, {.coverage_expansion = 0});
+      if (!input_snapshot.has_value()) {
+        return std::nullopt;
+      }
     }
   }
 
