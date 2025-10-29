@@ -96,7 +96,7 @@ FlDisplayMonitor* fl_engine_get_display_monitor(FlEngine* engine);
  * fl_engine_start:
  * @engine: an #FlEngine.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must not be uninitialized.
  *
  * Starts the Flutter engine.
  *
@@ -166,7 +166,7 @@ FlutterViewId fl_engine_add_view(FlEngine* engine,
  * @engine: an #FlEngine.
  * @result: a #GAsyncResult.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must not be uninitialized.
  *
  * Completes request started with fl_engine_add_view().
  *
@@ -210,7 +210,7 @@ void fl_engine_remove_view(FlEngine* engine,
  * @engine: an #FlEngine.
  * @result: a #GAsyncResult.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must not be uninitialized.
  *
  * Completes request started with fl_engine_remove_view().
  *
@@ -422,7 +422,7 @@ void fl_engine_send_key_event(FlEngine* engine,
  * @result: a #GAsyncResult.
  * @handled: location to write if this event was handled by the engine.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must not be uninitialized.
  *
  * Completes request started with fl_engine_send_key_event().
  *
@@ -453,7 +453,7 @@ void fl_engine_dispatch_semantics_action(FlEngine* engine,
  * @handle: handle that was provided in #FlEnginePlatformMessageHandler.
  * @response: (allow-none): response to send or %NULL for an empty response.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must not be uninitialized.
  *
  * Responds to a platform message.
  *
@@ -489,7 +489,7 @@ void fl_engine_send_platform_message(FlEngine* engine,
  * @engine: an #FlEngine.
  * @result: a #GAsyncResult.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must not be uninitialized.
  *
  * Completes request started with fl_engine_send_platform_message().
  *

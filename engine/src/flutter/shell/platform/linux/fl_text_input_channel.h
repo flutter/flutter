@@ -111,7 +111,7 @@ void fl_text_input_channel_update_editing_state(
  * @object:
  * @result: a #GAsyncResult.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must not be uninitialized.
  *
  * Completes request started with fl_text_input_channel_update_editing_state().
  *
@@ -162,7 +162,7 @@ void fl_text_input_channel_update_editing_state_with_deltas(
  * @object:
  * @result: a #GAsyncResult.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must not be uninitialized.
  *
  * Completes request started with
  * fl_text_input_channel_update_editing_state_with_deltas().
@@ -196,7 +196,7 @@ void fl_text_input_channel_perform_action(FlTextInputChannel* channel,
  * @object:
  * @result: a #GAsyncResult.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must not be uninitialized.
  *
  * Completes request started with fl_text_input_channel_perform_action().
  *

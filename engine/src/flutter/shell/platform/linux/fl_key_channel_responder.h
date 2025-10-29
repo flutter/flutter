@@ -62,7 +62,7 @@ void fl_key_channel_responder_handle_event(FlKeyChannelResponder* responder,
  * @result: a #GAsyncResult.
  * @handled: location to write if this event was handled by the platform.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must not be uninitialized.
  *
  * Completes request started with fl_key_channel_responder_handle_event().
  *

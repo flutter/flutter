@@ -159,7 +159,7 @@ void fl_basic_message_channel_set_message_handler(
  * @message: (allow-none): message response to send or %NULL for an empty
  * response.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must not be uninitialized.
  *
  * Responds to a message.
  *
@@ -194,7 +194,7 @@ void fl_basic_message_channel_send(FlBasicMessageChannel* channel,
  * @channel: an #FlBasicMessageChannel.
  * @result: a #GAsyncResult.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must not be uninitialized.
  *
  * Completes request started with fl_basic_message_channel_send().
  *
