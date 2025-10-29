@@ -79,7 +79,7 @@ abstract class DisposablePathMetrics {
 }
 
 abstract class DisposablePathMetric {
-  DisposablePath extractPath(double start, double end, {bool startWithMoveTo = true});
+  DisposablePathBuilder extractPath(double start, double end, {bool startWithMoveTo = true});
   ui.Tangent getTangentForOffset(double distance);
   bool get isClosed;
   double get length;
@@ -420,6 +420,14 @@ final class ClosePathCommand implements PathCommand {
   }
 }
 
+typedef PathCombineSource = (ui.PathOperation, LazyPath, LazyPath);
+typedef PathExtractSource = (
+  LazyPathMetric pathMetric,
+  double start,
+  double end,
+  bool startWithMoveTo,
+);
+
 abstract class DisposablePathConstructors {
   DisposablePathBuilder createNew();
   DisposablePathBuilder fromPath(DisposablePath path);
@@ -432,12 +440,19 @@ abstract class DisposablePathConstructors {
 
 class LazyPath implements ui.Path, Collectable {
   factory LazyPath(DisposablePathConstructors constructors) =>
-      LazyPath._(constructors, ui.PathFillType.nonZero, () => constructors.createNew());
-  LazyPath._(this.constructors, this._fillType, this.initializer) : _commands = [];
+      LazyPath._(constructors, ui.PathFillType.nonZero, []);
+  LazyPath._(
+    this.constructors,
+    this._fillType,
+    this._commands, {
+    PathCombineSource? combineSource,
+    PathExtractSource? extractSource,
+  }) : _combineSource = combineSource,
+       _extractSource = extractSource;
   LazyPath.fromLazyPath(LazyPath other)
     : _fillType = other._fillType,
       constructors = other.constructors,
-      initializer = other.initializer,
+      _combineSource = other._combineSource,
       _commands = List.from(other._commands);
   factory LazyPath.combined(ui.PathOperation operation, LazyPath path1, LazyPath path2) {
     final pathCopy1 = LazyPath.fromLazyPath(path1);
@@ -445,32 +460,27 @@ class LazyPath implements ui.Path, Collectable {
     return LazyPath._(
       pathCopy1.constructors,
       pathCopy1._fillType,
-      () =>
-          pathCopy1.constructors.combinePaths(operation, pathCopy1.builtPath, pathCopy2.builtPath),
+      [],
+      combineSource: (operation, pathCopy1, pathCopy2),
     );
   }
-  LazyPath extracted(
+  factory LazyPath.extracted(
+    LazyPath path,
     LazyPathMetric pathMetric,
     double start,
     double end, {
     bool startWithMoveTo = true,
   }) {
-    return LazyPath._(constructors, pathMetric.iterator.path._fillType, () {
-      // The extracted path is only needed temporarily to create the path builder. It can be disposed
-      // immediately after the path builder is created.
-      final DisposablePath path = pathMetric.buildExtractedPath(
-        start,
-        end,
-        startWithMoveTo: startWithMoveTo,
-      );
-      final DisposablePathBuilder pathBuilder = constructors.fromPath(path);
-      path.dispose();
-      return pathBuilder;
-    });
+    final pathCopy = LazyPath.fromLazyPath(path);
+    return LazyPath._(
+      pathCopy.constructors,
+      pathCopy._fillType,
+      [],
+      extractSource: (pathMetric, start, end, startWithMoveTo),
+    );
   }
 
   DisposablePathConstructors constructors;
-  DisposablePathBuilder Function() initializer;
 
   ui.PathFillType _fillType;
 
@@ -484,16 +494,34 @@ class LazyPath implements ui.Path, Collectable {
     _invalidateCachedPath();
   }
 
+  PathCombineSource? _combineSource;
+  PathExtractSource? _extractSource;
+
   DisposablePath? _cachedPath;
   DisposablePathBuilder? _cachedBuilder;
   final List<PathCommand> _commands;
 
   DisposablePathBuilder get _builtPathBuilder {
+    assert(
+      _combineSource == null || _extractSource == null,
+      'A LazyPath cannot have both a combine source and an extract source.',
+    );
+
     if (_cachedBuilder != null) {
       return _cachedBuilder!;
     }
 
-    final DisposablePathBuilder builder = initializer();
+    final DisposablePathBuilder builder;
+    if (_combineSource != null) {
+      final (op, path1, path2) = _combineSource!;
+      builder = constructors.combinePaths(op, path1.builtPath, path2.builtPath);
+    } else if (_extractSource != null) {
+      final (pathMetric, start, end, startWithMoveTo) = _extractSource!;
+      builder = pathMetric.buildExtractedPath(start, end, startWithMoveTo: startWithMoveTo);
+    } else {
+      builder = constructors.createNew();
+    }
+
     builder.fillType = _fillType;
     for (final command in _commands) {
       command.apply(builder);
@@ -666,7 +694,7 @@ class LazyPath implements ui.Path, Collectable {
   void reset() {
     _commands.clear();
     _fillType = ui.PathFillType.nonZero;
-    initializer = constructors.createNew;
+    _combineSource = null;
     collect();
   }
 
@@ -804,10 +832,14 @@ class LazyPathMetric implements ui.PathMetric {
 
   @override
   ui.Path extractPath(double start, double end, {bool startWithMoveTo = true}) {
-    return iterator.path.extracted(this, start, end, startWithMoveTo: startWithMoveTo);
+    return LazyPath.extracted(iterator.path, this, start, end, startWithMoveTo: startWithMoveTo);
   }
 
-  DisposablePath buildExtractedPath(double start, double end, {required bool startWithMoveTo}) {
+  DisposablePathBuilder buildExtractedPath(
+    double start,
+    double end, {
+    required bool startWithMoveTo,
+  }) {
     return builtMetric.extractPath(start, end, startWithMoveTo: startWithMoveTo);
   }
 
