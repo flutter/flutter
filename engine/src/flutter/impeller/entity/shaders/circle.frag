@@ -47,21 +47,21 @@ void main() {
       distanceFromCircle(frag_info.radius, frag_info.center, v_position);
   float dist_stroked = distanceFromStrokedCircle(
       frag_info.radius, frag_info.stroke_width, frag_info.center, v_position);
-  float sdfDistance = mix(dist_filled, dist_stroked, frag_info.stroked);
+  float sdf_distance = mix(dist_filled, dist_stroked, frag_info.stroked);
 
-  float pixelDerivativeSDF = fwidth(sdfDistance);
+  float pixel_derivative_sdf = fwidth(sdf_distance);
 
   // If the screen space derivative is less than the stroke width,
   // only one pixel can be covered and shouldn't be faded.
   if (frag_info.stroked > 0.0 &&
-      pixelDerivativeSDF * 2.0 >= frag_info.stroke_width) {
-    sdfDistance = -frag_info.radius;
+      pixel_derivative_sdf * 2.0 >= frag_info.stroke_width) {
+    sdf_distance = -frag_info.radius;
   }
 
-  float fadeWidth = pixelDerivativeSDF * frag_info.aa_pixels;
-  // The sdfDistance will be -pixelDerivativeSDF*N exactly at N pixels away from
-  // the edge of the circle
-  float alpha = 1.0 - smoothstep(-fadeWidth, 0.0, sdfDistance);
+  float fade_width = pixel_derivative_sdf * frag_info.aa_pixels;
+  // The sdf_distance will be -pixel_derivative_sdf*N exactly at N pixels away
+  // from the edge of the circle
+  float alpha = 1.0 - smoothstep(-fade_width, 0.0, sdf_distance);
 
   float finalAlpha = frag_info.color.w * alpha;
 
