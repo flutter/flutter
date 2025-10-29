@@ -126,8 +126,6 @@ public class FlutterFragment extends Fragment
   protected static final String ARG_SHOULD_DELAY_FIRST_ANDROID_VIEW_DRAW =
       "should_delay_first_android_view_draw";
 
-  /** Flutter shell arguments. */
-  protected static final String ARG_FLUTTER_INITIALIZATION_ARGS = "initialization_args";
   /**
    * {@link RenderMode} to be used for the {@link io.flutter.embedding.android.FlutterView} in this
    * {@code FlutterFragment}
