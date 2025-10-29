@@ -42,7 +42,8 @@ struct FlutterWindowCreationRequest {
   bool has_constraints;
   struct FlutterWindowConstraints constraints;
   int64_t parent_view_id;
-  void (*on_close)();
+  void (*on_should_close)();
+  void (*on_will_close)();
   void (*notify_listeners)();
 };
 
