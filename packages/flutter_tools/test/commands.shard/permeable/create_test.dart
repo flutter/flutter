@@ -3544,10 +3544,7 @@ void main() {
         ),
       );
     },
-    overrides: {
-      FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false, isMacOSEnabled: false),
-      Logger: () => logger,
-    },
+    overrides: {FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false), Logger: () => logger},
   );
 
   testUsingContext('Android FFI plugin contains 16kb page support', () async {
