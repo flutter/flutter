@@ -258,6 +258,8 @@ void sendSemanticsUpdate() {
     controlsNodes: null,
     inputType: SemanticsInputType.none,
     locale: null,
+    minValue: '0',
+    maxValue: '0',
   );
   _semanticsUpdate(builder.build());
 }
@@ -319,6 +321,8 @@ void sendSemanticsUpdateWithRole() {
     controlsNodes: null,
     inputType: SemanticsInputType.none,
     locale: null,
+    minValue: '0',
+    maxValue: '0',
   );
   _semanticsUpdate(builder.build());
 }
@@ -380,6 +384,8 @@ void sendSemanticsUpdateWithLocale() {
     controlsNodes: null,
     inputType: SemanticsInputType.none,
     locale: Locale('es', 'MX'),
+    minValue: '0',
+    maxValue: '0',
   );
   _semanticsUpdate(builder.build());
 }
@@ -436,6 +442,8 @@ void sendSemanticsUpdateWithIsLink() {
     controlsNodes: null,
     inputType: SemanticsInputType.none,
     locale: Locale('es', 'MX'),
+    minValue: '0',
+    maxValue: '0',
   );
   _semanticsUpdate(builder.build());
 }

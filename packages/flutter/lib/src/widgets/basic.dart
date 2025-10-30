@@ -4049,6 +4049,8 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required SemanticsValidationResult validationResult,
     required ui.SemanticsInputType? inputType,
     required Locale? localeForSubtree,
+    required String? minValue,
+    required String? maxValue,
   }) : this.fromProperties(
          key: key,
          child: child,
@@ -4132,6 +4134,8 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            controlsNodes: controlsNodes,
            validationResult: validationResult,
            inputType: inputType,
+           minValue: minValue,
+           maxValue: maxValue,
          ),
        );
 
@@ -4381,6 +4385,8 @@ class SliverSemantics extends _SemanticsBase {
     super.validationResult = SemanticsValidationResult.none,
     super.inputType,
     super.localeForSubtree,
+    super.minValue,
+    super.maxValue,
   }) : super(child: sliver);
 
   /// {@macro flutter.widgets.SemanticsBase.fromProperties}
@@ -7958,6 +7964,8 @@ class Semantics extends _SemanticsBase {
     super.validationResult = SemanticsValidationResult.none,
     super.inputType,
     super.localeForSubtree,
+    super.minValue,
+    super.maxValue,
   });
 
   /// {@macro flutter.widgets.SemanticsBase.fromProperties}
