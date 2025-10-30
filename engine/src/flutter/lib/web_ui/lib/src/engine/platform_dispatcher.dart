@@ -801,7 +801,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   @override
   void setApplicationLocale(ui.Locale locale) {
-    views.forEach((EngineFlutterView view) => view.setLocale(locale));
+    for (final EngineFlutterView view in views) {
+      view.setLocale(locale);
+    }
   }
 
   /// This is equivalent to `locales.first`, except that it will provide an

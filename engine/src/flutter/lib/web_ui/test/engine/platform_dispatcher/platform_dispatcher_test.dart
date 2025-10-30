@@ -239,8 +239,7 @@ void testMain() {
 
       dispatcher.setApplicationLocale(const ui.Locale('es', 'MX'));
       expect(host1.getAttribute('lang'), 'es-MX');
-      expect(domDocument.documentElement!.getAttribute('lang'), 'es-MX');
-      dispatcher.dispose();
+      expect(domDocument.querySelector('html')!.getAttribute('lang'), 'es-MX');
     });
 
     test('can find text scale factor', () async {
