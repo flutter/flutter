@@ -32,7 +32,7 @@ f16vec4 IPHalfUnpremultiply(f16vec4 color) {
 
 f16vec4 IPHalfUnpremultiplyOpaque(f16vec4 color) {
   if (color.a == 0.0hf) {
-    return f16vec4(1.0, 0.3, 0.6, 0.0);
+    return f16vec4(0.0hf);
   }
   return color / color.a;
 }

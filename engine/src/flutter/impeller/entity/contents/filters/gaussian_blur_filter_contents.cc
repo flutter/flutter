@@ -218,7 +218,7 @@ Quad RemapQuadCoords(const Quad& input, Scalar texture_sampler_y_coord_scale) {
     //   0   1
     //   2   3
     //
-    // becomes:
+    // should be flipped to:
     //
     //   2   3
     //   0   1
@@ -348,22 +348,6 @@ struct DownsamplePassArgs {
   /// the case with backdrop filters.
   Matrix transform;
 };
-
-GaussianBlurPipeline::FragmentShader::KernelSamples CloneKernelSamples(
-    KernelSamples parameters) {
-  GaussianBlurPipeline::FragmentShader::KernelSamples result = {};
-  result.sample_count = parameters.sample_count;
-  FML_DCHECK(result.sample_count <= kGaussianBlurMaxKernelSize);
-  static_assert(sizeof(result.sample_data) ==
-                sizeof(std::array<Vector4, kGaussianBlurMaxKernelSize>));
-
-  for (int i = 0; i < result.sample_count; i++) {
-    result.sample_data[i].x = parameters.samples[i].uv_offset.x;
-    result.sample_data[i].y = parameters.samples[i].uv_offset.y;
-    result.sample_data[i].z = parameters.samples[i].coefficient;
-  }
-  return result;
-}
 
 /// Calculates info required for the down-sampling pass.
 DownsamplePassArgs CalculateDownsamplePassArgs(
@@ -666,8 +650,8 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
           frag_info.quad_line_params =
               ExpandQuadLineParameters(PrecomputeQuadLineParameters(
                                            blur_info.blur_uv_bounds.value()),
-                                       1.0f / subpass_size.width,
-                                       1.0f / subpass_size.height)
+                                       1.0 / subpass_size.width,
+                                       1.0 / subpass_size.height)
                   .Transpose();
           GaussianBlurFragmentShader::BindFragInfo(
               pass, data_host_buffer.EmplaceUniform(frag_info));
@@ -690,16 +674,9 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
                 linear_sampler_descriptor));
         GaussianBlurVertexShader::BindFrameInfo(
             pass, data_host_buffer.EmplaceUniform(frame_info));
-        KernelSamples full_kernel_samples = GenerateBlurInfo(blur_info);
-        // For bounded blurs, kernel samples must not be lerped, as this can
-        // introduce wave-like artifacts at the edges of the bounds. This is
-        // likely due to increased sensitivity to pixel accuracy caused by
-        // opacity normalization.
-        auto kernel_samples = blur_info.blur_uv_bounds.has_value()
-                                  ? CloneKernelSamples(full_kernel_samples)
-                                  : LerpHackKernelSamples(full_kernel_samples);
         GaussianBlurFragmentShader::BindKernelSamples(
-            pass, data_host_buffer.EmplaceUniform(kernel_samples));
+            pass, data_host_buffer.EmplaceUniform(
+                      LerpHackKernelSamples(GenerateBlurInfo(blur_info))));
         return pass.Draw().ok();
       };
   if (destination_target.has_value()) {

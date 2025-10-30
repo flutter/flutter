@@ -727,8 +727,7 @@ TEST_P(DisplayListTest, CanDrawBoundedBlur) {
   auto callback = [&]() {
     static float sigma = 20;
     static float bg_scale = 2.1;
-    // static float rotate_degree = 0;
-    static float rotate_degree = 20;
+    static float rotate_degree = 0;
     static bool use_bounds = true;
 
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
