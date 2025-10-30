@@ -231,7 +231,7 @@ class PlatformViewEmbedder {
               final LazyPath path = ui.Path() as LazyPath;
               path.addRRect(mutator.rrect!);
               clipView.style.clipPath = 'path("${path.builtPath.toSvgString()}")';
-              path.dispose();
+              path.collect();
             }
           } else if (mutator.path != null) {
             clipView.style.clipPath = 'path("${mutator.path!.builtPath.toSvgString()}")';
