@@ -100,7 +100,8 @@ mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChi
   @override
   @protected
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
-    return child?.getDryBaseline(constraints, baseline);
+    final double? result = child?.getDryBaseline(constraints, baseline);
+    return result ?? super.computeDryBaseline(constraints, baseline);
   }
 
   @override
@@ -2839,6 +2840,13 @@ class RenderFittedBox extends RenderProxyBox {
     } else {
       return constraints.smallest;
     }
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    // Returns the baseline of the child with unconstrained layout, without
+    // applying any transforms or scaling that would be applied during paint.
+    return child?.getDryBaseline(const BoxConstraints(), baseline);
   }
 
   @override
