@@ -4702,6 +4702,7 @@ void main() {
           MaterialApp(
             home: Center(
               child: SubmenuButton(
+                animated: true,
                 style: SubmenuButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
                 menuChildren: <Widget>[
                   MenuItemButton(
@@ -4718,133 +4719,149 @@ void main() {
 
         // Test expanded state.
         await tester.tap(find.text('ABC'));
-        await tester.pump();
-        final Matcher expandedMatcher = hasSemantics(
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics(
-                id: 1,
-                rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                children: <TestSemantics>[
-                  TestSemantics(
-                    id: 2,
-                    rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                    children: <TestSemantics>[
-                      TestSemantics(
-                        id: 3,
-                        rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            id: 4,
-                            flags: <SemanticsFlag>[
-                              if (kIsWeb) SemanticsFlag.isButton,
-                              SemanticsFlag.isFocused,
-                              SemanticsFlag.hasEnabledState,
-                              SemanticsFlag.isEnabled,
-                              SemanticsFlag.isFocusable,
-                              SemanticsFlag.hasExpandedState,
-                              SemanticsFlag.isExpanded,
-                            ],
-                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                            label: 'ABC',
-                            rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-                          ),
-                          TestSemantics(
-                            id: 6,
-                            rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 64.0),
-                            children: <TestSemantics>[
-                              TestSemantics(
-                                id: 7,
-                                rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
-                                flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                                children: <TestSemantics>[
-                                  TestSemantics(
-                                    id: 8,
-                                    label: 'Item 0',
-                                    rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
-                                    flags: <SemanticsFlag>[
-                                      if (kIsWeb) SemanticsFlag.isButton,
-                                      SemanticsFlag.hasEnabledState,
-                                      SemanticsFlag.isEnabled,
-                                      SemanticsFlag.isFocusable,
-                                    ],
-                                    actions: <SemanticsAction>[
-                                      SemanticsAction.tap,
-                                      SemanticsAction.focus,
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-          ignoreTransform: true,
-        );
-
-        expect(semantics, expandedMatcher);
-
         await tester.pumpAndSettle();
-
-        expect(semantics, expandedMatcher);
-
+        expect(
+          semantics,
+          hasSemantics(
+            TestSemantics.root(
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 1,
+                  textDirection: TextDirection.ltr,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 2,
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 3,
+                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 4,
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  id: 7,
+                                  children: <TestSemantics>[
+                                    TestSemantics(
+                                      id: 8,
+                                      children: <TestSemantics>[
+                                        TestSemantics(
+                                          id: 9,
+                                          flags: <SemanticsFlag>[
+                                            if (kIsWeb) SemanticsFlag.isButton,
+                                            SemanticsFlag.hasImplicitScrolling,
+                                          ],
+                                          children: <TestSemantics>[
+                                            TestSemantics(
+                                              id: 10,
+                                              label: 'Item 0',
+                                              flags: <SemanticsFlag>[
+                                                SemanticsFlag.hasEnabledState,
+                                                SemanticsFlag.isEnabled,
+                                                SemanticsFlag.isFocusable,
+                                              ],
+                                              actions: <SemanticsAction>[
+                                                SemanticsAction.tap,
+                                                SemanticsAction.focus,
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                TestSemantics(
+                                  id: 5,
+                                  label: 'ABC',
+                                  flags: <SemanticsFlag>[
+                                    SemanticsFlag.isFocused,
+                                    if (kIsWeb) SemanticsFlag.isButton,
+                                    SemanticsFlag.hasEnabledState,
+                                    SemanticsFlag.isEnabled,
+                                    SemanticsFlag.isFocusable,
+                                    SemanticsFlag.hasExpandedState,
+                                    SemanticsFlag.isExpanded,
+                                  ],
+                                  actions: <SemanticsAction>[
+                                    SemanticsAction.tap,
+                                    SemanticsAction.focus,
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            ignoreTransform: true,
+            ignoreRect: true,
+          ),
+        );
         // Test collapsed state.
         await tester.tap(find.text('ABC'));
-        await tester.pump();
-
-        final Matcher collapsedMatcher = hasSemantics(
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics(
-                id: 1,
-                rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                children: <TestSemantics>[
-                  TestSemantics(
-                    id: 2,
-                    rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                    children: <TestSemantics>[
-                      TestSemantics(
-                        id: 3,
-                        rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            id: 4,
-                            flags: <SemanticsFlag>[
-                              if (kIsWeb) SemanticsFlag.isButton,
-                              SemanticsFlag.hasExpandedState,
-                              SemanticsFlag.isFocused,
-                              SemanticsFlag.hasEnabledState,
-                              SemanticsFlag.isEnabled,
-                              SemanticsFlag.isFocusable,
-                            ],
-                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                            label: 'ABC',
-                            rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-          ignoreTransform: true,
-        );
-        expect(semantics, collapsedMatcher);
-
         await tester.pumpAndSettle();
-        expect(semantics, collapsedMatcher);
+
+        expect(find.byType(MenuItemButton), findsNothing);
+        expect(
+          semantics,
+          hasSemantics(
+            TestSemantics.root(
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 1,
+                  textDirection: TextDirection.ltr,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 2,
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 3,
+                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 4,
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  id: 5,
+                                  label: 'ABC',
+                                  textDirection: TextDirection.ltr,
+                                  flags: <SemanticsFlag>[
+                                    if (kIsWeb) SemanticsFlag.isButton,
+                                    SemanticsFlag.isFocused,
+                                    SemanticsFlag.hasEnabledState,
+                                    SemanticsFlag.isEnabled,
+                                    SemanticsFlag.isFocusable,
+                                    SemanticsFlag.hasExpandedState,
+                                  ],
+                                  actions: <SemanticsAction>[
+                                    SemanticsAction.tap,
+                                    SemanticsAction.focus,
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            ignoreTransform: true,
+            ignoreRect: true,
+            ignoreTraversalIdentifier: true,
+          ),
+        );
+
         semantics.dispose();
       });
+
     }, skip: kIsWeb); // [intended] the web traversal order by using ARIA-OWNS.
 
     // This is a regression test for https://github.com/flutter/flutter/issues/131676.
