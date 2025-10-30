@@ -938,14 +938,8 @@ void main() {
               id: 1,
               flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
               children: <TestSemantics>[
-                TestSemantics(
-                  id: 2,
-                  actions: <SemanticsAction>[SemanticsAction.customAction],
-                ),
-                TestSemantics(
-                  id: 3,
-                  actions: <SemanticsAction>[SemanticsAction.customAction],
-                ),
+                TestSemantics(id: 2, actions: <SemanticsAction>[SemanticsAction.customAction]),
+                TestSemantics(id: 3, actions: <SemanticsAction>[SemanticsAction.customAction]),
               ],
             ),
           ],
