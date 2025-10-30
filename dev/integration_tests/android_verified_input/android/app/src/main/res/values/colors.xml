@@ -3,7 +3,6 @@
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file. -->
 
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="white">#FFFFFF</color>
     <color name="red">#FF0000</color>
