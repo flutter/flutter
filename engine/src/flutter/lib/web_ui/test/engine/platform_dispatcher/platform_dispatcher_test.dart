@@ -231,7 +231,6 @@ void testMain() {
 
     test('can set application locale', () async {
       final DomElement host1 = createDomHTMLDivElement();
-      final DomElement host2 = createDomHTMLDivElement();
       final EngineFlutterView view1 = EngineFlutterView(dispatcher, host1);
       final EngineFlutterView view2 = EngineFlutterView.implicit(dispatcher, null);
       dispatcher.viewManager
@@ -240,7 +239,7 @@ void testMain() {
 
       dispatcher.setApplicationLocale(const ui.Locale('es', 'MX'));
       expect(host1.getAttribute('lang'), 'es-MX');
-      expect(domDocument.documentElement.getAttribute('lang'), 'es-MX');
+      expect(domDocument.documentElement!.getAttribute('lang'), 'es-MX');
       dispatcher.dispose();
     });
 

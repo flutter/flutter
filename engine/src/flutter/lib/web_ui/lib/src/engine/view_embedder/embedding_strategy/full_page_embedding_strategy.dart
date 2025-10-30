@@ -28,7 +28,7 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
 
   @override
   void setLocale(ui.Locale locale) {
-    domDocument.documentElement.setAttribute('lang', locale.toLanguageTag());
+    domDocument.documentElement!.setAttribute('lang', locale.toLanguageTag());
   }
 
   @override
