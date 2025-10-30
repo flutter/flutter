@@ -355,7 +355,7 @@ void main() {
           Directionality(
             textDirection: TextDirection.ltr,
             child: CupertinoPicker(
-              soundEnabled: false,
+              enableSound: false,
               itemExtent: 100.0,
               onSelectedItemChanged: (int index) {
                 selectedItems.add(index);

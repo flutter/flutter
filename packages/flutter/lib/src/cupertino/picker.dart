@@ -94,7 +94,7 @@ class CupertinoPicker extends StatefulWidget {
     required this.onSelectedItemChanged,
     required List<Widget> children,
     this.selectionOverlay = const CupertinoPickerDefaultSelectionOverlay(),
-    this.soundEnabled = true,
+    this.enableSound = true,
     bool looping = false,
   }) : assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(magnification > 0),
@@ -136,7 +136,7 @@ class CupertinoPicker extends StatefulWidget {
     required NullableIndexedWidgetBuilder itemBuilder,
     int? childCount,
     this.selectionOverlay = const CupertinoPickerDefaultSelectionOverlay(),
-    this.soundEnabled = true,
+    this.enableSound = true,
   }) : assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(magnification > 0),
        assert(itemExtent > 0),
@@ -223,7 +223,7 @@ class CupertinoPicker extends StatefulWidget {
   /// Whether the ticking sound is enabled when scrolling the picker.
   ///
   /// The sound is only played on iOS devices.
-  final bool soundEnabled;
+  final bool enableSound;
 
   @override
   State<StatefulWidget> createState() => _CupertinoPickerState();
@@ -281,7 +281,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
         if (index != _lastHapticIndex) {
           _lastHapticIndex = index;
           HapticFeedback.selectionClick();
-          if (widget.soundEnabled) {
+          if (widget.enableSound) {
             SystemSound.play(SystemSoundType.tick);
           }
         }
