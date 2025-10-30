@@ -22,7 +22,6 @@ import androidx.annotation.VisibleForTesting;
 import io.flutter.BuildConfig;
 import io.flutter.FlutterInjector;
 import io.flutter.Log;
-import io.flutter.embedding.engine.FlutterEngineCommandLineFlags;
 import io.flutter.embedding.engine.FlutterEngineManifestFlags;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.util.HandlerCompat;
@@ -289,7 +288,7 @@ public class FlutterLoader {
       if (args != null) {
         for (String arg : args) {
           // Only allow known flags to be passed to the engine.
-          if (!FlutterEngineCommandLineFlags.ALL_FLAGS.contains(arg)) {
+          if (!FlutterEngineManifestFlags.containsCommandLineArgument(arg)) {
             continue;
           }
           shellArgs.add(arg);
