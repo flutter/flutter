@@ -897,7 +897,13 @@ void main() {
                     autovalidateMode: AutovalidateMode.onUserInteractionIfError,
                     builder: (FormFieldState<String> state) {
                       formFieldState = state;
-                      return Container();
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Container(),
+                          if (state.errorText != null) Text(state.errorText!),
+                        ],
+                      );
                     },
                     validator: errorText,
                   ),
