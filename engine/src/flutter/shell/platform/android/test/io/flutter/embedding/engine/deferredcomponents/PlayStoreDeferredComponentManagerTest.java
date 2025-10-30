@@ -23,8 +23,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import io.flutter.embedding.engine.FlutterEngineManifestFlags;
 import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.embedding.engine.FlutterShellArgs;
 import java.io.File;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -129,9 +129,8 @@ public class PlayStoreDeferredComponentManagerTest {
     TestFlutterJNI jni = new TestFlutterJNI();
 
     Bundle bundle = new Bundle();
-    bundle.putString(
-        FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME.metaDataKey, "custom_name.so");
-    bundle.putString(FlutterEngineManifestFlags.FLUTTER_ASSETS_DIR.metaDataKey, "custom_assets");
+    bundle.putString(FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.metaDataKey, "custom_name.so");
+    bundle.putString(FlutterShellArgs.FLUTTER_ASSETS_DIR.metaDataKey, "custom_assets");
 
     Context spyContext = createSpyContext(bundle);
     doReturn(null).when(spyContext).getAssets();
@@ -163,7 +162,7 @@ public class PlayStoreDeferredComponentManagerTest {
 
     Bundle bundle = new Bundle();
     bundle.putString(PlayStoreDeferredComponentManager.MAPPING_KEY, "123:module:custom_name.so");
-    bundle.putString(FlutterEngineManifestFlags.FLUTTER_ASSETS_DIR.metaDataKey, "custom_assets");
+    bundle.putString(FlutterShellArgs.FLUTTER_ASSETS_DIR.metaDataKey, "custom_assets");
 
     Context spyContext = createSpyContext(bundle);
     doReturn(null).when(spyContext).getAssets();
@@ -195,7 +194,7 @@ public class PlayStoreDeferredComponentManagerTest {
     Bundle bundle = new Bundle();
     bundle.putString(
         PlayStoreDeferredComponentManager.MAPPING_KEY, "123:module:custom_name.so,3:,4:");
-    bundle.putString(FlutterEngineManifestFlags.FLUTTER_ASSETS_DIR.metaDataKey, "custom_assets");
+    bundle.putString(FlutterShellArgs.FLUTTER_ASSETS_DIR.metaDataKey, "custom_assets");
 
     Context spyContext = createSpyContext(bundle);
     doReturn(null).when(spyContext).getAssets();

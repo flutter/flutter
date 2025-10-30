@@ -7,7 +7,7 @@ package io.flutter.embedding.engine;
 import java.util.*;
 
 /**
- * Arguments that can be delivered to the Flutter shell when it is created via the app manifest.
+ * Arguments that can be delivered to the Flutter shell on Android.
  *
  * <p>The term "shell" refers to the native code that adapts Flutter to different platforms.
  * Flutter's Android Java code initializes a native "shell" and passes these arguments to that
@@ -15,17 +15,32 @@ import java.util.*;
  * io.flutter.embedding.engine.loader.FlutterLoader#ensureInitializationComplete(Context, String[])}
  * for more information.
  *
+ * <p>All of these flags map to a flag listed in shell/common/switches.cc, which contains the full list
+ * of flags that can potentially be set. They can either be set
+ * via the manifest metadata in a Flutter component's AndroidManifest.xml or via the command line.
+ * See the inner {@code Flag} class for the way to specify each flag in the manifest and via the command line.
+ *
  * <p>If the same flag is provided both via command line arguments and via AndroidManifest.xml
  * meta-data, the command line value takes precedence at runtime.
  */
-public final class FlutterEngineManifestFlags {
+public final class FlutterShellArgs {
 
-  private FlutterEngineManifestFlags() {}
+  private FlutterShellArgs() {}
 
-  /** Represents a manifest flag and whether it is allowed in release mode. */
+  /** Represents a Flutter shell flag that can be set via manifest meta-data or command line. */
   public static class Flag {
+    /** The command line argument used to specify the flag. */
     public final String commandLineArgument;
+
+    /**
+     * The metadata key name used to specify the flag in AndroidManifest.xml.
+     * 
+     * <p>To specify a flag in a manifest, it must be prefixed with {@code io.flutter.embedding.android.}.
+     * This is done to avoid potential naming collisions with other metadata keys.
+    */
     public final String metaDataKey;
+
+    /** Whether this flag is allowed to be set in release mode. */
     public final boolean allowedInRelease;
 
     private String packageName = "io.flutter.embedding.android.";

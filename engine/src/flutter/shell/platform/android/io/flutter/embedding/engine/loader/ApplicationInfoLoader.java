@@ -10,7 +10,7 @@ import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
-import io.flutter.embedding.engine.FlutterEngineManifestFlags;
+import io.flutter.embedding.engine.FlutterShellArgs;
 import java.io.IOException;
 import org.json.JSONArray;
 import org.xmlpull.v1.XmlPullParserException;
@@ -139,10 +139,10 @@ public final class ApplicationInfoLoader {
   public static FlutterApplicationInfo load(@NonNull Context applicationContext) {
     ApplicationInfo appInfo = getApplicationInfo(applicationContext);
     return new FlutterApplicationInfo(
-        getString(appInfo.metaData, FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME.metaDataKey),
-        getString(appInfo.metaData, FlutterEngineManifestFlags.VM_SNAPSHOT_DATA.metaDataKey),
-        getString(appInfo.metaData, FlutterEngineManifestFlags.ISOLATE_SNAPSHOT_DATA.metaDataKey),
-        getString(appInfo.metaData, FlutterEngineManifestFlags.FLUTTER_ASSETS_DIR.metaDataKey),
+        getString(appInfo.metaData, FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.metaDataKey),
+        getString(appInfo.metaData, FlutterShellArgs.VM_SNAPSHOT_DATA.metaDataKey),
+        getString(appInfo.metaData, FlutterShellArgs.ISOLATE_SNAPSHOT_DATA.metaDataKey),
+        getString(appInfo.metaData, FlutterShellArgs.FLUTTER_ASSETS_DIR.metaDataKey),
         getNetworkPolicy(appInfo, applicationContext),
         appInfo.nativeLibraryDir,
         getBoolean(appInfo.metaData, PUBLIC_AUTOMATICALLY_REGISTER_PLUGINS_METADATA_KEY, true));
