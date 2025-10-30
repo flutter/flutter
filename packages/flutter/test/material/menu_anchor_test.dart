@@ -4861,7 +4861,6 @@ void main() {
 
         semantics.dispose();
       });
-
     }, skip: kIsWeb); // [intended] the web traversal order by using ARIA-OWNS.
 
     // This is a regression test for https://github.com/flutter/flutter/issues/131676.
