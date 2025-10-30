@@ -666,9 +666,8 @@ class LazyPath implements ui.Path, Collectable {
   void reset() {
     _commands.clear();
     _fillType = ui.PathFillType.nonZero;
-    _cachedPath?.dispose();
-    _cachedPath = null;
     initializer = constructors.createNew;
+    collect();
   }
 
   @override
@@ -706,10 +705,6 @@ class LazyPath implements ui.Path, Collectable {
 
   @override
   void collect() {
-    dispose();
-  }
-
-  void dispose() {
     _cachedPath?.dispose();
     _cachedPath = null;
     _cachedBuilder?.dispose();
