@@ -883,7 +883,7 @@ void main() {
     final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 0')));
     await tester.pump(kPressTimeout);
 
-    // Drag item 0 down past the swap threshold at 50px
+    // Drag item 0 down past the swap threshold at 50px.
     for (int i = 0; i < 6; i++) {
       await drag.moveBy(const Offset(0, 10));
       await tester.pump(const Duration(milliseconds: 50));
@@ -891,13 +891,13 @@ void main() {
 
     final double item1YBeforeInterrupt = tester.getCenter(find.text('item 1')).dy;
 
-    // Drag back to trigger swap reversal
+    // Drag back to trigger swap reversal.
     await drag.moveBy(const Offset(0, -10));
     await tester.pump(const Duration(milliseconds: 50));
 
     final double item1YAfterInterrupt = tester.getCenter(find.text('item 1')).dy;
 
-    // Position should not jump when animation is interrupted
+    // Position should not jump when animation is interrupted.
     expect(
       item1YAfterInterrupt,
       closeTo(item1YBeforeInterrupt, 5.0),
