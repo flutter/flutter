@@ -6569,6 +6569,10 @@ class SemanticsConfiguration {
     if (_hasExplicitRole && other._hasExplicitRole) {
       return false;
     }
+    if (_hitTestBehavior != ui.SemanticsHitTestBehavior.defer ||
+        other._hitTestBehavior != ui.SemanticsHitTestBehavior.defer) {
+      return false;
+    }
     return true;
   }
 
@@ -6679,8 +6683,7 @@ class SemanticsConfiguration {
       child._accessiblityFocusBlockType,
     );
 
-    if (_hitTestBehavior == ui.SemanticsHitTestBehavior.defer &&
-        child._hitTestBehavior != ui.SemanticsHitTestBehavior.defer) {
+    if (_hitTestBehavior == ui.SemanticsHitTestBehavior.defer) {
       _hitTestBehavior = child._hitTestBehavior;
     }
 
