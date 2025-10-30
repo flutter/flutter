@@ -56,6 +56,7 @@ impeller_shaders("entity_shaders") {
     "shaders/filters/filter_position.vert",
     "shaders/filters/filter_position_uv.vert",
     "shaders/filters/gaussian.frag",
+    "shaders/filters/gaussian_bounded.frag",
     "shaders/filters/yuv_to_rgb_filter.frag",
     "shaders/filters/srgb_to_linear_filter.frag",
     "shaders/filters/linear_to_srgb_filter.frag",

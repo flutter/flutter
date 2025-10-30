@@ -21,6 +21,8 @@ namespace impeller {
 
 using GaussianBlurVertexShader = GaussianBlurPipeline::VertexShader;
 using GaussianBlurFragmentShader = GaussianBlurPipeline::FragmentShader;
+using GaussianBlurBoundedFragmentShader =
+    GaussianBlurBoundedPipeline::FragmentShader;
 
 namespace {
 
@@ -646,14 +648,14 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
         } else {
           pass.SetPipeline(renderer.GetGaussianBlurBoundedPipeline(options));
 
-          GaussianBlurFragmentShader::FragInfo frag_info;
+          GaussianBlurBoundedFragmentShader::FragInfo frag_info;
           frag_info.quad_line_params =
               ExpandQuadLineParameters(PrecomputeQuadLineParameters(
                                            blur_info.blur_uv_bounds.value()),
                                        1.0 / subpass_size.width,
                                        1.0 / subpass_size.height)
                   .Transpose();
-          GaussianBlurFragmentShader::BindFragInfo(
+          GaussianBlurBoundedFragmentShader::BindFragInfo(
               pass, data_host_buffer.EmplaceUniform(frag_info));
         }
 

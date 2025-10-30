@@ -260,7 +260,7 @@ struct ContentContext::Pipelines {
   Variants<FramebufferBlendScreenPipeline> framebuffer_blend_screen;
   Variants<FramebufferBlendSoftLightPipeline> framebuffer_blend_softlight;
   Variants<GaussianBlurPipeline> gaussian_blur;
-  Variants<GaussianBlurPipeline> gaussian_blur_bounded;
+  Variants<GaussianBlurBoundedPipeline> gaussian_blur_bounded;
   Variants<GlyphAtlasPipeline> glyph_atlas;
   Variants<LinePipeline> line;
   Variants<LinearGradientFillPipeline> linear_gradient_fill;

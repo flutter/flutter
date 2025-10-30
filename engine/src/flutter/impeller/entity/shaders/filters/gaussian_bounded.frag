@@ -57,12 +57,9 @@ void main() {
     f16vec4 sampled_color = Sample(
         texture_sampler, v_texture_coords + kernel_samples.sample_data[i].xy);
     if (sampled_color.a < 1e-4hf && i > 0) {
-      vec2 offset = (kernel_samples.sample_data[i].xy +
-                     kernel_samples.sample_data[i - 1].xy) /
-                    2.0;
+      vec2 offset = (kernel_samples.sample_data[i].xy + kernel_samples.sample_data[i - 1].xy) / 2.0;
       float16_t coefficient = kernel_samples.sample_data[i].z / 2.0;
-      sampled_color =
-          IPHalfPremultiply(Sample(texture_sampler, v_texture_coords + offset));
+      sampled_color = IPHalfPremultiply(Sample(texture_sampler, v_texture_coords + offset));
       total_color += coefficient * sampled_color;
       break;
     }
