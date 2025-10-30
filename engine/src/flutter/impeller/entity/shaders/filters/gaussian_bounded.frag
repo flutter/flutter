@@ -39,8 +39,9 @@ f16vec4 Sample(f16sampler2D tex, vec2 coords) {
 
 f16vec4 BoundedSample(f16sampler2D tex, vec2 coords) {
   f16vec4 color = Sample(tex, coords);
+  float16_t min_alpha = 1.0hf / 255.0hf;
   if (OutOfBounds(coords)) {
-    color.a = min(color.a, 1e-5);
+    color.a = min(color.a, min_alpha);
   }
   return color;
 }
@@ -51,22 +52,44 @@ out f16vec4 frag_color;
 
 void main() {
   f16vec4 total_color = f16vec4(0.0hf);
+  int sample_count = int(kernel_samples.sample_count);
 
-  for (int i = 0; i < int(kernel_samples.sample_count); i++) {
-    float16_t coefficient = float16_t(kernel_samples.sample_data[i].z);
-    vec2 coords = v_texture_coords + kernel_samples.sample_data[i].xy;
-    if (OutOfBounds(coords) && i > 0) {
-      vec2 offset = (kernel_samples.sample_data[i].xy +
-                     kernel_samples.sample_data[i - 1].xy) /
-                    2.0;
-      float16_t coefficient = kernel_samples.sample_data[i].z / 2.0;
-      total_color +=
-          coefficient * IPHalfPremultiply(BoundedSample(
-                            texture_sampler, v_texture_coords + offset));
-      break;
-    }
+  int i = 0;
+  for (; i < (sample_count - 1) &&
+         OutOfBounds(v_texture_coords + kernel_samples.sample_data[i].xy);
+       i++) {
+  }
+
+  // Starting edge compensation
+  if (i > 0) {
+    vec2 offset = (kernel_samples.sample_data[i].xy +
+                   kernel_samples.sample_data[i - 1].xy) /
+                  2.0;
+    float16_t coefficient = kernel_samples.sample_data[i].z / 2.0;
     total_color +=
-        coefficient * IPHalfPremultiply(BoundedSample(texture_sampler, coords));
+        coefficient * IPHalfPremultiply(BoundedSample(
+                          texture_sampler, v_texture_coords + offset));
+  }
+
+  for (; i < sample_count &&
+         !OutOfBounds(v_texture_coords + kernel_samples.sample_data[i].xy);
+       i++) {
+    float16_t coefficient = float16_t(kernel_samples.sample_data[i].z);
+    total_color +=
+        coefficient * IPHalfPremultiply(BoundedSample(
+                          texture_sampler,
+                          v_texture_coords + kernel_samples.sample_data[i].xy));
+  }
+
+  // Ending edge compensation
+  if (i < sample_count) {
+    vec2 offset = (kernel_samples.sample_data[i].xy +
+                   kernel_samples.sample_data[i - 1].xy) /
+                  2.0;
+    float16_t coefficient = kernel_samples.sample_data[i].z / 2.0;
+    total_color +=
+        coefficient * IPHalfPremultiply(BoundedSample(
+                          texture_sampler, v_texture_coords + offset));
   }
 
   frag_color = IPHalfUnpremultiplyOpaque(total_color);
