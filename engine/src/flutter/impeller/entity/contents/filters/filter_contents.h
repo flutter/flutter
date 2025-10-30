@@ -122,11 +122,7 @@ class FilterContents : public Contents {
   std::optional<Snapshot> RenderToSnapshot(
       const ContentContext& renderer,
       const Entity& entity,
-      std::optional<Rect> coverage_limit = std::nullopt,
-      const std::optional<SamplerDescriptor>& sampler_descriptor = std::nullopt,
-      bool msaa_enabled = true,
-      int32_t mip_count = 1,
-      std::string_view label = "Filter Snapshot") const override;
+      const SnapshotOptions& options) const override;
 
   /// @brief  Determines the coverage of source pixels that will be needed
   ///         to produce results for the specified |output_limit| under the

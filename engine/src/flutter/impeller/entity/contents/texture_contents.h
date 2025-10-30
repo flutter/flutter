@@ -101,11 +101,7 @@ class TextureContents final : public Contents {
   std::optional<Snapshot> RenderToSnapshot(
       const ContentContext& renderer,
       const Entity& entity,
-      std::optional<Rect> coverage_limit = std::nullopt,
-      const std::optional<SamplerDescriptor>& sampler_descriptor = std::nullopt,
-      bool msaa_enabled = true,
-      int32_t mip_count = 1,
-      std::string_view label = "Texture Snapshot") const override;
+      const SnapshotOptions& options) const override;
 
   // |Contents|
   bool Render(const ContentContext& renderer,
