@@ -33,6 +33,7 @@ export 'package:flutter/rendering.dart' show AxisDirection;
 //     required super.mainAxis,
 //     required super.childManager,
 //     super.cacheExtent,
+//     super.cacheExtentStyle,
 //     super.clipBehavior = Clip.hardEdge,
 //   });
 //   @override
