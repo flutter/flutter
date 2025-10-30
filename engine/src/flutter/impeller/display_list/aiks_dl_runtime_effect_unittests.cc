@@ -277,5 +277,63 @@ TEST_P(AiksTest, ComposePaintRuntimeInner) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInner) {
+  auto runtime_stages =
+      OpenAssetAsRuntimeStage("runtime_stage_filter_circle.frag.iplr");
+
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(runtime_stage);
+  ASSERT_TRUE(runtime_stage->IsDirty());
+  Scalar sigma = 20.0;
+
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("sigma", &sigma, 0, 20);
+      ImGui::End();
+    }
+    DisplayListBuilder builder;
+    DlPaint background;
+    background.setColor(DlColor(1.0, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
+    builder.DrawPaint(background);
+
+    auto blur_filter =
+        DlImageFilter::MakeBlur(sigma, sigma, DlTileMode::kClamp);
+
+    std::vector<std::shared_ptr<DlColorSource>> sampler_inputs = {
+        nullptr,
+    };
+    auto uniform_data = std::make_shared<std::vector<uint8_t>>();
+    uniform_data->resize(sizeof(Vector2));
+
+    auto runtime_filter = DlImageFilter::MakeRuntimeEffect(
+        DlRuntimeEffectImpeller::Make(runtime_stage), sampler_inputs,
+        uniform_data);
+
+    auto backdrop_filter = DlImageFilter::MakeCompose(/*outer=*/runtime_filter,
+                                                      /*inner=*/blur_filter);
+
+    DlPaint paint;
+    auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
+    builder.DrawImage(image, DlPoint(100.0, 100.0),
+                      DlImageSampling::kNearestNeighbor, &paint);
+
+    DlPaint save_paint;
+    save_paint.setBlendMode(DlBlendMode::kSrc);
+    builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
+    builder.Restore();
+
+    DlPaint green;
+    green.setColor(DlColor::kGreen());
+    builder.DrawLine({100, 100}, {200, 100}, green);
+    builder.DrawLine({100, 100}, {100, 200}, green);
+
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 }  // namespace testing
 }  // namespace impeller
