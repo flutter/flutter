@@ -336,8 +336,9 @@ void main() {
     );
 
     // Menu bar (horizontal menu).
-    Finder menuMaterial =
-        find.ancestor(of: find.byType(TextButton), matching: find.byType(Material)).first;
+    Finder menuMaterial = find
+        .ancestor(of: find.byType(TextButton), matching: find.byType(Material))
+        .first;
 
     Material material = tester.widget<Material>(menuMaterial);
     expect(opened, isEmpty);
@@ -350,8 +351,9 @@ void main() {
       const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
     );
 
-    Finder buttonMaterial =
-        find.descendant(of: find.byType(TextButton), matching: find.byType(Material)).first;
+    Finder buttonMaterial = find
+        .descendant(of: find.byType(TextButton), matching: find.byType(Material))
+        .first;
     material = tester.widget<Material>(buttonMaterial);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
@@ -807,8 +809,9 @@ void main() {
       final Rect buttonRect = tester.getRect(find.byType(ElevatedButton));
       expect(buttonRect, equals(const Rect.fromLTRB(328.0, 14.0, 472.0, 62.0)));
 
-      final Finder findMenuScope =
-          find.ancestor(of: find.byKey(menuItemKey), matching: find.byType(FocusScope)).first;
+      final Finder findMenuScope = find
+          .ancestor(of: find.byKey(menuItemKey), matching: find.byType(FocusScope))
+          .first;
 
       // Open the menu and make sure things are the right size, in the right place.
       await tester.tap(find.text('Press Me'));
@@ -2203,8 +2206,8 @@ void main() {
           ),
         );
       },
-      experimentalLeakTesting:
-          LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+      experimentalLeakTesting: LeakTesting.settings
+          .withIgnoredAll(), // leaking by design because of exception
     );
 
     testWidgets('scrolling does not trigger hover traversal', (WidgetTester tester) async {
@@ -4187,14 +4190,16 @@ void main() {
       expect(
         topCompact,
         equals(topStandard),
-        reason: 'Compact visual density should not change top padding. '
+        reason:
+            'Compact visual density should not change top padding. '
             'Standard: $topStandard, Compact: $topCompact',
       );
 
       expect(
         bottomCompact,
         equals(bottomStandard),
-        reason: 'Compact visual density should not change bottom padding. '
+        reason:
+            'Compact visual density should not change bottom padding. '
             'Standard: $bottomStandard, Compact: $bottomCompact',
       );
     });
@@ -4864,8 +4869,9 @@ void main() {
       );
 
       // Test menu button text style uses the TextTheme.labelLarge.
-      Finder buttonMaterial =
-          find.descendant(of: find.byType(TextButton), matching: find.byType(Material)).first;
+      Finder buttonMaterial = find
+          .descendant(of: find.byType(TextButton), matching: find.byType(Material))
+          .first;
       Material material = tester.widget<Material>(buttonMaterial);
       expect(material.textStyle?.fontSize, menuTextStyle.fontSize);
       expect(material.textStyle?.fontStyle, menuTextStyle.fontStyle);
@@ -5389,7 +5395,7 @@ void main() {
     });
   });
 
-   group('Mouse cursors', () {
+  group('Mouse cursors', () {
     testWidgets('SubmenuButton has expected default mouse cursor on hover', (
       WidgetTester tester,
     ) async {
