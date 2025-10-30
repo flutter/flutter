@@ -47,6 +47,8 @@ export 'package:flutter/painting.dart'
 // Examples can assume:
 // late Widget image;
 // late ImageProvider _image;
+// late bool isPaused;
+// late AssetImage myAnimatedGif;
 
 /// Creates an [ImageConfiguration] based on the given [BuildContext] (and
 /// optionally size).
@@ -279,6 +281,23 @@ typedef ImageErrorWidgetBuilder =
 ///
 /// ```dart
 /// Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg')
+/// ```
+/// {@end-tool}
+///
+/// Multiframe images, such as animated GIFs, are paused when [TickerMode] is
+/// disabled just like any other animation. They also paused when animations are
+/// disabled via [MediaQueryData.disableAnimations], such as for accessibility
+/// purposes. If the animation is paused when the image first loads, the first
+/// frame will be displayed and then animation will stop.
+///
+/// {@tool snippet}
+//// An example of pausing a multiframe image using [TickerMode].
+///
+/// ```dart
+/// TickerMode(
+///   enabled: !isPaused,
+///   child: Image(image: myAnimatedGif),
+/// ),
 /// ```
 /// {@end-tool}
 ///
@@ -1101,6 +1120,15 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   StackTrace? _lastStack;
   ImageStreamCompleterHandle? _completerHandle;
 
+  /// True when animations are disabled and the image should not update, such as
+  /// when [TickerMode] is disabled or [MediaQueryData.disableAnimations] is
+  /// true.
+  bool _isPaused = false;
+
+  /// False when the class first is instantiated and true forever after the
+  /// first frame of the image is received.
+  bool _hasReceivedFirstFrame = false;
+
   @override
   void initState() {
     super.initState();
@@ -1124,10 +1152,12 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     _updateInvertColors();
     _resolveImage();
 
-    if (TickerMode.of(context)) {
-      _listenToStream();
-    } else {
+    _isPaused = !TickerMode.of(context) || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
+
+    if (_isPaused && _hasReceivedFirstFrame) {
       _stopListeningToStream(keepStreamAlive: true);
+    } else {
+      _listenToStream();
     }
 
     super.didChangeDependencies();
@@ -1143,7 +1173,9 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _imageStream!.removeListener(oldListener);
     }
     if (widget.image != oldWidget.image) {
+      _hasReceivedFirstFrame = false;
       _resolveImage();
+      _listenToStream();
     }
   }
 
@@ -1212,6 +1244,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
+    _hasReceivedFirstFrame = true;
     setState(() {
       _replaceImage(info: imageInfo);
       _loadingProgress = null;
@@ -1220,6 +1253,9 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _frameNumber = _frameNumber == null ? 0 : _frameNumber! + 1;
       _wasSynchronouslyLoaded = _wasSynchronouslyLoaded | synchronousCall;
     });
+    if (_isPaused) {
+      _stopListeningToStream(keepStreamAlive: true);
+    }
   }
 
   void _handleImageChunk(ImageChunkEvent event) {
@@ -1233,10 +1269,12 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
   void _replaceImage({required ImageInfo? info}) {
     final ImageInfo? oldImageInfo = _imageInfo;
-    SchedulerBinding.instance.addPostFrameCallback(
-      (_) => oldImageInfo?.dispose(),
-      debugLabel: 'Image.disposeOldInfo',
-    );
+    if (oldImageInfo != null) {
+      SchedulerBinding.instance.addPostFrameCallback(
+        (Duration duration) => oldImageInfo.dispose(),
+        debugLabel: 'Image.disposeOldInfo',
+      );
+    }
     _imageInfo = info;
   }
 
@@ -1275,11 +1313,10 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       return;
     }
 
+    _isListeningToStream = true;
     _imageStream!.addListener(_getListener());
     _completerHandle?.dispose();
     _completerHandle = null;
-
-    _isListeningToStream = true;
   }
 
   /// Stops listening to the image stream, if this state object has attached a
