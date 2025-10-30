@@ -4843,7 +4843,6 @@ targets:
 
   # mac mokey benchmark
   - name: Mac_mokey microbenchmarks
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/174101
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
