@@ -126,6 +126,24 @@ BlurInfo CalculateBlurInfo(const Entity& entity,
   };
 }
 
+template <class T>
+T::FragmentShader::KernelSamples CloneKernelSamples(KernelSamples parameters) {
+  typename T::FragmentShader::KernelSamples result = {};
+  static_assert(sizeof(result.sample_data) ==
+                sizeof(std::array<Vector4, kGaussianBlurMaxKernelSize>));
+  result.sample_count = parameters.sample_count;
+  FML_DCHECK(result.sample_count <= kGaussianBlurMaxKernelSize);
+  static_assert(sizeof(result.sample_data) ==
+                sizeof(std::array<Vector4, kGaussianBlurMaxKernelSize>));
+
+  for (int i = 0; i < result.sample_count; i++) {
+    result.sample_data[i].x = parameters.samples[i].uv_offset.x;
+    result.sample_data[i].y = parameters.samples[i].uv_offset.y;
+    result.sample_data[i].z = parameters.samples[i].coefficient;
+  }
+  return result;
+}
+
 /// Perform FilterInput::GetSnapshot with safety checks.
 std::optional<Snapshot> GetSnapshot(const std::shared_ptr<FilterInput>& input,
                                     const ContentContext& renderer,
@@ -632,55 +650,60 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
   // TODO(gaaclarke): This blurs the whole image, but because we know the clip
   //                  region we could focus on just blurring that.
   ISize subpass_size = input_texture->GetSize();
-  ContentContext::SubpassCallback subpass_callback =
-      [&](const ContentContext& renderer, RenderPass& pass) {
-        GaussianBlurVertexShader::FrameInfo frame_info;
-        frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1)),
-        frame_info.texture_sampler_y_coord_scale =
-            input_texture->GetYCoordScale();
+  ContentContext::SubpassCallback subpass_callback = [&](const ContentContext&
+                                                             renderer,
+                                                         RenderPass& pass) {
+    GaussianBlurVertexShader::FrameInfo frame_info;
+    frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1)),
+    frame_info.texture_sampler_y_coord_scale = input_texture->GetYCoordScale();
 
-        HostBuffer& data_host_buffer = renderer.GetTransientsDataBuffer();
+    HostBuffer& data_host_buffer = renderer.GetTransientsDataBuffer();
 
-        ContentContextOptions options = OptionsFromPass(pass);
-        options.primitive_type = PrimitiveType::kTriangleStrip;
-        if (!blur_info.blur_uv_bounds.has_value()) {
-          pass.SetPipeline(renderer.GetGaussianBlurPipeline(options));
-        } else {
-          pass.SetPipeline(renderer.GetGaussianBlurBoundedPipeline(options));
+    ContentContextOptions options = OptionsFromPass(pass);
+    options.primitive_type = PrimitiveType::kTriangleStrip;
+    if (!blur_info.blur_uv_bounds.has_value()) {
+      pass.SetPipeline(renderer.GetGaussianBlurPipeline(options));
 
-          GaussianBlurBoundedFragmentShader::FragInfo frag_info;
-          frag_info.quad_line_params =
-              ExpandQuadLineParameters(PrecomputeQuadLineParameters(
-                                           blur_info.blur_uv_bounds.value()),
-                                       1.0 / subpass_size.width,
-                                       1.0 / subpass_size.height)
-                  .Transpose();
-          GaussianBlurBoundedFragmentShader::BindFragInfo(
-              pass, data_host_buffer.EmplaceUniform(frag_info));
-        }
+      GaussianBlurFragmentShader::BindKernelSamples(
+          pass, data_host_buffer.EmplaceUniform(
+                    CloneKernelSamples<GaussianBlurPipeline>(
+                        LerpHackKernelSamples(GenerateBlurInfo(blur_info)))));
+    } else {
+      pass.SetPipeline(renderer.GetGaussianBlurBoundedPipeline(options));
 
-        std::array<VS::PerVertexData, 4> vertices = {
-            VS::PerVertexData{blur_uvs[0], blur_uvs[0]},
-            VS::PerVertexData{blur_uvs[1], blur_uvs[1]},
-            VS::PerVertexData{blur_uvs[2], blur_uvs[2]},
-            VS::PerVertexData{blur_uvs[3], blur_uvs[3]},
-        };
-        pass.SetVertexBuffer(CreateVertexBuffer(vertices, data_host_buffer));
+      GaussianBlurBoundedFragmentShader::FragInfo frag_info;
+      frag_info.quad_line_params =
+          ExpandQuadLineParameters(
+              PrecomputeQuadLineParameters(blur_info.blur_uv_bounds.value()),
+              1.0 / subpass_size.width, 1.0 / subpass_size.height)
+              .Transpose();
+      GaussianBlurBoundedFragmentShader::BindFragInfo(
+          pass, data_host_buffer.EmplaceUniform(frag_info));
+      GaussianBlurBoundedFragmentShader::BindKernelSamples(
+          pass, data_host_buffer.EmplaceUniform(
+                    CloneKernelSamples<GaussianBlurBoundedPipeline>(
+                        LerpHackKernelSamples(GenerateBlurInfo(blur_info)))));
+    }
 
-        SamplerDescriptor linear_sampler_descriptor = sampler_descriptor;
-        linear_sampler_descriptor.mag_filter = MinMagFilter::kLinear;
-        linear_sampler_descriptor.min_filter = MinMagFilter::kLinear;
-        GaussianBlurFragmentShader::BindTextureSampler(
-            pass, input_texture,
-            renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-                linear_sampler_descriptor));
-        GaussianBlurVertexShader::BindFrameInfo(
-            pass, data_host_buffer.EmplaceUniform(frame_info));
-        GaussianBlurFragmentShader::BindKernelSamples(
-            pass, data_host_buffer.EmplaceUniform(
-                      LerpHackKernelSamples(GenerateBlurInfo(blur_info))));
-        return pass.Draw().ok();
-      };
+    std::array<VS::PerVertexData, 4> vertices = {
+        VS::PerVertexData{blur_uvs[0], blur_uvs[0]},
+        VS::PerVertexData{blur_uvs[1], blur_uvs[1]},
+        VS::PerVertexData{blur_uvs[2], blur_uvs[2]},
+        VS::PerVertexData{blur_uvs[3], blur_uvs[3]},
+    };
+    pass.SetVertexBuffer(CreateVertexBuffer(vertices, data_host_buffer));
+
+    SamplerDescriptor linear_sampler_descriptor = sampler_descriptor;
+    linear_sampler_descriptor.mag_filter = MinMagFilter::kLinear;
+    linear_sampler_descriptor.min_filter = MinMagFilter::kLinear;
+    GaussianBlurFragmentShader::BindTextureSampler(
+        pass, input_texture,
+        renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+            linear_sampler_descriptor));
+    GaussianBlurVertexShader::BindFrameInfo(
+        pass, data_host_buffer.EmplaceUniform(frame_info));
+    return pass.Draw().ok();
+  };
   if (destination_target.has_value()) {
     return renderer.MakeSubpass("Gaussian Blur Filter",
                                 destination_target.value(), command_buffer,
@@ -1145,33 +1168,26 @@ KernelSamples GenerateBlurInfo(BlurParameters parameters) {
 
 // This works by shrinking the kernel size by 2 and relying on lerp to read
 // between the samples.
-GaussianBlurPipeline::FragmentShader::KernelSamples LerpHackKernelSamples(
-    KernelSamples parameters) {
-  GaussianBlurPipeline::FragmentShader::KernelSamples result = {};
+KernelSamples LerpHackKernelSamples(KernelSamples parameters) {
+  KernelSamples result = {};
   result.sample_count = ((parameters.sample_count - 1) / 2) + 1;
   int32_t middle = result.sample_count / 2;
   int32_t j = 0;
   FML_DCHECK(result.sample_count <= kGaussianBlurMaxKernelSize);
-  static_assert(sizeof(result.sample_data) ==
-                sizeof(std::array<Vector4, kGaussianBlurMaxKernelSize>));
 
   for (int i = 0; i < result.sample_count; i++) {
     if (i == middle) {
-      result.sample_data[i].x = parameters.samples[j].uv_offset.x;
-      result.sample_data[i].y = parameters.samples[j].uv_offset.y;
-      result.sample_data[i].z = parameters.samples[j].coefficient;
+      result.samples[i] = parameters.samples[j];
       j++;
     } else {
-      KernelSample left = parameters.samples[j];
-      KernelSample right = parameters.samples[j + 1];
+      const KernelSample& left = parameters.samples[j];
+      const KernelSample& right = parameters.samples[j + 1];
 
-      result.sample_data[i].z = left.coefficient + right.coefficient;
+      result.samples[i].coefficient = left.coefficient + right.coefficient;
 
-      Point uv = (left.uv_offset * left.coefficient +
-                  right.uv_offset * right.coefficient) /
-                 (left.coefficient + right.coefficient);
-      result.sample_data[i].x = uv.x;
-      result.sample_data[i].y = uv.y;
+      result.samples[i].uv_offset = (left.uv_offset * left.coefficient +
+                                     right.uv_offset * right.coefficient) /
+                                    (left.coefficient + right.coefficient);
       j += 2;
     }
   }

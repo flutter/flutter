@@ -704,11 +704,9 @@ ContentContext::ContentContext(
     pipelines_->tiled_texture.CreateDefault(*context_, options,
                                             {supports_decal});
     pipelines_->gaussian_blur.CreateDefault(
-        *context_, options_no_msaa_no_depth_stencil,
-        {supports_decal, /*bounded_blur=*/0});
+        *context_, options_no_msaa_no_depth_stencil, {supports_decal});
     pipelines_->gaussian_blur_bounded.CreateDefault(
-        *context_, options_no_msaa_no_depth_stencil,
-        {supports_decal, /*bounded_blur=*/1});
+        *context_, options_no_msaa_no_depth_stencil, {supports_decal});
     pipelines_->border_mask_blur.CreateDefault(*context_,
                                                options_trianglestrip);
     pipelines_->color_matrix_color_filter.CreateDefault(*context_,
