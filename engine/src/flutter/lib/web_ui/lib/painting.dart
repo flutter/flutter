@@ -1006,6 +1006,12 @@ base class UniformFloatSlot {
   final int index;
 }
 
+abstract class ImageSamplerSlot {
+  void set(Image val);
+  int get shaderIndex;
+  String get name;
+}
+
 abstract class FragmentShader implements Shader {
   void setFloat(int index, double value);
 
@@ -1018,4 +1024,6 @@ abstract class FragmentShader implements Shader {
   bool get debugDisposed;
 
   UniformFloatSlot getUniformFloat(String name, [int? index]) => UniformFloatSlot(name, index ?? 0);
+
+  ImageSamplerSlot getImageSampler(String name);
 }
