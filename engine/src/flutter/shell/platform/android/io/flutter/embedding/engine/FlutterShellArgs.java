@@ -107,7 +107,7 @@ public final class FlutterShellArgs {
 
   /** Enables lazy initialization of Impeller shaders. */
   public static final Flag IMPELLER_LAZY_SHADER_MODE =
-      new Flag("--impeller-lazy-shader-mode=", "ImpellerLazyShaderMode", true);
+      new Flag("--impeller-lazy-shader-mode=", "ImpellerLazyShaderInitialization", true);
 
   /** Enables antialiasing for lines in Impeller. */
   public static final Flag IMPELLER_ANTIALIAS_LINES =
