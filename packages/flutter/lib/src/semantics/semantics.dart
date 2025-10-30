@@ -129,8 +129,8 @@ enum AccessiblityFocusBlockType {
   /// may still be focusable.
   blockNode;
 
-  /// The AccessiblityFocusBlockType when two node get merged.
-  AccessiblityFocusBlockType merge(AccessiblityFocusBlockType other) {
+  /// The AccessiblityFocusBlockType when two nodes get merged.
+  AccessiblityFocusBlockType _merge(AccessiblityFocusBlockType other) {
     // 1. If either is blockSubtree, the result is blockSubtree.
     if (this == AccessiblityFocusBlockType.blockSubtree ||
         other == AccessiblityFocusBlockType.blockSubtree) {
@@ -6602,7 +6602,7 @@ class SemanticsConfiguration {
         _validationResult = child._validationResult;
       }
     }
-    _accessiblityFocusBlockType = _accessiblityFocusBlockType.merge(
+    _accessiblityFocusBlockType = _accessiblityFocusBlockType._merge(
       child._accessiblityFocusBlockType,
     );
 
