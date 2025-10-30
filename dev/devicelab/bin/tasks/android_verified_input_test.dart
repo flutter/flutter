@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/tasks/android_verified_input_test.dart';
+import 'package:flutter_devicelab/tasks/integration_tests.dart';
 
 Future<void> main() async {
   await task(androidVerifiedInputTest());
