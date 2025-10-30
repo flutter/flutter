@@ -22,8 +22,8 @@ import androidx.annotation.VisibleForTesting;
 import io.flutter.BuildConfig;
 import io.flutter.FlutterInjector;
 import io.flutter.Log;
-import io.flutter.embedding.engine.FlutterEngineManifestFlags;
 import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.util.HandlerCompat;
 import io.flutter.util.PathUtils;
 import io.flutter.util.TraceSection;
@@ -288,7 +288,7 @@ public class FlutterLoader {
       if (args != null) {
         for (String arg : args) {
           // Only allow known flags to be passed to the engine.
-          if (!FlutterEngineManifestFlags.containsCommandLineArgument(arg)) {
+          if (!FlutterShellArgs.containsCommandLineArgument(arg)) {
             continue;
           }
           shellArgs.add(arg);
@@ -312,26 +312,24 @@ public class FlutterLoader {
             .forEach(
                 metadataKey -> {
                   // String metadataKey = entry.getKey();
-                  FlutterEngineManifestFlags.Flag flag =
-                      FlutterEngineManifestFlags.getFlagByMetaDataKey(metadataKey);
+                  FlutterShellArgs.Flag flag = FlutterShellArgs.getFlagByMetaDataKey(metadataKey);
                   if (flag != null) {
                     // Only add flags that are allowed in the current build mode.
                     if (flag.allowedInRelease || !BuildConfig.RELEASE) {
-                      if (flag == FlutterEngineManifestFlags.OLD_GEN_HEAP_SIZE) {
+                      if (flag == FlutterShellArgs.OLD_GEN_HEAP_SIZE) {
                         // Mark if old gen heap size is set to track whether or not to set default
                         // internally.
                         oldGenHeapSizeSet.set(true);
-                      } else if (flag == FlutterEngineManifestFlags.LEAK_VM) {
+                      } else if (flag == FlutterShellArgs.LEAK_VM) {
                         // Mark if leak VM is set to track whether or not to set default internally.
                         isLeakVMSet.set(true);
-                      } else if (flag
-                          == FlutterEngineManifestFlags.DISABLE_MERGED_PLATFORM_UI_THREAD) {
+                      } else if (flag == FlutterShellArgs.DISABLE_MERGED_PLATFORM_UI_THREAD) {
                         // The --disable-merged-platform-ui-thread flag has been disabled on
                         // Android.
                         throw new IllegalArgumentException(
-                            FlutterEngineManifestFlags.DISABLE_MERGED_PLATFORM_UI_THREAD.metaDataKey
+                            FlutterShellArgs.DISABLE_MERGED_PLATFORM_UI_THREAD.metaDataKey
                                 + " is no longer allowed.");
-                      } else if (flag == FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME) {
+                      } else if (flag == FlutterShellArgs.AOT_SHARED_LIBRARY_NAME) {
                         // Perform security check for path containing application's compiled Dart
                         // code and
                         // potentially user-provided compiled native code.
@@ -350,7 +348,7 @@ public class FlutterLoader {
                         }
                         if (safeAotSharedLibraryName != null) {
                           shellArgs.add(
-                              FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME.commandLineArgument
+                              FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.commandLineArgument
                                   + safeAotSharedLibraryName);
                         } else {
                           // If the library path is not safe, we will skip adding this argument.
@@ -394,7 +392,7 @@ public class FlutterLoader {
                         TAG,
                         "Flag with metadata key "
                             + metadataKey
-                            + " is not recognized. Please ensure that the flag is defined in the FlutterEngineManifestFlags.");
+                            + " is not recognized. Please ensure that the flag is defined in the FlutterShellArgs.");
                   }
                 });
       }
@@ -409,23 +407,23 @@ public class FlutterLoader {
         kernelPath = snapshotAssetPath + File.separator + DEFAULT_KERNEL_BLOB;
         shellArgs.add("--" + SNAPSHOT_ASSET_PATH_KEY + "=" + snapshotAssetPath);
         shellArgs.add(
-            FlutterEngineManifestFlags.VM_SNAPSHOT_DATA.commandLineArgument
+            FlutterShellArgs.VM_SNAPSHOT_DATA.commandLineArgument
                 + flutterApplicationInfo.vmSnapshotData);
         shellArgs.add(
-            FlutterEngineManifestFlags.ISOLATE_SNAPSHOT_DATA.commandLineArgument
+            FlutterShellArgs.ISOLATE_SNAPSHOT_DATA.commandLineArgument
                 + flutterApplicationInfo.isolateSnapshotData);
       } else {
         // Add default AOT shared library name arg. Note that this can overriden by a value
         // set in the manifest.
         shellArgs.add(
-            FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME.commandLineArgument
+            FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.commandLineArgument
                 + flutterApplicationInfo.aotSharedLibraryName);
 
         // Some devices cannot load the an AOT shared library based on the library name
         // with no directory path. So, we provide a fully qualified path to the default library
         // as a workaround for devices where that fails.
         shellArgs.add(
-            FlutterEngineManifestFlags.AOT_SHARED_LIBRARY_NAME.commandLineArgument
+            FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.commandLineArgument
                 + flutterApplicationInfo.nativeLibraryDir
                 + File.separator
                 + flutterApplicationInfo.aotSharedLibraryName);
@@ -454,7 +452,7 @@ public class FlutterLoader {
         activityManager.getMemoryInfo(memInfo);
         int oldGenHeapSizeMegaBytes = (int) (memInfo.totalMem / 1e6 / 2);
         shellArgs.add(
-            FlutterEngineManifestFlags.OLD_GEN_HEAP_SIZE.commandLineArgument
+            FlutterShellArgs.OLD_GEN_HEAP_SIZE.commandLineArgument
                 + String.valueOf(oldGenHeapSizeMegaBytes));
       }
 
@@ -469,7 +467,7 @@ public class FlutterLoader {
       shellArgs.add("--prefetched-default-font-manager");
 
       if (!isLeakVMSet.get()) {
-        shellArgs.add(FlutterEngineManifestFlags.LEAK_VM.commandLineArgument + "true");
+        shellArgs.add(FlutterShellArgs.LEAK_VM.commandLineArgument + "true");
       }
 
       long initTimeMillis = SystemClock.uptimeMillis() - initStartTimestampMillis;
