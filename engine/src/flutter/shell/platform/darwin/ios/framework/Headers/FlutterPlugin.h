@@ -45,22 +45,30 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
  */
-- (void)applicationDidBecomeActive:(UIApplication*)application;
+- (void)applicationDidBecomeActive:(UIApplication*)application
+    API_DEPRECATED("Implement ``FlutterSceneLifeCycleDelegate/sceneDidBecomeActive:`` instead.",
+                   ios(2.0, 26.0));
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
  */
-- (void)applicationWillResignActive:(UIApplication*)application;
+- (void)applicationWillResignActive:(UIApplication*)application
+    API_DEPRECATED("Implement ``FlutterSceneLifeCycleDelegate/willResignActive:`` instead.",
+                   ios(2.0, 26.0));
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
  */
-- (void)applicationDidEnterBackground:(UIApplication*)application;
+- (void)applicationDidEnterBackground:(UIApplication*)application
+    API_DEPRECATED("Implement ``FlutterSceneLifeCycleDelegate/didEnterBackground:`` instead.",
+                   ios(4.0, 26.0));
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
  */
-- (void)applicationWillEnterForeground:(UIApplication*)application;
+- (void)applicationWillEnterForeground:(UIApplication*)application
+    API_DEPRECATED("Implement ``FlutterSceneLifeCycleDelegate/willEnterForeground:`` instead.",
+                   ios(4.0, 26.0));
 
 /**
  Called if this has been registered for `UIApplicationDelegate` callbacks.
@@ -113,14 +121,19 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (BOOL)application:(UIApplication*)application
             openURL:(NSURL*)url
-            options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options;
+            options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options
+    API_DEPRECATED("Implement ``FlutterSceneLifeCycleDelegate/scene:openURLContexts:`` instead.",
+                   ios(9.0, 26.0));
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
  *
  * @return `YES` if this handles the request.
  */
-- (BOOL)application:(UIApplication*)application handleOpenURL:(NSURL*)url;
+- (BOOL)application:(UIApplication*)application
+      handleOpenURL:(NSURL*)url
+    API_DEPRECATED("Implement ``FlutterSceneLifeCycleDelegate/scene:openURLContexts:`` instead.",
+                   ios(2.0, 9.0));
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
@@ -130,7 +143,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)application:(UIApplication*)application
               openURL:(NSURL*)url
     sourceApplication:(NSString*)sourceApplication
-           annotation:(id)annotation;
+           annotation:(id)annotation
+    API_DEPRECATED("Implement ``FlutterSceneLifeCycleDelegate/scene:openURLContexts:`` instead.",
+                   ios(4.2, 9.0));
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
@@ -140,7 +155,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)application:(UIApplication*)application
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler
-    API_AVAILABLE(ios(9.0));
+    API_DEPRECATED("Implement "
+                   "``FlutterSceneLifeCycleDelegate/"
+                   "windowScene:performActionForShortcutItem:completionHandler:`` instead.",
+                   ios(9.0, 26.0));
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
@@ -166,7 +184,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (BOOL)application:(UIApplication*)application
     continueUserActivity:(NSUserActivity*)userActivity
-      restorationHandler:(void (^)(NSArray*))restorationHandler;
+      restorationHandler:(void (^)(NSArray*))restorationHandler
+    API_DEPRECATED(
+        "Implement ``FlutterSceneLifeCycleDelegate/scene:continueUserActivity:`` instead.",
+        ios(8.0, 26.0));
 @end
 
 #pragma mark -

@@ -84,7 +84,9 @@ FLUTTER_DARWIN_EXPORT
  */
 - (BOOL)application:(UIApplication*)application
             openURL:(NSURL*)url
-            options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options;
+            options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options
+    API_DEPRECATED("Use ``FlutterPluginSceneLifeCycleDelegate/scene:openURLContexts:`` instead.",
+                   ios(9.0, 26.0));
 
 /**
  * Calls all plugins registered for `UIApplicationDelegate` callbacks in order of registration until
@@ -92,7 +94,10 @@ FLUTTER_DARWIN_EXPORT
  *
  * @return `YES` if any plugin handles the request.
  */
-- (BOOL)application:(UIApplication*)application handleOpenURL:(NSURL*)url;
+- (BOOL)application:(UIApplication*)application
+      handleOpenURL:(NSURL*)url
+    API_DEPRECATED("Use ``FlutterPluginSceneLifeCycleDelegate/scene:openURLContexts:`` instead.",
+                   ios(2.0, 9.0));
 
 /**
  * Calls all plugins registered for `UIApplicationDelegate` callbacks in order of registration until
@@ -103,7 +108,9 @@ FLUTTER_DARWIN_EXPORT
 - (BOOL)application:(UIApplication*)application
               openURL:(NSURL*)url
     sourceApplication:(NSString*)sourceApplication
-           annotation:(id)annotation;
+           annotation:(id)annotation
+    API_DEPRECATED("Use ``FlutterPluginSceneLifeCycleDelegate/scene:openURLContexts:`` instead.",
+                   ios(4.2, 9.0));
 
 /**
  * Calls all plugins registered for `UIApplicationDelegate` callbacks.
@@ -111,7 +118,10 @@ FLUTTER_DARWIN_EXPORT
 - (void)application:(UIApplication*)application
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler
-    API_AVAILABLE(ios(9.0));
+    API_DEPRECATED("Use "
+                   "``FlutterPluginSceneLifeCycleDelegate/"
+                   "windowScene:performActionForShortcutItem:completionHandler:`` instead.",
+                   ios(9.0, 26.0));
 
 /**
  * Calls all plugins registered for `UIApplicationDelegate` callbacks in order of registration until
@@ -140,7 +150,10 @@ FLUTTER_DARWIN_EXPORT
  */
 - (BOOL)application:(UIApplication*)application
     continueUserActivity:(NSUserActivity*)userActivity
-      restorationHandler:(void (^)(NSArray*))restorationHandler;
+      restorationHandler:(void (^)(NSArray*))restorationHandler
+    API_DEPRECATED(
+        "Use ``FlutterPluginSceneLifeCycleDelegate/scene:continueUserActivity:`` instead.",
+        ios(8.0, 26.0));
 @end
 
 NS_ASSUME_NONNULL_END
