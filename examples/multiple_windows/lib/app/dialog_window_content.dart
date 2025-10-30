@@ -18,6 +18,7 @@ class DialogWindowContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final WindowManager windowManager = WindowManagerAccessor.of(context);
+    final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
     final child = FocusScope(
       autofocus: true,
