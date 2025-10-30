@@ -43,61 +43,156 @@ public final class FlutterEngineManifestFlags {
 
   // Manifest flags allowed in release mode:
 
+  /** Use Skia software backend for rendering. */
   public static final Flag ENABLE_SOFTWARE_RENDERING =
-      new Flag(
-          FlutterEngineCommandLineFlags.ENABLE_SOFTWARE_RENDERING, "EnableSoftwareRendering", true);
+      new Flag("--enable-software-rendering", "EnableSoftwareRendering", true);
+
+  /** Ensures deterministic Skia rendering by skipping CPU feature swaps. */
   public static final Flag SKIA_DETERMINISTIC_RENDERING =
-      new Flag(
-          FlutterEngineCommandLineFlags.SKIA_DETERMINISTIC_RENDERING,
-          "SkiaDeterministicRendering",
-          true);
+      new Flag("--skia-deterministic-rendering", "SkiaDeterministicRendering", true);
+
+  /**
+   * Specifies the path to the AOT shared library containing compiled Dart code.
+   *
+   * <p>The AOT shared library that the engine uses will default to the library set by this flag,
+   * but will fall back to the libraries set internally by the embedding if the path specified by
+   * this argument is invalid.
+   */
   public static final Flag AOT_SHARED_LIBRARY_NAME =
-      new Flag(FlutterEngineCommandLineFlags.AOT_SHARED_LIBRARY_NAME, "AOTSharedLibraryName", true);
+      new Flag("--aot-shared-library-name=", "AOTSharedLibraryName", true);
+
+  /** Sets the directory containing Flutter assets. */
   public static final Flag FLUTTER_ASSETS_DIR =
-      new Flag(FlutterEngineCommandLineFlags.FLUTTER_ASSETS_DIR, "FlutterAssetsDir", true);
+      new Flag("--flutter-assets-dir=", "FlutterAssetsDir", true);
+
+  /** Sets the old generation heap size for the Dart VM in megabytes. */
   public static final Flag OLD_GEN_HEAP_SIZE =
-      new Flag(FlutterEngineCommandLineFlags.OLD_GEN_HEAP_SIZE, "OldGenHeapSize", true);
-  public static final Flag ENABLE_IMPELLER =
-      new Flag(FlutterEngineCommandLineFlags.ENABLE_IMPELLER, "EnableImpeller", true);
+      new Flag("--old-gen-heap-size=", "OldGenHeapSize", true);
+
+  /** Enables or disables the Impeller renderer. */
+  public static final Flag ENABLE_IMPELLER = new Flag("--enable-impeller", "EnableImpeller", true);
+
+  /** Specifies the backend to use for Impeller rendering. */
   public static final Flag IMPELLER_BACKEND =
-      new Flag(FlutterEngineCommandLineFlags.IMPELLER_BACKEND, "ImpellerBackend", true);
+      new Flag("--impeller-backend=", "ImpellerBackend", true);
+
+  @Deprecated
+  /** Used to disable merging of platform and UI threads. */
   public static final Flag DISABLE_MERGED_PLATFORM_UI_THREAD =
-      new Flag(
-          FlutterEngineCommandLineFlags.DISABLE_MERGED_PLATFORM_UI_THREAD,
-          "DisableMergedPlatformUIThread",
-          true);
+      new Flag("--disable-merged-platform-ui-thread", "DisableMergedPlatformUIThread", true);
+
+  /** Enables Android SurfaceControl for rendering. */
   public static final Flag ENABLE_SURFACE_CONTROL =
-      new Flag(FlutterEngineCommandLineFlags.ENABLE_SURFACE_CONTROL, "EnableSurfaceControl", true);
+      new Flag("--enable-surface-control", "EnableSurfaceControl", true);
+
+  /** Enables the Flutter GPU backend. */
   public static final Flag ENABLE_FLUTTER_GPU =
-      new Flag(FlutterEngineCommandLineFlags.ENABLE_FLUTTER_GPU, "EnableFlutterGPU", true);
+      new Flag("--enable-flutter-gpu", "EnableFlutterGPU", true);
+
+  /** Enables lazy initialization of Impeller shaders. */
   public static final Flag IMPELLER_LAZY_SHADER_MODE =
-      new Flag(
-          FlutterEngineCommandLineFlags.IMPELLER_LAZY_SHADER_MODE, "ImpellerLazyShaderMode", true);
+      new Flag("--impeller-lazy-shader-mode=", "ImpellerLazyShaderMode", true);
+
+  /** Enables antialiasing for lines in Impeller. */
   public static final Flag IMPELLER_ANTIALIAS_LINES =
-      new Flag(
-          FlutterEngineCommandLineFlags.IMPELLER_ANTIALIAS_LINES, "ImpellerAntialiasLines", true);
+      new Flag("--impeller-antialias-lines", "ImpellerAntialiasLines", true);
+
+  /** Specifies the path to the VM snapshot data file. */
   public static final Flag VM_SNAPSHOT_DATA =
-      new Flag(FlutterEngineCommandLineFlags.VM_SNAPSHOT_DATA, "VmSnapshotData", true);
+      new Flag("--vm-snapshot-data=", "VmSnapshotData", true);
+  /** Specifies the path to the isolate snapshot data file. */
   public static final Flag ISOLATE_SNAPSHOT_DATA =
-      new Flag(FlutterEngineCommandLineFlags.ISOLATE_SNAPSHOT_DATA, "IsolateSnapshotData", true);
+      new Flag("--isolate-snapshot-data=", "IsolateSnapshotData", true);
 
   // Manifest flags NOT allowed in release mode:
 
-  public static final Flag USE_TEST_FONTS =
-      new Flag(FlutterEngineCommandLineFlags.USE_TEST_FONTS, "UseTestFonts", false);
-  public static final Flag VM_SERVICE_PORT =
-      new Flag(FlutterEngineCommandLineFlags.VM_SERVICE_PORT, "VMServicePort", false);
+  /** Use the Ahem test font for font resolution. */
+  public static final Flag USE_TEST_FONTS = new Flag("--use-test-fonts", "UseTestFonts", false);
+
+  /** Sets the port for the Dart VM Service. */
+  public static final Flag VM_SERVICE_PORT = new Flag("--vm-service-port=", "VMServicePort", false);
+
+  /** Enables Vulkan validation layers if available. */
   public static final Flag ENABLE_VULKAN_VALIDATION =
-      new Flag(
-          FlutterEngineCommandLineFlags.ENABLE_VULKAN_VALIDATION, "EnableVulkanValidation", false);
+      new Flag("--enable-vulkan-validation", "EnableVulkanValidation", false);
+
+  /** Enables GPU tracing for OpenGL. */
   public static final Flag ENABLE_OPENGL_GPU_TRACING =
-      new Flag(
-          FlutterEngineCommandLineFlags.ENABLE_OPENGL_GPU_TRACING, "EnableOpenGLGPUTracing", false);
+      new Flag("--enable-opengl-gpu-tracing", "EnableOpenGLGPUTracing", false);
+  /** Enables GPU tracing for Vulkan. */
   public static final Flag ENABLE_VULKAN_GPU_TRACING =
-      new Flag(
-          FlutterEngineCommandLineFlags.ENABLE_VULKAN_GPU_TRACING, "EnableVulkanGPUTracing", false);
-  public static final Flag LEAK_VM =
-      new Flag(FlutterEngineCommandLineFlags.LEAK_VM, "LeakVM", false);
+      new Flag("--enable-vulkan-gpu-tracing", "EnableVulkanGPUTracing", false);
+
+  /**
+   * Set whether leave or clean up the VM after the last shell shuts down. It can be set from app's
+   * meta-data in the application block in AndroidManifest.xml. Set it to true in to leave the Dart
+   * VM, set it to false to destroy VM.
+   *
+   * <p>If your want to let your app destroy the last shell and re-create shells more quickly, set
+   * it to true, otherwise if you want to clean up the memory of the leak VM, set it to false.
+   *
+   * <p>TODO(eggfly): Should it be set to false by default?
+   * https://github.com/flutter/flutter/issues/96843
+   */
+  public static final Flag LEAK_VM = new Flag("--leak-vm", "LeakVM", false);
+
+  /** Measures startup time and switches to an endless trace buffer. */
+  public static final Flag TRACE_STARTUP = new Flag("--trace-startup", "TraceStartup", false);
+
+  /** Pauses Dart code execution at launch until a debugger is attached. */
+  public static final Flag START_PAUSED = new Flag("--start-paused", "StartPaused", false);
+
+  /** Disables authentication codes for VM service communication. */
+  public static final Flag DISABLE_SERVICE_AUTH_CODES =
+      new Flag("--disable-service-auth-codes", "DisableServiceAuthCodes", false);
+
+  /** Enables an endless trace buffer for timeline events. */
+  public static final Flag ENDLESS_TRACE_BUFFER =
+      new Flag("--endless-trace-buffer", "EndlessTraceBuffer", false);
+
+  /** Enables Dart profiling for use with DevTools. */
+  public static final Flag ENABLE_DART_PROFILING =
+      new Flag("--enable-dart-profiling", "EnableDartProfiling", false);
+
+  /** Discards new profiler samples once the buffer is full. */
+  public static final Flag PROFILE_STARTUP = new Flag("--profile-startup", "ProfileStartup", false);
+
+  /** Enables tracing of Skia GPU calls. */
+  public static final Flag TRACE_SKIA = new Flag("--trace-skia", "TraceSkia", false);
+
+  /** Only traces specified Skia event categories. */
+  public static final Flag TRACE_ALLOWLIST_FILE =
+      new Flag("--trace-allowlist-file=", "TraceAllowlistFile", false);
+
+  /** Traces to the system tracer on supported platforms. */
+  public static final Flag TRACE_SYSTRACE = new Flag("--trace-systrace", "TraceSystrace", false);
+
+  /** Writes timeline trace to a file in Perfetto format. */
+  public static final Flag TRACE_TO_FILE = new Flag("--trace-to-file=", "TraceToFile", false);
+
+  /** Collects and logs information about microtasks. */
+  public static final Flag PROFILE_MICROTASKS =
+      new Flag("--profile-microtasks", "ProfileMicrotasks", false);
+
+  /** Dumps SKP files that trigger shader compilations. */
+  public static final Flag DUMP_SKP_ON_SHADER_COMPILATION =
+      new Flag("--dump-skp-on-shader-compilation", "DumpSkpOnShaderCompilation", false);
+
+  /** Removes all persistent cache files for debugging. */
+  public static final Flag PURGE_PERSISTENT_CACHE =
+      new Flag("--purge-persistent-cache", "PurgePersistentCache", false);
+
+  /** Enables logging at all severity levels. */
+  public static final Flag VERBOSE_LOGGING = new Flag("--verbose-logging", "VerboseLogging", false);
+
+  /**
+   * Passes additional flags to the Dart VM.
+   *
+   * <p>All flags provided with this argument are subject to filtering based on a list of allowed
+   * flags in shell/common/switches.cc. If any flag provided is not allowed, the process will
+   * immediately terminate.
+   */
+  public static final Flag DART_FLAGS = new Flag("--dart-flags=", "DartFlags", false);
 
   public static final List<Flag> ALL_FLAGS =
       Collections.unmodifiableList(
@@ -110,10 +205,7 @@ public final class FlutterEngineManifestFlags {
               FLUTTER_ASSETS_DIR,
               OLD_GEN_HEAP_SIZE,
               ENABLE_IMPELLER,
-              ENABLE_VULKAN_VALIDATION,
               IMPELLER_BACKEND,
-              ENABLE_OPENGL_GPU_TRACING,
-              ENABLE_VULKAN_GPU_TRACING,
               DISABLE_MERGED_PLATFORM_UI_THREAD,
               ENABLE_SURFACE_CONTROL,
               ENABLE_FLUTTER_GPU,
@@ -121,20 +213,50 @@ public final class FlutterEngineManifestFlags {
               IMPELLER_ANTIALIAS_LINES,
               VM_SNAPSHOT_DATA,
               ISOLATE_SNAPSHOT_DATA,
-              LEAK_VM));
+              ENABLE_VULKAN_VALIDATION,
+              ENABLE_OPENGL_GPU_TRACING,
+              ENABLE_VULKAN_GPU_TRACING,
+              LEAK_VM,
+              TRACE_STARTUP,
+              START_PAUSED,
+              DISABLE_SERVICE_AUTH_CODES,
+              ENDLESS_TRACE_BUFFER,
+              ENABLE_DART_PROFILING,
+              PROFILE_STARTUP,
+              TRACE_SKIA,
+              TRACE_ALLOWLIST_FILE,
+              TRACE_SYSTRACE,
+              TRACE_TO_FILE,
+              PROFILE_MICROTASKS,
+              DUMP_SKP_ON_SHADER_COMPILATION,
+              PURGE_PERSISTENT_CACHE,
+              VERBOSE_LOGGING,
+              DART_FLAGS));
 
-  /**
-   * Looks up a Flag by its metaDataKey.
-   *
-   * @param key The manifest meta-data key.
-   * @return The {@link Flag}, or null if not found.
-   */
-  public static Flag getFlagByMetaDataKey(String key) {
+  // Efficient lookup map for retrieving the Flag corresponding to a specific command line argument.
+  private static final Map<String, Flag> FLAG_BY_COMMAND_LINE_ARG;
+
+  // Efficient lookup map for retrieving the Flag corresponding to a specific meta-data key.
+  private static final Map<String, Flag> FLAG_BY_META_DATA_KEY;
+
+  static {
+    Map<String, Flag> map = new HashMap<>(ALL_FLAGS.size());
+    Map<String, Flag> metaMap = new HashMap<>(ALL_FLAGS.size());
     for (Flag flag : ALL_FLAGS) {
-      if (flag.metaDataKey.equals(key)) {
-        return flag;
-      }
+      map.put(flag.commandLineArgument, flag);
+      metaMap.put(flag.metaDataKey, flag);
     }
-    return null;
+    FLAG_BY_COMMAND_LINE_ARG = Collections.unmodifiableMap(map);
+    FLAG_BY_META_DATA_KEY = Collections.unmodifiableMap(metaMap);
+  }
+
+  /** Returns true if a manifest flag with the given command line argument exists. */
+  public static boolean containsCommandLineArgument(String arg) {
+    return FLAG_BY_COMMAND_LINE_ARG.containsKey(arg);
+  }
+
+  /** Looks up a {@link Flag} by its metaDataKey. */
+  public static Flag getFlagByMetaDataKey(String key) {
+    return FLAG_BY_META_DATA_KEY.get(key);
   }
 }
