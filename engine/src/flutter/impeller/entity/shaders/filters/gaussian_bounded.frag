@@ -55,6 +55,8 @@ void main() {
   int sample_count = int(kernel_samples.sample_count);
 
   int i = 0;
+  // Use sample_count - 1 so that there is always at least one sample left for
+  // the edge compensation.
   for (; i < (sample_count - 1) &&
          OutOfBounds(v_texture_coords + kernel_samples.sample_data[i].xy);
        i++) {
@@ -76,7 +78,7 @@ void main() {
        i++) {
     float16_t coefficient = float16_t(kernel_samples.sample_data[i].z);
     total_color +=
-        coefficient * IPHalfPremultiply(BoundedSample(
+        coefficient * IPHalfPremultiply(Sample(
                           texture_sampler,
                           v_texture_coords + kernel_samples.sample_data[i].xy));
   }
