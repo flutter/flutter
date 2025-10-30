@@ -28,7 +28,7 @@ void main() {
     );
     expect(
       toggleXLButton.style!.backgroundColor!.resolve(enabled),
-      theme.colorScheme.surface.withOpacity(0.0),
+      theme.colorScheme.surface,
     );
 
     // Tap on XL.
