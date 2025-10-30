@@ -8,6 +8,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/shell/gpu/gpu_surface_gl_impeller.h"
 #include "flutter/shell/platform/embedder/embedder_external_view_embedder.h"
+#include "flutter/shell/platform/embedder/embedder_gl_dispatch_table.h"
 #include "flutter/shell/platform/embedder/embedder_surface.h"
 #include "flutter/shell/platform/embedder/embedder_surface_gl_skia.h"
 
@@ -23,7 +24,7 @@ class EmbedderSurfaceGLImpeller final : public EmbedderSurface,
                                         public GPUSurfaceGLDelegate {
  public:
   EmbedderSurfaceGLImpeller(
-      EmbedderSurfaceGLSkia::GLDispatchTable gl_dispatch_table,
+      GLDispatchTable gl_dispatch_table,
       bool fbo_reset_after_present,
       std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
 
@@ -31,7 +32,7 @@ class EmbedderSurfaceGLImpeller final : public EmbedderSurface,
 
  private:
   bool valid_ = false;
-  EmbedderSurfaceGLSkia::GLDispatchTable gl_dispatch_table_;
+  GLDispatchTable gl_dispatch_table_;
   bool fbo_reset_after_present_;
   std::shared_ptr<impeller::ContextGLES> impeller_context_;
   std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder_;
