@@ -92,10 +92,10 @@ class Ticker {
   TickerFuture? _future;
 
   /// If true, this ticker will request frames using
-  /// SchedulerBinding.scheduleForcedFrame instead of scheduleFrame.
+  /// [SchedulerBinding.scheduleForcedFrame] instead of [SchedulerBinding.scheduleFrame].
   ///
   /// This allows granular control to advance frames even when frames are
-  /// typically disabled (e.g. when the app is in the background) and should be
+  /// typically disabled (e.g. when the app is in the background). This should be
   /// used sparingly as it can increase battery usage.
   bool forceFrames = false;
 

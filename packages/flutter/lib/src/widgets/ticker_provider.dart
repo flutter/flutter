@@ -187,8 +187,8 @@ class TickerMode extends StatefulWidget {
       builder: (BuildContext context) {
         final _EffectiveTickerMode? parent = context
             .dependOnInheritedWidgetOfExactType<_EffectiveTickerMode>();
-        final bool parentEnabled = parent?.enabled ?? true;
-        final bool parentForce = parent?.forceFrames ?? false;
+        final bool parentEnabled = parent?.enabled ?? TickerModeData.fallback.enabled;
+        final bool parentForce = parent?.forceFrames ?? TickerModeData.fallback.forceFrames;
         return TickerMode(
           key: key,
           enabled: enabled ?? parentEnabled,
@@ -602,6 +602,7 @@ class _ConstantValueListenable<T> implements ValueListenable<T> {
 /// [SingleTickerProviderStateMixin] and [TickerProviderStateMixin] apply them
 /// automatically to the [Ticker]s they vend. Use this class when you need to
 /// observe or react to ticker policy explicitly.
+@immutable
 class TickerModeData {
   /// Creates a [TickerModeData].
   const TickerModeData({required this.enabled, required this.forceFrames});
@@ -623,6 +624,20 @@ class TickerModeData {
   /// [TickerMode.forceFrames] values. Forcing frames may increase battery
   /// usage, so use sparingly.
   final bool forceFrames;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(other, this)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is TickerModeData && other.enabled == enabled && other.forceFrames == forceFrames;
+  }
+
+  @override
+  int get hashCode => Object.hash(enabled, forceFrames);
 }
 
 class _ConstantTickerModeDataListenable implements ValueListenable<TickerModeData> {
