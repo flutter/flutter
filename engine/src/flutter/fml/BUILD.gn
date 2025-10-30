@@ -123,7 +123,7 @@ source_set("fml") {
 
   if (enable_backtrace) {
     # This abseil dependency is only used by backtrace.cc.
-    deps += [ "//flutter/third_party/abseil-cpp/absl/debugging:symbolize" ]
+    deps += [ "//third_party/abseil-cpp/absl/debugging:symbolize" ]
   }
 
   if (target_os != "wasm") {

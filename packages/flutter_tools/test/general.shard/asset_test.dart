@@ -375,6 +375,66 @@ flutter:
           expect(assetBundle.entries.keys, contains('shaders/$shader'));
         }
       });
+
+      testWithoutContext('fails if shader is also in assets', () async {
+        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_package');
+        fileSystem.file('pubspec.yaml').writeAsStringSync(r'''
+name: my_package
+flutter:
+  shaders:
+    - shaders/my_shader.frag
+  assets:
+    - shaders/my_shader.frag
+''');
+        fileSystem.file('shaders/my_shader.frag').createSync(recursive: true);
+        final assetBundle = ManifestAssetBundle(
+          logger: logger,
+          fileSystem: fileSystem,
+          platform: platform,
+          flutterRoot: flutterRoot,
+        );
+
+        final int result = await assetBundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        );
+        expect(result, isNot(0));
+        expect(
+          logger.errorText,
+          contains('Error: Shader "shaders/my_shader.frag" is also defined as an asset.'),
+        );
+      });
+
+      testWithoutContext('fails if shader is in asset directory', () async {
+        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_package');
+        fileSystem.file('pubspec.yaml').writeAsStringSync(r'''
+name: my_package
+flutter:
+  shaders:
+    - shaders/my_shader.frag
+  assets:
+    - shaders/
+''');
+        fileSystem.file('shaders/my_shader.frag').createSync(recursive: true);
+        final assetBundle = ManifestAssetBundle(
+          logger: logger,
+          fileSystem: fileSystem,
+          platform: platform,
+          flutterRoot: flutterRoot,
+        );
+
+        final int result = await assetBundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        );
+        expect(result, isNot(0));
+        expect(
+          logger.errorText,
+          contains(
+            'Error: Shader "shaders/my_shader.frag" is included in the asset directory "shaders/".',
+          ),
+        );
+      });
     });
   }
 }

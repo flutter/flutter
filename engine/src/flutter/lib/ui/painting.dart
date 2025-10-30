@@ -4203,6 +4203,8 @@ base class _ColorFilter extends NativeFieldWrapperClass1 {
 /// See also:
 ///
 ///  * [BackdropFilter], a widget that applies [ImageFilter] to its rendering.
+///  * [ClipRect], a widget that limits the area affected by the [ImageFilter]
+///    when used with [BackdropFilter].
 ///  * [ImageFiltered], a widget that applies [ImageFilter] to its children.
 ///  * [SceneBuilder.pushBackdropFilter], which is the low-level API for using
 ///    this class as a backdrop filter.
@@ -5255,6 +5257,7 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   // re-initialized.
   static final Map<String, FragmentProgram> _shaderRegistry = <String, FragmentProgram>{};
 
+  // This is called on hot reload when a shader has changed.
   static void _reinitializeShader(String assetKey) {
     // If a shader for the asset isn't already registered, then there's no
     // need to reinitialize it. The new shader will be loaded and initialized
@@ -5287,8 +5290,40 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
         return false;
       });
 
+      shader._samplers.removeWhere((WeakReference<ImageSamplerSlot> ref) {
+        final ImageSamplerSlot? slot = ref.target;
+        if (slot == null) {
+          return true;
+        }
+
+        slot._shaderIndex = program._getImageSamplerIndex(slot.name);
+        return false;
+      });
+
       return false;
     });
+  }
+
+  int _getImageSamplerIndex(String name) {
+    int index = 0;
+    bool found = false;
+    for (final dynamic entryDynamic in _uniformInfo) {
+      final Map<String, Object> entry = entryDynamic as Map<String, Object>;
+      if (entry['name'] == name) {
+        if (entry['type'] != 'SampledImage') {
+          throw ArgumentError('Uniform "$name" is not an image sampler.');
+        }
+        found = true;
+        break;
+      } else if (entry['type'] == 'SampledImage') {
+        index += 1;
+      }
+    }
+
+    if (!found) {
+      throw ArgumentError('No uniform named "$name".');
+    }
+    return index;
   }
 
   int _getUniformFloatIndex(String name, int index) {
@@ -5383,6 +5418,27 @@ base class UniformFloatSlot {
   final int index;
 }
 
+/// A binding to a shader's image sampler. Calling [set] on this object updates
+/// a sampler's bound image.
+base class ImageSamplerSlot {
+  ImageSamplerSlot._(this._shader, this.name, this._shaderIndex);
+
+  final FragmentShader _shader;
+  int _shaderIndex;
+
+  /// Set the [Image] value for the bound sampler associated with this slot.
+  void set(Image val) {
+    _shader.setImageSampler(_shaderIndex, val);
+  }
+
+  /// VisibleForTesting: This is the index one would use with
+  /// [FragmentShader.setImageSampler] for this sampler.
+  int get shaderIndex => _shaderIndex;
+
+  /// The name of the bound uniform.
+  final String name;
+}
+
 /// A [Shader] generated from a [FragmentProgram].
 ///
 /// Instances of this class can be obtained from the
@@ -5408,6 +5464,7 @@ base class FragmentShader extends Shader {
   static final Float32List _kEmptyFloat32List = Float32List(0);
   Float32List _floats = _kEmptyFloat32List;
   final List<WeakReference<UniformFloatSlot>> _slots = <WeakReference<UniformFloatSlot>>[];
+  final List<WeakReference<ImageSamplerSlot>> _samplers = <WeakReference<ImageSamplerSlot>>[];
 
   void _reinitialize() {
     _floats = _constructor(_program, _program._uniformFloatCount, _program._samplerCount);
@@ -5491,6 +5548,19 @@ base class FragmentShader extends Shader {
     _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
     _slots.add(WeakReference<UniformFloatSlot>(result));
     return result;
+  }
+
+  /// Access the [ImageSamplerSlot] binding associated with the sampler named
+  /// [name].
+  ///
+  /// The index provided to setImageSampler is the index of the sampler uniform
+  /// defined in the fragment program, excluding all non-sampler uniforms.
+  ImageSamplerSlot getImageSampler(String name) {
+    final int index = _program._getImageSamplerIndex(name);
+    final ImageSamplerSlot slot = ImageSamplerSlot._(this, name, index);
+    _samplers.removeWhere((WeakReference<ImageSamplerSlot> ref) => ref.target == null);
+    _samplers.add(WeakReference<ImageSamplerSlot>(slot));
+    return slot;
   }
 
   /// Sets the sampler uniform at [index] to [image].
