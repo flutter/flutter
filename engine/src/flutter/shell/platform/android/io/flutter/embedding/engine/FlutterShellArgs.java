@@ -15,10 +15,10 @@ import java.util.*;
  * io.flutter.embedding.engine.loader.FlutterLoader#ensureInitializationComplete(Context, String[])}
  * for more information.
  *
- * <p>All of these flags map to a flag listed in shell/common/switches.cc, which contains the full list
- * of flags that can potentially be set. They can either be set
- * via the manifest metadata in a Flutter component's AndroidManifest.xml or via the command line.
- * See the inner {@code Flag} class for the way to specify each flag in the manifest and via the command line.
+ * <p>All of these flags map to a flag listed in shell/common/switches.cc, which contains the full
+ * list of flags that can potentially be set. They can either be set via the manifest metadata in a
+ * Flutter component's AndroidManifest.xml or via the command line. See the inner {@code Flag} class
+ * for the way to specify each flag in the manifest and via the command line.
  *
  * <p>If the same flag is provided both via command line arguments and via AndroidManifest.xml
  * meta-data, the command line value takes precedence at runtime.
@@ -34,10 +34,11 @@ public final class FlutterShellArgs {
 
     /**
      * The metadata key name used to specify the flag in AndroidManifest.xml.
-     * 
-     * <p>To specify a flag in a manifest, it must be prefixed with {@code io.flutter.embedding.android.}.
-     * This is done to avoid potential naming collisions with other metadata keys.
-    */
+     *
+     * <p>To specify a flag in a manifest, it must be prefixed with {@code
+     * io.flutter.embedding.android.}. This is done to avoid potential naming collisions with other
+     * metadata keys.
+     */
     public final String metaDataKey;
 
     /** Whether this flag is allowed to be set in release mode. */
