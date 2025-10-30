@@ -564,12 +564,6 @@ abstract class DialogWindowController extends BaseWindowController {
   @internal
   bool get isActivated;
 
-  /// Whether or not window is currently minimized.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  bool get isMinimized;
-
   /// Request change to the content size of the window.
   ///
   /// The [size] describes the new requested window size. If the size disagrees
@@ -612,12 +606,6 @@ abstract class DialogWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void activate();
-
-  /// Requests window to be minimized.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void setMinimized(bool minimized);
 }
 
 /// [WindowingOwner] is responsible for creating and managing window controllers.
