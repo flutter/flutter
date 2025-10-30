@@ -24,11 +24,11 @@ void main() {
     // Initially, only M is selected.
     expect(
       toggleMButton.style!.backgroundColor!.resolve(enabled),
-      theme.colorScheme.primary.withOpacity(0.12),
+      theme.colorScheme.primary.withValues(alpha: 0.12),
     );
     expect(
       toggleXLButton.style!.backgroundColor!.resolve(enabled),
-      theme.colorScheme.surface,
+      theme.colorScheme.surface.withValues(alpha: 0.0),,
     );
 
     // Tap on XL.
@@ -41,11 +41,11 @@ void main() {
 
     expect(
       toggleMButton.style!.backgroundColor!.resolve(enabled),
-      theme.colorScheme.primary.withOpacity(0.12),
+      theme.colorScheme.primary.withValues(alpha: 0.12),
     );
     expect(
       toggleXLButton.style!.backgroundColor!.resolve(enabled),
-      theme.colorScheme.primary.withOpacity(0.12),
+      theme.colorScheme.primary.withValues(alpha: 0.12),
     );
 
     // Tap M to deselect it.
@@ -62,11 +62,11 @@ void main() {
 
     expect(
       toggleMButton.style!.backgroundColor!.resolve(enabled),
-      theme.colorScheme.surface.withOpacity(0.0),
+      theme.colorScheme.surface.withValues(alpha: 0.0),
     );
     expect(
       toggleXLButton.style!.backgroundColor!.resolve(enabled),
-      theme.colorScheme.surface.withOpacity(0.0),
+      theme.colorScheme.surface.withValues(alpha: 0.0),
     );
   });
 
