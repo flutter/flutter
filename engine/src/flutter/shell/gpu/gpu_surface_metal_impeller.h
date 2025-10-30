@@ -54,14 +54,7 @@ class IMPELLER_CA_METAL_LAYER_AVAILABLE GPUSurfaceMetalImpeller
   std::shared_ptr<impeller::SwapchainTransientsMTL> swapchain_transients_;
 
   // |Surface|
-  std::unique_ptr<SurfaceFrame> AcquireFrame(
-      int64_t view_id,
-      const DlISize& frame_size) override;
-
-  std::unique_ptr<SurfaceFrame> AcquireFrame(
-      const DlISize& frame_size) override {
-    return AcquireFrame(kFlutterImplicitViewId, frame_size);
-  }
+  std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size, int64_t view_id = kFlutterImplicitViewId) override;
 
   std::unique_ptr<SurfaceFrame> AcquireFrameFromCAMetalLayer(
       const GPUSurfaceMetalDelegate* delegate,
@@ -72,10 +65,7 @@ class IMPELLER_CA_METAL_LAYER_AVAILABLE GPUSurfaceMetalImpeller
       const DlISize& frame_size);
 
   // |Surface|
-  DlMatrix GetRootTransformation() const override;
-
-  // |Surface|
-  DlMatrix GetRootTransformation(int64_t view_id) const override;
+  DlMatrix GetRootTransformation(int64_t view_id = kFlutterImplicitViewId) const const override;
 
   // |Surface|
   GrDirectContext* GetContext() override;

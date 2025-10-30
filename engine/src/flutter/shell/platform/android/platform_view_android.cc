@@ -348,7 +348,6 @@ void PlatformViewAndroid::NotifyCreated(
 void PlatformViewAndroid::NotifyCreated(
     int64_t view_id,
     fml::RefPtr<AndroidNativeWindow> native_window) {
-      FML_LOG(ERROR) << "PlatformViewAndroid::NotifyCreated view_id: " << view_id;
   if (view_id != kFlutterImplicitViewId) {
       auto android_surface = surface_factory_->CreateSurface();
       android_surfaces_manager_->AddSurface(view_id, std::move(android_surface));

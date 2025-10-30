@@ -76,8 +76,7 @@ bool GPUSurfaceVulkanImpeller::IsValid() {
 
 // |Surface|
 std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
-    int64_t view_id,
-    const DlISize& size) {
+    const DlISize& size, int64_t view_id) {
   if (!IsValid()) {
     FML_LOG(ERROR) << "Vulkan surface was invalid.";
     return nullptr;
@@ -282,7 +281,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
 }
 
 // |Surface|
-DlMatrix GPUSurfaceVulkanImpeller::GetRootTransformation() const {
+DlMatrix GPUSurfaceVulkanImpeller::GetRootTransformation(int64_t view_id) const {
   // This backend does not currently support root surface transformations. Just
   // return identity.
   return {};

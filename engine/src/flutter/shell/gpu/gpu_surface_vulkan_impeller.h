@@ -39,15 +39,10 @@ class GPUSurfaceVulkanImpeller final : public Surface {
   const GetSurfaceContextVKCallback get_surface_context_vk_callback_;
 
   // |Surface|
-  std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size) override {
-    return nullptr;
-  }
+  std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size, int64_t view_id = kFlutterImplicitViewId) override;
 
   // |Surface|
-  std::unique_ptr<SurfaceFrame> AcquireFrame(int64_t view_id, const DlISize& size) override;
-
-  // |Surface|
-  DlMatrix GetRootTransformation() const override;
+  DlMatrix GetRootTransformation(int64_t view_id = kFlutterImplicitViewId) const override;
 
   // |Surface|
   GrDirectContext* GetContext() override;

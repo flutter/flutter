@@ -40,12 +40,10 @@ class GPUSurfaceGLImpeller final : public Surface {
   const GetGPUSurfaceGLDelegateCallback get_gpu_surface_delegate_;
 
   // |Surface|
-  std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size) override;
-
-   std::unique_ptr<SurfaceFrame> AcquireFrame(int64_t view_id, const DlISize& size) override;
+  std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size, int64_t view_id = kFlutterImplicitViewId) override;
 
   // |Surface|
-  DlMatrix GetRootTransformation() const override;
+  DlMatrix GetRootTransformation(int64_t view_id = kFlutterImplicitViewId) const override;
 
   // |Surface|
   GrDirectContext* GetContext() override;

@@ -53,7 +53,7 @@ bool GPUSurfaceMetalImpeller::IsValid() {
 }
 
 // |Surface|
-std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrame(int64_t view_id, const DlISize& frame_size) {
+std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrame(const DlISize& frame_size, int64_t view_id) {
   TRACE_EVENT0("impeller", "GPUSurfaceMetalImpeller::AcquireFrame");
 
   if (!IsValid()) {
@@ -352,13 +352,6 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
                                         nullptr,          // context result
                                         true              // display list fallback
   );
-}
-
-// |Surface|
-DlMatrix GPUSurfaceMetalImpeller::GetRootTransformation() const {
-  // This backend does not currently support root surface transformations. Just
-  // return identity.
-  return {};
 }
 
 // |Surface|

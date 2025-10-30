@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "flutter/common/constants.h"
 #include "flutter/common/graphics/gl_context_switch.h"
 #include "flutter/flow/embedded_views.h"
 #include "flutter/flow/surface_frame.h"
@@ -37,17 +38,9 @@ class Surface {
 
   virtual bool IsValid() = 0;
 
-  virtual std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size) = 0;
+  virtual std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size, int64_t view_id = kFlutterImplicitViewId) = 0;
 
-  virtual std::unique_ptr<SurfaceFrame> AcquireFrame(int64_t view_id, const DlISize& size) {
-    return AcquireFrame(size);
-  }
-
-  virtual DlMatrix GetRootTransformation() const = 0;
-
-  virtual DlMatrix GetRootTransformation(int64_t view_id) const {
-return GetRootTransformation();
-  }
+  virtual DlMatrix GetRootTransformation(int64_t view_id = kFlutterImplicitViewId) const = 0;
 
   virtual GrDirectContext* GetContext() = 0;
 
