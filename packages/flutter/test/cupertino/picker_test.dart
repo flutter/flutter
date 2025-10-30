@@ -378,7 +378,7 @@ void main() {
         // Let the scroll settle and end up in the middle of the item.
         await tester.pumpAndSettle();
         expect(systemCalls, hasLength(1));
-        // Check that the haptic feedback and ticking sound were triggered.
+        // Check that only the haptic feedback was triggered.
         expect(
           systemCalls.single,
           isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.selectionClick'),
