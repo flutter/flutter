@@ -6477,10 +6477,7 @@ class SemanticsConfiguration {
     if (_actionsAsBits & other._actionsAsBits != 0) {
       return false;
     }
-    if (_flags.hasRepeatedFlags(other._flags)) {
-      return false;
-    }
-    if (_flags.isAccessibilityFocusBlocked != other._flags.isAccessibilityFocusBlocked) {
+    if (_flags.hasConflictingFlags(other._flags)) {
       return false;
     }
 

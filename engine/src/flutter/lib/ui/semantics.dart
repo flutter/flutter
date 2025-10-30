@@ -1595,10 +1595,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
 
   /// Checks if any of the boolean semantic flags are set to true
   /// in both this instance and the [other] instance.
-  bool hasRepeatedFlags(SemanticsFlags other) {
-    // isAccessibilityFocusBlocked is not checked in `hasRepeatedFlags` because
-    // two semantics nodes both with `isAccessibilityFocusBlocked` set to true is
-    // still compatible and not conflicting.
+  bool hasConflictingFlags(SemanticsFlags other) {
     return isChecked.hasConflict(other.isChecked) ||
         isSelected.hasConflict(other.isSelected) ||
         isEnabled.hasConflict(other.isEnabled) ||
@@ -1622,7 +1619,8 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
         (isReadOnly && other.isReadOnly) ||
         (isLink && other.isLink) ||
         (isSlider && other.isSlider) ||
-        (isKeyboardKey && other.isKeyboardKey);
+        (isKeyboardKey && other.isKeyboardKey) ||
+        (isAccessibilityFocusBlocked != other.isAccessibilityFocusBlocked);
   }
 }
 

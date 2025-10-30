@@ -559,7 +559,7 @@ class SemanticsFlags {
     ];
   }
 
-  bool hasRepeatedFlags(SemanticsFlags other) {
+  bool hasConflictingFlags(SemanticsFlags other) {
     return isChecked.hasConflict(other.isChecked) ||
         isSelected.hasConflict(other.isSelected) ||
         isEnabled.hasConflict(other.isEnabled) ||
@@ -583,7 +583,8 @@ class SemanticsFlags {
         (isReadOnly && other.isReadOnly) ||
         (isLink && other.isLink) ||
         (isSlider && other.isSlider) ||
-        (isKeyboardKey && other.isKeyboardKey);
+        (isKeyboardKey && other.isKeyboardKey) ||
+        (isAccessibilityFocusBlocked != other.isAccessibilityFocusBlocked,);
   }
 }
 
