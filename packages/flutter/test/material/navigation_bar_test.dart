@@ -1742,6 +1742,24 @@ void main() {
         .bottom;
     expect(safeAreaBottomPadding, equals(0));
   });
+
+  testWidgets('NavigationBar does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: NavigationBar(
+              destinations: const <Widget>[
+                NavigationDestination(icon: Icon(Icons.add), label: 'X'),
+                NavigationDestination(icon: Icon(Icons.abc), label: 'Y'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(NavigationBar)), Size.zero);
+  });
 }
 
 Widget _buildWidget(Widget child, {bool? useMaterial3}) {
@@ -1773,7 +1791,9 @@ class IconWithRandomColor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color randomColor = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
+    final Color randomColor = Color(
+      (Random().nextDouble() * 0xFFFFFF).toInt(),
+    ).withValues(alpha: 1.0);
     return Icon(icon, color: randomColor);
   }
 }

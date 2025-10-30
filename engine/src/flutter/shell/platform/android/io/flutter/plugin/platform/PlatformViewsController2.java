@@ -526,6 +526,15 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
   }
 
+  public void hidePlatformView(int viewId) {
+    if (!initializePlatformViewIfNeeded(viewId)) {
+      return;
+    }
+
+    final FlutterMutatorView parentView = platformViewParent.get(viewId);
+    parentView.setVisibility(View.GONE);
+  }
+
   @RequiresApi(API_LEVELS.API_34)
   public void onEndFrame() {
     SurfaceControl.Transaction tx = new SurfaceControl.Transaction();

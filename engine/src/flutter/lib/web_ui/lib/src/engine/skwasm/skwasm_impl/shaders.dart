@@ -358,4 +358,14 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
     dataPointer[_floatUniformCount + index * 2] = image.width.toDouble();
     dataPointer[_floatUniformCount + index * 2 + 1] = image.height.toDouble();
   }
+
+  @override
+  ui.UniformFloatSlot getUniformFloat(String name, [int? index]) {
+    throw UnsupportedError('getUniformFloat is not supported on the web.');
+  }
+
+  @override
+  ui.ImageSamplerSlot getImageSampler(String name) {
+    throw UnsupportedError('getImageSampler is not supported on the web.');
+  }
 }

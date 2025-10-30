@@ -86,13 +86,14 @@ class OutlinedButton extends ButtonStyleButton {
     required super.child,
   }) : _addPadding = false;
 
-  /// Create a text button from a pair of widgets that serve as the button's
+  /// Create an outlined button from a pair of widgets that serve as the button's
   /// [icon] and [label].
   ///
   /// The icon and label are arranged in a row and padded by 12 logical pixels
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
   ///
-  /// If [icon] is null, will create an [OutlinedButton] instead.
+  /// If [icon] is null, this constructor will create an outlined button
+  /// that doesn't display an icon.
   ///
   /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
   ///
@@ -114,10 +115,10 @@ class OutlinedButton extends ButtonStyleButton {
        super(
          child: icon != null
              ? _OutlinedButtonWithIconChild(
-                 iconAlignment: iconAlignment,
                  label: label,
-                 buttonStyle: style,
                  icon: icon,
+                 buttonStyle: style,
+                 iconAlignment: iconAlignment,
                )
              : label,
        );
@@ -297,9 +298,7 @@ class OutlinedButton extends ButtonStyleButton {
   /// * `maximumSize` - Size.infinite
   /// * `side` - BorderSide(width: 1, color: Theme.colorScheme.onSurface(0.12))
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
-  /// * `mouseCursor`
-  ///   * disabled - SystemMouseCursors.basic
-  ///   * others - SystemMouseCursors.click
+  /// * `mouseCursor` - WidgetStateMouseCursor.adaptiveClickable
   /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
@@ -336,9 +335,7 @@ class OutlinedButton extends ButtonStyleButton {
   ///   * disabled - BorderSide(color: Theme.colorScheme.onSurface(0.12))
   ///   * others - BorderSide(color: Theme.colorScheme.outline)
   /// * `shape` - StadiumBorder()
-  /// * `mouseCursor`
-  ///   * disabled - SystemMouseCursors.basic
-  ///   * others - SystemMouseCursors.click
+  /// * `mouseCursor` - WidgetStateMouseCursor.adaptiveClickable
   /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
@@ -367,7 +364,7 @@ class OutlinedButton extends ButtonStyleButton {
             maximumSize: Size.infinite,
             side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
             shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
-            enabledMouseCursor: SystemMouseCursors.click,
+            enabledMouseCursor: kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
             disabledMouseCursor: SystemMouseCursors.basic,
             visualDensity: theme.visualDensity,
             tapTargetSize: theme.materialTapTargetSize,
@@ -419,13 +416,13 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
 class _OutlinedButtonWithIconChild extends StatelessWidget {
   const _OutlinedButtonWithIconChild({
     required this.label,
-    this.icon,
+    required this.icon,
     required this.buttonStyle,
     required this.iconAlignment,
   });
 
   final Widget label;
-  final Widget? icon;
+  final Widget icon;
   final ButtonStyle? buttonStyle;
   final IconAlignment? iconAlignment;
 
@@ -442,12 +439,6 @@ class _OutlinedButtonWithIconChild extends StatelessWidget {
         outlinedButtonTheme.style?.iconAlignment ??
         buttonStyle?.iconAlignment ??
         IconAlignment.start;
-    final Widget? icon = this.icon;
-
-    if (icon == null) {
-      return label;
-    }
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       spacing: lerpDouble(8, 4, scale)!,
@@ -575,13 +566,7 @@ class _OutlinedButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
-    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      if (states.contains(WidgetState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+  WidgetStateProperty<MouseCursor?>? get mouseCursor => WidgetStateMouseCursor.adaptiveClickable;
 
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;

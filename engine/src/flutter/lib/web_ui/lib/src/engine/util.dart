@@ -435,17 +435,6 @@ Float32List offsetListToFloat32List(List<ui.Offset> offsetList) {
   return floatList;
 }
 
-int clampInt(int value, int min, int max) {
-  assert(min <= max);
-  if (value < min) {
-    return min;
-  } else if (value > max) {
-    return max;
-  } else {
-    return value;
-  }
-}
-
 /// Prints a warning message to the console.
 ///
 /// This function can be overridden in tests. This could be useful, for example,
@@ -521,6 +510,30 @@ bool unorderedListEqual<T>(List<T>? a, List<T>? b) {
     }
   }
   return wordCounts.isEmpty;
+}
+
+bool paintEquals(ui.Paint? a, ui.Paint? b) {
+  if (identical(a, b)) {
+    // They are both the same instance or both null.
+    return true;
+  }
+  if (a == null || b == null) {
+    return false;
+  }
+  return a.blendMode == b.blendMode &&
+      a.color == b.color &&
+      a.colorFilter == b.colorFilter &&
+      a.filterQuality == b.filterQuality &&
+      a.imageFilter == b.imageFilter &&
+      a.invertColors == b.invertColors &&
+      a.isAntiAlias == b.isAntiAlias &&
+      a.maskFilter == b.maskFilter &&
+      a.shader == b.shader &&
+      a.strokeCap == b.strokeCap &&
+      a.strokeJoin == b.strokeJoin &&
+      a.strokeMiterLimit == b.strokeMiterLimit &&
+      a.strokeWidth == b.strokeWidth &&
+      a.style == b.style;
 }
 
 /// Extensions to [Map] that make it easier to treat it as a JSON object. The
