@@ -25,20 +25,23 @@ uniform FragInfo {
 }
 frag_info;
 
-f16vec4 Sample(f16sampler2D tex, vec2 coords) {
-  const float max_distance = 0.001;
-  float alpha = 1.0;
+bool OutOfBounds(vec2 coords) {
   vec4 signed_distances = frag_info.quad_line_params * vec4(coords, 1.0, 0.0);
-  if (any(lessThan(signed_distances, vec4(0.0)))) {
-    alpha = 1e-5;
-  }
-  f16vec4 color;
+  return any(lessThan(signed_distances, vec4(0.0)));
+}
+
+f16vec4 Sample(f16sampler2D tex, vec2 coords) {
   if (supports_decal == 1.0) {
-    color = texture(tex, coords);
-  } else {
-    color = IPHalfSampleDecal(tex, coords);
+    return texture(tex, coords);
   }
-  color.a = min(color.a, alpha);
+  return IPHalfSampleDecal(tex, coords);
+}
+
+f16vec4 BoundedSample(f16sampler2D tex, vec2 coords) {
+  f16vec4 color = Sample(tex, coords);
+  if (OutOfBounds(coords)) {
+    color.a = min(color.a, 1e-5);
+  }
   return color;
 }
 
@@ -51,15 +54,15 @@ void main() {
 
   for (int i = 0; i < int(kernel_samples.sample_count); i++) {
     float16_t coefficient = float16_t(kernel_samples.sample_data[i].z);
-    f16vec4 sampled_color = Sample(
+    f16vec4 sampled_color = BoundedSample(
         texture_sampler, v_texture_coords + kernel_samples.sample_data[i].xy);
     if (sampled_color.a < 1e-4hf && i > 0) {
       vec2 offset = (kernel_samples.sample_data[i].xy +
                      kernel_samples.sample_data[i - 1].xy) /
                     2.0;
       float16_t coefficient = kernel_samples.sample_data[i].z / 2.0;
-      sampled_color =
-          IPHalfPremultiply(Sample(texture_sampler, v_texture_coords + offset));
+      sampled_color = IPHalfPremultiply(
+          BoundedSample(texture_sampler, v_texture_coords + offset));
       total_color += coefficient * sampled_color;
       break;
     }
