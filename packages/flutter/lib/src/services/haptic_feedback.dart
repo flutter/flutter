@@ -121,7 +121,9 @@ abstract final class HapticFeedback {
   /// On iOS, this uses a `UINotificationFeedbackGenerator` with
   /// `UINotificationFeedbackTypeWarning`.
   ///
-  /// On Android, this uses `HapticFeedbackConstants.KEYBOARD_TAP`.
+  /// On Android, this uses `HapticFeedbackConstants.KEYBOARD_TAP` on API
+  /// levels 30 and above. This call has no effects on Android API levels below
+  /// 30.
   ///
   /// {@macro flutter.services.HapticFeedback.notification}
   static Future<void> warningNotification() async {

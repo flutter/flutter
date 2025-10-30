@@ -215,7 +215,9 @@ public class PlatformPlugin {
         }
         break;
       case WARNING_NOTIFICATION:
-        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+        if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
+          view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+        }
         break;
       case ERROR_NOTIFICATION:
         if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {

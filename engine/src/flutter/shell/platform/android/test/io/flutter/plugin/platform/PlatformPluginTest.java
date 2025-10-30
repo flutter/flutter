@@ -15,6 +15,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -767,34 +768,42 @@ public class PlatformPluginTest {
     platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
         PlatformChannel.HapticFeedbackType.STANDARD);
     verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+    clearInvocations(fakeDecorView);
 
     platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
         PlatformChannel.HapticFeedbackType.LIGHT_IMPACT);
     verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+    clearInvocations(fakeDecorView);
 
     platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
         PlatformChannel.HapticFeedbackType.MEDIUM_IMPACT);
     verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+    clearInvocations(fakeDecorView);
 
     platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
         PlatformChannel.HapticFeedbackType.HEAVY_IMPACT);
     verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+    clearInvocations(fakeDecorView);
 
     platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
         PlatformChannel.HapticFeedbackType.SELECTION_CLICK);
     verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+    clearInvocations(fakeDecorView);
 
     platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
         PlatformChannel.HapticFeedbackType.SUCCESS_NOTIFICATION);
     verify(fakeDecorView, never()).performHapticFeedback(HapticFeedbackConstants.CONFIRM);
+    clearInvocations(fakeDecorView);
 
     platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
         PlatformChannel.HapticFeedbackType.WARNING_NOTIFICATION);
-    verify(fakeDecorView, times(2)).performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+    verify(fakeDecorView, never()).performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+    clearInvocations(fakeDecorView);
 
     platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
         PlatformChannel.HapticFeedbackType.ERROR_NOTIFICATION);
     verify(fakeDecorView, never()).performHapticFeedback(HapticFeedbackConstants.REJECT);
+    clearInvocations(fakeDecorView);
   }
 
   @Config(minSdk = API_LEVELS.API_30)
@@ -810,33 +819,41 @@ public class PlatformPluginTest {
     platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
         PlatformChannel.HapticFeedbackType.STANDARD);
     verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+    clearInvocations(fakeDecorView);
 
     platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
         PlatformChannel.HapticFeedbackType.LIGHT_IMPACT);
     verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+    clearInvocations(fakeDecorView);
 
     platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
         PlatformChannel.HapticFeedbackType.MEDIUM_IMPACT);
     verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+    clearInvocations(fakeDecorView);
 
     platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
         PlatformChannel.HapticFeedbackType.HEAVY_IMPACT);
     verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+    clearInvocations(fakeDecorView);
 
     platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
         PlatformChannel.HapticFeedbackType.SELECTION_CLICK);
     verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+    clearInvocations(fakeDecorView);
 
     platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
         PlatformChannel.HapticFeedbackType.SUCCESS_NOTIFICATION);
     verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.CONFIRM);
+    clearInvocations(fakeDecorView);
 
     platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
         PlatformChannel.HapticFeedbackType.WARNING_NOTIFICATION);
-    verify(fakeDecorView, times(2)).performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+    clearInvocations(fakeDecorView);
 
     platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
         PlatformChannel.HapticFeedbackType.ERROR_NOTIFICATION);
     verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.REJECT);
+    clearInvocations(fakeDecorView);
   }
 }
