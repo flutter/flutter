@@ -132,6 +132,7 @@ def Main():
       help='Emit verbose output'
   )
 
+  # This flag is unused but is kept to support existing scripts that use it.
   parser.add_argument('--host-os', help='The host os')
 
   parser.add_argument('--fuchsia-sdk-path', help='The path in gcs to the fuchsia sdk to download')
