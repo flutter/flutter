@@ -127,7 +127,25 @@ enum AccessiblityFocusBlockType {
 
   /// Blocks accessibility focus for the **current node only**. Its descendants
   /// may still be focusable.
-  blockNode,
+  blockNode;
+
+  /// The AccessiblityFocusBlockType when two node get merged.
+  AccessiblityFocusBlockType merge(AccessiblityFocusBlockType other) {
+    // 1. If either is blockSubtree, the result is blockSubtree.
+    if (this == AccessiblityFocusBlockType.blockSubtree ||
+        other == AccessiblityFocusBlockType.blockSubtree) {
+      return AccessiblityFocusBlockType.blockSubtree;
+    }
+
+    // 2. If either is blockNode, the result is blockNode
+    if (this == AccessiblityFocusBlockType.blockNode ||
+        other == AccessiblityFocusBlockType.blockNode) {
+      return AccessiblityFocusBlockType.blockNode;
+    }
+
+    // 3. If neither is blockSubtree nor blockNode, both must be none.
+    return AccessiblityFocusBlockType.none;
+  }
 }
 
 final int _kUnblockedUserActions =
@@ -6587,6 +6605,9 @@ class SemanticsConfiguration {
         _validationResult = child._validationResult;
       }
     }
+    _accessiblityFocusBlockType = _accessiblityFocusBlockType.merge(
+      child._accessiblityFocusBlockType,
+    );
 
     _hasBeenAnnotated = hasBeenAnnotated || child.hasBeenAnnotated;
   }
