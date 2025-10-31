@@ -51,6 +51,7 @@ class WebDriverService extends DriverService {
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
+  final _connectionInfoCompleter = Completer<DebugConnectionInfo>.sync();
 
   @visibleForTesting
   Uri? get webUri => _webUri;
@@ -109,6 +110,7 @@ class WebDriverService extends DriverService {
     final appStartedCompleter = Completer<void>.sync();
     final Future<int?> runFuture = _residentRunner.run(
       appStartedCompleter: appStartedCompleter,
+      connectionInfoCompleter: _connectionInfoCompleter,
       route: route,
     );
 
@@ -221,11 +223,13 @@ class WebDriverService extends DriverService {
       await window.setLocation(const math.Point<int>(0, 0));
       await window.setSize(math.Rectangle<int>(0, 0, width, height));
     }
+    final DebugConnectionInfo debugConnectionInfo = await _connectionInfoCompleter.future;
     final int result = await _processUtils.stream(
       <String>[_dartSdkPath, ...arguments, testFile],
       environment: <String, String>{
         ..._platform.environment,
-        'VM_SERVICE_URL': _webUri.toString(),
+        if (debugConnectionInfo.wsUri != null)
+          'VM_SERVICE_URL': debugConnectionInfo.wsUri.toString(),
         ..._additionalDriverEnvironment(webDriver, browserName, androidEmulator),
       },
     );
