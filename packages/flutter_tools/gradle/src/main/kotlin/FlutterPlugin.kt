@@ -163,16 +163,20 @@ class FlutterPlugin : Plugin<Project> {
             // abiFilters cannot be added to templates because it would break builds when
             // --splits-per-abi is used due to conflicting configuration. This approach
             // adds them programmatically only when splits are not configured.
-            //
-            // If the user has specified abiFilters in their build.gradle file, those
-            // settings will take precedence over these defaults.
             FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
-                buildType.ndk.abiFilters.clear()
-                FlutterPluginConstants.DEFAULT_PLATFORMS.forEach { platform ->
-                    val abiValue: String =
-                        FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]
-                            ?: throw GradleException("Invalid platform: $platform")
-                    buildType.ndk.abiFilters.add(abiValue)
+                if (buildType.ndk.abiFilters.contains("x86")) {
+                    project.logger.warn(
+                        "Warning: Flutter does not support x86 architectures.  Removing from abiFilters."
+                    )
+                    buildType.ndk.abiFilters.remove("x86")
+                }
+            }
+            FlutterPluginUtils.getAndroidExtension(project).productFlavors.forEach { flavor ->
+                if (flavor.ndk.abiFilters.contains("x86")) {
+                    project.logger.warn(
+                        "Warning: Flutter does not support x86 architectures.  Removing from abiFilters."
+                    )
+                    flavor.ndk.abiFilters.remove("x86")
                 }
             }
         }
