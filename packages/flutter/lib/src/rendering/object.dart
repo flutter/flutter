@@ -4932,6 +4932,10 @@ mixin SemanticsAnnotationsMixin on RenderObject {
       config.validationResult = _properties.validationResult;
     }
 
+    if (_properties.hitTestBehavior != null) {
+      config.hitTestBehavior = _properties.hitTestBehavior!;
+    }
+
     if (_properties.inputType != null) {
       config.inputType = _properties.inputType!;
     }
