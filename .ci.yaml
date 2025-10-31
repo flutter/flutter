@@ -2475,6 +2475,16 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: basic_material_app_android__compile
 
+  - name: Linux_pixel_7pro android_verified_input_test
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: android_verified_input_test
+
   - name: Linux_pixel_7pro channels_integration_test
     recipe: devicelab/devicelab_drone
     presubmit: false

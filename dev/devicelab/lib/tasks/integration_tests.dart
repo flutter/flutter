@@ -139,6 +139,14 @@ TaskFunction createSolidColorTest({required bool enableImpeller}) {
   ).call;
 }
 
+TaskFunction androidVerifiedInputTest({Map<String, String>? environment}) {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/android_verified_input',
+    'lib/main.dart',
+    environment: environment,
+  ).call;
+}
+
 // Can run on emulator or physical android device.
 // Device must have developer settings enabled.
 // Device must be android api 30 or higher.
