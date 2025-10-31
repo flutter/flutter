@@ -1105,7 +1105,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     final BaseWindowController controller = _of(context, _WindowControllerAspect.minimized);
     return switch (controller) {
       RegularWindowController() => controller.isMinimized,
-      DialogWindowController() => controller.isMinimized,
+      DialogWindowController() => false,
     };
   }
 
@@ -1127,7 +1127,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
 
     return switch (controller) {
       RegularWindowController() => controller.isMinimized,
-      DialogWindowController() => controller.isMinimized,
+      DialogWindowController() => false,
     };
   }
 
@@ -1298,8 +1298,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
               final RegularWindowController regular =>
                 regular.isMinimized !=
                     (oldWidget.controller as RegularWindowController).isMinimized,
-              final DialogWindowController dialog =>
-                dialog.isMinimized != (oldWidget.controller as DialogWindowController).isMinimized,
+              DialogWindowController => false,
             },
             _WindowControllerAspect.fullscreen => switch (controller) {
               final RegularWindowController regular =>
