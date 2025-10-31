@@ -183,29 +183,29 @@ enum WindowPositionerAnchor {
 /// The [WindowPositionerConstraintAdjustment] how a window will adjust
 /// its position when it would be partly constrained by the platform.
 ///
+/// {@template flutter.widgets.window_positioner.constraint_adjustment}
 /// Whether a window is considered "constrained" is left to the platform
-/// to determine. For example, the surface may be partly outside of the
-/// area of the monitor, thus necessitating that the position of the
-/// child be adjusted until it is entirely inside the work area.
-///
-/// [flipX] and [flipY] mean reverse the anchor points and offset along an axis.
-/// [slideX] and [slideY] mean adjust the offset along an axis.
-/// [resizeX] and [resizeY] mean adjust the client window size along an axis.
+/// to determine. For example, the window may be partly outside the
+/// output's 'work area', thus necessitating the child window's
+/// position be adjusted until it is entirely inside the work area.
 ///
 /// The adjustments can be combined, according to a defined precedence:
 ///
-///  1. [flipX] and [flipY]
-///  2. [slideX] and [slideY]
-///  3. [resizeX] and [resizeY]
+/// 1. [WindowPositionerConstraintAdjustment.flipX] and [WindowPositionerConstraintAdjustment.flipY]
+/// 2. [WindowPositionerConstraintAdjustment.slideX] and [WindowPositionerConstraintAdjustment.slideY]
+/// 3. [WindowPositionerConstraintAdjustment.resizeX] and [WindowPositionerConstraintAdjustment.resizeY]
+///
+/// The first adjustment that results in the child window being entirely inside the work area will be picked.
+/// {@endtemplate}
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
 class WindowPositionerConstraintAdjustment {
   const WindowPositionerConstraintAdjustment({
-    this.slideX = false,
-    this.slideY = false,
     this.flipX = false,
     this.flipY = false,
+    this.slideX = false,
+    this.slideY = false,
     this.resizeX = false,
     this.resizeY = false,
   });
@@ -227,7 +227,7 @@ class WindowPositionerConstraintAdjustment {
   final bool slideY;
 
   /// If [flipX] is `true` and the window would be displayed off the screen in the X-axis in one direction, then
-  /// it will be flipped to the opposite side of its parent in order to show
+  /// it will be flipped to the opposite side of its parent in order
   /// to best display the window on screen.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
@@ -235,7 +235,7 @@ class WindowPositionerConstraintAdjustment {
   final bool flipX;
 
   /// If [flipY] is `true` and then window would be displayed off the screen in the Y-axis in one direction, then
-  /// it will be flipped to the opposite side of its parent in order to show
+  /// it will be flipped to the opposite side of its parent in order
   /// it on screen.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
@@ -258,7 +258,7 @@ class WindowPositionerConstraintAdjustment {
 }
 
 /// The [WindowPositioner] defines how child windows are placed relative to
-/// their parents.
+/// their parent window.
 ///
 /// For example, the rules may be defined such that the child window remains
 /// within the visible area's borders, and to specify how the child window
@@ -311,6 +311,8 @@ class WindowPositioner {
   ///
   /// This is used in conjunction with [childAnchor] to determine the final position
   /// of the child window.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
   final WindowPositionerAnchor parentAnchor;
 
   /// Defines the anchor point for the child window.
@@ -323,6 +325,8 @@ class WindowPositioner {
   ///
   /// This is used in conjunction with [parentAnchor] to determine the final position
   /// of the child window.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
   final WindowPositionerAnchor childAnchor;
 
   /// Specify the window position offset relative to the position of the
@@ -337,27 +341,21 @@ class WindowPositioner {
   /// An example use case is placing a popup menu on top of a user interface
   /// element, while aligning the user interface element of the parent window
   /// with some user interface element placed somewhere in the popup window.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
   final Offset offset;
 
   /// Defines how Flutter will adjust the position of the window if the unadjusted
-  /// position would result in the window being partly constrained by the platform.
   ///
-  /// Whether a window is considered "constrained" is left to the platform
-  /// to determine. For example, the window may be partly outside the
-  /// output's 'work area', thus necessitating the child window's
-  /// position be adjusted until it is entirely inside the work area.
-  ///
-  /// The adjustments can be combined, according to a defined precedence:
-  ///
-  /// 1. [WindowPositionerConstraintAdjustment.flipX] and [WindowPositionerConstraintAdjustment.flipY]
-  /// 2. [WindowPositionerConstraintAdjustment.slideX] and [WindowPositionerConstraintAdjustment.slideY]
-  /// 3. [WindowPositionerConstraintAdjustment.resizeX] and [WindowPositionerConstraintAdjustment.resizeY]
+  /// {@macro flutter.widgets.window_positioner.constraint_adjustment}
   ///
   /// The first adjustment that results in the child window being entirely inside the work area will be picked.
   ///
   /// See also:
   ///
   ///  * [WindowPositionerConstraintAdjustment] for details on each adjustment type.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
   final WindowPositionerConstraintAdjustment constraintAdjustment;
 
   /// Computes the screen-space rectangle for a child window placed according to
@@ -372,6 +370,8 @@ class WindowPositioner {
   /// [displayRect] is the output display area where the child window will be placed.
   ///
   /// All sizes and rectangles are in physical coordinates.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
   Rect placeWindow({
     required Size childSize,
     required Rect anchorRect,
