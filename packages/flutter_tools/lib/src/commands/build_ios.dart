@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/analyze_size.dart';
@@ -532,7 +533,8 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       final String exportMethodDisplayName = isAppStoreUpload ? 'App Store' : exportMethod;
       status = globals.logger.startProgress('Building $exportMethodDisplayName IPA...');
       if (exportOptions == null) {
-        generatedExportPlist = _createExportPlist(exportMethod);
+        final BuildInfo buildInfo = await cachedBuildInfo;
+        generatedExportPlist = await _createExportPlist(exportMethod, app, buildInfo);
         exportOptions = generatedExportPlist.path;
       }
 
@@ -618,8 +620,92 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     return FlutterCommandResult.success();
   }
 
-  File _createExportPlist(String exportMethod) {
-    // Create the plist to be passed into xcodebuild -exportOptionsPlist.
+  /// Test-only method to expose ExportOptions.plist generation logic for unit testing.
+  @visibleForTesting
+  static Future<File> createExportPlistForTesting({
+    required String exportMethod,
+    required BuildInfo buildInfo,
+    required String bundleId,
+    String? codeSignStyle,
+    String? profileSpecifier,
+    String? teamId,
+    String? profileUuid,
+    required FileSystem fileSystem,
+    required ProcessManager processManager,
+    required PlistParser plistParser,
+    String? homeDirPath,
+  }) async {
+    final isManualSigning = codeSignStyle == 'Manual';
+
+    // Only enhance for manual signing in Release/Profile builds
+    if (isManualSigning &&
+        (buildInfo.mode == BuildMode.release || buildInfo.mode == BuildMode.profile)) {
+      if (profileSpecifier != null && teamId != null && profileUuid != null) {
+        // Generate enhanced ExportOptions.plist for manual signing
+        return _createManualSigningExportPlistStatic(
+          exportMethod: exportMethod,
+          teamId: teamId,
+          bundleId: bundleId,
+          profileUuid: profileUuid,
+          fileSystem: fileSystem,
+        );
+      }
+    }
+
+    // Fall back to simple plist (current behavior)
+    return _createSimpleExportPlistStatic(exportMethod: exportMethod, fileSystem: fileSystem);
+  }
+
+  Future<File> _createExportPlist(
+    String exportMethod,
+    BuildableIOSApp app,
+    BuildInfo buildInfo,
+  ) async {
+    // Check if we should generate enhanced ExportOptions.plist for manual signing
+    final Map<String, String>? buildSettings = await app.project.buildSettingsForBuildInfo(
+      buildInfo,
+    );
+
+    final String? codeSignStyle = buildSettings?['CODE_SIGN_STYLE'];
+    final isManualSigning = codeSignStyle == 'Manual';
+
+    // Only enhance for manual signing in Release/Profile builds
+    if (isManualSigning &&
+        (buildInfo.mode == BuildMode.release || buildInfo.mode == BuildMode.profile)) {
+      final String? profileSpecifier = buildSettings?['PROVISIONING_PROFILE_SPECIFIER'];
+      final String? teamId = buildSettings?['DEVELOPMENT_TEAM'];
+      final String bundleId = buildSettings?['PRODUCT_BUNDLE_IDENTIFIER'] ?? app.id;
+
+      if (profileSpecifier != null && teamId != null) {
+        // Try to find and parse the provisioning profile
+        final String? profileUuid = await _findProvisioningProfileUuid(profileSpecifier);
+
+        if (profileUuid != null) {
+          // Generate enhanced ExportOptions.plist for manual signing
+          return _createManualSigningExportPlist(
+            exportMethod: exportMethod,
+            teamId: teamId,
+            bundleId: bundleId,
+            profileUuid: profileUuid,
+          );
+        }
+      }
+    }
+
+    // Fall back to simple plist (current behavior)
+    return _createSimpleExportPlist(exportMethod);
+  }
+
+  /// Creates a simple ExportOptions.plist (current behavior).
+  File _createSimpleExportPlist(String exportMethod) {
+    return _createSimpleExportPlistStatic(exportMethod: exportMethod, fileSystem: globals.fs);
+  }
+
+  /// Static version for testing.
+  static File _createSimpleExportPlistStatic({
+    required String exportMethod,
+    required FileSystem fileSystem,
+  }) {
     final plistContents = StringBuffer('''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -633,12 +719,182 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 </plist>
 ''');
 
-    final File tempPlist = globals.fs.systemTempDirectory
+    final File tempPlist = fileSystem.systemTempDirectory
         .createTempSync('flutter_build_ios.')
         .childFile('ExportOptions.plist');
     tempPlist.writeAsStringSync(plistContents.toString());
 
     return tempPlist;
+  }
+
+  /// Creates an ExportOptions.plist for manual signing with provisioning profile mapping.
+  File _createManualSigningExportPlist({
+    required String exportMethod,
+    required String teamId,
+    required String bundleId,
+    required String profileUuid,
+  }) {
+    return _createManualSigningExportPlistStatic(
+      exportMethod: exportMethod,
+      teamId: teamId,
+      bundleId: bundleId,
+      profileUuid: profileUuid,
+      fileSystem: globals.fs,
+    );
+  }
+
+  /// Static version for testing.
+  static File _createManualSigningExportPlistStatic({
+    required String exportMethod,
+    required String teamId,
+    required String bundleId,
+    required String profileUuid,
+    required FileSystem fileSystem,
+  }) {
+    final plistContents = StringBuffer('''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>method</key>
+        <string>$exportMethod</string>
+        <key>teamID</key>
+        <string>$teamId</string>
+        <key>signingStyle</key>
+        <string>manual</string>
+        <key>provisioningProfiles</key>
+        <dict>
+            <key>$bundleId</key>
+            <string>$profileUuid</string>
+        </dict>
+        <key>uploadBitcode</key>
+        <false/>
+        <key>stripSwiftSymbols</key>
+        <true/>
+    </dict>
+</plist>
+''');
+
+    final File tempPlist = fileSystem.systemTempDirectory
+        .createTempSync('flutter_build_ios.')
+        .childFile('ExportOptions.plist');
+    tempPlist.writeAsStringSync(plistContents.toString());
+
+    return tempPlist;
+  }
+
+  /// Finds a provisioning profile by name or UUID and returns its UUID.
+  /// Returns null if profile cannot be found or parsed.
+  Future<String?> _findProvisioningProfileUuid(String profileSpecifier) async {
+    final String? homeDir = globals.fsUtils.homeDirPath;
+    if (homeDir == null) {
+      return null;
+    }
+
+    final Directory profileDirectory = globals.fs.directory(
+      globals.fs.path.join(
+        homeDir,
+        'Library',
+        'Developer',
+        'Xcode',
+        'UserData',
+        'Provisioning Profiles',
+      ),
+    );
+
+    if (!profileDirectory.existsSync()) {
+      return null;
+    }
+
+    // Search for profiles matching the specifier (could be name or UUID)
+    for (final FileSystemEntity entity in profileDirectory.listSync()) {
+      if (entity is! File || globals.fs.path.extension(entity.path) != '.mobileprovision') {
+        continue;
+      }
+
+      // Try parsing the profile
+      final String? uuid = await _parseProvisioningProfileUuid(entity);
+      if (uuid != null) {
+        // Check if this profile matches the specifier (by UUID or name)
+        final String? name = await _getProvisioningProfileName(entity);
+        if (uuid == profileSpecifier || name == profileSpecifier) {
+          return uuid;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /// Parses a provisioning profile file and extracts its UUID.
+  Future<String?> _parseProvisioningProfileUuid(File profileFile) async {
+    try {
+      // Decode the provisioning profile using security command
+      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+        'flutter_provisioning_',
+      );
+      final File decodedPlist = tempDir.childFile('decoded.plist');
+
+      try {
+        final RunResult result = await globals.processUtils.run(<String>[
+          'security',
+          'cms',
+          '-D',
+          '-i',
+          profileFile.path,
+          '-o',
+          decodedPlist.path,
+        ]);
+
+        if (result.exitCode != 0 || !decodedPlist.existsSync()) {
+          return null;
+        }
+
+        // Parse the plist to get UUID
+        final Map<String, Object> plistData = globals.plistParser.parseFile(decodedPlist.path);
+        final uuid = plistData['UUID']?.toString();
+        return uuid;
+      } finally {
+        ErrorHandlingFileSystem.deleteIfExists(tempDir);
+      }
+    } on Exception catch (e) {
+      globals.logger.printTrace('Failed to parse provisioning profile ${profileFile.path}: $e');
+      return null;
+    }
+  }
+
+  /// Gets the name of a provisioning profile.
+  Future<String?> _getProvisioningProfileName(File profileFile) async {
+    try {
+      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+        'flutter_provisioning_',
+      );
+      final File decodedPlist = tempDir.childFile('decoded.plist');
+
+      try {
+        final RunResult result = await globals.processUtils.run(<String>[
+          'security',
+          'cms',
+          '-D',
+          '-i',
+          profileFile.path,
+          '-o',
+          decodedPlist.path,
+        ]);
+
+        if (result.exitCode != 0 || !decodedPlist.existsSync()) {
+          return null;
+        }
+
+        final Map<String, Object> plistData = globals.plistParser.parseFile(decodedPlist.path);
+        return plistData['Name']?.toString();
+      } finally {
+        ErrorHandlingFileSystem.deleteIfExists(tempDir);
+      }
+    } on Exception catch (e) {
+      globals.logger.printTrace('Failed to get provisioning profile name ${profileFile.path}: $e');
+      return null;
+    }
   }
 
   // As of Xcode 15.4, the old export methods 'app-store', 'ad-hoc', and 'development'
