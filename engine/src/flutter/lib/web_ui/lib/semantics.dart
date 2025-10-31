@@ -611,7 +611,7 @@ class SemanticsFlags {
         (isLink && other.isLink) ||
         (isSlider && other.isSlider) ||
         (isKeyboardKey && other.isKeyboardKey) ||
-        (isAccessibilityFocusBlocked != other.isAccessibilityFocusBlocked,);
+        (isAccessibilityFocusBlocked != other.isAccessibilityFocusBlocked);
   }
 }
 
