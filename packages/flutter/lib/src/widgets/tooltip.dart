@@ -241,9 +241,7 @@ class RawTooltip extends StatefulWidget {
     this.ignorePointer = false,
     this.waitDuration = Duration.zero,
     this.showDuration = const Duration(milliseconds: 1500),
-    this.fadeInDuration,
-    this.fadeOutDuration,
-    this.hoverExitDuration = const Duration(milliseconds: 100),
+    this.exitDuration = const Duration(milliseconds: 100),
     this.positionDelegate,
     this.child,
   });
@@ -270,6 +268,9 @@ class RawTooltip extends StatefulWidget {
   final Duration showDuration;
 
   ///
+  final Duration exitDuration;
+
+  ///
   final bool enableTapToDismiss;
 
   ///
@@ -293,15 +294,6 @@ class RawTooltip extends StatefulWidget {
   final Widget? child;
 
   static final List<RawTooltipState> _openedTooltips = <RawTooltipState>[];
-
-  ///
-  final Duration? fadeInDuration;
-
-  ///
-  final Duration? fadeOutDuration;
-
-  ///
-  final Duration hoverExitDuration;
 
   ///
   final TooltipPositionDelegate? positionDelegate;
@@ -339,8 +331,8 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
   AnimationController? _backingController;
   AnimationController get _controller {
     return _backingController ??= AnimationController(
-      duration: widget.fadeInDuration,
-      reverseDuration: widget.fadeOutDuration,
+      duration: const Duration(milliseconds: 150),
+      reverseDuration: const Duration(milliseconds: 75),
       vsync: this,
     )..addStatusListener(_handleStatusChanged);
   }
@@ -569,7 +561,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     }
     _activeHoveringPointerDevices.remove(event.device);
     if (_activeHoveringPointerDevices.isEmpty) {
-      _scheduleDismissTooltip(withDelay: widget.hoverExitDuration);
+      _scheduleDismissTooltip(withDelay: widget.exitDuration);
     }
   }
 

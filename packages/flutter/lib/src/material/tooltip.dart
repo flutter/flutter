@@ -444,10 +444,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const double _defaultVerticalOffset = 24.0;
   static const bool _defaultPreferBelow = true;
   static const EdgeInsetsGeometry _defaultMargin = EdgeInsets.zero;
-  static const Duration _fadeInDuration = Duration(milliseconds: 150);
-  static const Duration _fadeOutDuration = Duration(milliseconds: 75);
   static const Duration _defaultShowDuration = Duration(milliseconds: 1500);
-  static const Duration _defaultHoverExitDuration = Duration(milliseconds: 100);
+  static const Duration _defaultExitDuration = Duration(milliseconds: 100);
   static const Duration _defaultWaitDuration = Duration.zero;
   static const bool _defaultExcludeFromSemantics = false;
   static const TooltipTriggerMode _defaultTriggerMode = TooltipTriggerMode.longPress;
@@ -574,10 +572,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       onTriggered: widget.onTriggered,
       mouseCursor: widget.mouseCursor,
       ignorePointer: widget.ignorePointer ?? widget.message != null,
-      fadeInDuration: _fadeInDuration,
-      fadeOutDuration: _fadeOutDuration,
-      hoverExitDuration:
-          widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultHoverExitDuration,
+      exitDuration: widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultExitDuration,
       positionDelegate: widget.positionDelegate,
       child: widget.child,
     );
