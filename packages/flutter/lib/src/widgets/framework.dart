@@ -1872,6 +1872,33 @@ abstract class InheritedWidget extends ProxyWidget {
   /// object.
   @protected
   bool updateShouldNotify(covariant InheritedWidget oldWidget);
+
+  /// Whether dependencies on this widget should be automatically cleaned up
+  /// when they are not re-established during a build.
+  ///
+  /// When true, if a widget stops calling [BuildContext.dependOnInheritedWidgetOfExactType]
+  /// for this widget during a build, the dependency will be removed and future
+  /// changes to this widget will no longer trigger rebuilds of that dependent, else
+  /// dependencies persist even if not re-established during a build.
+  ///
+  /// This is useful for widgets where dependencies might be established outside
+  /// of the build method (e.g., in event handlers) and should not persist across
+  /// rebuilds.
+  ///
+  /// For example:
+  ///
+  /// ```dart
+  /// class MyTheme extends InheritedWidget {
+  ///   const MyTheme({required super.child});
+  ///
+  ///   @override
+  ///   bool get cleanupUnusedDependents => true;
+  ///
+  ///   @override
+  ///   bool updateShouldNotify(MyTheme oldWidget) => true;
+  /// }
+  /// ```
+  bool get cleanupUnusedDependents => false;
 }
 
 /// [RenderObjectWidget]s provide the configuration for [RenderObjectElement]s,
@@ -2443,16 +2470,8 @@ abstract class BuildContext {
   /// [InheritedWidget] subclasses that supports partial updates, like
   /// [InheritedModel]. It specifies what "aspect" of the inherited
   /// widget this context depends on.
-  ///
-  /// If [trackForCleanup] is true, this dependency will be tracked and
-  /// automatically removed when the widget rebuilds and no longer depends on it.
-  /// This helps prevent unnecessary rebuilds but requires careful consideration
-  /// as it changes the default behavior. Defaults to false for backward compatibility.
   /// {@endtemplate}
-  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({
-    Object? aspect,
-    bool trackForCleanup = false,
-  });
+  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect});
 
   /// Returns the nearest widget of the given [InheritedWidget] subclass `T` or
   /// null if an appropriate ancestor is not found.
@@ -5082,30 +5101,20 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  InheritedWidget dependOnInheritedElement(
-    InheritedElement ancestor, {
-    Object? aspect,
-    bool trackForCleanup = false,
-  }) {
+  InheritedWidget dependOnInheritedElement(InheritedElement ancestor, {Object? aspect}) {
     (_dependencies ??= HashSet<InheritedElement>()).add(ancestor);
-    if (trackForCleanup) {
-      (_currentBuildDependencies ??= HashSet<InheritedElement>()).add(ancestor);
-    }
+    (_currentBuildDependencies ??= HashSet<InheritedElement>()).add(ancestor);
 
     ancestor.updateDependencies(this, aspect);
     return ancestor.widget as InheritedWidget;
   }
 
   @override
-  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({
-    Object? aspect,
-    bool trackForCleanup = false,
-  }) {
+  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect}) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     final InheritedElement? ancestor = _inheritedElements?[T];
     if (ancestor != null) {
-      return dependOnInheritedElement(ancestor, aspect: aspect, trackForCleanup: trackForCleanup)
-          as T;
+      return dependOnInheritedElement(ancestor, aspect: aspect) as T;
     }
     _hadUnsatisfiedDependencies = true;
     return null;
@@ -5123,12 +5132,31 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   /// Called after every build to remove dependencies that are no longer used.
+  ///
+  /// This method only removes dependencies for InheritedWidgets that have
+  /// [InheritedWidget.cleanupUnusedDependents] set to true and were not
+  /// re-established in the current build. Dependencies on widgets with
+  /// [InheritedWidget.cleanupUnusedDependents] set to false persist across
+  /// rebuilds even if not re-established.
   void cleanupRemovedDependencies() {
     if (_dependencies != null && _currentBuildDependencies != null) {
-      final Set<InheritedElement> removedDependencies = _dependencies!.difference(
-        _currentBuildDependencies!,
-      );
-      for (final InheritedElement dependency in removedDependencies) {
+      final Set<InheritedElement> toRemove = HashSet<InheritedElement>();
+
+      for (final InheritedElement dependency in _dependencies!) {
+        // Check if this dependency was re-established in the current build
+        final bool inCurrentBuild = _currentBuildDependencies!.contains(dependency);
+
+        if (!inCurrentBuild) {
+          // Dependency was NOT re-established in this build
+          final InheritedWidget widget = dependency.widget as InheritedWidget;
+          if (widget.cleanupUnusedDependents) {
+            // The widget wants cleanup and the dependency wasn't re-established, so remove it
+            toRemove.add(dependency);
+          }
+        }
+      }
+
+      for (final InheritedElement dependency in toRemove) {
         dependency.removeDependent(this);
         _dependencies!.remove(dependency);
       }
@@ -6086,11 +6114,7 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  InheritedWidget dependOnInheritedElement(
-    InheritedElement ancestor, {
-    Object? aspect,
-    bool trackForCleanup = false,
-  }) {
+  InheritedWidget dependOnInheritedElement(Element ancestor, {Object? aspect}) {
     assert(() {
       final Type targetType = ancestor.widget.runtimeType;
       if (state._debugLifecycleState == _StateLifecycle.created) {
@@ -6142,11 +6166,7 @@ class StatefulElement extends ComponentElement {
       }
       return true;
     }());
-    return super.dependOnInheritedElement(
-      ancestor,
-      aspect: aspect,
-      trackForCleanup: trackForCleanup,
-    );
+    return super.dependOnInheritedElement(ancestor as InheritedElement, aspect: aspect);
   }
 
   /// This controls whether we should call [State.didChangeDependencies] from
