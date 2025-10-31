@@ -506,6 +506,7 @@ static BOOL _preparedOnce = NO;
 
 @interface FlutterTouchInterceptingView ()
 @property(nonatomic, weak, readonly) UIView* embeddedView;
+@property(nonatomic, weak, readonly) UIViewController<FlutterViewResponder>* flutterViewController;
 @property(nonatomic, readonly) FlutterDelayingGestureRecognizer* delayingRecognizer;
 @property(nonatomic, readonly) FlutterPlatformViewGestureRecognizersBlockingPolicy blockingPolicy;
 @end
@@ -519,6 +520,7 @@ static BOOL _preparedOnce = NO;
   if (self) {
     self.multipleTouchEnabled = YES;
     _embeddedView = embeddedView;
+    _flutterViewController = platformViewsController.flutterViewController;
     embeddedView.autoresizingMask =
         (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
 
@@ -534,7 +536,12 @@ static BOOL _preparedOnce = NO;
                                             forwardingRecognizer:forwardingRecognizer];
     _blockingPolicy = blockingPolicy;
 
-    [self addGestureRecognizer:_delayingRecognizer];
+    // For hit test, don't block gestures using delaying recognizer. However, we still
+    // forward touches so Flutter can process it in its gesture arena (e.g. dismiss a
+    // drop-down menu when tapping outside of the menu but inside the platform view).
+    if (blockingPolicy != FlutterPlatformViewGestureRecognizersBlockingPolicyHitTest) {
+      [self addGestureRecognizer:_delayingRecognizer];
+    }
     [self addGestureRecognizer:forwardingRecognizer];
   }
   return self;
@@ -573,8 +580,26 @@ static BOOL _preparedOnce = NO;
   return NO;
 }
 
+- (UIView*)hitTest:(CGPoint)point withEvent:(UIEvent*)event {
+  if (_blockingPolicy == FlutterPlatformViewGestureRecognizersBlockingPolicyHitTest &&
+      event.type == UIEventTypeTouches) {
+    CGPoint pointInFlutterView = [self convertPoint:point toView:self.flutterViewController.view];
+    // Block gesture if the framework instructed so (after performing its own hitTest).
+    if (![self.flutterViewController
+            platformViewShouldAcceptGestureAtTouchBeganLocation:pointInFlutterView]) {
+      return self;
+    }
+  }
+
+  return [super hitTest:point withEvent:event];
+}
+
 - (void)blockGesture {
   switch (_blockingPolicy) {
+    case FlutterPlatformViewGestureRecognizersBlockingPolicyHitTest:
+      // No-op. Handled by hit test.
+      break;
+
     case FlutterPlatformViewGestureRecognizersBlockingPolicyEager:
       // We block all other gesture recognizers immediately in this policy.
       self.delayingRecognizer.state = UIGestureRecognizerStateEnded;

@@ -830,6 +830,22 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
                                  uint64_t trace_flow_id);
 
   //----------------------------------------------------------------------------
+  /// @brief      Requests the engine if an embedded view should accept
+  ///             gesture at a given touch location.
+  ///
+  ///
+  /// @param[in]  view_id               The identifier of the flutter view that
+  ///                                   hosts the embedded view.
+  /// @param[in]  touch_began_location  The touch began location of a gesture.
+  ///
+  /// @return     true if the embedded view should accept gesture; false
+  /// otherwise.
+  ///
+  bool EmbeddedViewShouldAcceptGesture(
+      int64_t view_id,
+      const flutter::PointData& touch_began_location);
+
+  //----------------------------------------------------------------------------
   /// @brief      Notifies the engine that the embedder encountered an
   ///             accessibility related action on the specified node. This call
   ///             originates on the platform view and has been forwarded to the

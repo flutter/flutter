@@ -476,6 +476,16 @@ void Engine::DispatchPointerDataPacket(
   pointer_data_dispatcher_->DispatchPacket(std::move(packet), trace_flow_id);
 }
 
+bool Engine::EmbeddedViewShouldAcceptGesture(
+    int64_t view_id,
+    const flutter::PointData& touch_began_location) {
+  if (runtime_controller_) {
+    return runtime_controller_->EmbeddedViewShouldAcceptGesture(
+        view_id, touch_began_location);
+  }
+  return false;
+}
+
 void Engine::DispatchSemanticsAction(int64_t view_id,
                                      int node_id,
                                      SemanticsAction action,

@@ -279,7 +279,9 @@ class AssembleCommand extends FlutterCommand {
       }
       final int indexEquals = chunk.indexOf('=');
       if (indexEquals == -1) {
-        throwToolExit('Improperly formatted define flag: $chunk');
+        // TODO: revert this change. seems like a tools bug.
+        // throwToolExit('Improperly formatted define flag: $chunk');
+        continue;
       }
       final String key = chunk.substring(0, indexEquals);
       final String value = chunk.substring(indexEquals + 1);

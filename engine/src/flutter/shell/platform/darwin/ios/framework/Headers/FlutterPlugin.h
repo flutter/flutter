@@ -268,6 +268,17 @@ typedef enum {
    * but never recognizing the gesture (and never invoking actions).
    */
   FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded,
+
+  /**
+   * Flutter blocks all the UIGestureRecognizers on the platform view as soon as it
+   * decides they should be blocked.
+   *
+   * This is similar to FlutterPlatformViewGestureRecognizersBlockingPolicyEager. However,
+   * internally it performs hit test rather than a blocking gesture recognizer. This addresses
+   * a few bugs related to WKWebView being untappable. See
+   * https://github.com/flutter/flutter/issues/175099.
+   */
+  FlutterPlatformViewGestureRecognizersBlockingPolicyHitTest,
   // NOLINTEND(readability-identifier-naming)
 } FlutterPlatformViewGestureRecognizersBlockingPolicy;
 
