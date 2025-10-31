@@ -5615,8 +5615,8 @@ void main() {
         ),
       );
 
-      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-      final TextStyle? resultTextStyle = state.buildTextSpan().style;
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final TextStyle? resultTextStyle = renderEditable.text?.style;
       expect(resultTextStyle?.height, 2.0);
       expect(resultTextStyle?.letterSpacing, 2.0);
       expect(resultTextStyle?.wordSpacing, 2.0);
