@@ -317,6 +317,7 @@ class UiKitView extends _DarwinView {
   const UiKitView({
     super.key,
     required super.viewType,
+    this.gestureBlockingPolicy = UiKitViewGestureBlockingPolicy.fallbackToPluginDefault,
     super.onPlatformViewCreated,
     super.hitTestBehavior = PlatformViewHitTestBehavior.opaque,
     super.layoutDirection,
@@ -324,6 +325,9 @@ class UiKitView extends _DarwinView {
     super.creationParamsCodec,
     super.gestureRecognizers,
   }) : assert(creationParams == null || creationParamsCodec != null);
+
+  /// The gesture blocking policy that controls touch and gesture blocking behaviors.
+  final UiKitViewGestureBlockingPolicy gestureBlockingPolicy;
 
   @override
   State<UiKitView> createState() => _UiKitViewState();
@@ -965,6 +969,7 @@ class _UiKitViewState
     return PlatformViewsService.initUiKitView(
       id: id,
       viewType: widget.viewType,
+      gestureBlockingPolicy: widget.gestureBlockingPolicy,
       layoutDirection: _layoutDirection!,
       creationParams: widget.creationParams,
       creationParamsCodec: widget.creationParamsCodec,
