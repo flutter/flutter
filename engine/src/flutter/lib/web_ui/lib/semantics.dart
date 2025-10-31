@@ -669,6 +669,8 @@ class LocaleStringAttribute extends StringAttribute {
 
 enum SemanticsValidationResult { none, valid, invalid }
 
+enum SemanticsHitTestBehavior { defer, opaque, transparent }
+
 class SemanticsUpdateBuilder {
   SemanticsUpdateBuilder();
 
@@ -684,6 +686,7 @@ class SemanticsUpdateBuilder {
     required int platformViewId,
     required int scrollChildren,
     required int scrollIndex,
+    required int? traversalParent,
     required double scrollPosition,
     required double scrollExtentMax,
     required double scrollExtentMin,
@@ -702,6 +705,7 @@ class SemanticsUpdateBuilder {
     String? tooltip,
     TextDirection? textDirection,
     required Float64List transform,
+    required Float64List hitTestTransform,
     required Int32List childrenInTraversalOrder,
     required Int32List childrenInHitTestOrder,
     required Int32List additionalActions,
@@ -710,6 +714,7 @@ class SemanticsUpdateBuilder {
     SemanticsRole role = SemanticsRole.none,
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+    SemanticsHitTestBehavior hitTestBehavior = SemanticsHitTestBehavior.defer,
     required SemanticsInputType inputType,
     required Locale? locale,
   }) {
@@ -727,6 +732,7 @@ class SemanticsUpdateBuilder {
         textSelectionExtent: textSelectionExtent,
         scrollChildren: scrollChildren,
         scrollIndex: scrollIndex,
+        traversalParent: traversalParent,
         scrollPosition: scrollPosition,
         scrollExtentMax: scrollExtentMax,
         scrollExtentMin: scrollExtentMin,
@@ -745,6 +751,7 @@ class SemanticsUpdateBuilder {
         tooltip: tooltip,
         textDirection: textDirection,
         transform: engine.toMatrix32(transform),
+        hitTestTransform: engine.toMatrix32(hitTestTransform),
         childrenInTraversalOrder: childrenInTraversalOrder,
         childrenInHitTestOrder: childrenInHitTestOrder,
         additionalActions: additionalActions,
@@ -754,6 +761,7 @@ class SemanticsUpdateBuilder {
         role: role,
         controlsNodes: controlsNodes,
         validationResult: validationResult,
+        hitTestBehavior: hitTestBehavior,
         inputType: inputType,
         locale: locale,
       ),

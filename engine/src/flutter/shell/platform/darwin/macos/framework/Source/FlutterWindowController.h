@@ -24,11 +24,12 @@
 
 @end
 
-struct FlutterWindowSizing {
-  bool has_size;
+struct FlutterWindowSize {
   double width;
   double height;
-  bool has_constraints;
+};
+
+struct FlutterWindowConstraints {
   double min_width;
   double min_height;
   double max_width;
@@ -36,14 +37,12 @@ struct FlutterWindowSizing {
 };
 
 struct FlutterWindowCreationRequest {
-  FlutterWindowSizing contentSize;
+  bool has_size;
+  struct FlutterWindowSize size;
+  bool has_constraints;
+  struct FlutterWindowConstraints constraints;
   void (*on_close)();
-  void (*on_size_change)();
-};
-
-struct FlutterWindowSize {
-  double width;
-  double height;
+  void (*notify_listeners)();
 };
 
 extern "C" {
@@ -65,7 +64,11 @@ FLUTTER_DARWIN_EXPORT
 FlutterWindowSize InternalFlutter_Window_GetContentSize(void* window);
 
 FLUTTER_DARWIN_EXPORT
-void InternalFlutter_Window_SetContentSize(void* window, const FlutterWindowSizing* size);
+void InternalFlutter_Window_SetContentSize(void* window, const FlutterWindowSize* size);
+
+FLUTTER_DARWIN_EXPORT
+void InternalFlutter_Window_SetConstraints(void* window,
+                                           const FlutterWindowConstraints* constraints);
 
 FLUTTER_DARWIN_EXPORT
 void InternalFlutter_Window_SetTitle(void* window, const char* title);
@@ -93,6 +96,12 @@ bool InternalFlutter_Window_IsFullScreen(void* window);
 
 FLUTTER_DARWIN_EXPORT
 void InternalFlutter_Window_Activate(void* window);
+
+FLUTTER_DARWIN_EXPORT
+char* InternalFlutter_Window_GetTitle(void* window);
+
+FLUTTER_DARWIN_EXPORT
+bool InternalFlutter_Window_IsActivated(void* window);
 
 // NOLINTEND(google-objc-function-naming)
 }

@@ -3934,7 +3934,58 @@ void main() {
     });
   });
 
-  testWidgets('DropdownButton changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('DropdownMenuItem has expected default mouse cursor on hover', (
+    WidgetTester tester,
+  ) async {
+    const Key menuKey = Key('testDropdownMenuButton');
+    const Key itemKey = Key('testDropdownMenuItem');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DropdownButton<String>(
+            key: menuKey,
+            onChanged: (String? value) {},
+            items: const <DropdownMenuItem<String>>[
+              DropdownMenuItem<String>(
+                key: itemKey,
+                value: 'testDropdownMenuItem',
+                child: Text('TestDropdownMenuItem'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Open DropdownButton.
+    await tester.tap(find.byKey(menuKey));
+    await tester.pump();
+
+    // Find DropdownMenuItem.
+    final Finder menuItemFinder = find.byKey(itemKey);
+    final Offset onMenuItem = tester.getCenter(menuItemFinder);
+    final Offset offMenuItem = tester.getBottomRight(menuItemFinder) + const Offset(1, 1);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+
+    await gesture.addPointer(location: onMenuItem);
+    await tester.pump();
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+
+    await gesture.moveTo(offMenuItem);
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+  });
+
+  testWidgets('DropdownButton changes mouse cursor when hovered as expected', (
+    WidgetTester tester,
+  ) async {
     const Key key = Key('testDropdownButton');
     await tester.pumpWidget(
       MaterialApp(
@@ -3967,8 +4018,9 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
+
     await gesture.moveTo(offDropdownButton);
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
@@ -4001,6 +4053,85 @@ void main() {
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.basic,
+    );
+  });
+
+  testWidgets('DropdownButton has expected mouse cursor when explicitly configured', (
+    WidgetTester tester,
+  ) async {
+    const Key menuKey = Key('testDropdownButton');
+    const Key itemKey = Key('testDropdownMenuItem');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DropdownButton<String>(
+            key: menuKey,
+            mouseCursor: SystemMouseCursors.cell,
+            dropdownMenuItemMouseCursor: SystemMouseCursors.grab,
+            onChanged: (String? newValue) {},
+            items: const <DropdownMenuItem<String>>[
+              DropdownMenuItem<String>(key: itemKey, value: 'One', child: Text('One')),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder dropdownButtonFinder = find.byKey(menuKey);
+    final Offset onDropdownButton = tester.getCenter(dropdownButtonFinder);
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+
+    await gesture.addPointer(location: onDropdownButton);
+    await tester.pump();
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.cell,
+    );
+  });
+
+  testWidgets('DropdownMenuItem has expected mouse cursor when explicitly configured', (
+    WidgetTester tester,
+  ) async {
+    const Key menuKey = Key('testDropdownButton');
+    const Key itemKey = Key('testDropdownMenuItem');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DropdownButton<String>(
+            key: menuKey,
+            dropdownMenuItemMouseCursor: SystemMouseCursors.grab,
+            onChanged: (String? newValue) {},
+            items: const <DropdownMenuItem<String>>[
+              DropdownMenuItem<String>(key: itemKey, value: 'One', child: Text('One')),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+
+    // Open DropdownButton.
+    await tester.tap(find.byKey(menuKey));
+    await tester.pumpAndSettle();
+
+    // Find DropdownMenuItem.
+    final Finder menuItemFinder = find.byKey(itemKey);
+    final Offset onMenuItem = tester.getCenter(menuItemFinder);
+
+    await gesture.addPointer(location: onMenuItem);
+    await tester.pump();
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
     );
   });
 
@@ -4699,6 +4830,27 @@ void main() {
     },
   );
 
+  testWidgets('DropdownButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: DropdownButton<String>(
+                value: 'a',
+                onChanged: (_) {},
+                items: const <DropdownMenuItem<String>>[
+                  DropdownMenuItem<String>(value: 'a', child: Text('a')),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DropdownButton<String>)), Size.zero);
+  });
+
   testWidgets('DropdownButtonFormField does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -4717,6 +4869,21 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(DropdownButtonFormField<String>)), Size.zero);
+  });
+
+  testWidgets('DropdownMenuItem does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: DropdownMenuItem<String>(value: 'a', child: Text('a')),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DropdownMenuItem<String>)), Size.zero);
   });
 
   testWidgets('DropdownButtonFormField can inherit from local InputDecorationThemeData', (

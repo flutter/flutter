@@ -17,7 +17,7 @@ declare_args() {
   using_fuchsia_gn_sdk = false
 
   # The following variables are Flutter buildroot specific.
-  fuchsia_sdk_path = "//fuchsia/sdk/$host_os"
+  fuchsia_sdk_path = "//third_party/fuchsia-sdk/sdk"
   fuchsia_toolchain_path = "$buildtools_path/${host_os}-${host_cpu}/clang"
 }
 
@@ -27,7 +27,7 @@ declare_args() {
   skia_using_fuchsia_sdk = using_fuchsia_sdk
 }
 
-_fuchsia_sdk_path = "//fuchsia/sdk/$host_os"
+_fuchsia_sdk_path = fuchsia_sdk_path
 _fuchsia_tools_path = "${_fuchsia_sdk_path}/tools/${host_cpu}"
 
 template("_fuchsia_sysroot") {

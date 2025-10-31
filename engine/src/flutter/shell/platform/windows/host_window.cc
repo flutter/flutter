@@ -382,6 +382,24 @@ LRESULT HostWindow::HandleMessage(HWND hwnd,
       is_being_destroyed_ = true;
       break;
 
+    case WM_NCLBUTTONDOWN: {
+      // Fix for 500ms hang after user clicks on the title bar, but before
+      // moving mouse. Reference:
+      // https://gamedev.net/forums/topic/672094-keeping-things-moving-during-win32-moveresize-events/5254386/
+      if (SendMessage(window_handle_, WM_NCHITTEST, wparam, lparam) ==
+          HTCAPTION) {
+        POINT cursorPos;
+        // Get the current cursor position and synthesize WM_MOUSEMOVE to
+        // unblock default window proc implementation for WM_NCLBUTTONDOWN at
+        // HTCAPTION.
+        GetCursorPos(&cursorPos);
+        ScreenToClient(window_handle_, &cursorPos);
+        PostMessage(window_handle_, WM_MOUSEMOVE, 0,
+                    MAKELPARAM(cursorPos.x, cursorPos.y));
+      }
+      break;
+    }
+
     case WM_DPICHANGED: {
       auto* const new_scaled_window_rect = reinterpret_cast<RECT*>(lparam);
       LONG const width =

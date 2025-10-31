@@ -4,6 +4,7 @@
 
 #include "flutter/tools/licenses_cpp/src/filter.h"
 #include <fstream>
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 absl::StatusOr<Filter> Filter::Open(std::string_view path) {
   std::ifstream input;

@@ -130,7 +130,7 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
 
   @override
   Widget build(BuildContext context) {
-    // This example is assumes the full screen is available.
+    // This example assumes the full screen is available.
     final double screenWidth = MediaQuery.widthOf(context);
     final List<Widget> selectedChildren = <Widget>[];
     if (_selectedNode != null) {

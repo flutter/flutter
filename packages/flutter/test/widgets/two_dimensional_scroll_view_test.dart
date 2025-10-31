@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/src/gestures/monodrag.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -989,6 +990,31 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.testTextInput.isVisible, isFalse);
+    });
+
+    testWidgets('cacheExtentStyle is passed to viewport', (WidgetTester tester) async {
+      late final TwoDimensionalChildBuilderDelegate delegate;
+      addTearDown(() => delegate.dispose());
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SimpleBuilderTableView(
+            cacheExtent: 1.0,
+            cacheExtentStyle: CacheExtentStyle.viewport,
+            delegate: delegate = TwoDimensionalChildBuilderDelegate(
+              builder: _testChildBuilder,
+              maxXIndex: 5,
+              maxYIndex: 5,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final SimpleBuilderTableViewport viewport = tester.widget(
+        find.byType(SimpleBuilderTableViewport),
+      );
+      expect(viewport.cacheExtent, 1.0);
+      expect(viewport.cacheExtentStyle, CacheExtentStyle.viewport);
     });
   });
 }

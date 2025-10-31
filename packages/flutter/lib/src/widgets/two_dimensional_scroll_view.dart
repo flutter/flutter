@@ -62,6 +62,7 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
     this.horizontalDetails = const ScrollableDetails.horizontal(),
     required this.delegate,
     this.cacheExtent,
+    this.cacheExtentStyle,
     this.diagonalDragBehavior = DiagonalDragBehavior.none,
     this.dragStartBehavior = DragStartBehavior.start,
     this.keyboardDismissBehavior,
@@ -74,6 +75,9 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
   final double? cacheExtent;
+
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
+  final CacheExtentStyle? cacheExtentStyle;
 
   /// Whether scrolling gestures should lock to one axes, allow free movement
   /// in both axes, or be evaluated on a weighted scale.

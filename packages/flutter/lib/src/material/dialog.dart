@@ -13,6 +13,7 @@ library;
 import 'dart:ui' show SemanticsRole, clampDouble, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
 import 'color_scheme.dart';
 import 'colors.dart';
@@ -771,7 +772,7 @@ class AlertDialog extends StatelessWidget {
         : _DialogDefaultsM2(context);
 
     String? label = semanticLabel;
-    switch (theme.platform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         break;
@@ -848,7 +849,7 @@ class AlertDialog extends StatelessWidget {
           child: Semantics(
             // For iOS platform, the focus always lands on the title.
             // Set nameRoute to false to avoid title being announce twice.
-            namesRoute: label == null && theme.platform != TargetPlatform.iOS,
+            namesRoute: label == null && defaultTargetPlatform != TargetPlatform.iOS,
             container: true,
             child: title,
           ),
@@ -1273,7 +1274,7 @@ class SimpleDialog extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     String? label = semanticLabel;
-    switch (theme.platform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.macOS:
       case TargetPlatform.iOS:
         break;
@@ -1312,7 +1313,7 @@ class SimpleDialog extends StatelessWidget {
           child: Semantics(
             // For iOS platform, the focus always lands on the title.
             // Set nameRoute to false to avoid title being announce twice.
-            namesRoute: label == null && theme.platform != TargetPlatform.iOS,
+            namesRoute: label == null && defaultTargetPlatform != TargetPlatform.iOS,
             container: true,
             child: title,
           ),

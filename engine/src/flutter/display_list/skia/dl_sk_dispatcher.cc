@@ -181,7 +181,7 @@ void DlSkCanvasDispatcher::drawDashedLine(const DlPoint& p0,
                                           DlScalar off_length) {
   SkPaint dash_paint = paint();
   SkScalar intervals[] = {on_length, off_length};
-  dash_paint.setPathEffect(SkDashPathEffect::Make(intervals, 2, 0.0f));
+  dash_paint.setPathEffect(SkDashPathEffect::Make({intervals, 2}, 0.0f));
   canvas_->drawLine(ToSkPoint(p0), ToSkPoint(p1), dash_paint);
 }
 void DlSkCanvasDispatcher::drawRect(const DlRect& rect) {
@@ -218,7 +218,7 @@ void DlSkCanvasDispatcher::drawArc(const DlRect& bounds,
 void DlSkCanvasDispatcher::drawPoints(DlPointMode mode,
                                       uint32_t count,
                                       const DlPoint pts[]) {
-  canvas_->drawPoints(ToSk(mode), count, ToSkPoints(pts), paint());
+  canvas_->drawPoints(ToSk(mode), {ToSkPoints(pts), count}, paint());
 }
 void DlSkCanvasDispatcher::drawVertices(
     const std::shared_ptr<DlVertices>& vertices,
@@ -280,9 +280,15 @@ void DlSkCanvasDispatcher::drawAtlas(const sk_sp<DlImage> atlas,
       sk_colors.push_back(colors[i].argb());
     }
   }
-  canvas_->drawAtlas(skia_atlas.get(), ToSk(xform), ToSkRects(tex),
-                     sk_colors.empty() ? nullptr : sk_colors.data(), count,
-                     ToSk(mode), ToSk(sampling), ToSkRect(cullRect),
+  SkSpan<const SkColor> colorSpan;
+  if (!colors) {
+    colorSpan = {nullptr, 0};
+  } else {
+    colorSpan = {sk_colors.data(), count};
+  }
+  canvas_->drawAtlas(skia_atlas.get(), {ToSk(xform), count},
+                     {ToSkRects(tex), count}, colorSpan, ToSk(mode),
+                     ToSk(sampling), ToSkRect(cullRect),
                      safe_paint(render_with_attributes));
 }
 void DlSkCanvasDispatcher::drawDisplayList(
