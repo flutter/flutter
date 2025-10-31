@@ -1920,7 +1920,7 @@ resolution: workspace
       },
     );
 
-    group('with bundle identifier', () {
+    group('with bundle identifier and multiple schemes', () {
       setUp(() {
         const buildContext = XcodeProjectBuildContext(scheme: 'Runner');
         mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
@@ -2096,7 +2096,6 @@ resolution: workspace
 
           const watchBuildContext = XcodeProjectBuildContext(
             scheme: 'WatchScheme',
-            deviceId: '123',
             sdk: XcodeSdk.WatchOS,
           );
           mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] =
@@ -2138,7 +2137,252 @@ resolution: workspace
 
           const watchBuildContext = XcodeProjectBuildContext(
             scheme: 'WatchScheme',
-            deviceId: '123',
+            sdk: XcodeSdk.WatchOS,
+          );
+          mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] =
+              <String, String>{
+                IosProject.kProductBundleIdKey: 'io.flutter.someProject',
+                'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': r'$(PRODUCT_BUNDLE_IDENTIFIER)',
+              };
+
+          expect(
+            await project.ios.containsWatchCompanion(
+              projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
+              buildInfo: BuildInfo.debug,
+              deviceId: '123',
+            ),
+            isTrue,
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          PlistParser: () => testPlistParser,
+          XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+    });
+
+    group('with bundle identifier and only default scheme', () {
+      setUp(() {
+        const buildContext = XcodeProjectBuildContext(scheme: 'Runner');
+        mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
+          IosProject.kProductBundleIdKey: 'io.flutter.someProject',
+        };
+        mockXcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(
+          <String>['Runner', 'WatchTarget'],
+          <String>[],
+          <String>['Runner'],
+          logger,
+        );
+      });
+
+      testUsingContext(
+        'no Info.plist in target',
+        () async {
+          final FlutterProject project = await someProject();
+          expect(
+            await project.ios.containsWatchCompanion(
+              projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
+              buildInfo: BuildInfo.debug,
+              deviceId: '123',
+            ),
+            isFalse,
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          PlistParser: () => testPlistParser,
+          XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      testUsingContext(
+        'Info.plist in target does not contain WKCompanionAppBundleIdentifier',
+        () async {
+          final FlutterProject project = await someProject();
+          project.ios.hostAppRoot
+              .childDirectory('WatchTarget')
+              .childFile('Info.plist')
+              .createSync(recursive: true);
+
+          expect(
+            await project.ios.containsWatchCompanion(
+              projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
+              buildInfo: BuildInfo.debug,
+              deviceId: '123',
+            ),
+            isFalse,
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          PlistParser: () => testPlistParser,
+          XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      testUsingContext(
+        'target WKCompanionAppBundleIdentifier is not project bundle identifier',
+        () async {
+          final FlutterProject project = await someProject();
+          project.ios.hostAppRoot
+              .childDirectory('WatchTarget')
+              .childFile('Info.plist')
+              .createSync(recursive: true);
+
+          testPlistParser.setProperty(
+            'WKCompanionAppBundleIdentifier',
+            'io.flutter.someOTHERproject',
+          );
+          expect(
+            await project.ios.containsWatchCompanion(
+              projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
+              buildInfo: BuildInfo.debug,
+              deviceId: '123',
+            ),
+            isFalse,
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          PlistParser: () => testPlistParser,
+          XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      testUsingContext(
+        'has watch companion in plist',
+        () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProject.createSync();
+          project.ios.hostAppRoot
+              .childDirectory('WatchTarget')
+              .childFile('Info.plist')
+              .createSync(recursive: true);
+          testPlistParser.setProperty('WKCompanionAppBundleIdentifier', 'io.flutter.someProject');
+
+          expect(
+            await project.ios.containsWatchCompanion(
+              projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
+              buildInfo: BuildInfo.debug,
+              deviceId: '123',
+            ),
+            isTrue,
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          PlistParser: () => testPlistParser,
+          XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      testUsingContext(
+        'has watch companion in plist with xcode variable',
+        () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProject.createSync();
+          const buildContext = XcodeProjectBuildContext(scheme: 'Runner', deviceId: '123');
+          mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
+            IosProject.kProductBundleIdKey: 'io.flutter.someProject',
+          };
+          project.ios.hostAppRoot
+              .childDirectory('WatchTarget')
+              .childFile('Info.plist')
+              .createSync(recursive: true);
+          testPlistParser.setProperty(
+            'WKCompanionAppBundleIdentifier',
+            r'$(PRODUCT_BUNDLE_IDENTIFIER)',
+          );
+
+          expect(
+            await project.ios.containsWatchCompanion(
+              projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
+              buildInfo: BuildInfo.debug,
+              deviceId: '123',
+            ),
+            isTrue,
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          PlistParser: () => testPlistParser,
+          XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      testUsingContext(
+        'has watch companion in the default scheme build settings',
+        () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProject.createSync();
+          project.ios.xcodeProjectInfoFile.writeAsStringSync('''
+        Build settings for action build and target "WatchTarget":
+            INFOPLIST_KEY_WKCompanionAppBundleIdentifier = io.flutter.someProject
+''');
+
+          const buildContext = XcodeProjectBuildContext(scheme: 'Runner', deviceId: '123');
+          mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
+            IosProject.kProductBundleIdKey: 'io.flutter.someProject',
+          };
+
+          // Use the same scheme but specify watchOS SDK.
+          const watchBuildContext = XcodeProjectBuildContext(
+            scheme: 'Runner',
+            sdk: XcodeSdk.WatchOS,
+          );
+          mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] =
+              <String, String>{
+                'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': 'io.flutter.someProject',
+              };
+
+          expect(
+            await project.ios.containsWatchCompanion(
+              projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
+              buildInfo: BuildInfo.debug,
+              deviceId: '123',
+            ),
+            isTrue,
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          PlistParser: () => testPlistParser,
+          XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      testUsingContext(
+        'has watch companion in the default scheme build settings with xcode variable',
+        () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProject.createSync();
+          project.ios.xcodeProjectInfoFile.writeAsStringSync(r'''
+        Build settings for action build and target "WatchTarget":
+            INFOPLIST_KEY_WKCompanionAppBundleIdentifier = $(PRODUCT_BUNDLE_IDENTIFIER)
+''');
+          const buildContext = XcodeProjectBuildContext(scheme: 'Runner', deviceId: '123');
+          mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
+            IosProject.kProductBundleIdKey: 'io.flutter.someProject',
+          };
+
+          // Use the same scheme but specify watchOS SDK.
+          const watchBuildContext = XcodeProjectBuildContext(
+            scheme: 'Runner',
             sdk: XcodeSdk.WatchOS,
           );
           mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] =
