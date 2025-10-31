@@ -89,7 +89,14 @@ void main() {
             );
         expect(signingConfigs, isNull);
         // Should not log "Automatically signing..." when CODE_SIGN_STYLE is Manual.
-        expect(logger.statusText, isNot(contains("Automatically signing iOS for device deployment using specified development team in Xcode project")));
+        expect(
+          logger.statusText,
+          isNot(
+            contains(
+              'Automatically signing iOS for device deployment using specified development team in Xcode project',
+            ),
+          ),
+        );
         expect(logger.errorText, isEmpty);
         expect(logger.traceText, isEmpty);
       });
