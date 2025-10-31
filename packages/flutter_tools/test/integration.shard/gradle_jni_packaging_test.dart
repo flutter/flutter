@@ -77,6 +77,47 @@ void main() {
     expect(_checkLibIsInApk(projectDir, 'lib/armeabi-v7a/libflutter.so'), false);
     expect(_checkLibIsInApk(projectDir, 'lib/x86/libflutter.so'), false);
   });
+
+  testWithoutContext('abiFilters in product flavors provided by the user take precedence over the default', () async {
+    final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
+    final String buildGradleContents = projectDir
+        .childFile('android/app/build.gradle.kts')
+        .readAsStringSync();
+
+    const productFlavorsBlock = '''
+    flavorDimensions += listOf("device")
+    productFlavors {
+        create("arm64") {
+            dimension = "device"
+            ndk {
+                abiFilters.clear()
+                abiFilters.addAll(listOf("arm64-v8a"))
+            }
+        }
+        create("armeabi") {
+            dimension = "device"
+            ndk {
+                abiFilters.clear()
+                abiFilters.addAll(listOf("armeabi-v7a"))
+            }
+        }
+    }''';
+    // Modify the project's build.gradle.kts file to include abiFilters for product flavors.
+    final String updatedBuildGradleContents = buildGradleContents.replaceFirstMapped(
+      RegExp(r'^(android\s*\{)', multiLine: true),
+      (Match match) => '${match.group(1)!}\n$productFlavorsBlock',
+    );
+    projectDir
+        .childFile('android/app/build.gradle.kts')
+        .writeAsStringSync(updatedBuildGradleContents);
+
+    processManager.runSync(<String>[flutterBin, 'build', 'apk', '--release', '--flavor', 'arm64'], workingDirectory: projectDir.path);
+
+    expect(_checkLibIsInApk(projectDir, 'lib/arm64-v8a/libflutter.so', productFlavor: 'arm64'), true);
+    expect(_checkLibIsInApk(projectDir, 'lib/x86_64/libflutter.so', productFlavor: 'arm64'), false);
+    expect(_checkLibIsInApk(projectDir, 'lib/armeabi-v7a/libflutter.so', productFlavor: 'arm64'), false);
+    expect(_checkLibIsInApk(projectDir, 'lib/x86/libflutter.so', productFlavor: 'arm64'), false);
+  });
 }
 
 Directory createProjectWithThirdpartyLib(Directory workingDir) {
@@ -118,6 +159,7 @@ bool _checkLibIsInApk(
   Directory appDir,
   String filename, {
   BuildMode buildMode = BuildMode.release,
+  String productFlavor = '',
 }) {
   final File localPropertiesFile = appDir.childDirectory('android').childFile('local.properties');
   if (!localPropertiesFile.existsSync()) {
@@ -139,9 +181,17 @@ bool _checkLibIsInApk(
       .childFile(Platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer')
       .path;
 
+  final String apkName = (productFlavor.isEmpty) ?
+    'app-${buildMode.cliName}.apk' :
+    'app-$productFlavor-${buildMode.cliName}.apk';
+
+  final String apkDir = (productFlavor.isEmpty) ?
+    buildMode.cliName :
+    '$productFlavor/${buildMode.cliName}';
+
   final File apkFile = appDir
-      .childDirectory('build/app/outputs/apk/${buildMode.cliName}')
-      .childFile('app-${buildMode.cliName}.apk');
+      .childDirectory('build/app/outputs/apk/$apkDir')
+      .childFile(apkName);
 
   if (!apkFile.existsSync()) {
     throw StateError('APK file not found at ${apkFile.path}');
