@@ -8,15 +8,11 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/commands/build_ios.dart';
 
 import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart';
 
 void main() {
   group('ExportOptions.plist generation for manual signing', () {
     test('generates simple plist for automatic signing', () async {
       final fileSystem = MemoryFileSystem.test();
-      final processManager = FakeProcessManager.empty();
-      final plistParser = FakePlistParser();
 
       final File plistFile = await BuildIOSArchiveCommand.createExportPlistForTesting(
         exportMethod: 'app-store',
@@ -24,8 +20,6 @@ void main() {
         bundleId: 'com.example.myapp',
         codeSignStyle: 'Automatic',
         fileSystem: fileSystem,
-        processManager: processManager,
-        plistParser: plistParser,
       );
 
       final String plistContent = plistFile.readAsStringSync();
@@ -39,8 +33,6 @@ void main() {
 
     test('generates enhanced plist for manual signing when profile found', () async {
       final fileSystem = MemoryFileSystem.test();
-      final processManager = FakeProcessManager.empty();
-      final plistParser = FakePlistParser();
 
       final File plistFile = await BuildIOSArchiveCommand.createExportPlistForTesting(
         exportMethod: 'app-store',
@@ -51,8 +43,6 @@ void main() {
         teamId: 'ABC123DEF4',
         profileUuid: '12345678-1234-1234-1234-123456789012',
         fileSystem: fileSystem,
-        processManager: processManager,
-        plistParser: plistParser,
       );
 
       final String plistContent = plistFile.readAsStringSync();
@@ -71,8 +61,6 @@ void main() {
 
     test('falls back to simple plist when profile UUID not provided for manual signing', () async {
       final fileSystem = MemoryFileSystem.test();
-      final processManager = FakeProcessManager.empty();
-      final plistParser = FakePlistParser();
 
       final File plistFile = await BuildIOSArchiveCommand.createExportPlistForTesting(
         exportMethod: 'app-store',
@@ -83,8 +71,6 @@ void main() {
         teamId: 'ABC123DEF4',
         // profileUuid is null - should fall back
         fileSystem: fileSystem,
-        processManager: processManager,
-        plistParser: plistParser,
       );
 
       final String plistContent = plistFile.readAsStringSync();
@@ -98,8 +84,6 @@ void main() {
 
     test('does not enhance plist for debug builds with manual signing', () async {
       final fileSystem = MemoryFileSystem.test();
-      final processManager = FakeProcessManager.empty();
-      final plistParser = FakePlistParser();
 
       final File plistFile = await BuildIOSArchiveCommand.createExportPlistForTesting(
         exportMethod: 'app-store',
@@ -110,8 +94,6 @@ void main() {
         teamId: 'ABC123DEF4',
         profileUuid: '12345678-1234-1234-1234-123456789012',
         fileSystem: fileSystem,
-        processManager: processManager,
-        plistParser: plistParser,
       );
 
       final String plistContent = plistFile.readAsStringSync();
@@ -125,8 +107,6 @@ void main() {
 
     test('generates enhanced plist for profile builds with manual signing', () async {
       final fileSystem = MemoryFileSystem.test();
-      final processManager = FakeProcessManager.empty();
-      final plistParser = FakePlistParser();
 
       final File plistFile = await BuildIOSArchiveCommand.createExportPlistForTesting(
         exportMethod: 'app-store',
@@ -137,8 +117,6 @@ void main() {
         teamId: 'ABC123DEF4',
         profileUuid: '12345678-1234-1234-1234-123456789012',
         fileSystem: fileSystem,
-        processManager: processManager,
-        plistParser: plistParser,
       );
 
       final String plistContent = plistFile.readAsStringSync();
@@ -146,6 +124,45 @@ void main() {
       expect(plistContent, contains('<key>signingStyle</key>'));
       expect(plistContent, contains('<string>manual</string>'));
       expect(plistContent, contains('<key>provisioningProfiles</key>'));
+    });
+
+    test('generates enhanced plist with different export methods', () async {
+      final fileSystem = MemoryFileSystem.test();
+
+      final File plistFile = await BuildIOSArchiveCommand.createExportPlistForTesting(
+        exportMethod: 'ad-hoc',
+        buildInfo: BuildInfo.release,
+        bundleId: 'com.example.myapp',
+        codeSignStyle: 'Manual',
+        profileSpecifier: 'MyApp Distribution',
+        teamId: 'ABC123DEF4',
+        profileUuid: '12345678-1234-1234-1234-123456789012',
+        fileSystem: fileSystem,
+      );
+
+      final String plistContent = plistFile.readAsStringSync();
+      expect(plistContent, contains('<string>ad-hoc</string>'));
+      expect(plistContent, contains('<key>teamID</key>'));
+      expect(plistContent, contains('<key>signingStyle</key>'));
+      expect(plistContent, contains('<string>manual</string>'));
+    });
+
+    test('handles null codeSignStyle gracefully', () async {
+      final fileSystem = MemoryFileSystem.test();
+
+      final File plistFile = await BuildIOSArchiveCommand.createExportPlistForTesting(
+        exportMethod: 'app-store',
+        buildInfo: BuildInfo.release,
+        bundleId: 'com.example.myapp',
+        fileSystem: fileSystem,
+      );
+
+      final String plistContent = plistFile.readAsStringSync();
+      // Should generate simple plist when codeSignStyle is null
+      expect(plistContent, contains('<key>method</key>'));
+      expect(plistContent, contains('<string>app-store</string>'));
+      expect(plistContent, isNot(contains('<key>teamID</key>')));
+      expect(plistContent, isNot(contains('<key>signingStyle</key>')));
     });
 
     // TODO(mohamed): Integration test for full `flutter build ipa` flow with manual signing.
