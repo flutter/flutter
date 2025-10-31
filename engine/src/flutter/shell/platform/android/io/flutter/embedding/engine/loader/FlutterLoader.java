@@ -311,7 +311,6 @@ public class FlutterLoader {
             .filter(metadataKey -> !metadataKey.equals(FLUTTER_EMBEDDING_KEY))
             .forEach(
                 metadataKey -> {
-                  // String metadataKey = entry.getKey();
                   FlutterShellArgs.Flag flag = FlutterShellArgs.getFlagByMetaDataKey(metadataKey);
                   if (flag != null) {
                     // Only add flags that are allowed in the current build mode.

@@ -86,7 +86,7 @@ public final class FlutterShellArgs {
       new Flag("--old-gen-heap-size=", "OldGenHeapSize", true);
 
   /** Enables or disables the Impeller renderer. */
-  public static final Flag ENABLE_IMPELLER = new Flag("--enable-impeller", "EnableImpeller", true);
+  public static final Flag ENABLE_IMPELLER = new Flag("--enable-impeller=", "EnableImpeller", true);
 
   /** Specifies the backend to use for Impeller rendering. */
   public static final Flag IMPELLER_BACKEND =
@@ -116,6 +116,7 @@ public final class FlutterShellArgs {
   /** Specifies the path to the VM snapshot data file. */
   public static final Flag VM_SNAPSHOT_DATA =
       new Flag("--vm-snapshot-data=", "VmSnapshotData", true);
+
   /** Specifies the path to the isolate snapshot data file. */
   public static final Flag ISOLATE_SNAPSHOT_DATA =
       new Flag("--isolate-snapshot-data=", "IsolateSnapshotData", true);
@@ -135,6 +136,7 @@ public final class FlutterShellArgs {
   /** Enables GPU tracing for OpenGL. */
   public static final Flag ENABLE_OPENGL_GPU_TRACING =
       new Flag("--enable-opengl-gpu-tracing", "EnableOpenGLGPUTracing", false);
+
   /** Enables GPU tracing for Vulkan. */
   public static final Flag ENABLE_VULKAN_GPU_TRACING =
       new Flag("--enable-vulkan-gpu-tracing", "EnableVulkanGPUTracing", false);
@@ -150,7 +152,7 @@ public final class FlutterShellArgs {
    * <p>TODO(eggfly): Should it be set to false by default?
    * https://github.com/flutter/flutter/issues/96843
    */
-  public static final Flag LEAK_VM = new Flag("--leak-vm", "LeakVM", false);
+  public static final Flag LEAK_VM = new Flag("--leak-vm=", "LeakVM", false);
 
   /** Measures startup time and switches to an endless trace buffer. */
   public static final Flag TRACE_STARTUP = new Flag("--trace-startup", "TraceStartup", false);
@@ -177,8 +179,8 @@ public final class FlutterShellArgs {
   public static final Flag TRACE_SKIA = new Flag("--trace-skia", "TraceSkia", false);
 
   /** Only traces specified Skia event categories. */
-  public static final Flag TRACE_ALLOWLIST_FILE =
-      new Flag("--trace-allowlist-file=", "TraceAllowlistFile", false);
+  public static final Flag TRACE_SKIA_ALLOWLIST =
+      new Flag("--trace-skia-allowlist=", "TraceSkiaAllowList", false);
 
   /** Traces to the system tracer on supported platforms. */
   public static final Flag TRACE_SYSTRACE = new Flag("--trace-systrace", "TraceSystrace", false);
@@ -240,7 +242,7 @@ public final class FlutterShellArgs {
               ENABLE_DART_PROFILING,
               PROFILE_STARTUP,
               TRACE_SKIA,
-              TRACE_ALLOWLIST_FILE,
+              TRACE_SKIA_ALLOWLIST,
               TRACE_SYSTRACE,
               TRACE_TO_FILE,
               PROFILE_MICROTASKS,
