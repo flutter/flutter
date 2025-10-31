@@ -6,7 +6,6 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/analyze_size.dart';
@@ -28,6 +27,15 @@ import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
+
+/// Container for provisioning profile information extracted from a decoded profile.
+@immutable
+class ProfileData {
+  const ProfileData({required this.uuid, required this.name});
+
+  final String uuid;
+  final String? name;
+}
 
 /// Builds an .app for an iOS app to be used for local testing on an iOS device
 /// or simulator. Can only be run on a macOS host.
@@ -631,9 +639,6 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     String? teamId,
     String? profileUuid,
     required FileSystem fileSystem,
-    required ProcessManager processManager,
-    required PlistParser plistParser,
-    String? homeDirPath,
   }) async {
     final isManualSigning = codeSignStyle == 'Manual';
 
@@ -689,6 +694,8 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
             profileUuid: profileUuid,
           );
         }
+        // Note: If profile lookup fails, we fall back to simple plist.
+        // Trace-level logging is already emitted by _findProvisioningProfileUuid.
       }
     }
 
@@ -751,6 +758,9 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     required String profileUuid,
     required FileSystem fileSystem,
   }) {
+    // Note: uploadBitcode=false and stripSwiftSymbols=true are conservative defaults
+    // that work for most App Store distribution scenarios. These values are not currently
+    // configurable, but could be made configurable in a future enhancement if needed.
     final plistContents = StringBuffer('''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -785,9 +795,15 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
   /// Finds a provisioning profile by name or UUID and returns its UUID.
   /// Returns null if profile cannot be found or parsed.
+  /// Logs trace messages when profile lookup fails to aid debugging.
   Future<String?> _findProvisioningProfileUuid(String profileSpecifier) async {
+    // Cannot locate provisioning profiles without home directory
     final String? homeDir = globals.fsUtils.homeDirPath;
     if (homeDir == null) {
+      globals.logger.printTrace(
+        'Cannot find provisioning profile "$profileSpecifier": home directory not available. '
+        'Using basic ExportOptions.plist. Manual signing may fail during export.',
+      );
       return null;
     }
 
@@ -803,6 +819,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     );
 
     if (!profileDirectory.existsSync()) {
+      globals.logger.printTrace(
+        'Cannot find provisioning profile "$profileSpecifier": provisioning profiles directory not found. '
+        'Using basic ExportOptions.plist. Manual signing may fail during export.',
+      );
       return null;
     }
 
@@ -812,22 +832,26 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         continue;
       }
 
-      // Try parsing the profile
-      final String? uuid = await _parseProvisioningProfileUuid(entity);
-      if (uuid != null) {
+      // Decode profile once and extract both UUID and name
+      final ProfileData? profileInfo = await _parseProvisioningProfileInfo(entity);
+      if (profileInfo != null) {
         // Check if this profile matches the specifier (by UUID or name)
-        final String? name = await _getProvisioningProfileName(entity);
-        if (uuid == profileSpecifier || name == profileSpecifier) {
-          return uuid;
+        if (profileInfo.uuid == profileSpecifier || profileInfo.name == profileSpecifier) {
+          return profileInfo.uuid;
         }
       }
     }
 
+    globals.logger.printTrace(
+      'Cannot find provisioning profile "$profileSpecifier" in installed profiles. '
+      'Using basic ExportOptions.plist. Manual signing may fail during export.',
+    );
     return null;
   }
 
-  /// Parses a provisioning profile file and extracts its UUID.
-  Future<String?> _parseProvisioningProfileUuid(File profileFile) async {
+  /// Parses a provisioning profile file and extracts both UUID and name in a single decode operation.
+  /// Returns null if profile cannot be decoded or parsed.
+  Future<ProfileData?> _parseProvisioningProfileInfo(File profileFile) async {
     try {
       // Decode the provisioning profile using security command
       final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
@@ -850,49 +874,21 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
           return null;
         }
 
-        // Parse the plist to get UUID
+        // Parse the plist to get both UUID and name in a single operation
         final Map<String, Object> plistData = globals.plistParser.parseFile(decodedPlist.path);
         final uuid = plistData['UUID']?.toString();
-        return uuid;
+        final name = plistData['Name']?.toString();
+
+        if (uuid == null) {
+          return null;
+        }
+
+        return ProfileData(uuid: uuid, name: name);
       } finally {
         ErrorHandlingFileSystem.deleteIfExists(tempDir);
       }
     } on Exception catch (e) {
       globals.logger.printTrace('Failed to parse provisioning profile ${profileFile.path}: $e');
-      return null;
-    }
-  }
-
-  /// Gets the name of a provisioning profile.
-  Future<String?> _getProvisioningProfileName(File profileFile) async {
-    try {
-      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
-        'flutter_provisioning_',
-      );
-      final File decodedPlist = tempDir.childFile('decoded.plist');
-
-      try {
-        final RunResult result = await globals.processUtils.run(<String>[
-          'security',
-          'cms',
-          '-D',
-          '-i',
-          profileFile.path,
-          '-o',
-          decodedPlist.path,
-        ]);
-
-        if (result.exitCode != 0 || !decodedPlist.existsSync()) {
-          return null;
-        }
-
-        final Map<String, Object> plistData = globals.plistParser.parseFile(decodedPlist.path);
-        return plistData['Name']?.toString();
-      } finally {
-        ErrorHandlingFileSystem.deleteIfExists(tempDir);
-      }
-    } on Exception catch (e) {
-      globals.logger.printTrace('Failed to get provisioning profile name ${profileFile.path}: $e');
       return null;
     }
   }
