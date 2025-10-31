@@ -47,6 +47,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)forceTouchesCancelled:(NSSet*)touches;
 
+/**
+ * Returns YES if a platform view should accept the gesture started at specified location.
+ * Returns NO otherwise. The touch location is with respect to flutter view's coordinate space.
+ */
+- (BOOL)platformViewShouldAcceptGestureAtTouchBeganLocation:(CGPoint)location;
+
 @end
 NS_ASSUME_NONNULL_END
 

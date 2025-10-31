@@ -15,6 +15,7 @@
 #include "flutter/fml/time/time_point.h"
 #include "flutter/lib/ui/semantics/semantics_update.h"
 #include "flutter/lib/ui/window/platform_message_response.h"
+#include "flutter/lib/ui/window/point_data.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/lib/ui/window/view_focus.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
@@ -461,6 +462,10 @@ class PlatformConfiguration final {
   ///
   void DispatchPointerDataPacket(const PointerDataPacket& packet);
 
+  bool EmbeddedViewShouldAcceptGesture(
+      int64_t view_id,
+      const flutter::PointData& touch_began_location);
+
   //----------------------------------------------------------------------------
   /// @brief      Notifies the framework that the embedder encountered an
   ///             accessibility related action on the specified node. This call
@@ -584,6 +589,7 @@ class PlatformConfiguration final {
   tonic::DartPersistentValue update_accessibility_features_;
   tonic::DartPersistentValue dispatch_platform_message_;
   tonic::DartPersistentValue dispatch_pointer_data_packet_;
+  tonic::DartPersistentValue embedded_view_should_accept_gesture_;
   tonic::DartPersistentValue dispatch_semantics_action_;
   tonic::DartPersistentValue begin_frame_;
   tonic::DartPersistentValue draw_frame_;

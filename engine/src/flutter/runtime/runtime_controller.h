@@ -18,6 +18,7 @@
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/platform_configuration.h"
+#include "flutter/lib/ui/window/point_data.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/lib/ui/window/pointer_data_packet_converter.h"
 #include "flutter/lib/ui/window/view_focus.h"
@@ -475,6 +476,10 @@ class RuntimeController : public PlatformConfigurationClient,
   ///             an isolate is not running.
   ///
   bool DispatchPointerDataPacket(const PointerDataPacket& packet);
+
+  bool EmbeddedViewShouldAcceptGesture(
+      int64_t view_id,
+      const flutter::PointData& touch_began_location);
 
   //----------------------------------------------------------------------------
   /// @brief      Dispatch the semantics action to the specified accessibility

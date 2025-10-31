@@ -37,6 +37,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics;
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet;
+- (BOOL)platformViewShouldAcceptGestureAtTouchBeganLocation:(flutter::PointData)location
+                                                     viewId:(uint64_t)viewId;
 
 - (fml::RefPtr<fml::TaskRunner>)platformTaskRunner;
 - (fml::RefPtr<fml::TaskRunner>)uiTaskRunner;

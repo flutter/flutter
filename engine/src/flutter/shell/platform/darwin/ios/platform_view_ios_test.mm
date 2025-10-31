@@ -30,6 +30,11 @@ class MockDelegate : public PlatformView::Delegate {
   void OnPlatformViewDispatchPlatformMessage(std::unique_ptr<PlatformMessage> message) override {}
   void OnPlatformViewDispatchPointerDataPacket(std::unique_ptr<PointerDataPacket> packet) override {
   }
+  bool OnPlatformViewEmbeddedViewShouldAcceptGesture(
+      int64_t view_id,
+      const flutter::PointData& touch_began_location) override {
+    return false;
+  }
   void OnPlatformViewSendViewFocusEvent(const ViewFocusEvent& event) override {}
   void OnPlatformViewDispatchSemanticsAction(int64_t view_id,
                                              int32_t node_id,
