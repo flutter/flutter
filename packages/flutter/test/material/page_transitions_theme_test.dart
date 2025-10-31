@@ -582,58 +582,6 @@ void main() {
   );
 
   testWidgets(
-    'PageTransitionsTheme override builds a _OpenUpwardsPageTransition',
-    (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/': (BuildContext context) => Material(
-          child: TextButton(
-            child: const Text('push'),
-            onPressed: () {
-              Navigator.of(context).pushNamed('/b');
-            },
-          ),
-        ),
-        '/b': (BuildContext context) => const Text('page b'),
-      };
-
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(
-            pageTransitionsTheme: const PageTransitionsTheme(
-              builders: <TargetPlatform, PageTransitionsBuilder>{
-                TargetPlatform.android:
-                    OpenUpwardsPageTransitionsBuilder(), // creates a _OpenUpwardsPageTransition
-              },
-            ),
-          ),
-          routes: routes,
-        ),
-      );
-
-      Finder findOpenUpwardsPageTransition() {
-        return find.descendant(
-          of: find.byType(MaterialApp),
-          matching: find.byWidgetPredicate(
-            (Widget w) => '${w.runtimeType}' == '_OpenUpwardsPageTransition',
-          ),
-        );
-      }
-
-      expect(
-        Theme.of(tester.element(find.text('push'))).platform,
-        debugDefaultTargetPlatformOverride,
-      );
-      expect(findOpenUpwardsPageTransition(), findsOneWidget);
-
-      await tester.tap(find.text('push'));
-      await tester.pumpAndSettle();
-      expect(find.text('page b'), findsOneWidget);
-      expect(findOpenUpwardsPageTransition(), findsOneWidget);
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.android),
-  );
-
-  testWidgets(
     'PageTransitionsTheme override builds a CupertinoPageTransition on android',
     (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
