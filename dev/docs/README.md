@@ -25,7 +25,8 @@ In addition to the online sites above, Flutter's documentation can be downloaded
 as an HTML documentation ZIP file for use when offline or when you have a poor
 internet connection.
 
-**Warning: the offline documentation files are quite large, approximately 300MB zipped, 1GB unzipped.**
+> [!NOTE]
+> The offline documentation files are quite large, approximately 300MB zipped, 1GB unzipped.
 
 Offline HTML documentation ZIP bundles:
 
