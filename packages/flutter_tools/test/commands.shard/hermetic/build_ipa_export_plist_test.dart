@@ -2,6 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Unit tests for ExportOptions.plist generation in manual signing scenarios.
+//
+// These tests verify the logic for generating export options without requiring
+// a full `flutter build ipa` integration, which would require a hermetic iOS project
+// fixture that's difficult to maintain.
+//
+// **Test strategy:**
+// - Use `createExportPlistForTesting` to directly test plist generation logic
+// - Mock dependencies (FileSystem) to avoid filesystem dependencies
+// - Verify plist XML content contains expected keys and values
+// - Cover both success and fallback scenarios
+//
+// **Test coverage:**
+// - Automatic signing: Generates simple plist (existing behavior preserved)
+// - Manual signing + profile found: Generates enhanced plist with signing config
+// - Manual signing + profile not found: Falls back to simple plist gracefully
+// - Debug builds: Skips enhancement (not App Store export, avoids overhead)
+// - Profile builds: Applies enhancement (same as Release)
+// - Different export methods: Respects ad-hoc, app-store, etc.
+// - Null codeSignStyle: Handles gracefully (defaults to simple plist)
+//
+// See https://github.com/flutter/flutter/issues/177853 for the feature issue.
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -166,11 +189,28 @@ void main() {
     });
 
     // TODO(mohamed): Integration test for full `flutter build ipa` flow with manual signing.
+    //
     // This is currently skipped because `IosProject.buildSettingsForBuildInfo` does not
     // return mocked settings in the test harness environment. The project discovery logic
     // requires a fully-formed iOS project structure that is difficult to replicate in the
-    // current hermetic test setup. See https://github.com/flutter/flutter/issues/177853
-    // for the feature issue.
+    // current hermetic test setup.
+    //
+    // **To implement this test, we would need:**
+    // 1. A fully-formed iOS project fixture in the test environment (with proper Xcode
+    //    project structure, pbxproj files, etc.)
+    // 2. Mocking of the `security cms` command for profile decoding
+    // 3. Proper `XcodeProjectInterpreter` mocking that returns build settings
+    // 4. Integration with the full `build ipa` command execution path
+    //
+    // **When implemented, this test should verify:**
+    // - Profile lookup integration with real provisioning profile files
+    // - Full `xcodebuild -exportArchive` flow with generated plist
+    // - Error handling when profile is missing or malformed
+    // - Trace logging output when profile lookup fails
+    // - Successful IPA generation end-to-end
+    //
+    // See https://github.com/flutter/flutter/issues/177853 for the feature issue.
+    // Unit tests above provide sufficient coverage for the plist generation logic itself.
     test(
       'full build ipa path generates plist for manual signing (integration)',
       () {
