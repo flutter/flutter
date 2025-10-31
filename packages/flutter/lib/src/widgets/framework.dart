@@ -1889,7 +1889,7 @@ abstract class InheritedWidget extends ProxyWidget {
   ///
   /// ```dart
   /// class MyTheme extends InheritedWidget {
-  ///   const MyTheme({required super.child});
+  ///   const MyTheme({required super.key, required super.child});
   ///
   ///   @override
   ///   bool get cleanupUnusedDependents => true;
