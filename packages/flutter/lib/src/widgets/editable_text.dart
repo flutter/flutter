@@ -4474,7 +4474,24 @@ class EditableTextState extends State<EditableText>
       }
 
       spellCheckResults = SpellCheckResults(text, suggestions);
-      renderEditable.text = buildTextSpan();
+      final double? lineHeightScaleFactor = mounted
+          ? MediaQuery.maybeLineHeightScaleFactorOverrideOf(context)
+          : null;
+      final double? letterSpacing = mounted
+          ? MediaQuery.maybeLetterSpacingOverrideOf(context)
+          : null;
+      final double? wordSpacing = mounted ? MediaQuery.maybeWordSpacingOverrideOf(context) : null;
+      renderEditable.text =
+          lineHeightScaleFactor != null || letterSpacing != null || wordSpacing != null
+          ? _OverridingTextStyleTextSpan(
+              overrideTextStyle: TextStyle(
+                height: lineHeightScaleFactor,
+                letterSpacing: letterSpacing,
+                wordSpacing: wordSpacing,
+              ),
+              textSpan: buildTextSpan(),
+            )
+          : buildTextSpan();
     } catch (exception, stack) {
       FlutterError.reportError(
         FlutterErrorDetails(
@@ -5794,7 +5811,6 @@ class EditableTextState extends State<EditableText>
                                     key: _editableKey,
                                     startHandleLayerLink: _startHandleLayerLink,
                                     endHandleLayerLink: _endHandleLayerLink,
-                                    // inlineSpan: buildTextSpan(),
                                     inlineSpan:
                                         lineHeightScaleFactor != null ||
                                             letterSpacing != null ||
