@@ -16757,6 +16757,37 @@ void main() {
   );
 
   testWidgets(
+    'EditableText respects MediaQueryData.lineHeightScaleFactorOverride even when strutStyle.forceStrutHeight is enabled',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(lineHeightScaleFactorOverride: 2.0),
+            child: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: const TextStyle(fontWeight: FontWeight.normal),
+              cursorColor: Colors.red,
+              backgroundCursorColor: Colors.green,
+            ),
+          ),
+        ),
+      );
+
+      controller.text = 'foo';
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final TextStyle? resultTextStyle = renderEditable.text?.style;
+      expect(resultTextStyle?.height, 2.0);
+      // EditableText creates a strut style from the provided
+      // text style sets strutStyle.forceStrutHeight to true when
+      // the strutStyle is not provided. This is overriden when
+      // a non-null line height scale factor override is provided.
+      expect(renderEditable.strutStyle?.forceStrutHeight, false);
+    },
+  );
+
+  testWidgets(
     'code points are treated as single characters in obscure mode',
     (WidgetTester tester) async {
       await tester.pumpWidget(
