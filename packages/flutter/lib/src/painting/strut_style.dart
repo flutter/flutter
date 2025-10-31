@@ -566,6 +566,34 @@ class StrutStyle with Diagnosticable {
     );
   }
 
+  /// Creates a copy of this strut style but with the given fields replaced with
+  /// the new values.
+  StrutStyle copyWith({
+    String? fontFamily,
+    List<String>? fontFamilyFallback,
+    double? fontSize,
+    double? height,
+    double? leading,
+    FontWeight? fontWeight,
+    FontStyle? fontStyle,
+    bool? forceStrutHeight,
+    String? debugLabel,
+    TextLeadingDistribution? leadingDistribution,
+  }) {
+    return StrutStyle(
+      fontFamily: fontFamily ?? this.fontFamily,
+      fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
+      fontSize: fontSize ?? this.fontSize,
+      height: height ?? this.height,
+      leading: leading ?? this.leading,
+      fontWeight: fontWeight ?? this.fontWeight,
+      fontStyle: fontStyle ?? this.fontStyle,
+      forceStrutHeight: forceStrutHeight ?? this.forceStrutHeight,
+      debugLabel: debugLabel ?? this.debugLabel,
+      leadingDistribution: leadingDistribution ?? this.leadingDistribution,
+    );
+  }
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
