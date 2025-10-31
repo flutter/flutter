@@ -5,4 +5,4 @@ Team-facing documentation specific to Impeller:
 - [Impeller's readme](/docs/engine/impeller/README.md)
 - [Setting up MoltenVK on macOS for Impeller](Setting-up-MoltenVK-on-macOS-for-Impeller.md)
 - [Flutter GPU](Flutter-GPU.md)
-- [Instructions for playing with the Impeller Scene demo|Impeller Scene](Impeller-Scene.md)
+- [Instructions for playing with the Impeller Scene demo](Impeller-Scene.md)
