@@ -32,7 +32,7 @@ Scalar ComputeQuadradicSubdivisions(Scalar scale_factor,
                                     Point p0,
                                     Point p1,
                                     Point p2) {
-  Scalar k = scale_factor * .25f * kPrecision;
+  const Scalar k = scale_factor * .25f * kPrecision;
   return std::sqrt(k * (p0 - p1 * 2 + p2).GetLength());
 }
 

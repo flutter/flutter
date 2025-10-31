@@ -18,5 +18,13 @@ TEST(WangsFormulaTest, Cubic) {
   EXPECT_FLOAT_EQ(result, 30.f);
 }
 
+TEST(WangsFormulaTest, Quadratic) {
+  Point p0{15, 0};
+  Point p1{0, 0};
+  Point p2{0, 20};
+  Scalar result = ComputeQuadradicSubdivisions(1.0, p0, p1, p2);
+  EXPECT_FLOAT_EQ(result, 5.f);
+}
+
 }  // namespace testing
 }  // namespace impeller
