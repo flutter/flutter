@@ -34,6 +34,6 @@ More resources:
 * `package:integration_test`: https://pub.dev/packages/integration_test
 
 [1]: https://chromedriver.chromium.org/downloads
-[2]: https://docs.flutter.dev/development/tools/web-renderers
+[2]: https://docs.flutter.dev/platform-integration/web/renderers
 [3]: https://github.com/flutter/flutter/blob/main/dev/bots/test.dart
 [4]: https://docs.flutter.dev/testing/build-modes
