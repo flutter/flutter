@@ -368,6 +368,7 @@
                 "debug",
                 "--no-prebuilt-dart-sdk",
                 "--build-embedder-examples",
+                "--no-lto",
                 "--rbe",
                 "--no-goma"
             ],
