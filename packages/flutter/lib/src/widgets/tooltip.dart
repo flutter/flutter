@@ -19,7 +19,6 @@ import 'media_query.dart';
 import 'overlay.dart';
 import 'selection_container.dart';
 import 'ticker_provider.dart';
-import 'transitions.dart';
 
 const AnimationStyle _kDefaultAnimationStyle = AnimationStyle(
   curve: Curves.fastOutSlowIn,
