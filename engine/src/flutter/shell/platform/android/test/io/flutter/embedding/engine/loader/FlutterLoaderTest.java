@@ -617,12 +617,25 @@ public class FlutterLoaderTest {
 
   @Test
   public void itSetsOldGenHeapSizeFromMetaData() {
+    // Test old gen heap size can be set from metadata.
     int expectedOldGenHeapSize = 256;
     testFlagFromMetaData(
         "io.flutter.embedding.android.OldGenHeapSize",
         expectedOldGenHeapSize,
-        FlutterShellArgs.OLD_GEN_HEAP_SIZE.commandLineArgument
-            + expectedOldGenHeapSize);
+        FlutterShellArgs.OLD_GEN_HEAP_SIZE.commandLineArgument + expectedOldGenHeapSize);
+
+    // Test that default old gen heap size will not be included if it
+    // is configured via the manifest.
+    ActivityManager activityManager =
+        (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
+    ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
+    activityManager.getMemoryInfo(memInfo);
+    int oldGenHeapSizeMegaBytes = (int) (memInfo.totalMem / 1e6 / 2);
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.OldGenHeapSize",
+        expectedOldGenHeapSize,
+        FlutterShellArgs.OLD_GEN_HEAP_SIZE.commandLineArgument + oldGenHeapSizeMegaBytes,
+        false);
   }
 
   @Test
@@ -735,10 +748,18 @@ public class FlutterLoaderTest {
 
   @Test
   public void itSetsLeakVMFromMetaData() {
+    // Test that LeakVM can be set via manifest.
     testFlagFromMetaData(
         "io.flutter.embedding.android.LeakVM",
-        true,
-        FlutterShellArgs.LEAK_VM.commandLineArgument + "true");
+        false,
+        FlutterShellArgs.LEAK_VM.commandLineArgument + "false");
+
+    // Test that default LeakVM will not be included if it is configured via the manifest.
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.LeakVM",
+        false,
+        FlutterShellArgs.LEAK_VM.commandLineArgument + "true",
+        false);
   }
 
   @Test
@@ -855,8 +876,6 @@ public class FlutterLoaderTest {
         FlutterShellArgs.VERBOSE_LOGGING.commandLineArgument);
   }
 
-  //TODO(camsim99): write tests for old gen heap size and is leak vm set bc overlap with defaults
-
   @Test
   public void itSetsDartFlagsFromMetaData() {
     String expectedDartFlags = "--enable-asserts --enable-vm-service";
@@ -866,8 +885,13 @@ public class FlutterLoaderTest {
         FlutterShellArgs.DART_FLAGS.commandLineArgument + expectedDartFlags);
   }
 
-  // Test that specified shell argument can be set via manifest metadata as expected.
   private void testFlagFromMetaData(String metadataKey, Object metadataValue, String expectedArg) {
+    testFlagFromMetaData(metadataKey, metadataValue, expectedArg, true);
+  }
+
+  // Test that specified shell argument can be set via manifest metadata as expected.
+  private void testFlagFromMetaData(
+      String metadataKey, Object metadataValue, String expectedArg, boolean shouldBeSet) {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
     Bundle metaData = new Bundle();
@@ -903,6 +927,19 @@ public class FlutterLoaderTest {
             anyLong(),
             anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
-    assertTrue(arguments.contains(expectedArg));
+
+    if (shouldBeSet) {
+      assertTrue(
+          "Expected argument '"
+              + expectedArg
+              + "' was not found in the arguments passed to FlutterJNI.init",
+          arguments.contains(expectedArg));
+    } else {
+      assertFalse(
+          "Unexpected argument '"
+              + expectedArg
+              + "' was found in the arguments passed to FlutterJNI.init",
+          arguments.contains(expectedArg));
+    }
   }
 }
