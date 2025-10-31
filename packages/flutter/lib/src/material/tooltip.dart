@@ -555,7 +555,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     return RawTooltip(
       key: _tooltipKey,
       message: widget.message ?? widget.richMessage?.toPlainText() ?? '',
-      tooltipBox: tooltipBox,
+      tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+          FadeTransition(opacity: animation, child: tooltipBox),
       verticalOffset:
           widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset,
       preferBelow: widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow,

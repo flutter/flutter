@@ -21,6 +21,12 @@ import 'selection_container.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
+const AnimationStyle _kDefaultAnimationStyle = AnimationStyle(
+  curve: Curves.fastOutSlowIn,
+  duration: Duration(milliseconds: 150),
+  reverseDuration: Duration(milliseconds: 75),
+);
+
 class _TooltipVisibilityScope extends InheritedWidget {
   const _TooltipVisibilityScope({required super.child, required this.visible});
 
@@ -31,6 +37,10 @@ class _TooltipVisibilityScope extends InheritedWidget {
     return old.visible != visible;
   }
 }
+
+///
+typedef TooltipComponentBuilder =
+    Widget Function(BuildContext context, Animation<double> animation);
 
 /// Signature for computing the position of a tooltip.
 ///
@@ -229,7 +239,7 @@ class RawTooltip extends StatefulWidget {
   const RawTooltip({
     super.key,
     required this.message,
-    required this.tooltipBox,
+    required this.tooltipBuilder,
     this.verticalOffset = 24.0,
     this.preferBelow = true,
     this.excludeFromSemantics = false,
@@ -242,6 +252,7 @@ class RawTooltip extends StatefulWidget {
     this.waitDuration = Duration.zero,
     this.showDuration = const Duration(milliseconds: 1500),
     this.exitDuration = const Duration(milliseconds: 100),
+    this.animationStyle = _kDefaultAnimationStyle,
     this.positionDelegate,
     this.child,
   });
@@ -250,7 +261,7 @@ class RawTooltip extends StatefulWidget {
   final String message;
 
   ///
-  final Widget tooltipBox;
+  final TooltipComponentBuilder tooltipBuilder;
 
   ///
   final double verticalOffset;
@@ -287,6 +298,9 @@ class RawTooltip extends StatefulWidget {
 
   ///
   final bool ignorePointer;
+
+  ///
+  final AnimationStyle animationStyle;
 
   /// The widget below this widget in the tree.
   ///
@@ -331,8 +345,8 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
   AnimationController? _backingController;
   AnimationController get _controller {
     return _backingController ??= AnimationController(
-      duration: const Duration(milliseconds: 150),
-      reverseDuration: const Duration(milliseconds: 75),
+      duration: widget.animationStyle.duration,
+      reverseDuration: widget.animationStyle.reverseDuration,
       vsync: this,
     )..addStatusListener(_handleStatusChanged);
   }
@@ -341,7 +355,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
   CurvedAnimation get _overlayAnimation {
     return _backingOverlayAnimation ??= CurvedAnimation(
       parent: _controller,
-      curve: Curves.fastOutSlowIn,
+      curve: widget.animationStyle.curve ?? _kDefaultAnimationStyle.curve!,
     );
   }
 
@@ -625,7 +639,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
       preferBelow: widget.preferBelow,
       positionDelegate: widget.positionDelegate,
       ignorePointer: widget.ignorePointer,
-      tooltipBox: widget.tooltipBox,
+      tooltip: widget.tooltipBuilder(context, _overlayAnimation),
     );
 
     return SelectionContainer.maybeOf(context) == null
@@ -696,7 +710,7 @@ class _TooltipOverlay extends StatelessWidget {
     required this.verticalOffset,
     required this.preferBelow,
     required this.ignorePointer,
-    required this.tooltipBox,
+    required this.tooltip,
     this.positionDelegate,
     this.onEnter,
     this.onExit,
@@ -711,11 +725,11 @@ class _TooltipOverlay extends StatelessWidget {
   final PointerEnterEventListener? onEnter;
   final PointerExitEventListener? onExit;
   final bool ignorePointer;
-  final Widget tooltipBox;
+  final Widget tooltip;
 
   @override
   Widget build(BuildContext context) {
-    Widget result = FadeTransition(opacity: animation, child: tooltipBox);
+    Widget result = tooltip;
     if (onEnter != null || onExit != null) {
       result = _ExclusiveMouseRegion(onEnter: onEnter, onExit: onExit, child: result);
     }
