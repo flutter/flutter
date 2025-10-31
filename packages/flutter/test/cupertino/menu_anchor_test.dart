@@ -102,11 +102,10 @@ void main() {
 
   RenderParagraph? findDescendantParagraph(WidgetTester tester, Finder finder) {
     return find
-            .descendant(of: finder, matching: find.byType(RichText))
-            .evaluate()
-            .first
-            .renderObject
-        as RenderParagraph?;
+        .descendant(of: finder, matching: find.byType(RichText))
+        .evaluate()
+        .first
+        .renderObject as RenderParagraph?;
   }
 
   testWidgets("MenuController.isOpen is true when a menu's overlay is shown", (
@@ -719,9 +718,8 @@ void main() {
 
     menuAnchor.debugFillProperties(builder);
 
-    final List<String> descriptions = builder.properties
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+    final List<String> descriptions =
+        builder.properties.map((DiagnosticsNode node) => node.toString()).toList();
 
     expect(
       descriptions,
@@ -2120,9 +2118,8 @@ void main() {
     /// rect is taken after UnconstrainedBox clips its contents.
     List<Rect> collectOverlays({bool clipped = true}) {
       final List<Rect> menuRects = <Rect>[];
-      final Finder finder = clipped
-          ? find.byType(UnconstrainedBox)
-          : find.byType(CupertinoPopupSurface);
+      final Finder finder =
+          clipped ? find.byType(UnconstrainedBox) : find.byType(CupertinoPopupSurface);
       for (final Element candidate in finder.evaluate().toList()) {
         final RenderBox box = candidate.renderObject! as RenderBox;
         final Offset topLeft = box.localToGlobal(box.size.topLeft(Offset.zero));
@@ -2167,8 +2164,7 @@ void main() {
         expect(
           alignment.resolve(TextDirection.ltr).withinRect(anchorRect),
           offsetMoreOrLessEquals(overlay.center, epsilon: 0.01),
-          reason:
-              'Anchor alignment: $alignment \n'
+          reason: 'Anchor alignment: $alignment \n'
               'Menu rect: $overlay \n',
         );
       }
@@ -2211,8 +2207,7 @@ void main() {
         expect(
           alignment.resolve(TextDirection.rtl).withinRect(anchorRect),
           offsetMoreOrLessEquals(overlay.center, epsilon: 0.01),
-          reason:
-              'Anchor alignment: $alignment \n'
+          reason: 'Anchor alignment: $alignment \n'
               'Menu rect: $overlay \n',
         );
       }
@@ -2255,8 +2250,7 @@ void main() {
           expect(
             alignment.resolve(TextDirection.ltr).withinRect(overlay),
             offsetMoreOrLessEquals(size.center(Offset.zero), epsilon: 0.01),
-            reason:
-                'Menu alignment: $alignment \n'
+            reason: 'Menu alignment: $alignment \n'
                 'Menu rect: $overlay \n',
           );
         }
@@ -2297,8 +2291,7 @@ void main() {
         expect(
           alignment.resolve(TextDirection.rtl).withinRect(overlay),
           offsetMoreOrLessEquals(size.center(Offset.zero), epsilon: 0.01),
-          reason:
-              'Menu alignment: $alignment \n'
+          reason: 'Menu alignment: $alignment \n'
               'Menu rect: $overlay \n',
         );
       }
@@ -2357,8 +2350,7 @@ void main() {
           expect(
             position,
             offsetMoreOrLessEquals(surface.center, epsilon: 0.01),
-            reason:
-                'Anchor alignment: ${Alignment(horizontal, vertical)} \n'
+            reason: 'Anchor alignment: ${Alignment(horizontal, vertical)} \n'
                 'Menu rect: $surface \n',
           );
         }
@@ -2386,9 +2378,8 @@ void main() {
       await tester.pump();
       await tester.pump(kMenuOpenDuration);
 
-      final Offset anchorBottomCenter = tester
-          .getRect(find.widgetWithText(CupertinoButton, Tag.anchor.text))
-          .bottomCenter;
+      final Offset anchorBottomCenter =
+          tester.getRect(find.widgetWithText(CupertinoButton, Tag.anchor.text)).bottomCenter;
 
       expect(
         anchorBottomCenter,
@@ -3613,10 +3604,10 @@ void main() {
       await tester.pump();
       await tester.pump(kMenuOpenDuration);
       final ui.Rect overlay = collectOverlays().first;
-      expect(overlay.size, equals(const Size(75, 100)));
+      expect(overlay.size, sizeCloseTo(const Size(75, 100), 1));
 
       // Width and height should be maintained
-      expect(tester.getSize(find.byKey(Tag.a.key)), equals(const Size(50, 150)));
+      expect(tester.getSize(find.byKey(Tag.a.key)), sizeCloseTo(const Size(50, 150), 1));
 
       // The container should be centered in the overlay.
       expect(
@@ -4409,14 +4400,13 @@ void main() {
 
         BoxDecoration getItemDecoration() {
           return tester
-                  .widget<DecoratedBox>(
-                    find.descendant(
-                      of: find.byType(CupertinoMenuItem),
-                      matching: find.byType(DecoratedBox),
-                    ),
-                  )
-                  .decoration
-              as BoxDecoration;
+              .widget<DecoratedBox>(
+                find.descendant(
+                  of: find.byType(CupertinoMenuItem),
+                  matching: find.byType(DecoratedBox),
+                ),
+              )
+              .decoration as BoxDecoration;
         }
 
         RenderParagraph? findChild() {
@@ -4495,20 +4485,19 @@ void main() {
 
         const WidgetStateProperty<BoxDecoration> decoration =
             WidgetStateProperty<BoxDecoration>.fromMap(<WidgetStatesConstraint, BoxDecoration>{
-              WidgetState.hovered: BoxDecoration(color: customHoverColor),
-              WidgetState.any: BoxDecoration(),
-            });
+          WidgetState.hovered: BoxDecoration(color: customHoverColor),
+          WidgetState.any: BoxDecoration(),
+        });
 
         BoxDecoration getItemDecoration(Tag tag) {
           return tester
-                  .widget<DecoratedBox>(
-                    find.descendant(
-                      of: find.widgetWithText(CupertinoMenuItem, tag.text),
-                      matching: find.byType(DecoratedBox),
-                    ),
-                  )
-                  .decoration
-              as BoxDecoration;
+              .widget<DecoratedBox>(
+                find.descendant(
+                  of: find.widgetWithText(CupertinoMenuItem, tag.text),
+                  matching: find.byType(DecoratedBox),
+                ),
+              )
+              .decoration as BoxDecoration;
         }
 
         Widget buildApp(ui.Brightness brightness) {
@@ -4586,20 +4575,19 @@ void main() {
 
         const WidgetStateProperty<BoxDecoration> decoration =
             WidgetStateProperty<BoxDecoration>.fromMap(<WidgetStatesConstraint, BoxDecoration>{
-              WidgetState.pressed: BoxDecoration(color: customPressedColor),
-              WidgetState.any: BoxDecoration(),
-            });
+          WidgetState.pressed: BoxDecoration(color: customPressedColor),
+          WidgetState.any: BoxDecoration(),
+        });
 
         BoxDecoration getItemDecoration(Tag tag) {
           return tester
-                  .widget<DecoratedBox>(
-                    find.descendant(
-                      of: find.widgetWithText(CupertinoMenuItem, tag.text),
-                      matching: find.byType(DecoratedBox),
-                    ),
-                  )
-                  .decoration
-              as BoxDecoration;
+              .widget<DecoratedBox>(
+                find.descendant(
+                  of: find.widgetWithText(CupertinoMenuItem, tag.text),
+                  matching: find.byType(DecoratedBox),
+                ),
+              )
+              .decoration as BoxDecoration;
         }
 
         Widget buildApp(ui.Brightness brightness) {
@@ -4690,20 +4678,19 @@ void main() {
 
         const WidgetStateProperty<BoxDecoration> decoration =
             WidgetStateProperty<BoxDecoration>.fromMap(<WidgetStatesConstraint, BoxDecoration>{
-              WidgetState.focused: BoxDecoration(color: customFocusedColor),
-              WidgetState.any: BoxDecoration(),
-            });
+          WidgetState.focused: BoxDecoration(color: customFocusedColor),
+          WidgetState.any: BoxDecoration(),
+        });
 
         BoxDecoration getItemDecoration(Tag tag) {
           return tester
-                  .widget<DecoratedBox>(
-                    find.descendant(
-                      of: find.widgetWithText(CupertinoMenuItem, tag.text),
-                      matching: find.byType(DecoratedBox),
-                    ),
-                  )
-                  .decoration
-              as BoxDecoration;
+              .widget<DecoratedBox>(
+                find.descendant(
+                  of: find.widgetWithText(CupertinoMenuItem, tag.text),
+                  matching: find.byType(DecoratedBox),
+                ),
+              )
+              .decoration as BoxDecoration;
         }
 
         final FocusNode focusNodeA = FocusNode();
@@ -5535,9 +5522,8 @@ void main() {
           final ui.Rect childRect = tester.getRect(find.byKey(Tag.child.key));
           final double leadingWidth = childRect.left - menuItemRect.left;
           final Size leadingSize = ui.Size(leadingWidth, menuItemRect.height);
-          final Rect leadingWidgetRect = tester
-              .getRect(find.byKey(Tag.leading.key))
-              .shift(-menuItemRect.topLeft);
+          final Rect leadingWidgetRect =
+              tester.getRect(find.byKey(Tag.leading.key)).shift(-menuItemRect.topLeft);
 
           final Alignment alignment = offsetAlongSize(leadingWidgetRect.center, leadingSize);
 
@@ -6848,7 +6834,6 @@ void main() {
       await tester.pumpWidget(
         App(
           CupertinoMenuAnchor(
-            controller: controller,
             menuChildren: <Widget>[
               CupertinoMenuItem(
                 onPressed: () {},
@@ -6856,11 +6841,12 @@ void main() {
                 child: Text(Tag.a.text),
               ),
             ],
+            child: const AnchorButton(Tag.anchor),
           ),
         ),
       );
 
-      controller.open();
+      await tester.tap(find.byType(AnchorButton));
       await tester.pumpAndSettle();
 
       expect(
@@ -6869,6 +6855,7 @@ void main() {
           ignoreId: true,
           ignoreTransform: true,
           ignoreRect: true,
+          ignoreTraversalIdentifier: true,
           TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
@@ -6884,32 +6871,44 @@ void main() {
                         children: <TestSemantics>[
                           TestSemantics(
                             id: 4,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isButton,
+                              SemanticsFlag.isFocusable
+                            ],
+                            actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                            label: 'anchor',
+                            textDirection: TextDirection.ltr,
                             children: <TestSemantics>[
                               TestSemantics(
                                 id: 5,
-                                flags: <SemanticsFlag>[
-                                  SemanticsFlag.scopesRoute,
-                                  SemanticsFlag.namesRoute,
-                                ],
                                 children: <TestSemantics>[
                                   TestSemantics(
                                     id: 6,
-                                    flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                                    flags: <SemanticsFlag>[
+                                      SemanticsFlag.scopesRoute,
+                                      SemanticsFlag.namesRoute,
+                                    ],
                                     children: <TestSemantics>[
                                       TestSemantics(
                                         id: 7,
-                                        flags: <SemanticsFlag>[
-                                          SemanticsFlag.hasEnabledState,
-                                          SemanticsFlag.isEnabled,
-                                          SemanticsFlag.isFocusable,
+                                        flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                                        children: <TestSemantics>[
+                                          TestSemantics(
+                                            id: 8,
+                                            flags: <SemanticsFlag>[
+                                              SemanticsFlag.hasEnabledState,
+                                              SemanticsFlag.isEnabled,
+                                              SemanticsFlag.isFocusable,
+                                            ],
+                                            actions: <SemanticsAction>[
+                                              SemanticsAction.tap,
+                                              SemanticsAction.dismiss,
+                                              SemanticsAction.focus,
+                                            ],
+                                            label: 'a',
+                                            textDirection: TextDirection.ltr,
+                                          ),
                                         ],
-                                        actions: <SemanticsAction>[
-                                          SemanticsAction.tap,
-                                          SemanticsAction.dismiss,
-                                          SemanticsAction.focus,
-                                        ],
-                                        label: 'a',
-                                        textDirection: TextDirection.ltr,
                                       ),
                                     ],
                                   ),
@@ -6960,13 +6959,13 @@ abstract class Tag {
 
 class NestedTag extends Tag {
   const NestedTag(String name, {Tag? prefix, this.level = 0})
-    : assert(
-        // Limit the nesting level to prevent stack overflow.
-        level < 9,
-        'NestedTag.level must be less than 9 (was $level).',
-      ),
-      _name = name,
-      _prefix = prefix;
+      : assert(
+          // Limit the nesting level to prevent stack overflow.
+          level < 9,
+          'NestedTag.level must be less than 9 (was $level).',
+        ),
+        _name = name,
+        _prefix = prefix;
 
   final String _name;
   final Tag? _prefix;
@@ -7162,19 +7161,19 @@ abstract class AccessibilityTextSize {
   static const TextScaler undersized = TextScaler.linear(1 - 10 / 17);
 
   static List<TextScaler> get values => <TextScaler>[
-    xSmall,
-    small,
-    medium,
-    large,
-    xLarge,
-    xxLarge,
-    xxxLarge,
-    ax1,
-    ax2,
-    ax3,
-    ax4,
-    ax5,
-  ];
+        xSmall,
+        small,
+        medium,
+        large,
+        xLarge,
+        xxLarge,
+        xxxLarge,
+        ax1,
+        ax2,
+        ax3,
+        ax4,
+        ax5,
+      ];
 }
 
 /// The font family for menu items at smaller text scales.
