@@ -1202,18 +1202,29 @@ class _MenuOverlayState extends State<_MenuOverlay>
                     // cannot be empty" error is thrown due to the menu items
                     // being transparent while the menu semantics are still
                     // present.
-                    child: Semantics(
-                      explicitChildNodes: true,
-                      scopesRoute: true,
-                      namesRoute: true,
-                      child: ConstrainedBox(
-                        constraints: constraints,
-                        child: SingleChildScrollView(
-                          clipBehavior: Clip.none,
-                          primary: true,
-                          child: Column(mainAxisSize: MainAxisSize.min, children: _children),
+                    child: AnimatedBuilder(
+                      animation: _sizeAnimation,
+                      child: Semantics(
+                        explicitChildNodes: true,
+                        scopesRoute: true,
+                        namesRoute: true,
+                        child: ConstrainedBox(
+                          constraints: constraints,
+                          child: SingleChildScrollView(
+                            clipBehavior: Clip.none,
+                            primary: true,
+                            child: Column(mainAxisSize: MainAxisSize.min, children: _children),
+                          ),
                         ),
                       ),
+                      builder: (BuildContext context, Widget? child) {
+                        return Align(
+                          heightFactor: _sizeAnimation.value,
+                          widthFactor: 1.0,
+                          alignment: Alignment.topCenter,
+                          child: child,
+                        );
+                      },
                     ),
                   ),
                 ),
