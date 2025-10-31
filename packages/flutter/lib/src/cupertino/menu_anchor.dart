@@ -274,10 +274,10 @@ double _quantize(double value, {required double to}) {
 mixin CupertinoMenuEntryMixin {
   /// Whether this menu item has a leading widget.
   ///
-  /// If true, siblings of this menu item that are missing a leading
-  /// widget will have leading space added to align the leading edges of all
-  /// menu items.
-  bool get hasLeading;
+  /// If [hasLeading] returns true, siblings of this menu item that are missing
+  /// a leading widget will have leading space added to align the leading edges
+  /// of all menu items.
+  bool hasLeading(BuildContext context);
 
   /// Whether a separator can be drawn above this menu item.
   ///
@@ -598,7 +598,7 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
   final FocusScopeNode _menuScopeNode = FocusScopeNode(debugLabel: 'Menu Scope');
   final ValueNotifier<double> _swipeDistanceNotifier = ValueNotifier<double>(0);
 
-  bool _hasLeadingWidget = false;
+  bool? _hasLeadingWidget;
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
   MenuController? _internalMenuController;
   bool get isOpening => _animationStatus.isForwardOrCompleted;
@@ -619,7 +619,6 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
 
     _animationController = AnimationController.unbounded(vsync: this);
     _animationController.addStatusListener(_handleAnimationStatusChange);
-    _resolveHasLeading();
   }
 
   @override
@@ -635,8 +634,14 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
     }
 
     if (oldWidget.menuChildren != widget.menuChildren) {
-      _resolveHasLeading();
+      _hasLeadingWidget = _resolveHasLeading();
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _hasLeadingWidget ??= _resolveHasLeading();
   }
 
   @override
@@ -650,10 +655,10 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
     super.dispose();
   }
 
-  void _resolveHasLeading() {
-    _hasLeadingWidget = widget.menuChildren.any((Widget element) {
+  bool _resolveHasLeading() {
+    return widget.menuChildren.any((Widget element) {
       return switch (element) {
-        CupertinoMenuEntryMixin(hasLeading: true) => true,
+        final CupertinoMenuEntryMixin entry => entry.hasLeading(context),
         _ => false,
       };
     });
@@ -775,7 +780,7 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
       onDistanceChanged: _handleSwipeDistanceChange,
       enabled: enableSwipe,
       child: _AnchorScope(
-        hasLeading: _hasLeadingWidget,
+        hasLeading: _hasLeadingWidget!,
         child: RawMenuAnchor(
           useRootOverlay: widget.useRootOverlay,
           onCloseRequested: _handleCloseRequested,
@@ -1931,7 +1936,7 @@ class CupertinoMenuItem extends StatelessWidget with CupertinoMenuEntryMixin {
   final BoxConstraints? constraints;
 
   @override
-  bool get hasLeading => leading != null;
+  bool hasLeading(BuildContext context) => leading != null;
 
   @override
   bool get allowLeadingSeparator => true;
@@ -2521,7 +2526,7 @@ class CupertinoLargeMenuDivider extends StatelessWidget with CupertinoMenuEntryM
   bool get allowLeadingSeparator => false;
 
   @override
-  bool get hasLeading => false;
+  bool hasLeading(BuildContext context) => false;
 
   /// Default color for a [CupertinoLargeMenuDivider].
   // The following colors were measured from debug mode on the iOS 18.5 simulator,
