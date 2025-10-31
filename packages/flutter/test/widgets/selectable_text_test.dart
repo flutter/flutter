@@ -5623,6 +5623,30 @@ void main() {
     },
   );
 
+  testWidgets(
+    'SelectableText respects MediaQueryData.lineHeightScaleFactorOverride even when strutStyle.forceStrutHeight is enabled',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: MediaQueryData(lineHeightScaleFactorOverride: 2.0),
+            child: SelectableText('hello world'),
+          ),
+        ),
+      );
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final TextStyle? resultTextStyle = renderEditable.text?.style;
+      expect(resultTextStyle?.height, 2.0);
+      // SelectableText creates a strut style from the provided
+      // text style sets strutStyle.forceStrutHeight to true when
+      // the strutStyle is not provided. This is overriden when
+      // a non-null line height scale factor override is provided.
+      expect(renderEditable.strutStyle?.forceStrutHeight, false);
+    },
+  );
+
   group('context menu', () {
     // Regression test for https://github.com/flutter/flutter/issues/169001.
     testWidgets(

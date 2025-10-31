@@ -129,6 +129,44 @@ void main() {
   );
 
   testWidgets(
+    'Text respects MediaQueryData.lineHeightScaleFactorOverride even when strutStyle.forceStrutHeight is enabled',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(lineHeightScaleFactorOverride: 2.0),
+          child: Center(
+            child: Text(
+              'Hello',
+              textDirection: TextDirection.ltr,
+              strutStyle: StrutStyle(forceStrutHeight: true),
+            ),
+          ),
+        ),
+      );
+
+      RichText text = tester.firstWidget(find.byType(RichText));
+      expect(text, isNotNull);
+      expect(text.text.style?.height, 2.0);
+      expect(text.strutStyle?.forceStrutHeight, false);
+
+      await tester.pumpWidget(
+        const Center(
+          child: Text(
+            'Hello',
+            textDirection: TextDirection.ltr,
+            strutStyle: StrutStyle(forceStrutHeight: true),
+          ),
+        ),
+      );
+
+      text = tester.firstWidget(find.byType(RichText));
+      expect(text, isNotNull);
+      expect(text.text.style?.height, isNull);
+      expect(text.strutStyle?.forceStrutHeight, true);
+    },
+  );
+
+  testWidgets(
     'RichText ignores MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, and MediaQueryData.wordSpacingOverride',
     (WidgetTester tester) async {
       await tester.pumpWidget(
