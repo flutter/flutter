@@ -1259,12 +1259,20 @@ void main() {
           child: SizedBox.shrink(
             child: RefreshIndicator(
               onRefresh: refresh,
-              child: ListView(children: const <Text>[Text('X')]),
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: const <Text>[Text('X')],
+              ),
             ),
           ),
         ),
       ),
     );
     expect(tester.getSize(find.byType(RefreshIndicator)), Size.zero);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Center)));
+    await gesture.moveBy(const Offset(0.0, 20.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 }
