@@ -406,7 +406,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     },
   };
 
-  bool get _canShowOptionsView => _focusNode.hasFocus && _selection == null && _options.isNotEmpty;
+  bool get _canShowOptionsView => _focusNode.hasFocus && _options.isNotEmpty;
 
   void _updateOptionsViewVisibility() {
     if (_canShowOptionsView) {
@@ -481,7 +481,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       text: selectionString,
     );
     widget.onSelected?.call(nextSelection);
-    _updateOptionsViewVisibility();
+    _optionsViewController.hide();
   }
 
   void _updateHighlight(int nextIndex) {
