@@ -30,6 +30,7 @@ import android.util.DisplayMetrics;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.embedding.engine.FlutterShellArgs;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -204,35 +205,6 @@ public class FlutterLoaderTest {
   }
 
   @Test
-  public void itSetsTheLeakVMFromMetaData() {
-    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
-    Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.LeakVM", false);
-    ctx.getApplicationInfo().metaData = metaData;
-
-    FlutterLoader.Settings settings = new FlutterLoader.Settings();
-    assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(ctx, settings);
-    flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
-
-    final String leakVMArg = "--leak-vm=false";
-    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
-    verify(mockFlutterJNI, times(1))
-        .init(
-            eq(ctx),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong(),
-            anyInt());
-    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
-    assertTrue(arguments.contains(leakVMArg));
-  }
-
-  @Test
   public void itUsesCorrectExecutorService() {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     ExecutorService mockExecutorService = mock(ExecutorService.class);
@@ -291,122 +263,6 @@ public class FlutterLoaderTest {
             anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertFalse(arguments.contains(enableVulkanValidationArg));
-  }
-
-  @Test
-  public void itSetsEnableImpellerFromMetaData() {
-    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
-    Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.EnableImpeller", true);
-    ctx.getApplicationInfo().metaData = metaData;
-
-    FlutterLoader.Settings settings = new FlutterLoader.Settings();
-    assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(ctx, settings);
-    flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
-
-    final String enableImpellerArg = "--enable-impeller=true";
-    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
-    verify(mockFlutterJNI, times(1))
-        .init(
-            eq(ctx),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong(),
-            anyInt());
-    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
-    assertTrue(arguments.contains(enableImpellerArg));
-  }
-
-  @Test
-  public void itSetsEnableFlutterGPUFromMetaData() {
-    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
-    Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.EnableFlutterGPU", true);
-    ctx.getApplicationInfo().metaData = metaData;
-
-    FlutterLoader.Settings settings = new FlutterLoader.Settings();
-    assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(ctx, settings);
-    flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
-
-    final String enableFlutterGpuArg = "--enable-flutter-gpu";
-    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
-    verify(mockFlutterJNI, times(1))
-        .init(
-            eq(ctx),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong(),
-            anyInt());
-    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
-    assertTrue(arguments.contains(enableFlutterGpuArg));
-  }
-
-  @Test
-  public void itSetsEnableSurfaceControlFromMetaData() {
-    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
-    Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.EnableSurfaceControl", true);
-    ctx.getApplicationInfo().metaData = metaData;
-
-    FlutterLoader.Settings settings = new FlutterLoader.Settings();
-    assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(ctx, settings);
-    flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
-
-    final String disabledControlArg = "--enable-surface-control";
-    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
-    verify(mockFlutterJNI, times(1))
-        .init(
-            eq(ctx),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong(),
-            anyInt());
-    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
-    assertTrue(arguments.contains(disabledControlArg));
-  }
-
-  @Test
-  public void itSetsShaderInitModeFromMetaData() {
-    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
-    Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.ImpellerLazyShaderInitialization", true);
-    ctx.getApplicationInfo().metaData = metaData;
-
-    FlutterLoader.Settings settings = new FlutterLoader.Settings();
-    assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(ctx, settings);
-    flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
-
-    final String shaderModeArg = "--impeller-lazy-shader-mode=true";
-    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
-    verify(mockFlutterJNI, times(1))
-        .init(
-            eq(ctx),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong(),
-            anyInt());
-    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
-    assertTrue(arguments.contains(shaderModeArg));
   }
 
   @Test
@@ -732,5 +588,321 @@ public class FlutterLoaderTest {
       flutterLoader.initialized = false;
       clearInvocations(mockFlutterJNI);
     }
+  }
+
+  @Test
+  public void itSetsEnableSoftwareRenderingFromMetadata() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.EnableSoftwareRendering",
+        true,
+        FlutterShellArgs.ENABLE_SOFTWARE_RENDERING.commandLineArgument);
+  }
+
+  @Test
+  public void itSetsSkiaDeterministicRenderingFromMetadata() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.SkiaDeterministicRendering",
+        true,
+        FlutterShellArgs.SKIA_DETERMINISTIC_RENDERING.commandLineArgument);
+  }
+
+  @Test
+  public void itSetsFlutterAssetsDirFromMetadata() {
+    String expectedAssetsDir = "flutter_assets_dir";
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.FlutterAssetsDir",
+        expectedAssetsDir,
+        FlutterShellArgs.FLUTTER_ASSETS_DIR.commandLineArgument + expectedAssetsDir);
+  }
+
+  @Test
+  public void itSetsOldGenHeapSizeFromMetaData() {
+    int expectedOldGenHeapSize = 256;
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.OldGenHeapSize",
+        expectedOldGenHeapSize,
+        FlutterShellArgs.OLD_GEN_HEAP_SIZE.commandLineArgument
+            + expectedOldGenHeapSize);
+  }
+
+  @Test
+  public void itSetsEnableImpellerFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.EnableImpeller",
+        true,
+        FlutterShellArgs.ENABLE_IMPELLER.commandLineArgument + "true");
+  }
+
+  @Test
+  public void itSetsImpellerBackendFromMetadata() {
+    String expectedImpellerBackend = "Vulkan";
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.ImpellerBackend",
+        expectedImpellerBackend,
+        FlutterShellArgs.IMPELLER_BACKEND.commandLineArgument + expectedImpellerBackend);
+  }
+
+  @Test
+  public void itSetsEnableSurfaceControlFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.EnableSurfaceControl",
+        true,
+        FlutterShellArgs.ENABLE_SURFACE_CONTROL.commandLineArgument);
+  }
+
+  @Test
+  public void itSetsEnableFlutterGPUFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.EnableFlutterGPU",
+        true,
+        FlutterShellArgs.ENABLE_FLUTTER_GPU.commandLineArgument);
+  }
+
+  @Test
+  public void itSetsImpellerLazyShaderModeFromMetadata() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.ImpellerLazyShaderInitialization",
+        true,
+        FlutterShellArgs.IMPELLER_LAZY_SHADER_MODE.commandLineArgument + "true");
+  }
+
+  @Test
+  public void itSetsImpellerAntiAliasLinesFromMetadata() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.ImpellerAntialiasLines",
+        true,
+        FlutterShellArgs.IMPELLER_ANTIALIAS_LINES.commandLineArgument);
+  }
+
+  @Test
+  public void itSetsVmSnapshotDataFromMetaData() {
+    String expectedVmSnapshotData = "vm_snapshot_data";
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.VmSnapshotData",
+        expectedVmSnapshotData,
+        FlutterShellArgs.VM_SNAPSHOT_DATA.commandLineArgument + expectedVmSnapshotData);
+  }
+
+  @Test
+  public void itSetsIsolateSnapshotDataFromMetaData() {
+    String expectedIsolateSnapshotData = "isolate_snapshot_data";
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.IsolateSnapshotData",
+        expectedIsolateSnapshotData,
+        FlutterShellArgs.ISOLATE_SNAPSHOT_DATA.commandLineArgument + expectedIsolateSnapshotData);
+  }
+
+  @Test
+  public void itSetsUseTestFontsFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.UseTestFonts",
+        true,
+        FlutterShellArgs.USE_TEST_FONTS.commandLineArgument);
+  }
+
+  @Test
+  public void itSetsVmServicePortFromMetaData() {
+    int expectedVmServicePort = 12345;
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.VMServicePort",
+        expectedVmServicePort,
+        FlutterShellArgs.VM_SERVICE_PORT.commandLineArgument + expectedVmServicePort);
+  }
+
+  @Test
+  public void itSetsEnableVulkanValidationFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.EnableVulkanValidation",
+        true,
+        FlutterShellArgs.ENABLE_VULKAN_VALIDATION.commandLineArgument);
+  }
+
+  @Test
+  public void itSetsEnableOpenGLGPUTracingFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.EnableOpenGLGPUTracing",
+        true,
+        FlutterShellArgs.ENABLE_OPENGL_GPU_TRACING.commandLineArgument);
+  }
+
+  @Test
+  public void itSetsEnableVulkanGPUTracingFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.EnableVulkanGPUTracing",
+        true,
+        FlutterShellArgs.ENABLE_VULKAN_GPU_TRACING.commandLineArgument);
+  }
+
+  @Test
+  public void itSetsLeakVMFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.LeakVM",
+        true,
+        FlutterShellArgs.LEAK_VM.commandLineArgument + "true");
+  }
+
+  @Test
+  public void itSetsTraceStartupFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.TraceStartup",
+        true,
+        FlutterShellArgs.TRACE_STARTUP.commandLineArgument);
+  }
+
+  @Test
+  public void itSetsStartPausedFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.StartPaused",
+        true,
+        FlutterShellArgs.START_PAUSED.commandLineArgument);
+  }
+
+  @Test
+  public void itSetsDisableServiceAuthCodesFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.DisableServiceAuthCodes",
+        true,
+        FlutterShellArgs.DISABLE_SERVICE_AUTH_CODES.commandLineArgument);
+  }
+
+  @Test
+  public void itSetsEndlessTraceBufferFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.EndlessTraceBuffer",
+        true,
+        FlutterShellArgs.ENDLESS_TRACE_BUFFER.commandLineArgument);
+  }
+
+  @Test
+  public void itSetsEnableDartProfilingFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.EnableDartProfiling",
+        true,
+        FlutterShellArgs.ENABLE_DART_PROFILING.commandLineArgument);
+  }
+
+  @Test
+  public void itSetsProfileStartupFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.ProfileStartup",
+        true,
+        FlutterShellArgs.PROFILE_STARTUP.commandLineArgument);
+  }
+
+  @Test
+  public void itSetsTraceSkiaFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.TraceSkia",
+        true,
+        FlutterShellArgs.TRACE_SKIA.commandLineArgument);
+  }
+
+  @Test
+  public void itSetsTraceSkiaAllowlistFromMetaData() {
+    String expectedTraceSkiaAllowList = "allowed1,allowed2,allowed3";
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.TraceSkiaAllowList",
+        expectedTraceSkiaAllowList,
+        FlutterShellArgs.TRACE_SKIA_ALLOWLIST.commandLineArgument + expectedTraceSkiaAllowList);
+  }
+
+  @Test
+  public void itSetsTraceSystraceFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.TraceSystrace",
+        true,
+        FlutterShellArgs.TRACE_SYSTRACE.commandLineArgument);
+  }
+
+  @Test
+  public void itSetsTraceToFileFromMetaData() {
+    String expectedTraceToFilePath = "/path/to/trace/file";
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.TraceToFile",
+        expectedTraceToFilePath,
+        FlutterShellArgs.TRACE_TO_FILE.commandLineArgument + expectedTraceToFilePath);
+  }
+
+  @Test
+  public void itSetsProfileMicrotasksFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.ProfileMicrotasks",
+        true,
+        FlutterShellArgs.PROFILE_MICROTASKS.commandLineArgument);
+  }
+
+  @Test
+  public void itSetsDumpSkpOnShaderCompilationFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.DumpSkpOnShaderCompilation",
+        true,
+        FlutterShellArgs.DUMP_SKP_ON_SHADER_COMPILATION.commandLineArgument);
+  }
+
+  @Test
+  public void itSetsPurgePersistentCacheFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.PurgePersistentCache",
+        true,
+        FlutterShellArgs.PURGE_PERSISTENT_CACHE.commandLineArgument);
+  }
+
+  @Test
+  public void itSetsVerboseLoggingFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.VerboseLogging",
+        true,
+        FlutterShellArgs.VERBOSE_LOGGING.commandLineArgument);
+  }
+
+  //TODO(camsim99): write tests for old gen heap size and is leak vm set bc overlap with defaults
+
+  @Test
+  public void itSetsDartFlagsFromMetaData() {
+    String expectedDartFlags = "--enable-asserts --enable-vm-service";
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.DartFlags",
+        expectedDartFlags,
+        FlutterShellArgs.DART_FLAGS.commandLineArgument + expectedDartFlags);
+  }
+
+  // Test that specified shell argument can be set via manifest metadata as expected.
+  private void testFlagFromMetaData(String metadataKey, Object metadataValue, String expectedArg) {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metaData = new Bundle();
+
+    // Place metadata key and value into the metadata bundle used to mock the manifest.
+    if (metadataValue instanceof Boolean) {
+      metaData.putBoolean(metadataKey, (Boolean) metadataValue);
+    } else if (metadataValue instanceof Integer) {
+      metaData.putInt(metadataKey, (Integer) metadataValue);
+    } else if (metadataValue instanceof String) {
+      metaData.putString(metadataKey, (String) metadataValue);
+    } else {
+      throw new IllegalArgumentException(
+          "Unsupported metadataValue type: " + metadataValue.getClass());
+    }
+
+    ctx.getApplicationInfo().metaData = metaData;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null);
+    shadowOf(getMainLooper()).idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+    assertTrue(arguments.contains(expectedArg));
   }
 }
