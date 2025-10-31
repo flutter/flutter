@@ -489,7 +489,7 @@ In other words:
 
 Using this standard form ensures that we can write a script to detect all deprecated APIs and remove them. We have a test that verifies that this syntax is followed.
 
-To determine the latest beta version, see <https://docs.flutter.dev/development/tools/sdk/releases>.
+To determine the latest beta version, see <https://docs.flutter.dev/install/archive>.
 
 When adding a deprecation notice to the framework, a flutter fix should be included with your change. This helps users migrate to the new API as easily as possible. To learn more about authoring fixes, see [Data driven Fixes](Data-driven-Fixes.md). If a fix cannot be written for the new API, please file an issue in https://github.com/dart-lang/sdk and link to it in your change.
 
