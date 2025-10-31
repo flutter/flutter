@@ -714,20 +714,36 @@ class Text extends StatelessWidget {
     if (style == null || style!.inherit) {
       effectiveTextStyle = defaultTextStyle.style.merge(style);
     }
-    final bool boldText = MediaQuery.boldTextOf(context);
     final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(context);
     final double? letterSpacing = MediaQuery.maybeLetterSpacingOverrideOf(context);
     final double? wordSpacing = MediaQuery.maybeWordSpacingOverrideOf(context);
-    if (boldText || lineHeightScaleFactor != null || letterSpacing != null || wordSpacing != null) {
-      effectiveTextStyle = effectiveTextStyle!.merge(
-        TextStyle(
-          height: lineHeightScaleFactor,
-          letterSpacing: letterSpacing,
-          wordSpacing: wordSpacing,
-          fontWeight: boldText ? FontWeight.bold : null,
-        ),
-      );
+    if (MediaQuery.boldTextOf(context)) {
+      effectiveTextStyle = effectiveTextStyle!.merge(const TextStyle(fontWeight: FontWeight.bold));
     }
+    final TextSpan effectiveTextSpan =
+        lineHeightScaleFactor != null || letterSpacing != null || wordSpacing != null
+        ? _OverridingTextStyleTextSpan(
+            overrideTextStyle: TextStyle(
+              height: lineHeightScaleFactor,
+              letterSpacing: letterSpacing,
+              wordSpacing: wordSpacing,
+            ),
+            textSpan: TextSpan(
+              style: effectiveTextStyle,
+              text: data,
+              locale: locale,
+              children: textSpan != null ? <InlineSpan>[textSpan!] : null,
+            ),
+          )
+        : TextSpan(
+            style: effectiveTextStyle,
+            text: data,
+            locale: locale,
+            children: textSpan != null ? <InlineSpan>[textSpan!] : null,
+          );
+    final StrutStyle? effectiveStrutStyle = strutStyle != null && lineHeightScaleFactor != null
+        ? strutStyle!.copyWith(forceStrutHeight: false)
+        : strutStyle;
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     final TextScaler textScaler = switch ((this.textScaler, textScaleFactor)) {
       (final TextScaler textScaler, _) => textScaler,
@@ -749,7 +765,7 @@ class Text extends StatelessWidget {
           overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
           textScaler: textScaler,
           maxLines: maxLines ?? defaultTextStyle.maxLines,
-          strutStyle: strutStyle,
+          strutStyle: effectiveStrutStyle,
           textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
           textHeightBehavior:
               textHeightBehavior ??
@@ -759,12 +775,7 @@ class Text extends StatelessWidget {
               selectionColor ??
               DefaultSelectionStyle.of(context).selectionColor ??
               DefaultSelectionStyle.defaultColor,
-          text: TextSpan(
-            style: effectiveTextStyle,
-            text: data,
-            locale: locale,
-            children: textSpan != null ? <InlineSpan>[textSpan!] : null,
-          ),
+          text: effectiveTextSpan,
         ),
       );
     } else {
@@ -777,7 +788,7 @@ class Text extends StatelessWidget {
         overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
         textScaler: textScaler,
         maxLines: maxLines ?? defaultTextStyle.maxLines,
-        strutStyle: strutStyle,
+        strutStyle: effectiveStrutStyle,
         textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
         textHeightBehavior:
             textHeightBehavior ??
@@ -787,12 +798,7 @@ class Text extends StatelessWidget {
             selectionColor ??
             DefaultSelectionStyle.of(context).selectionColor ??
             DefaultSelectionStyle.defaultColor,
-        text: TextSpan(
-          style: effectiveTextStyle,
-          text: data,
-          locale: locale,
-          children: textSpan != null ? <InlineSpan>[textSpan!] : null,
-        ),
+        text: effectiveTextSpan,
       );
     }
     if (semanticsLabel != null || semanticsIdentifier != null) {
@@ -1493,3 +1499,28 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
 /// The length of the content that can be selected, and the range that is
 /// selected.
 typedef _SelectionInfo = ({int contentLength, SelectedContentRange? range});
+
+/// A [TextSpan] that overrides the style of its children with a given
+/// [TextStyle].
+class _OverridingTextStyleTextSpan extends TextSpan {
+  _OverridingTextStyleTextSpan({required TextStyle overrideTextStyle, required TextSpan textSpan})
+    : super(
+        text: textSpan.text,
+        children: textSpan.children?.map((InlineSpan child) {
+          if (child is TextSpan) {
+            return _OverridingTextStyleTextSpan(
+              overrideTextStyle: overrideTextStyle,
+              textSpan: child,
+            );
+          }
+          return child;
+        }).toList(),
+        recognizer: textSpan.recognizer,
+        semanticsLabel: textSpan.semanticsLabel,
+        locale: textSpan.locale,
+        spellOut: textSpan.spellOut,
+        style: textSpan.style != null
+            ? textSpan.style!.merge(overrideTextStyle)
+            : overrideTextStyle,
+      );
+}
