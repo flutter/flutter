@@ -602,15 +602,10 @@ abstract class FrameInfo {
   Image get image;
 }
 
-class Codec {
-  Codec._();
+abstract class Codec {
   int get frameCount => 0;
   int get repetitionCount => 0;
-  Future<FrameInfo> getNextFrame() {
-    return engine.futurize<FrameInfo>(_getNextFrame);
-  }
-
-  String? _getNextFrame(engine.Callback<FrameInfo> callback) => null;
+  Future<FrameInfo> getNextFrame();
   void dispose() {}
 }
 
