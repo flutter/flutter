@@ -2636,9 +2636,14 @@ void main() {
     test(
       'full build ipa path generates plist for manual signing (integration)',
       () {
-        // Skipped - see TODO above. Unit tests in build_ipa_export_plist_test.dart verify
-        // the ExportOptions.plist generation logic directly.
+        // Integration test skipped - see justification comment below.
       },
+      // Integration test skipped because `IosProject.buildSettingsForBuildInfo` does not
+      // return mocked settings in the test harness environment. The project discovery logic
+      // requires a fully-formed iOS project structure that is difficult to replicate in the
+      // current hermetic test setup. See TODO comment above for full requirements.
+      // Unit tests are available in build_ipa_export_plist_test.dart that verify the
+      // ExportOptions.plist generation logic directly.
       skip: 'Integration test requires hermetic iOS project fixture',
     );
   });
