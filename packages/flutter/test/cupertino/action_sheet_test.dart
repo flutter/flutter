@@ -11,7 +11,6 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
@@ -1837,9 +1836,8 @@ void main() {
       await tester.tap(find.text('Go'));
       await tester.pump();
 
-      // The inherited ScrollBehavior should not apply Scrollbars since they are
+      // The inherited ScrollBehavior should not apply scrollbars since they are
       // already built in to the widget.
-      expect(find.byType(Scrollbar), findsNothing);
       expect(find.byType(RawScrollbar), findsNothing);
       // Built in CupertinoScrollbars should only number 2: one for the actions,
       // one for the content.
