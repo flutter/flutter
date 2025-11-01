@@ -45,9 +45,8 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{
-      'PRODUCT_BUNDLE_IDENTIFIER':
-          overrides['PRODUCT_BUNDLE_IDENTIFIER'] ?? 'io.flutter.someProject',
-      'DEVELOPMENT_TEAM': overrides['DEVELOPMENT_TEAM'] ?? 'abc',
+      'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
+      'DEVELOPMENT_TEAM': 'abc',
       ...overrides,
     };
   }
