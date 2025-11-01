@@ -74,7 +74,7 @@ const double ckShadowLightRadius = 800;
 
 void drawSkShadow(
   SkCanvas skCanvas,
-  CkPath path,
+  SkPath path,
   ui.Color color,
   double elevation,
   bool transparentOccluder,
@@ -95,9 +95,8 @@ void drawSkShadow(
 
   final SkTonalColors tonalColors = canvasKit.computeTonalColors(inTonalColors);
 
-  final SkPath skPath = path.snapshotSkPath();
   skCanvas.drawShadow(
-    skPath,
+    path,
     Float32List(3)..[2] = devicePixelRatio * elevation,
     Float32List(3)
       ..[0] = 0
@@ -108,5 +107,4 @@ void drawSkShadow(
     tonalColors.spot,
     flags.toDouble(),
   );
-  skPath.delete();
 }
