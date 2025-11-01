@@ -23,6 +23,7 @@ import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import io.flutter.embedding.engine.FlutterShellArgs;
 import java.io.StringReader;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -70,10 +71,10 @@ public class ApplicationInfoLoaderTest {
   @Test
   public void itGeneratesCorrectApplicationInfoWithCustomValues() throws Exception {
     Bundle bundle = new Bundle();
-    bundle.putString(ApplicationInfoLoader.PUBLIC_AOT_SHARED_LIBRARY_NAME, "testaot");
-    bundle.putString(ApplicationInfoLoader.PUBLIC_VM_SNAPSHOT_DATA_KEY, "testvmsnapshot");
-    bundle.putString(ApplicationInfoLoader.PUBLIC_ISOLATE_SNAPSHOT_DATA_KEY, "testisolatesnapshot");
-    bundle.putString(ApplicationInfoLoader.PUBLIC_FLUTTER_ASSETS_DIR_KEY, "testassets");
+    bundle.putString(FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.metaDataKey, "testaot");
+    bundle.putString(FlutterShellArgs.VM_SNAPSHOT_DATA.metaDataKey, "testvmsnapshot");
+    bundle.putString(FlutterShellArgs.ISOLATE_SNAPSHOT_DATA.metaDataKey, "testisolatesnapshot");
+    bundle.putString(FlutterShellArgs.FLUTTER_ASSETS_DIR.metaDataKey, "testassets");
     Context context = generateMockContext(bundle, null);
     FlutterApplicationInfo info = ApplicationInfoLoader.load(context);
     assertNotNull(info);
