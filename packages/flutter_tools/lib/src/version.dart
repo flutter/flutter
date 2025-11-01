@@ -292,7 +292,7 @@ abstract class FlutterVersion {
   /// the date is omitted, and left `null`.
   String? get engineCommitDate;
 
-  /// A date String describing the [engineRevision] build time.
+  /// A date String describing the [engineContentHash] build time.
   ///
   /// If no date was recorded ([engineCommitDate] is a newly stored field),
   /// the date is omitted, and left `null`.
