@@ -23,6 +23,7 @@ import 'package:flutter/rendering.dart';
 
 import '../foundation/_features.dart';
 import '_window.dart';
+import '_window_positioner.dart';
 import 'binding.dart';
 
 // Maximum width and height a window can be.
@@ -543,6 +544,18 @@ class WindowingOwnerLinux extends WindowingOwner {
     String? title,
   }) {
     throw UnimplementedError('Dialog windows are not yet implemented on Linux.');
+  }
+
+  @internal
+  @override
+  TooltipWindowController createTooltipWindowController({
+    required TooltipWindowControllerDelegate delegate,
+    required BoxConstraints preferredConstraints,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required BaseWindowController parent,
+  }) {
+    throw UnimplementedError('Tooltip windows are not yet implemented on Linux.');
   }
 
   @internal
