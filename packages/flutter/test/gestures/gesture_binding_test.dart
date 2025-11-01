@@ -6,12 +6,17 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 typedef HandleEventCallback = void Function(PointerEvent event);
+typedef HandleHitTestInViewCallback =
+    void Function(HitTestResult result, Offset position, int viewId);
 
-class TestGestureFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding {
+class TestGestureFlutterBinding extends BindingBase
+    with GestureBinding, SchedulerBinding, ServicesBinding, TestDefaultBinaryMessengerBinding {
   @override
   void initInstances() {
     super.initInstances();
@@ -50,10 +55,118 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding, Schedul
     super.handleEvent(event, entry);
     onHandleEvent?.call(event);
   }
+
+  HandleHitTestInViewCallback? onHitTestInView;
+
+  @override
+  void hitTestInView(HitTestResult result, Offset position, int viewId) {
+    if (onHitTestInView != null) {
+      onHitTestInView!(result, position, viewId);
+      return;
+    }
+    super.hitTestInView(result, position, viewId);
+  }
+}
+
+class _DummyHitTestTarget implements HitTestTarget {
+  @override
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    // Nothing to do.
+  }
 }
 
 void main() {
   final TestGestureFlutterBinding binding = TestGestureFlutterBinding.ensureInitialized();
+
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, (
+    MethodCall methodCall,
+  ) async {
+    return null;
+  });
+
+  tearDown(() {
+    binding.onHitTestInView = null;
+  });
+
+  test('Platform view hit test should not accept gesture if no hit', () {
+    // not found
+    TestGestureFlutterBinding.instance.onHitTestInView =
+        (HitTestResult result, Offset position, int viewId) {};
+    final bool? acceptGesture = GestureBinding
+        .instance
+        .platformDispatcher
+        .onPlatformViewShouldAcceptGesture
+        ?.call(0, 1, 1);
+    expect(acceptGesture, isFalse);
+  });
+
+  test('Platform view hit test should not accept gesture if no platform view', () {
+    TestGestureFlutterBinding.instance.onHitTestInView =
+        (HitTestResult result, Offset position, int viewId) {
+          result.add(HitTestEntry(_DummyHitTestTarget()));
+        };
+    final bool? acceptGesture = GestureBinding
+        .instance
+        .platformDispatcher
+        .onPlatformViewShouldAcceptGesture
+        ?.call(0, 1, 1);
+    expect(acceptGesture, isFalse);
+  });
+
+  test(
+    'Platform view hit test should not accept gesture if first hit is not a platform view',
+    () async {
+      final UiKitViewController viewController = await PlatformViewsService.initUiKitView(
+        id: 0,
+        viewType: 'webview',
+        layoutDirection: TextDirection.ltr,
+      );
+      final RenderUiKitView platformViewTarget = RenderUiKitView(
+        viewController: viewController,
+        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+      );
+
+      TestGestureFlutterBinding.instance.onHitTestInView =
+          (HitTestResult result, Offset position, int viewId) {
+            result.add(HitTestEntry(_DummyHitTestTarget()));
+            result.add(HitTestEntry(platformViewTarget));
+          };
+
+      final bool? acceptGesture = GestureBinding
+          .instance
+          .platformDispatcher
+          .onPlatformViewShouldAcceptGesture
+          ?.call(0, 1, 1);
+      expect(acceptGesture, isFalse);
+    },
+  );
+
+  test('Platform view hit test should accept gesture if first hit is a platform view', () async {
+    final UiKitViewController viewController = await PlatformViewsService.initUiKitView(
+      id: 0,
+      viewType: 'webview',
+      layoutDirection: TextDirection.ltr,
+    );
+    final RenderUiKitView platformViewTarget = RenderUiKitView(
+      viewController: viewController,
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+    );
+
+    TestGestureFlutterBinding.instance.onHitTestInView =
+        (HitTestResult result, Offset position, int viewId) {
+          result.add(HitTestEntry(platformViewTarget));
+          result.add(HitTestEntry(_DummyHitTestTarget()));
+        };
+
+    final bool? acceptGesture = GestureBinding
+        .instance
+        .platformDispatcher
+        .onPlatformViewShouldAcceptGesture
+        ?.call(0, 1, 1);
+    expect(acceptGesture, isTrue);
+  });
 
   test('Pointer tap events', () {
     const ui.PointerDataPacket packet = ui.PointerDataPacket(

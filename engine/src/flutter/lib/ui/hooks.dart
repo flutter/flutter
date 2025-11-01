@@ -308,6 +308,11 @@ void _dispatchPointerDataPacket(ByteData packet) {
 }
 
 @pragma('vm:entry-point')
+bool _platformViewShouldAcceptGesture(int viewId, double x, double y) {
+  return PlatformDispatcher.instance._platformViewShouldAcceptGesture(viewId, x, y);
+}
+
+@pragma('vm:entry-point')
 void _dispatchSemanticsAction(int viewId, int nodeId, int action, ByteData? args) {
   PlatformDispatcher.instance._dispatchSemanticsAction(viewId, nodeId, action, args);
 }
@@ -414,6 +419,24 @@ void _invoke3<A1, A2, A3>(
     zone.runGuarded(() {
       callback(arg1, arg2, arg3);
     });
+  }
+}
+
+R? _invoke3WithReturn<A1, A2, A3, R>(
+  R Function(A1 a1, A2 a2, A3 a3)? callback,
+  Zone zone,
+  A1 arg1,
+  A2 arg2,
+  A3 arg3,
+) {
+  if (callback == null) {
+    return null;
+  }
+  if (identical(zone, Zone.current)) {
+    return callback(arg1, arg2, arg3);
+  } else {
+    // TODO: how to handle synchronous return? Should we assume zone is always current?
+    return null;
   }
 }
 

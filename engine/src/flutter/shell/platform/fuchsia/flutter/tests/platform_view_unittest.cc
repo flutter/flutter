@@ -117,6 +117,12 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
     pointer_packets_.push_back(std::move(packet));
   }
   // |flutter::PlatformView::Delegate|
+  bool OnPlatformViewEmbeddedViewShouldAcceptGesture(
+      int64_t view_id,
+      const flutter::PointData& touch_began_location) {
+    return false;
+  }
+  // |flutter::PlatformView::Delegate|
   void OnPlatformViewDispatchKeyDataPacket(
       std::unique_ptr<flutter::KeyDataPacket> packet,
       std::function<void(bool)> callback) {}

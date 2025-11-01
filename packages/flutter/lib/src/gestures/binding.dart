@@ -14,6 +14,7 @@ import 'dart:collection';
 import 'dart:ui' as ui show PointerDataPacket;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'arena.dart';
@@ -278,7 +279,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void initInstances() {
     super.initInstances();
     _instance = this;
-    platformDispatcher.onPointerDataPacket = _handlePointerDataPacket;
+    platformDispatcher
+      ..onPointerDataPacket = _handlePointerDataPacket
+      ..onPlatformViewShouldAcceptGesture = _handlePlatformViewShouldAcceptGesture;
   }
 
   /// The singleton instance of this object.
@@ -317,6 +320,17 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
         ),
       );
     }
+  }
+
+  bool _handlePlatformViewShouldAcceptGesture(int viewId, double x, double y) {
+    final HitTestResult result = HitTestResult();
+    hitTestInView(result, Offset(x, y), viewId);
+
+    if (result.path.isEmpty) {
+      return false;
+    }
+    final HitTestTarget firstHit = result.path.first.target;
+    return firstHit is RenderUiKitView;
   }
 
   double? _devicePixelRatioForView(int viewId) {

@@ -43,6 +43,8 @@ typedef KeyDataCallback = bool Function(KeyData data);
 /// Signature for [PlatformDispatcher.onSemanticsActionEvent].
 typedef SemanticsActionEventCallback = void Function(SemanticsActionEvent action);
 
+typedef PlatformViewShouldAcceptGestureCallback = bool Function(int viewId, double x, double y);
+
 /// Signature for responses to platform messages.
 ///
 /// Used as a parameter to [PlatformDispatcher.sendPlatformMessage] and
@@ -1336,6 +1338,14 @@ class PlatformDispatcher {
     _onSemanticsActionEventZone = Zone.current;
   }
 
+  PlatformViewShouldAcceptGestureCallback? get onPlatformViewShouldAcceptGesture =>
+      _onPlatformViewShouldAcceptGesture;
+  PlatformViewShouldAcceptGestureCallback? _onPlatformViewShouldAcceptGesture;
+  Zone _onPlatformViewShouldAcceptGestureZone = Zone.root;
+  set onPlatformViewShouldAcceptGesture(PlatformViewShouldAcceptGestureCallback? callback) {
+    _onPlatformViewShouldAcceptGesture = callback;
+  }
+
   // Called from the engine via hooks.dart.
   void _updateFrameData(int frameNumber) {
     final FrameData previous = _frameData;
@@ -1371,6 +1381,17 @@ class PlatformDispatcher {
         arguments: args,
       ),
     );
+  }
+
+  bool _platformViewShouldAcceptGesture(int viewId, double x, double y) {
+    return _invoke3WithReturn<int, double, double, bool>(
+          onPlatformViewShouldAcceptGesture,
+          _onPlatformViewShouldAcceptGestureZone,
+          viewId,
+          x,
+          y,
+        ) ??
+        false;
   }
 
   ErrorCallback? _onError;

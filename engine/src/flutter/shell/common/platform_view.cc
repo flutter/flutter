@@ -35,6 +35,13 @@ void PlatformView::DispatchPointerDataPacket(
   delegate_.OnPlatformViewDispatchPointerDataPacket(std::move(packet));
 }
 
+bool PlatformView::EmbeddedViewShouldAcceptGesture(
+    int64_t view_id,
+    const flutter::PointData& touch_began_location) {
+  return delegate_.OnPlatformViewEmbeddedViewShouldAcceptGesture(
+      view_id, touch_began_location);
+}
+
 void PlatformView::DispatchSemanticsAction(int64_t view_id,
                                            int32_t node_id,
                                            SemanticsAction action,
