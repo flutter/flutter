@@ -83,7 +83,7 @@ class TickerMode extends StatefulWidget {
   /// Obtains a [ValueListenable] from the [TickerMode] surrounding the `context`,
   /// which indicates whether tickers are enabled in the given subtree.
   ///
-  /// When that [TickerMode] enabled or disabled tickers, the listenable notifies
+  /// When that [TickerMode] enables or disables tickers, the listenable notifies
   /// its listeners.
   ///
   /// While the [ValueListenable] is stable for the lifetime of the surrounding
@@ -105,7 +105,7 @@ class TickerMode extends StatefulWidget {
   /// dependency between the provided `context` and the ancestor [TickerMode].
   /// In this case, the widget automatically rebuilds when the ticker mode
   /// changes or when it is moved to a new [TickerMode] ancestor, which
-  /// simplifies the management cost in the widget at the expensive of some
+  /// simplifies the management cost in the widget at the expense of some
   /// potential unnecessary rebuilds.
   ///
   /// In the absence of a [TickerMode] widget, this function returns a
