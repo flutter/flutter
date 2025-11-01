@@ -125,6 +125,7 @@ class _MyContextMenuState extends State<MyContextMenu> {
         onTapDown: _handleTapDown,
         onSecondaryTapDown: _handleSecondaryTapDown,
         child: MenuAnchor(
+          animated: true,
           controller: _menuController,
           menuChildren: <Widget>[
             MenuItemButton(
@@ -144,6 +145,7 @@ class _MyContextMenuState extends State<MyContextMenu> {
                 child: Text(MenuEntry.showMessage.label),
               ),
             SubmenuButton(
+              animated: true,
               menuChildren: <Widget>[
                 MenuItemButton(
                   onPressed: () => _activate(MenuEntry.colorRed),
