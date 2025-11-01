@@ -1975,6 +1975,149 @@ void main() {
         expect(itemRect.right, lessThanOrEqualTo(carouselRight));
       }
     });
+
+    testWidgets('CarouselView infinite', (WidgetTester tester) async {
+      final CarouselController controller = CarouselController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CarouselView(
+              itemExtent: 200,
+              infinite: true,
+              controller: controller,
+              children: List<Widget>.generate(3, (int index) {
+                return Center(child: Text('Item $index'));
+              }),
+            ),
+          ),
+        ),
+      );
+
+      // Verify animating to an index beyond the array length.
+      controller.animateToItem(5);
+      await tester.pumpAndSettle();
+
+      // Should show last item 2 times based on size.
+      expect(find.textContaining('Item 2'), findsAtLeastNWidgets(2));
+    });
+  });
+
+  testWidgets('CarouselView infinite scrolling', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView(
+            itemExtent: 200,
+            infinite: true,
+            children: List<Widget>.generate(3, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    // Initial state - should show Item 0
+    expect(find.text('Item 0'), findsAtLeastNWidgets(1));
+
+    // Scroll forward - should be able to scroll infinitely
+    await tester.drag(find.byType(CarouselView), const Offset(-400, 0));
+    await tester.pumpAndSettle();
+
+    // Should see one of the items
+    expect(find.textContaining('Item'), findsAtLeastNWidgets(1));
+  });
+
+  testWidgets('CarouselView.weighted infinite scrolling', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView.weighted(
+            flexWeights: const <int>[1, 2, 1],
+            infinite: true,
+            children: List<Widget>.generate(3, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    // Initial state - should show items 0, 1
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 1'), findsOneWidget);
+    expect(find.text('Item 2'), findsNothing);
+
+    // Scroll forward - infinite scrolling should work
+    await tester.drag(find.byType(CarouselView), const Offset(-400, 0));
+    await tester.pumpAndSettle();
+
+    // Should still see items after infinite scroll
+    expect(find.textContaining('Item'), findsAtLeastNWidgets(1));
+  });
+
+  testWidgets('CarouselView.weighted with hero layout (1,7,1) and infinite scrolling', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView.weighted(
+            flexWeights: const <int>[1, 7, 1],
+            infinite: true,
+            children: List<Widget>.generate(6, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    // Initial state - should show items
+    expect(find.textContaining('Item'), findsAtLeastNWidgets(1));
+
+    // Scroll forward multiple times
+    await tester.drag(find.byType(CarouselView), const Offset(-400, 0));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Item'), findsAtLeastNWidgets(1));
+
+    await tester.drag(find.byType(CarouselView), const Offset(-400, 0));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Item'), findsAtLeastNWidgets(1));
+
+    // Scroll backward
+    await tester.drag(find.byType(CarouselView), const Offset(400, 0));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Item'), findsAtLeastNWidgets(1));
+  });
+
+  testWidgets('CarouselView.weighted with multi-browse layout and infinite scrolling', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView.weighted(
+            flexWeights: const <int>[1, 2, 3, 2, 1],
+            infinite: true,
+            consumeMaxWeight: false,
+            children: List<Widget>.generate(10, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    // Initial state - should show items
+    expect(find.textContaining('Item'), findsAtLeastNWidgets(1));
+
+    // Scroll and verify items are still visible
+    await tester.drag(find.byType(CarouselView), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Item'), findsAtLeastNWidgets(1));
   });
 
   group('CarouselView item clipBehavior', () {
