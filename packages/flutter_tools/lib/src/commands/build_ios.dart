@@ -914,7 +914,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     }
 
     // Search for profiles matching the specifier (could be name or UUID)
-    for (final FileSystemEntity entity in profileDirectory.listSync()) {
+    await for (final FileSystemEntity entity in profileDirectory.list()) {
       if (entity is! File || globals.fs.path.extension(entity.path) != '.mobileprovision') {
         continue;
       }
