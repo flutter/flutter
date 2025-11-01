@@ -28,6 +28,25 @@ import '../ios/plist_parser.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
+/// Container for provisioning profile information extracted from a decoded profile.
+///
+/// Currently holds UUID and name, which are sufficient for generating ExportOptions.plist.
+/// Could be extended in the future to include:
+/// - Team ID (for validation)
+/// - Expiration date (for warning about expired profiles)
+/// - Entitlements (for debugging entitlement mismatches)
+/// - Supported bundle IDs (for multi-target support with extensions/widgets)
+@immutable
+class ProfileData {
+  const ProfileData({required this.uuid, required this.name});
+
+  /// The provisioning profile UUID (e.g., "12345678-1234-1234-1234-123456789012").
+  final String uuid;
+
+  /// The provisioning profile name (e.g., "MyApp Distribution"), or null if not available.
+  final String? name;
+}
+
 /// Builds an .app for an iOS app to be used for local testing on an iOS device
 /// or simulator. Can only be run on a macOS host.
 class BuildIOSCommand extends _BuildIOSSubCommand {
@@ -106,6 +125,26 @@ class _ImageAssetFileKey {
 /// App Store submission.
 ///
 /// Can only be run on a macOS host.
+///
+/// ## Design Decision: Manual Signing Export Options Generation
+///
+/// **Problem**: `flutter build ipa` fails for manual signing when apps use Push Notifications
+/// or Sign in with Apple entitlements. Xcode's `xcodebuild -exportArchive` requires a complete
+/// ExportOptions.plist with `teamID`, `signingStyle`, and `provisioningProfiles` mapping.
+///
+/// **Solution**: Auto-generate an enhanced ExportOptions.plist for manual signing scenarios.
+///
+/// **Why this design:**
+/// - Scoped to Release/Profile only: Debug builds don't need App Store export options, avoiding
+///   unnecessary overhead during development.
+/// - Single provisioning profile lookup: Apps with extensions not yet supported (future enhancement).
+/// - Graceful fallback: If profile lookup fails, uses simple plist (original behavior preserved).
+/// - Backward compatible: No changes to automatic signing or existing workflows.
+///
+/// **Future enhancements:**
+/// - Support apps with extensions/widgets (multiple provisioning profiles).
+/// - Make plist values (`uploadBitcode`, `stripSwiftSymbols`) configurable.
+/// - Cache profile lookups within a single build invocation.
 class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   BuildIOSArchiveCommand({required super.logger, required super.verboseHelp}) {
     argParser.addOption(
@@ -532,7 +571,8 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       final String exportMethodDisplayName = isAppStoreUpload ? 'App Store' : exportMethod;
       status = globals.logger.startProgress('Building $exportMethodDisplayName IPA...');
       if (exportOptions == null) {
-        generatedExportPlist = _createExportPlist(exportMethod);
+        final BuildInfo buildInfo = await cachedBuildInfo;
+        generatedExportPlist = await _createExportPlist(exportMethod, app, buildInfo);
         exportOptions = generatedExportPlist.path;
       }
 
@@ -618,8 +658,125 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     return FlutterCommandResult.success();
   }
 
-  File _createExportPlist(String exportMethod) {
-    // Create the plist to be passed into xcodebuild -exportOptionsPlist.
+  /// Test-only method to expose ExportOptions.plist generation logic for unit testing.
+  @visibleForTesting
+  static Future<File> createExportPlistForTesting({
+    required String exportMethod,
+    required BuildInfo buildInfo,
+    required String bundleId,
+    String? codeSignStyle,
+    String? profileSpecifier,
+    String? teamId,
+    String? profileUuid,
+    required FileSystem fileSystem,
+  }) async {
+    final isManualSigning = codeSignStyle == 'Manual';
+
+    // Only enhance for manual signing in Release/Profile builds
+    if (isManualSigning &&
+        (buildInfo.mode == BuildMode.release || buildInfo.mode == BuildMode.profile)) {
+      if (profileSpecifier != null && teamId != null && profileUuid != null) {
+        // Generate enhanced ExportOptions.plist for manual signing
+        return _createManualSigningExportPlistStatic(
+          exportMethod: exportMethod,
+          teamId: teamId,
+          bundleId: bundleId,
+          profileUuid: profileUuid,
+          fileSystem: fileSystem,
+        );
+      }
+    }
+
+    // Fall back to simple plist (current behavior)
+    return _createSimpleExportPlistStatic(exportMethod: exportMethod, fileSystem: fileSystem);
+  }
+
+  /// Generates an ExportOptions.plist for use with `xcodebuild -exportArchive`.
+  ///
+  /// For manual signing configurations, generates an enhanced plist with complete signing
+  /// configuration. Otherwise, generates a simple plist with just the export method.
+  ///
+  /// **Enhancement conditions:**
+  /// - `CODE_SIGN_STYLE=Manual` is detected (manual provisioning profile signing)
+  /// - Build mode is Release or Profile (production builds only, skips Debug to avoid overhead)
+  /// - A provisioning profile can be located and parsed
+  ///
+  /// **Known limitations:**
+  /// - Currently only supports single-target apps (main app bundle ID only)
+  /// - TODO: Handle multi-target apps with extensions/widgets (requires multiple bundle IDs
+  ///   mapped to their respective provisioning profiles in the provisioningProfiles dict)
+  ///
+  /// **Fallback behavior:**
+  /// - For Automatic signing: Let Xcode handle the export options (simple plist)
+  /// - For Debug builds: Skip enhancement (not needed for App Store export)
+  /// - If profile lookup fails: Use simple plist and log trace message
+  /// - If required build settings missing: Use simple plist
+  ///
+  /// Returns an enhanced plist with `teamID`, `signingStyle`, and `provisioningProfiles`
+  /// mapping when conditions are met, otherwise returns a simple plist with just `method`.
+  Future<File> _createExportPlist(
+    String exportMethod,
+    BuildableIOSApp app,
+    BuildInfo buildInfo,
+  ) async {
+    // Check if we should generate enhanced ExportOptions.plist for manual signing
+    final Map<String, String>? buildSettings = await app.project.buildSettingsForBuildInfo(
+      buildInfo,
+    );
+
+    final String? codeSignStyle = buildSettings?['CODE_SIGN_STYLE'];
+    final isManualSigning = codeSignStyle == 'Manual';
+
+    // Only enhance for manual signing in Release/Profile builds
+    // (skip for Debug to avoid overhead during development workflow)
+    if (isManualSigning &&
+        (buildInfo.mode == BuildMode.release || buildInfo.mode == BuildMode.profile)) {
+      final String? profileSpecifier = buildSettings?['PROVISIONING_PROFILE_SPECIFIER'];
+      final String? teamId = buildSettings?['DEVELOPMENT_TEAM'];
+      final String bundleId = buildSettings?['PRODUCT_BUNDLE_IDENTIFIER'] ?? app.id;
+
+      if (profileSpecifier != null && teamId != null) {
+        // Try to find and parse the provisioning profile
+        final String? profileUuid = await _findProvisioningProfileUuid(profileSpecifier);
+
+        if (profileUuid != null) {
+          // Generate enhanced ExportOptions.plist for manual signing
+          globals.logger.printTrace(
+            'Detected manual code signing. Generated ExportOptions.plist with '
+            'teamID, signingStyle=manual, and provisioningProfiles for $bundleId.',
+          );
+          return _createManualSigningExportPlist(
+            exportMethod: exportMethod,
+            teamId: teamId,
+            bundleId: bundleId,
+            profileUuid: profileUuid,
+          );
+        }
+        // Note: If profile lookup fails, we fall back to simple plist.
+        // Trace-level logging is already emitted by _findProvisioningProfileUuid.
+        globals.logger.printTrace(
+          'Manual signing detected but no matching provisioning profile UUID was found '
+          'for $bundleId. Falling back to default ExportOptions.plist. '
+          'If exportArchive fails with provisioning profile errors, consider supplying '
+          '--export-options-plist manually.',
+        );
+      }
+    }
+
+    // Fall back to simple plist (current behavior)
+    return _createSimpleExportPlist(exportMethod);
+  }
+
+  /// Creates a simple ExportOptions.plist (current behavior).
+  File _createSimpleExportPlist(String exportMethod) {
+    return _createSimpleExportPlistStatic(exportMethod: exportMethod, fileSystem: globals.fs);
+  }
+
+  /// Static version for testing.
+  static File _createSimpleExportPlistStatic({
+    required String exportMethod,
+    required FileSystem fileSystem,
+  }) {
     final plistContents = StringBuffer('''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -633,12 +790,215 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 </plist>
 ''');
 
-    final File tempPlist = globals.fs.systemTempDirectory
+    final File tempPlist = fileSystem.systemTempDirectory
         .createTempSync('flutter_build_ios.')
         .childFile('ExportOptions.plist');
     tempPlist.writeAsStringSync(plistContents.toString());
 
     return tempPlist;
+  }
+
+  /// Creates an ExportOptions.plist for manual signing with provisioning profile mapping.
+  File _createManualSigningExportPlist({
+    required String exportMethod,
+    required String teamId,
+    required String bundleId,
+    required String profileUuid,
+  }) {
+    return _createManualSigningExportPlistStatic(
+      exportMethod: exportMethod,
+      teamId: teamId,
+      bundleId: bundleId,
+      profileUuid: profileUuid,
+      fileSystem: globals.fs,
+    );
+  }
+
+  /// Static version for testing.
+  static File _createManualSigningExportPlistStatic({
+    required String exportMethod,
+    required String teamId,
+    required String bundleId,
+    required String profileUuid,
+    required FileSystem fileSystem,
+  }) {
+    // Note: uploadBitcode=false and stripSwiftSymbols=true are conservative defaults
+    // that work for most App Store distribution scenarios. These values are not currently
+    // configurable, but could be made configurable in a future enhancement if needed.
+    final plistContents = StringBuffer('''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>method</key>
+        <string>$exportMethod</string>
+        <key>teamID</key>
+        <string>$teamId</string>
+        <key>signingStyle</key>
+        <string>manual</string>
+        <key>provisioningProfiles</key>
+        <dict>
+            <key>$bundleId</key>
+            <string>$profileUuid</string>
+        </dict>
+        <key>uploadBitcode</key>
+        <false/>
+        <key>stripSwiftSymbols</key>
+        <true/>
+    </dict>
+</plist>
+''');
+
+    final File tempPlist = fileSystem.systemTempDirectory
+        .createTempSync('flutter_build_ios.')
+        .childFile('ExportOptions.plist');
+    tempPlist.writeAsStringSync(plistContents.toString());
+
+    return tempPlist;
+  }
+
+  /// Searches the provisioning profiles directory for a profile matching [profileSpecifier].
+  ///
+  /// The [profileSpecifier] can be either:
+  /// - A provisioning profile UUID (e.g., "12345678-1234-1234-1234-123456789012")
+  /// - A provisioning profile name (e.g., "MyApp Distribution")
+  ///
+  /// **Search strategy:**
+  /// - Iterates through all `.mobileprovision` files in the standard Xcode profiles directory
+  /// - Decodes each profile once to extract both UUID and name (performance optimization)
+  /// - Matches against both UUID and name to handle either specification format
+  /// - Returns the UUID of the first matching profile
+  ///
+  /// **Edge cases handled:**
+  /// - Home directory not available (CI/CD environments) - logs trace and returns null
+  /// - Provisioning profiles directory doesn't exist - logs trace and returns null
+  /// - Profile file parsing fails - logs trace and continues searching other profiles
+  /// - Multiple profiles with same name - returns first match (profile parse order dependent)
+  /// - Profile not found - logs trace with helpful context and returns null
+  ///
+  /// Returns the UUID of the matching profile, or null if not found or parsing fails.
+  Future<String?> _findProvisioningProfileUuid(String profileSpecifier) async {
+    // Cannot locate provisioning profiles without home directory
+    final String? homeDir = globals.fsUtils.homeDirPath;
+    if (homeDir == null) {
+      globals.logger.printTrace(
+        'Manual signing: provisioning profile "$profileSpecifier" not found. '
+        'Home directory not available (may be running in restricted environment). '
+        'Falling back to basic ExportOptions.plist. '
+        'Manual signing may fail during xcodebuild -exportArchive if entitlements require '
+        'specific provisioning profile configuration.',
+      );
+      return null;
+    }
+
+    final Directory profileDirectory = globals.fs.directory(
+      globals.fs.path.join(
+        homeDir,
+        'Library',
+        'Developer',
+        'Xcode',
+        'UserData',
+        'Provisioning Profiles',
+      ),
+    );
+
+    if (!profileDirectory.existsSync()) {
+      globals.logger.printTrace(
+        'Manual signing: provisioning profile "$profileSpecifier" not found. '
+        'Expected profiles in: ${profileDirectory.path} (directory does not exist). '
+        'Falling back to basic ExportOptions.plist. '
+        'Manual signing may fail during xcodebuild -exportArchive if entitlements require '
+        'specific provisioning profile configuration.',
+      );
+      return null;
+    }
+
+    // Search for profiles matching the specifier (could be name or UUID)
+    await for (final FileSystemEntity entity in profileDirectory.list()) {
+      if (entity is! File || globals.fs.path.extension(entity.path) != '.mobileprovision') {
+        continue;
+      }
+
+      // Decode profile once and extract both UUID and name
+      final ProfileData? profileInfo = await _parseProvisioningProfileInfo(entity);
+      if (profileInfo != null) {
+        // Check if this profile matches the specifier (by UUID or name)
+        if (profileInfo.uuid == profileSpecifier || profileInfo.name == profileSpecifier) {
+          return profileInfo.uuid;
+        }
+      }
+    }
+
+    globals.logger.printTrace(
+      'Manual signing: provisioning profile "$profileSpecifier" not found. '
+      'Expected profiles in: ${profileDirectory.path}. '
+      'Falling back to basic ExportOptions.plist. '
+      'Manual signing may fail during xcodebuild -exportArchive if entitlements require '
+      'specific provisioning profile configuration.',
+    );
+    return null;
+  }
+
+  /// Parses a provisioning profile file and extracts both UUID and name in a single decode operation.
+  ///
+  /// **Format**: Provisioning profiles are DER-encoded data wrapped in CMS (pkcs7) format.
+  /// We use the macOS `security cms -D` command to decode them.
+  ///
+  /// **Performance**: Extracts both UUID and name in one decode operation to minimize file I/O
+  /// when searching for profiles (avoids decoding the same file twice).
+  ///
+  /// **Security considerations:**
+  /// - Profiles are stored in user's home directory (`~/Library/Developer/Xcode/UserData/Provisioning Profiles/`)
+  ///   which is a trusted location managed by Xcode.
+  /// - We validate `security` command exit code and decoded file existence before parsing.
+  /// - Failed parses are caught, logged at trace level, and do not propagate exceptions.
+  /// - Temporary decoded plist files are always cleaned up in `finally` block.
+  ///
+  /// Returns a [ProfileData] object with UUID and name if parsing succeeds, or null if:
+  /// - The security command fails (exit code != 0)
+  /// - The decoded plist file is not created
+  /// - The plist cannot be parsed
+  /// - The UUID field is missing (required field)
+  Future<ProfileData?> _parseProvisioningProfileInfo(File profileFile) async {
+    try {
+      // Decode the provisioning profile using security command
+      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+        'flutter_provisioning_',
+      );
+      final File decodedPlist = tempDir.childFile('decoded.plist');
+
+      try {
+        final RunResult result = await globals.processUtils.run(<String>[
+          'security',
+          'cms',
+          '-D',
+          '-i',
+          profileFile.path,
+          '-o',
+          decodedPlist.path,
+        ]);
+
+        if (result.exitCode != 0 || !decodedPlist.existsSync()) {
+          return null;
+        }
+
+        // Parse the plist to get both UUID and name in a single operation
+        final Map<String, Object> plistData = globals.plistParser.parseFile(decodedPlist.path);
+        final uuid = plistData['UUID']?.toString();
+        final name = plistData['Name']?.toString();
+
+        if (uuid == null) {
+          return null;
+        }
+
+        return ProfileData(uuid: uuid, name: name);
+      } finally {
+        ErrorHandlingFileSystem.deleteIfExists(tempDir);
+      }
+    } on Exception catch (e) {
+      globals.logger.printTrace('Failed to parse provisioning profile ${profileFile.path}: $e');
+      return null;
+    }
   }
 
   // As of Xcode 15.4, the old export methods 'app-store', 'ad-hoc', and 'development'
