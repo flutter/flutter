@@ -1390,7 +1390,7 @@ class TextStyle with Diagnosticable {
     TextDirection? textDirection,
     TextScaler textScaler = TextScaler.noScaling,
     String? ellipsis,
-    int? maxLines,
+    num? maxLines,
     TextHeightBehavior? textHeightBehavior,
     Locale? locale,
     String? fontFamily,
@@ -1435,7 +1435,7 @@ class TextStyle with Diagnosticable {
               fontStyle: strutStyle.fontStyle,
               forceStrutHeight: strutStyle.forceStrutHeight,
             ),
-      maxLines: maxLines,
+      maxLines: maxLines?.ceil(),
       ellipsis: ellipsis,
       locale: locale,
     );
