@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <impeller/color.glsl>
 #include <impeller/constants.glsl>
 #include <impeller/gaussian.glsl>
 #include <impeller/texture.glsl>
@@ -10,6 +11,7 @@
 uniform f16sampler2D texture_sampler;
 
 layout(constant_id = 0) const float supports_decal = 1.0;
+layout(constant_id = 1) const float bounded_blur = 0.0;
 
 uniform KernelSamples {
   float sample_count;
@@ -19,7 +21,18 @@ uniform KernelSamples {
 }
 kernel_samples;
 
+uniform FragInfo {
+  mat4 quad_line_params;
+}
+frag_info;
+
 f16vec4 Sample(f16sampler2D tex, vec2 coords) {
+  if (bounded_blur == 1.0) {
+    vec4 signed_distances = frag_info.quad_line_params * vec4(coords, 1.0, 0.0);
+    if (any(lessThan(signed_distances, vec4(0.0)))) {
+      return f16vec4(0);
+    }
+  }
   if (supports_decal == 1.0) {
     return texture(tex, coords);
   }
@@ -40,5 +53,9 @@ void main() {
                           v_texture_coords + kernel_samples.sample_data[i].xy);
   }
 
-  frag_color = total_color;
+  if (bounded_blur == 1.0) {
+    frag_color = IPHalfUnpremultiply(total_color);
+  } else {
+    frag_color = total_color;
+  }
 }

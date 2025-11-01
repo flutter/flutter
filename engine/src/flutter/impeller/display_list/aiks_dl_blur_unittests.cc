@@ -13,6 +13,7 @@
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
+#include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 
@@ -361,6 +362,99 @@ TEST_P(AiksTest, CanRenderBackdropBlurHugeSigma) {
   auto backdrop_filter =
       DlImageFilter::MakeBlur(999999, 999999, DlTileMode::kClamp);
   builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderBoundedBlurFarFromEdge) {
+  // This test case corresponds to the 1st branch of downsampling, where
+  // the coverage hint is non-null but was ignored during snapshotting.
+
+  auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
+
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  builder.DrawImage(image, DlPoint(0.0, 0.0), DlImageSampling::kNearestNeighbor,
+                    &paint);
+
+  DlPaint save_paint;
+  save_paint.setBlendMode(DlBlendMode::kSrcOver);
+
+  // Subcase 1: When the blur bounds has a non-zero offset.
+  // We still need a clip to trigger the 1st branch of downsampling, therefore
+  // the clip is chosen as an expanded rect of the blur bounds.
+  // The resulting blur is expected to extend a bit beyond rect1, which is
+  // caused by the gaussian blur not being clipped.
+  DlRect rect1 = DlRect::MakeLTRB(50, 80, 233, 180);
+  Point offset = Point(10, 10);
+  builder.Save();
+  builder.ClipRect(rect1.Expand(offset));
+  auto backdrop_filter1 = DlBlurImageFilter::Make(
+      20, 20, rect1.Shift(offset - rect1.GetLeftTop()), DlTileMode::kDecal);
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter1.get());
+  builder.Restore();
+  builder.Restore();
+
+  // Stroke the rect so that we can see where the bounds are.
+  DlPaint stroke_paint(DlColor::kBlack());
+  stroke_paint.setStrokeWidth(1);
+  stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
+  builder.DrawRect(rect1, stroke_paint);
+
+  // Subcase 2: When the blur bounds has a zero offset.
+  DlRect rect2 = DlRect::MakeLTRB(50, 200, 233, 300);
+  builder.ClipRect(rect2);
+  builder.Save();
+  auto backdrop_filter = DlBlurImageFilter::Make(
+      20, 20, rect2.Shift(-rect2.GetOrigin()), DlTileMode::kDecal);
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
+  builder.Restore();
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderBoundedBlurCloseToEdge) {
+  // This test case corresponds to the 2nd branch of downsampling, where
+  // the coverage hint is null or was already used during snapshotting.
+  auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
+
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  builder.DrawImage(image, DlPoint(0.0, 0.0), DlImageSampling::kNearestNeighbor,
+                    &paint);
+
+  DlPaint save_paint;
+  save_paint.setBlendMode(DlBlendMode::kSrcOver);
+
+  // Subcase 1: When the blur bounds has a non-zero offset.
+  // The resulting blur is expected to extend a bit beyond rect1, which is
+  // caused by the gaussian blur not being clipped.
+  DlRect rect1 = DlRect::MakeLTRB(10, 80, 233, 180);
+  builder.Save();
+  auto backdrop_filter1 =
+      DlBlurImageFilter::Make(20, 20, rect1, DlTileMode::kDecal);
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter1.get());
+  builder.Restore();
+  builder.Restore();
+
+  // Stroke the rect so that we can see where the bounds are.
+  DlPaint stroke_paint(DlColor::kBlack());
+  stroke_paint.setStrokeWidth(1);
+  stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
+  builder.DrawRect(rect1, stroke_paint);
+
+  // Subcase 2: When the blur bounds has a zero offset.
+  DlRect rect2 = DlRect::MakeLTRB(10, 200, 233, 300);
+  builder.ClipRect(rect2);
+  builder.Save();
+  auto backdrop_filter = DlBlurImageFilter::Make(
+      20, 20, rect2.Shift(-rect2.GetOrigin()), DlTileMode::kDecal);
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
+  builder.Restore();
   builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
