@@ -87,9 +87,6 @@ class _StubDialogWindowController extends DialogWindowController {
   bool get isActivated => true;
 
   @override
-  bool get isMinimized => false;
-
-  @override
   void setSize(Size size) {}
 
   @override
@@ -100,9 +97,6 @@ class _StubDialogWindowController extends DialogWindowController {
 
   @override
   void activate() {}
-
-  @override
-  void setMinimized(bool minimized) {}
 
   @override
   void destroy() {}

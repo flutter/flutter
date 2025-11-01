@@ -565,13 +565,6 @@ class DialogWindowControllerWin32 extends DialogWindowController {
 
   @override
   @internal
-  bool get isMinimized {
-    _ensureNotDestroyed();
-    return _Win32PlatformInterface.isIconic(getWindowHandle()) != 0;
-  }
-
-  @override
-  @internal
   void setSize(Size? size) {
     _ensureNotDestroyed();
     _Win32PlatformInterface.setWindowContentSize(_owner.allocator, getWindowHandle(), size);
@@ -601,21 +594,6 @@ class DialogWindowControllerWin32 extends DialogWindowController {
   void activate() {
     _ensureNotDestroyed();
     _Win32PlatformInterface.showWindow(getWindowHandle(), _SW_RESTORE);
-  }
-
-  @override
-  @internal
-  void setMinimized(bool minimized) {
-    if (parent != null) {
-      return;
-    }
-
-    _ensureNotDestroyed();
-    if (minimized) {
-      _Win32PlatformInterface.showWindow(getWindowHandle(), _SW_MINIMIZE);
-    } else {
-      _Win32PlatformInterface.showWindow(getWindowHandle(), _SW_RESTORE);
-    }
   }
 
   @override

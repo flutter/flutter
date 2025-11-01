@@ -427,8 +427,8 @@ mixin class DialogWindowControllerDelegate {
 ///  * Modal dialogs: created with a non-null parent. These dialogs are modal
 ///    to the parent, do not have a system menu, and are not selectable from the
 ///    window switcher.
-///  * Modeless dialogs: created with a null parent. These dialogs can be
-///    minimized (but not maximized), and have a disabled close button.
+///  * Modeless dialogs: created with a null parent. These dialogs canot be
+///    minimized or maximized and have a disabled close button.
 ///
 /// This class does not interact with the widget tree. Instead, it is typically
 /// provided to the [DialogWindow] widget, which renders the content inside the
@@ -495,7 +495,7 @@ abstract class DialogWindowController extends BaseWindowController {
   /// The [parent] argument specifies the parent window of this dialog.
   ///
   /// If the [parent] is null, then the dialog is modeless. Such dialogs can
-  /// be minimized but not maximized. They also have a disabled close button.
+  /// not be minimized or maximized. They also have a disabled close button.
   ///
   /// If the [parent] is non-null, then the dialog is modal to the parent.
   /// Such dialogs do not have a system menu. They are also not selectable
@@ -564,12 +564,6 @@ abstract class DialogWindowController extends BaseWindowController {
   @internal
   bool get isActivated;
 
-  /// Whether or not window is currently minimized.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  bool get isMinimized;
-
   /// Request change to the content size of the window.
   ///
   /// The [size] describes the new requested window size. If the size disagrees
@@ -605,19 +599,9 @@ abstract class DialogWindowController extends BaseWindowController {
   /// The platform may also give the window input focus and bring it to the
   /// top of the window stack. However, this behavior is platform-dependent.
   ///
-  /// If the window is minimized, the window returns to the size and position
-  /// that it had before that state was applied. The window will also be
-  /// brought to the top of the window stack.
-  ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void activate();
-
-  /// Requests window to be minimized.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void setMinimized(bool minimized);
 }
 
 /// [WindowingOwner] is responsible for creating and managing window controllers.
@@ -1117,7 +1101,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
     final BaseWindowController controller = _of(context, _WindowControllerAspect.minimized);
     return switch (controller) {
       RegularWindowController() => controller.isMinimized,
-      DialogWindowController() => controller.isMinimized,
+      DialogWindowController() => false,
     };
   }
 
@@ -1139,7 +1123,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
 
     return switch (controller) {
       RegularWindowController() => controller.isMinimized,
-      DialogWindowController() => controller.isMinimized,
+      DialogWindowController() => false,
     };
   }
 
@@ -1310,8 +1294,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
               final RegularWindowController regular =>
                 regular.isMinimized !=
                     (oldWidget.controller as RegularWindowController).isMinimized,
-              final DialogWindowController dialog =>
-                dialog.isMinimized != (oldWidget.controller as DialogWindowController).isMinimized,
+              DialogWindowController => false,
             },
             _WindowControllerAspect.fullscreen => switch (controller) {
               final RegularWindowController regular =>
