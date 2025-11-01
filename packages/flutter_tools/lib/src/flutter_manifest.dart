@@ -788,20 +788,23 @@ class AssetsEntry {
   const AssetsEntry({
     required this.uri,
     this.flavors = const <String>{},
+    this.platforms = const <String>{},
     this.transformers = const <AssetTransformerEntry>[],
   });
 
   final Uri uri;
   final Set<String> flavors;
+  final Set<String> platforms;
   final List<AssetTransformerEntry> transformers;
 
   Object? get descriptor {
-    if (transformers.isEmpty && flavors.isEmpty) {
+    if (transformers.isEmpty && flavors.isEmpty && platforms.isEmpty) {
       return uri.toString();
     }
     return <String, Object?>{
       _pathKey: uri.toString(),
       if (flavors.isNotEmpty) _flavorKey: flavors.toList(),
+      if (platforms.isNotEmpty) _platformsKey: platforms.toList(),
       if (transformers.isNotEmpty)
         _transformersKey: transformers.map((AssetTransformerEntry e) => e.descriptor).toList(),
     };
@@ -809,6 +812,7 @@ class AssetsEntry {
 
   static const _pathKey = 'path';
   static const _flavorKey = 'flavors';
+  static const _platformsKey = 'platforms';
   static const _transformersKey = 'transformers';
 
   static AssetsEntry? parseFromYaml(Object? yaml) {
@@ -856,11 +860,15 @@ class AssetsEntry {
       final (List<String>? flavors, List<String> flavorsErrors) = _parseFlavorsSection(
         yaml[_flavorKey],
       );
+      final (List<String>? platforms, List<String> platformsErrors) = _parsePlatformsSection(
+        yaml[_platformsKey],
+      );
       final (List<AssetTransformerEntry>? transformers, List<String> transformersErrors) =
           _parseTransformersSection(yaml[_transformersKey]);
 
       final errors = <String>[
         ...flavorsErrors.map((String e) => 'In $_flavorKey section of asset "$path": $e'),
+        ...platformsErrors.map((String e) => 'In $_platformsKey section of asset "$path": $e'),
         ...transformersErrors.map(
           (String e) => 'In $_transformersKey section of asset "$path": $e',
         ),
@@ -873,6 +881,7 @@ class AssetsEntry {
         AssetsEntry(
           uri: Uri(pathSegments: path.split('/')),
           flavors: Set<String>.from(flavors ?? <String>[]),
+          platforms: Set<String>.from(platforms ?? <String>[]),
           transformers: transformers ?? <AssetTransformerEntry>[],
         ),
         null,
@@ -892,6 +901,38 @@ class AssetsEntry {
     }
 
     return _parseList<String>(yaml, _flavorKey, 'String');
+  }
+
+  static (List<String>? platforms, List<String> errors) _parsePlatformsSection(Object? yaml) {
+    if (yaml == null) {
+      return (null, <String>[]);
+    }
+
+    final (List<String>?, List<String>) result = _parseList<String>(yaml, _platformsKey, 'String');
+    final List<String>? platforms = result.$1;
+    final List<String> errors = result.$2;
+
+    if (platforms != null) {
+      final List<String> validPlatforms = [];
+      final List<String> invalidPlatforms = [];
+      for (final String p in platforms) {
+        if (_kValidPluginPlatforms.contains(p)) {
+          validPlatforms.add(p);
+        } else {
+          invalidPlatforms.add(p);
+        }
+      }
+
+      if (invalidPlatforms.isNotEmpty) {
+        errors.add(
+          'Invalid platform(s): "${invalidPlatforms.join(", ")}". '
+          'Supported platforms are: "${_kValidPluginPlatforms.join(", ")}".',
+        );
+      }
+      return (validPlatforms, errors);
+    }
+
+    return result;
   }
 
   static (List<AssetTransformerEntry>?, List<String> errors) _parseTransformersSection(
@@ -934,18 +975,22 @@ class AssetsEntry {
       return false;
     }
 
-    return uri == other.uri && setEquals(flavors, other.flavors);
+    return uri == other.uri &&
+        setEquals(flavors, other.flavors) &&
+        setEquals(platforms, other.platforms);
   }
 
   @override
   int get hashCode => Object.hashAll(<Object?>[
     uri.hashCode,
     Object.hashAllUnordered(flavors),
+    Object.hashAllUnordered(platforms),
     Object.hashAll(transformers),
   ]);
 
   @override
-  String toString() => 'AssetsEntry(uri: $uri, flavors: $flavors, transformers: $transformers)';
+  String toString() =>
+      'AssetsEntry(uri: $uri, flavors: $flavors, platforms: $platforms, transformers: $transformers)';
 }
 
 /// Represents an entry in the "transformers" section of an asset.
