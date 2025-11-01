@@ -809,6 +809,22 @@ TEST_P(DisplayListTest, NinePatchImagePrecision) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(DisplayListTest, NinePatchImageColorFilter) {
+  auto texture = CreateTextureForFixture("nine_patch2.png");
+
+  auto filter = flutter::DlColorFilter::MakeBlend(flutter::DlColor::kGreen(),
+                                                  flutter::DlBlendMode::kSrcIn);
+  flutter::DlPaint paint;
+  paint.setColorFilter(filter);
+
+  flutter::DisplayListBuilder builder;
+  builder.DrawImageNine(DlImageImpeller::Make(texture),
+                        DlIRect::MakeXYWH(10, 10, 1, 1),
+                        DlRect::MakeXYWH(0, 0, 200, 100),
+                        flutter::DlFilterMode::kNearest, &paint);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(DisplayListTest, CanDrawPoints) {
   flutter::DisplayListBuilder builder;
   DlPoint points[7] = {
