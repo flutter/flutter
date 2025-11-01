@@ -20,6 +20,7 @@ using UniqueAotDataPtr =
 enum class FlutterGpuPreference {
   NoPreference,
   LowPowerPreference,
+  HighPerformancePreference,
 };
 
 enum class FlutterUIThreadPolicy {
