@@ -63,7 +63,7 @@ void fl_key_embedder_responder_handle_event(FlKeyEmbedderResponder* responder,
  * @result: a #GAsyncResult.
  * @handled: location to write if this event was handled by the embedder.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must not be uninitialized.
  *
  * Completes request started with fl_key_embedder_responder_handle_event().
  *

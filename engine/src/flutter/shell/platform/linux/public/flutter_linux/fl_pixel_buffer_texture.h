@@ -93,7 +93,7 @@ struct _FlPixelBufferTextureClass {
    * @width: (inout): width of the texture in pixels.
    * @height: (inout): height of the texture in pixels.
    * @error: (allow-none): #GError location to store the error occurring, or
-   * %NULL to ignore.
+   * %NULL to ignore. If `error` is not %NULL, `*error` must not be uninitialized.
    *
    * Retrieve pixel buffer in RGBA format.
    *

@@ -52,7 +52,7 @@ FlValue* fl_method_call_get_args(FlMethodCall* method_call);
  * @method_call: an #FlMethodCall.
  * @response: an #FlMethodResponse.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must not be uninitialized.
  *
  * Responds to a method call.
  *
@@ -68,7 +68,7 @@ gboolean fl_method_call_respond(FlMethodCall* method_call,
  * @result: (allow-none): value to respond with, must match what the
  * #FlMethodCodec supports.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must not be uninitialized.
  *
  * Convenience method that responds to method call with
  * #FlMethodSuccessResponse.
@@ -86,7 +86,7 @@ gboolean fl_method_call_respond_success(FlMethodCall* method_call,
  * @message: (allow-none): error message.
  * @details: (allow-none): details for the error.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must not be uninitialized.
  *
  * Convenience method that responds to method call with #FlMethodErrorResponse.
  *
@@ -102,7 +102,7 @@ gboolean fl_method_call_respond_error(FlMethodCall* method_call,
  * fl_method_call_respond_not_implemented:
  * @method_call: an #FlMethodCall.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must not be uninitialized.
  *
  * Convenience method that responds to method call with
  * #FlMethodNotImplementedResponse.

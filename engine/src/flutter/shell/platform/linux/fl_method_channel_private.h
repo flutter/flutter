@@ -18,7 +18,7 @@ G_BEGIN_DECLS
  * @response_handle: an #FlBinaryMessengerResponseHandle.
  * @response: an #FlMethodResponse.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must not be uninitialized.
  *
  * Responds to a method call.
  *

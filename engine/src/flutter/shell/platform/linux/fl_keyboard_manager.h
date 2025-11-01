@@ -81,7 +81,7 @@ void fl_keyboard_manager_handle_event(FlKeyboardManager* manager,
  * @result: a #GAsyncResult.
  * @redispatched_event: FIXME
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must not be uninitialized.
  *
  * Completes request started with fl_keyboard_manager_handle_event().
  *

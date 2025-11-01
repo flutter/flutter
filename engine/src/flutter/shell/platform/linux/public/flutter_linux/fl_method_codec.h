@@ -43,7 +43,7 @@ struct _FlMethodCodecClass {
    * @name: method name.
    * @args: (allow-none): method arguments, or %NULL.
    * @error: (allow-none): #GError location to store the error occurring, or
-   * %NULL.
+   * %NULL. If `error` is not %NULL, `*error` must not be uninitialized.
    *
    * Encodes a method call.
    *
@@ -64,7 +64,7 @@ struct _FlMethodCodecClass {
    * @args: (transfer full): location to write method arguments, or %NULL if not
    * required
    * @error: (allow-none): #GError location to store the error occurring, or
-   * %NULL
+   * %NULL. If `error` is not %NULL, `*error` must not be uninitialized.
    *
    * Decodes a method call.
    *
@@ -81,7 +81,7 @@ struct _FlMethodCodecClass {
    * @codec: an #FlMethodCodec.
    * @result: (allow-none): method result, or %NULL.
    * @error: (allow-none): #GError location to store the error occurring, or
-   * %NULL.
+   * %NULL. If `error` is not %NULL, `*error` must not be uninitialized.
    *
    * Encodes a successful response to a method call.
    *
@@ -99,7 +99,7 @@ struct _FlMethodCodecClass {
    * @message: (allow-none): an error message, or %NULL.
    * @details: (allow-none): error details, or %NULL.
    * @error: (allow-none): #GError location to store the error occurring, or
-   * %NULL.
+   * %NULL. If `error` is not %NULL, `*error` must not be uninitialized.
    *
    * Encodes an error response to a method call.
    *
@@ -117,7 +117,7 @@ struct _FlMethodCodecClass {
    * @codec: an #FlMethodCodec.
    * @message: message to decode.
    * @error: (allow-none): #GError location to store the error occurring, or
-   * %NULL.
+   * %NULL. If `error` is not %NULL, `*error` must not be uninitialized.
    *
    * Decodes a response to a method call.
    *
