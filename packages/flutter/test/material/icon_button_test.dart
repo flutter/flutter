@@ -3558,6 +3558,19 @@ void main() {
       ),
     );
   });
+
+  testWidgets('IconButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(IconButton)), Size.zero);
+  });
 }
 
 Widget buildAllVariants({
