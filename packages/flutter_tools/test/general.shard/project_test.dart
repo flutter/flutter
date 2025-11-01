@@ -2047,6 +2047,13 @@ resolution: workspace
         () async {
           final FlutterProject project = await someProject();
           project.ios.xcodeProject.createSync();
+          const buildContext = XcodeProjectBuildContext(
+            scheme: 'Runner',
+            deviceId: '123',
+          ); // for substituteXcodeVariables call of plist parsing
+          mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
+            IosProject.kProductBundleIdKey: 'io.flutter.someProject',
+          };
           project.ios.hostAppRoot
               .childDirectory('WatchTarget')
               .childFile('Info.plist')
@@ -2273,6 +2280,13 @@ resolution: workspace
         () async {
           final FlutterProject project = await someProject();
           project.ios.xcodeProject.createSync();
+          const buildContext = XcodeProjectBuildContext(
+            scheme: 'Runner',
+            deviceId: '123',
+          ); // for substituteXcodeVariables call of plist parsing
+          mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
+            IosProject.kProductBundleIdKey: 'io.flutter.someProject',
+          };
           project.ios.hostAppRoot
               .childDirectory('WatchTarget')
               .childFile('Info.plist')
