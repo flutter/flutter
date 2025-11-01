@@ -412,7 +412,7 @@ If someone could have written the same documentation without knowing
 anything about the class other than its name, then it's useless. Avoid checking
 in such documentation.
 
-Example (from [`CircleAvatar`](http://docs.flutter.io/flutter/material/CircleAvatar-class.html)):
+Example (from [`CircleAvatar`](https://api.flutter.dev/flutter/material/CircleAvatar-class.html)):
 
 ```dart
 // BAD:

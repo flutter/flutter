@@ -42,7 +42,7 @@ extern NSNotificationName const FlutterSemanticsUpdateNotification;
  * used to implicitly spin up a new `FlutterEngine`. Creating a `FlutterEngine` before showing a
  * FlutterViewController can be used to pre-initialize the Dart VM and to prepare the isolate in
  * order to reduce the latency to the first rendered frame. See
- * https://flutter.dev/docs/development/add-to-app/performance for more details on loading
+ * https://docs.flutter.dev/development/add-to-app/performance for more details on loading
  * latency.
  *
  * Holding a `FlutterEngine` independently of FlutterViewControllers can also be used to not to lose

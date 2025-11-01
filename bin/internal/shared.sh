@@ -237,7 +237,7 @@ function shared::execute() {
     >&2 echo "Error: The Flutter directory is not a clone of the GitHub project."
     >&2 echo "       The flutter tool requires Git in order to operate properly;"
     >&2 echo "       to install Flutter, see the instructions at:"
-    >&2 echo "       https://flutter.dev/get-started"
+    >&2 echo "       https://docs.flutter.dev/get-started"
     exit 1
   fi
 

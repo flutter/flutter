@@ -18,7 +18,7 @@ body:
       value: |
         Before filling the form fields, please consider the following:
         - Ensure that you have searched the [existing package issues](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Apackage)
-        - Read the [guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
+        - Read the [guide to filing a bug](https://docs.flutter.dev/resources/bug-reports)
   - type: dropdown
     id: packages
     attributes:
