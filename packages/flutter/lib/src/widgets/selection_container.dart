@@ -9,6 +9,7 @@ library;
 
 import 'package:flutter/rendering.dart';
 
+import 'debug.dart';
 import 'framework.dart';
 
 /// A container that handles [SelectionEvent]s for the [Selectable]s in
@@ -83,6 +84,20 @@ class SelectionContainer extends StatefulWidget {
   /// This delegate is responsible for updating the selections for the selectables
   /// under this widget.
   final SelectionContainerDelegate? delegate;
+
+  /// Gets the immediate ancestor [SelectionRegistrar] of the [BuildContext].
+  ///
+  /// If no ancestor is found, this method will assert in debug mode, and throw
+  /// an exception in release mode.
+  ///
+  /// If this asserts or throws, either there is no [SelectionContainer] above
+  /// the [BuildContext] or the immediate [SelectionContainer] is not
+  /// enabled.
+  static SelectionRegistrar of(BuildContext context) {
+    assert(debugCheckHasSelectionRegistrar(context));
+    final SelectionRegistrar? registrar = maybeOf(context);
+    return registrar!;
+  }
 
   /// Gets the immediate ancestor [SelectionRegistrar] of the [BuildContext].
   ///
