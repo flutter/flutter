@@ -32,6 +32,12 @@ import 'selection_container.dart';
 /// The text style to apply to descendant [Text] widgets which don't have an
 /// explicit style.
 ///
+/// A [MediaQuery] ancestor of a [Text] widget may still override the
+/// [TextStyle.height], [TextStyle.letterSpacing], and [TextStyle.wordSpacing] of
+/// the [TextStyle] set by this [DefaultTextStyle] widget through its
+/// [MediaQueryData.lineHeightScaleFactorOverride], [MediaQueryData.letterSpacingOverride],
+/// and [MediaQueryData.wordSpacingOverride] members.
+///
 /// {@tool dartpad}
 /// This example shows how to use [DefaultTextStyle.merge] to create a default
 /// text style that inherits styling information from the current default text
@@ -579,6 +585,11 @@ class Text extends StatelessWidget {
   /// If the style's "inherit" property is true, the style will be merged with
   /// the closest enclosing [DefaultTextStyle]. Otherwise, the style will
   /// replace the closest enclosing [DefaultTextStyle].
+  ///
+  /// This [style]s [TextStyle.fontWeight], [TextStyle.height], [TextStyle.letterSpacing],
+  /// and [TextStyle.wordSpacing] will be overriden by [MediaQueryData.lineHeightScaleFactorOverride],
+  /// [MediaQueryData.letterSpacingOverride], and [MediaQueryData.wordSpacingOverride] from the nearest
+  /// [MediaQuery] ancestor, regardless of its [TextStyle.inherit] value.
   final TextStyle? style;
 
   /// {@macro flutter.painting.textPainter.strutStyle}
@@ -703,9 +714,36 @@ class Text extends StatelessWidget {
     if (style == null || style!.inherit) {
       effectiveTextStyle = defaultTextStyle.style.merge(style);
     }
+    final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(context);
+    final double? letterSpacing = MediaQuery.maybeLetterSpacingOverrideOf(context);
+    final double? wordSpacing = MediaQuery.maybeWordSpacingOverrideOf(context);
     if (MediaQuery.boldTextOf(context)) {
       effectiveTextStyle = effectiveTextStyle!.merge(const TextStyle(fontWeight: FontWeight.bold));
     }
+    final TextSpan effectiveTextSpan =
+        lineHeightScaleFactor != null || letterSpacing != null || wordSpacing != null
+        ? _OverridingTextStyleTextSpan(
+            overrideTextStyle: TextStyle(
+              height: lineHeightScaleFactor,
+              letterSpacing: letterSpacing,
+              wordSpacing: wordSpacing,
+            ),
+            textSpan: TextSpan(
+              style: effectiveTextStyle,
+              text: data,
+              locale: locale,
+              children: textSpan != null ? <InlineSpan>[textSpan!] : null,
+            ),
+          )
+        : TextSpan(
+            style: effectiveTextStyle,
+            text: data,
+            locale: locale,
+            children: textSpan != null ? <InlineSpan>[textSpan!] : null,
+          );
+    final StrutStyle? effectiveStrutStyle = strutStyle != null && lineHeightScaleFactor != null
+        ? strutStyle!.copyWith(forceStrutHeight: false)
+        : strutStyle;
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     final TextScaler textScaler = switch ((this.textScaler, textScaleFactor)) {
       (final TextScaler textScaler, _) => textScaler,
@@ -727,7 +765,7 @@ class Text extends StatelessWidget {
           overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
           textScaler: textScaler,
           maxLines: maxLines ?? defaultTextStyle.maxLines,
-          strutStyle: strutStyle,
+          strutStyle: effectiveStrutStyle,
           textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
           textHeightBehavior:
               textHeightBehavior ??
@@ -737,12 +775,7 @@ class Text extends StatelessWidget {
               selectionColor ??
               DefaultSelectionStyle.of(context).selectionColor ??
               DefaultSelectionStyle.defaultColor,
-          text: TextSpan(
-            style: effectiveTextStyle,
-            text: data,
-            locale: locale,
-            children: textSpan != null ? <InlineSpan>[textSpan!] : null,
-          ),
+          text: effectiveTextSpan,
         ),
       );
     } else {
@@ -755,7 +788,7 @@ class Text extends StatelessWidget {
         overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
         textScaler: textScaler,
         maxLines: maxLines ?? defaultTextStyle.maxLines,
-        strutStyle: strutStyle,
+        strutStyle: effectiveStrutStyle,
         textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
         textHeightBehavior:
             textHeightBehavior ??
@@ -765,12 +798,7 @@ class Text extends StatelessWidget {
             selectionColor ??
             DefaultSelectionStyle.of(context).selectionColor ??
             DefaultSelectionStyle.defaultColor,
-        text: TextSpan(
-          style: effectiveTextStyle,
-          text: data,
-          locale: locale,
-          children: textSpan != null ? <InlineSpan>[textSpan!] : null,
-        ),
+        text: effectiveTextSpan,
       );
     }
     if (semanticsLabel != null || semanticsIdentifier != null) {
@@ -1471,3 +1499,28 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
 /// The length of the content that can be selected, and the range that is
 /// selected.
 typedef _SelectionInfo = ({int contentLength, SelectedContentRange? range});
+
+/// A [TextSpan] that overrides the style of its children with a given
+/// [TextStyle].
+class _OverridingTextStyleTextSpan extends TextSpan {
+  _OverridingTextStyleTextSpan({required TextStyle overrideTextStyle, required TextSpan textSpan})
+    : super(
+        text: textSpan.text,
+        children: textSpan.children?.map((InlineSpan child) {
+          if (child is TextSpan) {
+            return _OverridingTextStyleTextSpan(
+              overrideTextStyle: overrideTextStyle,
+              textSpan: child,
+            );
+          }
+          return child;
+        }).toList(),
+        recognizer: textSpan.recognizer,
+        semanticsLabel: textSpan.semanticsLabel,
+        locale: textSpan.locale,
+        spellOut: textSpan.spellOut,
+        style: textSpan.style != null
+            ? textSpan.style!.merge(overrideTextStyle)
+            : overrideTextStyle,
+      );
+}
