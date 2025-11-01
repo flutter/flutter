@@ -72,6 +72,7 @@ Future<void> buildMacOS({
   bool configOnly = false,
   SizeAnalyzer? sizeAnalyzer,
   bool usingCISystem = false,
+  DarwinArch? activeArch,
 }) async {
   final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
   if (xcodeWorkspace == null) {
@@ -197,9 +198,22 @@ Future<void> buildMacOS({
     HostPlatform.darwin_x64 => 'x86_64',
     _ => throw UnimplementedError('Unsupported platform'),
   };
-  final String destination = buildInfo.isDebug
-      ? 'platform=${XcodeSdk.MacOSX.displayName},arch=$arch'
-      : XcodeSdk.MacOSX.genericPlatform;
+
+  // Determine the build destination
+  final String destination;
+  if (activeArch != null) {
+    // Build for specific architecture when --macos-arch is specified
+    destination = 'platform=${XcodeSdk.MacOSX.displayName},arch=${activeArch.name}';
+  } else if (buildInfo.isDebug) {
+    // Debug builds default to current host architecture
+    destination = 'platform=${XcodeSdk.MacOSX.displayName},arch=$arch';
+  } else {
+    // Release builds default to universal binary
+    destination = XcodeSdk.MacOSX.genericPlatform;
+  }
+
+  // Determine if we're building for only the active architecture
+  final bool onlyActiveArch = activeArch != null && activeArch.name == arch;
 
   try {
     result = await globals.processUtils.stream(
@@ -223,6 +237,11 @@ Future<void> buildMacOS({
         'COMPILER_INDEX_STORE_ENABLE=NO',
         if (disabledSandboxEntitlementFile != null)
           'CODE_SIGN_ENTITLEMENTS=${disabledSandboxEntitlementFile.path}',
+        // Add architecture-specific build settings when building for a specific arch
+        if (activeArch != null) ...<String>[
+          'ONLY_ACTIVE_ARCH=${onlyActiveArch ? 'YES' : 'NO'}',
+          'ARCHS=${activeArch.name}',
+        ],
         ...environmentVariablesAsXcodeBuildSettings(globals.platform),
       ],
       trace: true,
