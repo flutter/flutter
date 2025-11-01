@@ -4280,6 +4280,22 @@ void main() {
     expect(viewTextField.smartDashesType, SmartDashesType.disabled);
     expect(viewTextField.smartQuotesType, SmartQuotesType.disabled);
   });
+
+  testWidgets('SearchAnchor does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: SearchAnchor(
+              builder: (_, _) => const Text('X'),
+              suggestionsBuilder: (_, _) => <Widget>[const Text('Y')],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SearchAnchor)), Size.zero);
+  });
 }
 
 Future<void> checkSearchBarDefaults(
