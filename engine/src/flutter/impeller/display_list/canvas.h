@@ -395,6 +395,10 @@ class Canvas {
 
   void AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth = false);
 
+  bool AttemptDrawAntialiasedCircle(const Point& center,
+                                    Scalar radius,
+                                    const Paint& paint);
+
   bool AttemptDrawBlurredRRect(const Rect& rect,
                                Size corner_radii,
                                const Paint& paint);
