@@ -31,6 +31,7 @@ class BuildWebCommand extends BuildSubCommand {
     usesBuildNameOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
     usesDartDefineOption();
+    usesWebDefineOption();
     addEnableExperimentation(hide: !verboseHelp);
     addNativeNullAssertions();
 
