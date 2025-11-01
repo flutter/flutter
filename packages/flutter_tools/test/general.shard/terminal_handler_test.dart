@@ -934,6 +934,95 @@ void main() {
       expect(runner.calledReload, false);
       expect(runner.calledRestart, true);
     });
+
+    // Cyrillic keyboard layout support tests (QWERTY → ЙЦУКЕН mapping)
+    // Data-driven test approach for better maintainability
+    final cyrillicTestCases = <Map<String, Object>>[
+      <String, Object>{
+        'key': 'к',
+        'description': 'hotReload (Cyrillic r)',
+        'verify': (FakeResidentRunner runner) {
+          expect(runner.calledReload, true);
+          expect(runner.calledRestart, false);
+        },
+      },
+      <String, Object>{
+        'key': 'К',
+        'description': 'hotRestart (Cyrillic R)',
+        'verify': (FakeResidentRunner runner) {
+          expect(runner.calledReload, false);
+          expect(runner.calledRestart, true);
+        },
+      },
+      <String, Object>{
+        'key': 'й',
+        'description': 'exit (Cyrillic q)',
+        'verify': (FakeResidentRunner runner) {
+          expect(runner.calledExit, true);
+        },
+      },
+      <String, Object>{
+        'key': 'Й',
+        'description': 'exit (Cyrillic Q)',
+        'verify': (FakeResidentRunner runner) {
+          expect(runner.calledExit, true);
+        },
+      },
+      <String, Object>{
+        'key': 'в',
+        'description': 'detach (Cyrillic d)',
+        'verify': (FakeResidentRunner runner) {
+          expect(runner.calledDetach, true);
+        },
+      },
+      <String, Object>{
+        'key': 'В',
+        'description': 'detach (Cyrillic D)',
+        'verify': (FakeResidentRunner runner) {
+          expect(runner.calledDetach, true);
+        },
+      },
+      <String, Object>{
+        'key': 'р',
+        'description': 'help (Cyrillic h)',
+        'verify': (FakeResidentRunner runner) {
+          expect(runner.calledPrintWithDetails, true);
+        },
+      },
+      <String, Object>{
+        'key': 'Р',
+        'description': 'help (Cyrillic H)',
+        'verify': (FakeResidentRunner runner) {
+          expect(runner.calledPrintWithDetails, true);
+        },
+      },
+    ];
+
+    for (final testCase in cyrillicTestCases) {
+      testWithoutContext('${testCase['key']} - ${testCase['description']}', () async {
+        final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
+        final runner = terminalHandler.residentRunner as FakeResidentRunner;
+
+        await terminalHandler.processTerminalInput(testCase['key']! as String);
+
+        (testCase['verify']! as void Function(FakeResidentRunner))(runner);
+      });
+    }
+
+    testWithoutContext('ц - debugDumpApp (Cyrillic w)', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpApp',
+          args: <String, Object>{'isolateId': '1'},
+          jsonResponse: <String, Object>{'data': 'WIDGET DATA CYRILLIC'},
+        ),
+      ]);
+
+      await terminalHandler.processTerminalInput('ц');
+
+      expect(terminalHandler.logger.statusText, contains('WIDGET DATA CYRILLIC'));
+    });
   });
 
   testWithoutContext('ResidentRunner clears the screen when it should', () async {
@@ -1352,12 +1441,13 @@ TerminalHandler setUpTerminalHandler(
     targetPlatform: web ? TargetPlatform.web_javascript : TargetPlatform.android_arm,
   );
   device.vmService = FakeVmServiceHost(requests: requests).vmService;
-  final residentRunner = FakeResidentRunner(device, testLogger, localFileSystem)
-    ..supportsServiceProtocol = supportsServiceProtocol
-    ..supportsRestart = supportsRestart
-    ..canHotReload = supportsHotReload
-    ..fatalReloadError = fatalReloadError
-    ..reloadExitCode = reloadExitCode;
+  final residentRunner =
+      FakeResidentRunner(device, testLogger, localFileSystem)
+        ..supportsServiceProtocol = supportsServiceProtocol
+        ..supportsRestart = supportsRestart
+        ..canHotReload = supportsHotReload
+        ..fatalReloadError = fatalReloadError
+        ..reloadExitCode = reloadExitCode;
 
   switch (buildMode) {
     case BuildMode.debug:
