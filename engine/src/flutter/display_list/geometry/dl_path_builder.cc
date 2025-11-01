@@ -139,13 +139,11 @@ DlPathBuilder& DlPathBuilder::AddPath(const DlPath& path) {
 }
 
 const DlPath DlPathBuilder::CopyPath() {
-  return DlPath(path_);
+  return DlPath(path_.snapshot());
 }
 
 const DlPath DlPathBuilder::TakePath() {
-  DlPath path = DlPath(path_);
-  path_.reset();
-  return path;
+  return DlPath(path_.detach());
 }
 
 }  // namespace flutter
