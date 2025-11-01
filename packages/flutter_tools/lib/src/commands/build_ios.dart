@@ -701,6 +701,11 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   /// - Build mode is Release or Profile (production builds only, skips Debug to avoid overhead)
   /// - A provisioning profile can be located and parsed
   ///
+  /// **Known limitations:**
+  /// - Currently only supports single-target apps (main app bundle ID only)
+  /// - TODO: Handle multi-target apps with extensions/widgets (requires multiple bundle IDs
+  ///   mapped to their respective provisioning profiles in the provisioningProfiles dict)
+  ///
   /// **Fallback behavior:**
   /// - For Automatic signing: Let Xcode handle the export options (simple plist)
   /// - For Debug builds: Skip enhancement (not needed for App Store export)
@@ -736,6 +741,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
         if (profileUuid != null) {
           // Generate enhanced ExportOptions.plist for manual signing
+          globals.logger.printTrace(
+            'Detected manual code signing. Generated ExportOptions.plist with '
+            'teamID, signingStyle=manual, and provisioningProfiles for $bundleId.',
+          );
           return _createManualSigningExportPlist(
             exportMethod: exportMethod,
             teamId: teamId,
@@ -745,6 +754,12 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         }
         // Note: If profile lookup fails, we fall back to simple plist.
         // Trace-level logging is already emitted by _findProvisioningProfileUuid.
+        globals.logger.printTrace(
+          'Manual signing detected but no matching provisioning profile UUID was found '
+          'for $bundleId. Falling back to default ExportOptions.plist. '
+          'If exportArchive fails with provisioning profile errors, consider supplying '
+          '--export-options-plist manually.',
+        );
       }
     }
 
