@@ -4,6 +4,12 @@ This provides an overview of the structure of the flutter/packages repository.
 
 Most packages are located in `packages`. A few which are derived heavily from third-party code are instead in `third_party/packages/`.
 
+A package must follow the same folder structure as described in [Developing packages](https://docs.flutter.dev/packages-and-plugins/developing-packages) with additional files or directories in the root folder.
+
+- `ci_config.yaml` - A file that for setting package level CI configuration
+- `example/` - An optional directory that contains runnable example that show case the usage of this package.
+- `tool/run_tests.dart` - An optional tests suits to run by the CI. By default, the ci runs all tests in `test/` directory. Once can use this file to run additional tests.
+
 ## Plugins
 
 Plugins in flutter/packages uses the federated plugin model. If you are not familiar with federated plugins, start with reading [the federated plugin overview](https://flutter.dev/docs/development/packages-and-plugins/developing-packages#federated-plugins) to understand the terms below.
