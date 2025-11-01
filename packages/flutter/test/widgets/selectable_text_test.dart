@@ -5636,4 +5636,13 @@ void main() {
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
     );
   });
+
+  testWidgets('SelectableText does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: SelectableText('XYZ'))),
+      ),
+    );
+    expect(tester.getSize(find.byType(SelectableText)), Size.zero);
+  });
 }
