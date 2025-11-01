@@ -116,7 +116,7 @@ TaskFunction createAndroidHCPPScrollPerfTest() {
     testDriver: 'test_driver/scroll_perf_hcpp_test.dart',
     needsFullTimeline: false,
     enableImpeller: true,
-    enableSurfaceControl: true,
+    enableHCPP: true,
     enableMergedPlatformThread: true,
   ).run;
 }
@@ -844,7 +844,7 @@ void _addMetadataToManifest(String testDirectory, List<(String, String)> keyPair
 
 void _addSurfaceControlSupportToManifest(String testDirectory) {
   final List<(String, String)> keyPairs = <(String, String)>[
-    ('io.flutter.embedding.android.EnableSurfaceControl', 'true'),
+    ('io.flutter.embedding.android.EnableHCPP', 'true'),
   ];
   _addMetadataToManifest(testDirectory, keyPairs);
 }
@@ -1238,7 +1238,7 @@ class PerfTest {
     this.forceOpenGLES,
     this.disablePartialRepaint = false,
     this.enableMergedPlatformThread = false,
-    this.enableSurfaceControl = false,
+    this.enableHCPP = false,
     this.enableLazyShaderMode = false,
     this.createPlatforms = const <String>[],
   }) : _resultFilename = resultFilename;
@@ -1261,7 +1261,7 @@ class PerfTest {
     this.forceOpenGLES,
     this.disablePartialRepaint = false,
     this.enableMergedPlatformThread = false,
-    this.enableSurfaceControl = false,
+    this.enableHCPP = false,
     this.enableLazyShaderMode = false,
     this.createPlatforms = const <String>[],
   }) : saveTraceFile = false,
@@ -1320,7 +1320,7 @@ class PerfTest {
   final bool enableMergedPlatformThread;
 
   /// Whether to enable SurfaceControl swapchain.
-  final bool enableSurfaceControl;
+  final bool enableHCPP;
 
   /// Whether to defer construction of all PSO objects in the Impeller backend.
   final bool enableLazyShaderMode;
@@ -1420,7 +1420,7 @@ class PerfTest {
           if (enableMergedPlatformThread) {
             _addMergedPlatformThreadSupportToManifest(testDirectory);
           }
-          if (enableSurfaceControl) {
+          if (enableHCPP) {
             _addSurfaceControlSupportToManifest(testDirectory);
           }
           if (enableLazyShaderMode) {
