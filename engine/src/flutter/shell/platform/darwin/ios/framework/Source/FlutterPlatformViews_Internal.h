@@ -94,6 +94,9 @@
 // The inputRadius can be customized and it doesn't add any color saturation to the blurred view.
 @property(nonatomic, readonly) UIVisualEffectView* backdropFilterView;
 
+// Determines the corner radius of the backdrop filter view.
+@property(nonatomic, readonly) CGFloat cornerRadius;
+
 // For testing only.
 + (void)resetPreparation;
 
@@ -111,6 +114,7 @@
 // implementation in `PlatformViewFilter`, this method will return nil.
 - (instancetype)initWithFrame:(CGRect)frame
                    blurRadius:(CGFloat)blurRadius
+                 cornerRadius:(CGFloat)cornerRadius
              visualEffectView:(UIVisualEffectView*)visualEffectView NS_DESIGNATED_INITIALIZER;
 
 @end
@@ -192,6 +196,14 @@
 - (instancetype)initWithTarget:(id)target
        platformViewsController:(FlutterPlatformViewsController*)platformViewsController;
 - (ForwardingGestureRecognizer*)recreateRecognizerWithTarget:(id)target;
+@end
+
+@interface PendingRRectClip : NSObject
+@property(nonatomic) flutter::DlRect rect;
+@property(nonatomic) CGFloat topLeftRadius;
+@property(nonatomic) CGFloat topRightRadius;
+@property(nonatomic) CGFloat bottomRightRadius;
+@property(nonatomic) CGFloat bottomLeftRadius;
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMVIEWS_INTERNAL_H_

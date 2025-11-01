@@ -56,6 +56,8 @@ class ClipShapeLayer : public CacheableContainerLayer {
     Layer::AutoPrerollSaveLayerState save =
         Layer::AutoPrerollSaveLayerState::Create(context, UsesSaveLayer());
 
+    PushClipToEmbedderStack(context);
+
     auto mutator = context->state_stack.save();
     ApplyClip(mutator);
 
@@ -107,6 +109,7 @@ class ClipShapeLayer : public CacheableContainerLayer {
  protected:
   virtual const DlRect clip_shape_bounds() const = 0;
   virtual void ApplyClip(LayerStateStack::MutatorContext& mutator) const = 0;
+  virtual void PushClipToEmbedderStack(PrerollContext* context) const = 0;
   virtual ~ClipShapeLayer() = default;
 
   const ClipShape& clip_shape() const { return clip_shape_; }
