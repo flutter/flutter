@@ -2441,65 +2441,6 @@ class _RenderAlignMidpoint extends RenderPositionedBox {
 
     childParentData.offset = Offset(dx, dy);
   }
-
-  @override
-  void debugPaintSize(PaintingContext context, Offset offset) {
-    assert(() {
-      final Paint paint;
-      if (child != null && !child!.size.isEmpty) {
-        paint = Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.0
-          ..color = const Color(0xFFFFFF00);
-        final BoxParentData childParentData = child!.parentData! as BoxParentData;
-        // vertical alignment arrows
-        final double headSize = math.min(childParentData.offset.dy * 0.2, 10.0);
-        final ui.Size childSize = child!.size;
-        final double horizontalMidpoint =
-            offset.dx + childParentData.offset.dx + childSize.width / 2;
-        final double verticalMidpoint =
-            offset.dy + childParentData.offset.dy + childSize.height / 2;
-
-        final ui.Path path = Path()
-          // Top arrow
-          ..moveTo(horizontalMidpoint, offset.dy)
-          ..relativeLineTo(0.0, childParentData.offset.dy - headSize)
-          ..relativeLineTo(headSize, 0.0)
-          ..relativeLineTo(-headSize, headSize)
-          ..relativeLineTo(-headSize, -headSize)
-          ..relativeLineTo(headSize, 0.0)
-          // Bottom arrow
-          ..moveTo(horizontalMidpoint, offset.dy + size.height + headSize)
-          ..relativeLineTo(0.0, -size.height + childSize.height + childParentData.offset.dy)
-          ..relativeLineTo(headSize, 0)
-          ..relativeLineTo(-headSize, -headSize)
-          ..relativeLineTo(-headSize, headSize)
-          ..relativeLineTo(headSize, 0)
-          // Left arrow
-          ..moveTo(offset.dx, verticalMidpoint)
-          ..relativeLineTo(childParentData.offset.dx - headSize, 0.0)
-          ..relativeLineTo(0.0, headSize)
-          ..relativeLineTo(headSize, -headSize)
-          ..relativeLineTo(-headSize, -headSize)
-          ..relativeLineTo(0.0, headSize)
-          // Right arrow
-          ..moveTo(offset.dx + size.width, verticalMidpoint)
-          ..relativeLineTo(
-            -size.width + childSize.width + childParentData.offset.dx + headSize,
-            0.0,
-          )
-          ..relativeLineTo(0.0, headSize)
-          ..relativeLineTo(-headSize, -headSize)
-          ..relativeLineTo(headSize, -headSize)
-          ..relativeLineTo(0.0, headSize);
-        context.canvas.drawPath(path, paint);
-      } else {
-        paint = Paint()..color = const Color(0x90909090);
-        context.canvas.drawRect(offset & size, paint);
-      }
-      return true;
-    }());
-  }
 }
 
 /// A large horizontal divider that is used to separate [CupertinoMenuItem]s in
