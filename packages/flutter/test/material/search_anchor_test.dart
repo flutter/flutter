@@ -4280,6 +4280,22 @@ void main() {
     expect(viewTextField.smartDashesType, SmartDashesType.disabled);
     expect(viewTextField.smartQuotesType, SmartQuotesType.disabled);
   });
+
+  testWidgets('SearchBar does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final TextEditingController controller = TextEditingController(text: 'X');
+    addTearDown(controller.dispose);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(child: SearchBar(controller: controller)),
+      ),
+    );
+    expect(tester.getSize(find.byType(SearchBar)), Size.zero);
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    await tester.pump();
+    expect(find.text('X'), findsOne);
+  });
 }
 
 Future<void> checkSearchBarDefaults(
