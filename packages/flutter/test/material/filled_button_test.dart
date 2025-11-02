@@ -2862,6 +2862,19 @@ void main() {
     expect(iconStyle(tester, buttonIcon).color, hoveredColor);
   });
 
+  testWidgets('FilledButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: FilledButton(onPressed: () {}, child: const Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(FilledButton)), Size.zero);
+  });
+
   testWidgets('When a FilledButton gains an icon, preserves the same SemanticsNode id', (
     WidgetTester tester,
   ) async {
