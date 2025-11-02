@@ -5535,6 +5535,25 @@ void main() {
     );
     expect(tester.getSize(find.byType(CheckboxMenuButton)), Size.zero);
   });
+
+  testWidgets('MenuAnchor does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final MenuController menuController = MenuController();
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: MenuAnchor(menuChildren: const <Widget>[Text('X')], controller: menuController),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(MenuAnchor)), Size.zero);
+    menuController.open();
+    await tester.pump();
+    expect(find.text('X'), findsOne);
+  });
 }
 
 List<Widget> createTestMenus({
