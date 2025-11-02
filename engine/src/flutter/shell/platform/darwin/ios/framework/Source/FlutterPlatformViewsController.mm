@@ -512,8 +512,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   CGFloat screenScale = [UIScreen mainScreen].scale;
   auto iter = mutatorsStack.Begin();
   while (iter != mutatorsStack.End()) {
-    FML_LOG(ERROR) << "Encountered type: " << static_cast<int>((*iter)->GetType());
-
     switch ((*iter)->GetType()) {
       case flutter::MutatorType::kTransform: {
         transformMatrix = transformMatrix * (*iter)->GetMatrix();
@@ -624,8 +622,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         clip.bottomLeftRadius = radii.bottom_left.width;
         clip.bottomRightRadius = radii.bottom_right.width;
         [pendingClipRRects addObject:clip];
-
-        FML_LOG(ERROR) << "Added clipRRect" << rrect.IsRect();
       }
       case flutter::MutatorType::kBackdropClipRse: {
         // TODO: Pending Implementation
