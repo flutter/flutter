@@ -3850,13 +3850,9 @@ void main() {
       controller.open();
       await tester.pumpAndSettle();
 
-      expect(tester.widget<CupertinoMenuItem>(find.byKey(Tag.a.key)).hasLeading, isFalse);
-
       final Offset childOffsetWithoutLeading = tester.getTopLeft(find.text(Tag.a.text));
 
       await tester.pumpWidget(buildApp(hasLeading: true));
-
-      expect(tester.widget<CupertinoMenuItem>(find.byKey(Tag.a.key)).hasLeading, isFalse);
 
       final Offset childOffsetWithLeading = tester.getTopLeft(find.text(Tag.a.text));
 

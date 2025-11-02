@@ -1081,8 +1081,12 @@ class _MenuOverlayState extends State<_MenuOverlay>
     }
 
     final double yAttachmentPointRatio = _attachmentPoint.dy / widget.overlaySize.height;
+    final double xAttachmentPointRatio = _attachmentPoint.dx / widget.overlaySize.width;
     // The alignment of the menu growth point relative to the screen.
-    _attachmentPointAlignment = Alignment(xMidpointRatio * 2 - 1, yAttachmentPointRatio * 2 - 1);
+    _attachmentPointAlignment = Alignment(
+      xAttachmentPointRatio * 2 - 1,
+      yAttachmentPointRatio * 2 - 1,
+    );
   }
 
   void _handleOutsideTap(PointerDownEvent event) {
