@@ -1373,28 +1373,26 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    // The menu can be at most the size of the overlay.
-    return BoxConstraints.loose(constraints.biggest);
+    // The menu can be at most the size of the overlay minus padding.
+    return BoxConstraints.loose(constraints.biggest).deflate(padding);
   }
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
     final double inverseHeightFactor = heightFactor > 0.01 ? 1 / heightFactor : 0;
-    final Size finalSize = Size(childSize.width, childSize.height * inverseHeightFactor);
-    final ui.Offset desiredPosition = attachmentPoint - menuAlignment.alongSize(childSize);
+    // size: The size of the overlay.
+    // childSize: The size of the menu, when fully open, as determined by
+    // getConstraintsForChild.
+    final double finalHeight = math.min(childSize.height * inverseHeightFactor, size.height);
+    final Size finalSize = Size(childSize.width, finalHeight);
+    final ui.Offset desiredPosition = attachmentPoint - menuAlignment.alongSize(finalSize);
     final ui.Rect screen = _findClosestScreen(size, anchorRect.center, avoidBounds);
-    final ui.Offset finalPosition = _positionChild(
-      padding.deflateRect(screen),
-      finalSize,
-      desiredPosition,
-      anchorRect,
-    );
-    final double fullHeight = finalSize.height;
+    final ui.Offset finalPosition = _positionChild(screen, finalSize, desiredPosition, anchorRect);
     // If the menu sits above the anchor when fully open, grow upward:
     // keep the bottom (attachment) fixed by shifting the top-left during animation.
     final bool growsUp = finalPosition.dy + finalSize.height <= anchorRect.center.dy;
     if (growsUp) {
-      final double dy = fullHeight - childSize.height;
+      final double dy = finalHeight - childSize.height;
       return Offset(finalPosition.dx, finalPosition.dy + dy);
     }
 
