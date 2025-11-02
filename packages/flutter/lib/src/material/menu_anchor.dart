@@ -3343,16 +3343,15 @@ class _MenuLayout extends SingleChildLayoutDelegate {
     // childSize: The size of the menu, when fully open, as determined by
     // getConstraintsForChild.
     final Rect overlayRect = Offset.zero & size;
-    final double inverseHeightFactor = heightFactor > 0.01 ? 1 / heightFactor : 0;
-    final Size finalSize = Size(childSize.width, childSize.height * inverseHeightFactor);
-
-    final ui.Offset finalPosition = _positionChild(finalSize, overlayRect);
-    final double fullHeight = finalSize.height;
+    final double unconstrainedHeight = heightFactor > 0.01 ? childSize.height / heightFactor : 0;
+    final double heightEstimate = math.min(unconstrainedHeight, size.height);
+    final Size sizeEstimate = Size(childSize.width, heightEstimate);
+    final ui.Offset finalPosition = _positionChild(sizeEstimate, overlayRect);
     // If the menu sits above the anchor when fully open, grow upward:
     // keep the bottom (attachment) fixed by shifting the top-left during animation.
-    final bool growsUp = finalPosition.dy + finalSize.height <= anchorRect.center.dy;
+    final bool growsUp = finalPosition.dy + sizeEstimate.height <= anchorRect.center.dy;
     if (growsUp) {
-      final double dy = fullHeight - childSize.height;
+      final double dy = heightEstimate - childSize.height;
       return Offset(finalPosition.dx, finalPosition.dy + dy);
     }
 
