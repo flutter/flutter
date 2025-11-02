@@ -8,8 +8,8 @@
 #include <iosfwd>
 #include <memory>
 #include <string_view>
-#include "flutter/third_party/abseil-cpp/absl/status/statusor.h"
 #include "flutter/third_party/re2/re2/re2.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 /// A filter is a concatenation of multiple regex.
 ///
