@@ -16,7 +16,7 @@ able to run on other *nix platforms and Windows.
 The example has the following dependencies:
  * [GLFW](https://www.glfw.org/) - This can be installed with [Homebrew](https://brew.sh/) - `brew install glfw`
  * [CMake](https://cmake.org/) - This can be installed with [Homebrew](https://brew.sh/) - `brew install cmake`
- * [Flutter](https://flutter.dev/) - This can be installed from the [Flutter webpage](https://flutter.dev/docs/get-started/install)
+ * [Flutter](https://flutter.dev/) - This can be installed from the [Flutter webpage](https://docs.flutter.dev/get-started)
  * [Flutter Engine](https://flutter.dev) - This can be built or downloaded, see [Custom Flutter Engine Embedders](/docs/engine/Custom-Flutter-Engine-Embedders.md) for more information.
 
 In order to **build** and **run** the example you should be able to go into this directory and run

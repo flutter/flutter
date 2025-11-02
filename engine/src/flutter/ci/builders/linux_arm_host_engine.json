@@ -37,10 +37,10 @@
                 "ci/linux_profile_arm64",
                 "--runtime-mode",
                 "profile",
-                "--no-lto",
                 "--target-os=linux",
                 "--linux-cpu=arm64",
                 "--prebuilt-dart-sdk",
+                "--no-lto",
                 "--rbe",
                 "--no-goma"
             ],
@@ -87,6 +87,7 @@
                 "--target-os=linux",
                 "--linux-cpu=arm64",
                 "--prebuilt-dart-sdk",
+                "--no-lto",
                 "--rbe",
                 "--no-goma"
             ],
@@ -133,6 +134,7 @@
                 "--target-os=linux",
                 "--linux-cpu=arm64",
                 "--prebuilt-dart-sdk",
+                "--no-lto",
                 "--rbe",
                 "--no-goma"
             ],
