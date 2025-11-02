@@ -104,7 +104,7 @@ class _RawMenuAnchorAnimationExampleState extends State<RawMenuAnchorAnimationEx
                       borderRadius: BorderRadius.circular(16),
                       color: colorScheme.primary,
                       child: SizeTransition(
-                        axisAlignment: -1,
+                        alignment: Alignment.topLeft,
                         sizeFactor: animationController.view,
                         fixedCrossAxisSizeFactor: 1.0,
                         child: SizedBox(
