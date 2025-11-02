@@ -1516,4 +1516,24 @@ void main() {
     final Border? border = tableRowBoxDecoration?.border as Border?;
     expect(border?.bottom.width, defaultDividerThickness);
   });
+
+  testWidgets('PaginatedDataTable does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: PaginatedDataTable(
+              columns: const <DataColumn>[
+                DataColumn(label: Text('X')),
+                DataColumn(label: Text('Y')),
+                DataColumn(label: Text('Z')),
+              ],
+              source: source,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(PaginatedDataTable)), Size.zero);
+  });
 }
