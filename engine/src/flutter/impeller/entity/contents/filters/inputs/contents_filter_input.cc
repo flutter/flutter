@@ -25,14 +25,16 @@ std::optional<Snapshot> ContentsFilterInput::GetSnapshot(
     coverage_limit = entity.GetContents()->GetCoverageHint();
   }
   if (!snapshot_.has_value()) {
-    snapshot_ = contents_->RenderToSnapshot(renderer,        // renderer
-                                            entity,          // entity
-                                            coverage_limit,  // coverage_limit
-                                            std::nullopt,  // sampler_descriptor
-                                            msaa_enabled_,  // msaa_enabled
-                                            /*mip_count=*/mip_count,  //
-                                            label                     //
-    );
+    snapshot_ =
+        contents_->RenderToSnapshot(renderer,  // renderer
+                                    entity,    // entity
+                                    {
+                                        .coverage_limit = coverage_limit,    //
+                                        .sampler_descriptor = std::nullopt,  //
+                                        .msaa_enabled = msaa_enabled_,       //
+                                        .mip_count = mip_count,              //
+                                        .label = label                       //
+                                    });
   }
   return snapshot_;
 }
