@@ -413,7 +413,7 @@ class RotationTransition extends MatrixTransition {
 ///
 /// [SizeTransition] acts as a [ClipRect] that animates either its width or its
 /// height, depending upon the value of [axis]. The alignment of the child along
-/// the [axis] is specified by the [axisAlignment].
+/// the [axis] is specified by the [alignment].
 ///
 /// Like most widgets, [SizeTransition] will conform to the constraints it is
 /// given, so be sure to put it in a context where it can change size. For
@@ -446,14 +446,13 @@ class RotationTransition extends MatrixTransition {
 class SizeTransition extends AnimatedWidget {
   /// Creates a size transition.
   ///
-  /// The [axis] argument defaults to [Axis.vertical]. The [axisAlignment]
-  /// defaults to zero, which centers the child along the main axis during the
-  /// transition.
+  /// The [axis] argument defaults to [Axis.vertical]. The [alignment] defaults
+  /// to [Alignment.center].
   const SizeTransition({
     super.key,
     this.axis = Axis.vertical,
     required Animation<double> sizeFactor,
-    this.axisAlignment = 0.0,
+    this.alignment = Alignment.center,
     this.fixedCrossAxisSizeFactor,
     this.child,
   }) : assert(fixedCrossAxisSizeFactor == null || fixedCrossAxisSizeFactor >= 0.0),
@@ -473,18 +472,8 @@ class SizeTransition extends AnimatedWidget {
   /// in the appropriate axis.
   Animation<double> get sizeFactor => listenable as Animation<double>;
 
-  /// Describes how to align the child along the axis that [sizeFactor] is
-  /// modifying.
-  ///
-  /// A value of -1.0 indicates the top when [axis] is [Axis.vertical], and the
-  /// start when [axis] is [Axis.horizontal]. The start is on the left when the
-  /// text direction in effect is [TextDirection.ltr] and on the right when it
-  /// is [TextDirection.rtl].
-  ///
-  /// A value of 1.0 indicates the bottom or end, depending upon the [axis].
-  ///
-  /// A value of 0.0 (the default) indicates the center for either [axis] value.
-  final double axisAlignment;
+  /// The alignment of the child along the main axis during the transition.
+  final AlignmentGeometry alignment;
 
   /// The factor by which to multiply the cross axis size of the child.
   ///
@@ -503,10 +492,7 @@ class SizeTransition extends AnimatedWidget {
   Widget build(BuildContext context) {
     return ClipRect(
       child: Align(
-        alignment: switch (axis) {
-          Axis.horizontal => AlignmentDirectional(axisAlignment, -1.0),
-          Axis.vertical => AlignmentDirectional(-1.0, axisAlignment),
-        },
+        alignment: alignment,
         heightFactor: axis == Axis.vertical
             ? math.max(sizeFactor.value, 0.0)
             : fixedCrossAxisSizeFactor,
