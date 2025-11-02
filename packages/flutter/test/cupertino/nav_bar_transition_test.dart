@@ -209,7 +209,7 @@ void main() {
       flying(tester, find.text('Page 1')).first,
     );
     expect(bottomMiddle.text.style!.color, isSameColorAs(const Color(0xff000306)));
-    expect(bottomMiddle.text.style!.fontWeight, FontWeight.w600);
+    expect(bottomMiddle.text.style!.fontWeight, const FontWeight(595));
     expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
@@ -221,7 +221,7 @@ void main() {
       flying(tester, find.text('Page 1')).last,
     );
     expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff000306)));
-    expect(topBackLabel.text.style!.fontWeight, FontWeight.w600);
+    expect(topBackLabel.text.style!.fontWeight, const FontWeight(595));
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
@@ -230,14 +230,14 @@ void main() {
     // Move animation further a bit.
     await tester.pump(const Duration(milliseconds: 200));
     expect(bottomMiddle.text.style!.color, isSameColorAs(const Color(0xff005ec5)));
-    expect(bottomMiddle.text.style!.fontWeight, FontWeight.w400);
+    expect(bottomMiddle.text.style!.fontWeight, const FontWeight(445));
     expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.0);
 
     expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff005ec5)));
-    expect(topBackLabel.text.style!.fontWeight, FontWeight.w400);
+    expect(topBackLabel.text.style!.fontWeight, const FontWeight(445));
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
@@ -259,7 +259,7 @@ void main() {
       flying(tester, find.text('Page 1')).first,
     );
     expect(bottomMiddle.text.style!.color, isSameColorAs(const Color(0xfff8fbff)));
-    expect(bottomMiddle.text.style!.fontWeight, FontWeight.w600);
+    expect(bottomMiddle.text.style!.fontWeight, const FontWeight(595));
     expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
@@ -271,7 +271,7 @@ void main() {
       flying(tester, find.text('Page 1')).last,
     );
     expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xfff8fbff)));
-    expect(topBackLabel.text.style!.fontWeight, FontWeight.w600);
+    expect(topBackLabel.text.style!.fontWeight, const FontWeight(595));
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
@@ -280,14 +280,14 @@ void main() {
     // Move animation further a bit.
     await tester.pump(const Duration(milliseconds: 200));
     expect(bottomMiddle.text.style!.color, isSameColorAs(const Color(0xff409fff)));
-    expect(bottomMiddle.text.style!.fontWeight, FontWeight.w400);
+    expect(bottomMiddle.text.style!.fontWeight, const FontWeight(445));
     expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.0);
 
     expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff409fff)));
-    expect(topBackLabel.text.style!.fontWeight, FontWeight.w400);
+    expect(topBackLabel.text.style!.fontWeight, const FontWeight(445));
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
@@ -1408,7 +1408,7 @@ void main() {
       flying(tester, find.text('Page 1')).first,
     );
     expect(bottomLargeTitle.text.style!.color, isSameColorAs(const Color(0xff000306)));
-    expect(bottomLargeTitle.text.style!.fontWeight, FontWeight.w700);
+    expect(bottomLargeTitle.text.style!.fontWeight, const FontWeight(692));
     expect(bottomLargeTitle.text.style!.fontFamily, 'CupertinoSystemDisplay');
     expect(bottomLargeTitle.text.style!.letterSpacing, moreOrLessEquals(0.35967791542410854));
 
@@ -1417,19 +1417,19 @@ void main() {
       flying(tester, find.text('Page 1')).last,
     );
     expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff000306)));
-    expect(topBackLabel.text.style!.fontWeight, FontWeight.w700);
+    expect(topBackLabel.text.style!.fontWeight, const FontWeight(692));
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemDisplay');
     expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(0.35967791542410854));
 
     // Move animation further a bit.
     await tester.pump(const Duration(milliseconds: 200));
     expect(bottomLargeTitle.text.style!.color, isSameColorAs(const Color(0xff005ec5)));
-    expect(bottomLargeTitle.text.style!.fontWeight, FontWeight.w500);
+    expect(bottomLargeTitle.text.style!.fontWeight, const FontWeight(467));
     expect(bottomLargeTitle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomLargeTitle.text.style!.letterSpacing, moreOrLessEquals(-0.23270857974886894));
 
     expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff005ec5)));
-    expect(topBackLabel.text.style!.fontWeight, FontWeight.w500);
+    expect(topBackLabel.text.style!.fontWeight, const FontWeight(467));
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(-0.23270857974886894));
   });
