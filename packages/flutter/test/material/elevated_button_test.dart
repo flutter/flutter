@@ -2609,6 +2609,19 @@ void main() {
     expect(iconStyle(tester, buttonIcon).color, hoveredColor);
   });
 
+  testWidgets('ElevatedButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: ElevatedButton(onPressed: () {}, child: const Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ElevatedButton)), Size.zero);
+  });
+
   testWidgets('When an ElevatedButton gains an icon, preserves the same SemanticsNode id', (
     WidgetTester tester,
   ) async {
