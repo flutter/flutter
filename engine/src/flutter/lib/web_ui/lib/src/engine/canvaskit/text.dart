@@ -9,6 +9,8 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+const String _kWeightAxisTag = 'wght';
+
 final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
 String? _computeEffectiveFontFamily(String? fontFamily) {
   return ui_web.TestEnvironment.instance.forceTestFonts && !_testFonts.contains(fontFamily)
@@ -86,6 +88,12 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     if (fontWeight != null || fontStyle != null) {
       skTextStyle.fontStyle = toSkFontStyle(fontWeight, fontStyle);
     }
+
+    final int weightValue = fontWeight?.value ?? ui.FontWeight.normal.value;
+    final SkFontVariation skFontVariation = SkFontVariation();
+    skFontVariation.axis = _kWeightAxisTag;
+    skFontVariation.value = weightValue.toDouble();
+    skTextStyle.fontVariations = <SkFontVariation>[skFontVariation];
 
     if (fontSize != null) {
       skTextStyle.fontSize = fontSize;
@@ -579,16 +587,27 @@ class CkTextStyle implements ui.TextStyle {
       properties.fontFeatures = skFontFeatures;
     }
 
+    final List<SkFontVariation> skFontVariations = <SkFontVariation>[];
+    bool weightAxisSet = false;
     if (fontVariations != null) {
-      final List<SkFontVariation> skFontVariations = <SkFontVariation>[];
       for (final ui.FontVariation fontVariation in fontVariations) {
         final SkFontVariation skFontVariation = SkFontVariation();
         skFontVariation.axis = fontVariation.axis;
         skFontVariation.value = fontVariation.value;
         skFontVariations.add(skFontVariation);
+        if (fontVariation.axis == _kWeightAxisTag) {
+          weightAxisSet = true;
+        }
       }
-      properties.fontVariations = skFontVariations;
     }
+    if (!weightAxisSet) {
+      final int weightValue = fontWeight?.value ?? ui.FontWeight.normal.value;
+      final SkFontVariation skFontVariation = SkFontVariation();
+      skFontVariation.axis = _kWeightAxisTag;
+      skFontVariation.value = weightValue.toDouble();
+      skFontVariations.add(skFontVariation);
+    }
+    properties.fontVariations = skFontVariations;
 
     return canvasKit.TextStyle(properties);
   }();
