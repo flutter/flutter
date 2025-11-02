@@ -1755,4 +1755,15 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
 
     scrollController.dispose();
   });
+
+  testWidgets('Scrollbar does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: Scrollbar(child: SingleChildScrollView())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Scrollbar)), Size.zero);
+  });
 }
