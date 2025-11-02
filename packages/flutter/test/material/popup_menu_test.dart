@@ -4827,6 +4827,10 @@ void main() {
   });
 
   testWidgets('PopupMenuButton does not crash at zero area', (WidgetTester tester) async {
+    // This test case only verifies the layout of the button itself, not the
+    // overlay, because there doesn't seem to be a way to open the menu at zero
+    // area. Though, this should be sufficient since the overlay has been verified
+    // by similar tests for MenuAnchor and PopupMenuItem.
     tester.view.physicalSize = Size.zero;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
