@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/utils.dart';
 import 'device.dart';
 import 'device_port_forwarder.dart';
 import 'globals.dart' as globals;
@@ -85,7 +86,7 @@ class ProtocolDiscovery {
   /// Port forwarding is only attempted when this is invoked,
   /// for each VM Service URL in the stream.
   Stream<Uri> get uris {
-    final Stream<Uri> uriStream = _uriStreamController.stream.transform(
+    final Stream<Uri> uriStream = _uriStreamController.stream.transformWithCallSite(
       _throttle<Uri>(waitDuration: throttleDuration),
     );
     return uriStream.asyncMap<Uri>(_forwardPort);
