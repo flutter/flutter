@@ -3078,8 +3078,8 @@ class _SwipeSurface extends SingleChildRenderObjectWidget {
   final VoidCallback? onStart;
 
   @override
-  _RenderSwipenableSurface createRenderObject(BuildContext context) {
-    return _RenderSwipenableSurface(
+  _RenderSwipeableSurface createRenderObject(BuildContext context) {
+    return _RenderSwipeableSurface(
       region: _SwipeRegion.of(context),
       delay: delay,
       onStart: onStart,
@@ -3087,7 +3087,7 @@ class _SwipeSurface extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderSwipenableSurface renderObject) {
+  void updateRenderObject(BuildContext context, _RenderSwipeableSurface renderObject) {
     renderObject
       ..region = _SwipeRegion.of(context)
       ..delay = delay
@@ -3095,8 +3095,8 @@ class _SwipeSurface extends SingleChildRenderObjectWidget {
   }
 }
 
-class _RenderSwipenableSurface extends RenderProxyBox implements _SwipeSurfaceData {
-  _RenderSwipenableSurface({
+class _RenderSwipeableSurface extends RenderProxyBox implements _SwipeSurfaceData {
+  _RenderSwipeableSurface({
     required _SwipeRegionProvider region,
     required this.delay,
     required this.onStart,
