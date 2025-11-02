@@ -478,8 +478,10 @@ TEST_P(TypographerTest, GlyphAtlasTextureWillGrowTilMaxTextureSize) {
     auto add_char = [&](const SkFont& sk_font, char c) {
       int count = sk_font.countText(&c, 1, SkTextEncoding::kUTF8);
       auto buffer = builder.allocRunPos(sk_font, count);
-      sk_font.textToGlyphs(&c, 1, SkTextEncoding::kUTF8, buffer.glyphs, count);
-      sk_font.getPos(buffer.glyphs, count, buffer.points(), {0, 0});
+      sk_font.textToGlyphs(&c, 1, SkTextEncoding::kUTF8,
+                           {buffer.glyphs, count});
+      sk_font.getPos({buffer.glyphs, count}, {buffer.points(), count},
+                     {0, 0} /*=origin*/);
     };
 
     SkFont sk_font = flutter::testing::CreateTestFontOfSize(50 + i);

@@ -826,5 +826,6 @@ class WebServiceWorker extends Target {
 
 extension on Environment {
   ServiceWorkerStrategy get serviceWorkerStrategy =>
-      ServiceWorkerStrategy.fromCliName(defines[kServiceWorkerStrategy]);
+      ServiceWorkerStrategy.fromCliName(defines[kServiceWorkerStrategy]) ??
+      ServiceWorkerStrategy.offlineFirst;
 }
