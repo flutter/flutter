@@ -5,13 +5,13 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [RepeatingTweenAnimationBuilder].
+/// Flutter code sample for [RepeatingAnimationBuilder].
 void main() {
-  runApp(const RepeatingTweenAnimationBuilderExampleApp());
+  runApp(const RepeatingAnimationBuilderExampleApp());
 }
 
-class RepeatingTweenAnimationBuilderExampleApp extends StatelessWidget {
-  const RepeatingTweenAnimationBuilderExampleApp({super.key});
+class RepeatingAnimationBuilderExampleApp extends StatelessWidget {
+  const RepeatingAnimationBuilderExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,21 +20,19 @@ class RepeatingTweenAnimationBuilderExampleApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.purple, brightness: Brightness.dark),
         useMaterial3: true,
       ),
-      home: const RepeatingTweenAnimationBuilderExample(),
+      home: const RepeatingAnimationBuilderExample(),
     );
   }
 }
 
-class RepeatingTweenAnimationBuilderExample extends StatefulWidget {
-  const RepeatingTweenAnimationBuilderExample({super.key});
+class RepeatingAnimationBuilderExample extends StatefulWidget {
+  const RepeatingAnimationBuilderExample({super.key});
 
   @override
-  State<RepeatingTweenAnimationBuilderExample> createState() =>
-      _RepeatingTweenAnimationBuilderExampleState();
+  State<RepeatingAnimationBuilderExample> createState() => _RepeatingAnimationBuilderExampleState();
 }
 
-class _RepeatingTweenAnimationBuilderExampleState
-    extends State<RepeatingTweenAnimationBuilderExample> {
+class _RepeatingAnimationBuilderExampleState extends State<RepeatingAnimationBuilderExample> {
   bool _isPaused = false;
   bool _isReversing = false;
 
@@ -44,15 +42,15 @@ class _RepeatingTweenAnimationBuilderExampleState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('RepeatingTweenAnimationBuilder'),
+        title: const Text('RepeatingAnimationBuilder'),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: RepeatingTweenAnimationBuilder<double>(
+      body: RepeatingAnimationBuilder<double>(
         animatable: Tween<double>(begin: 0.0, end: 1.0),
         duration: const Duration(seconds: 4),
         paused: _isPaused,
-        reverse: _isReversing,
+        repeatMode: _isReversing ? RepeatMode.reverse : RepeatMode.restart,
         curve: Curves.easeInOut,
         builder: (BuildContext context, double value, Widget? child) {
           return Stack(
@@ -88,11 +86,11 @@ class _RepeatingTweenAnimationBuilderExampleState
               ),
             ),
           ),
-          RepeatingTweenAnimationBuilder<double>(
+          RepeatingAnimationBuilder<double>(
             animatable: Tween<double>(begin: 0.8, end: 1.0),
             duration: const Duration(seconds: 2),
             paused: _isPaused,
-            reverse: true,
+            repeatMode: RepeatMode.reverse,
             curve: Curves.easeInOutSine,
             builder: (BuildContext context, double value, Widget? child) {
               return Transform.scale(

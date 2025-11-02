@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/tween_animation_builder/repeating_tween_animation_builder.0.dart'
+import 'package:flutter_api_samples/widgets/repeating_animation_builder/repeating_animation_builder.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('RepeatingTweenAnimationBuilder animates continuously', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.RepeatingTweenAnimationBuilderExampleApp());
+  testWidgets('RepeatingAnimationBuilder animates continuously', (WidgetTester tester) async {
+    await tester.pumpWidget(const example.RepeatingAnimationBuilderExampleApp());
 
     // Verify animation is happening by checking Transform changes
     final Transform initial = tester.widget(find.byType(Transform).first);
@@ -20,7 +20,7 @@ void main() {
   });
 
   testWidgets('Play/pause button controls animation', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.RepeatingTweenAnimationBuilderExampleApp());
+    await tester.pumpWidget(const example.RepeatingAnimationBuilderExampleApp());
 
     // Initially playing (pause icon visible)
     expect(find.byIcon(Icons.pause), findsOneWidget);
@@ -43,7 +43,7 @@ void main() {
   });
 
   testWidgets('Reverse toggle changes animation direction', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.RepeatingTweenAnimationBuilderExampleApp());
+    await tester.pumpWidget(const example.RepeatingAnimationBuilderExampleApp());
 
     // Check initial state
     Switch switchWidget = tester.widget(find.byType(Switch));

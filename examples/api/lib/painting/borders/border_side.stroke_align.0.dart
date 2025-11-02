@@ -28,10 +28,10 @@ class StrokeAlignExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       child: Center(
-        child: RepeatingTweenAnimationBuilder<double>(
+        child: RepeatingAnimationBuilder<double>(
           animatable: Tween<double>(begin: -1.0, end: 1.0),
           duration: const Duration(seconds: 1),
-          reverse: true,
+          repeatMode: RepeatMode.reverse,
           builder: (BuildContext context, double strokeAlign, Widget? child) {
             return Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,

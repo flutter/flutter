@@ -44,7 +44,6 @@ import 'value_listenable_builder.dart';
 /// Registering an [onEnd] callback my be useful to trigger an action (like
 /// another animation) at the end of the current animation.
 ///
-/// {@template flutter.widgets.TweenAnimationBuilder.optimizations}
 /// ## Performance optimizations
 ///
 /// If your [builder] function contains a subtree that does not depend on the
@@ -57,7 +56,6 @@ import 'value_listenable_builder.dart';
 ///
 /// Using this pre-built child is entirely optional, but can improve
 /// performance significantly in some cases and is therefore a good practice.
-/// {@endtemplate}
 ///
 /// ## Ownership of the [Tween]
 ///
@@ -214,177 +212,5 @@ class _TweenAnimationBuilderState<T extends Object?>
   @override
   Widget build(BuildContext context) {
     return widget.builder(context, _currentTween!.evaluate(animation), widget.child);
-  }
-}
-
-/// Widget that animates an [Animatable] value and repeats indefinitely.
-///
-/// The animation continuously cycles from the [Animatable] evaluated at 0.0 to
-/// the value at 1.0.
-/// When [reverse] is true, the animation reverses direction when it reaches
-/// the end. When [paused] is true, the animation stops at its current value.
-///
-/// {@macro flutter.widgets.TweenAnimationBuilder.optimizations}
-///
-/// {@tool dartpad}
-/// This example shows a continuously rotating square that can be paused and resumed.
-///
-/// ** See code in examples/api/lib/widgets/tween_animation_builder/repeating_tween_animation_builder.0.dart **
-/// {@end-tool}
-///
-/// See also:
-///
-///  * [TweenAnimationBuilder], which animates a tween value once.
-///  * [AnimationController.repeat], the underlying mechanism.
-class RepeatingTweenAnimationBuilder<T extends Object> extends StatefulWidget {
-  /// Creates a widget that repeats an animatable animation.
-  const RepeatingTweenAnimationBuilder({
-    super.key,
-    required this.animatable,
-    required this.duration,
-    this.curve = Curves.linear,
-    this.reverse = false,
-    this.paused = false,
-    required this.builder,
-    this.child,
-  });
-
-  /// The animatable to drive repeatedly.
-  ///
-  /// The animation continuously cycles from the value returned by evaluating
-  /// [animatable] at 0.0 to the value returned at 1.0.
-  /// In most cases this will be a [Tween] or [TweenSequence], but any
-  /// [Animatable] that produces values of type [T] is accepted.
-  ///
-  /// ## Ownership
-  ///
-  /// The [RepeatingTweenAnimationBuilder] takes ownership of the provided
-  /// [Animatable] and may mutate it. Once an [Animatable] instance has been
-  /// passed to [RepeatingTweenAnimationBuilder] its properties should not be
-  /// accessed or changed to avoid interference with the
-  /// [RepeatingTweenAnimationBuilder].
-  ///
-  /// It is good practice to never store an [Animatable] provided to a
-  /// [RepeatingTweenAnimationBuilder] in an instance variable to avoid accidental
-  /// modifications of the [Animatable].
-  final Animatable<T> animatable;
-
-  /// The duration of the animation.
-  final Duration duration;
-
-  /// The curve to apply when animating the value.
-  ///
-  /// Defaults to [Curves.linear].
-  final Curve curve;
-
-  /// Called every time the animation value changes.
-  ///
-  /// The builder receives the current animation value and the optional child.
-  final ValueWidgetBuilder<T> builder;
-
-  /// The child widget to pass to the builder.
-  ///
-  /// If a builder callback's return value contains a subtree that does not
-  /// depend on the animation, it's more efficient to build that subtree once
-  /// instead of rebuilding it on every animation tick.
-  final Widget? child;
-
-  /// Whether the animation should reverse direction when it reaches the end.
-  ///
-  /// When true, the animation reverses direction instead of jumping back to
-  /// the beginning. Defaults to false.
-  final bool reverse;
-
-  /// Whether the animation is currently paused.
-  ///
-  /// When true, the animation stops at its current value. When changed to
-  /// false, the animation resumes from that value. Defaults to false.
-  final bool paused;
-
-  @override
-  State<RepeatingTweenAnimationBuilder<T>> createState() {
-    return _RepeatingTweenAnimationBuilderState<T>();
-  }
-}
-
-class _RepeatingTweenAnimationBuilderState<T extends Object>
-    extends State<RepeatingTweenAnimationBuilder<T>>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late Animation<T> _animation;
-  CurvedAnimation? _curvedAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(duration: widget.duration, vsync: this);
-    final T startValue = widget.animatable.transform(0.0);
-    final T endValue = widget.animatable.transform(1.0);
-    _updateAnimation();
-
-    // Start the animation if not paused and the animation spans different values.
-    if (!widget.paused && startValue != endValue) {
-      _controller.repeat(reverse: widget.reverse);
-    }
-  }
-
-  void _updateAnimation() {
-    _curvedAnimation?.dispose();
-    _curvedAnimation = CurvedAnimation(parent: _controller, curve: widget.curve);
-    _animation = widget.animatable.animate(_curvedAnimation!);
-  }
-
-  @override
-  void didUpdateWidget(RepeatingTweenAnimationBuilder<T> oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    final T oldStartValue = oldWidget.animatable.transform(0.0);
-    final T oldEndValue = oldWidget.animatable.transform(1.0);
-    final bool wasAnimating = oldStartValue != oldEndValue;
-
-    // Update the duration if it changed.
-    if (widget.duration != oldWidget.duration) {
-      _controller.duration = widget.duration;
-    }
-
-    final T startValue = widget.animatable.transform(0.0);
-    final T endValue = widget.animatable.transform(1.0);
-
-    // Update the animation if the curve or the animatable changed.
-    final bool animatableChanged =
-        !identical(widget.animatable, oldWidget.animatable) ||
-        startValue != oldStartValue ||
-        endValue != oldEndValue;
-    if (widget.curve != oldWidget.curve || animatableChanged) {
-      _updateAnimation();
-    }
-
-    final bool shouldAnimate = startValue != endValue;
-
-    if (!shouldAnimate || widget.paused) {
-      _controller.stop(canceled: false);
-    } else if (!wasAnimating ||
-        widget.paused != oldWidget.paused ||
-        widget.reverse != oldWidget.reverse) {
-      _controller.repeat(reverse: widget.reverse);
-    }
-  }
-
-  @override
-  void dispose() {
-    _curvedAnimation?.dispose();
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (BuildContext context, Widget? child) {
-        return widget.builder(context, _animation.value, child);
-      },
-      child: widget.child,
-    );
   }
 }
