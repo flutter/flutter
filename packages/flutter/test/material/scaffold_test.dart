@@ -3676,6 +3676,19 @@ void main() {
 
     expect(find.byType(BottomAppBar), findsOneWidget);
   });
+
+  testWidgets('Scaffold does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(appBar: AppBar(), body: const SizedBox.shrink()),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Scaffold)), Size.zero);
+  });
 }
 
 class _GeometryListener extends StatefulWidget {
