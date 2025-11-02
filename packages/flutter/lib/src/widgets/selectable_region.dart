@@ -32,6 +32,7 @@ import 'media_query.dart';
 import 'overlay.dart';
 import 'platform_selectable_region_context_menu.dart';
 import 'selection_container.dart';
+import 'tap_region.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
 import 'text_selection_toolbar_anchors.dart';
@@ -302,18 +303,21 @@ class SelectableRegion extends StatefulWidget {
   }) {
     final bool canCopy = selectionGeometry.status == SelectionStatus.uncollapsed;
     final bool canSelectAll = selectionGeometry.hasContent;
-    final bool platformCanShare = switch (defaultTargetPlatform) {
-      TargetPlatform.android => selectionGeometry.status == SelectionStatus.uncollapsed,
-      TargetPlatform.macOS ||
-      TargetPlatform.fuchsia ||
-      TargetPlatform.linux ||
-      TargetPlatform.windows => false,
-      // TODO(bleroux): the share button should be shown on iOS but the share
-      // functionality requires some changes on the engine side because, on iPad,
-      // it needs an anchor for the popup.
-      // See: https://github.com/flutter/flutter/issues/141775.
-      TargetPlatform.iOS => false,
-    };
+    // The share button is not supported on the web.
+    final bool platformCanShare =
+        !kIsWeb &&
+        switch (defaultTargetPlatform) {
+          TargetPlatform.android => selectionGeometry.status == SelectionStatus.uncollapsed,
+          TargetPlatform.macOS ||
+          TargetPlatform.fuchsia ||
+          TargetPlatform.linux ||
+          TargetPlatform.windows => false,
+          // TODO(bleroux): the share button should be shown on iOS but the share
+          // functionality requires some changes on the engine side because, on iPad,
+          // it needs an anchor for the popup.
+          // See: https://github.com/flutter/flutter/issues/141775.
+          TargetPlatform.iOS => false,
+        };
     final bool canShare = onShare != null && platformCanShare;
 
     // On Android, the share button is before the select all button.
@@ -409,7 +413,14 @@ class SelectableRegionState extends State<SelectableRegion>
   SelectedContent? _lastSelectedContent;
 
   /// Whether the native browser context menu is enabled.
-  bool get _webContextMenuEnabled => kIsWeb && BrowserContextMenu.enabled;
+  // TODO(Renzo-Olivares): Re-enable web context menu for Android
+  // and iOS when https://github.com/flutter/flutter/issues/177123
+  // is resolved.
+  bool get _webContextMenuEnabled =>
+      kIsWeb &&
+      BrowserContextMenu.enabled &&
+      defaultTargetPlatform != TargetPlatform.android &&
+      defaultTargetPlatform != TargetPlatform.iOS;
 
   /// The [SelectionOverlay] that is currently visible on the screen.
   ///
@@ -1937,18 +1948,32 @@ class SelectableRegionState extends State<SelectableRegion>
     if (_webContextMenuEnabled) {
       result = PlatformSelectableRegionContextMenu(child: result);
     }
-    return CompositedTransformTarget(
-      link: _toolbarLayerLink,
-      child: RawGestureDetector(
-        gestures: _gestureRecognizers,
-        behavior: HitTestBehavior.translucent,
-        excludeFromSemantics: true,
-        child: Actions(
-          actions: _actions,
-          child: Focus.withExternalFocusNode(
-            includeSemantics: false,
-            focusNode: _focusNode,
-            child: result,
+    return TapRegion(
+      groupId: SelectableRegion,
+      onTapOutside: (PointerDownEvent event) {
+        // To match the native web behavior, this selectable region is
+        // unfocused when tapping outside of it causing the selection to
+        // be dismissed.
+        //
+        // Tapping outside the selectable region does not unfocus
+        // the region on non-web platforms.
+        if (kIsWeb) {
+          _focusNode.unfocus();
+        }
+      },
+      child: CompositedTransformTarget(
+        link: _toolbarLayerLink,
+        child: RawGestureDetector(
+          gestures: _gestureRecognizers,
+          behavior: HitTestBehavior.translucent,
+          excludeFromSemantics: true,
+          child: Actions(
+            actions: _actions,
+            child: Focus.withExternalFocusNode(
+              includeSemantics: false,
+              focusNode: _focusNode,
+              child: result,
+            ),
           ),
         ),
       ),
