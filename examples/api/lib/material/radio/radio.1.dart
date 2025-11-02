@@ -64,9 +64,9 @@ class _RadioExampleState extends State<RadioExample> {
               value: RadioType.backgroundColor,
               backgroundColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
                 if (states.contains(WidgetState.selected)) {
-                  return Colors.greenAccent.withOpacity(0.5);
+                  return Colors.greenAccent.withValues(alpha: 0.5);
                 } else {
-                  return Colors.grey.shade300.withOpacity(0.3);
+                  return Colors.grey.shade300.withValues(alpha: 0.3);
                 }
               }),
             ),
