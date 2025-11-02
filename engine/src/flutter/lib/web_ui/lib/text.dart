@@ -14,18 +14,22 @@ enum FontStyle { normal, italic }
 enum PlaceholderAlignment { baseline, aboveBaseline, belowBaseline, top, bottom, middle }
 
 class FontWeight {
-  const FontWeight._(this.index, this.value);
-  final int index;
+  const FontWeight(this.value)
+    : assert(value >= 1, 'Font weight must be between 1 and 1000'),
+      assert(value <= 1000, 'Font weight must be between 1 and 1000');
+
   final int value;
-  static const FontWeight w100 = FontWeight._(0, 100);
-  static const FontWeight w200 = FontWeight._(1, 200);
-  static const FontWeight w300 = FontWeight._(2, 300);
-  static const FontWeight w400 = FontWeight._(3, 400);
-  static const FontWeight w500 = FontWeight._(4, 500);
-  static const FontWeight w600 = FontWeight._(5, 600);
-  static const FontWeight w700 = FontWeight._(6, 700);
-  static const FontWeight w800 = FontWeight._(7, 800);
-  static const FontWeight w900 = FontWeight._(8, 900);
+  int get index => (value ~/ 100 - 1).clamp(0, 8);
+
+  static const FontWeight w100 = FontWeight(100);
+  static const FontWeight w200 = FontWeight(200);
+  static const FontWeight w300 = FontWeight(300);
+  static const FontWeight w400 = FontWeight(400);
+  static const FontWeight w500 = FontWeight(500);
+  static const FontWeight w600 = FontWeight(600);
+  static const FontWeight w700 = FontWeight(700);
+  static const FontWeight w800 = FontWeight(800);
+  static const FontWeight w900 = FontWeight(900);
   static const FontWeight normal = w400;
   static const FontWeight bold = w700;
   static const List<FontWeight> values = <FontWeight>[
@@ -39,19 +43,32 @@ class FontWeight {
     w800,
     w900,
   ];
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is FontWeight && other.value == value;
+  }
+
+  @override
+  int get hashCode => value;
+
   static FontWeight? lerp(FontWeight? a, FontWeight? b, double t) {
     if (a == null && b == null) {
       return null;
     }
-    return values[engine.clampInt(
-      lerpDouble(a?.index ?? normal.index, b?.index ?? normal.index, t)!.round(),
-      0,
-      8,
-    )];
+    return FontWeight(
+      lerpDouble(a?.value ?? normal.value, b?.value ?? normal.value, t)!.round().clamp(100, 900),
+    );
   }
 
   @override
   String toString() {
+    if (value % 100 != 0) {
+      return 'FontWeight($value)';
+    }
     return const <int, String>{
       0: 'FontWeight.w100',
       1: 'FontWeight.w200',

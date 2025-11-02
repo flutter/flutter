@@ -2469,6 +2469,37 @@ void main() {
     expect(find.text('Tap me please!'), findsOneWidget);
   });
 
+  testWidgets('PopupMenuButton has expected default mouse cursor on hover', (
+    WidgetTester tester,
+  ) async {
+    const Key key = ValueKey<int>(1);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: key,
+              itemBuilder: (_) => const <PopupMenuEntry<String>>[
+                PopupMenuItem<String>(value: 'a', child: Text('A')),
+                PopupMenuItem<String>(value: 'b', child: Text('B')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: tester.getCenter(find.byKey(key)));
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+  });
+
   testWidgets('PopupMenuItem changes mouse cursor when hovered', (WidgetTester tester) async {
     const Key key = ValueKey<int>(1);
     // Test PopupMenuItem() constructor
@@ -2498,10 +2529,7 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-      pointer: 1,
-    );
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: tester.getCenter(find.byKey(key)));
 
     await tester.pump();
@@ -2535,7 +2563,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test default cursor when disabled
@@ -2597,10 +2625,7 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-      pointer: 1,
-    );
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: tester.getCenter(find.byKey(key)));
     addTearDown(gesture.removePointer);
 
@@ -2635,7 +2660,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test default cursor when disabled
@@ -4838,6 +4863,58 @@ void main() {
     );
     expect(tester.getSize(find.byType(PopupMenuItem<String>)), Size.zero);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/177003
+  testWidgets('PopupMenu semantics for mismatched platforms', (WidgetTester tester) async {
+    Future<void> pumpPopupMenuWithTheme(TargetPlatform themePlatform) async {
+      const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: themePlatform),
+          home: Scaffold(
+            body: Builder(
+              builder: (BuildContext context) {
+                return OutlinedButton(
+                  onPressed: () {
+                    showMenu<void>(
+                      context: context,
+                      position: RelativeRect.fill,
+                      items: const <PopupMenuItem<void>>[PopupMenuItem<void>(child: Text('foo'))],
+                    );
+                  },
+                  child: const Text('open'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      final Finder popupFinder = find.bySemanticsLabel(localizations.popupMenuLabel);
+
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          expect(popupFinder, findsNothing); // Apple platforms don't show label.
+        case _:
+          expect(popupFinder, findsOneWidget); // Non-Apple platforms show label.
+      }
+    }
+
+    // Test with theme.platform = Android on different real platforms.
+    await pumpPopupMenuWithTheme(TargetPlatform.android);
+
+    // Dismiss the first popup.
+    Navigator.of(tester.element(find.text('foo'))).pop();
+    await tester.pumpAndSettle();
+
+    // Test with theme.platform = iOS on different real platforms.
+    await pumpPopupMenuWithTheme(TargetPlatform.iOS);
+  }, variant: TargetPlatformVariant.all());
 }
 
 Matcher overlaps(Rect other) => OverlapsMatcher(other);
