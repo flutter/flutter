@@ -4851,6 +4851,15 @@ void main() {
     checkPopupMenu(popupMenuTheme2);
   });
 
+  testWidgets('PopupMenuDivider does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: PopupMenuDivider())),
+      ),
+    );
+    expect(tester.getSize(find.byType(PopupMenuDivider)), Size.zero);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/177003
   testWidgets('PopupMenu semantics for mismatched platforms', (WidgetTester tester) async {
     Future<void> pumpPopupMenuWithTheme(TargetPlatform themePlatform) async {
