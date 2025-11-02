@@ -145,6 +145,7 @@ class _ImageAssetFileKey {
 /// - Support apps with extensions/widgets (multiple provisioning profiles).
 /// - Make plist values (`uploadBitcode`, `stripSwiftSymbols`) configurable.
 /// - Cache profile lookups within a single build invocation.
+///
 class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   BuildIOSArchiveCommand({required super.logger, required super.verboseHelp}) {
     argParser.addOption(
