@@ -20,6 +20,7 @@ import 'package:flutter/foundation.dart';
 
 import '_window.dart';
 import '_window_linux.dart';
+import '_window_macos.dart';
 import '_window_win32.dart';
 
 /// Creates a default [WindowingOwner] for the current platform.
@@ -34,6 +35,8 @@ WindowingOwner? createDefaultOwner() {
     return WindowingOwnerWin32();
   } else if (Platform.isLinux) {
     return WindowingOwnerLinux();
+  } else if (Platform.isMacOS) {
+    return WindowingOwnerMacOS();
   } else {
     return null;
   }
