@@ -49,7 +49,7 @@ class _SizeTransitionExampleState extends State<SizeTransitionExample>
       body: SizeTransition(
         sizeFactor: _animation,
         axis: Axis.horizontal,
-        axisAlignment: -1,
+        alignment: Alignment.topLeft,
         child: const Center(child: FlutterLogo(size: 200.0)),
       ),
     );

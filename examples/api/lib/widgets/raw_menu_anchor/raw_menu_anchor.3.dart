@@ -224,7 +224,7 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
                       borderRadius: BorderRadius.circular(8),
                       shadowColor: colorScheme.shadow,
                       child: SizeTransition(
-                        axisAlignment: position.dx < 0 ? 1 : -1,
+                        alignment: Alignment(-1, position.dx < 0 ? 1 : -1),
                         sizeFactor: animation,
                         fixedCrossAxisSizeFactor: 1.0,
                         child: widget.panelBuilder(context, animationStatus),
