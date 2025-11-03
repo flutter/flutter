@@ -516,7 +516,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     String? currentTarget;
 
     for (final String eachLine in buildSettings.split('\n')) {
-      final String settingsLine = eachLine.trimRight();
+      final String settingsLine = eachLine.trim();
 
       final RegExpMatch? headerMatch = targetHeader.firstMatch(settingsLine);
       if (headerMatch != null) {
@@ -528,18 +528,11 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
         continue;
       }
 
-      final String leftTrimmed = settingsLine.trimLeft();
-      if (!leftTrimmed.startsWith('EXCLUDED_ARCHS') || !leftTrimmed.contains('=')) {
+      if (!settingsLine.startsWith('EXCLUDED_ARCHS') || !settingsLine.contains('=')) {
         continue;
       }
 
-      final int equalsIndex = leftTrimmed.indexOf('=');
-      if (equalsIndex < 0) {
-        continue;
-      }
-      final String rhs = leftTrimmed.substring(equalsIndex + 1).replaceAll(';', ' ').trim();
-
-      final Iterable<String> tokens = rhs.split(RegExp(r'\s+')).where((t) => t.isNotEmpty);
+      final Iterable<String> tokens = settingsLine.split(' ');
       if (tokens.contains('arm64')) {
         pluginsExcludingArmArch.add(currentTarget);
       }
