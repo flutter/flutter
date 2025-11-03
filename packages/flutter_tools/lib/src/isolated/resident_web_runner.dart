@@ -63,7 +63,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     required SystemClock systemClock,
     required Analytics analytics,
     bool machine = false,
-    Map<String, String>? webDefines,
+    Map<String, String> webDefines = const <String, String>{},
   }) {
     return ResidentWebRunner(
       device,
@@ -108,14 +108,14 @@ class ResidentWebRunner extends ResidentRunner {
     required SystemClock systemClock,
     required Analytics analytics,
     UrlTunneller? urlTunneller,
-    Map<String, String>? webDefines,
+    Map<String, String> webDefines = const <String, String>{},
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
        _systemClock = systemClock,
        _analytics = analytics,
        _urlTunneller = urlTunneller,
-       _webDefines = webDefines ?? <String, String>{},
+       _webDefines = webDefines,
        super(
          <FlutterDevice>[device],
          target: target ?? fileSystem.path.join('lib', 'main.dart'),

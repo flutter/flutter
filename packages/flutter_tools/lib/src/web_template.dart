@@ -106,7 +106,7 @@ class WebTemplate {
     String? buildConfig,
     String? flutterBootstrapJs,
     String? staticAssetsUrl,
-    Map<String, String>? webDefines,
+    Map<String, String> webDefines = const <String, String>{},
   }) {
     String newContent = _content;
 
@@ -150,8 +150,7 @@ class WebTemplate {
       newContent = newContent.replaceAll('{{flutter_bootstrap_js}}', flutterBootstrapJs);
     }
 
-    // Apply web-define substitutions and validate all variables are provided
-    newContent = _applyWebDefineSubstitutions(newContent, webDefines ?? <String, String>{});
+    newContent = _applyWebDefineSubstitutions(newContent, webDefines);
 
     return newContent;
   }

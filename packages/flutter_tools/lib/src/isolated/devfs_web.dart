@@ -84,8 +84,8 @@ class WebDevFS implements DevFS {
     required this.logger,
     required this.platform,
     this.testMode = false,
-    Map<String, String>? webDefines,
-  }) : _webDefines = webDefines ?? <String, String>{} {
+    Map<String, String> webDefines = const <String, String>{},
+  }) : _webDefines = webDefines {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (ddcModuleSystem) {
