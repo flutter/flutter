@@ -57,6 +57,7 @@ class WidgetPreviewAnalytics {
     );
   }
 
+  /// Send an analytics event reporting that the widget preview environment has loaded successfully.
   void reportPreviewerConnected() {
     analytics.send(
       // TODO(bkonyi): we should add a dedicated event type in unified_analytics, but this
