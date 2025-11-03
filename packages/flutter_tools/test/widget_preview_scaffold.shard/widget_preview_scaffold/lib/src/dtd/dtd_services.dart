@@ -26,9 +26,6 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   static const kSetPreference = 'setPreference';
   static const kGetPreference = 'getPreference';
 
-  static const kWidgetPreviewScaffoldStream = 'WidgetPreviewScaffold';
-  static const kWidgetPreviewConnectedEvent = 'Connected';
-
   /// Error code for RpcException thrown when attempting to load a key from
   /// persistent preferences that doesn't have an entry.
   static const kNoValueForKey = 200;
@@ -46,8 +43,8 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
     dtd = await DartToolingDaemon.connect(dtdWsUri);
     unawaited(
       dtd.postEvent(
-        kWidgetPreviewScaffoldStream,
-        kWidgetPreviewConnectedEvent,
+        'WidgetPreviewScaffold',
+        'Connected',
         const <String, Object?>{},
       ),
     );
