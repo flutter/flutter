@@ -344,8 +344,13 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
 
   @override
   void updateScrollbarPainter() {
-    scrollbarPainter
+    if (!widget.revealAssistiveScrollbar) {
+      // This behavior is handled based on scroll events if revealAssistiveScrollbar is true.
+      scrollbarPainter
       ..color = _thumbColor.resolve(_states)
+        ..ignorePointer = !enableGestures;
+    }
+    scrollbarPainter
       ..trackColor = _trackColor.resolve(_states)
       ..trackBorderColor = _trackBorderColor.resolve(_states)
       ..textDirection = Directionality.of(context)
@@ -359,8 +364,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       ..mainAxisMargin = _scrollbarTheme.mainAxisMargin ?? 0.0
       ..minLength = _scrollbarTheme.minThumbLength ?? _kScrollbarMinLength
       ..padding = MediaQuery.paddingOf(context)
-      ..scrollbarOrientation = widget.scrollbarOrientation
-      ..ignorePointer = !enableGestures;
+      ..scrollbarOrientation = widget.scrollbarOrientation;
   }
 
   @override

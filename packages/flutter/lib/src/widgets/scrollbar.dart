@@ -1415,7 +1415,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   ///
   ///   * [RawScrollbar.interactive], which overrides the default behavior.
   @protected
-  bool get enableGestures => widget.interactive ?? true;
+  bool get enableGestures {
+    return widget.interactive ?? !widget.revealAssistiveScrollbar;
+  }
 
   @protected
   @override
@@ -1427,8 +1429,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       parent: _fadeoutAnimationController,
       curve: Curves.fastOutSlowIn,
     );
+    final Color defaultThumbColor = widget.revealAssistiveScrollbar
+        ? const Color(0x00000000)
+        : const Color(0x66BCBCBC);
     scrollbarPainter = ScrollbarPainter(
-      color: widget.thumbColor ?? const Color(0x66BCBCBC),
+      color: widget.thumbColor ?? defaultThumbColor,
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
       thickness: widget.thickness ?? _kScrollbarThickness,
       radius: widget.radius,
@@ -1580,15 +1585,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   void updateScrollbarPainter() {
     final TextDirection textDirection = Directionality.of(context);
-
-    if (!widget.revealAssistiveScrollbar) {
-      // This behavior is handled based on scroll events if revealAssistiveScrollbar is true.
-      scrollbarPainter
-        ..color = widget.thumbColor ?? const Color(0x66BCBCBC)
-        ..ignorePointer = !enableGestures;
-    }
-
+    
     scrollbarPainter
+      ..color = widget.thumbColor ?? const Color(0x66BCBCBC)
       ..trackRadius = widget.trackRadius
       ..trackColor = _showTrack
           ? widget.trackColor ?? const Color(0x08000000)
@@ -1605,7 +1604,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ..shape = widget.shape
       ..crossAxisMargin = widget.crossAxisMargin
       ..minLength = widget.minThumbLength
-      ..minOverscrollLength = widget.minOverscrollLength ?? widget.minThumbLength;
+      ..minOverscrollLength = widget.minOverscrollLength ?? widget.minThumbLength
+      ..ignorePointer = !enableGestures;
   }
 
   @protected
@@ -2208,7 +2208,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   void _toggleAssistiveScrollbarVisibility(bool shouldRevealAssistiveScrollbar) {
-    print('_toggleAssistiveScrollbarVisibility called');
     _assistiveScrollbarIsVisible = !_assistiveScrollbarIsVisible;
     setState(() {
       scrollbarPainter.color = shouldRevealAssistiveScrollbar
@@ -2218,10 +2217,18 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     });
   }
 
+  void _handleAssistiveScrollbarVisibility(PointerDownEvent event) {
+    if (widget.revealAssistiveScrollbar &&
+        event.kind != PointerDeviceKind.mouse &&
+        event.kind != PointerDeviceKind.trackpad &&
+        _assistiveScrollbarIsVisible) {
+      _toggleAssistiveScrollbarVisibility(false);
+    }
+  }
+
   void _receivedPointerSignal(PointerSignalEvent event) {
     _cachedController = _effectiveScrollController;
 
-    // TODO(camsim99): Test if this does not show the scrollbar initially. That really is my only remaining concern.
     if (event is PointerScrollEvent && widget.revealAssistiveScrollbar) {
       final bool trackpadOrMouseScrollDetected =
           event.kind == PointerDeviceKind.mouse || event.kind == PointerDeviceKind.trackpad;
@@ -2276,6 +2283,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         child: RepaintBoundary(
           child: Listener(
             onPointerSignal: _receivedPointerSignal,
+            onPointerDown: _handleAssistiveScrollbarVisibility,
             child: RawGestureDetector(
               key: _gestureDetectorKey,
               gestures: _gestures,
