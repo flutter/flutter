@@ -229,6 +229,19 @@ void testMain() {
       expect(codec.decodeEnvelope(response!), true);
     });
 
+    test('can set application locale', () async {
+      final DomElement host1 = createDomHTMLDivElement();
+      final EngineFlutterView view1 = EngineFlutterView(dispatcher, host1);
+      final EngineFlutterView view2 = EngineFlutterView.implicit(dispatcher, null);
+      dispatcher.viewManager
+        ..registerView(view1)
+        ..registerView(view2);
+
+      dispatcher.setApplicationLocale(const ui.Locale('es', 'MX'));
+      expect(host1.getAttribute('lang'), 'es-MX');
+      expect(domDocument.querySelector('html')!.getAttribute('lang'), 'es-MX');
+    });
+
     test('can find text scale factor', () async {
       const double deltaTolerance = 1e-5;
 
