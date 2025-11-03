@@ -73,7 +73,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "android_virtual_device", "version": "android_36_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8719362231152674241"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8699815938758639089"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       os: Ubuntu
@@ -1688,6 +1688,19 @@ targets:
       - engine/**
       - DEPS
 
+  - name: linux_android_emu_unstable android_engine_vulkan_tests
+    recipe: flutter/flutter_drone
+    bringup: true
+    timeout: 60
+    properties:
+      shard: android_engine_vulkan_tests
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
+        ]
+
   - name: Linux_android_emu_vulkan_stable android_engine_vulkan_tests
     recipe: flutter/flutter_drone
     bringup: true
@@ -2474,6 +2487,16 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: basic_material_app_android__compile
+
+  - name: Linux_pixel_7pro android_verified_input_test
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: android_verified_input_test
 
   - name: Linux_pixel_7pro channels_integration_test
     recipe: devicelab/devicelab_drone
