@@ -350,6 +350,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       ..color = _thumbColor.resolve(_states)
         ..ignorePointer = !enableGestures;
     }
+
     scrollbarPainter
       ..trackColor = _trackColor.resolve(_states)
       ..trackBorderColor = _trackBorderColor.resolve(_states)
