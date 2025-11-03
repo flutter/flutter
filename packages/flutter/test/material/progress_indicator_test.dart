@@ -1970,6 +1970,15 @@ void main() {
     );
   });
 
+  testWidgets('CircularProgressIndicator does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: CircularProgressIndicator())),
+      ),
+    );
+    expect(tester.getSize(find.byType(CircularProgressIndicator)), Size.zero);
+  });
+
   testWidgets('LinearProgressIndicator does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
