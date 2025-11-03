@@ -74,8 +74,10 @@ bool IsWideGamut(const SkColorSpace* color_space) {
   float area = CalculateArea(rgb);
   return area > kSrgbGamutArea;
 }
+}  // namespace
 
-static std::optional<impeller::PixelFormat> ToPixelFormat(SkColorType type) {
+std::optional<impeller::PixelFormat> ImageDecoderImpeller::ToPixelFormat(
+    SkColorType type) {
   switch (type) {
     case kRGBA_8888_SkColorType:
       return impeller::PixelFormat::kR8G8B8A8UNormInt;
@@ -90,7 +92,6 @@ static std::optional<impeller::PixelFormat> ToPixelFormat(SkColorType type) {
   }
   return std::nullopt;
 }
-}  // namespace
 
 ImageDecoderImpeller::ImageDecoderImpeller(
     const TaskRunners& runners,
@@ -306,21 +307,21 @@ std::pair<sk_sp<DlImage>, std::string>
 ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
     const std::shared_ptr<impeller::Context>& context,
     const std::shared_ptr<impeller::DeviceBuffer>& buffer,
-    const SkImageInfo& image_info,
+    const ImageDecoderImpeller::ImageInfo& image_info,
     const std::optional<SkImageInfo>& resize_info) {
-  const auto pixel_format = ToPixelFormat(image_info.colorType());
-  if (!pixel_format) {
-    std::string decode_error(
-        std::format("Unsupported pixel format (SkColorType={})",
-                    static_cast<int>(image_info.colorType())));
-    FML_DLOG(ERROR) << decode_error;
-    return std::make_pair(nullptr, decode_error);
-  }
+  // const auto pixel_format = ToPixelFormat(image_info.colorType());
+  // if (!pixel_format) {
+  //   std::string decode_error(
+  //       std::format("Unsupported pixel format (SkColorType={})",
+  //                   static_cast<int>(image_info.colorType())));
+  //   FML_DLOG(ERROR) << decode_error;
+  //   return std::make_pair(nullptr, decode_error);
+  // }
 
   impeller::TextureDescriptor texture_descriptor;
   texture_descriptor.storage_mode = impeller::StorageMode::kDevicePrivate;
-  texture_descriptor.format = pixel_format.value();
-  texture_descriptor.size = {image_info.width(), image_info.height()};
+  texture_descriptor.format = image_info.format;
+  texture_descriptor.size = {image_info.size.width, image_info.size.height};
   texture_descriptor.mip_count = texture_descriptor.size.MipCount();
   if (context->GetBackendType() == impeller::Context::BackendType::kMetal &&
       resize_info.has_value()) {
@@ -368,7 +369,7 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
   if (resize_info.has_value()) {
     impeller::TextureDescriptor resize_desc;
     resize_desc.storage_mode = impeller::StorageMode::kDevicePrivate;
-    resize_desc.format = pixel_format.value();
+    resize_desc.format = image_info.format;
     resize_desc.size = {resize_info->width(), resize_info->height()};
     resize_desc.mip_count = resize_desc.size.MipCount();
     resize_desc.usage = impeller::TextureUsage::kShaderRead;
@@ -429,7 +430,7 @@ void ImageDecoderImpeller::UploadTextureToPrivate(
     ImageResult result,
     const std::shared_ptr<impeller::Context>& context,
     const std::shared_ptr<impeller::DeviceBuffer>& buffer,
-    const SkImageInfo& image_info,
+    const ImageDecoderImpeller::ImageInfo& image_info,
     const std::optional<SkImageInfo>& resize_info,
     const std::shared_ptr<const fml::SyncSwitch>& gpu_disabled_switch) {
   TRACE_EVENT0("impeller", __FUNCTION__);
@@ -580,11 +581,28 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
           return;
         }
 
+        const std::optional<impeller::PixelFormat> pixel_format =
+            ToPixelFormat(bitmap_result.image_info.colorType());
+        if (!pixel_format.has_value()) {
+          std::string decode_error(std::format(
+              "Unsupported pixel format (SkColorType={})",
+              static_cast<int>(bitmap_result.image_info.colorType())));
+          FML_DLOG(ERROR) << decode_error;
+          result(nullptr, decode_error);
+          return;
+        }
+
+        ImageInfo image_info = {
+            .size = impeller::ISize(bitmap_result.image_info.width(),
+                                    bitmap_result.image_info.height()),
+            .format = pixel_format.value()};
+
         auto upload_texture_and_invoke_result = [result, context, bitmap_result,
-                                                 gpu_disabled_switch]() {
+                                                 gpu_disabled_switch,
+                                                 image_info]() {
           UploadTextureToPrivate(result, context,              //
                                  bitmap_result.device_buffer,  //
-                                 bitmap_result.image_info,     //
+                                 image_info,                   //
                                  bitmap_result.resize_info,    //
                                  gpu_disabled_switch           //
           );
