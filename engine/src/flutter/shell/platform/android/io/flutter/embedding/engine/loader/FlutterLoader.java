@@ -255,6 +255,7 @@ public class FlutterLoader {
    * @param applicationContext The Android application context.
    * @param args Flags sent to the Flutter runtime.
    */
+  @SuppressLint("NewApi") // Calls to Stream and Collection#stream require API 24
   public void ensureInitializationComplete(
       @NonNull Context applicationContext, @Nullable String[] args) {
     if (initialized) {
