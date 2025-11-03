@@ -103,7 +103,7 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutDisplayP3) {
 #if IMPELLER_SUPPORTS_RENDERING
   std::shared_ptr<impeller::Allocator> allocator =
       std::make_shared<impeller::TestImpellerAllocator>();
-  std::optional<DecompressResult> wide_result =
+  std::optional<ImageDecoderImpeller::DecompressResult> wide_result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), {.target_width = 100, .target_height = 100},
           {100, 100},
@@ -130,7 +130,7 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutDisplayP3) {
   }
 
   ASSERT_TRUE(found_deep_red);
-  std::optional<DecompressResult> narrow_result =
+  std::optional<ImageDecoderImpeller::DecompressResult> narrow_result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), {.target_width = 100, .target_height = 100},
           {100, 100},
@@ -168,7 +168,7 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutIndexedPng) {
 #if IMPELLER_SUPPORTS_RENDERING
   std::shared_ptr<impeller::Allocator> allocator =
       std::make_shared<impeller::TestImpellerAllocator>();
-  std::optional<DecompressResult> wide_result =
+  std::optional<ImageDecoderImpeller::DecompressResult> wide_result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), {.target_width = 100, .target_height = 100},
           {100, 100},
@@ -194,7 +194,7 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutIndexedPng) {
   }
 
   ASSERT_TRUE(found_deep_red);
-  std::optional<DecompressResult> narrow_result =
+  std::optional<ImageDecoderImpeller::DecompressResult> narrow_result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), {.target_width = 100, .target_height = 100},
           {100, 100},
@@ -229,7 +229,7 @@ TEST(ImageDecoderNoGLTest, ImpellerUnmultipliedAlphaPng) {
 #if IMPELLER_SUPPORTS_RENDERING
   std::shared_ptr<impeller::Allocator> allocator =
       std::make_shared<impeller::TestImpellerAllocator>();
-  std::optional<DecompressResult> result =
+  std::optional<ImageDecoderImpeller::DecompressResult> result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), {.target_width = 11, .target_height = 11}, {11, 11},
           /*supports_wide_gamut=*/true, capabilities, allocator);
