@@ -72,7 +72,10 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
 
   // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
   decoder->Decode(
-      descriptor_, target_width_, target_height_, destination_format_,
+      descriptor_,
+      {.target_width = target_width_,
+       .target_height = target_height_,
+       .destination_format = destination_format_},
       [raw_codec_ref](const auto& image, const auto& decode_error) {
         std::unique_ptr<fml::RefPtr<SingleFrameCodec>> codec_ref(raw_codec_ref);
         fml::RefPtr<SingleFrameCodec> codec(std::move(*codec_ref));

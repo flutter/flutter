@@ -530,9 +530,7 @@ ImageDecoderImpeller::UploadTextureToStorage(
 
 // |ImageDecoder|
 void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
-                                  uint32_t target_width,
-                                  uint32_t target_height,
-                                  int32_t destination_format,
+                                  const ImageDecoder::Options& options,
                                   const ImageResult& p_result) {
   FML_DCHECK(descriptor);
   FML_DCHECK(p_result);
@@ -551,10 +549,11 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
   };
 
   concurrent_task_runner_->PostTask(
-      [raw_descriptor,                                            //
-       context = context_.get(),                                  //
-       target_size = SkISize::Make(target_width, target_height),  //
-       io_runner = runners_.GetIOTaskRunner(),                    //
+      [raw_descriptor,            //
+       context = context_.get(),  //
+       target_size =
+           SkISize::Make(options.target_width, options.target_height),  //
+       io_runner = runners_.GetIOTaskRunner(),                          //
        result,
        wide_gamut_enabled = wide_gamut_enabled_,  //
        gpu_disabled_switch = gpu_disabled_switch_]() {
