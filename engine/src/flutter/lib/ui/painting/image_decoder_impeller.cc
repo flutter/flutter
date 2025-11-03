@@ -532,6 +532,7 @@ ImageDecoderImpeller::UploadTextureToStorage(
 void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
                                   uint32_t target_width,
                                   uint32_t target_height,
+                                  int32_t destination_format,
                                   const ImageResult& p_result) {
   FML_DCHECK(descriptor);
   FML_DCHECK(p_result);

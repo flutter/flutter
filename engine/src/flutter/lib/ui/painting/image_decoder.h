@@ -42,6 +42,7 @@ class ImageDecoder {
   virtual void Decode(fml::RefPtr<ImageDescriptor> descriptor,
                       uint32_t target_width,
                       uint32_t target_height,
+                      int32_t destination_format,
                       const ImageResult& result) = 0;
 
   fml::TaskRunnerAffineWeakPtr<ImageDecoder> GetWeakPtr() const;

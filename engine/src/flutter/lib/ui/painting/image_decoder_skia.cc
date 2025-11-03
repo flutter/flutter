@@ -222,6 +222,7 @@ static SkiaGPUObject<SkImage> UploadRasterImage(
 void ImageDecoderSkia::Decode(fml::RefPtr<ImageDescriptor> descriptor_ref_ptr,
                               uint32_t target_width,
                               uint32_t target_height,
+                              int32_t destination_format,
                               const ImageResult& callback) {
   TRACE_EVENT0("flutter", __FUNCTION__);
   fml::tracing::TraceFlow flow(__FUNCTION__);
