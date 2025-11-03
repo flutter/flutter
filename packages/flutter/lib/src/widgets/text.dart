@@ -586,7 +586,7 @@ class Text extends StatelessWidget {
   /// the closest enclosing [DefaultTextStyle]. Otherwise, the style will
   /// replace the closest enclosing [DefaultTextStyle].
   ///
-  /// The user or platform may override this [style]s [TextStyle.fontWeight],
+  /// The user or platform may override this [style]'s [TextStyle.fontWeight],
   /// [TextStyle.height], [TextStyle.letterSpacing], and [TextStyle.wordSpacing]
   /// via a [MediaQuery] ancestor's [MediaQueryData.boldText],
   /// [MediaQueryData.lineHeightScaleFactorOverride],
@@ -716,6 +716,9 @@ class Text extends StatelessWidget {
     if (style == null || style!.inherit) {
       effectiveTextStyle = defaultTextStyle.style.merge(style);
     }
+    // TODO(Renzo-Olivares): Investigate ways the framework can automatically
+    // apply MediaQueryData.paragraphSpacingOverride to its own text components.
+    // See: https://github.com/flutter/flutter/issues/177953 and https://github.com/flutter/flutter/issues/177408.
     final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(context);
     final double? letterSpacing = MediaQuery.maybeLetterSpacingOverrideOf(context);
     final double? wordSpacing = MediaQuery.maybeWordSpacingOverrideOf(context);
