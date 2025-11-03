@@ -129,7 +129,7 @@ static SkAlphaType ChooseCompatibleAlphaType(SkAlphaType type) {
   return type;
 }
 
-DecompressResult ImageDecoderImpeller::DecompressTexture(
+ImageDecoderImpeller::DecompressResult ImageDecoderImpeller::DecompressTexture(
     ImageDescriptor* descriptor,
     const ImageDecoder::Options& options,
     impeller::ISize max_texture_size,

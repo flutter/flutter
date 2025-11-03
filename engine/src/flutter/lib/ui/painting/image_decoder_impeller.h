@@ -39,13 +39,6 @@ class ImpellerAllocator : public SkBitmap::Allocator {
   std::shared_ptr<impeller::DeviceBuffer> buffer_;
 };
 
-struct DecompressResult {
-  std::shared_ptr<impeller::DeviceBuffer> device_buffer;
-  SkImageInfo image_info;
-  std::optional<SkImageInfo> resize_info = std::nullopt;
-  std::string decode_error;
-};
-
 class ImageDecoderImpeller final : public ImageDecoder {
  public:
   ImageDecoderImpeller(
@@ -62,6 +55,13 @@ class ImageDecoderImpeller final : public ImageDecoder {
   struct ImageInfo {
     impeller::ISize size;
     impeller::PixelFormat format = impeller::PixelFormat::kUnknown;
+  };
+
+  struct DecompressResult {
+    std::shared_ptr<impeller::DeviceBuffer> device_buffer;
+    SkImageInfo image_info;
+    std::optional<SkImageInfo> resize_info = std::nullopt;
+    std::string decode_error;
   };
 
   // |ImageDecoder|
