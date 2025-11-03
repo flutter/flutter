@@ -1486,7 +1486,9 @@ void main() {
                                     SemanticsFlag.isFocused,
                                     SemanticsFlag.isFocusable,
                                   ],
-                                  tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                  tags: <SemanticsTag>[
+                                    const SemanticsTag('RenderViewport.twoPane'),
+                                  ],
                                   actions: <SemanticsAction>[
                                     SemanticsAction.tap,
                                     SemanticsAction.focus,
@@ -1500,7 +1502,9 @@ void main() {
                                     SemanticsFlag.isButton,
                                     SemanticsFlag.isFocusable,
                                   ],
-                                  tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                  tags: <SemanticsTag>[
+                                    const SemanticsTag('RenderViewport.twoPane'),
+                                  ],
                                   actions: <SemanticsAction>[
                                     SemanticsAction.tap,
                                     SemanticsAction.focus,
@@ -1514,7 +1518,9 @@ void main() {
                                     SemanticsFlag.isButton,
                                     SemanticsFlag.isFocusable,
                                   ],
-                                  tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                  tags: <SemanticsTag>[
+                                    const SemanticsTag('RenderViewport.twoPane'),
+                                  ],
                                   actions: <SemanticsAction>[
                                     SemanticsAction.tap,
                                     SemanticsAction.focus,
@@ -1528,7 +1534,9 @@ void main() {
                                     SemanticsFlag.isButton,
                                     SemanticsFlag.isFocusable,
                                   ],
-                                  tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                                  tags: <SemanticsTag>[
+                                    const SemanticsTag('RenderViewport.twoPane'),
+                                  ],
                                   actions: <SemanticsAction>[
                                     SemanticsAction.tap,
                                     SemanticsAction.focus,
