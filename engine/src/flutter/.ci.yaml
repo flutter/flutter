@@ -30,7 +30,7 @@ platform_properties:
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       device_type: none
-      os: Mac-14|Mac-15
+      os: Mac-15.5
       $flutter/osx_sdk : >-
         {
           "sdk_version": "16c5032a"
