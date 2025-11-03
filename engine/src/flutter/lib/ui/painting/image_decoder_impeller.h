@@ -41,7 +41,6 @@ class ImpellerAllocator : public SkBitmap::Allocator {
 
 struct DecompressResult {
   std::shared_ptr<impeller::DeviceBuffer> device_buffer;
-  std::shared_ptr<SkBitmap> sk_bitmap;
   SkImageInfo image_info;
   std::optional<SkImageInfo> resize_info = std::nullopt;
   std::string decode_error;
@@ -85,7 +84,6 @@ class ImageDecoderImpeller final : public ImageDecoder {
       const std::shared_ptr<impeller::Context>& context,
       const std::shared_ptr<impeller::DeviceBuffer>& buffer,
       const SkImageInfo& image_info,
-      const std::shared_ptr<SkBitmap>& bitmap,
       const std::optional<SkImageInfo>& resize_info,
       const std::shared_ptr<const fml::SyncSwitch>& gpu_disabled_switch);
 

@@ -171,8 +171,7 @@ MultiFrameCodec::State::GetNextFrameImage(
           dl_image = std::move(image);
           error_message = std::move(message);
         },
-        impeller_context, device_buffer, info,
-        std::make_shared<SkBitmap>(bitmap), std::nullopt,
+        impeller_context, device_buffer, info, std::nullopt,
         gpu_disable_sync_switch);
     return std::make_pair(dl_image, error_message);
 #endif
