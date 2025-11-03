@@ -18,6 +18,7 @@ class DialogWindowContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final WindowManager windowManager = WindowManagerAccessor.of(context);
+    final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
     final child = FocusScope(
       autofocus: true,
@@ -28,6 +29,26 @@ class DialogWindowContent extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                ElevatedButton(
+                  onPressed: () {
+                    final UniqueKey key = UniqueKey();
+                    windowManager.add(
+                      KeyedWindow(
+                        key: key,
+                        controller: DialogWindowController(
+                          preferredSize: windowSettings.dialogSize,
+                          delegate: CallbackDialogWindowControllerDelegate(
+                            onDestroyed: () => windowManager.remove(key),
+                          ),
+                          parent: window,
+                          title: 'Dialog',
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Create Modal Dialog'),
+                ),
+                const SizedBox(height: 20),
                 ListenableBuilder(
                   listenable: window,
                   builder: (BuildContext context, Widget? _) {
@@ -42,7 +63,7 @@ class DialogWindowContent extends StatelessWidget {
                     );
                   },
                 ),
-                const SizedBox(height: 16.0),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
                     window.destroy();
