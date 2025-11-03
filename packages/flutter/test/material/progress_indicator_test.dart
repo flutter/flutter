@@ -1969,6 +1969,33 @@ void main() {
       paints..arc(startAngle: 1.5707963267948966, sweepAngle: 0.001),
     );
   });
+
+  testWidgets('RefreshProgressIndicator does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: RefreshProgressIndicator())),
+      ),
+    );
+    expect(tester.getSize(find.byType(RefreshProgressIndicator)), Size.zero);
+  });
+
+  testWidgets('CircularProgressIndicator does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: CircularProgressIndicator())),
+      ),
+    );
+    expect(tester.getSize(find.byType(CircularProgressIndicator)), Size.zero);
+  });
+
+  testWidgets('LinearProgressIndicator does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: LinearProgressIndicator())),
+      ),
+    );
+    expect(tester.getSize(find.byType(LinearProgressIndicator)), Size.zero);
+  });
 }
 
 class _RefreshProgressIndicatorGolden extends StatefulWidget {

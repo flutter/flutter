@@ -78,8 +78,8 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
     point = ApplyTransform(point, globalTransform);
   }
   SkRect rect;
-  NSCAssert(rect.setBoundsCheck(quad, 4), @"Transformed points can't form a rect");
-  rect.setBounds(quad, 4);
+  NSCAssert(rect.setBoundsCheck({quad, 4}), @"Transformed points can't form a rect");
+  rect.setBounds({quad, 4});
 
   // `rect` is in the physical pixel coordinate system. iOS expects the accessibility frame in
   // the logical pixel coordinate system. Therefore, we divide by the `scale` (pixel ratio) to
