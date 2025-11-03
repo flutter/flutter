@@ -57,6 +57,13 @@ class ImageDecoderImpeller final : public ImageDecoder {
 
   ~ImageDecoderImpeller() override;
 
+  static std::optional<impeller::PixelFormat> ToPixelFormat(SkColorType type);
+
+  struct ImageInfo {
+    impeller::ISize size;
+    impeller::PixelFormat format = impeller::PixelFormat::kUnknown;
+  };
+
   // |ImageDecoder|
   void Decode(fml::RefPtr<ImageDescriptor> descriptor,
               const Options& options,
@@ -83,7 +90,7 @@ class ImageDecoderImpeller final : public ImageDecoder {
       ImageResult result,
       const std::shared_ptr<impeller::Context>& context,
       const std::shared_ptr<impeller::DeviceBuffer>& buffer,
-      const SkImageInfo& image_info,
+      const ImageInfo& image_info,
       const std::optional<SkImageInfo>& resize_info,
       const std::shared_ptr<const fml::SyncSwitch>& gpu_disabled_switch);
 
@@ -108,7 +115,7 @@ class ImageDecoderImpeller final : public ImageDecoder {
   static std::pair<sk_sp<DlImage>, std::string> UnsafeUploadTextureToPrivate(
       const std::shared_ptr<impeller::Context>& context,
       const std::shared_ptr<impeller::DeviceBuffer>& buffer,
-      const SkImageInfo& image_info,
+      const ImageInfo& image_info,
       const std::optional<SkImageInfo>& resize_info);
 
   FML_DISALLOW_COPY_AND_ASSIGN(ImageDecoderImpeller);
