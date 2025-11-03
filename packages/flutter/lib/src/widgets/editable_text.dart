@@ -1072,7 +1072,7 @@ class EditableText extends StatefulWidget {
 
   /// The text style to use for the editable text.
   ///
-  /// The user or platform may override this [style]s [TextStyle.fontWeight],
+  /// The user or platform may override this [style]'s [TextStyle.fontWeight],
   /// [TextStyle.height], [TextStyle.letterSpacing], and [TextStyle.wordSpacing]
   /// via a [MediaQuery] ancestor's [MediaQueryData.boldText],
   /// [MediaQueryData.lineHeightScaleFactorOverride],

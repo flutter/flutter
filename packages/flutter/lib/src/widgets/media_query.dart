@@ -1993,6 +1993,9 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// changes.
   ///
   /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  // TODO(Renzo-Olivares): Investigate ways the framework can automatically
+  // apply this override to its own text components.
+  // See: https://github.com/flutter/flutter/issues/177953 and https://github.com/flutter/flutter/issues/177408.
   static double? maybeParagraphSpacingOverrideOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.paragraphSpacingOverride)?.paragraphSpacingOverride;
 
