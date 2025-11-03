@@ -756,7 +756,7 @@ abstract class FlutterCommand extends Command<void> {
           'in web/index.html and web/flutter_bootstrap.js files during development and build.\n'
           'Variables are replaced in the format {{VARIABLE_NAME}}.\n'
           'Multiple defines can be passed by repeating "--${FlutterOptions.kWebDefinesOption}" multiple times.\n'
-          'If a template contains a variable placeholder but no corresponding --web-define is provided, '
+          'If a template contains a variable placeholder but no corresponding "--web-define" is provided, '
           'the build will fail with an error.',
       valueHelp: 'API_URL=https://api.example.com',
       splitCommas: false,
