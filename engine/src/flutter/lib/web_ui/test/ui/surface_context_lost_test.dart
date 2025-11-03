@@ -38,7 +38,7 @@ void testMain() {
         // A new context is created.
         expect(surface.glContext, isNot(initialGlContext));
       },
-      skip: isFirefox || !browserSupportsOffscreenCanvas,
+      skip: isFirefox || isSafari || !browserSupportsOffscreenCanvas,
     );
 
     test('can still render after context is lost', () async {
@@ -78,7 +78,9 @@ void testMain() {
       bitmaps = await surface.rasterizeToImageBitmaps(<ui.Picture>[bluePicture]);
       expect(bitmaps, hasLength(1));
       await expectBitmapColor(bitmaps.single, const ui.Color(0xFF0000FF));
-    }, skip: isFirefox || !browserSupportsOffscreenCanvas);
+      },
+      skip: isFirefox || isSafari || !browserSupportsOffscreenCanvas,
+    );
 
     test('can recover from multiple context losses', () async {
       final Rasterizer rasterizer = renderer.rasterizer;
@@ -102,7 +104,9 @@ void testMain() {
       await surface.initialized;
       final int contextAfterSecondLoss = surface.glContext;
       expect(contextAfterSecondLoss, isNot(contextAfterFirstLoss));
-    }, skip: isFirefox || !browserSupportsOffscreenCanvas);
+      },
+      skip: isFirefox || isSafari || !browserSupportsOffscreenCanvas,
+    );
   });
 }
 
