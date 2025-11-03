@@ -219,8 +219,18 @@ abstract class DeviceManager {
     await Future.wait<List<Device>>(<Future<List<Device>>>[
       for (final DeviceDiscovery discoverer in _platformDiscoverers)
         if (discoverer.requiresExtendedWirelessDeviceDiscovery)
-          discoverer.discoverDevices(timeout: timeout),
+          discoverer.discoverDevices(timeout: timeout, forWirelessDiscovery: true),
     ]);
+  }
+
+  /// Stop any running extended wireless device discoverers.
+  void stopExtendedWirelessDeviceDiscoverers() {
+    for (final PollingDeviceDiscovery deviceDiscoverer
+        in _platformDiscoverers.whereType<PollingDeviceDiscovery>()) {
+      if (deviceDiscoverer.requiresExtendedWirelessDeviceDiscovery) {
+        deviceDiscoverer.cancelWirelessDiscovery();
+      }
+    }
   }
 
   /// Whether we're capable of listing any devices given the current environment configuration.
@@ -440,7 +450,11 @@ abstract class DeviceDiscovery {
   Future<List<Device>> devices({DeviceDiscoveryFilter? filter});
 
   /// Return all connected devices. Discards existing cache of devices.
-  Future<List<Device>> discoverDevices({Duration? timeout, DeviceDiscoveryFilter? filter});
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+    bool forWirelessDiscovery = false,
+  });
 
   /// Gets a list of diagnostic messages pertaining to issues with any connected
   /// devices (will be an empty list if there are no issues).
@@ -472,7 +486,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   Timer? _timer;
 
-  Future<List<Device>> pollingGetDevices({Duration? timeout});
+  Future<List<Device>> pollingGetDevices({Duration? timeout, bool forWirelessDiscovery = false});
 
   void startPolling() {
     // Make initial population the default, fast polling timeout.
@@ -498,6 +512,9 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     _timer = null;
   }
 
+  /// Cancels any in-progress, long-running wireless discovery processes.
+  Future<void> cancelWirelessDiscovery() async {}
+
   /// Get devices from cache filtered by [filter].
   ///
   /// If the cache is empty, populate the cache.
@@ -514,8 +531,17 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   ///
   /// If [filter] is null, it may return devices that are not connected.
   @override
-  Future<List<Device>> discoverDevices({Duration? timeout, DeviceDiscoveryFilter? filter}) {
-    return _populateDevices(timeout: timeout, filter: filter, resetCache: true);
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+    bool forWirelessDiscovery = false,
+  }) {
+    return _populateDevices(
+      timeout: timeout,
+      filter: filter,
+      resetCache: true,
+      forWirelessDiscovery: forWirelessDiscovery,
+    );
   }
 
   /// Get devices from cache filtered by [filter].
@@ -527,9 +553,13 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     Duration? timeout,
     DeviceDiscoveryFilter? filter,
     bool resetCache = false,
+    bool forWirelessDiscovery = false,
   }) async {
     if (!deviceNotifier.isPopulated || resetCache) {
-      final List<Device> devices = await pollingGetDevices(timeout: timeout);
+      final List<Device> devices = await pollingGetDevices(
+        timeout: timeout,
+        forWirelessDiscovery: forWirelessDiscovery,
+      );
       // If the cache was populated while the polling was ongoing, do not
       // overwrite the cache unless it's explicitly refreshing the cache.
       if (!deviceNotifier.isPopulated || resetCache) {
@@ -709,6 +739,9 @@ abstract class Device {
   /// Get the DDS instance for this device.
   final DartDevelopmentService dds;
 
+  /// Get the DevTools URI for the application instance.
+  Uri? get devToolsUri => dds.devToolsUri;
+
   /// Clear the device's logs.
   void clearLogs();
 
@@ -767,9 +800,6 @@ abstract class Device {
   /// Whether the device supports taking screenshots of a running flutter
   /// application.
   bool get supportsScreenshot => false;
-
-  /// Whether the device supports the '--fast-start' development mode.
-  bool get supportsFastStart => false;
 
   /// Whether the Flavors feature ('--flavor') is supported for this device.
   bool get supportsFlavors => false;
@@ -874,7 +904,6 @@ abstract class Device {
         'hotReload': supportsHotReload,
         'hotRestart': supportsHotRestart,
         'screenshot': supportsScreenshot,
-        'fastStart': supportsFastStart,
         'flutterExit': supportsFlutterExit,
         'hardwareRendering': isLocalEmu && await supportsHardwareRendering,
         'startPaused': supportsStartPaused,
@@ -961,7 +990,6 @@ class DebuggingOptions {
     WebRendererMode? webRenderer,
     this.webUseWasm = false,
     this.vmserviceOutFile,
-    this.fastStart = false,
     this.nativeNullAssertions = false,
     this.enableImpeller = ImpellerStatus.platformDefault,
     this.enableFlutterGpu = false,
@@ -1027,7 +1055,6 @@ class DebuggingOptions {
        ddsPort = null,
        devToolsServerAddress = null,
        vmserviceOutFile = null,
-       fastStart = false,
        webEnableExpressionEvaluation = false,
        nativeNullAssertions = false,
        enableDevTools = false,
@@ -1074,7 +1101,6 @@ class DebuggingOptions {
     required this.webRenderer,
     required this.webUseWasm,
     required this.vmserviceOutFile,
-    required this.fastStart,
     required this.nativeNullAssertions,
     required this.enableImpeller,
     required this.enableFlutterGpu,
@@ -1168,7 +1194,6 @@ class DebuggingOptions {
 
   /// A file where the VM Service URL should be written after the application is started.
   final String? vmserviceOutFile;
-  final bool fastStart;
 
   /// Additional null runtime checks inserted for web applications.
   ///
@@ -1266,7 +1291,6 @@ class DebuggingOptions {
     'webRenderer': webRenderer.name,
     'webUseWasm': webUseWasm,
     'vmserviceOutFile': vmserviceOutFile,
-    'fastStart': fastStart,
     'nativeNullAssertions': nativeNullAssertions,
     'enableImpeller': enableImpeller.asBool,
     'enableFlutterGpu': enableFlutterGpu,
@@ -1275,6 +1299,8 @@ class DebuggingOptions {
     'profileStartup': profileStartup,
     'enableEmbedderApi': enableEmbedderApi,
     'usingCISystem': usingCISystem,
+    // TODO(bkonyi): remove once fg3 is updated.
+    'fastStart': false,
     'debugLogsDirectoryPath': debugLogsDirectoryPath,
     'enableDevTools': enableDevTools,
     'ipv6': ipv6,
@@ -1331,7 +1357,6 @@ class DebuggingOptions {
         webRenderer: WebRendererMode.values.byName(json['webRenderer']! as String),
         webUseWasm: json['webUseWasm']! as bool,
         vmserviceOutFile: json['vmserviceOutFile'] as String?,
-        fastStart: json['fastStart']! as bool,
         nativeNullAssertions: json['nativeNullAssertions']! as bool,
         enableImpeller: ImpellerStatus.fromBool(json['enableImpeller'] as bool?),
         enableFlutterGpu: json['enableFlutterGpu']! as bool,

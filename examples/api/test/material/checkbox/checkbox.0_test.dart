@@ -31,9 +31,9 @@ void main() {
     final Checkbox checkbox = tester.widget(find.byType(Checkbox));
 
     expect(checkbox.checkColor, Colors.white);
-    expect(checkbox.fillColor!.resolve(<MaterialState>{}), Colors.red);
-    expect(checkbox.fillColor!.resolve(<MaterialState>{MaterialState.pressed}), Colors.blue);
-    expect(checkbox.fillColor!.resolve(<MaterialState>{MaterialState.hovered}), Colors.blue);
-    expect(checkbox.fillColor!.resolve(<MaterialState>{MaterialState.focused}), Colors.blue);
+    expect(checkbox.fillColor!.resolve(<WidgetState>{}), Colors.red);
+    expect(checkbox.fillColor!.resolve(<WidgetState>{WidgetState.pressed}), Colors.blue);
+    expect(checkbox.fillColor!.resolve(<WidgetState>{WidgetState.hovered}), Colors.blue);
+    expect(checkbox.fillColor!.resolve(<WidgetState>{WidgetState.focused}), Colors.blue);
   });
 }

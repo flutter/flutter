@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "ค้นหาบนอินเทอร์เน็ต",
   "shareButtonLabel": "แชร์",
   "pasteButtonLabel": "วาง",
-  "selectAllButtonLabel": "เลือกทั้งหมด"
+  "selectAllButtonLabel": "เลือกทั้งหมด",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found",
+  "radioButtonUnselectedLabel": "Not selected"
 }

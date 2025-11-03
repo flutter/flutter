@@ -724,6 +724,7 @@ class AppDomain extends Domain {
         hostIsIde: true,
         machine: machine,
         analytics: globals.analytics,
+        logger: globals.logger,
       );
     } else {
       runner = ColdRunner(
@@ -789,21 +790,24 @@ class AppDomain extends Domain {
 
     Completer<DebugConnectionInfo>? connectionInfoCompleter;
 
-    if (runner.debuggingEnabled) {
+    if (runner.supportsServiceProtocol && runner.debuggingEnabled) {
       connectionInfoCompleter = Completer<DebugConnectionInfo>();
       // We don't want to wait for this future to complete and callbacks won't fail.
       // As it just writes to stdout.
       unawaited(
         connectionInfoCompleter.future.then<void>((DebugConnectionInfo info) {
-          final params = <String, Object?>{
+          _sendAppEvent(app, 'debugPort', {
             // The web vmservice proxy does not have an http address.
             'port': info.httpUri?.port ?? info.wsUri!.port,
             'wsUri': info.wsUri.toString(),
-          };
-          if (info.baseUri != null) {
-            params['baseUri'] = info.baseUri;
+            'baseUri': ?info.baseUri,
+          });
+          if (info.devToolsUri != null) {
+            _sendAppEvent(app, 'devTools', {'uri': info.devToolsUri!.toString()});
           }
-          _sendAppEvent(app, 'debugPort', params);
+          if (info.dtdUri != null) {
+            _sendAppEvent(app, 'dtd', {'uri': info.dtdUri!.toString()});
+          }
         }),
       );
     }
@@ -1279,7 +1283,11 @@ class DeviceDomain extends Domain {
       devToolsServerAddress: devToolsServerAddress,
     );
     unawaited(device.dds.done.whenComplete(() => sendEvent('device.dds.done.$deviceId')));
-    return <String, Object?>{'ddsUri': device.dds.uri?.toString()};
+    return <String, Object?>{
+      'ddsUri': device.dds.uri?.toString(),
+      'devToolsUri': device.dds.devToolsUri?.toString(),
+      'dtdUri': device.dds.dtdUri?.toString(),
+    };
   }
 
   /// Starts DDS for the device.
@@ -1402,7 +1410,8 @@ Future<Map<String, Object?>> _deviceToMap(Device device) async {
       'hotReload': device.supportsHotReload,
       'hotRestart': device.supportsHotRestart,
       'screenshot': device.supportsScreenshot,
-      'fastStart': device.supportsFastStart,
+      // TODO(bkonyi): remove once fg3 is updated.
+      'fastStart': false,
       'flutterExit': device.supportsFlutterExit,
       'hardwareRendering': await device.supportsHardwareRendering,
       'startPaused': device.supportsStartPaused,
@@ -1824,7 +1833,7 @@ final class MachineOutputLogger extends DelegatingLogger {
       final event = <String, Object?>{
         'id': eventId,
         'progressId': eventType,
-        if (message != null) 'message': message,
+        'message': ?message,
         'finished': finished,
       };
 

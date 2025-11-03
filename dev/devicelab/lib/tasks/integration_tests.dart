@@ -139,6 +139,14 @@ TaskFunction createSolidColorTest({required bool enableImpeller}) {
   ).call;
 }
 
+TaskFunction androidVerifiedInputTest({Map<String, String>? environment}) {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/android_verified_input',
+    'lib/main.dart',
+    environment: environment,
+  ).call;
+}
+
 // Can run on emulator or physical android device.
 // Device must have developer settings enabled.
 // Device must be android api 30 or higher.
@@ -219,6 +227,16 @@ TaskFunction createWindowsStartupDriverTest({String? deviceIdOverride}) {
     'lib/main.dart',
     deviceIdOverride: deviceIdOverride,
   ).call;
+}
+
+TaskFunction createWindowingDriverTest() {
+  return () async {
+    await flutter('config', options: const <String>['--enable-windowing']);
+    return DriverTest(
+      '${flutterDirectory.path}/dev/integration_tests/windowing_test',
+      'lib/main.dart',
+    ).call();
+  };
 }
 
 TaskFunction createWideGamutTest() {

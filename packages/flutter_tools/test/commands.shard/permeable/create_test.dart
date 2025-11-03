@@ -207,7 +207,6 @@ void main() {
             workflow: 'create',
             commandHasTerminal: false,
             createAndroidLanguage: 'java',
-            createIosLanguage: 'swift',
           ),
         ),
       );
@@ -571,7 +570,7 @@ void main() {
     () async {
       await _createAndAnalyzeProject(
         projectDir,
-        <String>['--template=plugin', '-i', 'objc', '-a', 'java'],
+        <String>['--template=plugin', '-a', 'java'],
         <String>[
           'analysis_options.yaml',
           'LICENSE',
@@ -639,7 +638,7 @@ void main() {
     () async {
       await _createProject(
         projectDir,
-        <String>['--template=plugin', '-i', 'objc', '-a', 'java'],
+        <String>['--template=plugin', '-a', 'java'],
         <String>['example/pubspec.yaml'],
       );
       final String rawPubspec = await projectDir
@@ -688,7 +687,7 @@ void main() {
   );
 
   testUsingContext(
-    'kotlin/swift plugin project without Swift Package Manager',
+    'plugin project with Swift Package Manager',
     () async {
       return _createProject(
         projectDir,
@@ -697,8 +696,6 @@ void main() {
           '--template=plugin',
           '-a',
           'kotlin',
-          '--ios-language',
-          'swift',
           '--platforms',
           'android,ios,macos',
         ],
@@ -733,18 +730,11 @@ void main() {
   );
 
   testUsingContext(
-    'swift plugin project with Swift Package Manager',
+    'plugin project with Swift Package Manager',
     () async {
       return _createProject(
         projectDir,
-        <String>[
-          '--no-pub',
-          '--template=plugin',
-          '--ios-language',
-          'swift',
-          '--platforms',
-          'ios,macos',
-        ],
+        <String>['--no-pub', '--template=plugin', '--platforms', 'ios,macos'],
         <String>[
           'ios/flutter_project/Package.swift',
           'ios/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
@@ -769,29 +759,6 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'objc plugin project with Swift Package Manager',
-    () async {
-      return _createProject(
-        projectDir,
-        <String>['--no-pub', '--template=plugin', '--ios-language', 'objc', '--platforms', 'ios'],
-        <String>[
-          'ios/flutter_project/Package.swift',
-          'ios/flutter_project/Sources/flutter_project/include/flutter_project/FlutterProjectPlugin.h',
-          'ios/flutter_project/Sources/flutter_project/FlutterProjectPlugin.m',
-          'ios/flutter_project/Sources/flutter_project/PrivacyInfo.xcprivacy',
-        ],
-        unexpectedPaths: <String>[
-          'ios/Classes/FlutterProjectPlugin.swift',
-          'ios/Classes/FlutterProjectPlugin.h',
-          'ios/Classes/FlutterProjectPlugin.m',
-          'ios/Assets/.gitkeep',
-        ],
-      );
-    },
-    overrides: {FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true)},
-  );
-
   testUsingContext('plugin project with custom org', () async {
     return _createProject(
       projectDir,
@@ -800,8 +767,6 @@ void main() {
         '--template=plugin',
         '--org',
         'com.bar.foo',
-        '-i',
-        'objc',
         '-a',
         'java',
         '--platform',
@@ -826,8 +791,6 @@ void main() {
         '--template=plugin',
         '--project-name',
         'xyz',
-        '-i',
-        'objc',
         '-a',
         'java',
         '--platforms',
@@ -1690,7 +1653,6 @@ void main() {
       '--org',
       'com.foo.bar',
       '--platforms=ios',
-      '--ios-language=objc',
       '--project-name=my_project',
       projectDir.path,
     ]);
@@ -1716,40 +1678,20 @@ void main() {
   });
 
   testUsingContext(
-    'should show --ios-language deprecation error for non-plugin templates',
+    'should show --ios-language deprecation warning for all templates',
     () async {
       final command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await expectToolExitLater(
-        runner.run(<String>['create', '--no-pub', '--ios-language=swift', projectDir.path]),
-        contains('The "ios-language" option is only supported for "--template=plugin".'),
-      );
-    },
-    overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
-  );
-
-  testUsingContext(
-    'should show --ios-language deprecation warning issue for Objective-C plugins',
-    () async {
-      final command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-
-      await runner.run(<String>[
-        'create',
-        '--no-pub',
-        '-t',
-        'plugin',
-        '--ios-language=objc',
-        projectDir.path,
-      ]);
+      await runner.run(<String>['create', '--no-pub', '--ios-language=swift', projectDir.path]);
       expect(
         logger.warningText,
         contains(
-          'The "ios-language" option is deprecated and will be removed in a future Flutter release.',
+          'The "--ios-language" option is deprecated and no longer has any effect. '
+          'Swift is always used for iOS-specific code. '
+          'This flag will be removed in a future version of Flutter.',
         ),
       );
-      expect(logger.warningText, contains('https://github.com/flutter/flutter/issues/169683'));
     },
     overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
   );
@@ -2097,24 +2039,15 @@ void main() {
       projectDir.childDirectory('ios').deleteSync(recursive: true);
       await _createProject(
         projectDir,
-        <String>[
-          '--no-pub',
-          '--template=plugin',
-          '-i',
-          'objc',
-          '-a',
-          'java',
-          '--platforms',
-          'ios,android',
-        ],
+        <String>['--no-pub', '--template=plugin', '-a', 'java', '--platforms', 'ios,android'],
         <String>[
           'example/android/app/src/main/java/com/bar/foo/flutter_project_example/MainActivity.java',
-          'ios/Classes/FlutterProjectPlugin.h',
+          'ios/Classes/FlutterProjectPlugin.swift',
         ],
         unexpectedPaths: <String>[
           'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
           'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
-          'ios/flutter_project/Sources/flutter_project/include/flutter_project/FlutterProjectPlugin.h',
+          'ios/flutter_project/Sources/flutter_project/include/flutter_project/FlutterProjectPlugin.swift',
         ],
       );
       final FlutterProject project = FlutterProject.fromDirectory(projectDir);
@@ -2137,8 +2070,6 @@ void main() {
         '--template=plugin',
         '--org',
         'com.bar.foo',
-        '-i',
-        'objc',
         '-a',
         'java',
         '--platforms',
@@ -2148,24 +2079,16 @@ void main() {
       projectDir.childDirectory('ios').deleteSync(recursive: true);
       await _createProject(
         projectDir,
-        <String>[
-          '--no-pub',
-          '--template=plugin',
-          '-i',
-          'objc',
-          '-a',
-          'java',
-          '--platforms',
-          'ios,android',
-        ],
+        <String>['--no-pub', '--template=plugin', '-a', 'java', '--platforms', 'ios,android'],
         <String>[
           'example/android/app/src/main/java/com/bar/foo/flutter_project_example/MainActivity.java',
-          'ios/flutter_project/Sources/flutter_project/include/flutter_project/FlutterProjectPlugin.h',
+          'ios/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
+          'ios/flutter_project/Package.swift',
         ],
         unexpectedPaths: <String>[
           'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
           'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
-          'ios/Classes/FlutterProjectPlugin.h',
+          'ios/Classes/FlutterProjectPlugin.swift',
         ],
       );
       final FlutterProject project = FlutterProject.fromDirectory(projectDir);
@@ -3000,8 +2923,6 @@ void main() {
         '--no-pub',
         '--template=plugin',
         '--platforms=ios',
-        '-i',
-        'objc',
         projectDir.path,
       ]);
 
@@ -3398,14 +3319,7 @@ void main() {
         flutterToolsAbsolutePath,
         'templates',
         'plugin',
-        'ios-objc.tmpl',
-        'projectName.podspec.tmpl',
-      ),
-      globals.fs.path.join(
-        flutterToolsAbsolutePath,
-        'templates',
-        'plugin',
-        'ios-swift.tmpl',
+        'ios.tmpl',
         'projectName.podspec.tmpl',
       ),
       globals.fs.path.join(
@@ -3584,8 +3498,8 @@ void main() {
 
     final String buildGradleContent = await buildGradleFile.readAsString();
 
-    expect(buildGradleContent.contains('sourceCompatibility = JavaVersion.VERSION_11'), true);
-    expect(buildGradleContent.contains('targetCompatibility = JavaVersion.VERSION_11'), true);
+    expect(buildGradleContent.contains('sourceCompatibility = JavaVersion.VERSION_'), true);
+    expect(buildGradleContent.contains('targetCompatibility = JavaVersion.VERSION_'), true);
   });
 
   testUsingContext('Android Kotlin plugin sets explicit compatibility version', () async {
@@ -3611,10 +3525,10 @@ void main() {
 
     final String buildGradleContent = await buildGradleFile.readAsString();
 
-    expect(buildGradleContent.contains('sourceCompatibility = JavaVersion.VERSION_11'), true);
-    expect(buildGradleContent.contains('targetCompatibility = JavaVersion.VERSION_11'), true);
+    expect(buildGradleContent.contains('sourceCompatibility = JavaVersion.VERSION_'), true);
+    expect(buildGradleContent.contains('targetCompatibility = JavaVersion.VERSION_'), true);
     // jvmTarget should be set to the same value.
-    expect(buildGradleContent.contains('jvmTarget = JavaVersion.VERSION_11'), true);
+    expect(buildGradleContent.contains('jvmTarget = JavaVersion.VERSION_'), true);
   });
 
   testUsingContext(

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'base/dds.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
@@ -24,7 +25,7 @@ class ColdRunner extends ResidentRunner {
     this.applicationBinary,
     super.stayResident,
     super.machine,
-    super.devtoolsHandler,
+    super.dartBuilder,
   }) : super(hotMode: false);
 
   final bool traceStartup;
@@ -75,24 +76,17 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
-    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-    if (debuggingEnabled && debuggingOptions.enableDevTools) {
-      // The method below is guaranteed never to return a failing future.
-      unawaited(
-        residentDevtoolsHandler!.serveAndAnnounceDevTools(
-          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-          flutterDevices: flutterDevices,
-          isStartPaused: debuggingOptions.startPaused,
-        ),
-      );
-    }
-
-    if (flutterDevices.first.vmServiceUris != null) {
+    final FlutterDevice flutterDevice = flutterDevices.first;
+    if (flutterDevice.vmServiceUris != null) {
+      final FlutterVmService? vmService = flutterDevice.vmService;
+      final DartDevelopmentService dds = flutterDevice.device!.dds;
       // For now, only support one debugger connection.
       connectionInfoCompleter?.complete(
         DebugConnectionInfo(
-          httpUri: flutterDevices.first.vmService!.httpAddress,
-          wsUri: flutterDevices.first.vmService!.wsAddress,
+          httpUri: vmService!.httpAddress,
+          wsUri: vmService.wsAddress,
+          devToolsUri: dds.devToolsUri,
+          dtdUri: dds.dtdUri,
         ),
       );
     }
@@ -177,7 +171,6 @@ class ColdRunner extends ResidentRunner {
     for (final FlutterDevice? flutterDevice in flutterDevices) {
       await flutterDevice!.device!.dispose();
     }
-    await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
   }
 

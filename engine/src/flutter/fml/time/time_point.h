@@ -49,26 +49,23 @@ class TimePoint {
     return TimePoint(ticks);
   }
 
-  TimeDelta ToEpochDelta() const { return TimeDelta::FromNanoseconds(ticks_); }
+  constexpr TimeDelta ToEpochDelta() const {
+    return TimeDelta::FromNanoseconds(ticks_);
+  }
 
   // Compute the difference between two time points.
-  TimeDelta operator-(TimePoint other) const {
+  constexpr TimeDelta operator-(TimePoint other) const {
     return TimeDelta::FromNanoseconds(ticks_ - other.ticks_);
   }
 
-  TimePoint operator+(TimeDelta duration) const {
+  constexpr TimePoint operator+(TimeDelta duration) const {
     return TimePoint(ticks_ + duration.ToNanoseconds());
   }
-  TimePoint operator-(TimeDelta duration) const {
+  constexpr TimePoint operator-(TimeDelta duration) const {
     return TimePoint(ticks_ - duration.ToNanoseconds());
   }
 
-  bool operator==(TimePoint other) const { return ticks_ == other.ticks_; }
-  bool operator!=(TimePoint other) const { return ticks_ != other.ticks_; }
-  bool operator<(TimePoint other) const { return ticks_ < other.ticks_; }
-  bool operator<=(TimePoint other) const { return ticks_ <= other.ticks_; }
-  bool operator>(TimePoint other) const { return ticks_ > other.ticks_; }
-  bool operator>=(TimePoint other) const { return ticks_ >= other.ticks_; }
+  constexpr auto operator<=>(const TimePoint& other) const = default;
 
  private:
   explicit constexpr TimePoint(int64_t ticks) : ticks_(ticks) {}

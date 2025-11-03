@@ -18,7 +18,6 @@ import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
-import 'material_state.dart';
 import 'radio.dart';
 import 'radio_theme.dart';
 import 'theme.dart';
@@ -51,7 +50,7 @@ enum _RadioType { material, adaptive }
 /// This widget does not coordinate the [selected] state and the
 /// [checked] state; to have the list tile appear selected when the
 /// radio button is the selected radio button, set [selected] to true
-/// when [value] matches [groupValue].
+/// when [value] matches [RadioGroup.groupValue].
 ///
 /// The radio button is shown on the left by default in left-to-right languages
 /// (i.e. the leading edge). This can be changed using [controlAffinity]. The
@@ -363,7 +362,7 @@ class RadioListTile<T> extends StatefulWidget {
   /// If null, then the value of [activeColor] is used in the selected state. If
   /// that is also null, then the value of [RadioThemeData.fillColor] is used.
   /// If that is also null, then the default value is used.
-  final MaterialStateProperty<Color?>? fillColor;
+  final WidgetStateProperty<Color?>? fillColor;
 
   /// {@macro flutter.material.radio.materialTapTargetSize}
   ///
@@ -384,7 +383,7 @@ class RadioListTile<T> extends StatefulWidget {
   /// and [hoverColor] is used in the pressed and hovered state. If that is also
   /// null, the value of [SwitchThemeData.overlayColor] is used. If that is
   /// also null, then the default value is used in the pressed and hovered state.
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
 
   /// {@macro flutter.material.radio.splashRadius}
   ///
@@ -578,6 +577,9 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
   @override
   bool get tristate => widget.toggleable;
 
+  @override
+  bool get enabled => _enabled;
+
   bool get checked => radioValue == effectiveGroupValue;
 
   late final _RadioRegistry<T> _radioRegistry = _RadioRegistry<T>(this);
@@ -692,7 +694,7 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
     };
     final ThemeData theme = Theme.of(context);
     final RadioThemeData radioThemeData = RadioTheme.of(context);
-    final Set<MaterialState> states = <MaterialState>{if (widget.selected) MaterialState.selected};
+    final Set<WidgetState> states = <WidgetState>{if (widget.selected) WidgetState.selected};
     final Color effectiveActiveColor =
         widget.activeColor ??
         radioThemeData.fillColor?.resolve(states) ??

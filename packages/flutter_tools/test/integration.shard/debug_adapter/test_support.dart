@@ -29,7 +29,11 @@ final useInProcessDap = Platform.environment['DAP_TEST_INTERNAL'] == 'true';
 /// This is useful for debugging locally or on the bots and will include both
 /// DAP traffic (between the test DAP client and the DAP server) and the VM
 /// Service traffic (wrapped in a custom 'dart.log' event).
-final verboseLogging = Platform.environment['DAP_TEST_VERBOSE'] == 'true';
+final bool verboseLogging =
+    Platform.environment['DAP_TEST_VERBOSE'] == 'true' ||
+    // Enable verbose logging on CI bots.
+    // TODO(bkonyi): remove this once https://github.com/flutter/flutter/issues/172636 is resolved.
+    Platform.environment.containsKey('SWARMING_TASK_ID');
 
 const endOfErrorOutputMarker =
     '════════════════════════════════════════════════════════════════════════════════';

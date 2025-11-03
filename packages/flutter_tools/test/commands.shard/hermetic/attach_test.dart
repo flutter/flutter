@@ -1591,10 +1591,10 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
     String? packagesFilePath,
     String? dillOutputPath,
     bool stayResident = true,
-    bool ipv6 = false,
     FlutterProject? flutterProject,
-    Analytics? analytics,
     String? nativeAssetsYamlFile,
+    required Analytics analytics,
+    Logger? logger,
   }) {
     if (_artifactTester != null) {
       for (final device in devices) {

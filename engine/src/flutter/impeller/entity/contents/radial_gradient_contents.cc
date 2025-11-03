@@ -101,17 +101,17 @@ bool RadialGradientContents::RenderSSBO(const ContentContext& renderer,
             GetOpacityFactor() *
             GetGeometry()->ComputeAlphaCoverage(entity.GetTransform());
 
-        auto& host_buffer = renderer.GetTransientsBuffer();
+        auto& data_host_buffer = renderer.GetTransientsDataBuffer();
         auto colors = CreateGradientColors(colors_, stops_);
 
         frag_info.colors_length = colors.size();
-        auto color_buffer =
-            host_buffer.Emplace(colors.data(), colors.size() * sizeof(StopData),
-                                host_buffer.GetMinimumUniformAlignment());
+        auto color_buffer = data_host_buffer.Emplace(
+            colors.data(), colors.size() * sizeof(StopData),
+            renderer.GetDeviceCapabilities()
+                .GetMinimumStorageBufferAlignment());
 
         pass.SetCommandLabel("RadialGradientSSBOFill");
-        FS::BindFragInfo(
-            pass, renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
+        FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
         FS::BindColorData(pass, color_buffer);
 
         return true;
@@ -148,7 +148,7 @@ bool RadialGradientContents::RenderUniform(const ContentContext& renderer,
         pass.SetCommandLabel("RadialGradientUniformFill");
 
         FS::BindFragInfo(
-            pass, renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
+            pass, renderer.GetTransientsDataBuffer().EmplaceUniform(frag_info));
 
         return true;
       });
@@ -198,7 +198,7 @@ bool RadialGradientContents::RenderTexture(const ContentContext& renderer,
         pass.SetCommandLabel("RadialGradientFill");
 
         FS::BindFragInfo(
-            pass, renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
+            pass, renderer.GetTransientsDataBuffer().EmplaceUniform(frag_info));
         FS::BindTextureSampler(
             pass, gradient_texture,
             renderer.GetContext()->GetSamplerLibrary()->GetSampler(

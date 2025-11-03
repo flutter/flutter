@@ -16,6 +16,7 @@ import 'package:flutter/widgets.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'elevation_overlay.dart';
+import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -228,7 +229,7 @@ class NavigationBar extends StatelessWidget {
 
   /// The highlight color that's typically used to indicate that
   /// the [NavigationDestination] is focused, hovered, or pressed.
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
 
   //// The text style of the label.
   ///
@@ -241,7 +242,7 @@ class NavigationBar extends StatelessWidget {
   ///
   /// If [ThemeData.useMaterial3] is false, then the default text style is
   /// [TextTheme.labelSmall] with [ColorScheme.onSurface].
-  final MaterialStateProperty<TextStyle?>? labelTextStyle;
+  final WidgetStateProperty<TextStyle?>? labelTextStyle;
 
   /// The padding around the [NavigationDestination.label] widget.
   ///
@@ -423,9 +424,9 @@ class NavigationDestination extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _NavigationDestinationInfo info = _NavigationDestinationInfo.of(context);
-    const Set<MaterialState> selectedState = <MaterialState>{MaterialState.selected};
-    const Set<MaterialState> unselectedState = <MaterialState>{};
-    const Set<MaterialState> disabledState = <MaterialState>{MaterialState.disabled};
+    const Set<WidgetState> selectedState = <WidgetState>{WidgetState.selected};
+    const Set<WidgetState> unselectedState = <WidgetState>{};
+    const Set<WidgetState> disabledState = <WidgetState>{WidgetState.disabled};
 
     final NavigationBarThemeData navigationBarTheme = NavigationBarTheme.of(context);
     final NavigationBarThemeData defaults = _defaultsFor(context);
@@ -732,7 +733,7 @@ class _NavigationDestinationInfo extends InheritedWidget {
   /// the [NavigationDestination] is focused, hovered, or pressed.
   ///
   /// This is used by destinations to override the overlay color.
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
 
   /// The callback that should be called when this destination is tapped.
   ///
@@ -741,7 +742,7 @@ class _NavigationDestinationInfo extends InheritedWidget {
   final VoidCallback onTap;
 
   /// The text style of the label.
-  final MaterialStateProperty<TextStyle?>? labelTextStyle;
+  final WidgetStateProperty<TextStyle?>? labelTextStyle;
 
   /// The padding around the label.
   ///
@@ -866,7 +867,7 @@ class NavigationIndicator extends StatelessWidget {
             builder: (BuildContext context, Animation<double> fadeAnimation) {
               return FadeTransition(
                 opacity: fadeAnimation,
-                child: Container(
+                child: Ink(
                   width: width,
                   height: height,
                   decoration: ShapeDecoration(
@@ -916,8 +917,6 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
   /// See [NavigationDestination.label].
   final Widget label;
 
-  static final Key _labelKey = UniqueKey();
-
   @override
   Widget build(BuildContext context) {
     return _DestinationLayoutAnimationBuilder(
@@ -927,15 +926,12 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
           children: <Widget>[
             LayoutId(
               id: _NavigationDestinationLayoutDelegate.iconId,
-              child: RepaintBoundary(key: iconKey, child: icon),
+              // The key is used by the _IndicatorInkWell to query the icon position.
+              child: KeyedSubtree(key: iconKey, child: icon),
             ),
             LayoutId(
               id: _NavigationDestinationLayoutDelegate.labelId,
-              child: FadeTransition(
-                alwaysIncludeSemantics: true,
-                opacity: animation,
-                child: RepaintBoundary(key: _labelKey, child: label),
-              ),
+              child: FadeTransition(alwaysIncludeSemantics: true, opacity: animation, child: label),
             ),
           ],
         );
@@ -1402,7 +1398,7 @@ class _NavigationBarDefaultsM2 extends NavigationBarThemeData {
       ElevationOverlay.colorWithOverlay(_colors.surface, _colors.onSurface, 3.0);
 
   @override
-  MaterialStateProperty<IconThemeData?>? get iconTheme {
+  WidgetStateProperty<IconThemeData?>? get iconTheme {
     return MaterialStatePropertyAll<IconThemeData>(
       IconThemeData(size: 24, color: _colors.onSurface),
     );
@@ -1412,7 +1408,7 @@ class _NavigationBarDefaultsM2 extends NavigationBarThemeData {
   Color? get indicatorColor => _colors.secondary.withOpacity(0.24);
 
   @override
-  MaterialStateProperty<TextStyle?>? get labelTextStyle => MaterialStatePropertyAll<TextStyle?>(
+  WidgetStateProperty<TextStyle?>? get labelTextStyle => MaterialStatePropertyAll<TextStyle?>(
     _theme.textTheme.labelSmall!.copyWith(color: _colors.onSurface),
   );
 
@@ -1450,13 +1446,13 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   Color? get surfaceTintColor => Colors.transparent;
 
   @override
-  MaterialStateProperty<IconThemeData?>? get iconTheme {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<IconThemeData?>? get iconTheme {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
       return IconThemeData(
         size: 24.0,
-        color: states.contains(MaterialState.disabled)
+        color: states.contains(WidgetState.disabled)
           ? _colors.onSurfaceVariant.withOpacity(0.38)
-          : states.contains(MaterialState.selected)
+          : states.contains(WidgetState.selected)
             ? _colors.onSecondaryContainer
             : _colors.onSurfaceVariant,
       );
@@ -1470,13 +1466,13 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   ShapeBorder? get indicatorShape => const StadiumBorder();
 
   @override
-  MaterialStateProperty<TextStyle?>? get labelTextStyle {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<TextStyle?>? get labelTextStyle {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
     final TextStyle style = _textTheme.labelMedium!;
       return style.apply(
-        color: states.contains(MaterialState.disabled)
+        color: states.contains(WidgetState.disabled)
           ? _colors.onSurfaceVariant.withOpacity(0.38)
-          : states.contains(MaterialState.selected)
+          : states.contains(WidgetState.selected)
             ? _colors.onSurface
             : _colors.onSurfaceVariant
       );

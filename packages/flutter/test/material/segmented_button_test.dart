@@ -9,6 +9,7 @@ library;
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -241,6 +242,57 @@ void main() {
     await tester.pumpAndSettle();
     expect(callbackCount, 3);
     expect(selection, <int>{2, 3});
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/161922.
+  testWidgets('Focused segment does not lose focus when its selection state changes', (
+    WidgetTester tester,
+  ) async {
+    int callbackCount = 0;
+    Set<int> selection = <int>{1};
+
+    Widget frameWithSelection(Set<int> selected) {
+      return Material(
+        child: boilerplate(
+          child: SegmentedButton<int>(
+            multiSelectionEnabled: true,
+            segments: const <ButtonSegment<int>>[
+              ButtonSegment<int>(value: 1, label: Text('1')),
+              ButtonSegment<int>(value: 2, label: Text('2')),
+            ],
+            selected: selected,
+            onSelectionChanged: (Set<int> selected) {
+              selection = selected;
+              callbackCount += 1;
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(frameWithSelection(selection));
+    expect(selection, <int>{1});
+    expect(callbackCount, 0);
+
+    // Select segment 2.
+    await tester.pumpWidget(frameWithSelection(<int>{1, 2}));
+    await tester.pumpAndSettle();
+
+    FocusNode getSegment2FocusNode() {
+      return Focus.of(tester.element(find.text('2')));
+    }
+
+    // Set focus on segment 2.
+    getSegment2FocusNode().requestFocus();
+    await tester.pumpAndSettle();
+    expect(getSegment2FocusNode().hasFocus, true);
+
+    // Unselect segment 2.
+    await tester.pumpWidget(frameWithSelection(<int>{1}));
+    await tester.pumpAndSettle();
+
+    // The button should still be focused.
+    expect(getSegment2FocusNode().hasFocus, true);
   });
 
   testWidgets('SegmentedButton allows for empty selection', (WidgetTester tester) async {
@@ -585,7 +637,7 @@ void main() {
     );
 
     final Material material = tester.widget<Material>(
-      find.descendant(of: find.byType(TextButton), matching: find.byType(Material)),
+      find.descendant(of: find.byType(TextButton).last, matching: find.byType(Material)),
     );
 
     // Hovered.
@@ -798,10 +850,7 @@ void main() {
         ),
       ),
     );
-    final Set<MaterialState> states = <MaterialState>{
-      MaterialState.selected,
-      MaterialState.disabled,
-    };
+    final Set<WidgetState> states = <WidgetState>{WidgetState.selected, WidgetState.disabled};
     // Check the initial states.
     SegmentedButtonState<int> state = tester.state(find.byType(SegmentedButton<int>));
     expect(state.statesControllers.values.first.value, states);
@@ -1394,8 +1443,97 @@ void main() {
         ..rrect(color: disabledColor),
     );
   });
+
+  testWidgets('SegmentedButton has expected default mouse cursor on hover', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SegmentedButton<int>(
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(value: 0, label: Text('0')),
+                ButtonSegment<int>(value: 1, label: Text('1')),
+              ],
+              selected: const <int>{0},
+              onSelectionChanged: (Set<int> newSelection) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(10, 10));
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+
+    final Offset chip = tester.getCenter(find.text('0'));
+    await gesture.moveTo(chip);
+    await tester.pump();
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+  });
+
+  testWidgets('SegmentedButton has expected mouse cursor when explicitly configured', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SegmentedButton<int>(
+              style: ButtonStyle(
+                mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.grab),
+              ),
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(value: 0, label: Text('0')),
+                ButtonSegment<int>(value: 1, label: Text('1')),
+              ],
+              selected: const <int>{0},
+              onSelectionChanged: (Set<int> newSelection) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: tester.getCenter(find.byType(SegmentedButton<int>)));
+    addTearDown(gesture.removePointer);
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+  });
+
+  testWidgets('SegmentedButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: SegmentedButton<String>(
+              segments: const <ButtonSegment<String>>[
+                ButtonSegment<String>(value: 'X', label: Text('X')),
+              ],
+              selected: const <String>{'X'},
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SegmentedButton<String>)), Size.zero);
+  });
 }
 
-Set<MaterialState> enabled = const <MaterialState>{};
-Set<MaterialState> disabled = const <MaterialState>{MaterialState.disabled};
-Set<MaterialState> selected = const <MaterialState>{MaterialState.selected};
+Set<WidgetState> enabled = const <WidgetState>{};
+Set<WidgetState> disabled = const <WidgetState>{WidgetState.disabled};
+Set<WidgetState> selected = const <WidgetState>{WidgetState.selected};

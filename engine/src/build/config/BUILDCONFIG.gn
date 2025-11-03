@@ -132,6 +132,11 @@ declare_args() {
   # Debug build.
   is_debug = true
 
+  # Optimize for code size rather than speed.
+  # Optimized builds for Windows, iOS, and Android are
+  # always optimized for size regardless of the value of this flag.
+  optimize_for_size = false
+
   # Whether this is a minimal linux instance without x11, etc.
   is_minimal_linux = false
 
@@ -347,7 +352,8 @@ default_library_type = "static_library"
 
 # These Sanitizers all imply using the Clang compiler. On Windows they either
 # don't work or work differently.
-using_sanitizer = !is_win && (is_asan || is_hwasan || is_lsan || is_tsan || is_msan)
+using_sanitizer =
+    !is_win && (is_asan || is_hwasan || is_lsan || is_tsan || is_msan)
 if (!is_clang && using_sanitizer) {
   is_clang = true
 }
@@ -730,6 +736,9 @@ template("component") {
       if (defined(invoker.include_dirs)) {
         include_dirs = invoker.include_dirs
       }
+      if (defined(invoker.inputs)) {
+        inputs = invoker.inputs
+      }
       if (defined(invoker.ldflags)) {
         ldflags = invoker.ldflags
       }
@@ -820,6 +829,9 @@ template("component") {
       }
       if (defined(invoker.include_dirs)) {
         include_dirs = invoker.include_dirs
+      }
+      if (defined(invoker.inputs)) {
+        inputs = invoker.inputs
       }
       if (defined(invoker.ldflags)) {
         ldflags = invoker.ldflags

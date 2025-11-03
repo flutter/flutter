@@ -22,11 +22,9 @@ import("$dart_src/sdk/lib/html/html_sources.gni")
 import("$dart_src/sdk/lib/internal/internal_sources.gni")
 import("$dart_src/sdk/lib/io/io_sources.gni")
 import("$dart_src/sdk/lib/isolate/isolate_sources.gni")
-import("$dart_src/sdk/lib/js/js_annotations_sources.gni")
 import("$dart_src/sdk/lib/js/js_sources.gni")
 import("$dart_src/sdk/lib/js_interop/js_interop_sources.gni")
 import("$dart_src/sdk/lib/js_interop_unsafe/js_interop_unsafe_sources.gni")
-import("$dart_src/sdk/lib/js_util/js_util_sources.gni")
 import("$dart_src/sdk/lib/math/math_sources.gni")
 import("$dart_src/sdk/lib/typed_data/typed_data_sources.gni")
 
@@ -102,12 +100,6 @@ copy("_interceptors") {
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/lib/_interceptors/{{source_file_part}}",
   ]
-}
-
-copy("_js_annotations") {
-  lib_path = rebase_path("js", "", dart_sdk_lib_path)
-  sources = rebase_path(js_annotations_sdk_sources, "", lib_path)
-  outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/_js_annotations/{{source_file_part}}" ]
 }
 
 copy("_js_types") {
@@ -188,13 +180,6 @@ copy("js_interop_unsafe") {
   outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/js_interop_unsafe/{{source_file_part}}" ]
 }
 
-copy("js_util") {
-  lib_path = rebase_path("js_util", "", dart_sdk_lib_path)
-  sources = rebase_path(js_util_sdk_sources, "", lib_path)
-  outputs =
-      [ "$root_gen_dir/dart-pkg/sky_engine/lib/js_util/{{source_file_part}}" ]
-}
-
 copy("math") {
   lib_path = rebase_path("math", "", dart_sdk_lib_path)
   sources = rebase_path(math_sdk_sources, "", lib_path)
@@ -232,7 +217,6 @@ group("copy_dart_sdk") {
   deps = [
     ":_http",
     ":_interceptors",
-    ":_js_annotations",
     ":_js_types",
     ":async",
     ":collection",
@@ -249,7 +233,6 @@ group("copy_dart_sdk") {
     ":js",
     ":js_interop",
     ":js_interop_unsafe",
-    ":js_util",
     ":math",
     ":typed_data",
     ":vm_internal",
@@ -278,7 +261,6 @@ generated_file("_embedder_yaml") {
     "  \"dart:js\": \"js/js.dart\"",
     "  \"dart:js_interop\": \"js_interop/js_interop.dart\"",
     "  \"dart:js_interop_unsafe\": \"js_interop_unsafe/js_interop_unsafe.dart\"",
-    "  \"dart:js_util\": \"js_util/js_util.dart\"",
     "  \"dart:math\": \"math/math.dart\"",
     "  \"dart:typed_data\": \"typed_data/typed_data.dart\"",
     "  \"dart:ui\": \"ui/ui.dart\"",
@@ -290,8 +272,6 @@ generated_file("_embedder_yaml") {
     "  # public API, e.g. List being Iterable by virtue of implementing",
     "  # EfficientLengthIterable. Not including this library yields analysis errors.",
     "  \"dart:_internal\": \"internal/internal.dart\"",
-    "  # The _js_annotations library is also needed for the same reasons as _internal.",
-    "  \"dart:_js_annotations\": \"_js_annotations/_js_annotations.dart\"",
     "  # The _js_types library is also needed for the same reasons as _internal.",
     "  \"dart:_js_types\": \"_js_types/js_types.dart\"",
     "  \"dart:nativewrappers\": \"_empty.dart\"",

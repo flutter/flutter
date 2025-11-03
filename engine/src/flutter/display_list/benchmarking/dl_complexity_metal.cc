@@ -51,12 +51,12 @@ DisplayListMetalComplexityCalculator::MetalHelper::BatchedComplexity() {
   }
 
   unsigned int draw_text_blob_complexity;
-  if (draw_text_blob_count_ == 0) {
+  if (draw_text_count_ == 0) {
     draw_text_blob_complexity = 0;
   } else {
     // m = 1/240
     // c = 0.75
-    draw_text_blob_complexity = (draw_text_blob_count_ + 180) * 2500 / 3;
+    draw_text_blob_complexity = (draw_text_count_ + 180) * 2500 / 3;
   }
 
   return save_layer_complexity + draw_text_blob_complexity;
@@ -585,8 +585,8 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawDisplayList(
   AccumulateComplexity(helper.ComplexityScore());
 }
 
-void DisplayListMetalComplexityCalculator::MetalHelper::drawTextBlob(
-    const sk_sp<SkTextBlob> blob,
+void DisplayListMetalComplexityCalculator::MetalHelper::drawText(
+    const std::shared_ptr<DlText>& text,
     DlScalar x,
     DlScalar y) {
   if (IsComplex()) {
@@ -597,14 +597,9 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawTextBlob(
   // per frame, that fixed cost is greatly reduced per subsequent call. This
   // is likely because there is batching being done in SkCanvas.
 
-  // Increment draw_text_blob_count_ and calculate the cost at the end.
-  draw_text_blob_count_++;
+  // Increment draw_text_count_ and calculate the cost at the end.
+  draw_text_count_++;
 }
-
-void DisplayListMetalComplexityCalculator::MetalHelper::drawTextFrame(
-    const std::shared_ptr<impeller::TextFrame>& text_frame,
-    DlScalar x,
-    DlScalar y) {}
 
 void DisplayListMetalComplexityCalculator::MetalHelper::drawShadow(
     const DlPath& path,

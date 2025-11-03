@@ -8,6 +8,7 @@
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_op_flags.h"
 #include "flutter/display_list/dl_sampling_options.h"
+#include "flutter/display_list/dl_text_skia.h"
 #include "flutter/display_list/effects/color_filters/dl_matrix_color_filter.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
@@ -23,7 +24,8 @@
 #include "flutter/testing/display_list_testing.h"
 #include "flutter/testing/testing.h"
 #ifdef IMPELLER_SUPPORTS_RENDERING
-#include "flutter/impeller/typographer/backends/skia/text_frame_skia.h"
+#include "flutter/impeller/display_list/dl_text_impeller.h"  // nogncheck
+#include "flutter/impeller/typographer/backends/skia/text_frame_skia.h"  // nogncheck
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
 #include "third_party/skia/include/core/SkBBHFactory.h"
@@ -3085,7 +3087,7 @@ TEST_F(DisplayListRendering, DrawDiagonalDashedLines) {
             SkPaint p = ctx.paint;
             p.setStyle(SkPaint::kStroke_Style);
             DlScalar intervals[2] = {25.0f, 5.0f};
-            p.setPathEffect(SkDashPathEffect::Make(intervals, 2, 0.0f));
+            p.setPathEffect(SkDashPathEffect::Make({intervals, 2}, 0.0f));
             ctx.canvas->drawLine(ToSkPoint(p1), ToSkPoint(p2), p);
             ctx.canvas->drawLine(ToSkPoint(p3), ToSkPoint(p4), p);
             ctx.canvas->drawLine(ToSkPoint(p5), ToSkPoint(p6), p);
@@ -3297,7 +3299,7 @@ TEST_F(DisplayListRendering, DrawPointsAsPoints) {
             SkPaint p = ctx.paint;
             p.setStyle(SkPaint::kStroke_Style);
             auto mode = SkCanvas::kPoints_PointMode;
-            ctx.canvas->drawPoints(mode, count, ToSkPoints(points), p);
+            ctx.canvas->drawPoints(mode, {ToSkPoints(points), count}, p);
           },
           [=](const DlRenderContext& ctx) {
             auto mode = DlPointMode::kPoints;
@@ -3349,7 +3351,7 @@ TEST_F(DisplayListRendering, DrawPointsAsLines) {
             SkPaint p = ctx.paint;
             p.setStyle(SkPaint::kStroke_Style);
             auto mode = SkCanvas::kLines_PointMode;
-            ctx.canvas->drawPoints(mode, count, ToSkPoints(points), p);
+            ctx.canvas->drawPoints(mode, {ToSkPoints(points), count}, p);
           },
           [=](const DlRenderContext& ctx) {
             auto mode = DlPointMode::kLines;
@@ -3384,7 +3386,7 @@ TEST_F(DisplayListRendering, DrawPointsAsPolygon) {
             SkPaint p = ctx.paint;
             p.setStyle(SkPaint::kStroke_Style);
             auto mode = SkCanvas::kPolygon_PointMode;
-            ctx.canvas->drawPoints(mode, count1, ToSkPoints(points1), p);
+            ctx.canvas->drawPoints(mode, {ToSkPoints(points1), count1}, p);
           },
           [=](const DlRenderContext& ctx) {
             auto mode = DlPointMode::kPolygon;
@@ -3693,9 +3695,10 @@ TEST_F(DisplayListRendering, DrawAtlasNearest) {
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](const SkRenderContext& ctx) {
-            ctx.canvas->drawAtlas(ctx.image.get(), sk_xform, ToSkRects(tex),
-                                  sk_colors, 4, SkBlendMode::kSrcOver,
-                                  sk_sampling, nullptr, &ctx.paint);
+            ctx.canvas->drawAtlas(ctx.image.get(), {sk_xform, 4},
+                                  {ToSkRects(tex), 4}, {sk_colors, 4},
+                                  SkBlendMode::kSrcOver, sk_sampling, nullptr,
+                                  &ctx.paint);
           },
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawAtlas(ctx.image, dl_xform, tex, dl_colors, 4,
@@ -3752,9 +3755,10 @@ TEST_F(DisplayListRendering, DrawAtlasNearestNoPaint) {
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](const SkRenderContext& ctx) {
-            ctx.canvas->drawAtlas(ctx.image.get(), sk_xform, ToSkRects(tex),
-                                  sk_colors, 4, SkBlendMode::kSrcOver,
-                                  sk_sampling, nullptr, nullptr);
+            ctx.canvas->drawAtlas(ctx.image.get(), {sk_xform, 4},
+                                  {ToSkRects(tex), 4}, {sk_colors, 4},
+                                  SkBlendMode::kSrcOver, sk_sampling, nullptr,
+                                  nullptr);
           },
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawAtlas(ctx.image, dl_xform, tex, dl_colors, 4,
@@ -3811,9 +3815,10 @@ TEST_F(DisplayListRendering, DrawAtlasLinear) {
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](const SkRenderContext& ctx) {
-            ctx.canvas->drawAtlas(ctx.image.get(), sk_xform, ToSkRects(tex),
-                                  sk_colors, 2, SkBlendMode::kSrcOver,
-                                  sk_sampling, nullptr, &ctx.paint);
+            ctx.canvas->drawAtlas(ctx.image.get(), {sk_xform, 2},
+                                  {ToSkRects(tex), 2}, {sk_colors, 2},
+                                  SkBlendMode::kSrcOver, sk_sampling, nullptr,
+                                  &ctx.paint);
           },
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawAtlas(ctx.image, dl_xform, tex, dl_colors, 2,
@@ -3869,8 +3874,10 @@ TEST_F(DisplayListRendering, DrawTextBlob) {
 #else
   sk_sp<SkTextBlob> blob =
       CanvasCompareTester::MakeTextBlob("Testing", kRenderHeight * 0.33f);
+  std::shared_ptr<DlText> skiaText = DlTextSkia::Make(blob);
 #ifdef IMPELLER_SUPPORTS_RENDERING
   auto frame = impeller::MakeTextFrameFromTextBlobSkia(blob);
+  std::shared_ptr<DlText> impellerText = DlTextImpeller::Make(frame);
 #endif  // IMPELLER_SUPPORTS_RENDERING
   DlScalar render_y_1_3 = kRenderTop + kRenderHeight * 0.3;
   DlScalar render_y_2_3 = kRenderTop + kRenderHeight * 0.6;
@@ -3884,19 +3891,22 @@ TEST_F(DisplayListRendering, DrawTextBlob) {
           },
           [=](const DlRenderContext& ctx) {
             auto paint = ctx.paint;
-            ctx.canvas->DrawTextBlob(blob, kRenderLeft, render_y_1_3, paint);
-            ctx.canvas->DrawTextBlob(blob, kRenderLeft, render_y_2_3, paint);
-            ctx.canvas->DrawTextBlob(blob, kRenderLeft, kRenderBottom, paint);
+            ctx.canvas->DrawText(skiaText, kRenderLeft, render_y_1_3, paint);
+            ctx.canvas->DrawText(skiaText, kRenderLeft, render_y_2_3, paint);
+            ctx.canvas->DrawText(skiaText, kRenderLeft, kRenderBottom, paint);
           },
 #ifdef IMPELLER_SUPPORTS_RENDERING
           [=](const DlRenderContext& ctx) {
             auto paint = ctx.paint;
-            ctx.canvas->DrawTextFrame(frame, kRenderLeft, render_y_1_3, paint);
-            ctx.canvas->DrawTextFrame(frame, kRenderLeft, render_y_2_3, paint);
-            ctx.canvas->DrawTextFrame(frame, kRenderLeft, kRenderBottom, paint);
+            ctx.canvas->DrawText(impellerText, kRenderLeft, render_y_1_3,
+                                 paint);
+            ctx.canvas->DrawText(impellerText, kRenderLeft, render_y_2_3,
+                                 paint);
+            ctx.canvas->DrawText(impellerText, kRenderLeft, kRenderBottom,
+                                 paint);
           },
 #endif  // IMPELLER_SUPPORTS_RENDERING
-          kDrawTextBlobFlags)
+          kDrawTextFlags)
           .set_draw_text_blob(),
       // From examining the bounds differential for the "Default" case, the
       // SkTextBlob adds a padding of ~32 on the left, ~30 on the right,

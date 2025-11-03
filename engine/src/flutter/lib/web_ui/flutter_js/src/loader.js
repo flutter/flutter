@@ -55,7 +55,7 @@ export class FlutterLoader {
    * Loads and initializes a flutter application.
    * @param {Object} options
    * @param {import("/.types".ServiceWorkerSettings?)} options.serviceWorkerSettings
-   *   Settings for the service worker to be loaded. Can pass `undefined` or
+   *   DEPRECATED: Settings for the service worker to be loaded. Can pass `undefined` or
    *   `null` to not launch a service worker at all.
    * @param {import("/.types".OnEntryPointLoadedCallback)} options.onEntrypointLoaded
    *   An optional callback to invoke
@@ -89,19 +89,11 @@ export class FlutterLoader {
       }
     }
 
-    /**
-     * @param {import("./types").ApplicationBuild} build
-     * @param {import("./types").WebRenderer} renderer
-     **/
-    const buildContainsRenderer = (build, renderer) => {
-      return build.renderer == renderer;
-    }
-
     const buildIsCompatible = (build) => {
       if (build.compileTarget === "dart2wasm" && !supportsDart2Wasm) {
         return false;
       }
-      if (config.renderer && !buildContainsRenderer(build, config.renderer)) {
+      if (config.renderer && config.renderer != build.renderer) {
         return false;
       }
       return rendererIsCompatible(build.renderer);

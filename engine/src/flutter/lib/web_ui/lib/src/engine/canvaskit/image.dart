@@ -312,17 +312,6 @@ CkImage scaleImage(SkImage image, int? targetWidth, int? targetHeight) {
   return ckImage;
 }
 
-/// Thrown when the web engine fails to decode an image, either due to a
-/// network issue, corrupted image contents, or missing codec.
-class ImageCodecException implements Exception {
-  ImageCodecException(this._message);
-
-  final String _message;
-
-  @override
-  String toString() => 'ImageCodecException: $_message';
-}
-
 const String _kNetworkImageMessage = 'Failed to load network image.';
 
 /// Instantiates a [ui.Codec] backed by an `SkAnimatedImage` from Skia after
@@ -387,7 +376,7 @@ Future<Uint8List> fetchImage(String url, ui_web.ImageCodecChunkCallback? chunkCa
       '$_kNetworkImageMessage\n'
       'Image URL: $url\n'
       'Trying to load an image from another domain? Find answers at:\n'
-      'https://flutter.dev/docs/development/platform-integration/web-images',
+      'https://docs.flutter.dev/development/platform-integration/web-images',
     );
   }
 }

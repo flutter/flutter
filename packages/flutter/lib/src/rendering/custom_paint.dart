@@ -953,7 +953,7 @@ class RenderCustomPaint extends RenderProxyBox {
       config.isFocusable = properties.focusable!;
     }
     if (properties.focused != null) {
-      config.isFocused = properties.focused!;
+      config.isFocused = properties.focused;
     }
     if (properties.enabled != null) {
       config.isEnabled = properties.enabled;
@@ -1017,6 +1017,12 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.identifier != null) {
       config.identifier = properties.identifier!;
+    }
+    if (properties.traversalParentIdentifier != null) {
+      config.traversalParentIdentifier = properties.traversalParentIdentifier;
+    }
+    if (properties.traversalChildIdentifier != null) {
+      config.traversalChildIdentifier = properties.traversalChildIdentifier;
     }
     if (properties.tooltip != null) {
       config.tooltip = properties.tooltip!;
@@ -1104,6 +1110,12 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.onDismiss != null) {
       config.onDismiss = properties.onDismiss;
+    }
+    if (properties.onExpand != null) {
+      config.onExpand = properties.onExpand;
+    }
+    if (properties.onCollapse != null) {
+      config.onCollapse = properties.onCollapse;
     }
 
     newChild.updateWith(

@@ -5,6 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -1598,6 +1599,14 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/78229.
   testWidgets('AlertDialog has correct semantics for content in iOS', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
+    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+
+    // With the change to defaultTargetPlatform
+    // (see https://github.com/flutter/flutter/issues/176566),
+    // the actual platform (not theme.platform) determines the semantics.
+    // By default:
+    // On iOS/macOS, no "Alert" label should be added in title.
+    // On other platforms, an "Alert" label is added.
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1609,6 +1618,10 @@ void main() {
         ),
       ),
     );
+
+    final bool isIOSorMacOS =
+        defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS;
 
     expect(
       semantics,
@@ -1629,35 +1642,82 @@ void main() {
                         TestSemantics(
                           id: 4,
                           role: SemanticsRole.alertDialog,
-                          children: <TestSemantics>[
-                            TestSemantics(id: 5, label: 'title', textDirection: TextDirection.ltr),
-                            // The content semantics does not merge into the semantics
-                            // node 4.
-                            TestSemantics(
-                              id: 6,
-                              children: <TestSemantics>[
-                                TestSemantics(
-                                  id: 7,
-                                  label: 'some content',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                                TestSemantics(
-                                  id: 8,
-                                  label: 'more content',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                              ],
-                            ),
-                            TestSemantics(
-                              id: 9,
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.isButton,
-                                SemanticsFlag.hasEnabledState,
-                              ],
-                              label: 'action',
-                              textDirection: TextDirection.ltr,
-                            ),
-                          ],
+                          children: isIOSorMacOS
+                              ? <TestSemantics>[
+                                  TestSemantics(
+                                    id: 5,
+                                    label: 'title',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                  // The content semantics does not merge into the semantics
+                                  // node 4.
+                                  TestSemantics(
+                                    id: 6,
+                                    children: <TestSemantics>[
+                                      TestSemantics(
+                                        id: 7,
+                                        label: 'some content',
+                                        textDirection: TextDirection.ltr,
+                                      ),
+                                      TestSemantics(
+                                        id: 8,
+                                        label: 'more content',
+                                        textDirection: TextDirection.ltr,
+                                      ),
+                                    ],
+                                  ),
+                                  TestSemantics(
+                                    id: 9,
+                                    flags: <SemanticsFlag>[
+                                      SemanticsFlag.isButton,
+                                      SemanticsFlag.hasEnabledState,
+                                    ],
+                                    label: 'action',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                ]
+                              : <TestSemantics>[
+                                  TestSemantics(
+                                    id: 5,
+                                    flags: <SemanticsFlag>[
+                                      SemanticsFlag.scopesRoute,
+                                      SemanticsFlag.namesRoute,
+                                    ],
+                                    label: localizations.alertDialogLabel,
+                                    textDirection: TextDirection.ltr,
+                                    children: <TestSemantics>[
+                                      TestSemantics(
+                                        id: 6,
+                                        label: 'title',
+                                        textDirection: TextDirection.ltr,
+                                      ),
+                                      TestSemantics(
+                                        id: 7,
+                                        children: <TestSemantics>[
+                                          TestSemantics(
+                                            id: 8,
+                                            label: 'some content',
+                                            textDirection: TextDirection.ltr,
+                                          ),
+                                          TestSemantics(
+                                            id: 9,
+                                            label: 'more content',
+                                            textDirection: TextDirection.ltr,
+                                          ),
+                                        ],
+                                      ),
+                                      TestSemantics(
+                                        id: 10,
+                                        flags: <SemanticsFlag>[
+                                          SemanticsFlag.isButton,
+                                          SemanticsFlag.hasEnabledState,
+                                        ],
+                                        label: 'action',
+                                        textDirection: TextDirection.ltr,
+                                      ),
+                                    ],
+                                  ),
+                                ],
                         ),
                       ],
                     ),
@@ -1787,6 +1847,14 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/78229.
   testWidgets('SimpleDialog has correct semantics for title in iOS', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
+    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+
+    // With the change to defaultTargetPlatform
+    // (see https://github.com/flutter/flutter/issues/176566),
+    // the actual platform (not theme.platform) determines the semantics.
+    // By default:
+    // On iOS/macOS, no "Alert" label should be added in title.
+    // On other platforms, an "Alert" label is added.
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1800,6 +1868,10 @@ void main() {
         ),
       ),
     );
+
+    final bool isIOSorMacOS =
+        defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS;
 
     expect(
       semantics,
@@ -1820,31 +1892,74 @@ void main() {
                         TestSemantics(
                           id: 4,
                           role: SemanticsRole.dialog,
-                          children: <TestSemantics>[
-                            // Title semantics does not merge into the semantics
-                            // node 4.
-                            TestSemantics(id: 5, label: 'title', textDirection: TextDirection.ltr),
-                            TestSemantics(
-                              id: 6,
-                              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                              children: <TestSemantics>[
-                                TestSemantics(
-                                  id: 7,
-                                  label: 'content',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                                TestSemantics(
-                                  id: 8,
-                                  flags: <SemanticsFlag>[
-                                    SemanticsFlag.isButton,
-                                    SemanticsFlag.hasEnabledState,
-                                  ],
-                                  label: 'action',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                              ],
-                            ),
-                          ],
+                          children: isIOSorMacOS
+                              ? <TestSemantics>[
+                                  // Title semantics does not merge into the semantics
+                                  // node 4.
+                                  TestSemantics(
+                                    id: 5,
+                                    label: 'title',
+                                    textDirection: TextDirection.ltr,
+                                  ),
+                                  TestSemantics(
+                                    id: 6,
+                                    flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                                    children: <TestSemantics>[
+                                      TestSemantics(
+                                        id: 7,
+                                        label: 'content',
+                                        textDirection: TextDirection.ltr,
+                                      ),
+                                      TestSemantics(
+                                        id: 8,
+                                        flags: <SemanticsFlag>[
+                                          SemanticsFlag.isButton,
+                                          SemanticsFlag.hasEnabledState,
+                                        ],
+                                        label: 'action',
+                                        textDirection: TextDirection.ltr,
+                                      ),
+                                    ],
+                                  ),
+                                ]
+                              : <TestSemantics>[
+                                  TestSemantics(
+                                    id: 5,
+                                    flags: <SemanticsFlag>[
+                                      SemanticsFlag.scopesRoute,
+                                      SemanticsFlag.namesRoute,
+                                    ],
+                                    label: localizations.dialogLabel,
+                                    textDirection: TextDirection.ltr,
+                                    children: <TestSemantics>[
+                                      TestSemantics(
+                                        id: 6,
+                                        label: 'title',
+                                        textDirection: TextDirection.ltr,
+                                      ),
+                                      TestSemantics(
+                                        id: 7,
+                                        flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                                        children: <TestSemantics>[
+                                          TestSemantics(
+                                            id: 8,
+                                            label: 'content',
+                                            textDirection: TextDirection.ltr,
+                                          ),
+                                          TestSemantics(
+                                            id: 9,
+                                            flags: <SemanticsFlag>[
+                                              SemanticsFlag.isButton,
+                                              SemanticsFlag.hasEnabledState,
+                                            ],
+                                            label: 'action',
+                                            textDirection: TextDirection.ltr,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
                         ),
                       ],
                     ),
@@ -3020,6 +3135,198 @@ void main() {
 
     expect(find.byType(BackButton), findsNothing);
     expect(find.byType(CloseButton), findsOneWidget);
+  });
+
+  testWidgets('SimpleDialog does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: SimpleDialog(title: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SimpleDialog)), Size.zero);
+  });
+
+  testWidgets('SimpleDialogOption does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox.shrink(child: SimpleDialogOption(child: Text('X'))),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SimpleDialogOption)), Size.zero);
+  });
+
+  testWidgets('Dialog does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: Dialog(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Dialog)).isEmpty, isTrue);
+  });
+
+  testWidgets('AlertDialog does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: AlertDialog(content: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(AlertDialog)).isEmpty, isTrue);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/177001
+  group('Dialog semantics for mismatched platforms', () {
+    Future<void> pumpDialogWithTheme({
+      required WidgetTester tester,
+      required Widget dialog,
+      required TargetPlatform themePlatform,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: themePlatform),
+          home: Material(
+            child: Builder(
+              builder: (BuildContext context) {
+                return Center(
+                  child: ElevatedButton(
+                    child: const Text('X'),
+                    onPressed: () {
+                      showDialog<void>(context: context, builder: (BuildContext context) => dialog);
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('AlertDialog', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+
+      final bool isIOSorMacOS =
+          defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS;
+
+      // Test with theme.platform = Android on different real platforms.
+      await pumpDialogWithTheme(
+        tester: tester,
+        themePlatform: TargetPlatform.android,
+        dialog: const AlertDialog(title: Text('Title'), content: Text('Y'), actions: <Widget>[]),
+      );
+
+      // Dismiss the first dialog.
+      Navigator.of(tester.element(find.text('Title'))).pop();
+      await tester.pumpAndSettle();
+
+      // Test with theme.platform = iOS on different real platforms.
+      await pumpDialogWithTheme(
+        tester: tester,
+        themePlatform: TargetPlatform.iOS,
+        dialog: const AlertDialog(title: Text('Title'), content: Text('Y'), actions: <Widget>[]),
+      );
+
+      if (isIOSorMacOS) {
+        // On iOS/macOS, semantic label should be omitted and namesRoute flag should not exist.
+        expect(
+          semantics,
+          isNot(
+            includesNodeWith(
+              label: localizations.alertDialogLabel,
+              flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
+            ),
+          ),
+        );
+      } else {
+        // On other platforms, semantic label should be added and namesRoute should exist.
+        expect(
+          semantics,
+          includesNodeWith(
+            label: localizations.alertDialogLabel,
+            flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
+          ),
+        );
+      }
+
+      semantics.dispose();
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('SimpleDialog', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+
+      final bool isIOSorMacOS =
+          defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS;
+
+      // Test with theme.platform = Android on different real platforms.
+      await pumpDialogWithTheme(
+        tester: tester,
+        themePlatform: TargetPlatform.android,
+        dialog: const SimpleDialog(
+          title: Text('Title'),
+          children: <Widget>[
+            Text('content'),
+            TextButton(onPressed: null, child: Text('action')),
+          ],
+        ),
+      );
+
+      // Dismiss the first dialog.
+      Navigator.of(tester.element(find.text('Title'))).pop();
+      await tester.pumpAndSettle();
+
+      // Test with theme.platform = iOS on different real platforms.
+      await pumpDialogWithTheme(
+        tester: tester,
+        themePlatform: TargetPlatform.iOS,
+        dialog: const SimpleDialog(
+          title: Text('Title'),
+          children: <Widget>[
+            Text('content'),
+            TextButton(onPressed: null, child: Text('action')),
+          ],
+        ),
+      );
+
+      if (isIOSorMacOS) {
+        // On iOS/macOS, semantic label should be omitted and namesRoute flag should not exist.
+        expect(
+          semantics,
+          isNot(
+            includesNodeWith(
+              label: localizations.dialogLabel,
+              flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
+            ),
+          ),
+        );
+      } else {
+        // On other platforms, semantic label should be added and namesRoute should exist.
+        expect(
+          semantics,
+          includesNodeWith(
+            label: localizations.dialogLabel,
+            flags: <SemanticsFlag>[SemanticsFlag.namesRoute, SemanticsFlag.scopesRoute],
+          ),
+        );
+      }
+
+      semantics.dispose();
+    }, variant: TargetPlatformVariant.all());
   });
 }
 

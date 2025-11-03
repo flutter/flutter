@@ -191,7 +191,7 @@ TEST_P(AiksTest, DlAtlasGeometryNoBlendRenamed) {
 
   ContentContext context(GetContext(), nullptr);
   auto vertex_buffer =
-      geom.CreateSimpleVertexBuffer(context.GetTransientsBuffer());
+      geom.CreateSimpleVertexBuffer(context.GetTransientsDataBuffer());
 
   EXPECT_EQ(vertex_buffer.index_type, IndexType::kNone);
   EXPECT_EQ(vertex_buffer.vertex_count, texture_coordinates.size() * 6);
@@ -214,7 +214,7 @@ TEST_P(AiksTest, DlAtlasGeometryBlend) {
 
   ContentContext context(GetContext(), nullptr);
   auto vertex_buffer =
-      geom.CreateBlendVertexBuffer(context.GetTransientsBuffer());
+      geom.CreateBlendVertexBuffer(context.GetTransientsDataBuffer());
 
   EXPECT_EQ(vertex_buffer.index_type, IndexType::kNone);
   EXPECT_EQ(vertex_buffer.vertex_count, texture_coordinates.size() * 6);

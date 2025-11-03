@@ -13,6 +13,7 @@
 /// @docImport 'widget_tester.dart';
 library;
 
+import 'dart:ui' as ui;
 import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -73,17 +74,6 @@ class SemanticsController {
       SemanticsAction.scrollLeft.index |
       SemanticsAction.scrollRight.index |
       SemanticsAction.scrollToOffset.index;
-
-  /// Based on Android's FOCUSABLE_FLAGS. See [flutter/engine/AccessibilityBridge.java](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java).
-  static final int _importantFlagsForAccessibility =
-      SemanticsFlag.hasCheckedState.index |
-      SemanticsFlag.hasToggledState.index |
-      SemanticsFlag.hasEnabledState.index |
-      SemanticsFlag.isButton.index |
-      SemanticsFlag.isTextField.index |
-      SemanticsFlag.isFocusable.index |
-      SemanticsFlag.isSlider.index |
-      SemanticsFlag.isInMutuallyExclusiveGroup.index;
 
   final WidgetController _controller;
 
@@ -353,7 +343,7 @@ class SemanticsController {
     final SemanticsData data = node.getSemanticsData();
     // If the node scopes a route, it doesn't matter what other flags/actions it
     // has, it is _not_ important for accessibility, so we short circuit.
-    if (data.hasFlag(SemanticsFlag.scopesRoute)) {
+    if (data.flagsCollection.scopesRoute) {
       return false;
     }
 
@@ -362,12 +352,26 @@ class SemanticsController {
       return true;
     }
 
-    final bool hasImportantFlag = data.flags & _importantFlagsForAccessibility != 0;
+    /// Based on Android's FOCUSABLE_FLAGS. See [flutter/engine/AccessibilityBridge.java](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java).
+    final bool hasImportantFlag =
+        data.flagsCollection.isChecked != ui.CheckedState.none ||
+        data.flagsCollection.isToggled != ui.Tristate.none ||
+        data.flagsCollection.isEnabled != ui.Tristate.none ||
+        data.flagsCollection.isButton ||
+        data.flagsCollection.isTextField ||
+        data.flagsCollection.isFocused != ui.Tristate.none ||
+        data.flagsCollection.isSlider ||
+        data.flagsCollection.isInMutuallyExclusiveGroup;
+
     if (hasImportantFlag) {
       return true;
     }
 
-    final bool hasContent = data.label.isNotEmpty || data.value.isNotEmpty || data.hint.isNotEmpty;
+    final bool hasContent =
+        data.label.isNotEmpty ||
+        data.value.isNotEmpty ||
+        data.hint.isNotEmpty ||
+        data.tooltip.isNotEmpty;
     if (hasContent) {
       return true;
     }
