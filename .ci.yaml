@@ -5490,7 +5490,7 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: ios_debug_workflow
-      os: Mac-15
+      os: Mac-15.5
       $flutter/osx_sdk : >-
         {
           "sdk_version": "17a5295f"
@@ -5532,7 +5532,7 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios
       drone_dimensions: >
-        ["device_os=iOS-18","os=Mac-14|Mac-15", "cpu=x86"]
+        ["device_os=iOS-18","os=Mac-15.1|Mac-15.5|Mac-15.6", "cpu=x86"]
 
   - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
