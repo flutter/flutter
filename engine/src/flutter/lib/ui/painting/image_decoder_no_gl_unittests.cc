@@ -112,12 +112,12 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutDisplayP3) {
   ASSERT_EQ(wide_result->image_info.colorType(), kRGBA_F16_SkColorType);
   ASSERT_TRUE(wide_result->image_info.colorSpace()->isSRGB());
 
-  const SkPixmap wide_pixmap(wide_result->image_info,
-                             wide_result->device_buffer->OnGetContents(),
-                             wide_result->image_info.minRowBytes());
-  const uint16_t* half_ptr = static_cast<const uint16_t*>(wide_pixmap.addr());
+  const uint16_t* half_ptr = reinterpret_cast<const uint16_t*>(
+      wide_result->device_buffer->OnGetContents());
   bool found_deep_red = false;
-  for (int i = 0; i < wide_pixmap.width() * wide_pixmap.height(); ++i) {
+  for (int i = 0;
+       i < wide_result->image_info.width() * wide_result->image_info.height();
+       ++i) {
     float red = HalfToFloat(*half_ptr++);
     float green = HalfToFloat(*half_ptr++);
     float blue = HalfToFloat(*half_ptr++);
@@ -176,12 +176,12 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutIndexedPng) {
   ASSERT_EQ(wide_result->image_info.colorType(), kBGR_101010x_XR_SkColorType);
   ASSERT_TRUE(wide_result->image_info.colorSpace()->isSRGB());
 
-  const SkPixmap wide_pixmap(wide_result->image_info,
-                             wide_result->device_buffer->OnGetContents(),
-                             wide_result->image_info.minRowBytes());
-  const uint32_t* pixel_ptr = static_cast<const uint32_t*>(wide_pixmap.addr());
+  const uint32_t* pixel_ptr = reinterpret_cast<const uint32_t*>(
+      wide_result->device_buffer->OnGetContents());
   bool found_deep_red = false;
-  for (int i = 0; i < wide_pixmap.width() * wide_pixmap.height(); ++i) {
+  for (int i = 0;
+       i < wide_result->image_info.width() * wide_result->image_info.height();
+       ++i) {
     uint32_t pixel = *pixel_ptr++;
     float blue = DecodeBGR10((pixel >> 0) & 0x3ff);
     float green = DecodeBGR10((pixel >> 10) & 0x3ff);
@@ -235,10 +235,8 @@ TEST(ImageDecoderNoGLTest, ImpellerUnmultipliedAlphaPng) {
           /*supports_wide_gamut=*/true, capabilities, allocator);
   ASSERT_EQ(result->image_info.colorType(), kRGBA_8888_SkColorType);
 
-  const SkPixmap pixmap(result->image_info,
-                        result->device_buffer->OnGetContents(),
-                        result->image_info.minRowBytes());
-  const uint32_t* pixel_ptr = static_cast<const uint32_t*>(pixmap.addr());
+  const uint32_t* pixel_ptr =
+      reinterpret_cast<const uint32_t*>(result->device_buffer->OnGetContents());
   // Test the upper left pixel is premultiplied and not solid red.
   ASSERT_EQ(*pixel_ptr, (uint32_t)0x1000001);
   // Test a pixel in the green box is still green.
