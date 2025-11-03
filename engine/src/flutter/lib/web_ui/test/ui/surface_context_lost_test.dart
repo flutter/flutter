@@ -41,69 +41,73 @@ void testMain() {
       skip: isFirefox || isSafari || !browserSupportsOffscreenCanvas,
     );
 
-    test('can still render after context is lost', () async {
-      final Rasterizer rasterizer = renderer.rasterizer;
-      final OffscreenSurfaceProvider surfaceProvider =
-          rasterizer.surfaceProvider as OffscreenSurfaceProvider;
-      final OffscreenSurface surface = surfaceProvider.createSurface();
-      await surface.initialized;
+    test(
+      'can still render after context is lost',
+      () async {
+        final Rasterizer rasterizer = renderer.rasterizer;
+        final OffscreenSurfaceProvider surfaceProvider =
+            rasterizer.surfaceProvider as OffscreenSurfaceProvider;
+        final OffscreenSurface surface = surfaceProvider.createSurface();
+        await surface.initialized;
 
-      await surface.setSize(const BitmapSize(10, 10));
+        await surface.setSize(const BitmapSize(10, 10));
 
-      // Draw a red square.
-      final ui.Picture redPicture = drawPicture((ui.Canvas canvas) {
-        canvas.drawRect(
-          const ui.Rect.fromLTWH(0, 0, 10, 10),
-          ui.Paint()..color = const ui.Color(0xFFFF0000),
-        );
-      });
-      List<DomImageBitmap> bitmaps = await surface.rasterizeToImageBitmaps(<ui.Picture>[
-        redPicture,
-      ]);
-      expect(bitmaps, hasLength(1));
-      await expectBitmapColor(bitmaps.single, const ui.Color(0xFFFF0000));
+        // Draw a red square.
+        final ui.Picture redPicture = drawPicture((ui.Canvas canvas) {
+          canvas.drawRect(
+            const ui.Rect.fromLTWH(0, 0, 10, 10),
+            ui.Paint()..color = const ui.Color(0xFFFF0000),
+          );
+        });
+        List<DomImageBitmap> bitmaps = await surface.rasterizeToImageBitmaps(<ui.Picture>[
+          redPicture,
+        ]);
+        expect(bitmaps, hasLength(1));
+        await expectBitmapColor(bitmaps.single, const ui.Color(0xFFFF0000));
 
-      // Lose the context.
-      await surface.triggerContextLoss();
-      await surface.handledContextLossEvent;
-      await surface.initialized;
+        // Lose the context.
+        await surface.triggerContextLoss();
+        await surface.handledContextLossEvent;
+        await surface.initialized;
 
-      // Draw a blue square.
-      final ui.Picture bluePicture = drawPicture((ui.Canvas canvas) {
-        canvas.drawRect(
-          const ui.Rect.fromLTWH(0, 0, 10, 10),
-          ui.Paint()..color = const ui.Color(0xFF0000FF),
-        );
-      });
-      bitmaps = await surface.rasterizeToImageBitmaps(<ui.Picture>[bluePicture]);
-      expect(bitmaps, hasLength(1));
-      await expectBitmapColor(bitmaps.single, const ui.Color(0xFF0000FF));
+        // Draw a blue square.
+        final ui.Picture bluePicture = drawPicture((ui.Canvas canvas) {
+          canvas.drawRect(
+            const ui.Rect.fromLTWH(0, 0, 10, 10),
+            ui.Paint()..color = const ui.Color(0xFF0000FF),
+          );
+        });
+        bitmaps = await surface.rasterizeToImageBitmaps(<ui.Picture>[bluePicture]);
+        expect(bitmaps, hasLength(1));
+        await expectBitmapColor(bitmaps.single, const ui.Color(0xFF0000FF));
       },
       skip: isFirefox || isSafari || !browserSupportsOffscreenCanvas,
     );
 
-    test('can recover from multiple context losses', () async {
-      final Rasterizer rasterizer = renderer.rasterizer;
-      final OffscreenSurfaceProvider surfaceProvider =
-          rasterizer.surfaceProvider as OffscreenSurfaceProvider;
-      final OffscreenSurface surface = surfaceProvider.createSurface();
-      await surface.initialized;
+    test(
+      'can recover from multiple context losses',
+      () async {
+        final Rasterizer rasterizer = renderer.rasterizer;
+        final OffscreenSurfaceProvider surfaceProvider =
+            rasterizer.surfaceProvider as OffscreenSurfaceProvider;
+        final OffscreenSurface surface = surfaceProvider.createSurface();
+        await surface.initialized;
 
-      final int initialGlContext = surface.glContext;
+        final int initialGlContext = surface.glContext;
 
-      // First loss
-      await surface.triggerContextLoss();
-      await surface.handledContextLossEvent;
-      await surface.initialized;
-      final int contextAfterFirstLoss = surface.glContext;
-      expect(contextAfterFirstLoss, isNot(initialGlContext));
+        // First loss
+        await surface.triggerContextLoss();
+        await surface.handledContextLossEvent;
+        await surface.initialized;
+        final int contextAfterFirstLoss = surface.glContext;
+        expect(contextAfterFirstLoss, isNot(initialGlContext));
 
-      // Second loss
-      await surface.triggerContextLoss();
-      await surface.handledContextLossEvent;
-      await surface.initialized;
-      final int contextAfterSecondLoss = surface.glContext;
-      expect(contextAfterSecondLoss, isNot(contextAfterFirstLoss));
+        // Second loss
+        await surface.triggerContextLoss();
+        await surface.handledContextLossEvent;
+        await surface.initialized;
+        final int contextAfterSecondLoss = surface.glContext;
+        expect(contextAfterSecondLoss, isNot(contextAfterFirstLoss));
       },
       skip: isFirefox || isSafari || !browserSupportsOffscreenCanvas,
     );

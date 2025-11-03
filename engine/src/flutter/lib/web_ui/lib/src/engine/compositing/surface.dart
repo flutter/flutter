@@ -112,5 +112,4 @@ abstract class OffscreenSurface extends Surface {
 ///
 /// This surface renders a picture directly to an on-screen canvas that is
 /// part of the DOM.
-abstract class OnscreenSurface extends Surface implements DisplayCanvas {
-}
+abstract class OnscreenSurface extends Surface implements DisplayCanvas {}

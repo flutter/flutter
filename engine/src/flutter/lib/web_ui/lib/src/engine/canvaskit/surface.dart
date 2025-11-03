@@ -294,7 +294,6 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     final WebGLContext gl = (canvas as DomOffscreenCanvas).getGlContext(webGLVersion);
     gl.loseContextExtension.loseContext();
   }
-
 }
 
 /// The CanvasKit implementation of [OnscreenSurface].
