@@ -35,9 +35,9 @@ class ImageDecoder {
   using ImageResult = std::function<void(sk_sp<DlImage>, std::string)>;
 
   struct Options {
-    uint32_t target_width;
-    uint32_t target_height;
-    int32_t destination_format;
+    uint32_t target_width = 0;
+    uint32_t target_height = 0;
+    int32_t destination_format = -1;
   };
 
   // Takes an image descriptor and returns a handle to a texture resident on the
