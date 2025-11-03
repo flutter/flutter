@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// The main application widget for the Fruit Catalog.
 class ResizeApp extends StatefulWidget {
   /// Creates the [ResizeApp].
   const ResizeApp({super.key});
@@ -10,13 +9,10 @@ class ResizeApp extends StatefulWidget {
 }
 
 class _ResizeAppState extends State<ResizeApp> {
-  int _counter = 1;
-  void _incrementCounter() {
+  int _listSize = 1;
+  void _addToList() {
     setState(() {
-      if (_counter > 40) {
-        _counter = 1;
-      }
-      _counter++;
+      _listSize ++;
     });
   }
 
@@ -34,11 +30,11 @@ class _ResizeAppState extends State<ResizeApp> {
               child: Semantics(
                   label: "Add to list",
                   child: ElevatedButton(
-                onPressed: _incrementCounter,
+                onPressed: _addToList,
                 child: Text("Add to list"),
               )),
             ),
-            for (int i = 0; i < _counter; i++)
+            for (int i = 0; i < _listSize; i++)
               Text(
                 "Hello from Flutter $i",
                 style: TextStyle(color: Colors.pink, fontSize: 30),

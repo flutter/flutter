@@ -10,9 +10,6 @@
 
 @end
 
-static NSString *_kChannel = @"increment";
-static NSString *_kPing = @"ping";
-
 @implementation DynamicResizingViewController {
   FlutterBasicMessageChannel *_messageChannel;
 }
@@ -58,9 +55,6 @@ static NSString *_kPing = @"ping";
         [stackView addArrangedSubview:_flutterViewController.view];
         _flutterViewController.view.translatesAutoresizingMaskIntoConstraints = NO;
         _flutterViewController.view.accessibilityIdentifier = @"flutter_view";
-//        NSLayoutConstraint *heightConstraint = [_flutterViewController.view.heightAnchor
-//                                                    constraintEqualToConstant:200];
-//        heightConstraint.active = YES;
         [_flutterViewController didMoveToParentViewController:self];
       } else {
         UILabel *label = [[UILabel alloc] init];
