@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class FlutterLoader {
   private static final String TAG = "FlutterLoader";
 
-  // Flags to only be set internally by default. Matches values in flutter::switches.
+  // Flags to only be set internally by default. Match values in flutter::switches.
   static final String SNAPSHOT_ASSET_PATH_KEY = "snapshot-asset-path";
   static final String AOT_VMSERVICE_SHARED_LIBRARY_NAME = "aot-vmservice-shared-library-name";
 

@@ -17,6 +17,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 /** Loads application information given a Context. */
 public final class ApplicationInfoLoader {
+  // AndroidManifest.xml metadata keys for setting internal respective Flutter configuration values.
   public static final String NETWORK_POLICY_METADATA_KEY = "io.flutter.network-policy";
   public static final String PUBLIC_AUTOMATICALLY_REGISTER_PLUGINS_METADATA_KEY =
       "io.flutter.automatically-register-plugins";
