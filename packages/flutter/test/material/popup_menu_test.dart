@@ -4851,6 +4851,19 @@ void main() {
     checkPopupMenu(popupMenuTheme2);
   });
 
+  testWidgets('PopupMenuItem does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(child: PopupMenuItem<String>(child: Text('X'))),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(PopupMenuItem<String>)), Size.zero);
+  });
+
   testWidgets('PopupMenuButton does not crash at zero area', (WidgetTester tester) async {
     // This test case only verifies the layout of the button itself, not the
     // overlay, because there doesn't seem to be a way to open the menu at zero
