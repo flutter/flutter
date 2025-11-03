@@ -1072,10 +1072,12 @@ class EditableText extends StatefulWidget {
 
   /// The text style to use for the editable text.
   ///
-  /// This [style]s [TextStyle.fontWeight], [TextStyle.height], [TextStyle.letterSpacing],
-  /// and [TextStyle.wordSpacing] will be overriden by [MediaQueryData.lineHeightScaleFactorOverride],
-  /// [MediaQueryData.letterSpacingOverride], and [MediaQueryData.wordSpacingOverride] from the nearest
-  /// [MediaQuery] ancestor, regardless of its [TextStyle.inherit] value.
+  /// The user or platform may override this [style]s [TextStyle.fontWeight],
+  /// [TextStyle.height], [TextStyle.letterSpacing], and [TextStyle.wordSpacing]
+  /// via a [MediaQuery] ancestor's [MediaQueryData.boldText],
+  /// [MediaQueryData.lineHeightScaleFactorOverride],
+  /// [MediaQueryData.letterSpacingOverride], and [MediaQueryData.wordSpacingOverride]
+  /// regardless of its [TextStyle.inherit] value.
   final TextStyle style;
 
   /// Controls the undo state of the current editable text.
@@ -6786,12 +6788,16 @@ class _EditableTextTapUpOutsideAction extends ContextAction<EditableTextTapUpOut
 
 /// A [TextSpan] that overrides the style of its children with a given
 /// [TextStyle].
+// When changes are made to this class, the equivalent API in text.dart
+// must also be updated.
+// TODO(Renzo-Olivares): Remove after investigating a solution for overriding all
+// styles for children in an [InlineSpan] tree, see: https://github.com/flutter/flutter/issues/177952.
 class _OverridingTextStyleTextSpan extends TextSpan {
   _OverridingTextStyleTextSpan({required TextStyle overrideTextStyle, required TextSpan textSpan})
     : super(
         text: textSpan.text,
         children: textSpan.children?.map((InlineSpan child) {
-          if (child is TextSpan) {
+          if (child is TextSpan && child.runtimeType == TextSpan) {
             return _OverridingTextStyleTextSpan(
               overrideTextStyle: overrideTextStyle,
               textSpan: child,
@@ -6803,8 +6809,6 @@ class _OverridingTextStyleTextSpan extends TextSpan {
         semanticsLabel: textSpan.semanticsLabel,
         locale: textSpan.locale,
         spellOut: textSpan.spellOut,
-        style: textSpan.style != null
-            ? textSpan.style!.merge(overrideTextStyle)
-            : overrideTextStyle,
+        style: textSpan.style?.merge(overrideTextStyle) ?? overrideTextStyle,
       );
 }

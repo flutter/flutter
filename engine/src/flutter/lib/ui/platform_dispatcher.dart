@@ -1124,9 +1124,9 @@ class PlatformDispatcher {
   /// The system-reported height of the text, as a multiple of the font size.
   ///
   /// This value takes precedence over any text height specified at the
-  /// application level and overrides it. For example, at framework level,
-  /// in the [TextStyle] for [Text], [SelectableText], and [EditableText]
-  /// widgets, this value overrides the existing value of [TextStyle.height].
+  /// application level. For example, at framework level, in the [TextStyle]
+  /// for [Text], [SelectableText], and [EditableText] widgets, this value
+  /// overrides the existing value of [TextStyle.height].
   ///
   /// Returns null when no override has been set by the system.
   ///
@@ -1139,9 +1139,9 @@ class PlatformDispatcher {
   /// A negative value can be used to bring the letters closer.
   ///
   /// This value takes precedence over any text letter spacing specified at the
-  /// application level and overrides it. For example, at framework level,
-  /// in the [TextStyle] for [Text], [SelectableText], and [EditableText]
-  /// widgets, this value overrides the existing value of [TextStyle.letterSpacing].
+  /// application level. For example, at framework level, in the [TextStyle]
+  /// for [Text], [SelectableText], and [EditableText] widgets, this value
+  /// overrides the existing value of [TextStyle.letterSpacing].
   ///
   /// Returns null when no override has been set by the system.
   ///
@@ -1154,9 +1154,9 @@ class PlatformDispatcher {
   /// A negative value can be used to bring the words closer.
   ///
   /// This value takes precedence over any text word spacing specified at the
-  /// application level and overrides it. For example, at framework level,
-  /// in the [TextStyle] for [Text], [SelectableText], and [EditableText]
-  /// widgets, this value overrides the existing value of [TextStyle.wordSpacing].
+  /// application level. For example, at framework level, in the [TextStyle]
+  /// for [Text], [SelectableText], and [EditableText] widgets, this value
+  /// overrides the existing value of [TextStyle.wordSpacing].
   ///
   /// Returns null when no override has been set by the system.
   ///
@@ -1167,7 +1167,7 @@ class PlatformDispatcher {
   /// to add between each paragraph in text.
   ///
   /// This value takes precedence over any text paragraph spacing specified at
-  /// the application level and overrides it.
+  /// the application level.
   ///
   /// Returns null when no override has been set by the system.
   ///

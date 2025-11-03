@@ -1947,7 +1947,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   )?.supportsShowingSystemContextMenu;
 
   /// Returns the [MediaQueryData.lineHeightScaleFactorOverride] for the nearest
-  /// [MediaQuery] ancestor or null, if no such ancestor exists.
+  /// [MediaQuery] ancestor or null, if no such ancestor exists or if the platform
+  /// has not specified an override.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.lineHeightScaleFactorOverride] property of the ancestor [MediaQuery]
@@ -1960,7 +1961,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   )?.lineHeightScaleFactorOverride;
 
   /// Returns the [MediaQueryData.letterSpacingOverride] for the nearest
-  /// [MediaQuery] ancestor or null, if no such ancestor exists.
+  /// [MediaQuery] ancestor or null, if no such ancestor exists or if the platform
+  /// has not specified an override.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.letterSpacingOverride] property of the ancestor [MediaQuery]
@@ -1971,7 +1973,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
       _maybeOf(context, _MediaQueryAspect.letterSpacingOverride)?.letterSpacingOverride;
 
   /// Returns the [MediaQueryData.wordSpacingOverride] for the nearest
-  /// [MediaQuery] ancestor or null, if no such ancestor exists.
+  /// [MediaQuery] ancestor or null, if no such ancestor exists or if the platform
+  /// has not specified an override.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.wordSpacingOverride] property of the ancestor [MediaQuery]
@@ -1982,7 +1985,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
       _maybeOf(context, _MediaQueryAspect.wordSpacingOverride)?.wordSpacingOverride;
 
   /// Returns the [MediaQueryData.paragraphSpacingOverride] for the nearest
-  /// [MediaQuery] ancestor or null, if no such ancestor exists.
+  /// [MediaQuery] ancestor or null, if no such ancestor exists or if the platform
+  /// has not specified an override.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.paragraphSpacingOverride] property of the ancestor [MediaQuery]
