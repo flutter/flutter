@@ -184,7 +184,8 @@ DecompressResult ImageDecoderImpeller::DecompressTexture(
             .makeColorSpace(SkColorSpace::MakeSRGB());
   }
 
-  const auto pixel_format = ToPixelFormat(image_info.colorType());
+  const std::optional<impeller::PixelFormat> pixel_format =
+      ToPixelFormat(image_info.colorType());
   if (!pixel_format.has_value()) {
     std::string decode_error(
         std::format("Codec pixel format is not supported (SkColorType={})",
@@ -292,12 +293,10 @@ DecompressResult ImageDecoderImpeller::DecompressTexture(
     buffer->Flush();
 
     return DecompressResult{.device_buffer = std::move(buffer),
-                            .sk_bitmap = scaled_bitmap,
                             .image_info = scaled_bitmap->info()};
   }
 
   return DecompressResult{.device_buffer = std::move(buffer),
-                          .sk_bitmap = bitmap,
                           .image_info = bitmap->info(),
                           .resize_info = resize_info};
 }
@@ -431,7 +430,6 @@ void ImageDecoderImpeller::UploadTextureToPrivate(
     const std::shared_ptr<impeller::Context>& context,
     const std::shared_ptr<impeller::DeviceBuffer>& buffer,
     const SkImageInfo& image_info,
-    const std::shared_ptr<SkBitmap>& bitmap,
     const std::optional<SkImageInfo>& resize_info,
     const std::shared_ptr<const fml::SyncSwitch>& gpu_disabled_switch) {
   TRACE_EVENT0("impeller", __FUNCTION__);
@@ -587,7 +585,6 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
           UploadTextureToPrivate(result, context,              //
                                  bitmap_result.device_buffer,  //
                                  bitmap_result.image_info,     //
-                                 bitmap_result.sk_bitmap,      //
                                  bitmap_result.resize_info,    //
                                  gpu_disabled_switch           //
           );

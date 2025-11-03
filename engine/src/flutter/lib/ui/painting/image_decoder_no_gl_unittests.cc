@@ -112,7 +112,9 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutDisplayP3) {
   ASSERT_EQ(wide_result->image_info.colorType(), kRGBA_F16_SkColorType);
   ASSERT_TRUE(wide_result->image_info.colorSpace()->isSRGB());
 
-  const SkPixmap& wide_pixmap = wide_result->sk_bitmap->pixmap();
+  const SkPixmap wide_pixmap(wide_result->image_info,
+                             wide_result->device_buffer->OnGetContents(),
+                             wide_result->image_info.minRowBytes());
   const uint16_t* half_ptr = static_cast<const uint16_t*>(wide_pixmap.addr());
   bool found_deep_red = false;
   for (int i = 0; i < wide_pixmap.width() * wide_pixmap.height(); ++i) {
@@ -174,7 +176,9 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutIndexedPng) {
   ASSERT_EQ(wide_result->image_info.colorType(), kBGR_101010x_XR_SkColorType);
   ASSERT_TRUE(wide_result->image_info.colorSpace()->isSRGB());
 
-  const SkPixmap& wide_pixmap = wide_result->sk_bitmap->pixmap();
+  const SkPixmap wide_pixmap(wide_result->image_info,
+                             wide_result->device_buffer->OnGetContents(),
+                             wide_result->image_info.minRowBytes());
   const uint32_t* pixel_ptr = static_cast<const uint32_t*>(wide_pixmap.addr());
   bool found_deep_red = false;
   for (int i = 0; i < wide_pixmap.width() * wide_pixmap.height(); ++i) {
@@ -231,7 +235,9 @@ TEST(ImageDecoderNoGLTest, ImpellerUnmultipliedAlphaPng) {
           /*supports_wide_gamut=*/true, capabilities, allocator);
   ASSERT_EQ(result->image_info.colorType(), kRGBA_8888_SkColorType);
 
-  const SkPixmap& pixmap = result->sk_bitmap->pixmap();
+  const SkPixmap pixmap(result->image_info,
+                        result->device_buffer->OnGetContents(),
+                        result->image_info.minRowBytes());
   const uint32_t* pixel_ptr = static_cast<const uint32_t*>(pixmap.addr());
   // Test the upper left pixel is premultiplied and not solid red.
   ASSERT_EQ(*pixel_ptr, (uint32_t)0x1000001);
