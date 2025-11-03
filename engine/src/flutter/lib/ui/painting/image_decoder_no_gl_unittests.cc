@@ -105,7 +105,8 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutDisplayP3) {
       std::make_shared<impeller::TestImpellerAllocator>();
   std::optional<DecompressResult> wide_result =
       ImageDecoderImpeller::DecompressTexture(
-          descriptor.get(), SkISize::Make(100, 100), {100, 100},
+          descriptor.get(), {.target_width = 100, .target_height = 100},
+          {100, 100},
           /*supports_wide_gamut=*/true, capabilities, allocator);
   ASSERT_TRUE(wide_result.has_value());
   ASSERT_EQ(wide_result->image_info.colorType(), kRGBA_F16_SkColorType);
@@ -129,7 +130,8 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutDisplayP3) {
   ASSERT_TRUE(found_deep_red);
   std::optional<DecompressResult> narrow_result =
       ImageDecoderImpeller::DecompressTexture(
-          descriptor.get(), SkISize::Make(100, 100), {100, 100},
+          descriptor.get(), {.target_width = 100, .target_height = 100},
+          {100, 100},
           /*supports_wide_gamut=*/false, capabilities, allocator);
 
   ASSERT_TRUE(narrow_result.has_value());
@@ -166,7 +168,8 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutIndexedPng) {
       std::make_shared<impeller::TestImpellerAllocator>();
   std::optional<DecompressResult> wide_result =
       ImageDecoderImpeller::DecompressTexture(
-          descriptor.get(), SkISize::Make(100, 100), {100, 100},
+          descriptor.get(), {.target_width = 100, .target_height = 100},
+          {100, 100},
           /*supports_wide_gamut=*/true, capabilities, allocator);
   ASSERT_EQ(wide_result->image_info.colorType(), kBGR_101010x_XR_SkColorType);
   ASSERT_TRUE(wide_result->image_info.colorSpace()->isSRGB());
@@ -189,7 +192,8 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutIndexedPng) {
   ASSERT_TRUE(found_deep_red);
   std::optional<DecompressResult> narrow_result =
       ImageDecoderImpeller::DecompressTexture(
-          descriptor.get(), SkISize::Make(100, 100), {100, 100},
+          descriptor.get(), {.target_width = 100, .target_height = 100},
+          {100, 100},
           /*supports_wide_gamut=*/false, capabilities, allocator);
 
   ASSERT_TRUE(narrow_result.has_value());
@@ -223,7 +227,7 @@ TEST(ImageDecoderNoGLTest, ImpellerUnmultipliedAlphaPng) {
       std::make_shared<impeller::TestImpellerAllocator>();
   std::optional<DecompressResult> result =
       ImageDecoderImpeller::DecompressTexture(
-          descriptor.get(), SkISize::Make(11, 11), {11, 11},
+          descriptor.get(), {.target_width = 11, .target_height = 11}, {11, 11},
           /*supports_wide_gamut=*/true, capabilities, allocator);
   ASSERT_EQ(result->image_info.colorType(), kRGBA_8888_SkColorType);
 

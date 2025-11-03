@@ -130,7 +130,7 @@ static SkAlphaType ChooseCompatibleAlphaType(SkAlphaType type) {
 
 DecompressResult ImageDecoderImpeller::DecompressTexture(
     ImageDescriptor* descriptor,
-    SkISize target_size,
+    const ImageDecoder::Options& options,
     impeller::ISize max_texture_size,
     bool supports_wide_gamut,
     const std::shared_ptr<const impeller::Capabilities>& capabilities,
@@ -142,10 +142,11 @@ DecompressResult ImageDecoderImpeller::DecompressTexture(
     return DecompressResult{.decode_error = decode_error};
   }
 
-  target_size.set(std::min(static_cast<int32_t>(max_texture_size.width),
-                           target_size.width()),
-                  std::min(static_cast<int32_t>(max_texture_size.height),
-                           target_size.height()));
+  SkISize target_size =
+      SkISize::Make(std::min(max_texture_size.width,
+                             static_cast<int64_t>(options.target_width)),
+                    std::min(max_texture_size.height,
+                             static_cast<int64_t>(options.target_height)));
 
   const SkISize source_size = descriptor->image_info().dimensions();
   auto decode_size = source_size;
@@ -551,9 +552,8 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
   concurrent_task_runner_->PostTask(
       [raw_descriptor,            //
        context = context_.get(),  //
-       target_size =
-           SkISize::Make(options.target_width, options.target_height),  //
-       io_runner = runners_.GetIOTaskRunner(),                          //
+       options,
+       io_runner = runners_.GetIOTaskRunner(),  //
        result,
        wide_gamut_enabled = wide_gamut_enabled_,  //
        gpu_disabled_switch = gpu_disabled_switch_]() {
@@ -573,7 +573,7 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
 
         // Always decompress on the concurrent runner.
         auto bitmap_result = DecompressTexture(
-            raw_descriptor, target_size, max_size_supported,
+            raw_descriptor, options, max_size_supported,
             /*supports_wide_gamut=*/wide_gamut_enabled &&
                 context->GetCapabilities()->SupportsExtendedRangeFormats(),
             context->GetCapabilities(), context->GetResourceAllocator());
