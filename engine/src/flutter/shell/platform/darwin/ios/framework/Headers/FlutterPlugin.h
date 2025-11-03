@@ -44,6 +44,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
+ *
+ * This method is deprecated and will not be called when this plugin conforms to
+ * `FlutterSceneLifeCycleDelegate`.
  */
 - (void)applicationDidBecomeActive:(UIApplication*)application
     API_DEPRECATED("Implement ``FlutterSceneLifeCycleDelegate/sceneDidBecomeActive:`` instead.",
@@ -51,6 +54,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
+ *
+ * This method is deprecated and will not be called when this plugin conforms to
+ * `FlutterSceneLifeCycleDelegate`.
  */
 - (void)applicationWillResignActive:(UIApplication*)application
     API_DEPRECATED("Implement ``FlutterSceneLifeCycleDelegate/willResignActive:`` instead.",
@@ -58,6 +64,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
+ *
+ * This method is deprecated and will not be called when this plugin conforms to
+ * `FlutterSceneLifeCycleDelegate`.
  */
 - (void)applicationDidEnterBackground:(UIApplication*)application
     API_DEPRECATED("Implement ``FlutterSceneLifeCycleDelegate/didEnterBackground:`` instead.",
@@ -77,6 +86,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
+ *
+ * This method is deprecated and will not be called when this plugin conforms to
+ * `FlutterSceneLifeCycleDelegate`.
  */
 - (void)application:(UIApplication*)application
     didRegisterUserNotificationSettings:(UIUserNotificationSettings*)notificationSettings
@@ -118,6 +130,9 @@ NS_ASSUME_NONNULL_BEGIN
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
  *
  * @return `YES` if this handles the request.
+ *
+ * This method is deprecated and will not be called when this plugin conforms to
+ * `FlutterSceneLifeCycleDelegate`.
  */
 - (BOOL)application:(UIApplication*)application
             openURL:(NSURL*)url
@@ -129,6 +144,9 @@ NS_ASSUME_NONNULL_BEGIN
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
  *
  * @return `YES` if this handles the request.
+ *
+ * This method is deprecated and will not be called when this plugin conforms to
+ * `FlutterSceneLifeCycleDelegate`.
  */
 - (BOOL)application:(UIApplication*)application
       handleOpenURL:(NSURL*)url
@@ -139,6 +157,9 @@ NS_ASSUME_NONNULL_BEGIN
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
  *
  * @return `YES` if this handles the request.
+ *
+ * This method is deprecated and will not be called when this plugin conforms to
+ * `FlutterSceneLifeCycleDelegate`.
  */
 - (BOOL)application:(UIApplication*)application
               openURL:(NSURL*)url
@@ -151,6 +172,9 @@ NS_ASSUME_NONNULL_BEGIN
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
  *
  * @return `YES` if this handles the request.
+ *
+ * This method is deprecated and will not be called when this plugin conforms to
+ * `FlutterSceneLifeCycleDelegate`.
  */
 - (BOOL)application:(UIApplication*)application
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
@@ -164,6 +188,9 @@ NS_ASSUME_NONNULL_BEGIN
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
  *
  * @return `YES` if this handles the request.
+ *
+ * This method is deprecated and will not be called when this plugin conforms to
+ * `FlutterSceneLifeCycleDelegate`.
  */
 - (BOOL)application:(UIApplication*)application
     handleEventsForBackgroundURLSession:(nonnull NSString*)identifier
@@ -181,6 +208,9 @@ NS_ASSUME_NONNULL_BEGIN
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
  *
  * @return `YES` if this handles the request.
+ *
+ * This method is deprecated and will not be called when this plugin conforms to
+ * `FlutterSceneLifeCycleDelegate`.
  */
 - (BOOL)application:(UIApplication*)application
     continueUserActivity:(NSUserActivity*)userActivity

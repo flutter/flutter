@@ -81,6 +81,8 @@ FLUTTER_DARWIN_EXPORT
  * some plugin handles the request.
  *
  *  @return `YES` if any plugin handles the request.
+ *
+ * This method is deprecated and must not be called when this app is using UIScenes.
  */
 - (BOOL)application:(UIApplication*)application
             openURL:(NSURL*)url
@@ -93,6 +95,8 @@ FLUTTER_DARWIN_EXPORT
  * some plugin handles the request.
  *
  * @return `YES` if any plugin handles the request.
+ *
+ * This method is deprecated and must not be called when this app is using UIScenes.
  */
 - (BOOL)application:(UIApplication*)application
       handleOpenURL:(NSURL*)url
@@ -104,6 +108,8 @@ FLUTTER_DARWIN_EXPORT
  * some plugin handles the request.
  *
  * @return `YES` if any plugin handles the request.
+ *
+ * This method is deprecated and must not be called when this app is using UIScenes.
  */
 - (BOOL)application:(UIApplication*)application
               openURL:(NSURL*)url
@@ -114,6 +120,8 @@ FLUTTER_DARWIN_EXPORT
 
 /**
  * Calls all plugins registered for `UIApplicationDelegate` callbacks.
+ *
+ * This method is deprecated and must not be called when this app is using UIScenes.
  */
 - (void)application:(UIApplication*)application
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
@@ -147,6 +155,8 @@ FLUTTER_DARWIN_EXPORT
  * some plugin handles the request.
  *
  * @return `YES` if any plugin handles the request.
+ *
+ * This method is deprecated and must not be called when this app is using UIScenes.
  */
 - (BOOL)application:(UIApplication*)application
     continueUserActivity:(NSUserActivity*)userActivity
