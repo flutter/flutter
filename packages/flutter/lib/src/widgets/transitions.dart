@@ -412,8 +412,8 @@ class RotationTransition extends MatrixTransition {
 /// Animates its own size and clips and aligns its child.
 ///
 /// [SizeTransition] acts as a [ClipRect] that animates either its width or its
-/// height, depending upon the value of [axis]. The alignment of the child along
-/// the [axis] is specified by the [alignment].
+/// height, depending upon the value of [axis]. The alignment of the child within
+/// is specified by the [alignment].
 ///
 /// Like most widgets, [SizeTransition] will conform to the constraints it is
 /// given, so be sure to put it in a context where it can change size. For
@@ -472,7 +472,7 @@ class SizeTransition extends AnimatedWidget {
   /// in the appropriate axis.
   Animation<double> get sizeFactor => listenable as Animation<double>;
 
-  /// The alignment of the child along the main axis during the transition.
+  /// The alignment of the child within the parent during the transition.
   final AlignmentGeometry alignment;
 
   /// The factor by which to multiply the cross axis size of the child.
