@@ -586,10 +586,12 @@ class Text extends StatelessWidget {
   /// the closest enclosing [DefaultTextStyle]. Otherwise, the style will
   /// replace the closest enclosing [DefaultTextStyle].
   ///
-  /// This [style]s [TextStyle.fontWeight], [TextStyle.height], [TextStyle.letterSpacing],
-  /// and [TextStyle.wordSpacing] will be overriden by [MediaQueryData.lineHeightScaleFactorOverride],
-  /// [MediaQueryData.letterSpacingOverride], and [MediaQueryData.wordSpacingOverride] from the nearest
-  /// [MediaQuery] ancestor, regardless of its [TextStyle.inherit] value.
+  /// The user or platform may override this [style]s [TextStyle.fontWeight],
+  /// [TextStyle.height], [TextStyle.letterSpacing], and [TextStyle.wordSpacing]
+  /// via a [MediaQuery] ancestor's [MediaQueryData.boldText],
+  /// [MediaQueryData.lineHeightScaleFactorOverride],
+  /// [MediaQueryData.letterSpacingOverride], and [MediaQueryData.wordSpacingOverride]
+  /// regardless of its [TextStyle.inherit] value.
   final TextStyle? style;
 
   /// {@macro flutter.painting.textPainter.strutStyle}
@@ -720,27 +722,22 @@ class Text extends StatelessWidget {
     if (MediaQuery.boldTextOf(context)) {
       effectiveTextStyle = effectiveTextStyle!.merge(const TextStyle(fontWeight: FontWeight.bold));
     }
-    final TextSpan effectiveTextSpan =
-        lineHeightScaleFactor != null || letterSpacing != null || wordSpacing != null
-        ? _OverridingTextStyleTextSpan(
-            overrideTextStyle: TextStyle(
-              height: lineHeightScaleFactor,
-              letterSpacing: letterSpacing,
-              wordSpacing: wordSpacing,
-            ),
-            textSpan: TextSpan(
-              style: effectiveTextStyle,
-              text: data,
-              locale: locale,
-              children: textSpan != null ? <InlineSpan>[textSpan!] : null,
-            ),
-          )
-        : TextSpan(
-            style: effectiveTextStyle,
-            text: data,
-            locale: locale,
-            children: textSpan != null ? <InlineSpan>[textSpan!] : null,
-          );
+    TextSpan effectiveTextSpan = TextSpan(
+      style: effectiveTextStyle,
+      text: data,
+      locale: locale,
+      children: textSpan != null ? <InlineSpan>[textSpan!] : null,
+    );
+    if (lineHeightScaleFactor != null || letterSpacing != null || wordSpacing != null) {
+      effectiveTextSpan = _OverridingTextStyleTextSpan(
+        overrideTextStyle: TextStyle(
+          height: lineHeightScaleFactor,
+          letterSpacing: letterSpacing,
+          wordSpacing: wordSpacing,
+        ),
+        textSpan: effectiveTextSpan,
+      );
+    }
     final StrutStyle? effectiveStrutStyle = strutStyle != null && lineHeightScaleFactor != null
         ? strutStyle!.copyWith(forceStrutHeight: false)
         : strutStyle;
@@ -1502,12 +1499,16 @@ typedef _SelectionInfo = ({int contentLength, SelectedContentRange? range});
 
 /// A [TextSpan] that overrides the style of its children with a given
 /// [TextStyle].
+// When changes are made to this class, the equivalent API in editable_text.dart
+// must also be updated.
+// TODO(Renzo-Olivares): Remove after investigating a solution for overriding all
+// styles for children in an [InlineSpan] tree, see: https://github.com/flutter/flutter/issues/177952.
 class _OverridingTextStyleTextSpan extends TextSpan {
   _OverridingTextStyleTextSpan({required TextStyle overrideTextStyle, required TextSpan textSpan})
     : super(
         text: textSpan.text,
         children: textSpan.children?.map((InlineSpan child) {
-          if (child is TextSpan) {
+          if (child is TextSpan && child.runtimeType == TextSpan) {
             return _OverridingTextStyleTextSpan(
               overrideTextStyle: overrideTextStyle,
               textSpan: child,
@@ -1519,8 +1520,6 @@ class _OverridingTextStyleTextSpan extends TextSpan {
         semanticsLabel: textSpan.semanticsLabel,
         locale: textSpan.locale,
         spellOut: textSpan.spellOut,
-        style: textSpan.style != null
-            ? textSpan.style!.merge(overrideTextStyle)
-            : overrideTextStyle,
+        style: textSpan.style?.merge(overrideTextStyle) ?? overrideTextStyle,
       );
 }
