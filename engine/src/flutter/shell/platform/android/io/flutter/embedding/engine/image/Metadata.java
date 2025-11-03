@@ -52,6 +52,6 @@ class Metadata {
    * @return True if the image is HEIF, false otherwise.
    */
   boolean isHeif() {
-    return mimeType.equals("image/heif");
+    return "image/heif".equals(mimeType);
   }
 }
