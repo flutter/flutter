@@ -5644,5 +5644,12 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(SelectableText)), Size.zero);
+
+    // Manually set a selection to trigger the code path that was crashing.
+    final EditableTextState state = tester.state(find.byType(EditableText));
+    state.updateEditingValue(
+      const TextEditingValue(text: 'XYZ', selection: TextSelection(baseOffset: 0, extentOffset: 3)),
+    );
+    await tester.pump();
   });
 }
