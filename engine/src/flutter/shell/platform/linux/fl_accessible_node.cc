@@ -83,6 +83,43 @@ G_DEFINE_TYPE_WITH_CODE(
             G_IMPLEMENT_INTERFACE(ATK_TYPE_ACTION,
                                   fl_accessible_node_action_interface_init))
 
+// Returns TRUE if [flags] indicate this element is checkable.
+static gboolean is_checkable(FlutterSemanticsFlags flags) {
+  return flags.is_checked != kFlutterCheckStateNone ||
+         flags.is_toggled != kFlutterTristateNone;
+}
+
+// Returns TRUE if [flags] indicate this element is checked.
+static gboolean is_checked(FlutterSemanticsFlags flags) {
+  return flags.is_checked == kFlutterCheckStateTrue ||
+         flags.is_toggled == kFlutterTristateTrue;
+}
+
+// Returns TRUE if [flags] indicate this element is focusable.
+static gboolean is_focusable(FlutterSemanticsFlags flags) {
+  return flags.is_focused != kFlutterTristateNone;
+}
+
+// Returns TRUE if [flags] indicate this element is focused.
+static gboolean is_focused(FlutterSemanticsFlags flags) {
+  return flags.is_focused == kFlutterTristateTrue;
+}
+
+// Returns TRUE if [flags] indicate this element is selected.
+static gboolean is_selected(FlutterSemanticsFlags flags) {
+  return flags.is_selected == kFlutterTristateTrue;
+}
+
+// Returns TRUE if [flags] indicate this element is sensitive.
+static gboolean is_sensitive(FlutterSemanticsFlags flags) {
+  return flags.is_enabled != kFlutterTristateNone;
+}
+
+// Returns TRUE if [flags] indicate this element is enabled.
+static gboolean is_enabled(FlutterSemanticsFlags flags) {
+  return flags.is_enabled == kFlutterTristateTrue;
+}
+
 // Returns TRUE if [action] is set in [actions].
 static gboolean has_action(FlutterSemanticsAction actions,
                            FlutterSemanticsAction action) {
@@ -237,23 +274,25 @@ static AtkStateSet* fl_accessible_node_ref_state_set(AtkObject* accessible) {
   if (!priv->flags.is_hidden) {
     atk_state_set_add_state(state_set, ATK_STATE_VISIBLE);
   }
-  if (priv->flags.is_checked != kFlutterCheckStateNone) {
+  if (is_checkable(priv->flags)) {
     atk_state_set_add_state(state_set, ATK_STATE_CHECKABLE);
   }
-  if (priv->flags.is_focused != kFlutterTristateNone) {
-    atk_state_set_add_state(state_set, ATK_STATE_FOCUSABLE);
-  }
-  if (priv->flags.is_focused == kFlutterTristateTrue) {
-    atk_state_set_add_state(state_set, ATK_STATE_FOCUSED);
-  }
-  if (priv->flags.is_checked || priv->flags.is_toggled) {
+  if (is_checked(priv->flags)) {
     atk_state_set_add_state(state_set, ATK_STATE_CHECKED);
   }
-  if (priv->flags.is_selected) {
+  if (is_focusable(priv->flags)) {
+    atk_state_set_add_state(state_set, ATK_STATE_FOCUSABLE);
+  }
+  if (is_focused(priv->flags)) {
+    atk_state_set_add_state(state_set, ATK_STATE_FOCUSED);
+  }
+  if (is_selected(priv->flags)) {
     atk_state_set_add_state(state_set, ATK_STATE_SELECTED);
   }
-  if (priv->flags.is_enabled == kFlutterTristateTrue) {
+  if (is_enabled(priv->flags)) {
     atk_state_set_add_state(state_set, ATK_STATE_ENABLED);
+  }
+  if (is_sensitive(priv->flags)) {
     atk_state_set_add_state(state_set, ATK_STATE_SENSITIVE);
   }
   if (priv->flags.is_read_only) {
@@ -372,43 +411,33 @@ static void fl_accessible_node_set_flags_impl(FlAccessibleNode* self,
     atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_VISIBLE,
                                    !flags->is_hidden);
   }
-  bool was_checkable = old_flags.is_checked != kFlutterCheckStateNone;
-  bool is_checkable = flags->is_checked != kFlutterCheckStateNone;
-  if (flag_changed(was_checkable, is_checkable)) {
+  if (flag_changed(is_checkable(old_flags), is_checkable(priv->flags))) {
     atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_CHECKABLE,
-                                   is_checkable);
+                                   is_checkable(priv->flags));
   }
-  if (flag_changed(old_flags.is_focused, flags->is_focused)) {
-    atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_FOCUSABLE,
-                                   flags->is_focused != kFlutterTristateNone);
-  }
-  if (flag_changed(old_flags.is_focused, flags->is_focused)) {
-    atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_FOCUSED,
-                                   flags->is_focused == kFlutterTristateTrue);
-  }
-  bool old_is_checked = old_flags.is_checked || old_flags.is_toggled;
-  bool is_checked = flags->is_checked || flags->is_toggled;
-  if (flag_changed(old_is_checked, is_checked)) {
+  if (flag_changed(is_checked(old_flags), is_checked(priv->flags))) {
     atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_CHECKED,
-                                   is_checked);
+                                   is_checked(priv->flags));
   }
-  if (flag_changed(old_flags.is_selected, flags->is_selected)) {
+  if (flag_changed(is_focusable(old_flags), is_focusable(priv->flags))) {
+    atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_FOCUSABLE,
+                                   is_focusable(priv->flags));
+  }
+  if (flag_changed(is_focused(old_flags), is_focused(priv->flags))) {
+    atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_FOCUSED,
+                                   is_focused(priv->flags));
+  }
+  if (flag_changed(is_selected(old_flags), is_selected(priv->flags))) {
     atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_SELECTED,
-                                   flags->is_selected);
+                                   is_selected(priv->flags));
   }
-  if (flag_changed(old_flags.is_enabled, flags->is_enabled)) {
-    atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_ENABLED,
-                                   flags->is_enabled);
+  if (flag_changed(is_sensitive(old_flags), is_sensitive(priv->flags))) {
     atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_SENSITIVE,
-                                   flags->is_enabled);
+                                   is_sensitive(priv->flags));
   }
-  if (flag_changed(old_flags.is_enabled, flags->is_enabled)) {
+  if (flag_changed(is_enabled(old_flags), is_enabled(priv->flags))) {
     atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_ENABLED,
-                                   flags->is_enabled);
-  }
-  if (flag_changed(old_flags.is_enabled, flags->is_enabled)) {
-    atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_ENABLED,
-                                   flags->is_enabled);
+                                   is_enabled(priv->flags));
   }
   if (flag_changed(old_flags.is_read_only, flags->is_read_only)) {
     atk_object_notify_state_change(ATK_OBJECT(self), ATK_STATE_READ_ONLY,
