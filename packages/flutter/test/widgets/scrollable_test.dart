@@ -115,38 +115,67 @@ void main() {
     }
 
     await tester.pumpWidget(
-      const MaterialApp(home: SingleChildScrollView(hitTestBehavior: HitTestBehavior.translucent)),
+      const MaterialApp(
+        home: ScrollConfiguration(
+          behavior: const NoScrollbarBehavior(),
+          child: SingleChildScrollView(hitTestBehavior: HitTestBehavior.translucent),
+        ),
+      ),
     );
     expect(getBehavior(SingleChildScrollView), HitTestBehavior.translucent);
 
     await tester.pumpWidget(
-      const MaterialApp(home: CustomScrollView(hitTestBehavior: HitTestBehavior.translucent)),
+      const MaterialApp(
+        home: ScrollConfiguration(
+          behavior: const NoScrollbarBehavior(),
+          child: CustomScrollView(hitTestBehavior: HitTestBehavior.translucent),
+        ),
+      ),
     );
     expect(getBehavior(CustomScrollView), HitTestBehavior.translucent);
 
     await tester.pumpWidget(
-      MaterialApp(home: ListView(hitTestBehavior: HitTestBehavior.translucent)),
+      MaterialApp(
+        home: ScrollConfiguration(
+          behavior: const NoScrollbarBehavior(),
+          child: ListView(hitTestBehavior: HitTestBehavior.translucent),
+        ),
+      ),
     );
     expect(getBehavior(ListView), HitTestBehavior.translucent);
 
     await tester.pumpWidget(
       MaterialApp(
-        home: GridView.extent(maxCrossAxisExtent: 1, hitTestBehavior: HitTestBehavior.translucent),
+        home: ScrollConfiguration(
+          behavior: const NoScrollbarBehavior(),
+          child: GridView.extent(
+            maxCrossAxisExtent: 1,
+            hitTestBehavior: HitTestBehavior.translucent,
+          ),
+        ),
       ),
     );
     expect(getBehavior(GridView), HitTestBehavior.translucent);
 
     await tester.pumpWidget(
-      MaterialApp(home: PageView(hitTestBehavior: HitTestBehavior.translucent)),
+      MaterialApp(
+        home: ScrollConfiguration(
+          behavior: const NoScrollbarBehavior(),
+          child: PageView(hitTestBehavior: HitTestBehavior.translucent),
+        ),
+      ),
     );
     expect(getBehavior(PageView), HitTestBehavior.translucent);
 
     await tester.pumpWidget(
       MaterialApp(
-        home: ListWheelScrollView(
-          itemExtent: 10,
-          hitTestBehavior: HitTestBehavior.translucent,
-          children: const <Widget>[],
+        home: ScrollConfiguration(
+          behavior: const NoScrollbarBehavior(),
+          child: ListWheelScrollView(
+            itemExtent: 10,
+            hitTestBehavior: HitTestBehavior.translucent,
+            children: const <Widget>[],
+          ),
         ),
       ),
     );
@@ -1441,16 +1470,19 @@ void main() {
     final UniqueKey listView = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
-        home: TickerMode(
-          enabled: true,
-          child: ListView.builder(
-            key: listView,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
+        home: ScrollConfiguration(
+          behavior: const NoScrollbarBehavior(),
+          child: TickerMode(
+            enabled: true,
+            child: ListView.builder(
+              key: listView,
+              itemCount: 100,
+              itemBuilder: (BuildContext context, int index) {
               return Text('Item $index');
             },
           ),
         ),
+      ),
       ),
     );
 
@@ -1468,14 +1500,17 @@ void main() {
     // It will reconstruct the scroll position and apply content dimensions.
     await tester.pumpWidget(
       MaterialApp(
-        home: TickerMode(
-          enabled: false,
-          child: ListView.builder(
-            key: listView,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
+        home: ScrollConfiguration(
+          behavior: const NoScrollbarBehavior(),
+          child: TickerMode(
+            enabled: false,
+            child: ListView.builder(
+              key: listView,
+              itemCount: 100,
+              itemBuilder: (BuildContext context, int index) {
               return Text('Item $index');
-            },
+              },
+            ),
           ),
         ),
       ),

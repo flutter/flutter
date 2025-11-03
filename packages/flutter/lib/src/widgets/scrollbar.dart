@@ -1340,13 +1340,15 @@ class RawScrollbar extends StatefulWidget {
   /// Defaults to null.
   final EdgeInsetsGeometry? padding;
 
+  /// {@template flutter.widgets.Scrollbar.revealAssistiveScrollbar}
   /// Selectively reveal the scrollbar on scroll when a mouse or trackpad
   /// is used.
   ///
   /// The [thumbVisibility] setting will still be ignored when a mouse
   /// or trackpad is
   ///
-  /// Defaults to false;
+  /// Defaults to false.
+  /// {@endtemplate}
   final bool revealAssistiveScrollbar;
 
   @override

@@ -23,7 +23,10 @@ void main() {
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
-        home: ListView(controller: controller, children: children(30)),
+        home: ScrollConfiguration(
+          behavior: const NoScrollbarBehavior(),
+          child: ListView(controller: controller, children: children(30)),
+        ),
       ),
     );
     final double thirty = controller.position.maxScrollExtent;
@@ -33,7 +36,10 @@ void main() {
     await tester.pump();
     await tester.pumpWidget(
       MaterialApp(
-        home: ListView(controller: controller, children: children(31)),
+        home: ScrollConfiguration(
+          behavior: const NoScrollbarBehavior(),
+          child: ListView(controller: controller, children: children(31)),
+        ),
       ),
     );
     expect(
@@ -559,4 +565,11 @@ class _ScrollActivityDelegate extends ScrollActivityDelegate {
 
   @override
   double setPixels(double pixels) => 0.0;
+}
+
+class NoScrollbarBehavior extends ScrollBehavior {
+  const NoScrollbarBehavior();
+
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
 }

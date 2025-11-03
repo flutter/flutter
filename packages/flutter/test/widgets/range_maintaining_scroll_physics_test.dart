@@ -101,12 +101,15 @@ void main() {
   testWidgets('shrink listview while dragging', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: ListView.builder(
+        home: ScrollConfiguration(
+          behavior: const NoScrollbarBehavior(),
+          child: ListView.builder(
           itemBuilder: (BuildContext context, int index) => index == 0
               ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
               : Container(height: 300, color: Colors.red),
           itemCount: 2,
         ),
+      ),
       ),
     );
 
@@ -418,5 +421,17 @@ class RangeMaintainingTestScrollBehavior extends ScrollBehavior {
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) {
     return const BouncingScrollPhysics(parent: RangeMaintainingScrollPhysics());
+  }
+}
+
+class NoScrollbarBehavior extends ScrollBehavior {
+  const NoScrollbarBehavior();
+
+  @override
+  TargetPlatform getPlatform(BuildContext context) => defaultTargetPlatform;
+
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
+    return child;
   }
 }

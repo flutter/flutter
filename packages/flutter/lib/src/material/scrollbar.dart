@@ -94,6 +94,7 @@ class Scrollbar extends StatelessWidget {
     this.notificationPredicate,
     this.interactive,
     this.scrollbarOrientation,
+    this.revealAssistiveScrollbar,
   });
 
   /// {@macro flutter.widgets.Scrollbar.child}
@@ -148,6 +149,9 @@ class Scrollbar extends StatelessWidget {
 
   /// {@macro flutter.widgets.Scrollbar.scrollbarOrientation}
   final ScrollbarOrientation? scrollbarOrientation;
+  
+  /// {@macro flutter.widgets.Scrollbar.revealAssistiveScrollbar}
+  final bool? revealAssistiveScrollbar;
 
   @override
   Widget build(BuildContext context) {
@@ -173,6 +177,7 @@ class Scrollbar extends StatelessWidget {
       notificationPredicate: notificationPredicate,
       interactive: interactive,
       scrollbarOrientation: scrollbarOrientation,
+      revealAssistiveScrollbar: revealAssistiveScrollbar ?? false,
       child: child,
     );
   }
@@ -189,12 +194,12 @@ class _MaterialScrollbar extends RawScrollbar {
     ScrollNotificationPredicate? notificationPredicate,
     super.interactive,
     super.scrollbarOrientation,
+    super.revealAssistiveScrollbar,
   }) : super(
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
          pressDuration: Duration.zero,
          notificationPredicate: notificationPredicate ?? defaultScrollNotificationPredicate,
-         revealAssistiveScrollbar: true,
        );
 
   @override
