@@ -242,5 +242,79 @@ void testMain() {
       expect(contentManager.isVisible(viewId + 2), isTrue);
       expect(contentManager.isInvisible(viewId + 2), isFalse);
     });
+
+    group('updatePlatformViewAccessibility', () {
+      setUp(() {
+        contentManager.registerFactory(viewType, (int id) => createDomHTMLDivElement());
+      });
+
+      test('sets inert attribute by default when rendering', () {
+        final DomElement wrapper = contentManager.renderContent(viewType, viewId, null);
+
+        expect(
+          wrapper.hasAttribute('inert'),
+          isTrue,
+          reason: 'Platform views should be inert by default for ExcludeSemantics support',
+        );
+      });
+
+      test('hides platform view from accessibility when isHidden is true', () {
+        final DomElement wrapper = contentManager.renderContent(viewType, viewId, null);
+
+        // Remove inert to simulate semantic node making it accessible
+        wrapper.removeAttribute('inert');
+        expect(wrapper.hasAttribute('inert'), isFalse);
+
+        // Now hide it again
+        contentManager.updatePlatformViewAccessibility(viewId, true);
+
+        expect(
+          wrapper.hasAttribute('inert'),
+          isTrue,
+          reason: 'inert should be set when isHidden is true',
+        );
+      });
+
+      test('makes platform view accessible when isHidden is false', () {
+        final DomElement wrapper = contentManager.renderContent(viewType, viewId, null);
+
+        expect(
+          wrapper.hasAttribute('inert'),
+          isTrue,
+          reason: 'Platform view should start as inert',
+        );
+
+        // Make it accessible
+        contentManager.updatePlatformViewAccessibility(viewId, false);
+
+        expect(
+          wrapper.hasAttribute('inert'),
+          isFalse,
+          reason: 'inert should be removed when isHidden is false',
+        );
+      });
+
+      test('handles toggle between hidden and accessible states', () {
+        final DomElement wrapper = contentManager.renderContent(viewType, viewId, null);
+
+        // Make accessible
+        contentManager.updatePlatformViewAccessibility(viewId, false);
+        expect(wrapper.hasAttribute('inert'), isFalse);
+
+        // Hide again
+        contentManager.updatePlatformViewAccessibility(viewId, true);
+        expect(wrapper.hasAttribute('inert'), isTrue);
+
+        // Make accessible again
+        contentManager.updatePlatformViewAccessibility(viewId, false);
+        expect(wrapper.hasAttribute('inert'), isFalse);
+      });
+
+      test('does nothing when viewId does not exist', () {
+        // Should not throw
+        expect(() => contentManager.updatePlatformViewAccessibility(999, true), returnsNormally);
+        expect(() => contentManager.updatePlatformViewAccessibility(999, false), returnsNormally);
+      });
+    });
   });
 }

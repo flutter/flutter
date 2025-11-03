@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../dom.dart';
@@ -119,18 +121,18 @@ class PlatformViewManager {
   /// The resulting DOM for the `contents` of a Platform View looks like this:
   ///
   /// ```html
-  /// <flt-platform-view id="flt-pv-VIEW_ID" slot="...">
+  /// <flt-platform-view id="flt-pv-VIEW_ID" slot="..." aria-hidden="true">
   ///   <arbitrary-html-elements />
   /// </flt-platform-view-slot>
   /// ```
-  ///
-  /// The `arbitrary-html-elements` are the result of the call to the user-supplied
-  /// `factory` function for this Platform View (see [registerFactory]).
   ///
   /// The outer `flt-platform-view` tag is a simple wrapper that we add to have
   /// a place where to attach the `slot` property, that will tell the browser
   /// what `slot` tag will reveal this `contents`, **without modifying the returned
   /// html from the `factory` function**.
+  ///
+  /// By default, platform views are hidden from screen readers (aria-hidden="true").
+  /// The semantics layer will remove this when a semantic node is created.
   DomElement renderContent(String viewType, int viewId, Object? params) {
     assert(
       knowsViewType(viewType),
@@ -157,6 +159,13 @@ class PlatformViewManager {
 
       _ensureContentCorrectlySized(content, viewType);
       wrapper.append(content);
+
+      // By default, hide platform views from screen readers and keyboard navigation.
+      // The semantic layer will remove this when a semantic node is created.
+      // This ensures ExcludeSemantics works correctly on web.
+      // We use 'inert' attribute which prevents focus and hides from accessibility tree.
+      // See: https://github.com/flutter/flutter/issues/171948
+      wrapper.setAttribute('inert', '');
 
       return wrapper;
     });
@@ -208,6 +217,25 @@ class PlatformViewManager {
   /// Returns `true` if the given [viewId] is a platform view with a visible
   /// component.
   bool isVisible(int viewId) => !isInvisible(viewId);
+
+  /// Updates the accessibility attributes of a platform view.
+  ///
+  /// This is called by the semantics layer to hide or show platform views
+  /// from screen readers based on semantic properties like ExcludeSemantics.
+  void updatePlatformViewAccessibility(int viewId, bool isHidden) {
+    final DomElement? wrapper = getSlottedContent(viewId);
+    if (wrapper == null) {
+      return;
+    }
+
+    if (isHidden) {
+      // Hide from screen readers and keyboard navigation
+      wrapper.setAttribute('inert', '');
+    } else {
+      // Make accessible to screen readers and keyboard navigation
+      wrapper.removeAttribute('inert');
+    }
+  }
 
   /// Clears the state. Used in tests.
   void debugClear() {
