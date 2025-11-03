@@ -256,6 +256,9 @@ FLUTTER_DARWIN_EXPORT
 
 /**
  * Controls whether the created view can be sized based on its content.
+ * When set to `YES`, the FlutterView will be the same size as the outermost widget.
+ * Cannot be used with unbounded height widgets, such as Scaffold.
+ * This property is intended to be used with Add-to-App scenarios.
  *
  * Default is `NO`.
  */

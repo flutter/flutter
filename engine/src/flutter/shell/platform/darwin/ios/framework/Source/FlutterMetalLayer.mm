@@ -253,7 +253,6 @@ extern CFTimeInterval display_link_target;
     _front = nil;
     _totalTextures = 0;
     _drawableSize = drawableSize;
-    NSLog(@"drawableSize %f", drawableSize.height);
   }
 }
 

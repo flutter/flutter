@@ -665,9 +665,9 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
      withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext {
   TRACE_EVENT0("flutter", "PlatformViewsController::SubmitFrame");
 
-  // No platform views to render; we're done.
+  // No platform views to render.
   if (self.flutterView == nil || (self.compositionOrder.empty() && !self.hadPlatformViews)) {
-    // No platform views to render but there is a Flutter view and therefore may have a resize
+    // No platform views to render but the FlutterView may need to be resized.
     if (self.flutterView != nil) {
       // If the raster thread isn't merged, resize the view on the platform thread and block until
       // complete.
