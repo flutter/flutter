@@ -352,6 +352,8 @@ typedef struct {
   bool is_slider;
   /// Whether the semantics node represents a keyboard key.
   bool is_keyboard_key;
+  /// Whether to block a11y focus for the semantics node.
+  bool is_accessibility_focus_blocked;
 } FlutterSemanticsFlags;
 
 typedef enum {

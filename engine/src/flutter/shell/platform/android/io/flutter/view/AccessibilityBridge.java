@@ -2275,7 +2275,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     IS_EXPANDED(1 << 27),
     HAS_SELECTED_STATE(1 << 28),
     HAS_REQUIRED_STATE(1 << 29),
-    IS_REQUIRED(1 << 30);
+    IS_REQUIRED(1 << 30),
+    IS_ACCESSIBILITY_FOCUS_BLOCKED(1 << 31);
 
     final int value;
 
@@ -2801,6 +2802,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       }
       if (hasFlag(Flag.IS_FOCUSABLE)) {
         return true;
+      }
+      if (hasFlag(Flag.IS_ACCESSIBILITY_FOCUS_BLOCKED)) {
+        return false;
       }
       // If not explicitly set as focusable, then use our legacy
       // algorithm. Once all focusable widgets have a Focus widget, then
