@@ -460,6 +460,8 @@ class SemanticsFlags {
       isLink: isLink ?? this.isLink,
       isSlider: isSlider ?? this.isSlider,
       isKeyboardKey: isKeyboardKey ?? this.isKeyboardKey,
+      isExpanded: isExpanded ?? this.isExpanded,
+      isRequired: isRequired ?? this.isRequired,
       isAccessibilityFocusBlocked: isAccessibilityFocusBlocked ?? this.isAccessibilityFocusBlocked,
     );
   }
