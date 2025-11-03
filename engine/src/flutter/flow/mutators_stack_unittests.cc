@@ -100,39 +100,39 @@ TEST(MutatorsStack, PushOpacity) {
 }
 
 TEST(MutatorsStack, PushPlatformViewClipRect) {
-    MutatorsStack stack;
-    auto rect = DlRect();
-    stack.PushPlatformViewClipRect(rect);
-    auto iter = stack.Bottom();
-    ASSERT_TRUE(iter->get()->GetType() == MutatorType::kBackdropClipRect);
-    ASSERT_TRUE(iter->get()->GetBackdropClipRect().rect == rect);
+  MutatorsStack stack;
+  auto rect = DlRect();
+  stack.PushPlatformViewClipRect(rect);
+  auto iter = stack.Bottom();
+  ASSERT_TRUE(iter->get()->GetType() == MutatorType::kBackdropClipRect);
+  ASSERT_TRUE(iter->get()->GetBackdropClipRect().rect == rect);
 }
 
 TEST(MutatorsStack, PushPlatformViewClipRRect) {
-    MutatorsStack stack;
-    auto rrect = DlRoundRect();
-    stack.PushPlatformViewClipRRect(rrect);
-    auto iter = stack.Bottom();
-    ASSERT_TRUE(iter->get()->GetType() == MutatorType::kBackdropClipRRect);
-    ASSERT_TRUE(iter->get()->GetBackdropClipRRect().rrect == rrect);
+  MutatorsStack stack;
+  auto rrect = DlRoundRect();
+  stack.PushPlatformViewClipRRect(rrect);
+  auto iter = stack.Bottom();
+  ASSERT_TRUE(iter->get()->GetType() == MutatorType::kBackdropClipRRect);
+  ASSERT_TRUE(iter->get()->GetBackdropClipRRect().rrect == rrect);
 }
 
 TEST(MutatorsStack, PushPlatformViewClipRSE) {
-    MutatorsStack stack;
-    auto rse = DlRoundSuperellipse();
-    stack.PushPlatformViewClipRSE(rse);
-    auto iter = stack.Bottom();
-    ASSERT_TRUE(iter->get()->GetType() == MutatorType::kBackdropClipRse);
-    ASSERT_TRUE(iter->get()->GetBackdropClipRSE().rse == rse);
+  MutatorsStack stack;
+  auto rse = DlRoundSuperellipse();
+  stack.PushPlatformViewClipRSE(rse);
+  auto iter = stack.Bottom();
+  ASSERT_TRUE(iter->get()->GetType() == MutatorType::kBackdropClipRse);
+  ASSERT_TRUE(iter->get()->GetBackdropClipRSE().rse == rse);
 }
 
 TEST(MutatorsStack, PushPlatformViewClipPath) {
-    MutatorsStack stack;
-    auto path = DlPath();
-    stack.PushPlatformViewClipPath(path);
-    auto iter = stack.Bottom();
-    ASSERT_TRUE(iter->get()->GetType() == MutatorType::kBackdropClipPath);
-    ASSERT_TRUE(iter->get()->GetBackdropClipPath().path == path);
+  MutatorsStack stack;
+  auto path = DlPath();
+  stack.PushPlatformViewClipPath(path);
+  auto iter = stack.Bottom();
+  ASSERT_TRUE(iter->get()->GetType() == MutatorType::kBackdropClipPath);
+  ASSERT_TRUE(iter->get()->GetBackdropClipPath().path == path);
 }
 
 TEST(MutatorsStack, PushBackdropFilter) {
