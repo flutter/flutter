@@ -62,6 +62,7 @@ class ImageDecoderImpeller final : public ImageDecoder {
   void Decode(fml::RefPtr<ImageDescriptor> descriptor,
               uint32_t target_width,
               uint32_t target_height,
+              int32_t destination_format,
               const ImageResult& result) override;
 
   static DecompressResult DecompressTexture(
