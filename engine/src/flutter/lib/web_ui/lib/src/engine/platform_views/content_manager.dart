@@ -121,7 +121,7 @@ class PlatformViewManager {
   /// The resulting DOM for the `contents` of a Platform View looks like this:
   ///
   /// ```html
-  /// <flt-platform-view id="flt-pv-VIEW_ID" slot="..." aria-hidden="true">
+  /// <flt-platform-view id="flt-pv-VIEW_ID" slot="..." inert>
   ///   <arbitrary-html-elements />
   /// </flt-platform-view-slot>
   /// ```
@@ -131,8 +131,8 @@ class PlatformViewManager {
   /// what `slot` tag will reveal this `contents`, **without modifying the returned
   /// html from the `factory` function**.
   ///
-  /// By default, platform views are hidden from screen readers (aria-hidden="true").
-  /// The semantics layer will remove this when a semantic node is created.
+  /// By default, platform views are made inert. The semantics layer will
+  /// remove this when a semantic node is created.
   DomElement renderContent(String viewType, int viewId, Object? params) {
     assert(
       knowsViewType(viewType),
