@@ -3782,6 +3782,21 @@ void main() {
         ..paragraph(),
     );
   });
+
+  testWidgets('RangeSlider does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: RangeSlider(values: const RangeValues(0, 1), onChanged: (_) {}),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RangeSlider)), Size.zero);
+  });
 }
 
 // A value indicator shape to log labelPainter text.
