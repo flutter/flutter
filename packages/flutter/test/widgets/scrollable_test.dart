@@ -117,7 +117,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: ScrollConfiguration(
-          behavior: const NoScrollbarBehavior(),
+          behavior: NoScrollbarBehavior(),
           child: SingleChildScrollView(hitTestBehavior: HitTestBehavior.translucent),
         ),
       ),
@@ -127,7 +127,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: ScrollConfiguration(
-          behavior: const NoScrollbarBehavior(),
+          behavior: NoScrollbarBehavior(),
           child: CustomScrollView(hitTestBehavior: HitTestBehavior.translucent),
         ),
       ),
