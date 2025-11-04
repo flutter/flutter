@@ -183,7 +183,8 @@ class PlatformView {
         std::unique_ptr<PointerDataPacket> packet) = 0;
 
     //--------------------------------------------------------------------------
-    /// @brief      Requests the delegate if an embedded view should accept
+    /// @brief      Requests the delegate if an embedded native view should
+    /// accept
     ///             gesture at a given touch location.
     ///
     /// @param[in]  view_id               The identifier of the flutter view
@@ -194,7 +195,7 @@ class PlatformView {
     /// @return     true if the embedded view should accept gesture; false
     /// otherwise.
     ///
-    virtual bool OnPlatformViewEmbeddedViewShouldAcceptGesture(
+    virtual bool OnPlatformViewEmbeddedNativeViewShouldAcceptGesture(
         int64_t view_id,
         const flutter::PointData& touch_began_location) = 0;
 
@@ -765,7 +766,7 @@ class PlatformView {
   /// @return     true if the embedded view should accept gesture; false
   /// otherwise.
   ///
-  bool EmbeddedViewShouldAcceptGesture(
+  bool EmbeddedNativeViewShouldAcceptGesture(
       int64_t view_id,
       const flutter::PointData& touch_began_location);
 

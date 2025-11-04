@@ -1221,12 +1221,12 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
   next_pointer_flow_id_++;
 }
 
-bool Shell::OnPlatformViewEmbeddedViewShouldAcceptGesture(
+bool Shell::OnPlatformViewEmbeddedNativeViewShouldAcceptGesture(
     int64_t view_id,
     const flutter::PointData& touch_began_location) {
   if (engine_) {
-    return engine_->EmbeddedViewShouldAcceptGesture(view_id,
-                                                    touch_began_location);
+    return engine_->EmbeddedNativeViewShouldAcceptGesture(view_id,
+                                                          touch_began_location);
   }
   return false;
 }

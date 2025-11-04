@@ -608,7 +608,7 @@ class Shell final : public PlatformView::Delegate,
   void OnPlatformViewDispatchPointerDataPacket(
       std::unique_ptr<PointerDataPacket> packet) override;
 
-  bool OnPlatformViewEmbeddedViewShouldAcceptGesture(
+  bool OnPlatformViewEmbeddedNativeViewShouldAcceptGesture(
       int64_t view_id,
       const flutter::PointData& touch_began_location) override;
 

@@ -395,7 +395,7 @@ void PlatformConfiguration::DispatchPointerDataPacket(
       tonic::DartInvoke(dispatch_pointer_data_packet_.Get(), {data_handle}));
 }
 
-bool PlatformConfiguration::EmbeddedViewShouldAcceptGesture(
+bool PlatformConfiguration::EmbeddedNativeViewShouldAcceptGesture(
     int64_t view_id,
     const flutter::PointData& touch_began_location) {
   std::shared_ptr<tonic::DartState> dart_state =

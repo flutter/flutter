@@ -830,7 +830,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
                                  uint64_t trace_flow_id);
 
   //----------------------------------------------------------------------------
-  /// @brief      Requests from the engine if an embedded view should accept
+  /// @brief      Requests from the engine if an embedded native view should
+  /// accept
   ///             gesture at a given touch location.
   ///
   ///
@@ -841,7 +842,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   /// @return     true if the embedded view should accept gesture; false
   /// otherwise.
   ///
-  bool EmbeddedViewShouldAcceptGesture(
+  bool EmbeddedNativeViewShouldAcceptGesture(
       int64_t view_id,
       const flutter::PointData& touch_began_location);
 

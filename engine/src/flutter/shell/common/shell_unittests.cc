@@ -143,7 +143,7 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
               (override));
 
   MOCK_METHOD(bool,
-              OnPlatformViewEmbeddedViewShouldAcceptGesture,
+              OnPlatformViewEmbeddedNativeViewShouldAcceptGesture,
               (int64_t view_id, const flutter::PointData& touch_began_location),
               (override));
 
