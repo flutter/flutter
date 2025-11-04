@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../dom.dart';
 import '../platform_views/content_manager.dart';
 import '../platform_views/slots.dart';
 import 'label_and_value.dart';
