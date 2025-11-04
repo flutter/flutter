@@ -261,11 +261,9 @@ void testMain() {
       test('hides platform view from accessibility when isHidden is true', () {
         final DomElement wrapper = contentManager.renderContent(viewType, viewId, null);
 
-        // Remove inert to simulate semantic node making it accessible
         wrapper.removeAttribute('inert');
         expect(wrapper.hasAttribute('inert'), isFalse);
 
-        // Now hide it again
         contentManager.updatePlatformViewAccessibility(viewId, true);
 
         expect(
@@ -284,7 +282,6 @@ void testMain() {
           reason: 'Platform view should start as inert',
         );
 
-        // Make it accessible
         contentManager.updatePlatformViewAccessibility(viewId, false);
 
         expect(
@@ -297,21 +294,17 @@ void testMain() {
       test('handles toggle between hidden and accessible states', () {
         final DomElement wrapper = contentManager.renderContent(viewType, viewId, null);
 
-        // Make accessible
         contentManager.updatePlatformViewAccessibility(viewId, false);
         expect(wrapper.hasAttribute('inert'), isFalse);
 
-        // Hide again
         contentManager.updatePlatformViewAccessibility(viewId, true);
         expect(wrapper.hasAttribute('inert'), isTrue);
 
-        // Make accessible again
         contentManager.updatePlatformViewAccessibility(viewId, false);
         expect(wrapper.hasAttribute('inert'), isFalse);
       });
 
       test('does nothing when viewId does not exist', () {
-        // Should not throw
         expect(() => contentManager.updatePlatformViewAccessibility(999, true), returnsNormally);
         expect(() => contentManager.updatePlatformViewAccessibility(999, false), returnsNormally);
       });
