@@ -107,14 +107,37 @@ SkAlphaType ChooseCompatibleAlphaType(SkAlphaType type) {
   return type;
 }
 
-SkImageInfo CreateImageInfo(const SkImageInfo& base_image_info,
-                            const SkISize& decode_size,
-                            bool supports_wide_gamut) {
+fml::StatusOr<SkColorType> ChooseCompatibleColorType(
+    ImageDecoder::PixelFormat format) {
+  switch (format) {
+    case ImageDecoder::PixelFormat::kR32G32B32A32Float:
+      return kRGBA_F32_SkColorType;
+    default:
+      return {{fml::StatusCode::kInvalidArgument,
+               "unsupported target pixel format"}};
+  }
+}
+
+fml::StatusOr<SkImageInfo> CreateImageInfo(
+    const SkImageInfo& base_image_info,
+    const SkISize& decode_size,
+    bool supports_wide_gamut,
+    ImageDecoder::PixelFormat target_format) {
   const bool is_wide_gamut =
       supports_wide_gamut ? IsWideGamut(base_image_info.colorSpace()) : false;
   SkAlphaType alpha_type =
       ChooseCompatibleAlphaType(base_image_info.alphaType());
-  if (is_wide_gamut) {
+  if (target_format != ImageDecoder::PixelFormat::kOptimal) {
+    fml::StatusOr<SkColorType> target_skia_color_type =
+        ChooseCompatibleColorType(target_format);
+    if (!target_skia_color_type.ok()) {
+      return target_skia_color_type.status();
+    }
+    return base_image_info.makeWH(decode_size.width(), decode_size.height())
+        .makeColorType(target_skia_color_type.value())
+        .makeAlphaType(alpha_type)
+        .makeColorSpace(SkColorSpace::MakeSRGB());
+  } else if (is_wide_gamut) {
     SkColorType color_type = alpha_type == SkAlphaType::kOpaque_SkAlphaType
                                  ? kBGR_101010x_XR_SkColorType
                                  : kRGBA_F16_SkColorType;
@@ -122,11 +145,12 @@ SkImageInfo CreateImageInfo(const SkImageInfo& base_image_info,
         .makeColorType(color_type)
         .makeAlphaType(alpha_type)
         .makeColorSpace(SkColorSpace::MakeSRGB());
+  } else {
+    return base_image_info.makeWH(decode_size.width(), decode_size.height())
+        .makeColorType(ChooseCompatibleColorType(base_image_info.colorType()))
+        .makeAlphaType(alpha_type)
+        .makeColorSpace(SkColorSpace::MakeSRGB());
   }
-  return base_image_info.makeWH(decode_size.width(), decode_size.height())
-      .makeColorType(ChooseCompatibleColorType(base_image_info.colorType()))
-      .makeAlphaType(alpha_type)
-      .makeColorSpace(SkColorSpace::MakeSRGB());
 }
 
 struct DecodedBitmap {
@@ -253,6 +277,8 @@ std::optional<impeller::PixelFormat> ImageDecoderImpeller::ToPixelFormat(
       return impeller::PixelFormat::kR16G16B16A16Float;
     case kBGR_101010x_XR_SkColorType:
       return impeller::PixelFormat::kB10G10R10XR;
+    case kRGBA_F32_SkColorType:
+      return impeller::PixelFormat::kR32G32B32A32Float;
     default:
       return std::nullopt;
   }
@@ -310,19 +336,23 @@ ImageDecoderImpeller::DecompressResult ImageDecoderImpeller::DecompressTexture(
   }
 
   const SkImageInfo& base_image_info = descriptor->image_info();
-  const SkImageInfo image_info =
-      CreateImageInfo(base_image_info, decode_size, supports_wide_gamut);
+  const fml::StatusOr<SkImageInfo> image_info = CreateImageInfo(
+      base_image_info, decode_size, supports_wide_gamut, options.target_format);
 
-  if (!ToPixelFormat(image_info.colorType()).has_value()) {
+  if (!image_info.ok()) {
+    return {.decode_error = std::string(image_info.status().message())};
+  }
+
+  if (!ToPixelFormat(image_info.value().colorType()).has_value()) {
     std::string decode_error =
         std::format("Codec pixel format is not supported (SkColorType={})",
-                    static_cast<int>(image_info.colorType()));
+                    static_cast<int>(image_info.value().colorType()));
     FML_DLOG(ERROR) << decode_error;
     return {.decode_error = decode_error};
   }
 
-  DecodedBitmap decoded =
-      DecodeToBitmap(descriptor, image_info, base_image_info, allocator);
+  DecodedBitmap decoded = DecodeToBitmap(descriptor, image_info.value(),
+                                         base_image_info, allocator);
   if (!decoded.error.empty()) {
     return {.decode_error = decoded.error};
   }
@@ -351,7 +381,8 @@ ImageDecoderImpeller::DecompressResult ImageDecoderImpeller::DecompressTexture(
   std::optional<SkImageInfo> resize_info =
       bitmap->dimensions() == target_size
           ? std::nullopt
-          : std::optional<SkImageInfo>(image_info.makeDimensions(target_size));
+          : std::optional<SkImageInfo>(
+                image_info.value().makeDimensions(target_size));
 
   fml::StatusOr<ImageDecoderImpeller::ImageInfo> decoded_image_info =
       ToImageInfo(bitmap->info());
