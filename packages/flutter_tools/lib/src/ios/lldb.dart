@@ -10,7 +10,7 @@ import 'dart:async';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
-import '../convert.dart';
+import '../base/utils.dart';
 
 /// LLDB is the default debugger in Xcode on macOS. Once the application has
 /// launched on a physical iOS device, you can attach to it using LLDB.
@@ -148,8 +148,7 @@ return False
       );
 
       final StreamSubscription<String> stdoutSubscription = _lldbProcess!.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
+          .transform(utf8LineDecoder)
           .listen((String line) {
             if (_isAttached && !_ignoreLog(line)) {
               // Only forwards logs after LLDB is attached. All logs before then are part of the
@@ -163,8 +162,7 @@ return False
           });
 
       final StreamSubscription<String> stderrSubscription = _lldbProcess!.stderr
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
+          .transform(utf8LineDecoder)
           .listen((String line) {
             _monitorError(line);
             if (_isAttached && !_ignoreLog(line)) {
