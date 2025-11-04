@@ -329,6 +329,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   // up/down keys.
   static const int _pageSize = 4;
 
+  late bool _hasFocus;
+
   TextEditingController? _internalTextEditingController;
   TextEditingController get _textEditingController {
     return widget.textEditingController ??
@@ -337,8 +339,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   FocusNode? _internalFocusNode;
   FocusNode get _focusNode {
-    return widget.focusNode ??
-        (_internalFocusNode ??= FocusNode()..addListener(_updateOptionsViewVisibility));
+    return widget.focusNode ?? (_internalFocusNode ??= FocusNode()..addListener(_onFocusChange));
   }
 
   late final Map<Type, CallbackAction<Intent>> _actionMap = <Type, CallbackAction<Intent>>{
@@ -408,6 +409,13 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   bool get _canShowOptionsView => _focusNode.hasFocus && _options.isNotEmpty;
 
+  void _onFocusChange() {
+    if (_focusNode.hasFocus != _hasFocus) {
+      _hasFocus = _focusNode.hasFocus;
+      _updateOptionsViewVisibility();
+    }
+  }
+
   void _updateOptionsViewVisibility() {
     if (_canShowOptionsView) {
       _optionsViewController.show();
@@ -476,12 +484,13 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     }
     _selection = nextSelection;
     final String selectionString = widget.displayStringForOption(nextSelection);
+    _lastFieldText = selectionString;
     _textEditingController.value = TextEditingValue(
       selection: TextSelection.collapsed(offset: selectionString.length),
       text: selectionString,
     );
     widget.onSelected?.call(nextSelection);
-    _optionsViewController.hide();
+    _hideOptions(const DismissIntent());
   }
 
   void _updateHighlight(int nextIndex) {
@@ -606,7 +615,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
         widget.textEditingController ??
         (_internalTextEditingController = TextEditingController.fromValue(widget.initialValue));
     initialController.addListener(_onChangedField);
-    widget.focusNode?.addListener(_updateOptionsViewVisibility);
+    _hasFocus = _focusNode.hasFocus;
+    widget.focusNode?.addListener(_onFocusChange);
   }
 
   @override
