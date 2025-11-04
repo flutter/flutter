@@ -14,12 +14,6 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 class SkwasmRenderer extends Renderer {
-  final OffscreenSurfaceProvider _surfaceProvider = OffscreenSurfaceProvider(
-    OffscreenCanvasProvider(),
-    (OffscreenCanvasProvider canvasProvider) => SkwasmSurface(canvasProvider),
-  );
-  late final SkwasmSurface surface = _surfaceProvider.createSurface() as SkwasmSurface;
-
   bool get isMultiThreaded => skwasmIsMultiThreaded();
 
   SkwasmPathConstructors pathConstructors = SkwasmPathConstructors();
@@ -323,11 +317,10 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  FutureOr<void> initialize() {
+  FutureOr<void> initialize() async {
     rasterizer = OffscreenCanvasRasterizer(
       (OffscreenCanvasProvider canvasProvider) => SkwasmSurface(canvasProvider),
     );
-    pictureToImageSurface = rasterizer.createPictureToImageSurface();
     return super.initialize();
   }
 
@@ -453,7 +446,7 @@ class SkwasmRenderer extends Renderer {
         imageSource,
         imageSource.width,
         imageSource.height,
-        surface.handle,
+        (pictureToImageSurface as SkwasmSurface).handle,
       ),
     );
   }
@@ -474,7 +467,12 @@ class SkwasmRenderer extends Renderer {
       ))).toJSAnyShallow;
     }
     return SkwasmImage(
-      imageCreateFromTextureSource(textureSource as JSObject, width, height, surface.handle),
+      imageCreateFromTextureSource(
+        textureSource as JSObject,
+        width,
+        height,
+        (pictureToImageSurface as SkwasmSurface).handle,
+      ),
     );
   }
 
@@ -533,6 +531,8 @@ class SkwasmRenderer extends Renderer {
     rasterizer = OffscreenCanvasRasterizer(
       (OffscreenCanvasProvider canvasProvider) => SkwasmSurface(canvasProvider),
     );
-    pictureToImageSurface = rasterizer.createPictureToImageSurface();
   }
+
+  @override
+  Surface get pictureToImageSurface => (rasterizer as OffscreenCanvasRasterizer).offscreenSurface;
 }

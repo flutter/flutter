@@ -45,7 +45,7 @@ abstract class Renderer {
   late Rasterizer rasterizer;
 
   /// A surface used specifically for `Picture.toImage`.
-  late Surface pictureToImageSurface;
+  Surface get pictureToImageSurface;
 
   /// Resets the [Rasterizer] to the default value. Used in tests.
   @visibleForTesting

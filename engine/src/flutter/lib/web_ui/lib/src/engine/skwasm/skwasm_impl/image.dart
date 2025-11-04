@@ -80,7 +80,7 @@ class SkwasmImage extends SkwasmObjectWrapper<RawImage> implements ui.Image {
       context.transferFromImageBitmap(null);
       return ByteData.view(arrayBuffer.toDart);
     } else {
-      return (renderer as SkwasmRenderer).surface.rasterizeImage(this, format);
+      return renderer.pictureToImageSurface.rasterizeImage(this, format);
     }
   }
 
