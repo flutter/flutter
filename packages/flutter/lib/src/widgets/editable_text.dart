@@ -4486,17 +4486,12 @@ class EditableTextState extends State<EditableText>
           ? MediaQuery.maybeLetterSpacingOverrideOf(context)
           : null;
       final double? wordSpacing = mounted ? MediaQuery.maybeWordSpacingOverrideOf(context) : null;
-      renderEditable.text =
-          lineHeightScaleFactor != null || letterSpacing != null || wordSpacing != null
-          ? _OverridingTextStyleTextSpan(
-              overrideTextStyle: TextStyle(
-                height: lineHeightScaleFactor,
-                letterSpacing: letterSpacing,
-                wordSpacing: wordSpacing,
-              ),
-              textSpan: buildTextSpan(),
-            )
-          : buildTextSpan();
+      renderEditable.text = _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides(
+        lineHeightScaleFactor: lineHeightScaleFactor,
+        letterSpacing: letterSpacing,
+        wordSpacing: wordSpacing,
+        textSpan: buildTextSpan(),
+      );
     } catch (exception, stack) {
       FlutterError.reportError(
         FlutterErrorDetails(
@@ -5817,18 +5812,12 @@ class EditableTextState extends State<EditableText>
                                     startHandleLayerLink: _startHandleLayerLink,
                                     endHandleLayerLink: _endHandleLayerLink,
                                     inlineSpan:
-                                        lineHeightScaleFactor != null ||
-                                            letterSpacing != null ||
-                                            wordSpacing != null
-                                        ? _OverridingTextStyleTextSpan(
-                                            overrideTextStyle: TextStyle(
-                                              height: lineHeightScaleFactor,
-                                              letterSpacing: letterSpacing,
-                                              wordSpacing: wordSpacing,
-                                            ),
-                                            textSpan: buildTextSpan(),
-                                          )
-                                        : buildTextSpan(),
+                                        _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides(
+                                          lineHeightScaleFactor: lineHeightScaleFactor,
+                                          letterSpacing: letterSpacing,
+                                          wordSpacing: wordSpacing,
+                                          textSpan: buildTextSpan(),
+                                        ),
                                     value: _value,
                                     cursorColor: _cursorColor,
                                     backgroundCursorColor: widget.backgroundCursorColor,
@@ -6787,29 +6776,45 @@ class _EditableTextTapUpOutsideAction extends ContextAction<EditableTextTapUpOut
   }
 }
 
-/// A [TextSpan] that overrides the style of its children with a given
-/// [TextStyle].
-// When changes are made to this class, the equivalent API in text.dart
+/// A utility class for overriding the text styles of a [TextSpan] tree.
+// When changes are made to this class, the equivalent API in editable_text.dart
 // must also be updated.
 // TODO(Renzo-Olivares): Remove after investigating a solution for overriding all
 // styles for children in an [InlineSpan] tree, see: https://github.com/flutter/flutter/issues/177952.
-class _OverridingTextStyleTextSpan extends TextSpan {
-  _OverridingTextStyleTextSpan({required TextStyle overrideTextStyle, required TextSpan textSpan})
-    : super(
-        text: textSpan.text,
-        children: textSpan.children?.map((InlineSpan child) {
-          if (child is TextSpan && child.runtimeType == TextSpan) {
-            return _OverridingTextStyleTextSpan(
-              overrideTextStyle: overrideTextStyle,
-              textSpan: child,
-            );
-          }
-          return child;
-        }).toList(),
-        recognizer: textSpan.recognizer,
-        semanticsLabel: textSpan.semanticsLabel,
-        locale: textSpan.locale,
-        spellOut: textSpan.spellOut,
-        style: textSpan.style?.merge(overrideTextStyle) ?? overrideTextStyle,
-      );
+class _OverridingTextStyleTextSpanUtils {
+  static TextSpan applyTextSpacingOverrides({
+    double? lineHeightScaleFactor,
+    double? letterSpacing,
+    double? wordSpacing,
+    required TextSpan textSpan,
+  }) {
+    if (lineHeightScaleFactor == null && letterSpacing == null && wordSpacing == null) {
+      return textSpan;
+    }
+    return _applyTextStyleOverrides(
+      TextStyle(
+        height: lineHeightScaleFactor,
+        letterSpacing: letterSpacing,
+        wordSpacing: wordSpacing,
+      ),
+      textSpan,
+    );
+  }
+
+  static TextSpan _applyTextStyleOverrides(TextStyle overrideTextStyle, TextSpan textSpan) {
+    return TextSpan(
+      text: textSpan.text,
+      children: textSpan.children?.map((InlineSpan child) {
+        if (child is TextSpan && child.runtimeType == TextSpan) {
+          return _applyTextStyleOverrides(overrideTextStyle, child);
+        }
+        return child;
+      }).toList(),
+      recognizer: textSpan.recognizer,
+      semanticsLabel: textSpan.semanticsLabel,
+      locale: textSpan.locale,
+      spellOut: textSpan.spellOut,
+      style: textSpan.style?.merge(overrideTextStyle) ?? overrideTextStyle,
+    );
+  }
 }
