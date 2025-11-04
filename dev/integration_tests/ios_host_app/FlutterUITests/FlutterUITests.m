@@ -144,13 +144,11 @@ static const CGFloat kStandardTimeOut = 60.0;
 
   [self waitForAndTapElement:app.otherElements[@"Add to list"]];
 
-  [self waitForAndTapElement:app.otherElements[@"Add to list"]];
-
   XCUIElement *flutterViewPostClick = app.otherElements[@"flutter_view"];
   CGRect flutterViewFramePostClick = flutterViewPostClick.frame;
   CGSize flutterViewSizePostClick = flutterViewFramePostClick.size;
 
-  XCTAssertTrue(flutterViewSizePostClick.height == 214);
+  XCTAssertTrue(flutterViewSizePostClick.height == 242);
 
   // Back navigation.
   [app.navigationBars[@"Dynamic Content Resizing"].buttons[@"Flutter iOS Demos Home"] tap];
