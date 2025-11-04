@@ -619,18 +619,27 @@ class _AndroidMotionEventConverter {
     final int pointerIdx = pointers.indexOf(event.pointer);
     final int numPointers = pointers.length;
 
-    // This value must match the value in engine's FlutterView.java.
+    // These values must match the values in the engine's AndroidTouchProcessor.java.
     // This flag indicates whether the original Android pointer events were batched together.
     const int kPointerDataFlagBatched = 1;
+    // This flag indicates that this event is part of a group of events representing a change
+    // that affects multiple pointers.
+    const int kPointerDataFlagMultiple = 2;
 
     // Android MotionEvent objects can batch information on multiple pointers.
     // Flutter breaks these such batched events into multiple PointerEvent objects.
     // When there are multiple active pointers we accumulate the information for all pointers
     // as we get PointerEvents, and only send it to the embedded Android view when
     // we see the last pointer. This way we achieve the same batching as Android.
-    if (event.platformData == kPointerDataFlagBatched ||
-        (isSinglePointerAction(event) && pointerIdx < numPointers - 1)) {
+    final int platformDataFlag = event.platformData & 0xff;
+    if (platformDataFlag == kPointerDataFlagBatched) {
       return null;
+    }
+    if (platformDataFlag == kPointerDataFlagMultiple) {
+      final int originalPointerCount = event.platformData >> 8;
+      if (pointerIdx != originalPointerCount - 1) {
+        return null;
+      }
     }
 
     final int? action = switch (event) {
@@ -697,9 +706,6 @@ class _AndroidMotionEventConverter {
       },
     );
   }
-
-  bool isSinglePointerAction(PointerEvent event) =>
-      event is! PointerDownEvent && event is! PointerUpEvent;
 }
 
 class _CreationParams {
