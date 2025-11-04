@@ -16,8 +16,21 @@ class ScrollEndNotificationApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: ScrollEndNotificationExample());
+    return const MaterialApp(
+      home: ScrollConfiguration(
+        // TODO(camsim99): Figure out how to handle nested Scrollbars in the long run.
+        behavior: NoScrollbarBehavior(),
+        child: ScrollEndNotificationExample(),
+      ),
+    );
   }
+}
+
+class NoScrollbarBehavior extends ScrollBehavior {
+  const NoScrollbarBehavior();
+
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
 }
 
 class ScrollEndNotificationExample extends StatefulWidget {

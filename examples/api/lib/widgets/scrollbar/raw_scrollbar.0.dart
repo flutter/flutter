@@ -14,12 +14,23 @@ class RawScrollbarExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('RawScrollbar Sample')),
-        body: const Center(child: RawScrollbarExample()),
+      home: ScrollConfiguration(
+        // TODO(camsim99): Figure out how to handle nested Scrollbars in the long run.
+        behavior: const NoScrollbarBehavior(),
+        child: Scaffold(
+          appBar: AppBar(title: const Text('RawScrollbar Sample')),
+          body: const Center(child: RawScrollbarExample()),
+        ),
       ),
     );
   }
+}
+
+class NoScrollbarBehavior extends ScrollBehavior {
+  const NoScrollbarBehavior();
+
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
 }
 
 class RawScrollbarExample extends StatefulWidget {
