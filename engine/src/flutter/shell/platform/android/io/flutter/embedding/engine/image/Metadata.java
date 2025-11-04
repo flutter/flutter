@@ -5,6 +5,7 @@
 package io.flutter.embedding.engine.image;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.Build;
@@ -20,7 +21,7 @@ class Metadata {
   int width;
   int height;
   int rotation;
-  String mimeType;
+  @Nullable String mimeType;
   int orientation;
   int originalHeight;
   int originalWidth;
@@ -52,6 +53,6 @@ class Metadata {
    * @return True if the image is HEIF, false otherwise.
    */
   boolean isHeif() {
-    return mimeType.equals("image/heif");
+    return "image/heif".equals(mimeType);
   }
 }
