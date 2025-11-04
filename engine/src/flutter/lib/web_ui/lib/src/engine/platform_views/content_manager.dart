@@ -161,11 +161,6 @@ class PlatformViewManager {
       _ensureContentCorrectlySized(content, viewType);
       wrapper.append(content);
 
-      // By default, hide platform views from screen readers and keyboard navigation.
-      // The semantic layer will remove this when a semantic node is created.
-      // This ensures ExcludeSemantics works correctly on web.
-      // We use 'inert' attribute which prevents focus and hides from accessibility tree.
-      // See: https://github.com/flutter/flutter/issues/171948
       wrapper.setAttribute('inert', '');
 
       return wrapper;
