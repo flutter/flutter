@@ -4,6 +4,7 @@
 
 package io.flutter.embedding.engine.loader;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
