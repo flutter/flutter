@@ -27,76 +27,89 @@ void main() {
     return current.path;
   }();
 
+  /// Verify that the platform specified in the target name matches one of the
+  /// platforms defined in the platform_properties section.
+  void checkTargetPlatform(String targetName, _CiYaml ciYaml) {
+    final String platformName = targetName.split(' ').first.toLowerCase();
+    expect(ciYaml.platforms, contains(platformName));
+  }
+
   group('framework', () {
-    final List<_CiYamlTarget> targets = _CiYamlTarget.parseAll(p.join(flutterRoot, '.ci.yaml'));
+    final _CiYaml ciYaml = _CiYaml.parse(p.join(flutterRoot, '.ci.yaml'));
 
-    for (final _CiYamlTarget target in targets) {
-      if (target.runIf == null || target.runIf!.isEmpty) {
-        continue;
-      }
-
-      setUp(() {
-        printOnFailure(target.span.message('One or more errors occurred validating'));
-      });
-
+    for (final _CiYamlTarget target in ciYaml.targets) {
       group(target.name, () {
-        test('must include .ci.yaml', () {
-          expect(
-            target.runIf,
-            contains('.ci.yaml'),
-            reason: '.ci.yaml inclusion means changes to the runIfs will trigger presubmit tests.',
-          );
+        setUp(() {
+          printOnFailure(target.span.message('One or more errors occurred validating'));
         });
 
-        test('must include DEPS', () {
-          expect(
-            target.runIf,
-            contains('DEPS'),
-            reason: 'DEPS updates (including the Dart SDK) mean presubmit tests must be run.',
-          );
+        test('validate platform name', () {
+          checkTargetPlatform(target.name, ciYaml);
         });
 
-        test('must include the engine sources', () {
-          expect(
-            target.runIf,
-            contains('engine/**'),
-            reason: 'Engine updates means framework presubmit tests must be run.',
-          );
-        });
+        if (target.runIf != null && target.runIf!.isNotEmpty) {
+          test('must include .ci.yaml', () {
+            expect(
+              target.runIf,
+              contains('.ci.yaml'),
+              reason:
+                  '.ci.yaml inclusion means changes to the runIfs will trigger presubmit tests.',
+            );
+          });
+
+          test('must include DEPS', () {
+            expect(
+              target.runIf,
+              contains('DEPS'),
+              reason: 'DEPS updates (including the Dart SDK) mean presubmit tests must be run.',
+            );
+          });
+
+          test('must include the engine sources', () {
+            expect(
+              target.runIf,
+              contains('engine/**'),
+              reason: 'Engine updates means framework presubmit tests must be run.',
+            );
+          });
+        }
       });
     }
   });
 
   group('engine', () {
-    final List<_CiYamlTarget> targets = _CiYamlTarget.parseAll(
+    final _CiYaml ciYaml = _CiYaml.parse(
       p.join(flutterRoot, 'engine', 'src', 'flutter', '.ci.yaml'),
     );
 
-    for (final _CiYamlTarget target in targets) {
-      if (target.runIf == null || target.runIf!.isEmpty) {
-        continue;
-      }
-
-      setUp(() {
-        printOnFailure(target.span.message('One or more errors occurred validating'));
-      });
-
+    for (final _CiYamlTarget target in ciYaml.targets) {
       group(target.name, () {
-        test('must include .ci.yaml', () {
-          expect(
-            target.runIf,
-            contains('engine/src/flutter/.ci.yaml'),
-            reason: '.ci.yaml inclusion means changes to the runIfs will trigger presubmit tests.',
-          );
+        setUp(() {
+          printOnFailure(target.span.message('One or more errors occurred validating'));
         });
 
-        test('must include DEPS', () {
-          expect(
-            target.runIf,
-            contains('DEPS'),
-            reason: 'DEPS updates (including the Dart SDK) mean presubmit tests must be run.',
-          );
+        test('validate platform name', () {
+          checkTargetPlatform(target.name, ciYaml);
         });
+
+        if (target.runIf != null && target.runIf!.isNotEmpty) {
+          test('must include .ci.yaml', () {
+            expect(
+              target.runIf,
+              contains('engine/src/flutter/.ci.yaml'),
+              reason:
+                  '.ci.yaml inclusion means changes to the runIfs will trigger presubmit tests.',
+            );
+          });
+
+          test('must include DEPS', () {
+            expect(
+              target.runIf,
+              contains('DEPS'),
+              reason: 'DEPS updates (including the Dart SDK) mean presubmit tests must be run.',
+            );
+          });
+        }
       });
     }
   });
@@ -136,20 +149,6 @@ final class _CiYamlTarget {
     );
   }
 
-  /// Parses a list of targets from the provided `.ci.yaml` file [path].
-  static List<_CiYamlTarget> parseAll(String path) {
-    final YamlDocument yamlDoc = loadYamlDocument(
-      io.File(path).readAsStringSync(),
-      sourceUrl: Uri.parse(path),
-    );
-
-    final YamlMap root = yamlDoc.contents as YamlMap;
-    final YamlList targets = root['targets'] as YamlList;
-    return targets.nodes.map((YamlNode node) {
-      return _CiYamlTarget.fromYamlMap(node as YamlMap);
-    }).toList();
-  }
-
   /// Name of the target.
   final String name;
 
@@ -158,4 +157,29 @@ final class _CiYamlTarget {
 
   /// Which lines were present in a `runIf` block, if any.
   final List<String>? runIf;
+}
+
+final class _CiYaml {
+  _CiYaml({required this.targets, required this.platforms});
+
+  final List<_CiYamlTarget> targets;
+  final Set<String> platforms;
+
+  /// Parses a list of targets from the provided `.ci.yaml` file [path].
+  static _CiYaml parse(String path) {
+    final YamlDocument yamlDoc = loadYamlDocument(
+      io.File(path).readAsStringSync(),
+      sourceUrl: Uri.parse(path),
+    );
+
+    final YamlMap root = yamlDoc.contents as YamlMap;
+    final YamlList yamlTargets = root['targets'] as YamlList;
+    final List<_CiYamlTarget> targets = yamlTargets.nodes.map((YamlNode node) {
+      return _CiYamlTarget.fromYamlMap(node as YamlMap);
+    }).toList();
+
+    final YamlMap yamlPlatforms = root['platform_properties'] as YamlMap;
+    final Set<String> platforms = Set<String>.from(yamlPlatforms.keys.cast<String>());
+    return _CiYaml(targets: targets, platforms: platforms);
+  }
 }
