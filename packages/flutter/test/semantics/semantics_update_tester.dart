@@ -8,13 +8,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
-  @override
-  ui.SemanticsUpdateBuilder createSemanticsUpdateBuilder() {
-    return SemanticsUpdateBuilderSpy();
-  }
-}
-
 class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilder {
   final SemanticsUpdateBuilder _builder = ui.SemanticsUpdateBuilder();
 
@@ -59,6 +52,7 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
     SemanticsRole role = SemanticsRole.none,
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+    ui.SemanticsHitTestBehavior hitTestBehavior = ui.SemanticsHitTestBehavior.defer,
     required ui.SemanticsInputType inputType,
     required ui.Locale? locale,
   }) {
