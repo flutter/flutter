@@ -77,6 +77,9 @@ void PlatformConfiguration::DidCreateIsolate() {
   dispatch_pointer_data_packet_.Set(
       tonic::DartState::Current(),
       Dart_GetField(library, tonic::ToDart("_dispatchPointerDataPacket")));
+  // The embedded platform view (e.g. UIView on iOS) is called "platform view"
+  // on framework side, but "embedded view" on engine side. On the other hand,
+  // "platform view" refers to the whole flutter view on engine side.
   embedded_view_should_accept_gesture_.Set(
       tonic::DartState::Current(),
       Dart_GetField(library,
@@ -406,6 +409,9 @@ bool PlatformConfiguration::EmbeddedViewShouldAcceptGesture(
       embedded_view_should_accept_gesture_.Get(),
       {tonic::ToDart(view_id), tonic::ToDart(touch_began_location.x),
        tonic::ToDart(touch_began_location.y)});
+  if (tonic::CheckAndHandleError(dart_result)) {
+    return false;
+  }
   return tonic::DartConverter<bool>::FromDart(dart_result);
 }
 
