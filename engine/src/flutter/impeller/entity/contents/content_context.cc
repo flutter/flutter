@@ -18,6 +18,7 @@
 #include "impeller/entity/entity.h"
 #include "impeller/entity/render_target_cache.h"
 #include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/pipeline.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_target.h"
@@ -229,6 +230,7 @@ struct ContentContext::Pipelines {
   Variants<BlendScreenPipeline> blend_screen;
   Variants<BlendSoftLightPipeline> blend_softlight;
   Variants<BorderMaskBlurPipeline> border_mask_blur;
+  Variants<CirclePipeline> circle;
   Variants<ClipPipeline> clip;
   Variants<ColorMatrixColorFilterPipeline> color_matrix_color_filter;
   Variants<ConicalGradientFillConicalPipeline> conical_gradient_fill;
@@ -628,6 +630,7 @@ ContentContext::ContentContext(
     pipelines_->texture.CreateDefault(*context_, options);
     pipelines_->fast_gradient.CreateDefault(*context_, options);
     pipelines_->line.CreateDefault(*context_, options);
+    pipelines_->circle.CreateDefault(*context_, options);
 
     if (context_->GetCapabilities()->SupportsSSBO()) {
       pipelines_->linear_gradient_ssbo_fill.CreateDefault(*context_, options);
@@ -1494,6 +1497,11 @@ PipelineRef ContentContext::GetDrawVerticesUberPipeline(
   } else {
     return GetPipeline(this, pipelines_->vertices_uber_2_, opts);
   }
+}
+
+PipelineRef ContentContext::GetCirclePipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->circle, opts);
 }
 
 PipelineRef ContentContext::GetLinePipeline(ContentContextOptions opts) const {
