@@ -47,8 +47,10 @@ class SemanticPlatformView extends SemanticRole {
         setAttribute('aria-owns', getPlatformViewDomId(platformViewId));
       }
 
-      final bool isHidden = semanticsObject.flags.isHidden;
-      PlatformViewManager.instance.updatePlatformViewAccessibility(platformViewId, isHidden);
+      PlatformViewManager.instance.updatePlatformViewAccessibility(
+        platformViewId,
+        semanticsObject.flags.isHidden,
+      );
     } else {
       removeAttribute('aria-owns');
     }
