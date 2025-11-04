@@ -26,6 +26,9 @@ class WidgetPreviewAnalytics {
   /// The analytics event tracking widget preview reload times.
   static const kPreviewReloadTime = 'preview-reload-time';
 
+  /// The analytics event tracking actual launches of the widget preview environment.
+  static const kPreviewerConnected = 'previewer-connected';
+
   /// Provided as the label to [kLaunchTime] events if the widget preview scaffold project was
   /// generated as part of the widget previewer starting up.
   static const kScaffoldGeneratedLabel = 'scaffold-generated';
@@ -51,6 +54,15 @@ class WidgetPreviewAnalytics {
         elapsedMilliseconds: _launchTimer.elapsedMilliseconds,
         label: _launchIncludedProjectGeneration ? kScaffoldGeneratedLabel : null,
       ),
+    );
+  }
+
+  /// Send an analytics event reporting that the widget preview environment has loaded successfully.
+  void reportPreviewerConnected() {
+    analytics.send(
+      // TODO(bkonyi): we should add a dedicated event type in unified_analytics, but this
+      // works as a temporary solution.
+      Event.timing(workflow: kWorkflow, variableName: kPreviewerConnected, elapsedMilliseconds: 0),
     );
   }
 
