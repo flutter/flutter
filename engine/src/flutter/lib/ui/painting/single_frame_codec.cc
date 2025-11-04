@@ -13,11 +13,11 @@ SingleFrameCodec::SingleFrameCodec(
     const fml::RefPtr<ImageDescriptor>& descriptor,
     uint32_t target_width,
     uint32_t target_height,
-    int32_t destination_format)
+    ImageDecoder::PixelFormat target_format)
     : descriptor_(descriptor),
       target_width_(target_width),
       target_height_(target_height),
-      destination_format_(destination_format) {}
+      target_format_(target_format) {}
 
 SingleFrameCodec::~SingleFrameCodec() = default;
 
@@ -75,7 +75,7 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
       descriptor_,
       {.target_width = target_width_,
        .target_height = target_height_,
-       .destination_format = destination_format_},
+       .target_format = target_format_},
       [raw_codec_ref](const auto& image, const auto& decode_error) {
         std::unique_ptr<fml::RefPtr<SingleFrameCodec>> codec_ref(raw_codec_ref);
         fml::RefPtr<SingleFrameCodec> codec(std::move(*codec_ref));
