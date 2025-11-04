@@ -581,8 +581,7 @@ static BOOL _preparedOnce = NO;
 }
 
 - (UIView*)hitTest:(CGPoint)point withEvent:(UIEvent*)event {
-  if (_blockingPolicy == FlutterPlatformViewGestureRecognizersBlockingPolicyHitTest &&
-      event.type == UIEventTypeTouches) {
+  if (_blockingPolicy == FlutterPlatformViewGestureRecognizersBlockingPolicyHitTest) {
     CGPoint pointInFlutterView = [self convertPoint:point toView:self.flutterViewController.view];
     // Block gesture if the framework instructed so (after performing its own hitTest).
     if (![self.flutterViewController

@@ -422,6 +422,12 @@ void _invoke3<A1, A2, A3>(
   }
 }
 
+/// Invokes [callback] inside the given [zone] passing it [arg1], [arg2], and [arg3],
+/// and returns a nullable result of the specified type.
+///
+/// The 3 in the name refers to the number of arguments expected by
+/// the callback (and thus passed to this function, in addition to the
+/// callback itself and the zone in which the callback is executed).
 R? _invoke3WithReturn<A1, A2, A3, R>(
   R Function(A1 a1, A2 a2, A3 a3)? callback,
   Zone zone,
@@ -435,8 +441,15 @@ R? _invoke3WithReturn<A1, A2, A3, R>(
   if (identical(zone, Zone.current)) {
     return callback(arg1, arg2, arg3);
   } else {
-    // TODO: how to handle synchronous return? Should we assume zone is always current?
-    return null;
+    // TODO(hellohuanlin): add `zone.runGuardedWithReturn` API.
+    try {
+      return zone.run(() {
+        return callback(arg1, arg2, arg3);
+      });
+    } catch (e, s) {
+      zone.handleUncaughtError(e, s);
+      return null;
+    }
   }
 }
 

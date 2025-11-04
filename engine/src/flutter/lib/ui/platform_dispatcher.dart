@@ -43,6 +43,7 @@ typedef KeyDataCallback = bool Function(KeyData data);
 /// Signature for [PlatformDispatcher.onSemanticsActionEvent].
 typedef SemanticsActionEventCallback = void Function(SemanticsActionEvent action);
 
+/// Signature for [PlatformDispatcher.onPlatformViewShouldAcceptGesture].
 typedef PlatformViewShouldAcceptGestureCallback = bool Function(int viewId, double x, double y);
 
 /// Signature for responses to platform messages.

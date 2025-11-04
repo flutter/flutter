@@ -830,7 +830,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
                                  uint64_t trace_flow_id);
 
   //----------------------------------------------------------------------------
-  /// @brief      Requests the engine if an embedded view should accept
+  /// @brief      Requests from the engine if an embedded view should accept
   ///             gesture at a given touch location.
   ///
   ///
