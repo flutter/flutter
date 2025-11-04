@@ -764,7 +764,8 @@ TEST_P(DisplayListTest, CanDrawBoundedBlur) {
 
     Point p1 = inverse_transform * p1_global;
     Point p2 = inverse_transform * p2_global;
-    DlRect bounds = DlRect::MakeLTRB(p2.x, p1.y, p1.x, p2.y).Scale(bounds_scale);
+    DlRect bounds =
+        DlRect::MakeLTRB(p2.x, p1.y, p1.x, p2.y).Scale(bounds_scale);
 
     builder.ClipRect(bounds);
     builder.Save();

@@ -21,14 +21,13 @@ uniform KernelSamples {
 kernel_samples;
 
 uniform FragInfo {
+  // A matrix to calculate the signed distance from the edges of the quad
+  // defining the bounded area.
+  //
+  // See PrecomputeQuadLineParameters for details on the format.
   mat4 quad_line_params;
 }
 frag_info;
-
-bool OutOfBounds(vec2 coords) {
-  vec4 signed_distances = frag_info.quad_line_params * vec4(coords, 1.0, 0.0);
-  return any(lessThan(signed_distances, vec4(0.0)));
-}
 
 f16vec4 Sample(f16sampler2D tex, vec2 coords) {
   if (supports_decal == 1.0) {
@@ -37,12 +36,18 @@ f16vec4 Sample(f16sampler2D tex, vec2 coords) {
   return IPHalfSampleDecal(tex, coords);
 }
 
+// Determines if the given texture coordinates are out of bounds defined by
+// `frag_info.quad_line_params`.
+bool OutOfBounds(vec2 coords) {
+  vec4 signed_distances = vec4(coords, 1.0, 0.0) * frag_info.quad_line_params;
+  return any(lessThan(signed_distances, vec4(0.0)));
+}
+
 // Sampling the texture while treating out of bounds pixels as almost
 // transparent.
 //
 // Returns Sample(tex, coords) for in-bounds pixels.  For out-of-bounds (OOB)
-// pixels (per `frag_info.quad_line_params`), it returns the same color but
-// clamps alpha to `min_alpha`.
+// pixels, it returns the same color but clamps alpha to `min_alpha`.
 //
 // This is crucial for preventing dark fringes at the blur boundary. This is a
 // two-pass blur, and the second pass linearly interpolates the first pass's
@@ -77,7 +82,11 @@ void main() {
        i++) {
   }
 
-  // Starting edge compensation
+  // Starting edge compensation.
+  //
+  // This allieviates the issue caused by the lerped kernel where the first
+  // in-bounds sample is actually quite far from the edge, and there is a large
+  // gap that would be unaccounted for in the blur.
   if (i > 0) {
     vec2 offset = (kernel_samples.sample_data[i].xy +
                    kernel_samples.sample_data[i - 1].xy) /
@@ -98,7 +107,7 @@ void main() {
                           v_texture_coords + kernel_samples.sample_data[i].xy));
   }
 
-  // Ending edge compensation
+  // Ending edge compensation.
   if (i < sample_count) {
     vec2 offset = (kernel_samples.sample_data[i].xy +
                    kernel_samples.sample_data[i - 1].xy) /

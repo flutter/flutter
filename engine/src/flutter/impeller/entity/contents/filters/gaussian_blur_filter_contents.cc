@@ -252,7 +252,11 @@ Quad RemapQuadCoords(const Quad& input, Scalar texture_sampler_y_coord_scale) {
   }
 }
 
-Quad RotateQuadIfNecessary(const Quad& input) {
+// Rotate the quad so that point 0 is among the two top points.
+//
+// This is necessary because the quad may be rotated 180 degrees, which would
+// might confuse the expansion logic that assumes the edge orders.
+Quad RotateQuadToUpright(const Quad& input) {
   if (input[0].y > input[2].y) {
     // The 4 points need reordering, because the quad is rotated 180 degrees:
     //
@@ -320,6 +324,8 @@ Matrix PrecomputeQuadLineParameters(const Quad& bounds) {
   return result;
 }
 
+// Expands the quad line parameters by translating each line outwards
+// perpendicular to X and Y by the specified amounts.
 Matrix ExpandQuadLineParameters(const Matrix& input,
                                 Scalar expandX,
                                 Scalar expandY) {
@@ -650,60 +656,63 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
   // TODO(gaaclarke): This blurs the whole image, but because we know the clip
   //                  region we could focus on just blurring that.
   ISize subpass_size = input_texture->GetSize();
-  ContentContext::SubpassCallback subpass_callback = [&](const ContentContext&
-                                                             renderer,
-                                                         RenderPass& pass) {
-    GaussianBlurVertexShader::FrameInfo frame_info;
-    frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1)),
-    frame_info.texture_sampler_y_coord_scale = input_texture->GetYCoordScale();
+  ContentContext::SubpassCallback subpass_callback =
+      [&](const ContentContext& renderer, RenderPass& pass) {
+        GaussianBlurVertexShader::FrameInfo frame_info;
+        frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1)),
+        frame_info.texture_sampler_y_coord_scale =
+            input_texture->GetYCoordScale();
 
-    HostBuffer& data_host_buffer = renderer.GetTransientsDataBuffer();
+        HostBuffer& data_host_buffer = renderer.GetTransientsDataBuffer();
 
-    ContentContextOptions options = OptionsFromPass(pass);
-    options.primitive_type = PrimitiveType::kTriangleStrip;
-    if (!blur_info.blur_uv_bounds.has_value()) {
-      pass.SetPipeline(renderer.GetGaussianBlurPipeline(options));
+        ContentContextOptions options = OptionsFromPass(pass);
+        options.primitive_type = PrimitiveType::kTriangleStrip;
+        if (!blur_info.blur_uv_bounds.has_value()) {
+          pass.SetPipeline(renderer.GetGaussianBlurPipeline(options));
 
-      GaussianBlurFragmentShader::BindKernelSamples(
-          pass, data_host_buffer.EmplaceUniform(
-                    CloneKernelSamples<GaussianBlurPipeline>(
-                        LerpHackKernelSamples(GenerateBlurInfo(blur_info)))));
-    } else {
-      pass.SetPipeline(renderer.GetGaussianBlurBoundedPipeline(options));
+          GaussianBlurFragmentShader::BindKernelSamples(
+              pass,
+              data_host_buffer.EmplaceUniform(
+                  CloneKernelSamples<GaussianBlurPipeline>(
+                      LerpHackKernelSamples(GenerateBlurInfo(blur_info)))));
+        } else {
+          pass.SetPipeline(renderer.GetGaussianBlurBoundedPipeline(options));
 
-      GaussianBlurBoundedFragmentShader::FragInfo frag_info;
-      frag_info.quad_line_params =
-          ExpandQuadLineParameters(
+          GaussianBlurBoundedFragmentShader::FragInfo frag_info;
+          // The expansion here enlarges the sampling bounds so diagonal/partial
+          // pixels near the edge are included rather than treated as
+          // out-of-bounds, preventing jagged (aliased) boundaries.
+          frag_info.quad_line_params = ExpandQuadLineParameters(
               PrecomputeQuadLineParameters(blur_info.blur_uv_bounds.value()),
-              1.0 / subpass_size.width, 1.0 / subpass_size.height)
-              .Transpose();
-      GaussianBlurBoundedFragmentShader::BindFragInfo(
-          pass, data_host_buffer.EmplaceUniform(frag_info));
-      GaussianBlurBoundedFragmentShader::BindKernelSamples(
-          pass, data_host_buffer.EmplaceUniform(
-                    CloneKernelSamples<GaussianBlurBoundedPipeline>(
-                        LerpHackKernelSamples(GenerateBlurInfo(blur_info)))));
-    }
+              1.0 / subpass_size.width, 1.0 / subpass_size.height);
+          GaussianBlurBoundedFragmentShader::BindFragInfo(
+              pass, data_host_buffer.EmplaceUniform(frag_info));
+          GaussianBlurBoundedFragmentShader::BindKernelSamples(
+              pass,
+              data_host_buffer.EmplaceUniform(
+                  CloneKernelSamples<GaussianBlurBoundedPipeline>(
+                      LerpHackKernelSamples(GenerateBlurInfo(blur_info)))));
+        }
 
-    std::array<VS::PerVertexData, 4> vertices = {
-        VS::PerVertexData{blur_uvs[0], blur_uvs[0]},
-        VS::PerVertexData{blur_uvs[1], blur_uvs[1]},
-        VS::PerVertexData{blur_uvs[2], blur_uvs[2]},
-        VS::PerVertexData{blur_uvs[3], blur_uvs[3]},
-    };
-    pass.SetVertexBuffer(CreateVertexBuffer(vertices, data_host_buffer));
+        std::array<VS::PerVertexData, 4> vertices = {
+            VS::PerVertexData{blur_uvs[0], blur_uvs[0]},
+            VS::PerVertexData{blur_uvs[1], blur_uvs[1]},
+            VS::PerVertexData{blur_uvs[2], blur_uvs[2]},
+            VS::PerVertexData{blur_uvs[3], blur_uvs[3]},
+        };
+        pass.SetVertexBuffer(CreateVertexBuffer(vertices, data_host_buffer));
 
-    SamplerDescriptor linear_sampler_descriptor = sampler_descriptor;
-    linear_sampler_descriptor.mag_filter = MinMagFilter::kLinear;
-    linear_sampler_descriptor.min_filter = MinMagFilter::kLinear;
-    GaussianBlurFragmentShader::BindTextureSampler(
-        pass, input_texture,
-        renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-            linear_sampler_descriptor));
-    GaussianBlurVertexShader::BindFrameInfo(
-        pass, data_host_buffer.EmplaceUniform(frame_info));
-    return pass.Draw().ok();
-  };
+        SamplerDescriptor linear_sampler_descriptor = sampler_descriptor;
+        linear_sampler_descriptor.mag_filter = MinMagFilter::kLinear;
+        linear_sampler_descriptor.min_filter = MinMagFilter::kLinear;
+        GaussianBlurFragmentShader::BindTextureSampler(
+            pass, input_texture,
+            renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+                linear_sampler_descriptor));
+        GaussianBlurVertexShader::BindFrameInfo(
+            pass, data_host_buffer.EmplaceUniform(frame_info));
+        return pass.Draw().ok();
+      };
   if (destination_target.has_value()) {
     return renderer.MakeSubpass("Gaussian Blur Filter",
                                 destination_target.value(), command_buffer,
@@ -953,7 +962,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   std::optional<Quad> source_bounds;
   if (bounds_.has_value()) {
     Quad global_bounds = bounds_->GetTransformedPoints(effect_transform);
-    source_bounds = RotateQuadIfNecessary(
+    source_bounds = RotateQuadToUpright(
         RemapQuadCoords(snapshot_entity.GetTransform().Transform(global_bounds),
                         input_snapshot->texture->GetYCoordScale()));
   }
