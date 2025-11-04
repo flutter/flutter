@@ -12,7 +12,7 @@ class _ResizeAppState extends State<ResizeApp> {
   int _listSize = 1;
   void _addToList() {
     setState(() {
-      _listSize ++;
+      _listSize++;
     });
   }
 
@@ -24,21 +24,16 @@ class _ResizeAppState extends State<ResizeApp> {
         textDirection: TextDirection.ltr,
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
+          children: <Widget>[
             Padding(
               padding: const EdgeInsets.fromLTRB(8.0, 50, 8.0, 8.0),
               child: Semantics(
-                  label: "Add to list",
-                  child: ElevatedButton(
-                onPressed: _addToList,
-                child: Text("Add to list"),
-              )),
+                label: 'Add to list',
+                child: ElevatedButton(onPressed: _addToList, child: const Text('Add to list')),
+              ),
             ),
             for (int i = 0; i < _listSize; i++)
-              Text(
-                "Hello from Flutter $i",
-                style: TextStyle(color: Colors.pink, fontSize: 30),
-              ),
+              Text('Hello from Flutter $i', style: const TextStyle(color: Colors.pink, fontSize: 30)),
           ],
         ),
       ),
