@@ -111,16 +111,17 @@ public class FlutterView extends FrameLayout
   private static final String TAG = "FlutterView";
   private static final String GBOARD_PACKAGE_NAME = "com.google.android.inputmethod.latin";
 
-  private static final int CONTENT_SIZING_MAX = 2 << 12; // 2 << 13
+  @VisibleForTesting static final int CONTENT_SIZING_MAX = 2 << 12; // 2 << 13
 
   // Internal view hierarchy references.
   @Nullable private FlutterSurfaceView flutterSurfaceView;
   @Nullable private FlutterTextureView flutterTextureView;
   @Nullable private FlutterImageView flutterImageView;
 
-  @Nullable private View flutterEngineView;
+  @Nullable @VisibleForTesting /* package */ View flutterEngineView;
   @Nullable @VisibleForTesting /* package */ RenderSurface renderSurface;
   @Nullable private RenderSurface previousRenderSurface;
+  @Nullable private View previousEngineView;
   private final Set<FlutterUiDisplayListener> flutterUiDisplayListeners = new HashSet<>();
   private boolean isFlutterUiDisplayed;
 
@@ -180,7 +181,8 @@ public class FlutterView extends FrameLayout
         }
       };
 
-  private final FlutterUiResizeListener flutterUiResizeListener =
+  @VisibleForTesting
+  final FlutterUiResizeListener flutterUiResizeListener =
       new FlutterUiResizeListener() {
         @Override
         public void resizeEngineView(int width, int height) {
@@ -410,7 +412,6 @@ public class FlutterView extends FrameLayout
   }
 
   private void init() {
-    Log.setLogLevel(Log.VERBOSE);
     Log.v(TAG, "Initializing FlutterView");
 
     if (flutterSurfaceView != null) {
@@ -1306,15 +1307,18 @@ public class FlutterView extends FrameLayout
     flutterRenderer.setSemanticsEnabled(false);
 
     // Revert the image view to previous surface
-    if (previousRenderSurface != null && renderSurface == flutterImageView) {
+    if (previousRenderSurface != null
+        && renderSurface == flutterImageView
+        && previousEngineView != null) {
       renderSurface = previousRenderSurface;
-      flutterEngineView = flutterImageView;
+      flutterEngineView = previousEngineView;
     }
     renderSurface.detachFromRenderer();
 
     releaseImageView();
 
     previousRenderSurface = null;
+    previousEngineView = null;
     flutterEngine = null;
   }
 
@@ -1351,12 +1355,12 @@ public class FlutterView extends FrameLayout
 
     if (flutterImageView == null) {
       flutterImageView = createImageView();
-      flutterEngineView = flutterImageView;
       addView(flutterImageView);
     } else {
       flutterImageView.resizeIfNeeded(getWidth(), getHeight());
     }
 
+    previousEngineView = flutterEngineView;
     previousRenderSurface = renderSurface;
     renderSurface = flutterImageView;
     flutterEngineView = flutterImageView;
@@ -1381,9 +1385,15 @@ public class FlutterView extends FrameLayout
       Log.v(TAG, "Tried to revert the image view, but no previous surface was used.");
       return;
     }
+    if (previousEngineView == null) {
+      Log.v(TAG, "Tried to revert the image view, but no previous engine view was used.");
+      return;
+    }
+
     renderSurface = previousRenderSurface;
-    flutterEngineView = flutterImageView;
+    flutterEngineView = previousEngineView;
     previousRenderSurface = null;
+    previousEngineView = null;
 
     final FlutterRenderer renderer = flutterEngine.getRenderer();
 

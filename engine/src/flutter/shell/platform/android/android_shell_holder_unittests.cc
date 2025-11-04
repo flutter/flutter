@@ -214,7 +214,7 @@ TEST(AndroidShellHolder, CreateWithUnMergedPlatformAndUIThread) {
       Settings::MergedPlatformUIThread::kDisabled;
   auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
   auto holder = std::make_unique<AndroidShellHolder>(
-      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGGLES);
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(
       nullptr, /*is_fake_window=*/true);
   holder->GetPlatformView()->NotifyCreated(window);
@@ -222,6 +222,19 @@ TEST(AndroidShellHolder, CreateWithUnMergedPlatformAndUIThread) {
   EXPECT_NE(
       holder->GetShellForTesting()->GetTaskRunners().GetUITaskRunner(),
       holder->GetShellForTesting()->GetTaskRunners().GetPlatformTaskRunner());
+}
+
+TEST(AndroidShellHolder, PrepareFlutterView) {
+  Settings settings;
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
+  holder->GetPlatformView()->NotifyCreated(window);
+
+  EXPECT_CALL(*jni, MaybeResizeSurfaceView(100, 200));
+  holder->GetPlatformView()->PrepareFlutterView(SkISize::Make(100, 200), 1.0);
 }
 
 }  // namespace testing
