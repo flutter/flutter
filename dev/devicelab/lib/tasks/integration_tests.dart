@@ -274,6 +274,13 @@ class DriverTest {
       }
       await flutter('packages', options: <String>['get']);
 
+      // Make the device ID available in the driver code, so tools like ADB can
+      // reference it if needed.
+      final Map<String, String> env = <String, String>{
+        if (environment != null) ...environment!,
+        'DEVICE_ID_NUMBER': deviceId,
+      };
+
       final List<String> options = <String>[
         '--no-android-gradle-daemon',
         '-v',
@@ -283,7 +290,7 @@ class DriverTest {
         deviceId,
         ...extraOptions,
       ];
-      await flutter('drive', options: options, environment: environment);
+      await flutter('drive', options: options, environment: env);
       return TaskResult.success(null);
     });
   }
