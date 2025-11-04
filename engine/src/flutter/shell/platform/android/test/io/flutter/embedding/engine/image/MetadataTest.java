@@ -151,4 +151,11 @@ public class MetadataTest {
       // Expected
     }
   }
+
+  @Test
+  public void isHeif_doesNotCrashWithNullMetatdata() {
+    Metadata metadata = new Metadata();
+    metadata.mimeType = null;
+    assertFalse(metadata.isHeif());
+  }
 }
