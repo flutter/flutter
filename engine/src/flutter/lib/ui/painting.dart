@@ -8203,7 +8203,12 @@ base class _NativeImageDescriptor extends NativeFieldWrapperClass1 implements Im
   @Native<Void Function(Pointer<Void>, Handle, Int32, Int32, Int32)>(
     symbol: 'ImageDescriptor::instantiateCodec',
   )
-  external void _instantiateCodec(Codec outCodec, int targetWidth, int targetHeight, int destinationFormat);
+  external void _instantiateCodec(
+    Codec outCodec,
+    int targetWidth,
+    int targetHeight,
+    int destinationFormat,
+  );
 
   @override
   String toString() =>
