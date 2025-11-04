@@ -39,22 +39,22 @@ class TextPaint {
         continue;
       }
 
-      // We need to adjust the canvas size to fit the block in case there is scaling or zoom involved
-      final double zoomFactor = painter.adjustCanvas(
-        canvas,
-        block.advance.width.ceilToDouble(),
-        block.advance.height.ceilToDouble(),
-      );
       // Let's calculate the sizes
       final (ui.Rect sourceRect, ui.Rect targetRect) = calculateBlock(
         layout,
         block as TextBlock,
         ui.Offset(
-          line.advance.left + line.formattingShift,
+          line.advance.left + line.formattingShift + block.shiftFromLineStart,
           line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
         ),
         ui.Offset(x, y),
-        zoomFactor,
+        ui.window.devicePixelRatio,
+      );
+
+      WebParagraphDebug.log(
+        '+_paintByBlocks: ${block.textRange} ${block.spanShiftFromLineStart} ${block.shiftFromLineStart} '
+        '${line.advance} + ${line.formattingShift} '
+        '\nsourceRect: $sourceRect targetRect: $targetRect',
       );
       // Let's draw whatever has to be drawn
       switch (styleElement) {
@@ -92,6 +92,7 @@ class TextPaint {
       WebParagraphDebug.log(
         '+paintByClusters: ${block.textRange} ${block.clusterRange} ${(block as TextBlock).clusterRangeWithoutWhitespaces} ${block.whitespacesWidth} ${block.isLtr} ${line.advance.left} + ${line.formattingShift} + ${block.shiftFromLineStart}',
       );
+
       // We are painting clusters in visual order so that if they step on each other, the paint
       // order is correct.
       final int start = block.isLtr
@@ -103,14 +104,7 @@ class TextPaint {
       final int step = block.isLtr ? 1 : -1;
       for (int i = start; i != end; i += step) {
         final clusterText = layout.allClusters[i];
-        // If we have shadows, we need to make sure the canvas is big enough
-        final blockHasShadows = block.style.hasElement(StyleElements.shadows);
         // We need to adjust the canvas size to fit the block in case there is scaling or zoom involved
-        final double zoomFactor = painter.adjustCanvas(
-          canvas,
-          clusterText.advance.width.ceilToDouble() + (blockHasShadows ? 200 : 0),
-          clusterText.advance.height.ceilToDouble() + (blockHasShadows ? 200 : 0),
-        );
         final (ui.Rect sourceRect, ui.Rect targetRect) = calculateCluster(
           layout,
           block,
@@ -121,8 +115,9 @@ class TextPaint {
             line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
           ),
           ui.Offset(x, y),
-          zoomFactor,
+          ui.window.devicePixelRatio,
         );
+
         if (sourceRect.width <= 0 || sourceRect.height <= 0) {
           // Let's skip empty clusters
           continue;
@@ -161,7 +156,7 @@ class TextPaint {
     // Define the text cluster bounds
     // Source rect must take in account the scaling
     final ui.Rect sourceRect = ui.Rect.fromLTWH(
-      pos, // + shift,
+      pos * zoomFactor,
       0,
       webTextCluster.bounds.width.ceilToDouble() * zoomFactor,
       webTextCluster.advance.height.ceilToDouble() * zoomFactor,
@@ -222,7 +217,7 @@ class TextPaint {
     final ui.Rect targetRect = zeroRect
         // TODO(jlavrova): Can we use `block.advance.left` instead of the cluster? That way
         //                 we don't have to worry about LTR vs RTL to get first cluster.
-        .translate(blockOffset.dx + block.advance.left, blockOffset.dy)
+        .translate(blockOffset.dx, blockOffset.dy)
         .translate(paragraphOffset.dx, paragraphOffset.dy);
 
     final String text = paragraph.getText(block.textRange);
