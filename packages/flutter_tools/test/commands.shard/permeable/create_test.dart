@@ -3457,17 +3457,19 @@ void main() {
       final String pubspecContent = await pubspec.readAsString();
       expect(
         pubspecContent,
-        contains('''
-      ios:
-        pluginClass: DarwinPlugin
-        sharedDarwinSource: true'''),
+        contains(
+          '      ios:\n'
+          '        pluginClass: DarwinPlugin\n'
+          '        sharedDarwinSource: true',
+        ),
       );
       expect(
         pubspecContent,
-        contains('''
-      macos:
-        pluginClass: DarwinPlugin
-        sharedDarwinSource: true'''),
+        contains(
+          '      macos:\n'
+          '        pluginClass: DarwinPlugin\n'
+          '        sharedDarwinSource: true',
+        ),
       );
 
       final File podspec = projectDir.childDirectory('darwin').childFile('darwin_plugin.podspec');
