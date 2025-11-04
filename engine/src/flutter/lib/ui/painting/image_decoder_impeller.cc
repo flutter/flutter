@@ -9,7 +9,6 @@
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/make_copyable.h"
-#include "flutter/fml/status_or.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/impeller/core/allocator.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
@@ -20,6 +19,7 @@
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/skia_conversions.h"
 #include "impeller/geometry/size.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
@@ -76,16 +76,15 @@ bool IsWideGamut(const SkColorSpace* color_space) {
   return area > kSrgbGamutArea;
 }
 
-fml::StatusOr<ImageDecoderImpeller::ImageInfo> ToImageInfo(
+absl::StatusOr<ImageDecoderImpeller::ImageInfo> ToImageInfo(
     const SkImageInfo& sk_image_format) {
   const std::optional<impeller::PixelFormat> pixel_format =
       ImageDecoderImpeller::ToPixelFormat(sk_image_format.colorType());
   if (!pixel_format.has_value()) {
-    // std::string decode_error(
-    //     std::format("Codec pixel format is not supported (SkColorType={})",
-    //                 static_cast<int>(image_info.colorType())));
-    return {fml::Status(fml::StatusCode::kInvalidArgument,
-                        "Codec pixel format is not supported")};
+    std::string decode_error(
+        std::format("Codec pixel format is not supported (SkColorType={})",
+                    static_cast<int>(sk_image_format.colorType())));
+    return absl::InvalidArgumentError(decode_error);
   }
   return {{
       .size =
@@ -107,18 +106,17 @@ SkAlphaType ChooseCompatibleAlphaType(SkAlphaType type) {
   return type;
 }
 
-fml::StatusOr<SkColorType> ChooseCompatibleColorType(
+absl::StatusOr<SkColorType> ChooseCompatibleColorType(
     ImageDecoder::PixelFormat format) {
   switch (format) {
     case ImageDecoder::PixelFormat::kR32G32B32A32Float:
       return kRGBA_F32_SkColorType;
     default:
-      return {{fml::StatusCode::kInvalidArgument,
-               "unsupported target pixel format"}};
+      return absl::InvalidArgumentError("unsupported target pixel format");
   }
 }
 
-fml::StatusOr<SkImageInfo> CreateImageInfo(
+absl::StatusOr<SkImageInfo> CreateImageInfo(
     const SkImageInfo& base_image_info,
     const SkISize& decode_size,
     bool supports_wide_gamut,
@@ -128,7 +126,7 @@ fml::StatusOr<SkImageInfo> CreateImageInfo(
   SkAlphaType alpha_type =
       ChooseCompatibleAlphaType(base_image_info.alphaType());
   if (target_format != ImageDecoder::PixelFormat::kOptimal) {
-    fml::StatusOr<SkColorType> target_skia_color_type =
+    absl::StatusOr<SkColorType> target_skia_color_type =
         ChooseCompatibleColorType(target_format);
     if (!target_skia_color_type.ok()) {
       return target_skia_color_type.status();
@@ -255,7 +253,7 @@ ImageDecoderImpeller::DecompressResult ResizeOnCpu(
   }
   buffer->Flush();
 
-  fml::StatusOr<ImageDecoderImpeller::ImageInfo> decoded_image_info =
+  absl::StatusOr<ImageDecoderImpeller::ImageInfo> decoded_image_info =
       ToImageInfo(scaled_bitmap->info());
   if (!decoded_image_info.ok()) {
     return {.decode_error = std::string(decoded_image_info.status().message())};
@@ -336,7 +334,7 @@ ImageDecoderImpeller::DecompressResult ImageDecoderImpeller::DecompressTexture(
   }
 
   const SkImageInfo& base_image_info = descriptor->image_info();
-  const fml::StatusOr<SkImageInfo> image_info = CreateImageInfo(
+  const absl::StatusOr<SkImageInfo> image_info = CreateImageInfo(
       base_image_info, decode_size, supports_wide_gamut, options.target_format);
 
   if (!image_info.ok()) {
@@ -384,7 +382,7 @@ ImageDecoderImpeller::DecompressResult ImageDecoderImpeller::DecompressTexture(
           : std::optional<SkImageInfo>(
                 image_info.value().makeDimensions(target_size));
 
-  fml::StatusOr<ImageDecoderImpeller::ImageInfo> decoded_image_info =
+  absl::StatusOr<ImageDecoderImpeller::ImageInfo> decoded_image_info =
       ToImageInfo(bitmap->info());
   if (!decoded_image_info.ok()) {
     return {.decode_error = std::string(decoded_image_info.status().message())};
