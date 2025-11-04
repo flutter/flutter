@@ -23,8 +23,8 @@ class TextFieldExample extends StatelessWidget {
         decoration: InputDecoration(
           labelText: 'TextField',
           errorText: 'Error text',
-          contentPadding: EdgeInsets.all(16),
-          errorPadding: EdgeInsets.all(0),
+          contentPadding: EdgeInsets.all(5),
+          errorPadding: EdgeInsets.all(10),
         ),
       ),
     );

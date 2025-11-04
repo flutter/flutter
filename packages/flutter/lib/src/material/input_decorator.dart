@@ -185,6 +185,7 @@ class _BorderContainer extends StatefulWidget {
     required this.fillColor,
     required this.hoverColor,
     required this.isHovering,
+    required this.contentPadding,
   });
 
   final InputBorder border;
@@ -193,6 +194,7 @@ class _BorderContainer extends StatefulWidget {
   final Color fillColor;
   final Color hoverColor;
   final bool isHovering;
+  final EdgeInsetsGeometry? contentPadding;
 
   @override
   _BorderContainerState createState() => _BorderContainerState();
@@ -2365,6 +2367,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     final Widget container = _BorderContainer(
       border: border,
+      contentPadding: decoration.contentPadding,
       gap: _borderGap,
       gapAnimation: _floatingLabelAnimation,
       fillColor: _getFillColor(themeData, defaults),
