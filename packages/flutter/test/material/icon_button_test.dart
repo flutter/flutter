@@ -974,7 +974,7 @@ void main() {
       SystemMouseCursors.forbidden,
     );
 
-    // Test default is click
+    // Test default is click on web, basic on non-web
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -991,7 +991,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
 
@@ -3557,6 +3557,19 @@ void main() {
         statesController: MaterialStatesController(),
       ),
     );
+  });
+
+  testWidgets('IconButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(IconButton)), Size.zero);
   });
 }
 
