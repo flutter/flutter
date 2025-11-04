@@ -118,7 +118,7 @@ void main() {
     lastOnSelected(selection);
     await tester.pump();
     expect(find.byKey(fieldKey), findsOneWidget);
-    expect(find.byKey(optionsKey), findsOne);
+    expect(find.byKey(optionsKey), findsNothing);
     expect(textEditingController.text, selection);
 
     // Modify the field text. The options appear again and are filtered.
@@ -236,7 +236,7 @@ void main() {
     lastOnSelected(selection);
     await tester.pump();
     expect(find.byKey(fieldKey), findsOneWidget);
-    expect(find.byKey(optionsKey), findsOne);
+    expect(find.byKey(optionsKey), findsNothing);
     expect(textEditingController.text, selection);
 
     // Modify the field text. The options appear again and are filtered.
@@ -337,7 +337,7 @@ void main() {
       await tester.tap(find.text(kOptions[2]));
       await tester.pump();
 
-      expect(find.byKey(optionsKey), findsOne);
+      expect(find.byKey(optionsKey), findsNothing);
 
       expect(textEditingController.text, equals(kOptions[2]));
     });
@@ -802,7 +802,7 @@ void main() {
     lastOnSelected(selection);
     await tester.pump();
     expect(find.byKey(fieldKey), findsOneWidget);
-    expect(find.byKey(optionsKey), findsOne);
+    expect(find.byKey(optionsKey), findsNothing);
     expect(lastUserSelected, selection);
     expect(textEditingController.text, selection.name);
 
@@ -887,7 +887,7 @@ void main() {
     lastOnFieldSubmitted();
     await tester.pump();
     expect(find.byKey(fieldKey), findsOneWidget);
-    expect(find.byKey(optionsKey), findsOne);
+    expect(find.byKey(optionsKey), findsNothing);
     expect(textEditingController.text, lastOptions.elementAt(0));
   });
 
@@ -1524,7 +1524,7 @@ void main() {
     lastOnSelected(selection);
     await tester.pump();
     expect(find.byKey(fieldKey), findsOneWidget);
-    expect(find.byKey(optionsKey), findsOne);
+    expect(find.byKey(optionsKey), findsNothing);
     expect(textEditingController.text, selection);
   });
 
