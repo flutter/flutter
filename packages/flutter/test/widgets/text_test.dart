@@ -103,7 +103,11 @@ void main() {
             wordSpacingOverride: 2.0,
           ),
           child: Center(
-            child: Text.rich(TextSpan(text: 'Hello'), textDirection: TextDirection.ltr),
+            child: Text.rich(
+              TextSpan(text: 'Hello'),
+              textDirection: TextDirection.ltr,
+              strutStyle: StrutStyle(height: 0.9),
+            ),
           ),
         ),
       );
@@ -113,10 +117,15 @@ void main() {
       expect(text.text.style?.height, 2.0);
       expect(text.text.style?.letterSpacing, 2.0);
       expect(text.text.style?.wordSpacing, 2.0);
+      expect(text.strutStyle?.height, 2.0);
 
       await tester.pumpWidget(
         const Center(
-          child: Text.rich(TextSpan(text: 'Hello'), textDirection: TextDirection.ltr),
+          child: Text.rich(
+            TextSpan(text: 'Hello'),
+            textDirection: TextDirection.ltr,
+            strutStyle: StrutStyle(height: 0.9),
+          ),
         ),
       );
 
@@ -125,44 +134,7 @@ void main() {
       expect(text.text.style?.height, isNull);
       expect(text.text.style?.letterSpacing, isNull);
       expect(text.text.style?.wordSpacing, isNull);
-    },
-  );
-
-  testWidgets(
-    'Text respects MediaQueryData.lineHeightScaleFactorOverride even when strutStyle.forceStrutHeight is enabled',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const MediaQuery(
-          data: MediaQueryData(lineHeightScaleFactorOverride: 2.0),
-          child: Center(
-            child: Text(
-              'Hello',
-              textDirection: TextDirection.ltr,
-              strutStyle: StrutStyle(forceStrutHeight: true),
-            ),
-          ),
-        ),
-      );
-
-      RichText text = tester.firstWidget(find.byType(RichText));
-      expect(text, isNotNull);
-      expect(text.text.style?.height, 2.0);
-      expect(text.strutStyle?.forceStrutHeight, false);
-
-      await tester.pumpWidget(
-        const Center(
-          child: Text(
-            'Hello',
-            textDirection: TextDirection.ltr,
-            strutStyle: StrutStyle(forceStrutHeight: true),
-          ),
-        ),
-      );
-
-      text = tester.firstWidget(find.byType(RichText));
-      expect(text, isNotNull);
-      expect(text.text.style?.height, isNull);
-      expect(text.strutStyle?.forceStrutHeight, true);
+      expect(text.strutStyle?.height, 0.9);
     },
   );
 
@@ -180,6 +152,7 @@ void main() {
             child: RichText(
               text: const TextSpan(text: 'Hello'),
               textDirection: TextDirection.ltr,
+              strutStyle: const StrutStyle(height: 0.9),
             ),
           ),
         ),
@@ -190,6 +163,7 @@ void main() {
       expect(text.text.style?.height, isNull);
       expect(text.text.style?.letterSpacing, isNull);
       expect(text.text.style?.wordSpacing, isNull);
+      expect(text.strutStyle?.height, 0.9);
     },
   );
 

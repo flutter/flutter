@@ -1109,6 +1109,9 @@ class EditableText extends StatefulWidget {
   /// Within editable text and text fields, [StrutStyle] will not use its standalone
   /// default values, and will instead inherit omitted/null properties from the
   /// [TextStyle] instead. See [StrutStyle.inheritFromTextStyle].
+  ///
+  /// The user or platform may override this [strutStyle]'s [StrutStyle.height]
+  /// via a [MediaQuery] ancestor's [MediaQueryData.lineHeightScaleFactorOverride].
   StrutStyle get strutStyle {
     if (_strutStyle == null) {
       return StrutStyle.fromTextStyle(style, forceStrutHeight: true);
@@ -5837,9 +5840,7 @@ class EditableTextState extends State<EditableText>
                                     minLines: widget.minLines,
                                     expands: widget.expands,
                                     strutStyle: widget.strutStyle.copyWith(
-                                      forceStrutHeight: lineHeightScaleFactor == null
-                                          ? null
-                                          : false,
+                                      height: lineHeightScaleFactor,
                                     ),
                                     selectionColor:
                                         _selectionOverlay?.spellCheckToolbarIsVisible ?? false

@@ -1126,7 +1126,7 @@ class PlatformDispatcher {
   /// This value takes precedence over any text height specified at the
   /// application level. For example, at framework level, in the [TextStyle]
   /// for [Text], [SelectableText], and [EditableText] widgets, this value
-  /// overrides the existing value of [TextStyle.height].
+  /// overrides the existing value of [TextStyle.height] and [StrutStyle.height].
   ///
   /// Returns null when no override has been set by the system.
   ///
