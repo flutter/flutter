@@ -688,7 +688,8 @@ class MediaQueryData {
   /// See also:
   ///
   ///  * [Text], [SelectableText], and [EditableText], all of whose
-  ///  [TextStyle.height] is overriden by [lineHeightScaleFactorOverride].
+  ///  [TextStyle.height] and [StrutStyle.height] are overriden by
+  ///  [lineHeightScaleFactorOverride].
   final double? lineHeightScaleFactorOverride;
 
   /// The amount of space (in logical pixels) to add between each letter

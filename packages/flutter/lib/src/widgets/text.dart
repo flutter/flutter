@@ -595,6 +595,9 @@ class Text extends StatelessWidget {
   final TextStyle? style;
 
   /// {@macro flutter.painting.textPainter.strutStyle}
+  ///
+  /// The user or platform may override this [strutStyle]'s [StrutStyle.height]
+  /// via a [MediaQuery] ancestor's [MediaQueryData.lineHeightScaleFactorOverride].
   final StrutStyle? strutStyle;
 
   /// How the text should be aligned horizontally.
@@ -742,7 +745,7 @@ class Text extends StatelessWidget {
       );
     }
     final StrutStyle? effectiveStrutStyle = strutStyle != null && lineHeightScaleFactor != null
-        ? strutStyle!.copyWith(forceStrutHeight: false)
+        ? strutStyle!.copyWith(height: lineHeightScaleFactor)
         : strutStyle;
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     final TextScaler textScaler = switch ((this.textScaler, textScaleFactor)) {
