@@ -8,13 +8,14 @@
 
 #include "third_party/skia/include/core/SkContourMeasure.h"
 #include "third_party/skia/include/core/SkPath.h"
+#include "third_party/skia/include/core/SkPathBuilder.h"
 
 using namespace Skwasm;
 
 SKWASM_EXPORT SkContourMeasureIter*
-contourMeasureIter_create(SkPath* path, bool forceClosed, SkScalar resScale) {
+contourMeasureIter_create(SkPathBuilder* path, bool forceClosed, SkScalar resScale) {
   liveCountourMeasureIterCount++;
-  return new SkContourMeasureIter(*path, forceClosed, resScale);
+  return new SkContourMeasureIter(path->snapshot(), forceClosed, resScale);
 }
 
 SKWASM_EXPORT SkContourMeasure* contourMeasureIter_next(
