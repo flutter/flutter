@@ -14,6 +14,15 @@ import 'debug.dart';
 import 'layout.dart';
 import 'paragraph.dart';
 
+// TODO(mdebbar): Discuss it: we use this canvas for painting the entire block (entire line)
+// so we need to make sure it's big enough to hold the biggest line.
+// Also, we use it to paint shadows (with vertical shifts) so we need to make it tall enough as well.
+const int _paintWidth = 1000;
+const int _paintHeight = 500;
+double? currentDevicePixelRatio;
+final DomOffscreenCanvas _paintCanvas = createDomOffscreenCanvas(_paintWidth, _paintHeight);
+final paintContext = _paintCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
+
 /// Abstracts the interface for painting text clusters, shadows, and decorations.
 abstract class Painter {
   Painter();
@@ -40,32 +49,34 @@ abstract class Painter {
   void paintDecorations(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
 
   /// Adjust the _paintCanvas scale based on device pixel ratio
-  double adjustCanvas(ui.Canvas canvas, double width, double height) {
-    if (width == 0 || height == 0) {
-      return 1.0;
+  void resizePaintCanvas(double zoomFactor) {
+    if (currentDevicePixelRatio == zoomFactor) {
+      // Nothing changed
+      return;
     }
 
-    final double zoomFactor = ui.window.devicePixelRatio;
-    _paintCanvas.width = (width * zoomFactor).ceilToDouble();
-    _paintCanvas.height = (height * zoomFactor).ceilToDouble();
+    // Since the output canvas is zoomed by device pixel ratio,
+    // we need to adjust our offscreen canvas accordingly to avoid pixelation
+    // that would happen if didn't resize it.
+    if (currentDevicePixelRatio != null) {
+      paintContext.restore(); // Restore to unscaled state
+    }
+    _paintCanvas.width = (_paintWidth * zoomFactor).ceilToDouble();
+    _paintCanvas.height = (_paintHeight * zoomFactor).ceilToDouble();
     paintContext.scale(zoomFactor, zoomFactor);
+    paintContext.save();
+
+    currentDevicePixelRatio = zoomFactor;
 
     WebParagraphDebug.log(
-      'adjustPaintCanvas: ${_paintCanvas.width}x${_paintCanvas.height} @ $zoomFactor',
+      'resizePaintCanvas: ${_paintCanvas.width}x${_paintCanvas.height} @ $zoomFactor',
     );
-    return zoomFactor;
   }
 
   void clearCanvas(ui.Rect sourceRect) {
     paintContext.clearRect(0, 0, _paintCanvas.width!.ceil(), _paintCanvas.height!.ceil());
   }
 }
-
-// TODO(jlavrova): precalculate the size of the canvas based on the text to be painted
-// (including shadows, decorations, etc) and make sure it does not exceed the maximum canvas size
-// supported by the browser.
-final DomOffscreenCanvas _paintCanvas = createDomOffscreenCanvas(500, 500);
-final paintContext = _paintCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
 
 class CanvasKitPainter extends Painter {
   @override
@@ -102,9 +113,10 @@ class CanvasKitPainter extends Painter {
 
       paintContext.reset();
       paintContext.lineWidth = thickness;
-      paintContext.strokeStyle = block.style.getDecorationColor().toCssString();
+      paintContext.strokeStyle = (block.style.decorationColor ?? const ui.Color(0x00000000))
+          .toCssString();
 
-      switch (block.style.decorationStyle!) {
+      switch (block.style.decorationStyle ?? ui.TextDecorationStyle.solid) {
         case ui.TextDecorationStyle.wavy:
           calculateWaves(x, y, block.style, sourceRect, thickness);
 
@@ -245,7 +257,7 @@ class CanvasKitPainter extends Painter {
   }
 
   double calculateThickness(WebTextStyle textStyle) {
-    return (textStyle.fontSize! / 14.0) * textStyle.decorationThickness!;
+    return (textStyle.fontSize! / 14.0) * (textStyle.decorationThickness ?? 1.0);
   }
 
   double calculatePosition(

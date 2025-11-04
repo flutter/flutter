@@ -229,9 +229,9 @@ class WebTextStyle implements ui.TextStyle {
   final ui.Paint? background;
   final List<ui.Shadow>? shadows;
   final ui.TextDecoration? decoration;
-  final ui.Color? decorationColor;
-  final ui.TextDecorationStyle? decorationStyle;
-  final double? decorationThickness;
+  final ui.Color? decorationColor; // Defaults to foreground color
+  final ui.TextDecorationStyle? decorationStyle; // Defaults to none
+  final double? decorationThickness; // Defaults to 1
   final double? letterSpacing;
   final double? wordSpacing;
   final double? height;
@@ -337,17 +337,9 @@ class WebTextStyle implements ui.TextStyle {
   }
 
   ui.Color getForegroundColor() {
-    //print('foreground: ${foreground == null ? 'null' : foreground!.color.toCssString()}');
-    //print('color: ${color == null ? 'null' : color!.toCssString()}');
     return foreground != null
         ? foreground!.color
         : (color != null ? color! : const ui.Color(0xFFFFFFFF));
-  }
-
-  ui.Color getDecorationColor() {
-    //print('foreground: ${foreground == null ? 'null' : foreground!.color.toCssString()}');
-    //print('color: ${color == null ? 'null' : color!.toCssString()}');
-    return decorationColor != null ? decorationColor! : getForegroundColor();
   }
 
   String _debugPaintToString(ui.Paint? paint) {
@@ -480,7 +472,9 @@ class WebTextStyle implements ui.TextStyle {
       case StyleElements.shadows:
         return shadows != null && shadows!.isNotEmpty;
       case StyleElements.decorations:
-        return decoration != null && decoration! != ui.TextDecoration.none;
+        return decoration != null &&
+            decoration! != ui.TextDecoration.none &&
+            decorationStyle != null;
       case StyleElements.text:
         return true;
     }
@@ -634,6 +628,12 @@ class TextSpan extends ParagraphSpan {
     // layoutContext.direction = isDefaultLtr ? 'ltr' : 'rtl';
 
     style.applyToContext(layoutContext);
+    if (text.length == 1) {
+      print(
+        'layoutContext.font:${layoutContext.font} letter:${layoutContext.letterSpacing} word:${layoutContext.wordSpacing} '
+        'caps:${layoutContext.fontVariantCaps} dir:${layoutContext.direction} kerning:${layoutContext.fontKerning} rendering:${layoutContext.textRendering}',
+      );
+    }
     return layoutContext.measureText(text);
   }
 
@@ -957,6 +957,7 @@ class WebParagraph implements ui.Paragraph {
   }
 
   void paint(ui.Canvas canvas, ui.Offset offset) {
+    _paint.painter.resizePaintCanvas(ui.window.devicePixelRatio);
     for (final line in _layout.lines) {
       _paint.paintLine(canvas, _layout, line, offset.dx, offset.dy);
     }
