@@ -209,5 +209,12 @@ public class AccessibilityChannel {
 
     /** The user has opened a tooltip. */
     void onTooltip(@NonNull String message);
+
+    /**
+     * The framework has started or stopped compiling the accessibility tree.
+     *
+     * @param enabled True to start compiling the accessibility tree, false to stop it.
+     */
+    void setSemanticsTreeEnabled(boolean enabled);
   }
 }

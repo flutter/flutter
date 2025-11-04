@@ -44,6 +44,8 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
 
   void FlutterViewOnPreEngineRestart() override;
 
+  void FlutterViewSetSemanticsTreeEnabled(bool enabled) override;
+
   void SurfaceTextureAttachToGLContext(JavaLocalRef surface_texture,
                                        int textureId) override;
 

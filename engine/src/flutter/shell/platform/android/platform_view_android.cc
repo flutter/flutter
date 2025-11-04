@@ -330,6 +330,11 @@ void PlatformViewAndroid::SetApplicationLocale(std::string locale) {
   jni_facade_->FlutterViewSetApplicationLocale(std::move(locale));
 }
 
+// |PlatformView|
+void PlatformViewAndroid::SetSemanticsTreeEnabled(bool enabled) {
+  jni_facade_->FlutterViewSetSemanticsTreeEnabled(enabled);
+}
+
 void PlatformViewAndroid::RegisterExternalTexture(
     int64_t texture_id,
     const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture) {

@@ -795,6 +795,22 @@ public class FlutterJNI {
   }
 
   /**
+   * Invoked by native to notify framework started or stopped compiling accessibility tree.
+   *
+   * <p>The embedding needs to be prepare to receive accessibility tree updates when true, and clean
+   * up when false.
+   *
+   * @param enabled True if the framework is compiling the accessibility tree.
+   */
+  @UiThread
+  public void setSemanticsTreeEnabled(boolean enabled) {
+    ensureRunningOnMainThread();
+    if (accessibilityDelegate != null) {
+      accessibilityDelegate.setSemanticsTreeEnabled(enabled);
+    }
+  }
+
+  /**
    * Invoked by native to send new custom accessibility events from Flutter to Android.
    *
    * <p>The {@code buffer} and {@code strings} form a communication protocol that is implemented
@@ -1641,6 +1657,16 @@ public class FlutterJNI {
      * <p>Must be called on the main thread
      */
     void setLocale(@NonNull String locale);
+
+    /**
+     * Invoked by native to notify framework started or stopped compiling accessibility tree.
+     *
+     * <p>The embedding needs to be prepare to receive accessibility tree updates when true, and
+     * clean up when false.
+     *
+     * @param enabled True if the framework is compiling the accessibility tree.
+     */
+    void setSemanticsTreeEnabled(boolean enabled);
   }
 
   public interface AsyncWaitForVsyncDelegate {
