@@ -476,11 +476,11 @@ void Engine::DispatchPointerDataPacket(
   pointer_data_dispatcher_->DispatchPacket(std::move(packet), trace_flow_id);
 }
 
-bool Engine::EmbeddedViewShouldAcceptGesture(
+bool Engine::EmbeddedNativeViewShouldAcceptGesture(
     int64_t view_id,
     const flutter::PointData& touch_began_location) {
   if (runtime_controller_) {
-    return runtime_controller_->EmbeddedViewShouldAcceptGesture(
+    return runtime_controller_->EmbeddedNativeViewShouldAcceptGesture(
         view_id, touch_began_location);
   }
   return false;

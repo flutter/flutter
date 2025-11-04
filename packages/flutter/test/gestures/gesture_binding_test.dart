@@ -6,7 +6,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -75,6 +74,13 @@ class _DummyHitTestTarget implements HitTestTarget {
   }
 }
 
+class _DummyNativeHitTestTarget implements NativeHitTestTarget, HitTestTarget {
+  @override
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    // Nothing to do.
+  }
+}
+
 void main() {
   final TestGestureFlutterBinding binding = TestGestureFlutterBinding.ensureInitialized();
 
@@ -113,50 +119,25 @@ void main() {
     expect(acceptGesture, isFalse);
   });
 
-  test(
-    'Platform view hit test should not accept gesture if first hit is not a platform view',
-    () async {
-      final UiKitViewController viewController = await PlatformViewsService.initUiKitView(
-        id: 0,
-        viewType: 'webview',
-        layoutDirection: TextDirection.ltr,
-      );
-      final RenderUiKitView platformViewTarget = RenderUiKitView(
-        viewController: viewController,
-        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
-        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
-      );
-
-      TestGestureFlutterBinding.instance.onHitTestInView =
-          (HitTestResult result, Offset position, int viewId) {
-            result.add(HitTestEntry(_DummyHitTestTarget()));
-            result.add(HitTestEntry(platformViewTarget));
-          };
-
-      final bool? acceptGesture = GestureBinding
-          .instance
-          .platformDispatcher
-          .onPlatformViewShouldAcceptGesture
-          ?.call(0, 1, 1);
-      expect(acceptGesture, isFalse);
-    },
-  );
-
-  test('Platform view hit test should accept gesture if first hit is a platform view', () async {
-    final UiKitViewController viewController = await PlatformViewsService.initUiKitView(
-      id: 0,
-      viewType: 'webview',
-      layoutDirection: TextDirection.ltr,
-    );
-    final RenderUiKitView platformViewTarget = RenderUiKitView(
-      viewController: viewController,
-      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
-      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
-    );
-
+  test('Platform view hit test should not accept gesture if first hit is not a platform view', () {
     TestGestureFlutterBinding.instance.onHitTestInView =
         (HitTestResult result, Offset position, int viewId) {
-          result.add(HitTestEntry(platformViewTarget));
+          result.add(HitTestEntry(_DummyHitTestTarget()));
+          result.add(HitTestEntry(_DummyNativeHitTestTarget()));
+        };
+
+    final bool? acceptGesture = GestureBinding
+        .instance
+        .platformDispatcher
+        .onPlatformViewShouldAcceptGesture
+        ?.call(0, 1, 1);
+    expect(acceptGesture, isFalse);
+  });
+
+  test('Platform view hit test should accept gesture if first hit is a platform view', () {
+    TestGestureFlutterBinding.instance.onHitTestInView =
+        (HitTestResult result, Offset position, int viewId) {
+          result.add(HitTestEntry(_DummyNativeHitTestTarget()));
           result.add(HitTestEntry(_DummyHitTestTarget()));
         };
 

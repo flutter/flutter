@@ -14,7 +14,6 @@ import 'dart:collection';
 import 'dart:ui' as ui show PointerDataPacket;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'arena.dart';
@@ -37,6 +36,9 @@ export 'pointer_router.dart' show PointerRouter;
 export 'pointer_signal_resolver.dart' show PointerSignalResolver;
 
 typedef _HandleSampleTimeChangedCallback = void Function();
+
+/// Abstract class that represents a hit test target backed by a embedded native view.
+abstract class NativeHitTestTarget {}
 
 /// Class that implements clock used for sampling.
 class SamplingClock {
@@ -330,7 +332,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       return false;
     }
     final HitTestTarget firstHit = result.path.first.target;
-    return firstHit is RenderUiKitView;
+    return firstHit is NativeHitTestTarget;
   }
 
   double? _devicePixelRatioForView(int viewId) {

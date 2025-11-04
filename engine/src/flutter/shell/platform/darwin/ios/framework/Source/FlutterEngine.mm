@@ -391,7 +391,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   if (!self.platformView) {
     return NO;
   }
-  return self.platformView->EmbeddedViewShouldAcceptGesture(viewId, location);
+  return self.platformView->EmbeddedNativeViewShouldAcceptGesture(viewId, location);
 }
 
 - (void)installFirstFrameCallback:(void (^)(void))block {
