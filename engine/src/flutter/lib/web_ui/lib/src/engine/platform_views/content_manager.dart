@@ -124,13 +124,16 @@ class PlatformViewManager {
   /// </flt-platform-view-slot>
   /// ```
   ///
+  /// The `arbitrary-html-elements` are the result of the call to the user-supplied
+  /// `factory` function for this Platform View (see [registerFactory]).
+  ///
   /// The outer `flt-platform-view` tag is a simple wrapper that we add to have
   /// a place where to attach the `slot` property, that will tell the browser
   /// what `slot` tag will reveal this `contents`, **without modifying the returned
   /// html from the `factory` function**.
   ///
-  /// By default, platform views are made inert. The semantics layer will
-  /// remove this when a semantic node is created.
+  /// By default, platform views are made inert. The semantics layer will remove
+  /// this when a semantic node is created.
   DomElement renderContent(String viewType, int viewId, Object? params) {
     assert(
       knowsViewType(viewType),
