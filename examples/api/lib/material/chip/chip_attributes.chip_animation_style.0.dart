@@ -51,7 +51,7 @@ class _ChipAnimationStyleExampleState extends State<ChipAnimationStyleExample> {
                     ),
                   ),
                   onSelected: !enabled ? null : (bool value) {},
-                  disabledColor: Colors.red.withOpacity(0.12),
+                  disabledColor: Colors.red.withValues(alpha: 0.12),
                   backgroundColor: Colors.amber,
                   label: Text(enabled ? 'Enabled' : 'Disabled'),
                 ),
