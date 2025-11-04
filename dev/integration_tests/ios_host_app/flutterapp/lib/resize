@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+void main() {
+  runApp(ResizeApp());
+}
+
 class ResizeApp extends StatefulWidget {
   /// Creates the [ResizeApp].
   const ResizeApp({super.key});
@@ -29,11 +33,14 @@ class _ResizeAppState extends State<ResizeApp> {
               padding: const EdgeInsets.fromLTRB(8.0, 50, 8.0, 8.0),
               child: Semantics(
                 label: 'Add to list',
-                child: ElevatedButton(onPressed: _addToList, child: const Text('Add to list')),
+                child: ElevatedButton(
+                  onPressed: _addToList,
+                  child: const Text('Add to list'),
+                ),
               ),
             ),
             for (int i = 0; i < _listSize; i++)
-              Text('Hello from Flutter $i', style: const TextStyle(color: Colors.pink, fontSize: 30)),
+              Container(color: HSVColor.fromAHSV(1, (10.0 * i), 1, 1).toColor(), height: 100),
           ],
         ),
       ),
