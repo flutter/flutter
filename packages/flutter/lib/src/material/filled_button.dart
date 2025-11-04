@@ -90,63 +90,45 @@ class FilledButton extends ButtonStyleButton {
     super.clipBehavior = Clip.none,
     super.statesController,
     required super.child,
-  }) : _variant = _FilledButtonVariant.filled;
+  }) : _variant = _FilledButtonVariant.filled,
+       _addPadding = false;
 
   /// Create a filled button from [icon] and [label].
   ///
   /// The icon and label are arranged in a row with padding at the start and end
   /// and a gap between them.
   ///
-  /// If [icon] is null, will create a [FilledButton] instead.
+  /// If [icon] is null, this constructor will create a [FilledButton]
+  /// that doesn't display an icon.
   ///
   /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
   ///
-  factory FilledButton.icon({
-    Key? key,
-    required VoidCallback? onPressed,
-    VoidCallback? onLongPress,
-    ValueChanged<bool>? onHover,
-    ValueChanged<bool>? onFocusChange,
-    ButtonStyle? style,
-    FocusNode? focusNode,
-    bool? autofocus,
-    Clip? clipBehavior,
-    MaterialStatesController? statesController,
+  FilledButton.icon({
+    super.key,
+    required super.onPressed,
+    super.onLongPress,
+    super.onHover,
+    super.onFocusChange,
+    super.style,
+    super.focusNode,
+    super.autofocus = false,
+    super.clipBehavior = Clip.none,
+    super.statesController,
     Widget? icon,
     required Widget label,
     IconAlignment? iconAlignment,
-  }) {
-    if (icon == null) {
-      return FilledButton(
-        key: key,
-        onPressed: onPressed,
-        onLongPress: onLongPress,
-        onHover: onHover,
-        onFocusChange: onFocusChange,
-        style: style,
-        focusNode: focusNode,
-        autofocus: autofocus ?? false,
-        clipBehavior: clipBehavior ?? Clip.none,
-        statesController: statesController,
-        child: label,
-      );
-    }
-    return _FilledButtonWithIcon(
-      key: key,
-      onPressed: onPressed,
-      onLongPress: onLongPress,
-      onHover: onHover,
-      onFocusChange: onFocusChange,
-      style: style,
-      focusNode: focusNode,
-      autofocus: autofocus ?? false,
-      clipBehavior: clipBehavior ?? Clip.none,
-      statesController: statesController,
-      icon: icon,
-      label: label,
-      iconAlignment: iconAlignment,
-    );
-  }
+  }) : _variant = _FilledButtonVariant.filled,
+       _addPadding = icon != null,
+       super(
+         child: icon != null
+             ? _FilledButtonWithIconChild(
+                 label: label,
+                 icon: icon,
+                 buttonStyle: style,
+                 iconAlignment: iconAlignment,
+               )
+             : label,
+       );
 
   /// Create a tonal variant of FilledButton.
   ///
@@ -166,60 +148,42 @@ class FilledButton extends ButtonStyleButton {
     super.clipBehavior = Clip.none,
     super.statesController,
     required super.child,
-  }) : _variant = _FilledButtonVariant.tonal;
+  }) : _variant = _FilledButtonVariant.tonal,
+       _addPadding = false;
 
   /// Create a filled tonal button from [icon] and [label].
   ///
   /// The [icon] and [label] are arranged in a row with padding at the start and
   /// end and a gap between them.
   ///
-  /// If [icon] is null, will create a [FilledButton.tonal] instead.
-  factory FilledButton.tonalIcon({
-    Key? key,
-    required VoidCallback? onPressed,
-    VoidCallback? onLongPress,
-    ValueChanged<bool>? onHover,
-    ValueChanged<bool>? onFocusChange,
-    ButtonStyle? style,
-    FocusNode? focusNode,
-    bool? autofocus,
-    Clip? clipBehavior,
-    MaterialStatesController? statesController,
+  /// If [icon] is null, this constructor will create a [FilledButton]
+  /// that doesn't display an icon.
+  FilledButton.tonalIcon({
+    super.key,
+    required super.onPressed,
+    super.onLongPress,
+    super.onHover,
+    super.onFocusChange,
+    super.style,
+    super.focusNode,
+    super.autofocus = false,
+    super.clipBehavior = Clip.none,
+    super.statesController,
     Widget? icon,
     required Widget label,
     IconAlignment? iconAlignment,
-  }) {
-    if (icon == null) {
-      return FilledButton.tonal(
-        key: key,
-        onPressed: onPressed,
-        onLongPress: onLongPress,
-        onHover: onHover,
-        onFocusChange: onFocusChange,
-        style: style,
-        focusNode: focusNode,
-        autofocus: autofocus ?? false,
-        clipBehavior: clipBehavior ?? Clip.none,
-        statesController: statesController,
-        child: label,
-      );
-    }
-    return _FilledButtonWithIcon.tonal(
-      key: key,
-      onPressed: onPressed,
-      onLongPress: onLongPress,
-      onHover: onHover,
-      onFocusChange: onFocusChange,
-      style: style,
-      focusNode: focusNode,
-      autofocus: autofocus,
-      clipBehavior: clipBehavior,
-      statesController: statesController,
-      icon: icon,
-      label: label,
-      iconAlignment: iconAlignment,
-    );
-  }
+  }) : _variant = _FilledButtonVariant.tonal,
+       _addPadding = icon != null,
+       super(
+         child: icon != null
+             ? _FilledButtonWithIconChild(
+                 label: label,
+                 icon: icon,
+                 buttonStyle: style,
+                 iconAlignment: iconAlignment,
+               )
+             : label,
+       );
 
   /// A static convenience method that constructs a filled button
   /// [ButtonStyle] given simple values.
@@ -351,6 +315,7 @@ class FilledButton extends ButtonStyleButton {
   }
 
   final _FilledButtonVariant _variant;
+  final bool _addPadding;
 
   /// Defines the button's default appearance.
   ///
@@ -465,10 +430,37 @@ class FilledButton extends ButtonStyleButton {
   /// [ButtonStyle.padding] is reduced from 24 to 16.
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
-    return switch (_variant) {
+    final ButtonStyle buttonStyle = switch (_variant) {
       _FilledButtonVariant.filled => _FilledButtonDefaultsM3(context),
       _FilledButtonVariant.tonal => _FilledTonalButtonDefaultsM3(context),
     };
+
+    if (_addPadding) {
+      final bool useMaterial3 = Theme.of(context).useMaterial3;
+      final double defaultFontSize =
+          buttonStyle.textStyle?.resolve(const <WidgetState>{})?.fontSize ?? 14.0;
+      final double effectiveTextScale =
+          MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
+
+      final EdgeInsetsGeometry scaledPadding = useMaterial3
+          ? ButtonStyleButton.scaledPadding(
+              const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
+              const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
+              const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
+              effectiveTextScale,
+            )
+          : ButtonStyleButton.scaledPadding(
+              const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
+              const EdgeInsets.symmetric(horizontal: 8),
+              const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
+              effectiveTextScale,
+            );
+      return buttonStyle.copyWith(
+        padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
+      );
+    }
+
+    return buttonStyle;
   }
 
   /// Returns the [FilledButtonThemeData.style] of the closest
@@ -490,83 +482,6 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
     EdgeInsets.symmetric(horizontal: padding1x / 2 / 2),
     effectiveTextScale,
   );
-}
-
-class _FilledButtonWithIcon extends FilledButton {
-  _FilledButtonWithIcon({
-    super.key,
-    required super.onPressed,
-    super.onLongPress,
-    super.onHover,
-    super.onFocusChange,
-    super.style,
-    super.focusNode,
-    bool? autofocus,
-    super.clipBehavior,
-    super.statesController,
-    required Widget icon,
-    required Widget label,
-    IconAlignment? iconAlignment,
-  }) : super(
-         autofocus: autofocus ?? false,
-         child: _FilledButtonWithIconChild(
-           icon: icon,
-           label: label,
-           buttonStyle: style,
-           iconAlignment: iconAlignment,
-         ),
-       );
-
-  _FilledButtonWithIcon.tonal({
-    super.key,
-    required super.onPressed,
-    super.onLongPress,
-    super.onHover,
-    super.onFocusChange,
-    super.style,
-    super.focusNode,
-    bool? autofocus,
-    super.clipBehavior,
-    super.statesController,
-    required Widget icon,
-    required Widget label,
-    IconAlignment? iconAlignment,
-  }) : super.tonal(
-         autofocus: autofocus ?? false,
-         child: _FilledButtonWithIconChild(
-           icon: icon,
-           label: label,
-           buttonStyle: style,
-           iconAlignment: iconAlignment,
-         ),
-       );
-
-  @override
-  ButtonStyle defaultStyleOf(BuildContext context) {
-    final bool useMaterial3 = Theme.of(context).useMaterial3;
-    final ButtonStyle buttonStyle = super.defaultStyleOf(context);
-    final double defaultFontSize =
-        buttonStyle.textStyle?.resolve(const <WidgetState>{})?.fontSize ?? 14.0;
-    final double effectiveTextScale =
-        MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
-
-    final EdgeInsetsGeometry scaledPadding = useMaterial3
-        ? ButtonStyleButton.scaledPadding(
-            const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
-            const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
-            const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
-            effectiveTextScale,
-          )
-        : ButtonStyleButton.scaledPadding(
-            const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
-            const EdgeInsets.symmetric(horizontal: 8),
-            const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
-            effectiveTextScale,
-          );
-    return buttonStyle.copyWith(
-      padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
-    );
-  }
 }
 
 class _FilledButtonWithIconChild extends StatelessWidget {
