@@ -917,7 +917,7 @@ class _RenderDecoration extends RenderBox
 
   static BoxParentData _boxParentData(RenderBox box) => box.parentData! as BoxParentData;
 
-  EdgeInsetsDirectional get contentPadding => decoration.contentPadding;
+  EdgeInsetsDirectional get contentPadding => decoration.errorPadding ?? decoration.contentPadding;
 
   _SubtextSize? _computeSubtextSizes({
     required BoxConstraints constraints,
@@ -2583,8 +2583,17 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           );
 
     final EdgeInsetsDirectional contentPadding;
+    final EdgeInsetsDirectional? errorPadding;
+    final EdgeInsets? resolvedErrorPadding = decoration.errorPadding?.resolve(textDirection);
+    errorPadding = resolvedErrorPadding == null
+        ? null
+        : EdgeInsetsDirectional.fromSTEB(
+            flipHorizontal ? resolvedErrorPadding.right : resolvedErrorPadding.left,
+            resolvedErrorPadding.top,
+            flipHorizontal ? resolvedErrorPadding.left : resolvedErrorPadding.right,
+            resolvedErrorPadding.bottom,
+          );
     final double floatingLabelHeight;
-
     if (decoration.isCollapsed!) {
       floatingLabelHeight = 0.0;
       contentPadding = decorationContentPadding ?? EdgeInsetsDirectional.zero;
@@ -2641,7 +2650,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     final _Decorator decorator = _Decorator(
       decoration: _Decoration(
-        errorPadding: decorationContentPadding,
+        errorPadding: errorPadding,
         contentPadding: contentPadding,
         isCollapsed: decoration.isCollapsed!,
         inputGap: inputGap,
@@ -3911,6 +3920,7 @@ class InputDecoration {
     bool? isCollapsed,
     bool? isDense,
     EdgeInsetsGeometry? contentPadding,
+    EdgeInsetsGeometry? errorPadding,
     Widget? prefixIcon,
     Widget? prefix,
     String? prefixText,
@@ -3971,6 +3981,7 @@ class InputDecoration {
       isCollapsed: isCollapsed ?? this.isCollapsed,
       isDense: isDense ?? this.isDense,
       contentPadding: contentPadding ?? this.contentPadding,
+      errorPadding: errorPadding ?? this.errorPadding,
       prefixIcon: prefixIcon ?? this.prefixIcon,
       prefix: prefix ?? this.prefix,
       prefixText: prefixText ?? this.prefixText,
@@ -4034,6 +4045,7 @@ class InputDecoration {
       floatingLabelAlignment: floatingLabelAlignment ?? theme.floatingLabelAlignment,
       isDense: isDense ?? theme.isDense,
       contentPadding: contentPadding ?? theme.contentPadding,
+      errorPadding: errorPadding ?? theme.errorPadding,
       isCollapsed: isCollapsed ?? theme.isCollapsed,
       iconColor: iconColor ?? theme.iconColor,
       prefixStyle: prefixStyle ?? theme.prefixStyle,
@@ -4094,6 +4106,7 @@ class InputDecoration {
         other.floatingLabelAlignment == floatingLabelAlignment &&
         other.isDense == isDense &&
         other.contentPadding == contentPadding &&
+        other.errorPadding == errorPadding &&
         other.isCollapsed == isCollapsed &&
         other.prefixIcon == prefixIcon &&
         other.prefixIconColor == prefixIconColor &&
@@ -4156,6 +4169,7 @@ class InputDecoration {
       floatingLabelAlignment,
       isDense,
       contentPadding,
+      errorPadding,
       isCollapsed,
       filled,
       fillColor,
@@ -4216,6 +4230,7 @@ class InputDecoration {
       if (floatingLabelAlignment != null) 'floatingLabelAlignment: $floatingLabelAlignment',
       if (isDense ?? false) 'isDense: $isDense',
       if (contentPadding != null) 'contentPadding: $contentPadding',
+      if (errorPadding != null) 'errorPadding: $errorPadding',
       if (isCollapsed ?? false) 'isCollapsed: $isCollapsed',
       if (prefixIcon != null) 'prefixIcon: $prefixIcon',
       if (prefixIconColor != null) 'prefixIconColor: $prefixIconColor',
@@ -4324,6 +4339,7 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
                      floatingLabelAlignment ??
                      isDense ??
                      contentPadding ??
+                     errorPadding ??
                      isCollapsed ??
                      iconColor ??
                      prefixStyle ??
@@ -4512,6 +4528,9 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
   /// please use the [InputDecorationThemeData.contentPadding] property in [data] instead.
   EdgeInsetsGeometry? get contentPadding => _data != null ? _data.contentPadding : _contentPadding;
 
+  ///TODO(abikko): add documentation after implementing error padding in text field
+  EdgeInsetsGeometry? get errorPadding => _data != null ? _data.errorPadding : _errorPadding;
+
   /// Overrides the default value for [InputDecoration.isCollapsed].
   ///
   /// This property is obsolete and will be deprecated in a future release:
@@ -4677,6 +4696,7 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
         floatingLabelAlignment: _floatingLabelAlignment,
         isDense: _isDense,
         contentPadding: _contentPadding,
+        errorPadding: _errorPadding,
         isCollapsed: _isCollapsed,
         iconColor: _iconColor,
         prefixStyle: _prefixStyle,
@@ -4738,6 +4758,7 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
     FloatingLabelAlignment? floatingLabelAlignment,
     bool? isDense,
     EdgeInsetsGeometry? contentPadding,
+    EdgeInsetsGeometry? errorPadding,
     bool? isCollapsed,
     Color? iconColor,
     TextStyle? prefixStyle,
@@ -4777,6 +4798,7 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
       floatingLabelAlignment: floatingLabelAlignment ?? this.floatingLabelAlignment,
       isDense: isDense ?? this.isDense,
       contentPadding: contentPadding ?? this.contentPadding,
+      errorPadding: errorPadding ?? this.errorPadding,
       iconColor: iconColor ?? this.iconColor,
       isCollapsed: isCollapsed ?? this.isCollapsed,
       prefixStyle: prefixStyle ?? this.prefixStyle,
@@ -4828,6 +4850,7 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
       errorStyle: errorStyle ?? other.errorStyle,
       errorMaxLines: errorMaxLines ?? other.errorMaxLines,
       contentPadding: contentPadding ?? other.contentPadding,
+      errorPadding: errorPadding ?? other.errorPadding,
       iconColor: iconColor ?? other.iconColor,
       prefixStyle: prefixStyle ?? other.prefixStyle,
       prefixIconColor: prefixIconColor ?? other.prefixIconColor,
@@ -4879,7 +4902,6 @@ class InputDecorationThemeData with Diagnosticable {
   /// Creates a [InputDecorationThemeData] that can be used to override default
   /// properties in a [InputDecorationTheme] widget.
   const InputDecorationThemeData({
-    this.errorPadding,
     this.labelStyle,
     this.floatingLabelStyle,
     this.helperStyle,
@@ -4893,6 +4915,7 @@ class InputDecorationThemeData with Diagnosticable {
     this.floatingLabelAlignment = FloatingLabelAlignment.start,
     this.isDense = false,
     this.contentPadding,
+    this.errorPadding,
     this.isCollapsed = false,
     this.iconColor,
     this.prefixStyle,
