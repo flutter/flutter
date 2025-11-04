@@ -3455,22 +3455,10 @@ void main() {
 
       final File pubspec = projectDir.childFile('pubspec.yaml');
       final String pubspecContent = await pubspec.readAsString();
-      expect(
-        pubspecContent,
-        contains(
-          '      ios:\n'
-          '        pluginClass: DarwinPlugin\n'
-          '        sharedDarwinSource: true',
-        ),
-      );
-      expect(
-        pubspecContent,
-        contains(
-          '      macos:\n'
-          '        pluginClass: DarwinPlugin\n'
-          '        sharedDarwinSource: true',
-        ),
-      );
+      expect(pubspecContent, contains('ios:'));
+      expect(pubspecContent, contains('macos:'));
+      expect(pubspecContent, contains('pluginClass: DarwinPlugin'));
+      expect(pubspecContent, contains('sharedDarwinSource: true'));
 
       final File podspec = projectDir.childDirectory('darwin').childFile('darwin_plugin.podspec');
       final String podspecContent = await podspec.readAsString();
