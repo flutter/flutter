@@ -123,7 +123,7 @@ class RawMaterialButton extends StatefulWidget {
   ///  * [WidgetState.disabled].
   /// {@endtemplate}
   ///
-  /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
+  /// If this property is null, [WidgetStateMouseCursor.adaptiveClickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// Defines the default text style, with [Material.textStyle], for the
@@ -362,7 +362,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
       widget.constraints,
     );
     final MouseCursor? effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor?>(
-      widget.mouseCursor ?? WidgetStateMouseCursor.clickable,
+      widget.mouseCursor ?? WidgetStateMouseCursor.adaptiveClickable,
       materialStates,
     );
     final EdgeInsetsGeometry padding = widget.padding
@@ -508,9 +508,9 @@ class _RenderInputPadding extends RenderShiftedBox {
   Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
     if (child != null) {
       final Size childSize = layoutChild(child!, constraints);
-      final double height = math.max(childSize.width, minSize.width);
-      final double width = math.max(childSize.height, minSize.height);
-      return constraints.constrain(Size(height, width));
+      final double width = math.max(childSize.width, minSize.width);
+      final double height = math.max(childSize.height, minSize.height);
+      return constraints.constrain(Size(width, height));
     }
     return Size.zero;
   }

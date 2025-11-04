@@ -2111,7 +2111,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test default cursor when disabled
@@ -3075,5 +3075,18 @@ void main() {
 
     // The button should still be focused.
     expect(getButtonFocusNode().hasFocus, true);
+  });
+
+  testWidgets('OutlinedButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: OutlinedButton(onPressed: () {}, child: const Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(OutlinedButton)), Size.zero);
   });
 }

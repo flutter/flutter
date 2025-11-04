@@ -240,7 +240,7 @@ class FontFallbackManager {
         printWarning(
           'Could not find a set of Noto fonts to display all missing '
           'characters. Please add a font asset for the missing characters.'
-          ' See: https://flutter.dev/docs/cookbook/design/fonts',
+          ' See: https://docs.flutter.dev/cookbook/design/fonts',
         );
         _codePointsWithNoKnownFont.addAll(missingCodePoints);
       }

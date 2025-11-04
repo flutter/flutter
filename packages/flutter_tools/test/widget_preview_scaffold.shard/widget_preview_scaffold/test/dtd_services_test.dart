@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:flutter_tools/src/widget_preview/persistent_preferences.dart';
 import 'package:test/fake.dart';
@@ -18,7 +19,7 @@ import 'package:widget_preview_scaffold/src/dtd/dtd_services.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
-import '../../../src/test_flutter_command_runner.dart';
+import '../../../src/fakes.dart';
 import '../../../commands.shard/permeable/utils/project_testing_utils.dart';
 
 class FakeFlutterProject extends Fake implements FlutterProject {
@@ -47,6 +48,14 @@ void main() {
         // restart requests.
         final hotRestartRequestCompleter = Completer<void>();
         dtdServer = WidgetPreviewDtdServices(
+          previewAnalytics: WidgetPreviewAnalytics(
+            analytics: getInitializedFakeAnalyticsInstance(
+              // We don't care about anything written to the file system by analytics, so we're safe
+              // to use a different file system here.
+              fs: MemoryFileSystem.test(),
+              fakeFlutterVersion: FakeFlutterVersion(),
+            ),
+          ),
           fs: MemoryFileSystem.test(),
           logger: logger,
           shutdownHooks: ShutdownHooks(),
@@ -76,6 +85,14 @@ void main() {
       'can set and retreive values from $PersistentPreferences',
       () async {
         dtdServer = WidgetPreviewDtdServices(
+          previewAnalytics: WidgetPreviewAnalytics(
+            analytics: getInitializedFakeAnalyticsInstance(
+              // We don't care about anything written to the file system by analytics, so we're safe
+              // to use a different file system here.
+              fs: MemoryFileSystem.test(),
+              fakeFlutterVersion: FakeFlutterVersion(),
+            ),
+          ),
           fs: MemoryFileSystem.test(),
           logger: logger,
           shutdownHooks: ShutdownHooks(),

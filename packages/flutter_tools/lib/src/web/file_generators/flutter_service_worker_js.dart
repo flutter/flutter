@@ -17,8 +17,8 @@ enum ServiceWorkerStrategy implements CliEnum {
   @override
   String get cliName => kebabCase(name);
 
-  static ServiceWorkerStrategy fromCliName(String? value) => value == null
-      ? ServiceWorkerStrategy.offlineFirst
+  static ServiceWorkerStrategy? fromCliName(String? value) => value == null
+      ? null
       : values.singleWhere(
           (ServiceWorkerStrategy element) => element.cliName == value,
           orElse: () => throw ArgumentError.value(value, 'value', 'Not supported.'),

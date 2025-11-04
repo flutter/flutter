@@ -7,6 +7,7 @@ library;
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -2094,7 +2095,7 @@ void main() {
     // Test that the checkbox cursor is not changed.
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     await gesture.moveTo(tester.getCenter(find.text('Data')));

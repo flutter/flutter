@@ -15,7 +15,7 @@ import subprocess
 import sys
 
 SRC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-FUCHSIA_SDK_DIR = os.path.join(SRC_ROOT, 'fuchsia', 'sdk')
+FUCHSIA_SDK_DIR = os.path.join(SRC_ROOT, 'third_party', 'fuchsia-sdk')
 FLUTTER_DIR = os.path.join(SRC_ROOT, 'flutter')
 
 
@@ -97,8 +97,8 @@ def OnErrorRmTree(func, path, exc_info):
     raise
 
 
-def ExtractGzipArchive(archive, host_os, verbose):
-  sdk_dest = os.path.join(FUCHSIA_SDK_DIR, host_os)
+def ExtractGzipArchive(archive, verbose):
+  sdk_dest = os.path.join(FUCHSIA_SDK_DIR, 'sdk')
   if os.path.isdir(sdk_dest):
     shutil.rmtree(sdk_dest, onerror=OnErrorRmTree)
 
@@ -132,6 +132,7 @@ def Main():
       help='Emit verbose output'
   )
 
+  # This flag is unused but is kept to support existing scripts that pass it.
   parser.add_argument('--host-os', help='The host os')
 
   parser.add_argument('--fuchsia-sdk-path', help='The path in gcs to the fuchsia sdk to download')
@@ -139,7 +140,6 @@ def Main():
   args = parser.parse_args()
   fail_loudly = 1 if args.fail_loudly else 0
   verbose = args.verbose
-  host_os = args.host_os
   fuchsia_sdk_path = args.fuchsia_sdk_path
 
   if fuchsia_sdk_path is None:
@@ -151,7 +151,7 @@ def Main():
     eprint('Failed to download SDK from %s' % fuchsia_sdk_path)
     return fail_loudly
 
-  ExtractGzipArchive(archive, host_os, verbose)
+  ExtractGzipArchive(archive, verbose)
 
   success = True
   return 0 if success else fail_loudly

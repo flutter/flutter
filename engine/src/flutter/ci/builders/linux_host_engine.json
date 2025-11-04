@@ -43,6 +43,7 @@
                 "--runtime-mode",
                 "debug",
                 "--prebuilt-dart-sdk",
+                "--no-lto",
                 "--rbe",
                 "--no-goma"
             ],
@@ -93,6 +94,7 @@
                 "--runtime-mode",
                 "release",
                 "--prebuilt-dart-sdk",
+                "--no-lto",
                 "--rbe",
                 "--no-goma"
             ],

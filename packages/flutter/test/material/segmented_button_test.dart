@@ -9,6 +9,7 @@ library;
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -1441,6 +1442,95 @@ void main() {
         // Second segment has a disabled border.
         ..rrect(color: disabledColor),
     );
+  });
+
+  testWidgets('SegmentedButton has expected default mouse cursor on hover', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SegmentedButton<int>(
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(value: 0, label: Text('0')),
+                ButtonSegment<int>(value: 1, label: Text('1')),
+              ],
+              selected: const <int>{0},
+              onSelectionChanged: (Set<int> newSelection) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(10, 10));
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+
+    final Offset chip = tester.getCenter(find.text('0'));
+    await gesture.moveTo(chip);
+    await tester.pump();
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+  });
+
+  testWidgets('SegmentedButton has expected mouse cursor when explicitly configured', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SegmentedButton<int>(
+              style: ButtonStyle(
+                mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.grab),
+              ),
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(value: 0, label: Text('0')),
+                ButtonSegment<int>(value: 1, label: Text('1')),
+              ],
+              selected: const <int>{0},
+              onSelectionChanged: (Set<int> newSelection) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: tester.getCenter(find.byType(SegmentedButton<int>)));
+    addTearDown(gesture.removePointer);
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+  });
+
+  testWidgets('SegmentedButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: SegmentedButton<String>(
+              segments: const <ButtonSegment<String>>[
+                ButtonSegment<String>(value: 'X', label: Text('X')),
+              ],
+              selected: const <String>{'X'},
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SegmentedButton<String>)), Size.zero);
   });
 }
 

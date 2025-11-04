@@ -337,6 +337,9 @@ class _SemanticsDebuggerPainter extends CustomPainter {
   }
 
   void _paint(Canvas canvas, SemanticsNode node, int rank, int indexInParent, int level) {
+    if (node.traversalChildIdentifier != null) {
+      return;
+    }
     canvas.save();
     if (node.transform != null) {
       canvas.transform(node.transform!.storage);

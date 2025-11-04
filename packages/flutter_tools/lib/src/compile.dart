@@ -17,6 +17,7 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
 import 'base/process.dart';
+import 'base/utils.dart';
 import 'build_info.dart';
 import 'convert.dart';
 
@@ -378,10 +379,7 @@ class KernelCompiler {
     final Process server = await _processManager.start(command);
 
     server.stderr.transform<String>(utf8.decoder).listen(_logger.printError);
-    server.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen(_stdoutHandler.handler);
+    server.stdout.transform(utf8LineDecoder).listen(_stdoutHandler.handler);
     final int exitCode = await server.exitCode;
     if (exitCode == 0) {
       return _stdoutHandler.compilerOutput?.future;
@@ -893,8 +891,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _logger.printTrace(command.join(' '));
     _server = await _processManager.start(command);
     _server?.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
+        .transform(utf8LineDecoder)
         .listen(
           _stdoutHandler.handler,
           onDone: () {
@@ -907,10 +904,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
           },
         );
 
-    _server?.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen(_logger.printError);
+    _server?.stderr.transform(utf8LineDecoder).listen(_logger.printError);
 
     unawaited(
       _server?.exitCode.then((int code) {

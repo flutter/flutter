@@ -426,6 +426,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 --------------------------------------------------------------------------------
+icu
 json
 
 
@@ -4480,6 +4481,7 @@ prospectively choose to deem waived or otherwise exclude such Section(s) of
 the License, but only in their entirety and only with respect to the Combined
 Software.
 --------------------------------------------------------------------------------
+icu
 include
 json
 
@@ -8056,43 +8058,7 @@ icu
 Copyright (C) 2016 and later: Unicode, Inc. and others.
 License & terms of use: http://www.unicode.org/copyright.html
 
-Copyright (C) 2002-2010, International Business Machines
-Corporation and others.  All Rights Reserved.
-
-
---------------------------------------------------------------------------------
-icu
-
-Copyright (C) 2016 and later: Unicode, Inc. and others.
-License & terms of use: http://www.unicode.org/copyright.html
-
-Copyright (c) 2001-2003 International Business Machines
-Corporation and others. All Rights Reserved.
-
---------------------------------------------------------------------------------
-icu
-
-Copyright (C) 2016 and later: Unicode, Inc. and others.
-License & terms of use: http://www.unicode.org/copyright.html
-
-Copyright (c) 2001-2010 International Business Machines
-Corporation and others. All Rights Reserved.
-
---------------------------------------------------------------------------------
-icu
-
-Copyright (C) 2016 and later: Unicode, Inc. and others.
-License & terms of use: http://www.unicode.org/copyright.html
-
 Copyright (c) 2002-2005, International Business Machines Corporation and others. All Rights Reserved.
-
---------------------------------------------------------------------------------
-icu
-
-Copyright (C) 2016 and later: Unicode, Inc. and others.
-License & terms of use: http://www.unicode.org/copyright.html
-
-Copyright (c) 2002-2010, International Business Machines Corporation and others. All Rights Reserved.
 
 --------------------------------------------------------------------------------
 icu
@@ -8114,22 +8080,6 @@ Copyright (c) 2002-2016  International Business Machines Corporation and
 others. All Rights Reserved.
 
  
---------------------------------------------------------------------------------
-icu
-
-Copyright (C) 2016 and later: Unicode, Inc. and others.
-License & terms of use: http://www.unicode.org/copyright.html
-
-Copyright (c) 2003-2005, International Business Machines Corporation and others. All Rights Reserved.
-
---------------------------------------------------------------------------------
-icu
-
-Copyright (C) 2016 and later: Unicode, Inc. and others.
-License & terms of use: http://www.unicode.org/copyright.html
-
-Copyright (c) 2003-2010, International Business Machines Corporation and others. All Rights Reserved.
-
 --------------------------------------------------------------------------------
 icu
 
@@ -8306,17 +8256,6 @@ icu
 
 Copyright (C) 2016 and later: Unicode, Inc. and others.
 License & terms of use: http://www.unicode.org/copyright.html
-***************************************************************************
-*
-* Copyright (C) 2009 International Business Machines
-* Corporation and others.  All Rights Reserved.
-*
-***************************************************************************
---------------------------------------------------------------------------------
-icu
-
-Copyright (C) 2016 and later: Unicode, Inc. and others.
-License & terms of use: http://www.unicode.org/copyright.html
 *****************************************************************************
 
   Copyright (C) 2002-2015, International Business Machines Corporation and others.
@@ -8325,19 +8264,6 @@ License & terms of use: http://www.unicode.org/copyright.html
 *****************************************************************************
 
  
---------------------------------------------------------------------------------
-icu
-
-Copyright (C) 2016 and later: Unicode, Inc. and others.
-License & terms of use: http://www.unicode.org/copyright.html
-*******************************************************************************
-*
-*   Copyright (C) 1995-2001, International Business Machines
-*   Corporation and others.  All Rights Reserved.
-*
-*******************************************************************************
-
-
 --------------------------------------------------------------------------------
 icu
 
@@ -8415,6 +8341,15 @@ License & terms of use: http://www.unicode.org/copyright.html
 *
 *******************************************************************************
 
+
+--------------------------------------------------------------------------------
+icu
+
+Copyright (C) 2016 and later: Unicode, Inc. and others.
+License & terms of use: http://www.unicode.org/copyright.html
+---------------------------------------------------------
+Copyright (C) 2013, International Business Machines
+Corporation and others.  All Rights Reserved.
 
 --------------------------------------------------------------------------------
 icu
@@ -20944,6 +20879,48 @@ FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
 ON AN "AS IS" BASIS, AND THE COPYRIGHT HOLDER HAS NO OBLIGATION TO
 PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 --------------------------------------------------------------------------------
+flutter
+
+License for the Ahem font embedded below is from:
+https://www.w3.org/Style/CSS/Test/Fonts/Ahem/COPYING
+
+The Ahem font in this directory belongs to the public domain. In
+jurisdictions that do not recognize public domain ownership of these
+files, the following Creative Commons Zero declaration applies:
+
+<http://labs.creativecommons.org/licenses/zero-waive/1.0/us/legalcode>
+
+which is quoted below:
+
+  The person who has associated a work with this document (the "Work")
+  affirms that he or she (the "Affirmer") is the/an author or owner of
+  the Work. The Work may be any work of authorship, including a
+  database.
+
+  The Affirmer hereby fully, permanently and irrevocably waives and
+  relinquishes all of her or his copyright and related or neighboring
+  legal rights in the Work available under any federal or state law,
+  treaty or contract, including but not limited to moral rights,
+  publicity and privacy rights, rights protecting against unfair
+  competition and any rights protecting the extraction, dissemination
+  and reuse of data, whether such rights are present or future, vested
+  or contingent (the "Waiver"). The Affirmer makes the Waiver for the
+  benefit of the public at large and to the detriment of the Affirmer's
+  heirs or successors.
+
+  The Affirmer understands and intends that the Waiver has the effect
+  of eliminating and entirely removing from the Affirmer's control all
+  the copyright and related or neighboring legal rights previously held
+  by the Affirmer in the Work, to that extent making the Work freely
+  available to the public for any and all uses and purposes without
+  restriction of any kind, including commercial use and uses in media
+  and formats or by methods that have not yet been invented or
+  conceived. Should the Waiver for any reason be judged legally
+  ineffective in any jurisdiction, the Affirmer hereby grants a free,
+  full, permanent, irrevocable, nonexclusive and worldwide license for
+  all her or his copyright and related or neighboring legal rights in
+  the Work.
+--------------------------------------------------------------------------------
 fallback_root_certificates
 
 Mozilla Public License Version 2.0
@@ -22929,7 +22906,7 @@ UNICODE LICENSE V3
 
 COPYRIGHT AND PERMISSION NOTICE
 
-Copyright © 2016-2023 Unicode, Inc.
+Copyright © 2016-2025 Unicode, Inc.
 
 NOTICE TO USER: Carefully read the following legal agreement. BY
 DOWNLOADING, INSTALLING, COPYING OR OTHERWISE USING DATA FILES, AND/OR
@@ -22964,6 +22941,8 @@ Except as contained in this notice, the name of a copyright holder shall
 not be used in advertising or otherwise to promote the sale, use or other
 dealings in these Data Files or Software without prior written
 authorization of the copyright holder.
+
+SPDX-License-Identifier: Unicode-3.0
 
 ----------------------------------------------------------------------
 
@@ -23355,6 +23334,34 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+----------------------------------------------------------------------
+
+JSON parsing library (nlohmann/json)
+
+File: vendor/json/upstream/single_include/nlohmann/json.hpp (only for ICU4C)
+
+MIT License
+
+Copyright (c) 2013-2022 Niels Lohmann
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 ----------------------------------------------------------------------
 
@@ -26650,17 +26657,6 @@ icu
 License & terms of use: http://www.unicode.org/copyright.html
 
 
-Copyright (C) 2008-2013, International Business Machines Corporation and
-others. All Rights Reserved.
-
-
---------------------------------------------------------------------------------
-icu
-
-© 2016 and later: Unicode, Inc. and others.
-License & terms of use: http://www.unicode.org/copyright.html
-
-
 Copyright (C) 2009-2011, International Business Machines
                Corporation and others. All Rights Reserved.
 
@@ -26684,16 +26680,6 @@ License & terms of use: http://www.unicode.org/copyright.html
 
 
 Copyright (c) 1999-2003, International Business Machines Corporation and
-others. All Rights Reserved.
-
---------------------------------------------------------------------------------
-icu
-
-© 2016 and later: Unicode, Inc. and others.
-License & terms of use: http://www.unicode.org/copyright.html
-
-
-Copyright (c) 1999-2007, International Business Machines Corporation and
 others. All Rights Reserved.
 
 --------------------------------------------------------------------------------
@@ -30198,15 +30184,6 @@ icu
 
 © 2016 and later: Unicode, Inc. and others.
 License & terms of use: http://www.unicode.org/copyright.html
-Copyright (C) 2008-2014, International Business Machines Corporation and
-others. All Rights Reserved.
-
-
---------------------------------------------------------------------------------
-icu
-
-© 2016 and later: Unicode, Inc. and others.
-License & terms of use: http://www.unicode.org/copyright.html
 Copyright (C) 2008-2016, International Business Machines Corporation and
 others. All Rights Reserved.
 
@@ -30436,14 +30413,6 @@ icu
 © 2016 and later: Unicode, Inc. and others.
 License & terms of use: http://www.unicode.org/copyright.html
 Copyright (c) 2008-2011, International Business Machines Corporation and
-others. All Rights Reserved.
-
---------------------------------------------------------------------------------
-icu
-
-© 2016 and later: Unicode, Inc. and others.
-License & terms of use: http://www.unicode.org/copyright.html
-Copyright (c) 2008-2014, International Business Machines Corporation and
 others. All Rights Reserved.
 
 --------------------------------------------------------------------------------

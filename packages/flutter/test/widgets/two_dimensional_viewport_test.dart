@@ -1998,10 +1998,40 @@ void main() {
         result.first.toString(),
         equalsIgnoringHashCodes('(xIndex: 0, yIndex: 0): RenderRepaintBoundary#00000'),
       );
-      expect(
-        result.last.toString(),
-        equalsIgnoringHashCodes('(xIndex: 4, yIndex: 3): RenderRepaintBoundary#00000 NEEDS-PAINT'),
+    });
+
+    testWidgets('use cacheExtentStyle', (WidgetTester tester) async {
+      final Map<ChildVicinity, UniqueKey> childKeys = <ChildVicinity, UniqueKey>{};
+      final TwoDimensionalChildBuilderDelegate delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 5,
+        maxYIndex: 5,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
+          return SizedBox.square(key: childKeys[vicinity], dimension: 200);
+        },
       );
+      addTearDown(delegate.dispose);
+
+      await tester.pumpWidget(
+        simpleBuilderTest(
+          delegate: delegate,
+          cacheExtent: 1.0,
+          cacheExtentStyle: CacheExtentStyle.viewport,
+          useCacheExtent: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final RenderTwoDimensionalViewport viewport = getViewport(tester, childKeys.values.first);
+      // The viewport is 800x600. The children are 200x200.
+      // Without cache extent, it should show 4x3 = 12 children, but with the
+      // trailing edge calculation it is 5x4 = 20.
+      // With cacheExtent: 1.0 and cacheExtentStyle: CacheExtentStyle.viewport,
+      // The visible area will be from -800 to 800 + 800 = 1600 horizontally,
+      // and -600 to 600 + 600 = 1200 vertically.
+      // So, it should lay out children from (0,0) to (5,5).
+      // This is a total of 6 * 6 = 36 children.
+      expect(viewport.debugDescribeChildren().length, 36);
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('asserts that both axes are bounded', (WidgetTester tester) async {

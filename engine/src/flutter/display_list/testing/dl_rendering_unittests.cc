@@ -3089,7 +3089,7 @@ TEST_F(DisplayListRendering, DrawDiagonalDashedLines) {
             SkPaint p = ctx.paint;
             p.setStyle(SkPaint::kStroke_Style);
             DlScalar intervals[2] = {25.0f, 5.0f};
-            p.setPathEffect(SkDashPathEffect::Make(intervals, 2, 0.0f));
+            p.setPathEffect(SkDashPathEffect::Make({intervals, 2}, 0.0f));
             ctx.canvas->drawLine(ToSkPoint(p1), ToSkPoint(p2), p);
             ctx.canvas->drawLine(ToSkPoint(p3), ToSkPoint(p4), p);
             ctx.canvas->drawLine(ToSkPoint(p5), ToSkPoint(p6), p);
@@ -3301,7 +3301,7 @@ TEST_F(DisplayListRendering, DrawPointsAsPoints) {
             SkPaint p = ctx.paint;
             p.setStyle(SkPaint::kStroke_Style);
             auto mode = SkCanvas::kPoints_PointMode;
-            ctx.canvas->drawPoints(mode, count, ToSkPoints(points), p);
+            ctx.canvas->drawPoints(mode, {ToSkPoints(points), count}, p);
           },
           [=](const DlRenderContext& ctx) {
             auto mode = DlPointMode::kPoints;
@@ -3353,7 +3353,7 @@ TEST_F(DisplayListRendering, DrawPointsAsLines) {
             SkPaint p = ctx.paint;
             p.setStyle(SkPaint::kStroke_Style);
             auto mode = SkCanvas::kLines_PointMode;
-            ctx.canvas->drawPoints(mode, count, ToSkPoints(points), p);
+            ctx.canvas->drawPoints(mode, {ToSkPoints(points), count}, p);
           },
           [=](const DlRenderContext& ctx) {
             auto mode = DlPointMode::kLines;
@@ -3388,7 +3388,7 @@ TEST_F(DisplayListRendering, DrawPointsAsPolygon) {
             SkPaint p = ctx.paint;
             p.setStyle(SkPaint::kStroke_Style);
             auto mode = SkCanvas::kPolygon_PointMode;
-            ctx.canvas->drawPoints(mode, count1, ToSkPoints(points1), p);
+            ctx.canvas->drawPoints(mode, {ToSkPoints(points1), count1}, p);
           },
           [=](const DlRenderContext& ctx) {
             auto mode = DlPointMode::kPolygon;
@@ -3697,9 +3697,10 @@ TEST_F(DisplayListRendering, DrawAtlasNearest) {
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](const SkRenderContext& ctx) {
-            ctx.canvas->drawAtlas(ctx.image.get(), sk_xform, ToSkRects(tex),
-                                  sk_colors, 4, SkBlendMode::kSrcOver,
-                                  sk_sampling, nullptr, &ctx.paint);
+            ctx.canvas->drawAtlas(ctx.image.get(), {sk_xform, 4},
+                                  {ToSkRects(tex), 4}, {sk_colors, 4},
+                                  SkBlendMode::kSrcOver, sk_sampling, nullptr,
+                                  &ctx.paint);
           },
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawAtlas(ctx.image, dl_xform, tex, dl_colors, 4,
@@ -3756,9 +3757,10 @@ TEST_F(DisplayListRendering, DrawAtlasNearestNoPaint) {
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](const SkRenderContext& ctx) {
-            ctx.canvas->drawAtlas(ctx.image.get(), sk_xform, ToSkRects(tex),
-                                  sk_colors, 4, SkBlendMode::kSrcOver,
-                                  sk_sampling, nullptr, nullptr);
+            ctx.canvas->drawAtlas(ctx.image.get(), {sk_xform, 4},
+                                  {ToSkRects(tex), 4}, {sk_colors, 4},
+                                  SkBlendMode::kSrcOver, sk_sampling, nullptr,
+                                  nullptr);
           },
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawAtlas(ctx.image, dl_xform, tex, dl_colors, 4,
@@ -3815,9 +3817,10 @@ TEST_F(DisplayListRendering, DrawAtlasLinear) {
   CanvasCompareTester::RenderAll(  //
       TestParameters(
           [=](const SkRenderContext& ctx) {
-            ctx.canvas->drawAtlas(ctx.image.get(), sk_xform, ToSkRects(tex),
-                                  sk_colors, 2, SkBlendMode::kSrcOver,
-                                  sk_sampling, nullptr, &ctx.paint);
+            ctx.canvas->drawAtlas(ctx.image.get(), {sk_xform, 2},
+                                  {ToSkRects(tex), 2}, {sk_colors, 2},
+                                  SkBlendMode::kSrcOver, sk_sampling, nullptr,
+                                  &ctx.paint);
           },
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawAtlas(ctx.image, dl_xform, tex, dl_colors, 2,

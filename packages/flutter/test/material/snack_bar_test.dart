@@ -4390,6 +4390,19 @@ void main() {
     // The snackbar auto dismisses after the timeout.
     expect(find.text(snackbarContent), findsNothing);
   });
+
+  testWidgets('SnackBarAction does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: SnackBarAction(label: 'X', onPressed: () {}),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SnackBarAction)), Size.zero);
+  });
 }
 
 /// Start test for "SnackBar dismiss test".

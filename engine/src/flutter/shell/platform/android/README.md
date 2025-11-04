@@ -121,8 +121,7 @@ How to edit and contribute to the Android embedder.
 >
 > You should also have a working Android development environment:
 >
-> - [Android Studio](https://developer.android.com/studio)
-> - [Install Flutter > Test Drive](https://docs.flutter.dev/get-started/test-drive?tab=androidstudio)
+> - [Android Studio and IntelliJ](https://docs.flutter.dev/tools/android-studio)
 >
 > _It is also recommended (but not required) to install
 > [Visual Studio Code](https://code.visualstudio.com/)._

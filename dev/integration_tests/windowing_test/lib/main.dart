@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
 import 'package:flutter_driver/driver_extension.dart';
@@ -56,6 +57,14 @@ void main() {
         controller.addListener(notificationHandler);
 
         act();
+
+        // On macOS, the predicate is immediately true, even though
+        // the animation is in progress and next request for state change
+        // will be ignored. Easiest way to handle this is to just wait.
+        if (defaultTargetPlatform == TargetPlatform.macOS) {
+          await Future.delayed(Duration(seconds: 1));
+        }
+
         await for (final _ in streamController.stream) {
           if (predicate()) {
             break;

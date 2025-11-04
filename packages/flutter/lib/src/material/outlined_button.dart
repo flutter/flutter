@@ -298,9 +298,7 @@ class OutlinedButton extends ButtonStyleButton {
   /// * `maximumSize` - Size.infinite
   /// * `side` - BorderSide(width: 1, color: Theme.colorScheme.onSurface(0.12))
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
-  /// * `mouseCursor`
-  ///   * disabled - SystemMouseCursors.basic
-  ///   * others - SystemMouseCursors.click
+  /// * `mouseCursor` - WidgetStateMouseCursor.adaptiveClickable
   /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
@@ -337,9 +335,7 @@ class OutlinedButton extends ButtonStyleButton {
   ///   * disabled - BorderSide(color: Theme.colorScheme.onSurface(0.12))
   ///   * others - BorderSide(color: Theme.colorScheme.outline)
   /// * `shape` - StadiumBorder()
-  /// * `mouseCursor`
-  ///   * disabled - SystemMouseCursors.basic
-  ///   * others - SystemMouseCursors.click
+  /// * `mouseCursor` - WidgetStateMouseCursor.adaptiveClickable
   /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
@@ -368,7 +364,7 @@ class OutlinedButton extends ButtonStyleButton {
             maximumSize: Size.infinite,
             side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
             shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
-            enabledMouseCursor: SystemMouseCursors.click,
+            enabledMouseCursor: kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
             disabledMouseCursor: SystemMouseCursors.basic,
             visualDensity: theme.visualDensity,
             tapTargetSize: theme.materialTapTargetSize,
@@ -570,13 +566,7 @@ class _OutlinedButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
-    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      if (states.contains(WidgetState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+  WidgetStateProperty<MouseCursor?>? get mouseCursor => WidgetStateMouseCursor.adaptiveClickable;
 
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;

@@ -248,7 +248,7 @@ also the reason there is a single task runner for IO tasks. In reality, the
 reading of the compressed bytes and decompression can happen on a thread pool.
 The IO task runner is special because access to the context is only safe from a
 specific thread. The only way to get a resource like
-[`ui.Image`](https://docs.flutter.io/flutter/dart-ui/instantiateImageCodec.html)
+[`ui.Image`](https://api.flutter.dev/flutter/dart-ui/Image-class.html)
 is via an async call; this allows the framework to talk to the IO runner so that
 it can asynchronously perform all the texture operations mentioned. The image
 can then be immediately used in a frame without the raster thread having to do

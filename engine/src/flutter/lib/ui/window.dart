@@ -771,7 +771,7 @@ class SingletonFlutterWindow extends FlutterView {
   /// method of the [FlutterActivity](/javadoc/io/flutter/embedding/android/FlutterActivity.html)'s
   /// intent builder.
   ///
-  /// On a standalone engine, see https://flutter.dev/docs/development/add-to-app/android/add-flutter-screen#initial-route-with-a-cached-engine.
+  /// On a standalone engine, see https://docs.flutter.dev/development/add-to-app/android/add-flutter-screen#initial-route-with-a-cached-engine.
   ///
   /// ## iOS
   ///
@@ -779,7 +779,7 @@ class SingletonFlutterWindow extends FlutterView {
   /// [`FlutterViewController.setInitialRoute`](/ios-embedder/interface_flutter_view_controller.html#a7f269c2da73312f856d42611cc12a33f)
   /// initializer.
   ///
-  /// On a standalone engine, see https://flutter.dev/docs/development/add-to-app/ios/add-flutter-screen#route.
+  /// On a standalone engine, see https://docs.flutter.dev/development/add-to-app/ios/add-flutter-screen#route.
   ///
   /// See also:
   ///
