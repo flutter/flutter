@@ -1164,7 +1164,7 @@ class PlatformDispatcher {
   double? get wordSpacingOverride => _configuration.wordSpacingOverride;
 
   /// The system-reported amount of additional space (in logical pixels)
-  /// to add between each paragraph in text.
+  /// to add following each paragraph in text.
   ///
   /// This value takes precedence over any text paragraph spacing specified at
   /// the application level.

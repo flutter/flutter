@@ -720,7 +720,7 @@ class MediaQueryData {
   ///  [TextStyle.wordSpacing] is overriden by [wordSpacingOverride].
   final double? wordSpacingOverride;
 
-  /// The amount of space (in logical pixels) to add between each paragraph
+  /// The amount of space (in logical pixels) to add following each paragraph
   /// in a piece of text.
   ///
   /// Returns `null` when the platform has not set an override
