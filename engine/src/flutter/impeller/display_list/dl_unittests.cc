@@ -728,12 +728,14 @@ TEST_P(DisplayListTest, CanDrawBoundedBlur) {
     static float sigma = 20;
     static float bg_scale = 2.1;
     static float rotate_degree = 0;
+    static float bounds_scale = 1.0;
     static bool use_bounds = true;
 
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::SliderFloat("Background scale", &bg_scale, 0, 10);
     ImGui::SliderFloat("Sigma", &sigma, 0, 100);
-    ImGui::SliderFloat("Rotate", &rotate_degree, -200, 200);
+    ImGui::SliderFloat("Bounds rotate", &rotate_degree, -200, 200);
+    ImGui::SliderFloat("Bounds scale", &bounds_scale, 0.5f, 2.0f);
     ImGui::NewLine();
     ImGui::Checkbox("Bounded blur", &use_bounds);
     ImGui::End();
@@ -762,7 +764,7 @@ TEST_P(DisplayListTest, CanDrawBoundedBlur) {
 
     Point p1 = inverse_transform * p1_global;
     Point p2 = inverse_transform * p2_global;
-    DlRect bounds = DlRect::MakeLTRB(p2.x, p1.y, p1.x, p2.y);
+    DlRect bounds = DlRect::MakeLTRB(p2.x, p1.y, p1.x, p2.y).Scale(bounds_scale);
 
     builder.ClipRect(bounds);
     builder.Save();

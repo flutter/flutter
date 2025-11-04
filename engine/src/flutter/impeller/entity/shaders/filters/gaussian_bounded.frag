@@ -37,9 +37,24 @@ f16vec4 Sample(f16sampler2D tex, vec2 coords) {
   return IPHalfSampleDecal(tex, coords);
 }
 
+// Sampling the texture while treating out of bounds pixels as almost
+// transparent.
+//
+// Returns Sample(tex, coords) for in-bounds pixels.  For out-of-bounds (OOB)
+// pixels (per `frag_info.quad_line_params`), it returns the same color but
+// clamps alpha to `min_alpha`.
+//
+// This is crucial for preventing dark fringes at the blur boundary. This is a
+// two-pass blur, and the second pass linearly interpolates the first pass's
+// output. If OOB samples were transparent black (0,0,0,0), interpolating with
+// premultiplied in-bounds pixels would darken the color.
+//
+// Using the edge color with a minimal alpha provides the correct RGB continuity
+// for the interpolator while being effectively transparent, avoiding the
+// artifact.
 f16vec4 BoundedSample(f16sampler2D tex, vec2 coords) {
   f16vec4 color = Sample(tex, coords);
-  float16_t min_alpha = 1.0hf / 255.0hf;
+  const float16_t min_alpha = 1.0hf / 255.0hf;
   if (OutOfBounds(coords)) {
     color.a = min(color.a, min_alpha);
   }
