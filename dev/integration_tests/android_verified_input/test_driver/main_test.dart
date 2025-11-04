@@ -45,7 +45,11 @@ Future<void> main() async {
         '${offset.dx}',
         '${offset.dy}',
       ]);
-      expect(result.exitCode, equals(0), reason: 'Stdout: ${result.stdout}\nStderr: ${result.stderr}');
+      expect(
+        result.exitCode,
+        equals(0),
+        reason: 'Stdout: ${result.stdout}\nStderr: ${result.stderr}',
+      );
     }
     // Input
     expect(await inputEventWasVerified, equals('true'));
