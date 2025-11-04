@@ -93,6 +93,153 @@ fml::StatusOr<ImageDecoderImpeller::ImageInfo> ToImageInfo(
       .format = pixel_format.value(),
   }};
 }
+
+SkColorType ChooseCompatibleColorType(SkColorType type) {
+  switch (type) {
+    case kRGBA_F32_SkColorType:
+      return kRGBA_F16_SkColorType;
+    default:
+      return kRGBA_8888_SkColorType;
+  }
+}
+
+SkAlphaType ChooseCompatibleAlphaType(SkAlphaType type) {
+  return type;
+}
+
+SkImageInfo CreateImageInfo(const SkImageInfo& base_image_info,
+                            const SkISize& decode_size,
+                            bool supports_wide_gamut) {
+  const bool is_wide_gamut =
+      supports_wide_gamut ? IsWideGamut(base_image_info.colorSpace()) : false;
+  SkAlphaType alpha_type =
+      ChooseCompatibleAlphaType(base_image_info.alphaType());
+  if (is_wide_gamut) {
+    SkColorType color_type = alpha_type == SkAlphaType::kOpaque_SkAlphaType
+                                 ? kBGR_101010x_XR_SkColorType
+                                 : kRGBA_F16_SkColorType;
+    return base_image_info.makeWH(decode_size.width(), decode_size.height())
+        .makeColorType(color_type)
+        .makeAlphaType(alpha_type)
+        .makeColorSpace(SkColorSpace::MakeSRGB());
+  }
+  return base_image_info.makeWH(decode_size.width(), decode_size.height())
+      .makeColorType(ChooseCompatibleColorType(base_image_info.colorType()))
+      .makeAlphaType(alpha_type)
+      .makeColorSpace(SkColorSpace::MakeSRGB());
+}
+
+struct DecodedBitmap {
+  std::shared_ptr<SkBitmap> bitmap;
+  std::shared_ptr<ImpellerAllocator> allocator;
+  std::string error;
+};
+
+DecodedBitmap DecodeToBitmap(
+    ImageDescriptor* descriptor,
+    const SkImageInfo& image_info,
+    const SkImageInfo& base_image_info,
+    const std::shared_ptr<impeller::Allocator>& allocator) {
+  std::shared_ptr<SkBitmap> bitmap = std::make_shared<SkBitmap>();
+  bitmap->setInfo(image_info);
+  std::shared_ptr<ImpellerAllocator> bitmap_allocator =
+      std::make_shared<ImpellerAllocator>(allocator);
+
+  if (descriptor->is_compressed()) {
+    if (!bitmap->tryAllocPixels(bitmap_allocator.get())) {
+      std::string error =
+          "Could not allocate intermediate for image decompression.";
+      FML_DLOG(ERROR) << error;
+      return {.error = error};
+    }
+    if (!descriptor->get_pixels(bitmap->pixmap())) {
+      std::string error = "Could not decompress image.";
+      FML_DLOG(ERROR) << error;
+      return {.error = error};
+    }
+  } else {
+    std::shared_ptr<SkBitmap> temp_bitmap = std::make_shared<SkBitmap>();
+    temp_bitmap->setInfo(base_image_info);
+    sk_sp<SkPixelRef> pixel_ref = SkMallocPixelRef::MakeWithData(
+        base_image_info, descriptor->row_bytes(), descriptor->data());
+    temp_bitmap->setPixelRef(pixel_ref, 0, 0);
+
+    if (!bitmap->tryAllocPixels(bitmap_allocator.get())) {
+      std::string error =
+          "Could not allocate intermediate for pixel conversion.";
+      FML_DLOG(ERROR) << error;
+      return {.error = error};
+    }
+    temp_bitmap->readPixels(bitmap->pixmap());
+    bitmap->setImmutable();
+  }
+  return {.bitmap = bitmap, .allocator = bitmap_allocator};
+}
+
+DecodedBitmap HandlePremultiplication(
+    std::shared_ptr<SkBitmap> bitmap,
+    std::shared_ptr<ImpellerAllocator> bitmap_allocator,
+    const std::shared_ptr<impeller::Allocator>& allocator) {
+  if (bitmap->alphaType() != SkAlphaType::kUnpremul_SkAlphaType) {
+    return {.bitmap = bitmap, .allocator = bitmap_allocator};
+  }
+
+  std::shared_ptr<ImpellerAllocator> premul_allocator =
+      std::make_shared<ImpellerAllocator>(allocator);
+  std::shared_ptr<SkBitmap> premul_bitmap = std::make_shared<SkBitmap>();
+  premul_bitmap->setInfo(bitmap->info().makeAlphaType(kPremul_SkAlphaType));
+  if (!premul_bitmap->tryAllocPixels(premul_allocator.get())) {
+    std::string error =
+        "Could not allocate intermediate for premultiplication conversion.";
+    FML_DLOG(ERROR) << error;
+    return {.error = error};
+  }
+  bitmap->readPixels(premul_bitmap->pixmap());
+  premul_bitmap->setImmutable();
+  return {.bitmap = premul_bitmap, .allocator = premul_allocator};
+}
+
+ImageDecoderImpeller::DecompressResult ResizeOnCpu(
+    std::shared_ptr<SkBitmap> bitmap,
+    const SkISize& target_size,
+    const std::shared_ptr<impeller::Allocator>& allocator) {
+  TRACE_EVENT0("impeller", "SlowCPUDecodeScale");
+  const SkImageInfo scaled_image_info =
+      bitmap->info().makeDimensions(target_size);
+
+  std::shared_ptr<SkBitmap> scaled_bitmap = std::make_shared<SkBitmap>();
+  std::shared_ptr<ImpellerAllocator> scaled_allocator =
+      std::make_shared<ImpellerAllocator>(allocator);
+  scaled_bitmap->setInfo(scaled_image_info);
+  if (!scaled_bitmap->tryAllocPixels(scaled_allocator.get())) {
+    std::string error =
+        "Could not allocate scaled bitmap for image decompression.";
+    FML_DLOG(ERROR) << error;
+    return {.decode_error = error};
+  }
+  if (!bitmap->pixmap().scalePixels(
+          scaled_bitmap->pixmap(),
+          SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone))) {
+    FML_LOG(ERROR) << "Could not scale decoded bitmap data.";
+  }
+  scaled_bitmap->setImmutable();
+
+  std::shared_ptr<impeller::DeviceBuffer> buffer =
+      scaled_allocator->GetDeviceBuffer();
+  if (!buffer) {
+    return {.decode_error = "Unable to get device buffer"};
+  }
+  buffer->Flush();
+
+  fml::StatusOr<ImageDecoderImpeller::ImageInfo> decoded_image_info =
+      ToImageInfo(scaled_bitmap->info());
+  if (!decoded_image_info.ok()) {
+    return {.decode_error = std::string(decoded_image_info.status().message())};
+  }
+  return {.device_buffer = std::move(buffer),
+          .image_info = decoded_image_info.value()};
+}
+
 }  // namespace
 
 std::optional<impeller::PixelFormat> ImageDecoderImpeller::ToPixelFormat(
@@ -135,19 +282,6 @@ ImageDecoderImpeller::ImageDecoderImpeller(
 
 ImageDecoderImpeller::~ImageDecoderImpeller() = default;
 
-static SkColorType ChooseCompatibleColorType(SkColorType type) {
-  switch (type) {
-    case kRGBA_F32_SkColorType:
-      return kRGBA_F16_SkColorType;
-    default:
-      return kRGBA_8888_SkColorType;
-  }
-}
-
-static SkAlphaType ChooseCompatibleAlphaType(SkAlphaType type) {
-  return type;
-}
-
 ImageDecoderImpeller::DecompressResult ImageDecoderImpeller::DecompressTexture(
     ImageDescriptor* descriptor,
     const ImageDecoder::Options& options,
@@ -162,115 +296,55 @@ ImageDecoderImpeller::DecompressResult ImageDecoderImpeller::DecompressTexture(
     return DecompressResult{.decode_error = decode_error};
   }
 
-  SkISize target_size =
+  const SkISize source_size = descriptor->image_info().dimensions();
+  const SkISize target_size =
       SkISize::Make(std::min(max_texture_size.width,
                              static_cast<int64_t>(options.target_width)),
                     std::min(max_texture_size.height,
                              static_cast<int64_t>(options.target_height)));
-
-  const SkISize source_size = descriptor->image_info().dimensions();
-  auto decode_size = source_size;
+  SkISize decode_size = source_size;
   if (descriptor->is_compressed()) {
     decode_size = descriptor->get_scaled_dimensions(std::max(
         static_cast<float>(target_size.width()) / source_size.width(),
         static_cast<float>(target_size.height()) / source_size.height()));
   }
 
-  //----------------------------------------------------------------------------
-  /// 1. Decode the image.
-  ///
+  const SkImageInfo& base_image_info = descriptor->image_info();
+  const SkImageInfo image_info =
+      CreateImageInfo(base_image_info, decode_size, supports_wide_gamut);
 
-  const auto base_image_info = descriptor->image_info();
-  const bool is_wide_gamut =
-      supports_wide_gamut ? IsWideGamut(base_image_info.colorSpace()) : false;
-  SkAlphaType alpha_type =
-      ChooseCompatibleAlphaType(base_image_info.alphaType());
-  SkImageInfo image_info;
-  if (is_wide_gamut) {
-    SkColorType color_type = alpha_type == SkAlphaType::kOpaque_SkAlphaType
-                                 ? kBGR_101010x_XR_SkColorType
-                                 : kRGBA_F16_SkColorType;
-    image_info =
-        base_image_info.makeWH(decode_size.width(), decode_size.height())
-            .makeColorType(color_type)
-            .makeAlphaType(alpha_type)
-            .makeColorSpace(SkColorSpace::MakeSRGB());
-  } else {
-    image_info =
-        base_image_info.makeWH(decode_size.width(), decode_size.height())
-            .makeColorType(
-                ChooseCompatibleColorType(base_image_info.colorType()))
-            .makeAlphaType(alpha_type)
-            .makeColorSpace(SkColorSpace::MakeSRGB());
-  }
-
-  const std::optional<impeller::PixelFormat> pixel_format =
-      ToPixelFormat(image_info.colorType());
-  if (!pixel_format.has_value()) {
-    std::string decode_error(
+  if (!ToPixelFormat(image_info.colorType()).has_value()) {
+    std::string decode_error =
         std::format("Codec pixel format is not supported (SkColorType={})",
-                    static_cast<int>(image_info.colorType())));
+                    static_cast<int>(image_info.colorType()));
     FML_DLOG(ERROR) << decode_error;
-    return DecompressResult{.decode_error = decode_error};
+    return {.decode_error = decode_error};
   }
 
-  auto bitmap = std::make_shared<SkBitmap>();
-  bitmap->setInfo(image_info);
-  auto bitmap_allocator = std::make_shared<ImpellerAllocator>(allocator);
-
-  if (descriptor->is_compressed()) {
-    if (!bitmap->tryAllocPixels(bitmap_allocator.get())) {
-      std::string decode_error(
-          "Could not allocate intermediate for image decompression.");
-      FML_DLOG(ERROR) << decode_error;
-      return DecompressResult{.decode_error = decode_error};
-    }
-    // Decode the image into the image generator's closest supported size.
-    if (!descriptor->get_pixels(bitmap->pixmap())) {
-      std::string decode_error("Could not decompress image.");
-      FML_DLOG(ERROR) << decode_error;
-      return DecompressResult{.decode_error = decode_error};
-    }
-  } else {
-    auto temp_bitmap = std::make_shared<SkBitmap>();
-    temp_bitmap->setInfo(base_image_info);
-    auto pixel_ref = SkMallocPixelRef::MakeWithData(
-        base_image_info, descriptor->row_bytes(), descriptor->data());
-    temp_bitmap->setPixelRef(pixel_ref, 0, 0);
-
-    if (!bitmap->tryAllocPixels(bitmap_allocator.get())) {
-      std::string decode_error(
-          "Could not allocate intermediate for pixel conversion.");
-      FML_DLOG(ERROR) << decode_error;
-      return DecompressResult{.decode_error = decode_error};
-    }
-    temp_bitmap->readPixels(bitmap->pixmap());
-    bitmap->setImmutable();
+  DecodedBitmap decoded =
+      DecodeToBitmap(descriptor, image_info, base_image_info, allocator);
+  if (!decoded.error.empty()) {
+    return {.decode_error = decoded.error};
   }
 
-  // If the image is unpremultiplied, fix it.
-  if (alpha_type == SkAlphaType::kUnpremul_SkAlphaType) {
-    // Single copy of ImpellerAllocator crashes.
-    auto premul_allocator = std::make_shared<ImpellerAllocator>(allocator);
-    auto premul_bitmap = std::make_shared<SkBitmap>();
-    premul_bitmap->setInfo(bitmap->info().makeAlphaType(kPremul_SkAlphaType));
-    if (!premul_bitmap->tryAllocPixels(premul_allocator.get())) {
-      std::string decode_error(
-          "Could not allocate intermediate for premultiplication conversion.");
-      FML_DLOG(ERROR) << decode_error;
-      return DecompressResult{.decode_error = decode_error};
-    }
-    // readPixels() handles converting pixels to premultiplied form.
-    bitmap->readPixels(premul_bitmap->pixmap());
-    premul_bitmap->setImmutable();
-    bitmap_allocator = premul_allocator;
-    bitmap = premul_bitmap;
+  DecodedBitmap premultiplied =
+      HandlePremultiplication(decoded.bitmap, decoded.allocator, allocator);
+  if (!premultiplied.error.empty()) {
+    return {.decode_error = premultiplied.error};
+  }
+  std::shared_ptr<SkBitmap> bitmap = premultiplied.bitmap;
+  std::shared_ptr<ImpellerAllocator> bitmap_allocator = premultiplied.allocator;
+
+  if (source_size.width() > max_texture_size.width ||
+      source_size.height() > max_texture_size.height ||
+      !capabilities->SupportsTextureToTextureBlits()) {
+    return ResizeOnCpu(bitmap, target_size, allocator);
   }
 
   std::shared_ptr<impeller::DeviceBuffer> buffer =
       bitmap_allocator->GetDeviceBuffer();
   if (!buffer) {
-    return DecompressResult{.decode_error = "Unable to get device buffer"};
+    return {.decode_error = "Unable to get device buffer"};
   }
   buffer->Flush();
 
@@ -279,59 +353,15 @@ ImageDecoderImpeller::DecompressResult ImageDecoderImpeller::DecompressTexture(
           ? std::nullopt
           : std::optional<SkImageInfo>(image_info.makeDimensions(target_size));
 
-  if (source_size.width() > max_texture_size.width ||
-      source_size.height() > max_texture_size.height ||
-      !capabilities->SupportsTextureToTextureBlits()) {
-    //----------------------------------------------------------------------------
-    /// 2. If the decoded image isn't the requested target size and the src size
-    ///    exceeds the device max texture size, perform a slow CPU resize.
-    ///
-    TRACE_EVENT0("impeller", "SlowCPUDecodeScale");
-    const auto scaled_image_info = image_info.makeDimensions(target_size);
-
-    auto scaled_bitmap = std::make_shared<SkBitmap>();
-    auto scaled_allocator = std::make_shared<ImpellerAllocator>(allocator);
-    scaled_bitmap->setInfo(scaled_image_info);
-    if (!scaled_bitmap->tryAllocPixels(scaled_allocator.get())) {
-      std::string decode_error(
-          "Could not allocate scaled bitmap for image decompression.");
-      FML_DLOG(ERROR) << decode_error;
-      return DecompressResult{.decode_error = decode_error};
-    }
-    if (!bitmap->pixmap().scalePixels(
-            scaled_bitmap->pixmap(),
-            SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone))) {
-      FML_LOG(ERROR) << "Could not scale decoded bitmap data.";
-    }
-    scaled_bitmap->setImmutable();
-
-    std::shared_ptr<impeller::DeviceBuffer> buffer =
-        scaled_allocator->GetDeviceBuffer();
-    if (!buffer) {
-      return DecompressResult{.decode_error = "Unable to get device buffer"};
-    }
-    buffer->Flush();
-
-    fml::StatusOr<ImageDecoderImpeller::ImageInfo> decoded_image_info =
-        ToImageInfo(scaled_bitmap->info());
-    if (!decoded_image_info.ok()) {
-      return DecompressResult{
-          .decode_error = std::string(decoded_image_info.status().message())};
-    }
-    return DecompressResult{.device_buffer = std::move(buffer),
-                            .image_info = decoded_image_info.value()};
-  }
-
   fml::StatusOr<ImageDecoderImpeller::ImageInfo> decoded_image_info =
       ToImageInfo(bitmap->info());
   if (!decoded_image_info.ok()) {
-    return DecompressResult{
-        .decode_error = std::string(decoded_image_info.status().message())};
+    return {.decode_error = std::string(decoded_image_info.status().message())};
   }
 
-  return DecompressResult{.device_buffer = std::move(buffer),
-                          .image_info = decoded_image_info.value(),
-                          .resize_info = resize_info};
+  return {.device_buffer = std::move(buffer),
+          .image_info = decoded_image_info.value(),
+          .resize_info = resize_info};
 }
 
 // static
