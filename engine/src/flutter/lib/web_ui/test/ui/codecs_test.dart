@@ -188,27 +188,34 @@ Future<void> testMain() async {
     });
 
     void runCodecTest(TestCodec testCodec) {
-      const problematicChromeImages = <String, int>{
-        // Stop at frameCount 2, the 3rd frame crashes Chrome.
+      const problematicChromeImages = <String, Set<int>>{
+        // Frame 2 cause Chrome to crash.
         // https://issues.chromium.org/456445108
-        'crbug445556737.png': 2,
-        // Stop at frameCount 1, Chrome fails to decode the 2nd frame.
+        'crbug445556737.png': {2},
+        // Frames 2 and 3 cause Chrome to crash.
         // https://issues.chromium.org/456445108
-        'interlaced-multiframe-with-blending.png': 1,
+        'interlaced-multiframe-with-blending.png': {2, 3},
       };
 
       test('${testCodec.description} can create an image and convert it to byte array', () async {
         final ui.Codec codec = await testCodec.createCodec();
 
-        final int frameCount;
+        final Set<int> problematicFrames;
         if (isChromium && problematicChromeImages.containsKey(testCodec.testFile)) {
-          // Encountered an image known to be problematic on Chromium when decoding certain frames.
-          frameCount = problematicChromeImages[testCodec.testFile]!;
+          // Encountered an image with known problematic frames on Chromium.
+          problematicFrames = problematicChromeImages[testCodec.testFile]!;
         } else {
-          frameCount = codec.frameCount;
+          problematicFrames = <int>{};
         }
 
-        for (int i = 0; i < frameCount; i++) {
+        for (int i = 0; i < codec.frameCount; i++) {
+          if (problematicFrames.contains(i)) {
+            printWarning(
+              'Skipping frame $i of ${testCodec.description} due to known Chromium crash bug.',
+            );
+            continue;
+          }
+
           final ui.Image image;
           try {
             final ui.FrameInfo frameInfo = await codec.getNextFrame();
