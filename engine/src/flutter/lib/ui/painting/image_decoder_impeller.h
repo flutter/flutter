@@ -52,6 +52,11 @@ class ImageDecoderImpeller final : public ImageDecoder {
 
   static std::optional<impeller::PixelFormat> ToPixelFormat(SkColorType type);
 
+  // |ImageDecoder|
+  void Decode(fml::RefPtr<ImageDescriptor> descriptor,
+              const Options& options,
+              const ImageResult& result) override;
+
   struct ImageInfo {
     impeller::ISize size;
     impeller::PixelFormat format = impeller::PixelFormat::kUnknown;
@@ -59,15 +64,10 @@ class ImageDecoderImpeller final : public ImageDecoder {
 
   struct DecompressResult {
     std::shared_ptr<impeller::DeviceBuffer> device_buffer;
-    SkImageInfo image_info;
+    ImageInfo image_info;
     std::optional<SkImageInfo> resize_info = std::nullopt;
     std::string decode_error;
   };
-
-  // |ImageDecoder|
-  void Decode(fml::RefPtr<ImageDescriptor> descriptor,
-              const Options& options,
-              const ImageResult& result) override;
 
   static DecompressResult DecompressTexture(
       ImageDescriptor* descriptor,
