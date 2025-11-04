@@ -1880,10 +1880,6 @@ class _PlatformConfiguration {
     String? defaultRouteName,
     String? systemFontFamily,
     int? configurationId,
-    double? lineHeightScaleFactorOverride,
-    double? letterSpacingOverride,
-    double? wordSpacingOverride,
-    double? paragraphSpacingOverride,
   }) {
     return _PlatformConfiguration(
       accessibilityFeatures: accessibilityFeatures ?? this.accessibilityFeatures,
@@ -1895,11 +1891,10 @@ class _PlatformConfiguration {
       defaultRouteName: defaultRouteName ?? this.defaultRouteName,
       systemFontFamily: systemFontFamily ?? this.systemFontFamily,
       configurationId: configurationId ?? this.configurationId,
-      lineHeightScaleFactorOverride:
-          lineHeightScaleFactorOverride ?? this.lineHeightScaleFactorOverride,
-      letterSpacingOverride: letterSpacingOverride ?? this.letterSpacingOverride,
-      wordSpacingOverride: wordSpacingOverride ?? this.wordSpacingOverride,
-      paragraphSpacingOverride: paragraphSpacingOverride ?? this.paragraphSpacingOverride,
+      lineHeightScaleFactorOverride: lineHeightScaleFactorOverride,
+      letterSpacingOverride: letterSpacingOverride,
+      wordSpacingOverride: wordSpacingOverride,
+      paragraphSpacingOverride: paragraphSpacingOverride,
     );
   }
 

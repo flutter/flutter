@@ -765,10 +765,6 @@ class MediaQueryData {
     DeviceGestureSettings? gestureSettings,
     List<ui.DisplayFeature>? displayFeatures,
     bool? supportsShowingSystemContextMenu,
-    double? lineHeightScaleFactorOverride,
-    double? letterSpacingOverride,
-    double? wordSpacingOverride,
-    double? paragraphSpacingOverride,
   }) {
     assert(textScaleFactor == null || textScaler == null);
     if (textScaleFactor != null) {
@@ -796,11 +792,10 @@ class MediaQueryData {
       displayFeatures: displayFeatures ?? this.displayFeatures,
       supportsShowingSystemContextMenu:
           supportsShowingSystemContextMenu ?? this.supportsShowingSystemContextMenu,
-      lineHeightScaleFactorOverride:
-          lineHeightScaleFactorOverride ?? this.lineHeightScaleFactorOverride,
-      letterSpacingOverride: letterSpacingOverride ?? this.letterSpacingOverride,
-      wordSpacingOverride: wordSpacingOverride ?? this.wordSpacingOverride,
-      paragraphSpacingOverride: paragraphSpacingOverride ?? this.paragraphSpacingOverride,
+      lineHeightScaleFactorOverride: lineHeightScaleFactorOverride,
+      letterSpacingOverride: letterSpacingOverride,
+      wordSpacingOverride: wordSpacingOverride,
+      paragraphSpacingOverride: paragraphSpacingOverride,
     );
   }
 
