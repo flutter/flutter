@@ -1125,10 +1125,6 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   /// true.
   bool _isPaused = false;
 
-  /// False when the class first is instantiated and true forever after the
-  /// first frame of the image is received.
-  bool _hasReceivedFirstFrame = false;
-
   @override
   void initState() {
     super.initState();
@@ -1154,7 +1150,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
     _isPaused = !TickerMode.of(context) || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
 
-    if (_isPaused && _hasReceivedFirstFrame) {
+    if (_isPaused && _frameNumber != null) {
       _stopListeningToStream(keepStreamAlive: true);
     } else {
       _listenToStream();
@@ -1173,7 +1169,6 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _imageStream!.removeListener(oldListener);
     }
     if (widget.image != oldWidget.image) {
-      _hasReceivedFirstFrame = false;
       _resolveImage();
       _listenToStream();
     }
@@ -1244,7 +1239,6 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
-    _hasReceivedFirstFrame = true;
     setState(() {
       _replaceImage(info: imageInfo);
       _loadingProgress = null;
@@ -1253,7 +1247,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _frameNumber = _frameNumber == null ? 0 : _frameNumber! + 1;
       _wasSynchronouslyLoaded = _wasSynchronouslyLoaded | synchronousCall;
     });
-    if (_isPaused) {
+    if (_isPaused && _frameNumber != null) {
       _stopListeningToStream(keepStreamAlive: true);
     }
   }
