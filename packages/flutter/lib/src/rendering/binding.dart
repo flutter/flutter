@@ -263,7 +263,6 @@ mixin RendererBinding
   late final PipelineOwner pipelineOwner = PipelineOwner(
     onSemanticsOwnerCreated: () {
       final RenderView? root = pipelineOwner.rootNode as RenderView?;
-      (pipelineOwner.rootNode as RenderView?)?.scheduleInitialSemantics();
       if (root != null) {
         root.scheduleInitialSemantics();
         // Synchronously flush semantics if possible. This should send the
