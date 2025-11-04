@@ -152,7 +152,7 @@ extension type DecodeResult(JSObject _) implements JSObject {
 ///
 ///  * https://www.w3.org/TR/webcodecs/#dictdef-imagedecodeoptions
 extension type DecodeOptions._(JSObject _) implements JSObject {
-  external DecodeOptions({required int frameIndex});
+  external DecodeOptions({required int frameIndex, required bool completeFramesOnly});
 }
 
 /// The only frame in a static image, or one of the frames in an animated one.
