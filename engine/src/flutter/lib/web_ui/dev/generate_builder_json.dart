@@ -29,10 +29,7 @@ class GenerateBuilderJsonCommand extends Command<bool> {
       path.join(environment.webUiTestDir.path, 'felt_config.yaml'),
     );
     final List<TestSuite> testSuites = config.testSuites.where((suite) => suite.enableCi).toList();
-    final List<TestBundle> testBundles = testSuites
-        .map((suite) => suite.testBundle)
-        .toSet()
-        .toList();
+    final Iterable<TestBundle> testBundles = testSuites.map((suite) => suite.testBundle).toSet();
     _writeBuilderJson(
       _generateBuilderJson(
         testBundles.map((TestBundle bundle) => _getBundleBuildStep(bundle)).toList(),
