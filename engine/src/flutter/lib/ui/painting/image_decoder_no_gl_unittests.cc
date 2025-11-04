@@ -109,14 +109,14 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutDisplayP3) {
           {100, 100},
           /*supports_wide_gamut=*/true, capabilities, allocator);
   ASSERT_TRUE(wide_result.has_value());
-  ASSERT_EQ(wide_result->image_info.colorType(), kRGBA_F16_SkColorType);
-  ASSERT_TRUE(wide_result->image_info.colorSpace()->isSRGB());
+  ASSERT_EQ(wide_result->image_info.format,
+            impeller::PixelFormat::kR16G16B16A16Float);
 
   const uint16_t* half_ptr = reinterpret_cast<const uint16_t*>(
       wide_result->device_buffer->OnGetContents());
   bool found_deep_red = false;
-  for (int i = 0;
-       i < wide_result->image_info.width() * wide_result->image_info.height();
+  for (int i = 0; i < wide_result->image_info.size.width *
+                          wide_result->image_info.size.height;
        ++i) {
     float red = HalfToFloat(*half_ptr++);
     float green = HalfToFloat(*half_ptr++);
@@ -137,7 +137,8 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutDisplayP3) {
           /*supports_wide_gamut=*/false, capabilities, allocator);
 
   ASSERT_TRUE(narrow_result.has_value());
-  ASSERT_EQ(narrow_result->image_info.colorType(), kRGBA_8888_SkColorType);
+  ASSERT_EQ(narrow_result->image_info.format,
+            impeller::PixelFormat::kR8G8B8A8UNormInt);
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
@@ -173,14 +174,14 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutIndexedPng) {
           descriptor.get(), {.target_width = 100, .target_height = 100},
           {100, 100},
           /*supports_wide_gamut=*/true, capabilities, allocator);
-  ASSERT_EQ(wide_result->image_info.colorType(), kBGR_101010x_XR_SkColorType);
-  ASSERT_TRUE(wide_result->image_info.colorSpace()->isSRGB());
+  ASSERT_EQ(wide_result->image_info.format,
+            impeller::PixelFormat::kB10G10R10XR);
 
   const uint32_t* pixel_ptr = reinterpret_cast<const uint32_t*>(
       wide_result->device_buffer->OnGetContents());
   bool found_deep_red = false;
-  for (int i = 0;
-       i < wide_result->image_info.width() * wide_result->image_info.height();
+  for (int i = 0; i < wide_result->image_info.size.width *
+                          wide_result->image_info.size.height;
        ++i) {
     uint32_t pixel = *pixel_ptr++;
     float blue = DecodeBGR10((pixel >> 0) & 0x3ff);
@@ -201,7 +202,8 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutIndexedPng) {
           /*supports_wide_gamut=*/false, capabilities, allocator);
 
   ASSERT_TRUE(narrow_result.has_value());
-  ASSERT_EQ(narrow_result->image_info.colorType(), kRGBA_8888_SkColorType);
+  ASSERT_EQ(narrow_result->image_info.format,
+            impeller::PixelFormat::kR8G8B8A8UNormInt);
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
@@ -233,7 +235,8 @@ TEST(ImageDecoderNoGLTest, ImpellerUnmultipliedAlphaPng) {
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), {.target_width = 11, .target_height = 11}, {11, 11},
           /*supports_wide_gamut=*/true, capabilities, allocator);
-  ASSERT_EQ(result->image_info.colorType(), kRGBA_8888_SkColorType);
+  ASSERT_EQ(result->image_info.format,
+            impeller::PixelFormat::kR8G8B8A8UNormInt);
 
   const uint32_t* pixel_ptr =
       reinterpret_cast<const uint32_t*>(result->device_buffer->OnGetContents());
