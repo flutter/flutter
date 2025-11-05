@@ -252,7 +252,6 @@ def generate_module_output_file_map_fragment(args):
         'const-values': f'{out_name}.swiftconstvalues',
         'dependencies': f'{out_name}.d',
         'diagnostics': f'{out_name}.dia',
-        'swift-dependencies': f'{out_name}.swiftdeps',
     }
   else:
     fragment = {
