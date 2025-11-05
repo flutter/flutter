@@ -129,8 +129,8 @@ public class PlayStoreDeferredComponentManagerTest {
     TestFlutterJNI jni = new TestFlutterJNI();
 
     Bundle bundle = new Bundle();
-    bundle.putString(FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.metaDataKey, "custom_name.so");
-    bundle.putString(FlutterShellArgs.FLUTTER_ASSETS_DIR.metaDataKey, "custom_assets");
+    bundle.putString(FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.metadataKey, "custom_name.so");
+    bundle.putString(FlutterShellArgs.FLUTTER_ASSETS_DIR.metadataKey, "custom_assets");
 
     Context spyContext = createSpyContext(bundle);
     doReturn(null).when(spyContext).getAssets();
@@ -162,7 +162,7 @@ public class PlayStoreDeferredComponentManagerTest {
 
     Bundle bundle = new Bundle();
     bundle.putString(PlayStoreDeferredComponentManager.MAPPING_KEY, "123:module:custom_name.so");
-    bundle.putString(FlutterShellArgs.FLUTTER_ASSETS_DIR.metaDataKey, "custom_assets");
+    bundle.putString(FlutterShellArgs.FLUTTER_ASSETS_DIR.metadataKey, "custom_assets");
 
     Context spyContext = createSpyContext(bundle);
     doReturn(null).when(spyContext).getAssets();
@@ -194,7 +194,7 @@ public class PlayStoreDeferredComponentManagerTest {
     Bundle bundle = new Bundle();
     bundle.putString(
         PlayStoreDeferredComponentManager.MAPPING_KEY, "123:module:custom_name.so,3:,4:");
-    bundle.putString(FlutterShellArgs.FLUTTER_ASSETS_DIR.metaDataKey, "custom_assets");
+    bundle.putString(FlutterShellArgs.FLUTTER_ASSETS_DIR.metadataKey, "custom_assets");
 
     Context spyContext = createSpyContext(bundle);
     doReturn(null).when(spyContext).getAssets();

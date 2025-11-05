@@ -71,10 +71,10 @@ public class ApplicationInfoLoaderTest {
   @Test
   public void itGeneratesCorrectApplicationInfoWithCustomValues() throws Exception {
     Bundle bundle = new Bundle();
-    bundle.putString(FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.metaDataKey, "testaot");
-    bundle.putString(FlutterShellArgs.VM_SNAPSHOT_DATA.metaDataKey, "testvmsnapshot");
-    bundle.putString(FlutterShellArgs.ISOLATE_SNAPSHOT_DATA.metaDataKey, "testisolatesnapshot");
-    bundle.putString(FlutterShellArgs.FLUTTER_ASSETS_DIR.metaDataKey, "testassets");
+    bundle.putString(FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.metadataKey, "testaot");
+    bundle.putString(FlutterShellArgs.VM_SNAPSHOT_DATA.metadataKey, "testvmsnapshot");
+    bundle.putString(FlutterShellArgs.ISOLATE_SNAPSHOT_DATA.metadataKey, "testisolatesnapshot");
+    bundle.putString(FlutterShellArgs.FLUTTER_ASSETS_DIR.metadataKey, "testassets");
     Context context = generateMockContext(bundle, null);
     FlutterApplicationInfo info = ApplicationInfoLoader.load(context);
     assertNotNull(info);
