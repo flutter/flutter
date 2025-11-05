@@ -892,7 +892,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -912,7 +915,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -932,7 +938,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -952,7 +961,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -973,7 +985,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -994,7 +1009,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -1084,7 +1102,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -1105,7 +1126,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       # TODO(fujino): delete once propagation from
       # https://github.com/flutter/flutter/issues/158521 completes.
@@ -1613,7 +1637,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:17"}
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       task_name: android_java17_dependency_smoke_tests
       tags: >
@@ -3139,6 +3166,12 @@ targets:
       tags: >
         ["devicelab", "linux"]
       task_name: native_assets_android
+      dependencies: >-
+        [
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
+        ]
 
   # linux mokey benchmark
   - name: Linux_mokey new_gallery__crane_perf
