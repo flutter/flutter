@@ -878,6 +878,7 @@ void main() {
       expect(find.text('Required'), findsNothing);
     },
   );
+
   testWidgets(
     'Does not auto-validate before value changes even when initialValue is empty and autovalidateMode is set to onUserInteractionIfError',
     (WidgetTester tester) async {
@@ -1118,7 +1119,7 @@ void main() {
 
       await tester.pumpWidget(builder());
 
-      // No error text is visible yet. (Initial valid state)
+      // No error text is visible yet. (Initial valid state).
       expect(find.text('Required'), findsNothing);
 
       // User types valid input 'bar' → autovalidate is disabled → still no error.
@@ -1126,16 +1127,16 @@ void main() {
       await tester.pump();
       expect(find.text('Required'), findsNothing);
 
-      // Clear the input (invalid)
+      // Clear the input (invalid).
       await tester.enterText(find.byType(TextFormField), '');
       await tester.pump();
 
-      // Manually submit form to show the initial error (AutovalidateMode is now active)
+      // Manually submit form to show the initial error (AutovalidateMode is now active).
       formState.currentState!.validate();
       expect(find.text('Required'), findsNothing);
       await tester.pump();
 
-      // Verify error is shown
+      // Verify error is shown.
       expect(find.text('Required'), findsOneWidget);
 
       // Now user interacts again with valid text ('baz') → validation auto-runs and clears the error.
