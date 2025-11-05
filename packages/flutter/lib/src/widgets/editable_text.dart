@@ -6777,7 +6777,7 @@ class _EditableTextTapUpOutsideAction extends ContextAction<EditableTextTapUpOut
 }
 
 /// A utility class for overriding the text styles of a [TextSpan] tree.
-// When changes are made to this class, the equivalent API in editable_text.dart
+// When changes are made to this class, the equivalent API in text.dart
 // must also be updated.
 // TODO(Renzo-Olivares): Remove after investigating a solution for overriding all
 // styles for children in an [InlineSpan] tree, see: https://github.com/flutter/flutter/issues/177952.
