@@ -34,8 +34,8 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ### [3.35.7](https://github.com/flutter/flutter/releases/tag/3.35.7)
 
-[flutter/174082](https://github.com/flutter/flutter/issues/174082) Apps, on all platforms, that extend MenuController class see a compile time failure when building.
-[flutter/173770](https://github.com/flutter/flutter/issues/173770) Mitigates a memory leak that occurs on Android, when `Activities` are not kept upon exit and an Activity is exited and re-entered.
+- [flutter/174082](https://github.com/flutter/flutter/issues/174082) Apps, on all platforms, that extend MenuController class see a compile time failure when building.
+- [flutter/173770](https://github.com/flutter/flutter/issues/173770) Mitigates a memory leak that occurs on Android, when `Activities` are not kept upon exit and an Activity is exited and re-entered.
 
 ### [3.35.6](https://github.com/flutter/flutter/releases/tag/3.35.6)
 
