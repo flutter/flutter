@@ -1238,7 +1238,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     return _imageStreamListener!;
   }
 
-  void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
+  void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) async {
     setState(() {
       _replaceImage(info: imageInfo);
       _loadingProgress = null;
@@ -1247,7 +1247,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _frameNumber = _frameNumber == null ? 0 : _frameNumber! + 1;
       _wasSynchronouslyLoaded = _wasSynchronouslyLoaded | synchronousCall;
     });
-    if (_isPaused && _frameNumber != null) {
+    // TODO(justinmc): GitHub issue.
+    if (_isPaused && _frameNumber! > 0) {
       _stopListeningToStream(keepStreamAlive: true);
     }
   }

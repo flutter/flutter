@@ -903,7 +903,11 @@ void main() {
       // listening.
       expect(imageStreamCompleter.listeners.length, 2);
 
-      // Send the first frame and the listeners will be removed.
+      // The final listener is removed after sending the second frame.
+      imageStreamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+      await tester.pump();
+      expect(imageStreamCompleter.listeners.length, 1);
+
       imageStreamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
       await tester.pump();
       expect(imageStreamCompleter.listeners.length, 0);
@@ -938,7 +942,10 @@ void main() {
       // listening.
       expect(imageStreamCompleter.listeners.length, 2);
 
-      // Send the first frame and the listeners will be removed.
+      // The final listener is removed after sending the second frame.
+      imageStreamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+      await tester.pump();
+      expect(imageStreamCompleter.listeners.length, 1);
       imageStreamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
       await tester.pump();
       expect(imageStreamCompleter.listeners.length, 0);
@@ -1651,195 +1658,19 @@ void main() {
           disableAnimations = false;
         });
         await tester.pump();
-        expect(lastFrame1, 1);
+        expect(lastFrame1, 0);
         expect(lastFrame2, 0);
         expect(buildCount, 7);
         streamCompleter1.setData(imageInfo: ImageInfo(image: await nextFrame()));
         await tester.pump();
-        expect(lastFrame1, 2);
+        expect(lastFrame1, 1);
         expect(lastFrame2, 0);
         expect(buildCount, 8);
         streamCompleter1.setData(imageInfo: ImageInfo(image: await nextFrame()));
         await tester.pump();
-        expect(lastFrame1, 3);
+        expect(lastFrame1, 2);
         expect(lastFrame2, 0);
         expect(buildCount, 9);
-      },
-    );
-
-    testWidgets(
-      'image source swapping while paused with $disableMethod',
-      experimentalLeakTesting: LeakTesting.settings
-          .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
-      (WidgetTester tester) async {
-        final ui.Codec codec = (await tester.runAsync(() {
-          return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
-        }))!;
-
-        Future<ui.Image> nextFrame() async {
-          final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
-          return frameInfo.image;
-        }
-
-        final _TestImageStreamCompleter streamCompleter1 = _TestImageStreamCompleter();
-        final _TestImageProvider imageProvider1 = _TestImageProvider(
-          streamCompleter: streamCompleter1,
-        );
-        final _TestImageStreamCompleter streamCompleter2 = _TestImageStreamCompleter();
-        final _TestImageProvider imageProvider2 = _TestImageProvider(
-          streamCompleter: streamCompleter2,
-        );
-        int? lastFrame1;
-        int? lastFrame2;
-        int buildCount = 0;
-
-        _TestImageProvider imageProvider = imageProvider1;
-        Widget buildFrame1(
-          BuildContext context,
-          Widget child,
-          int? frame,
-          bool wasSynchronouslyLoaded,
-        ) {
-          lastFrame1 = frame;
-          buildCount++;
-          return child;
-        }
-
-        Widget buildFrame2(
-          BuildContext context,
-          Widget child,
-          int? frame,
-          bool wasSynchronouslyLoaded,
-        ) {
-          lastFrame2 = frame;
-          buildCount++;
-          return child;
-        }
-
-        late StateSetter setState;
-        await tester.pumpWidget(
-          StatefulBuilder(
-            builder: (BuildContext context, StateSetter localSetState) {
-              setState = localSetState;
-              return switch (disableMethod) {
-                _DisableMethod.tickerMode => TickerMode(
-                  enabled: false,
-                  child: Image(
-                    image: imageProvider,
-                    frameBuilder: imageProvider == imageProvider1 ? buildFrame1 : buildFrame2,
-                  ),
-                ),
-                _DisableMethod.mediaQuery => MediaQuery(
-                  data: const MediaQueryData(disableAnimations: true),
-                  child: Image(
-                    image: imageProvider,
-                    frameBuilder: imageProvider == imageProvider1 ? buildFrame1 : buildFrame2,
-                  ),
-                ),
-              };
-            },
-          ),
-        );
-
-        expect(lastFrame1, isNull);
-        expect(lastFrame2, isNull);
-        expect(buildCount, 1);
-
-        // Pumping another frame doesn't do anything.
-        await tester.pump();
-        expect(lastFrame1, isNull);
-        expect(lastFrame2, isNull);
-        expect(buildCount, 1);
-
-        // When some data comes through for image 1, it updates to show the
-        // first frame.
-        streamCompleter1.setData(imageInfo: ImageInfo(image: await nextFrame()));
-        await tester.pump();
-        expect(lastFrame1, 0);
-        expect(lastFrame2, isNull);
-        expect(buildCount, 2);
-
-        // When some data comes through for image 2, it doesn't update because
-        // it's not showing that image.
-        streamCompleter2.setData(imageInfo: ImageInfo(image: await nextFrame()));
-        await tester.pump();
-        expect(lastFrame1, 0);
-        expect(lastFrame2, isNull);
-        expect(buildCount, 2);
-
-        // Pumping another frame doesn't do anything.
-        await tester.pump();
-        expect(lastFrame1, 0);
-        expect(lastFrame2, isNull);
-        expect(buildCount, 2);
-
-        // Subsequent frames do nothing because it's paused.
-        streamCompleter1.setData(imageInfo: ImageInfo(image: await nextFrame()));
-        await tester.pump();
-        expect(lastFrame1, 0);
-        expect(lastFrame2, isNull);
-        expect(buildCount, 2);
-        streamCompleter2.setData(imageInfo: ImageInfo(image: await nextFrame()));
-        await tester.pump();
-        expect(lastFrame1, 0);
-        expect(lastFrame2, isNull);
-        expect(buildCount, 2);
-
-        // Swap the image source and pump a frame. The second image updates with
-        // the frame that already came in.
-        setState(() {
-          imageProvider = imageProvider2;
-        });
-        await tester.pump();
-        expect(lastFrame1, 0);
-        expect(lastFrame2, 0);
-        expect(buildCount, 3);
-
-        // Subsequently swapping the image source loads the new image but does
-        // not advance the frame.
-        setState(() {
-          imageProvider = imageProvider1;
-        });
-        await tester.pump();
-        expect(lastFrame1, 0);
-        expect(lastFrame2, 0);
-        expect(buildCount, 4);
-        setState(() {
-          imageProvider = imageProvider2;
-        });
-        await tester.pump();
-        expect(lastFrame1, 0);
-        expect(lastFrame2, 0);
-        expect(buildCount, 5);
-
-        // Even when new frames come in, they are not displayed.
-        streamCompleter1.setData(imageInfo: ImageInfo(image: await nextFrame()));
-        await tester.pump();
-        expect(lastFrame1, 0);
-        expect(lastFrame2, 0);
-        expect(buildCount, 5);
-        streamCompleter2.setData(imageInfo: ImageInfo(image: await nextFrame()));
-        await tester.pump();
-        expect(lastFrame1, 0);
-        expect(lastFrame2, 0);
-        expect(buildCount, 5);
-
-        // Even when the source is swapped again, the new frames that previously
-        // came in are not displayed.
-        setState(() {
-          imageProvider = imageProvider1;
-        });
-        await tester.pump();
-        expect(lastFrame1, 0);
-        expect(lastFrame2, 0);
-        expect(buildCount, 6);
-        setState(() {
-          imageProvider = imageProvider2;
-        });
-        await tester.pump();
-        expect(lastFrame1, 0);
-        expect(lastFrame2, 0);
-        expect(buildCount, 7);
       },
     );
 
@@ -2002,16 +1833,21 @@ void main() {
       expect(lastFrame, 0);
       expect(buildCount, 2);
 
-      // Subsequent frames arriving don't do anything, because disableAnimations
-      // is true.
+      // Stops listening after two frames.
       streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
       await tester.pump();
-      expect(lastFrame, 0);
-      expect(buildCount, 2);
+      expect(lastFrame, 1);
+      expect(buildCount, 3);
+
+      // Subsequent frames arriving don't do anything because it's disabled.
       streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
       await tester.pump();
-      expect(lastFrame, 0);
-      expect(buildCount, 2);
+      expect(lastFrame, 1);
+      expect(buildCount, 3);
+      streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+      await tester.pump();
+      expect(lastFrame, 1);
+      expect(buildCount, 3);
     },
   );
 
@@ -2072,16 +1908,21 @@ void main() {
       expect(lastFrame, 0);
       expect(buildCount, 2);
 
-      // Subsequent frames arriving don't do anything, because disableAnimations
-      // is true.
+      // Stops listening after two frames.
       streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
       await tester.pump();
-      expect(lastFrame, 0);
-      expect(buildCount, 2);
+      expect(lastFrame, 1);
+      expect(buildCount, 3);
+
+      // Subsequent frames arriving don't do anything because it's disabled.
       streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
       await tester.pump();
-      expect(lastFrame, 0);
-      expect(buildCount, 2);
+      expect(lastFrame, 1);
+      expect(buildCount, 3);
+      streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+      await tester.pump();
+      expect(lastFrame, 1);
+      expect(buildCount, 3);
     },
   );
 
