@@ -592,7 +592,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test default cursor when disabled
@@ -1842,6 +1842,23 @@ void main() {
     final double bottomPositionSecondary = tileHeight - verticalPadding - secondaryHeight;
     expect(checkboxOffset.dy - tileOffset.dy, bottomPositionCheckbox);
     expect(secondaryOffset.dy - tileOffset.dy, bottomPositionSecondary);
+  });
+
+  testWidgets('CheckboxListTile does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(
+              body: wrap(
+                child: CheckboxListTile(value: true, onChanged: (_) {}, title: const Text('X')),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CheckboxListTile)), Size.zero);
   });
 }
 

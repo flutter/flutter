@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_api_samples/widgets/basic/ignore_pointer.0.dart' as example;
@@ -24,7 +25,7 @@ void main() {
     // On hovering the ElevatedButton, the cursor should be SystemMouseCursors.click.
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Tap to set ignoring pointer to true.
