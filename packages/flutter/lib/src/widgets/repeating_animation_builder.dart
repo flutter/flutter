@@ -5,6 +5,7 @@
 import 'package:flutter/animation.dart';
 
 import 'framework.dart';
+import 'ticker_provider.dart';
 import 'transitions.dart';
 import 'value_listenable_builder.dart';
 
