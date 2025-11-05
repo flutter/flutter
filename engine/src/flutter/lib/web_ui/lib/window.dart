@@ -116,6 +116,9 @@ abstract class AccessibilityFeatures {
   bool get highContrast;
   bool get onOffSwitchLabels;
   bool get supportsAnnounce;
+  bool get autoPlayAnimatedImages;
+  bool get autoPlayVideoPreviews;
+  bool get nonBlinkingCursor;
 }
 
 enum Brightness { dark, light }

@@ -107,6 +107,12 @@ typedef enum {
   kFlutterAccessibilityFeatureOnOffSwitchLabels = 1 << 6,
   /// Indicate the platform does not support announcements.
   kFlutterAccessibilityFeatureNoAnnounce = 1 << 7,
+  /// Indicate the platform allows auto-playing animated images.
+  kFlutterAccessibilityFeatureAutoPlayAnimatedImages = 1 << 8,
+  /// Indicate the platform allows auto-playing video previews.
+  kFlutterAccessibilityFeatureAutoPlayVideoPreviews = 1 << 9,
+  /// Request to show non-blinking cursor in editable text fields.
+  kFlutterAccessibilityFeatureNonBlinkingCursor = 1 << 10,
 } FlutterAccessibilityFeature;
 
 /// The set of possible actions that can be conveyed to a semantics node.

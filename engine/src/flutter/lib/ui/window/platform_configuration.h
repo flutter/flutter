@@ -36,22 +36,6 @@ FML_TEST_CLASS(PlatformConfigurationTest, BeginFrameMonotonic);
 }
 
 //--------------------------------------------------------------------------
-/// @brief An enum for defining the different kinds of accessibility features
-///        that can be enabled by the platform.
-///
-///         Must match the `AccessibilityFeatures` class in framework.
-enum class AccessibilityFeatureFlag : int32_t {
-  kAccessibleNavigation = 1 << 0,
-  kInvertColors = 1 << 1,
-  kDisableAnimations = 1 << 2,
-  kBoldText = 1 << 3,
-  kReduceMotion = 1 << 4,
-  kHighContrast = 1 << 5,
-  kOnOffSwitchLabels = 1 << 6,
-  kNoAnnounce = 1 << 7,
-};
-
-//--------------------------------------------------------------------------
 /// @brief A client interface that the `RuntimeController` uses to define
 ///        handlers for `PlatformConfiguration` requests.
 ///
