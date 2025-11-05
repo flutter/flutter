@@ -812,10 +812,10 @@ class MediaQueryData {
   ///  * [MediaQuery.applyTextStyleOverrides], which uses this method to apply
   ///    text style overrides to the ambient [MediaQuery].
   MediaQueryData applyTextStyleOverrides({
-    double? lineHeightScaleFactorOverride,
-    double? letterSpacingOverride,
-    double? wordSpacingOverride,
-    double? paragraphSpacingOverride,
+    required double? lineHeightScaleFactorOverride,
+    required double? letterSpacingOverride,
+    required double? wordSpacingOverride,
+    required double? paragraphSpacingOverride,
   }) {
     return MediaQueryData(
       size: size,
@@ -1158,10 +1158,10 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   MediaQuery.applyTextStyleOverrides({
     super.key,
     required BuildContext context,
-    double? lineHeightScaleFactorOverride,
-    double? letterSpacingOverride,
-    double? wordSpacingOverride,
-    double? paragraphSpacingOverride,
+    required double? lineHeightScaleFactorOverride,
+    required double? letterSpacingOverride,
+    required double? wordSpacingOverride,
+    required double? paragraphSpacingOverride,
     required super.child,
   }) : data = MediaQuery.of(context).applyTextStyleOverrides(
          lineHeightScaleFactorOverride: lineHeightScaleFactorOverride,

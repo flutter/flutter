@@ -1155,12 +1155,10 @@ void main() {
           builder: (BuildContext context) {
             return MediaQuery.applyTextStyleOverrides(
               context: context,
-              // null is the default for the text style overrides,
-              // leaving null will reset the values to null.
-              // lineHeightScaleFactorOverride: null,
-              // letterSpacingOverride: null,
-              // wordSpacingOverride: null,
-              // paragraphSpacingOverride: null,
+              lineHeightScaleFactorOverride: null,
+              letterSpacingOverride: null,
+              wordSpacingOverride: null,
+              paragraphSpacingOverride: null,
               child: Builder(
                 builder: (BuildContext context) {
                   withTextStyleOverrides = MediaQuery.of(context);
