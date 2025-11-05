@@ -2320,6 +2320,7 @@ targets:
       presubmit_max_attempts: "2"
 
   - name: Linux_android_emu_unstable android_defines_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/178034
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
