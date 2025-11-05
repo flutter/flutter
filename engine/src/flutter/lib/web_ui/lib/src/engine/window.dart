@@ -131,6 +131,16 @@ class EngineFlutterView implements ui.FlutterView {
     semantics.updateSemantics(update);
   }
 
+  /// Sets the locale for this view.
+  ///
+  /// This method is typically called by the Flutter framework after it has
+  /// resolved the application's locale. It configures the view to reflect
+  /// the given locale, which is important for accessibility and for the
+  /// browser.
+  void setLocale(ui.Locale locale) {
+    embeddingStrategy.setLocale(locale);
+  }
+
   late final GlobalHtmlAttributes _globalHtmlAttributes = GlobalHtmlAttributes(
     rootElement: dom.rootElement,
     hostElement: embeddingStrategy.hostElement,
