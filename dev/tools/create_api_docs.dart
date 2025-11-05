@@ -833,7 +833,7 @@ class DartdocGenerator {
     for (final String argumentRegExp in argumentRegExps) {
       _sanityCheckExample(
         widgetsDirectory.childFile('Listener-class.html').path,
-        r'\s*<iframe\s+class="snippet-dartpad"\s+src="'
+        r'\s*<iframe\s+class="snippet-dartpad"\s+allow="clipboard-write"\s+src="'
         r'https:\/\/dartpad.dev\/embed-flutter.html\?.*?\b'
         '$argumentRegExp'
         r'\b.*">\s*<\/iframe>',

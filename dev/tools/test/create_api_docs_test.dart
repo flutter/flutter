@@ -597,7 +597,7 @@ void main() {
             const String queryParams =
                 'split=1&run=true&sample_id=widgets.Listener.123&channel=main';
             widgetsDir.childFile('Listener-class.html').writeAsStringSync('''
-<iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?$queryParams">
+<iframe class="snippet-dartpad" allow="clipboard-write" src="https://dartpad.dev/embed-flutter.html?$queryParams">
 </iframe>
 ''');
           },
