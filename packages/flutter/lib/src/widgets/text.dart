@@ -725,7 +725,7 @@ class Text extends StatelessWidget {
     // TODO(Renzo-Olivares): Investigate ways the framework can automatically
     // apply MediaQueryData.paragraphSpacingOverride to its own text components.
     // See: https://github.com/flutter/flutter/issues/177953 and https://github.com/flutter/flutter/issues/177408.
-    final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(context);
+    // final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(context);
     // final double? letterSpacing = MediaQuery.maybeLetterSpacingOverrideOf(context);
     // final double? wordSpacing = MediaQuery.maybeWordSpacingOverrideOf(context);
     // final TextSpan effectiveTextSpan = _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides(
@@ -739,15 +739,15 @@ class Text extends StatelessWidget {
     //     children: textSpan != null ? <InlineSpan>[textSpan!] : null,
     //   ),
     // );
-    final TextSpan effectiveTextSpan = TextSpan(
-      style: effectiveTextStyle,
-      text: data,
-      locale: locale,
-      children: textSpan != null ? <InlineSpan>[textSpan!] : null,
-    );
-    final StrutStyle? effectiveStrutStyle = strutStyle != null && lineHeightScaleFactor != null
-        ? strutStyle!.copyWith(height: lineHeightScaleFactor)
-        : strutStyle;
+    // final TextSpan effectiveTextSpan = TextSpan(
+    //   style: effectiveTextStyle,
+    //   text: data,
+    //   locale: locale,
+    //   children: textSpan != null ? <InlineSpan>[textSpan!] : null,
+    // );
+    // final StrutStyle? effectiveStrutStyle = strutStyle != null && lineHeightScaleFactor != null
+    //     ? strutStyle!.copyWith(height: lineHeightScaleFactor)
+    //     : strutStyle;
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     final TextScaler textScaler = switch ((this.textScaler, textScaleFactor)) {
       (final TextScaler textScaler, _) => textScaler,
@@ -769,7 +769,8 @@ class Text extends StatelessWidget {
           overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
           textScaler: textScaler,
           maxLines: maxLines ?? defaultTextStyle.maxLines,
-          strutStyle: effectiveStrutStyle,
+          // strutStyle: effectiveStrutStyle,
+          strutStyle: strutStyle,
           textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
           textHeightBehavior:
               textHeightBehavior ??
@@ -779,7 +780,12 @@ class Text extends StatelessWidget {
               selectionColor ??
               DefaultSelectionStyle.of(context).selectionColor ??
               DefaultSelectionStyle.defaultColor,
-          text: effectiveTextSpan,
+          text: TextSpan(
+            style: effectiveTextStyle,
+            text: data,
+            locale: locale,
+            children: textSpan != null ? <InlineSpan>[textSpan!] : null,
+          ),
         ),
       );
     } else {
@@ -792,7 +798,7 @@ class Text extends StatelessWidget {
         overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
         textScaler: textScaler,
         maxLines: maxLines ?? defaultTextStyle.maxLines,
-        strutStyle: effectiveStrutStyle,
+        strutStyle: strutStyle,
         textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
         textHeightBehavior:
             textHeightBehavior ??
@@ -802,7 +808,12 @@ class Text extends StatelessWidget {
             selectionColor ??
             DefaultSelectionStyle.of(context).selectionColor ??
             DefaultSelectionStyle.defaultColor,
-        text: effectiveTextSpan,
+        text: TextSpan(
+          style: effectiveTextStyle,
+          text: data,
+          locale: locale,
+          children: textSpan != null ? <InlineSpan>[textSpan!] : null,
+        ),
       );
     }
     if (semanticsLabel != null || semanticsIdentifier != null) {
