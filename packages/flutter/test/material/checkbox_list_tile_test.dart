@@ -2175,6 +2175,35 @@ void main() {
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
     expect(right('title'), 708.0);
   });
+
+  testWidgets('CheckboxListTile minTileHeight', (WidgetTester tester) async {
+    Widget buildFrame(TextDirection textDirection, {double? minTileHeight}) {
+      return MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: Container(
+              alignment: Alignment.topLeft,
+              child: CheckboxListTile(value: true, minTileHeight: minTileHeight, onChanged: (_) {}),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Default list tile with height = 56.0
+    await tester.pumpWidget(buildFrame(TextDirection.ltr));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+
+    // Set list tile height = 30.0
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, minTileHeight: 30));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 30.0));
+
+    // Set list tile height = 60.0
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, minTileHeight: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 60.0));
+  });
 }
 
 class _SelectedGrabMouseCursor extends WidgetStateMouseCursor {
