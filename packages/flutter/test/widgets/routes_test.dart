@@ -2701,6 +2701,42 @@ void main() {
     expect(parentRoute, isA<MaterialPageRoute<void>>());
   });
 
+  testWidgets('ModalRoute sets hitTestBehavior.opaque on modal scope', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return ElevatedButton(
+              onPressed: () {
+                showDialog<void>(
+                  context: context,
+                  builder: (BuildContext context) => const AlertDialog(
+                    title: Text('Test Dialog'),
+                  ),
+                );
+              },
+              child: const Text('Show Dialog'),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Show Dialog'));
+    await tester.pumpAndSettle();
+
+    final Iterable<Semantics> semanticsWidgets = tester.widgetList<Semantics>(find.byType(Semantics));
+    
+    final Semantics modalScopeSemantics = semanticsWidgets.firstWhere(
+      (Semantics widget) => 
+        widget.properties.scopesRoute == true &&
+        widget.properties.hitTestBehavior != null,
+    );
+    
+    expect(modalScopeSemantics.properties.scopesRoute, isTrue);
+    expect(modalScopeSemantics.properties.hitTestBehavior, SemanticsHitTestBehavior.opaque);
+  });
+
   testWidgets('RawDialogRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(restorationScopeId: 'app', home: _RestorableDialogTestWidget()),
