@@ -258,14 +258,15 @@ class WebAssetServer implements AssetReader {
       fileSystem: fileSystem,
     );
     final int selectedPort = server.selectedPort;
-    var url = '$hostname:$selectedPort';
-    if (hostname == 'any') {
-      url = 'localhost:$selectedPort';
-    }
-    server._baseUri = Uri.http(url, server.basePath);
-    if (tlsCertPath != null && tlsCertKeyPath != null) {
-      server._baseUri = Uri.https(url, server.basePath);
-    }
+
+    final cleanHost = hostname == 'any' ? 'localhost' : hostname;
+    final scheme = tlsCertPath != null && tlsCertKeyPath != null ? 'https' : 'http';
+    server._baseUri = Uri(
+      scheme: scheme,
+      host: cleanHost,
+      port: selectedPort,
+      path: server.basePath,
+    );
     if (testMode) {
       return server;
     }
