@@ -261,9 +261,9 @@ class Expansible extends StatefulWidget {
 
   /// Used to override the expansion animation curve and duration.
   ///
-  /// If [AnimationStyle.duration] or [AnimationStyle.reverseDuration] is
-  /// provided, it will be used to override [duration]. If it is null, then
-  /// [duration] will be used. Otherwise, defaults to 200ms.
+  /// If [AnimationStyle.duration] is provided, it will be used instead of
+  /// [duration]. If not provided, [duration] is used, which defaults to
+  /// 200ms.
   ///
   /// If [AnimationStyle.curve] is provided, it will be used to override
   /// [curve]. If it is null, then [curve] will be used. Otherwise, defaults
