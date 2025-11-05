@@ -376,7 +376,7 @@ Future<Uint8List> fetchImage(String url, ui_web.ImageCodecChunkCallback? chunkCa
       '$_kNetworkImageMessage\n'
       'Image URL: $url\n'
       'Trying to load an image from another domain? Find answers at:\n'
-      'https://flutter.dev/docs/development/platform-integration/web-images',
+      'https://docs.flutter.dev/development/platform-integration/web-images',
     );
   }
 }
@@ -561,11 +561,15 @@ class CkImage implements ui.Image, StackTraceDebugger {
 
   ByteData? _readPixelsFromImageViaSurface(ui.ImageByteFormat format) {
     final Surface surface = CanvasKitRenderer.instance.pictureToImageSurface;
-    final CkSurface ckSurface = surface.createOrUpdateSurface(BitmapSize(width, height));
-    final CkCanvas ckCanvas = ckSurface.getCanvas();
+    surface.setSize(BitmapSize(width, height));
+    final CkSurface ckSurface = surface as CkSurface;
+    final SkSurface skiaSurface = ckSurface.skSurface!;
+
+    final CkCanvas ckCanvas = CkCanvas.fromSkCanvas(skiaSurface.getCanvas());
     ckCanvas.clear(const ui.Color(0x00000000));
     ckCanvas.drawImage(this, ui.Offset.zero, CkPaint());
-    final SkImage skImage = ckSurface.surface.makeImageSnapshot();
+    final SkImage skImage = skiaSurface.makeImageSnapshot();
+
     final SkImageInfo imageInfo = SkImageInfo(
       alphaType: canvasKit.AlphaType.Premul,
       colorType: canvasKit.ColorType.RGBA_8888,
@@ -574,6 +578,8 @@ class CkImage implements ui.Image, StackTraceDebugger {
       height: height.toDouble(),
     );
     final Uint8List? pixels = skImage.readPixels(0, 0, imageInfo);
+    skImage.delete();
+
     if (pixels == null) {
       throw StateError('Unable to convert read pixels from SkImage.');
     }

@@ -695,4 +695,15 @@ void main() {
       SystemMouseCursors.grab,
     );
   }, skip: kIsWeb); // There's a Web version in html_element_view_test.dart
+
+  testWidgets('SelectionArea does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: SelectionArea(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SelectionArea)), Size.zero);
+  });
 }
