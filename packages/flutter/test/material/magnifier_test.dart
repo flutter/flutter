@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 @Tags(<String>['reduced-test-set'])
-@TestOn('!chrome')
 library;
 
 import 'package:flutter/cupertino.dart';
