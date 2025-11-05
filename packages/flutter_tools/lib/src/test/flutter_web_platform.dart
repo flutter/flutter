@@ -625,7 +625,10 @@ class FlutterWebPlatform extends PlatformPlugin {
   /// If no browser manager is running yet, starts one.
   Future<BrowserManager> _launchBrowser(Runtime browser) {
     if (_browserManager != null) {
-      throw StateError('Another browser is currently running.');
+      print('!!! Browser already running !!!');
+      if (!_browserManager!.isClosed) {
+        throw StateError('Another browser is currently running.');
+      }
     }
 
     final completer = Completer<WebSocketChannel>.sync();
@@ -967,8 +970,10 @@ class BrowserManager {
 
   /// The callback for handling messages received from the host page.
   void _onMessage(dynamic message) {
+    print('!!! _onMessage($message)');
     assert(message is Map<String, dynamic>);
     if (message is Map<String, dynamic>) {
+      print('!!! >> command:${message['command']}');
       switch (message['command'] as String?) {
         case 'ping':
           break;
