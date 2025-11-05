@@ -113,6 +113,9 @@ public class AndroidTouchProcessor {
   // a change that affects multiple pointers.
   private static final int POINTER_DATA_FLAG_MULTIPLE = 2;
 
+  // Bit shift for encoding the pointer count when using POINTER_DATA_FLAG_MULTIPLE
+  private static final int POINTER_DATA_MULTIPLE_POINTER_COUNT_SHIFT = 8;
+
   // The view ID for the only view in a single-view Flutter app.
   private static final int IMPLICIT_VIEW_ID = 0;
 
@@ -215,7 +218,9 @@ public class AndroidTouchProcessor {
       // but it's the responsibility of a later part of the system to
       // ignore 0-deltas if desired.
       for (int p = 0; p < originalPointerCount; p++) {
-        int pointerData = POINTER_DATA_FLAG_MULTIPLE | (originalPointerCount << 8);
+        int pointerData =
+            POINTER_DATA_FLAG_MULTIPLE
+                | (originalPointerCount << POINTER_DATA_MULTIPLE_POINTER_COUNT_SHIFT);
         addPointerForIndex(event, p, pointerChange, pointerData, transformMatrix, packet);
       }
     }
