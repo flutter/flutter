@@ -667,7 +667,6 @@ class RenderSliverIndexedVariedExtentList extends RenderSliverMultiBoxAdaptor {
   }
 
   @override
-  @override
   void performLayout() {
     _precedingScrollExtent = this.constraints.precedingScrollExtent;
 
