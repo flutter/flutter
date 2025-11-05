@@ -1683,6 +1683,26 @@ void main() {
     expect(colors.first, equals(activeColor));
     expect(colors.last, equals(activeColor));
   });
+
+  testWidgets('Stepper does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: Stepper(
+                steps: const <Step>[
+                  Step(title: Text('X'), content: Text('X')),
+                  Step(title: Text('Y'), content: Text('Y')),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Stepper)), Size.zero);
+  });
 }
 
 class _TappableColorWidget extends StatefulWidget {
