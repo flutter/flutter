@@ -5598,6 +5598,31 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets(
+    'SelectableText respects MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, and MediaQueryData.wordSpacingOverride',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: MediaQueryData(
+              lineHeightScaleFactorOverride: 2.0,
+              letterSpacingOverride: 2.0,
+              wordSpacingOverride: 2.0,
+            ),
+            child: SelectableText('hello world', strutStyle: StrutStyle(height: 0.9)),
+          ),
+        ),
+      );
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final TextStyle? resultTextStyle = renderEditable.text?.style;
+      expect(resultTextStyle?.height, 2.0);
+      expect(resultTextStyle?.letterSpacing, 2.0);
+      expect(resultTextStyle?.wordSpacing, 2.0);
+      expect(renderEditable.strutStyle?.height, 2.0);
+    },
+  );
   group('context menu', () {
     // Regression test for https://github.com/flutter/flutter/issues/169001.
     testWidgets(
