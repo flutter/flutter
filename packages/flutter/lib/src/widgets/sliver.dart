@@ -293,7 +293,12 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
-  }) : super(
+  }) : assert(
+         findItemIndexCallback == null || findChildIndexCallback == null,
+         'Cannot provide both findItemIndexCallback and findChildIndexCallback. '
+         'Use findItemIndexCallback as findChildIndexCallback is deprecated.',
+       ),
+       super(
          delegate: SliverChildBuilderDelegate(
            (BuildContext context, int index) {
              final int itemIndex = index ~/ 2;

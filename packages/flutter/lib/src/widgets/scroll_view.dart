@@ -1476,6 +1476,11 @@ class ListView extends BoxScrollView {
     super.clipBehavior,
     super.hitTestBehavior,
   }) : assert(itemCount >= 0),
+       assert(
+         findItemIndexCallback == null || findChildIndexCallback == null,
+         'Cannot provide both findItemIndexCallback and findChildIndexCallback. '
+         'Use findItemIndexCallback as findChildIndexCallback is deprecated.',
+       ),
        itemExtent = null,
        itemExtentBuilder = null,
        prototypeItem = null,
