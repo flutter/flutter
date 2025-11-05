@@ -339,6 +339,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   /// This is used to determine whether the focus state has changed.
   late bool _hasFocus;
 
+  /// Whether an option is currently being selected.
+  bool _selecting = false;
+
   TextEditingController? _internalTextEditingController;
   TextEditingController get _textEditingController {
     return widget.textEditingController ??
@@ -455,6 +458,11 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   int _onChangedCallId = 0;
   // Called when _textEditingController changes.
   Future<void> _onChangedField() async {
+    // During a selection, changes to the field text should not trigger
+    // options update.
+    if (_selecting) {
+      return;
+    }
     final TextEditingValue value = _textEditingController.value;
 
     // Makes sure that options change only when content of the field changes.
@@ -496,16 +504,16 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     if (nextSelection == _selection) {
       return;
     }
+    _selecting = true;
     _selection = nextSelection;
     final String selectionString = widget.displayStringForOption(nextSelection);
-    _lastFieldText =
-        selectionString; // To prevent re-fetching options and opening the menu after the selection.
     _textEditingController.value = TextEditingValue(
       selection: TextSelection.collapsed(offset: selectionString.length),
       text: selectionString,
     );
     widget.onSelected?.call(nextSelection);
     _hideOptions(const DismissIntent()); // Close the options view after a selection is made.
+    _selecting = false;
   }
 
   void _updateHighlight(int nextIndex) {
