@@ -143,6 +143,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)discreteScrollEvent:(UIPanGestureRecognizer*)recognizer;
 - (void)updateViewportMetricsIfNeeded;
 - (void)updateAutoResizeConstraints;
+- (void)checkAndUpdateAutoResizeConstraints
 - (void)onUserSettingsChanged:(NSNotification*)notification;
 - (void)applicationWillTerminate:(NSNotification*)notification;
 - (void)goToApplicationLifecycle:(nonnull NSString*)state;
@@ -1006,8 +1007,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                                  bundle:nil];
   viewController.autoResizable = YES;
   mockEngine.viewController = viewController;
+  OCMExpect([viewController checkAndUpdateAutoResizeConstraints]);
   OCMExpect([viewController updateAutoResizeConstraints]);
-  [viewController updateViewportMetricsIfNeeded];
   OCMVerifyAll(mockEngine);
 }
 
@@ -1019,6 +1020,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                                  bundle:nil];
   viewController.autoResizable = NO;
   mockEngine.viewController = viewController;
+  OCMExpect([viewController checkAndUpdateAutoResizeConstraints]);
   OCMReject([viewController updateAutoResizeConstraints]);
   OCMVerifyAll(viewController);
 }

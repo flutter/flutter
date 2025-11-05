@@ -1503,11 +1503,15 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   self.flutterView.contentMode = UIViewContentModeCenter;
 }
 
-- (void)updateAutoResizeConstraints {
+- (void)checkAndUpdateAutoResizeContraints {
   if (!self.isAutoResizable) {
     return;
   }
 
+  [self updateAutoResizeConstraints];
+}
+
+- (void)updateAutoResizeConstraints {
   // When viewDidLayoutSubviews is called (which is where this method is called),
   // the view has finished laying out its subviews and has applied any auto layout constraints.
   // Therefore, we're able to use the frame to determine what size is allowed by layout constraints.
