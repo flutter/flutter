@@ -1121,7 +1121,7 @@ class PlatformDispatcher {
   /// This option is used by [showTimePicker].
   bool get alwaysUse24HourFormat => _configuration.alwaysUse24HourFormat;
 
-  /// The system-reported height of the text, as a multiple of the font size.
+  /// The system-suggested height of the text, as a multiple of the font size.
   ///
   /// This value takes precedence over any text height specified at the
   /// application level. For example, at framework level, in the [TextStyle]
@@ -1133,7 +1133,7 @@ class PlatformDispatcher {
   /// If this value changes, [onMetricsChanged] will be called.
   double? get lineHeightScaleFactorOverride => _configuration.lineHeightScaleFactorOverride;
 
-  /// The system-reported amount of additional space (in logical pixels)
+  /// The system-suggested amount of additional space (in logical pixels)
   /// to add between each letter.
   ///
   /// A negative value can be used to bring the letters closer.
@@ -1148,7 +1148,7 @@ class PlatformDispatcher {
   /// If this value changes, [onMetricsChanged] will be called.
   double? get letterSpacingOverride => _configuration.letterSpacingOverride;
 
-  /// The system-reported amount of additional space (in logical pixels)
+  /// The system-suggested amount of additional space (in logical pixels)
   /// to add between each sequence of white-space (i.e. between each word).
   ///
   /// A negative value can be used to bring the words closer.
@@ -1163,7 +1163,7 @@ class PlatformDispatcher {
   /// If this value changes, [onMetricsChanged] will be called.
   double? get wordSpacingOverride => _configuration.wordSpacingOverride;
 
-  /// The system-reported amount of additional space (in logical pixels)
+  /// The system-suggested amount of additional space (in logical pixels)
   /// to add following each paragraph in text.
   ///
   /// This value takes precedence over any text paragraph spacing specified at
