@@ -4512,10 +4512,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "open_jdk", "version": "version:21"}
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
@@ -6313,10 +6310,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v4"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "open_jdk", "version": "version:21"}
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
