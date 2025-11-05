@@ -128,6 +128,11 @@ enum OptionsViewOpenDirection {
 /// The user's text input is received in a field built with the
 /// [fieldViewBuilder] parameter. The options to be displayed are determined
 /// using [optionsBuilder] and rendered with [optionsViewBuilder].
+///
+/// The options view opens when the field gains focus or when the field's text
+/// changes, as long as [optionsBuilder] returns at least one option. The options
+/// view closes when the user selects an option, when there are no matching
+/// options, or when the field loses focus.
 /// {@endtemplate}
 ///
 /// This is a core framework widget with very basic UI.
@@ -329,6 +334,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   // up/down keys.
   static const int _pageSize = 4;
 
+  /// Whether the field currently has focus.
+  ///
+  /// This is used to determine whether the focus state has changed.
   late bool _hasFocus;
 
   TextEditingController? _internalTextEditingController;
@@ -407,15 +415,21 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     },
   };
 
+  /// The options view is considered eligible to show only while the field has
+  /// focus and there is at least one option to display.
   bool get _canShowOptionsView => _focusNode.hasFocus && _options.isNotEmpty;
 
   void _onFocusChange() {
     if (_focusNode.hasFocus != _hasFocus) {
       _hasFocus = _focusNode.hasFocus;
+      // Gaining focus can open the options view (if there are options). Losing
+      // focus always closes it.
       _updateOptionsViewVisibility();
     }
   }
 
+  /// Shows the options view when the field is focused and there is at least one
+  /// option to display; otherwise hides the options view.
   void _updateOptionsViewVisibility() {
     if (_canShowOptionsView) {
       _optionsViewController.show();
@@ -484,13 +498,14 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     }
     _selection = nextSelection;
     final String selectionString = widget.displayStringForOption(nextSelection);
-    _lastFieldText = selectionString;
+    _lastFieldText =
+        selectionString; // To prevent re-fetching options and opening the menu after the selection.
     _textEditingController.value = TextEditingValue(
       selection: TextSelection.collapsed(offset: selectionString.length),
       text: selectionString,
     );
     widget.onSelected?.call(nextSelection);
-    _hideOptions(const DismissIntent());
+    _hideOptions(const DismissIntent()); // Close the options view after a selection is made.
   }
 
   void _updateHighlight(int nextIndex) {
