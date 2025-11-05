@@ -945,6 +945,7 @@ targets:
       - DEPS
 
   - name: Linux gradle_plugin_fat_apk_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/178041
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
