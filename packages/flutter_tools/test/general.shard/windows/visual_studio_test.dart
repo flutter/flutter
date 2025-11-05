@@ -53,6 +53,18 @@ const _vs2022Response = <String, dynamic>{
   'catalog': <String, dynamic>{'productDisplayVersion': '17.0.0'},
 };
 
+// A minimum version of a response where a VS 2026 installation was found.
+const _vs2026Response = <String, dynamic>{
+  'installationPath': visualStudioPath,
+  'displayName': 'Visual Studio Community 2026',
+  'installationVersion': '18.0.11116.177',
+  'isRebootRequired': false,
+  'isComplete': true,
+  'isLaunchable': true,
+  'isPrerelease': false,
+  'catalog': <String, dynamic>{'productDisplayVersion': 'Insiders [11116.177]'},
+};
+
 // A minimum version of a response where a Build Tools installation was found.
 const _defaultBuildToolsResponse = <String, dynamic>{
   'installationPath': visualStudioPath,
@@ -823,6 +835,27 @@ void main() {
       expect(visualStudio.hasNecessaryComponents, true);
       expect(visualStudio.cmakePath, equals(cmakePath));
       expect(visualStudio.cmakeGenerator, equals('Visual Studio 17 2022'));
+      expect(visualStudio.clPath, equals(clPath));
+      expect(visualStudio.libPath, equals(libPath));
+      expect(visualStudio.linkPath, equals(linkPath));
+      expect(visualStudio.vcvarsPath, equals(vcvarsPath));
+    });
+
+    testWithoutContext('properties return the right value for Visual Studio 2026', () {
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
+
+      setMockCompatibleVisualStudioInstallation(
+        _vs2026Response,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+
+      expect(visualStudio.isInstalled, true);
+      expect(visualStudio.isAtLeastMinimumVersion, true);
+      expect(visualStudio.hasNecessaryComponents, true);
+      expect(visualStudio.cmakePath, equals(cmakePath));
+      expect(visualStudio.cmakeGenerator, equals('Visual Studio 18 2026'));
       expect(visualStudio.clPath, equals(clPath));
       expect(visualStudio.libPath, equals(libPath));
       expect(visualStudio.linkPath, equals(linkPath));

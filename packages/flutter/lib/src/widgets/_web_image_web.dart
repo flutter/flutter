@@ -42,7 +42,8 @@ class ImgElementPlatformView extends StatelessWidget {
       // Set `width` and `height`, otherwise the engine will issue a warning.
       img.style
         ..width = '100%'
-        ..height = '100%';
+        ..height = '100%'
+        ..pointerEvents = 'none';
       return img;
     });
   }

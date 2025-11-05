@@ -1,0 +1,41 @@
+ahem
+License for the Ahem font embedded below is from:
+(?s)License for the Ahem font embedded below is from:
+https://www.w3.org/Style/CSS/Test/Fonts/Ahem/COPYING
+
+The Ahem font in this directory belongs to the public domain. In
+jurisdictions that do not recognize public domain ownership of these
+files, the following Creative Commons Zero declaration applies:
+
+<http://labs.creativecommons.org/licenses/zero-waive/1.0/us/legalcode>
+
+which is quoted below:
+
+  The person who has associated a work with this document \(the "Work"\)
+  affirms that he or she \(the "Affirmer"\) is the/an author or owner of
+  the Work. The Work may be any work of authorship, including a
+  database.
+
+  The Affirmer hereby fully, permanently and irrevocably waives and
+  relinquishes all of her or his copyright and related or neighboring
+  legal rights in the Work available under any federal or state law,
+  treaty or contract, including but not limited to moral rights,
+  publicity and privacy rights, rights protecting against unfair
+  competition and any rights protecting the extraction, dissemination
+  and reuse of data, whether such rights are present or future, vested
+  or contingent \(the "Waiver"\). The Affirmer makes the Waiver for the
+  benefit of the public at large and to the detriment of the Affirmer's
+  heirs or successors.
+
+  The Affirmer understands and intends that the Waiver has the effect
+  of eliminating and entirely removing from the Affirmer's control all
+  the copyright and related or neighboring legal rights previously held
+  by the Affirmer in the Work, to that extent making the Work freely
+  available to the public for any and all uses and purposes without
+  restriction of any kind, including commercial use and uses in media
+  and formats or by methods that have not yet been invented or
+  conceived. Should the Waiver for any reason be judged legally
+  ineffective in any jurisdiction, the Affirmer hereby grants a free,
+  full, permanent, irrevocable, nonexclusive and worldwide license for
+  all her or his copyright and related or neighboring legal rights in
+  the Work.
