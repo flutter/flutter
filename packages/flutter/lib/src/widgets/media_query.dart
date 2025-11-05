@@ -799,6 +799,52 @@ class MediaQueryData {
     );
   }
 
+  /// Creates a copy of this media query data but with the
+  /// `lineHeightScaleFactorOverride`, `letterSpacingOverride`,
+  /// `wordSpacingOverride`, and `paragraphSpacingOverride` replaced
+  /// with the given values.
+  ///
+  /// If an argument is null (the default), then this [MediaQueryData]
+  /// is returned with the corresponding override set to null.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQuery.applyTextStyleOverrides], which uses this method to apply
+  ///    text style overrides to the ambient [MediaQuery].
+  MediaQueryData applyTextStyleOverrides({
+    double? lineHeightScaleFactorOverride,
+    double? letterSpacingOverride,
+    double? wordSpacingOverride,
+    double? paragraphSpacingOverride,
+  }) {
+    return MediaQueryData(
+      size: size,
+      devicePixelRatio: devicePixelRatio,
+      textScaler: textScaler,
+      platformBrightness: platformBrightness,
+      padding: padding,
+      viewPadding: viewPadding,
+      viewInsets: viewInsets,
+      systemGestureInsets: systemGestureInsets,
+      alwaysUse24HourFormat: alwaysUse24HourFormat,
+      invertColors: invertColors,
+      highContrast: highContrast,
+      onOffSwitchLabels: onOffSwitchLabels,
+      disableAnimations: disableAnimations,
+      accessibleNavigation: accessibleNavigation,
+      boldText: boldText,
+      supportsAnnounce: supportsAnnounce,
+      navigationMode: navigationMode,
+      gestureSettings: gestureSettings,
+      displayFeatures: displayFeatures,
+      supportsShowingSystemContextMenu: supportsShowingSystemContextMenu,
+      lineHeightScaleFactorOverride: lineHeightScaleFactorOverride,
+      letterSpacingOverride: letterSpacingOverride,
+      wordSpacingOverride: wordSpacingOverride,
+      paragraphSpacingOverride: paragraphSpacingOverride,
+    );
+  }
+
   /// Creates a copy of this media query data but with the given [padding]s
   /// replaced with zero.
   ///
@@ -1095,6 +1141,34 @@ class MediaQueryData {
 class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Creates a widget that provides [MediaQueryData] to its descendants.
   const MediaQuery({super.key, required this.data, required super.child});
+
+  /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
+  /// from the given context, but applies the specified text style overrides.
+  ///
+  /// The [context] argument must have a [MediaQuery] in scope.
+  ///
+  /// If a text style override argument is null (the default), then the
+  /// corresponding override in the returned [MediaQueryData] is set to null.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQueryData.lineHeightScaleFactorOverride], [MediaQueryData.letterSpacingOverride],
+  ///    [MediaQueryData.wordSpacingOverride], [MediaQueryData.paragraphSpacingOverride], the
+  ///    affected properties of the [MediaQueryData].
+  MediaQuery.applyTextStyleOverrides({
+    super.key,
+    required BuildContext context,
+    double? lineHeightScaleFactorOverride,
+    double? letterSpacingOverride,
+    double? wordSpacingOverride,
+    double? paragraphSpacingOverride,
+    required super.child,
+  }) : data = MediaQuery.of(context).applyTextStyleOverrides(
+         lineHeightScaleFactorOverride: lineHeightScaleFactorOverride,
+         letterSpacingOverride: letterSpacingOverride,
+         wordSpacingOverride: wordSpacingOverride,
+         paragraphSpacingOverride: paragraphSpacingOverride,
+       );
 
   /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
   /// from the given context, but removes the specified padding.
