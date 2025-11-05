@@ -143,7 +143,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)discreteScrollEvent:(UIPanGestureRecognizer*)recognizer;
 - (void)updateViewportMetricsIfNeeded;
 - (void)updateAutoResizeConstraints;
-- (void)checkAndUpdateAutoResizeConstraints
+- (void)checkAndUpdateAutoResizeConstraints;
 - (void)onUserSettingsChanged:(NSNotification*)notification;
 - (void)applicationWillTerminate:(NSNotification*)notification;
 - (void)goToApplicationLifecycle:(nonnull NSString*)state;
