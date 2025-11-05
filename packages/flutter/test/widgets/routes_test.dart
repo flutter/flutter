@@ -2729,7 +2729,7 @@ void main() {
     
     final Semantics modalScopeSemantics = semanticsWidgets.firstWhere(
       (Semantics widget) => 
-        widget.properties.scopesRoute == true &&
+        (widget.properties.scopesRoute ?? false) &&
         widget.properties.hitTestBehavior != null,
     );
     
