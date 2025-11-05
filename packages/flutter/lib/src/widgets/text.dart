@@ -726,18 +726,24 @@ class Text extends StatelessWidget {
     // apply MediaQueryData.paragraphSpacingOverride to its own text components.
     // See: https://github.com/flutter/flutter/issues/177953 and https://github.com/flutter/flutter/issues/177408.
     final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(context);
-    final double? letterSpacing = MediaQuery.maybeLetterSpacingOverrideOf(context);
-    final double? wordSpacing = MediaQuery.maybeWordSpacingOverrideOf(context);
-    final TextSpan effectiveTextSpan = _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides(
-      lineHeightScaleFactor: lineHeightScaleFactor,
-      letterSpacing: letterSpacing,
-      wordSpacing: wordSpacing,
-      textSpan: TextSpan(
-        style: effectiveTextStyle,
-        text: data,
-        locale: locale,
-        children: textSpan != null ? <InlineSpan>[textSpan!] : null,
-      ),
+    // final double? letterSpacing = MediaQuery.maybeLetterSpacingOverrideOf(context);
+    // final double? wordSpacing = MediaQuery.maybeWordSpacingOverrideOf(context);
+    // final TextSpan effectiveTextSpan = _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides(
+    //   lineHeightScaleFactor: lineHeightScaleFactor,
+    //   letterSpacing: letterSpacing,
+    //   wordSpacing: wordSpacing,
+    //   textSpan: TextSpan(
+    //     style: effectiveTextStyle,
+    //     text: data,
+    //     locale: locale,
+    //     children: textSpan != null ? <InlineSpan>[textSpan!] : null,
+    //   ),
+    // );
+    final TextSpan effectiveTextSpan = TextSpan(
+      style: effectiveTextStyle,
+      text: data,
+      locale: locale,
+      children: textSpan != null ? <InlineSpan>[textSpan!] : null,
     );
     final StrutStyle? effectiveStrutStyle = strutStyle != null && lineHeightScaleFactor != null
         ? strutStyle!.copyWith(height: lineHeightScaleFactor)
@@ -1503,44 +1509,44 @@ typedef _SelectionInfo = ({int contentLength, SelectedContentRange? range});
 // must also be updated.
 // TODO(Renzo-Olivares): Remove after investigating a solution for overriding all
 // styles for children in an [InlineSpan] tree, see: https://github.com/flutter/flutter/issues/177952.
-class _OverridingTextStyleTextSpanUtils {
-  static TextSpan applyTextSpacingOverrides({
-    double? lineHeightScaleFactor,
-    double? letterSpacing,
-    double? wordSpacing,
-    required TextSpan textSpan,
-  }) {
-    if (lineHeightScaleFactor == null && letterSpacing == null && wordSpacing == null) {
-      return textSpan;
-    }
-    return _applyTextStyleOverrides(
-      TextStyle(
-        height: lineHeightScaleFactor,
-        letterSpacing: letterSpacing,
-        wordSpacing: wordSpacing,
-      ),
-      textSpan,
-    );
-  }
+// class _OverridingTextStyleTextSpanUtils {
+//   static TextSpan applyTextSpacingOverrides({
+//     double? lineHeightScaleFactor,
+//     double? letterSpacing,
+//     double? wordSpacing,
+//     required TextSpan textSpan,
+//   }) {
+//     if (lineHeightScaleFactor == null && letterSpacing == null && wordSpacing == null) {
+//       return textSpan;
+//     }
+//     return _applyTextStyleOverrides(
+//       TextStyle(
+//         height: lineHeightScaleFactor,
+//         letterSpacing: letterSpacing,
+//         wordSpacing: wordSpacing,
+//       ),
+//       textSpan,
+//     );
+//   }
 
-  static TextSpan _applyTextStyleOverrides(TextStyle overrideTextStyle, TextSpan textSpan) {
-    return TextSpan(
-      text: textSpan.text,
-      children: textSpan.children?.map((InlineSpan child) {
-        if (child is TextSpan && child.runtimeType == TextSpan) {
-          return _applyTextStyleOverrides(overrideTextStyle, child);
-        }
-        return child;
-      }).toList(),
-      style: textSpan.style?.merge(overrideTextStyle) ?? overrideTextStyle,
-      recognizer: textSpan.recognizer,
-      mouseCursor: textSpan.mouseCursor,
-      onEnter: textSpan.onEnter,
-      onExit: textSpan.onExit,
-      semanticsLabel: textSpan.semanticsLabel,
-      semanticsIdentifier: textSpan.semanticsIdentifier,
-      locale: textSpan.locale,
-      spellOut: textSpan.spellOut,
-    );
-  }
-}
+//   static TextSpan _applyTextStyleOverrides(TextStyle overrideTextStyle, TextSpan textSpan) {
+//     return TextSpan(
+//       text: textSpan.text,
+//       children: textSpan.children?.map((InlineSpan child) {
+//         if (child is TextSpan && child.runtimeType == TextSpan) {
+//           return _applyTextStyleOverrides(overrideTextStyle, child);
+//         }
+//         return child;
+//       }).toList(),
+//       style: textSpan.style?.merge(overrideTextStyle) ?? overrideTextStyle,
+//       recognizer: textSpan.recognizer,
+//       mouseCursor: textSpan.mouseCursor,
+//       onEnter: textSpan.onEnter,
+//       onExit: textSpan.onExit,
+//       semanticsLabel: textSpan.semanticsLabel,
+//       semanticsIdentifier: textSpan.semanticsIdentifier,
+//       locale: textSpan.locale,
+//       spellOut: textSpan.spellOut,
+//     );
+//   }
+// }
