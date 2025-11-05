@@ -2703,7 +2703,7 @@ void main() {
 
   testWidgets('ModalRoute sets hitTestBehavior.opaque on modal scope', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    
+
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
@@ -2712,9 +2712,7 @@ void main() {
               onPressed: () {
                 showDialog<void>(
                   context: context,
-                  builder: (BuildContext context) => const AlertDialog(
-                    title: Text('Test Dialog'),
-                  ),
+                  builder: (BuildContext context) => const AlertDialog(title: Text('Test Dialog')),
                 );
               },
               child: const Text('Show Dialog'),
@@ -2727,8 +2725,10 @@ void main() {
     await tester.tap(find.text('Show Dialog'));
     await tester.pumpAndSettle();
 
-    final Iterable<Semantics> semanticsWidgets = tester.widgetList<Semantics>(find.byType(Semantics));
-    
+    final Iterable<Semantics> semanticsWidgets = tester.widgetList<Semantics>(
+      find.byType(Semantics),
+    );
+
     bool found = false;
     for (final Semantics widget in semanticsWidgets) {
       if (widget.properties.hitTestBehavior == SemanticsHitTestBehavior.opaque) {
@@ -2737,9 +2737,9 @@ void main() {
         break;
       }
     }
-    
+
     expect(found, isTrue, reason: 'No Semantics widget with hitTestBehavior.opaque found');
-    
+
     semantics.dispose();
   });
 
