@@ -548,8 +548,7 @@ class WindowingOwnerLinux extends WindowingOwner {
   }
 
   /// Controllers being managed by Flutter.
-  final Map<int, RegularWindowControllerLinux> _regularWindowControllers = {};
-  final Map<int, DialogWindowControllerLinux> _dialogWindowControllers = {};
+  final Map<int, _LinuxWindowController> _windowControllers = {};
 
   @internal
   @override
@@ -566,7 +565,7 @@ class WindowingOwnerLinux extends WindowingOwner {
       preferredConstraints: preferredConstraints,
       title: title,
     );
-    _regularWindowControllers[controller.rootView.viewId] = controller;
+    _windowControllers[controller.rootView.viewId] = controller;
     return controller;
   }
 
@@ -587,15 +586,20 @@ class WindowingOwnerLinux extends WindowingOwner {
       parent: parent,
       title: title,
     );
-    _dialogWindowControllers[controller.rootView.viewId] = controller;
+    _windowControllers[controller.rootView.viewId] = controller;
     return controller;
   }
 
   @internal
   @override
   bool hasTopLevelWindows() {
-    return _regularWindowControllers.isNotEmpty || _dialogWindowControllers.isNotEmpty;
+    return _windowControllers.isNotEmpty;
   }
+}
+
+abstract class _LinuxWindowController {
+  /// The GTK window containing the Flutter content.
+  _GtkWindow get window;
 }
 
 /// Implementation of [RegularWindowController] for the Linux platform.
@@ -605,7 +609,8 @@ class WindowingOwnerLinux extends WindowingOwner {
 /// See also:
 ///
 ///  * [RegularWindowController], the base class for regular windows.
-class RegularWindowControllerLinux extends RegularWindowController {
+class RegularWindowControllerLinux extends RegularWindowController
+    implements _LinuxWindowController {
   /// Creates a new regular window controller for Linux.
   ///
   /// When this constructor completes the native window has been created and
@@ -673,6 +678,10 @@ class RegularWindowControllerLinux extends RegularWindowController {
   late final _FlWindowMonitor _windowMonitor;
   bool _destroyed = false;
 
+  @internal
+  @override
+  _GtkWindow get window => _window;
+
   @override
   @internal
   Size get contentSize => _window.getSize();
@@ -686,7 +695,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
     _windowMonitor.close();
     _windowMonitor.unref();
     _destroyed = true;
-    _owner._regularWindowControllers.remove(rootView.viewId);
+    _owner._windowControllers.remove(rootView.viewId);
   }
 
   @override
@@ -778,7 +787,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
 /// See also:
 ///
 ///  * [DialogWindowController], the base class for dialog windows.
-class DialogWindowControllerLinux extends DialogWindowController {
+class DialogWindowControllerLinux extends DialogWindowController implements _LinuxWindowController {
   /// Creates a new dialog window controller for Linux.
   ///
   /// When this constructor completes the native window has been created and
@@ -808,9 +817,9 @@ class DialogWindowControllerLinux extends DialogWindowController {
 
     _window.setTypeHint(_GDK_WINDOW_TYPE_HINT_DIALOG);
     if (parent != null) {
-      final controller = owner._regularWindowControllers[parent.rootView.viewId];
+      final controller = owner._windowControllers[parent.rootView.viewId];
       if (controller != null) {
-        _window.setTransientFor(controller._window);
+        _window.setTransientFor(controller.window);
         _window.setModal(true);
       }
     }
@@ -858,6 +867,10 @@ class DialogWindowControllerLinux extends DialogWindowController {
   late final _FlWindowMonitor _windowMonitor;
   bool _destroyed = false;
 
+  @internal
+  @override
+  _GtkWindow get window => _window;
+
   @override
   @internal
   Size get contentSize => _window.getSize();
@@ -871,7 +884,7 @@ class DialogWindowControllerLinux extends DialogWindowController {
     _windowMonitor.close();
     _windowMonitor.unref();
     _destroyed = true;
-    _owner._dialogWindowControllers.remove(rootView.viewId);
+    _owner._windowControllers.remove(rootView.viewId);
   }
 
   @override
