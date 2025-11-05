@@ -4832,7 +4832,7 @@ class EditableTextState extends State<EditableText>
     }
 
     final InlineSpan inlineSpan = renderEditable.text!;
-    final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(context);
+    // final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(context);
     final TextScaler effectiveTextScaler = switch ((widget.textScaler, widget.textScaleFactor)) {
       (final TextScaler textScaler, _) => textScaler,
       (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
@@ -4846,9 +4846,10 @@ class EditableTextState extends State<EditableText>
       textScaler: effectiveTextScaler,
       textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
       locale: widget.locale,
-      structStyle: widget.strutStyle.copyWith(
-        forceStrutHeight: lineHeightScaleFactor == null ? null : false,
-      ),
+      structStyle: widget.strutStyle,
+      // structStyle: widget.strutStyle.copyWith(
+      //   forceStrutHeight: lineHeightScaleFactor == null ? null : false,
+      // ),
       placeholder: _placeholderLocation,
       size: renderEditable.size,
     );
@@ -5684,7 +5685,7 @@ class EditableTextState extends State<EditableText>
       (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
       (null, null) => MediaQuery.textScalerOf(context),
     };
-    final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(context);
+    // final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(context);
     // final double? letterSpacing = MediaQuery.maybeLetterSpacingOverrideOf(context);
     // final double? wordSpacing = MediaQuery.maybeWordSpacingOverrideOf(context);
     final ui.SemanticsInputType inputType;
@@ -5830,9 +5831,10 @@ class EditableTextState extends State<EditableText>
                                     maxLines: widget.maxLines,
                                     minLines: widget.minLines,
                                     expands: widget.expands,
-                                    strutStyle: widget.strutStyle.copyWith(
-                                      height: lineHeightScaleFactor,
-                                    ),
+                                    // strutStyle: widget.strutStyle.copyWith(
+                                    //   height: lineHeightScaleFactor,
+                                    // ),
+                                    strutStyle: widget.strutStyle,
                                     selectionColor:
                                         _selectionOverlay?.spellCheckToolbarIsVisible ?? false
                                         ? _spellCheckConfiguration.misspelledSelectionColor ??
