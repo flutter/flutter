@@ -2307,4 +2307,15 @@ void main() {
     final Radio<bool> radio = tester.widget(find.byType(Radio<bool>));
     expect(radio.innerRadius, innerRadius);
   });
+
+  testWidgets('RadioListTile does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(child: SizedBox.shrink(child: RadioListTile<bool>(value: true))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RadioListTile<bool>)), Size.zero);
+  });
 }
