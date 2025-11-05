@@ -25,7 +25,6 @@ void main() {
     // The warm up frame will send update for an empty semantics tree. We
     // ignore this one time update.
     SemanticsUpdateBuilderSpy.observations.clear();
-
     // Builds the real widget tree.
     await tester.pumpWidget(
       Directionality(
@@ -74,11 +73,11 @@ void main() {
     expect(SemanticsUpdateBuilderSpy.observations[1]!.childrenInTraversalOrder.length, 0);
     expect(SemanticsUpdateBuilderSpy.observations[1]!.label, 'outer\ninner-updated\ntext');
 
-    SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
   });
 
   testWidgets('Semantics update receives attributed text', (WidgetTester tester) async {
+    addTearDown(SemanticsUpdateBuilderSpy.observations.clear);
     final SemanticsHandle handle = tester.ensureSemantics();
     // Pumps a placeholder to trigger the warm up frame.
     await tester.pumpWidget(
@@ -172,15 +171,6 @@ void main() {
       'attributedHint: "hint" [SpellOutStringAttribute(TextRange(start: 1, end: 2))]' // ignore: missing_whitespace_between_adjacent_strings
       ')',
     );
-
-    SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
   });
-}
-
-class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
-  @override
-  ui.SemanticsUpdateBuilder createSemanticsUpdateBuilder() {
-    return SemanticsUpdateBuilderSpy();
-  }
 }

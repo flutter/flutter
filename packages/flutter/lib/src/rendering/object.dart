@@ -25,6 +25,7 @@ import 'package:flutter/semantics.dart';
 import 'binding.dart';
 import 'debug.dart';
 import 'layer.dart';
+import 'view.dart';
 
 export 'package:flutter/foundation.dart'
     show
@@ -1398,6 +1399,19 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           'Attempted to enable semantics without configuring an onSemanticsUpdate callback.',
         );
         _semanticsOwner = SemanticsOwner(onSemanticsUpdate: onSemanticsUpdate!);
+        final RenderView? root = rootNode as RenderView?;
+        if (root != null) {
+          root.scheduleInitialSemantics();
+          // Synchronously flush semantics if possible. This should send the
+          // update to platform synchronously if UI and platform threads are
+          // merged.
+          //
+          // Doing this let OS to read the semantics tree synchronously even if
+          // semantics has not been built before.
+          if (root.child?.hasSize ?? false) {
+            _flushSemanticsWithin();
+          }
+        }
         onSemanticsOwnerCreated?.call();
       }
     } else if (_semanticsOwner != null) {
@@ -1430,6 +1444,13 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   // See [_RenderObjectSemantics]'s documentation for detailed explanations on
   // what this method does
   void flushSemantics() {
+    _flushSemanticsWithin();
+    for (final PipelineOwner child in _children) {
+      child.flushSemantics();
+    }
+  }
+
+  void _flushSemanticsWithin() {
     if (_semanticsOwner == null) {
       return;
     }
@@ -1510,9 +1531,6 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       }
 
       _semanticsOwner!.sendSemanticsUpdate();
-      for (final PipelineOwner child in _children) {
-        child.flushSemantics();
-      }
       assert(
         _nodesNeedingSemantics.isEmpty,
         'Child PipelineOwners must not dirty nodes in their parent.',

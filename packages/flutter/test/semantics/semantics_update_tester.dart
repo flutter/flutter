@@ -56,8 +56,6 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
     required ui.SemanticsInputType inputType,
     required ui.Locale? locale,
   }) {
-    // Makes sure we don't send the same id twice.
-    assert(!observations.containsKey(id));
     observations[id] = SemanticsNodeUpdateObservation(
       label: label,
       labelAttributes: labelAttributes,
@@ -95,4 +93,11 @@ class SemanticsNodeUpdateObservation {
   final String hint;
   final List<StringAttribute>? hintAttributes;
   final Int32List childrenInTraversalOrder;
+}
+
+class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
+  @override
+  ui.SemanticsUpdateBuilder createSemanticsUpdateBuilder() {
+    return SemanticsUpdateBuilderSpy();
+  }
 }
