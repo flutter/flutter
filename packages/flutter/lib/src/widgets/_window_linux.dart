@@ -512,9 +512,6 @@ class WindowingOwnerLinux extends WindowingOwner {
     );
   }
 
-  /// Number of windows being managed by Flutter.
-  int _windowCount = 0;
-
   @internal
   @override
   RegularWindowController createRegularWindowController({
@@ -523,7 +520,6 @@ class WindowingOwnerLinux extends WindowingOwner {
     String? title,
     required RegularWindowControllerDelegate delegate,
   }) {
-    _windowCount++;
     return RegularWindowControllerLinux(
       owner: this,
       delegate: delegate,
@@ -543,12 +539,6 @@ class WindowingOwnerLinux extends WindowingOwner {
     String? title,
   }) {
     throw UnimplementedError('Dialog windows are not yet implemented on Linux.');
-  }
-
-  @internal
-  @override
-  bool hasTopLevelWindows() {
-    return _windowCount > 0;
   }
 }
 
@@ -640,7 +630,6 @@ class RegularWindowControllerLinux extends RegularWindowController {
     _windowMonitor.close();
     _windowMonitor.unref();
     _destroyed = true;
-    _owner._windowCount--;
   }
 
   @override
