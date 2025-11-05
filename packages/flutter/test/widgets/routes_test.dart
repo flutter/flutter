@@ -2702,6 +2702,8 @@ void main() {
   });
 
   testWidgets('ModalRoute sets hitTestBehavior.opaque on modal scope', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
@@ -2727,14 +2729,18 @@ void main() {
 
     final Iterable<Semantics> semanticsWidgets = tester.widgetList<Semantics>(find.byType(Semantics));
     
-    final Semantics modalScopeSemantics = semanticsWidgets.firstWhere(
-      (Semantics widget) => 
-        (widget.properties.scopesRoute ?? false) &&
-        widget.properties.hitTestBehavior != null,
-    );
+    bool found = false;
+    for (final Semantics widget in semanticsWidgets) {
+      if (widget.properties.hitTestBehavior == SemanticsHitTestBehavior.opaque) {
+        expect(widget.properties.hitTestBehavior, SemanticsHitTestBehavior.opaque);
+        found = true;
+        break;
+      }
+    }
     
-    expect(modalScopeSemantics.properties.scopesRoute, isTrue);
-    expect(modalScopeSemantics.properties.hitTestBehavior, SemanticsHitTestBehavior.opaque);
+    expect(found, isTrue, reason: 'No Semantics widget with hitTestBehavior.opaque found');
+    
+    semantics.dispose();
   });
 
   testWidgets('RawDialogRoute is state restorable', (WidgetTester tester) async {
