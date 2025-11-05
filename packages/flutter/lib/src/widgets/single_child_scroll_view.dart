@@ -493,6 +493,8 @@ class _RenderSingleChildViewport extends RenderBox
     return constraints.constrain(childSize);
   }
 
+  static const int _maxLayoutCycles = 10;
+
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
@@ -502,8 +504,7 @@ class _RenderSingleChildViewport extends RenderBox
       child!.layout(_getInnerConstraints(constraints), parentUsesSize: true);
       size = constraints.constrain(child!.size);
     }
-
-    while (true) {
+    for (int i = 0; i < _maxLayoutCycles; i++) {
       final bool didAcceptViewportDimension = offset.applyViewportDimension(_viewportExtent);
       final bool didAcceptContentDimension = offset.applyContentDimensions(
         _minScrollExtent,
