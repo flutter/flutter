@@ -18,16 +18,16 @@ import java.util.*;
  * <p>All of these flags map to a flag listed in shell/common/switches.cc, which contains the full
  * list of flags that can potentially be set. They can either be set via the manifest metadata in a
  * Flutter component's AndroidManifest.xml or via the command line. See the inner {@code Flag} class
- * for the way to specify each flag in the manifest and via the command line.
+ * for the specification of how to set each flag via the command line and manifest metadata.
  *
  * <p>If the same flag is provided both via command line arguments and via AndroidManifest.xml
- * meta-data, the command line value takes precedence at runtime.
+ * metadata, the command line value will take precedence at runtime.
  */
 public final class FlutterShellArgs {
 
   private FlutterShellArgs() {}
 
-  /** Represents a Flutter shell flag that can be set via manifest meta-data or command line. */
+  /** Represents a Flutter shell flag that can be set via manifest metadata or command line. */
   public static class Flag {
     /** The command line argument used to specify the flag. */
     public final String commandLineArgument;
@@ -39,7 +39,7 @@ public final class FlutterShellArgs {
      * io.flutter.embedding.android.}. This is done to avoid potential naming collisions with other
      * metadata keys.
      */
-    public final String metaDataKey;
+    public final String metadataKey;
 
     /** Whether this flag is allowed to be set in release mode. */
     public final boolean allowedInRelease;
@@ -48,10 +48,11 @@ public final class FlutterShellArgs {
 
     public Flag(String commandLineArgument, String metaDataName, boolean allowedInRelease) {
       this.commandLineArgument = commandLineArgument;
-      this.metaDataKey = packageName + metaDataName;
+      this.metadataKey = packageName + metaDataName;
       this.allowedInRelease = allowedInRelease;
     }
 
+    /** Returns true if this flag requires a value to be specified. */
     public boolean hasValue() {
       return commandLineArgument.endsWith("=");
     }
@@ -91,11 +92,6 @@ public final class FlutterShellArgs {
   /** Specifies the backend to use for Impeller rendering. */
   public static final Flag IMPELLER_BACKEND =
       new Flag("--impeller-backend=", "ImpellerBackend", true);
-
-  @Deprecated
-  /** Used to disable merging of platform and UI threads. */
-  public static final Flag DISABLE_MERGED_PLATFORM_UI_THREAD =
-      new Flag("--disable-merged-platform-ui-thread", "DisableMergedPlatformUIThread", true);
 
   /** Enables Android SurfaceControl for rendering. */
   public static final Flag ENABLE_SURFACE_CONTROL =
@@ -143,7 +139,7 @@ public final class FlutterShellArgs {
 
   /**
    * Set whether leave or clean up the VM after the last shell shuts down. It can be set from app's
-   * meta-data in the application block in AndroidManifest.xml. Set it to true in to leave the Dart
+   * metadata in the application block in AndroidManifest.xml. Set it to true in to leave the Dart
    * VM, set it to false to destroy VM.
    *
    * <p>If your want to let your app destroy the last shell and re-create shells more quickly, set
@@ -224,7 +220,6 @@ public final class FlutterShellArgs {
               OLD_GEN_HEAP_SIZE,
               ENABLE_IMPELLER,
               IMPELLER_BACKEND,
-              DISABLE_MERGED_PLATFORM_UI_THREAD,
               ENABLE_SURFACE_CONTROL,
               ENABLE_FLUTTER_GPU,
               IMPELLER_LAZY_SHADER_MODE,
@@ -251,18 +246,18 @@ public final class FlutterShellArgs {
               VERBOSE_LOGGING,
               DART_FLAGS));
 
-  // Efficient lookup map for retrieving the Flag corresponding to a specific command line argument.
+  // Lookup map for retrieving the Flag corresponding to a specific command line argument.
   private static final Map<String, Flag> FLAG_BY_COMMAND_LINE_ARG;
 
-  // Efficient lookup map for retrieving the Flag corresponding to a specific meta-data key.
+  // Lookup map for retrieving the Flag corresponding to a specific metadata key.
   private static final Map<String, Flag> FLAG_BY_META_DATA_KEY;
 
   static {
-    Map<String, Flag> map = new HashMap<>(ALL_FLAGS.size());
-    Map<String, Flag> metaMap = new HashMap<>(ALL_FLAGS.size());
+    Map<String, Flag> map = new HashMap<String, Flag>(ALL_FLAGS.size());
+    Map<String, Flag> metaMap = new HashMap<String, Flag>(ALL_FLAGS.size());
     for (Flag flag : ALL_FLAGS) {
       map.put(flag.commandLineArgument, flag);
-      metaMap.put(flag.metaDataKey, flag);
+      metaMap.put(flag.metadataKey, flag);
     }
     FLAG_BY_COMMAND_LINE_ARG = Collections.unmodifiableMap(map);
     FLAG_BY_META_DATA_KEY = Collections.unmodifiableMap(metaMap);
@@ -273,8 +268,8 @@ public final class FlutterShellArgs {
     return FLAG_BY_COMMAND_LINE_ARG.containsKey(arg);
   }
 
-  /** Looks up a {@link Flag} by its metaDataKey. */
-  public static Flag getFlagByMetaDataKey(String key) {
+  /** Looks up a {@link Flag} by its metadataKey. */
+  public static Flag getFlagByMetadataKey(String key) {
     return FLAG_BY_META_DATA_KEY.get(key);
   }
 }

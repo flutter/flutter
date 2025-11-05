@@ -140,10 +140,10 @@ public final class ApplicationInfoLoader {
   public static FlutterApplicationInfo load(@NonNull Context applicationContext) {
     ApplicationInfo appInfo = getApplicationInfo(applicationContext);
     return new FlutterApplicationInfo(
-        getString(appInfo.metaData, FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.metaDataKey),
-        getString(appInfo.metaData, FlutterShellArgs.VM_SNAPSHOT_DATA.metaDataKey),
-        getString(appInfo.metaData, FlutterShellArgs.ISOLATE_SNAPSHOT_DATA.metaDataKey),
-        getString(appInfo.metaData, FlutterShellArgs.FLUTTER_ASSETS_DIR.metaDataKey),
+        getString(appInfo.metaData, FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.metadataKey),
+        getString(appInfo.metaData, FlutterShellArgs.VM_SNAPSHOT_DATA.metadataKey),
+        getString(appInfo.metaData, FlutterShellArgs.ISOLATE_SNAPSHOT_DATA.metadataKey),
+        getString(appInfo.metaData, FlutterShellArgs.FLUTTER_ASSETS_DIR.metadataKey),
         getNetworkPolicy(appInfo, applicationContext),
         appInfo.nativeLibraryDir,
         getBoolean(appInfo.metaData, PUBLIC_AUTOMATICALLY_REGISTER_PLUGINS_METADATA_KEY, true));

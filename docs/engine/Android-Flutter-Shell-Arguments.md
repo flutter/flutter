@@ -5,19 +5,21 @@ You can set flags for the Flutter engine on Android in two different ways:
 - From the command line when launching an app with the Flutter tool
 - Via `AndroidManifest.xml` metadata (static, per-build configuration)
 
-All flags available on Android can be set via the command line, but only some
-can be set via manifest metada. See `src/flutter/shell/common/switches.cc` for
-the list of all supported flags. See
+All flags available on Android can be set via the command line *and** via
+manifest metada. See `src/flutter/shell/common/switches.cc` for
+the list of all supported flags, and see
 `src/flutter/shell/platform/android/io/flutter/embedding/engine/`
 `FlutterShellArgs.java` for the list of flags that can be set via
 manifest metadata.
 
-## When to use manifest vs command line
+## When to use manifest metadata versus the command line
 
-- Use the manifest when you want a fixed, reproducible baseline of engine flags
+Use the manifest when:
+
+- You want a fixed, reproducible baseline of engine flags
     for your app across all launches. This is ideal for CI and for enforcing a
-    consistent config for your team.
-- Use the manifest when you want to vary flags by build mode or product flavor
+    consistent configuration for your app.
+- You want to vary flags by build mode or product flavor
     via manifest merging. For example, place metadata in
     `src/debug/AndroidManifest.xml`, `src/profile/AndroidManifest.xml`, and
     `src/release/AndroidManifest.xml` (or per-flavor manifests) to tailor flags
@@ -27,7 +29,7 @@ See below for details on using each method.
 
 ## How to set engine flags from the command line
 
-When you run a standalone Flutter app with the Flutter tool, many engine flags
+When you run a standalone Flutter app with the Flutter tool, engine flags
 can be passed directly and are forwarded to the Android engine. Examples:
 
 ```bash
@@ -45,8 +47,8 @@ Notes:
     the manifest is recommended and modifying the embedding to allow that is
     encouraged.
 
-Note: If a flag is specified both on the command line and in the manifest,
-the command-line value takes precedence at runtime.
+**Note: If a flag is specified both on the command line and in the manifest,
+the command-line value takes precedence at runtime.**
 
 ## How to set engine flags in the manifest
 
@@ -58,12 +60,12 @@ related command line flag as determined in
 `mode=` command line flag corresponds to the metadata key
 `io.flutter.embedding.android.ImpellerLazyShaderMode`.
 
-For flags that take values, set the numeric or string value (without the
-leading `--flag=` prefix). For boolean flags, use `android:value="true"` to
+For flags that take values, set the numeric, string, or boolean value (without
+the leading `--flag=` prefix). For boolean flags, use `android:value=true` to
 enable; omit or set `false` to disable.
 
-Note: Manifest-provided values are overridden by command-line flags if both
-are present.
+**Note: Manifest-provided values are overridden by command-line flags if both
+are present.**
 
 ### Examples
 
@@ -75,7 +77,7 @@ Set the `--old-gen-heap-size=` flag to 322 MB:
     <application ...>
         <meta-data
             android:name="io.flutter.embedding.android.OldGenHeapSize"
-            android:value="322" />
+            android:value=true/>
             ...
     </application>
 </manifest>
@@ -94,16 +96,16 @@ Set the `--enable-flutter-gpu` flag:
 - Some flags are not allowed in release mode. The Android embedding enforces
     this policy (see `FlutterShellArgs`, which marks allowed flags
     with `allowedInRelease`). If a disallowed flag is set in release, it will
-    be ignored or rejected.
+    be ignored.
 - If you need different behavior in release vs debug/profile, configure it via
     variant-specific manifests or product flavors.
 
 ## How to set engine flags dynamically
 
-As of November 2025, setting Flutter shell arguments via an Android `Intent` is
-no longer supported. If you need per-launch or runtime-controlled flags in an
-add-to-app integration, you may do so programatically before engine
-initialization.
+As of the writing of this document, setting Flutter shell arguments via an
+Android `Intent` is no longer supported. If you need per-launch or
+runtime-controlled flags in an add-to-app integration, you may do so
+programatically before engine initialization.
 
 To do that, supply engine arguments at process start by calling
 `FlutterLoader.ensureInitializationComplete(Context, String[])` before any

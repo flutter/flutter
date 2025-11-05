@@ -8,6 +8,7 @@ import static android.os.Looper.getMainLooper;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
@@ -302,9 +303,9 @@ public class FlutterLoaderTest {
 
     for (Path testPath : pathsToTest) {
       String path = testPath.toString();
-      Bundle metaData = new Bundle();
-      metaData.putString("io.flutter.embedding.android.AOTSharedLibraryName", path);
-      ctx.getApplicationInfo().metaData = metaData;
+      Bundle metadata = new Bundle();
+      metadata.putString("io.flutter.embedding.android.AOTSharedLibraryName", path);
+      ctx.getApplicationInfo().metaData = metadata;
 
       flutterLoader.ensureInitializationComplete(ctx, null);
 
@@ -380,9 +381,9 @@ public class FlutterLoaderTest {
 
     for (Path testPath : pathsToTest) {
       String path = testPath.toString();
-      Bundle metaData = new Bundle();
-      metaData.putString("io.flutter.embedding.android.AOTSharedLibraryName", path);
-      ctx.getApplicationInfo().metaData = metaData;
+      Bundle metadata = new Bundle();
+      metadata.putString("io.flutter.embedding.android.AOTSharedLibraryName", path);
+      ctx.getApplicationInfo().metaData = metadata;
 
       flutterLoader.ensureInitializationComplete(ctx, null);
 
@@ -430,9 +431,9 @@ public class FlutterLoaderTest {
 
     String invalidFilePath = "my\0file.so";
 
-    Bundle metaData = new Bundle();
-    metaData.putString("io.flutter.embedding.android.AOTSharedLibraryName", invalidFilePath);
-    ctx.getApplicationInfo().metaData = metaData;
+    Bundle metadata = new Bundle();
+    metadata.putString("io.flutter.embedding.android.AOTSharedLibraryName", invalidFilePath);
+    ctx.getApplicationInfo().metaData = metadata;
 
     flutterLoader.ensureInitializationComplete(ctx, null);
 
@@ -481,10 +482,10 @@ public class FlutterLoaderTest {
     when(flutterLoader.getFileFromPath(spySymlinkFile.getPath())).thenReturn(spySymlinkFile);
     doReturn(realSoFile.getCanonicalPath()).when(spySymlinkFile).getCanonicalPath();
 
-    Bundle metaData = new Bundle();
-    metaData.putString(
+    Bundle metadata = new Bundle();
+    metadata.putString(
         "io.flutter.embedding.android.AOTSharedLibraryName", spySymlinkFile.getPath());
-    ctx.getApplicationInfo().metaData = metaData;
+    ctx.getApplicationInfo().metaData = metadata;
     flutterLoader.ensureInitializationComplete(ctx, null);
 
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
@@ -539,10 +540,10 @@ public class FlutterLoaderTest {
     List<File> unsafeFiles = Arrays.asList(nonSoFile, fileJustOutsideInternalStorage);
     Files.deleteIfExists(spySymlinkFile.toPath());
 
-    Bundle metaData = new Bundle();
-    metaData.putString(
+    Bundle metadata = new Bundle();
+    metadata.putString(
         "io.flutter.embedding.android.AOTSharedLibraryName", spySymlinkFile.getAbsolutePath());
-    ctx.getApplicationInfo().metaData = metaData;
+    ctx.getApplicationInfo().metaData = metadata;
 
     for (File unsafeFile : unsafeFiles) {
       // Simulate a symlink since some filesystems do not support symlinks.
@@ -885,6 +886,69 @@ public class FlutterLoaderTest {
         FlutterShellArgs.DART_FLAGS.commandLineArgument + expectedDartFlags);
   }
 
+  @Test
+  public void itDoesNotSetDisableMergedPlatformUIThreadFromMetaData() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metadata = new Bundle();
+
+    metadata.putBoolean("io.flutter.embedding.android.DisableMergedPlatformUIThread", true);
+    ctx.getApplicationInfo().metaData = metadata;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+
+    // Verify that an IllegalArgumentException is thrown when DisableMergedPlatformUIThread is set,
+    // as it is no longer supported.
+    Exception exception =
+        assertThrows(
+            RuntimeException.class, () -> flutterLoader.ensureInitializationComplete(ctx, null));
+    Throwable cause = exception.getCause();
+
+    assertNotNull(cause);
+    assertTrue(
+        "Expected cause to be IllegalArgumentException", cause instanceof IllegalArgumentException);
+    assertTrue(
+        cause
+            .getMessage()
+            .contains(
+                "io.flutter.embedding.android.DisableMergedPlatformUIThread is no longer allowed."));
+  }
+
+  @Test
+  public void itDoesNotSetUnrecognizedMetadataKey() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metadata = new Bundle();
+
+    metadata.putBoolean("io.flutter.embedding.android.UnrecognizedKey", true);
+    ctx.getApplicationInfo().metaData = metadata;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null);
+    shadowOf(getMainLooper()).idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+
+    // Verify that no unrecognized argument is set.
+    assertFalse(
+        "Unexpected argument '--unrecognized-key' was found in the arguments passed to FlutterJNI.init",
+        arguments.contains("--unrecognized-key"));
+  }
+
   private void testFlagFromMetaData(String metadataKey, Object metadataValue, String expectedArg) {
     testFlagFromMetaData(metadataKey, metadataValue, expectedArg, true);
   }
@@ -894,21 +958,21 @@ public class FlutterLoaderTest {
       String metadataKey, Object metadataValue, String expectedArg, boolean shouldBeSet) {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
-    Bundle metaData = new Bundle();
+    Bundle metadata = new Bundle();
 
     // Place metadata key and value into the metadata bundle used to mock the manifest.
     if (metadataValue instanceof Boolean) {
-      metaData.putBoolean(metadataKey, (Boolean) metadataValue);
+      metadata.putBoolean(metadataKey, (Boolean) metadataValue);
     } else if (metadataValue instanceof Integer) {
-      metaData.putInt(metadataKey, (Integer) metadataValue);
+      metadata.putInt(metadataKey, (Integer) metadataValue);
     } else if (metadataValue instanceof String) {
-      metaData.putString(metadataKey, (String) metadataValue);
+      metadata.putString(metadataKey, (String) metadataValue);
     } else {
       throw new IllegalArgumentException(
           "Unsupported metadataValue type: " + metadataValue.getClass());
     }
 
-    ctx.getApplicationInfo().metaData = metaData;
+    ctx.getApplicationInfo().metaData = metadata;
 
     FlutterLoader.Settings settings = new FlutterLoader.Settings();
     assertFalse(flutterLoader.initialized());

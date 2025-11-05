@@ -48,18 +48,18 @@ public class FlutterShellArgsTest {
   }
 
   @Test
-  public void getFlagByMetaDataKey_returnsExpectedFlagWhenValidKeySpecified() {
+  public void getFlagByMetadataKey_returnsExpectedFlagWhenValidKeySpecified() {
     FlutterShellArgs.Flag flag =
-        FlutterShellArgs.getFlagByMetaDataKey(
+        FlutterShellArgs.getFlagByMetadataKey(
             "io.flutter.embedding.android.EnableSoftwareRendering");
     assertNotNull(flag);
     assertEquals("--enable-software-rendering", flag.commandLineArgument);
   }
 
   @Test
-  public void getFlagByMetaDataKey_returnsNullWhenInvalidKeySpecified() {
+  public void getFlagByMetadataKey_returnsNullWhenInvalidKeySpecified() {
     FlutterShellArgs.Flag flag =
-        FlutterShellArgs.getFlagByMetaDataKey("io.flutter.embedding.android.InvalidMetaDataKey");
+        FlutterShellArgs.getFlagByMetadataKey("io.flutter.embedding.android.InvalidMetaDataKey");
     assertNull("Should return null for an invalid meta-data key", flag);
   }
 }
