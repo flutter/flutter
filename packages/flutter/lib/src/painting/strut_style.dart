@@ -574,24 +574,26 @@ class StrutStyle with Diagnosticable {
     List<String>? fontFamilyFallback,
     double? fontSize,
     double? height,
+    TextLeadingDistribution? leadingDistribution,
     double? leading,
     FontWeight? fontWeight,
     FontStyle? fontStyle,
     bool? forceStrutHeight,
     String? debugLabel,
-    TextLeadingDistribution? leadingDistribution,
+    String? package,
   }) {
     return StrutStyle(
       fontFamily: fontFamily ?? this.fontFamily,
       fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
       fontSize: fontSize ?? this.fontSize,
       height: height ?? this.height,
+      leadingDistribution: leadingDistribution ?? this.leadingDistribution,
       leading: leading ?? this.leading,
       fontWeight: fontWeight ?? this.fontWeight,
       fontStyle: fontStyle ?? this.fontStyle,
       forceStrutHeight: forceStrutHeight ?? this.forceStrutHeight,
       debugLabel: debugLabel ?? this.debugLabel,
-      leadingDistribution: leadingDistribution ?? this.leadingDistribution,
+      package: package ?? _package,
     );
   }
 
