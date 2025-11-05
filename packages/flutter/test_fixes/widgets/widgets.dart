@@ -226,8 +226,10 @@ void main() {
   // All three parameters
   Expansible(
     controller: controller,
-    headerBuilder: (BuildContext context, Animation<double> animation) => Container(),
-    bodyBuilder: (BuildContext context, Animation<double> animation) => Container(),
+    headerBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
+    bodyBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
     duration: const Duration(milliseconds: 300),
     curve: Curves.easeIn,
     reverseCurve: Curves.easeOut,
@@ -235,45 +237,57 @@ void main() {
   // Only duration
   Expansible(
     controller: controller,
-    headerBuilder: (BuildContext context, Animation<double> animation) => Container(),
-    bodyBuilder: (BuildContext context, Animation<double> animation) => Container(),
+    headerBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
+    bodyBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
     duration: const Duration(milliseconds: 200),
   );
   // Only curve
   Expansible(
     controller: controller,
-    headerBuilder: (BuildContext context, Animation<double> animation) => Container(),
-    bodyBuilder: (BuildContext context, Animation<double> animation) => Container(),
+    headerBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
+    bodyBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
     curve: Curves.bounceIn,
   );
   // Only reverseCurve
   Expansible(
     controller: controller,
-    headerBuilder: (BuildContext context, Animation<double> animation) => Container(),
-    bodyBuilder: (BuildContext context, Animation<double> animation) => Container(),
+    headerBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
+    bodyBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
     reverseCurve: Curves.bounceOut,
   );
   // duration + curve
   Expansible(
     controller: controller,
-    headerBuilder: (BuildContext context, Animation<double> animation) => Container(),
-    bodyBuilder: (BuildContext context, Animation<double> animation) => Container(),
+    headerBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
+    bodyBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
     duration: const Duration(milliseconds: 400),
     curve: Curves.linear,
   );
   // duration + reverseCurve
   Expansible(
     controller: controller,
-    headerBuilder: (BuildContext context, Animation<double> animation) => Container(),
-    bodyBuilder: (BuildContext context, Animation<double> animation) => Container(),
+    headerBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
+    bodyBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
     duration: const Duration(milliseconds: 500),
     reverseCurve: Curves.easeInOut,
   );
   // curve + reverseCurve
   Expansible(
     controller: controller,
-    headerBuilder: (BuildContext context, Animation<double> animation) => Container(),
-    bodyBuilder: (BuildContext context, Animation<double> animation) => Container(),
+    headerBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
+    bodyBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
     curve: Curves.elasticIn,
     reverseCurve: Curves.elasticOut,
   );
