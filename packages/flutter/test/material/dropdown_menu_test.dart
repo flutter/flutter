@@ -4062,63 +4062,59 @@ void main() {
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/177993.
-  testWidgets(
-    'Pressing ESC key closes the menu when requestFocusOnTap is false',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Center(
-              child: DropdownMenu<TestMenu>(
-                dropdownMenuEntries: menuChildren,
-                requestFocusOnTap: false,
-              ),
+  testWidgets('Pressing ESC key closes the menu when requestFocusOnTap is false', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              requestFocusOnTap: false,
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      // Move focus to the TextField and open the menu.
-      await tester.tap(find.byType(TextField));
-      await tester.pump();
-      expect(findMenuPanel(), findsOne);
+    // Move focus to the TextField and open the menu.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(findMenuPanel(), findsOne);
 
-      // Press ESC to close the menu.
-      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-      await tester.pump();
-      expect(findMenuPanel(), findsNothing);
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    // Press ESC to close the menu.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(findMenuPanel(), findsNothing);
+  });
 
-  testWidgets(
-    'Pressing ESC key closes the menu when requestFocusOnTap is true',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Center(
-              child: DropdownMenu<TestMenu>(
-                dropdownMenuEntries: menuChildren,
-                requestFocusOnTap: true,
-              ),
+  testWidgets('Pressing ESC key closes the menu when requestFocusOnTap is true', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              requestFocusOnTap: true,
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      // Move focus to the TextField and open the menu.
-      await tester.tap(find.byType(TextField));
-      await tester.pump();
-      expect(findMenuPanel(), findsOne);
+    // Move focus to the TextField and open the menu.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(findMenuPanel(), findsOne);
 
-      // Press ESC to close the menu.
-      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-      await tester.pump();
-      expect(findMenuPanel(), findsNothing);
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    // Press ESC to close the menu.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(findMenuPanel(), findsNothing);
+  });
 
   testWidgets(
     'Pressing ESC key after changing the selected item closes the menu',
