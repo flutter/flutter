@@ -19,7 +19,7 @@ _Contributors: please consider moving this content to the web site or deleting i
 <!-- don't add things here; if you have a new feature, it should be documented on the web site not the wiki -->
 - [Apple Silicon support](../platforms/desktop/macos/Developing-with-Flutter-on-Apple-Silicon.md)
 - [Bad Builds](../releases/Bad-Builds.md)
-- [Binding to native code via FFI](https://flutter.dev/docs/development/platform-integration/c-interop)
+- [Binding to native code via FFI](https://docs.flutter.dev/development/platform-integration/c-interop)
 - [Data-driven Fixes](../contributing/Data-driven-Fixes.md)
 - [Flutter CLI crash reporting](https://docs.flutter.dev/reference/crash-reporting)
 - [Flutter CLI custom embedder support](../tool/Using-custom-embedders-with-the-Flutter-CLI.md)
@@ -29,8 +29,8 @@ _Contributors: please consider moving this content to the web site or deleting i
 - [JIT release builds](../engine/JIT-Release-Modes.md)
 - [Making animated GIFs of Flutter apps](../contributing/issue_hygiene/Making-animated-GIFs-of-Flutter-apps.md)
 - [Multi-device debugging in VS Code](Multi-device-debugging-in-VS-Code.md)
-- [Obfuscating Dart Code](https://flutter.dev/docs/deployment/obfuscate)
-- [Reduce shader compilation jank using SkSL warm up](https://flutter.dev/docs/perf/rendering/shader)
+- [Obfuscating Dart Code](https://docs.flutter.dev/deployment/obfuscate)
+- [Reduce shader compilation jank using SkSL warm up](https://docs.flutter.dev/perf/rendering/shader)
 - [Upgrading Flutter projects from using PlatformMessages to using channels](Upgrading-Flutter-projects-from-using-PlatformMessages-to-using-channels.md)
 - [Writing Effective Tests](../contributing/testing/Writing-Effective-Tests.md)
 

@@ -2005,6 +2005,26 @@ void main() {
 
     expect(startDateDecoration.filled, isTrue);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/177441.
+  testWidgets('DateRangePickerDialog.currentDate is optional', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: InputDecorationTheme(
+            data: const InputDecorationThemeData(filled: true),
+            child: DateRangePickerDialog(
+              firstDate: firstDate,
+              lastDate: lastDate,
+              initialEntryMode: DatePickerEntryMode.inputOnly,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), null);
+  });
 }
 
 class _RestorableDateRangePickerDialogTestWidget extends StatefulWidget {
