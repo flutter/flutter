@@ -6810,11 +6810,15 @@ class _OverridingTextStyleTextSpanUtils {
         }
         return child;
       }).toList(),
+      style: textSpan.style?.merge(overrideTextStyle) ?? overrideTextStyle,
       recognizer: textSpan.recognizer,
+      mouseCursor: textSpan.mouseCursor,
+      onEnter: textSpan.onEnter,
+      onExit: textSpan.onExit,
       semanticsLabel: textSpan.semanticsLabel,
+      semanticsIdentifier: textSpan.semanticsIdentifier,
       locale: textSpan.locale,
       spellOut: textSpan.spellOut,
-      style: textSpan.style?.merge(overrideTextStyle) ?? overrideTextStyle,
     );
   }
 }
