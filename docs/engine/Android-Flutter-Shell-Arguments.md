@@ -56,8 +56,8 @@ All manifest metadata keys must be prefixed with the package name
 `io.flutter.embedding.android` and are suffixed with the metadata name for the
 related command line flag as determined in
 `src/flutter/shell/platform/android/io/flutter/embedding/engine/`
-`FlutterShellArgs.java`. For example, the `--impeller-lazy-shader-`
-`mode=` command line flag corresponds to the metadata key
+`FlutterShellArgs.java`. For example, the `--impeller-lazy-shader-mode=`
+command line flag corresponds to the metadata key
 `io.flutter.embedding.android.ImpellerLazyShaderMode`.
 
 For flags that take values, set the numeric, string, or boolean value (without
@@ -107,32 +107,85 @@ Android `Intent` is no longer supported. If you need per-launch or
 runtime-controlled flags in an add-to-app integration, you may do so
 programatically before engine initialization.
 
-To do that, supply engine arguments at process start by calling
-`FlutterLoader.ensureInitializationComplete(Context, String[])` before any
-`FlutterEngine` is created. This works well in add-to-app apps (call from your
-`Application` or the earliest entry point you control). For example:
-
-Kotlin:
+To do that, supply engine arguments directly to a `FlutterEngine` with the
+desired flags from the earliest point you can control in your
+application. For example, if you are writing an add-to-app app that launches
+a `FlutterActivity` or `FlutterFragment`, then you can cache a
+`FlutterEngine` that is initialized with your desired
+engine flags:
 
 ```kotlin
+// Your native Android application
 class MyApp : Application() {
     override fun onCreate() {
         super.onCreate()
-        val loader = FlutterInjector.instance().flutterLoader()
-        loader.startInitialization(this)
+        // Initialize the Flutter engine with desired flags
         val args = arrayOf(
-                "--trace-startup",
-                "--old-gen-heap-size=256",
-                "--enable-software-rendering"
+            "--trace-startup",
+            "--old-gen-heap-size=256",
+            "--enable-software-rendering"
         )
-        loader.ensureInitializationComplete(this, args)
+        val flutterEngine = FlutterEngine(this, args)
+
+        // Start executing Dart code in the FlutterEngine
+        flutterEngine.dartExecutor.executeDartEntrypoint(
+            DartEntrypoint.createDefault()
+        )
+
+        // Store the engine in the cache for later use
+        FlutterEngineCache.getInstance().put("my_engine_id", flutterEngine)
     }
 }
 ```
 
-Notes:
+Then, your `Activity` can launch a `FlutterActivity` or `FlutterFragment
+with that cached`FlutterEngine`:
 
-- Call this exactly once and before creating any `FlutterEngine`,
-    `FlutterEngineGroup`, `FlutterActivity`, or `FlutterFragment`.
-- Flags are process-wide for the engine. Changing them later requires a fresh
-    process.
+```kotlin
+// Start a FlutterActivity using the cached engine...
+val intent = FlutterActivity.withCachedEngine("my_engine_id").build(this)
+startActivity(intent)
+
+// Or launch a FlutterFragment using the cached engine
+val flutterFragment = FlutterFragment.withCachedEngine("my_engine_id").build()
+supportFragmentManager
+    .beginTransaction()
+    .add(R.id.fragment_container, flutterFragment, TAG_FLUTTER_FRAGMENT)
+    .commit()
+```
+
+For a normal Flutter Android app, you can create an initialize a `FlutterEngine`
+with your desired flags the same as in the example above, then override
+`provideFlutterEngine` in your app's `FlutterActivity` to provide the
+configured `FlutterEngine`. For example:
+
+```kotlin
+// Your Flutter Android application
+class MyApplication : FlutterApplication() {
+    override fun onCreate() {
+        super.onCreate()
+
+        val args = arrayOf(
+            "--trace-startup",
+            "--old-gen-heap-size=256",
+            "--enable-software-rendering"
+        )
+        FlutterEngine flutterEngine = FlutterEngine(this, args)
+        flutterEngine.dartExecutor.executeDartEntrypoint(
+            DartExecutor.DartEntrypoint.createDefault()
+        )
+        FlutterEngineCache
+            .getInstance()
+            .put(MY_ENGINE_ID, flutterEngine)
+    }
+}
+
+// Your Flutter Android Activity
+class MainActivity: FlutterActivity() {
+    override fun provideFlutterEngine(context: Context): FlutterEngine? {
+        return FlutterEngineCache
+            .getInstance()
+            .get(MyApplication.MY_ENGINE_ID)
+    }
+}
+```
