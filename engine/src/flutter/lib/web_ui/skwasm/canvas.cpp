@@ -7,6 +7,7 @@
 #include "text/text_types.h"
 #include "wrappers.h"
 
+#include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkPathBuilder.h"
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 
