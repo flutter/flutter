@@ -132,75 +132,47 @@ class WebTemplate {
             "navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion') /* $_kServiceWorkerDeprecationNotice */",
           );
     }
-    newContent = newContent.replaceAll(
-      '{{flutter_service_worker_version}}',
-      serviceWorkerVersion != null
+    newContent = _applyVariableSubstitutions(newContent, <String, String>{
+      ...webDefines,
+      if (buildConfig != null) '{{flutter_build_config}}': buildConfig,
+      if (flutterBootstrapJs != null) '{{flutter_bootstrap_js}}': flutterBootstrapJs,
+      '{{flutter_js}}': flutterJsFile.readAsStringSync(),
+      '{{flutter_service_worker_version}}': serviceWorkerVersion != null
           ? '"$serviceWorkerVersion" /* $_kServiceWorkerDeprecationNotice */'
           : 'null /* $_kServiceWorkerDeprecationNotice */',
-    );
-    if (buildConfig != null) {
-      newContent = newContent.replaceAll('{{flutter_build_config}}', buildConfig);
-    }
-
-    if (newContent.contains('{{flutter_js}}')) {
-      newContent = newContent.replaceAll('{{flutter_js}}', flutterJsFile.readAsStringSync());
-    }
-
-    if (flutterBootstrapJs != null) {
-      newContent = newContent.replaceAll('{{flutter_bootstrap_js}}', flutterBootstrapJs);
-    }
-
-    newContent = _applyWebDefineSubstitutions(newContent, webDefines);
+    });
 
     return newContent;
   }
 
   /// Applies web-define variable substitutions and validates all variables are provided.
   /// Throws ToolExit if any {{VARIABLE}} placeholders are found without corresponding values.
-  String _applyWebDefineSubstitutions(String content, Map<String, String> webDefines) {
-    // Pattern to match {{VARIABLE_NAME}} format (letters, numbers, underscore)
-    final RegExp variablePattern = RegExp(r'\{\{([A-Za-z_][A-Za-z0-9_]*)\}\}');
-    final Set<String> missingVariables = <String>{};
+  String _applyVariableSubstitutions(String content, Map<String, String> webDefines) {
+    final variablePattern = RegExp(r'\{\{([A-Za-z_][A-Za-z0-9_]*)\}\}');
+    final missingVariables = <String>{};
 
-    // Find all variable placeholders
-    final Iterable<RegExpMatch> matches = variablePattern.allMatches(content);
-
-    // Built-in Flutter variables that are handled separately
-    const Set<String> builtInVariables = <String>{
-      'flutter_js',
-      'flutter_build_config',
-      'flutter_service_worker_version',
-      'flutter_bootstrap_js',
-    };
-
-    for (final RegExpMatch match in matches) {
+    final String result = content.replaceAllMapped(variablePattern, (Match match) {
       final String variableName = match.group(1)!;
-      // Skip built-in Flutter variables and only validate user-defined web-define variables
-      if (!builtInVariables.contains(variableName) && !webDefines.containsKey(variableName)) {
-        missingVariables.add(variableName);
-      }
-    }
-
-    // Throw error if any variables are missing
-    if (missingVariables.isNotEmpty) {
-      final String variables = missingVariables.join(', ');
-      final String suggestion = missingVariables.map((String name) => '--web-define=$name=VALUE').join(' ');
-      throwToolExit(
-        'Missing web-define variable${missingVariables.length > 1 ? 's' : ''}: $variables\n\n'
-        'Please provide the missing variable${missingVariables.length > 1 ? 's' : ''} using:\n'
-        'flutter run $suggestion\n'
-        'or\n'
-        'flutter build web $suggestion',
-      );
-    }
-
-    // Apply substitutions
-    String result = content;
-    webDefines.forEach((String key, String value) {
-      result = result.replaceAll('{{$key}}', value);
+      if (webDefines.containsKey(variableName)) return webDefines[variableName]!;
+      missingVariables.add(variableName);
+      // Return the original match for missing variables.
+      return match.group(0)!;
     });
+    if (missingVariables.isEmpty) {
+      return result;
+    }
 
-    return result;
+    final String variables = missingVariables.join(', ');
+    final String suggestion = missingVariables
+        .map((String name) => '--web-define=$name=VALUE')
+        .join(' ');
+    throwToolExit(
+      'Missing web-define variable${missingVariables.length > 1 ? 's' : ''}: $variables\n\n'
+      'Please provide the missing variable${missingVariables.length > 1 ? 's' : ''} using:\n'
+      'flutter run $suggestion\n'
+      'or\n'
+      'flutter build web $suggestion',
+    );
   }
 }
 
