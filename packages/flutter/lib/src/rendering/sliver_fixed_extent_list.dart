@@ -6,13 +6,14 @@
 /// @docImport 'sliver_list.dart';
 library;
 
+import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-
-import 'box.dart';
-import 'sliver.dart';
-import 'sliver_multi_box_adaptor.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/src/widgets/indexed_scroll_controller.dart';
+import 'package:flutter/src/widgets/scroll_position.dart';
 
 /// A sliver that contains multiple box children that have the explicit extent in
 /// the main axis.
@@ -509,4 +510,421 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
 
   @override
   double? get itemExtent => null;
+}
+
+class RenderSliverIndexedVariedExtentList extends RenderSliverMultiBoxAdaptor {
+  RenderSliverIndexedVariedExtentList({
+    required super.childManager,
+    required ItemExtentBuilder itemExtentBuilder,
+    required ItemPositionsListener itemPositionsListener,
+    required SliverIndexAnchor anchor,
+    required IndexedScrollAPI api,
+  }) : _itemExtentBuilder = itemExtentBuilder,
+       _itemPositionsListener = itemPositionsListener,
+       _anchor = anchor,
+       _api = api;
+
+  IndexedScrollAPI _api;
+
+  final Map<int, double> _offsetCache = HashMap();
+  final Map<int, double> _extentCache = HashMap();
+  double _lastCumulativeOffset = 0.0;
+  int _lastCachedIndex = -1;
+  bool _needsCorrection = false;
+  double _precedingScrollExtent = 0.0;
+
+  SliverIndexAnchor _anchor;
+  SliverIndexAnchor get anchor => _anchor;
+  set anchor(SliverIndexAnchor value) {
+    if (_anchor == value) return;
+    _anchor = value;
+  }
+
+  set api(IndexedScrollAPI api) {
+    _api = api;
+  }
+
+  ItemPositionsListener _itemPositionsListener;
+  ItemPositionsListener get itemPositionsListener => _itemPositionsListener;
+  set itemPositionsListener(ItemPositionsListener value) {
+    if (_itemPositionsListener == value) return;
+    _itemPositionsListener = value;
+  }
+
+  ItemExtentBuilder get itemExtentBuilder => _itemExtentBuilder;
+  ItemExtentBuilder _itemExtentBuilder;
+  set itemExtentBuilder(ItemExtentBuilder value) {
+    if (_itemExtentBuilder == value) return;
+    _itemExtentBuilder = value;
+    _needsCorrection = true;
+    markNeedsLayout();
+  }
+
+  double get precedingScrollExtent => _precedingScrollExtent;
+  void _clearExtentsCache() {
+    _offsetCache.clear();
+    _extentCache.clear();
+    _lastCachedIndex = -1;
+    _lastCumulativeOffset = 0.0;
+  }
+
+  double? getExtentForIndex(int index) => _getExtentForIndex(index);
+  double? getOffsetForIndex(int index) => _getOffsetForIndex(index);
+  double? _getExtentForIndex(int index) {
+    if (_extentCache.containsKey(index)) return _extentCache[index];
+    final SliverLayoutDimensions layoutDimensions = _currentLayoutDimensions ?? _layoutDimensions;
+    final double? extent = itemExtentBuilder(index, layoutDimensions);
+    if (extent != null) _extentCache[index] = extent;
+    return extent;
+  }
+
+  double? _getOffsetForIndex(int index) {
+    if (index < 0) return 0.0;
+    if (_offsetCache.containsKey(index)) return _offsetCache[index];
+    if (index < _lastCachedIndex) _clearExtentsCache();
+    if (_lastCachedIndex == -1) {
+      _offsetCache[0] = 0.0;
+      _lastCachedIndex = 0;
+    }
+    for (int i = _lastCachedIndex; i < index; i++) {
+      final double? extent = _getExtentForIndex(i);
+      if (extent == null) return null;
+      _lastCumulativeOffset += extent;
+      _offsetCache[i + 1] = _lastCumulativeOffset;
+    }
+    _lastCachedIndex = math.max(_lastCachedIndex, index);
+    return _offsetCache[index];
+  }
+
+  SliverLayoutDimensions? _currentLayoutDimensions;
+  SliverLayoutDimensions get _layoutDimensions => SliverLayoutDimensions(
+    scrollOffset: constraints.scrollOffset,
+    precedingScrollExtent: constraints.precedingScrollExtent,
+    viewportMainAxisExtent: constraints.viewportMainAxisExtent,
+    crossAxisExtent: constraints.crossAxisExtent,
+  );
+  double indexToLayoutOffset(int index) => _getOffsetForIndex(index) ?? 0.0;
+
+  int getChildIndexForScrollOffset(double scrollOffset) {
+    if (scrollOffset <= 0.0) {
+      return 0;
+    }
+
+    double position = 0.0;
+    int index = 0;
+
+    while (true) {
+      final double? extent = _getExtentForIndex(index);
+      // If we can't get an extent, we've reached the end of the list.
+      if (extent == null) {
+        final int? childCount = childManager.estimatedChildCount;
+        if (childCount != null) {
+          return (childCount - 1).clamp(0, childCount);
+        }
+        return index > 0 ? index - 1 : 0;
+      }
+
+      final double nextPosition = position + extent;
+      // If the next item's starting edge is past our scroll offset,
+      // then the current item is the one we are looking for.
+      if (nextPosition > scrollOffset) {
+        return index;
+      }
+
+      final int? childCount = childManager.estimatedChildCount;
+      if (childCount != null && index + 1 >= childCount) {
+        return index;
+      }
+
+      position = nextPosition;
+      index++;
+    }
+  }
+
+  int getMinChildIndexForScrollOffset(double scrollOffset) =>
+      getChildIndexForScrollOffset(scrollOffset);
+  int getMaxChildIndexForScrollOffset(double scrollOffset) =>
+      getChildIndexForScrollOffset(scrollOffset);
+
+  double estimateMaxScrollOffset(
+    SliverConstraints constraints, {
+    int? firstIndex,
+    int? lastIndex,
+    double? leadingScrollOffset,
+    double? trailingScrollOffset,
+  }) => childManager.estimateMaxScrollOffset(
+    constraints,
+    firstIndex: firstIndex,
+    lastIndex: lastIndex,
+    leadingScrollOffset: leadingScrollOffset,
+    trailingScrollOffset: trailingScrollOffset,
+  );
+  double computeMaxScrollOffset(SliverConstraints constraints) =>
+      _getOffsetForIndex(childManager.childCount) ?? 0.0;
+  BoxConstraints _getChildConstraints(int index) {
+    final double extent = _getExtentForIndex(index)!;
+    return constraints.asBoxConstraints(minExtent: extent, maxExtent: extent);
+  }
+
+  @override
+  @override
+  void performLayout() {
+    _precedingScrollExtent = this.constraints.precedingScrollExtent;
+
+    if (_needsCorrection) {
+      final double? oldOffset = getOffsetForIndex(anchor.index);
+      final double? oldExtent = getExtentForIndex(anchor.index);
+      final double? oldAnchorPointInSliver = (oldOffset != null && oldExtent != null)
+          ? oldOffset + oldExtent * anchor.alignment
+          : null;
+
+      _clearExtentsCache();
+
+      if (oldAnchorPointInSliver != null) {
+        final double? newOffset = getOffsetForIndex(anchor.index);
+        final double? newExtent = getExtentForIndex(anchor.index);
+        final double? newAnchorPointInSliver = (newOffset != null && newExtent != null)
+            ? newOffset + newExtent * anchor.alignment
+            : null;
+
+        if (newAnchorPointInSliver != null) {
+          final double scrollOffsetCorrection = newAnchorPointInSliver - oldAnchorPointInSliver;
+          if (scrollOffsetCorrection.abs() > precisionErrorTolerance) {
+            geometry = SliverGeometry(scrollOffsetCorrection: scrollOffsetCorrection);
+            _needsCorrection = false;
+            return;
+          }
+        }
+      }
+    }
+
+    _needsCorrection = false;
+    childManager.didStartLayout();
+    childManager.setDidUnderflow(false);
+    final SliverConstraints constraints = this.constraints;
+    final double scrollOffset = constraints.scrollOffset + constraints.cacheOrigin;
+    final double remainingExtent = constraints.remainingCacheExtent;
+    final double targetEndScrollOffset = scrollOffset + remainingExtent;
+    _currentLayoutDimensions = _layoutDimensions;
+    final List<SliverIndexedItemPosition> visiblePositions = <SliverIndexedItemPosition>[];
+
+    final int firstIndex = getMinChildIndexForScrollOffset(scrollOffset);
+    final int? targetLastIndex = targetEndScrollOffset.isFinite
+        ? getMaxChildIndexForScrollOffset(targetEndScrollOffset)
+        : null;
+
+    if (firstChild != null) {
+      final int leadingGarbage = calculateLeadingGarbage(firstIndex: firstIndex);
+      final int trailingGarbage = targetLastIndex != null
+          ? calculateTrailingGarbage(lastIndex: targetLastIndex)
+          : 0;
+      collectGarbage(leadingGarbage, trailingGarbage);
+    } else {
+      collectGarbage(0, 0);
+    }
+
+    if (firstChild == null) {
+      if (!addInitialChild(index: firstIndex, layoutOffset: indexToLayoutOffset(firstIndex))) {
+        final double max = (firstIndex <= 0) ? 0.0 : computeMaxScrollOffset(constraints);
+        geometry = SliverGeometry(scrollExtent: max, maxPaintExtent: max);
+        childManager.didFinishLayout();
+        _itemPositionsListener.positionsNotifier.value = <SliverIndexedItemPosition>[];
+        return;
+      }
+    }
+
+    RenderBox? trailingChildWithLayout;
+
+    for (int index = indexOf(firstChild!) - 1; index >= firstIndex; --index) {
+      final RenderBox? child = insertAndLayoutLeadingChild(_getChildConstraints(index));
+      if (child == null) {
+        geometry = SliverGeometry(scrollOffsetCorrection: indexToLayoutOffset(index));
+        return;
+      }
+      final SliverMultiBoxAdaptorParentData childParentData =
+          child.parentData! as SliverMultiBoxAdaptorParentData;
+      childParentData.layoutOffset = indexToLayoutOffset(index);
+      trailingChildWithLayout ??= child;
+    }
+
+    if (trailingChildWithLayout == null) {
+      firstChild!.layout(_getChildConstraints(indexOf(firstChild!)));
+      final SliverMultiBoxAdaptorParentData childParentData =
+          firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
+      childParentData.layoutOffset = indexToLayoutOffset(firstIndex);
+      trailingChildWithLayout = firstChild;
+    }
+
+    for (
+      int index = indexOf(trailingChildWithLayout!) + 1;
+      targetLastIndex == null || index <= targetLastIndex;
+      ++index
+    ) {
+      RenderBox? child = childAfter(trailingChildWithLayout!);
+      if (child == null || indexOf(child) != index) {
+        child = insertAndLayoutChild(_getChildConstraints(index), after: trailingChildWithLayout);
+        if (child == null) break;
+      } else {
+        child.layout(_getChildConstraints(index));
+      }
+      trailingChildWithLayout = child;
+      final SliverMultiBoxAdaptorParentData childParentData =
+          child.parentData! as SliverMultiBoxAdaptorParentData;
+      childParentData.layoutOffset = indexToLayoutOffset(childParentData.index!);
+    }
+
+    // Get the obstruction from preceding slivers (e.g., a pinned app bar).
+    double obstruction = 0.0;
+    final RenderObject? parentViewport = parent;
+    if (parentViewport is RenderViewportBase) {
+      // ignore: invalid_use_of_protected_member
+      obstruction = parentViewport.maxScrollObstructionExtentBefore(this);
+    }
+
+    final double effectivePaintExtent = math.max(
+      0.0,
+      constraints.remainingPaintExtent - obstruction,
+    );
+
+    RenderBox? currentChild = firstChild;
+    while (currentChild != null) {
+      final SliverMultiBoxAdaptorParentData childParentData =
+          currentChild.parentData! as SliverMultiBoxAdaptorParentData;
+      final double mainAxisExtent = _getExtentForIndex(childParentData.index!)!;
+
+      final double itemOffsetFromScrollableArea =
+          childParentData.layoutOffset! - constraints.scrollOffset;
+
+      final double itemOffsetFromVisibleArea = itemOffsetFromScrollableArea - obstruction;
+
+      if (effectivePaintExtent > 0) {
+        final double itemLeadingEdge = itemOffsetFromVisibleArea / effectivePaintExtent;
+        final double itemTrailingEdge =
+            (itemOffsetFromVisibleArea + mainAxisExtent) / effectivePaintExtent;
+
+        if (itemLeadingEdge < 1.0 && itemTrailingEdge > 0.0) {
+          visiblePositions.add(
+            SliverIndexedItemPosition(
+              index: childParentData.index!,
+              itemLeadingEdge: itemLeadingEdge,
+              itemTrailingEdge: itemTrailingEdge,
+            ),
+          );
+        }
+      }
+
+      currentChild = childAfter(currentChild);
+    }
+
+    final int lastIndex = indexOf(lastChild!);
+    final double leadingScrollOffset = indexToLayoutOffset(firstIndex);
+    final double trailingScrollOffset = indexToLayoutOffset(lastIndex + 1);
+
+    final int? totalChildCount = childManager.estimatedChildCount;
+    final double accurateMaxScrollOffset = (totalChildCount != null && totalChildCount > 0)
+        ? (_getOffsetForIndex(totalChildCount) ?? trailingScrollOffset)
+        : trailingScrollOffset;
+
+    final double paintExtent = calculatePaintOffset(
+      constraints,
+      from: leadingScrollOffset,
+      to: trailingScrollOffset,
+    );
+    final double cacheExtent = calculateCacheOffset(
+      constraints,
+      from: leadingScrollOffset,
+      to: trailingScrollOffset,
+    );
+    final double targetEndScrollOffsetForPaint =
+        constraints.scrollOffset + constraints.remainingPaintExtent;
+    final int? targetLastIndexForPaint = targetEndScrollOffsetForPaint.isFinite
+        ? getMaxChildIndexForScrollOffset(targetEndScrollOffsetForPaint)
+        : null;
+
+    geometry = SliverGeometry(
+      scrollExtent: accurateMaxScrollOffset,
+      paintExtent: paintExtent,
+      cacheExtent: cacheExtent,
+      maxPaintExtent: accurateMaxScrollOffset,
+      hasVisualOverflow:
+          (targetLastIndexForPaint != null && lastIndex >= targetLastIndexForPaint) ||
+          constraints.scrollOffset > 0.0,
+    );
+
+    if (accurateMaxScrollOffset == trailingScrollOffset) {
+      childManager.setDidUnderflow(true);
+    }
+
+    visiblePositions.sort(
+      (SliverIndexedItemPosition a, SliverIndexedItemPosition b) => a.index.compareTo(b.index),
+    );
+    if (!const IterableEquality().equals(
+      visiblePositions,
+      _itemPositionsListener.positionsNotifier.value,
+    )) {
+      _itemPositionsListener.positionsNotifier.value = visiblePositions;
+    }
+
+    _currentLayoutDimensions = null;
+    childManager.didFinishLayout();
+  }
+
+  @override
+  void setupParentData(RenderObject child) {
+    if (child.parentData is! SliverMultiBoxAdaptorParentData) {
+      child.parentData = SliverMultiBoxAdaptorParentData();
+    }
+  }
+
+  double? _calculateTargetScrollOffset(int index, double alignment) {
+    final double viewportDimension = constraints.viewportMainAxisExtent;
+    final double sliverStartOffset = precedingScrollExtent;
+
+    final double? itemOffsetInSliver = getOffsetForIndex(index);
+    if (itemOffsetInSliver == null) return null;
+
+    final double? itemExtent = getExtentForIndex(index);
+    if (itemExtent == null) return null;
+
+    final double alignmentOffset = (viewportDimension - itemExtent) * alignment;
+
+    double targetScrollOffset = sliverStartOffset + itemOffsetInSliver - alignmentOffset;
+
+    final RenderObject? parentViewport = parent;
+    if (parentViewport is RenderViewportBase) {
+      final double obstruction = parentViewport
+          // ignore: invalid_use_of_protected_member
+          .maxScrollObstructionExtentBefore(this);
+      final double obstructionAdjustment = obstruction * (1.0 - alignment);
+      targetScrollOffset -= obstructionAdjustment;
+    }
+
+    return targetScrollOffset;
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _api.calculateTargetOffset = (int index, double alignment) {
+      final double? offset = _calculateTargetScrollOffset(index, alignment);
+      if (offset != null &&
+          _api is IndexedScrollController &&
+          (_api as IndexedScrollController).hasClients) {
+        final ScrollPosition position = (_api as IndexedScrollController).position;
+        return offset.clamp(position.minScrollExtent, position.maxScrollExtent);
+      }
+      return offset;
+    };
+  }
+
+  @override
+  void detach() {
+    _api.calculateTargetOffset = (_, __) {
+      debugPrint(
+        'Warning: Tried to scroll to an index on a detached SliverIndexedVariedExtentList.',
+      );
+      return null;
+    };
+    super.detach();
+  }
 }

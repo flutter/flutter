@@ -22,6 +22,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/widgets/indexed_scroll_controller.dart';
 
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
@@ -659,6 +660,41 @@ class SliverVariedExtentList extends SliverMultiBoxAdaptorWidget {
   @override
   void updateRenderObject(BuildContext context, RenderSliverVariedExtentList renderObject) {
     renderObject.itemExtentBuilder = itemExtentBuilder;
+  }
+}
+
+class SliverIndexedVariedExtentList extends SliverMultiBoxAdaptorWidget {
+  const SliverIndexedVariedExtentList({
+    super.key,
+    required super.delegate,
+    required this.itemExtentBuilder,
+    required this.itemPositionsListener,
+    required this.indexedScrollController,
+    this.anchor = SliverIndexAnchor.zero,
+  });
+  final ItemExtentBuilder itemExtentBuilder;
+  final ItemPositionsListener itemPositionsListener;
+  final SliverIndexAnchor anchor;
+  final IndexedScrollController indexedScrollController;
+
+  @override
+  RenderSliverIndexedVariedExtentList createRenderObject(BuildContext context) {
+    final element = context as SliverMultiBoxAdaptorElement;
+    return RenderSliverIndexedVariedExtentList(
+      childManager: element,
+      itemExtentBuilder: itemExtentBuilder,
+      itemPositionsListener: itemPositionsListener,
+      anchor: anchor,
+      api: indexedScrollController.api,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSliverIndexedVariedExtentList renderObject) {
+    renderObject.itemExtentBuilder = itemExtentBuilder;
+    renderObject.itemPositionsListener = itemPositionsListener;
+    renderObject.anchor = anchor;
+    renderObject.api = indexedScrollController.api;
   }
 }
 
