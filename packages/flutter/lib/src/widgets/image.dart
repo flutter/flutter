@@ -1238,7 +1238,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     return _imageStreamListener!;
   }
 
-  void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) async {
+  void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
     setState(() {
       _replaceImage(info: imageInfo);
       _loadingProgress = null;
