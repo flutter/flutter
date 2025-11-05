@@ -220,22 +220,4 @@ void main() {
   final _TestRouteTransitionRecord testRouteTransitionRecord =
       _TestRouteTransitionRecord();
   testRouteTransitionRecord.markForComplete();
-
-  // Changes made in https://github.com/flutter/flutter/pull/174491
-  ListView.separated(
-    itemCount: 10,
-    itemBuilder: (context, index) => Text('$index'),
-    separatorBuilder: (context, index) => Divider(),
-    findChildIndexCallback: (key) {
-      return 0;
-    },
-  );
-  SliverList.separated(
-    itemCount: 10,
-    itemBuilder: (context, index) => Text('$index'),
-    separatorBuilder: (context, index) => Divider(),
-    findChildIndexCallback: (key) {
-      return 0;
-    },
-  );
 }
