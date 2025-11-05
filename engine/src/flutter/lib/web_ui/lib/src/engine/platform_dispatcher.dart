@@ -1116,11 +1116,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       ..wordSpacing = '${spacingDefault}px'
       ..margin = '0px 0px ${spacingDefault}px 0px';
     domDocument.body!.append(_typographyMeasurementElement!);
-    final double? typographyMeasurementElementFontSize = parseFontSize(
-      _typographyMeasurementElement!,
-    )?.toDouble();
-    final double defaultLineHeightFactor = spacingDefault / typographyMeasurementElementFontSize!;
-
+    final double typographyMeasurementElementFontSize =
+        parseFontSize(_typographyMeasurementElement!)?.toDouble() ?? _defaultRootFontSize;
+    final double defaultLineHeightFactor = spacingDefault / typographyMeasurementElementFontSize;
     _typographySettingsObserver = createDomResizeObserver((
       List<DomResizeObserverEntry> entries,
       DomResizeObserver observer,
