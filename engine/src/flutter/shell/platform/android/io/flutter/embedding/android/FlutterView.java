@@ -111,7 +111,8 @@ public class FlutterView extends FrameLayout
   private static final String TAG = "FlutterView";
   private static final String GBOARD_PACKAGE_NAME = "com.google.android.inputmethod.latin";
 
-  @VisibleForTesting static final int CONTENT_SIZING_MAX = 2 << 12; // 2 << 13
+  // Maximum size allowed for a content sized view.
+  @VisibleForTesting static final int CONTENT_SIZING_MAX = 2 << 12;
 
   // Internal view hierarchy references.
   @Nullable private FlutterSurfaceView flutterSurfaceView;
@@ -1574,8 +1575,8 @@ public class FlutterView extends FrameLayout
     }
     if (widthMode == MeasureSpec.UNSPECIFIED) {
       Log.d(TAG, "FlutterView width is set to wrap content - updating viewport metrics to max");
-      viewportMetrics.minHeight = 0;
-      viewportMetrics.maxHeight = CONTENT_SIZING_MAX;
+      viewportMetrics.minWidth = 0;
+      viewportMetrics.maxWidth = CONTENT_SIZING_MAX;
     } else {
       viewportMetrics.minWidth = viewportMetrics.width;
       viewportMetrics.maxWidth = viewportMetrics.width;
