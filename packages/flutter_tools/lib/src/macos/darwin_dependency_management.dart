@@ -126,15 +126,15 @@ class DarwinDependencyManagement {
     _analytics.send(event);
   }
 
-  /// Returns count of total number of plugins, number of Swift Package Manager
-  /// compatible plugins, and number of CocoaPods compatible plugins. A plugin
-  /// can be both Swift Package Manager and CocoaPods compatible.
+  /// Returns count of total number of plugins, number of Swift Package Manager compatible plugins,
+  /// and number of CocoaPods compatible plugins. A plugin can be both Swift Package Manager and
+  /// CocoaPods compatible.
   ///
-  /// Prints warnings when using a plugin incompatible with the available Darwin
-  /// Dependency Manager (Swift Package Manager or CocoaPods).
+  /// If [hostPlatformIsMacOS], prints warnings when using a plugin incompatible with the available
+  /// Darwin Dependency Manager (Swift Package Manager or CocoaPods).
   ///
-  /// Prints message prompting the user to deintegrate CocoaPods if using all
-  /// Swift Package plugins.
+  /// If [hostPlatformIsMacOS], prints message prompting the user to deintegrate CocoaPods if
+  /// using all Swift Package plugins.
   Future<({int totalCount, int swiftPackageCount, int podCount})> _evaluatePluginsAndPrintWarnings({
     required FlutterDarwinPlatform platform,
     required XcodeBasedProject xcodeProject,
