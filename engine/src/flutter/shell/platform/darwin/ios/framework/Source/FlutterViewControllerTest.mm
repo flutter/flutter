@@ -143,6 +143,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)discreteScrollEvent:(UIPanGestureRecognizer*)recognizer;
 - (void)updateViewportMetricsIfNeeded;
 - (void)updateAutoResizeConstraints;
+- (BOOL)isAutoResizable;
 - (void)onUserSettingsChanged:(NSNotification*)notification;
 - (void)applicationWillTerminate:(NSNotification*)notification;
 - (void)goToApplicationLifecycle:(nonnull NSString*)state;
@@ -998,7 +999,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMVerifyAll(mockEngine);
 }
 
-- (void)testUpdatedViewportMetricsResizesFlutterView {
+- (void)testUpdatedViewportMetricsDoesResizeFlutterViewWhenAutoResizable {
   FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
   [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
@@ -1006,10 +1007,21 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                                  bundle:nil];
   viewController.isAutoResizable = YES;
   mockEngine.viewController = viewController;
-  flutter::ViewportMetrics viewportMetrics;
   OCMExpect([viewController updateAutoResizeConstraints]);
   [viewController updateViewportMetricsIfNeeded];
   OCMVerifyAll(mockEngine);
+}
+
+- (void)testUpdatedViewportMetricsDoesNotResizeFlutterViewWhenNotAutoResizable {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  viewController.isAutoResizable = NO;
+  mockEngine.viewController = viewController;
+  OCMReject([viewController updateAutoResizeConstraints]);
+  OCMVerifyAll(viewController);
 }
 
 - (void)testUpdateViewportMetricsIfNeeded_DoesNotInvokeEngineWhenShouldBeIgnoredDuringRotation {
