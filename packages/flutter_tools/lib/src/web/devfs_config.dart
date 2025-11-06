@@ -189,28 +189,33 @@ WebDevServerConfig:
 /// Represents the [HttpsConfig] for the web dev server
 @immutable
 class HttpsConfig {
-  const HttpsConfig({this.certPath, this.certKeyPath});
+  const HttpsConfig({required this.certPath, required this.certKeyPath});
 
   factory HttpsConfig.fromYaml(YamlMap yaml) {
     final String? certPath = _validateType<String>(value: yaml[_kCertPath], fieldName: _kCertPath);
+    if (certPath == null) {
+      throw ArgumentError.value(yaml, 'yaml', '"$_kCertPath" must be defined');
+    }
+
     final String? certKeyPath = _validateType<String>(
       value: yaml[_kCertKeyPath],
       fieldName: _kCertKeyPath,
     );
+    if (certKeyPath == null) {
+      throw ArgumentError.value(yaml, 'yaml', '"$_kCertKeyPath" must be defined');
+    }
 
     return HttpsConfig(certPath: certPath, certKeyPath: certKeyPath);
   }
 
   /// Creates a copy of this [HttpsConfig] with optional overrides.
-  HttpsConfig copyWith({String? certPath, String? certKeyPath}) {
-    return HttpsConfig(
-      certPath: certPath ?? this.certPath,
-      certKeyPath: certKeyPath ?? this.certKeyPath,
-    );
-  }
+  HttpsConfig copyWith({String? certPath, String? certKeyPath}) => HttpsConfig(
+    certPath: certPath ?? this.certPath,
+    certKeyPath: certKeyPath ?? this.certKeyPath,
+  );
 
-  final String? certPath;
-  final String? certKeyPath;
+  final String certPath;
+  final String certKeyPath;
 
   @override
   String toString() {

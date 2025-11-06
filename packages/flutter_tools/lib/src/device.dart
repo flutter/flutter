@@ -1374,13 +1374,14 @@ class DebuggingOptions {
         webDevServerConfig: WebDevServerConfig(
           port: json['port'] is int ? json['port']! as int : 8080,
           host: json['hostname'] is String ? json['hostname']! as String : 'localhost',
-
-          https: (json['tlsCertPath'] != null || json['tlsCertKeyPath'] != null)
-              ? HttpsConfig(
-                  certPath: json['tlsCertPath'] as String?,
-                  certKeyPath: json['tlsCertKeyPath'] as String?,
-                )
-              : null,
+          https: switch ((json['tlsCertPath'], json['tlsCertKeyPath'])) {
+            (final String certPath, final String certKeyPath) => HttpsConfig(
+              certPath: certPath,
+              certKeyPath: certKeyPath,
+            ),
+            // TODO(kevmoo): should have some error handling if only one is set
+            _ => null,
+          },
           headers: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
         ),
       );
