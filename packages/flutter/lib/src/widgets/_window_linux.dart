@@ -547,8 +547,8 @@ class WindowingOwnerLinux extends WindowingOwner {
     );
   }
 
-  /// Controllers being managed by Flutter.
-  final Map<int, _LinuxWindowController> _windowControllers = <int, _LinuxWindowController>{};
+  /// GTK windows keyed by view ID.
+  final Map<int, _GtkWindow> _windows = <int, _GtkWindow>{};
 
   @internal
   @override
@@ -565,7 +565,7 @@ class WindowingOwnerLinux extends WindowingOwner {
       preferredConstraints: preferredConstraints,
       title: title,
     );
-    _windowControllers[controller.rootView.viewId] = controller;
+    _windows[controller.rootView.viewId] = controller._window;
     return controller;
   }
 
@@ -586,20 +586,15 @@ class WindowingOwnerLinux extends WindowingOwner {
       parent: parent,
       title: title,
     );
-    _windowControllers[controller.rootView.viewId] = controller;
+    _windows[controller.rootView.viewId] = controller._window;
     return controller;
   }
 
   @internal
   @override
   bool hasTopLevelWindows() {
-    return _windowControllers.isNotEmpty;
+    return _windows.isNotEmpty;
   }
-}
-
-abstract class _LinuxWindowController {
-  /// The GTK window containing the Flutter content.
-  _GtkWindow get window;
 }
 
 /// Implementation of [RegularWindowController] for the Linux platform.
@@ -609,8 +604,7 @@ abstract class _LinuxWindowController {
 /// See also:
 ///
 ///  * [RegularWindowController], the base class for regular windows.
-class RegularWindowControllerLinux extends RegularWindowController
-    implements _LinuxWindowController {
+class RegularWindowControllerLinux extends RegularWindowController {
   /// Creates a new regular window controller for Linux.
   ///
   /// When this constructor completes the native window has been created and
@@ -678,10 +672,6 @@ class RegularWindowControllerLinux extends RegularWindowController
   late final _FlWindowMonitor _windowMonitor;
   bool _destroyed = false;
 
-  @internal
-  @override
-  _GtkWindow get window => _window;
-
   @override
   @internal
   Size get contentSize => _window.getSize();
@@ -695,7 +685,7 @@ class RegularWindowControllerLinux extends RegularWindowController
     _windowMonitor.close();
     _windowMonitor.unref();
     _destroyed = true;
-    _owner._windowControllers.remove(rootView.viewId);
+    _owner._windows.remove(rootView.viewId);
   }
 
   @override
@@ -787,7 +777,7 @@ class RegularWindowControllerLinux extends RegularWindowController
 /// See also:
 ///
 ///  * [DialogWindowController], the base class for dialog windows.
-class DialogWindowControllerLinux extends DialogWindowController implements _LinuxWindowController {
+class DialogWindowControllerLinux extends DialogWindowController {
   /// Creates a new dialog window controller for Linux.
   ///
   /// When this constructor completes the native window has been created and
@@ -817,9 +807,9 @@ class DialogWindowControllerLinux extends DialogWindowController implements _Lin
 
     _window.setTypeHint(_GDK_WINDOW_TYPE_HINT_DIALOG);
     if (parent != null) {
-      final _LinuxWindowController? controller = owner._windowControllers[parent.rootView.viewId];
-      if (controller != null) {
-        _window.setTransientFor(controller.window);
+      final _GtkWindow? parentWindow = owner._windows[parent.rootView.viewId];
+      if (parentWindow != null) {
+        _window.setTransientFor(parentWindow);
         _window.setModal(true);
       }
     }
@@ -867,10 +857,6 @@ class DialogWindowControllerLinux extends DialogWindowController implements _Lin
   late final _FlWindowMonitor _windowMonitor;
   bool _destroyed = false;
 
-  @internal
-  @override
-  _GtkWindow get window => _window;
-
   @override
   @internal
   Size get contentSize => _window.getSize();
@@ -884,7 +870,7 @@ class DialogWindowControllerLinux extends DialogWindowController implements _Lin
     _windowMonitor.close();
     _windowMonitor.unref();
     _destroyed = true;
-    _owner._windowControllers.remove(rootView.viewId);
+    _owner._windows.remove(rootView.viewId);
   }
 
   @override
