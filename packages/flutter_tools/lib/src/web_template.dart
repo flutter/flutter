@@ -135,10 +135,10 @@ class WebTemplate {
     }
     newContent = _applyVariableSubstitutions(newContent, <String, String>{
       ...webDefines,
-      if (buildConfig != null) '{{flutter_build_config}}': buildConfig,
-      if (flutterBootstrapJs != null) '{{flutter_bootstrap_js}}': flutterBootstrapJs,
-      '{{flutter_js}}': flutterJsFile.readAsStringSync(),
-      '{{flutter_service_worker_version}}': serviceWorkerVersion != null
+      if (buildConfig != null) 'flutter_build_config': buildConfig,
+      if (flutterBootstrapJs != null) 'flutter_bootstrap_js': flutterBootstrapJs,
+      'flutter_js': flutterJsFile.readAsStringSync(),
+      'flutter_service_worker_version': serviceWorkerVersion != null
           ? '"$serviceWorkerVersion" /* $_kServiceWorkerDeprecationNotice */'
           : 'null /* $_kServiceWorkerDeprecationNotice */',
     });
@@ -147,15 +147,35 @@ class WebTemplate {
   }
 
   /// Applies web-define variable substitutions and validates all variables are provided.
-  /// Throws ToolExit if any {{VARIABLE}} placeholders are found without corresponding values.
+  ///
+  /// Replaces {{VARIABLE}} placeholders with values from webDefines. Built-in Flutter
+  /// variables are preserved if missing; user-defined variables throw ToolExit.
   String _applyVariableSubstitutions(String content, Map<String, String> webDefines) {
     final variablePattern = RegExp(r'\{\{([A-Za-z_][A-Za-z0-9_]*)\}\}');
     final missingVariables = <String>{};
 
+    // Framework-provided variables added by withSubstitutions(). These don't trigger
+    // errors if missing, unlike user --web-define variables.
+    // - flutter_js: flutter.js loader content (always added)
+    // - flutter_build_config: build config JSON (optional, build-mode dependent)
+    // - flutter_service_worker_version: SW version hash (optional)
+    // - flutter_bootstrap_js: full bootstrap script (optional)
+    const builtInVariables = <String>{
+      'flutter_js',
+      'flutter_build_config',
+      'flutter_service_worker_version',
+      'flutter_bootstrap_js',
+    };
+
     final String result = content.replaceAllMapped(variablePattern, (Match match) {
       final String variableName = match.group(1)!;
-      if (webDefines.containsKey(variableName)) return webDefines[variableName]!;
-      missingVariables.add(variableName);
+      if (webDefines.containsKey(variableName)) {
+        return webDefines[variableName]!;
+      }
+      // Skip built-in Flutter variables and only validate user-defined web-define variables
+      if (!builtInVariables.contains(variableName)) {
+        missingVariables.add(variableName);
+      }
       // Return the original match for missing variables.
       return match.group(0)!;
     });
