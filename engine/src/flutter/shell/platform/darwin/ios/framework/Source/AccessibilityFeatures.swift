@@ -9,8 +9,8 @@ import UIKit
 /// An option set for defining the different kinds of accessibility features
 /// that can be enabled by the platform.
 ///
-/// - Important: Must match the `AccessibilityFeatures` class in `window.dart`.
-public struct AccessibilityFeatureFlag: OptionSet {
+/// - Important: must match the `AccessibilityFeatures` class in `window.dart`.
+struct AccessibilityFeatureFlag: OptionSet {
     public let rawValue: Int32
 
     public init(rawValue: Int32) {
