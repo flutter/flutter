@@ -331,44 +331,34 @@ class ConvexTessellatorImpl : public Tessellator::ConvexTessellator {
           nullptr, sizeof(IndexT) * (point_count + contour_count),
           alignof(IndexT));
 
+      auto* points_ptr =
+          reinterpret_cast<Point*>(point_buffer.GetBuffer()->OnGetContents() +
+                                   point_buffer.GetRange().offset);
+      auto* indices_ptr =
+          reinterpret_cast<IndexT*>(index_buffer.GetBuffer()->OnGetContents() +
+                                    index_buffer.GetRange().offset);
+
+      auto tessellate_path = [&](auto& writer) {
+        PathTessellator::PathToFilledVertices(path, writer, tolerance);
+        FML_DCHECK(writer.GetPointCount() <= point_count);
+        FML_DCHECK(writer.GetIndexCount() <= (point_count + contour_count));
+        point_buffer.GetBuffer()->Flush(point_buffer.GetRange());
+        index_buffer.GetBuffer()->Flush(index_buffer.GetRange());
+
+        return VertexBuffer{
+            .vertex_buffer = std::move(point_buffer),
+            .index_buffer = std::move(index_buffer),
+            .vertex_count = writer.GetIndexCount(),
+            .index_type = IndexTypeFor<IndexT>(),
+        };
+      };
+
       if (supports_triangle_fan) {
-        FanPathVertexWriter writer(
-            reinterpret_cast<Point*>(point_buffer.GetBuffer()->OnGetContents() +
-                                     point_buffer.GetRange().offset),
-            reinterpret_cast<IndexT*>(
-                index_buffer.GetBuffer()->OnGetContents() +
-                index_buffer.GetRange().offset));
-        PathTessellator::PathToFilledVertices(path, writer, tolerance);
-        FML_DCHECK(writer.GetPointCount() <= point_count);
-        FML_DCHECK(writer.GetIndexCount() <= (point_count + contour_count));
-        point_buffer.GetBuffer()->Flush(point_buffer.GetRange());
-        index_buffer.GetBuffer()->Flush(index_buffer.GetRange());
-
-        return VertexBuffer{
-            .vertex_buffer = std::move(point_buffer),
-            .index_buffer = std::move(index_buffer),
-            .vertex_count = writer.GetIndexCount(),
-            .index_type = IndexTypeFor<IndexT>(),
-        };
+        FanPathVertexWriter writer(points_ptr, indices_ptr);
+        return tessellate_path(writer);
       } else {
-        StripPathVertexWriter writer(
-            reinterpret_cast<Point*>(point_buffer.GetBuffer()->OnGetContents() +
-                                     point_buffer.GetRange().offset),
-            reinterpret_cast<IndexT*>(
-                index_buffer.GetBuffer()->OnGetContents() +
-                index_buffer.GetRange().offset));
-        PathTessellator::PathToFilledVertices(path, writer, tolerance);
-        FML_DCHECK(writer.GetPointCount() <= point_count);
-        FML_DCHECK(writer.GetIndexCount() <= (point_count + contour_count));
-        point_buffer.GetBuffer()->Flush(point_buffer.GetRange());
-        index_buffer.GetBuffer()->Flush(index_buffer.GetRange());
-
-        return VertexBuffer{
-            .vertex_buffer = std::move(point_buffer),
-            .index_buffer = std::move(index_buffer),
-            .vertex_count = writer.GetIndexCount(),
-            .index_type = IndexTypeFor<IndexT>(),
-        };
+        StripPathVertexWriter writer(points_ptr, indices_ptr);
+        return tessellate_path(writer);
       }
     }
 
