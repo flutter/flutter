@@ -27,6 +27,9 @@ Future<void> main() async {
     // to be verified.
     final Future<String> inputEventWasVerified = driver.requestData('input_was_verified');
 
+    // Passed in by the driver task.
+    final String? deviceId = Platform.environment['DEVICE_ID_NUMBER'];
+
     // Keep issuing taps until we get the requested data. The actual setup
     // of the platform view is asynchronous so we might have to tap more than
     // once to  get a response.
@@ -35,13 +38,18 @@ Future<void> main() async {
     while (!stop) {
       // We must use the Android input tool to get verified input events.
       final ProcessResult result = await Process.run('adb', <String>[
+        if (deviceId != null) ...<String>['-s', deviceId],
         'shell',
         'input',
         'tap',
         '${offset.dx}',
         '${offset.dy}',
       ]);
-      expect(result.exitCode, equals(0));
+      expect(
+        result.exitCode,
+        equals(0),
+        reason: 'Stdout: ${result.stdout}\nStderr: ${result.stderr}',
+      );
     }
     // Input
     expect(await inputEventWasVerified, equals('true'));
