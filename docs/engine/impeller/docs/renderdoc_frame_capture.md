@@ -57,7 +57,7 @@ RenderDoc can be used on a debug-mode Flutter app running on Android.
     - To debug an app with Impeller explicitly enabled or disabled,
     specify an `EnableImpeller` value in your `AndroidManifest.xml` as described
     [here](https://github.com/flutter/flutter/blob/main/engine/src/flutter/impeller/README.md#android).
-      - Any `--(no-)enable-impeller` flag used with `flutter run` will not be retained when the app is launched from RenderDoc.
+      - **Note**: Any `--(no-)enable-impeller` flag used with `flutter run` will not be retained when the app is launched from RenderDoc.
 
 2. Follow the RenderDoc [Android How To](https://renderdoc.org/docs/how/how_android_capture.html)
    to connect RenderDoc to your Android device and select your app to debug.
