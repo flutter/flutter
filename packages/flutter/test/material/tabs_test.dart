@@ -9322,4 +9322,15 @@ void main() {
     expect((outerMaterial as dynamic).debugInkFeatures, isNull);
     expect((innerMaterial as dynamic).debugInkFeatures, hasLength(1));
   });
+
+  testWidgets('DefaultTabController does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: DefaultTabController(length: 2, child: Scaffold())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DefaultTabController)), Size.zero);
+  });
 }
