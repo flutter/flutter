@@ -580,7 +580,9 @@ class FlutterWebPlatform extends PlatformPlugin {
 
     final Runtime browser = platform.runtime;
     try {
-      _browserManager ??= await _launchBrowser(browser);
+      if (_browserManager?.isClosed ?? true) {
+        _browserManager = await _launchBrowser(browser);
+      }
     } on Error catch (_) {
       await _suiteLock.close();
       rethrow;
@@ -618,7 +620,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   ///
   /// If no browser manager is running yet, starts one.
   Future<BrowserManager> _launchBrowser(Runtime browser) {
-    if (_browserManager != null) {
+    if (_browserManager != null && !_browserManager!.isClosed) {
       throw StateError('Another browser is currently running.');
     }
 
@@ -758,6 +760,8 @@ class BrowserManager {
 
   /// Whether the channel to the browser has closed.
   var _closed = false;
+
+  bool get isClosed => _closed;
 
   /// The completer for [_BrowserEnvironment.displayPause].
   ///
