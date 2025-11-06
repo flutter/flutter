@@ -2682,7 +2682,7 @@ void decodeImageFromPixels(
   int? targetWidth,
   int? targetHeight,
   bool allowUpscaling = true,
-  PixelFormat destinationFormat = PixelFormat.optimal,
+  PixelFormat targetFormat = PixelFormat.optimal,
 }) {
   if (targetWidth != null) {
     assert(allowUpscaling || targetWidth <= width);
@@ -2713,7 +2713,7 @@ void decodeImageFromPixels(
         .instantiateCodec(
           targetWidth: targetWidth,
           targetHeight: targetHeight,
-          destinationFormat: destinationFormat,
+          targetFormat: targetFormat,
         )
         .then((Codec codec) {
           final Future<FrameInfo> frameInfo = codec.getNextFrame();
@@ -8097,7 +8097,7 @@ abstract class ImageDescriptor {
   Future<Codec> instantiateCodec({
     int? targetWidth,
     int? targetHeight,
-    PixelFormat destinationFormat = PixelFormat.optimal,
+    PixelFormat targetFormat = PixelFormat.optimal,
   });
 }
 
@@ -8175,7 +8175,7 @@ base class _NativeImageDescriptor extends NativeFieldWrapperClass1 implements Im
   Future<Codec> instantiateCodec({
     int? targetWidth,
     int? targetHeight,
-    PixelFormat destinationFormat = PixelFormat.optimal,
+    PixelFormat targetFormat = PixelFormat.optimal,
   }) async {
     if (targetWidth != null && targetWidth <= 0) {
       targetWidth = null;
@@ -8196,7 +8196,7 @@ base class _NativeImageDescriptor extends NativeFieldWrapperClass1 implements Im
     assert(targetHeight != null);
 
     final Codec codec = _NativeCodec._();
-    _instantiateCodec(codec, targetWidth!, targetHeight!, destinationFormat.index);
+    _instantiateCodec(codec, targetWidth!, targetHeight!, targetFormat.index);
     return codec;
   }
 
@@ -8207,7 +8207,7 @@ base class _NativeImageDescriptor extends NativeFieldWrapperClass1 implements Im
     Codec outCodec,
     int targetWidth,
     int targetHeight,
-    int destinationFormat,
+    int targetFormat,
   );
 
   @override
