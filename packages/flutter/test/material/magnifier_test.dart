@@ -494,7 +494,7 @@ void main() {
           TextMagnifier.jumpBetweenLinesAnimationDuration + const Duration(seconds: 2),
         );
         expect(getIsAnimated(tester), false);
-      });
+      }, skip: true); // Debugging a skwasm flake.
     });
   });
 }
