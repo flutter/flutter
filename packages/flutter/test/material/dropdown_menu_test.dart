@@ -2050,15 +2050,13 @@ void main() {
     expect(isItemHighlighted(tester, themeData, 'Menu 1'), true);
 
     // Press up to the upper item (Item 0).
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowUp);
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pumpAndSettle();
     expect(find.widgetWithText(TextField, 'Item 0'), findsOneWidget);
     expect(isItemHighlighted(tester, themeData, 'Item 0'), true);
 
     // Continue to move up to the last item (Item 5).
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowUp);
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pumpAndSettle();
     expect(find.widgetWithText(TextField, 'Item 5'), findsOneWidget);
     expect(isItemHighlighted(tester, themeData, 'Item 5'), true);
@@ -2273,9 +2271,9 @@ void main() {
     final ThemeData themeData = ThemeData();
     final List<DropdownMenuEntry<TestMenu>> menuWithDisabledItems = <DropdownMenuEntry<TestMenu>>[
       const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
-      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 1', enabled: false),
-      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 2'),
-      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 3'),
+      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu1, label: 'Item 1', enabled: false),
+      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu2, label: 'Item 2'),
+      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu3, label: 'Item 3'),
     ];
     final TextEditingController controller = TextEditingController();
     addTearDown(controller.dispose);
@@ -2311,7 +2309,7 @@ void main() {
     int expectedCount = 1;
 
     // Test onSelected on key press
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
 
     // On mobile platforms, the TextField cannot gain focus by default; the focus is
@@ -4059,6 +4057,97 @@ void main() {
       await tester.pump();
 
       expect(selectedMenu, TestMenu.mainMenu0);
+    },
+    variant: TargetPlatformVariant.all(),
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/177993.
+  testWidgets('Pressing ESC key closes the menu when requestFocusOnTap is false', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              requestFocusOnTap: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Move focus to the TextField and open the menu.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(findMenuPanel(), findsOne);
+
+    // Press ESC to close the menu.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(findMenuPanel(), findsNothing);
+  });
+
+  testWidgets('Pressing ESC key closes the menu when requestFocusOnTap is true', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              requestFocusOnTap: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Move focus to the TextField and open the menu.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(findMenuPanel(), findsOne);
+
+    // Press ESC to close the menu.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(findMenuPanel(), findsNothing);
+  });
+
+  testWidgets(
+    'Pressing ESC key after changing the selected item closes the menu',
+    (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Material(
+            child: Center(
+              child: DropdownMenu<TestMenu>(
+                dropdownMenuEntries: menuChildren,
+                initialSelection: menuChildren[2].value,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Move focus to the TextField and open the menu.
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+      expect(findMenuPanel(), findsOne);
+
+      // Move the selection.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(isItemHighlighted(tester, themeData, menuChildren[3].label), isTrue);
+
+      // Press ESC to close the menu.
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pump();
+      expect(findMenuPanel(), findsNothing);
     },
     variant: TargetPlatformVariant.all(),
   );
