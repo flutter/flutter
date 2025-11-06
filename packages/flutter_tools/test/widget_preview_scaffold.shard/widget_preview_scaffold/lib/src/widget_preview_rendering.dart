@@ -1005,34 +1005,38 @@ class _WidgetPreviewScaffoldState extends State<WidgetPreviewScaffold> {
       ),
       themeMode: widget.ideTheme.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: Material(
-        child: ValueListenableBuilder(
-          valueListenable: widget.controller.widgetInspectorVisible,
-          builder: (context, widgetInspectorVisible, previewView) {
-            if (!widgetInspectorVisible) {
-              return previewView!;
-            }
-            return SplitPane(
-              axis: Axis.horizontal,
-              initialFractions: const [0.7, 0.3],
+        child: OutlineDecoration.onlyTop(
+          child: ValueListenableBuilder(
+            valueListenable: widget.controller.widgetInspectorVisible,
+            builder: (context, widgetInspectorVisible, previewView) {
+              if (!widgetInspectorVisible) {
+                return previewView!;
+              }
+              return SplitPane(
+                axis: Axis.horizontal,
+                initialFractions: const [0.7, 0.3],
+                children: [
+                  OutlineDecoration.onlyRight(child: previewView!),
+                  OutlineDecoration.onlyLeft(
+                    child: widget.enableWebView
+                        ? WebViewWidget(controller: _webViewController!)
+                        : Container(),
+                  ),
+                ],
+              );
+            },
+            // Display the previewer
+            child: Column(
               children: [
-                previewView!,
-                widget.enableWebView
-                    ? WebViewWidget(controller: _webViewController!)
-                    : Container(),
-              ],
-            );
-          },
-          // Display the previewer
-          child: Column(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(8.0),
-                  child: WidgetPreviews(controller: widget.controller),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(8.0),
+                    child: WidgetPreviews(controller: widget.controller),
+                  ),
                 ),
-              ),
-              WidgetPreviewControls(controller: widget.controller),
-            ],
+                WidgetPreviewControls(controller: widget.controller),
+              ],
+            ),
           ),
         ),
       ),

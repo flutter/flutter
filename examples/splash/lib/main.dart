@@ -4,6 +4,32 @@
 
 import 'package:flutter/material.dart';
 
+class _MyBase with MyBase {}
+
+mixin MyBase {
+  static MyBase get instance => _instance;
+  static set instance(MyBase updated) {
+    _instance = updated;
+  }
+
+  static MyBase _instance = _MyBase();
+
+  void foo() {
+    print('MyBase: foo');
+  }
+}
+
+class MyCustomBase with MyBase {
+  MyCustomBase() {
+    MyBase.instance = this;
+  }
+
+  @override
+  void foo() {
+    print('MyCustomBase: foo');
+  }
+}
+
 void main() {
   runApp(
     const DecoratedBox(
