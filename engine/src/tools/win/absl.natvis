@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<AutoVisualizer
+    xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="absl::flat_hash_map&lt;*&gt;">
+    <Intrinsic Name="size_data" Expression="settings_.value.size_.data_" />
+    <Intrinsic Name="size_shift" Expression="settings_.value.size_.kSizeShift" />
+    <Intrinsic Name="actual_size" Expression="size_data() >> size_shift()" />
+    <Intrinsic Name="capacity" Expression="settings_.value.capacity_" />
+    <!-- Small Object Optimization (SOO) mode. -->
+    <Intrinsic Name="is_soo" Expression="capacity() &lt;= 1" />
+    <Intrinsic Name="soo_element_ptr" Expression="($T5::value_type*)&amp;settings_.value.heap_or_soo_.soo_data[0]" />
+    <!-- Heap mode. -->
+    <Intrinsic Name="ctrl_ptr" Expression="settings_.value.heap_or_soo_.heap.control.p" />
+    <Intrinsic Name="slots_ptr" Expression="settings_.value.heap_or_soo_.heap.slot_array.p" />
+    <Intrinsic Name="typed_slots_ptr" Expression="($T5::value_type*)slots_ptr()" />
+    <DisplayString Condition="actual_size() == 0">empty</DisplayString>
+    <DisplayString>{{ size={actual_size()} }}</DisplayString>
+    <Expand>
+        <Item Name="[size]" ExcludeView="simple">actual_size()</Item>
+        <Item Name="[capacity]" ExcludeView="simple">capacity()</Item>
+        <Item Name="[0]" Condition="is_soo() &amp;&amp; actual_size() > 0">*soo_element_ptr()</Item>
+        <CustomListItems Condition="!is_soo()" MaxItemsPerView="5000">
+            <Variable Name="iSlot" InitialValue="0" />
+            <Size>actual_size()</Size>
+            <Loop>
+                <If Condition="ctrl_ptr()[iSlot] >= 0">
+                    <Item>typed_slots_ptr()[iSlot]</Item>
+                </If>
+                <Exec>iSlot++</Exec>
+                <Break Condition="iSlot == capacity()" />
+            </Loop>
+        </CustomListItems>
+    </Expand>
+  </Type>
+</AutoVisualizer>
