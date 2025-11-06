@@ -9,7 +9,6 @@
 #include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/testing/dl_test_mock_path_receiver.h"
 #include "flutter/third_party/skia/include/core/SkPath.h"
-#include "flutter/third_party/skia/include/core/SkPoint.h"
 #include "flutter/third_party/skia/include/core/SkRRect.h"
 
 namespace flutter {
@@ -393,18 +392,14 @@ TEST(DisplayListPath, ConstructFromDlPathBuilderRoundRect) {
 }
 
 TEST(DisplayListPath, ConstructFromPath) {
-  SkPathBuilder pb1;
-  pb1.moveTo({10, 10});
-  pb1.lineTo({20, 20});
-  pb1.lineTo({20, 10});
-  SkPathBuilder pb2;
-  pb2.moveTo({10, 10});
-  pb2.lineTo({20, 20});
-  pb2.lineTo({20, 10});
-
-  SkPath sk_path1 = pb1.detach();
-  SkPath sk_path2 = pb2.detach();
-
+  SkPath sk_path1;
+  sk_path1.moveTo(10, 10);
+  sk_path1.lineTo(20, 20);
+  sk_path1.lineTo(20, 10);
+  SkPath sk_path2;
+  sk_path2.moveTo(10, 10);
+  sk_path2.lineTo(20, 20);
+  sk_path2.lineTo(20, 10);
   DlPath path(sk_path1);
 
   ASSERT_EQ(sk_path1, sk_path2);
@@ -433,21 +428,22 @@ TEST(DisplayListPath, ConstructFromDlPathBuilderEqualsConstructFromSkia) {
   path_builder.LineTo({0, 100});
   path_builder.Close();
 
-  SkPathBuilder sk_path(SkPathFillType::kWinding);
-  sk_path.moveTo({0, 0});
-  sk_path.lineTo({100, 0});
-  sk_path.lineTo({0, 100});
+  SkPath sk_path;
+  sk_path.setFillType(SkPathFillType::kWinding);
+  sk_path.moveTo(0, 0);
+  sk_path.lineTo(100, 0);
+  sk_path.lineTo(0, 100);
   sk_path.close();
 
-  EXPECT_EQ(path_builder.TakePath(), DlPath(sk_path.detach()));
+  EXPECT_EQ(path_builder.TakePath(), DlPath(sk_path));
 }
 
 TEST(DisplayListPath, IsLineFromSkPath) {
-  SkPathBuilder sk_path;
-  sk_path.moveTo({0, 0});
-  sk_path.lineTo({100, 100});
+  SkPath sk_path;
+  sk_path.moveTo(SkPoint::Make(0, 0));
+  sk_path.lineTo(SkPoint::Make(100, 100));
 
-  DlPath path = DlPath(sk_path.detach());
+  DlPath path = DlPath(sk_path);
 
   DlPoint start;
   DlPoint end;
@@ -511,16 +507,16 @@ static void TestPathDispatchOneOfEachVerb(const DlPath& path) {
 }
 
 TEST(DisplayListPath, DispatchSkiaPathOneOfEachVerb) {
-  SkPathBuilder path;
+  SkPath path;
 
-  path.moveTo({100, 200});
-  path.lineTo({101, 201});
-  path.quadTo({110, 202}, {102, 210});
-  path.conicTo({150, 240}, {250, 140}, 0.5);
-  path.cubicTo({300, 300}, {350, 300}, {300, 350});
+  path.moveTo(100, 200);
+  path.lineTo(101, 201);
+  path.quadTo(110, 202, 102, 210);
+  path.conicTo(150, 240, 250, 140, 0.5);
+  path.cubicTo(300, 300, 350, 300, 300, 350);
   path.close();
 
-  TestPathDispatchOneOfEachVerb(DlPath(path.detach()));
+  TestPathDispatchOneOfEachVerb(DlPath(path));
 }
 
 TEST(DisplayListPath, DispatchImpellerPathOneOfEachVerb) {
@@ -562,11 +558,11 @@ static void TestPathDispatchConicToQuads(
 static void TestSkiaPathDispatchConicToQuads(
     DlScalar weight,
     const std::array<DlPoint, 4>& quad_points) {
-  SkPathBuilder sk_path;
-  sk_path.moveTo({10, 10});
-  sk_path.conicTo({20, 10}, {20, 20}, weight);
+  SkPath sk_path;
+  sk_path.moveTo(10, 10);
+  sk_path.conicTo(20, 10, 20, 20, weight);
 
-  TestPathDispatchConicToQuads(DlPath(sk_path.detach()), weight, quad_points);
+  TestPathDispatchConicToQuads(DlPath(sk_path), weight, quad_points);
 }
 
 static void TestImpellerPathDispatchConicToQuads(
@@ -666,12 +662,12 @@ static void TestPathDispatchUnclosedTriangle(const DlPath& path) {
 }
 
 TEST(DisplayListPath, DispatchUnclosedSkiaTriangle) {
-  SkPathBuilder sk_path;
-  sk_path.moveTo({10, 10});
-  sk_path.lineTo({20, 10});
-  sk_path.lineTo({10, 20});
+  SkPath sk_path;
+  sk_path.moveTo(10, 10);
+  sk_path.lineTo(20, 10);
+  sk_path.lineTo(10, 20);
 
-  TestPathDispatchUnclosedTriangle(DlPath(sk_path.detach()));
+  TestPathDispatchUnclosedTriangle(DlPath(sk_path));
 }
 
 TEST(DisplayListPath, DispatchUnclosedImpellerTriangle) {
@@ -700,13 +696,13 @@ static void TestPathDispatchClosedTriangle(const DlPath& path) {
 }
 
 TEST(DisplayListPath, DispatchClosedSkiaTriangle) {
-  SkPathBuilder sk_path;
-  sk_path.moveTo({10, 10});
-  sk_path.lineTo({20, 10});
-  sk_path.lineTo({10, 20});
+  SkPath sk_path;
+  sk_path.moveTo(10, 10);
+  sk_path.lineTo(20, 10);
+  sk_path.lineTo(10, 20);
   sk_path.close();
 
-  TestPathDispatchClosedTriangle(DlPath(sk_path.detach()));
+  TestPathDispatchClosedTriangle(DlPath(sk_path));
 }
 
 TEST(DisplayListPath, DispatchClosedPathBuilderTriangle) {
@@ -742,19 +738,19 @@ static void TestPathDispatchMixedCloseTriangles(const DlPath& path) {
 }
 
 TEST(DisplayListPath, DispatchMixedCloseSkiaPath) {
-  SkPathBuilder sk_path;
-  sk_path.moveTo({10, 10});
-  sk_path.lineTo({20, 10});
-  sk_path.lineTo({10, 20});
-  sk_path.moveTo({110, 10});
-  sk_path.lineTo({120, 10});
-  sk_path.lineTo({110, 20});
+  SkPath sk_path;
+  sk_path.moveTo(10, 10);
+  sk_path.lineTo(20, 10);
+  sk_path.lineTo(10, 20);
+  sk_path.moveTo(110, 10);
+  sk_path.lineTo(120, 10);
+  sk_path.lineTo(110, 20);
   sk_path.close();
-  sk_path.moveTo({210, 10});
-  sk_path.lineTo({220, 10});
-  sk_path.lineTo({210, 20});
+  sk_path.moveTo(210, 10);
+  sk_path.lineTo(220, 10);
+  sk_path.lineTo(210, 20);
 
-  TestPathDispatchMixedCloseTriangles(DlPath(sk_path.detach()));
+  TestPathDispatchMixedCloseTriangles(DlPath(sk_path));
 }
 
 TEST(DisplayListPath, DispatchMixedCloseImpellerPath) {
@@ -793,15 +789,15 @@ static void TestPathDispatchImplicitMoveAfterClose(const DlPath& path) {
 }
 
 TEST(DisplayListPath, DispatchImplicitMoveAfterCloseSkiaPath) {
-  SkPathBuilder sk_path;
-  sk_path.moveTo({10, 10});
-  sk_path.lineTo({20, 10});
-  sk_path.lineTo({10, 20});
+  SkPath sk_path;
+  sk_path.moveTo(10, 10);
+  sk_path.lineTo(20, 10);
+  sk_path.lineTo(10, 20);
   sk_path.close();
-  sk_path.lineTo({-20, 10});
-  sk_path.lineTo({10, -20});
+  sk_path.lineTo(-20, 10);
+  sk_path.lineTo(10, -20);
 
-  TestPathDispatchImplicitMoveAfterClose(DlPath(sk_path.detach()));
+  TestPathDispatchImplicitMoveAfterClose(DlPath(sk_path));
 }
 
 TEST(DisplayListPath, DispatchImplicitMoveAfterClosePathBuilder) {
@@ -821,25 +817,25 @@ TEST(DisplayListPath, DispatchImplicitMoveAfterClosePathBuilder) {
 // supported by either Flutter public APIs or Impeller
 
 TEST(DisplayListPath, CannotConstructFromSkiaInverseWinding) {
-  SkPathBuilder sk_path(SkPathFillType::kInverseWinding);
-  sk_path.moveTo({0, 0});
-  sk_path.lineTo({100, 0});
-  sk_path.lineTo({0, 100});
+  SkPath sk_path;
+  sk_path.setFillType(SkPathFillType::kInverseWinding);
+  sk_path.moveTo(0, 0);
+  sk_path.lineTo(100, 0);
+  sk_path.lineTo(0, 100);
   sk_path.close();
 
-  EXPECT_DEATH_IF_SUPPORTED(new DlPath(sk_path.detach()),
-                            "SkPathFillType_IsInverse");
+  EXPECT_DEATH_IF_SUPPORTED(new DlPath(sk_path), "SkPathFillType_IsInverse");
 }
 
 TEST(DisplayListPath, CannotConstructFromSkiaInverseEvenOdd) {
-  SkPathBuilder sk_path(SkPathFillType::kInverseEvenOdd);
-  sk_path.moveTo({0, 0});
-  sk_path.lineTo({100, 0});
-  sk_path.lineTo({0, 100});
+  SkPath sk_path;
+  sk_path.setFillType(SkPathFillType::kInverseEvenOdd);
+  sk_path.moveTo(0, 0);
+  sk_path.lineTo(100, 0);
+  sk_path.lineTo(0, 100);
   sk_path.close();
 
-  EXPECT_DEATH_IF_SUPPORTED(new DlPath(sk_path.detach()),
-                            "SkPathFillType_IsInverse");
+  EXPECT_DEATH_IF_SUPPORTED(new DlPath(sk_path), "SkPathFillType_IsInverse");
 }
 #endif
 
