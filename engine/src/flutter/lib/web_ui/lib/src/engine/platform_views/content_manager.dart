@@ -37,6 +37,9 @@ class PlatformViewManager {
   /// rendering of PlatformViews into the web app.
   static PlatformViewManager instance = PlatformViewManager();
 
+  /// The attribute name used to hide platform views from accessibility.
+  static const String _ariaHiddenAttribute = 'aria-hidden';
+
   // The factory functions, indexed by the viewType
   final Map<String, Function> _factories = <String, Function>{};
 
@@ -119,7 +122,7 @@ class PlatformViewManager {
   /// The resulting DOM for the `contents` of a Platform View looks like this:
   ///
   /// ```html
-  /// <flt-platform-view id="flt-pv-VIEW_ID" slot="..." inert>
+  /// <flt-platform-view id="flt-pv-VIEW_ID" slot="..." aria-hidden="true">
   ///   <arbitrary-html-elements />
   /// </flt-platform-view-slot>
   /// ```
@@ -132,8 +135,8 @@ class PlatformViewManager {
   /// what `slot` tag will reveal this `contents`, **without modifying the returned
   /// html from the `factory` function**.
   ///
-  /// By default, platform views are made inert. The semantics layer will remove
-  /// this when a semantic node is created.
+  /// By default, platform views are hidden from accessibility using aria-hidden.
+  /// The semantics layer will remove this when a semantic node is created.
   DomElement renderContent(String viewType, int viewId, Object? params) {
     assert(
       knowsViewType(viewType),
@@ -161,7 +164,7 @@ class PlatformViewManager {
       _ensureContentCorrectlySized(content, viewType);
       wrapper.append(content);
 
-      wrapper.setAttribute('inert', '');
+      wrapper.setAttribute(_ariaHiddenAttribute, 'true');
 
       return wrapper;
     });
@@ -225,11 +228,9 @@ class PlatformViewManager {
     }
 
     if (isHidden) {
-      // Hide from screen readers and keyboard navigation
-      wrapper.setAttribute('inert', '');
+      wrapper.setAttribute(_ariaHiddenAttribute, 'true');
     } else {
-      // Make accessible to screen readers and keyboard navigation
-      wrapper.removeAttribute('inert');
+      wrapper.removeAttribute(_ariaHiddenAttribute);
     }
   }
 

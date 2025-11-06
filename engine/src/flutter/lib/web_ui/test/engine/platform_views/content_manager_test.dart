@@ -248,28 +248,28 @@ void testMain() {
         contentManager.registerFactory(viewType, (int id) => createDomHTMLDivElement());
       });
 
-      test('sets inert attribute by default when rendering', () {
+      test('sets aria-hidden attribute by default when rendering', () {
         final DomElement wrapper = contentManager.renderContent(viewType, viewId, null);
 
         expect(
-          wrapper.hasAttribute('inert'),
-          isTrue,
-          reason: 'Platform views should be inert by default for ExcludeSemantics support',
+          wrapper.getAttribute('aria-hidden'),
+          'true',
+          reason: 'Platform views should be aria-hidden by default for ExcludeSemantics support',
         );
       });
 
       test('hides platform view from accessibility when isHidden is true', () {
         final DomElement wrapper = contentManager.renderContent(viewType, viewId, null);
 
-        wrapper.removeAttribute('inert');
-        expect(wrapper.hasAttribute('inert'), isFalse);
+        wrapper.removeAttribute('aria-hidden');
+        expect(wrapper.hasAttribute('aria-hidden'), isFalse);
 
         contentManager.updatePlatformViewAccessibility(viewId, true);
 
         expect(
-          wrapper.hasAttribute('inert'),
-          isTrue,
-          reason: 'inert should be set when isHidden is true',
+          wrapper.getAttribute('aria-hidden'),
+          'true',
+          reason: 'aria-hidden should be set to true when isHidden is true',
         );
       });
 
@@ -277,17 +277,17 @@ void testMain() {
         final DomElement wrapper = contentManager.renderContent(viewType, viewId, null);
 
         expect(
-          wrapper.hasAttribute('inert'),
-          isTrue,
-          reason: 'Platform view should start as inert',
+          wrapper.getAttribute('aria-hidden'),
+          'true',
+          reason: 'Platform view should start with aria-hidden=true',
         );
 
         contentManager.updatePlatformViewAccessibility(viewId, false);
 
         expect(
-          wrapper.hasAttribute('inert'),
+          wrapper.hasAttribute('aria-hidden'),
           isFalse,
-          reason: 'inert should be removed when isHidden is false',
+          reason: 'aria-hidden should be removed when isHidden is false',
         );
       });
 
@@ -295,13 +295,13 @@ void testMain() {
         final DomElement wrapper = contentManager.renderContent(viewType, viewId, null);
 
         contentManager.updatePlatformViewAccessibility(viewId, false);
-        expect(wrapper.hasAttribute('inert'), isFalse);
+        expect(wrapper.hasAttribute('aria-hidden'), isFalse);
 
         contentManager.updatePlatformViewAccessibility(viewId, true);
-        expect(wrapper.hasAttribute('inert'), isTrue);
+        expect(wrapper.getAttribute('aria-hidden'), 'true');
 
         contentManager.updatePlatformViewAccessibility(viewId, false);
-        expect(wrapper.hasAttribute('inert'), isFalse);
+        expect(wrapper.hasAttribute('aria-hidden'), isFalse);
       });
 
       test('does nothing when viewId does not exist', () {
