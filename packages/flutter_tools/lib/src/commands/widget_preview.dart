@@ -493,6 +493,10 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         await appStarted.future;
         logger.sendStartedEvent(applicationUrl: flutterDevice.devFS!.baseUri!);
         final DebugConnectionInfo debugConnection = await connectionInfo.future;
+        final Uri? devToolsUri = devToolsServerAddress ?? debugConnection.devToolsUri;
+        if (devToolsUri == null) {
+          throwToolExit('Could not determine DevTools server address for the widget inspector.');
+        }
         _dtdService.setDevToolsServerAddress(
           devToolsServerAddress: devToolsServerAddress ?? debugConnection.devToolsUri!,
           applicationUri: debugConnection.wsUri!,
