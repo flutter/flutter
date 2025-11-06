@@ -2869,7 +2869,7 @@ class _SwipeRegionState extends State<_SwipeRegion> implements _SwipeRegionProvi
       return _createSwipeHandle(position);
     }
 
-    // Use a MultiDragGestureRecognizer instead of a SwipeGestureRecognizer
+    // Use a MultiDragGestureRecognizer instead of a PanGestureRecognizer
     // since the latter does not support delayed recognition.
     if (delay == Duration.zero) {
       _recognizer = ImmediateMultiDragGestureRecognizer(
