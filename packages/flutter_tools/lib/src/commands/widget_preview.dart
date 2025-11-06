@@ -491,12 +491,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           ),
         );
         await appStarted.future;
+        logger.sendStartedEvent(applicationUrl: flutterDevice.devFS!.baseUri!);
         final DebugConnectionInfo debugConnection = await connectionInfo.future;
         _dtdService.setDevToolsServerAddress(
           devToolsServerAddress: devToolsServerAddress ?? debugConnection.devToolsUri!,
           applicationUri: debugConnection.wsUri!,
         );
-        logger.sendStartedEvent(applicationUrl: flutterDevice.devFS!.baseUri!);
       }
     } on Exception catch (error) {
       throwToolExit(error.toString());
