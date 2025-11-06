@@ -9411,26 +9411,115 @@ void main() {
     );
 
     // Regression test for https://github.com/flutter/flutter/issues/93337.
+    testWidgets('depends on hint width when decorator is not empty and maintainHintSize is true', (
+      WidgetTester tester,
+    ) async {
+      const InputDecoration decorationWithHint = InputDecoration(
+        contentPadding: EdgeInsets.zero,
+        hintText: 'Hint',
+      );
+      const double contentWidth = 20.0;
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decorationWithHint,
+          useIntrinsicWidth: true,
+          child: const SizedBox(width: contentWidth),
+        ),
+      );
+
+      const double hintTextWidth = 66.0;
+      expect(getDecoratorRect(tester).width, hintTextWidth);
+    });
+
     testWidgets(
-      'depends on content width when decorator is not empty and maintainHintSize is true',
+      'does not depend on label width when decorator is empty and maintainLabelSize is false',
       (WidgetTester tester) async {
-        const InputDecoration decorationWithHint = InputDecoration(
+        const double labelWidth = 30;
+        const InputDecoration decorationWithLabel = InputDecoration(
           contentPadding: EdgeInsets.zero,
-          hintText: 'Hint',
+          label: SizedBox(width: labelWidth),
         );
-        const double contentWidth = 20.0;
 
         await tester.pumpWidget(
           buildInputDecorator(
-            decoration: decorationWithHint,
+            decoration: decorationWithLabel,
+            useIntrinsicWidth: true,
+            isEmpty: true,
+            child: const SizedBox.shrink(),
+          ),
+        );
+
+        // The label width is ignored even if larger than the content width.
+        expect(getDecoratorRect(tester).width, 0);
+      },
+    );
+
+    testWidgets('depends on label width when decorator is empty and maintainLabelSize is true', (
+      WidgetTester tester,
+    ) async {
+      const double labelWidth = 30;
+      const InputDecoration decorationWithLabel = InputDecoration(
+        contentPadding: EdgeInsets.zero,
+        label: SizedBox(width: labelWidth),
+        maintainLabelSize: true,
+      );
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decorationWithLabel,
+          useIntrinsicWidth: true,
+          isEmpty: true,
+          child: const SizedBox.shrink(),
+        ),
+      );
+
+      expect(getDecoratorRect(tester).width, labelWidth);
+    });
+
+    testWidgets(
+      'does not depend on label width when decorator is not empty and maintainLabelSize is false',
+      (WidgetTester tester) async {
+        const double contentWidth = 20.0;
+        const double labelWidth = 30;
+        const InputDecoration decorationWithLabel = InputDecoration(
+          contentPadding: EdgeInsets.zero,
+          label: SizedBox(width: labelWidth),
+        );
+
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: decorationWithLabel,
             useIntrinsicWidth: true,
             child: const SizedBox(width: contentWidth),
           ),
         );
 
-        // The hint width is ignored even if larger than the content width.
-        const double hintTextWidth = 66.0;
-        expect(getDecoratorRect(tester).width, hintTextWidth);
+        // The label width is ignored even if larger than the content width.
+        expect(getDecoratorRect(tester).width, contentWidth);
+      },
+    );
+
+    testWidgets(
+      'depends on label width when decorator is not empty and maintainLabelSize is true',
+      (WidgetTester tester) async {
+        const double contentWidth = 20.0;
+        const double labelWidth = 30;
+        const InputDecoration decorationWithLabel = InputDecoration(
+          contentPadding: EdgeInsets.zero,
+          label: SizedBox(width: labelWidth),
+          maintainLabelSize: true,
+        );
+
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: decorationWithLabel,
+            useIntrinsicWidth: true,
+            child: const SizedBox(width: contentWidth),
+          ),
+        );
+
+        expect(getDecoratorRect(tester).width, labelWidth);
       },
     );
   });
