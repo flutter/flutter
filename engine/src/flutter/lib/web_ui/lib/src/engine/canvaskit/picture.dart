@@ -6,7 +6,6 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../compositing/surface.dart';
 import '../layer/layer_painting.dart';
 import '../util.dart';
 import 'canvas.dart';
@@ -97,47 +96,30 @@ class CkPicture implements LayerPicture {
   }
 
   @override
-  ui.Image toImageSync(int width, int height) {
-    assert(!debugDisposed);
-    final Surface surface = CanvasKitRenderer.instance.pictureToImageSurface;
-    surface.setSize(BitmapSize(width, height));
-    final CkSurface ckSurface = surface as CkSurface;
-    final SkSurface skiaSurface = ckSurface.skSurface!;
+  CkImage toImageSync(int width, int height) {
+    assert(debugCheckNotDisposed('Cannot convert picture to image.'));
 
-    final CkCanvas ckCanvas = CkCanvas.fromSkCanvas(skiaSurface.getCanvas());
+    final Surface surface = CanvasKitRenderer.instance.pictureToImageSurface;
+    final CkSurface ckSurface = surface.createOrUpdateSurface(BitmapSize(width, height));
+    final CkCanvas ckCanvas = ckSurface.getCanvas();
     ckCanvas.clear(const ui.Color(0x00000000));
     ckCanvas.drawPicture(this);
-    final SkImage skImage = skiaSurface.makeImageSnapshot();
-
-    // TODO(hterkelsen): This is a hack to get the pixels from the SkImage.
-    // We should be able to do this without creating a new image. This is
-    // a workaround for a bug in CanvasKit.
-    final Uint8List? pixels = skImage.readPixels(
-      0,
-      0,
-      SkImageInfo(
-        alphaType: canvasKit.AlphaType.Premul,
-        colorType: canvasKit.ColorType.RGBA_8888,
-        colorSpace: SkColorSpaceSRGB,
-        width: width.toDouble(),
-        height: height.toDouble(),
-      ),
+    final SkImage skImage = ckSurface.surface.makeImageSnapshot();
+    final SkImageInfo imageInfo = SkImageInfo(
+      alphaType: canvasKit.AlphaType.Premul,
+      colorType: canvasKit.ColorType.RGBA_8888,
+      colorSpace: SkColorSpaceSRGB,
+      width: width.toDouble(),
+      height: height.toDouble(),
     );
-    skImage.delete();
+    final Uint8List? pixels = skImage.readPixels(0, 0, imageInfo);
     if (pixels == null) {
-      throw StateError('Unable to convert read pixels from SkImage.');
+      throw StateError('Unable to read pixels from SkImage.');
     }
-    final SkImage newSkImage = canvasKit.MakeImage(
-      SkImageInfo(
-        alphaType: canvasKit.AlphaType.Premul,
-        colorType: canvasKit.ColorType.RGBA_8888,
-        colorSpace: SkColorSpaceSRGB,
-        width: width.toDouble(),
-        height: height.toDouble(),
-      ),
-      pixels,
-      (4 * width).toDouble(),
-    )!;
-    return CkImage(newSkImage);
+    final SkImage? rasterImage = canvasKit.MakeImage(imageInfo, pixels, (4 * width).toDouble());
+    if (rasterImage == null) {
+      throw StateError('Unable to convert image pixels into SkImage.');
+    }
+    return CkImage(rasterImage);
   }
 }

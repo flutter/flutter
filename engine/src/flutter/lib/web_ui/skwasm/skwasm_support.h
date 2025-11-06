@@ -28,20 +28,11 @@ extern void skwasm_connectThread(pthread_t threadId);
 extern void skwasm_dispatchRenderPictures(unsigned long threadId,
                                           Skwasm::Surface* surface,
                                           sk_sp<flutter::DisplayList>* pictures,
+                                          int width,
+                                          int height,
                                           int count,
                                           uint32_t callbackId);
-extern uint32_t skwasm_getGlContextForCanvas(SkwasmObject canvas,
-                                             Skwasm::Surface* surface);
-extern void skwasm_reportInitialized(Skwasm::Surface* surface,
-                                     uint32_t callbackId,
-                                     uint32_t contextLostCallbackId);
-extern void skwasm_reportResizeComplete(Skwasm::Surface* surface,
-                                        uint32_t callbackId);
-extern void skwasm_dispatchResizeSurface(unsigned long threadId,
-                                         Skwasm::Surface* surface,
-                                         int width,
-                                         int height,
-                                         uint32_t callbackId);
+extern uint32_t skwasm_createOffscreenCanvas(int width, int height);
 extern void skwasm_resizeCanvas(uint32_t contextHandle, int width, int height);
 extern SkwasmObject skwasm_captureImageBitmap(uint32_t contextHandle,
                                               SkwasmObject imageBitmaps);
@@ -53,19 +44,6 @@ extern unsigned int skwasm_createGlTextureFromTextureSource(
     SkwasmObject textureSource,
     int width,
     int height);
-extern void skwasm_dispatchTriggerContextLoss(unsigned long threadId,
-                                              Skwasm::Surface* surface,
-                                              uint32_t callbackId);
-extern void skwasm_triggerContextLossOnCanvas();
-extern void skwasm_reportContextLossTriggered(Skwasm::Surface* surface,
-                                              uint32_t callbackId);
-extern void skwasm_reportContextLost(Skwasm::Surface* surface,
-                                     uint32_t callbackId);
-extern void skwasm_destroyContext(uint32_t contextHandle);
-extern void skwasm_dispatchTransferCanvas(unsigned long threadId,
-                                          Skwasm::Surface* surface,
-                                          SkwasmObject canvas,
-                                          uint32_t callbackId);
 extern void skwasm_dispatchDisposeSurface(unsigned long threadId,
                                           Skwasm::Surface* surface);
 extern void skwasm_dispatchRasterizeImage(unsigned long threadId,
