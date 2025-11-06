@@ -576,7 +576,7 @@ extension DurationAgo on Duration {
 }
 
 extension UriParseExtension on String {
-  /// Convienence method for parsing [Uri]s from a [String].
+  /// Convenience method for parsing [Uri]s from a [String].
   ///
   /// Allows for use of null-aware operators when building [Uri]s.
   Uri toUri() => Uri.parse(this);
