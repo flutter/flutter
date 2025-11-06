@@ -82,7 +82,12 @@ In general the flow chart for team assignment is as follows, stopping as soon as
 - If it's about the Flutter engine, add `team-engine`.
 - If it's about the Flutter framework, add `team-framework`.
 - If it's about the Flutter tool, add `team-tool`.
-- If it's about developer tools, add `team-devexp`.
+- If it's about any Developer Experience:
+  - Many of the developer experiences have their own projects, and some are not contained within the same organization. These issues will need to be recreated in the proper GitHub repository and linked to the original issue.
+  - If it's about the IntelliJ or Android Studio Flutter Plugin, transfer the issue to [flutter/flutter-intellij](https://github.com/flutter/flutter-intellij)
+  - If it's about the VS-Code Dart and Flutter Plugin, recreate in the [Dart-Code/DartCode](https://github.com/Dart-Code/Dart-Code/issues) repository, and link to the original issue.
+  - If it's about the Dart analysis server, recreate in the [dart-lang/sdk](https://github.com/dart-lang/sdk/issues) repository, and link to the original issue.
+  - If it's about Flutter Dev Tools, add `team-devexp`.
 - If it's about a first-party package:
   - Apply `team-framework` if it's about:
     - `animations`
