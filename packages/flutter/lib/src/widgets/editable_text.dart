@@ -4845,9 +4845,7 @@ class EditableTextState extends State<EditableText>
       textScaler: effectiveTextScaler,
       textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
       locale: widget.locale,
-      structStyle: widget.strutStyle.copyWith(
-        forceStrutHeight: lineHeightScaleFactor == null ? null : false,
-      ),
+      structStyle: widget.strutStyle.merge(StrutStyle(height: lineHeightScaleFactor)),
       placeholder: _placeholderLocation,
       size: renderEditable.size,
     );
@@ -5828,8 +5826,8 @@ class EditableTextState extends State<EditableText>
                                     maxLines: widget.maxLines,
                                     minLines: widget.minLines,
                                     expands: widget.expands,
-                                    strutStyle: widget.strutStyle.copyWith(
-                                      height: lineHeightScaleFactor,
+                                    strutStyle: widget.strutStyle.merge(
+                                      StrutStyle(height: lineHeightScaleFactor),
                                     ),
                                     selectionColor:
                                         _selectionOverlay?.spellCheckToolbarIsVisible ?? false

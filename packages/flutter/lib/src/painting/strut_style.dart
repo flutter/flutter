@@ -567,33 +567,29 @@ class StrutStyle with Diagnosticable {
     );
   }
 
-  /// Creates a copy of this strut style but with the given fields replaced with
-  /// the new values.
-  StrutStyle copyWith({
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? height,
-    TextLeadingDistribution? leadingDistribution,
-    double? leading,
-    FontWeight? fontWeight,
-    FontStyle? fontStyle,
-    bool? forceStrutHeight,
-    String? debugLabel,
-    String? package,
-  }) {
+  /// Returns a new strut style that is a combination of this style and the given
+  /// [other] style.
+  ///
+  /// All null values of the given style will be replaced with members from this
+  /// style.
+  ///
+  /// If the given strut style is null, returns this strut style.
+  StrutStyle merge(StrutStyle? other) {
+    if (other == null) {
+      return this;
+    }
     return StrutStyle(
-      fontFamily: fontFamily ?? this.fontFamily,
-      fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
-      fontSize: fontSize ?? this.fontSize,
-      height: height ?? this.height,
-      leadingDistribution: leadingDistribution ?? this.leadingDistribution,
-      leading: leading ?? this.leading,
-      fontWeight: fontWeight ?? this.fontWeight,
-      fontStyle: fontStyle ?? this.fontStyle,
-      forceStrutHeight: forceStrutHeight ?? this.forceStrutHeight,
-      debugLabel: debugLabel ?? this.debugLabel,
-      package: package ?? _package,
+      fontFamily: other.fontFamily ?? fontFamily,
+      fontFamilyFallback: other.fontFamilyFallback ?? fontFamilyFallback,
+      fontSize: other.fontSize ?? fontSize,
+      height: other.height ?? height,
+      leadingDistribution: other.leadingDistribution ?? leadingDistribution,
+      leading: other.leading ?? leading,
+      fontWeight: other.fontWeight ?? fontWeight,
+      fontStyle: other.fontStyle ?? fontStyle,
+      forceStrutHeight: other.forceStrutHeight ?? forceStrutHeight,
+      debugLabel: other.debugLabel ?? debugLabel,
+      package: other._package ?? _package,
     );
   }
 

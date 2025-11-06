@@ -740,7 +740,7 @@ class Text extends StatelessWidget {
       ),
     );
     final StrutStyle? effectiveStrutStyle = strutStyle != null && lineHeightScaleFactor != null
-        ? strutStyle!.copyWith(height: lineHeightScaleFactor)
+        ? strutStyle!.merge(StrutStyle(height: lineHeightScaleFactor))
         : strutStyle;
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     final TextScaler textScaler = switch ((this.textScaler, textScaleFactor)) {
