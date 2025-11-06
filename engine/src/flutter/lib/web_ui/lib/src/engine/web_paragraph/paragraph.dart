@@ -53,7 +53,6 @@ class WebParagraphStyle implements ui.ParagraphStyle {
          height: height,
          locale: locale,
          color: color,
-         background: ui.Paint()..color = const ui.Color(0x00000000),
        ),
        textDirection = textDirection ?? ui.TextDirection.ltr,
        textAlign = textAlign ?? ui.TextAlign.start;
@@ -468,13 +467,17 @@ class WebTextStyle implements ui.TextStyle {
   bool hasElement(StyleElements element) {
     switch (element) {
       case StyleElements.background:
-        return background != null;
+        // Transparent background is equivalent to no background
+        // We do not check for transparency in other paints (like foreground) because
+        // it seems unnatural to have a transparent paint on them
+        return background != null && background!.color != const ui.Color(0x00000000);
       case StyleElements.shadows:
         return shadows != null && shadows!.isNotEmpty;
       case StyleElements.decorations:
         return decoration != null &&
             decoration! != ui.TextDecoration.none &&
-            decorationStyle != null;
+            decorationStyle != null &&
+            decorationColor != null;
       case StyleElements.text:
         return true;
     }
@@ -626,14 +629,7 @@ class TextSpan extends ParagraphSpan {
   DomTextMetrics _getMetrics() {
     // TODO(jlavrova): Is this necessary?
     // layoutContext.direction = isDefaultLtr ? 'ltr' : 'rtl';
-
     style.applyToContext(layoutContext);
-    if (text.length == 1) {
-      print(
-        'layoutContext.font:${layoutContext.font} letter:${layoutContext.letterSpacing} word:${layoutContext.wordSpacing} '
-        'caps:${layoutContext.fontVariantCaps} dir:${layoutContext.direction} kerning:${layoutContext.fontKerning} rendering:${layoutContext.textRendering}',
-      );
-    }
     return layoutContext.measureText(text);
   }
 

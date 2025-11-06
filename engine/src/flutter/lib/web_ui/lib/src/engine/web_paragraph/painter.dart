@@ -49,8 +49,8 @@ abstract class Painter {
   void paintDecorations(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
 
   /// Adjust the _paintCanvas scale based on device pixel ratio
-  void resizePaintCanvas(double zoomFactor) {
-    if (currentDevicePixelRatio == zoomFactor) {
+  void resizePaintCanvas(double devicePixelRatio) {
+    if (currentDevicePixelRatio == devicePixelRatio) {
       // Nothing changed
       return;
     }
@@ -61,15 +61,15 @@ abstract class Painter {
     if (currentDevicePixelRatio != null) {
       paintContext.restore(); // Restore to unscaled state
     }
-    _paintCanvas.width = (_paintWidth * zoomFactor).ceilToDouble();
-    _paintCanvas.height = (_paintHeight * zoomFactor).ceilToDouble();
-    paintContext.scale(zoomFactor, zoomFactor);
+    _paintCanvas.width = (_paintWidth * devicePixelRatio).ceilToDouble();
+    _paintCanvas.height = (_paintHeight * devicePixelRatio).ceilToDouble();
+    paintContext.scale(devicePixelRatio, devicePixelRatio);
     paintContext.save();
 
-    currentDevicePixelRatio = zoomFactor;
+    currentDevicePixelRatio = devicePixelRatio;
 
     WebParagraphDebug.log(
-      'resizePaintCanvas: ${_paintCanvas.width}x${_paintCanvas.height} @ $zoomFactor',
+      'resizePaintCanvas: ${_paintCanvas.width}x${_paintCanvas.height} @ $devicePixelRatio',
     );
   }
 
@@ -113,10 +113,9 @@ class CanvasKitPainter extends Painter {
 
       paintContext.reset();
       paintContext.lineWidth = thickness;
-      paintContext.strokeStyle = (block.style.decorationColor ?? const ui.Color(0x00000000))
-          .toCssString();
+      paintContext.strokeStyle = block.style.decorationColor!.toCssString();
 
-      switch (block.style.decorationStyle ?? ui.TextDecorationStyle.solid) {
+      switch (block.style.decorationStyle!) {
         case ui.TextDecorationStyle.wavy:
           calculateWaves(x, y, block.style, sourceRect, thickness);
 

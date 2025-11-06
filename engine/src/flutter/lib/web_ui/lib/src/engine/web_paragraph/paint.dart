@@ -118,7 +118,7 @@ class TextPaint {
           ui.window.devicePixelRatio,
         );
 
-        if (sourceRect.width <= 0 || sourceRect.height <= 0) {
+        if (sourceRect.isEmpty) {
           // Let's skip empty clusters
           continue;
         }
@@ -146,20 +146,18 @@ class TextPaint {
     WebCluster webTextCluster,
     ui.Offset clusterOffset,
     ui.Offset lineOffset,
-    double zoomFactor,
+    double devicePixelRatio,
   ) {
     // Define the text cluster bounds
     final pos = webTextCluster.bounds.left - webTextCluster.advance.left;
-    final double left = clusterOffset.dx + webTextCluster.advance.left + lineOffset.dx;
-    final double shift = left - left.floorToDouble();
 
     // Define the text cluster bounds
     // Source rect must take in account the scaling
     final ui.Rect sourceRect = ui.Rect.fromLTWH(
-      pos * zoomFactor,
+      pos * devicePixelRatio,
       0,
-      webTextCluster.bounds.width.ceilToDouble() * zoomFactor,
-      webTextCluster.advance.height.ceilToDouble() * zoomFactor,
+      webTextCluster.bounds.width.ceilToDouble() * devicePixelRatio,
+      webTextCluster.advance.height.ceilToDouble() * devicePixelRatio,
     );
     // Target rect will be scaled by the canvas transform, so we don't scale it here
     final ui.Rect zeroRect = ui.Rect.fromLTWH(
@@ -180,6 +178,8 @@ class TextPaint {
 
     if (WebParagraphDebug.logging) {
       final String text = paragraph.getText1(webTextCluster.start, webTextCluster.end);
+      final double left = clusterOffset.dx + webTextCluster.advance.left + lineOffset.dx;
+      final double shift = left - left.floorToDouble();
       WebParagraphDebug.log(
         'calculateCluster "$text" bounds: ${webTextCluster.bounds} advance: ${webTextCluster.advance} shift $shift\n'
         'clusterOffset: $clusterOffset lineOffset: $lineOffset\n'
@@ -195,7 +195,7 @@ class TextPaint {
     TextBlock block,
     ui.Offset blockOffset,
     ui.Offset paragraphOffset,
-    double zoomFactor,
+    double devicePixelRatio,
   ) {
     final ui.Rect advance = block.advance;
 
@@ -204,8 +204,8 @@ class TextPaint {
     final ui.Rect sourceRect = ui.Rect.fromLTWH(
       0,
       0,
-      advance.width * zoomFactor,
-      advance.height * zoomFactor,
+      advance.width * devicePixelRatio,
+      advance.height * devicePixelRatio,
     );
     // Target rect will be scaled by the canvas transform, so we don't scale it here
     final ui.Rect zeroRect = ui.Rect.fromLTWH(0, 0, advance.width, advance.height);
