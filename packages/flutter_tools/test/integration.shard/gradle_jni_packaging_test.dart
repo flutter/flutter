@@ -202,7 +202,7 @@ bool _checkLibIsInApk(
       .childFile(Platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer')
       .path;
 
-  final String apkName = (productFlavor.isEmpty)
+  final apkName = (productFlavor.isEmpty)
       ? 'app-${buildMode.cliName}.apk'
       : 'app-$productFlavor-${buildMode.cliName}.apk';
 
