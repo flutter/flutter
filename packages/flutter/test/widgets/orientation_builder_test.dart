@@ -16,11 +16,11 @@ void main() {
         MediaQuery(
           data: const MediaQueryData(
             size: Size(800.0, 600.0),
-            // Device orientation is landscape
+            // Device orientation is landscape.
           ),
           child: Center(
             child: SizedBox(
-              // Widget constraints are portrait (100 wide, 200 tall)
+              // Widget constraints are portrait (100 wide, 200 tall).
               width: 100.0,
               height: 200.0,
               child: OrientationBuilder(
@@ -34,7 +34,7 @@ void main() {
         ),
       );
 
-      // OrientationBuilder should report portrait because width (100) < height (200)
+      // OrientationBuilder should report portrait because width (100) < height (200).
       expect(orientation, Orientation.portrait);
     });
 
@@ -48,7 +48,7 @@ void main() {
           data: const MediaQueryData(size: Size(600.0, 800.0)),
           child: Center(
             child: SizedBox(
-              // Widget constraints are landscape (200 wide, 100 tall)
+              // Widget constraints are landscape (200 wide, 100 tall).
               width: 200.0,
               height: 100.0,
               child: OrientationBuilder(
@@ -62,7 +62,7 @@ void main() {
         ),
       );
 
-      // OrientationBuilder should report landscape because width (200) > height (100)
+      // OrientationBuilder should report landscape because width (200) > height (100).
       expect(orientation, Orientation.landscape);
     });
 
@@ -87,11 +87,11 @@ void main() {
         );
       }
 
-      // First, test portrait orientation
+      // First, test portrait orientation.
       await tester.pumpWidget(buildTestWidget(width: 100.0, height: 200.0));
       expect(orientation, Orientation.portrait);
 
-      // Then, test landscape orientation
+      // Then, test landscape orientation.
       await tester.pumpWidget(buildTestWidget(width: 200.0, height: 100.0));
       expect(orientation, Orientation.landscape);
     });
@@ -107,7 +107,7 @@ void main() {
         MediaQuery(
           data: const MediaQueryData(
             size: Size(800.0, 600.0),
-            // Device is in landscape orientation
+            // Device is in landscape orientation.
           ),
           child: Center(
             child: SizedBox(
@@ -126,7 +126,7 @@ void main() {
       );
 
       // DeviceOrientationBuilder should report landscape based on MediaQuery
-      // even though the widget's constraints are portrait
+      // even though the widget's constraints are portrait.
       expect(deviceOrientation, Orientation.landscape);
     });
 
@@ -139,11 +139,11 @@ void main() {
         MediaQuery(
           data: const MediaQueryData(
             size: Size(600.0, 800.0),
-            // Device is in portrait orientation
+            // Device is in portrait orientation.
           ),
           child: Center(
             child: SizedBox(
-              // Widget constraints are landscape, but device is portrait
+              // Widget constraints are landscape, but device is portrait.
               width: 200.0,
               height: 100.0,
               child: DeviceOrientationBuilder(
@@ -158,7 +158,7 @@ void main() {
       );
 
       // DeviceOrientationBuilder should report portrait based on MediaQuery
-      // even though the widget's constraints are landscape
+      // even though the widget's constraints are landscape.
       expect(deviceOrientation, Orientation.portrait);
     });
 
@@ -179,11 +179,11 @@ void main() {
         );
       }
 
-      // First, test portrait orientation
+      // First, test portrait orientation.
       await tester.pumpWidget(buildTestWidget(size: const Size(600.0, 800.0)));
       expect(deviceOrientation, Orientation.portrait);
 
-      // Then, test landscape orientation
+      // Then, test landscape orientation.
       await tester.pumpWidget(buildTestWidget(size: const Size(800.0, 600.0)));
       expect(deviceOrientation, Orientation.landscape);
     });
@@ -198,11 +198,11 @@ void main() {
         MediaQuery(
           data: const MediaQueryData(
             size: Size(800.0, 600.0),
-            // Device orientation is landscape
+            // Device orientation is landscape.
           ),
           child: Center(
             child: SizedBox(
-              // Widget constraints are portrait
+              // Widget constraints are portrait.
               width: 100.0,
               height: 200.0,
               child: Column(
