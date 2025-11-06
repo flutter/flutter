@@ -15,8 +15,10 @@ import 'package:flutter/widget_previews.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dtd/editor_service.dart';
+import 'split.dart';
 import 'theme/ide_theme.dart';
 import 'theme/theme.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import 'controls.dart';
 import 'generated_preview.dart';
@@ -959,15 +961,33 @@ Future<void> mainImpl() async {
   );
 }
 
-class WidgetPreviewScaffold extends StatelessWidget {
+class WidgetPreviewScaffold extends StatefulWidget {
   const WidgetPreviewScaffold({
     super.key,
     required this.controller,
     this.ideTheme = const IdeTheme(),
+    this.enableWebView = true,
   });
 
   final WidgetPreviewScaffoldController controller;
   final IdeTheme ideTheme;
+  final bool enableWebView;
+
+  @override
+  State<WidgetPreviewScaffold> createState() => _WidgetPreviewScaffoldState();
+}
+
+class _WidgetPreviewScaffoldState extends State<WidgetPreviewScaffold> {
+  WebViewController? _webViewController;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.enableWebView) {
+      _webViewController = WebViewController()
+        ..loadRequest(widget.controller.devToolsUri);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -975,27 +995,45 @@ class WidgetPreviewScaffold extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: themeFor(
         isDarkTheme: false,
-        ideTheme: ideTheme,
+        ideTheme: widget.ideTheme,
         theme: ThemeData(),
       ),
       darkTheme: themeFor(
         isDarkTheme: true,
-        ideTheme: ideTheme,
+        ideTheme: widget.ideTheme,
         theme: ThemeData.dark(),
       ),
-      themeMode: ideTheme.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      themeMode: widget.ideTheme.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: Material(
-        child: Column(
-          children: [
-            // Display the previewer
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.all(8.0),
-                child: WidgetPreviews(controller: controller),
+        child: ValueListenableBuilder(
+          valueListenable: widget.controller.widgetInspectorVisible,
+          builder: (context, widgetInspectorVisible, previewView) {
+            if (!widgetInspectorVisible) {
+              return previewView!;
+            }
+            return SplitPane(
+              axis: Axis.horizontal,
+              initialFractions: const [0.7, 0.3],
+              children: [
+                previewView!,
+                widget.enableWebView
+                    ? WebViewWidget(controller: _webViewController!)
+                    : Container(),
+              ],
+            );
+          },
+          // Display the previewer
+          child: Column(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(8.0),
+                  child: WidgetPreviews(controller: widget.controller),
+                ),
               ),
-            ),
-            WidgetPreviewControls(controller: controller),
-          ],
+              WidgetPreviewControls(controller: widget.controller),
+            ],
+          ),
         ),
       ),
     );
@@ -1020,8 +1058,12 @@ class WidgetPreviewControls extends StatelessWidget {
       child: Row(
         children: [
           LayoutTypeSelector(controller: controller),
+          if (controller.editorServiceAvailable.value) ...[
+            HorizontalSpacer(),
+            FilterBySelectedFileToggle(controller: controller),
+          ],
           HorizontalSpacer(),
-          FilterBySelectedFileToggle(controller: controller),
+          WidgetInspectorToggle(controller: controller),
           Spacer(),
           WidgetPreviewerRestartButton(controller: controller),
         ],

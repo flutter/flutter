@@ -456,8 +456,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           webEnableHotReload: true,
         ),
         webEnableExposeUrl: false,
+        webEnableExpressionEvaluation: true,
         webRunHeadless: boolArg(kHeadless),
-        enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
         devToolsServerAddress: devToolsServerAddress,
       );
       final String target = bundle.defaultMainPath;
@@ -470,6 +470,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
       if (boolArg(kLaunchPreviewer)) {
         final appStarted = Completer<void>();
+        final connectionInfo = Completer<DebugConnectionInfo>();
         _widgetPreviewApp = ResidentWebRunner(
           flutterDevice,
           target: target,
@@ -483,8 +484,18 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           outputPreferences: globals.outputPreferences,
           systemClock: globals.systemClock,
         );
-        unawaited(_widgetPreviewApp!.run(appStartedCompleter: appStarted));
+        unawaited(
+          _widgetPreviewApp!.run(
+            appStartedCompleter: appStarted,
+            connectionInfoCompleter: connectionInfo,
+          ),
+        );
         await appStarted.future;
+        final DebugConnectionInfo debugConnection = await connectionInfo.future;
+        _dtdService.setDevToolsServerAddress(
+          devToolsServerAddress: devToolsServerAddress ?? debugConnection.devToolsUri!,
+          applicationUri: debugConnection.wsUri!,
+        );
         logger.sendStartedEvent(applicationUrl: flutterDevice.devFS!.baseUri!);
       }
     } on Exception catch (error) {
@@ -657,7 +668,9 @@ final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
     if (!machine) {
       return;
     }
-    super.printStatus(
+    // Don't call super.printStatus as it will result in a prefix being printed when --verbose is
+    // provided.
+    globals.stdio.stdout.writeln(
       json.encode([
         {'event': 'widget_preview.$name', 'params': ?args},
       ]),

@@ -58,6 +58,8 @@ dependencies:
   web: 1.1.1
   web_socket: 1.0.1
   web_socket_channel: 3.0.3
+  webview_flutter: 4.9.0
+  webview_flutter_web: ^0.2.3+4
 
 dev_dependencies:
   flutter_tools:
@@ -66,4 +68,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-# PUBSPEC CHECKSUM: dap0e
+# PUBSPEC CHECKSUM: 8s8crs

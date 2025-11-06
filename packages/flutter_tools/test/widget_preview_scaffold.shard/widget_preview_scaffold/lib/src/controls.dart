@@ -130,6 +130,32 @@ class LayoutTypeSelector extends StatelessWidget {
   }
 }
 
+class WidgetInspectorToggle extends StatelessWidget {
+  const WidgetInspectorToggle({super.key, required this.controller});
+
+  final WidgetPreviewScaffoldController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return _ControlDecorator(
+      child: ValueListenableBuilder(
+        valueListenable: controller.widgetInspectorVisible,
+        builder: (context, widgetInspectorVisible, _) {
+          final theme = Theme.of(context);
+          return IconButton(
+            style: theme.iconButtonTheme.style,
+            visualDensity: VisualDensity.compact,
+            onPressed: controller.toggleWidgetInspectorVisible,
+            // TODO(bkonyi): replace with widget inspector icon.
+            icon: Icon(Icons.image_search),
+            color: widgetInspectorVisible ? Colors.blue : Colors.black,
+          );
+        },
+      ),
+    );
+  }
+}
+
 /// A toggle button that enables / disables filtering previews by the currently
 /// selected source file.
 ///
