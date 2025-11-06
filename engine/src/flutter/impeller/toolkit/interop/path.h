@@ -6,7 +6,6 @@
 #define FLUTTER_IMPELLER_TOOLKIT_INTEROP_PATH_H_
 
 #include "flutter/third_party/skia/include/core/SkPath.h"
-#include "flutter/third_party/skia/include/core/SkPathBuilder.h"
 #include "impeller/toolkit/interop/impeller.h"
 #include "impeller/toolkit/interop/object.h"
 
@@ -23,12 +22,12 @@ class Path final
 
   Path& operator=(const Path&) = delete;
 
-  SkPath GetPath() const;
+  const SkPath& GetPath() const;
 
   ImpellerRect GetBounds() const;
 
  private:
-  SkPathBuilder path_;
+  SkPath path_;
 };
 
 }  // namespace impeller::interop

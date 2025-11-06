@@ -7,7 +7,7 @@
 
 #include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/display_list/geometry/dl_path.h"
-#include "flutter/third_party/skia/include/core/SkPathBuilder.h"
+#include "flutter/third_party/skia/include/core/SkPath.h"
 
 namespace flutter {
 
@@ -132,7 +132,7 @@ class DlPathBuilder {
   const DlPath TakePath();
 
  private:
-  SkPathBuilder path_;
+  SkPath path_;
 };
 
 }  // namespace flutter
