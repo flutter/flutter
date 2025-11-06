@@ -265,21 +265,38 @@ class DriverTest {
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
       String deviceId;
+      Device? selectedDevice;
       if (deviceIdOverride != null) {
         deviceId = deviceIdOverride!;
       } else {
-        final Device device = await devices.workingDevice;
-        await device.unlock();
-        deviceId = device.deviceId;
+        selectedDevice = await devices.workingDevice;
+        await selectedDevice.unlock();
+        deviceId = selectedDevice.deviceId;
       }
       await flutter('packages', options: <String>['get']);
 
+      final bool isAndroidRun = selectedDevice != null
+          ? selectedDevice is AndroidDevice
+          : const <DeviceOperatingSystem>{
+        DeviceOperatingSystem.android,
+        DeviceOperatingSystem.androidArm,
+        DeviceOperatingSystem.androidArm64,
+      }.contains(deviceOperatingSystem);
+
+      String? devicelabAdbPath;
+      if (isAndroidRun) {
+        try {
+          devicelabAdbPath = adbPath;
+        } on DeviceException {
+          devicelabAdbPath = null;
+        }
+      }
       // Make the device ID available in the driver code, so tools like ADB can
       // reference it if needed.
       final Map<String, String> env = <String, String>{
         if (environment != null) ...environment!,
         'FLUTTER_DEVICE_ID_NUMBER': deviceId,
-        'FLUTTER_ADB_PATH': adbPath,
+        if (devicelabAdbPath != null) 'FLUTTER_ADB_PATH': devicelabAdbPath,
       };
 
       final List<String> options = <String>[
