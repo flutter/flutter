@@ -141,6 +141,7 @@ class Scrollbar extends StatelessWidget {
   final Radius? radius;
 
   /// {@macro flutter.widgets.Scrollbar.interactive}
+  /// TODO(camsim99): update docs
   final bool? interactive;
 
   /// {@macro flutter.widgets.Scrollbar.notificationPredicate}
@@ -409,9 +410,9 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     _assistiveScrollbarIsVisible = !_assistiveScrollbarIsVisible;
     setState(() {
       scrollbarPainter.color = shouldRevealAssistiveScrollbar
-          ? widget.thumbColor ?? const Color(0x66BCBCBC)
+          ? _thumbColor.resolve(_states)
           : const Color(0x00000000);
-      scrollbarPainter.ignorePointer = !shouldRevealAssistiveScrollbar;
+      scrollbarPainter.ignorePointer = !shouldRevealAssistiveScrollbar && enableGestures;
     });
   }
 
