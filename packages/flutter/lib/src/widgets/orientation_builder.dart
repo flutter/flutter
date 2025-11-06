@@ -79,6 +79,9 @@ class OrientationBuilder extends StatelessWidget {
 /// ```
 /// {@end-tool}
 ///
+/// This widget requires a [MediaQuery] ancestor to obtain the orientation.
+/// Typically, this is provided by [MaterialApp] or [WidgetsApp].
+///
 /// See also:
 ///
 ///  * [OrientationBuilder], which builds based on parent widget's layout
@@ -86,9 +89,6 @@ class OrientationBuilder extends StatelessWidget {
 ///  * [MediaQueryData.orientation], which provides the device orientation
 ///    directly from [MediaQuery].
 ///  * [LayoutBuilder], which exposes the complete layout constraints.
-///
-/// This widget requires a [MediaQuery] ancestor to obtain the orientation.
-/// Typically, this is provided by [MaterialApp] or [WidgetsApp].
 class DeviceOrientationBuilder extends StatelessWidget {
   /// Creates a device orientation builder.
   const DeviceOrientationBuilder({super.key, required this.builder});
