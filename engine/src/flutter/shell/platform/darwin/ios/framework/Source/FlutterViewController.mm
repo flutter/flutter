@@ -1464,7 +1464,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   bool firstViewBoundsUpdate = !_viewportMetrics.physical_width;
   _viewportMetrics.device_pixel_ratio = scale;
   [self setViewportMetricsSize];
-  [self updateAutoResizeConstraints];
+  [self checkAndUpdateAutoResizeConstraints];
   [self setViewportMetricsPaddings];
   [self updateViewportMetricsIfNeeded];
 

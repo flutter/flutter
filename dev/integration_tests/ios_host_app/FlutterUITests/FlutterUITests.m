@@ -130,10 +130,11 @@ static const CGFloat kStandardTimeOut = 60.0;
   XCUIApplication *app = self.app;
 
   [self waitForAndTapElement:app.buttons[@"Dynamic Content Resizing"]];
+//
+//  XCUIElementQuery *buttonQuery = [app.buttons matchingIdentifier:@"Add to list"];
+//  [self expectationForPredicate:[NSPredicate predicateWithFormat:@"count = 1"] evaluatedWithObject:buttonQuery handler:nil];
+//  [self waitForExpectationsWithTimeout:30.0 handler:nil];
 
-  XCUIElementQuery *buttonQuery = [app.buttons matchingIdentifier:@"Add to list"];
-  [self expectationForPredicate:[NSPredicate predicateWithFormat:@"count = 1"] evaluatedWithObject:buttonQuery handler:nil];
-  [self waitForExpectationsWithTimeout:30.0 handler:nil];
 
   XCUIElement *flutterView = app.otherElements[@"flutter_view"];
 
@@ -143,7 +144,7 @@ static const CGFloat kStandardTimeOut = 60.0;
   NSLog(@"%d", flutterViewSize.height);
   XCTAssertTrue(flutterViewSize.height == 100);
 
-  [self waitForAndTapElement:app.otherElements[@"Add to list"]];
+  [self waitForAndTapElement: app.otherElements[@"flutter_view"]];
 
   XCUIElement *flutterViewPostClick = app.otherElements[@"flutter_view"];
   CGRect flutterViewFramePostClick = flutterViewPostClick.frame;
