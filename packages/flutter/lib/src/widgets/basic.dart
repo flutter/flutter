@@ -4006,7 +4006,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required int? currentValueLength,
     required String? identifier,
     required Object? traversalParentIdentifier,
-    required Set<Object>? traversalChildIdentifier,
+    required Object? traversalChildIdentifier,
     required String? label,
     required AttributedString? attributedLabel,
     required String? value,
