@@ -94,7 +94,6 @@ class Scrollbar extends StatelessWidget {
     this.notificationPredicate,
     this.interactive,
     this.scrollbarOrientation,
-    this.revealAssistiveScrollbar,
   });
 
   /// {@macro flutter.widgets.Scrollbar.child}
@@ -149,9 +148,6 @@ class Scrollbar extends StatelessWidget {
 
   /// {@macro flutter.widgets.Scrollbar.scrollbarOrientation}
   final ScrollbarOrientation? scrollbarOrientation;
-  
-  /// {@macro flutter.widgets.Scrollbar.revealAssistiveScrollbar}
-  final bool? revealAssistiveScrollbar;
 
   @override
   Widget build(BuildContext context) {
@@ -177,7 +173,6 @@ class Scrollbar extends StatelessWidget {
       notificationPredicate: notificationPredicate,
       interactive: interactive,
       scrollbarOrientation: scrollbarOrientation,
-      revealAssistiveScrollbar: revealAssistiveScrollbar ?? false,
       child: child,
     );
   }
@@ -194,7 +189,6 @@ class _MaterialScrollbar extends RawScrollbar {
     ScrollNotificationPredicate? notificationPredicate,
     super.interactive,
     super.scrollbarOrientation,
-    super.revealAssistiveScrollbar,
   }) : super(
          fadeDuration: _kScrollbarFadeDuration,
          timeToFade: _kScrollbarTimeToFade,
@@ -214,6 +208,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   late ScrollbarThemeData _scrollbarTheme;
   // On Android, scrollbars should match native appearance.
   late bool _useAndroidScrollbar;
+  bool _assistiveScrollbarIsVisible = false;
 
   @override
   bool get showScrollbar =>
@@ -349,13 +344,6 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
 
   @override
   void updateScrollbarPainter() {
-    if (!widget.revealAssistiveScrollbar) {
-      // This behavior is handled based on scroll events if revealAssistiveScrollbar is true.
-      scrollbarPainter
-      ..color = _thumbColor.resolve(_states)
-        ..ignorePointer = !enableGestures;
-    }
-
     scrollbarPainter
       ..trackColor = _trackColor.resolve(_states)
       ..trackBorderColor = _trackBorderColor.resolve(_states)
@@ -415,6 +403,40 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       _hoverIsActive = false;
     });
     _hoverAnimationController.reverse();
+  }
+
+  void _toggleAssistiveScrollbarVisibility(bool shouldRevealAssistiveScrollbar) {
+    _assistiveScrollbarIsVisible = !_assistiveScrollbarIsVisible;
+    setState(() {
+      scrollbarPainter.color = shouldRevealAssistiveScrollbar
+          ? widget.thumbColor ?? const Color(0x66BCBCBC)
+          : const Color(0x00000000);
+      scrollbarPainter.ignorePointer = !shouldRevealAssistiveScrollbar;
+    });
+  }
+
+  @override
+  void receivedPointerSignal(PointerSignalEvent event) {
+    if (event is PointerScrollEvent) {
+      final bool trackpadOrMouseScrollDetected =
+          event.kind == PointerDeviceKind.mouse || event.kind == PointerDeviceKind.trackpad;
+      if (!_assistiveScrollbarIsVisible && trackpadOrMouseScrollDetected) {
+        _toggleAssistiveScrollbarVisibility(true);
+      } else if (_assistiveScrollbarIsVisible && !trackpadOrMouseScrollDetected) {
+        _toggleAssistiveScrollbarVisibility(false);
+      }
+    }
+
+    super.receivedPointerSignal(event);
+  }
+
+  @override
+  void receivedPointerDown(PointerDownEvent event) {
+    if (event.kind != PointerDeviceKind.mouse &&
+        event.kind != PointerDeviceKind.trackpad &&
+        _assistiveScrollbarIsVisible) {
+      _toggleAssistiveScrollbarVisibility(false);
+    }
   }
 
   @override

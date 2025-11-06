@@ -1006,7 +1006,6 @@ class RawScrollbar extends StatefulWidget {
     this.mainAxisMargin = 0.0,
     this.crossAxisMargin = 0.0,
     this.padding,
-    this.revealAssistiveScrollbar = false,
   }) : assert(
          !(thumbVisibility == false && (trackVisibility ?? false)),
          'A scrollbar track cannot be drawn without a scrollbar thumb.',
@@ -1340,17 +1339,6 @@ class RawScrollbar extends StatefulWidget {
   /// Defaults to null.
   final EdgeInsetsGeometry? padding;
 
-  /// {@template flutter.widgets.Scrollbar.revealAssistiveScrollbar}
-  /// Selectively reveal the scrollbar on scroll when a mouse or trackpad
-  /// is used.
-  ///
-  /// The [thumbVisibility] setting will still be ignored when a mouse
-  /// or trackpad is
-  ///
-  /// Defaults to false.
-  /// {@endtemplate}
-  final bool revealAssistiveScrollbar;
-
   @override
   RawScrollbarState<RawScrollbar> createState() => RawScrollbarState<RawScrollbar>();
 }
@@ -1417,9 +1405,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   ///
   ///   * [RawScrollbar.interactive], which overrides the default behavior.
   @protected
-  bool get enableGestures {
-    return widget.interactive ?? !widget.revealAssistiveScrollbar;
-  }
+  bool get enableGestures => widget.interactive ?? false;
 
   @protected
   @override
@@ -1431,11 +1417,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       parent: _fadeoutAnimationController,
       curve: Curves.fastOutSlowIn,
     );
-    final Color defaultThumbColor = widget.revealAssistiveScrollbar
-        ? const Color(0x00000000)
-        : const Color(0x66BCBCBC);
     scrollbarPainter = ScrollbarPainter(
-      color: widget.thumbColor ?? defaultThumbColor,
+      color: widget.thumbColor ?? const Color(0x00000000),
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
       thickness: widget.thickness ?? _kScrollbarThickness,
       radius: widget.radius,
@@ -1587,7 +1570,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   void updateScrollbarPainter() {
     final TextDirection textDirection = Directionality.of(context);
-    
+
     scrollbarPainter
       ..color = widget.thumbColor ?? const Color(0x66BCBCBC)
       ..trackRadius = widget.trackRadius
@@ -2209,37 +2192,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
   }
 
-  void _toggleAssistiveScrollbarVisibility(bool shouldRevealAssistiveScrollbar) {
-    _assistiveScrollbarIsVisible = !_assistiveScrollbarIsVisible;
-    setState(() {
-      scrollbarPainter.color = shouldRevealAssistiveScrollbar
-          ? widget.thumbColor ?? const Color(0x66BCBCBC)
-          : const Color(0x00000000);
-      scrollbarPainter.ignorePointer = !shouldRevealAssistiveScrollbar;
-    });
-  }
-
-  void _handleAssistiveScrollbarVisibility(PointerDownEvent event) {
-    if (widget.revealAssistiveScrollbar &&
-        event.kind != PointerDeviceKind.mouse &&
-        event.kind != PointerDeviceKind.trackpad &&
-        _assistiveScrollbarIsVisible) {
-      _toggleAssistiveScrollbarVisibility(false);
-    }
-  }
-
-  void _receivedPointerSignal(PointerSignalEvent event) {
+  @mustCallSuper
+  /// Handles pointer signal events for the scrollbar.
+  void receivedPointerSignal(PointerSignalEvent event) {
     _cachedController = _effectiveScrollController;
-
-    if (event is PointerScrollEvent && widget.revealAssistiveScrollbar) {
-      final bool trackpadOrMouseScrollDetected =
-          event.kind == PointerDeviceKind.mouse || event.kind == PointerDeviceKind.trackpad;
-      if (!_assistiveScrollbarIsVisible && trackpadOrMouseScrollDetected) {
-        _toggleAssistiveScrollbarVisibility(true);
-      } else if (_assistiveScrollbarIsVisible && !trackpadOrMouseScrollDetected) {
-        _toggleAssistiveScrollbarVisibility(false);
-      }
-    }
 
     // Only try to scroll if the bar absorb the hit test.
     if ((scrollbarPainter.hitTest(event.localPosition) ?? false) &&
@@ -2263,6 +2219,12 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
   }
 
+  /// Handles pointer down events for the scrollbar.
+  void receivedPointerDown(PointerDownEvent event) {
+    // Intentionally left empty. This implementation is provided
+    // so that subclasses can override it to respond to pointer down events.
+  }
+
   @protected
   @override
   void dispose() {
@@ -2284,8 +2246,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         onNotification: _handleScrollNotification,
         child: RepaintBoundary(
           child: Listener(
-            onPointerSignal: _receivedPointerSignal,
-            onPointerDown: _handleAssistiveScrollbarVisibility,
+            onPointerSignal: receivedPointerSignal,
+            onPointerDown: receivedPointerDown,
             child: RawGestureDetector(
               key: _gestureDetectorKey,
               gestures: _gestures,

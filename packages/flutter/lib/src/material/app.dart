@@ -861,11 +861,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
           case TargetPlatform.android:
             // Build transparent, non-interactive scrollbar that will be revealed by default
             // if a trackpad or mouse is used to scroll.
-            return Scrollbar(
-              controller: details.controller,
-              revealAssistiveScrollbar: true,
-              child: child,
-            );
+            return Scrollbar(controller: details.controller, child: child);
           case TargetPlatform.fuchsia:
           case TargetPlatform.iOS:
             return child;
