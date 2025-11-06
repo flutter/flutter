@@ -567,7 +567,6 @@ mixin RendererBinding
     _firstFrameSent = false;
   }
 
-
   /// Pump the rendering pipeline to generate a frame.
   ///
   /// This method is called by [handleDrawFrame], which itself is called

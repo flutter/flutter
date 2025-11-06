@@ -81,9 +81,6 @@ class TestRenderingFlutterBinding extends BindingBase
   @override
   PipelineOwner createRootPipelineOwner() {
     return PipelineOwner(
-      onSemanticsOwnerCreated: () {
-        renderView.scheduleInitialSemantics();
-      },
       onSemanticsUpdate: (SemanticsUpdate update) {
         renderView.updateSemantics(update);
       },
