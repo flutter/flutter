@@ -657,13 +657,6 @@ abstract class WindowingOwner {
     BaseWindowController? parent,
     String? title,
   });
-
-  /// Returns whether the application has any top level windows created by this
-  /// windowing owner.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  bool hasTopLevelWindows();
 }
 
 /// Creates default windowing owner for standard desktop embedders.
@@ -707,11 +700,6 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
     BaseWindowController? parent,
     String? title,
   }) {
-    throw UnsupportedError(errorMessage);
-  }
-
-  @override
-  bool hasTopLevelWindows() {
     throw UnsupportedError(errorMessage);
   }
 }
