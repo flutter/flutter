@@ -741,7 +741,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
     if (this is CupertinoSheetRoute<dynamic> && _hasCustomTopGap) {
       return false;
     }
-    return nextRoute is _CupertinoSheetRouteTransitionMixin && !_hasCustomTopGap;
+    return nextRoute is _CupertinoSheetRouteTransitionMixin;
   }
 
   @override
