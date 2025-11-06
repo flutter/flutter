@@ -278,10 +278,10 @@ class DriverTest {
       final bool isAndroidRun = selectedDevice != null
           ? selectedDevice is AndroidDevice
           : const <DeviceOperatingSystem>{
-        DeviceOperatingSystem.android,
-        DeviceOperatingSystem.androidArm,
-        DeviceOperatingSystem.androidArm64,
-      }.contains(deviceOperatingSystem);
+              DeviceOperatingSystem.android,
+              DeviceOperatingSystem.androidArm,
+              DeviceOperatingSystem.androidArm64,
+            }.contains(deviceOperatingSystem);
 
       String? devicelabAdbPath;
       if (isAndroidRun) {
