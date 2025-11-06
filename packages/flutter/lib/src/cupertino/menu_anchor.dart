@@ -2784,19 +2784,9 @@ abstract class _SwipeTarget {
   void didSwipeLeave({required bool pointerUp});
 }
 
-abstract class _SwipeSurfaceData {
-  ui.Rect computeRect();
-}
-
-abstract class _SwipeRegionProvider {
-  void attachSurface(_SwipeSurfaceData surface);
-  void detachSurface(_SwipeSurfaceData surface);
-  void beginSwipe(PointerDownEvent event, {Duration delay = Duration.zero, VoidCallback? onStart});
-}
-
 class _SwipeScope extends InheritedWidget {
   const _SwipeScope({required super.child, required this.state});
-  final _SwipeRegionProvider state;
+  final _SwipeRegionState state;
 
   @override
   bool updateShouldNotify(_SwipeScope oldWidget) {
@@ -2806,57 +2796,37 @@ class _SwipeScope extends InheritedWidget {
 
 class _SwipeRegion extends StatefulWidget {
   const _SwipeRegion({this.enabled = true, required this.onDistanceChanged, required this.child});
-
   final bool enabled;
   final ValueChanged<double> onDistanceChanged;
   final Widget child;
 
-  static _SwipeRegionProvider of(BuildContext context) {
+  static _SwipeRegionState? of(BuildContext context) {
     final _SwipeScope? scope = context.dependOnInheritedWidgetOfExactType<_SwipeScope>();
-    assert(scope != null, 'No SwipeRegion found in context');
-    return scope!.state;
+    return scope?.state;
   }
 
   @override
   State<_SwipeRegion> createState() => _SwipeRegionState();
 }
 
-class _SwipeRegionState extends State<_SwipeRegion> implements _SwipeRegionProvider {
-  final Set<_SwipeSurfaceData> _surfaces = <_SwipeSurfaceData>{};
+class _SwipeRegionState extends State<_SwipeRegion> {
+  final Set<_RenderSwipeSurface> _surfaces = <_RenderSwipeSurface>{};
   MultiDragGestureRecognizer? _recognizer;
-  bool get _isSwiping => _position != null;
+
+  bool get isSwiping => _position != null;
   ui.Offset? _position;
 
-  @override
-  void attachSurface(_SwipeSurfaceData surface) {
+  void attachSurface(_RenderSwipeSurface surface) {
     _surfaces.add(surface);
   }
 
-  @override
-  void detachSurface(_SwipeSurfaceData surface) {
+  void detachSurface(_RenderSwipeSurface surface) {
     _surfaces.remove(surface);
   }
 
-  @override
   void beginSwipe(PointerDownEvent event, {Duration delay = Duration.zero, VoidCallback? onStart}) {
-    if (!widget.enabled) {
+    if (isSwiping || !widget.enabled) {
       return;
-    }
-
-    if (_isSwiping) {
-      assert(_recognizer != null);
-      return;
-    }
-
-    if (_recognizer != null && _recognizer!.onStart == onStart) {
-      bool delayMatches = true;
-      if (_recognizer case final DelayedMultiDragGestureRecognizer recognizer) {
-        delayMatches = recognizer.delay == delay;
-      }
-      if (delayMatches) {
-        _recognizer!.addPointer(event);
-        return;
-      }
     }
 
     _recognizer?.dispose();
@@ -2889,10 +2859,8 @@ class _SwipeRegionState extends State<_SwipeRegion> implements _SwipeRegionProvi
     super.didUpdateWidget(oldWidget);
     if (widget.enabled != oldWidget.enabled) {
       if (!widget.enabled) {
-        if (_isSwiping) {
-          _position = null;
-          widget.onDistanceChanged(0);
-        }
+        _position = null;
+        widget.onDistanceChanged(0);
         _recognizer?.dispose();
         _recognizer = null;
       }
@@ -2917,9 +2885,9 @@ class _SwipeRegionState extends State<_SwipeRegion> implements _SwipeRegionProvi
   void _handleSwipeUpdate(DragUpdateDetails updateDetails, {bool onTarget = false}) {
     _position = _position! + updateDetails.delta;
 
-    // We can't merge rects because the root menu anchor may not be contiguous.
+    // We can't used expandToInclude() because the total menu area may not be rectangular.
     double minimumSquaredDistance = double.maxFinite;
-    for (final _SwipeSurfaceData surface in _surfaces) {
+    for (final _RenderSwipeSurface surface in _surfaces) {
       final double squaredDistance = _computeSquaredDistanceToRect(
         _position!,
         surface.computeRect(),
@@ -2938,7 +2906,7 @@ class _SwipeRegionState extends State<_SwipeRegion> implements _SwipeRegionProvi
   }
 
   Drag _createSwipeHandle(ui.Offset position) {
-    assert(!_isSwiping, 'A new swipe should not begin while a swipe is active.');
+    assert(!isSwiping, 'A new swipe should not begin while a swipe is active.');
     _position = position;
     return _SwipeHandle(
       router: this,
@@ -2951,7 +2919,7 @@ class _SwipeRegionState extends State<_SwipeRegion> implements _SwipeRegionProvi
   }
 
   void _disposeInactiveRecognizer() {
-    if (!_isSwiping && _recognizer != null) {
+    if (!isSwiping && _recognizer != null) {
       _recognizer!.dispose();
       _recognizer = null;
     }
@@ -2988,33 +2956,32 @@ class _SwipeSurface extends SingleChildRenderObjectWidget {
   final VoidCallback? onStart;
 
   @override
-  _RenderSwipeableSurface createRenderObject(BuildContext context) {
-    return _RenderSwipeableSurface(
-      region: _SwipeRegion.of(context),
-      delay: delay,
-      onStart: onStart,
-    );
+  _RenderSwipeSurface createRenderObject(BuildContext context) {
+    return _RenderSwipeSurface(region: _SwipeRegion.of(context)!, delay: delay, onStart: onStart);
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderSwipeableSurface renderObject) {
+  void updateRenderObject(BuildContext context, _RenderSwipeSurface renderObject) {
     renderObject
-      ..region = _SwipeRegion.of(context)
+      ..region = _SwipeRegion.of(context)!
       ..delay = delay
       ..onStart = onStart;
   }
 }
 
-class _RenderSwipeableSurface extends RenderProxyBox implements _SwipeSurfaceData {
-  _RenderSwipeableSurface({
-    required _SwipeRegionProvider region,
+class _RenderSwipeSurface extends RenderProxyBoxWithHitTestBehavior {
+  _RenderSwipeSurface({
+    required _SwipeRegionState region,
     required this.delay,
     required this.onStart,
-  }) : _region = region;
+  }) : _region = region,
+       super(behavior: HitTestBehavior.opaque) {
+    _region.attachSurface(this);
+  }
 
-  _SwipeRegionProvider get region => _region;
-  _SwipeRegionProvider _region;
-  set region(_SwipeRegionProvider value) {
+  _SwipeRegionState get region => _region;
+  _SwipeRegionState _region;
+  set region(_SwipeRegionState value) {
     if (_region != value) {
       _region.detachSurface(this);
       _region = value;
@@ -3025,14 +2992,7 @@ class _RenderSwipeableSurface extends RenderProxyBox implements _SwipeSurfaceDat
   Duration delay;
   VoidCallback? onStart;
 
-  @override
   ui.Rect computeRect() => localToGlobal(Offset.zero) & size;
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    _region.attachSurface(this);
-  }
 
   @override
   void detach() {
