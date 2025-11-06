@@ -559,6 +559,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     Object message,
   ) async {
     if (_closed) {
+      print('@@@ !_closed 1');
       throw StateError('Load called on a closed FlutterWebPlatform');
     }
 
@@ -587,12 +588,14 @@ class FlutterWebPlatform extends PlatformPlugin {
         }
         _browserManager = await _launchBrowser(browser);
       }
-    } on Error catch (_) {
+    } on Error catch (e) {
+      print('@@@ on Error catch($e)');
       await _suiteLock.close();
       rethrow;
     }
 
     if (_closed) {
+      print('@@@ !_closed 2');
       throw StateError('Load called on a closed FlutterWebPlatform');
     }
 
@@ -614,6 +617,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     );
 
     if (_closed) {
+      print('@@@ !_closed 3');
       throw StateError('Load called on a closed FlutterWebPlatform');
     }
 
