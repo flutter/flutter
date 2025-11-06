@@ -103,7 +103,9 @@ class TextPaint {
           : block.clusterRangeWithoutWhitespaces.start - 1;
       final int step = block.isLtr ? 1 : -1;
       for (int i = start; i != end; i += step) {
-        final clusterText = layout.allClusters[i];
+        final clusterText = block is EllipsisBlock
+            ? layout.ellipsisClusters[i]
+            : layout.allClusters[i];
         // We need to adjust the canvas size to fit the block in case there is scaling or zoom involved
         final (ui.Rect sourceRect, ui.Rect targetRect) = calculateCluster(
           layout,
@@ -179,7 +181,9 @@ class TextPaint {
         .translate(lineOffset.dx, lineOffset.dy);
 
     if (WebParagraphDebug.logging) {
-      final String text = paragraph.getText1(webTextCluster.start, webTextCluster.end);
+      final String text = block is EllipsisBlock
+          ? block.getText(webTextCluster.start, webTextCluster.end)
+          : paragraph.getText(webTextCluster.start, webTextCluster.end);
       WebParagraphDebug.log(
         'calculateCluster "$text" bounds: ${webTextCluster.bounds} advance: ${webTextCluster.advance} shift $shift\n'
         'clusterOffset: $clusterOffset lineOffset: $lineOffset\n'
@@ -220,9 +224,8 @@ class TextPaint {
         .translate(blockOffset.dx, blockOffset.dy)
         .translate(paragraphOffset.dx, paragraphOffset.dy);
 
-    final String text = paragraph.getText(block.textRange);
     WebParagraphDebug.log(
-      'calculateBlock "$text" ${block.textRange}-${block.span.start} ${block.clusterRange} '
+      'calculateBlock "${block.span.text}" ${block.textRange}-${block.span.start} ${block.clusterRange} '
       'source: ${sourceRect.left}:${sourceRect.right}x${sourceRect.top}:${sourceRect.bottom} => '
       'target: ${targetRect.left}:${targetRect.right}x${targetRect.top}:${targetRect.bottom}',
     );

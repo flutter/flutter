@@ -623,6 +623,8 @@ class TextSpan extends ParagraphSpan {
   @override
   late final double fontBoundingBoxDescent = _metrics.fontBoundingBoxDescent;
 
+  late final double? advanceWidth = _metrics.width;
+
   DomTextMetrics _getMetrics() {
     // TODO(jlavrova): Is this necessary?
     // layoutContext.direction = isDefaultLtr ? 'ltr' : 'rtl';
@@ -1060,12 +1062,7 @@ class WebParagraph implements ui.Paragraph {
     return _layout;
   }
 
-  // TODO(mdebbar): Remove this in favor of `getText1`.
-  String getText(ui.TextRange textRange) {
-    return getText1(textRange.start, textRange.end);
-  }
-
-  String getText1(int start, int end) {
+  String getText(int start, int end) {
     if (text.isEmpty) {
       return text;
     }

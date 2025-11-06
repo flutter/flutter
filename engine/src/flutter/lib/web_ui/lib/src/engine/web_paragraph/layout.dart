@@ -30,6 +30,7 @@ class TextLayout {
   final lines = <TextLine>[];
 
   final allClusters = <WebCluster>[];
+  late var ellipsisClusters = <WebCluster>[];
   late final _mapping = _TextClusterMapping(paragraph.text.length + 1, allClusters);
 
   bool get isDefaultLtr => paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr;
@@ -175,10 +176,11 @@ class TextLayout {
     ClusterRange whitespaceRange,
     bool hardLineBreak,
     double top,
+    List<TextCluster> ellipsisClusters,
   ) {
     assert(contentRange.end == whitespaceRange.start);
     if (WebParagraphDebug.logging) {
-      final allLineText = paragraph.getText1(contentRange.start, whitespaceRange.end);
+      final allLineText = paragraph.getText(contentRange.start, whitespaceRange.end);
       WebParagraphDebug.log('LINE "$allLineText" clusters:$contentRange+$whitespaceRange');
     }
 
@@ -268,7 +270,7 @@ class TextLayout {
 
       if (WebParagraphDebug.logging) {
         WebParagraphDebug.log(
-          'Run: "${paragraph.getText(bidiLineTextRange)}" '
+          'Run: "${paragraph.getText(bidiLineTextRange.start, bidiLineTextRange.end)}" '
           '${bidiRun.clusterRange} & $contentRange = $fullIntersection textRange:$bidiLineTextRange',
         );
       }
@@ -351,7 +353,10 @@ class TextLayout {
         }
 
         if (WebParagraphDebug.logging) {
-          final String styledText = paragraph.getText(bidiLineSpanTextRange);
+          final String styledText = paragraph.getText(
+            bidiLineSpanTextRange.start,
+            bidiLineSpanTextRange.end,
+          );
           WebParagraphDebug.log(
             'Styled text: "$styledText" clusterRange: $bidiLineSpanRange '
             'width:$blockWidth shiftFromLineStart:$blockShiftFromLineStart trailingSpacesWidth:$trailingSpacesWidth',
@@ -361,9 +366,30 @@ class TextLayout {
       }
     }
 
+    // Add the ellipsis blocks if any
+    if (ellipsisClusters.isNotEmpty) {
+      this.ellipsisClusters = ellipsisClusters;
+      final TextSpan ellipsisSpan = TextSpan(
+        start: ellipsisClusters.first.start,
+        end: ellipsisClusters.last.end,
+        style: ellipsisClusters.first.style,
+        text: paragraph.paragraphStyle.ellipsis!,
+      );
+      line.visualBlocks.add(
+        EllipsisBlock(
+          ellipsisSpan,
+          paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr ? 0 : 1,
+          ClusterRange(start: 0, end: ellipsisSpan.extractClusters().length),
+          ui.TextRange(start: 0, end: ellipsisSpan.text.length),
+          blockShiftFromLineStart,
+          0.0,
+        ),
+      );
+    }
+
     // Now when we calculated all line metrics we have to correct placeholders that depend on it
     for (final LineBlock block in line.visualBlocks) {
-      if (block is TextBlock) {
+      if (block is TextBlock || block is EllipsisBlock) {
         continue;
       }
       final placeholderBlock = block as PlaceholderBlock;
@@ -394,7 +420,8 @@ class TextLayout {
     lines.add(line);
 
     WebParagraphDebug.log(
-      'Line [${line.textClusterRange.start}:${line.textClusterRange.end}) ${line.advance.left},${line.advance.top} ${line.advance.width}x${line.advance.height}',
+      'Line [${line.textClusterRange.start}:${line.textClusterRange.end}) ${line.advance.left},${line.advance.top} ${line.advance.width}x${line.advance.height} '
+      '${ellipsisClusters.isNotEmpty ? 'Ellipsis: "${paragraph.paragraphStyle.ellipsis}" ${ellipsisClusters.length}' : ''}',
     );
 
     return line.advance.height;
@@ -1055,6 +1082,11 @@ abstract class LineBlock {
 
   // TODO(mdebbar): Remove when possible!
   double get spanShiftFromLineStart;
+
+  String getText(int start, int end) {
+    assert(false);
+    return '';
+  }
 }
 
 class TextBlock extends LineBlock {
@@ -1163,6 +1195,27 @@ class PlaceholderBlock extends LineBlock {
   // TODO(jlavrova): Why are we using separate properties instead of `rawFontBoundingBoxAscent` and `rawFontBoundingBoxDescent`?
   late final double ascent;
   late final double descent;
+}
+
+class EllipsisBlock extends TextBlock {
+  EllipsisBlock(
+    super.span,
+    super._bidiLevel,
+    super.clusterRange,
+    super.textRange,
+    super.shiftFromLineStart,
+    super.shiftFromSpanStart,
+  );
+
+  @override
+  String getText(int start, int end) {
+    if (span.text.isEmpty) {
+      return span.text;
+    }
+    assert(start >= 0);
+    assert(end <= span.text.length);
+    return span.text.substring(start, end);
+  }
 }
 
 class TextLine {
