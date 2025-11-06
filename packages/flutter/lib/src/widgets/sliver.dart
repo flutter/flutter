@@ -246,6 +246,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   ///
   /// {@macro flutter.widgets.PageView.findChildIndexCallback}
   ///
+  /// {@macro flutter.widgets.ListView.separated.findItemIndexCallback}
   ///
   /// The `separatorBuilder` is similar to `itemBuilder`, except it is the widget
   /// that gets placed between itemBuilder(context, index) and itemBuilder(context, index + 1).

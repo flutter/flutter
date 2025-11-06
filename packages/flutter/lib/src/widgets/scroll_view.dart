@@ -1419,6 +1419,20 @@ class ListView extends BoxScrollView {
   ///
   /// {@macro flutter.widgets.PageView.findChildIndexCallback}
   ///
+  /// {@template flutter.widgets.ListView.separated.findItemIndexCallback}
+  /// The [findItemIndexCallback] returns item indices (excluding separators),
+  /// unlike the deprecated [findChildIndexCallback] which returns child indices
+  /// (including both items and separators).
+  ///
+  /// For example, in a list with 3 items and 2 separators:
+  /// * Item indices: 0, 1, 2
+  /// * Child indices: 0 (item), 1 (separator), 2 (item), 3 (separator), 4 (item)
+  ///
+  /// This callback should be implemented if the order of items may change at a
+  /// later time. If null, reordering items may result in state-loss as widgets
+  /// may not map to their existing [RenderObject]s.
+  /// {@endtemplate}
+  ///
   /// {@tool snippet}
   ///
   /// This example shows how to create [ListView] whose [ListTile] list items
