@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/utils.dart';
 
 /// Placeholder for base href
 const kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
@@ -166,9 +167,10 @@ class WebTemplate {
     final String suggestion = missingVariables
         .map((String name) => '--web-define=$name=VALUE')
         .join(' ');
+    final String variablesList = pluralize('variable', missingVariables.length);
     throwToolExit(
-      'Missing web-define variable${missingVariables.length > 1 ? 's' : ''}: $variables\n\n'
-      'Please provide the missing variable${missingVariables.length > 1 ? 's' : ''} using:\n'
+      'Missing web-define $variablesList: $variables\n\n'
+      'Please provide the missing $variablesList using:\n'
       'flutter run $suggestion\n'
       'or\n'
       'flutter build web $suggestion',
