@@ -340,12 +340,16 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       case TargetPlatform.windows:
         _useAndroidScrollbar = false;
     }
+    scrollbarPainter.color = _thumbColor.resolve(_states);
+    print('1: ${_thumbColor.resolve(_states)}');
     super.didChangeDependencies();
   }
 
   @override
   void updateScrollbarPainter() {
+    print('2: ${_thumbColor.resolve(_states)}');
     scrollbarPainter
+      // ..color = _thumbColor.resolve(_states)
       ..trackColor = _trackColor.resolve(_states)
       ..trackBorderColor = _trackBorderColor.resolve(_states)
       ..textDirection = Directionality.of(context)
@@ -360,6 +364,9 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       ..minLength = _scrollbarTheme.minThumbLength ?? _kScrollbarMinLength
       ..padding = MediaQuery.paddingOf(context)
       ..scrollbarOrientation = widget.scrollbarOrientation;
+    print(scrollbarPainter.color);
+    print(scrollbarPainter.ignorePointer);
+    print('----------------------');
   }
 
   @override
@@ -407,6 +414,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   }
 
   void _toggleAssistiveScrollbarVisibility(bool shouldRevealAssistiveScrollbar) {
+    print('toggle: $shouldRevealAssistiveScrollbar');
     _assistiveScrollbarIsVisible = !_assistiveScrollbarIsVisible;
     setState(() {
       scrollbarPainter.color = shouldRevealAssistiveScrollbar

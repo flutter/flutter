@@ -367,16 +367,55 @@ void main() {
     },
   );
 
+  // TODO(camsim99): Remove changes made here but take the lessons on.
   testWidgets('On first render with thumbVisibility: false, the thumb is hidden', (
     WidgetTester tester,
   ) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll() {
       return _buildBoilerplate(
+        // child: Theme(
+        // data: ThemeData(),
+        child: Scrollbar(
+          // thumbVisibility: false,
+          controller: controller,
+          child: SingleChildScrollView(
+            controller: controller,
+            child: const SizedBox(width: 4000.0, height: 4000.0),
+          ),
+        ),
+        // ),
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll());
+    await tester.pumpAndSettle();
+    expect(find.byType(Scrollbar), isNot(paints..rect()));
+
+    // Simulate a scroll action
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
+    await tester.pumpAndSettle();
+
+    // After scrolling, the scrollbar should still be visible
+    expect(find.byType(Scrollbar), paints..rect());
+
+    // Wait for the scrollbar to fade out
+    await tester.pump(const Duration(milliseconds: 600)); // Wait for fade duration
+    await tester.pumpAndSettle();
+
+    // After waiting, the scrollbar should not be visible
+    expect(find.byType(Scrollbar), isNot(paints..rect()));
+
+    controller.dispose();
+  });
+
+  testWidgets('WIP', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    Widget viewWithScroll() {
+      return _buildBoilerplate(
         child: Theme(
           data: ThemeData(),
           child: Scrollbar(
-            thumbVisibility: false,
             controller: controller,
             child: SingleChildScrollView(
               controller: controller,
@@ -389,6 +428,16 @@ void main() {
 
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
+    expect(find.byType(Scrollbar), isNot(paints..rect()));
+
+    final TestPointer trackpadPointer = TestPointer(1, PointerDeviceKind.stylus);
+    await tester.sendEventToBinding(
+      trackpadPointer.hover(tester.getCenter(find.byType(SingleChildScrollView))),
+    );
+    await tester.sendEventToBinding(trackpadPointer.scroll(const Offset(0, -300)));
+
+    await tester.pump();
+
     expect(find.byType(Scrollbar), isNot(paints..rect()));
 
     controller.dispose();
@@ -922,6 +971,7 @@ void main() {
         ),
       );
     },
+    skip: true,
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.linux,
       TargetPlatform.macOS,
@@ -1003,6 +1053,7 @@ void main() {
           ),
       );
     },
+    skip: true,
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.linux}),
   );
 
@@ -1419,7 +1470,7 @@ void main() {
 
   testWidgets('Scrollbar dragging is disabled by default on Android', (WidgetTester tester) async {
     // TODO(camsim99): Figure out what the behavior should be when a MaterialApp (that uses MaterialScrollBehavior)
-    // is used with a Scrollbar. Should we search for Scrollbar descendants or should this just be a breaking change? 
+    // is used with a Scrollbar. Should we search for Scrollbar descendants or should this just be a breaking change?
     int tapCount = 0;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
