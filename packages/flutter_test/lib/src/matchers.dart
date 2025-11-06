@@ -664,8 +664,6 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 ///   * [containsSemantics], a similar matcher without default values for flags or actions.
 Matcher matchesSemantics({
   String? identifier,
-  String? traversalParentIdentifier,
-  String? traversalChildIdentifier,
   String? label,
   AttributedString? attributedLabel,
   String? hint,
@@ -750,8 +748,6 @@ Matcher matchesSemantics({
 }) {
   return _MatchesSemanticsData(
     identifier: identifier,
-    traversalParentIdentifier: traversalParentIdentifier,
-    traversalChildIdentifier: traversalChildIdentifier,
     label: label,
     attributedLabel: attributedLabel,
     hint: hint,
@@ -864,8 +860,6 @@ Matcher matchesSemantics({
 ///   * [matchesSemantics], a similar matcher with default values for flags and actions.
 Matcher containsSemantics({
   String? identifier,
-  String? traversalParentIdentifier,
-  String? traversalChildIdentifier,
   String? label,
   AttributedString? attributedLabel,
   String? hint,
@@ -950,8 +944,6 @@ Matcher containsSemantics({
 }) {
   return _MatchesSemanticsData(
     identifier: identifier,
-    traversalChildIdentifier: traversalChildIdentifier,
-    traversalParentIdentifier: traversalParentIdentifier,
     label: label,
     attributedLabel: attributedLabel,
     hint: hint,
@@ -2383,8 +2375,6 @@ class _MatchesReferenceImage extends AsyncMatcher {
 class _MatchesSemanticsData extends Matcher {
   _MatchesSemanticsData({
     required this.identifier,
-    required this.traversalParentIdentifier,
-    required this.traversalChildIdentifier,
     required this.label,
     required this.attributedLabel,
     required this.hint,
@@ -2527,8 +2517,6 @@ class _MatchesSemanticsData extends Matcher {
            : SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint);
 
   final String? identifier;
-  final String? traversalParentIdentifier;
-  final String? traversalChildIdentifier;
   final String? label;
   final AttributedString? attributedLabel;
   final String? hint;
