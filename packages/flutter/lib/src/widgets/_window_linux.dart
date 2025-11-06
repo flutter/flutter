@@ -548,7 +548,7 @@ class WindowingOwnerLinux extends WindowingOwner {
   }
 
   /// Controllers being managed by Flutter.
-  final Map<int, _LinuxWindowController> _windowControllers = {};
+  final Map<int, _LinuxWindowController> _windowControllers = <int, _LinuxWindowController>{};
 
   @internal
   @override
@@ -558,7 +558,7 @@ class WindowingOwnerLinux extends WindowingOwner {
     String? title,
     required RegularWindowControllerDelegate delegate,
   }) {
-    final controller = RegularWindowControllerLinux(
+    final RegularWindowControllerLinux controller = RegularWindowControllerLinux(
       owner: this,
       delegate: delegate,
       preferredSize: preferredSize,
@@ -578,7 +578,7 @@ class WindowingOwnerLinux extends WindowingOwner {
     BaseWindowController? parent,
     String? title,
   }) {
-    final controller = DialogWindowControllerLinux(
+    final DialogWindowControllerLinux controller = DialogWindowControllerLinux(
       owner: this,
       delegate: delegate,
       preferredSize: preferredSize,
@@ -817,7 +817,7 @@ class DialogWindowControllerLinux extends DialogWindowController implements _Lin
 
     _window.setTypeHint(_GDK_WINDOW_TYPE_HINT_DIALOG);
     if (parent != null) {
-      final controller = owner._windowControllers[parent.rootView.viewId];
+      final _LinuxWindowController? controller = owner._windowControllers[parent.rootView.viewId];
       if (controller != null) {
         _window.setTransientFor(controller.window);
         _window.setModal(true);
