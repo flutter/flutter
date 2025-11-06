@@ -4,7 +4,7 @@
 
 import '../framework/devices.dart';
 import '../framework/framework.dart';
-import '../framework/talkback.dart' hide adbPath;
+import '../framework/talkback.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
@@ -278,8 +278,7 @@ class DriverTest {
       // reference it if needed.
       final Map<String, String> env = <String, String>{
         if (environment != null) ...environment!,
-        'FLUTTER_DEVICE_ID_NUMBER': deviceId,
-        'FLUTTER_ADB_PATH': adbPath,
+        'DEVICE_ID_NUMBER': deviceId,
       };
 
       final List<String> options = <String>[
