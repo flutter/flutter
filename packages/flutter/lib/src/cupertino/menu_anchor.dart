@@ -798,19 +798,6 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
   }
 }
 
-// TODO(davidhicks980): Remove _resolveMotion() when AnimationBehavior accommodates reduced motion.
-// (https://github.com/flutter/flutter/issues/173461)
-enum _CompatAnimationBehavior {
-  /// All animations are played as normal, with no reduction in motion.
-  normal,
-
-  /// Corresponds to ui.AccessibilityFeatures.reduceMotion
-  reduced,
-
-  /// Corresponds to ui.AccessibilityFeatures.disableAnimations
-  none,
-}
-
 class _MenuOverlay extends StatefulWidget {
   const _MenuOverlay({
     required this.children,
@@ -858,16 +845,15 @@ class _MenuOverlayState extends State<_MenuOverlay>
     _FocusFirstIntent: _FocusFirstAction(),
     _FocusLastIntent: _FocusLastAction(),
   };
-  final ScrollController _scrollController = ScrollController();
   late final AnimationController _swipeAnimationController;
-  late final ProxyAnimation _scaleAnimation = ProxyAnimation(kAlwaysCompleteAnimation);
-  final ProxyAnimation _fadeAnimation = ProxyAnimation(kAlwaysCompleteAnimation);
-  final ProxyAnimation _sizeAnimation = ProxyAnimation(kAlwaysCompleteAnimation);
+  final ScrollController _scrollController = ScrollController();
+  final ProxyAnimation _scaleAnimation = ProxyAnimation();
+  final ProxyAnimation _fadeAnimation = ProxyAnimation();
+  final ProxyAnimation _sizeAnimation = ProxyAnimation();
   late Alignment _attachmentPointAlignment;
   late ui.Offset _attachmentPoint;
   late Alignment _menuAlignment;
   List<Widget> _children = <Widget>[];
-  _CompatAnimationBehavior? _animationBehavior;
   ui.TextDirection? _textDirection;
 
   // The actual distance the user has swiped away from the menu.
@@ -990,29 +976,12 @@ class _MenuOverlayState extends State<_MenuOverlay>
       context,
     ).platformDispatcher.accessibilityFeatures;
 
-    final _CompatAnimationBehavior newAnimationBehavior = switch (accessibilityFeatures) {
-      ui.AccessibilityFeatures(disableAnimations: true) => _CompatAnimationBehavior.none,
-      ui.AccessibilityFeatures(reduceMotion: true) => _CompatAnimationBehavior.reduced,
-      _ => _CompatAnimationBehavior.normal,
-    };
-
-    if (_animationBehavior == newAnimationBehavior) {
-      return;
-    }
-
-    _animationBehavior = newAnimationBehavior;
-    switch (_animationBehavior!) {
-      case _CompatAnimationBehavior.normal:
-        _scaleAnimation.parent = _AnimationProduct(
-          first: widget.visibilityAnimation,
-          next: _swipeAnimationController.view.drive(Tween<double>(begin: 0.8, end: 1)),
-        );
-        _sizeAnimation.parent = widget.visibilityAnimation.drive(Tween<double>(begin: 0.8, end: 1));
-        _fadeAnimation.parent = widget.visibilityAnimation.drive(
-          CurveTween(curve: Curves.easeIn).chain(const _ClampTween(begin: 0, end: 1)),
-        );
-
-      case _CompatAnimationBehavior.reduced:
+    switch (accessibilityFeatures!) {
+      case ui.AccessibilityFeatures(disableAnimations: true):
+        _scaleAnimation.parent = kAlwaysCompleteAnimation;
+        _fadeAnimation.parent = kAlwaysCompleteAnimation;
+        _sizeAnimation.parent = kAlwaysCompleteAnimation;
+      case ui.AccessibilityFeatures(reduceMotion: true):
         // Swipe scaling works with reduced motion.
         _scaleAnimation.parent = _swipeAnimationController.view.drive(
           Tween<double>(begin: 0.8, end: 1),
@@ -1021,11 +990,15 @@ class _MenuOverlayState extends State<_MenuOverlay>
         _fadeAnimation.parent = widget.visibilityAnimation.drive(
           CurveTween(curve: Curves.easeIn).chain(const _ClampTween(begin: 0, end: 1)),
         );
-
-      case _CompatAnimationBehavior.none:
-        _scaleAnimation.parent = kAlwaysCompleteAnimation;
-        _fadeAnimation.parent = kAlwaysCompleteAnimation;
-        _sizeAnimation.parent = kAlwaysCompleteAnimation;
+      case _:
+        _scaleAnimation.parent = _AnimationProduct(
+          first: widget.visibilityAnimation,
+          next: _swipeAnimationController.view.drive(Tween<double>(begin: 0.8, end: 1)),
+        );
+        _sizeAnimation.parent = widget.visibilityAnimation.drive(Tween<double>(begin: 0.8, end: 1));
+        _fadeAnimation.parent = widget.visibilityAnimation.drive(
+          CurveTween(curve: Curves.easeIn).chain(const _ClampTween(begin: 0, end: 1)),
+        );
     }
   }
 
