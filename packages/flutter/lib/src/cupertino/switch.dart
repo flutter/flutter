@@ -39,6 +39,7 @@ const List<BoxShadow> _kSwitchBoxShadows = <BoxShadow>[
 // must be dragged to commit the state change.
 // This threshold is used when the user is dragging to a new state.
 const double _kDragCommitThreshold = 0.7;
+
 // The drag distance (as a fraction of the track width) past which the user must
 // drag back to reverse a state change that has already been visually committed
 // during the drag.
@@ -486,10 +487,12 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
   // The global position where the user first touched the screen. This value to
   // calculate the initial drag delta.
   Offset _dragStartPosition = Offset.zero;
-  // The cumulative horizontal drag delta, normalized as a fraction of the
+
+    // The cumulative horizontal drag delta, normalized as a fraction of the
   // track width.
   double _dragDelta = 0;
-  // The transient value of the switch determined by _dragDelta during a
+
+    // The transient value of the switch determined by _dragDelta during a
   // drag.
   bool? _dragValue;
 
