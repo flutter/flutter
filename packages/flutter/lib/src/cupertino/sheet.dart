@@ -243,6 +243,10 @@ class CupertinoSheetTransition extends StatefulWidget {
 
   /// The gap between the top of the screen and the top of the sheet as a ratio
   /// of the screen height.
+  ///
+  /// This value should be between 0.0 and 1.0, where 0.0 means no gap (sheet
+  /// extends to the top of the screen) and 1.0 means the sheet starts at the
+  /// bottom of the screen. A value of 0.08 represents 8% of the screen height.
   final double topGap;
 
   /// The primary delegated transition. Will slide a non [CupertinoSheetRoute] page down.
@@ -572,8 +576,8 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
     this.enableDrag = true,
     double? topGap,
   }) : assert(
-         topGap == null || (topGap >= 0.0 && topGap <= 1.0),
-         'topGap must be between 0.0 and 1.0',
+         topGap == null || (topGap >= 0.0 && topGap <= 0.9),
+         'topGap must be between 0.0 and 0.9',
        ),
        _topGap = topGap;
 
