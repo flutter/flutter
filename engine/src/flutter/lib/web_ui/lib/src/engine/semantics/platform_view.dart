@@ -42,15 +42,17 @@ class SemanticPlatformView extends SemanticRole {
 
     if (semanticsObject.isPlatformView) {
       final int platformViewId = semanticsObject.platformViewId;
+      final bool isHidden = semanticsObject.flags.isHidden;
 
-      if (semanticsObject.isPlatformViewIdDirty) {
+      if (isHidden) {
+        // When hidden, remove aria-owns since the platform view is not part
+        // of the accessibility tree.
+        removeAttribute('aria-owns');
+      } else if (semanticsObject.isPlatformViewIdDirty) {
         setAttribute('aria-owns', getPlatformViewDomId(platformViewId));
       }
 
-      PlatformViewManager.instance.updatePlatformViewAccessibility(
-        platformViewId,
-        semanticsObject.flags.isHidden,
-      );
+      PlatformViewManager.instance.updatePlatformViewAccessibility(platformViewId, isHidden);
     } else {
       removeAttribute('aria-owns');
     }
