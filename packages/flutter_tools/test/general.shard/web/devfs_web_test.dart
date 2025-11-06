@@ -1308,6 +1308,7 @@ void main() {
       final String dummyCertPath = globals.fs.path.join(dataPath, 'tls_cert', 'dummy-cert.pem');
       final String dummyCertKeyPath = globals.fs.path.join(dataPath, 'tls_cert', 'dummy-key.pem');
       final webDevServerConfig = WebDevServerConfig(
+        host: '::1',
         https: HttpsConfig(certPath: dummyCertPath, certKeyPath: dummyCertKeyPath),
       );
       final webDevFS = WebDevFS(
@@ -1341,6 +1342,8 @@ void main() {
 
       // Ensure the connection established is secure
       expect(uri.scheme, 'https');
+      // Ensure that the host correctly support IPv6
+      expect(uri.host, '::1');
 
       await webDevFS.destroy();
     }, overrides: <Type, Generator>{Artifacts: () => Artifacts.test()}),
