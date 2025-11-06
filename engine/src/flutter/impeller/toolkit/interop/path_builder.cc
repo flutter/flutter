@@ -61,12 +61,12 @@ void PathBuilder::Close() {
 
 ScopedObject<Path> PathBuilder::TakePath(FillType fill) {
   builder_.setFillType(ToSkiaType(fill));
-  return Create<Path>(builder_.detach());
+  return Create<Path>(std::move(builder_));
 }
 
 ScopedObject<Path> PathBuilder::CopyPath(FillType fill) {
   builder_.setFillType(ToSkiaType(fill));
-  return Create<Path>(builder_.snapshot());
+  return Create<Path>(builder_);
 }
 
 }  // namespace impeller::interop
