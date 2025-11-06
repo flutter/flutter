@@ -488,11 +488,11 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
   // calculate the initial drag delta.
   Offset _dragStartPosition = Offset.zero;
 
-    // The cumulative horizontal drag delta, normalized as a fraction of the
+  // The cumulative horizontal drag delta, normalized as a fraction of the
   // track width.
   double _dragDelta = 0;
 
-    // The transient value of the switch determined by _dragDelta during a
+  // The transient value of the switch determined by _dragDelta during a
   // drag.
   bool? _dragValue;
 
@@ -606,14 +606,14 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
         TextDirection.ltr => delta,
       };
 
-      final bool isValueChanged = widget.value != _dragValue;
-      final bool currentDragValue = widget.value
-          ? (isValueChanged
-                ? _dragDelta > -_kDragReverseThreshold
-                : _dragDelta >= -_kDragCommitThreshold)
-          : (isValueChanged
-                ? _dragDelta > _kDragReverseThreshold
-                : _dragDelta >= _kDragCommitThreshold);
+      final bool valueChangedWhileDragging = widget.value != _dragValue;
+
+      final double threshold = valueChangedWhileDragging
+          ? _kDragReverseThreshold
+          : _kDragCommitThreshold;
+      final double effectiveThreshold = widget.value ? -threshold : threshold;
+
+      final bool currentDragValue = _dragDelta >= effectiveThreshold;
 
       if (_dragValue != currentDragValue) {
         _emitVibration();
