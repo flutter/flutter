@@ -88,8 +88,6 @@ class WindowManager {
 
   void Initialize(const WindowingInitRequest* request);
 
-  bool HasTopLevelWindows() const;
-
   FlutterViewId CreateRegularWindow(
       const RegularWindowCreationRequest* request);
 
@@ -131,9 +129,6 @@ FLUTTER_EXPORT
 void InternalFlutterWindows_WindowManager_Initialize(
     int64_t engine_id,
     const flutter::WindowingInitRequest* request);
-
-FLUTTER_EXPORT
-bool InternalFlutterWindows_WindowManager_HasTopLevelWindows(int64_t engine_id);
 
 FLUTTER_EXPORT
 FlutterViewId InternalFlutterWindows_WindowManager_CreateRegularWindow(

@@ -27,10 +27,6 @@ void WindowManager::Initialize(const WindowingInitRequest* request) {
   isolate_ = Isolate::Current();
 }
 
-bool WindowManager::HasTopLevelWindows() const {
-  return !active_windows_.empty();
-}
-
 FlutterViewId WindowManager::CreateRegularWindow(
     const RegularWindowCreationRequest* request) {
   auto window = HostWindow::CreateRegularWindow(
@@ -119,13 +115,6 @@ void InternalFlutterWindows_WindowManager_Initialize(
   flutter::FlutterWindowsEngine* engine =
       flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
   engine->window_manager()->Initialize(request);
-}
-
-bool InternalFlutterWindows_WindowManager_HasTopLevelWindows(
-    int64_t engine_id) {
-  flutter::FlutterWindowsEngine* engine =
-      flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
-  return engine->window_manager()->HasTopLevelWindows();
 }
 
 FlutterViewId InternalFlutterWindows_WindowManager_CreateRegularWindow(
