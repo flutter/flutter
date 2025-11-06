@@ -9322,4 +9322,17 @@ void main() {
     expect((outerMaterial as dynamic).debugInkFeatures, isNull);
     expect((innerMaterial as dynamic).debugInkFeatures, hasLength(1));
   });
+
+  testWidgets('Tab does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(child: Tab(child: Text('X'))),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Tab)), Size.zero);
+  });
 }
