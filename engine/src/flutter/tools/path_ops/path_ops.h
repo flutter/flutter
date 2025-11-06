@@ -5,6 +5,7 @@
 #ifndef FLUTTER_TOOLS_PATH_OPS_PATH_OPS_H_
 #define FLUTTER_TOOLS_PATH_OPS_PATH_OPS_H_
 
+#include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkPathBuilder.h"
 #include "third_party/skia/include/core/SkPathTypes.h"
 #include "third_party/skia/include/pathops/SkPathOps.h"
@@ -19,15 +20,15 @@ extern "C" {
 
 namespace flutter {
 
-API SkPathBuilder* CreatePath(SkPathFillType fill_type);
+API SkPath* CreatePath(SkPathFillType fill_type);
 
-API void DestroyPath(SkPathBuilder* path);
+API void DestroyPathBuilder(SkPath* path);
 
-API void MoveTo(SkPathBuilder* path, SkScalar x, SkScalar y);
+API void MoveTo(SkPath* path, SkScalar x, SkScalar y);
 
-API void LineTo(SkPathBuilder* path, SkScalar x, SkScalar y);
+API void LineTo(SkPath* path, SkScalar x, SkScalar y);
 
-API void CubicTo(SkPathBuilder* path,
+API void CubicTo(SkPath* path,
                  SkScalar x1,
                  SkScalar y1,
                  SkScalar x2,
@@ -35,13 +36,15 @@ API void CubicTo(SkPathBuilder* path,
                  SkScalar x3,
                  SkScalar y3);
 
-API void Close(SkPathBuilder* path);
+API void Close(SkPath* path);
 
-API void Reset(SkPathBuilder* path);
+API void Reset(SkPath* path);
 
-API void Op(SkPathBuilder* one, SkPathBuilder* two, SkPathOp op);
+API void DestroyPath(SkPath* path);
 
-API int GetFillType(SkPathBuilder* path);
+API void Op(SkPath* one, SkPath* two, SkPathOp op);
+
+API int GetFillType(SkPath* path);
 
 struct API PathData {
   uint8_t* verbs;
@@ -50,7 +53,7 @@ struct API PathData {
   size_t point_count;
 };
 
-API struct PathData* Data(SkPathBuilder* path);
+API struct PathData* Data(SkPath* path);
 
 API void DestroyData(PathData* data);
 

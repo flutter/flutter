@@ -7,8 +7,6 @@
 #include "text/text_types.h"
 #include "wrappers.h"
 
-#include "third_party/skia/include/core/SkPath.h"
-#include "third_party/skia/include/core/SkPathBuilder.h"
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 
 #include "flutter/display_list/dl_builder.h"
@@ -193,9 +191,9 @@ SKWASM_EXPORT void canvas_clipRRect(DisplayListBuilder* canvas,
 }
 
 SKWASM_EXPORT void canvas_clipPath(DisplayListBuilder* canvas,
-                                   SkPathBuilder* path,
+                                   SkPath* path,
                                    bool antialias) {
-  canvas->ClipPath(DlPath(path->snapshot()), DlClipOp::kIntersect, antialias);
+  canvas->ClipPath(DlPath(*path), DlClipOp::kIntersect, antialias);
 }
 
 SKWASM_EXPORT void canvas_drawColor(DisplayListBuilder* canvas,
@@ -265,18 +263,18 @@ SKWASM_EXPORT void canvas_drawArc(DisplayListBuilder* canvas,
 }
 
 SKWASM_EXPORT void canvas_drawPath(DisplayListBuilder* canvas,
-                                   SkPathBuilder* path,
+                                   SkPath* path,
                                    DlPaint* paint) {
-  canvas->DrawPath(DlPath(path->snapshot()), paint ? *paint : DlPaint());
+  canvas->DrawPath(DlPath(*path), paint ? *paint : DlPaint());
 }
 
 SKWASM_EXPORT void canvas_drawShadow(DisplayListBuilder* canvas,
-                                     SkPathBuilder* path,
+                                     SkPath* path,
                                      DlScalar elevation,
                                      DlScalar devicePixelRatio,
                                      uint32_t color,
                                      bool transparentOccluder) {
-  canvas->DrawShadow(DlPath(path->snapshot()), DlColor(color), elevation,
+  canvas->DrawShadow(DlPath(*path), DlColor(color), elevation,
                      transparentOccluder, devicePixelRatio);
 }
 

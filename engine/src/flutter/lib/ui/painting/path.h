@@ -10,7 +10,6 @@
 #include "flutter/lib/ui/painting/rsuperellipse.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "third_party/skia/include/core/SkPath.h"
-#include "third_party/skia/include/core/SkPathBuilder.h"
 #include "third_party/skia/include/pathops/SkPathOps.h"
 #include "third_party/tonic/typed_data/typed_list.h"
 
@@ -121,7 +120,7 @@ class CanvasPath : public RefCountedDartWrappable<CanvasPath> {
  private:
   CanvasPath();
 
-  SkPathBuilder sk_path_;
+  SkPath sk_path_;
   mutable std::optional<const DlPath> dl_path_;
 
   // Must be called whenever the path is created or mutated.
