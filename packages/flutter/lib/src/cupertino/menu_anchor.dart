@@ -2500,17 +2500,15 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
     ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleActivation),
     ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: _handleActivation),
   };
+  Map<Type, GestureRecognizerFactory>? gestures;
 
   // If a focus node isn't given to the widget, then we have to manage our own.
-  FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
   FocusNode? _internalFocusNode;
-
+  FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
   WidgetStatesController? _internalStatesController;
   WidgetStatesController get _statesController {
     return widget.statesController ?? _internalStatesController!;
   }
-
-  Map<Type, GestureRecognizerFactory>? gestures;
 
   bool get isHovered => _isHovered;
   bool _isHovered = false;
