@@ -1503,7 +1503,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   self.flutterView.contentMode = UIViewContentModeCenter;
 }
 
-- (void)checkAndUpdateAutoResizeContraints {
+- (void)checkAndUpdateAutoResizeConstraints {
   if (!self.isAutoResizable) {
     return;
   }

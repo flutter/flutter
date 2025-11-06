@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-void main() {
-  runApp(ResizeApp());
-}
+import 'package:flutter/material.dart';
 
 class ResizeApp extends StatefulWidget {
   /// Creates the [ResizeApp].
@@ -22,26 +22,19 @@ class _ResizeAppState extends State<ResizeApp> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      heightFactor: 1,
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8.0, 50, 8.0, 8.0),
-              child: Semantics(
-                label: 'Add to list',
-                child: ElevatedButton(
-                  onPressed: _addToList,
-                  child: const Text('Add to list'),
-                ),
-              ),
-            ),
-            for (int i = 0; i < _listSize; i++)
-              Container(color: HSVColor.fromAHSV(1, (10.0 * i), 1, 1).toColor(), height: 100),
-          ],
+    return GestureDetector(
+      onTap: _addToList, // The tap anywhere logic
+      child: Center(
+        heightFactor: 1,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              for (int i = 0; i < _listSize; i++)
+                Container(color: HSVColor.fromAHSV(1, (10.0 * i), 1, 1).toColor(), height: 100),
+            ],
+          ),
         ),
       ),
     );
