@@ -1366,7 +1366,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   Axis? _axis;
   final GlobalKey<RawGestureDetectorState> _gestureDetectorKey =
       GlobalKey<RawGestureDetectorState>();
-  bool _assistiveScrollbarIsVisible = false;
 
   ScrollController? get _effectiveScrollController =>
       widget.controller ?? PrimaryScrollController.maybeOf(context);
@@ -1405,7 +1404,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   ///
   ///   * [RawScrollbar.interactive], which overrides the default behavior.
   @protected
-  bool get enableGestures => widget.interactive ?? false;
+  bool get enableGestures => widget.interactive ?? true;
 
   @protected
   @override
@@ -1418,7 +1417,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       curve: Curves.fastOutSlowIn,
     );
     scrollbarPainter = ScrollbarPainter(
-      color: widget.thumbColor ?? const Color(0x00000000),
+      color: widget.thumbColor ?? const Color(0x66BCBCBC),
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
       thickness: widget.thickness ?? _kScrollbarThickness,
       radius: widget.radius,
@@ -1570,7 +1569,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   void updateScrollbarPainter() {
     final TextDirection textDirection = Directionality.of(context);
-
     scrollbarPainter
       ..color = widget.thumbColor ?? const Color(0x66BCBCBC)
       ..trackRadius = widget.trackRadius
@@ -2196,7 +2194,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Handles pointer signal events for the scrollbar.
   void receivedPointerSignal(PointerSignalEvent event) {
     _cachedController = _effectiveScrollController;
-
     // Only try to scroll if the bar absorb the hit test.
     if ((scrollbarPainter.hitTest(event.localPosition) ?? false) &&
         _cachedController != null &&
