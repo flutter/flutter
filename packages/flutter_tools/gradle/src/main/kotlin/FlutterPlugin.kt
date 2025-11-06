@@ -166,14 +166,16 @@ class FlutterPlugin : Plugin<Project> {
             //
             // If the user has specified abiFilters in their build.gradle file, those
             // settings will take precedence over these defaults.
-            FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
-                buildType.ndk.abiFilters.clear()
-                FlutterPluginConstants.DEFAULT_PLATFORMS.forEach { platform ->
-                    val abiValue: String =
-                        FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]
-                            ?: throw GradleException("Invalid platform: $platform")
-                    buildType.ndk.abiFilters.add(abiValue)
-                }
+            if (!FlutterPluginUtils.shouldProjectDisableAbiFiltering(project)) {
+              FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
+                  buildType.ndk.abiFilters.clear()
+                  FlutterPluginConstants.DEFAULT_PLATFORMS.forEach { platform ->
+                      val abiValue: String =
+                          FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]
+                              ?: throw GradleException("Invalid platform: $platform")
+                      buildType.ndk.abiFilters.add(abiValue)
+                  }
+              }
             }
         }
         val propDeferredComponentNames = "deferred-component-names"

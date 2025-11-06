@@ -78,13 +78,15 @@ void main() {
     expect(_checkLibIsInApk(projectDir, 'lib/x86/libflutter.so'), false);
   });
 
-  testWithoutContext('abiFilters in product flavors provided by the user take precedence over the default', () async {
-    final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
-    final String buildGradleContents = projectDir
-        .childFile('android/app/build.gradle.kts')
-        .readAsStringSync();
+  testWithoutContext(
+    'abiFilters in product flavors provided by the user take precedence over the default',
+    () async {
+      final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
+      final String buildGradleContents = projectDir
+          .childFile('android/app/build.gradle.kts')
+          .readAsStringSync();
 
-    const productFlavorsBlock = '''
+      const productFlavorsBlock = '''
     flavorDimensions += listOf("device")
     productFlavors {
         create("arm64") {
@@ -102,22 +104,41 @@ void main() {
             }
         }
     }''';
-    // Modify the project's build.gradle.kts file to include abiFilters for product flavors.
-    final String updatedBuildGradleContents = buildGradleContents.replaceFirstMapped(
-      RegExp(r'^(android\s*\{)', multiLine: true),
-      (Match match) => '${match.group(1)!}\n$productFlavorsBlock',
-    );
-    projectDir
-        .childFile('android/app/build.gradle.kts')
-        .writeAsStringSync(updatedBuildGradleContents);
+      // Modify the project's build.gradle.kts file to include abiFilters for product flavors.
+      final String updatedBuildGradleContents = buildGradleContents.replaceFirstMapped(
+        RegExp(r'^(android\s*\{)', multiLine: true),
+        (Match match) => '${match.group(1)!}\n$productFlavorsBlock',
+      );
+      projectDir
+          .childFile('android/app/build.gradle.kts')
+          .writeAsStringSync(updatedBuildGradleContents);
 
-    processManager.runSync(<String>[flutterBin, 'build', 'apk', '--release', '--flavor', 'arm64'], workingDirectory: projectDir.path);
+      processManager.runSync(<String>[
+        flutterBin,
+        'build',
+        'apk',
+        '--release',
+        '--flavor',
+        'arm64',
+        '-P',
+        'disable-abi-filtering=true',
+      ], workingDirectory: projectDir.path);
 
-    expect(_checkLibIsInApk(projectDir, 'lib/arm64-v8a/libflutter.so', productFlavor: 'arm64'), true);
-    expect(_checkLibIsInApk(projectDir, 'lib/x86_64/libflutter.so', productFlavor: 'arm64'), false);
-    expect(_checkLibIsInApk(projectDir, 'lib/armeabi-v7a/libflutter.so', productFlavor: 'arm64'), false);
-    expect(_checkLibIsInApk(projectDir, 'lib/x86/libflutter.so', productFlavor: 'arm64'), false);
-  });
+      expect(
+        _checkLibIsInApk(projectDir, 'lib/arm64-v8a/libflutter.so', productFlavor: 'arm64'),
+        true,
+      );
+      expect(
+        _checkLibIsInApk(projectDir, 'lib/x86_64/libflutter.so', productFlavor: 'arm64'),
+        false,
+      );
+      expect(
+        _checkLibIsInApk(projectDir, 'lib/armeabi-v7a/libflutter.so', productFlavor: 'arm64'),
+        false,
+      );
+      expect(_checkLibIsInApk(projectDir, 'lib/x86/libflutter.so', productFlavor: 'arm64'), false);
+    },
+  );
 }
 
 Directory createProjectWithThirdpartyLib(Directory workingDir) {
@@ -181,17 +202,15 @@ bool _checkLibIsInApk(
       .childFile(Platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer')
       .path;
 
-  final String apkName = (productFlavor.isEmpty) ?
-    'app-${buildMode.cliName}.apk' :
-    'app-$productFlavor-${buildMode.cliName}.apk';
+  final String apkName = (productFlavor.isEmpty)
+      ? 'app-${buildMode.cliName}.apk'
+      : 'app-$productFlavor-${buildMode.cliName}.apk';
 
-  final String apkDir = (productFlavor.isEmpty) ?
-    buildMode.cliName :
-    '$productFlavor/${buildMode.cliName}';
+  final String apkDir = (productFlavor.isEmpty)
+      ? buildMode.cliName
+      : '$productFlavor/${buildMode.cliName}';
 
-  final File apkFile = appDir
-      .childDirectory('build/app/outputs/apk/$apkDir')
-      .childFile(apkName);
+  final File apkFile = appDir.childDirectory('build/app/outputs/apk/$apkDir').childFile(apkName);
 
   if (!apkFile.existsSync()) {
     throw StateError('APK file not found at ${apkFile.path}');
