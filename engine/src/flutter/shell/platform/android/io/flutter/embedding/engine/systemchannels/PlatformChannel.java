@@ -592,7 +592,10 @@ public class PlatformChannel {
     LIGHT_IMPACT("HapticFeedbackType.lightImpact"),
     MEDIUM_IMPACT("HapticFeedbackType.mediumImpact"),
     HEAVY_IMPACT("HapticFeedbackType.heavyImpact"),
-    SELECTION_CLICK("HapticFeedbackType.selectionClick");
+    SELECTION_CLICK("HapticFeedbackType.selectionClick"),
+    SUCCESS_NOTIFICATION("HapticFeedbackType.successNotification"),
+    WARNING_NOTIFICATION("HapticFeedbackType.warningNotification"),
+    ERROR_NOTIFICATION("HapticFeedbackType.errorNotification");
 
     @NonNull
     static HapticFeedbackType fromValue(@Nullable String encodedName) throws NoSuchFieldException {
