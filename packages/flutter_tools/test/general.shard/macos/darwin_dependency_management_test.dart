@@ -5,6 +5,7 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/macos/darwin_dependency_management.dart';
@@ -61,6 +62,7 @@ void main() {
                 featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
                 logger: testLogger,
                 analytics: fakeAnalytics,
+                platform: FakePlatform(operatingSystem: 'macos'),
               );
               await dependencyManagement.setUp(platform: platform);
               expect(swiftPackageManager.generated, isTrue);
@@ -127,6 +129,7 @@ void main() {
                   featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
                   logger: testLogger,
                   analytics: testAnalytics,
+                  platform: FakePlatform(operatingSystem: 'macos'),
                 );
                 await dependencyManagement.setUp(platform: platform);
                 expect(swiftPackageManager.generated, isTrue);
@@ -195,6 +198,7 @@ void main() {
                   featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
                   logger: testLogger,
                   analytics: testAnalytics,
+                  platform: FakePlatform(operatingSystem: 'macos'),
                 );
                 await dependencyManagement.setUp(platform: platform);
                 expect(swiftPackageManager.generated, isTrue);
@@ -266,6 +270,7 @@ void main() {
                   featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
                   logger: testLogger,
                   analytics: testAnalytics,
+                  platform: FakePlatform(operatingSystem: 'macos'),
                 );
                 await dependencyManagement.setUp(platform: platform);
                 expect(swiftPackageManager.generated, isTrue);
@@ -353,6 +358,7 @@ void main() {
                   featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
                   logger: testLogger,
                   analytics: testAnalytics,
+                  platform: FakePlatform(operatingSystem: 'macos'),
                 );
                 await dependencyManagement.setUp(platform: platform);
                 expect(swiftPackageManager.generated, isTrue);
@@ -449,6 +455,7 @@ void main() {
                 featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
                 logger: testLogger,
                 analytics: testAnalytics,
+                platform: FakePlatform(operatingSystem: 'macos'),
               );
               await dependencyManagement.setUp(platform: platform);
               expect(swiftPackageManager.generated, isTrue);
@@ -515,6 +522,7 @@ void main() {
                 featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
                 logger: testLogger,
                 analytics: testAnalytics,
+                platform: FakePlatform(operatingSystem: 'macos'),
               );
               await dependencyManagement.setUp(platform: platform);
               expect(swiftPackageManager.generated, isTrue);
@@ -568,6 +576,7 @@ void main() {
                 featureFlags: TestFeatureFlags(),
                 logger: testLogger,
                 analytics: testAnalytics,
+                platform: FakePlatform(operatingSystem: 'macos'),
               );
               await dependencyManagement.setUp(platform: platform);
               expect(swiftPackageManager.generated, isFalse);
@@ -621,6 +630,7 @@ void main() {
                 featureFlags: TestFeatureFlags(),
                 logger: testLogger,
                 analytics: testAnalytics,
+                platform: FakePlatform(operatingSystem: 'macos'),
               );
               await expectLater(
                 () => dependencyManagement.setUp(platform: platform),
@@ -636,6 +646,46 @@ void main() {
               expect(cocoaPods.podfileSetup, isFalse);
               expect(testAnalytics.sentEvents, isEmpty);
             });
+
+            testWithoutContext(
+              'with only Swift Package Manager plugins does not throw error on non-mac',
+              () async {
+                final testFileSystem = MemoryFileSystem.test();
+                final testLogger = BufferLogger.test();
+                final FakeAnalytics testAnalytics = getInitializedFakeAnalyticsInstance(
+                  fs: testFileSystem,
+                  fakeFlutterVersion: FakeFlutterVersion(),
+                );
+                final File swiftPackagePluginPodspec = testFileSystem.file(
+                  '/path/to/cocoapod_plugin_1/darwin/cocoapod_plugin_1/Package.swift',
+                )..createSync(recursive: true);
+                final plugins = <Plugin>[
+                  FakePlugin(
+                    name: 'swift_package_plugin_1',
+                    platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+                    pluginSwiftPackageManifestPath: swiftPackagePluginPodspec.path,
+                  ),
+                ];
+                final swiftPackageManager = FakeSwiftPackageManager(expectedPlugins: plugins);
+                final cocoaPods = FakeCocoaPods();
+
+                final dependencyManagement = DarwinDependencyManagement(
+                  project: FakeFlutterProject(fileSystem: testFileSystem),
+                  plugins: plugins,
+                  cocoapods: cocoaPods,
+                  swiftPackageManager: swiftPackageManager,
+                  fileSystem: testFileSystem,
+                  featureFlags: TestFeatureFlags(),
+                  logger: testLogger,
+                  analytics: testAnalytics,
+                  platform: FakePlatform(operatingSystem: 'windows'),
+                );
+                await dependencyManagement.setUp(platform: platform);
+                expect(swiftPackageManager.generated, isFalse);
+                expect(cocoaPods.podfileSetup, isTrue);
+                expect(testAnalytics.sentEvents, isNotEmpty);
+              },
+            );
 
             testWithoutContext('when project is a module', () async {
               final testFileSystem = MemoryFileSystem.test();
@@ -666,6 +716,7 @@ void main() {
                 featureFlags: TestFeatureFlags(),
                 logger: testLogger,
                 analytics: testAnalytics,
+                platform: FakePlatform(operatingSystem: 'macos'),
               );
               await dependencyManagement.setUp(platform: platform);
               expect(swiftPackageManager.generated, isFalse);
