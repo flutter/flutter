@@ -207,8 +207,8 @@ class WebAssetServer implements AssetReader {
     if (ddcModuleSystem) {
       assert(canaryFeatures);
     }
-    InternetAddress address;
-    if (hostname == 'any') {
+    final InternetAddress address;
+    if (hostname == webDevAnyHostDefault) {
       address = InternetAddress.anyIPv4;
     } else {
       address = (await InternetAddress.lookup(hostname)).first;
@@ -259,7 +259,7 @@ class WebAssetServer implements AssetReader {
     );
     final int selectedPort = server.selectedPort;
 
-    final cleanHost = hostname == 'any' ? 'localhost' : hostname;
+    final cleanHost = hostname == webDevAnyHostDefault ? 'localhost' : hostname;
     final scheme = tlsCertPath != null && tlsCertKeyPath != null ? 'https' : 'http';
     server._baseUri = Uri(
       scheme: scheme,
