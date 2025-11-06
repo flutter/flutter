@@ -2008,7 +2008,7 @@ void main() {
     expect(left('title'), 58.0);
   });
 
-  testWidgets('CheckboxListTile minVerticalPadding = 80.0', (WidgetTester tester) async {
+  testWidgets('CheckboxListTile minVerticalPadding = 80.0 Material 3', (WidgetTester tester) async {
     Widget buildFrame(
       TextDirection textDirection, {
       double? themeMinVerticalPadding,
@@ -2036,7 +2036,7 @@ void main() {
     }
 
     await tester.pumpWidget(buildFrame(TextDirection.ltr, widgetMinVerticalPadding: 80));
-    // 80 + 80 + 16(Title) = 176
+    // 80 + 80 + 24(Title) = 184
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 184.0));
 
     await tester.pumpWidget(buildFrame(TextDirection.ltr, themeMinVerticalPadding: 80));
@@ -2048,7 +2048,7 @@ void main() {
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 184.0));
 
     await tester.pumpWidget(buildFrame(TextDirection.rtl, widgetMinVerticalPadding: 80));
-    // 80 + 80 + 16(Title) = 176
+    // 80 + 80 + 24(Title) = 184
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 184.0));
 
     await tester.pumpWidget(buildFrame(TextDirection.rtl, themeMinVerticalPadding: 80));
@@ -2060,7 +2060,7 @@ void main() {
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 184.0));
   });
 
-  testWidgets('CheckboxListTile minVerticalPadding = 80.0', (WidgetTester tester) async {
+  testWidgets('CheckboxListTile minVerticalPadding = 80.0 Material 2', (WidgetTester tester) async {
     Widget buildFrame(
       TextDirection textDirection, {
       double? themeMinVerticalPadding,
