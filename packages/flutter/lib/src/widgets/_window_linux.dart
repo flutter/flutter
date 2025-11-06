@@ -521,7 +521,6 @@ class WindowingOwnerLinux extends WindowingOwner {
     required RegularWindowControllerDelegate delegate,
   }) {
     return RegularWindowControllerLinux(
-      owner: this,
       delegate: delegate,
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
@@ -562,13 +561,11 @@ class RegularWindowControllerLinux extends RegularWindowController {
   ///  * [RegularWindowController], the base class for regular windows.
   @internal
   RegularWindowControllerLinux({
-    required WindowingOwnerLinux owner,
     required RegularWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
-  }) : _owner = owner,
-       _delegate = delegate,
+  }) : _delegate = delegate,
        _window = _GtkWindow(),
        super.empty() {
     if (!isWindowingEnabled) {
@@ -611,7 +608,6 @@ class RegularWindowControllerLinux extends RegularWindowController {
     _window.present();
   }
 
-  final WindowingOwnerLinux _owner;
   final RegularWindowControllerDelegate _delegate;
   final _GtkWindow _window;
   late final _FlWindowMonitor _windowMonitor;
