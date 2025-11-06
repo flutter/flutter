@@ -799,6 +799,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     implicitView?.semantics.updateSemantics(update);
   }
 
+  @override
+  void setApplicationLocale(ui.Locale locale) {
+    for (final EngineFlutterView view in views) {
+      view.setLocale(locale);
+    }
+  }
+
   /// This is equivalent to `locales.first`, except that it will provide an
   /// undefined (using the language tag "und") non-null locale if the [locales]
   /// list has not been set or is empty.

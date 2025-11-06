@@ -27,6 +27,7 @@ export interface WasmApplicationBuild extends ApplicationBuildBase {
 export type ApplicationBuild = JSApplicationBuild | WasmApplicationBuild;
 
 export interface BuildConfig {
+  /** @deprecated Flutter's service worker is deprecated and will be removed in a future Flutter release*/
   serviceWorkerVersion: string;
   engineRevision: string;
   useLocalCanvasKit?: boolean;
@@ -65,6 +66,7 @@ export interface FlutterConfiguration {
   wasmAllowList?: WasmAllowList;
 }
 
+/** @deprecated Flutter's service worker is deprecated and will be removed in a future Flutter release*/
 export interface ServiceWorkerSettings {
   serviceWorkerVersion: string;
   serviceWorkerUrl?: string;
