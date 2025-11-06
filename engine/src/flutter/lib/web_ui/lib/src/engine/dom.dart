@@ -178,6 +178,12 @@ extension type DomWindow._(JSObject _) implements DomEventTarget {
   /// The Trusted Types API (when available).
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/Trusted_Types_API
   external DomTrustedTypePolicyFactory? get trustedTypes;
+
+  @JS('createImageBitmap')
+  external JSPromise<JSAny?> _createImageBitmap(DomImageData source);
+  Future<DomImageBitmap> createImageBitmap(DomImageData source) {
+    return _createImageBitmap(source).toDart.then((JSAny? value) => value! as DomImageBitmap);
+  }
 }
 
 typedef DomRequestAnimationFrameCallback = void Function(JSNumber highResTime);
@@ -214,9 +220,6 @@ Future<DomImageBitmap> createImageBitmap(
   JSAny source, [
   ({int x, int y, int width, int height})? bounds,
 ]) {
-  if (debugThrowOnCreateImageBitmapIfDisabled && !browserSupportsCreateImageBitmap) {
-    throw UnsupportedError('createImageBitmap is not supported in this browser');
-  }
   JSPromise<JSAny?> jsPromise;
   if (bounds != null) {
     jsPromise = _createImageBitmap(source, bounds.x, bounds.y, bounds.width, bounds.height);
@@ -430,7 +433,6 @@ extension type DomElement._(JSObject _) implements DomNode {
   external String? getAttribute(String attributeName);
   external DomRect getBoundingClientRect();
   external void prepend(DomNode node);
-  external void replaceWith(DomNode node);
   external DomElement? querySelector(String selectors);
   external DomElement? closest(String selectors);
   external bool matches(String selectors);
@@ -802,7 +804,7 @@ extension type DomPerformanceEntry._(JSObject _) implements JSObject {}
 extension type DomPerformanceMeasure._(JSObject _) implements DomPerformanceEntry {}
 
 @JS('HTMLCanvasElement')
-extension type DomHTMLCanvasElement._(JSObject _) implements DomHTMLElement, DomCanvasImageSource {
+extension type DomHTMLCanvasElement._(JSObject _) implements DomHTMLElement {
   external double? width;
   external double? height;
 
@@ -2021,7 +2023,7 @@ DomHTMLLabelElement createDomHTMLLabelElement() =>
     domDocument.createElement('label') as DomHTMLLabelElement;
 
 @JS('OffscreenCanvas')
-extension type DomOffscreenCanvas._(JSObject _) implements DomEventTarget, DomCanvasImageSource {
+extension type DomOffscreenCanvas._(JSObject _) implements DomEventTarget {
   external DomOffscreenCanvas(int width, int height);
 
   external double? height;
@@ -2606,16 +2608,14 @@ external JSAny? get _offscreenCanvasConstructor;
 
 bool browserSupportsOffscreenCanvas = _offscreenCanvasConstructor != null;
 
+@JS('window.createImageBitmap')
+external JSAny? get _createImageBitmapFunction;
+
 /// Set to `true` to disable `createImageBitmap` support. Used in tests.
-@visibleForTesting
 bool debugDisableCreateImageBitmapSupport = false;
 
-/// Set to `true` to throw an error if `createImageBitmap` is disabled. Used in tests.
-@visibleForTesting
-bool debugThrowOnCreateImageBitmapIfDisabled = false;
-
 bool get browserSupportsCreateImageBitmap =>
-    domWindow.has('createImageBitmap') &&
+    _createImageBitmapFunction != null &&
     !isChrome110OrOlder &&
     !debugDisableCreateImageBitmapSupport;
 
