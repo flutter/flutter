@@ -589,12 +589,6 @@ class WindowingOwnerLinux extends WindowingOwner {
     _windows[controller.rootView.viewId] = controller._window;
     return controller;
   }
-
-  @internal
-  @override
-  bool hasTopLevelWindows() {
-    return _windows.isNotEmpty;
-  }
 }
 
 /// Implementation of [RegularWindowController] for the Linux platform.
