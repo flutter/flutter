@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../platform_views/content_manager.dart';
 import '../platform_views/slots.dart';
 import 'label_and_value.dart';
 import 'semantics.dart';
@@ -40,9 +41,16 @@ class SemanticPlatformView extends SemanticRole {
     super.update();
 
     if (semanticsObject.isPlatformView) {
+      final int platformViewId = semanticsObject.platformViewId;
+
       if (semanticsObject.isPlatformViewIdDirty) {
-        setAttribute('aria-owns', getPlatformViewDomId(semanticsObject.platformViewId));
+        setAttribute('aria-owns', getPlatformViewDomId(platformViewId));
       }
+
+      PlatformViewManager.instance.updatePlatformViewAccessibility(
+        platformViewId,
+        semanticsObject.flags.isHidden,
+      );
     } else {
       removeAttribute('aria-owns');
     }
