@@ -28,8 +28,7 @@ Future<void> main() async {
     final Future<String> inputEventWasVerified = driver.requestData('input_was_verified');
 
     // Passed in by the driver task.
-    final String? deviceId = Platform.environment['FLUTTER_DEVICE_ID_NUMBER'];
-    final String? adbPath = Platform.environment['FLUTTER_ADB_PATH'];
+    final String? deviceId = Platform.environment['DEVICE_ID_NUMBER'];
 
     // Keep issuing taps until we get the requested data. The actual setup
     // of the platform view is asynchronous so we might have to tap more than
@@ -38,7 +37,7 @@ Future<void> main() async {
     inputEventWasVerified.whenComplete(() => stop = true);
     while (!stop) {
       // We must use the Android input tool to get verified input events.
-      final ProcessResult result = await Process.run(adbPath ?? 'adb', <String>[
+      final ProcessResult result = await Process.run('adb', <String>[
         if (deviceId != null) ...<String>['-s', deviceId],
         'shell',
         'input',
