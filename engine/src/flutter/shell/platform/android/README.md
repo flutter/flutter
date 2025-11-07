@@ -117,7 +117,7 @@ How to edit and contribute to the Android embedder.
 > This guide assumes you already have a working Engine development environment:
 >
 > - [Setting up the Engine development environment](https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Setting-up-the-Engine-development-environment.md)
-> - [Compiling for Android](https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Compiling-the-engine#compiling-for-android-from-macos-or-linux.md)
+> - [Compiling for Android](https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Compiling-the-engine.md#compiling-for-android-from-macos-or-linux)
 >
 > You should also have a working Android development environment:
 >
