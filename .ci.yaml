@@ -363,10 +363,8 @@ targets:
       tags: >
         ["framework","hostonly","shard","linux"]
 
-  - name: Linux web_skwasm_tests
+  - name: Linux web_skwasm_tests_0
     recipe: flutter/flutter_drone
-    bringup: true
-    presubmit: true
     timeout: 30
     properties:
       dependencies: >-
