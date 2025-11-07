@@ -4797,7 +4797,9 @@ mixin SemanticsAnnotationsMixin on RenderObject {
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
     config.isBlockingUserActions = blockUserActions;
-    config.localeForSubtree = localeForSubtree;
+    if (localeForSubtree != null) {
+      config.localeForSubtree = localeForSubtree;
+    }
     assert(
       ((_properties.scopesRoute ?? false) && explicitChildNodes) ||
           !(_properties.scopesRoute ?? false),
