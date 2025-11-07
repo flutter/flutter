@@ -6525,6 +6525,9 @@ class SemanticsConfiguration {
     if (_hasExplicitRole && other._hasExplicitRole) {
       return false;
     }
+    if (_traversalChildIdentifier != other._traversalChildIdentifier) {
+      return false;
+    }
     return true;
   }
 
