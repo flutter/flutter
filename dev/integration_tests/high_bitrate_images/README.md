@@ -6,5 +6,7 @@ An integration test used for testing high bitrate image support in the engine.
 
 ```sh
 flutter create --platforms="ios" --no-overwrite .
-flutter test integration_test/app_test.dart
+flutter drive \
+  --target=integration_test/app_test.dart \
+  --driver=test_driver/integration_test.dart
 ```
