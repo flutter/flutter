@@ -72,6 +72,7 @@ Future<ui.Image> _getScreenshot() async {
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  VmServiceProxyGoldenFileComparator.useIfRunningOnDevice();
 
   group('end-to-end test', () {
     testWidgets('renders sdfs with rgba32f', (WidgetTester tester) async {
