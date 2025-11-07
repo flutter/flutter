@@ -9322,4 +9322,19 @@ void main() {
     expect((outerMaterial as dynamic).debugInkFeatures, isNull);
     expect((innerMaterial as dynamic).debugInkFeatures, hasLength(1));
   });
+
+  testWidgets('TabPageSelector does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final TabController controller = TabController(length: 2, vsync: tester);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(child: TabPageSelector(controller: controller)),
+      ),
+    );
+    expect(tester.getSize(find.byType(TabPageSelector)), Size.zero);
+    controller.animateTo(1);
+    await tester.pump();
+    await tester.pumpAndSettle();
+  });
 }
