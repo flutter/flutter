@@ -1247,10 +1247,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _frameNumber = _frameNumber == null ? 0 : _frameNumber! + 1;
       _wasSynchronouslyLoaded = _wasSynchronouslyLoaded | synchronousCall;
     });
-    // TODO(justinmc): Should stop listening immediately after the first frame,
-    // not the second frame.
-    // https://github.com/flutter/flutter/issues/178017
-    if (_isPaused && _frameNumber! > 0) {
+    if (_isPaused) {
       _stopListeningToStream(keepStreamAlive: true);
     }
   }
