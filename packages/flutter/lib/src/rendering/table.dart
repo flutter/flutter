@@ -1272,9 +1272,9 @@ class RenderTable extends RenderBox {
           continue;
         }
 
-        final TableCellParentData pd = child.parentData! as TableCellParentData;
-        final int colSpan = pd.colSpan;
-        final int rowSpan = pd.rowSpan;
+        final TableCellParentData parentData = child.parentData! as TableCellParentData;
+        final int colSpan = parentData.colSpan;
+        final int rowSpan = parentData.rowSpan;
 
         // Only process if there are actual spans to avoid unnecessary work
         if (colSpan <= 1 && rowSpan <= 1) {
@@ -1311,23 +1311,23 @@ class RenderTable extends RenderBox {
       }
     }
 
-    // Convert logical span information to visual span information for RTL
-    if (textDirection == TextDirection.rtl) {
-      // Convert logical column indices to visual column indices for RTL
-      _cachedSpannedColumnsPerRow = logicalSpannedColumnsPerRow.map((Set<int> rowSpans) {
-        return rowSpans.map((int col) => columns - col).toSet();
-      }).toList();
+    switch (textDirection) {
+      case TextDirection.ltr:
+        // In LTR mode, use the logical span mappings directly.
+        _cachedSpannedColumnsPerRow = logicalSpannedColumnsPerRow;
+        _cachedSpannedRowsPerColumn = logicalSpannedRowsPerColumn;
+      case TextDirection.rtl:
+        // In RTL mode, convert logical span mappings to visual coordinates.
+        _cachedSpannedColumnsPerRow = logicalSpannedColumnsPerRow.map((Set<int> rowSpans) {
+          return rowSpans.map((int col) => columns - col).toSet();
+        }).toList();
 
-      _cachedSpannedRowsPerColumn = List<Set<int>>.generate(columns, (int visualCol) {
-        final int logicalCol = columns - 1 - visualCol;
-        return logicalCol < logicalSpannedRowsPerColumn.length
-            ? logicalSpannedRowsPerColumn[logicalCol]
-            : <int>{};
-      });
-    } else {
-      // For LTR, use the logical span information directly
-      _cachedSpannedColumnsPerRow = logicalSpannedColumnsPerRow;
-      _cachedSpannedRowsPerColumn = logicalSpannedRowsPerColumn;
+        _cachedSpannedRowsPerColumn = List<Set<int>>.generate(columns, (int visualCol) {
+          final int logicalCol = columns - 1 - visualCol;
+          return logicalCol < logicalSpannedRowsPerColumn.length
+              ? logicalSpannedRowsPerColumn[logicalCol]
+              : <int>{};
+        });
     }
   }
 

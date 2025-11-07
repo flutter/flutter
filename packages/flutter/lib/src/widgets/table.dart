@@ -535,22 +535,22 @@ class TableCell extends StatelessWidget {
 
   /// The number of columns this cell should span.
   ///
-  /// A value greater than 1 means that this cell extends horizontally
-  /// across multiple columns.
+  /// The value represents the number of columns the cell will extend to cover,
+  /// defaults to 1.
   ///
-  /// **Note:** When a cell spans multiple columns, you must insert
-  /// [TableCell.none] placeholders in the same row to fill the
+  /// When a cell spans multiple columns, you must follow with
+  /// the corresponding number of [TableCell.none] in the same row to fill the
   /// remaining covered columns and maintain the table’s grid structure.
   final int colSpan;
 
   /// The number of rows this cell should span.
   ///
-  /// A value greater than 1 means that this cell extends vertically
-  /// across multiple rows.
+  /// The value represents the number of rows the cell will extend to cover,
+  /// defaults to 1.
   ///
-  /// **Note:** When a cell spans multiple rows, you must insert
-  /// [TableCell.none] placeholders in the affected rows below to
-  /// preserve consistent table alignment.
+  /// When a cell spans multiple rows, you must follow with
+  /// the corresponding number of [TableCell.none] in the following [TableRow]s
+  /// to preserve consistent table alignment.
   final int rowSpan;
 
   /// The child of this cell.
