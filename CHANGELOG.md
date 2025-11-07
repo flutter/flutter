@@ -34,7 +34,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ### [3.38.0](https://github.com/flutter/flutter/releases/tag/3.38.0)
 
-Learn about what's new in this release in [the blog post](https://blog.flutter.dev/whats-new-in-flutter-3-35-c58ef72e3766), and check out the [CHANGELOG](https://docs.flutter.dev/release/release-notes/release-notes-3.38.0) for a detailed list of all the new changes.
+Learn about what's new in this release in [the blog post](https://blog.flutter.dev/whats-new-in-flutter-3-38-3f7b258f7228), and check out the [CHANGELOG](https://docs.flutter.dev/release/release-notes/release-notes-3.38.0) for a detailed list of all the new changes.
 
 ## Flutter 3.35 Changes
 
