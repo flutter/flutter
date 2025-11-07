@@ -145,9 +145,6 @@ void runSemanticsTests() {
   group('requirable', () {
     _testRequirable();
   });
-  group('traversalOrder', () {
-    _testSemanticsTraversalOrder();
-  });
   group('SemanticsValidationResult', () {
     _testSemanticsValidationResult();
   });
@@ -3963,6 +3960,43 @@ void _testPlatformView() {
 
     semantics().semanticsEnabled = false;
   });
+
+  test('removes aria-owns when platform view is hidden', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    // Create a platform view that is visible (has aria-owns).
+    {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(builder, platformViewId: 5, rect: const ui.Rect.fromLTRB(0, 0, 100, 50));
+      owner().updateSemantics(builder.build());
+      expectSemanticsTree(owner(), '<sem aria-owns="flt-pv-5"></sem>');
+    }
+
+    // Hide the platform view (should remove aria-owns).
+    {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        platformViewId: 5,
+        flags: const ui.SemanticsFlags(isHidden: true),
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      owner().updateSemantics(builder.build());
+      expectSemanticsTree(owner(), '<sem></sem>');
+    }
+
+    // Show the platform view again (should restore aria-owns).
+    {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(builder, platformViewId: 5, rect: const ui.Rect.fromLTRB(0, 0, 100, 50));
+      owner().updateSemantics(builder.build());
+      expectSemanticsTree(owner(), '<sem aria-owns="flt-pv-5"></sem>');
+    }
+
+    semantics().semanticsEnabled = false;
+  });
 }
 
 void _testGroup() {
@@ -5494,152 +5528,6 @@ void _testRequirable() {
   });
 }
 
-void _testSemanticsTraversalOrder() {
-  test('aria-owns is correctly set', () async {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
-
-    final tester = SemanticsTester(owner());
-    tester.updateNode(
-      id: 0,
-      rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
-      children: <SemanticsNodeUpdate>[
-        tester.updateNode(
-          id: 1,
-          rect: const ui.Rect.fromLTRB(0, 0, 100, 20),
-          children: <SemanticsNodeUpdate>[
-            tester.updateNode(
-              id: 4,
-              children: <SemanticsNodeUpdate>[tester.updateNode(id: 6), tester.updateNode(id: 7)],
-            ),
-            tester.updateNode(id: 5),
-          ],
-        ),
-        tester.updateNode(id: 2, rect: const ui.Rect.fromLTRB(0, 20, 100, 40), traversalParent: 4),
-        tester.updateNode(id: 3, rect: const ui.Rect.fromLTRB(0, 40, 100, 60)),
-      ],
-    );
-    tester.apply();
-
-    expectSemanticsTree(owner(), '''
-<sem>
-    <sem>
-        <sem id="flt-semantic-node-4" aria-owns="flt-semantic-node-2">
-            <sem></sem>
-            <sem></sem>
-        </sem>
-        <sem></sem>
-    </sem>
-    <sem id="flt-semantic-node-2"></sem>
-    <sem></sem>
-</sem>
-''');
-
-    final SemanticsObject node4 = tester.getSemanticsObject(4);
-    expect(node4.element.getAttribute('aria-owns'), 'flt-semantic-node-2');
-  });
-
-  test('aria-owns is correctly set with nested traversalParent relationship', () async {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
-
-    final tester = SemanticsTester(owner());
-    tester.updateNode(
-      id: 0,
-      rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
-      children: <SemanticsNodeUpdate>[
-        tester.updateNode(
-          id: 1,
-          rect: const ui.Rect.fromLTRB(0, 0, 100, 20),
-          children: <SemanticsNodeUpdate>[
-            tester.updateNode(
-              id: 4,
-              children: <SemanticsNodeUpdate>[tester.updateNode(id: 6), tester.updateNode(id: 7)],
-            ),
-            tester.updateNode(id: 5),
-          ],
-        ),
-        tester.updateNode(id: 2, rect: const ui.Rect.fromLTRB(0, 20, 100, 40), traversalParent: 4),
-        tester.updateNode(id: 3, rect: const ui.Rect.fromLTRB(0, 40, 100, 60)),
-        tester.updateNode(id: 8, rect: const ui.Rect.fromLTRB(0, 40, 100, 60), traversalParent: 6),
-      ],
-    );
-    tester.apply();
-
-    expectSemanticsTree(owner(), '''
-<sem>
-    <sem>
-        <sem id="flt-semantic-node-4" aria-owns="flt-semantic-node-2">
-            <sem id="flt-semantic-node-6" aria-owns="flt-semantic-node-8"></sem>
-            <sem></sem>
-        </sem>
-        <sem></sem>
-    </sem>
-    <sem id="flt-semantic-node-2"></sem>
-    <sem></sem>
-    <sem id="flt-semantic-node-8"></sem>
-</sem>
-''');
-
-    final SemanticsObject node4 = tester.getSemanticsObject(4);
-    expect(node4.element.getAttribute('aria-owns'), 'flt-semantic-node-2');
-    final SemanticsObject node6 = tester.getSemanticsObject(6);
-    expect(node6.element.getAttribute('aria-owns'), 'flt-semantic-node-8');
-  });
-
-  test('aria-owns is correctly set when one traversalParent has multiple children', () async {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
-
-    final tester = SemanticsTester(owner());
-    tester.updateNode(
-      id: 0,
-      rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
-      children: <SemanticsNodeUpdate>[
-        tester.updateNode(
-          id: 1,
-          rect: const ui.Rect.fromLTRB(0, 0, 100, 20),
-          children: <SemanticsNodeUpdate>[
-            tester.updateNode(
-              id: 4,
-              children: <SemanticsNodeUpdate>[tester.updateNode(id: 6), tester.updateNode(id: 7)],
-            ),
-            tester.updateNode(id: 5),
-          ],
-        ),
-        tester.updateNode(id: 2, rect: const ui.Rect.fromLTRB(0, 20, 100, 40), traversalParent: 4),
-        tester.updateNode(id: 3, rect: const ui.Rect.fromLTRB(0, 40, 100, 60), traversalParent: 4),
-        tester.updateNode(id: 8, rect: const ui.Rect.fromLTRB(0, 40, 100, 60), traversalParent: 4),
-      ],
-    );
-    tester.apply();
-
-    expectSemanticsTree(owner(), '''
-<sem>
-    <sem>
-        <sem id="flt-semantic-node-4" aria-owns="flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-8">
-            <sem></sem>
-            <sem></sem>
-        </sem>
-        <sem></sem>
-    </sem>
-    <sem id="flt-semantic-node-2"></sem>
-    <sem id="flt-semantic-node-3"></sem>
-    <sem id="flt-semantic-node-8"></sem>
-</sem>
-''');
-
-    final SemanticsObject node4 = tester.getSemanticsObject(4);
-    expect(
-      node4.element.getAttribute('aria-owns'),
-      'flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-8',
-    );
-  });
-}
-
 void _testSemanticsValidationResult() {
   test('renders validation result', () {
     semantics()
@@ -6130,7 +6018,6 @@ void updateNode(
   int platformViewId = -1, // -1 means not a platform view
   int scrollChildren = 0,
   int scrollIndex = 0,
-  int traversalParent = -1,
   double scrollPosition = 0.0,
   double scrollExtentMax = 0.0,
   double scrollExtentMin = 0.0,
@@ -6149,7 +6036,6 @@ void updateNode(
   String tooltip = '',
   ui.TextDirection textDirection = ui.TextDirection.ltr,
   Float64List? transform,
-  Float64List? hitTestTransform,
   Int32List? childrenInTraversalOrder,
   Int32List? childrenInHitTestOrder,
   Int32List? additionalActions,
@@ -6162,7 +6048,6 @@ void updateNode(
   ui.Locale? locale,
 }) {
   transform ??= Float64List.fromList(Matrix4.identity().storage);
-  hitTestTransform ??= Float64List.fromList(Matrix4.identity().storage);
   childrenInTraversalOrder ??= Int32List(0);
   childrenInHitTestOrder ??= Int32List(0);
   additionalActions ??= Int32List(0);
@@ -6178,7 +6063,6 @@ void updateNode(
     platformViewId: platformViewId,
     scrollChildren: scrollChildren,
     scrollIndex: scrollIndex,
-    traversalParent: traversalParent,
     scrollPosition: scrollPosition,
     scrollExtentMax: scrollExtentMax,
     scrollExtentMin: scrollExtentMin,
@@ -6197,7 +6081,6 @@ void updateNode(
     tooltip: tooltip,
     textDirection: textDirection,
     transform: transform,
-    hitTestTransform: hitTestTransform,
     childrenInTraversalOrder: childrenInTraversalOrder,
     childrenInHitTestOrder: childrenInHitTestOrder,
     additionalActions: additionalActions,
