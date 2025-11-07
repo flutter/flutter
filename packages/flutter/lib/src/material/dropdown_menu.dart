@@ -1326,6 +1326,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
         _ArrowUpIntent: CallbackAction<_ArrowUpIntent>(onInvoke: handleUpKeyInvoke),
         _ArrowDownIntent: CallbackAction<_ArrowDownIntent>(onInvoke: handleDownKeyInvoke),
         _EnterIntent: CallbackAction<_EnterIntent>(onInvoke: (_) => _handleSubmitted()),
+        DismissIntent: DismissMenuAction(controller: _controller),
       },
       child: Stack(
         children: <Widget>[
@@ -1335,6 +1336,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
               SingleActivator(LogicalKeyboardKey.arrowUp): _ArrowUpIntent(),
               SingleActivator(LogicalKeyboardKey.arrowDown): _ArrowDownIntent(),
               SingleActivator(LogicalKeyboardKey.enter): _EnterIntent(),
+              SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
             },
             child: Focus(
               focusNode: _internalFocudeNode,
