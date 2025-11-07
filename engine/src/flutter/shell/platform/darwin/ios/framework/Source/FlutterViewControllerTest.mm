@@ -1002,27 +1002,33 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)testUpdatedViewportMetricsDoesResizeFlutterViewWhenAutoResizable {
   FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
   [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
-                                                                                nibName:nil
-                                                                                 bundle:nil];
-  viewController.autoResizable = YES;
-  mockEngine.viewController = viewController;
-  OCMExpect([viewController checkAndUpdateAutoResizeConstraints]);
-  OCMExpect([viewController updateAutoResizeConstraints]);
-  OCMVerifyAll(mockEngine);
+
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:mockEngine nibName:nil bundle:nil];
+  id mockVC = OCMPartialMock(realVC);
+  mockEngine.viewController = mockVC;
+
+  OCMExpect([mockVC checkAndUpdateAutoResizeConstraints]);
+  OCMExpect([mockVC updateAutoResizeConstraints]);
+
+  mockVC.autoResizable = YES;
+
+  OCMVerifyAll(mockVC);
 }
 
 - (void)testUpdatedViewportMetricsDoesNotResizeFlutterViewWhenNotAutoResizable {
   FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
   [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
-                                                                                nibName:nil
-                                                                                 bundle:nil];
-  viewController.autoResizable = NO;
-  mockEngine.viewController = viewController;
-  OCMExpect([viewController checkAndUpdateAutoResizeConstraints]);
-  OCMReject([viewController updateAutoResizeConstraints]);
-  OCMVerifyAll(viewController);
+
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:mockEngine nibName:nil bundle:nil];
+  id mockVC = OCMPartialMock(realVC);
+  mockEngine.viewController = mockVC;
+
+  OCMExpect([mockVC checkAndUpdateAutoResizeConstraints]);
+  OCMReject([mockVC updateAutoResizeConstraints]);
+
+  mockVC.autoResizable = NO;
+
+  OCMVerifyAll(mockVC);
 }
 
 - (void)testUpdateViewportMetricsIfNeeded_DoesNotInvokeEngineWhenShouldBeIgnoredDuringRotation {

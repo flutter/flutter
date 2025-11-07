@@ -130,18 +130,11 @@ static const CGFloat kStandardTimeOut = 60.0;
   XCUIApplication *app = self.app;
 
   [self waitForAndTapElement:app.buttons[@"Dynamic Content Resizing"]];
-//
-//  XCUIElementQuery *buttonQuery = [app.buttons matchingIdentifier:@"Add to list"];
-//  [self expectationForPredicate:[NSPredicate predicateWithFormat:@"count = 1"] evaluatedWithObject:buttonQuery handler:nil];
-//  [self waitForExpectationsWithTimeout:30.0 handler:nil];
-
-
   XCUIElement *flutterView = app.otherElements[@"flutter_view"];
 
   CGRect flutterViewFrame = flutterView.frame;
   CGSize flutterViewSize = flutterViewFrame.size;
 
-  NSLog(@"%d", flutterViewSize.height);
   XCTAssertTrue(flutterViewSize.height == 100);
 
   [self waitForAndTapElement: app.otherElements[@"flutter_view"]];
@@ -150,7 +143,6 @@ static const CGFloat kStandardTimeOut = 60.0;
   CGRect flutterViewFramePostClick = flutterViewPostClick.frame;
   CGSize flutterViewSizePostClick = flutterViewFramePostClick.size;
 
-  NSLog(@"%d", flutterViewSizePostClick.height);
   XCTAssertTrue(flutterViewSizePostClick.height == 200);
 
   // Back navigation.
