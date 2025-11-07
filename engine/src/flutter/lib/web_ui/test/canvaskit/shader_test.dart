@@ -55,11 +55,8 @@ void testMain() {
       expect(gradient.getSkShader(ui.FilterQuality.none), isNotNull);
     });
 
-    test('Image shader initialize/dispose cycle', () {
-      final SkImage skImage = canvasKit.MakeAnimatedImageFromEncoded(
-        kTransparentImage,
-      )!.makeImageAtCurrentFrame();
-      final CkImage image = CkImage(skImage);
+    test('Image shader initialize/dispose cycle', () async {
+      final CkImage image = await createImageFromBytes(kTransparentImage);
       final CkImageShader imageShader =
           ui.ImageShader(
                 image,
@@ -82,11 +79,8 @@ void testMain() {
       expect(image.debugDisposed, true);
     });
 
-    test('Image shader withQuality', () {
-      final SkImage skImage = canvasKit.MakeAnimatedImageFromEncoded(
-        kTransparentImage,
-      )!.makeImageAtCurrentFrame();
-      final CkImage image = CkImage(skImage);
+    test('Image shader withQuality', () async {
+      final CkImage image = await createImageFromBytes(kTransparentImage);
       final CkImageShader imageShader =
           ui.ImageShader(
                 image,
@@ -135,7 +129,7 @@ void testMain() {
       expect(image.debugDisposed, true);
     });
 
-    test('isGradient', () {
+    test('isGradient', () async {
       final CkGradientSweep sweepGradient =
           ui.Gradient.sweep(ui.Offset.zero, testColors) as CkGradientSweep;
       expect(sweepGradient.isGradient, isTrue);
@@ -166,10 +160,7 @@ void testMain() {
       expect(conicalGradient.isGradient, isTrue);
       conicalGradient.dispose();
 
-      final SkImage skImage = canvasKit.MakeAnimatedImageFromEncoded(
-        kTransparentImage,
-      )!.makeImageAtCurrentFrame();
-      final CkImage image = CkImage(skImage);
+      final CkImage image = await createImageFromBytes(kTransparentImage);
       final CkImageShader imageShader =
           ui.ImageShader(
                 image,
