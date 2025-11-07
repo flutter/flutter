@@ -903,7 +903,7 @@ void main() {
         tester.takeException(),
         anyOf(
           isNull,
-            isA<FlutterError>().having(
+          isA<FlutterError>().having(
             (FlutterError e) => e.message,
             'message',
             contains('Navigator operation requested with no present routes'),

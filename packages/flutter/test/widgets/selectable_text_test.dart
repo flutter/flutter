@@ -5595,11 +5595,14 @@ void main() {
     await tester.tap(find.text('Pop'));
     await tester.pumpAndSettle();
 
-    expect(tester.takeException(), isA<FlutterError>().having(
-      (FlutterError e) => e.message,
-      'message',
-      contains('Navigator operation requested with no present routes'),
-    ),);
+    expect(
+      tester.takeException(),
+      isA<FlutterError>().having(
+        (FlutterError e) => e.message,
+        'message',
+        contains('Navigator operation requested with no present routes'),
+      ),
+    );
   });
 
   testWidgets(
