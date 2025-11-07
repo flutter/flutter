@@ -680,7 +680,7 @@ class MediaQueryData {
   ///    supported.
   final bool supportsShowingSystemContextMenu;
 
-  /// The height of the text, as a multiple of the font size.
+  /// Overrides the height of the text, as a multiple of the font size.
   ///
   /// Returns `null` when the platform has not set an override
   /// for text height.
@@ -692,8 +692,8 @@ class MediaQueryData {
   ///  [lineHeightScaleFactorOverride].
   final double? lineHeightScaleFactorOverride;
 
-  /// The amount of space (in logical pixels) to add between each letter
-  /// in a piece of text.
+  /// Overrides the amount of space (in logical pixels) to add between each
+  /// letter in a piece of text.
   ///
   /// A negative value can be used to bring the letters closer.
   ///
@@ -706,8 +706,8 @@ class MediaQueryData {
   ///  [TextStyle.letterSpacing] is overriden by [letterSpacingOverride].
   final double? letterSpacingOverride;
 
-  /// The amount of space (in logical pixels) to add at each sequence of
-  /// white-space (i.e. between each word) in a piece of text.
+  /// Overrides the amount of space (in logical pixels) to add at each
+  /// sequence of white-space (i.e. between each word) in a piece of text.
   ///
   /// A negative value can be used to bring the words closer.
   ///
