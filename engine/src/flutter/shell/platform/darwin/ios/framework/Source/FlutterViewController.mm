@@ -2355,6 +2355,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   return self.engine;
 }
 
++ (BOOL)isUIAccessibilityIsVoiceOverRunning {
+  return UIAccessibilityIsVoiceOverRunning();
+}
+
 #pragma mark - FlutterPluginRegistry
 
 - (NSObject<FlutterPluginRegistrar>*)registrarForPlugin:(NSString*)pluginKey {
