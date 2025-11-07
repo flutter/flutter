@@ -242,7 +242,6 @@ class FormState extends State<Form> {
   int _generation = 0;
   bool _hasInteractedByUser = false;
   final Set<FormFieldState<dynamic>> _fields = <FormFieldState<dynamic>>{};
-  bool get _hasError => _fields.any((FormFieldState<dynamic> field) => field.hasError);
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
   void _fieldDidChange() {
@@ -272,6 +271,8 @@ class FormState extends State<Form> {
   @protected
   @override
   Widget build(BuildContext context) {
+    final bool hasError = _fields.any((FormFieldState<dynamic> field) => field.hasError);
+
     switch (widget.autovalidateMode) {
       case AutovalidateMode.always:
         _validate(View.of(context));
@@ -280,7 +281,7 @@ class FormState extends State<Form> {
           _validate(View.of(context));
         }
       case AutovalidateMode.onUserInteractionIfError:
-        if (_hasInteractedByUser && _hasError) {
+        if (_hasInteractedByUser && hasError) {
           _validate(View.of(context));
         }
       case AutovalidateMode.onUnfocus:
