@@ -791,7 +791,7 @@ class IOSCoreDeviceControl {
               _logger.printTrace(line);
             }
 
-            if (line.contains(kCoreDeviceLaunchCompleteLog)) {
+            if (!launchCompleter.isCompleted && line.contains(kCoreDeviceLaunchCompleteLog)) {
               launchCompleter.complete(true);
             }
           });
@@ -823,10 +823,12 @@ class IOSCoreDeviceControl {
 
       // Sometimes devicectl launch logs don't stream to stdout.
       // As a workaround, we also use the log output file to check if it has finished launching.
-      timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        if (output.existsSync() &&
-            output.readAsStringSync().contains(kCoreDeviceLaunchCompleteLog)) {
-          launchCompleter.complete(true);
+      timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+        if (await output.exists()) {
+          final String contents = await output.readAsString();
+          if (!launchCompleter.isCompleted && contents.contains(kCoreDeviceLaunchCompleteLog)) {
+            launchCompleter.complete(true);
+          }
         }
       });
 
