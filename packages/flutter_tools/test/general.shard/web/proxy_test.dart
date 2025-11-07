@@ -368,11 +368,17 @@ void main() {
   });
 
   group('getFinalTargetUri', () {
-    test('should correctly convert original to final uri', () {
+    test('should add query parameters if original request does have one', () {
       final rule = RegexProxyRule(pattern: RegExp(r'^/api'), target: 'http://mock-backend.com');
-      final originalRequest = Request('GET', Uri.parse('http://localhost:8000/api?foo=bar'));
+      final originalRequest = Request('GET', Uri.parse('http://localhost:8000/api?foo=bar&a=b'));
       final Uri target = getFinalTargetUri(originalRequest, rule);
-      expect('$target', 'http://mock-backend.com/api?foo=bar');
+      expect('$target', 'http://mock-backend.com/api?foo=bar&a=b');
+    });
+    test('should not add empty query if original request does not have one', () {
+      final rule = RegexProxyRule(pattern: RegExp(r'^/api'), target: 'http://mock-backend.com');
+      final originalRequest = Request('GET', Uri.parse('http://localhost:8000/api'));
+      final Uri target = getFinalTargetUri(originalRequest, rule);
+      expect('$target', 'http://mock-backend.com/api');
     });
   });
 
