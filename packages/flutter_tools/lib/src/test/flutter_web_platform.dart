@@ -815,6 +815,7 @@ class BrowserManager {
       url.toString(),
       headless: headless,
       webBrowserFlags: webBrowserFlags,
+      enableDebugLogging: true,
     );
     final completer = Completer<BrowserManager>();
 
