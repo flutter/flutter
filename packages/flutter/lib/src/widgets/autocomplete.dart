@@ -512,7 +512,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       text: selectionString,
     );
     widget.onSelected?.call(nextSelection);
-    _hideOptions(const DismissIntent()); // Close the options view after a selection is made.
+    if (_optionsViewController.isShowing) {
+      _optionsViewController.hide(); // Close the options view after a selection is made.
+    }
     _selecting = false;
   }
 
