@@ -1003,7 +1003,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
   [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
 
-  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:mockEngine nibName:nil bundle:nil];
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                        nibName:nil
+                                                                         bundle:nil];
   id mockVC = OCMPartialMock(realVC);
   mockEngine.viewController = mockVC;
 
@@ -1019,7 +1021,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
   [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
 
-  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:mockEngine nibName:nil bundle:nil];
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                        nibName:nil
+                                                                         bundle:nil];
   id mockVC = OCMPartialMock(realVC);
   mockEngine.viewController = mockVC;
 
