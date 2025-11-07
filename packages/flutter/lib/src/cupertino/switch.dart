@@ -613,18 +613,18 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
           : _kDragCommitThreshold;
       final double effectiveThreshold = widget.value ? -threshold : threshold;
 
-      final bool currentDragValue = _dragDelta >= effectiveThreshold;
+      final bool newDragValue = _dragDelta >= effectiveThreshold;
 
-      if (_dragValue != currentDragValue) {
+      if (_dragValue != newDragValue) {
         _emitVibration();
 
-        if (currentDragValue) {
+        if (newDragValue) {
           positionController.forward();
         } else {
           positionController.reverse();
         }
 
-        _dragValue = currentDragValue;
+        _dragValue = newDragValue;
       }
     }
   }
