@@ -367,6 +367,15 @@ void main() {
     });
   });
 
+  group('getFinalTargetUri', () {
+    test('should correctly convert original to final uri', () {
+      final rule = RegexProxyRule(pattern: RegExp(r'^/api'), target: 'http://mock-backend.com');
+      final originalRequest = Request('GET', Uri.parse('http://localhost:8000/api?foo=bar'));
+      final Uri target = getFinalTargetUri(originalRequest, rule);
+      expect('$target', 'http://mock-backend.com/api?foo=bar');
+    });
+  });
+
   group('proxyMiddleware', () {
     test('should call inner handler if no rule matches', () async {
       final rules = <ProxyRule>[
