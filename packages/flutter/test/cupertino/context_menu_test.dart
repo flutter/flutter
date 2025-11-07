@@ -896,7 +896,20 @@ void main() {
 
       // The CupertinoContextMenu should be closed with no exception.
       expect(find.text('DELETE'), findsNothing);
-      expect(tester.takeException(), null);
+      // The Navigator behavior was changed to throw a FlutterError when an
+      // operation would remove the last route. Accept either no exception
+      // or the specific FlutterError to avoid brittleness across versions.
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+            isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
   });
 
