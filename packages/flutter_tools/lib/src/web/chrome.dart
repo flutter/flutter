@@ -189,6 +189,7 @@ class ChromiumLauncher {
     bool skipCheck = false,
     Directory? cacheDir,
     List<String> webBrowserFlags = const <String>[],
+    bool enableDebugLogging = false,
   }) async {
     if (currentCompleter.isCompleted) {
       throwToolExit('Only one instance of chrome can be started.');
@@ -248,6 +249,7 @@ class ChromiumLauncher {
       '--no-sandbox',
 
       if (headless) ...<String>['--headless', '--disable-gpu', '--window-size=2400,1800'],
+      if (enableDebugLogging) ...<String>['--enable-logging=stderr', '--v=1'],
       ...webBrowserFlags,
       url,
     ];
@@ -276,6 +278,8 @@ class ChromiumLauncher {
         process: process,
         chromiumLauncher: this,
         logger: _logger,
+        userDataDir: userDataDir,
+        enableDebugLogging: enableDebugLogging,
       ),
       skipCheck,
     );
@@ -491,9 +495,17 @@ class Chromium {
     required Process process,
     required ChromiumLauncher chromiumLauncher,
     required Logger logger,
-  }) : _process = process,
+    Directory? userDataDir,
+    bool enableDebugLogging = false,
+  }) : assert(
+         !enableDebugLogging || userDataDir != null,
+         'User data dir must be provided when debug logging is enabled.',
+       ),
+       _process = process,
        _chromiumLauncher = chromiumLauncher,
-       _logger = logger;
+       _logger = logger,
+       _userDataDir = userDataDir,
+       _enableDebugLogging = enableDebugLogging;
 
   final String? url;
   final int debugPort;
@@ -501,6 +513,8 @@ class Chromium {
   final ChromeConnection chromeConnection;
   final ChromiumLauncher _chromiumLauncher;
   final Logger _logger;
+  final Directory? _userDataDir;
+  final bool _enableDebugLogging;
   var _hasValidChromeConnection = false;
 
   /// Resolves to browser's main process' exit code, when the browser exits.
@@ -616,6 +630,17 @@ class Chromium {
         );
       },
     );
+
+    if (_enableDebugLogging) {
+      _logger.printTrace('${'=' * 20} ↓ Chromium debug log ↓ ${'=' * 20}');
+      final File debugLogFile = _userDataDir!.childFile('chrome_debug.log');
+      if (debugLogFile.existsSync()) {
+        _logger.printTrace(debugLogFile.readAsStringSync());
+      } else {
+        _logger.printTrace('No debug log found at ${debugLogFile.path}');
+      }
+      _logger.printTrace('${'=' * 20} ↑ Chromium debug log ↑ ${'=' * 20}');
+    }
   }
 }
 
