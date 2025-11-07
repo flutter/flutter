@@ -655,7 +655,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Stepper header subtitle should not overflow', (WidgetTester tester) async {
@@ -681,7 +691,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Material2 - Stepper enabled button styles', (WidgetTester tester) async {

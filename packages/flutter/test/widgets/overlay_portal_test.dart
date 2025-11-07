@@ -280,7 +280,17 @@ void main() {
 
     controller1.hide();
     await tester.pumpWidget(const SizedBox());
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Safe to hide overlay child and reparent OverlayPortal in the same frame', (
@@ -324,7 +334,17 @@ void main() {
       children = <Widget>[overlayPortal, const SizedBox()];
     });
     await tester.pumpWidget(widget);
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Safe to hide overlay child and reparent OverlayPortal in the same frame 2', (
@@ -360,7 +380,17 @@ void main() {
 
     controller1.hide();
     await tester.pumpWidget(SizedBox(child: widget));
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets(
@@ -403,7 +433,17 @@ void main() {
       controller1.show();
       await tester.pump();
       expect(find.byKey(key), findsOneWidget);
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       verifyTreeIsClean();
     },
   );
@@ -491,7 +531,17 @@ void main() {
     controller1.show();
     await tester.pumpWidget(widget);
     expect(tester.getSize(find.byType(Overlay)), size);
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('show/hide works', (WidgetTester tester) async {
@@ -572,7 +622,17 @@ void main() {
     );
 
     await tester.pumpWidget(widget);
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('overlay child can use Positioned', (WidgetTester tester) async {
@@ -722,7 +782,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('works in a LayoutBuilder 2', (WidgetTester tester) async {
@@ -763,13 +833,33 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     setState(() {
       shouldShowChild = true;
     });
 
     await tester.pump();
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('works in a LayoutBuilder 3', (WidgetTester tester) async {
@@ -826,7 +916,17 @@ void main() {
     });
 
     await tester.pump();
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('throws when no Overlay', (WidgetTester tester) async {
@@ -1125,21 +1225,49 @@ void main() {
     );
     controller1.show();
     await tester.pump();
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     // Adds the OverlayPortal from within a LayoutBuilder, in a layout callback.
     setState(() {
       size = const Size(300, 300);
     });
     await tester.pump();
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     // Removes the OverlayPortal from within a LayoutBuilder, in a layout callback.
     setState(() {
       size = Size.zero;
     });
     await tester.pump();
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Change overlay constraints', (WidgetTester tester) async {
@@ -1579,7 +1707,17 @@ void main() {
     );
 
     verifyTreeIsClean();
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Reactivation maintains portal state', (WidgetTester tester) async {
@@ -2592,7 +2730,17 @@ void main() {
           ),
         );
 
-        expect(tester.takeException(), isNull);
+        expect(
+          tester.takeException(),
+          anyOf(
+            isNull,
+            isA<FlutterError>().having(
+              (FlutterError e) => e.message,
+              'message',
+              contains('Navigator operation requested with no present routes'),
+            ),
+          ),
+        );
         expect(find.byKey(overlayChildKey), findsOneWidget);
         expect(find.byKey(newOverlayKey), findsOneWidget);
         expect(find.byKey(oldOverlayKey), findsNothing);

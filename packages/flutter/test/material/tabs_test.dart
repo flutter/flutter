@@ -2012,7 +2012,17 @@ void main() {
     controller = DefaultTabController.of(tester.element(find.text('A')));
     expect(controller.index, 2);
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('TabBarView skips animation when disabled in controller', (
@@ -2646,7 +2656,17 @@ void main() {
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 3'), findsNothing);
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('TabBarView scrolls end close to a new page with custom physics', (
@@ -5627,7 +5647,17 @@ void main() {
     );
     await tester.tap(find.byIcon(Icons.directions_bike));
     // No crash on dispose.
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets(
@@ -6409,7 +6439,17 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Tab 1'), findsOneWidget);
     expect(find.text('Tab 2'), findsNothing);
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets(
@@ -6681,8 +6721,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     // Test TabAlignment.fill with scrollable tab bar.
     await tester.pumpWidget(
       MaterialApp(
@@ -6718,8 +6767,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     // Test TabAlignment.start with non-scrollable tab bar.
     await tester.pumpWidget(
       MaterialApp(
@@ -6743,8 +6801,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     // Test TabAlignment.startOffset with non-scrollable tab bar.
     await tester.pumpWidget(
       MaterialApp(

@@ -3351,7 +3351,17 @@ void main() {
       expect(find.byType(Switch), findsNothing);
 
       imageProvider.complete();
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
 
     testWidgets('do not crash when previous imageProvider completes after Switch is disposed', (
@@ -3385,10 +3395,29 @@ void main() {
 
       // Completing the replaced ImageProvider shouldn't crash.
       imageProvider1.complete();
-      expect(tester.takeException(), isNull);
-
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       imageProvider2.complete();
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
   });
 

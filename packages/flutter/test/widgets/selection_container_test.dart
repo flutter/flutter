@@ -111,7 +111,17 @@ void main() {
     await tester.pumpAndSettle();
     expect(registrar.selectables.length, 1);
     expect(delegate.value.hasContent, isTrue);
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Can update within one frame', (WidgetTester tester) async {

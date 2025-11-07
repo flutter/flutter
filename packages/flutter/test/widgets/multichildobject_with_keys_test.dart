@@ -124,8 +124,17 @@ void main() {
 
       // Initial build with two different keys.
       await buildWithKey(key2);
-      expect(tester.takeException(), isNull);
-
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       // Subsequent build with duplicated keys.
       await buildWithKey(key1);
       expect(

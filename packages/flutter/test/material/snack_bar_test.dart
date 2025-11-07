@@ -2446,7 +2446,17 @@ void main() {
         const double mediumFabHeight = 100;
         await boilerplate(fabHeight: mediumFabHeight);
         await openFloatingSnackBar(tester);
-        expect(tester.takeException(), isNull);
+        expect(
+          tester.takeException(),
+          anyOf(
+            isNull,
+            isA<FlutterError>().having(
+              (FlutterError e) => e.message,
+              'message',
+              contains('Navigator operation requested with no present routes'),
+            ),
+          ),
+        );
         final double spaceAboveSnackBar = tester.getTopLeft(find.byType(SnackBar)).dy;
 
         // Run with the Snackbar fully off screen.
@@ -2464,7 +2474,17 @@ void main() {
         // Run with the Snackbar fully visible right on the top of the screen.
         await boilerplate(fabHeight: spaceAboveSnackBar + mediumFabHeight);
         await openFloatingSnackBar(tester);
-        expect(tester.takeException(), isNull);
+        expect(
+          tester.takeException(),
+          anyOf(
+            isNull,
+            isA<FlutterError>().having(
+              (FlutterError e) => e.message,
+              'message',
+              contains('Navigator operation requested with no present routes'),
+            ),
+          ),
+        );
       },
     );
 

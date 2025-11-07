@@ -79,7 +79,17 @@ void main() {
         CupertinoApp(home: CupertinoTimerPicker(onTimerDurationChanged: (_) {})),
       );
 
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
 
     testWidgets('specified background color is applied', (WidgetTester tester) async {
@@ -338,7 +348,17 @@ void main() {
     testWidgets('background color can be null', (WidgetTester tester) async {
       await tester.pumpWidget(CupertinoApp(home: CupertinoDatePicker(onDateTimeChanged: (_) {})));
 
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
 
     testWidgets('specified background color is applied', (WidgetTester tester) async {

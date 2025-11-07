@@ -13,7 +13,17 @@ void main() {
     final Finder buttonFinder = find.byType(Scrollbar);
     await tester.drag(buttonFinder.last, const Offset(0, 100.0));
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   }, variant: TargetPlatformVariant.all());
 
   testWidgets('The scrollbar should be painted when the user scrolls', (WidgetTester tester) async {

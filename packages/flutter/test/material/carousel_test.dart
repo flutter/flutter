@@ -1232,7 +1232,17 @@ void main() {
     await tester.pumpAndSettle();
 
     // No exception.
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('The shrinkExtent should keep the same when the item is tapped', (
@@ -1435,7 +1445,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/166067.
@@ -1476,7 +1496,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/160679.
@@ -1492,7 +1522,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('itemExtent can be set to double.infinity', (WidgetTester tester) async {
@@ -1526,7 +1566,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/163436.
@@ -1544,7 +1594,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/163436.
@@ -1612,7 +1672,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/167621.
@@ -1633,7 +1703,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/167621.

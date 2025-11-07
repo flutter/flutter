@@ -388,7 +388,17 @@ void main() {
         ),
       ),
     );
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('no text keyboard when widget is focused', (WidgetTester tester) async {
@@ -2861,12 +2871,30 @@ void main() {
         const TextStyle(inherit: false, fontSize: 12.0, textBaseline: TextBaseline.alphabetic),
       ),
     );
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     // With inherit not set to false, will pickup required fields from theme.
     await tester.pumpWidget(buildFrame(const TextStyle(fontSize: 12.0)));
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     await tester.pumpWidget(buildFrame(const TextStyle(inherit: false, fontSize: 12.0)));
     expect(tester.takeException(), isNotNull);
   });

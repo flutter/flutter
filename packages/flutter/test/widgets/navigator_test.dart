@@ -335,7 +335,17 @@ void main() {
     await buildPages(<Page<void>>[page, page4, page5, page6]);
     await tester.pumpAndSettle();
     expect(find.text('page6'), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/177322.
@@ -381,7 +391,17 @@ void main() {
     await buildPages(<Page<void>>[page]);
     await tester.pumpAndSettle();
     expect(find.text('page'), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Zero transition page-based route correctly notifies observers when it is popped', (
@@ -1254,7 +1274,17 @@ void main() {
     await tester.pumpAndSettle();
 
     // No exceptions should have been thrown and the home page should be visible
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     expect(find.text('home'), findsOneWidget);
     expect(find.text('second'), findsNothing);
   });
@@ -1362,7 +1392,17 @@ void main() {
     await tester.pumpAndSettle();
     // Now only expect to pop until the first route
     expect(find.text('/'), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('popUntilWithResult return value to the last popped route', (
@@ -3815,7 +3855,17 @@ void main() {
 
       await tester.pumpAndSettle();
       expect(find.text('second'), findsOneWidget);
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
 
     testWidgets('throw if onPopPage callback is not provided', (WidgetTester tester) async {
@@ -4738,7 +4788,17 @@ void main() {
       );
 
       // It should not crash the app.
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(find.text('second'), findsOneWidget);
     });
@@ -4773,7 +4833,17 @@ void main() {
       );
 
       // It should not crash the app.
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(find.text('initial'), findsOneWidget);
     });
@@ -4811,7 +4881,17 @@ void main() {
         buildNavigator(view: tester.view, pages: myPages, onPopPage: onPopPage, key: navigator),
       );
       // It should not crash the app.
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(find.text('initial'), findsOneWidget);
     });

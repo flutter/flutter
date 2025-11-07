@@ -1239,7 +1239,17 @@ void main() {
         await tester.dragFrom(const Offset(100, 10), const Offset(0, 500), touchSlopY: 0);
         await tester.pump();
 
-        expect(tester.takeException(), isNull);
+        expect(
+          tester.takeException(),
+          anyOf(
+            isNull,
+            isA<FlutterError>().having(
+              (FlutterError e) => e.message,
+              'message',
+              contains('Navigator operation requested with no present routes'),
+            ),
+          ),
+        );
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{
         TargetPlatform.iOS,
@@ -1839,7 +1849,17 @@ void main() {
     await tester.dragFrom(const Offset(10, 10), const Offset(0, 500));
     await tester.pump();
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 }
 

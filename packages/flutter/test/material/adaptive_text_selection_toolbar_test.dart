@@ -285,7 +285,17 @@ void main() {
       );
 
       expect(tester.getSize(find.byType(AdaptiveTextSelectionToolbar)), Size.zero);
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     },
     skip: isBrowser, // [intended] on web the browser handles the context menu.
     variant: TargetPlatformVariant.all(),

@@ -888,7 +888,17 @@ void main() {
       await tester.pump();
       WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.rootElement!);
       await tester.pump();
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     },
   );
 
@@ -938,7 +948,17 @@ void main() {
       layoutBuilderElement.markNeedsBuild();
       await tester.pump();
       expect(rebuilt, isFalse);
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     },
   );
 

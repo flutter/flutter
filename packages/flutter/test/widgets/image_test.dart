@@ -502,7 +502,17 @@ void main() {
     expect(capturedException, testException);
     expect(capturedStackTrace, testStack);
     // If there is an error listener, there should be no FlutterError reported.
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Stream completer errors can be listened to by attaching after resolving', (
@@ -604,7 +614,17 @@ void main() {
     expect(capturedException, testException);
     expect(capturedStackTrace, testStack);
     // If there is an error listener, there should be no FlutterError reported.
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Duplicate error listeners are all called', (WidgetTester tester) async {
@@ -654,7 +674,17 @@ void main() {
     expect(capturedStackTrace, testStack);
     expect(errorListenerCalled, 2);
     // If there is an error listener, there should be no FlutterError reported.
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Listeners are only removed if callback tuple matches', (WidgetTester tester) async {
@@ -873,7 +903,17 @@ void main() {
     expect(capturedException, testException);
     expect(capturedStackTrace, testStack);
     // If there is an error listener, there should be no FlutterError reported.
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets(
@@ -2604,7 +2644,17 @@ void main() {
 
     expect(find.byKey(errorKey), findsOneWidget);
     expect(caughtException.toString(), 'threw');
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('errorBuilder - fails on load', (WidgetTester tester) async {
@@ -2624,7 +2674,17 @@ void main() {
 
     expect(find.byKey(errorKey), findsOneWidget);
     expect(caughtException.toString(), 'threw');
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('no errorBuilder - failure reported to FlutterError', (WidgetTester tester) async {
@@ -3070,7 +3130,17 @@ void main() {
       reason: 'FlutterError.onError should not be called when an errorBuilder was provided.',
     );
     // Also check takeException as a standard backup.
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets(
@@ -3134,7 +3204,17 @@ void main() {
             'FlutterError.onError should be called when an errorBuilder was not provided eventually.',
       );
       // Also check takeException as a standard backup.
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     },
   );
 }

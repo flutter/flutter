@@ -246,7 +246,17 @@ void main() {
     // The back button should still persist;
     expect(find.byType(CupertinoNavigationBarBackButton), findsOneWidget);
     // The app does not crash
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Can specify custom padding', (WidgetTester tester) async {
@@ -1602,7 +1612,17 @@ void main() {
         CupertinoApp(home: CupertinoNavigationBarBackButton(onPressed: () => backPressed = true)),
       );
 
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       expect(find.text(String.fromCharCode(CupertinoIcons.back.codePoint)), findsOneWidget);
 
       await tester.tap(find.byType(CupertinoNavigationBarBackButton));

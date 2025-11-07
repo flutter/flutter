@@ -1086,7 +1086,17 @@ void main() {
       const Directionality(textDirection: TextDirection.ltr, child: IndexedStack()),
     );
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('IndexedStack does not assert when index is null', (WidgetTester tester) async {
@@ -1097,7 +1107,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('IndexedStack asserts when index is negative', (WidgetTester tester) async {

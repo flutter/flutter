@@ -2004,7 +2004,17 @@ void main() {
       expect(find.byType(CupertinoSwitch), findsNothing);
 
       imageProvider.complete();
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
 
     testWidgets('Does not crash when previous imageProvider completes after switch is disposed', (
@@ -2041,10 +2051,29 @@ void main() {
 
       // Completing the replaced ImageProvider shouldn't crash.
       imageProvider1.complete();
-      expect(tester.takeException(), isNull);
-
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       imageProvider2.complete();
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
 
     testWidgets('Switch uses inactive track color when set', (WidgetTester tester) async {

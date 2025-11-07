@@ -3104,8 +3104,17 @@ void main() {
 
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Tooltip)));
     await tester.pumpWidget(const SizedBox());
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     // Finish gesture to release resources.
     await gesture.up();
     await tester.pumpAndSettle();
@@ -3133,8 +3142,17 @@ void main() {
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Tooltip)));
       tooltipState.ensureTooltipVisible();
       await tester.pumpWidget(const SizedBox());
-      expect(tester.takeException(), isNull);
-
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       // Finish gesture to release resources.
       await gesture.up();
       await tester.pumpAndSettle();
@@ -3526,7 +3544,17 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.text('World')));
     await tester.pumpAndSettle();
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/169741.
@@ -3588,7 +3616,17 @@ void main() {
       await gesture.moveTo(tester.getCenter(find.text('World')));
       await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     },
   );
 

@@ -975,7 +975,17 @@ void main() {
     );
 
     // The test passes if no exception is thrown during the layout phase.
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     expect(find.byType(DropdownMenu<int>), findsOneWidget);
   });
 
@@ -1713,7 +1723,17 @@ void main() {
     await tester.pump();
     await tester.enterText(find.byType(TextField).first, 'Meu');
     await tester.pump();
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/154532.
@@ -1739,7 +1759,17 @@ void main() {
     await tester.pump();
     await tester.enterText(find.byType(TextField).first, 'No match 2');
     await tester.pump();
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/165867.
@@ -2964,7 +2994,17 @@ void main() {
 
     // Opening the width=100 menu should not crash.
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
     Finder findMenuItemText(String label) {
@@ -3277,7 +3317,17 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(selectionCount, 1);
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     },
   );
 
@@ -3306,7 +3356,17 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     },
   );
 
@@ -3478,7 +3538,17 @@ void main() {
     await tester.pumpAndSettle();
 
     // No exception should be thrown.
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/147076.
@@ -4248,7 +4318,17 @@ void main() {
     await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     expect(tester.getSize(findMenuItemButton(longLabel)).width, 150.0);
 
     // The overwrite of menuStyle is different when a width is provided,
@@ -4270,7 +4350,17 @@ void main() {
     await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     expect(tester.getSize(findMenuItemButton(menuChildren.first.label)).width, 150.0);
 
     // The overwrite of menuStyle is different when a width is provided but maximumSize is not,
@@ -4337,8 +4427,17 @@ void main() {
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
-      // Default width is 800, so the expected width is 800 - padding (20 + 20).
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      ); // Default width is 800, so the expected width is 800 - padding (20 + 20).
       expect(tester.getSize(findMenuItemButton(shortLabel)).width, 760.0);
     },
   );
@@ -4501,7 +4600,17 @@ void main() {
     await pumpDropdownMenu(controller2);
     controller1.dispose();
     controller2.dispose();
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/169942.

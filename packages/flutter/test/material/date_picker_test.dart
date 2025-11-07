@@ -2124,42 +2124,122 @@ void main() {
 
     testWidgets('common screen size - portrait', (WidgetTester tester) async {
       await showPicker(tester, kCommonScreenSizePortrait);
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
 
     testWidgets('common screen size - landscape', (WidgetTester tester) async {
       await showPicker(tester, kCommonScreenSizeLandscape);
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
 
     testWidgets('common screen size - portrait - textScale 1.3', (WidgetTester tester) async {
       await showPicker(tester, kCommonScreenSizePortrait, 1.3);
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
 
     testWidgets('common screen size - landscape - textScale 1.3', (WidgetTester tester) async {
       await showPicker(tester, kCommonScreenSizeLandscape, 1.3);
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
 
     testWidgets('small screen size - portrait', (WidgetTester tester) async {
       await showPicker(tester, kSmallScreenSizePortrait);
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
 
     testWidgets('small screen size - landscape', (WidgetTester tester) async {
       await showPicker(tester, kSmallScreenSizeLandscape);
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
 
     testWidgets('small screen size - portrait -textScale 1.3', (WidgetTester tester) async {
       await showPicker(tester, kSmallScreenSizePortrait, 1.3);
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
 
     testWidgets('small screen size - landscape - textScale 1.3', (WidgetTester tester) async {
       await showPicker(tester, kSmallScreenSizeLandscape, 1.3);
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
   });
 

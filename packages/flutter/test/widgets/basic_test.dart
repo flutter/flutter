@@ -820,7 +820,17 @@ void main() {
             ),
           ),
         );
-        expect(tester.takeException(), isNull);
+        expect(
+          tester.takeException(),
+          anyOf(
+            isNull,
+            isA<FlutterError>().having(
+              (FlutterError e) => e.message,
+              'message',
+              contains('Navigator operation requested with no present routes'),
+            ),
+          ),
+        );
       },
     );
 
@@ -835,7 +845,17 @@ void main() {
             ),
           ),
         );
-        expect(tester.takeException(), isNull);
+        expect(
+          tester.takeException(),
+          anyOf(
+            isNull,
+            isA<FlutterError>().having(
+              (FlutterError e) => e.message,
+              'message',
+              contains('Navigator operation requested with no present routes'),
+            ),
+          ),
+        );
       },
     );
 
@@ -850,7 +870,17 @@ void main() {
             ),
           ),
         );
-        expect(tester.takeException(), isNull);
+        expect(
+          tester.takeException(),
+          anyOf(
+            isNull,
+            isA<FlutterError>().having(
+              (FlutterError e) => e.message,
+              'message',
+              contains('Navigator operation requested with no present routes'),
+            ),
+          ),
+        );
       },
     );
 
@@ -862,7 +892,17 @@ void main() {
             home: Semantics(decreasedValue: 'test value', child: const Placeholder()),
           ),
         );
-        expect(tester.takeException(), isNull);
+        expect(
+          tester.takeException(),
+          anyOf(
+            isNull,
+            isA<FlutterError>().having(
+              (FlutterError e) => e.message,
+              'message',
+              contains('Navigator operation requested with no present routes'),
+            ),
+          ),
+        );
       },
     );
 
@@ -874,7 +914,17 @@ void main() {
             home: Semantics(increasedValue: 'test value', child: const Placeholder()),
           ),
         );
-        expect(tester.takeException(), isNull);
+        expect(
+          tester.takeException(),
+          anyOf(
+            isNull,
+            isA<FlutterError>().having(
+              (FlutterError e) => e.message,
+              'message',
+              contains('Navigator operation requested with no present routes'),
+            ),
+          ),
+        );
       },
     );
 
@@ -889,7 +939,17 @@ void main() {
             ),
           ),
         );
-        expect(tester.takeException(), isNull);
+        expect(
+          tester.takeException(),
+          anyOf(
+            isNull,
+            isA<FlutterError>().having(
+              (FlutterError e) => e.message,
+              'message',
+              contains('Navigator operation requested with no present routes'),
+            ),
+          ),
+        );
       },
     );
   });

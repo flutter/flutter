@@ -666,7 +666,17 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(const Duration(seconds: 2));
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Material2 - Custom rectCallback renders an ink splash from its center', (

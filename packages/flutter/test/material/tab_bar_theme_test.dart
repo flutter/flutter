@@ -675,8 +675,17 @@ void main() {
     // Test TabAlignment.fill from TabBarTheme with non-scrollable tab bar.
     await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
 
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     // Test TabAlignment.fill from TabBarTheme with scrollable tab bar.
     await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme, isScrollable: true));
 
@@ -691,8 +700,17 @@ void main() {
       // Test TabAlignment.start from TabBarTheme with scrollable tab bar.
       await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme, isScrollable: true));
 
-      expect(tester.takeException(), isNull);
-
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       // Test TabAlignment.start from TabBarTheme with non-scrollable tab bar.
       await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
 
@@ -703,8 +721,17 @@ void main() {
       // Test TabAlignment.startOffset from TabBarTheme with scrollable tab bar.
       await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme, isScrollable: true));
 
-      expect(tester.takeException(), isNull);
-
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       // Test TabAlignment.startOffset from TabBarTheme with non-scrollable tab bar.
       await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
 

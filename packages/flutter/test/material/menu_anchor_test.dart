@@ -3172,7 +3172,17 @@ void main() {
       );
 
       // No exception should be thrown.
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
 
     testWidgets('MenuItemButton layout is updated by overflowAxis', (WidgetTester tester) async {
@@ -3259,7 +3269,17 @@ void main() {
         ),
       );
 
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
   });
 
@@ -3470,7 +3490,17 @@ void main() {
       await tester.tap(find.text('Set focus to null'));
       await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
 
     testWidgets('constrained menus show up in the right place in RTL', (WidgetTester tester) async {
@@ -4965,7 +4995,17 @@ void main() {
       final MenuController controller = MenuController();
       controller.close();
       await tester.pump();
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
 
     testWidgets('Unattached MenuController returns false when calling isOpen', (

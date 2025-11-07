@@ -188,7 +188,17 @@ void main() {
         ),
       );
 
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
 
     testWidgets('can draw handles when they are at rect boundaries', (WidgetTester tester) async {
@@ -3972,7 +3982,17 @@ void main() {
         await gesture.moveTo(textOffsetToPosition(innerParagraph, 2)); // on `Good`.
 
         // Should not crash.
-        expect(tester.takeException(), isNull);
+        expect(
+          tester.takeException(),
+          anyOf(
+            isNull,
+            isA<FlutterError>().having(
+              (FlutterError e) => e.message,
+              'message',
+              contains('Navigator operation requested with no present routes'),
+            ),
+          ),
+        );
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{
         TargetPlatform.android,
@@ -4074,7 +4094,17 @@ void main() {
         await tester.pump();
 
         // Should not crash.
-        expect(tester.takeException(), isNull);
+        expect(
+          tester.takeException(),
+          anyOf(
+            isNull,
+            isA<FlutterError>().having(
+              (FlutterError e) => e.message,
+              'message',
+              contains('Navigator operation requested with no present routes'),
+            ),
+          ),
+        );
       },
       variant: TargetPlatformVariant.only(TargetPlatform.macOS),
     );

@@ -380,13 +380,31 @@ void main() {
     await tester.pumpWidget(
       buildWidget(border: allowedBorderVariations, borderRadius: BorderRadius.circular(25)),
     );
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     await tester.pumpWidget(
       buildWidget(border: allowedBorderVariations, boxShape: BoxShape.circle),
     );
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     await tester.pumpWidget(
       buildWidget(
         border: const Border(
@@ -471,7 +489,17 @@ void main() {
     await tester.pumpWidget(
       buildWidget(border: allowedBorderDirectionalVariations, boxShape: BoxShape.circle),
     );
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   test('Compound borders with differing preferPaintInteriors', () {

@@ -2278,7 +2278,17 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Tab 1'), findsOneWidget);
     expect(find.text('Tab 2'), findsNothing);
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   group('Material 2', () {

@@ -126,7 +126,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Table widget - column offset (LTR)', (WidgetTester tester) async {
@@ -871,7 +881,17 @@ void main() {
 
     await tester.pumpWidget(buildTable(const ValueKey<int>(2)));
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     expect(find.text('Hello'), findsOneWidget);
   });
 

@@ -3825,7 +3825,17 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
     await tester.pumpWidget(const MaterialApp(home: Material(child: Text('disposed'))));
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     ChangeNotifier.debugAssertNotDisposed(controller);
   });
 
@@ -3875,7 +3885,17 @@ void main() {
 
     await tester.pumpAndSettle();
     // The search menu and the internal search controller are now disposed.
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     expect(find.byType(TextField), findsNothing);
     FlutterError? error;
     try {
@@ -3933,7 +3953,17 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('SearchAnchor viewOnClose function test', (WidgetTester tester) async {

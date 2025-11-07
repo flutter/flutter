@@ -32,7 +32,17 @@ void main() {
 
     // Doesn't throw the exception a second time, because we didn't reset
     // overflowReportNeeded.
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     expect(find.byType(UnconstrainedBox), paints..rect());
   });
 

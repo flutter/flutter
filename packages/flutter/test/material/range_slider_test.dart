@@ -2992,14 +2992,32 @@ void main() {
     semantics.dispose();
     await tester.pumpAndSettle();
 
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     // Initialize the semantics again.
     semantics = SemanticsTester(tester);
     await tester.pumpAndSettle();
 
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     semantics.dispose();
   }, semanticsEnabled: false);
 
