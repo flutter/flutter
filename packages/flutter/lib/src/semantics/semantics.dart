@@ -5006,12 +5006,9 @@ class SemanticsConfiguration {
   Locale? get localeForSubtree => _localeForSubtree;
   Locale? _localeForSubtree;
   set localeForSubtree(Locale? value) {
-    assert(
-      value == null || _isSemanticBoundary,
-      'to set locale for subtree, this configuration must also be a semantics '
-      'boundary.',
-    );
+    assert(value != null);
     _localeForSubtree = value;
+    _hasBeenAnnotated = true;
   }
 
   /// The locale of the resulting semantics node if this configuration formed
@@ -6518,6 +6515,9 @@ class SemanticsConfiguration {
       return false;
     }
     if (_attributedValue.string.isNotEmpty && other._attributedValue.string.isNotEmpty) {
+      return false;
+    }
+    if (_localeForSubtree != other._localeForSubtree) {
       return false;
     }
     if (_hasExplicitRole && other._hasExplicitRole) {
