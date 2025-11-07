@@ -23,6 +23,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
 import 'binding.dart';
+import 'box.dart';
 import 'debug.dart';
 import 'layer.dart';
 import 'view.dart';
@@ -1399,7 +1400,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           'Attempted to enable semantics without configuring an onSemanticsUpdate callback.',
         );
         _semanticsOwner = SemanticsOwner(onSemanticsUpdate: onSemanticsUpdate!);
-        final RenderView? root = rootNode as RenderView?;
+        final RenderObject? root = rootNode;
         if (root != null) {
           root.scheduleInitialSemantics();
           // Synchronously flush semantics if possible. This should send the
@@ -1408,7 +1409,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           //
           // Doing this let OS to read the semantics tree synchronously even if
           // semantics has not been built before.
-          if (root.child?.hasSize ?? false) {
+          if (root is RenderObjectWithChildMixin<RenderBox> && (root.child?.hasSize ?? false)) {
             _flushSemanticsWithin();
           }
         }
