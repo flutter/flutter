@@ -505,6 +505,8 @@ class Context {
 
     final String buildMode = parseFlutterBuildMode();
 
+    updateBuildConfigurationForSwiftPackages(buildMode);
+
     final List<String> flutterArgs = _generateFlutterArgsForAssemble(
       command: 'prepare',
       buildMode: buildMode,
@@ -529,6 +531,27 @@ class Context {
       echoError('Failed to copy Flutter framework.');
       exitApp(-1);
     }
+  }
+
+  /// Replace the build mode in `FLUTTER_PLUGINS_SWIFT_PACKAGE_PATH` with the current build mode.
+  void updateBuildConfigurationForSwiftPackages(String buildMode) {
+    String formattedBuildMode(String buildMode) =>
+        'let mode = "${buildMode[0].toUpperCase()}${buildMode.substring(1)}"';
+    final String? swiftPackagePath = environment['FLUTTER_PLUGINS_SWIFT_PACKAGE_PATH'];
+    if (swiftPackagePath == null) {
+      return;
+    }
+    final swiftPackage = File(swiftPackagePath);
+    if (!swiftPackage.existsSync()) {
+      return;
+    }
+    swiftPackage.writeAsStringSync(
+      swiftPackage
+          .readAsStringSync()
+          .replaceAll(formattedBuildMode('debug'), formattedBuildMode(buildMode))
+          .replaceAll(formattedBuildMode('profile'), formattedBuildMode(buildMode))
+          .replaceAll(formattedBuildMode('release'), formattedBuildMode(buildMode)),
+    );
   }
 
   /// Calls `flutter assemble [buildMode]_[platform]_bundle_flutter_assets`

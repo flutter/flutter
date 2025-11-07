@@ -6,6 +6,7 @@ import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/template.dart';
 import '../base/version.dart';
+import '../build_info.dart';
 import '../darwin/darwin.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -33,15 +34,24 @@ class SwiftPackageManager {
   final FileSystem _fileSystem;
   final TemplateRenderer _templateRenderer;
 
+  static const BuildMode _defaultBuildMode = BuildMode.debug;
+  static String formattedBuildMode(BuildMode buildMode) =>
+      'let mode = "${buildMode.uppercaseName}"';
+
   /// Creates a Swift Package called 'FlutterGeneratedPluginSwiftPackage' that
   /// has dependencies on Flutter plugins that are compatible with Swift
   /// Package Manager.
   Future<void> generatePluginsSwiftPackage(
     List<Plugin> plugins,
     FlutterDarwinPlatform platform,
-    XcodeBasedProject project,
-  ) async {
-    final Directory symlinkDirectory = project.relativeSwiftPackagesDirectory;
+    XcodeBasedProject project, {
+    List<BuildMode> buildModes = const <BuildMode>[
+      BuildMode.debug,
+      BuildMode.profile,
+      BuildMode.release,
+    ],
+  }) async {
+    final Directory symlinkDirectory = project.flutterSwiftPackagesDirectory;
     ErrorHandlingFileSystem.deleteIfExists(symlinkDirectory, recursive: true);
     symlinkDirectory.createSync(recursive: true);
 
@@ -53,6 +63,8 @@ class SwiftPackageManager {
       platform: platform,
       symlinkDirectory: symlinkDirectory,
       pathRelativeTo: project.flutterPluginSwiftPackageDirectory.path,
+      defaultBuildMode: _defaultBuildMode,
+      buildModes: buildModes,
     );
 
     // If there aren't any Swift Package plugins and the project hasn't been
@@ -85,16 +97,23 @@ class SwiftPackageManager {
       dependencies: packageDependencies,
       targets: <SwiftPackageTarget>[generatedTarget],
       templateRenderer: _templateRenderer,
+      swiftCodeBeforePackageDefinition: formattedBuildMode(_defaultBuildMode),
     );
     pluginsPackage.createSwiftPackage();
   }
 
+  /// Returns plugin dependencies for the FlutterGeneratedPluginSwiftPackage.
+  /// Uses the plugin Swift packages symlinked in the [buildModeDirectory].
+  /// Makes the path relative to the [flutterPluginSwiftPackageDirectory]. Also,
+  /// replaces the [defaultBuildMode] with a Swift variable.
   (List<SwiftPackagePackageDependency>, List<SwiftPackageTargetDependency>)
   _dependenciesForPlugins({
     required List<Plugin> plugins,
     required FlutterDarwinPlatform platform,
     required Directory symlinkDirectory,
     required String pathRelativeTo,
+    required BuildMode defaultBuildMode,
+    required List<BuildMode> buildModes,
   }) {
     final packageDependencies = <SwiftPackagePackageDependency>[];
     final targetDependencies = <SwiftPackageTargetDependency>[];
@@ -111,12 +130,24 @@ class SwiftPackageManager {
           !_fileSystem.file(pluginSwiftPackageManifestPath).existsSync()) {
         continue;
       }
-
-      final Link pluginSymlink = symlinkDirectory.childLink(plugin.name);
-      ErrorHandlingFileSystem.deleteIfExists(pluginSymlink);
-      pluginSymlink.createSync(packagePath);
-      packagePath = pluginSymlink.path;
-      packagePath = _fileSystem.path.relative(packagePath, from: pathRelativeTo);
+      for (final buildMode in buildModes) {
+        final Directory buildModeDirectory = symlinkDirectory.childDirectory(
+          buildMode.uppercaseName,
+        );
+        buildModeDirectory.createSync(recursive: true);
+        final Link pluginSymlink = buildModeDirectory.childLink(plugin.name);
+        ErrorHandlingFileSystem.deleteIfExists(pluginSymlink);
+        pluginSymlink.createSync(packagePath);
+      }
+      final String defaultPluginSymlinkedPath = symlinkDirectory
+          .childDirectory(defaultBuildMode.uppercaseName)
+          .childLink(plugin.name)
+          .path;
+      packagePath = _fileSystem.path.relative(defaultPluginSymlinkedPath, from: pathRelativeTo);
+      packagePath = packagePath.replaceFirst(
+        defaultBuildMode.uppercaseName,
+        r'\(mode)',
+      );
 
       packageDependencies.add(SwiftPackagePackageDependency(name: plugin.name, path: packagePath));
 

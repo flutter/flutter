@@ -306,6 +306,48 @@ let package = Package(
     });
   });
 
+  testWithoutContext('with swift code before package definition', () {
+    final fs = MemoryFileSystem();
+    final File swiftPackageFile = fs.systemTempDirectory.childFile(
+      'Packages/FlutterGeneratedPluginSwiftPackage/Package.swift',
+    );
+    final swiftPackage = SwiftPackage(
+      manifest: swiftPackageFile,
+      name: 'FlutterGeneratedPluginSwiftPackage',
+      swiftCodeBeforePackageDefinition: 'let mode = "Debug"',
+      platforms: <SwiftPackageSupportedPlatform>[],
+      products: <SwiftPackageProduct>[],
+      dependencies: <SwiftPackagePackageDependency>[],
+      targets: <SwiftPackageTarget>[],
+      templateRenderer: const MustacheTemplateRenderer(),
+    );
+    swiftPackage.createSwiftPackage();
+    expect(swiftPackageFile.readAsStringSync(), '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+//  Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let mode = "Debug"
+
+let package = Package(
+    name: "FlutterGeneratedPluginSwiftPackage",
+    products: [
+$_doubleIndent
+    ],
+    dependencies: [
+$_doubleIndent
+    ],
+    targets: [
+$_doubleIndent
+    ]
+)
+''');
+  });
+
   testWithoutContext('Format SwiftPackageSupportedPlatform', () {
     final supportedPlatform = SwiftPackageSupportedPlatform(
       platform: SwiftPackagePlatform.ios,

@@ -67,6 +67,8 @@ void main() {
 
 import PackageDescription
 
+let mode = "Debug"
+
 let package = Package(
     name: "FlutterGeneratedPluginSwiftPackage",
     platforms: [
@@ -111,11 +113,22 @@ $_doubleIndent
                 ? '.iOS("13.0")'
                 : '.macOS("10.15")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
-            expect(project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1'), exists);
-            expect(
-              project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1').targetSync(),
-              validPlugin1Directory.path,
-            );
+            for (final buildMode in ['Debug', 'Profile', 'Release']) {
+              expect(
+                project.flutterSwiftPackagesDirectory
+                    .childDirectory(buildMode)
+                    .childLink('valid_plugin_1'),
+                exists,
+              );
+              expect(
+                project.flutterSwiftPackagesDirectory
+                    .childDirectory(buildMode)
+                    .childLink('valid_plugin_1')
+                    .targetSync(),
+                validPlugin1Directory.path,
+              );
+            }
+
             expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
@@ -124,6 +137,8 @@ $_doubleIndent
 //
 
 import PackageDescription
+
+let mode = "Debug"
 
 let package = Package(
     name: "FlutterGeneratedPluginSwiftPackage",
@@ -134,7 +149,7 @@ let package = Package(
         .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
     ],
     dependencies: [
-        .package(name: "valid_plugin_1", path: "../.packages/valid_plugin_1")
+        .package(name: "valid_plugin_1", path: "../\\(mode)/valid_plugin_1")
     ],
     targets: [
         .target(
@@ -208,16 +223,34 @@ let package = Package(
                 ? '.iOS("13.0")'
                 : '.macOS("10.15")';
             expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
-            expect(project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1'), exists);
-            expect(
-              project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1').targetSync(),
-              validPlugin1Directory.path,
-            );
-            expect(project.relativeSwiftPackagesDirectory.childLink('valid_plugin_2'), exists);
-            expect(
-              project.relativeSwiftPackagesDirectory.childLink('valid_plugin_2').targetSync(),
-              validPlugin2Directory.path,
-            );
+            for (final buildMode in ['Debug', 'Profile', 'Release']) {
+              expect(
+                project.flutterSwiftPackagesDirectory
+                    .childDirectory(buildMode)
+                    .childLink('valid_plugin_1'),
+                exists,
+              );
+              expect(
+                project.flutterSwiftPackagesDirectory
+                    .childDirectory(buildMode)
+                    .childLink('valid_plugin_1')
+                    .targetSync(),
+                validPlugin1Directory.path,
+              );
+              expect(
+                project.flutterSwiftPackagesDirectory
+                    .childDirectory(buildMode)
+                    .childLink('valid_plugin_2'),
+                exists,
+              );
+              expect(
+                project.flutterSwiftPackagesDirectory
+                    .childDirectory(buildMode)
+                    .childLink('valid_plugin_2')
+                    .targetSync(),
+                validPlugin2Directory.path,
+              );
+            }
             expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
@@ -226,6 +259,8 @@ let package = Package(
 //
 
 import PackageDescription
+
+let mode = "Debug"
 
 let package = Package(
     name: "FlutterGeneratedPluginSwiftPackage",
@@ -236,8 +271,8 @@ let package = Package(
         .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
     ],
     dependencies: [
-        .package(name: "valid_plugin_1", path: "../.packages/valid_plugin_1"),
-        .package(name: "valid_plugin_2", path: "../.packages/valid_plugin_2")
+        .package(name: "valid_plugin_1", path: "../\\(mode)/valid_plugin_1"),
+        .package(name: "valid_plugin_2", path: "../\\(mode)/valid_plugin_2")
     ],
     targets: [
         .target(
@@ -360,10 +395,6 @@ class FakeXcodeProject extends Fake implements IosProject {
   @override
   Directory get flutterSwiftPackagesDirectory =>
       hostAppRoot.childDirectory('Flutter').childDirectory('ephemeral').childDirectory('Packages');
-
-  @override
-  Directory get relativeSwiftPackagesDirectory =>
-      flutterSwiftPackagesDirectory.childDirectory('.packages');
 
   @override
   Directory get flutterPluginSwiftPackageDirectory =>

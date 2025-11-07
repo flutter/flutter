@@ -144,11 +144,6 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// The Flutter generated directory for generated Swift packages.
   Directory get flutterSwiftPackagesDirectory => ephemeralDirectory.childDirectory('Packages');
 
-  /// Flutter plugins that support SwiftPM will be symlinked in this directory to keep all
-  /// Swift packages relative to each other.
-  Directory get relativeSwiftPackagesDirectory =>
-      flutterSwiftPackagesDirectory.childDirectory('.packages');
-
   /// The Flutter generated directory for the Swift package handling plugin
   /// dependencies.
   Directory get flutterPluginSwiftPackageDirectory =>

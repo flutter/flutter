@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/macos/darwin_dependency_management.dart';
@@ -838,8 +839,13 @@ class FakeSwiftPackageManager extends Fake implements SwiftPackageManager {
   Future<void> generatePluginsSwiftPackage(
     List<Plugin> plugins,
     FlutterDarwinPlatform platform,
-    XcodeBasedProject project,
-  ) async {
+    XcodeBasedProject project, {
+    List<BuildMode> buildModes = const <BuildMode>[
+      BuildMode.debug,
+      BuildMode.profile,
+      BuildMode.release,
+    ],
+  }) async {
     generated = true;
     expect(plugins, expectedPlugins);
   }

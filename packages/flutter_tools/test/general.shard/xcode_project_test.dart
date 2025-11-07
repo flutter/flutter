@@ -53,15 +53,6 @@ void main() {
       expect(project.flutterSwiftPackagesDirectory.path, 'app_name/ios/Flutter/ephemeral/Packages');
     });
 
-    testWithoutContext('relativeSwiftPackagesDirectory', () {
-      final fs = MemoryFileSystem.test();
-      final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
-      expect(
-        project.relativeSwiftPackagesDirectory.path,
-        'app_name/ios/Flutter/ephemeral/Packages/.packages',
-      );
-    });
-
     testWithoutContext('flutterPluginSwiftPackageDirectory', () {
       final fs = MemoryFileSystem.test();
       final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
@@ -466,15 +457,6 @@ void main() {
       expect(
         project.flutterSwiftPackagesDirectory.path,
         'app_name/macos/Flutter/ephemeral/Packages',
-      );
-    });
-
-    testWithoutContext('relativeSwiftPackagesDirectory', () {
-      final fs = MemoryFileSystem.test();
-      final project = MacOSProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
-      expect(
-        project.relativeSwiftPackagesDirectory.path,
-        'app_name/macos/Flutter/ephemeral/Packages/.packages',
       );
     });
 

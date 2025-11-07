@@ -160,6 +160,15 @@ Future<List<String>> _xcodeBuildSettingsLines({
   xcodeBuildSettings.add(
     'FLUTTER_APPLICATION_PATH=${globals.fs.path.normalize(project.directory.path)}',
   );
+  if (useMacOSConfig) {
+    xcodeBuildSettings.add(
+      'FLUTTER_PLUGINS_SWIFT_PACKAGE_PATH=${globals.fs.path.normalize(project.macos.flutterPluginSwiftPackageManifest.path)}',
+    );
+  } else {
+    xcodeBuildSettings.add(
+      'FLUTTER_PLUGINS_SWIFT_PACKAGE_PATH=${globals.fs.path.normalize(project.ios.flutterPluginSwiftPackageManifest.path)}',
+    );
+  }
 
   // Tell CocoaPods behavior to codesign in parallel with rest of scripts to speed it up.
   // Value must be "true", not "YES". https://github.com/CocoaPods/CocoaPods/pull/6088

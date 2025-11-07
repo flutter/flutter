@@ -18,6 +18,7 @@ const _swiftPackageTemplate = '''
 
 import PackageDescription
 
+{{#hasSwiftCodeBefore}}\n{{swiftCodeBefore}}\n\n{{/hasSwiftCodeBefore}}
 let package = Package(
     name: "{{packageName}}",
     {{#platforms}}
@@ -62,13 +63,15 @@ class SwiftPackage {
     required List<SwiftPackagePackageDependency> dependencies,
     required List<SwiftPackageTarget> targets,
     required TemplateRenderer templateRenderer,
+    String? swiftCodeBeforePackageDefinition,
   }) : _manifest = manifest,
        _name = name,
        _platforms = platforms,
        _products = products,
        _dependencies = dependencies,
        _targets = targets,
-       _templateRenderer = templateRenderer;
+       _templateRenderer = templateRenderer,
+       _swiftCodeBeforePackageDefinition = swiftCodeBeforePackageDefinition;
 
   /// [File] for Package.swift.
   final File _manifest;
@@ -90,6 +93,8 @@ class SwiftPackage {
 
   final TemplateRenderer _templateRenderer;
 
+  final String? _swiftCodeBeforePackageDefinition;
+
   /// Context for the [_swiftPackageTemplate] template.
   Map<String, Object> get _templateContext => <String, Object>{
     'swiftToolsVersion': minimumSwiftToolchainVersion,
@@ -99,6 +104,8 @@ class SwiftPackage {
     'products': _formatProducts(),
     'dependencies': _formatDependencies(),
     'targets': _formatTargets(),
+    'hasSwiftCodeBefore': _swiftCodeBeforePackageDefinition != null,
+    'swiftCodeBefore': _swiftCodeBeforePackageDefinition ?? '',
   };
 
   /// Create a Package.swift using settings from [_templateContext].

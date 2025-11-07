@@ -506,10 +506,6 @@ class FakeMacOSProject extends Fake implements MacOSProject {
       hostAppRoot.childDirectory('Flutter').childDirectory('ephemeral').childDirectory('Packages');
 
   @override
-  Directory get relativeSwiftPackagesDirectory =>
-      flutterSwiftPackagesDirectory.childDirectory('.packages');
-
-  @override
   Directory get flutterPluginSwiftPackageDirectory =>
       flutterSwiftPackagesDirectory.childDirectory('FlutterGeneratedPluginSwiftPackage');
 
@@ -553,10 +549,6 @@ class FakeIosProject extends Fake implements IosProject {
   @override
   Directory get flutterSwiftPackagesDirectory =>
       hostAppRoot.childDirectory('Flutter').childDirectory('ephemeral').childDirectory('Packages');
-
-  @override
-  Directory get relativeSwiftPackagesDirectory =>
-      flutterSwiftPackagesDirectory.childDirectory('.packages');
 
   @override
   Directory get flutterPluginSwiftPackageDirectory =>
