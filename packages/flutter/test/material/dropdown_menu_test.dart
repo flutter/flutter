@@ -4966,6 +4966,95 @@ void main() {
     await tester.pump();
     expect(find.byType(MenuItemButton), findsWidgets);
   });
+
+  // The variants to test in the focus handling test.
+  final ValueVariant<TextInputAction> focusVariants = ValueVariant<TextInputAction>(
+    TextInputAction.values.toSet(),
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/177009.
+  testWidgets('Handles focus correctly when TextInputAction is invoked', (
+    WidgetTester tester,
+  ) async {
+    Future<void> ensureCorrectFocusHandlingForAction(
+      TextInputAction textInputAction, {
+      required bool shouldLoseFocus,
+      bool shouldFocusNext = false,
+      bool shouldFocusPrevious = false,
+    }) async {
+      final FocusNode previousFocusNode = FocusNode();
+      final FocusNode textFieldFocusNode = FocusNode();
+      final FocusNode nextFocusNode = FocusNode();
+      addTearDown(previousFocusNode.dispose);
+      addTearDown(textFieldFocusNode.dispose);
+      addTearDown(nextFocusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                TextButton(
+                  focusNode: previousFocusNode,
+                  child: const Text('Previous'),
+                  onPressed: () {},
+                ),
+                DropdownMenu<TestMenu>(
+                  dropdownMenuEntries: menuChildren,
+                  focusNode: textFieldFocusNode,
+                  textInputAction: textInputAction,
+                  requestFocusOnTap: true,
+                  showTrailingIcon: false,
+                ),
+                TextButton(focusNode: nextFocusNode, child: const Text('Next'), onPressed: () {}),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(textFieldFocusNode.hasFocus, isFalse);
+
+      // Tap on DropdownMenu to request focus on the TextField.
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pumpAndSettle();
+      expect(textFieldFocusNode.hasFocus, isTrue);
+
+      await tester.testTextInput.receiveAction(textInputAction);
+      await tester.pumpAndSettle();
+
+      expect(previousFocusNode.hasFocus, equals(shouldFocusPrevious));
+      expect(textFieldFocusNode.hasFocus, equals(!shouldLoseFocus));
+      expect(nextFocusNode.hasFocus, equals(shouldFocusNext));
+    }
+
+    // The expectations for each of the types of TextInputAction.
+    const Map<TextInputAction, bool> actionShouldLoseFocus = <TextInputAction, bool>{
+      TextInputAction.none: false,
+      TextInputAction.unspecified: false,
+      TextInputAction.done: true,
+      TextInputAction.go: true,
+      TextInputAction.search: true,
+      TextInputAction.send: true,
+      TextInputAction.continueAction: false,
+      TextInputAction.join: false,
+      TextInputAction.route: false,
+      TextInputAction.emergencyCall: false,
+      TextInputAction.newline: true,
+      TextInputAction.next: true,
+      TextInputAction.previous: true,
+    };
+
+    final TextInputAction textInputAction = focusVariants.currentValue!;
+    expect(actionShouldLoseFocus.containsKey(textInputAction), isTrue);
+
+    await ensureCorrectFocusHandlingForAction(
+      textInputAction,
+      shouldLoseFocus: actionShouldLoseFocus[textInputAction]!,
+      shouldFocusNext: textInputAction == TextInputAction.next,
+      shouldFocusPrevious: textInputAction == TextInputAction.previous,
+    );
+  }, variant: focusVariants);
 }
 
 enum TestMenu {
