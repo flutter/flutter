@@ -538,7 +538,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
     if (selectedText != null) {
       _searchController.value = TextEditingValue(text: selectedText);
     }
-    Navigator.of(context).pop();
+    Navigator.of(context).maybePop();
   }
 
   bool toggleVisibility() {
