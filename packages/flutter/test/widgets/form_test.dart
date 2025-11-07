@@ -839,6 +839,7 @@ void main() {
       expect(find.text(errorText('foo')!), findsNothing);
     },
   );
+
   testWidgets(
     'Does not auto-validate before value changes when autovalidateMode is set to onUserInteractionIfError',
     (WidgetTester tester) async {
