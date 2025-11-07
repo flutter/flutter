@@ -1109,20 +1109,24 @@ class _CupertinoDragGestureController<T> {
   }
 }
 
-class _CupertinoSheetScrollController extends DraggableScrollableSheetScrollController {
-  _CupertinoSheetScrollController({required super.extent});
-  // @override
-  // _DraggableScrollableSheetScrollPosition createScrollPosition(
-  //   ScrollPhysics physics,
-  //   ScrollContext context,
-  //   ScrollPosition? oldPosition,
-  // ) {
-  //   return _DraggableScrollableSheetScrollPosition(
-  //     physics: _NeverUserScrollableScrollPhysics(parent: physics),
-  //     context: context,
-  //     oldPosition: oldPosition,
-  //   );
-  // }
+class _CupertinoSheetScrollController extends ScrollController {
+  _CupertinoSheetScrollController({required this.extent});
+
+  _CupertinoDraggableSheetExtent extent;
+
+  @override
+  _DraggableScrollableSheetScrollPosition createScrollPosition(
+    ScrollPhysics physics,
+    ScrollContext context,
+    ScrollPosition? oldPosition,
+  ) {
+    return _DraggableScrollableSheetScrollPosition(
+      physics: physics.applyTo(const AlwaysScrollableScrollPhysics()),
+      context: context,
+      oldPosition: oldPosition,
+      getExtent: () => extent,
+    );
+  }
 
   // @override
   // _DraggableScrollableSheetScrollPosition get position =>
@@ -1146,10 +1150,12 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
     required super.physics,
     required super.context,
     super.oldPosition,
+    required this.getExtent,
   });
 
   VoidCallback? _dragCancelCallback;
   final Set<AnimationController> _ballisticControllers = <AnimationController>{};
+  final _CupertinoDraggableSheetExtent Function() getExtent;
   bool get listShouldScroll => pixels > 0.0;
 
   @override
@@ -1186,7 +1192,24 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   }
 
   @override
+  void applyUserOffset(double delta) {
+    // Start user gesture
+
+    // if (!listShouldScroll &&
+    //     (!(extent.isAtMin || extent.isAtMax) ||
+    //         (extent.isAtMin && delta < 0) ||
+    //         (extent.isAtMax && delta > 0))) {
+    if (!listShouldScroll) {
+      // Maybe only need to report delta and let drag controller handle it.
+      // extent.reportDelta(-delta, context.notificationContext!);
+    } else {
+      super.applyUserOffset(delta);
+    }
+  }
+
+  @override
   void goBallistic(double velocity) {
+    // End drag gesture.
     if ((velocity == 0.0) ||
         (velocity < 0.0 && listShouldScroll) ||
         (velocity > 0.0 && pixels != maxScrollExtent)) {
@@ -1247,20 +1270,6 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   }
 }
 
-class _NeverUserScrollableScrollPhysics extends ScrollPhysics {
-  /// Creates a scroll physics that prevents scrolling with user input, for example
-  /// by dragging, but still allows for programmatic scrolling.
-  const _NeverUserScrollableScrollPhysics({super.parent});
-
-  @override
-  _NeverUserScrollableScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return _NeverUserScrollableScrollPhysics(parent: buildParent(ancestor));
-  }
-
-  @override
-  bool get allowUserScrolling => false;
-}
-
 class _CupertinoDraggableScrollableSheet<T> extends StatefulWidget {
   const _CupertinoDraggableScrollableSheet({
     super.key,
@@ -1286,20 +1295,13 @@ class _CupertinoDraggableScrollableSheet<T> extends StatefulWidget {
 class _CupertinoDraggableScrollableSheetState<T>
     extends State<_CupertinoDraggableScrollableSheet<T>> {
   late _CupertinoSheetScrollController _scrollController;
-  late DraggableSheetExtent _extent;
+  late _CupertinoDraggableSheetExtent _extent;
   _CupertinoDragGestureController<T>? _dragGestureController;
 
   @override
   void initState() {
     super.initState();
-    _extent = DraggableSheetExtent(
-      minSize: 0,
-      maxSize: 1.0,
-      snap: false,
-      snapSizes: <double>[],
-      initialSize: 1.0,
-      shouldCloseOnMinExtent: false,
-    );
+    _extent = _CupertinoDraggableSheetExtent();
     _scrollController = _CupertinoSheetScrollController(extent: _extent);
   }
 
@@ -1339,6 +1341,80 @@ class _CupertinoDraggableScrollableSheetState<T>
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(context, _scrollController);
+    // return widget.builder(context, _scrollController);
+    return ValueListenableBuilder<double>(
+      valueListenable: _extent._delta,
+      builder: (BuildContext context, double delta, Widget? child) {
+        _dragUpdate(delta);
+        return child!;
+      },
+      child: widget.builder(context, _scrollController),
+    );
+  }
+}
+
+class _CupertinoDraggableSheetExtent {
+  _CupertinoDraggableSheetExtent({ValueNotifier<double>? delta})
+    : _delta = delta ?? ValueNotifier<double>(0.0) {
+    assert(debugMaybeDispatchCreated('widgets', 'DraggableSheetExtent', this));
+  }
+
+  VoidCallback? _cancelActivity;
+
+  final ValueNotifier<double> _delta;
+
+  // May need to be passed callbacks to check this;
+  // bool get isAtMin => minSize >= _currentSize.value;
+  // bool get isAtMax => maxSize <= _currentSize.value;
+
+  /// Start an activity that affects the sheet and register a cancel call back
+  /// that will be called if another activity starts.
+  ///
+  /// The `onCanceled` callback will get called even if the subsequent activity
+  /// started after this one finished, so `onCanceled` must be safe to call at
+  /// any time.
+  void startActivity({required VoidCallback onCanceled}) {
+    _cancelActivity?.call();
+    _cancelActivity = onCanceled;
+  }
+
+  /// The scroll position gets inputs in terms of pixels, but the size is
+  /// expected to be expressed as a number between 0..1.
+  ///
+  /// This should only be called to respond to a user drag. To update the
+  /// size in response to a programmatic call, use [updateSize] directly.
+  void reportDelta(double delta, BuildContext context) {
+    // Stop any playing sheet animations.
+    _cancelActivity?.call();
+    _cancelActivity = null;
+
+    // updateSize(currentSize + pixelsToSize(delta), context);
+    // send notification.
+  }
+
+  /// Set the size to the new value. [newSize] should be a number between
+  /// [minSize] and [maxSize].
+  ///
+  /// This can be triggered by a programmatic (e.g. controller triggered) change
+  /// or a user drag.
+  // void updateSize(double newSize, BuildContext context) {
+  //   final double clampedSize = clampDouble(newSize, minSize, maxSize);
+  //   if (_currentSize.value == clampedSize) {
+  //     return;
+  //   }
+  //   _currentSize.value = clampedSize;
+  //   DraggableScrollableNotification(
+  //     minExtent: minSize,
+  //     maxExtent: maxSize,
+  //     extent: currentSize,
+  //     initialExtent: initialSize,
+  //     context: context,
+  //     shouldCloseOnMinExtent: shouldCloseOnMinExtent,
+  //   ).dispatch(context);
+  // }
+
+  void dispose() {
+    assert(debugMaybeDispatchDisposed(this));
+    _delta.dispose();
   }
 }
