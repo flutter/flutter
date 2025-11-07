@@ -249,7 +249,7 @@ class ChromiumLauncher {
       '--no-sandbox',
 
       if (headless) ...<String>['--headless', '--disable-gpu', '--window-size=2400,1800'],
-      if (enableDebugLogging) ...<String>['--enable-logging=stderr', '--v=1'],
+      if (enableDebugLogging) ...<String>['--enable-logging=stderr', '--v=stderr'],
       ...webBrowserFlags,
       url,
     ];
@@ -633,11 +633,21 @@ class Chromium {
 
     if (_enableDebugLogging) {
       _logger.printTrace('${'=' * 20} ↓ Chromium debug log ↓ ${'=' * 20}');
-      final File debugLogFile = _userDataDir!.childFile('chrome_debug.log');
+      final File debugLogFile = _userDataDir!
+          .childDirectory('Default')
+          .childFile('chrome_debug.log');
       if (debugLogFile.existsSync()) {
         _logger.printTrace(debugLogFile.readAsStringSync());
       } else {
         _logger.printTrace('No debug log found at ${debugLogFile.path}');
+        if (_userDataDir.existsSync()) {
+          _logger.printTrace(
+            'Contents of user data dir (${_userDataDir.path}):\n'
+            '${_userDataDir.listSync(recursive: true).map((FileSystemEntity entity) => '-- ${entity.path}').join('\n')}',
+          );
+        } else {
+          _logger.printTrace('User data dir ${_userDataDir.path} does not exist!');
+        }
       }
       _logger.printTrace('${'=' * 20} ↑ Chromium debug log ↑ ${'=' * 20}');
     }
