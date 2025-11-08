@@ -2225,21 +2225,21 @@ void main() {
       expect(focusNodeTwo.hasPrimaryFocus, isFalse);
       expect(focusNodeCancel.hasPrimaryFocus, isFalse);
 
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
 
       expect(focusNodeOne.hasPrimaryFocus, isTrue);
       expect(focusNodeTwo.hasPrimaryFocus, isFalse);
       expect(focusNodeCancel.hasPrimaryFocus, isFalse);
 
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
 
       expect(focusNodeOne.hasPrimaryFocus, isFalse);
       expect(focusNodeTwo.hasPrimaryFocus, isTrue);
       expect(focusNodeCancel.hasPrimaryFocus, isFalse);
 
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
 
       expect(focusNodeOne.hasPrimaryFocus, isFalse);
@@ -2277,7 +2277,7 @@ void main() {
       await tester.tap(find.text('Go'));
       await tester.pumpAndSettle();
 
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
 
       expect(isOneSelected, isFalse);
