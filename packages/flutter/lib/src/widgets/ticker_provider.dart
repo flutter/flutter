@@ -157,7 +157,7 @@ class TickerMode extends StatefulWidget {
   /// it is moved to a new location in the tree where it may have a different
   /// [TickerMode] ancestor. When this happens, the widget must manually
   /// unsubscribe from the old listenable, obtain a new one from the new ancestor
-  /// [TickerMode] by calling this method again, and re-subscribe to it
+  /// [TickerMode] by calling this method again, and re-subscribe to it.
   /// [StatefulWidget]s can, for example, do this in [State.activate],
   /// which is called after the widget has been moved to a new location.
   ///
