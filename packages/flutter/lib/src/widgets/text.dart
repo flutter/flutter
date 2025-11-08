@@ -739,9 +739,9 @@ class Text extends StatelessWidget {
         children: textSpan != null ? <InlineSpan>[textSpan!] : null,
       ),
     );
-    final StrutStyle? effectiveStrutStyle = strutStyle != null && lineHeightScaleFactor != null
-        ? strutStyle!.merge(StrutStyle(height: lineHeightScaleFactor))
-        : strutStyle;
+    final StrutStyle? effectiveStrutStyle = strutStyle?.merge(
+      StrutStyle(height: lineHeightScaleFactor),
+    );
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     final TextScaler textScaler = switch ((this.textScaler, textScaleFactor)) {
       (final TextScaler textScaler, _) => textScaler,
