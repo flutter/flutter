@@ -35,6 +35,14 @@ class TestRasterizer extends Rasterizer {
   List<LayerTree> treesRenderedInView(EngineFlutterView view) {
     return viewRasterizers[view]!.treesRendered;
   }
+
+  @override
+  Surface createPictureToImageSurface() {
+    throw UnimplementedError();
+  }
+
+  @override
+  SurfaceProvider get surfaceProvider => throw UnimplementedError();
 }
 
 class TestViewRasterizer extends ViewRasterizer {
@@ -46,8 +54,8 @@ class TestViewRasterizer extends ViewRasterizer {
   DisplayCanvasFactory<DisplayCanvas> get displayFactory => throw UnimplementedError();
 
   @override
-  void prepareToDraw() {
-    // Do nothing
+  Future<void> prepareToDraw() {
+    return Future<void>.value();
   }
 
   @override

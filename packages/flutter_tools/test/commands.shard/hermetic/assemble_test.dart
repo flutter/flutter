@@ -86,6 +86,35 @@ void main() {
   );
 
   testUsingContext(
+    'flutter assemble can parse empty defines',
+    () async {
+      final CommandRunner<void> commandRunner = createTestCommandRunner(
+        AssembleCommand(
+          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            expect(environment.defines, const {'DeferredComponents': 'false'});
+          }),
+        ),
+      );
+      await commandRunner.run(<String>[
+        'assemble',
+        '-o Output',
+        '--DartDefines=',
+        'debug_macos_bundle_flutter_assets',
+      ]);
+
+      expect(testLogger.traceText, contains('build succeeded.'));
+    },
+    overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
     'flutter assemble can parse inputs',
     () async {
       final command = AssembleCommand(

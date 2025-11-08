@@ -72,18 +72,10 @@ mergeInto(LibraryManager.library, {
       };
     }
 
+    const handleToContextLostHandlerMap = new Map();
     const handleToCanvasMap = new Map();
     const associatedObjectsMap = new Map();
-    _skwasm_setAssociatedObjectOnThread = function(threadId, pointer, object) {
-      skwasm_postMessage({
-        skwasmMessage: 'setAssociatedObject',
-        pointer,
-        object,
-      }, [object], threadId);
-    };
-    _skwasm_getAssociatedObject = function(pointer) {
-      return associatedObjectsMap.get(pointer);
-    };
+
     _skwasm_connectThread = function(threadId) {
       const eventListener = function(data) {
         const skwasmMessage = data.skwasmMessage;
@@ -91,12 +83,35 @@ mergeInto(LibraryManager.library, {
           return;
         }
         switch (skwasmMessage) {
+          case 'transferCanvas':
+            _surface_receiveCanvasOnWorker(
+              data.surface,
+              data.canvas,
+              data.callbackId,
+            );
+            return;
+          case 'onInitialized':
+            _surface_onInitialized(data.surface, data.callbackId);
+            return;
+          case 'resizeSurface':
+            _surface_resizeOnWorker(data.surface, data.width, data.height, data.callbackId);
+            return;
+          case 'onResizeComplete':
+            _surface_onResizeComplete(data.surface, data.callbackId);
+            return;
+          case 'triggerContextLoss':
+            _surface_triggerContextLossOnWorker(data.surface, data.callbackId);
+            return;
+          case 'onContextLossTriggered':
+            _surface_onContextLossTriggered(data.surface, data.callbackId);
+            return;
+          case 'reportContextLost':
+            _surface_reportContextLost(data.surface, data.callbackId);
+            return;
           case 'renderPictures':
             _surface_renderPicturesOnWorker(
               data.surface,
               data.pictures,
-              data.width,
-              data.height,
               data.pictureCount,
               data.callbackId,
               skwasm_getCurrentTimestamp());
@@ -146,45 +161,83 @@ mergeInto(LibraryManager.library, {
       };
       skwasm_registerMessageListener(threadId, eventListener);
     };
-    _skwasm_dispatchRenderPictures = function (threadId, surfaceHandle, pictures, width, height, pictureCount, callbackId) {
+
+    // Associated Objects
+    _skwasm_setAssociatedObjectOnThread = function(threadId, pointer, object) {
       skwasm_postMessage({
-        skwasmMessage: 'renderPictures',
-        surface: surfaceHandle,
-        pictures,
-        width,
-        height,
-        pictureCount,
-        callbackId,
+        skwasmMessage: 'setAssociatedObject',
+        pointer,
+        object,
+      }, [object], threadId);
+    };
+    _skwasm_getAssociatedObject = function(pointer) {
+      return associatedObjectsMap.get(pointer);
+    };
+    _skwasm_disposeAssociatedObjectOnThread = function(threadId, pointer) {
+      skwasm_postMessage({
+        skwasmMessage: 'disposeAssociatedObject',
+        pointer,
       }, [], threadId);
     };
-    _skwasm_createOffscreenCanvas = function(width, height) {
-      const canvas = new OffscreenCanvas(width, height);
-      var contextAttributes = {
-        majorVersion: 2,
-        alpha: true,
-        depth: true,
-        stencil: true,
-        antialias: false,
-        premultipliedAlpha: true,
-        preserveDrawingBuffer: false,
-        powerPreference: 'default',
-        failIfMajorPerformanceCaveat: false,
-        enableExtensionsByDefault: true,
-      };
-      const contextHandle = GL.createContext(canvas, contextAttributes);
-      handleToCanvasMap.set(contextHandle, canvas);
-      return contextHandle;
+
+    // Surface Lifecycle
+    _skwasm_dispatchDisposeSurface = function(threadId, surface) {
+      skwasm_postMessage({
+        skwasmMessage: 'disposeSurface',
+        surface,
+      }, [], threadId);
+    }
+
+    // Surface Setup
+    _skwasm_dispatchTransferCanvas = function (threadId, surfaceHandle, canvas, callbackId) {
+      skwasm_postMessage({
+        skwasmMessage: 'transferCanvas',
+        surface: surfaceHandle,
+        canvas,
+        callbackId,
+      }, [canvas], threadId);
+    };
+    _skwasm_reportInitialized = function (surfaceHandle, contextLostCallbackId, callbackId) {
+      skwasm_postMessage({
+        skwasmMessage: 'onInitialized',
+        surface: surfaceHandle,
+        contextLostCallbackId,
+        callbackId,
+      }, []);
+    };
+
+    // Resizing
+    _skwasm_dispatchResizeSurface = function (threadId, surface, width, height, callbackId) {
+      skwasm_postMessage({
+        skwasmMessage: 'resizeSurface',
+        surface,
+        width,
+        height,
+        callbackId,
+      }, [], threadId);
+    }
+    _skwasm_reportResizeComplete = function (surfaceHandle, callbackId) {
+      skwasm_postMessage({
+        skwasmMessage: 'onResizeComplete',
+        surface: surfaceHandle,
+        callbackId,
+      }, []);
     };
     _skwasm_resizeCanvas = function(contextHandle, width, height) {
       const canvas = handleToCanvasMap.get(contextHandle);
       canvas.width = width;
       canvas.height = height;
     };
-    _skwasm_captureImageBitmap = function (contextHandle, imageBitmaps) {
-      if (!imageBitmaps) imageBitmaps = Array();
-      const canvas = handleToCanvasMap.get(contextHandle);
-      imageBitmaps.push(canvas.transferToImageBitmap());
-      return imageBitmaps;
+
+    // Rendering
+    _skwasm_dispatchRenderPictures = function (threadId, surfaceHandle, pictures, pictureCount, callbackId) {
+      skwasm_postMessage({
+        skwasmMessage: 'renderPictures',
+        surface: surfaceHandle,
+        pictures,
+        pictureCount,
+        callbackId,
+      }, [], threadId);
     };
     _skwasm_resolveAndPostImages = async function (surfaceHandle, imageBitmaps, rasterStart, callbackId) {
       if (!imageBitmaps) imageBitmaps = Array();
@@ -198,33 +251,14 @@ mergeInto(LibraryManager.library, {
         rasterEnd,
       }, [...imageBitmaps]);
     };
-    _skwasm_createGlTextureFromTextureSource = function(textureSource, width, height) {
-      const glCtx = GL.currentContext.GLctx;
-      const newTexture = glCtx.createTexture();
-      glCtx.bindTexture(glCtx.TEXTURE_2D, newTexture);
-      glCtx.pixelStorei(glCtx.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
-
-      glCtx.texImage2D(glCtx.TEXTURE_2D, 0, glCtx.RGBA, width, height, 0, glCtx.RGBA, glCtx.UNSIGNED_BYTE, textureSource);
-
-      glCtx.pixelStorei(glCtx.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
-      glCtx.bindTexture(glCtx.TEXTURE_2D, null);
-
-      const textureId = GL.getNewId(GL.textures);
-      GL.textures[textureId] = newTexture;
-      return textureId;
+    _skwasm_captureImageBitmap = function (contextHandle, imageBitmaps) {
+      if (!imageBitmaps) imageBitmaps = Array();
+      const canvas = handleToCanvasMap.get(contextHandle);
+      imageBitmaps.push(canvas.transferToImageBitmap());
+      return imageBitmaps;
     };
-    _skwasm_disposeAssociatedObjectOnThread = function(threadId, pointer) {
-      skwasm_postMessage({
-        skwasmMessage: 'disposeAssociatedObject',
-        pointer,
-      }, [], threadId);
-    };
-    _skwasm_dispatchDisposeSurface = function(threadId, surface) {
-      skwasm_postMessage({
-        skwasmMessage: 'disposeSurface',
-        surface,
-      }, [], threadId);
-    }
+
+    // Image Rasterization
     _skwasm_dispatchRasterizeImage = function(threadId, surface, image, format, callbackId) {
       skwasm_postMessage({
         skwasmMessage: 'rasterizeImage',
@@ -242,6 +276,89 @@ mergeInto(LibraryManager.library, {
         callbackId,
       });
     }
+
+    // Context Loss
+    _skwasm_dispatchTriggerContextLoss = function (threadId, surfaceHandle, callbackId) {
+      skwasm_postMessage({
+        skwasmMessage: 'triggerContextLoss',
+        surface: surfaceHandle,
+        callbackId,
+      }, [], threadId);
+    };
+    _skwasm_reportContextLossTriggered = function (surfaceHandle, callbackId) {
+      skwasm_postMessage({
+        skwasmMessage: 'onContextLossTriggered',
+        surface: surfaceHandle,
+        callbackId,
+      }, []);
+    };
+    _skwasm_reportContextLost = function (surfaceHandle, callbackId) {
+      skwasm_postMessage({
+        skwasmMessage: 'reportContextLost',
+        surface: surfaceHandle,
+        callbackId,
+      }, []);
+    };
+    _skwasm_triggerContextLossOnCanvas = function () {
+      const glCtx = GL.currentContext.GLctx;
+      glCtx.getExtension("WEBGL_lose_context").loseContext();
+    };
+
+    // GL Context
+    _skwasm_getGlContextForCanvas = function (canvas, surfaceHandle) {
+      var contextAttributes = {
+        majorVersion: 2,
+        alpha: true,
+        depth: true,
+        stencil: true,
+        antialias: false,
+        premultipliedAlpha: true,
+        preserveDrawingBuffer: false,
+        powerPreference: 'default',
+        failIfMajorPerformanceCaveat: false,
+        enableExtensionsByDefault: true,
+      };
+      const contextHandle = GL.createContext(canvas, contextAttributes);
+      handleToCanvasMap.set(contextHandle, canvas);
+
+      // Register an event listener for the context lost event.
+      var contextLostHandler;
+      contextLostHandler = function (e) {
+        e.preventDefault();
+        _surface_onContextLost(surfaceHandle);
+        canvas.removeEventListener('webglcontextlost', contextLostHandler);
+      }
+      canvas.addEventListener('webglcontextlost', contextLostHandler);
+      handleToContextLostHandlerMap.set(contextHandle, contextLostHandler);
+      return contextHandle;
+    };
+    _skwasm_destroyContext = function (contextHandle) {
+      const canvas = handleToCanvasMap.get(contextHandle);
+      const handler = handleToContextLostHandlerMap.get(contextHandle);
+      if (canvas && handler) {
+        canvas.removeEventListener('webglcontextlost', handler);
+      }
+      GL.deleteContext(contextHandle);
+      handleToCanvasMap.delete(contextHandle);
+      handleToContextLostHandlerMap.delete(contextHandle);
+    };
+
+    // Texture Sources
+    _skwasm_createGlTextureFromTextureSource = function(textureSource, width, height) {
+      const glCtx = GL.currentContext.GLctx;
+      const newTexture = glCtx.createTexture();
+      glCtx.bindTexture(glCtx.TEXTURE_2D, newTexture);
+      glCtx.pixelStorei(glCtx.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+
+      glCtx.texImage2D(glCtx.TEXTURE_2D, 0, glCtx.RGBA, width, height, 0, glCtx.RGBA, glCtx.UNSIGNED_BYTE, textureSource);
+
+      glCtx.pixelStorei(glCtx.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+      glCtx.bindTexture(glCtx.TEXTURE_2D, null);
+
+      const textureId = GL.getNewId(GL.textures);
+      GL.textures[textureId] = newTexture;
+      return textureId;
+    };
   },
   $skwasm_registerMessageListener: function() {},
   $skwasm_registerMessageListener__deps: ['$skwasm_support_setup'],
@@ -259,10 +376,28 @@ mergeInto(LibraryManager.library, {
   skwasm_disposeAssociatedObjectOnThread__deps: ['$skwasm_support_setup'],
   skwasm_connectThread: function() {},
   skwasm_connectThread__deps: ['$skwasm_support_setup', '$skwasm_registerMessageListener', '$skwasm_getCurrentTimestamp'],
+  skwasm_dispatchTransferCanvas: function () { },
+  skwasm_dispatchTransferCanvas__deps: ['$skwasm_support_setup'],
+  skwasm_reportInitialized: function () { },
+  skwasm_reportInitialized__deps: ['$skwasm_support_setup'],
+  skwasm_reportResizeComplete: function () { },
+  skwasm_reportResizeComplete__deps: ['$skwasm_support_setup'],
+  skwasm_getGlContextForCanvas: function () { },
+  skwasm_getGlContextForCanvas__deps: ['$skwasm_support_setup'],
+  skwasm_dispatchTriggerContextLoss: function () { },
+  skwasm_dispatchTriggerContextLoss__deps: ['$skwasm_support_setup'],
+  skwasm_triggerContextLossOnCanvas: function () { },
+  skwasm_triggerContextLossOnCanvas__deps: ['$skwasm_support_setup'],
+  skwasm_reportContextLossTriggered: function () { },
+  skwasm_reportContextLossTriggered__deps: ['$skwasm_support_setup'],
+  skwasm_reportContextLost: function () { },
+  skwasm_reportContextLost__deps: ['$skwasm_support_setup'],
+  skwasm_destroyContext: function () { },
+  skwasm_destroyContext__deps: ['$skwasm_support_setup'],
+  skwasm_dispatchResizeSurface: function () { },
+  skwasm_dispatchResizeSurface__deps: ['$skwasm_support_setup'],
   skwasm_dispatchRenderPictures: function() {},
   skwasm_dispatchRenderPictures__deps: ['$skwasm_support_setup'],
-  skwasm_createOffscreenCanvas: function () {},
-  skwasm_createOffscreenCanvas__deps: ['$skwasm_support_setup'],
   skwasm_resizeCanvas: function () {},
   skwasm_resizeCanvas__deps: ['$skwasm_support_setup'],
   skwasm_captureImageBitmap: function () {},
