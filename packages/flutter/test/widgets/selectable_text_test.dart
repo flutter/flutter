@@ -5623,6 +5623,7 @@ void main() {
       expect(renderEditable.strutStyle?.height, 2.0);
     },
   );
+
   group('context menu', () {
     // Regression test for https://github.com/flutter/flutter/issues/169001.
     testWidgets(

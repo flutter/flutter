@@ -1142,33 +1142,45 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Creates a widget that provides [MediaQueryData] to its descendants.
   const MediaQuery({super.key, required this.data, required super.child});
 
-  /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
-  /// from the given context, but applies the specified text style overrides.
-  ///
-  /// The [context] argument must have a [MediaQuery] in scope.
+  /// Wraps the `child` in a [MediaQuery] with its [MediaQueryData.lineHeightScaleFactorOverride],
+  /// [MediaQueryData.letterSpacingOverride], [MediaQueryData.wordSpacingOverride],
+  /// [MediaQueryData.paragraphSpacingOverride] set to the specified values.
   ///
   /// If a text style override argument is null (the default), then the
-  /// corresponding override in the returned [MediaQueryData] is set to null.
+  /// corresponding override in the updated [MediaQueryData] is set to null.
+  ///
+  /// The returned widget must be inserted in a widget tree below an existing
+  /// [MediaQuery] widget.
   ///
   /// See also:
   ///
   ///  * [MediaQueryData.lineHeightScaleFactorOverride], [MediaQueryData.letterSpacingOverride],
   ///    [MediaQueryData.wordSpacingOverride], [MediaQueryData.paragraphSpacingOverride], the
   ///    affected properties of the [MediaQueryData].
-  MediaQuery.applyTextStyleOverrides({
-    super.key,
-    required BuildContext context,
+  static Widget applyTextStyleOverrides({
+    Key? key,
     required double? lineHeightScaleFactorOverride,
     required double? letterSpacingOverride,
     required double? wordSpacingOverride,
     required double? paragraphSpacingOverride,
-    required super.child,
-  }) : data = MediaQuery.of(context).applyTextStyleOverrides(
-         lineHeightScaleFactorOverride: lineHeightScaleFactorOverride,
-         letterSpacingOverride: letterSpacingOverride,
-         wordSpacingOverride: wordSpacingOverride,
-         paragraphSpacingOverride: paragraphSpacingOverride,
-       );
+    required Widget child,
+  }) {
+    return Builder(
+      key: key,
+      builder: (BuildContext context) {
+        assert(debugCheckHasMediaQuery(context));
+        return MediaQuery(
+          data: MediaQuery.of(context).applyTextStyleOverrides(
+            lineHeightScaleFactorOverride: lineHeightScaleFactorOverride,
+            letterSpacingOverride: letterSpacingOverride,
+            wordSpacingOverride: wordSpacingOverride,
+            paragraphSpacingOverride: paragraphSpacingOverride,
+          ),
+          child: child,
+        );
+      },
+    );
+  }
 
   /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
   /// from the given context, but removes the specified padding.

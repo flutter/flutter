@@ -1116,22 +1116,17 @@ void main() {
           wordSpacingOverride: 9.0,
           paragraphSpacingOverride: 9.0,
         ),
-        child: Builder(
-          builder: (BuildContext context) {
-            return MediaQuery.applyTextStyleOverrides(
-              context: context,
-              lineHeightScaleFactorOverride: 2.0,
-              letterSpacingOverride: 2.0,
-              wordSpacingOverride: 2.0,
-              paragraphSpacingOverride: 2.0,
-              child: Builder(
-                builder: (BuildContext context) {
-                  withTextStyleOverrides = MediaQuery.of(context);
-                  return Container();
-                },
-              ),
-            );
-          },
+        child: MediaQuery.applyTextStyleOverrides(
+          lineHeightScaleFactorOverride: 2.0,
+          letterSpacingOverride: 2.0,
+          wordSpacingOverride: 2.0,
+          paragraphSpacingOverride: 2.0,
+          child: Builder(
+            builder: (BuildContext context) {
+              withTextStyleOverrides = MediaQuery.of(context);
+              return Container();
+            },
+          ),
         ),
       ),
     );
@@ -1151,22 +1146,17 @@ void main() {
           wordSpacingOverride: 9.0,
           paragraphSpacingOverride: 9.0,
         ),
-        child: Builder(
-          builder: (BuildContext context) {
-            return MediaQuery.applyTextStyleOverrides(
-              context: context,
-              lineHeightScaleFactorOverride: null,
-              letterSpacingOverride: null,
-              wordSpacingOverride: null,
-              paragraphSpacingOverride: null,
-              child: Builder(
-                builder: (BuildContext context) {
-                  withTextStyleOverrides = MediaQuery.of(context);
-                  return Container();
-                },
-              ),
-            );
-          },
+        child: MediaQuery.applyTextStyleOverrides(
+          lineHeightScaleFactorOverride: null,
+          letterSpacingOverride: null,
+          wordSpacingOverride: null,
+          paragraphSpacingOverride: null,
+          child: Builder(
+            builder: (BuildContext context) {
+              withTextStyleOverrides = MediaQuery.of(context);
+              return Container();
+            },
+          ),
         ),
       ),
     );
