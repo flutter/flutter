@@ -1119,7 +1119,10 @@ class AdbLogReader extends DeviceLogReader {
     // We expect logcat streams to occasionally contain invalid utf-8,
     // see: https://github.com/flutter/flutter/pull/8864.
     const decoder = Utf8Decoder(reportErrors: false);
-    _adbProcess.stdout.transform(utf8LineDecoder).listen(_onLine);
+    _adbProcess.stdout
+        .transformWithCallSite(decoder)
+        .transform(const LineSplitter())
+        .listen(_onLine);
     _adbProcess.stderr
         .transformWithCallSite(decoder)
         .transform(const LineSplitter())
