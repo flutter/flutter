@@ -9346,4 +9346,21 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('TabBarView does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final TabController controller = TabController(length: 2, vsync: tester);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: TabBarView(controller: controller, children: const <Widget>[Text('X'), Text('Y')]),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TabBarView)), Size.zero);
+    controller.animateTo(1);
+    await tester.pump();
+    await tester.pumpAndSettle();
+  });
 }
