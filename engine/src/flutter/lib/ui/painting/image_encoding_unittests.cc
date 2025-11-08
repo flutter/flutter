@@ -48,8 +48,6 @@ class MockDlImage : public DlImage {
   MOCK_METHOD(size_t, GetApproximateByteSize, (), (const, override));
 };
 
-}  // namespace
-
 class MockSyncSwitch {
  public:
   struct Handlers {
@@ -109,6 +107,8 @@ class MockSnapshotDelegate : public SnapshotDelegate {
  private:
   fml::TaskRunnerAffineWeakPtrFactory<MockSnapshotDelegate> weak_factory_;
 };
+
+}  // namespace
 
 TEST_F(ShellTest, EncodeImageGivesExternalTypedData) {
   auto native_encode_image = [&](Dart_NativeArguments args) {
