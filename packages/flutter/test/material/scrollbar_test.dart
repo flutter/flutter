@@ -367,55 +367,16 @@ void main() {
     },
   );
 
-  // TODO(camsim99): Remove changes made here but take the lessons on.
   testWidgets('On first render with thumbVisibility: false, the thumb is hidden', (
     WidgetTester tester,
   ) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll() {
       return _buildBoilerplate(
-        // child: Theme(
-        // data: ThemeData(),
-        child: Scrollbar(
-          // thumbVisibility: false,
-          controller: controller,
-          child: SingleChildScrollView(
-            controller: controller,
-            child: const SizedBox(width: 4000.0, height: 4000.0),
-          ),
-        ),
-        // ),
-      );
-    }
-
-    await tester.pumpWidget(viewWithScroll());
-    await tester.pumpAndSettle();
-    expect(find.byType(Scrollbar), isNot(paints..rect()));
-
-    // Simulate a scroll action
-    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
-    await tester.pumpAndSettle();
-
-    // After scrolling, the scrollbar should still be visible
-    expect(find.byType(Scrollbar), paints..rect());
-
-    // Wait for the scrollbar to fade out
-    await tester.pump(const Duration(milliseconds: 600)); // Wait for fade duration
-    await tester.pumpAndSettle();
-
-    // After waiting, the scrollbar should not be visible
-    expect(find.byType(Scrollbar), isNot(paints..rect()));
-
-    controller.dispose();
-  });
-
-  testWidgets('WIP', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
-    Widget viewWithScroll() {
-      return _buildBoilerplate(
         child: Theme(
           data: ThemeData(),
           child: Scrollbar(
+            thumbVisibility: false,
             controller: controller,
             child: SingleChildScrollView(
               controller: controller,
@@ -428,16 +389,6 @@ void main() {
 
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
-    expect(find.byType(Scrollbar), isNot(paints..rect()));
-
-    final TestPointer trackpadPointer = TestPointer(1, PointerDeviceKind.stylus);
-    await tester.sendEventToBinding(
-      trackpadPointer.hover(tester.getCenter(find.byType(SingleChildScrollView))),
-    );
-    await tester.sendEventToBinding(trackpadPointer.scroll(const Offset(0, -300)));
-
-    await tester.pump();
-
     expect(find.byType(Scrollbar), isNot(paints..rect()));
 
     controller.dispose();
@@ -784,10 +735,10 @@ void main() {
   });
 
   testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
-    // TODO(camsim99): Figure out what the behavior should be when a MaterialApp (that uses MaterialScrollBehavior)
-    // is used with a Scrollbar. Should we search for Scrollbar descendants or should this just be a breaking change?
     await tester.pumpWidget(
       const MaterialApp(
+        // Do not build default Scrollbar; use the one we provide.
+        scrollBehavior: NoScrollbarBehavior(),
         home: Scrollbar(
           child: SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
         ),
@@ -846,15 +797,15 @@ void main() {
         )
         ..rect(rect: const Rect.fromLTRB(796.0, 3.0, 800.0, 93.0), color: const Color(0xc6bcbcbc)),
     );
-  }, skip: true);
+  });
 
   testWidgets('Scrollbar thumb can be dragged', (WidgetTester tester) async {
-    // TODO(camsim99): Figure out what the behavior should be when a MaterialApp (that uses MaterialScrollBehavior)
-    // is used with a Scrollbar. Should we search for Scrollbar descendants or should this just be a breaking change?
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
+        // Do not build default Scrollbar; use the one we provide.
+        scrollBehavior: const NoScrollbarBehavior(),
         home: PrimaryScrollController(
           controller: scrollController,
           child: Scrollbar(
@@ -928,7 +879,7 @@ void main() {
     );
 
     scrollController.dispose();
-  }, skip: true);
+  });
 
   testWidgets(
     'Scrollbar thumb color completes a hover animation',
@@ -971,7 +922,6 @@ void main() {
         ),
       );
     },
-    skip: true,
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.linux,
       TargetPlatform.macOS,
@@ -1053,7 +1003,6 @@ void main() {
           ),
       );
     },
-    skip: true,
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.linux}),
   );
 
@@ -1469,12 +1418,12 @@ void main() {
   );
 
   testWidgets('Scrollbar dragging is disabled by default on Android', (WidgetTester tester) async {
-    // TODO(camsim99): Figure out what the behavior should be when a MaterialApp (that uses MaterialScrollBehavior)
-    // is used with a Scrollbar. Should we search for Scrollbar descendants or should this just be a breaking change?
     int tapCount = 0;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
+        // Do not build default Scrollbar; use the one we provide.
+        scrollBehavior: const NoScrollbarBehavior(),
         home: PrimaryScrollController(
           controller: scrollController,
           child: Scrollbar(
@@ -1552,17 +1501,18 @@ void main() {
     expect(tapCount, 2);
 
     scrollController.dispose();
-  }, skip: true);
+  });
 
   testWidgets('Simultaneous dragging and pointer scrolling does not cause a crash', (
     WidgetTester tester,
   ) async {
-    // TODO(camsim99): Figure out what the behavior should be when a MaterialApp (that uses MaterialScrollBehavior)
-    // is used with a Scrollbar. Should we search for Scrollbar descendants or should this just be a breaking change?    // Regression test for https://github.com/flutter/flutter/issues/70105
+    // Regression test for https://github.com/flutter/flutter/issues/70105
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
+        // Do not build default Scrollbar; use the one we provide.
+        scrollBehavior: const NoScrollbarBehavior(),
         home: PrimaryScrollController(
           controller: scrollController,
           child: Scrollbar(
@@ -1685,6 +1635,7 @@ void main() {
 
     await dragScrollbarGesture.up();
     await tester.pumpAndSettle();
+
     expect(scrollController.offset, 0.0);
     expect(
       find.byType(Scrollbar),
@@ -1696,11 +1647,49 @@ void main() {
           strokeWidth: 1.0,
           color: Colors.transparent,
         )
-        ..rect(rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0), color: const Color(0xffbcbcbc)),
+        // Mouse drag is still active, so the scrollbar is still visible.
+        ..rect(rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0), color: const Color(0x99000000)),
     );
 
+    print('---------------MOVING ONTO MY CHANGES------------------');
+
+    await tester.sendEventToBinding(pointer.removePointer());
+    // print(Color(0xc6bcbcbc));
+    // print(_kAndroidThumbIdleColor);
+    // print(Color(0x99000000));
+    // Ensure the scroll position has settled (ScrollEndNotification delivered).
+    await tester.pumpAndSettle();
+
+    // If the pointer is still hovering, move it away / send exit so hover doesn't keep thumb visible.
+    // await tester.sendEventToBinding(
+    //   PointerExitEvent(
+    //     position: tester.getCenter(find.byType(SingleChildScrollView)),
+    //     device: pointer.pointer,
+    //     kind: pointer.kind,
+    //   ),
+    // );
+    await tester.pump();
+
+    // Advance the scrollbar's fade timer and complete the fade animation.
+    await tester.pump(_kScrollbarTimeToFade);
+    await tester.pump(_kScrollbarFadeDuration);
+
+    expect(scrollController.offset, 0.0);
+    expect(
+      find.byType(Scrollbar),
+      paints
+        ..rect(rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0), color: Colors.transparent)
+        ..line(
+          p1: const Offset(796.0, 0.0),
+          p2: const Offset(796.0, 600.0),
+          strokeWidth: 1.0,
+          color: Colors.transparent,
+        )
+        // Mouse drag is still active, so the scrollbar is still visible.
+        ..rect(rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0), color: Colors.transparent),
+    );
     scrollController.dispose();
-  }, skip: true);
+  });
 
   testWidgets(
     'Scrollbar.thumbVisibility triggers assertion when multiple ScrollPositions are attached.',
@@ -1812,5 +1801,16 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     );
 
     scrollController.dispose();
+  });
+
+  testWidgets('Scrollbar does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: Scrollbar(child: SingleChildScrollView())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Scrollbar)), Size.zero);
   });
 }

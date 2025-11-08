@@ -210,6 +210,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   // On Android, scrollbars should match native appearance.
   late bool _useAndroidScrollbar;
   bool _assistiveScrollbarIsVisible = false;
+  bool _trackpadOrMouseScrollDetected = false;
 
   @override
   bool get showScrollbar =>
@@ -340,16 +341,37 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       case TargetPlatform.windows:
         _useAndroidScrollbar = false;
     }
-    scrollbarPainter.color = _thumbColor.resolve(_states);
-    print('1: ${_thumbColor.resolve(_states)}');
+    print(
+      '-----didChangeDependencies scrollbarPainter.color initial: ${_thumbColor.resolve(_states)}',
+    );
     super.didChangeDependencies();
   }
 
   @override
   void updateScrollbarPainter() {
-    print('2: ${_thumbColor.resolve(_states)}');
+    print(
+      '-------UPDATESCROLLBARPAINTER trackpad or mouse is scrolling: $_trackpadOrMouseScrollDetected',
+    );
+    if (!_trackpadOrMouseScrollDetected) {
+      assert(!_assistiveScrollbarIsVisible);
+      scrollbarPainter
+        ..color = _thumbColor.resolve(_states)
+        ..ignorePointer = !enableGestures;
+    }
+
+    // TODO use: _trackpadOrMouseScrollDetected
+    // print('-----BEFORE updateScrollbarPainter thumb color: ${_thumbColor.resolve(_states)}');
+    // if (_assistiveScrollbarIsVisible) {
+    //   print('----------updateScrollbarPainter updating color');
+    //   scrollbarPainter
+    //     ..color = _thumbColor.resolve(_states)
+    //     ..ignorePointer = !enableGestures;
+    // } else {
+    //   scrollbarPainter.color = const Color(0x00000000);
+    //   scrollbarPainter.ignorePointer = !shouldRevealAssistiveScrollbar && enableGestures;
+    // }
+
     scrollbarPainter
-      // ..color = _thumbColor.resolve(_states)
       ..trackColor = _trackColor.resolve(_states)
       ..trackBorderColor = _trackBorderColor.resolve(_states)
       ..textDirection = Directionality.of(context)
@@ -364,9 +386,10 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       ..minLength = _scrollbarTheme.minThumbLength ?? _kScrollbarMinLength
       ..padding = MediaQuery.paddingOf(context)
       ..scrollbarOrientation = widget.scrollbarOrientation;
-    print(scrollbarPainter.color);
-    print(scrollbarPainter.ignorePointer);
-    print('----------------------');
+    // print('------AFTER updateScrollbarPainter:');
+    print('color: ${scrollbarPainter.color}');
+    print('ignorePointer: ${scrollbarPainter.ignorePointer}');
+    // print('----------------------');
   }
 
   @override
@@ -406,6 +429,8 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
 
   @override
   void handleHoverExit(PointerExitEvent event) {
+    print('--------[Material] PointerExitEvent received!');
+
     super.handleHoverExit(event);
     setState(() {
       _hoverIsActive = false;
@@ -414,24 +439,29 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   }
 
   void _toggleAssistiveScrollbarVisibility(bool shouldRevealAssistiveScrollbar) {
-    print('toggle: $shouldRevealAssistiveScrollbar');
-    _assistiveScrollbarIsVisible = !_assistiveScrollbarIsVisible;
+    if (_assistiveScrollbarIsVisible == shouldRevealAssistiveScrollbar) {
+      return;
+    }
+
+    print('----------TOGGLING VISIBILITY!!!!!!: $shouldRevealAssistiveScrollbar');
     setState(() {
       scrollbarPainter.color = shouldRevealAssistiveScrollbar
           ? _thumbColor.resolve(_states)
           : const Color(0x00000000);
       scrollbarPainter.ignorePointer = !shouldRevealAssistiveScrollbar && enableGestures;
     });
+    print('new color: ${scrollbarPainter.color}');
+    _assistiveScrollbarIsVisible = shouldRevealAssistiveScrollbar;
   }
 
   @override
   void receivedPointerSignal(PointerSignalEvent event) {
     if (event is PointerScrollEvent) {
-      final bool trackpadOrMouseScrollDetected =
+      _trackpadOrMouseScrollDetected =
           event.kind == PointerDeviceKind.mouse || event.kind == PointerDeviceKind.trackpad;
-      if (!_assistiveScrollbarIsVisible && trackpadOrMouseScrollDetected) {
+      if (!_assistiveScrollbarIsVisible && _trackpadOrMouseScrollDetected) {
         _toggleAssistiveScrollbarVisibility(true);
-      } else if (_assistiveScrollbarIsVisible && !trackpadOrMouseScrollDetected) {
+      } else if (_assistiveScrollbarIsVisible && !_trackpadOrMouseScrollDetected) {
         _toggleAssistiveScrollbarVisibility(false);
       }
     }
@@ -444,6 +474,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     if (event.kind != PointerDeviceKind.mouse &&
         event.kind != PointerDeviceKind.trackpad &&
         _assistiveScrollbarIsVisible) {
+      _trackpadOrMouseScrollDetected = false;
       _toggleAssistiveScrollbarVisibility(false);
     }
   }

@@ -140,7 +140,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Color get color => _color;
   Color _color;
   set color(Color value) {
-    print('new color: $value');
+    // print('new color: $value');
     if (color == value) {
       return;
     }
