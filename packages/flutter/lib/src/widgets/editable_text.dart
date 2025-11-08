@@ -4290,7 +4290,7 @@ class EditableTextState extends State<EditableText>
     // text of [EditableText] is updated at the same time as the selection is
     // changed by a gesture event.
     final String text = widget.controller.value.text;
-    if (text.length < selection.end || text.length < selection.start) {
+    if (text.length < selection.end || text.length < selection.start || selection.end <= selection.start) {
       return;
     }
 
