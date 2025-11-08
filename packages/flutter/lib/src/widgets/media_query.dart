@@ -1142,46 +1142,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Creates a widget that provides [MediaQueryData] to its descendants.
   const MediaQuery({super.key, required this.data, required super.child});
 
-  /// Wraps the `child` in a [MediaQuery] with its [MediaQueryData.lineHeightScaleFactorOverride],
-  /// [MediaQueryData.letterSpacingOverride], [MediaQueryData.wordSpacingOverride],
-  /// [MediaQueryData.paragraphSpacingOverride] set to the specified values.
-  ///
-  /// If a text style override argument is null (the default), then the
-  /// corresponding override in the updated [MediaQueryData] is set to null.
-  ///
-  /// The returned widget must be inserted in a widget tree below an existing
-  /// [MediaQuery] widget.
-  ///
-  /// See also:
-  ///
-  ///  * [MediaQueryData.lineHeightScaleFactorOverride], [MediaQueryData.letterSpacingOverride],
-  ///    [MediaQueryData.wordSpacingOverride], [MediaQueryData.paragraphSpacingOverride], the
-  ///    affected properties of the [MediaQueryData].
-  static Widget applyTextStyleOverrides({
-    Key? key,
-    required double? lineHeightScaleFactorOverride,
-    required double? letterSpacingOverride,
-    required double? wordSpacingOverride,
-    required double? paragraphSpacingOverride,
-    required Widget child,
-  }) {
-    return Builder(
-      key: key,
-      builder: (BuildContext context) {
-        assert(debugCheckHasMediaQuery(context));
-        return MediaQuery(
-          data: MediaQuery.of(context).applyTextStyleOverrides(
-            lineHeightScaleFactorOverride: lineHeightScaleFactorOverride,
-            letterSpacingOverride: letterSpacingOverride,
-            wordSpacingOverride: wordSpacingOverride,
-            paragraphSpacingOverride: paragraphSpacingOverride,
-          ),
-          child: child,
-        );
-      },
-    );
-  }
-
   /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
   /// from the given context, but removes the specified padding.
   ///
@@ -1290,6 +1250,46 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
          removeRight: removeRight,
          removeBottom: removeBottom,
        );
+
+  /// Wraps the `child` in a [MediaQuery] with its [MediaQueryData.lineHeightScaleFactorOverride],
+  /// [MediaQueryData.letterSpacingOverride], [MediaQueryData.wordSpacingOverride],
+  /// [MediaQueryData.paragraphSpacingOverride] set to the specified values.
+  ///
+  /// If a text style override argument is null (the default), then the
+  /// corresponding override in the updated [MediaQueryData] is set to null.
+  ///
+  /// The returned widget must be inserted in a widget tree below an existing
+  /// [MediaQuery] widget.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQueryData.lineHeightScaleFactorOverride], [MediaQueryData.letterSpacingOverride],
+  ///    [MediaQueryData.wordSpacingOverride], [MediaQueryData.paragraphSpacingOverride], the
+  ///    affected properties of the [MediaQueryData].
+  static Widget applyTextStyleOverrides({
+    Key? key,
+    required double? lineHeightScaleFactorOverride,
+    required double? letterSpacingOverride,
+    required double? wordSpacingOverride,
+    required double? paragraphSpacingOverride,
+    required Widget child,
+  }) {
+    return Builder(
+      key: key,
+      builder: (BuildContext context) {
+        assert(debugCheckHasMediaQuery(context));
+        return MediaQuery(
+          data: MediaQuery.of(context).applyTextStyleOverrides(
+            lineHeightScaleFactorOverride: lineHeightScaleFactorOverride,
+            letterSpacingOverride: letterSpacingOverride,
+            wordSpacingOverride: wordSpacingOverride,
+            paragraphSpacingOverride: paragraphSpacingOverride,
+          ),
+          child: child,
+        );
+      },
+    );
+  }
 
   /// Deprecated. Use [MediaQuery.fromView] instead.
   ///
