@@ -268,7 +268,7 @@ class Expansible extends StatefulWidget {
   /// collapsed. Otherwise, the body is removed from the tree when the
   /// widget is collapsed and recreated upon expansion.
   ///
-  /// Defaults to false.
+  /// Defaults to true.
   final bool maintainState;
 
   /// Builds the widget with the results of [headerBuilder] and [bodyBuilder].
