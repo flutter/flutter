@@ -199,11 +199,11 @@ DecodedBitmap DecodeToBitmap(
 }
 
 DecodedBitmap HandlePremultiplication(
-    std::shared_ptr<SkBitmap> bitmap,
+    const std::shared_ptr<SkBitmap>& bitmap,
     std::shared_ptr<ImpellerAllocator> bitmap_allocator,
     const std::shared_ptr<impeller::Allocator>& allocator) {
   if (bitmap->alphaType() != SkAlphaType::kUnpremul_SkAlphaType) {
-    return {.bitmap = bitmap, .allocator = bitmap_allocator};
+    return {.bitmap = bitmap, .allocator = std::move(bitmap_allocator)};
   }
 
   std::shared_ptr<ImpellerAllocator> premul_allocator =
@@ -222,7 +222,7 @@ DecodedBitmap HandlePremultiplication(
 }
 
 ImageDecoderImpeller::DecompressResult ResizeOnCpu(
-    std::shared_ptr<SkBitmap> bitmap,
+    const std::shared_ptr<SkBitmap>& bitmap,
     const SkISize& target_size,
     const std::shared_ptr<impeller::Allocator>& allocator) {
   TRACE_EVENT0("impeller", "SlowCPUDecodeScale");
