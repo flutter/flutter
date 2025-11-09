@@ -25,12 +25,13 @@ class AppBarApp extends StatelessWidget {
 class AppBarExample extends StatelessWidget {
   const AppBarExample({super.key});
 
+  static const int tabsCount = 3;
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
     final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
-    const int tabsCount = 3;
+    
 
     return DefaultTabController(
       initialIndex: 1,
