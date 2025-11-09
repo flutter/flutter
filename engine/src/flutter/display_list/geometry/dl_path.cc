@@ -44,14 +44,14 @@ DlPath DlPath::MakeRectLTRB(DlScalar left,
                             DlScalar top,
                             DlScalar right,
                             DlScalar bottom) {
-  return DlPath(SkPath().addRect(left, top, right, bottom));
+  return DlPath(SkPath::Rect(SkRect::MakeLTRB(left, top, right, bottom)));
 }
 
 DlPath DlPath::MakeRectXYWH(DlScalar x,
                             DlScalar y,
                             DlScalar width,
                             DlScalar height) {
-  return DlPath(SkPath().addRect(SkRect::MakeXYWH(x, y, width, height)));
+  return DlPath(SkPath::Rect(SkRect::MakeXYWH(x, y, width, height)));
 }
 
 DlPath DlPath::MakeOval(const DlRect& bounds) {
@@ -102,7 +102,7 @@ DlPath DlPath::MakeArc(const DlRect& bounds,
                        DlDegrees start,
                        DlDegrees sweep,
                        bool use_center) {
-  SkPath path;
+  SkPathBuilder path;
   if (use_center) {
     path.moveTo(ToSkPoint(bounds.GetCenter()));
   }
@@ -110,7 +110,7 @@ DlPath DlPath::MakeArc(const DlRect& bounds,
   if (use_center) {
     path.close();
   }
-  return DlPath(path);
+  return DlPath(path.detach());
 }
 
 const SkPath& DlPath::GetSkPath() const {
@@ -188,9 +188,7 @@ void DlPath::WillRenderSkPath() const {
   if (!offset.IsFinite()) {
     return DlPath();
   }
-  SkPath path = data_->sk_path;
-  path = path.offset(offset.x, offset.y);
-  return DlPath(path);
+  return DlPath(data_->sk_path.makeOffset(offset.x, offset.y));
 }
 
 [[nodiscard]] DlPath DlPath::WithFillType(DlPathFillType type) const {
@@ -259,9 +257,9 @@ bool DlPath::IsConvex() const {
 }
 
 DlPath DlPath::operator+(const DlPath& other) const {
-  SkPath path = GetSkPath();
+  SkPathBuilder path = SkPathBuilder(GetSkPath());
   path.addPath(other.GetSkPath());
-  return DlPath(path);
+  return DlPath(path.detach());
 }
 
 void DlPath::ReduceConic(DlPathReceiver& receiver,

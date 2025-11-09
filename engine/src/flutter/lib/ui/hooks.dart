@@ -455,7 +455,7 @@ void Function(Uri) _getHttpConnectionHookClosure(bool mayInsecurelyConnectToAllD
     }
     throw UnsupportedError(
       'Non-https connection "$uri" is not supported by the platform. '
-      'Refer to https://flutter.dev/docs/release/breaking-changes/network-policy-ios-android.',
+      'Refer to https://docs.flutter.dev/release/breaking-changes/network-policy-ios-android.',
     );
   };
 }
