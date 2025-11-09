@@ -18,35 +18,19 @@ void main() {
 }
 
 abstract class TestCodec {
-  TestCodec({required this.description});
-  final String description;
-
-  ui.Codec? _cachedCodec;
-
-  Future<ui.Codec> getCodec() async => _cachedCodec ??= await createCodec();
-
-  Future<ui.Codec> createCodec();
-
-  void dispose() {
-    _cachedCodec?.dispose();
-    _cachedCodec = null;
-  }
-}
-
-abstract class TestFileCodec extends TestCodec {
-  TestFileCodec.fromTestFile(this.testFile, {required super.description});
+  TestCodec.fromTestFile(this.testFile, {required this.description});
 
   final String testFile;
+  final String description;
 
   Future<ui.Codec> createCodecFromTestFile(String testFile);
 
-  @override
   Future<ui.Codec> createCodec() {
     return createCodecFromTestFile(testFile);
   }
 }
 
-class UrlTestCodec extends TestFileCodec {
+class UrlTestCodec extends TestCodec {
   UrlTestCodec(super.testFile, this.codecFactory, String function)
     : super.fromTestFile(description: 'created with $function("$testFile")');
 
@@ -58,7 +42,7 @@ class UrlTestCodec extends TestFileCodec {
   }
 }
 
-class FetchTestCodec extends TestFileCodec {
+class FetchTestCodec extends TestCodec {
   FetchTestCodec(super.testFile, this.codecFactory, String function)
     : super.fromTestFile(
         description:
@@ -70,7 +54,7 @@ class FetchTestCodec extends TestFileCodec {
 
   @override
   Future<ui.Codec> createCodecFromTestFile(String testFile) async {
-    final HttpFetchResponse response = await httpFetch(testFile);
+    final HttpFetchResponse response = await httpFetch('/test_images/$testFile');
 
     if (!response.hasPayload) {
       throw Exception('Unable to fetch() image test file "$testFile"');
@@ -81,7 +65,7 @@ class FetchTestCodec extends TestFileCodec {
   }
 }
 
-class BitmapTestCodec extends TestFileCodec {
+class BitmapTestCodec extends TestCodec {
   BitmapTestCodec(super.testFile, this.codecFactory, String function)
     : super.fromTestFile(
         description:
@@ -94,7 +78,7 @@ class BitmapTestCodec extends TestFileCodec {
   @override
   Future<ui.Codec> createCodecFromTestFile(String testFile) async {
     final DomHTMLImageElement imageElement = createDomHTMLImageElement();
-    imageElement.src = testFile;
+    imageElement.src = '/test_images/$testFile';
     imageElement.decoding = 'async';
 
     await imageElement.decode();
@@ -168,26 +152,25 @@ Future<void> testMain() async {
       );
       testCodecs.add(
         FetchTestCodec(
-          '/test_images/$testFile',
+          testFile,
           (Uint8List bytes) => renderer.instantiateImageCodec(bytes),
           'renderer.instantiateImageCodec',
         ),
       );
       testCodecs.add(
         FetchTestCodec(
-          '/test_images/$testFile',
+          testFile,
           (Uint8List bytes) => renderer.instantiateImageCodec(
             bytes,
             targetWidth: testTargetWidth,
             targetHeight: testTargetHeight,
           ),
-          'renderer.instantiateImageCodec '
-              '($testTargetWidth x $testTargetHeight)',
+          'renderer.instantiateImageCodec ($testTargetWidth x $testTargetHeight)',
         ),
       );
       testCodecs.add(
         BitmapTestCodec(
-          'test_images/$testFile',
+          testFile,
           (DomImageBitmap bitmap) async => renderer.createImageFromImageBitmap(bitmap),
           'renderer.createImageFromImageBitmap',
         ),
@@ -204,32 +187,46 @@ Future<void> testMain() async {
       mockHttpFetchResponseFactory = null;
     });
 
-    group('Codecs', () {
-      final List<TestCodec> testCodecs = createTestCodecs();
-      for (final TestCodec testCodec in testCodecs) {
-        test('${testCodec.description} can create an image', () async {
-          try {
-            final ui.Codec codec = await testCodec.getCodec();
-            final ui.FrameInfo frameInfo = await codec.getNextFrame();
-            final ui.Image image = frameInfo.image;
-            expect(image, isNotNull);
-            expect(image.width, isNonZero);
-            expect(image.height, isNonZero);
-            expect(image.colorSpace, isNotNull);
-          } catch (e) {
-            throw TestFailure('Failed to get image for ${testCodec.description}: $e');
-          }
-        });
+    void runCodecTest(TestCodec testCodec) {
+      const problematicChromeImages = <String, Set<int>>{
+        // Frame 2 cause Chrome to crash.
+        // https://issues.chromium.org/456445108
+        'crbug445556737.png': {2},
+        // Frames 2 and 3 cause Chrome to crash.
+        // https://issues.chromium.org/456445108
+        'interlaced-multiframe-with-blending.png': {2, 3},
+      };
 
-        test('${testCodec.description} can be decoded with toByteData', () async {
-          ui.Image image;
+      test('${testCodec.description} can create an image and convert it to byte array', () async {
+        final ui.Codec codec = await testCodec.createCodec();
+
+        final Set<int> problematicFrames;
+        if (isChromium && problematicChromeImages.containsKey(testCodec.testFile)) {
+          // Encountered an image with known problematic frames on Chromium.
+          problematicFrames = problematicChromeImages[testCodec.testFile]!;
+        } else {
+          problematicFrames = <int>{};
+        }
+
+        for (int i = 0; i < codec.frameCount; i++) {
+          if (problematicFrames.contains(i)) {
+            printWarning(
+              'Skipping frame $i of ${testCodec.description} due to known Chromium crash bug.',
+            );
+            continue;
+          }
+
+          final ui.Image image;
           try {
-            final ui.Codec codec = await testCodec.getCodec();
             final ui.FrameInfo frameInfo = await codec.getNextFrame();
             image = frameInfo.image;
           } catch (e) {
-            throw TestFailure('Failed to get image for ${testCodec.description}: $e');
+            codec.dispose();
+            throw TestFailure('Failed to get image at frame $i for ${testCodec.description}: $e');
           }
+
+          expect(image.width, isNonZero);
+          expect(image.height, isNonZero);
 
           final ByteData? byteData = await image.toByteData();
           expect(
@@ -249,12 +246,31 @@ Future<void> testMain() async {
                 '${testCodec.description} toByteData() should '
                 'contain nonzero value',
           );
-        });
-      }
-      for (final testCodec in testCodecs) {
-        testCodec.dispose();
-      }
+        }
+
+        // After all frames are decoded and tested, dispose the codec.
+        codec.dispose();
+      });
+    }
+
+    group('Codecs (default browserSupportsImageDecoder)', () {
+      createTestCodecs().forEach(runCodecTest);
     });
+
+    if (browserSupportsImageDecoder) {
+      // For the sake of completeness, test codec fallback logic on browsers that support
+      // `ImageDecoder`.
+      group('Codecs (browserSupportsImageDecoder=false)', () {
+        setUpAll(() {
+          browserSupportsImageDecoder = false;
+        });
+        tearDownAll(() {
+          debugResetBrowserSupportsImageDecoder();
+        });
+
+        createTestCodecs().forEach(runCodecTest);
+      });
+    }
   });
 
   test('crossOrigin requests cause an error', () async {
