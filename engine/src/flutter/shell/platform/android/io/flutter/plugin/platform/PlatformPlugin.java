@@ -209,6 +209,21 @@ public class PlatformPlugin {
       case SELECTION_CLICK:
         view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
         break;
+      case SUCCESS_NOTIFICATION:
+        if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
+          view.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
+        }
+        break;
+      case WARNING_NOTIFICATION:
+        if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
+          view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+        }
+        break;
+      case ERROR_NOTIFICATION:
+        if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
+          view.performHapticFeedback(HapticFeedbackConstants.REJECT);
+        }
+        break;
     }
   }
 
