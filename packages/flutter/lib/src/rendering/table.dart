@@ -1013,10 +1013,6 @@ class RenderTable extends RenderBox {
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    assert(_children.length == rows * columns);
-    if (rows * columns == 0) {
-      return 0.0;
-    }
     return getMinIntrinsicHeight(width);
   }
 
