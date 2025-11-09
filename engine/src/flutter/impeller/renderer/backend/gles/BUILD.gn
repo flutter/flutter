@@ -17,6 +17,7 @@ impeller_component("gles_unittests") {
     "blit_command_gles_unittests.cc",
     "buffer_bindings_gles_unittests.cc",
     "device_buffer_gles_unittests.cc",
+    "render_pass_gles_unittests.cc",
     "test/capabilities_unittests.cc",
     "test/formats_gles_unittests.cc",
     "test/gpu_tracer_gles_unittests.cc",
