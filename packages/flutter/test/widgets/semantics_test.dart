@@ -2371,69 +2371,16 @@ void main() {
         ),
       );
 
-      // Semantics tree in traversal order. This tree is the same as the tree in
-      // hit test order.
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
       expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics.rootChild(
-                id: 1,
-                traversalChildIdentifier: identifier,
-                children: <TestSemantics>[
-                  TestSemantics(
-                    id: 2,
-                    traversalParentIdentifier: identifier,
-                    actions: <SemanticsAction>[SemanticsAction.focus, SemanticsAction.tap],
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.isButton,
-                      SemanticsFlag.hasEnabledState,
-                      SemanticsFlag.isEnabled,
-                      SemanticsFlag.isFocusable,
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-          ignoreRect: true,
-          ignoreTransform: true,
-        ),
+        error.message,
+        'The traversalParent 2 cannot be the child of the traversalChild 1 in hit-test order',
       );
-
-      // Semantics tree in hit-test order.
-      expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics.rootChild(
-                id: 1,
-                traversalChildIdentifier: identifier,
-                children: <TestSemantics>[
-                  TestSemantics(
-                    id: 2,
-                    traversalParentIdentifier: identifier,
-                    actions: <SemanticsAction>[SemanticsAction.focus, SemanticsAction.tap],
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.isButton,
-                      SemanticsFlag.hasEnabledState,
-                      SemanticsFlag.isEnabled,
-                      SemanticsFlag.isFocusable,
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-          ignoreRect: true,
-          ignoreTransform: true,
-        ),
-      );
-
       semantics.dispose();
     },
+    skip: kIsWeb, // [intended] the web traversal order by using ARIA-OWNS.
   );
 }
 

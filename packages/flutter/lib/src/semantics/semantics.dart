@@ -4034,18 +4034,17 @@ class SemanticsNode with DiagnosticableTreeMixin {
         // needed, otherwise, it will cause infinite loop.
         SemanticsNode? traversalParent =
             owner!._traversalParentNodes[child.getSemanticsData().traversalChildIdentifier];
-        bool needGrafting = true;
+        final int? traversalParentId = traversalParent?.id;
         while (traversalParent != null) {
           if (traversalParent == child) {
-            needGrafting = false;
-            break;
+            throw FlutterError(
+              'The traversalParent $traversalParentId cannot be the child of the traversalChild ${child.id} in hit-test order',
+            );
           }
           traversalParent = traversalParent.parent;
         }
 
-        if (needGrafting) {
-          continue;
-        }
+        continue;
       }
 
       updatedChildren.add(child);
@@ -4068,8 +4067,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
         while (currentNode.parent != null) {
           currentNode = currentNode.parent!;
           if (traversalChildren.contains(currentNode)) {
-            traversalChildren.remove(currentNode);
-            break;
+            throw FlutterError(
+              'The traversalParent $id cannot be the child of the traversalChild ${currentNode.id} in hit-test order',
+            );
           }
         }
         for (final SemanticsNode node in traversalChildren) {
