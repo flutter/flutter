@@ -31,7 +31,7 @@ class AppBarExample extends StatelessWidget {
     final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
     final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
     const int tabsCount = 3;
-    
+
     return DefaultTabController(
       initialIndex: 1,
       length: tabsCount,
