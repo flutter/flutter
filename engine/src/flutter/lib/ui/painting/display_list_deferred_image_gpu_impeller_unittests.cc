@@ -12,6 +12,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "impeller/core/texture_descriptor.h"
+
 namespace flutter {
 namespace testing {
 namespace {
@@ -19,6 +21,43 @@ class MockTextureRegistry : public TextureRegistry {
  public:
   MockTextureRegistry() = default;
   virtual ~MockTextureRegistry() = default;
+};
+
+// Local mock texture for testing purposes.
+class MockTexture : public impeller::Texture {
+ public:
+  explicit MockTexture(const impeller::TextureDescriptor& desc)
+      : impeller::Texture(desc) {}
+
+  MOCK_METHOD(void, SetLabel, (std::string_view label), (override));
+  MOCK_METHOD(void,
+              SetLabel,
+              (std::string_view label, std::string_view trailing),
+              (override));
+  MOCK_METHOD(bool, IsValid, (), (const, override));
+  MOCK_METHOD(impeller::ISize, GetSize, (), (const, override));
+  MOCK_METHOD(bool,
+              OnSetContents,
+              (const uint8_t* contents, size_t length, size_t slice),
+              (override));
+  MOCK_METHOD(bool,
+              OnSetContents,
+              (std::shared_ptr<const fml::Mapping> mapping, size_t slice),
+              (override));
+};
+
+class MockDlImage : public DlImage {
+ public:
+  MOCK_METHOD(DlISize, GetSize, (), (const, override));
+  MOCK_METHOD(sk_sp<SkImage>, skia_image, (), (const, override));
+  MOCK_METHOD(bool, isOpaque, (), (const, override));
+  MOCK_METHOD(bool, isTextureBacked, (), (const, override));
+  MOCK_METHOD(std::shared_ptr<impeller::Texture>,
+              impeller_texture,
+              (),
+              (const, override));
+  MOCK_METHOD(size_t, GetApproximateByteSize, (), (const, override));
+  MOCK_METHOD(bool, isUIThreadSafe, (), (const, override));
 };
 
 class MockSnapshotDelegate : public SnapshotDelegate {
@@ -94,6 +133,57 @@ TEST(DlDeferredImageGPUImpeller, GetSize) {
   auto image = DlDeferredImageGPUImpeller::Make(
       builder.Build(), size, snapshot_delegate_weak_ptr, task_runner);
   ASSERT_EQ(image->GetSize(), size);
+
+  fml::AutoResetWaitableEvent destroy_latch;
+  task_runner->PostTask([&]() {
+    snapshot_delegate.reset();
+    destroy_latch.Signal();
+  });
+  destroy_latch.Wait();
+}
+
+TEST(DlDeferredImageGPUImpeller, TrashesDisplayList) {
+  fml::Thread raster_thread("raster");
+  auto task_runner = raster_thread.GetTaskRunner();
+  const DlISize size = {100, 200};
+  flutter::DisplayListBuilder builder;
+
+  fml::AutoResetWaitableEvent latch;
+  std::unique_ptr<MockSnapshotDelegate> snapshot_delegate;
+  fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate_weak_ptr;
+  task_runner->PostTask([&]() {
+    snapshot_delegate = std::make_unique<MockSnapshotDelegate>();
+    // Set up the mock to return the internal texture_registry_.
+    ON_CALL(*snapshot_delegate, GetTextureRegistry())
+        .WillByDefault(
+            ::testing::Return(snapshot_delegate->GetMockTextureRegistry()));
+
+    auto mock_image = sk_make_sp<MockDlImage>();
+    impeller::TextureDescriptor desc;
+    desc.size = {1, 1};
+    auto mock_texture = std::make_shared<MockTexture>(desc);
+    EXPECT_CALL(*mock_image, impeller_texture)
+        .WillOnce(::testing::Return(mock_texture));
+    EXPECT_CALL(*snapshot_delegate,
+                MakeRasterSnapshotSync(::testing::_, ::testing::_))
+        .WillOnce(::testing::Return(mock_image));
+    snapshot_delegate_weak_ptr = snapshot_delegate->GetWeakPtr();
+    latch.Signal();
+  });
+  latch.Wait();
+
+  auto image = DlDeferredImageGPUImpeller::Make(
+      builder.Build(), size, snapshot_delegate_weak_ptr, task_runner);
+
+  // Flush raster events.
+  {
+    fml::AutoResetWaitableEvent destroy_latch;
+    task_runner->PostTask([&]() { destroy_latch.Signal(); });
+    destroy_latch.Wait();
+  }
+
+  EXPECT_TRUE(image->impeller_texture());
+  // EXPECT_FALSE(image->wrapper_->display_list_);
 
   fml::AutoResetWaitableEvent destroy_latch;
   task_runner->PostTask([&]() {

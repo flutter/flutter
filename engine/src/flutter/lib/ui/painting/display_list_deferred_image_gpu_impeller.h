@@ -16,6 +16,11 @@
 
 namespace flutter {
 
+namespace testing {
+FML_TEST_CLASS(DlDeferredImageGPUImpeller, TrashesDisplayList);
+}  // namespace testing
+
+
 class DlDeferredImageGPUImpeller final : public DlImage {
  public:
   static sk_sp<DlDeferredImageGPUImpeller> Make(
@@ -59,6 +64,8 @@ class DlDeferredImageGPUImpeller final : public DlImage {
   }
 
  private:
+  FML_FRIEND_TEST(testing::DlDeferredImageGPUImpeller, TrashesDisplayList);
+
   class ImageWrapper final : public std::enable_shared_from_this<ImageWrapper>,
                              public ContextListener {
    public:
@@ -86,6 +93,7 @@ class DlDeferredImageGPUImpeller final : public DlImage {
     std::optional<std::string> get_error();
 
    private:
+    FML_FRIEND_TEST(testing::DlDeferredImageGPUImpeller, TrashesDisplayList);
     DlISize size_;
     sk_sp<DisplayList> display_list_;
     std::shared_ptr<impeller::Texture> texture_;
