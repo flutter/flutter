@@ -227,7 +227,6 @@ template("mac_toolchain") {
       if (swift_whole_module_optimization) {
         outputs += [
           "$_output_dir/{{module_name}}.swiftconstvalues",
-          "$_output_dir/{{module_name}}.swiftdeps",
         ]
       } else {
         outputs += [ "$_output_dir/{{module_name}}.priors" ]
