@@ -104,7 +104,7 @@ typedef ReorderItemProxyDecorator =
 ///          return DragBoundary.forRectOf(context);
 ///        },
 ///        itemCount: 5,
-///        onReorder: (int fromIndex, int toIndex) {},
+///        onReorderItem: (int fromIndex, int toIndex) {},
 ///      ),
 ///    ],
 ///  )
@@ -151,7 +151,13 @@ class ReorderableList extends StatefulWidget {
     super.key,
     required this.itemBuilder,
     required this.itemCount,
-    required this.onReorder,
+    @Deprecated(
+      'Use the onReorderItem callback instead. '
+      'The onReorderItem callback adjusts the newIndex parameter for a removed item at the oldIndex. '
+      'This feature was deprecated after 3.38.0-0.2.pre.',
+    )
+    this.onReorder,
+    required this.onReorderItem,
     this.onReorderStart,
     this.onReorderEnd,
     this.itemExtent,
@@ -203,12 +209,20 @@ class ReorderableList extends StatefulWidget {
   /// {@endtemplate}
   final int itemCount;
 
-  /// {@template flutter.widgets.reorderable_list.onReorder}
+  /// {@macro flutter.widgets.reorderable_list.onReorderItem}
+  @Deprecated(
+    'Use the onReorderItem callback instead. '
+    'The onReorderItem callback adjusts the newIndex parameter for a removed item at the oldIndex. '
+    'This feature was deprecated after 3.38.0-0.2.pre.',
+  )
+  final ReorderCallback? onReorder;
+
+  /// {@template flutter.widgets.reorderable_list.onReorderItem}
   /// A callback used by the list to report that a list item has been dragged
   /// to a new location in the list and the application should update the order
   /// of the items.
   /// {@endtemplate}
-  final ReorderCallback onReorder;
+  final ReorderCallback onReorderItem;
 
   /// {@template flutter.widgets.reorderable_list.onReorderStart}
   /// A callback that is called when an item drag has started.
@@ -218,7 +232,7 @@ class ReorderableList extends StatefulWidget {
   /// See also:
   ///
   ///   * [onReorderEnd], which is a called when the dragged item is dropped.
-  ///   * [onReorder], which reports that a list item has been dragged to a new
+  ///   * [onReorderItem], which reports that a list item has been dragged to a new
   ///     location.
   /// {@endtemplate}
   final void Function(int index)? onReorderStart;
@@ -227,13 +241,13 @@ class ReorderableList extends StatefulWidget {
   /// A callback that is called when the dragged item is dropped.
   ///
   /// The index parameter of the callback is the index where the item is
-  /// dropped. Unlike [onReorder], this is called even when the list item is
+  /// dropped. Unlike [onReorderItem], this is called even when the list item is
   /// dropped in the same location.
   ///
   /// See also:
   ///
   ///   * [onReorderStart], which is a called when an item drag has started.
-  ///   * [onReorder], which reports that a list item has been dragged to a new
+  ///   * [onReorderItem], which reports that a list item has been dragged to a new
   ///     location.
   /// {@endtemplate}
   final void Function(int index)? onReorderEnd;
@@ -391,7 +405,7 @@ class ReorderableList extends StatefulWidget {
 ///     key: listKey,
 ///     itemBuilder: (BuildContext context, int index) => const SizedBox(height: 10.0),
 ///     itemCount: 5,
-///     onReorder: (int oldIndex, int newIndex) {
+///     onReorderItem: (int oldIndex, int newIndex) {
 ///        // ...
 ///     },
 ///   );
@@ -464,6 +478,7 @@ class ReorderableListState extends State<ReorderableList> {
             itemExtentBuilder: widget.itemExtentBuilder,
             itemCount: widget.itemCount,
             onReorder: widget.onReorder,
+            onReorderItem: widget.onReorderItem,
             onReorderStart: widget.onReorderStart,
             onReorderEnd: widget.onReorderEnd,
             proxyDecorator: widget.proxyDecorator,
@@ -508,7 +523,13 @@ class SliverReorderableList extends StatefulWidget {
     required this.itemBuilder,
     this.findChildIndexCallback,
     required this.itemCount,
-    required this.onReorder,
+    @Deprecated(
+      'Use the onReorderItem callback instead. '
+      'The onReorderItem callback adjusts the newIndex parameter for a removed item at the oldIndex. '
+      'This feature was deprecated after 3.38.0-0.2.pre.',
+    )
+    this.onReorder,
+    required this.onReorderItem,
     this.onReorderStart,
     this.onReorderEnd,
     this.itemExtent,
@@ -538,8 +559,16 @@ class SliverReorderableList extends StatefulWidget {
   /// {@macro flutter.widgets.reorderable_list.itemCount}
   final int itemCount;
 
-  /// {@macro flutter.widgets.reorderable_list.onReorder}
-  final ReorderCallback onReorder;
+  /// {@macro flutter.widgets.reorderable_list.onReorderItem}
+  @Deprecated(
+    'Use the onReorderItem callback instead. '
+    'The onReorderItem callback adjusts the newIndex parameter for a removed item at the oldIndex. '
+    'This feature was deprecated after 3.38.0-0.2.pre.',
+  )
+  final ReorderCallback? onReorder;
+
+  /// {@macro flutter.widgets.reorderable_list.onReorderItem}
+  final ReorderCallback onReorderItem;
 
   /// {@macro flutter.widgets.reorderable_list.onReorderStart}
   final void Function(int)? onReorderStart;
@@ -651,7 +680,7 @@ class SliverReorderableList extends StatefulWidget {
 ///     key: listKey,
 ///     itemBuilder: (BuildContext context, int index) => const SizedBox(height: 10.0),
 ///     itemCount: 5,
-///     onReorder: (int oldIndex, int newIndex) {
+///     onReorderItem: (int oldIndex, int newIndex) {
 ///        // ...
 ///     },
 ///   );
