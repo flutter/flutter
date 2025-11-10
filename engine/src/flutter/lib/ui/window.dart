@@ -1039,7 +1039,35 @@ enum Brightness {
   /// contrast.
   ///
   /// For example, the color might be bright white, requiring black text.
-  light,
+  light;
+
+  /// Returns the [Brightness] of the current theme from the given [BuildContext].
+  ///
+  /// This is a convenient way to access whether the app is currently using
+  /// a light or dark theme without directly calling `Theme.of(context).brightness`.
+  ///
+  /// Example:
+  /// ```dart
+  /// final brightness = Brightness.of(context);
+  /// if (brightness == Brightness.dark) {
+  ///   // Use light text or icons
+  /// }
+  /// ```
+  static Brightness of(BuildContext context) {
+    return Theme.of(context).brightness;
+  }
+
+  /// Returns `true` if the brightness is light.
+  ///
+  /// This can be used to easily check if the current color palette
+  /// represents a light theme.
+  bool get isLight => this == Brightness.light;
+
+  /// Returns `true` if the brightness is dark.
+  ///
+  /// This can be used to easily check if the current color palette
+  /// represents a dark theme.
+  bool get isDark => this == Brightness.dark;
 }
 
 /// Deprecated. Will be removed in a future version of Flutter.
