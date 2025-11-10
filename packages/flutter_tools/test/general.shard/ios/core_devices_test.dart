@@ -1791,6 +1791,8 @@ invalid JSON
               '--console',
               '--environment-variables',
               '{"OS_ACTIVITY_DT_MODE": "enable"}',
+              '--log-output',
+              '/.tmp_rand0/core_devices.rand0/launch_log.txt',
               bundleId,
             ],
             stdout: '''
@@ -1830,6 +1832,8 @@ Waiting for the application to terminate...
               '--console',
               '--environment-variables',
               '{"OS_ACTIVITY_DT_MODE": "enable"}',
+              '--log-output',
+              '/.tmp_rand0/core_devices.rand0/launch_log.txt',
               bundleId,
               '--arg1',
               '--arg2',
@@ -1872,6 +1876,8 @@ Waiting for the application to terminate...
               '--console',
               '--environment-variables',
               '{"OS_ACTIVITY_DT_MODE": "enable"}',
+              '--log-output',
+              '/.tmp_rand0/core_devices.rand0/launch_log.txt',
               bundleId,
             ],
             stdout: '''
@@ -1939,6 +1945,8 @@ Waiting for the application to terminate...
               '--console',
               '--environment-variables',
               '{"OS_ACTIVITY_DT_MODE": "enable"}',
+              '--log-output',
+              '/.tmp_rand0/core_devices.rand0/launch_log.txt',
               bundleId,
             ],
             exitCode: 1,
@@ -1960,6 +1968,54 @@ ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatus
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(logger.errorText, isEmpty);
         expect(result, isFalse);
+      });
+
+      testWithoutContext('Successful launch with output in log file', () async {
+        final Completer<void> launchCompleter = Completer();
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: const <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'process',
+              'launch',
+              '--device',
+              deviceId,
+              '--start-stopped',
+              '--console',
+              '--environment-variables',
+              '{"OS_ACTIVITY_DT_MODE": "enable"}',
+              '--log-output',
+              '/.tmp_rand0/core_devices.rand0/launch_log.txt',
+              bundleId,
+            ],
+            onRun: (command) {
+              fileSystem.file('/.tmp_rand0/core_devices.rand0/launch_log.txt')
+                ..createSync(recursive: true)
+                ..writeAsStringSync('''
+10:04:12  Acquired tunnel connection to device.
+10:04:12  Enabling developer disk image services.
+10:04:12  Acquired usage assertion.
+Launched application with com.example.my_app bundle identifier.
+Waiting for the application to terminate...
+''');
+            },
+            completer: launchCompleter,
+          ),
+        );
+
+        final bool result = await deviceControl.launchAppAndStreamLogs(
+          deviceId: deviceId,
+          bundleId: bundleId,
+          coreDeviceLogForwarder: FakeIOSCoreDeviceLogForwarder(),
+          startStopped: true,
+        );
+        launchCompleter.complete();
+
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(logger.errorText, isEmpty);
+        expect(result, isTrue);
       });
     });
 
