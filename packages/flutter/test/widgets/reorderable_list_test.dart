@@ -1104,6 +1104,64 @@ void main() {
     },
   );
 
+  testWidgets('SliverReorderableList calls onReorderItem callback correctly', (
+    WidgetTester tester,
+  ) async {
+    const int itemCount = 5;
+    final List<int> items = List<int>.generate(itemCount, (int index) => index);
+
+    void handleReorderItem(int fromIndex, int toIndex) {
+      items.insert(toIndex, items.removeAt(fromIndex));
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverReorderableList(
+              itemCount: items.length,
+              itemBuilder: (BuildContext context, int index) {
+                return SizedBox(
+                  key: ValueKey<int>(items[index]),
+                  height: 100,
+                  child: ReorderableDragStartListener(
+                    index: index,
+                    child: Text('item ${items[index]}'),
+                  ),
+                );
+              },
+              onReorderItem: handleReorderItem,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Start gesture on the first item.
+    final TestGesture dragDown = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // Drag enough to move down the first item.
+    await dragDown.moveBy(const Offset(0, 50));
+    await tester.pump();
+    await dragDown.up();
+    await tester.pumpAndSettle();
+
+    expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
+
+    // Now do the reverse.
+    final TestGesture dragUp = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // Drag enough to move up the first item.
+    await dragUp.moveBy(const Offset(0, -50));
+    await tester.pump();
+    await dragUp.up();
+    await tester.pumpAndSettle();
+
+    expect(items, orderedEquals(<int>[0, 1, 2, 3, 4]));
+  });
+
   testWidgets(
     'ReorderableList prefers old onReorder callback if provided along with onReorderItem callback',
     (WidgetTester tester) async {
@@ -1177,6 +1235,60 @@ void main() {
       expect(items, orderedEquals(<int>[0, 1, 2, 3, 4]));
     },
   );
+
+  testWidgets('ReorderableList calls onReorderItem callback correctly', (
+    WidgetTester tester,
+  ) async {
+    const int itemCount = 5;
+    final List<int> items = List<int>.generate(itemCount, (int index) => index);
+
+    void handleReorderItem(int fromIndex, int toIndex) {
+      items.insert(toIndex, items.removeAt(fromIndex));
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ReorderableList(
+          itemCount: items.length,
+          itemBuilder: (BuildContext context, int index) {
+            return SizedBox(
+              key: ValueKey<int>(items[index]),
+              height: 100,
+              child: ReorderableDragStartListener(
+                index: index,
+                child: Text('item ${items[index]}'),
+              ),
+            );
+          },
+          onReorderItem: handleReorderItem,
+        ),
+      ),
+    );
+
+    // Start gesture on the first item.
+    final TestGesture dragDown = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // Drag enough to move down the first item.
+    await dragDown.moveBy(const Offset(0, 50));
+    await tester.pump();
+    await dragDown.up();
+    await tester.pumpAndSettle();
+
+    expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
+
+    // Now do the reverse.
+    final TestGesture dragUp = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // Drag enough to move up the first item.
+    await dragUp.moveBy(const Offset(0, -50));
+    await tester.pump();
+    await dragUp.up();
+    await tester.pumpAndSettle();
+
+    expect(items, orderedEquals(<int>[0, 1, 2, 3, 4]));
+  });
 
   testWidgets('ReorderableList asserts on both non-null itemExtent and prototypeItem', (
     WidgetTester tester,
