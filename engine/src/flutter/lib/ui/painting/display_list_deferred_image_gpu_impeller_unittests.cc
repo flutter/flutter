@@ -18,20 +18,6 @@ namespace flutter {
 namespace testing {
 namespace {
 
-class MockDlImage : public DlImage {
- public:
-  MOCK_METHOD(DlISize, GetSize, (), (const, override));
-  MOCK_METHOD(sk_sp<SkImage>, skia_image, (), (const, override));
-  MOCK_METHOD(bool, isOpaque, (), (const, override));
-  MOCK_METHOD(bool, isTextureBacked, (), (const, override));
-  MOCK_METHOD(std::shared_ptr<impeller::Texture>,
-              impeller_texture,
-              (),
-              (const, override));
-  MOCK_METHOD(size_t, GetApproximateByteSize, (), (const, override));
-  MOCK_METHOD(bool, isUIThreadSafe, (), (const, override));
-};
-
 void PostTaskSync(fml::RefPtr<fml::TaskRunner> task_runner,
                   std::function<void()> task) {
   fml::AutoResetWaitableEvent latch;

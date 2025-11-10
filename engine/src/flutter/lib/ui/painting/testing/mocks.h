@@ -67,6 +67,20 @@ class MockSnapshotDelegate : public SnapshotDelegate {
   std::shared_ptr<MockTextureRegistry> texture_registry_;
 };
 
+class MockDlImage : public DlImage {
+ public:
+  MOCK_METHOD(DlISize, GetSize, (), (const, override));
+  MOCK_METHOD(sk_sp<SkImage>, skia_image, (), (const, override));
+  MOCK_METHOD(bool, isOpaque, (), (const, override));
+  MOCK_METHOD(bool, isTextureBacked, (), (const, override));
+  MOCK_METHOD(std::shared_ptr<impeller::Texture>,
+              impeller_texture,
+              (),
+              (const, override));
+  MOCK_METHOD(size_t, GetApproximateByteSize, (), (const, override));
+  MOCK_METHOD(bool, isUIThreadSafe, (), (const, override));
+};
+
 }  // namespace testing
 }  // namespace flutter
 

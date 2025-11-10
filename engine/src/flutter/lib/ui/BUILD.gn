@@ -323,6 +323,7 @@ if (enable_unittests) {
     public_deps = [
       ":ui",
       "//flutter/common/graphics",
+      "//flutter/display_list",
       "//third_party/googletest:gmock",
     ]
   }

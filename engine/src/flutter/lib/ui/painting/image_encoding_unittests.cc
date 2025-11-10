@@ -34,20 +34,6 @@ namespace testing {
 namespace {
 fml::AutoResetWaitableEvent message_latch;
 
-class MockDlImage : public DlImage {
- public:
-  MOCK_METHOD(sk_sp<SkImage>, skia_image, (), (const, override));
-  MOCK_METHOD(std::shared_ptr<impeller::Texture>,
-              impeller_texture,
-              (),
-              (const, override));
-  MOCK_METHOD(bool, isOpaque, (), (const, override));
-  MOCK_METHOD(bool, isTextureBacked, (), (const, override));
-  MOCK_METHOD(bool, isUIThreadSafe, (), (const, override));
-  MOCK_METHOD(DlISize, GetSize, (), (const, override));
-  MOCK_METHOD(size_t, GetApproximateByteSize, (), (const, override));
-};
-
 class MockSyncSwitch {
  public:
   struct Handlers {
