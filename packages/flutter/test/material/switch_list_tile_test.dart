@@ -2194,4 +2194,17 @@ void main() {
     );
     expect(title.text.style!.color, Colors.yellow[500]);
   });
+
+  testWidgets('SwitchListTile does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(child: SwitchListTile(value: true, onChanged: (_) {})),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SwitchListTile)), Size.zero);
+  });
 }
