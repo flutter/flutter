@@ -38,10 +38,6 @@ import 'transitions.dart';
 /// Implementations should remove the corresponding list item at [oldIndex]
 /// and reinsert it at [newIndex].
 ///
-/// If [oldIndex] is before [newIndex], removing the item at [oldIndex] from the
-/// list will reduce the list's length by one. Implementations will need to
-/// account for this when inserting before [newIndex].
-///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
 ///
 /// {@tool snippet}
@@ -49,11 +45,7 @@ import 'transitions.dart';
 /// ```dart
 /// final List<MyDataObject> backingList = <MyDataObject>[/* ... */];
 ///
-/// void handleReorder(int oldIndex, int newIndex) {
-///   if (oldIndex < newIndex) {
-///     // removing the item at oldIndex will shorten the list by 1.
-///     newIndex -= 1;
-///   }
+/// void handleReorderItem(int oldIndex, int newIndex) {
 ///   final MyDataObject element = backingList.removeAt(oldIndex);
 ///   backingList.insert(newIndex, element);
 /// }
