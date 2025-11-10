@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -199,6 +200,64 @@ void main() {
       ]);
 
       await const DebugUniversalFramework().build(environment);
+      expect(processManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => macPlatform,
+    },
+  );
+
+  testUsingContext(
+    'IosAssetBundle throws ToolExit if plutil fails',
+    () async {
+      environment.defines[kBuildMode] = 'debug';
+      fileSystem
+          .file(artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug))
+          .createSync();
+      fileSystem
+          .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
+          .createSync();
+      fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      fileSystem
+          .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
+          .createSync(recursive: true);
+      environment.buildDir.childFile('app.dill').createSync(recursive: true);
+      environment.buildDir.childFile('native_assets.json').createSync();
+      environment.buildDir
+          .childDirectory('App.framework')
+          .childFile('App')
+          .createSync(recursive: true);
+
+      final File infoPlist = environment.outputDir
+          .childDirectory('App.framework')
+          .childFile('Info.plist');
+
+      // fake plutil command that is configured to fail.
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'plutil',
+            '-replace',
+            'MinimumOSVersion',
+            '-string',
+            '13.0',
+            infoPlist.path,
+          ],
+          exitCode: 1,
+          stderr: 'plutil: error: invalid argument',
+        ),
+      ]);
+
+      await expectLater(
+        const DebugIosApplicationBundle().build(environment),
+        throwsA(isA<ToolExit>()),
+      );
+
+      expect(logger.errorText, contains('Failed to update MinimumOSVersion in ${infoPlist.path}'));
+      expect(logger.errorText, contains('plutil: error: invalid argument'));
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
