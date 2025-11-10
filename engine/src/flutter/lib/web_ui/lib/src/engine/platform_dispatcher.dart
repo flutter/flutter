@@ -681,6 +681,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       'HapticFeedbackType.mediumImpact' => vibrateMediumImpact,
       'HapticFeedbackType.heavyImpact' => vibrateHeavyImpact,
       'HapticFeedbackType.selectionClick' => vibrateSelectionClick,
+      'HapticFeedbackType.successNotification' => vibrateMediumImpact,
+      'HapticFeedbackType.warningNotification' => vibrateMediumImpact,
+      'HapticFeedbackType.errorNotification' => vibrateHeavyImpact,
       _ => vibrateLongPress,
     };
   }
