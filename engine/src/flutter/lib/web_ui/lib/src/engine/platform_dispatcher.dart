@@ -59,8 +59,8 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   static final EnginePlatformDispatcher _instance = EnginePlatformDispatcher();
 
   @visibleForTesting
-  final DomElement accessibilityPlaceholder = EngineSemantics.instance.semanticsHelper
-      .prepareAccessibilityPlaceholder();
+  DomElement get accessibilityPlaceholder =>
+      EngineSemantics.instance.semanticsHelper.accessibilityPlaceholder;
 
   PlatformConfiguration configuration = PlatformConfiguration(
     locales: parseBrowserLanguages(),
