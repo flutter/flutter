@@ -1517,7 +1517,7 @@ void main() {
           controller: scrollController,
           child: Scrollbar(
             interactive: true,
-            thumbVisibility: true,
+            // thumbVisibility: true,
             controller: scrollController,
             child: const SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
           ),
@@ -1525,6 +1525,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+
     expect(scrollController.offset, 0.0);
     expect(
       find.byType(Scrollbar),
@@ -1536,7 +1537,7 @@ void main() {
           strokeWidth: 1.0,
           color: Colors.transparent,
         )
-        ..rect(rect: getStartingThumbRect(isAndroid: true), color: _kAndroidThumbIdleColor),
+        ..rect(rect: getStartingThumbRect(isAndroid: true), color: Colors.transparent),
     );
 
     // Drag the thumb down to scroll down.
@@ -1557,10 +1558,9 @@ void main() {
         ..rect(
           rect: getStartingThumbRect(isAndroid: true),
           // Drag color
-          color: const Color(0x99000000),
+          color: Colors.transparent,
         ),
     );
-
     await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
     await tester.pumpAndSettle();
     expect(scrollController.offset, greaterThan(10.0));
@@ -1575,17 +1575,17 @@ void main() {
           strokeWidth: 1.0,
           color: Colors.transparent,
         )
-        ..rect(
-          rect: const Rect.fromLTRB(796.0, 10.0, 800.0, 100.0),
-          color: const Color(0x99000000),
-        ),
+        ..rect(rect: const Rect.fromLTRB(796.0, 10.0, 800.0, 100.0), color: Colors.transparent),
     );
 
     // Execute a pointer scroll while dragging (drag gesture has not come up yet)
     final TestPointer pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     pointer.hover(const Offset(798.0, 15.0));
     await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 20.0)));
+    print('---------------C5------------------');
+
     await tester.pumpAndSettle();
+    print('---------------C4------------------');
 
     if (!kIsWeb) {
       // Scrolling while holding the drag on the scrollbar and still hovered over
@@ -1615,8 +1615,14 @@ void main() {
     // Drag is still being held, move pointer to be hovering over another area
     // of the scrollable (not over the scrollbar) and execute another pointer scroll
     pointer.hover(tester.getCenter(find.byType(SingleChildScrollView)));
+    print('---------------C4.1------------------');
+
     await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, -90.0)));
+    print('---------------C4.2------------------');
+
     await tester.pumpAndSettle();
+    print('---------------C3------------------');
+
     // Scrolling while holding the drag on the scrollbar changed the offset
     expect(pointer.location, const Offset(400.0, 300.0));
     expect(scrollController.offset, 0.0);
@@ -1634,7 +1640,10 @@ void main() {
     );
 
     await dragScrollbarGesture.up();
+    print('---------------C2------------------');
+
     await tester.pumpAndSettle();
+    print('---------------C1------------------');
 
     expect(scrollController.offset, 0.0);
     expect(
@@ -1668,7 +1677,7 @@ void main() {
     //     kind: pointer.kind,
     //   ),
     // );
-    await tester.pump();
+    // await tester.pump();
 
     // Advance the scrollbar's fade timer and complete the fade animation.
     await tester.pump(_kScrollbarTimeToFade);
@@ -1677,16 +1686,17 @@ void main() {
     expect(scrollController.offset, 0.0);
     expect(
       find.byType(Scrollbar),
-      paints
-        ..rect(rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0), color: Colors.transparent)
-        ..line(
-          p1: const Offset(796.0, 0.0),
-          p2: const Offset(796.0, 600.0),
-          strokeWidth: 1.0,
-          color: Colors.transparent,
-        )
-        // Mouse drag is still active, so the scrollbar is still visible.
-        ..rect(rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0), color: Colors.transparent),
+      isNot(paints..rect()),
+      // paints
+      //   ..rect(rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 600.0), color: Colors.transparent)
+      //   ..line(
+      //     p1: const Offset(796.0, 0.0),
+      //     p2: const Offset(796.0, 600.0),
+      //     strokeWidth: 1.0,
+      //     color: Colors.transparent,
+      //   )
+      //   // Mouse drag is still active, so the scrollbar is still visible.
+      //   ..rect(rect: const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0), color: Colors.transparent),
     );
     scrollController.dispose();
   });

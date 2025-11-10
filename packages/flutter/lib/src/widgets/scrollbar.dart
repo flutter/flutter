@@ -1411,6 +1411,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   void initState() {
     super.initState();
+    // showScrollbar = widget.thumbVisibility ?? false;
     _fadeoutAnimationController = AnimationController(vsync: this, duration: widget.fadeDuration)
       ..addStatusListener(_validateInteractions);
     _fadeoutOpacityAnimation = CurvedAnimation(
@@ -1608,6 +1609,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   void _maybeStartFadeoutTimer() {
+    print('_maybeStartFadeoutTimer called, showScrollbar: $showScrollbar');
     if (!showScrollbar) {
       _fadeoutTimer?.cancel();
       _fadeoutTimer = Timer(widget.timeToFade, () {
@@ -1972,6 +1974,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         scrollbarPainter.update(metrics, metrics.axisDirection);
       }
     } else if (notification is ScrollEndNotification) {
+      print('------scrollEndNotification!!!!!');
       if (_thumbDrag == null) {
         _maybeStartFadeoutTimer();
       }

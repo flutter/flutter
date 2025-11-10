@@ -213,10 +213,6 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   bool _trackpadOrMouseScrollDetected = false;
 
   @override
-  bool get showScrollbar =>
-      widget.thumbVisibility ?? _scrollbarTheme.thumbVisibility?.resolve(_states) ?? false;
-
-  @override
   bool get enableGestures =>
       widget.interactive ?? _scrollbarTheme.interactive ?? !_useAndroidScrollbar;
 
@@ -317,6 +313,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   @override
   void initState() {
     super.initState();
+
     _hoverAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
@@ -327,10 +324,19 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   }
 
   @override
+  bool get showScrollbar =>
+      widget.thumbVisibility ?? _scrollbarTheme.thumbVisibility?.resolve(_states) ?? false;
+
+  @override
   void didChangeDependencies() {
     final ThemeData theme = Theme.of(context);
     _colorScheme = theme.colorScheme;
     _scrollbarTheme = ScrollbarTheme.of(context);
+    print(widget.thumbVisibility);
+    print(_scrollbarTheme.thumbVisibility?.resolve(_states));
+
+    // super.showScrollbar =
+    //     widget.thumbVisibility ?? _scrollbarTheme.thumbVisibility?.resolve(_states) ?? false;
     switch (theme.platform) {
       case TargetPlatform.android:
         _useAndroidScrollbar = true;
@@ -344,6 +350,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     print(
       '-----didChangeDependencies scrollbarPainter.color initial: ${_thumbColor.resolve(_states)}',
     );
+    scrollbarPainter.color = Color(0x00000000);
     super.didChangeDependencies();
   }
 
@@ -352,26 +359,9 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     print(
       '-------UPDATESCROLLBARPAINTER trackpad or mouse is scrolling: $_trackpadOrMouseScrollDetected',
     );
-    if (!_trackpadOrMouseScrollDetected) {
-      assert(!_assistiveScrollbarIsVisible);
-      scrollbarPainter
-        ..color = _thumbColor.resolve(_states)
-        ..ignorePointer = !enableGestures;
-    }
-
-    // TODO use: _trackpadOrMouseScrollDetected
-    // print('-----BEFORE updateScrollbarPainter thumb color: ${_thumbColor.resolve(_states)}');
-    // if (_assistiveScrollbarIsVisible) {
-    //   print('----------updateScrollbarPainter updating color');
-    //   scrollbarPainter
-    //     ..color = _thumbColor.resolve(_states)
-    //     ..ignorePointer = !enableGestures;
-    // } else {
-    //   scrollbarPainter.color = const Color(0x00000000);
-    //   scrollbarPainter.ignorePointer = !shouldRevealAssistiveScrollbar && enableGestures;
-    // }
 
     scrollbarPainter
+      // ..color = _thumbColor.resolve(_states)
       ..trackColor = _trackColor.resolve(_states)
       ..trackBorderColor = _trackBorderColor.resolve(_states)
       ..textDirection = Directionality.of(context)
@@ -394,6 +384,8 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
 
   @override
   void handleThumbPressStart(Offset localPosition) {
+    print('--------[Material] handleThumbPressStart called!');
+
     super.handleThumbPressStart(localPosition);
     setState(() {
       _dragIsActive = true;
@@ -402,6 +394,8 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
 
   @override
   void handleThumbPressEnd(Offset localPosition, Velocity velocity) {
+    print('--------[Material] handleThumbPressEnd called!');
+
     super.handleThumbPressEnd(localPosition, velocity);
     setState(() {
       _dragIsActive = false;
@@ -448,6 +442,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       scrollbarPainter.color = shouldRevealAssistiveScrollbar
           ? _thumbColor.resolve(_states)
           : const Color(0x00000000);
+      // super.showScrollbar = shouldRevealAssistiveScrollbar && (_scrollbarTheme.thumbVisibility?.resolve(_states) ?? false);
       scrollbarPainter.ignorePointer = !shouldRevealAssistiveScrollbar && enableGestures;
     });
     print('new color: ${scrollbarPainter.color}');
