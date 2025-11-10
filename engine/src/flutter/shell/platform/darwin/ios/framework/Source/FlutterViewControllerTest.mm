@@ -1012,7 +1012,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMExpect([mockVC checkAndUpdateAutoResizeConstraints]);
   OCMExpect([mockVC updateAutoResizeConstraints]);
 
-  mockVC.autoResizable = YES;
+  [mockVC setAutoResizable:YES];
 
   OCMVerifyAll(mockVC);
 }
@@ -1030,7 +1030,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMExpect([mockVC checkAndUpdateAutoResizeConstraints]);
   OCMReject([mockVC updateAutoResizeConstraints]);
 
-  mockVC.autoResizable = NO;
+  [mockVC setAutoResizable:NO];
 
   OCMVerifyAll(mockVC);
 }

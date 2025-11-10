@@ -1535,12 +1535,16 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   CGFloat minWidth = self.sizeBeforeAutoResized.width;
   CGFloat minHeight = self.sizeBeforeAutoResized.height;
 
-  // maxWidth or maxHeight may be 0 when the width/height are ambiguous.
+  // maxWidth or maxHeight may be 0 when the width/height are ambiguous, eg. for
+  // unsized widgets
   if (maxWidth == 0) {
     maxWidth = DBL_MAX;
+    [FlutterLogger logWarning:@"Warning: The outermost widget in the autoresizable Flutter view is unsized or has ambiguous dimensions, causing the host native view's width to be 0. The autoresizing logic is setting the viewport constraint to unbounded ($\text{DBL\_MAX}$) to prevent rendering failure. Please ensure your top-level Flutter widget has explicit constraints (e.g., using SizedBox or Container)."];
+
   }
   if (maxHeight == 0) {
     maxHeight = DBL_MAX;
+    [FlutterLogger logWarning:@"Warning: The outermost widget in the autoresizable Flutter view is unsized or has ambiguous dimensions, causing the host native view's width to be 0. The autoresizing logic is setting the viewport constraint to unbounded ($\text{DBL\_MAX}$) to prevent rendering failure. Please ensure your top-level Flutter widget has explicit constraints (e.g., using SizedBox or Container)."];
   }
   _viewportMetrics.physical_min_width_constraint = minWidth * _viewportMetrics.device_pixel_ratio;
   _viewportMetrics.physical_max_width_constraint = maxWidth * _viewportMetrics.device_pixel_ratio;
