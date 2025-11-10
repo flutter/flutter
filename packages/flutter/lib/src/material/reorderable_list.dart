@@ -81,7 +81,7 @@ class ReorderableListView extends StatefulWidget {
     @Deprecated(
       'Use the onReorderItem callback instead. '
       'The onReorderItem callback adjusts the newIndex parameter for a removed item at the oldIndex. '
-      'This feature was deprecated after 3.38.0-0.2.pre.',
+      'This feature was deprecated after v3.38.0-0.2.pre.',
     )
     this.onReorder,
     required this.onReorderItem,
@@ -158,7 +158,7 @@ class ReorderableListView extends StatefulWidget {
     @Deprecated(
       'Use the onReorderItem callback instead. '
       'The onReorderItem callback adjusts the newIndex parameter for a removed item at the oldIndex. '
-      'This feature was deprecated after 3.38.0-0.2.pre.',
+      'This feature was deprecated after v3.38.0-0.2.pre.',
     )
     this.onReorder,
     required this.onReorderItem,
@@ -205,7 +205,7 @@ class ReorderableListView extends StatefulWidget {
   @Deprecated(
     'Use the onReorderItem callback instead. '
     'The onReorderItem callback adjusts the newIndex parameter for a removed item at the oldIndex. '
-    'This feature was deprecated after 3.38.0-0.2.pre.',
+    'This feature was deprecated after v3.38.0-0.2.pre.',
   )
   final ReorderCallback? onReorder;
 
