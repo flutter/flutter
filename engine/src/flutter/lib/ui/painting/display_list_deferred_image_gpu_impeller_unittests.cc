@@ -172,8 +172,20 @@ TEST(DlDeferredImageGPUImpeller, TrashesDisplayList) {
     snapshot_delegate_weak_ptr = snapshot_delegate->GetWeakPtr();
   });
 
+  // Pause raster thread.
+  fml::AutoResetWaitableEvent latch;
+  task_runner->PostTask([&latch]() {
+    latch.Wait();
+  });
+
   auto image = DlDeferredImageGPUImpeller::Make(
       builder.Build(), size, snapshot_delegate_weak_ptr, task_runner);
+
+  EXPECT_FALSE(image->impeller_texture());
+  EXPECT_TRUE(image->wrapper_->display_list_);
+
+  // Unpause raster thread.
+  latch.Signal();
 
   // Flush raster events.
   PostTaskSync(task_runner, []() {});
