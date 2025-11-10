@@ -916,11 +916,22 @@ class SliverReorderableListState extends State<SliverReorderableList>
   }
 
   void _dropCompleted() {
-    final int fromIndex = _dragIndex!;
-    final int toIndex = _insertIndex!;
-    if (fromIndex != toIndex) {
-      widget.onReorder.call(fromIndex, toIndex);
+    final int oldIndex = _dragIndex!;
+    int newIndex = _insertIndex!;
+
+    if (widget.onReorder != null) {
+      if (oldIndex != newIndex) {
+        widget.onReorder?.call(oldIndex, newIndex);
+      }
+    } else {
+      // Removing an item at the old index shortens the list by one.
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+
+      widget.onReorderItem.call(oldIndex, newIndex);
     }
+
     setState(() {
       _dragReset();
     });
@@ -1079,9 +1090,18 @@ class SliverReorderableListState extends State<SliverReorderableList>
   }
 
   Widget _wrapWithSemantics(Widget child, int index) {
-    void reorder(int startIndex, int endIndex) {
-      if (startIndex != endIndex) {
-        widget.onReorder(startIndex, endIndex);
+    void reorder(int oldIndex, int newIndex) {
+      if (widget.onReorder != null) {
+        if (oldIndex != newIndex) {
+          widget.onReorder?.call(oldIndex, newIndex);
+        }
+      } else {
+        // Removing an item at the old index shortens the list by one.
+        if (newIndex > oldIndex) {
+          newIndex -= 1;
+        }
+
+        widget.onReorderItem.call(oldIndex, newIndex);
       }
     }
 
