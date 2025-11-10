@@ -846,7 +846,6 @@ class MaterialScrollBehavior extends ScrollBehavior {
 
   @override
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
-    print('CAMILLE: ${getPlatform(context)}');
     // When modifying this function, consider modifying the implementation in
     // the base class ScrollBehavior as well.
     switch (axisDirectionToAxis(details.direction)) {

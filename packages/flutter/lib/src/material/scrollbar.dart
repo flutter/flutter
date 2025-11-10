@@ -441,11 +441,12 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
 
   @override
   void receivedPointerDown(PointerDownEvent event) {
-    if (event.kind != PointerDeviceKind.mouse &&
-        event.kind != PointerDeviceKind.trackpad &&
-        _assistiveScrollbarIsVisible) {
+    if (event.kind != PointerDeviceKind.mouse && event.kind != PointerDeviceKind.trackpad) {
       _trackpadOrMouseScrollDetected = false;
-      _toggleAssistiveScrollbarVisibility(false);
+
+      if (_assistiveScrollbarIsVisible) {
+        _toggleAssistiveScrollbarVisibility(false);
+      }
     }
   }
 

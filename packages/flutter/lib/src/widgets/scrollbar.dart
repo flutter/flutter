@@ -1410,7 +1410,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   void initState() {
     super.initState();
-    // showScrollbar = widget.thumbVisibility ?? false;
     _fadeoutAnimationController = AnimationController(vsync: this, duration: widget.fadeDuration)
       ..addStatusListener(_validateInteractions);
     _fadeoutOpacityAnimation = CurvedAnimation(
