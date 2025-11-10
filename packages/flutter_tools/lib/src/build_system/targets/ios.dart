@@ -367,10 +367,6 @@ class ReleaseUnpackIOSDsym extends ReleaseUnpackDarwinDsym {
     if (sdkRoot == null) {
       throw MissingDefineException(kSdkRoot, name);
     }
-    final String? archs = environment.defines[kIosArchs];
-    if (archs == null) {
-      throw MissingDefineException(kIosArchs, name);
-    }
     final EnvironmentType? environmentType = environmentTypeFromSdkroot(
       sdkRoot,
       environment.fileSystem,
