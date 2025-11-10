@@ -123,25 +123,11 @@ DlDeferredImageGPUImpeller::ImageWrapper::ImageWrapper(
       snapshot_delegate_(std::move(snapshot_delegate)),
       raster_task_runner_(std::move(raster_task_runner)) {}
 
-DlDeferredImageGPUImpeller::ImageWrapper::~ImageWrapper() {
-  fml::TaskRunner::RunNowOrPostTask(
-      raster_task_runner_, [id = reinterpret_cast<uintptr_t>(this),
-                            texture_registry = std::move(texture_registry_)]() {
-        if (texture_registry) {
-          texture_registry->UnregisterContextListener(id);
-        }
-      });
-}
+DlDeferredImageGPUImpeller::ImageWrapper::~ImageWrapper() {}
 
-void DlDeferredImageGPUImpeller::ImageWrapper::OnGrContextCreated() {
-  FML_DCHECK(raster_task_runner_->RunsTasksOnCurrentThread());
-  SnapshotDisplayList();
-}
+void DlDeferredImageGPUImpeller::ImageWrapper::OnGrContextCreated() {}
 
-void DlDeferredImageGPUImpeller::ImageWrapper::OnGrContextDestroyed() {
-  // Impeller textures do not have threading requirements for deletion, and
-  texture_.reset();
-}
+void DlDeferredImageGPUImpeller::ImageWrapper::OnGrContextDestroyed() {}
 
 bool DlDeferredImageGPUImpeller::ImageWrapper::isTextureBacked() const {
   return texture_ && texture_->IsValid();
@@ -163,14 +149,12 @@ void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
           return;
         }
 
-        wrapper->texture_registry_ = snapshot_delegate->GetTextureRegistry();
-        wrapper->texture_registry_->RegisterContextListener(
-            reinterpret_cast<uintptr_t>(wrapper.get()), weak_this);
-
+        std::shared_ptr<TextureRegistry> texture_registry =
+            snapshot_delegate->GetTextureRegistry();
         if (layer_tree) {
           wrapper->display_list_ = layer_tree->Flatten(
               DlRect::MakeWH(wrapper->size_.width, wrapper->size_.height),
-              wrapper->texture_registry_);
+              texture_registry);
         }
         auto snapshot = snapshot_delegate->MakeRasterSnapshotSync(
             wrapper->display_list_, wrapper->size_);

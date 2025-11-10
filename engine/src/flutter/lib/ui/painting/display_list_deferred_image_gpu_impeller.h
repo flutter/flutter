@@ -99,7 +99,6 @@ class DlDeferredImageGPUImpeller final : public DlImage {
     std::shared_ptr<impeller::Texture> texture_;
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate_;
     fml::RefPtr<fml::TaskRunner> raster_task_runner_;
-    std::shared_ptr<TextureRegistry> texture_registry_;
 
     mutable std::mutex error_mutex_;
     std::optional<std::string> error_;
