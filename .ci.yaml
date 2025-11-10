@@ -54,7 +54,10 @@ platform_properties:
           {"dependency": "android_sdk", "version": "version:36v3"},
           {"dependency": "android_virtual_device", "version": "android_36_google_apis_x64.textpb"},
           {"dependency": "avd_cipd_version", "version": "build_id:8719362231152674241"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       os: Ubuntu
       cores: "8"
@@ -74,7 +77,10 @@ platform_properties:
           {"dependency": "android_sdk", "version": "version:36v3"},
           {"dependency": "android_virtual_device", "version": "android_36_google_apis_x64.textpb"},
           {"dependency": "avd_cipd_version", "version": "build_id:8719362231152674241"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       os: Ubuntu
       cores: "8"
@@ -95,7 +101,10 @@ platform_properties:
           {"dependency": "android_sdk", "version": "version:36v3"},
           {"dependency": "android_virtual_device", "version": "android_35_google_apis_x64.textpb"},
           {"dependency": "avd_cipd_version", "version": "build_id:8733065022087935185"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       os: Ubuntu
       cores: "8"
@@ -425,7 +434,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -787,7 +799,10 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:36v3"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       shard: framework_tests
       subshard: slow
@@ -892,7 +907,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -912,7 +930,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -932,7 +953,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -952,7 +976,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -973,7 +1000,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -994,7 +1024,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -1015,7 +1048,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -1059,7 +1095,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -1081,7 +1120,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -1102,7 +1144,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       # TODO(fujino): delete once propagation from
       # https://github.com/flutter/flutter/issues/158521 completes.
@@ -1127,7 +1172,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
@@ -1604,7 +1652,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v3"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:17"}
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       task_name: android_java17_dependency_smoke_tests
       tags: >
@@ -2136,6 +2187,7 @@ targets:
 
   - name: Linux web_skwasm_tests_2
     recipe: flutter/flutter_drone
+    bringup: true # Failing: https://github.com/flutter/flutter/issues/178060
     timeout: 60
     properties:
       dependencies: >-
@@ -3124,6 +3176,12 @@ targets:
       artifact: gallery__transition_perf
       drone_dimensions: >
         ["device_os=U","os=Linux", "device_type=mokey"]
+      dependencies: >-
+        [
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
+        ]
 
   - name: Linux_build_test flutter_gallery__transition_perf_e2e
     recipe: devicelab/devicelab_drone_build_test
@@ -3136,6 +3194,12 @@ targets:
       artifact: gallery__transition_perf_e2e
       drone_dimensions: >
         ["device_os=U","os=Linux", "device_type=mokey"]
+      dependencies: >-
+        [
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
+        ]
 
   - name: Linux_build_test flutter_gallery__transition_perf_hybrid
     recipe: devicelab/devicelab_drone_build_test
@@ -3148,6 +3212,12 @@ targets:
       artifact: gallery__transition_perf_hybrid
       drone_dimensions: >
         ["device_os=U","os=Linux", "device_type=mokey"]
+      dependencies: >-
+        [
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
+        ]
 
   # linux mokey benchmark
   - name: Linux_mokey flutter_gallery__transition_perf_with_semantics
