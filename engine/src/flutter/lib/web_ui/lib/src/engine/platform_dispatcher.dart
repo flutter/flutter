@@ -480,17 +480,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         final MethodCall decoded = jsonCodec.decodeMethodCall(data);
         switch (decoded.method) {
           case 'Skia.setResourceCacheMaxBytes':
-            if (renderer is CanvasKitRenderer) {
-              assert(
-                decoded.arguments is int,
-                'Argument to Skia.setResourceCacheMaxBytes must be an int, but was ${(decoded.arguments as Object?).runtimeType}',
-              );
-              final int cacheSizeInBytes = decoded.arguments as int;
-              CanvasKitRenderer.instance.resourceCacheMaxBytes = cacheSizeInBytes;
-            }
+            assert(
+              decoded.arguments is int,
+              'Argument to Skia.setResourceCacheMaxBytes must be an int, but was ${(decoded.arguments as Object?).runtimeType}',
+            );
+            final int cacheSizeInBytes = decoded.arguments as int;
+            renderer.resourceCacheMaxBytes = cacheSizeInBytes;
 
-            // Also respond in HTML mode. Otherwise, apps would have to detect
-            // CanvasKit vs HTML before invoking this method.
             replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(<bool>[true]));
         }
         return;
@@ -685,6 +681,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       'HapticFeedbackType.mediumImpact' => vibrateMediumImpact,
       'HapticFeedbackType.heavyImpact' => vibrateHeavyImpact,
       'HapticFeedbackType.selectionClick' => vibrateSelectionClick,
+      'HapticFeedbackType.successNotification' => vibrateMediumImpact,
+      'HapticFeedbackType.warningNotification' => vibrateMediumImpact,
+      'HapticFeedbackType.errorNotification' => vibrateHeavyImpact,
       _ => vibrateLongPress,
     };
   }
@@ -707,6 +706,15 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     required ui.VoidCallback drawFrame,
   }) {
     FrameService.instance.scheduleWarmUpFrame(beginFrame: beginFrame, drawFrame: drawFrame);
+  }
+
+  @override
+  void setSemanticsTreeEnabled(bool enabled) {
+    if (!enabled) {
+      for (final EngineFlutterView view in views) {
+        view.semantics.reset();
+      }
+    }
   }
 
   /// Updates the application's rendering on the GPU with the newly provided
@@ -792,6 +800,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ''')
   void updateSemantics(ui.SemanticsUpdate update) {
     implicitView?.semantics.updateSemantics(update);
+  }
+
+  @override
+  void setApplicationLocale(ui.Locale locale) {
+    for (final EngineFlutterView view in views) {
+      view.setLocale(locale);
+    }
   }
 
   /// This is equivalent to `locales.first`, except that it will provide an

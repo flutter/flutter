@@ -1778,7 +1778,53 @@ class Transform extends SingleChildRenderObjectWidget {
   /// [Directionality.of] returns [TextDirection.rtl].
   final AlignmentGeometry? alignment;
 
-  /// Whether to apply the transformation when performing hit tests.
+  /// Whether to transform registered hits into the child's resulting coordinate system.
+  ///
+  /// When `true`, hit coordinates within the parent's bounds are transformed to match
+  /// where the child appears visually after any transformation such as translation,
+  /// rotation, scaling, or skewing.
+  ///
+  /// When `false`, hit coordinates are not transformed, potentially causing taps to
+  /// register in a different location relative to the child's visual position.
+  ///
+  /// **Important:** Even when [transformHitTests] is true, children cannot
+  /// receive events outside the parent's bounds. Hit testing always starts
+  /// with the parent's own bounds check in [RenderBox.hitTest]. If the pointer
+  /// is outside the parent's bounds, [RenderBox.hitTestChildren] is not
+  /// invoked and the children are not considered for hit testing.
+  ///
+  /// For interactive elements that need to be tappable outside their parent's
+  /// original bounds, consider:
+  /// - Expanding the parent widget's bounds to encompass the transformed child.
+  /// - Using an [OverlayEntry] or [OverlayPortal] to place the widget in an
+  ///   [Overlay].
+  /// - Restructuring the widget hierarchy.
+  ///
+  /// {@tool snippet}
+  /// This example shows a `Container` that is scaled up. Even though it appears
+  /// larger, taps are only registered within the original 100x100 area of the
+  /// parent `SizedBox`.
+  ///
+  /// ```dart
+  /// Center(
+  ///   child: SizedBox(
+  ///     width: 100.0,
+  ///     height: 100.0,
+  ///     child: Transform.scale(
+  ///       scale: 2.0,
+  ///       child: GestureDetector(
+  ///         onTap: () => debugPrint('Tapped!'),
+  ///         child: const ColoredBox(
+  ///           color: Colors.purple,
+  ///         ),
+  ///       ),
+  ///     ),
+  ///   ),
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// Defaults to true.
   final bool transformHitTests;
 
   /// The filter quality with which to apply the transform as a bitmap operation.
@@ -3945,6 +3991,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required bool? readOnly,
     required bool? focusable,
     required bool? focused,
+    required AccessiblityFocusBlockType? accessiblityFocusBlockType,
     required bool? inMutuallyExclusiveGroup,
     required bool? obscured,
     required bool? multiline,
@@ -3993,6 +4040,8 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required VoidCallback? onDidGainAccessibilityFocus,
     required VoidCallback? onDidLoseAccessibilityFocus,
     required VoidCallback? onFocus,
+    required VoidCallback? onExpand,
+    required VoidCallback? onCollapse,
     required Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions,
     required SemanticsRole? role,
     required Set<String>? controlsNodes,
@@ -4025,6 +4074,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            readOnly: readOnly,
            focusable: focusable,
            focused: focused,
+           accessiblityFocusBlockType: accessiblityFocusBlockType,
            inMutuallyExclusiveGroup: inMutuallyExclusiveGroup,
            obscured: obscured,
            multiline: multiline,
@@ -4070,6 +4120,8 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            onDismiss: onDismiss,
            onSetSelection: onSetSelection,
            onSetText: onSetText,
+           onExpand: onExpand,
+           onCollapse: onCollapse,
            customSemanticsActions: customSemanticsActions,
            hintOverrides: onTapHint != null || onLongPressHint != null
                ? SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint)
@@ -4269,6 +4321,7 @@ class SliverSemantics extends _SemanticsBase {
     super.readOnly,
     super.focusable,
     super.focused,
+    super.accessiblityFocusBlockType,
     super.inMutuallyExclusiveGroup,
     super.obscured,
     super.multiline,
@@ -4317,6 +4370,8 @@ class SliverSemantics extends _SemanticsBase {
     super.onDidGainAccessibilityFocus,
     super.onDidLoseAccessibilityFocus,
     super.onFocus,
+    super.onExpand,
+    super.onCollapse,
     super.customSemanticsActions,
     super.role,
     super.controlsNodes,
@@ -7842,6 +7897,7 @@ class Semantics extends _SemanticsBase {
     super.readOnly,
     super.focusable,
     super.focused,
+    super.accessiblityFocusBlockType,
     super.inMutuallyExclusiveGroup,
     super.obscured,
     super.multiline,
@@ -7890,6 +7946,8 @@ class Semantics extends _SemanticsBase {
     super.onDidGainAccessibilityFocus,
     super.onDidLoseAccessibilityFocus,
     super.onFocus,
+    super.onExpand,
+    super.onCollapse,
     super.customSemanticsActions,
     super.role,
     super.controlsNodes,
@@ -8338,31 +8396,59 @@ class _StatefulBuilderState extends State<StatefulBuilder> {
 /// child on top of that color.
 class ColoredBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that paints its area with the specified [Color].
-  const ColoredBox({required this.color, super.child, super.key});
+  const ColoredBox({required this.color, this.isAntiAlias = true, super.child, super.key});
 
   /// The color to paint the background area with.
   final Color color;
 
+  /// {@template flutter.widgets.ColoredBox.isAntiAlias}
+  /// Whether to apply anti-aliasing when painting the box.
+  ///
+  /// Defaults to `true`.
+  ///
+  /// When `true`, the painted box will have smooth edges. This is crucial for
+  /// animations and transformations (such as rotation or scaling) where the
+  /// widget's edges may not align perfectly with the physical pixel grid.
+  /// Anti-aliasing allows for sub-pixel rendering, which prevents a 'jagged'
+  /// appearance during motion and ensures visually smooth transitions.
+  ///
+  /// Set this to `false` for specific use cases where multiple `ColoredBox`
+  /// widgets are positioned adjacent to each other to form a larger, seamless
+  /// area of solid color. With anti-aliasing enabled (`true`), faint seams or
+  /// gaps might appear between the boxes due to the semi-transparent pixels at
+  /// their edges. Disabling anti-aliasing ensures that the boxes align perfectly
+  /// without such visual artifacts.
+  ///
+  /// See also:
+  ///
+  ///  * [Paint.isAntiAlias], the underlying property that this controls.
+  /// {@endtemplate}
+  final bool isAntiAlias;
+
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderColoredBox(color: color);
+    return _RenderColoredBox(color: color, isAntiAlias: isAntiAlias);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderObject renderObject) {
-    (renderObject as _RenderColoredBox).color = color;
+    (renderObject as _RenderColoredBox)
+      ..color = color
+      ..isAntiAlias = isAntiAlias;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Color>('color', color));
+    properties.add(DiagnosticsProperty<bool>('isAntiAlias', isAntiAlias, defaultValue: true));
   }
 }
 
 class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
-  _RenderColoredBox({required Color color})
+  _RenderColoredBox({required Color color, required bool isAntiAlias})
     : _color = color,
+      _isAntiAlias = isAntiAlias,
       super(behavior: HitTestBehavior.opaque);
 
   /// The fill color for this render object.
@@ -8376,6 +8462,16 @@ class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
     markNeedsPaint();
   }
 
+  bool get isAntiAlias => _isAntiAlias;
+  bool _isAntiAlias;
+  set isAntiAlias(bool value) {
+    if (value == _isAntiAlias) {
+      return;
+    }
+    _isAntiAlias = value;
+    markNeedsPaint();
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
     // It's tempting to want to optimize out this `drawRect()` call if the
@@ -8383,7 +8479,12 @@ class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
     // https://github.com/flutter/flutter/pull/72526#issuecomment-749185938 for
     // a good description of why.
     if (size > Size.zero) {
-      context.canvas.drawRect(offset & size, Paint()..color = color);
+      context.canvas.drawRect(
+        offset & size,
+        Paint()
+          ..isAntiAlias = isAntiAlias
+          ..color = color,
+      );
     }
     if (child != null) {
       context.paintChild(child!, offset);

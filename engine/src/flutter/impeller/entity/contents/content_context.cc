@@ -4,6 +4,7 @@
 
 #include "impeller/entity/contents/content_context.h"
 
+#include <format>
 #include <memory>
 #include <utility>
 
@@ -17,6 +18,7 @@
 #include "impeller/entity/entity.h"
 #include "impeller/entity/render_target_cache.h"
 #include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/pipeline.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_target.h"
@@ -147,6 +149,7 @@ class Variants : public GenericVariants {
     }
     SetDefault(default_options_.value(), std::make_unique<PipelineHandleT>(
                                              context, desc_, /*async=*/false));
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     return Get(default_options_.value());
   }
 
@@ -188,8 +191,7 @@ RenderPipelineHandleT* CreateIfNeeded(
       /*async=*/false, [&opts, variants_count = container.GetPipelineCount()](
                            PipelineDescriptor& desc) {
         opts.ApplyToPipelineDescriptor(desc);
-        desc.SetLabel(
-            SPrintF("%s V#%zu", desc.GetLabel().data(), variants_count));
+        desc.SetLabel(std::format("{} V#{}", desc.GetLabel(), variants_count));
       });
   std::unique_ptr<RenderPipelineHandleT> variant =
       std::make_unique<RenderPipelineHandleT>(std::move(variant_future));
@@ -228,6 +230,7 @@ struct ContentContext::Pipelines {
   Variants<BlendScreenPipeline> blend_screen;
   Variants<BlendSoftLightPipeline> blend_softlight;
   Variants<BorderMaskBlurPipeline> border_mask_blur;
+  Variants<CirclePipeline> circle;
   Variants<ClipPipeline> clip;
   Variants<ColorMatrixColorFilterPipeline> color_matrix_color_filter;
   Variants<ConicalGradientFillConicalPipeline> conical_gradient_fill;
@@ -554,7 +557,7 @@ ContentContext::ContentContext(
                                ? std::make_shared<RenderTargetCache>(
                                      context_->GetResourceAllocator())
                                : std::move(render_target_allocator)),
-      host_buffer_(HostBuffer::Create(
+      data_host_buffer_(HostBuffer::Create(
           context_->GetResourceAllocator(),
           context_->GetIdleWaiter(),
           context_->GetCapabilities()->GetMinimumUniformAlignment())),
@@ -563,6 +566,16 @@ ContentContext::ContentContext(
     return;
   }
 
+  // On most backends, indexes and other data can be allocated into the same
+  // buffers. However, some backends (namely WebGL) require indexes used in
+  // indexed draws to be allocated separately from other data. For those
+  // backends, we allocate a separate host buffer just for indexes.
+  indexes_host_buffer_ =
+      context_->GetCapabilities()->NeedsPartitionedHostBuffer()
+          ? HostBuffer::Create(
+                context_->GetResourceAllocator(), context_->GetIdleWaiter(),
+                context_->GetCapabilities()->GetMinimumUniformAlignment())
+          : data_host_buffer_;
   {
     TextureDescriptor desc;
     desc.storage_mode = StorageMode::kDevicePrivate;
@@ -574,8 +587,8 @@ ContentContext::ContentContext(
     std::shared_ptr<CommandBuffer> cmd_buffer =
         GetContext()->CreateCommandBuffer();
     std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
-    HostBuffer& host_buffer = GetTransientsBuffer();
-    BufferView buffer_view = host_buffer.Emplace(data);
+    HostBuffer& data_host_buffer = GetTransientsDataBuffer();
+    BufferView buffer_view = data_host_buffer.Emplace(data);
     blit_pass->AddCopy(buffer_view, empty_texture_);
 
     if (!blit_pass->EncodeCommands() || !GetContext()
@@ -617,6 +630,7 @@ ContentContext::ContentContext(
     pipelines_->texture.CreateDefault(*context_, options);
     pipelines_->fast_gradient.CreateDefault(*context_, options);
     pipelines_->line.CreateDefault(*context_, options);
+    pipelines_->circle.CreateDefault(*context_, options);
 
     if (context_->GetCapabilities()->SupportsSSBO()) {
       pipelines_->linear_gradient_ssbo_fill.CreateDefault(*context_, options);
@@ -973,6 +987,17 @@ void ContentContext::ClearCachedRuntimeEffectPipeline(
     } else {
       it++;
     }
+  }
+}
+
+void ContentContext::ResetTransientsBuffers() {
+  data_host_buffer_->Reset();
+
+  // We should only reset the indexes host buffer if it is actually different
+  // from the data host buffer. Otherwise we'll end up resetting the same host
+  // buffer twice.
+  if (data_host_buffer_ != indexes_host_buffer_) {
+    indexes_host_buffer_->Reset();
   }
 }
 
@@ -1472,6 +1497,11 @@ PipelineRef ContentContext::GetDrawVerticesUberPipeline(
   } else {
     return GetPipeline(this, pipelines_->vertices_uber_2_, opts);
   }
+}
+
+PipelineRef ContentContext::GetCirclePipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->circle, opts);
 }
 
 PipelineRef ContentContext::GetLinePipeline(ContentContextOptions opts) const {

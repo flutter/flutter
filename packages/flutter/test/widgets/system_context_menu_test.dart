@@ -895,4 +895,446 @@ void main() {
     },
     skip: kIsWeb, // [intended] SystemContextMenu is not supported on web.
   );
+
+  testWidgets(
+    'can use custom menu items',
+    (WidgetTester tester) async {
+      bool customAction1Called = false;
+      bool customAction2Called = false;
+      final List<List<IOSSystemContextMenuItemData>> itemsReceived =
+          <List<IOSSystemContextMenuItemData>>[];
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (MethodCall methodCall) async {
+          switch (methodCall.method) {
+            case 'ContextMenu.showSystemContextMenu':
+              final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
+              final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
+              final List<IOSSystemContextMenuItemData> lastItems = untypedItems.map((
+                dynamic value,
+              ) {
+                final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
+                return systemContextMenuItemDataFromJson(itemJson);
+              }).toList();
+              itemsReceived.add(lastItems);
+          }
+          return;
+        },
+      );
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+
+      final List<IOSSystemContextMenuItem> items = <IOSSystemContextMenuItem>[
+        const IOSSystemContextMenuItemCopy(),
+        IOSSystemContextMenuItemCustom(
+          title: 'Custom Action 1',
+          onPressed: () {
+            customAction1Called = true;
+          },
+        ),
+        IOSSystemContextMenuItemCustom(
+          title: 'Custom Action 2',
+          onPressed: () {
+            customAction2Called = true;
+          },
+        ),
+      ];
+
+      final TextEditingController controller = TextEditingController(text: 'test text');
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            final MediaQueryData mediaQueryData = MediaQuery.of(context);
+            return MediaQuery(
+              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
+              child: MaterialApp(
+                home: Scaffold(
+                  body: Center(
+                    child: TextField(
+                      controller: controller,
+                      contextMenuBuilder:
+                          (BuildContext context, EditableTextState editableTextState) {
+                            return SystemContextMenu.editableText(
+                              editableTextState: editableTextState,
+                              items: items,
+                            );
+                          },
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      await tester.tap(find.byType(TextField));
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.showToolbar(), true);
+      await tester.pump();
+
+      expect(find.byType(SystemContextMenu), findsOneWidget);
+      expect(itemsReceived, hasLength(1));
+      expect(itemsReceived.last, hasLength(3));
+
+      expect(itemsReceived.last[0], equals(const IOSSystemContextMenuItemDataCopy()));
+      expect(itemsReceived.last[1], isA<IOSSystemContextMenuItemDataCustom>());
+      expect(
+        (itemsReceived.last[1] as IOSSystemContextMenuItemDataCustom).title,
+        'Custom Action 1',
+      );
+      expect(itemsReceived.last[2], isA<IOSSystemContextMenuItemDataCustom>());
+      expect(
+        (itemsReceived.last[2] as IOSSystemContextMenuItemDataCustom).title,
+        'Custom Action 2',
+      );
+
+      final IOSSystemContextMenuItemCustom customItem1 = items[1] as IOSSystemContextMenuItemCustom;
+      final IOSSystemContextMenuItemCustom customItem2 = items[2] as IOSSystemContextMenuItemCustom;
+
+      ByteData? message = const JSONMethodCodec().encodeMethodCall(
+        MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[
+          0,
+          customItem1.hashCode.toString(),
+        ]),
+      );
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/platform',
+        message,
+        (_) {},
+      );
+      expect(customAction1Called, isTrue);
+      expect(customAction2Called, isFalse);
+
+      message = const JSONMethodCodec().encodeMethodCall(
+        MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[
+          0,
+          customItem2.hashCode.toString(),
+        ]),
+      );
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/platform',
+        message,
+        (_) {},
+      );
+      expect(customAction2Called, isTrue);
+
+      state.hideToolbar();
+      await tester.pump();
+      expect(find.byType(SystemContextMenu), findsNothing);
+    },
+    skip: kIsWeb, // [intended]
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets(
+    'system context menu auto-closes after custom action',
+    (WidgetTester tester) async {
+      bool customActionCalled = false;
+      final TextEditingController controller = TextEditingController(text: 'test text');
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            final MediaQueryData mediaQueryData = MediaQuery.of(context);
+            return MediaQuery(
+              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
+              child: MaterialApp(
+                home: Scaffold(
+                  body: Center(
+                    child: TextField(
+                      controller: controller,
+                      contextMenuBuilder:
+                          (BuildContext context, EditableTextState editableTextState) {
+                            return SystemContextMenu.editableText(
+                              editableTextState: editableTextState,
+                              items: <IOSSystemContextMenuItem>[
+                                IOSSystemContextMenuItemCustom(
+                                  title: 'Test Action',
+                                  onPressed: () {
+                                    customActionCalled = true;
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      await tester.tap(find.byType(TextField));
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.showToolbar(), true);
+      await tester.pump();
+
+      expect(find.byType(SystemContextMenu), findsOneWidget);
+
+      final SystemContextMenu menu = tester.widget<SystemContextMenu>(
+        find.byType(SystemContextMenu),
+      );
+      final IOSSystemContextMenuItemCustom item = menu.items[0] as IOSSystemContextMenuItemCustom;
+
+      final ByteData message = const JSONMethodCodec().encodeMethodCall(
+        MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[0, item.hashCode.toString()]),
+      );
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/platform',
+        message,
+        (_) {},
+      );
+
+      expect(customActionCalled, isTrue);
+
+      // iOS system menus auto-close after custom actions on real devices.
+      // Simulate this by sending the platform dismiss message.
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'method': 'ContextMenu.onDismissSystemContextMenu',
+      });
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/platform',
+        messageBytes,
+        (_) {},
+      );
+      await tester.pump();
+
+      expect(find.byType(SystemContextMenu), findsNothing);
+    },
+    skip: kIsWeb, // [intended]
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets(
+    'can trigger custom menu action through platform channel message',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'one two three');
+      addTearDown(controller.dispose);
+
+      bool customActionCalled = false;
+      final List<IOSSystemContextMenuItem> items = <IOSSystemContextMenuItem>[
+        const IOSSystemContextMenuItemCut(),
+        IOSSystemContextMenuItemCustom(
+          title: 'Test Action',
+          onPressed: () {
+            customActionCalled = true;
+          },
+        ),
+      ];
+
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            final MediaQueryData mediaQueryData = MediaQuery.of(context);
+            return MediaQuery(
+              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
+              child: MaterialApp(
+                home: Scaffold(
+                  body: Center(
+                    child: TextField(
+                      controller: controller,
+                      contextMenuBuilder:
+                          (BuildContext context, EditableTextState editableTextState) {
+                            return SystemContextMenu.editableText(
+                              editableTextState: editableTextState,
+                              items: items,
+                            );
+                          },
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+
+      const TextSelection selection = TextSelection(baseOffset: 0, extentOffset: 3);
+      controller.selection = selection;
+
+      await tester.longPress(find.byType(TextField));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SystemContextMenu), findsOneWidget);
+
+      final IOSSystemContextMenuItemCustom customItem = items[1] as IOSSystemContextMenuItemCustom;
+      final String callbackId = customItem.hashCode.toString();
+
+      final ByteData message = const JSONMethodCodec().encodeMethodCall(
+        MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[0, callbackId]),
+      );
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/platform',
+        message,
+        (_) {},
+      );
+
+      expect(customActionCalled, isTrue);
+
+      // Verify menu closes after custom action.
+      // Simulate platform dismiss message for consistency.
+      final ByteData? dismissMessage = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'method': 'ContextMenu.onDismissSystemContextMenu',
+      });
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/platform',
+        dismissMessage,
+        (_) {},
+      );
+      await tester.pump();
+      expect(find.byType(SystemContextMenu), findsNothing);
+    },
+    skip: kIsWeb, // [intended]
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets(
+    'two TextFields can have different custom SystemContextMenu items',
+    (WidgetTester tester) async {
+      bool field1ActionCalled = false;
+      bool field2ActionCalled = false;
+
+      final TextEditingController controller1 = TextEditingController(text: 'Field 1 text');
+      final TextEditingController controller2 = TextEditingController(text: 'Field 2 text');
+      addTearDown(() {
+        controller1.dispose();
+        controller2.dispose();
+      });
+
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            final MediaQueryData mediaQueryData = MediaQuery.of(context);
+            return MediaQuery(
+              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
+              child: MaterialApp(
+                home: Scaffold(
+                  body: Column(
+                    children: <Widget>[
+                      TextField(
+                        controller: controller1,
+                        contextMenuBuilder:
+                            (BuildContext context, EditableTextState editableTextState) {
+                              return SystemContextMenu.editableText(
+                                editableTextState: editableTextState,
+                                items: <IOSSystemContextMenuItem>[
+                                  IOSSystemContextMenuItemCustom(
+                                    title: 'Field 1 Action',
+                                    onPressed: () {
+                                      field1ActionCalled = true;
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                      ),
+                      TextField(
+                        controller: controller2,
+                        contextMenuBuilder:
+                            (BuildContext context, EditableTextState editableTextState) {
+                              return SystemContextMenu.editableText(
+                                editableTextState: editableTextState,
+                                items: <IOSSystemContextMenuItem>[
+                                  IOSSystemContextMenuItemCustom(
+                                    title: 'Field 2 Action',
+                                    onPressed: () {
+                                      field2ActionCalled = true;
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      await tester.longPress(find.byType(TextField).first);
+      await tester.pump();
+      expect(find.byType(SystemContextMenu), findsOneWidget);
+
+      final SystemContextMenu menu1 = tester.widget<SystemContextMenu>(
+        find.byType(SystemContextMenu),
+      );
+      final IOSSystemContextMenuItemCustom item1 = menu1.items[0] as IOSSystemContextMenuItemCustom;
+
+      ByteData message = const JSONMethodCodec().encodeMethodCall(
+        MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[0, item1.hashCode.toString()]),
+      );
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/platform',
+        message,
+        (_) {},
+      );
+
+      expect(field1ActionCalled, isTrue);
+      expect(field2ActionCalled, isFalse);
+
+      final ByteData? messageBytes1 = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'method': 'ContextMenu.onDismissSystemContextMenu',
+      });
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/platform',
+        messageBytes1,
+        (_) {},
+      );
+      await tester.pump();
+
+      field1ActionCalled = false;
+
+      await tester.longPress(find.byType(TextField).last);
+      await tester.pump();
+      expect(find.byType(SystemContextMenu), findsOneWidget);
+
+      final SystemContextMenu menu2 = tester.widget<SystemContextMenu>(
+        find.byType(SystemContextMenu),
+      );
+      final IOSSystemContextMenuItemCustom item2 = menu2.items[0] as IOSSystemContextMenuItemCustom;
+
+      message = const JSONMethodCodec().encodeMethodCall(
+        MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[0, item2.hashCode.toString()]),
+      );
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/platform',
+        message,
+        (_) {},
+      );
+
+      expect(field1ActionCalled, isFalse);
+      expect(field2ActionCalled, isTrue);
+
+      final ByteData? messageBytes2 = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'method': 'ContextMenu.onDismissSystemContextMenu',
+      });
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/platform',
+        messageBytes2,
+        (_) {},
+      );
+      await tester.pump();
+
+      expect(find.byType(SystemContextMenu), findsNothing);
+    },
+    skip: kIsWeb, // [intended]
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 }

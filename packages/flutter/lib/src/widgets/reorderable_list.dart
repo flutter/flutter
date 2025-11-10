@@ -852,7 +852,13 @@ class SliverReorderableListState extends State<SliverReorderableList>
 
   void _dragEnd(_DragInfo item) {
     setState(() {
-      if (_insertIndex == item.index) {
+      if (_insertIndex! - item.index == 1) {
+        // When returning to original position from below, _insertIndex equals
+        // item.index + 1 because insertion index is calculated with the dragged
+        // item still present. Use the actual target position for animation.
+        _finalDropPosition = _itemOffsetAt(_insertIndex! - 1);
+      } else if (_insertIndex == item.index) {
+        // No movement - animate to current position
         _finalDropPosition = _itemOffsetAt(_insertIndex!);
       } else if (_reverse) {
         if (_insertIndex! >= _items.length) {
@@ -1227,6 +1233,7 @@ class _ReorderableItemState extends State<_ReorderableItem> {
       newTargetOffset = Offset.zero;
     }
     if (newTargetOffset != _targetOffset) {
+      final Offset previousTarget = _targetOffset;
       _targetOffset = newTargetOffset;
       if (animate) {
         if (_offsetAnimation == null) {
@@ -1242,7 +1249,14 @@ class _ReorderableItemState extends State<_ReorderableItem> {
                 })
                 ..forward();
         } else {
-          _startOffset = offset;
+          // Animation interrupted - calculate current position from previous animation
+          final double currentAnimValue = Curves.easeInOut.transform(_offsetAnimation!.value);
+          final Offset currentPosition = Offset.lerp(
+            _startOffset,
+            previousTarget,
+            currentAnimValue,
+          )!;
+          _startOffset = currentPosition;
           _offsetAnimation!.forward(from: 0.0);
         }
       } else {

@@ -29,6 +29,7 @@ CAPABILITY_TEST(SupportsDecalSamplerAddressMode, false);
 CAPABILITY_TEST(SupportsDeviceTransientTextures, false);
 CAPABILITY_TEST(SupportsTriangleFan, false);
 CAPABILITY_TEST(SupportsExtendedRangeFormats, false);
+CAPABILITY_TEST(NeedsPartitionedHostBuffer, false);
 
 TEST(CapabilitiesTest, DefaultColorFormat) {
   auto defaults = CapabilitiesBuilder().Build();

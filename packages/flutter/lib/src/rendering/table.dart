@@ -722,14 +722,17 @@ class RenderTable extends RenderBox {
             (rawChildrens.single.role != SemanticsRole.cell &&
                 rawChildrens.single.role != SemanticsRole.columnHeader);
 
-        final SemanticsNode cell = addCellWrapper
-            ? (_cachedCells[_Index(y, x)] ??
-                  (_cachedCells[_Index(y, x)] = SemanticsNode()
-                    ..updateWith(
-                      config: SemanticsConfiguration()..role = SemanticsRole.cell,
-                      childrenInInversePaintOrder: rawChildrens,
-                    )))
-            : rawChildrens.single;
+        late final SemanticsNode cell;
+        if (!addCellWrapper) {
+          cell = rawChildrens.single;
+        } else {
+          final _Index index = _Index(y, x);
+          cell = _cachedCells.putIfAbsent(index, () => SemanticsNode())
+            ..updateWith(
+              config: SemanticsConfiguration()..role = SemanticsRole.cell,
+              childrenInInversePaintOrder: rawChildrens,
+            );
+        }
 
         final double cellWidth = x == _columns - 1
             ? rowBox.width - _columnLefts!.elementAt(x)
@@ -751,11 +754,13 @@ class RenderTable extends RenderBox {
           // Shift child transform.
           final Rect localRect = rectWithOffset(child);
           // The rect should satisfy 0 <= localRect.top < localRect.bottom <= rowBox.height
-          final double dy = localRect.top >= rowBox.height ? -_rowTops.elementAt(y) : 0.0;
+          final double dy = localRect.bottom > rowBox.height + precisionErrorTolerance
+              ? -_rowTops.elementAt(y)
+              : 0.0;
 
           // if addCellWrapper is true, the rect is relative to the cell
           // The rect should satisfy 0 <= localRect.left < localRect.right <= cellWidth
-          // if addCellWrapper is false, the rect is relative to the raw
+          // if addCellWrapper is false, the rect is relative to the row
           // The rect should satisfy _columnLefts!.elementAt(x) <= localRect.left < localRect.right <= _columnLefts!.elementAt(x+1)
           final double dx = addCellWrapper
               ? ((localRect.left >= cellWidth) ? -_columnLefts!.elementAt(x) : 0.0)
@@ -1553,8 +1558,23 @@ class RenderTable extends RenderBox {
 }
 
 /// Index for a cell.
+@immutable
 class _Index {
-  _Index(this.y, this.x);
-  int y;
-  int x;
+  const _Index(this.y, this.x);
+  final int y;
+  final int x;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! _Index) {
+      return false;
+    }
+    return y == other.y && x == other.x;
+  }
+
+  @override
+  int get hashCode => Object.hash(y, x);
 }

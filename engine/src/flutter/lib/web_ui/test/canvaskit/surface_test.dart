@@ -305,7 +305,7 @@ void testMain() {
         CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
       );
       final CkPicture picture = recorder.endRecording();
-      await surface.rasterizeToCanvas(const BitmapSize(10, 10), renderCanvas, <CkPicture>[picture]);
+      await surface.rasterizeToCanvas(const BitmapSize(10, 10), renderCanvas, picture);
       expect(transferToImageBitmapCalls, 1);
     }, skip: !Surface.offscreenCanvasSupported);
 

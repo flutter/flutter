@@ -23,7 +23,9 @@ FlutterSemanticsNode2 CreateSemanticsNode(
     const std::vector<int32_t>* children = nullptr) {
   return {
       .id = id,
+      // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
       .flags__deprecated__ = static_cast<FlutterSemanticsFlag>(0),
+      // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
       .actions = static_cast<FlutterSemanticsAction>(0),
       .text_selection_base = -1,
       .text_selection_extent = -1,
@@ -46,6 +48,7 @@ TEST(AccessibilityBridgeTest, BasicTest) {
 
   std::vector<int32_t> children{1, 2};
   FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root", &children);
+  root.identifier = "identifier";
   FlutterSemanticsNode2 child1 = CreateSemanticsNode(1, "child 1");
   FlutterSemanticsNode2 child2 = CreateSemanticsNode(2, "child 2");
 
@@ -61,6 +64,7 @@ TEST(AccessibilityBridgeTest, BasicTest) {
   EXPECT_EQ(root_node->GetData().child_ids[0], 1);
   EXPECT_EQ(root_node->GetData().child_ids[1], 2);
   EXPECT_EQ(root_node->GetName(), "root");
+  EXPECT_EQ(root_node->GetAuthorUniqueId(), u"identifier");
 
   EXPECT_EQ(child1_node->GetChildCount(), 0);
   EXPECT_EQ(child1_node->GetName(), "child 1");

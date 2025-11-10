@@ -13,6 +13,7 @@ import 'dart:core';
 import 'dart:math' as math;
 import 'dart:ui'
     show
+        CheckedState,
         Locale,
         Offset,
         Rect,
@@ -25,7 +26,8 @@ import 'dart:ui'
         SemanticsUpdateBuilder,
         SemanticsValidationResult,
         StringAttribute,
-        TextDirection;
+        TextDirection,
+        Tristate;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -112,49 +114,91 @@ typedef SemanticsUpdateCallback = void Function(SemanticsUpdate update);
 typedef ChildSemanticsConfigurationsDelegate =
     ChildSemanticsConfigurationsResult Function(List<SemanticsConfiguration>);
 
+/// Controls how accessibility focus is blocked.
+///
+/// This is typically used to prevent screen readers
+/// from focusing on parts of the UI.
+enum AccessiblityFocusBlockType {
+  /// Accessibility focus is **not blocked**.
+  none,
+
+  /// Blocks accessibility focus for the entire subtree.
+  blockSubtree,
+
+  /// Blocks accessibility focus for the **current node only**. Its descendants
+  /// may still be focusable.
+  blockNode;
+
+  /// The AccessiblityFocusBlockType when two nodes get merged.
+  AccessiblityFocusBlockType _merge(AccessiblityFocusBlockType other) {
+    // 1. If either is blockSubtree, the result is blockSubtree.
+    if (this == AccessiblityFocusBlockType.blockSubtree ||
+        other == AccessiblityFocusBlockType.blockSubtree) {
+      return AccessiblityFocusBlockType.blockSubtree;
+    }
+
+    // 2. If either is blockNode, the result is blockNode
+    if (this == AccessiblityFocusBlockType.blockNode ||
+        other == AccessiblityFocusBlockType.blockNode) {
+      return AccessiblityFocusBlockType.blockNode;
+    }
+
+    // 3. If neither is blockSubtree nor blockNode, both must be none.
+    return AccessiblityFocusBlockType.none;
+  }
+}
+
 final int _kUnblockedUserActions =
     SemanticsAction.didGainAccessibilityFocus.index |
     SemanticsAction.didLoseAccessibilityFocus.index;
 
 /// A static class to conduct semantics role checks.
 sealed class _DebugSemanticsRoleChecks {
-  static FlutterError? _checkSemanticsData(SemanticsNode node) => switch (node.role) {
-    SemanticsRole.alertDialog => _noCheckRequired,
-    SemanticsRole.dialog => _noCheckRequired,
-    SemanticsRole.none => _noCheckRequired,
-    SemanticsRole.tab => _semanticsTab,
-    SemanticsRole.tabBar => _semanticsTabBar,
-    SemanticsRole.tabPanel => _noCheckRequired,
-    SemanticsRole.table => _semanticsTable,
-    SemanticsRole.cell => _semanticsCell,
-    SemanticsRole.row => _semanticsRow,
-    SemanticsRole.columnHeader => _semanticsColumnHeader,
-    SemanticsRole.radioGroup => _semanticsRadioGroup,
-    SemanticsRole.menu => _semanticsMenu,
-    SemanticsRole.menuBar => _semanticsMenuBar,
-    SemanticsRole.menuItem => _semanticsMenuItem,
-    SemanticsRole.menuItemCheckbox => _semanticsMenuItemCheckbox,
-    SemanticsRole.menuItemRadio => _semanticsMenuItemRadio,
-    SemanticsRole.alert => _noLiveRegion,
-    SemanticsRole.status => _noLiveRegion,
-    SemanticsRole.list => _noCheckRequired,
-    SemanticsRole.listItem => _semanticsListItem,
-    SemanticsRole.complementary => _semanticsComplementary,
-    SemanticsRole.contentInfo => _semanticsContentInfo,
-    SemanticsRole.main => _semanticsMain,
-    SemanticsRole.navigation => _semanticsNavigation,
-    SemanticsRole.region => _semanticsRegion,
-    SemanticsRole.form => _noCheckRequired,
-    // TODO(chunhtai): add checks when the roles are used in framework.
-    // https://github.com/flutter/flutter/issues/159741.
-    SemanticsRole.dragHandle => _unimplemented,
-    SemanticsRole.spinButton => _unimplemented,
-    SemanticsRole.comboBox => _unimplemented,
-    SemanticsRole.tooltip => _unimplemented,
-    SemanticsRole.loadingSpinner => _unimplemented,
-    SemanticsRole.progressBar => _unimplemented,
-    SemanticsRole.hotKey => _unimplemented,
-  }(node);
+  static FlutterError? _checkSemanticsData(SemanticsNode node) {
+    final FlutterError? error = switch (node.role) {
+      SemanticsRole.alertDialog => _noCheckRequired,
+      SemanticsRole.dialog => _noCheckRequired,
+      SemanticsRole.none => _noCheckRequired,
+      SemanticsRole.tab => _semanticsTab,
+      SemanticsRole.tabBar => _semanticsTabBar,
+      SemanticsRole.tabPanel => _noCheckRequired,
+      SemanticsRole.table => _semanticsTable,
+      SemanticsRole.cell => _semanticsCell,
+      SemanticsRole.row => _semanticsRow,
+      SemanticsRole.columnHeader => _semanticsColumnHeader,
+      SemanticsRole.radioGroup => _semanticsRadioGroup,
+      SemanticsRole.menu => _semanticsMenu,
+      SemanticsRole.menuBar => _semanticsMenuBar,
+      SemanticsRole.menuItem => _semanticsMenuItem,
+      SemanticsRole.menuItemCheckbox => _semanticsMenuItemCheckbox,
+      SemanticsRole.menuItemRadio => _semanticsMenuItemRadio,
+      SemanticsRole.alert => _noLiveRegion,
+      SemanticsRole.status => _noLiveRegion,
+      SemanticsRole.list => _noCheckRequired,
+      SemanticsRole.listItem => _semanticsListItem,
+      SemanticsRole.complementary => _semanticsComplementary,
+      SemanticsRole.contentInfo => _semanticsContentInfo,
+      SemanticsRole.main => _semanticsMain,
+      SemanticsRole.navigation => _semanticsNavigation,
+      SemanticsRole.region => _semanticsRegion,
+      SemanticsRole.form => _noCheckRequired,
+      // TODO(chunhtai): add checks when the roles are used in framework.
+      // https://github.com/flutter/flutter/issues/159741.
+      SemanticsRole.dragHandle => _unimplemented,
+      SemanticsRole.spinButton => _unimplemented,
+      SemanticsRole.comboBox => _unimplemented,
+      SemanticsRole.tooltip => _unimplemented,
+      SemanticsRole.loadingSpinner => _unimplemented,
+      SemanticsRole.progressBar => _unimplemented,
+      SemanticsRole.hotKey => _unimplemented,
+    }(node);
+
+    if (error != null) {
+      return error;
+    }
+
+    return _semanticsGeneral(node);
+  }
 
   static FlutterError? _unimplemented(SemanticsNode node) =>
       FlutterError('Missing checks for role ${node.getSemanticsData().role}');
@@ -163,7 +207,7 @@ sealed class _DebugSemanticsRoleChecks {
 
   static FlutterError? _semanticsTab(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
-    if (!data.flagsCollection.hasSelectedState) {
+    if (data.flagsCollection.isSelected == Tristate.none) {
       return FlutterError('A tab needs selected states');
     }
 
@@ -171,13 +215,11 @@ sealed class _DebugSemanticsRoleChecks {
       return null;
     }
 
-    if (!data.flagsCollection.hasEnabledState) {
-      if (!data.hasAction(SemanticsAction.tap)) {
-        return FlutterError('A tab must have a tap action');
-      }
-    } else if (data.flagsCollection.isEnabled && !data.hasAction(SemanticsAction.tap)) {
+    if (data.flagsCollection.isEnabled != Tristate.isFalse &&
+        !data.hasAction(SemanticsAction.tap)) {
       return FlutterError('A tab must have a tap action');
     }
+
     return null;
   }
 
@@ -250,7 +292,7 @@ sealed class _DebugSemanticsRoleChecks {
         return error == null;
       }
 
-      if (data.flagsCollection.isChecked) {
+      if (data.flagsCollection.isChecked == CheckedState.isTrue) {
         if (hasCheckedChild) {
           error = FlutterError('Radio groups must not have multiple checked children');
           return false;
@@ -296,7 +338,7 @@ sealed class _DebugSemanticsRoleChecks {
 
   static FlutterError? _semanticsMenuItemCheckbox(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
-    if (!data.flagsCollection.hasCheckedState) {
+    if (data.flagsCollection.isChecked == CheckedState.none) {
       return FlutterError('a menu item checkbox must be checkable');
     }
 
@@ -313,7 +355,7 @@ sealed class _DebugSemanticsRoleChecks {
 
   static FlutterError? _semanticsMenuItemRadio(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
-    if (!data.flagsCollection.hasCheckedState) {
+    if (data.flagsCollection.isChecked == CheckedState.none) {
       return FlutterError('a menu item radio must be checkable');
     }
 
@@ -455,6 +497,36 @@ sealed class _DebugSemanticsRoleChecks {
     if (data.label.isEmpty) {
       return FlutterError(
         'A region role should include a label that describes the purpose of the content.',
+      );
+    }
+
+    return null;
+  }
+
+  static FlutterError? _semanticsGeneral(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+    final bool? isExpanded = data.flagsCollection.isExpanded.toBoolOrNull();
+
+    if (isExpanded != null) {
+      final bool hasExpandAction = data.hasAction(SemanticsAction.expand);
+      final bool hasCollapseAction = data.hasAction(SemanticsAction.collapse);
+
+      if (hasExpandAction && hasCollapseAction) {
+        return FlutterError(
+          'An expandable node cannot have both expand and collapse actions set at the same time.',
+        );
+      }
+      if (isExpanded && hasExpandAction) {
+        return FlutterError('An expanded node cannot have an expand action.');
+      }
+      if (!isExpanded && hasCollapseAction) {
+        return FlutterError('A collapsed node cannot have a collapse action.');
+      }
+    }
+    if (data.flagsCollection.isAccessibilityFocusBlocked &&
+        data.flagsCollection.isFocused != Tristate.none) {
+      return FlutterError(
+        'A node that is keyboard focusable cannot be set to accessibility unfocusable',
       );
     }
 
@@ -1472,8 +1544,14 @@ class SemanticsProperties extends DiagnosticableTree {
     this.slider,
     this.keyboardKey,
     this.readOnly,
+    @Deprecated(
+      'Use focused instead. '
+      'Setting focused automatically set focusable. '
+      'This feature was deprecated after v3.36.0-0.0.pre.',
+    )
     this.focusable,
     this.focused,
+    this.accessiblityFocusBlockType,
     this.inMutuallyExclusiveGroup,
     this.hidden,
     this.obscured,
@@ -1526,6 +1604,8 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onDidLoseAccessibilityFocus,
     this.onFocus,
     this.onDismiss,
+    this.onExpand,
+    this.onCollapse,
     this.customSemanticsActions,
   }) : assert(
          label == null || attributedLabel == null,
@@ -1656,9 +1736,16 @@ class SemanticsProperties extends DiagnosticableTree {
   /// to be confused with accessibility focus. Accessibility focus is the
   /// green/black rectangular highlight that TalkBack/VoiceOver draws around the
   /// element it is reading, and is separate from input focus.
+  @Deprecated(
+    'Use focused instead. '
+    'Setting focused automatically set focusable. '
+    'This feature was deprecated after v3.36.0-0.0.pre.',
+  )
   final bool? focusable;
 
   /// If non-null, whether the node currently holds input focus.
+  ///
+  /// If null, the node is not fosusable.
   ///
   /// At most one node in the tree should hold input focus at any point in time,
   /// and it should not be set to true if [focusable] is false.
@@ -1668,6 +1755,13 @@ class SemanticsProperties extends DiagnosticableTree {
   /// green/black rectangular highlight that TalkBack/VoiceOver draws around the
   /// element it is reading, and is separate from input focus.
   final bool? focused;
+
+  /// If non-null, indicates if this subtree or current node is blocked in a11y focus.
+  ///
+  /// This is for accessibility focus, which is the focus used by screen readers
+  /// like TalkBack and VoiceOver. It is different from input focus, which is
+  /// usually held by the element that currently responds to keyboard inputs.
+  final AccessiblityFocusBlockType? accessiblityFocusBlockType;
 
   /// If non-null, whether a semantic node is in a mutually exclusive group.
   ///
@@ -2318,6 +2412,24 @@ class SemanticsProperties extends DiagnosticableTree {
   /// menu, and VoiceOver users on iOS can trigger this action with a standard
   /// gesture or menu option.
   final VoidCallback? onDismiss;
+
+  /// The handler for [SemanticsAction.expand].
+  ///
+  /// This is a request to expand the currently focused node. For example, this
+  /// action might be recognized by a dropdown.
+  ///
+  /// This handler should only be set when the node is in a collapsed state
+  /// (i.e., [expanded] is false).
+  final VoidCallback? onExpand;
+
+  /// The handler for [SemanticsAction.collapse].
+  ///
+  /// This is a request to collapse the currently focused node. For example,
+  /// this action might be recognized by a dropdown.
+  ///
+  /// This handler should only be set when the node is in an expanded state
+  /// (i.e., [expanded] is true).
+  final VoidCallback? onCollapse;
 
   /// A map from each supported [CustomSemanticsAction] to a provided handler.
   ///
@@ -3846,6 +3958,15 @@ class SemanticsNode with DiagnosticableTreeMixin {
     if (_inputType != SemanticsInputType.none) {
       properties.add(EnumProperty<SemanticsInputType>('inputType', _inputType));
     }
+    if (validationResult != SemanticsValidationResult.none) {
+      properties.add(
+        EnumProperty<SemanticsValidationResult>(
+          'validationResult',
+          validationResult,
+          defaultValue: SemanticsValidationResult.none,
+        ),
+      );
+    }
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -5019,6 +5140,28 @@ class SemanticsConfiguration {
     _onFocus = value;
   }
 
+  /// The handler for [SemanticsAction.expand].
+  ///
+  /// This is a request to expand the currently focused node.
+  VoidCallback? get onExpand => _onExpand;
+  VoidCallback? _onExpand;
+  set onExpand(VoidCallback? value) {
+    assert(value != null);
+    _addArgumentlessAction(SemanticsAction.expand, value!);
+    _onExpand = value;
+  }
+
+  /// The handler for [SemanticsAction.collapse].
+  ///
+  /// This is a request to collapse the currently focused node.
+  VoidCallback? get onCollapse => _onCollapse;
+  VoidCallback? _onCollapse;
+  set onCollapse(VoidCallback? value) {
+    assert(value != null);
+    _addArgumentlessAction(SemanticsAction.collapse, value!);
+    _onCollapse = value;
+  }
+
   /// A delegate that decides how to handle [SemanticsConfiguration]s produced
   /// in the widget subtree.
   ///
@@ -5490,9 +5633,9 @@ class SemanticsConfiguration {
   /// accessibility focused may or may not be selected; e.g. a [ListTile] can have
   /// accessibility focus but have its [ListTile.selected] property set to false,
   /// in which case it will not be flagged as selected.
-  bool get isSelected => _flags.isSelected;
+  bool get isSelected => _flags.isSelected == Tristate.isTrue;
   set isSelected(bool value) {
-    _flags = _flags.copyWith(hasSelectedState: true, isSelected: value);
+    _flags = _flags.copyWith(isSelected: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
   }
 
@@ -5504,9 +5647,9 @@ class SemanticsConfiguration {
   ///
   /// The getter returns null if the owning [RenderObject] does not have
   /// expanded/collapsed state.
-  bool? get isExpanded => _flags.hasExpandedState ? _flags.isExpanded : null;
+  bool? get isExpanded => _flags.isExpanded.toBoolOrNull();
   set isExpanded(bool? value) {
-    _flags = _flags.copyWith(hasExpandedState: true, isExpanded: value);
+    _flags = _flags.copyWith(isExpanded: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
   }
 
@@ -5525,10 +5668,9 @@ class SemanticsConfiguration {
   /// This property does not control whether semantics are enabled. If you wish to
   /// disable semantics for a particular widget, you should use an [ExcludeSemantics]
   /// widget.
-  bool? get isEnabled => _flags.hasEnabledState ? _flags.isEnabled : null;
+  bool? get isEnabled => _flags.isEnabled.toBoolOrNull();
   set isEnabled(bool? value) {
-    _flags = _flags.copyWith(hasEnabledState: true, isEnabled: value);
-
+    _flags = _flags.copyWith(isEnabled: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
   }
 
@@ -5541,10 +5683,12 @@ class SemanticsConfiguration {
   ///
   /// The getter returns null if the owning [RenderObject] does not have
   /// checked/unchecked state.
-  bool? get isChecked => _flags.hasCheckedState ? _flags.isChecked : null;
+  bool? get isChecked =>
+      _flags.isChecked == CheckedState.none ? null : _flags.isChecked == CheckedState.isTrue;
   set isChecked(bool? value) {
-    assert(value != true || isCheckStateMixed != true);
-    _flags = _flags.copyWith(hasCheckedState: true, isChecked: value);
+    if (value != null) {
+      _flags = _flags.copyWith(isChecked: value ? CheckedState.isTrue : CheckedState.isFalse);
+    }
     _hasBeenAnnotated = true;
   }
 
@@ -5556,10 +5700,12 @@ class SemanticsConfiguration {
   ///
   /// The getter returns null if the owning [RenderObject] does not have
   /// mixed checked state.
-  bool? get isCheckStateMixed => _flags.hasCheckedState ? _flags.isCheckStateMixed : null;
+  bool? get isCheckStateMixed =>
+      _flags.isChecked == CheckedState.none ? null : _flags.isChecked == CheckedState.mixed;
   set isCheckStateMixed(bool? value) {
-    assert(value != true || isChecked != true);
-    _flags = _flags.copyWith(hasCheckedState: true, isCheckStateMixed: value);
+    if (value ?? false) {
+      _flags = _flags.copyWith(isChecked: CheckedState.mixed);
+    }
     _hasBeenAnnotated = true;
   }
 
@@ -5571,9 +5717,9 @@ class SemanticsConfiguration {
   ///
   /// The getter returns null if the owning [RenderObject] does not have
   /// on/off state.
-  bool? get isToggled => _flags.hasToggledState ? _flags.isToggled : null;
+  bool? get isToggled => _flags.isToggled.toBoolOrNull();
   set isToggled(bool? value) {
-    _flags = _flags.copyWith(hasToggledState: true, isToggled: value);
+    _flags = _flags.copyWith(isToggled: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
   }
 
@@ -5589,16 +5735,45 @@ class SemanticsConfiguration {
   }
 
   /// Whether the owning [RenderObject] can hold the input focus.
-  bool get isFocusable => _flags.isFocusable;
+  @Deprecated(
+    'Check if isFocused is null instead. '
+    'This feature was deprecated after v3.36.0-0.0.pre.',
+  )
+  bool get isFocusable => _flags.isFocused != Tristate.none;
+
+  @Deprecated(
+    'Setting isFocused automatically set this to true. '
+    'This feature was deprecated after v3.36.0-0.0.pre.',
+  )
   set isFocusable(bool value) {
-    _flags = _flags.copyWith(isFocusable: value);
+    // If value is false, set `isFocused` to none.
+    // If value is true, `isFocused` should be true or false. If `isFocused` is not none,
+    // don't change it, if `isFocused` is `none`, change it to `false`.
+    if (!value) {
+      _flags = _flags.copyWith(isFocused: Tristate.none);
+    } else {
+      if (_flags.isFocused == Tristate.none) {
+        _flags = _flags.copyWith(isFocused: Tristate.isFalse);
+      }
+    }
     _hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] currently holds the input focus.
-  bool get isFocused => _flags.isFocused;
-  set isFocused(bool value) {
-    _flags = _flags.copyWith(isFocused: value);
+  bool? get isFocused => _flags.isFocused.toBoolOrNull();
+  set isFocused(bool? value) {
+    _flags = _flags.copyWith(isFocused: _tristateFromBoolOrNull(value));
+    _hasBeenAnnotated = true;
+  }
+
+  AccessiblityFocusBlockType _accessiblityFocusBlockType = AccessiblityFocusBlockType.none;
+
+  /// Whether the owning [RenderObject] and its subtree
+  /// is blocked in the a11y focus (different from input focus).
+  AccessiblityFocusBlockType get accessiblityFocusBlockType => _accessiblityFocusBlockType;
+  set accessiblityFocusBlockType(AccessiblityFocusBlockType value) {
+    _accessiblityFocusBlockType = value;
+    _flags = _flags.copyWith(isAccessibilityFocusBlocked: value != AccessiblityFocusBlockType.none);
     _hasBeenAnnotated = true;
   }
 
@@ -5735,9 +5910,9 @@ class SemanticsConfiguration {
   /// See also:
   ///
   ///  * [SemanticsFlag.isRequired], for a full description of required nodes.
-  bool? get isRequired => _flags.hasRequiredState ? _flags.isRequired : null;
+  bool? get isRequired => _flags.isRequired.toBoolOrNull();
   set isRequired(bool? value) {
-    _flags = _flags.copyWith(hasRequiredState: true, isRequired: value);
+    _flags = _flags.copyWith(isRequired: _tristateFromBoolOrNull(value));
     _hasBeenAnnotated = true;
   }
 
@@ -5911,9 +6086,10 @@ class SemanticsConfiguration {
     if (_actionsAsBits & other._actionsAsBits != 0) {
       return false;
     }
-    if (_flags.hasRepeatedFlags(other._flags)) {
+    if (_flags.hasConflictingFlags(other._flags)) {
       return false;
     }
+
     if (_platformViewId != null && other._platformViewId != null) {
       return false;
     }
@@ -5961,6 +6137,7 @@ class SemanticsConfiguration {
     _actionsAsBits |= child._effectiveActionsAsBits;
     _customSemanticsActions.addAll(child._customSemanticsActions);
     _flags = _flags.merge(child._flags);
+    _linkUrl ??= child._linkUrl;
     _textSelection ??= child._textSelection;
     _scrollPosition ??= child._scrollPosition;
     _scrollExtentMax ??= child._scrollExtentMax;
@@ -6028,6 +6205,9 @@ class SemanticsConfiguration {
         _validationResult = child._validationResult;
       }
     }
+    _accessiblityFocusBlockType = _accessiblityFocusBlockType._merge(
+      child._accessiblityFocusBlockType,
+    );
 
     _hasBeenAnnotated = hasBeenAnnotated || child.hasBeenAnnotated;
   }
@@ -6048,6 +6228,7 @@ class SemanticsConfiguration {
       .._attributedValue = _attributedValue
       .._attributedDecreasedValue = _attributedDecreasedValue
       .._attributedHint = _attributedHint
+      .._accessiblityFocusBlockType = _accessiblityFocusBlockType
       .._hintOverrides = _hintOverrides
       .._tooltip = _tooltip
       .._flags = _flags
@@ -6252,16 +6433,27 @@ int _mergeHeadingLevels({required int sourceLevel, required int targetLevel}) {
   return targetLevel == 0 ? sourceLevel : targetLevel;
 }
 
+Tristate _tristateFromBoolOrNull(bool? value) {
+  if (value == null) {
+    return Tristate.none;
+  }
+
+  if (value) {
+    return Tristate.isTrue;
+  }
+  return Tristate.isFalse;
+}
+
 /// This is just to support flag 0-30, new flags don't need to be in the bitmask.
 int _toBitMask(SemanticsFlags flags) {
   int bitmask = 0;
-  if (flags.hasCheckedState) {
+  if (flags.isChecked != CheckedState.none) {
     bitmask |= 1 << 0;
   }
-  if (flags.isChecked) {
+  if (flags.isChecked == CheckedState.isTrue) {
     bitmask |= 1 << 1;
   }
-  if (flags.isSelected) {
+  if (flags.isSelected == Tristate.isTrue) {
     bitmask |= 1 << 2;
   }
   if (flags.isButton) {
@@ -6270,13 +6462,13 @@ int _toBitMask(SemanticsFlags flags) {
   if (flags.isTextField) {
     bitmask |= 1 << 4;
   }
-  if (flags.isFocused) {
+  if (flags.isFocused == Tristate.isTrue) {
     bitmask |= 1 << 5;
   }
-  if (flags.hasEnabledState) {
+  if (flags.isEnabled != Tristate.none) {
     bitmask |= 1 << 6;
   }
-  if (flags.isEnabled) {
+  if (flags.isEnabled == Tristate.isTrue) {
     bitmask |= 1 << 7;
   }
   if (flags.isInMutuallyExclusiveGroup) {
@@ -6303,10 +6495,10 @@ int _toBitMask(SemanticsFlags flags) {
   if (flags.isLiveRegion) {
     bitmask |= 1 << 15;
   }
-  if (flags.hasToggledState) {
+  if (flags.isToggled != Tristate.none) {
     bitmask |= 1 << 16;
   }
-  if (flags.isToggled) {
+  if (flags.isToggled == Tristate.isTrue) {
     bitmask |= 1 << 17;
   }
   if (flags.hasImplicitScrolling) {
@@ -6318,7 +6510,7 @@ int _toBitMask(SemanticsFlags flags) {
   if (flags.isReadOnly) {
     bitmask |= 1 << 20;
   }
-  if (flags.isFocusable) {
+  if (flags.isFocused != Tristate.none) {
     bitmask |= 1 << 21;
   }
   if (flags.isLink) {
@@ -6330,22 +6522,22 @@ int _toBitMask(SemanticsFlags flags) {
   if (flags.isKeyboardKey) {
     bitmask |= 1 << 24;
   }
-  if (flags.isCheckStateMixed) {
+  if (flags.isChecked == CheckedState.mixed) {
     bitmask |= 1 << 25;
   }
-  if (flags.hasExpandedState) {
+  if (flags.isExpanded != Tristate.none) {
     bitmask |= 1 << 26;
   }
-  if (flags.isExpanded) {
+  if (flags.isExpanded == Tristate.isTrue) {
     bitmask |= 1 << 27;
   }
-  if (flags.hasSelectedState) {
+  if (flags.isSelected != Tristate.none) {
     bitmask |= 1 << 28;
   }
-  if (flags.hasRequiredState) {
+  if (flags.isRequired != Tristate.none) {
     bitmask |= 1 << 29;
   }
-  if (flags.isRequired) {
+  if (flags.isRequired == Tristate.isTrue) {
     bitmask |= 1 << 30;
   }
   return bitmask;

@@ -253,6 +253,30 @@ void main() {
       matchesGoldenFile('painting.rounded_superellipse_border.all_elliptical.png'),
     );
 
+    await tester.pumpWidget(
+      containerWithBorder(const Size(120, 300), const BorderRadius.all(Radius.circular(600))),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('painting.rounded_superellipse_border.clamping_uniform.png'),
+    );
+
+    await tester.pumpWidget(
+      containerWithBorder(
+        const Size(120, 300),
+        const BorderRadius.only(
+          topLeft: Radius.elliptical(1000, 1000),
+          topRight: Radius.elliptical(0, 1000),
+          bottomRight: Radius.elliptical(800, 1000),
+          bottomLeft: Radius.elliptical(100, 500),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('painting.rounded_superellipse_border.clamping_non_uniform.png'),
+    );
+
     // Regression test for https://github.com/flutter/flutter/issues/170593
     await tester.pumpWidget(
       containerWithBorder(

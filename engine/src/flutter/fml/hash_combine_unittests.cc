@@ -10,11 +10,13 @@ namespace fml {
 namespace testing {
 
 TEST(HashCombineTest, CanHash) {
+  std::string hello("Hello");
+  std::string world("World");
   ASSERT_EQ(HashCombine(), HashCombine());
-  ASSERT_EQ(HashCombine("Hello"), HashCombine("Hello"));
-  ASSERT_NE(HashCombine("Hello"), HashCombine("World"));
-  ASSERT_EQ(HashCombine("Hello", "World"), HashCombine("Hello", "World"));
-  ASSERT_NE(HashCombine("World", "Hello"), HashCombine("Hello", "World"));
+  ASSERT_EQ(HashCombine(hello), HashCombine(hello));
+  ASSERT_NE(HashCombine(hello), HashCombine(world));
+  ASSERT_EQ(HashCombine(hello, world), HashCombine(hello, world));
+  ASSERT_NE(HashCombine(world, hello), HashCombine(hello, world));
   ASSERT_EQ(HashCombine(12u), HashCombine(12u));
   ASSERT_NE(HashCombine(12u), HashCombine(12.0f));
   ASSERT_EQ(HashCombine('a'), HashCombine('a'));

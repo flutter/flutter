@@ -11,11 +11,14 @@ import com.flutter.gradle.FlutterPluginUtils.addApiDependencies
 import com.flutter.gradle.FlutterPluginUtils.buildModeFor
 import com.flutter.gradle.FlutterPluginUtils.getAndroidExtension
 import com.flutter.gradle.FlutterPluginUtils.getCompileSdkFromProject
+import com.flutter.gradle.FlutterPluginUtils.isBuiltAsApp
 import com.flutter.gradle.FlutterPluginUtils.supportsBuildMode
 import com.flutter.gradle.NativePluginLoaderReflectionBridge
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import java.io.File
+import com.android.build.gradle.internal.dsl.BuildType as dslBuildType
 
 /**
  * Handles interactions with the flutter plugins (not Gradle plugins) used by the Flutter project,
@@ -177,7 +180,24 @@ class PluginHandler(
 
             // Copy build types from the app to the plugin.
             // This allows to build apps with plugins and custom build types or flavors.
-            getAndroidExtension(pluginProject).buildTypes.addAll(getAndroidExtension(project).buildTypes)
+            // However, only copy if the plugin is also an app project, since library projects
+            // cannot have applicationIdSuffix and other app-specific properties.
+            if (isBuiltAsApp(pluginProject)) {
+                (getAndroidExtension(pluginProject).buildTypes as NamedDomainObjectContainer<dslBuildType>)
+                    .addAll(getAndroidExtension(project).buildTypes as NamedDomainObjectContainer<dslBuildType>)
+            } else {
+                // For library projects, create compatible build types without app-specific properties
+                getAndroidExtension(project).buildTypes.forEach { appBuildType ->
+                    if (getAndroidExtension(pluginProject).buildTypes.findByName(appBuildType.name) == null) {
+                        getAndroidExtension(pluginProject).buildTypes.create(appBuildType.name) {
+                            // Copy library-compatible properties only
+                            isDebuggable = appBuildType.isDebuggable
+                            isMinifyEnabled = appBuildType.isMinifyEnabled
+                            // Note: applicationIdSuffix and other app-specific properties are intentionally not copied
+                        }
+                    }
+                }
+            }
 
             // The embedding is API dependency of the plugin, so the AGP is able to desugar
             // default method implementations when the interface is implemented by a plugin.

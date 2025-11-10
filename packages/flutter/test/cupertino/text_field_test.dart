@@ -574,6 +574,7 @@ void main() {
                             inputType: ui.SemanticsInputType.text,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocusable,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isEnabled,
                             ],
@@ -7634,6 +7635,65 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Paste'), isContextMenuProvidedByPlatform ? findsNothing : findsOneWidget);
     });
+
+    testWidgets('Placeholder and editable text with differing font sizes', (
+      WidgetTester tester,
+    ) async {
+      const Size size = Size(200.0, 200.0);
+      TextAlignVertical alignment = TextAlignVertical.top;
+      late StateSetter setState;
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return CupertinoPageScaffold(
+                  child: Align(
+                    child: SizedBox(
+                      width: size.width,
+                      height: size.height,
+                      child: CupertinoTextField(
+                        placeholder: 'hint text',
+                        placeholderStyle: const TextStyle(fontSize: 30.0),
+                        style: const TextStyle(fontSize: 20.0),
+                        textAlignVertical: alignment,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byType(CupertinoTextField), 'text');
+      await tester.pump();
+      expect(
+        tester.getTopLeft(find.byType(EditableText)).dy,
+        moreOrLessEquals(207.0, epsilon: .0001),
+      );
+
+      setState(() {
+        alignment = TextAlignVertical.center;
+      });
+      await tester.pump();
+      expect(
+        tester.getTopLeft(find.byType(EditableText)).dy,
+        moreOrLessEquals(290.0, epsilon: .0001),
+      );
+
+      setState(() {
+        alignment = TextAlignVertical.bottom;
+      });
+      await tester.pump();
+      expect(
+        tester.getTopLeft(find.byType(EditableText)).dy,
+        moreOrLessEquals(373.0, epsilon: .0001),
+      );
+    });
   });
 
   testWidgets("Arrow keys don't move input focus", (WidgetTester tester) async {
@@ -7775,6 +7835,7 @@ void main() {
       ),
       matchesSemantics(
         isTextField: true,
+        isFocusable: true,
         isEnabled: true,
         hasEnabledState: true,
         hasTapAction: true,
@@ -7801,7 +7862,12 @@ void main() {
             .descendant(of: find.byType(CupertinoTextField), matching: find.byType(Semantics))
             .first,
       ),
-      matchesSemantics(hasEnabledState: true, isTextField: true, isReadOnly: true),
+      matchesSemantics(
+        hasEnabledState: true,
+        isTextField: true,
+        isFocusable: true,
+        isReadOnly: true,
+      ),
     );
   });
 
@@ -9968,6 +10034,48 @@ void main() {
         TargetPlatform.iOS,
       }),
     );
+    testWidgets(
+      'TextField cursor appears only when focused',
+      (WidgetTester tester) async {
+        final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+        addTearDown(focusNode.dispose);
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Center(
+              child: CupertinoTextField(
+                focusNode: focusNode,
+                dragStartBehavior: DragStartBehavior.down,
+              ),
+            ),
+          ),
+        );
+
+        final Offset fieldCenter = tester.getCenter(find.byType(EditableText));
+        final TestGesture gesture = await tester.startGesture(fieldCenter);
+        await gesture.moveBy(const Offset(30, 0));
+        await tester.pumpAndSettle();
+
+        // The blinking cursor should NOT be shown.
+        final EditableTextState editableTextState = tester.state<EditableTextState>(
+          find.byType(EditableText),
+        );
+        expect(focusNode.hasFocus, isFalse);
+        expect(editableTextState.cursorCurrentlyVisible, isFalse);
+
+        // Simulate long press again.
+        await tester.pump();
+        await tester.longPress(find.byType(EditableText));
+        await tester.pumpAndSettle();
+
+        // The blinking cursor should now be shown.
+        expect(focusNode.hasFocus, isTrue);
+        expect(editableTextState.cursorCurrentlyVisible, isTrue);
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.iOS,
+        TargetPlatform.android,
+      }),
+    );
   });
 
   group('TapRegion integration', () {
@@ -10475,6 +10583,36 @@ void main() {
     expect(find.byType(EditableText).hitTestable(), findsOne);
   });
 
+  testWidgets('Text field with placeholder has correct intrinsic height', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: IntrinsicHeight(child: CupertinoTextField(placeholder: 'placeholder')),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoTextField), findsOneWidget);
+    expect(tester.getSize(find.byType(CupertinoTextField)).height, greaterThan(0.0));
+  });
+
+  testWidgets('Text field with placeholder has correct intrinsic width', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: IntrinsicWidth(child: CupertinoTextField(placeholder: 'placeholder')),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoTextField), findsOneWidget);
+    expect(tester.getSize(find.byType(CupertinoTextField)).width, greaterThan(0.0));
+  });
+
   testWidgets('Start the floating cursor on long tap', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final TextEditingController controller = TextEditingController(text: 'abcd');
@@ -10538,6 +10676,7 @@ void main() {
                           inputType: ui.SemanticsInputType.text,
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isTextField,
+                            SemanticsFlag.isFocusable,
                             SemanticsFlag.hasEnabledState,
                             SemanticsFlag.isEnabled,
                           ],
@@ -10605,6 +10744,7 @@ void main() {
                             inputType: ui.SemanticsInputType.text,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocusable,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isReadOnly,
                             ],

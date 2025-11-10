@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -2562,14 +2563,14 @@ void main() {
         expect(controller.offset, equals(0.0));
 
         // Go down until we hit the bottom of the visible area.
-        for (int i = 1; i <= 4; ++i) {
+        for (int i = 1; i <= 3; ++i) {
           await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
           await tester.pump();
           expect(controller.offset, equals(0.0), reason: 'Focusing item $i caused a scroll');
         }
 
         // Now keep going down, and the scrollable should scroll automatically.
-        for (int i = 5; i <= 10; ++i) {
+        for (int i = 4; i <= 10; ++i) {
           await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
           await tester.pump();
           final double expectedOffset = 100.0 * (i - 5) + 200.0;
@@ -2687,14 +2688,14 @@ void main() {
         expect(controller.offset, equals(0.0));
 
         // Go right until we hit the right of the visible area.
-        for (int i = 1; i <= 6; ++i) {
+        for (int i = 1; i <= 5; ++i) {
           await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
           await tester.pump();
           expect(controller.offset, equals(0.0), reason: 'Focusing item $i caused a scroll');
         }
 
         // Now keep going right, and the scrollable should scroll automatically.
-        for (int i = 7; i <= 10; ++i) {
+        for (int i = 6; i <= 10; ++i) {
           await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
           await tester.pump();
           final double expectedOffset = 100.0 * (i - 5);
@@ -2752,6 +2753,260 @@ void main() {
         await tester.pump();
         expect(leftNode.hasPrimaryFocus, isTrue);
         expect(controller.offset, equals(0.0));
+      },
+      // https://github.com/flutter/flutter/issues/35347
+      skip: isBrowser,
+      variant: KeySimulatorTransitModeVariant.all(),
+    );
+
+    testWidgets(
+      'Focus traversal with horizontal scrollables inside a vertical scrollable handles vertical navigation correctly',
+      (WidgetTester tester) async {
+        // Tester view size is 800x600.
+
+        const double cellHeight = 100;
+
+        const int rowCount = 10;
+        const int buttonsPerRow = 5;
+
+        // Create focus nodes for all elements.
+        final FocusNode stickyButtonNode = FocusNode(debugLabel: 'Sticky Button');
+        addTearDown(stickyButtonNode.dispose);
+
+        final List<List<FocusNode>> gridNodes = List<List<FocusNode>>.generate(
+          rowCount,
+          (int row) => List<FocusNode>.generate(
+            buttonsPerRow,
+            (int col) => FocusNode(debugLabel: 'Button $row-$col'),
+          ),
+        );
+        addTearDown(() {
+          for (final FocusNode node in gridNodes.flattened) {
+            node.dispose();
+          }
+        });
+
+        final ScrollController verticalController = ScrollController();
+        addTearDown(verticalController.dispose);
+
+        final List<ScrollController> horizontalControllers = List<ScrollController>.generate(
+          rowCount,
+          (int index) => ScrollController(debugLabel: 'Horizontal Controller $index'),
+        );
+        addTearDown(() {
+          for (final ScrollController controller in horizontalControllers) {
+            controller.dispose();
+          }
+        });
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Column(
+              children: <Widget>[
+                Focus(
+                  focusNode: stickyButtonNode,
+                  child: Container(height: cellHeight, color: Colors.blue),
+                ),
+                Expanded(
+                  child: ListView.separated(
+                    controller: verticalController,
+                    itemCount: rowCount,
+                    separatorBuilder: (_, _) => const SizedBox(height: 32),
+                    itemBuilder: (BuildContext context, int rowIndex) {
+                      return SizedBox(
+                        height: cellHeight,
+                        child: ListView.builder(
+                          controller: horizontalControllers[rowIndex],
+                          scrollDirection: Axis.horizontal,
+                          itemCount: buttonsPerRow,
+                          itemBuilder: (BuildContext context, int colIndex) {
+                            return Focus(
+                              focusNode: gridNodes[rowIndex][colIndex],
+                              child: Container(
+                                width: cellHeight,
+                                height: cellHeight,
+                                color: Colors.primaries[rowIndex % Colors.primaries.length],
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+
+        // Start by focusing the sticky button.
+        stickyButtonNode.requestFocus();
+        await tester.pump();
+        expect(stickyButtonNode.hasPrimaryFocus, isTrue);
+
+        // Navigate down to the first row - should focus one of the widgets in the first row.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+
+        // Find which column in the first row got focused.
+        int focusedColumn = -1;
+        for (int col = 0; col < buttonsPerRow; col++) {
+          if (gridNodes[0][col].hasPrimaryFocus) {
+            focusedColumn = col;
+            break;
+          }
+        }
+        expect(focusedColumn, greaterThanOrEqualTo(0)); // Ensure something in first row is focused.
+
+        // Navigate down through the rows.
+        for (int row = 1; row < rowCount; row++) {
+          await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+          await tester.pump();
+          expect(gridNodes[row][focusedColumn].hasPrimaryFocus, isTrue);
+          // Verify vertical scroll happened from the 5th row onwards (500px).
+          if (row >= 5) {
+            expect(verticalController.offset, greaterThan(0));
+          }
+        }
+
+        // Navigate back up - should go to previous rows, not sticky button.
+        for (int row = rowCount - 2; row >= 0; row--) {
+          await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+          await tester.pump();
+          expect(gridNodes[row][focusedColumn].hasPrimaryFocus, isTrue);
+        }
+
+        // Only now should we reach the sticky button.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        await tester.pump();
+        expect(stickyButtonNode.hasPrimaryFocus, isTrue);
+      },
+      // https://github.com/flutter/flutter/issues/35347
+      skip: isBrowser,
+      variant: KeySimulatorTransitModeVariant.all(),
+    );
+
+    testWidgets(
+      'Focus traversal with vertical scrollables inside a horizontal scrollable handles horizontal navigation correctly',
+      (WidgetTester tester) async {
+        // Tester view size is 800x600.
+
+        const double cellWidth = 100;
+
+        const int columnCount = 10;
+        const int buttonsPerColumn = 10;
+
+        // Create focus nodes for all elements.
+        final FocusNode stickyButtonNode = FocusNode(debugLabel: 'Sticky Button');
+        addTearDown(stickyButtonNode.dispose);
+
+        final List<List<FocusNode>> gridNodes = List<List<FocusNode>>.generate(
+          columnCount,
+          (int column) => List<FocusNode>.generate(
+            buttonsPerColumn,
+            (int row) => FocusNode(debugLabel: 'Button $column-$row'),
+          ),
+        );
+        addTearDown(() {
+          for (final FocusNode node in gridNodes.flattened) {
+            node.dispose();
+          }
+        });
+
+        final ScrollController horizontalController = ScrollController();
+        addTearDown(horizontalController.dispose);
+
+        final List<ScrollController> verticalControllers = List<ScrollController>.generate(
+          columnCount,
+          (int index) => ScrollController(debugLabel: 'Vertical Controller $index'),
+        );
+        addTearDown(() {
+          for (final ScrollController controller in verticalControllers) {
+            controller.dispose();
+          }
+        });
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Row(
+              children: <Widget>[
+                Focus(
+                  focusNode: stickyButtonNode,
+                  child: Container(width: cellWidth, color: Colors.blue),
+                ),
+                Expanded(
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    controller: horizontalController,
+                    itemCount: columnCount,
+                    separatorBuilder: (_, _) => const SizedBox(width: 32),
+                    itemBuilder: (BuildContext context, int columnIndex) {
+                      return SizedBox(
+                        width: cellWidth,
+                        child: ListView.builder(
+                          controller: verticalControllers[columnIndex],
+                          itemCount: buttonsPerColumn,
+                          itemBuilder: (BuildContext context, int rowIndex) {
+                            return Focus(
+                              focusNode: gridNodes[columnIndex][rowIndex],
+                              child: Container(
+                                width: cellWidth,
+                                height: cellWidth,
+                                color: Colors.red,
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+
+        // Start by focusing the sticky button.
+        stickyButtonNode.requestFocus();
+        await tester.pump();
+        expect(stickyButtonNode.hasPrimaryFocus, isTrue);
+
+        // Navigate right to the first column - should focus one of the widgets in the first column.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.pump();
+
+        // Find which row in the first column got focused.
+        int focusedRow = -1;
+        for (int row = 0; row < buttonsPerColumn; row++) {
+          if (gridNodes[0][row].hasPrimaryFocus) {
+            focusedRow = row;
+            break;
+          }
+        }
+        expect(focusedRow, greaterThanOrEqualTo(0)); // Ensure something in first column is focused.
+
+        // Navigate right through the columns.
+        for (int column = 1; column < columnCount; column++) {
+          await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+          await tester.pump();
+          expect(gridNodes[column][focusedRow].hasPrimaryFocus, isTrue);
+          // Verify horizontal scroll happened from the 7th column onwards (700px).
+          if (column >= 6) {
+            expect(horizontalController.offset, greaterThan(0));
+          }
+        }
+
+        // Navigate back left - should go to previous columns, not sticky button.
+        for (int column = columnCount - 2; column >= 0; column--) {
+          await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+          await tester.pump();
+          expect(gridNodes[column][focusedRow].hasPrimaryFocus, isTrue);
+        }
+
+        // Only now should we reach the sticky button.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pump();
+        expect(stickyButtonNode.hasPrimaryFocus, isTrue);
       },
       // https://github.com/flutter/flutter/issues/35347
       skip: isBrowser,

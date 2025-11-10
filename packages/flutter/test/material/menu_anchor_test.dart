@@ -271,7 +271,7 @@ void main() {
     );
     expect(
       tester.getRect(find.widgetWithText(MenuItemButton, TestMenu.subMenu10.label)),
-      equals(const Rect.fromLTRB(265.0, 40.0, 467.0, 80.0)),
+      equals(const Rect.fromLTRB(265.0, 48.0, 467.0, 88.0)),
     );
     expect(
       tester.getRect(
@@ -279,7 +279,7 @@ void main() {
             .ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material))
             .at(1),
       ),
-      equals(const Rect.fromLTRB(265.0, 40.0, 467.0, 160.0)),
+      equals(const Rect.fromLTRB(265.0, 40.0, 467.0, 176.0)),
     );
 
     await tester.pumpWidget(Container());
@@ -295,7 +295,7 @@ void main() {
     // 590 = 695 - 105
     expect(
       tester.getRect(find.byType(MenuBar)),
-      equals(const Rect.fromLTRB(105.0, 0.0, 695.0, 72.0)),
+      equals(const Rect.fromLTRB(105.0, 0.0, 695.0, 56.0)),
     );
 
     // Open and make sure things are the right size.
@@ -304,15 +304,11 @@ void main() {
 
     expect(
       tester.getRect(find.byType(MenuBar)),
-      equals(const Rect.fromLTRB(105.0, 0.0, 695.0, 72.0)),
-    );
-    expect(
-      tester.getRect(find.byType(MenuBar)),
-      equals(const Rect.fromLTRB(105.0, 0.0, 695.0, 72.0)),
+      equals(const Rect.fromLTRB(105.0, 0.0, 695.0, 56.0)),
     );
     expect(
       tester.getRect(find.widgetWithText(MenuItemButton, TestMenu.subMenu10.label)),
-      equals(const Rect.fromLTRB(257.0, 80.0, 491.0, 136.0)),
+      equals(const Rect.fromLTRB(257.0, 64.0, 491.0, 120.0)),
     );
     expect(
       tester.getRect(
@@ -320,7 +316,7 @@ void main() {
             .ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material))
             .at(1),
       ),
-      equals(const Rect.fromLTRB(249.0, 64.0, 499.0, 264.0)),
+      equals(const Rect.fromLTRB(249.0, 56.0, 499.0, 240.0)),
     );
   });
 
@@ -510,7 +506,7 @@ void main() {
                 menuChildren: <Widget>[
                   MenuItemButton(
                     style: ButtonStyle(
-                      minimumSize: MaterialStateProperty.all<Size>(const Size.fromHeight(1000)),
+                      minimumSize: WidgetStateProperty.all<Size>(const Size.fromHeight(1000)),
                     ),
                     onPressed: () {},
                     child: const Text('Category'),
@@ -548,7 +544,7 @@ void main() {
                   menuChildren: <Widget>[
                     MenuItemButton(
                       style: ButtonStyle(
-                        minimumSize: MaterialStateProperty.all<Size>(const Size.fromHeight(1000)),
+                        minimumSize: WidgetStateProperty.all<Size>(const Size.fromHeight(1000)),
                       ),
                       onPressed: () {},
                       child: const Text('Category'),
@@ -1101,7 +1097,7 @@ void main() {
                     Expanded(
                       child: MenuBar(
                         style: MenuStyle(
-                          elevation: MaterialStateProperty.all<double?>(10),
+                          elevation: WidgetStateProperty.all<double?>(10),
                           backgroundColor: const MaterialStatePropertyAll<Color>(Colors.red),
                         ),
                         children: createTestMenus(onPressed: onPressed),
@@ -2684,6 +2680,43 @@ void main() {
       expect(closed, unorderedEquals(<TestMenu>[TestMenu.mainMenu1, TestMenu.subMenu11]));
       expect(opened, isEmpty);
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/176374.
+    testWidgets('internal controller is created when the controller is null', (
+      WidgetTester tester,
+    ) async {
+      MenuController? testController;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MenuAnchor(
+            controller: controller,
+            menuChildren: const <Widget>[],
+            builder: (BuildContext context, MenuController controller, Widget? child) {
+              testController = controller;
+              return const Text('Anchor');
+            },
+          ),
+        ),
+      );
+
+      expect(testController, equals(controller));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MenuAnchor(
+            menuChildren: const <Widget>[],
+            builder: (BuildContext context, MenuController controller, Widget? child) {
+              testController = controller;
+              return const Text('Anchor');
+            },
+          ),
+        ),
+      );
+
+      expect(testController, isNotNull);
+      expect(testController, isNot(controller));
+    });
   });
 
   group('MenuItemButton', () {
@@ -2996,13 +3029,13 @@ void main() {
 
     testWidgets('diagnostics', (WidgetTester tester) async {
       final ButtonStyle style = ButtonStyle(
-        shape: MaterialStateProperty.all<OutlinedBorder?>(const StadiumBorder()),
-        elevation: MaterialStateProperty.all<double?>(10.0),
+        shape: WidgetStateProperty.all<OutlinedBorder?>(const StadiumBorder()),
+        elevation: WidgetStateProperty.all<double?>(10.0),
         backgroundColor: const MaterialStatePropertyAll<Color>(Colors.red),
       );
       final MenuStyle menuStyle = MenuStyle(
-        shape: MaterialStateProperty.all<OutlinedBorder?>(const RoundedRectangleBorder()),
-        elevation: MaterialStateProperty.all<double?>(20.0),
+        shape: WidgetStateProperty.all<OutlinedBorder?>(const RoundedRectangleBorder()),
+        elevation: WidgetStateProperty.all<double?>(20.0),
         backgroundColor: const MaterialStatePropertyAll<Color>(Colors.green),
       );
       await tester.pumpWidget(
@@ -3803,8 +3836,8 @@ void main() {
         collectSubmenuRects(),
         equals(const <Rect>[
           Rect.fromLTRB(161.0, 0.0, 639.0, 40.0),
-          Rect.fromLTRB(265.0, 40.0, 467.0, 160.0),
-          Rect.fromLTRB(467.0, 80.0, 707.0, 240.0),
+          Rect.fromLTRB(265.0, 40.0, 467.0, 176.0),
+          Rect.fromLTRB(467.0, 80.0, 707.0, 256.0),
         ]),
       );
     });
@@ -3819,8 +3852,8 @@ void main() {
         collectSubmenuRects(),
         equals(const <Rect>[
           Rect.fromLTRB(161.0, 0.0, 639.0, 40.0),
-          Rect.fromLTRB(333.0, 40.0, 535.0, 160.0),
-          Rect.fromLTRB(93.0, 80.0, 333.0, 240.0),
+          Rect.fromLTRB(333.0, 40.0, 535.0, 176.0),
+          Rect.fromLTRB(93.0, 80.0, 333.0, 256.0),
         ]),
       );
     });
@@ -3942,6 +3975,103 @@ void main() {
         );
       },
     );
+
+    // Regression test for https://github.com/flutter/flutter/issues/171608
+    testWidgets('Menu vertical padding should not be reduced with compact visual density', (
+      WidgetTester tester,
+    ) async {
+      // Helper function to get menu padding by measuring first/last items.
+      (double, double) getMenuPadding() {
+        // Find any menu items that are available.
+        final Finder menuItems = find.byType(SubmenuButton);
+        if (menuItems.evaluate().length < 2) {
+          return (0.0, 0.0);
+        }
+
+        final Rect firstItem = tester.getRect(menuItems.first);
+        final Rect lastItem = tester.getRect(menuItems.last);
+        final Rect menuPanel = tester.getRect(find.byType(Material).last);
+
+        final double topPadding = firstItem.top - menuPanel.top;
+        final double bottomPadding = menuPanel.bottom - lastItem.bottom;
+        return (topPadding, bottomPadding);
+      }
+
+      Future<void> buildSimpleMenuAnchor(
+        TextDirection textDirection, {
+        VisualDensity visualDensity = VisualDensity.standard,
+      }) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(visualDensity: visualDensity),
+            home: Directionality(
+              textDirection: textDirection,
+              child: Scaffold(
+                body: MenuAnchor(
+                  style: const MenuStyle(
+                    padding: WidgetStatePropertyAll<EdgeInsets>(
+                      EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                    ),
+                  ),
+                  menuChildren: const <Widget>[
+                    DecoratedBox(
+                      decoration: BoxDecoration(color: Colors.blue),
+                      child: Text('Text 1'),
+                    ),
+                    DecoratedBox(
+                      decoration: BoxDecoration(color: Colors.blue),
+                      child: Text('Text 2'),
+                    ),
+                  ],
+                  builder: (BuildContext context, MenuController controller, Widget? child) {
+                    return TextButton(
+                      onPressed: () {
+                        if (controller.isOpen) {
+                          controller.close();
+                        } else {
+                          controller.open();
+                        }
+                      },
+                      child: const Text('OPEN MENU'),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('OPEN MENU'));
+        await tester.pump();
+      }
+
+      // Pump widget with standard visual density.
+      await buildSimpleMenuAnchor(TextDirection.ltr);
+
+      final (double topStandard, double bottomStandard) = getMenuPadding();
+
+      // Pump widget with compact visual density.
+      await buildSimpleMenuAnchor(TextDirection.ltr, visualDensity: VisualDensity.compact);
+
+      final (double topCompact, double bottomCompact) = getMenuPadding();
+
+      // Compare standard vs compact padding.
+      expect(
+        topCompact,
+        equals(topStandard),
+        reason:
+            'Compact visual density should not change top padding. '
+            'Standard: $topStandard, Compact: $topCompact',
+      );
+
+      expect(
+        bottomCompact,
+        equals(bottomStandard),
+        reason:
+            'Compact visual density should not change bottom padding. '
+            'Standard: $bottomStandard, Compact: $bottomCompact',
+      );
+    });
 
     group('LocalizedShortcutLabeler', () {
       testWidgets('getShortcutLabel returns the right labels', (WidgetTester tester) async {
@@ -4154,7 +4284,9 @@ void main() {
     });
 
     group('Semantics', () {
-      testWidgets('MenuItemButton is not a semantic button', (WidgetTester tester) async {
+      testWidgets('MenuItemButton has platform-adaptive button semantics', (
+        WidgetTester tester,
+      ) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Directionality(
@@ -4169,7 +4301,8 @@ void main() {
           ),
         );
 
-        // The flags should not have SemanticsFlag.isButton.
+        // On web, menu items should have SemanticsFlag.isButton.
+        // On other platforms, they should NOT have the isButton flag.
         expect(
           semantics,
           hasSemantics(
@@ -4181,6 +4314,7 @@ void main() {
                   rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
                   transform: Matrix4.translationValues(356.0, 276.0, 0.0),
                   flags: <SemanticsFlag>[
+                    if (kIsWeb) SemanticsFlag.isButton,
                     SemanticsFlag.hasEnabledState,
                     SemanticsFlag.isEnabled,
                     SemanticsFlag.isFocusable,
@@ -4216,7 +4350,9 @@ void main() {
         semantics.dispose();
       }, variant: TargetPlatformVariant.desktop());
 
-      testWidgets('SubMenuButton is not a semantic button', (WidgetTester tester) async {
+      testWidgets('SubmenuButton has platform-adaptive button semantics', (
+        WidgetTester tester,
+      ) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Directionality(
@@ -4232,7 +4368,8 @@ void main() {
           ),
         );
 
-        // The flags should not have SemanticsFlag.isButton.
+        // On web, submenu buttons should have SemanticsFlag.isButton.
+        // On other platforms, they should NOT have the isButton flag.
         expect(
           semantics,
           hasSemantics(
@@ -4241,6 +4378,7 @@ void main() {
                 TestSemantics(
                   rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
                   flags: <SemanticsFlag>[
+                    if (kIsWeb) SemanticsFlag.isButton,
                     SemanticsFlag.hasEnabledState,
                     SemanticsFlag.hasExpandedState,
                   ],
@@ -4301,6 +4439,7 @@ void main() {
                             TestSemantics(
                               id: 4,
                               flags: <SemanticsFlag>[
+                                if (kIsWeb) SemanticsFlag.isButton,
                                 SemanticsFlag.isFocused,
                                 SemanticsFlag.hasEnabledState,
                                 SemanticsFlag.isEnabled,
@@ -4329,6 +4468,7 @@ void main() {
                                       label: 'Item 0',
                                       rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
                                       flags: <SemanticsFlag>[
+                                        if (kIsWeb) SemanticsFlag.isButton,
                                         SemanticsFlag.hasEnabledState,
                                         SemanticsFlag.isEnabled,
                                         SemanticsFlag.isFocusable,
@@ -4378,6 +4518,7 @@ void main() {
                             TestSemantics(
                               id: 4,
                               flags: <SemanticsFlag>[
+                                if (kIsWeb) SemanticsFlag.isButton,
                                 SemanticsFlag.hasExpandedState,
                                 SemanticsFlag.isFocused,
                                 SemanticsFlag.hasEnabledState,
@@ -4953,6 +5094,447 @@ void main() {
       await tester.pump();
       expect(find.byIcon(disabledIcon), findsOneWidget);
     });
+  });
+
+  group('Mouse cursors', () {
+    testWidgets('SubmenuButton has expected default mouse cursor on hover', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: SubmenuButton(
+              menuChildren: <Widget>[
+                MenuItemButton(onPressed: () {}, child: const Text('Test menu button item')),
+              ],
+              child: const Text('Main Menu'),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: const Offset(1000, 1000));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.basic,
+      );
+
+      await gesture.moveTo(tester.getCenter(find.byType(SubmenuButton)));
+      await tester.pump();
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      );
+    });
+
+    testWidgets('MenuItemButton has expected default mouse cursor on hover', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              children: <Widget>[
+                SubmenuButton(
+                  menuChildren: <Widget>[
+                    MenuItemButton(onPressed: () {}, child: const Text('Test menu item')),
+                  ],
+                  child: const Text('File'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Open SubmenuButton.
+      await tester.tap(find.text('File'));
+      await tester.pumpAndSettle();
+
+      final Finder menuItemFinder = find.byType(MenuItemButton);
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: const Offset(1000, 1000));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.basic,
+      );
+
+      // Move to MenuItemButton.
+      await gesture.moveTo(tester.getCenter(menuItemFinder));
+      await tester.pump();
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      );
+    });
+
+    testWidgets('CheckboxMenuButton has expected default mouse cursor on hover', (
+      WidgetTester tester,
+    ) async {
+      bool? value = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: CheckboxMenuButton(
+              value: value,
+              onChanged: (bool? newValue) {
+                value = newValue;
+              },
+              child: const Text('Checkbox'),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: const Offset(1000, 1000));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.basic,
+      );
+
+      await gesture.moveTo(tester.getCenter(find.byType(CheckboxMenuButton)));
+      await tester.pump();
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      );
+    });
+
+    testWidgets('RadioMenuButton has expected default mouse cursor on hover', (
+      WidgetTester tester,
+    ) async {
+      int? groupValue = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: RadioMenuButton<int>(
+              value: 1,
+              groupValue: groupValue,
+              onChanged: (int? newValue) {
+                groupValue = newValue;
+              },
+              child: const Text('Radio'),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: const Offset(1000, 1000));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.basic,
+      );
+
+      await gesture.moveTo(tester.getCenter(find.byType(RadioMenuButton<int>)));
+      await tester.pump();
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      );
+    });
+
+    testWidgets('MenuItemButton has expected mouse cursor when explicitly configured', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuItemButton(
+              onPressed: () {},
+              style: ButtonStyle(
+                mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
+              ),
+              child: const Text('Menu Item'),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: tester.getCenter(find.byType(MenuItemButton)));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.cell,
+      );
+    });
+
+    testWidgets('CheckboxMenuButton has expected mouse cursor when explicitly configured', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: CheckboxMenuButton(
+              style: ButtonStyle(
+                mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
+              ),
+              value: true,
+              onChanged: (bool? value) {},
+              child: const Text('Menu Item'),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: tester.getCenter(find.byType(CheckboxMenuButton)));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.cell,
+      );
+    });
+
+    testWidgets('RadioMenuButton has expected mouse cursor when explicitly configured', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: RadioMenuButton<bool>(
+              style: ButtonStyle(
+                mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
+              ),
+              value: false,
+              onChanged: (bool? value) {},
+              groupValue: null,
+              child: const Text('Menu Item'),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: tester.getCenter(find.byType(RadioMenuButton<bool>)));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.cell,
+      );
+    });
+
+    testWidgets('SubmenuButton has expected mouse cursor when explicitly configured', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              children: <Widget>[
+                SubmenuButton(
+                  style: ButtonStyle(
+                    mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
+                  ),
+                  menuChildren: <Widget>[
+                    MenuItemButton(onPressed: () {}, child: const Text('Test menu item')),
+                  ],
+                  child: const Text('File'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: tester.getCenter(find.byType(SubmenuButton)));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.cell,
+      );
+    });
+  });
+
+  testWidgets('Menu panel default reserved padding', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: MenuAnchor(
+              controller: controller,
+              menuChildren: const <Widget>[SizedBox(width: 800, height: 24)],
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                return const SizedBox(width: 800, height: 24);
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    controller.open();
+    await tester.pump();
+
+    const double defaultReservedPadding = 8.0; // See _kMenuViewPadding.
+    expect(tester.getRect(findMenuPanels()).width, 800.0 - defaultReservedPadding * 2);
+  });
+
+  testWidgets('Menu panel accepts custom reserved padding', (WidgetTester tester) async {
+    const EdgeInsetsGeometry reservedPadding = EdgeInsets.symmetric(horizontal: 13.0);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: MenuAnchor(
+              controller: controller,
+              reservedPadding: reservedPadding,
+              menuChildren: const <Widget>[SizedBox(width: 800, height: 24)],
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                return const SizedBox(width: 800, height: 24);
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    controller.open();
+    await tester.pump();
+
+    expect(tester.getRect(findMenuPanels()).width, 800.0 - reservedPadding.horizontal);
+  });
+
+  testWidgets('MenuAcceleratorLabel does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: MenuAcceleratorLabel('X'))),
+      ),
+    );
+    expect(tester.getSize(find.byType(MenuAcceleratorLabel)), Size.zero);
+  });
+
+  testWidgets('Layout updates when reserved padding changes', (WidgetTester tester) async {
+    const EdgeInsetsGeometry reservedPadding = EdgeInsets.symmetric(horizontal: 13.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MenuAnchor(
+          controller: controller,
+          menuChildren: const <Widget>[SizedBox(width: 800, height: 24)],
+        ),
+      ),
+    );
+
+    controller.open(position: Offset.zero);
+    await tester.pump();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MenuAnchor(
+          controller: controller,
+          reservedPadding: reservedPadding,
+          menuChildren: const <Widget>[SizedBox(width: 800, height: 24)],
+        ),
+      ),
+    );
+
+    expect(tester.getRect(findMenuPanels()).width, 800.0 - reservedPadding.horizontal);
+  });
+
+  testWidgets('SubmenuButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: SubmenuButton(menuChildren: <Widget>[], child: null)),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SubmenuButton)), Size.zero);
+  });
+
+  testWidgets('MenuBar does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: MenuBar(children: <Widget>[Text('X')])),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(MenuBar)), Size.zero);
+  });
+
+  testWidgets('MenuItemButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: MenuItemButton())),
+      ),
+    );
+    expect(tester.getSize(find.byType(MenuItemButton)), Size.zero);
+  });
+
+  testWidgets('RadioMenuButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: RadioMenuButton<bool>(
+              value: true,
+              groupValue: true,
+              onChanged: (bool? value) {},
+              child: null,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RadioMenuButton<bool>)), Size.zero);
+  });
+
+  testWidgets('CheckboxMenuButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: CheckboxMenuButton(
+              value: true,
+              onChanged: (bool? value) {},
+              child: const Text('X'),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CheckboxMenuButton)), Size.zero);
+  });
+
+  testWidgets('MenuAnchor does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final MenuController menuController = MenuController();
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: MenuAnchor(menuChildren: const <Widget>[Text('X')], controller: menuController),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(MenuAnchor)), Size.zero);
+    menuController.open();
+    await tester.pump();
+    expect(find.text('X'), findsOne);
   });
 }
 

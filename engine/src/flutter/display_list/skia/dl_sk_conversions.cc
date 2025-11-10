@@ -11,6 +11,7 @@
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
+#include "third_party/skia/include/effects/SkRuntimeEffect.h"
 
 namespace flutter {
 
@@ -154,7 +155,7 @@ sk_sp<SkShader> ToSk(const DlColorSource* source) {
       auto samplers = runtime_source->samplers();
       std::vector<sk_sp<SkShader>> sk_samplers(samplers.size());
       for (size_t i = 0; i < samplers.size(); i++) {
-        auto sampler = samplers[i];
+        const auto& sampler = samplers[i];
         if (sampler == nullptr) {
           return nullptr;
         }

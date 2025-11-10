@@ -58,6 +58,11 @@ class MockDelegate : public Engine::Delegate {
               (int64_t, SemanticsNodeUpdates, CustomAccessibilityActionUpdates),
               (override));
   MOCK_METHOD(void,
+              OnEngineSetApplicationLocale,
+              (const std::string),
+              (override));
+  MOCK_METHOD(void, OnEngineSetSemanticsTreeEnabled, (bool), (override));
+  MOCK_METHOD(void,
               OnEngineHandlePlatformMessage,
               (std::unique_ptr<PlatformMessage>),
               (override));

@@ -270,6 +270,7 @@ class SemanticsNodeUpdate {
     required this.role,
     required this.controlsNodes,
     required this.validationResult,
+    this.hitTestBehavior = ui.SemanticsHitTestBehavior.defer,
     required this.inputType,
     required this.locale,
   });
@@ -381,6 +382,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.SemanticsValidationResult validationResult;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final ui.SemanticsHitTestBehavior hitTestBehavior;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.SemanticsInputType inputType;
@@ -581,20 +585,46 @@ abstract class SemanticRole {
   ///
   /// This boolean decides whether to set the `pointer-events` CSS property to
   /// `all` or to `none` on the semantics [element].
+  ///
+  /// The behavior is determined by [ui.SemanticsHitTestBehavior]:
+  /// - `opaque`: Accepts pointer events (blocks elements behind)
+  /// - `transparent`: Rejects pointer events (passes through)
+  /// - `defer`: Infers based on semantic properties (interactive behaviors, etc.)
   bool get acceptsPointerEvents {
+    final hitTestBehavior = semanticsObject.hitTestBehavior;
+
+    switch (hitTestBehavior) {
+      case ui.SemanticsHitTestBehavior.opaque:
+        // Absorb pointer events, blocking them from reaching elements behind.
+        // Used by modal surfaces like dialogs, bottom sheets, drawers.
+        return true;
+      case ui.SemanticsHitTestBehavior.transparent:
+        // Pass through pointer events to elements behind.
+        // Used for non-interactive decorative elements.
+        return false;
+      case ui.SemanticsHitTestBehavior.defer:
+        return _inferAcceptsPointerEvents();
+    }
+  }
+
+  /// Infers whether pointer events should be accepted based on semantic properties.
+  bool _inferAcceptsPointerEvents() {
+    assert(semanticsObject.hitTestBehavior == ui.SemanticsHitTestBehavior.defer);
+
+    // Check if any interactive behavior requires pointer events.
+    // Interactive behaviors (Tappable, SemanticTextField, SemanticIncrementable)
+    // override this to return true, ensuring buttons, text fields, and other
+    // interactive elements receive pointer events when framework defers.
     final behaviors = _behaviors;
     if (behaviors != null) {
       for (final behavior in behaviors) {
-        if (behavior.acceptsPointerEvents) {
+        if (behavior.shouldAcceptPointerEvents) {
           return true;
         }
       }
     }
-    // Ignore pointer events on all container nodes.
-    if (semanticsObject.hasChildren) {
-      return false;
-    }
-    return true;
+
+    return false;
   }
 
   /// Semantic behaviors provided by this role, if any.
@@ -1014,7 +1044,7 @@ abstract class SemanticBehavior {
   ///
   /// This boolean decides whether to set the `pointer-events` CSS property to
   /// `all` or to `none` on [SemanticsObject.element].
-  bool get acceptsPointerEvents => false;
+  bool get shouldAcceptPointerEvents => false;
 
   /// Called immediately after the [semanticsObject] updates some of its fields.
   ///
@@ -1466,6 +1496,17 @@ class SemanticsObject {
     _dirtyFields |= _validationResultIndex;
   }
 
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  ui.SemanticsHitTestBehavior get hitTestBehavior => _hitTestBehavior;
+  ui.SemanticsHitTestBehavior _hitTestBehavior = ui.SemanticsHitTestBehavior.defer;
+
+  static const int _hitTestBehaviorIndex = 1 << 28;
+
+  bool get isHitTestBehaviorDirty => _isDirty(_hitTestBehaviorIndex);
+  void _markHitTestBehaviorDirty() {
+    _dirtyFields |= _hitTestBehaviorIndex;
+  }
+
   /// A unique permanent identifier of the semantics node in the tree.
   final int id;
 
@@ -1538,25 +1579,25 @@ class SemanticsObject {
   bool hasAction(ui.SemanticsAction action) => (_actions! & action.index) != 0;
 
   /// Whether this object represents a widget that can receive input focus.
-  bool get isFocusable => flags.isFocusable;
+  bool get isFocusable => flags.isFocused != ui.Tristate.none;
 
   /// Whether this object currently has input focus.
   ///
   /// This value only makes sense if [isFocusable] is true.
-  bool get hasFocus => flags.isFocused;
+  bool get hasFocus => flags.isFocused == ui.Tristate.isTrue;
 
   /// Whether this object can be in one of "enabled" or "disabled" state.
   ///
   /// If this is true, [isEnabled] communicates the state.
-  bool get hasEnabledState => flags.hasEnabledState;
+  bool get hasEnabledState => flags.isEnabled != ui.Tristate.none;
 
   /// Whether this object is enabled.
   ///
   /// This field is only meaningful if [hasEnabledState] is true.
-  bool get isEnabled => flags.isEnabled;
+  bool get isEnabled => flags.isEnabled == ui.Tristate.isTrue;
 
   /// Whether this object can be in one of "expanded" or "collapsed" state.
-  bool get hasExpandedState => flags.hasExpandedState;
+  bool get hasExpandedState => flags.isExpanded != ui.Tristate.none;
 
   /// Whether this object represents a vertically scrollable area.
   bool get isVerticalScrollContainer =>
@@ -1600,14 +1641,13 @@ class SemanticsObject {
   ///
   /// See [EnabledState] for more details.
   EnabledState enabledState() {
-    if (flags.hasEnabledState) {
-      if (flags.isEnabled) {
+    switch (flags.isEnabled) {
+      case ui.Tristate.none:
+        return EnabledState.noOpinion;
+      case ui.Tristate.isTrue:
         return EnabledState.enabled;
-      } else {
+      case ui.Tristate.isFalse:
         return EnabledState.disabled;
-      }
-    } else {
-      return EnabledState.noOpinion;
     }
   }
 
@@ -1777,6 +1817,11 @@ class SemanticsObject {
     if (_validationResult != update.validationResult) {
       _validationResult = update.validationResult;
       _markValidationResultDirty();
+    }
+
+    if (_hitTestBehavior != update.hitTestBehavior) {
+      _hitTestBehavior = update.hitTestBehavior;
+      _markHitTestBehaviorDirty();
     }
 
     role = update.role;
@@ -2056,14 +2101,14 @@ class SemanticsObject {
       return EngineSemanticsRole.image;
     } else if (isCheckable) {
       return EngineSemanticsRole.checkable;
+    } else if (isLink) {
+      return EngineSemanticsRole.link;
     } else if (isButton) {
       return EngineSemanticsRole.button;
     } else if (isScrollContainer) {
       return EngineSemanticsRole.scrollable;
     } else if (scopesRoute) {
       return EngineSemanticsRole.route;
-    } else if (isLink) {
-      return EngineSemanticsRole.link;
     } else if (isHeader) {
       return EngineSemanticsRole.header;
     } else if (isButtonLike) {
@@ -2190,15 +2235,16 @@ class SemanticsObject {
   /// Because such widgets require the use of specific ARIA roles and HTML
   /// elements, they are managed by the [SemanticCheckable] role, and they do
   /// not use the [Selectable] behavior.
-  bool get isCheckable => flags.hasCheckedState || flags.hasToggledState;
+  bool get isCheckable =>
+      flags.isChecked != ui.CheckedState.none || flags.isToggled != ui.Tristate.none;
 
   /// If true, this node represents something that can be in a "checked" or
   /// state, such as checkboxes, radios, and switches.
-  bool get isChecked => flags.isChecked;
+  bool get isChecked => flags.isChecked == ui.CheckedState.isTrue;
 
   /// If true, this node represents something that can be in a "mixed" or
   /// state, such as checkboxes.
-  bool get isMixed => flags.isCheckStateMixed;
+  bool get isMixed => flags.isChecked == ui.CheckedState.mixed;
 
   /// If true, this node represents something that can be annotated as
   /// "selected", such as a tab, or an item in a list.
@@ -2213,11 +2259,11 @@ class SemanticsObject {
   /// See also:
   ///
   ///   * [isSelected], which indicates whether the node is currently selected.
-  bool get isSelectable => flags.hasSelectedState;
+  bool get isSelectable => flags.isSelected != ui.Tristate.none;
 
   /// If [isSelectable] is true, indicates whether the node is currently
   /// selected.
-  bool get isSelected => flags.isSelected;
+  bool get isSelected => flags.isSelected == ui.Tristate.isTrue;
 
   /// If true, this node represents something that currently requires user input
   /// before a form can be submitted.
@@ -2230,10 +2276,10 @@ class SemanticsObject {
   /// See also:
   ///
   ///   * [isRequired], which indicates whether the is currently required.
-  bool get isRequirable => flags.hasRequiredState;
+  bool get isRequirable => flags.isRequired != ui.Tristate.none;
 
   /// If [isRequirable] is true, indicates whether the node is required.
-  bool get isRequired => flags.isRequired;
+  bool get isRequired => flags.isRequired == ui.Tristate.isTrue;
 
   /// If true, this node represents something that can be annotated as
   /// "expanded", such as a expansion tile or drop down menu
@@ -2243,10 +2289,10 @@ class SemanticsObject {
   /// See also:
   ///
   ///   * [isExpanded], which indicates whether the node is currently selected.
-  bool get isExpandable => flags.hasExpandedState;
+  bool get isExpandable => flags.isExpanded != ui.Tristate.none;
 
   /// Indicates whether the node is currently expanded.
-  bool get isExpanded => flags.isExpanded;
+  bool get isExpanded => flags.isExpanded == ui.Tristate.isTrue;
 
   /// Role-specific adjustment of the vertical position of the children.
   ///
@@ -2425,6 +2471,39 @@ class SemanticsObject {
     }
 
     return true;
+  }
+
+  /// Recursively visits the tree rooted at `this` node in depth-first fashion
+  /// in traversal order but can skip a subtree.
+  void _visitDepthFirstInTraversalOrderCanSkipSubtree(
+    bool Function(SemanticsObject) searchSubtree,
+  ) {
+    final bool shouldSearchSubtree = searchSubtree(this);
+
+    if (!shouldSearchSubtree) {
+      return;
+    }
+
+    final Int32List? childrenInTraversalOrder = _childrenInTraversalOrder;
+
+    if (childrenInTraversalOrder == null) {
+      return;
+    }
+
+    for (final int childId in childrenInTraversalOrder) {
+      final SemanticsObject? child = owner._semanticsTree[childId];
+
+      assert(
+        child != null,
+        'visitDepthFirstInTraversalOrder must only be called after the node '
+        'tree has been established. However, child #$childId does not have its '
+        'SemanticsNode created at the time this method was called.',
+      );
+
+      child!._visitDepthFirstInTraversalOrder(searchSubtree);
+    }
+
+    return;
   }
 
   @override
@@ -2898,17 +2977,21 @@ class EngineSemanticsOwner {
     for (final SemanticsObject detachmentRoot in _detachments) {
       // A detached node may or may not have some of its descendants reattached
       // elsewhere. Walk the descendant tree and find all descendants that were
-      // reattached to a parent. Those descendants need to be removed.
-      detachmentRoot.visitDepthFirstInTraversalOrder((SemanticsObject node) {
+      // *NOT* reattached to a parent. Those descendants need to be removed.
+      detachmentRoot._visitDepthFirstInTraversalOrderCanSkipSubtree((SemanticsObject node) {
         final SemanticsObject? parent = _attachments[node.id];
         if (parent == null) {
           // Was not reparented and is removed permanently from the tree.
           removals.add(node);
+          // Keep searching the subtree.
+          return true;
         } else {
           assert(node._parent == parent);
           assert(node.element.parentNode == parent.element);
+          // Skip this subtree here because if this node is reparented, the subtree
+          // is reparented with it. They won't be added to removal.
+          return false;
         }
-        return true;
       });
     }
 

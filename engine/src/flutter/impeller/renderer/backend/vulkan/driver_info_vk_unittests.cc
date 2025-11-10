@@ -164,16 +164,16 @@ TEST(DriverInfoVKTest, DriverParsingAdreno) {
 }
 
 TEST(DriverInfoVKTest, DisabledDevices) {
-  EXPECT_FALSE(IsBadVersionTest("Adreno (TM) 620"));
-  EXPECT_FALSE(IsBadVersionTest("Adreno (TM) 610"));
-  EXPECT_FALSE(IsBadVersionTest("Adreno (TM) 530"));
-  EXPECT_FALSE(IsBadVersionTest("Adreno (TM) 512"));
-  EXPECT_FALSE(IsBadVersionTest("Adreno (TM) 509"));
-  EXPECT_FALSE(IsBadVersionTest("Adreno (TM) 508"));
-  EXPECT_FALSE(IsBadVersionTest("Adreno (TM) 506"));
-  EXPECT_FALSE(IsBadVersionTest("Adreno (TM) 505"));
-  EXPECT_FALSE(IsBadVersionTest("Adreno (TM) 504"));
-  EXPECT_FALSE(IsBadVersionTest("Adreno (TM) 630"));
+  EXPECT_TRUE(IsBadVersionTest("Adreno (TM) 620"));
+  EXPECT_TRUE(IsBadVersionTest("Adreno (TM) 610"));
+  EXPECT_TRUE(IsBadVersionTest("Adreno (TM) 530"));
+  EXPECT_TRUE(IsBadVersionTest("Adreno (TM) 512"));
+  EXPECT_TRUE(IsBadVersionTest("Adreno (TM) 509"));
+  EXPECT_TRUE(IsBadVersionTest("Adreno (TM) 508"));
+  EXPECT_TRUE(IsBadVersionTest("Adreno (TM) 506"));
+  EXPECT_TRUE(IsBadVersionTest("Adreno (TM) 505"));
+  EXPECT_TRUE(IsBadVersionTest("Adreno (TM) 504"));
+  EXPECT_TRUE(IsBadVersionTest("Adreno (TM) 630"));
   EXPECT_FALSE(IsBadVersionTest("Adreno (TM) 640"));
   EXPECT_FALSE(IsBadVersionTest("Adreno (TM) 650"));
 }
@@ -285,6 +285,23 @@ TEST(DriverInfoVKTest, NewPowerVREnabled) {
             std::optional<PowerVRGPU>(PowerVRGPU::kDXT));
   EXPECT_TRUE(GetWorkaroundsFromDriverInfo(*context->GetDriverInfo())
                   .input_attachment_self_dependency_broken);
+}
+
+TEST(DriverInfoVKTest, PowerVRBSeries) {
+  std::shared_ptr<ContextVK> context =
+      MockVulkanContextBuilder()
+          .SetPhysicalPropertiesCallback(
+              [](VkPhysicalDevice device, VkPhysicalDeviceProperties* prop) {
+                prop->vendorID = 0x1010;
+                prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
+                std::string name = "PowerVR BXM-8-256";
+                name.copy(prop->deviceName, name.size());
+              })
+          .Build();
+
+  EXPECT_FALSE(context->GetDriverInfo()->IsKnownBadDriver());
+  EXPECT_EQ(context->GetDriverInfo()->GetPowerVRGPUInfo(),
+            std::optional<PowerVRGPU>(PowerVRGPU::kBXM));
 }
 
 }  // namespace impeller::testing

@@ -21,6 +21,34 @@ class IMockGLESImpl {
   virtual ~IMockGLESImpl() = default;
   virtual void DeleteTextures(GLsizei size, const GLuint* queries) {}
   virtual void GenTextures(GLsizei n, GLuint* textures) {}
+  virtual void BindTexture(GLenum target, GLuint texture) {}
+  virtual void TexImage2D(GLenum target,
+                          GLint level,
+                          GLint internalformat,
+                          GLsizei width,
+                          GLsizei height,
+                          GLint border,
+                          GLenum format,
+                          GLenum type,
+                          const void* pixels) {}
+  virtual void GenFramebuffers(GLsizei n, GLuint* framebuffers) {}
+  virtual void BindFramebuffer(GLenum target, GLuint framebuffer) {}
+  virtual void FramebufferTexture2D(GLenum target,
+                                    GLenum attachment,
+                                    GLenum textarget,
+                                    GLuint texture,
+                                    GLint level) {}
+  virtual GLenum CheckFramebufferStatus(GLenum target) {
+    return GL_FRAMEBUFFER_COMPLETE;
+  }
+  virtual void ReadPixels(GLint x,
+                          GLint y,
+                          GLsizei width,
+                          GLsizei height,
+                          GLenum format,
+                          GLenum type,
+                          void* pixels) {}
+  virtual void DeleteFramebuffers(GLsizei n, const GLuint* framebuffers) {}
   virtual void ObjectLabelKHR(GLenum identifier,
                               GLuint name,
                               GLsizei length,
@@ -36,7 +64,12 @@ class IMockGLESImpl {
                                       GLuint64* result) {}
   virtual void DeleteQueriesEXT(GLsizei size, const GLuint* queries) {}
   virtual void GenBuffers(GLsizei n, GLuint* buffers) {}
+  virtual void DeleteBuffers(GLsizei n, const GLuint* buffers) {}
   virtual GLboolean IsTexture(GLuint texture) { return true; }
+  virtual void DiscardFramebufferEXT(GLenum target,
+                                     GLsizei numAttachments,
+                                     const GLenum* attachments) {};
+  virtual void GetIntegerv(GLenum name, GLint* attachments) {};
 };
 
 class MockGLESImpl : public IMockGLESImpl {
@@ -46,6 +79,50 @@ class MockGLESImpl : public IMockGLESImpl {
               (GLsizei size, const GLuint* queries),
               (override));
   MOCK_METHOD(void, GenTextures, (GLsizei n, GLuint* textures), (override));
+  MOCK_METHOD(void, BindTexture, (GLenum target, GLuint texture), (override));
+  MOCK_METHOD(void,
+              TexImage2D,
+              (GLenum target,
+               GLint level,
+               GLint internalformat,
+               GLsizei width,
+               GLsizei height,
+               GLint border,
+               GLenum format,
+               GLenum type,
+               const void* pixels),
+              (override));
+  MOCK_METHOD(void,
+              GenFramebuffers,
+              (GLsizei n, GLuint* framebuffers),
+              (override));
+  MOCK_METHOD(void,
+              BindFramebuffer,
+              (GLenum target, GLuint framebuffer),
+              (override));
+  MOCK_METHOD(void,
+              FramebufferTexture2D,
+              (GLenum target,
+               GLenum attachment,
+               GLenum textarget,
+               GLuint texture,
+               GLint level),
+              (override));
+  MOCK_METHOD(GLenum, CheckFramebufferStatus, (GLenum target), (override));
+  MOCK_METHOD(void,
+              ReadPixels,
+              (GLint x,
+               GLint y,
+               GLsizei width,
+               GLsizei height,
+               GLenum format,
+               GLenum type,
+               void* pixels),
+              (override));
+  MOCK_METHOD(void,
+              DeleteFramebuffers,
+              (GLsizei n, const GLuint* framebuffers),
+              (override));
   MOCK_METHOD(
       void,
       ObjectLabelKHR,
@@ -71,7 +148,18 @@ class MockGLESImpl : public IMockGLESImpl {
               (GLsizei size, const GLuint* queries),
               (override));
   MOCK_METHOD(void, GenBuffers, (GLsizei n, GLuint* buffers), (override));
+  MOCK_METHOD(void,
+              DeleteBuffers,
+              (GLsizei n, const GLuint* buffers),
+              (override));
   MOCK_METHOD(GLboolean, IsTexture, (GLuint texture), (override));
+  MOCK_METHOD(void,
+              DiscardFramebufferEXT,
+              (GLenum target,
+               GLsizei numAttachments,
+               const GLenum* attachments),
+              (override));
+  MOCK_METHOD(void, GetIntegerv, (GLenum name, GLint* value), (override));
 };
 
 /// @brief      Provides a mocked version of the |ProcTableGLES| class.

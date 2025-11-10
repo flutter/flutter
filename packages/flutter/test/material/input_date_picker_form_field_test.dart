@@ -294,6 +294,7 @@ void main() {
         matchesSemantics(
           label: 'Enter Date',
           isTextField: true,
+          isFocusable: true,
           hasEnabledState: true,
           isEnabled: true,
           isFocused: true,
@@ -505,6 +506,43 @@ void main() {
 
       expect(selectedDate, DateTime(2025, DateTime.april, 21));
     });
+  });
+
+  testWidgets('InputDatePickerFormField does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: InputDatePickerFormField(firstDate: DateTime(2020), lastDate: DateTime(2030)),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(InputDatePickerFormField)), Size.zero);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/177088.
+  testWidgets('Local InputDecorationTheme is honored', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: InputDecorationTheme(
+              data: const InputDecorationThemeData(filled: true),
+              child: InputDatePickerFormField(
+                firstDate: DateTime(2025, DateTime.february),
+                lastDate: DateTime(2026, DateTime.may),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final InputDecoration decoration = tester.widget<TextField>(find.byType(TextField)).decoration!;
+    expect(decoration.filled, isTrue);
   });
 }
 

@@ -304,7 +304,7 @@ typedef ImageErrorWidgetBuilder =
 ///
 /// ## Custom image providers
 ///
-/// {@tool dartpad}
+/// {@tool sample}
 /// In this example, a variant of [NetworkImage] is created that passes all the
 /// [ImageConfiguration] information (locale, platform, size, etc) to the server
 /// using query arguments in the image URL.
@@ -869,8 +869,9 @@ class Image extends StatefulWidget {
   /// the exception by providing a replacement widget, or rethrow the exception.
   ///
   /// {@tool dartpad}
-  /// The following sample uses [errorBuilder] to show a '😢' in place of the
-  /// image that fails to load, and prints the error to the console.
+  /// The following sample uses [errorBuilder] to show 'Image
+  /// failed to load' in place of the image that fails to load, and prints
+  /// the error to the console.
   ///
   /// ** See code in examples/api/lib/widgets/image/image.error_builder.0.dart **
   /// {@end-tool}

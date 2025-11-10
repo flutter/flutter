@@ -1965,8 +1965,8 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Slider(
                   value: value,
-                  overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                    if (states.contains(MaterialState.focused)) {
+                  overlayColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+                    if (states.contains(WidgetState.focused)) {
                       return Colors.purple[500]!;
                     }
 
@@ -2095,8 +2095,8 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Slider(
                   value: value,
-                  overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                    if (states.contains(MaterialState.hovered)) {
+                  overlayColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+                    if (states.contains(WidgetState.hovered)) {
                       return Colors.cyan[500]!;
                     }
 
@@ -2247,8 +2247,8 @@ void main() {
                   key: sliderKey,
                   value: value,
                   focusNode: focusNode,
-                  overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                    if (states.contains(MaterialState.dragged)) {
+                  overlayColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+                    if (states.contains(WidgetState.dragged)) {
                       return Colors.lime[500]!;
                     }
 
@@ -3333,7 +3333,7 @@ void main() {
     );
   });
 
-  testWidgets('Slider MaterialStateMouseCursor resolves correctly', (WidgetTester tester) async {
+  testWidgets('Slider WidgetStateMouseCursor resolves correctly', (WidgetTester tester) async {
     const MouseCursor systemDefaultCursor = SystemMouseCursors.basic;
     const MouseCursor regularCursor = SystemMouseCursors.click;
     const MouseCursor disabledCursor = SystemMouseCursors.forbidden;
@@ -5459,5 +5459,18 @@ void main() {
       material,
       paints..circle(x: 800.0 - sliderPadding, y: 300.0, color: theme.colorScheme.primary),
     );
+  });
+
+  testWidgets('Slider does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(child: Slider(value: 1, onChanged: (_) {})),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Slider)), Size.zero);
   });
 }

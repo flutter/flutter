@@ -1627,7 +1627,7 @@ class EditableText extends StatefulWidget {
   /// [TextSelectionGestureDetectorBuilder] to wrap the [EditableText], and set
   /// [rendererIgnoresPointer] to true.
   ///
-  /// When [rendererIgnoresPointer] is true true, the [RenderEditable] created
+  /// When [rendererIgnoresPointer] is true, the [RenderEditable] created
   /// by this widget will not handle pointer events.
   ///
   /// This property is false by default.
@@ -3214,8 +3214,21 @@ class EditableTextState extends State<EditableText>
     widget.focusNode.addListener(_handleFocusChanged);
     _cursorVisibilityNotifier.value = widget.showCursor;
     _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
-    _appLifecycleListener = AppLifecycleListener(onResume: () => _justResumed = true);
+    _appLifecycleListener = AppLifecycleListener(onResume: _onResume);
     _initProcessTextActions();
+  }
+
+  void _onResume() {
+    _justResumed = true;
+    // To prevent adding multiple listeners, remove any existing one first.
+    FocusManager.instance.removeListener(_resetJustResumed);
+    // Reset _justResumed as soon as there is a focus change.
+    FocusManager.instance.addListener(_resetJustResumed);
+  }
+
+  void _resetJustResumed() {
+    _justResumed = false;
+    FocusManager.instance.removeListener(_resetJustResumed);
   }
 
   /// Query the engine to initialize the list of text processing actions to show
@@ -3436,6 +3449,7 @@ class EditableTextState extends State<EditableText>
     _cursorVisibilityNotifier.dispose();
     _appLifecycleListener.dispose();
     FocusManager.instance.removeListener(_unflagInternalFocus);
+    FocusManager.instance.removeListener(_resetJustResumed);
     _disposeScrollNotificationObserver();
     super.dispose();
     assert(_batchEditDepth <= 0, 'unfinished batch edits: $_batchEditDepth');
@@ -3653,7 +3667,9 @@ class EditableTextState extends State<EditableText>
         renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
       case FloatingCursorDragState.End:
         // Resume cursor blinking.
-        _startCursorBlink();
+        if (_hasFocus) {
+          _startCursorBlink();
+        }
         // We skip animation if no update has happened.
         if (_lastTextPosition != null && _lastBoundedOffset != null) {
           _floatingCursorResetController!.value = 0.0;

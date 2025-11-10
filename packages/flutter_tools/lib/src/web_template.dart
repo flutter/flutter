@@ -11,6 +11,10 @@ import 'base/file_system.dart';
 
 /// Placeholder for base href
 const kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
+const kStaticAssetsUrlPlaceholder = r'$FLUTTER_STATIC_ASSETS_URL';
+
+const _kServiceWorkerDeprecationNotice =
+    "Flutter's service worker is deprecated and will be removed in a future Flutter release.";
 
 class WebTemplateWarning {
   WebTemplateWarning(this.warningText, this.lineNumber);
@@ -66,11 +70,11 @@ class WebTemplate {
     return <WebTemplateWarning>[
       ..._getWarningsForPattern(
         RegExp('(const|var) serviceWorkerVersion = null'),
-        'Local variable for "serviceWorkerVersion" is deprecated. Use "{{flutter_service_worker_version}}" template token instead. See https://docs.flutter.dev/platform-integration/web/initialization for more details.',
+        '$_kServiceWorkerDeprecationNotice See https://github.com/flutter/flutter/issues/156910 for more details.',
       ),
       ..._getWarningsForPattern(
         "navigator.serviceWorker.register('flutter_service_worker.js')",
-        'Manual service worker registration deprecated. Use flutter.js service worker bootstrapping instead. See https://docs.flutter.dev/platform-integration/web/initialization for more details.',
+        '$_kServiceWorkerDeprecationNotice See https://github.com/flutter/flutter/issues/156910 for more details.',
       ),
       ..._getWarningsForPattern(
         '_flutter.loader.loadEntrypoint(',
@@ -101,6 +105,7 @@ class WebTemplate {
     required File flutterJsFile,
     String? buildConfig,
     String? flutterBootstrapJs,
+    String? staticAssetsUrl,
   }) {
     String newContent = _content;
 
@@ -108,23 +113,29 @@ class WebTemplate {
       newContent = newContent.replaceAll(kBaseHrefPlaceholder, baseHref);
     }
 
+    if (newContent.contains(kStaticAssetsUrlPlaceholder) && staticAssetsUrl != null) {
+      newContent = newContent.replaceAll(kStaticAssetsUrlPlaceholder, staticAssetsUrl);
+    }
+
     if (serviceWorkerVersion != null) {
       newContent = newContent
           .replaceFirst(
             // Support older `var` syntax as well as new `const` syntax
             RegExp('(const|var) serviceWorkerVersion = null'),
-            'const serviceWorkerVersion = "$serviceWorkerVersion"',
+            'const serviceWorkerVersion = "$serviceWorkerVersion" /* $_kServiceWorkerDeprecationNotice */',
           )
           // This is for legacy index.html that still uses the old service
           // worker loading mechanism.
           .replaceFirst(
             "navigator.serviceWorker.register('flutter_service_worker.js')",
-            "navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion')",
+            "navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion') /* $_kServiceWorkerDeprecationNotice */",
           );
     }
     newContent = newContent.replaceAll(
       '{{flutter_service_worker_version}}',
-      serviceWorkerVersion != null ? '"$serviceWorkerVersion"' : 'null',
+      serviceWorkerVersion != null
+          ? '"$serviceWorkerVersion" /* $_kServiceWorkerDeprecationNotice */'
+          : 'null /* $_kServiceWorkerDeprecationNotice */',
     );
     if (buildConfig != null) {
       newContent = newContent.replaceAll('{{flutter_build_config}}', buildConfig);

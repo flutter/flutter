@@ -22,6 +22,8 @@ void main() {
     expect(localizations.reorderItemRight, isNotNull);
     expect(localizations.reorderItemToEnd, isNotNull);
     expect(localizations.reorderItemToStart, isNotNull);
+    expect(localizations.searchResultsFound, isNotNull);
+    expect(localizations.noResultsFound, isNotNull);
     expect(localizations.copyButtonLabel, isNotNull);
     expect(localizations.cutButtonLabel, isNotNull);
     expect(localizations.pasteButtonLabel, isNotNull);
@@ -57,6 +59,24 @@ void main() {
     expect(locale, const Locale('fo'));
     await tester.pump();
     expect(find.text('loaded'), findsOneWidget);
+  });
+
+  testWidgets('Locale is sent to engine if this is a top level Localizations', (
+    WidgetTester tester,
+  ) async {
+    final FakeLocalizationsDelegate delegate = FakeLocalizationsDelegate();
+    await tester.pumpWidget(
+      Localizations(
+        locale: const Locale('fo'),
+        isApplicationLevel: true,
+        delegates: <LocalizationsDelegate<dynamic>>[WidgetsLocalizationsDelegate(), delegate],
+        child: const Text('loaded'),
+      ),
+    );
+    delegate.completer.complete('foo');
+    await tester.idle();
+    await tester.pump();
+    expect(tester.binding.platformDispatcher.applicationLocale, const Locale('fo'));
   });
 
   testWidgets('Localizations.localeOf throws when no localizations exist', (

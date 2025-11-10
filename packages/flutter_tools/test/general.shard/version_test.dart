@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/git.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
+import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
@@ -56,6 +57,34 @@ void main() {
       Channel.values,
     );
   });
+
+  /// Mocks the series of commands used to determine the Flutter version for `master`.
+  @useResult
+  List<FakeCommand> mockGitTagHistory({
+    required String latestTag,
+    required String headRef,
+    required String ancestorRef,
+    required int commitsBetweenRefs,
+  }) {
+    return [
+      FakeCommand(
+        command: const [
+          'git',
+          'for-each-ref',
+          '--sort=-v:refname',
+          '--count=1',
+          '--format=%(refname:short)',
+          'refs/tags/[0-9]*.*.*',
+        ],
+        stdout: latestTag,
+      ),
+      FakeCommand(command: ['git', 'merge-base', headRef, latestTag], stdout: ancestorRef),
+      FakeCommand(
+        command: ['git', 'rev-list', '--count', '$ancestorRef..$headRef'],
+        stdout: '$commitsBetweenRefs',
+      ),
+    ];
+  }
 
   for (final String channel in kOfficialChannels) {
     DateTime getChannelUpToDateVersion() {
@@ -100,17 +129,11 @@ void main() {
               stdout: '1234abcd',
             ),
             const FakeCommand(command: <String>['git', 'tag', '--points-at', '1234abcd']),
-            const FakeCommand(
-              command: <String>[
-                'git',
-                'describe',
-                '--match',
-                '*.*.*',
-                '--long',
-                '--tags',
-                '1234abcd',
-              ],
-              stdout: '0.1.2-3-1234abcd',
+            ...mockGitTagHistory(
+              latestTag: '',
+              headRef: '1234abcd',
+              ancestorRef: '',
+              commitsBetweenRefs: 0,
             ),
             FakeCommand(
               command: const <String>['git', 'symbolic-ref', '--short', 'HEAD'],
@@ -278,17 +301,11 @@ void main() {
               ],
             ),
             const FakeCommand(command: <String>['git', 'tag', '--points-at', '1234abcd']),
-            const FakeCommand(
-              command: <String>[
-                'git',
-                'describe',
-                '--match',
-                '*.*.*',
-                '--long',
-                '--tags',
-                '1234abcd',
-              ],
-              stdout: '0.1.2-3-1234abcd',
+            ...mockGitTagHistory(
+              latestTag: '0.1.2-3',
+              headRef: '1234abcd',
+              ancestorRef: 'abcd1234',
+              commitsBetweenRefs: 170,
             ),
             FakeCommand(
               command: const <String>['git', 'symbolic-ref', '--short', 'HEAD'],
@@ -417,7 +434,6 @@ void main() {
 
           // Verify the version files exist and have been repopulated after the fetch.
           expect(FlutterVersion.getVersionFile(fs, flutterRoot), exists); // flutter.version.json
-          expect(fs.file(fs.path.join(flutterRoot, 'version')), exists); // legacy
 
           expect(flutterVersion.channel, channel);
           expect(flutterVersion.repositoryUrl, flutterUpstreamUrl);
@@ -468,17 +484,11 @@ void main() {
               stdout: '1234abcd',
             ),
             const FakeCommand(command: <String>['git', 'tag', '--points-at', '1234abcd']),
-            const FakeCommand(
-              command: <String>[
-                'git',
-                'describe',
-                '--match',
-                '*.*.*',
-                '--long',
-                '--tags',
-                '1234abcd',
-              ],
-              stdout: '0.1.2-3-1234abcd',
+            ...mockGitTagHistory(
+              latestTag: '0.1.2-3',
+              headRef: '1234abcd',
+              ancestorRef: 'abcd1234',
+              commitsBetweenRefs: 170,
             ),
             FakeCommand(
               command: const <String>['git', 'symbolic-ref', '--short', 'HEAD'],
@@ -735,7 +745,7 @@ void main() {
 
     VersionCheckError? runUpstreamValidator({String? versionUpstreamUrl, String? flutterGitUrl}) {
       final Platform testPlatform = FakePlatform(
-        environment: <String, String>{if (flutterGitUrl != null) 'FLUTTER_GIT_URL': flutterGitUrl},
+        environment: <String, String>{'FLUTTER_GIT_URL': ?flutterGitUrl},
       );
       return VersionUpstreamValidator(
         version: FakeFlutterVersion(repositoryUrl: versionUpstreamUrl),
@@ -860,9 +870,11 @@ void main() {
           stdout: '1234abcd',
         ),
         const FakeCommand(command: <String>['git', 'tag', '--points-at', '1234abcd']),
-        const FakeCommand(
-          command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', '1234abcd'],
-          stdout: '0.1.2-3-1234abcd',
+        ...mockGitTagHistory(
+          latestTag: '0.1.2-3',
+          headRef: '1234abcd',
+          ancestorRef: 'abcd1234',
+          commitsBetweenRefs: 170,
         ),
         const FakeCommand(
           command: <String>['git', 'symbolic-ref', '--short', 'HEAD'],
@@ -908,9 +920,11 @@ void main() {
           stdout: '1234abcd',
         ),
         const FakeCommand(command: <String>['git', 'tag', '--points-at', '1234abcd']),
-        const FakeCommand(
-          command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', '1234abcd'],
-          stdout: '0.1.2-3-1234abcd',
+        ...mockGitTagHistory(
+          latestTag: '0.1.2-3',
+          headRef: '1234abcd',
+          ancestorRef: 'abcd1234',
+          commitsBetweenRefs: 170,
         ),
         const FakeCommand(
           command: <String>['git', 'symbolic-ref', '--short', 'HEAD'],
@@ -1056,7 +1070,12 @@ void main() {
       expect(legacyVersionFile.existsSync(), isTrue);
       expect(legacyVersionFile.readAsStringSync(), '1.2.3');
     },
-    overrides: <Type, Generator>{ProcessManager: () => processManager, Cache: () => cache},
+    overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      Cache: () => cache,
+      // ignore: avoid_redundant_argument_values
+      FeatureFlags: () => TestFeatureFlags(isOmitLegacyVersionFileEnabled: false),
+    },
   );
 
   testUsingContext(
@@ -1128,7 +1147,6 @@ void main() {
       final Directory flutterRoot = fs.directory(fs.path.join('path', 'to', 'flutter'));
       final Directory cacheDir = flutterRoot.childDirectory('bin').childDirectory('cache')
         ..createSync(recursive: true);
-      final File legacyVersionFile = flutterRoot.childFile('version');
       final File versionFile = cacheDir.childFile('flutter.version.json')..writeAsStringSync('{');
 
       processManager.addCommands(<FakeCommand>[
@@ -1145,9 +1163,11 @@ void main() {
           stdout: '1234abcd',
         ),
         const FakeCommand(command: <String>['git', 'tag', '--points-at', '1234abcd']),
-        const FakeCommand(
-          command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', '1234abcd'],
-          stdout: '0.1.2-3-1234abcd',
+        ...mockGitTagHistory(
+          latestTag: '0.1.2-3',
+          headRef: '1234abcd',
+          ancestorRef: 'abcd1234',
+          commitsBetweenRefs: 170,
         ),
         const FakeCommand(
           command: <String>['git', 'symbolic-ref', '--short', 'HEAD'],
@@ -1202,12 +1222,10 @@ void main() {
 
       // version file was deleted because it couldn't be parsed
       expect(versionFile.existsSync(), isFalse);
-      expect(legacyVersionFile.existsSync(), isFalse);
       // version file was written to disk
       flutterVersion.ensureVersionFile();
       expect(processManager, hasNoRemainingExpectations);
       expect(versionFile.existsSync(), isTrue);
-      expect(legacyVersionFile.existsSync(), isTrue);
     },
     overrides: <Type, Generator>{ProcessManager: () => processManager, Cache: () => cache},
   );
@@ -1399,15 +1417,16 @@ void main() {
   testUsingContext('determine reports correct git describe version if HEAD is not at a tag', () {
     const devTag = '1.2.0-2.0.pre';
     const headRevision = 'abcd1234';
-    const commitsAhead = '12';
     processManager.addCommands(<FakeCommand>[
       const FakeCommand(
         command: <String>['git', 'tag', '--points-at', 'HEAD'],
         // no output, since there's no tag
       ),
-      const FakeCommand(
-        command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
-        stdout: '$devTag-$commitsAhead-g$headRevision',
+      ...mockGitTagHistory(
+        latestTag: devTag,
+        headRef: 'HEAD',
+        ancestorRef: 'abcd1234',
+        commitsBetweenRefs: 12,
       ),
     ]);
     final platform = FakePlatform();
@@ -1424,9 +1443,11 @@ void main() {
   testUsingContext('determine does not call fetch --tags', () {
     processManager.addCommands(<FakeCommand>[
       const FakeCommand(command: <String>['git', 'tag', '--points-at', 'HEAD']),
-      const FakeCommand(
-        command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
-        stdout: 'v0.1.2-3-1234abcd',
+      ...mockGitTagHistory(
+        latestTag: 'v0.1.2-3',
+        headRef: 'HEAD',
+        ancestorRef: 'abcd1234',
+        commitsBetweenRefs: 12,
       ),
     ]);
     final platform = FakePlatform();
@@ -1442,9 +1463,11 @@ void main() {
         stdout: 'beta',
       ),
       const FakeCommand(command: <String>['git', 'tag', '--points-at', 'HEAD']),
-      const FakeCommand(
-        command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
-        stdout: 'v0.1.2-3-1234abcd',
+      ...mockGitTagHistory(
+        latestTag: 'v0.1.2-3',
+        headRef: 'HEAD',
+        ancestorRef: 'abcd1234',
+        commitsBetweenRefs: 12,
       ),
     ]);
     final platform = FakePlatform();
@@ -1463,9 +1486,11 @@ void main() {
         command: <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags', '-f'],
       ),
       const FakeCommand(command: <String>['git', 'tag', '--points-at', 'HEAD']),
-      const FakeCommand(
-        command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
-        stdout: 'v0.1.2-3-1234abcd',
+      ...mockGitTagHistory(
+        latestTag: 'v0.1.2-3',
+        headRef: 'HEAD',
+        ancestorRef: 'abcd1234',
+        commitsBetweenRefs: 12,
       ),
     ]);
     final platform = FakePlatform();
@@ -1484,9 +1509,11 @@ void main() {
         command: <String>['git', 'fetch', 'https://githubmirror.com/flutter.git', '--tags', '-f'],
       ),
       const FakeCommand(command: <String>['git', 'tag', '--points-at', 'HEAD']),
-      const FakeCommand(
-        command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
-        stdout: 'v0.1.2-3-1234abcd',
+      ...mockGitTagHistory(
+        latestTag: 'v0.1.2-3',
+        headRef: 'HEAD',
+        ancestorRef: 'abcd1234',
+        commitsBetweenRefs: 12,
       ),
     ]);
     final platform = FakePlatform(

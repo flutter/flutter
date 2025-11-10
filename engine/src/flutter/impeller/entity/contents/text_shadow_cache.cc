@@ -19,13 +19,15 @@ TextShadowCache::TextShadowCacheKey::TextShadowCacheKey(Scalar p_max_basis,
                                                         int64_t p_identifier,
                                                         bool p_is_single_glyph,
                                                         const Font& p_font,
-                                                        Sigma p_sigma)
+                                                        Sigma p_sigma,
+                                                        Color p_color)
     : max_basis(p_max_basis),
       identifier(p_identifier),
       is_single_glyph(p_is_single_glyph),
       font(p_font),
       rounded_sigma(Rational(std::round(p_sigma.sigma * kMaxSigmaDenominator),
-                             kMaxSigmaDenominator)) {}
+                             kMaxSigmaDenominator)),
+      color(p_color) {}
 
 void TextShadowCache::MarkFrameStart() {
   for (auto& entry : entries_) {

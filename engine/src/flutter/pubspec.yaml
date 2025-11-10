@@ -101,7 +101,6 @@ workspace:
   - tools/header_guard_check
   - tools/gen_web_locale_keymap
   - tools/githooks
-  - tools/licenses
   - tools/mcp
   - tools/path_ops/dart
   - tools/golden_tests_harvester
@@ -179,12 +178,14 @@ dependency_overrides:
     path: ./third_party/dart/pkg/async_helper
   boolean_selector:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/boolean_selector
+  cli_config:
+    path: ./third_party/dart/third_party/pkg/tools/pkgs/cli_config
   collection:
     path: ./third_party/dart/third_party/pkg/core/pkgs/collection
   convert:
     path: ./third_party/dart/third_party/pkg/core/pkgs/convert
   coverage:
-    path: ./third_party/pkg/coverage
+    path: ./third_party/dart/third_party/pkg/tools/pkgs/coverage
   crypto:
     path: ./third_party/dart/third_party/pkg/core/pkgs/crypto
   dart_mcp:

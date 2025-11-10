@@ -87,7 +87,7 @@ const htmlSampleInlineFlutterJsBootstrapOutput = '''
     (build config)
     _flutter.loader.load({
       serviceWorker: {
-        serviceWorkerVersion: "(service worker version)",
+        serviceWorkerVersion: "(service worker version)" /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */,
       },
     });
   </script>
@@ -195,10 +195,10 @@ String htmlSample2Replaced({required String baseHref, required String serviceWor
   <div></div>
   <script src="main.dart.js"></script>
   <script>
-    const serviceWorkerVersion = "$serviceWorkerVersion";
+    const serviceWorkerVersion = "$serviceWorkerVersion" /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */;
   </script>
   <script>
-    navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion');
+    navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion') /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */;
   </script>
 </body>
 </html>
@@ -215,6 +215,70 @@ const htmlSample3 = '''
 <body>
   <div></div>
   <script src="main.dart.js"></script>
+</body>
+</html>
+''';
+
+const htmlSampleStaticAssetsUrl =
+    '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <base href="/">
+  <meta charset="utf-8">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+</head>
+<body>
+  <div></div>
+  <script>
+    {{flutter_js}}
+    {{flutter_build_config}}
+    _flutter.loader.load({
+      config: {
+        entryPointBaseUrl: "$kStaticAssetsUrlPlaceholder",
+      },
+      onEntrypointLoaded: async function (engineInitializer) {
+        const appRunner = await engineInitializer.initializeEngine({
+          assetBase: "$kStaticAssetsUrlPlaceholder",
+        });
+
+        await appRunner.runApp();
+      },
+    });
+  </script>
+</body>
+</html>
+''';
+
+String htmlSampleStaticAssetsUrlReplaced({required String staticAssetsUrl}) =>
+    '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <base href="/">
+  <meta charset="utf-8">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+</head>
+<body>
+  <div></div>
+  <script>
+    (flutter.js content)
+    {{flutter_build_config}}
+    _flutter.loader.load({
+      config: {
+        entryPointBaseUrl: "$staticAssetsUrl",
+      },
+      onEntrypointLoaded: async function (engineInitializer) {
+        const appRunner = await engineInitializer.initializeEngine({
+          assetBase: "$staticAssetsUrl",
+        });
+
+        await appRunner.runApp();
+      },
+    });
+  </script>
 </body>
 </html>
 ''';
@@ -300,6 +364,21 @@ void main() {
     );
   });
 
+  test('applies substitutions to static assets url', () {
+    const indexHtml = WebTemplate(htmlSampleStaticAssetsUrl);
+    const expectedStaticAssetsUrl = 'https://static.example.com/my-app/';
+
+    expect(
+      indexHtml.withSubstitutions(
+        baseHref: '/',
+        serviceWorkerVersion: 'v123xyz',
+        flutterJsFile: flutterJs,
+        staticAssetsUrl: expectedStaticAssetsUrl,
+      ),
+      htmlSampleStaticAssetsUrlReplaced(staticAssetsUrl: expectedStaticAssetsUrl),
+    );
+  });
+
   test('re-parses after substitutions', () {
     const indexHtml = WebTemplate(htmlSample2);
     expect(WebTemplate.baseHref(htmlSample2), ''); // Placeholder base href.
@@ -316,10 +395,24 @@ void main() {
   test('warns on legacy service worker patterns', () {
     const indexHtml = WebTemplate(htmlSampleLegacyVar);
     final List<WebTemplateWarning> warnings = indexHtml.getWarnings();
-    expect(warnings.length, 2);
+    expect(warnings, hasLength(2));
 
-    expect(warnings.where((WebTemplateWarning warning) => warning.lineNumber == 13), isNotEmpty);
-    expect(warnings.where((WebTemplateWarning warning) => warning.lineNumber == 16), isNotEmpty);
+    final Iterable<WebTemplateWarning> serviceWorkerWarnings = warnings.where(
+      (WebTemplateWarning warning) => warning.lineNumber == 13 || warning.lineNumber == 16,
+    );
+    expect(serviceWorkerWarnings, hasLength(2));
+    expect(
+      serviceWorkerWarnings,
+      everyElement(
+        isA<WebTemplateWarning>().having(
+          (WebTemplateWarning warning) => warning.warningText,
+          'service worker warning message',
+          contains(
+            "Flutter's service worker is deprecated and will be removed in a future Flutter release.",
+          ),
+        ),
+      ),
+    );
   });
 
   test('warns on legacy FlutterLoader.loadEntrypoint', () {

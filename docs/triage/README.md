@@ -1,6 +1,6 @@
 # Primary issue triage process
 
-The process of triaging new incoming bugs consists of processing the list of [issues without team-* labels, with no assignees, and not labeled `will need additional triage`](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20no%3Aassignee%20-label%3A%22will%20need%20additional%20triage%22%20-label%3Ateam-codelabs%2Cteam-ecosystem%2Cteam-infra%2Cteam-engine%2Cteam-framework%2Cteam-news%2Cteam-ios%2Cteam-tool%2Cteam-web%2Cteam-linux%2Cteam-macos%2Cteam-windows%2Cteam-design%2Cteam-android%2Cteam-go_router%2Cteam-games%2Cteam-text-input) as described in this section, so as to make that list empty.
+The process of triaging new incoming bugs consists of processing the list of [issues without team-* labels, with no assignees, and not labeled `will need additional triage`](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20no%3Aassignee%20-label%3A%22will%20need%20additional%20triage%22%20-label%3Ateam-codelabs%2Cteam-ecosystem%2Cteam-infra%2Cteam-engine%2Cteam-framework%2Cteam-ios%2Cteam-tool%2Cteam-web%2Cteam-linux%2Cteam-macos%2Cteam-windows%2Cteam-design%2Cteam-android%2Cteam-games%2Cteam-text-input) as described in this section, so as to make that list empty.
 
 _See also: [Issue triage reports](https://github.com/flutter/flutter/wiki/Issue-triage-reports)_
 
@@ -67,7 +67,6 @@ Some labels are used to track the flow of issues from the time they're filed unt
 
 In general the flow chart for team assignment is as follows, stopping as soon as the first `team-` label is assigned:
 
-- If it's about the flutter/news_toolkit repository, add `team-news`.
 - If it's about a codelab, add `team-codelab`.
 - If it's about the release process or tooling (e.g., `packages_autoroller`), add `team-infra` and `infra: release`.
 - If it's about the Flutter team's CI or infrastructure, add `team-infra`.
@@ -85,9 +84,16 @@ In general the flow chart for team assignment is as follows, stopping as soon as
 - If it's about the Flutter tool, add `team-tool`.
 - If it's about developer tools, add `team-devexp`.
 - If it's about a first-party package:
-  - If it's about `go_router` or `go_router_builder`, add `team-framework`.
-  - If it's about `two_dimensional_scrollables`, add `team-framework`.
-  - If it's about `flutter_svg` or `vector_graphics`, add `team-engine`.
+  - Apply `team-framework` if it's about:
+    - `animations`
+    - `cupertino_icons`
+    - `flutter_lints`
+    - `go_router`, `go_router_builder`
+    - `google_fonts`
+    - `two_dimensional_scrollables`
+  - Apply `team-engine` if it's about:
+    - `flutter_svg`
+    - `vector_graphics`
   - Otherwise, add `team-ecosystem`.
 - If none of the above apply, add `will need additional triage`.
 
@@ -210,7 +216,7 @@ For more guidance on reviewing PRs, see [Tree Hygiene](../contributing/Tree-hygi
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-android%2Cfyi-android+-label%3Atriaged-android+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-android+label%3AP0+sort%3Aupdated-asc)
 - [P1, No Assignee list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-android+label%3Ap1+no%3Aassignee+sort%3Aupdated-asc)
-- PRs: [Framework/Tool](https://github.com/flutter/flutter/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android+-label%3A%22work+in+progress%3B+do+not+review%22+sort%3Aupdated-asc+), [Plugins \(non-dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Atriage-android+sort%3Aupdated-asc+-author%3Aapp%2Fdependabot+), [Plugins \(dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android+sort%3Aupdated-asc+author%3Aapp%2Fdependabot+)
+- PRs: [Framework/Tool](https://github.com/flutter/flutter/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android%2Cteam-android+-label%3A%22work+in+progress%3B+do+not+review%22+sort%3Aupdated-asc+), [Plugins \(non-dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Atriage-android+sort%3Aupdated-asc+-author%3Aapp%2Fdependabot+), [Plugins \(dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android+sort%3Aupdated-asc+author%3Aapp%2Fdependabot+)
 
 ### Codelabs team (`team-codelabs`)
 
@@ -232,8 +238,8 @@ For more guidance on reviewing PRs, see [Tree Hygiene](../contributing/Tree-hygi
 
 In addition, consider these issues that fall under another team's triage, but are things the ecosystem team might want to be aware of:
  * [`a: plugins` issues](https://github.com/flutter/flutter/issues?q=is%3Aopen+label%3A%22a%3A+plugins%22+-label%3Ateam-ecosystem+-label%3Atriaged-ecosystem)
- * [`package` issues](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Apackage+-label%3Ateam-ecosystem+-label%3Atriaged-ecosystem+-label%3Ateam-go_router+sort%3Acreated-desc+)
- * [Package regressions](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+-label%3Ateam-go_router+label%3Apackage+label%3A%22c%3A+regression%22+sort%3Acreated-desc)
+ * [`package` issues](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Apackage%20-label%3Ateam-ecosystem%20-label%3Atriaged-ecosystem%20sort%3Acreated-desc)
+ * [Package regressions](https://github.com/flutter/flutter/issues?q=is%3Aopen%20is%3Aissue%20label%3Apackage%20label%3A%22c%3A%20regression%22%20sort%3Acreated-desc)
 
 
 ### Engine team (`team-engine`)
@@ -247,9 +253,9 @@ In addition, consider these issues that fall under another team's triage, but ar
 
 ### Framework team (`team-framework`)
 
-- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Ateam-framework%2C%22p%3A%20go_router%22%20label%3AP0%20sort%3Aupdated-desc)
-- [Framework PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aframework%2C%22p%3A+go_router%22+-label%3A%22f%3A+material+design%22+-label%3A%22f%3A+cupertino%22+draft%3Afalse+sort%3Aupdated-desc)
-- [Framework-owned Package PR list](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3A%22p%3A+two_dimensional_scrollables%22%2C%22p%3A+go_router%22%2C%22p%3A+go_router_builder%22%2C%22p%3A+animation%22%2C%22p%3A+animations%22%2C%22p%3A+cupertino_icons%22%2C%22p%3A+flutter_lints%22+)
+- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Ateam-framework%20label%3AP0%20sort%3Aupdated-desc)
+- [Framework PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aframework+-label%3A%22f%3A+material+design%22+-label%3A%22f%3A+cupertino%22+draft%3Afalse+sort%3Aupdated-desc+)
+- [Framework-owned Package PR list](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3A%22p%3A+two_dimensional_scrollables%22%2C%22p%3A+go_router%22%2C%22p%3A+go_router_builder%22%2C%22p%3A+google_fonts%22%2C%22p%3A+animation%22%2C%22p%3A+animations%22%2C%22p%3A+cupertino_icons%22%2C%22p%3A+flutter_lints%22+)
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Ateam-framework%2Cfyi-framework%20-label%3Atriaged-framework%20-label%3A%22will%20need%20additional%20triage%22%20-label%3A%22waiting%20for%20customer%20response%22%20sort%3Aupdated-desc)
 
 ### Games team (`team-games`)
@@ -271,7 +277,7 @@ See the [Flutter Infra Team Triage](./Infra-Triage.md) page.
 
 PRs are reviewed weekly across the framework, packages, and engine repositories:
 
-- [iOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aplatform-ios+sort%3Acreated-asc+-is%3Adraft)
+- [iOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aplatform-ios%2Cteam-ios+sort%3Acreated-asc+-is%3Adraft)
 - [macOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-macos++sort%3Aupdated-asc)
 - [iOS and macOS PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-macos%2Ctriage-ios+sort%3Aupdated-asc+)
 
@@ -282,16 +288,11 @@ PRs are reviewed weekly across the framework, packages, and engine repositories:
 - [Linux PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-linux+sort%3Aupdated-asc)
 - [Linux PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-linux+sort%3Aupdated-asc)
 
-### News Toolkit team (`team-news`)
-
-- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-news%2Cfyi-news+-label%3Atriaged-news+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
-- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-news+label%3AP0+sort%3Aupdated-asc)
-
 ### Text Input team (`team-text-input`)
 
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22a%3A+text+input%22%2Cteam-text-input%2Cfyi-text-input+sort%3Aupdated-asc+label%3AP0+)
 - [PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+sort%3Acreated-desc+draft%3Afalse+label%3A%22a%3A+text+input%22%2Cteam-text-input%2Cfyi-text-input+)
-- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22a%3A+text+input%22%2Cteam-text-input%2Cfyi-text-input+no%3Aassignee+-label%3A%22triaged-design%22+-label%3A%22triaged-framework%22+-label%3A%22triaged-linux%22+-label%3A%22triaged-macos%22+-label%3A%22triaged-windows%22+-label%3A%22triaged-android%22+-label%3A%22triaged-ios%22+-label%3A%22triaged-web%22+-label%3A%22triaged-ecosystem%22+-label%3A%22triaged-engine%22+-label%3A%22triaged-tool%22+-label%3A%22triaged-text-input%22+-project%3Aflutter%2F111+)
+- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aopen%20is%3Aissue%20label%3Ateam-text-input%2Cfyi-text-input%20no%3Aassignee%20-label%3Atriaged-text-input%20-label%3A%22waiting%20for%20customer%20response%22)
 
 ### Flutter Tool team (`team-tool`)
 

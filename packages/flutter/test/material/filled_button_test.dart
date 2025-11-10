@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -635,14 +636,14 @@ void main() {
     const Color focusedColor = Color(0x00000003);
     const Color defaultColor = Color(0x00000004);
 
-    Color getTextColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    Color getTextColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedColor;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverColor;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedColor;
       }
       return defaultColor;
@@ -655,7 +656,7 @@ void main() {
             child: FilledButtonTheme(
               data: FilledButtonThemeData(
                 style: ButtonStyle(
-                  foregroundColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
+                  foregroundColor: WidgetStateProperty.resolveWith<Color>(getTextColor),
                 ),
               ),
               child: Builder(
@@ -710,14 +711,14 @@ void main() {
     const Color focusedColor = Color(0x00000003);
     const Color defaultColor = Color(0x00000004);
 
-    Color getTextColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    Color getTextColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedColor;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverColor;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedColor;
       }
       return defaultColor;
@@ -730,8 +731,8 @@ void main() {
             child: FilledButtonTheme(
               data: FilledButtonThemeData(
                 style: ButtonStyle(
-                  foregroundColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
-                  iconColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
+                  foregroundColor: WidgetStateProperty.resolveWith<Color>(getTextColor),
+                  iconColor: WidgetStateProperty.resolveWith<Color>(getTextColor),
                 ),
               ),
               child: Builder(
@@ -1045,8 +1046,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: FilledButton(
           style: ButtonStyle(
-            overlayColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-              return states.contains(MaterialState.hovered) ? hoverColor : null;
+            overlayColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+              return states.contains(WidgetState.hovered) ? hoverColor : null;
             }),
           ),
           onPressed: () {},
@@ -1075,8 +1076,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: FilledButton(
           style: ButtonStyle(
-            overlayColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-              return states.contains(MaterialState.focused) ? focusColor : null;
+            overlayColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+              return states.contains(WidgetState.focused) ? focusColor : null;
             }),
           ),
           focusNode: focusNode,
@@ -1100,8 +1101,8 @@ void main() {
   testWidgets('Does FilledButton work with autofocus', (WidgetTester tester) async {
     const Color focusColor = Color(0xff001122);
 
-    Color? getOverlayColor(Set<MaterialState> states) {
-      return states.contains(MaterialState.focused) ? focusColor : null;
+    Color? getOverlayColor(Set<WidgetState> states) {
+      return states.contains(WidgetState.focused) ? focusColor : null;
     }
 
     final FocusNode focusNode = FocusNode(debugLabel: 'FilledButton Node');
@@ -1111,7 +1112,7 @@ void main() {
         child: FilledButton(
           autofocus: true,
           style: ButtonStyle(
-            overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
+            overlayColor: WidgetStateProperty.resolveWith<Color?>(getOverlayColor),
           ),
           focusNode: focusNode,
           onPressed: () {},
@@ -1995,7 +1996,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test default cursor when disabled
@@ -2137,7 +2138,7 @@ void main() {
       ),
     );
 
-    expect(controller.value, <MaterialState>{});
+    expect(controller.value, <WidgetState>{});
     expect(count, 0);
 
     final Offset center = tester.getCenter(find.byType(Text));
@@ -2146,42 +2147,42 @@ void main() {
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(controller.value, <WidgetState>{WidgetState.hovered});
     expect(count, 1);
 
     await gesture.moveTo(Offset.zero);
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{});
+    expect(controller.value, <WidgetState>{});
     expect(count, 2);
 
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(controller.value, <WidgetState>{WidgetState.hovered});
     expect(count, 3);
 
     await gesture.down(center);
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
+    expect(controller.value, <WidgetState>{WidgetState.hovered, WidgetState.pressed});
     expect(count, 4);
 
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(controller.value, <WidgetState>{WidgetState.hovered});
     expect(count, 5);
 
     await gesture.moveTo(Offset.zero);
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{});
+    expect(controller.value, <WidgetState>{});
     expect(count, 6);
 
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
+    expect(controller.value, <WidgetState>{WidgetState.hovered, WidgetState.pressed});
     expect(count, 8); // adds hovered and pressed - two changes
 
     // If the button is rebuilt disabled, then the pressed state is
@@ -2205,11 +2206,11 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.disabled});
+    expect(controller.value, <WidgetState>{WidgetState.hovered, WidgetState.disabled});
     expect(count, 10); // removes pressed and adds disabled - two changes
     await gesture.moveTo(Offset.zero);
     await tester.pumpAndSettle();
-    expect(controller.value, <MaterialState>{MaterialState.disabled});
+    expect(controller.value, <WidgetState>{WidgetState.disabled});
     expect(count, 11);
     await gesture.removePointer();
   }
@@ -2242,7 +2243,7 @@ void main() {
         ),
       ),
     );
-    expect(controller.value, <MaterialState>{MaterialState.disabled});
+    expect(controller.value, <WidgetState>{WidgetState.disabled});
     expect(count, 1);
   });
 
@@ -2255,13 +2256,13 @@ void main() {
         textDirection: TextDirection.ltr,
         child: FilledButton(
           style: FilledButton.styleFrom(
-            backgroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+            backgroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
               return DecoratedBox(
                 decoration: const BoxDecoration(color: backgroundColor),
                 child: child,
               );
             },
-            foregroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+            foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
               return DecoratedBox(
                 decoration: const BoxDecoration(color: foregroundColor),
                 child: child,
@@ -2305,10 +2306,10 @@ void main() {
           textDirection: TextDirection.ltr,
           child: FilledButton(
             style: FilledButton.styleFrom(
-              backgroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+              backgroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
                 return const DecoratedBox(decoration: BoxDecoration(color: backgroundColor));
               },
-              foregroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+              foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
                 return const DecoratedBox(decoration: BoxDecoration(color: foregroundColor));
               },
             ),
@@ -2336,7 +2337,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: FilledButton(
           style: FilledButton.styleFrom(
-            foregroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+            foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
               return const DecoratedBox(decoration: BoxDecoration(color: foregroundColor));
             },
           ),
@@ -2358,8 +2359,8 @@ void main() {
   testWidgets('FilledButton foreground and background builders are applied to the correct states', (
     WidgetTester tester,
   ) async {
-    Set<MaterialState> foregroundStates = <MaterialState>{};
-    Set<MaterialState> backgroundStates = <MaterialState>{};
+    Set<WidgetState> foregroundStates = <WidgetState>{};
+    Set<WidgetState> backgroundStates = <WidgetState>{};
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
@@ -2368,16 +2369,14 @@ void main() {
           body: Center(
             child: FilledButton(
               style: ButtonStyle(
-                backgroundBuilder:
-                    (BuildContext context, Set<MaterialState> states, Widget? child) {
-                      backgroundStates = states;
-                      return child!;
-                    },
-                foregroundBuilder:
-                    (BuildContext context, Set<MaterialState> states, Widget? child) {
-                      foregroundStates = states;
-                      return child!;
-                    },
+                backgroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
+                  backgroundStates = states;
+                  return child!;
+                },
+                foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
+                  foregroundStates = states;
+                  return child!;
+                },
               ),
               onPressed: () {},
               focusNode: focusNode,
@@ -2392,18 +2391,18 @@ void main() {
     expect(backgroundStates.isEmpty, isTrue);
     expect(foregroundStates.isEmpty, isTrue);
 
-    const Set<MaterialState> focusedStates = <MaterialState>{MaterialState.focused};
-    const Set<MaterialState> focusedHoveredStates = <MaterialState>{
-      MaterialState.focused,
-      MaterialState.hovered,
+    const Set<WidgetState> focusedStates = <WidgetState>{WidgetState.focused};
+    const Set<WidgetState> focusedHoveredStates = <WidgetState>{
+      WidgetState.focused,
+      WidgetState.hovered,
     };
-    const Set<MaterialState> focusedHoveredPressedStates = <MaterialState>{
-      MaterialState.focused,
-      MaterialState.hovered,
-      MaterialState.pressed,
+    const Set<WidgetState> focusedHoveredPressedStates = <WidgetState>{
+      WidgetState.focused,
+      WidgetState.hovered,
+      WidgetState.pressed,
     };
 
-    bool sameStates(Set<MaterialState> expectedValue, Set<MaterialState> actualValue) {
+    bool sameStates(Set<WidgetState> expectedValue, Set<WidgetState> actualValue) {
       return expectedValue.difference(actualValue).isEmpty &&
           actualValue.difference(expectedValue).isEmpty;
     }
@@ -2861,5 +2860,182 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(textColor(tester, buttonText), hoveredColor);
     expect(iconStyle(tester, buttonIcon).color, hoveredColor);
+  });
+
+  testWidgets('FilledButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: FilledButton(onPressed: () {}, child: const Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(FilledButton)), Size.zero);
+  });
+
+  testWidgets('When a FilledButton gains an icon, preserves the same SemanticsNode id', (
+    WidgetTester tester,
+  ) async {
+    bool toggled = false;
+    const Key key = Key('button');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Row(
+                children: <Widget>[
+                  FilledButton.icon(
+                    key: key,
+                    onPressed: () {
+                      setState(() {
+                        toggled = true;
+                      });
+                    },
+                    icon: toggled ? const Icon(Icons.favorite) : null,
+                    label: const Text('Button'),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Initially, no icons are present.
+    expect(find.byIcon(Icons.favorite), findsNothing);
+
+    // Find the original FilledButton with no icon and get its SemanticsNode.
+    final Finder filledButton = find.bySemanticsLabel('Button');
+    expect(filledButton, findsOneWidget);
+
+    final SemanticsNode origSemanticsNode = tester.getSemantics(filledButton);
+
+    // Tap the button. It should receive an icon now.
+    await tester.tap(filledButton);
+    await tester.pump();
+
+    // Now one icon should be present.
+    expect(find.byIcon(Icons.favorite), findsOneWidget);
+
+    // Check if the semantics has change.
+    final SemanticsNode semanticsNodeWithIcon = tester.getSemantics(filledButton);
+
+    expect(semanticsNodeWithIcon, origSemanticsNode);
+  });
+
+  testWidgets('When a filled tonal button gains an icon, preserves the same SemanticsNode id', (
+    WidgetTester tester,
+  ) async {
+    bool toggled = false;
+    const Key key = Key('button');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Row(
+                children: <Widget>[
+                  FilledButton.tonalIcon(
+                    key: key,
+                    onPressed: () {
+                      setState(() {
+                        toggled = true;
+                      });
+                    },
+                    icon: toggled ? const Icon(Icons.favorite) : null,
+                    label: const Text('Button'),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Initially, no icons are present.
+    expect(find.byIcon(Icons.favorite), findsNothing);
+
+    // Find the original button with no icon and get its SemanticsNode.
+    final Finder filledTonalButton = find.bySemanticsLabel('Button');
+    expect(filledTonalButton, findsOneWidget);
+
+    final SemanticsNode origSemanticsNode = tester.getSemantics(filledTonalButton);
+
+    // Tap the button. It should receive an icon now.
+    await tester.tap(filledTonalButton);
+    await tester.pump();
+
+    // Now one icon should be present.
+    expect(find.byIcon(Icons.favorite), findsOneWidget);
+
+    // Check if the semantics has change.
+    final SemanticsNode semanticsNodeWithIcon = tester.getSemantics(filledTonalButton);
+
+    expect(semanticsNodeWithIcon, origSemanticsNode);
+  });
+
+  testWidgets('FilledButton.icon does not lose focus when icon is nullified', (
+    WidgetTester tester,
+  ) async {
+    Widget buildButton({required Widget? icon}) {
+      return MaterialApp(
+        home: Center(
+          child: FilledButton.icon(onPressed: () {}, icon: icon, label: const Text('button')),
+        ),
+      );
+    }
+
+    // Build once with an icon.
+    await tester.pumpWidget(buildButton(icon: const Icon(Icons.abc)));
+
+    FocusNode getButtonFocusNode() {
+      return Focus.of(tester.element(find.text('button')));
+    }
+
+    getButtonFocusNode().requestFocus();
+    await tester.pumpAndSettle();
+    expect(getButtonFocusNode().hasFocus, true);
+
+    // Rebuild without icon.
+    await tester.pumpWidget(buildButton(icon: null));
+
+    // The button should still be focused.
+    expect(getButtonFocusNode().hasFocus, true);
+  });
+
+  testWidgets('FilledButton.tonalIcon does not lose focus when icon is nullified', (
+    WidgetTester tester,
+  ) async {
+    Widget buildButton({required Widget? icon}) {
+      return MaterialApp(
+        home: Center(
+          child: FilledButton.tonalIcon(onPressed: () {}, icon: icon, label: const Text('button')),
+        ),
+      );
+    }
+
+    // Build once with an icon.
+    await tester.pumpWidget(buildButton(icon: const Icon(Icons.abc)));
+
+    FocusNode getButtonFocusNode() {
+      return Focus.of(tester.element(find.text('button')));
+    }
+
+    getButtonFocusNode().requestFocus();
+    await tester.pumpAndSettle();
+    expect(getButtonFocusNode().hasFocus, true);
+
+    // Rebuild without icon.
+    await tester.pumpWidget(buildButton(icon: null));
+
+    // The button should still be focused.
+    expect(getButtonFocusNode().hasFocus, true);
   });
 }
