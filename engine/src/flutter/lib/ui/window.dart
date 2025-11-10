@@ -1039,7 +1039,19 @@ enum Brightness {
   /// contrast.
   ///
   /// For example, the color might be bright white, requiring black text.
-  light,
+  light;
+
+  /// Returns `true` if the brightness is light.
+  ///
+  /// This can be used to easily check if the current color palette
+  /// represents a light theme.
+  bool get isLight => this == Brightness.light;
+
+  /// Returns `true` if the brightness is dark.
+  ///
+  /// This can be used to easily check if the current color palette
+  /// represents a dark theme.
+  bool get isDark => this == Brightness.dark;
 }
 
 /// Deprecated. Will be removed in a future version of Flutter.
