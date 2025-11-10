@@ -120,6 +120,7 @@ class AndroidShellHolder {
   uint64_t next_pointer_flow_id_ = 0;
   std::unique_ptr<APKAssetProvider> apk_asset_provider_;
   const AndroidRenderingAPI android_rendering_api_;
+  shell::Shell* shell_ = nullptr;
 
   //----------------------------------------------------------------------------
   /// @brief      Constructor with its components injected.
@@ -135,6 +136,7 @@ class AndroidShellHolder {
   AndroidShellHolder(const flutter::Settings& settings,
                      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
                      const std::shared_ptr<ThreadHost>& thread_host,
+                     std::unique_ptr<Shell> shell,
                      std::unique_ptr<APKAssetProvider> apk_asset_provider,
                      const fml::WeakPtr<PlatformViewAndroid>& platform_view,
                      AndroidRenderingAPI rendering_api);

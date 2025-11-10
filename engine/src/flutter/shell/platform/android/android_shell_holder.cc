@@ -136,13 +136,10 @@ AndroidShellHolder::AndroidShellHolder(
                                     io_runner         // io
   );
 
-  embedder_bridge_ = std::make_unique<EmbedderBridge>(
-      task_runners, jni_facade_, settings, android_rendering_api_);
+  embedder_bridge_ =
+      std::make_unique<EmbedderBridge>(task_runners, jni_facade_, settings);
 
   is_valid_ = embedder_bridge_ != nullptr && embedder_bridge_->IsValid();
-  if (is_valid_) {
-    platform_view_ = embedder_bridge_->GetPlatformView();
-  }
   // embedder_bridge_->GetShell();
 
   // fml::WeakPtr<PlatformViewAndroid> weak_platform_view;
@@ -160,10 +157,6 @@ AndroidShellHolder::AndroidShellHolder(
 
                   weak_platform_view = platform_view_android->GetWeakPtr();
                   return platform_view_android;
-  };
-
-  Shell::CreateCallback<Rasterizer> on_create_rasterizer = [](Shell& shell) {
-          return std::make_unique<Rasterizer>(shell);
   };*/
 }
 
@@ -171,6 +164,7 @@ AndroidShellHolder::AndroidShellHolder(
     const Settings& settings,
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
     const std::shared_ptr<ThreadHost>& thread_host,
+    std::unique_ptr<Shell> shell,
     std::unique_ptr<APKAssetProvider> apk_asset_provider,
     const fml::WeakPtr<PlatformViewAndroid>& platform_view,
     AndroidRenderingAPI rendering_api)
@@ -234,6 +228,7 @@ Rasterizer::Screenshot AndroidShellHolder::Screenshot(
 }
 
 fml::WeakPtr<PlatformViewAndroid> AndroidShellHolder::GetPlatformView() {
+  FML_LOG(ERROR) << "WTF2 platform view";
   FML_DCHECK(platform_view_);
   return platform_view_;
 }
