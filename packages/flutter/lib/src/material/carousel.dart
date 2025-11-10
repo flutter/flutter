@@ -1858,7 +1858,6 @@ class CarouselController extends ScrollController {
   ///   largest visible extent in the viewport (the most prominently shown).
   ///
   /// This value is maintained internally and mirrors the current layout state.
-  /// Prefer [onIndexChanged] for callbacks when the primary item changes.
   int get currentIndex => _currentIndex;
   int _currentIndex;
 
