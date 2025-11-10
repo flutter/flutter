@@ -725,9 +725,12 @@ abstract class IosAssetBundle extends Target {
     );
 
     // Copy the plist from either the project or module.
-    flutterProject.ios.appFrameworkInfoPlist.copySync(
-      environment.outputDir.childDirectory('App.framework').childFile('Info.plist').path,
-    );
+    final File appFrameworkInfoPlist = environment.outputDir
+        .childDirectory('App.framework')
+        .childFile('Info.plist');
+    flutterProject.ios.appFrameworkInfoPlist.copySync(appFrameworkInfoPlist.path);
+
+    await _updateMinimumOSVersion(appFrameworkInfoPlist, environment);
 
     await _signFramework(environment, frameworkBinary, buildMode);
   }
@@ -825,6 +828,26 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
         );
       }
     }
+  }
+}
+
+Future<void> _updateMinimumOSVersion(File infoPlist, Environment environment) async {
+  final minimumOSVersion = FlutterDarwinPlatform.ios.deploymentTarget().toString();
+  final plutilArgs = <String>[
+    'plutil',
+    '-replace',
+    'MinimumOSVersion',
+    '-string',
+    minimumOSVersion,
+    infoPlist.path,
+  ];
+  final ProcessResult result = await environment.processManager.run(plutilArgs);
+  if (result.exitCode != 0) {
+    environment.logger.printError(
+      'Failed to update MinimumOSVersion in ${infoPlist.path}:\n'
+      '${result.stdout}\n---\n${result.stderr}',
+    );
+    throwToolExit('Failed to update MinimumOSVersion in ${infoPlist.path}');
   }
 }
 

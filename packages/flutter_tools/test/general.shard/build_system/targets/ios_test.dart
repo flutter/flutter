@@ -233,7 +233,18 @@ void main() {
 
       final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
       final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
+      final File infoPlist = frameworkDirectory.childFile('Info.plist');
       processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'plutil',
+            '-replace',
+            'MinimumOSVersion',
+            '-string',
+            '13.0',
+            infoPlist.path,
+          ],
+        ),
         FakeCommand(
           command: <String>[
             'xattr',
@@ -323,7 +334,18 @@ void main() {
 
       final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
       final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
+      final File infoPlist = frameworkDirectory.childFile('Info.plist');
       processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'plutil',
+            '-replace',
+            'MinimumOSVersion',
+            '-string',
+            '13.0',
+            infoPlist.path,
+          ],
+        ),
         FakeCommand(
           command: <String>[
             'xattr',
@@ -410,6 +432,7 @@ void main() {
 
       final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
       final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
+      final File infoPlist = frameworkDirectory.childFile('Info.plist');
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -422,6 +445,16 @@ void main() {
             '--input-type=frag',
             '--include=/',
             '--include=/./shader_lib',
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'plutil',
+            '-replace',
+            'MinimumOSVersion',
+            '-string',
+            '13.0',
+            infoPlist.path,
           ],
         ),
         FakeCommand(
@@ -497,7 +530,18 @@ void main() {
 
       final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
       final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
+      final File infoPlist = frameworkDirectory.childFile('Info.plist');
       processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'plutil',
+            '-replace',
+            'MinimumOSVersion',
+            '-string',
+            '13.0',
+            infoPlist.path,
+          ],
+        ),
         FakeCommand(
           command: <String>[
             'xattr',
@@ -565,7 +609,18 @@ void main() {
 
       final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
       final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
+      final File infoPlist = frameworkDirectory.childFile('Info.plist');
       processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'plutil',
+            '-replace',
+            'MinimumOSVersion',
+            '-string',
+            '13.0',
+            infoPlist.path,
+          ],
+        ),
         FakeCommand(
           command: <String>[
             'xattr',
