@@ -47,4 +47,26 @@ void main() {
 
     expect(find.text('Simple'), findsOneWidget);
   });
+
+  testWidgets('GridTile does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: GridTile(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(GridTile)), Size.zero);
+  });
+
+  testWidgets('GridTileBar does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: GridTileBar(title: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(GridTileBar)), Size.zero);
+  });
 }
