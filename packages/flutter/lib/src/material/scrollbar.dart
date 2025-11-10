@@ -332,11 +332,6 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     final ThemeData theme = Theme.of(context);
     _colorScheme = theme.colorScheme;
     _scrollbarTheme = ScrollbarTheme.of(context);
-    print(widget.thumbVisibility);
-    print(_scrollbarTheme.thumbVisibility?.resolve(_states));
-
-    // super.showScrollbar =
-    //     widget.thumbVisibility ?? _scrollbarTheme.thumbVisibility?.resolve(_states) ?? false;
     switch (theme.platform) {
       case TargetPlatform.android:
         _useAndroidScrollbar = true;
@@ -347,19 +342,12 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       case TargetPlatform.windows:
         _useAndroidScrollbar = false;
     }
-    print(
-      '-----didChangeDependencies scrollbarPainter.color initial: ${_thumbColor.resolve(_states)}',
-    );
     scrollbarPainter.color = Color(0x00000000);
     super.didChangeDependencies();
   }
 
   @override
   void updateScrollbarPainter() {
-    print(
-      '-------UPDATESCROLLBARPAINTER trackpad or mouse is scrolling: $_trackpadOrMouseScrollDetected',
-    );
-
     scrollbarPainter
       // ..color = _thumbColor.resolve(_states)
       ..trackColor = _trackColor.resolve(_states)
@@ -376,16 +364,10 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       ..minLength = _scrollbarTheme.minThumbLength ?? _kScrollbarMinLength
       ..padding = MediaQuery.paddingOf(context)
       ..scrollbarOrientation = widget.scrollbarOrientation;
-    // print('------AFTER updateScrollbarPainter:');
-    print('color: ${scrollbarPainter.color}');
-    print('ignorePointer: ${scrollbarPainter.ignorePointer}');
-    // print('----------------------');
   }
 
   @override
   void handleThumbPressStart(Offset localPosition) {
-    print('--------[Material] handleThumbPressStart called!');
-
     super.handleThumbPressStart(localPosition);
     setState(() {
       _dragIsActive = true;
@@ -394,8 +376,6 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
 
   @override
   void handleThumbPressEnd(Offset localPosition, Velocity velocity) {
-    print('--------[Material] handleThumbPressEnd called!');
-
     super.handleThumbPressEnd(localPosition, velocity);
     setState(() {
       _dragIsActive = false;
@@ -423,8 +403,6 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
 
   @override
   void handleHoverExit(PointerExitEvent event) {
-    print('--------[Material] PointerExitEvent received!');
-
     super.handleHoverExit(event);
     setState(() {
       _hoverIsActive = false;
@@ -436,8 +414,6 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     if (_assistiveScrollbarIsVisible == shouldRevealAssistiveScrollbar) {
       return;
     }
-
-    print('----------TOGGLING VISIBILITY!!!!!!: $shouldRevealAssistiveScrollbar');
     setState(() {
       scrollbarPainter.color = shouldRevealAssistiveScrollbar
           ? _thumbColor.resolve(_states)
@@ -445,7 +421,6 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       // super.showScrollbar = shouldRevealAssistiveScrollbar && (_scrollbarTheme.thumbVisibility?.resolve(_states) ?? false);
       scrollbarPainter.ignorePointer = !shouldRevealAssistiveScrollbar && enableGestures;
     });
-    print('new color: ${scrollbarPainter.color}');
     _assistiveScrollbarIsVisible = shouldRevealAssistiveScrollbar;
   }
 

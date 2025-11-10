@@ -140,7 +140,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Color get color => _color;
   Color _color;
   set color(Color value) {
-    // print('new color: $value');
     if (color == value) {
       return;
     }
@@ -1609,7 +1608,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   void _maybeStartFadeoutTimer() {
-    print('_maybeStartFadeoutTimer called, showScrollbar: $showScrollbar');
     if (!showScrollbar) {
       _fadeoutTimer?.cancel();
       _fadeoutTimer = Timer(widget.timeToFade, () {
@@ -1974,7 +1972,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         scrollbarPainter.update(metrics, metrics.axisDirection);
       }
     } else if (notification is ScrollEndNotification) {
-      print('------scrollEndNotification!!!!!');
       if (_thumbDrag == null) {
         _maybeStartFadeoutTimer();
       }
