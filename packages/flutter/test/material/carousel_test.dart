@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -1975,7 +1976,9 @@ void main() {
         expect(itemRect.right, lessThanOrEqualTo(carouselRight));
       }
     });
+  });
 
+  group('CarouselView onIndexChanged callback', () {
     testWidgets('CarouselView shows correct item after animation with symmetric flexWeights', (
       WidgetTester tester,
     ) async {
@@ -1991,7 +1994,6 @@ void main() {
               controller: controller,
               itemSnapping: true,
               onIndexChanged: (int index) {
-                // This callback is to ensure the controller's currentIndex is updated.
                 currentIndex = index;
               },
               children: List<Widget>.generate(6, (int i) => Text('Item $i')),
@@ -2012,16 +2014,28 @@ void main() {
       expect(currentIndex, equals(4));
       expect(find.text('Item 4'), findsOneWidget);
 
+      final double visible4 = visiblePortionOf(tester, 'Item 4');
+      final double visible3 = visiblePortionOf(tester, 'Item 3');
+      final double visible5 = visiblePortionOf(tester, 'Item 5');
+      expect(visible4, greaterThan(visible3));
+      expect(visible4, greaterThan(visible5));
+
       controller.animateToItem(
         2,
         duration: const Duration(milliseconds: 200),
         curve: Curves.linear,
       );
-
       await tester.pumpAndSettle();
+
       expect(controller.currentIndex, equals(2));
       expect(currentIndex, equals(2));
       expect(find.text('Item 2'), findsOneWidget);
+
+      final double visible2 = visiblePortionOf(tester, 'Item 2');
+      final double visible1 = visiblePortionOf(tester, 'Item 1');
+      final double visible3After = visiblePortionOf(tester, 'Item 3');
+      expect(visible2, greaterThan(visible1));
+      expect(visible2, greaterThan(visible3After));
     });
 
     testWidgets('CarouselView shows correct item after animation with asymmetric flexWeights', (
@@ -2060,16 +2074,28 @@ void main() {
       expect(currentIndex, equals(4));
       expect(find.text('Item 4'), findsOneWidget);
 
+      final double visible4 = visiblePortionOf(tester, 'Item 4');
+      final double visible3 = visiblePortionOf(tester, 'Item 3');
+      final double visible5 = visiblePortionOf(tester, 'Item 5');
+      expect(visible4, greaterThan(visible3));
+      expect(visible4, greaterThan(visible5));
+
       controller.animateToItem(
         2,
         duration: const Duration(milliseconds: 200),
         curve: Curves.linear,
       );
-
       await tester.pumpAndSettle();
+
       expect(controller.currentIndex, equals(2));
       expect(currentIndex, equals(2));
       expect(find.text('Item 2'), findsOneWidget);
+
+      final double visible2 = visiblePortionOf(tester, 'Item 2');
+      final double visible1 = visiblePortionOf(tester, 'Item 1');
+      final double visible3After = visiblePortionOf(tester, 'Item 3');
+      expect(visible2, greaterThan(visible1));
+      expect(visible2, greaterThan(visible3After));
     });
 
     testWidgets('CarouselView shows the correct item after dragging', (WidgetTester tester) async {
@@ -2095,20 +2121,41 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Drag to the left to show the next item.
+      // Drag to the left to move to the next item.
       await tester.drag(find.byType(CarouselView), const Offset(-300, 0));
       await tester.pumpAndSettle();
 
+      // Verify the new index based on controller and callback.
       expect(controller.currentIndex, equals(2));
       expect(currentIndex, equals(2));
-      expect(find.text('Item ${controller.currentIndex}'), findsOneWidget);
 
-      // Drag to the right to show the previous item.
+      // Validate that the dragged item is now the most visible in the viewport.
+      final List<double> visibleAreasAfterLeftDrag = List<double>.generate(
+        5,
+        (int i) => visiblePortionOf(tester, 'Item $i'),
+      );
+      final int mostVisibleIndexAfterLeftDrag = visibleAreasAfterLeftDrag.indexWhere(
+        (double area) => area == visibleAreasAfterLeftDrag.reduce(math.max),
+      );
+      expect(mostVisibleIndexAfterLeftDrag, equals(controller.currentIndex));
+
+      // Drag to the right to return to the previous item.
       await tester.drag(find.byType(CarouselView), const Offset(150, 0));
       await tester.pumpAndSettle();
+
+      // Verify the updated index.
       expect(controller.currentIndex, equals(1));
       expect(currentIndex, equals(1));
-      expect(find.text('Item ${controller.currentIndex}'), findsOneWidget);
+
+      // Validate again which item is most visible after dragging back.
+      final List<double> visibleAreasAfterRightDrag = List<double>.generate(
+        5,
+        (int i) => visiblePortionOf(tester, 'Item $i'),
+      );
+      final int mostVisibleIndexAfterRightDrag = visibleAreasAfterRightDrag.indexWhere(
+        (double area) => area == visibleAreasAfterRightDrag.reduce(math.max),
+      );
+      expect(mostVisibleIndexAfterRightDrag, equals(controller.currentIndex));
     });
 
     testWidgets('CarouselView starts with the correct initial item', (WidgetTester tester) async {
@@ -2375,4 +2422,30 @@ Future<void> runCarouselTest({
   // Verify that the first item is visible.
   expect(find.text('Item 0'), findsOneWidget);
   expect(realOffset(), controller.offset);
+}
+
+double visiblePortionOf(WidgetTester tester, String label) {
+  // Locate the CarouselView widget that defines the visible viewport.
+  final Finder carouselFinder = find.byType(CarouselView);
+
+  // If the item with the given label is not currently in the render tree,
+  // return 0.0 because it is outside the visible area.
+  if (find.text(label).evaluate().isEmpty) {
+    return 0.0;
+  }
+
+  // Get the RenderBox of the CarouselView to determine its visible boundaries.
+  final RenderBox carouselBox = tester.renderObject(carouselFinder);
+  final Rect viewportRect = carouselBox.paintBounds;
+
+  // Get the bounding rectangle of the target item.
+  final Rect itemRect = tester.getRect(find.text(label));
+
+  // Calculate the intersection between the item’s rectangle and the viewport.
+  // This represents the visible portion of the item currently on screen.
+  final Rect intersection = itemRect.intersect(viewportRect);
+
+  // Return the visible area (width * height) of the intersected region.
+  // This helps determine which item is most visible in the Carousel.
+  return intersection.width * intersection.height;
 }
