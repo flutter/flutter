@@ -750,7 +750,7 @@ void Canvas::DrawArc(const Arc& arc, const Paint& paint) {
     //
     // TODO(flar): It also only supports Butt and Square caps for now.
     // See https://github.com/flutter/flutter/issues/169400
-    if (oval_bounds.IsSquare() && paint.stroke.cap != Cap::kRound) {
+    if (oval_bounds.IsSquare()) {
       ArcGeometry geom(arc, paint.stroke);
       AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
       return;

@@ -208,6 +208,7 @@ class Tessellator {
     const bool use_center_;
     const Scalar half_width_;
     const Cap cap_;
+    const std::unique_ptr<Trigs> round_cap_trigs_;
     const bool supports_triangle_fans_;
 
     ArcVertexGenerator(const Arc::Iteration& iteration,
@@ -220,7 +221,8 @@ class Tessellator {
                        Trigs&& trigs,
                        const Rect& oval_bounds,
                        Scalar half_width,
-                       Cap cap);
+                       Cap cap,
+                       std::unique_ptr<Trigs> round_cap_trigs);
   };
 
   Tessellator();
@@ -416,6 +418,7 @@ class Tessellator {
                                  const Rect& oval_bounds,
                                  Scalar half_width,
                                  Cap cap,
+                                 const std::unique_ptr<Trigs>& round_cap_trigs,
                                  const TessellatedVertexProc& proc);
 
   static void GenerateRoundCapLine(const Trigs& trigs,
@@ -430,6 +433,16 @@ class Tessellator {
       const Trigs& trigs,
       const EllipticalVertexGenerator::Data& data,
       const TessellatedVertexProc& proc);
+
+  // Generates vertices for the start or end round cap of a stroke.
+  //
+  // The perpendicular points clockwise to the direction the path is traveling
+  // and is the length of half of the stroke width.
+  static void GenerateRoundCap(bool is_start_cap,
+                               const Point& p,
+                               Vector2 perpendicular,
+                               const Trigs& trigs,
+                               const TessellatedVertexProc& proc);
 
   Tessellator(const Tessellator&) = delete;
 
