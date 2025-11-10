@@ -1062,10 +1062,20 @@ class WidgetPreviewControls extends StatelessWidget {
       child: Row(
         children: [
           LayoutTypeSelector(controller: controller),
-          if (controller.editorServiceAvailable.value) ...[
-            HorizontalSpacer(),
-            FilterBySelectedFileToggle(controller: controller),
-          ],
+          ValueListenableBuilder(
+            valueListenable: controller.editorServiceAvailable,
+            builder: (context, editorServiceAvailable, _) {
+              if (!editorServiceAvailable) {
+                return Container();
+              }
+              return Row(
+                children: [
+                  HorizontalSpacer(),
+                  FilterBySelectedFileToggle(controller: controller),
+                ],
+              );
+            },
+          ),
           HorizontalSpacer(),
           WidgetInspectorToggle(controller: controller),
           Spacer(),

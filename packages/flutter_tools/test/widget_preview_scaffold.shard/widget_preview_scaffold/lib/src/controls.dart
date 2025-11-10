@@ -170,26 +170,18 @@ class FilterBySelectedFileToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: controller.editorServiceAvailable,
-      builder: (context, editorServiceAvailable, child) {
-        if (!editorServiceAvailable) {
-          return Container();
-        }
-        return _ControlDecorator(
-          child: ValueListenableBuilder(
-            valueListenable: controller.filterBySelectedFileListenable,
-            builder: (context, value, child) {
-              return IconButton(
-                onPressed: controller.toggleFilterBySelectedFile,
-                icon: Icon(Icons.file_open),
-                color: value ? Colors.blue : Colors.black,
-                tooltip: kTooltip,
-              );
-            },
-          ),
-        );
-      },
+    return _ControlDecorator(
+      child: ValueListenableBuilder(
+        valueListenable: controller.filterBySelectedFileListenable,
+        builder: (context, value, child) {
+          return IconButton(
+            onPressed: controller.toggleFilterBySelectedFile,
+            icon: Icon(Icons.file_open),
+            color: value ? Colors.blue : Colors.black,
+            tooltip: kTooltip,
+          );
+        },
+      ),
     );
   }
 }
