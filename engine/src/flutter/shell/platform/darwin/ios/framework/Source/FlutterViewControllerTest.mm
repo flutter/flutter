@@ -1008,12 +1008,13 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                          bundle:nil];
   id mockVC = OCMPartialMock(realVC);
   mockEngine.viewController = mockVC;
-  [mockVC viewDidLayoutSubviews];
 
   OCMExpect([mockVC checkAndUpdateAutoResizeConstraints]);
   OCMExpect([mockVC updateAutoResizeConstraints]);
 
   [mockVC setAutoResizable:YES];
+
+  [mockVC viewDidLayoutSubviews];
 
   OCMVerifyAll(mockVC);
 }
@@ -1032,6 +1033,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMReject([mockVC updateAutoResizeConstraints]);
 
   [mockVC setAutoResizable:NO];
+
+  [mockVC viewDidLayoutSubviews];
 
   OCMVerifyAll(mockVC);
 }
