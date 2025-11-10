@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import 'dom.dart';
+import 'safe_browser_api.dart';
 
 /// A flag to check if the current browser is running on a laptop/desktop device.
 bool get isDesktop => ui_web.browser.isDesktop;
@@ -137,7 +138,7 @@ bool get _workAroundBug91333 => _isIOS;
 
 /// Whether the current browser supports the Chromium variant of CanvasKit.
 bool get browserSupportsCanvaskitChromium =>
-    domIntl.v8BreakIterator != null && domIntl.Segmenter != null;
+    domIntl.v8BreakIterator != null && domIntl.Segmenter != null && browserSupportsImageDecoder;
 
 /// Whether the current browser is Safari 17.4 or newer.
 ///

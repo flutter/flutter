@@ -189,7 +189,7 @@ Future<void> testMain() async {
 
     void runCodecTest(TestCodec testCodec) {
       const problematicChromeImages = <String, Set<int>>{
-        // Frame 2 cause Chrome to crash.
+        // Frame 2 causes Chrome to crash.
         // https://issues.chromium.org/456445108
         'crbug445556737.png': {2},
         // Frames 2 and 3 cause Chrome to crash.
@@ -257,9 +257,12 @@ Future<void> testMain() async {
       createTestCodecs().forEach(runCodecTest);
     });
 
-    if (browserSupportsImageDecoder) {
+    if (browserSupportsImageDecoder && !browserSupportsCanvaskitChromium) {
       // For the sake of completeness, test codec fallback logic on browsers that support
       // `ImageDecoder`.
+      //
+      // We skip this on Canvaskit Chromium because there there is no fallback; the
+      // `ImageDecoder`-based codec is always used.
       group('Codecs (browserSupportsImageDecoder=false)', () {
         setUpAll(() {
           browserSupportsImageDecoder = false;
