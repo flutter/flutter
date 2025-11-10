@@ -174,9 +174,7 @@ TEST(DlDeferredImageGPUImpeller, TrashesDisplayList) {
 
   // Pause raster thread.
   fml::AutoResetWaitableEvent latch;
-  task_runner->PostTask([&latch]() {
-    latch.Wait();
-  });
+  task_runner->PostTask([&latch]() { latch.Wait(); });
 
   auto image = DlDeferredImageGPUImpeller::Make(
       builder.Build(), size, snapshot_delegate_weak_ptr, task_runner);
@@ -187,13 +185,11 @@ TEST(DlDeferredImageGPUImpeller, TrashesDisplayList) {
   // Unpause raster thread.
   latch.Signal();
 
-  // Flush raster events.
-  PostTaskSync(task_runner, []() {});
-
-  EXPECT_TRUE(image->impeller_texture());
-  // EXPECT_FALSE(image->wrapper_->display_list_);
-
-  PostTaskSync(task_runner, [&]() { snapshot_delegate.reset(); });
+  PostTaskSync(task_runner, [&]() {
+    EXPECT_TRUE(image->impeller_texture());
+    EXPECT_FALSE(image->wrapper_->display_list_);
+    snapshot_delegate.reset();
+  });
 }
 
 }  // namespace testing

@@ -180,6 +180,7 @@ void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
           return;
         }
         wrapper->texture_ = snapshot->impeller_texture();
+        wrapper->display_list_ = nullptr;
       }));
 }
 
