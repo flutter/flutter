@@ -111,7 +111,7 @@ abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
   FlutterProject validateFlutterProjectForPreview(Directory directory) {
     logger.printTrace('Verifying that ${directory.path} is a Flutter project.');
     final FlutterProject flutterProject = projectFactory.fromDirectory(directory);
-    if (!flutterProject.dartTool.existsSync()) {
+    if (!flutterProject.pubspecFile.existsSync()) {
       throwToolExit('${flutterProject.directory.path} is not a valid Flutter project.');
     }
     return flutterProject;
