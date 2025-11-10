@@ -382,4 +382,17 @@ void main() {
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);
     expect(iconTheme.data.color, equals(Colors.cyan));
   });
+
+  testWidgets('Expand icon does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(child: ExpandIcon(onPressed: (bool value) {})),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ExpandIcon)), Size.zero);
+  });
 }

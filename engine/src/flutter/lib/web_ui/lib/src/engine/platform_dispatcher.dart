@@ -681,6 +681,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       'HapticFeedbackType.mediumImpact' => vibrateMediumImpact,
       'HapticFeedbackType.heavyImpact' => vibrateHeavyImpact,
       'HapticFeedbackType.selectionClick' => vibrateSelectionClick,
+      'HapticFeedbackType.successNotification' => vibrateMediumImpact,
+      'HapticFeedbackType.warningNotification' => vibrateMediumImpact,
+      'HapticFeedbackType.errorNotification' => vibrateHeavyImpact,
       _ => vibrateLongPress,
     };
   }
@@ -797,6 +800,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ''')
   void updateSemantics(ui.SemanticsUpdate update) {
     implicitView?.semantics.updateSemantics(update);
+  }
+
+  @override
+  void setApplicationLocale(ui.Locale locale) {
+    for (final EngineFlutterView view in views) {
+      view.setLocale(locale);
+    }
   }
 
   /// This is equivalent to `locales.first`, except that it will provide an
