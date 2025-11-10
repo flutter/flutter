@@ -23,8 +23,10 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
 import 'binding.dart';
+import 'box.dart';
 import 'debug.dart';
 import 'layer.dart';
+import 'view.dart';
 
 export 'package:flutter/foundation.dart'
     show
@@ -1398,6 +1400,19 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           'Attempted to enable semantics without configuring an onSemanticsUpdate callback.',
         );
         _semanticsOwner = SemanticsOwner(onSemanticsUpdate: onSemanticsUpdate!);
+        final RenderObject? root = rootNode;
+        if (root != null) {
+          root.scheduleInitialSemantics();
+          // Synchronously flush semantics if possible. This should send the
+          // update to platform synchronously if UI and platform threads are
+          // merged.
+          //
+          // Doing this let OS to read the semantics tree synchronously even if
+          // semantics has not been built before.
+          if (root is RenderObjectWithChildMixin<RenderBox> && (root.child?.hasSize ?? false)) {
+            _flushSemanticsWithin();
+          }
+        }
         onSemanticsOwnerCreated?.call();
       }
     } else if (_semanticsOwner != null) {
@@ -1430,6 +1445,13 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   // See [_RenderObjectSemantics]'s documentation for detailed explanations on
   // what this method does
   void flushSemantics() {
+    _flushSemanticsWithin();
+    for (final PipelineOwner child in _children) {
+      child.flushSemantics();
+    }
+  }
+
+  void _flushSemanticsWithin() {
     if (_semanticsOwner == null) {
       return;
     }
@@ -1510,9 +1532,6 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       }
 
       _semanticsOwner!.sendSemanticsUpdate();
-      for (final PipelineOwner child in _children) {
-        child.flushSemantics();
-      }
       assert(
         _nodesNeedingSemantics.isEmpty,
         'Child PipelineOwners must not dirty nodes in their parent.',
@@ -5720,7 +5739,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       effectiveChildParentData = childParentData;
     }
     for (final _RenderObjectSemantics childSemantics in _getNonBlockedChildren()) {
-      assert(!childSemantics.renderObject._needsLayout);
       childSemantics._didUpdateParentData(effectiveChildParentData);
       for (final _SemanticsFragment fragment in childSemantics.mergeUp) {
         if (hasChildConfigurationsDelegate && fragment.configToMergeUp != null) {
