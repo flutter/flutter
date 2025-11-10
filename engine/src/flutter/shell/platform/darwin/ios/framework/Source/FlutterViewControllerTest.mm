@@ -1008,6 +1008,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                          bundle:nil];
   id mockVC = OCMPartialMock(realVC);
   mockEngine.viewController = mockVC;
+  [mockVC viewDidLayoutSubviews];
 
   OCMExpect([mockVC checkAndUpdateAutoResizeConstraints]);
   OCMExpect([mockVC updateAutoResizeConstraints]);
