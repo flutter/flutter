@@ -93,4 +93,59 @@ abstract final class HapticFeedback {
       'HapticFeedbackType.selectionClick',
     );
   }
+
+  /// Provides a haptic feedback indicating that a task or action has completed
+  /// successfully.
+  ///
+  /// On iOS, this uses a `UINotificationFeedbackGenerator` with
+  /// `UINotificationFeedbackTypeSuccess`.
+  ///
+  /// On Android, this uses `HapticFeedbackConstants.CONFIRM` on API levels 30
+  /// and above. This call has no effects on Android API levels below 30.
+  ///
+  /// {@template flutter.services.HapticFeedback.notification}
+  /// See also:
+  ///
+  ///  * [Human Interface Guidelines Playing Haptics](https://developer.apple.com/design/human-interface-guidelines/playing-haptics#Notification)
+  /// {@endtemplate}
+  static Future<void> successNotification() async {
+    await SystemChannels.platform.invokeMethod<void>(
+      'HapticFeedback.vibrate',
+      'HapticFeedbackType.successNotification',
+    );
+  }
+
+  /// Provides a haptic feedback indicating that a task or action has produced
+  /// a warning.
+  ///
+  /// On iOS, this uses a `UINotificationFeedbackGenerator` with
+  /// `UINotificationFeedbackTypeWarning`.
+  ///
+  /// On Android, this uses `HapticFeedbackConstants.KEYBOARD_TAP` on API
+  /// levels 30 and above. This call has no effects on Android API levels below
+  /// 30.
+  ///
+  /// {@macro flutter.services.HapticFeedback.notification}
+  static Future<void> warningNotification() async {
+    await SystemChannels.platform.invokeMethod<void>(
+      'HapticFeedback.vibrate',
+      'HapticFeedbackType.warningNotification',
+    );
+  }
+
+  /// Provides a haptic feedback indicating that a task or action has failed.
+  ///
+  /// On iOS, this uses a `UINotificationFeedbackGenerator` with
+  /// `UINotificationFeedbackTypeError`.
+  ///
+  /// On Android, this uses `HapticFeedbackConstants.REJECT` on API levels 30
+  /// and above. This call has no effects on Android API levels below 30.
+  ///
+  /// {@macro flutter.services.HapticFeedback.notification}
+  static Future<void> errorNotification() async {
+    await SystemChannels.platform.invokeMethod<void>(
+      'HapticFeedback.vibrate',
+      'HapticFeedbackType.errorNotification',
+    );
+  }
 }
