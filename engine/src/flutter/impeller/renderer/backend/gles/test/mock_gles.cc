@@ -103,7 +103,7 @@ void mockGetIntegerv(GLenum name, int* value) {
       *value = 4096;
       break;
     default:
-      *value = 0;
+      CallMockMethod(&IMockGLESImpl::GetIntegerv, name, value);
       break;
   }
 }
@@ -246,8 +246,15 @@ void mockReadPixels(GLint x,
                         type, data);
 }
 
-static_assert(CheckSameSignature<decltype(mockReadPixels),  //
-                                 decltype(glReadPixels)>::value);
+void mockDiscardFramebufferEXT(GLenum target,
+                               GLsizei numAttachments,
+                               const GLenum* attachments) {
+  return CallMockMethod(&IMockGLESImpl::DiscardFramebufferEXT, target,
+                        numAttachments, attachments);
+}
+
+static_assert(CheckSameSignature<decltype(mockDiscardFramebufferEXT),  //
+                                 decltype(glDiscardFramebufferEXT)>::value);
 
 // static
 std::shared_ptr<MockGLES> MockGLES::Init(
@@ -322,6 +329,8 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockGenFramebuffers);
   } else if (strcmp(name, "glBindFramebuffer") == 0) {
     return reinterpret_cast<void*>(mockBindFramebuffer);
+  } else if (strcmp(name, "glDiscardFramebufferEXT") == 0) {
+    return reinterpret_cast<void*>(mockDiscardFramebufferEXT);
   } else {
     return reinterpret_cast<void*>(&doNothing);
   }
