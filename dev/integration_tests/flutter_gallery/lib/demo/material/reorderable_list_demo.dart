@@ -171,11 +171,8 @@ class _ListDemoState extends State<ReorderableListDemo> {
     return listTile;
   }
 
-  void _onReorder(int oldIndex, int newIndex) {
+  void _onReorderItem(int oldIndex, int newIndex) {
     setState(() {
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
       final _ListItem item = _items.removeAt(oldIndex);
       _items.insert(newIndex, item);
     });
@@ -223,7 +220,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
                   ),
                 )
               : null,
-          onReorder: _onReorder,
+          onReorderItem: _onReorderItem,
           reverse: _reverse!,
           scrollDirection: _itemType == _ReorderableListType.horizontalAvatar
               ? Axis.horizontal
