@@ -831,6 +831,7 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
   }
 }
 
+/// Update the MinimumOSVersion key in the given Info.plist file.
 Future<void> _updateMinimumOSVersion(File infoPlist, Environment environment) async {
   final minimumOSVersion = FlutterDarwinPlatform.ios.deploymentTarget().toString();
   final plutilArgs = <String>[
