@@ -278,9 +278,9 @@ if (enable_unittests) {
     ]
 
     deps = [
+      ":display_list_deferred_image_unittests",
       ":ui",
       ":ui_unittests_fixtures",
-      ":display_list_deferred_image_unittests",
       "$dart_src/runtime/bin:elf_loader",
       "//flutter/common",
       "//flutter/impeller",
@@ -303,14 +303,13 @@ if (enable_unittests) {
 
   source_set("display_list_deferred_image_unittests") {
     testonly = true
-    sources = [
-      "painting/display_list_deferred_image_gpu_impeller_unittests.cc",
-    ]
+    sources =
+        [ "painting/display_list_deferred_image_gpu_impeller_unittests.cc" ]
     deps = [
+      ":ui",
       "//flutter/display_list",
       "//flutter/fml",
       "//flutter/testing:testing_lib",
-      ":ui",
     ]
   }
 }

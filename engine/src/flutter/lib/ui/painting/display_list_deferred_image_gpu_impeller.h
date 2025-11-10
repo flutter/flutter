@@ -20,7 +20,6 @@ namespace testing {
 FML_TEST_CLASS(DlDeferredImageGPUImpeller, TrashesDisplayList);
 }  // namespace testing
 
-
 class DlDeferredImageGPUImpeller final : public DlImage {
  public:
   static sk_sp<DlDeferredImageGPUImpeller> Make(
