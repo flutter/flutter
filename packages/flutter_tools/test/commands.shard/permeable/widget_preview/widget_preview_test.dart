@@ -268,6 +268,31 @@ void main() {
     });
 
     testUsingContext(
+      'start succeeds when no .dart_tool/ directory exists',
+      () async {
+        // Regression test for https://github.com/flutter/flutter/issues/178052
+        final Directory rootProject = await createRootProject();
+        rootProject.childDirectory('.dart_tool').deleteSync(recursive: true);
+        await startWidgetPreview(rootProject: rootProject);
+        expectSinglePreviewLaunchTimingEvent();
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        DeviceManager: () => fakeDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => loggingProcessManager,
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
+      },
+    );
+
+    testUsingContext(
       'start creates .dart_tool/widget_preview_scaffold',
       () async {
         final Directory rootProject = await createRootProject();
