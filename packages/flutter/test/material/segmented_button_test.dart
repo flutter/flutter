@@ -496,7 +496,7 @@ void main() {
                 SemanticsFlag.isButton,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.hasEnabledState,
-                SemanticsFlag.hasCheckedState,
+                SemanticsFlag.hasSelectedState,
                 SemanticsFlag.isFocusable,
                 SemanticsFlag.isInMutuallyExclusiveGroup,
               ],
@@ -510,8 +510,8 @@ void main() {
                 SemanticsFlag.isButton,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.hasEnabledState,
-                SemanticsFlag.hasCheckedState,
-                SemanticsFlag.isChecked,
+                SemanticsFlag.hasSelectedState,
+                SemanticsFlag.isSelected,
                 SemanticsFlag.isFocusable,
                 SemanticsFlag.isInMutuallyExclusiveGroup,
               ],
@@ -524,7 +524,7 @@ void main() {
               flags: <SemanticsFlag>[
                 SemanticsFlag.isButton,
                 SemanticsFlag.hasEnabledState,
-                SemanticsFlag.hasCheckedState,
+                SemanticsFlag.hasSelectedState,
                 SemanticsFlag.isInMutuallyExclusiveGroup,
               ],
               label: '3',
@@ -571,8 +571,8 @@ void main() {
                 SemanticsFlag.isButton,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.hasEnabledState,
-                SemanticsFlag.hasCheckedState,
-                SemanticsFlag.isChecked,
+                SemanticsFlag.hasSelectedState,
+                SemanticsFlag.isSelected,
                 SemanticsFlag.isFocusable,
               ],
               label: '1',
@@ -585,7 +585,7 @@ void main() {
                 SemanticsFlag.isButton,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.hasEnabledState,
-                SemanticsFlag.hasCheckedState,
+                SemanticsFlag.hasSelectedState,
                 SemanticsFlag.isFocusable,
               ],
               label: '2',
@@ -597,8 +597,8 @@ void main() {
               flags: <SemanticsFlag>[
                 SemanticsFlag.isButton,
                 SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isChecked,
-                SemanticsFlag.hasCheckedState,
+                SemanticsFlag.isSelected,
+                SemanticsFlag.hasSelectedState,
               ],
               label: '3',
             ),
@@ -609,6 +609,61 @@ void main() {
         ignoreTransform: true,
       ),
     );
+
+    semantics.dispose();
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/146987
+  testWidgets('SegmentedButton announce state on all platforms', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: SegmentedButton<int>(
+            segments: const <ButtonSegment<int>>[
+              ButtonSegment<int>(value: 1, label: Text('1')),
+              ButtonSegment<int>(value: 2, label: Text('2')),
+            ],
+            selected: const <int>{2},
+            onSelectionChanged: (Set<int> selected) {},
+          ),
+        ),
+      ),
+    );
+
+    // Verify that the selected segments/buttons use 'selected' semantic property.
+    // This ensures iOS VoiceOver announces 'selected' state.
+
+    final Iterable<SemanticsNode> allNodes = semantics.nodesWith();
+
+    // Verify that the selected state flags are existing.
+    final Iterable<SemanticsNode> selectedNodes = allNodes.where(
+      (SemanticsNode node) =>
+          node.hasFlag(SemanticsFlag.hasSelectedState) && node.hasFlag(SemanticsFlag.isSelected),
+    );
+
+    expect(selectedNodes.isNotEmpty, isTrue);
+
+    final Iterable<SemanticsNode> unselectedNodes = allNodes.where(
+      (SemanticsNode node) =>
+          node.hasFlag(SemanticsFlag.hasSelectedState) && !node.hasFlag(SemanticsFlag.isSelected),
+    );
+
+    expect(unselectedNodes.isNotEmpty, isTrue);
+
+    // Verify that there is one selected segment and one unselected segment.
+    expect(selectedNodes.length, equals(1));
+    expect(unselectedNodes.length, equals(1));
+
+    // Ensure that the 'checked' flags are NOT used to prevent duplication issue
+    // on Android.
+    // On Android, TalkBack reader announces both 'checked' and 'selected' states.
+    // This verifies `checked` state is not read with Android TalkBack.
+    for (final SemanticsNode node in allNodes) {
+      expect(node.hasFlag(SemanticsFlag.hasCheckedState), isFalse);
+      expect(node.hasFlag(SemanticsFlag.isChecked), isFalse);
+    }
 
     semantics.dispose();
   });
