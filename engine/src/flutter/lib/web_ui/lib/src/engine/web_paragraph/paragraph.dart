@@ -470,7 +470,7 @@ class WebTextStyle implements ui.TextStyle {
         // Transparent background is equivalent to no background
         // We do not check for transparency in other paints (like foreground) because
         // it seems unnatural to have a transparent paint on them
-        return background != null && background!.color != const ui.Color(0x00000000);
+        return background != null && background!.color.a != 0;
       case StyleElements.shadows:
         return shadows != null && shadows!.isNotEmpty;
       case StyleElements.decorations:
