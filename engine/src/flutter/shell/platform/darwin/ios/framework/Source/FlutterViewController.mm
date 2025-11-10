@@ -1543,7 +1543,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
         logWarning:
             @"Warning: The outermost widget in the autoresizable Flutter view is unsized or has "
             @"ambiguous dimensions, causing the host native view's width to be 0. The autoresizing "
-            @"logic is setting the viewport constraint to unbounded ($\text{DBL\_MAX}$) to prevent "
+            @"logic is setting the viewport constraint to unbounded DBL_MAX to prevent "
             @"rendering failure. Please ensure your top-level Flutter widget has explicit "
             @"constraints (e.g., using SizedBox or Container)."];
   }
@@ -1553,7 +1553,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
         logWarning:
             @"Warning: The outermost widget in the autoresizable Flutter view is unsized or has "
             @"ambiguous dimensions, causing the host native view's width to be 0. The autoresizing "
-            @"logic is setting the viewport constraint to unbounded ($\text{DBL\_MAX}$) to prevent "
+            @"logic is setting the viewport constraint to unbounded DBL_MAX to prevent "
             @"rendering failure. Please ensure your top-level Flutter widget has explicit "
             @"constraints (e.g., using SizedBox or Container)."];
   }
