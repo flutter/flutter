@@ -4473,19 +4473,18 @@ class EditableTextState extends State<EditableText>
       final List<SuggestionSpan>? suggestions = await _spellCheckConfiguration.spellCheckService!
           .fetchSpellCheckSuggestions(localeForSpellChecking!, text);
 
-      if (suggestions == null) {
-        // The request to fetch spell check suggestions was canceled due to ongoing request.
+      if (suggestions == null || !mounted) {
+        // The request to fetch spell check suggestions was canceled due to ongoing request,
+        // or the widget was unmounted.
         return;
       }
 
       spellCheckResults = SpellCheckResults(text, suggestions);
-      final double? lineHeightScaleFactor = mounted
-          ? MediaQuery.maybeLineHeightScaleFactorOverrideOf(context)
-          : null;
-      final double? letterSpacing = mounted
-          ? MediaQuery.maybeLetterSpacingOverrideOf(context)
-          : null;
-      final double? wordSpacing = mounted ? MediaQuery.maybeWordSpacingOverrideOf(context) : null;
+      final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(
+        context,
+      );
+      final double? letterSpacing = MediaQuery.maybeLetterSpacingOverrideOf(context);
+      final double? wordSpacing = MediaQuery.maybeWordSpacingOverrideOf(context);
       renderEditable.text = _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides(
         lineHeightScaleFactor: lineHeightScaleFactor,
         letterSpacing: letterSpacing,
