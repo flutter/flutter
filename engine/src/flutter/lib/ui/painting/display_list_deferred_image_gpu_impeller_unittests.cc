@@ -108,6 +108,17 @@ class MockSnapshotDelegate : public SnapshotDelegate {
   fml::TaskRunnerAffineWeakPtrFactory<MockSnapshotDelegate> weak_factory_;
   std::shared_ptr<MockTextureRegistry> texture_registry_;
 };
+
+void PostTaskSync(fml::RefPtr<fml::TaskRunner> task_runner,
+                  std::function<void()> task) {
+  fml::AutoResetWaitableEvent latch;
+  task_runner->PostTask([&latch, &task]() {
+    task();
+    latch.Signal();
+  });
+  latch.Wait();
+}
+
 }  // namespace
 
 TEST(DlDeferredImageGPUImpeller, GetSize) {
@@ -116,30 +127,22 @@ TEST(DlDeferredImageGPUImpeller, GetSize) {
   const DlISize size = {100, 200};
   flutter::DisplayListBuilder builder;
 
-  fml::AutoResetWaitableEvent latch;
   std::unique_ptr<MockSnapshotDelegate> snapshot_delegate;
   fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate_weak_ptr;
-  task_runner->PostTask([&]() {
+  PostTaskSync(task_runner, [&]() {
     snapshot_delegate = std::make_unique<MockSnapshotDelegate>();
     // Set up the mock to return the internal texture_registry_.
     ON_CALL(*snapshot_delegate, GetTextureRegistry())
         .WillByDefault(
             ::testing::Return(snapshot_delegate->GetMockTextureRegistry()));
     snapshot_delegate_weak_ptr = snapshot_delegate->GetWeakPtr();
-    latch.Signal();
   });
-  latch.Wait();
 
   auto image = DlDeferredImageGPUImpeller::Make(
       builder.Build(), size, snapshot_delegate_weak_ptr, task_runner);
   ASSERT_EQ(image->GetSize(), size);
 
-  fml::AutoResetWaitableEvent destroy_latch;
-  task_runner->PostTask([&]() {
-    snapshot_delegate.reset();
-    destroy_latch.Signal();
-  });
-  destroy_latch.Wait();
+  PostTaskSync(task_runner, [&]() { snapshot_delegate.reset(); });
 }
 
 TEST(DlDeferredImageGPUImpeller, TrashesDisplayList) {
@@ -148,10 +151,9 @@ TEST(DlDeferredImageGPUImpeller, TrashesDisplayList) {
   const DlISize size = {100, 200};
   flutter::DisplayListBuilder builder;
 
-  fml::AutoResetWaitableEvent latch;
   std::unique_ptr<MockSnapshotDelegate> snapshot_delegate;
   fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate_weak_ptr;
-  task_runner->PostTask([&]() {
+  PostTaskSync(task_runner, [&]() {
     snapshot_delegate = std::make_unique<MockSnapshotDelegate>();
     // Set up the mock to return the internal texture_registry_.
     ON_CALL(*snapshot_delegate, GetTextureRegistry())
@@ -168,29 +170,18 @@ TEST(DlDeferredImageGPUImpeller, TrashesDisplayList) {
                 MakeRasterSnapshotSync(::testing::_, ::testing::_))
         .WillOnce(::testing::Return(mock_image));
     snapshot_delegate_weak_ptr = snapshot_delegate->GetWeakPtr();
-    latch.Signal();
   });
-  latch.Wait();
 
   auto image = DlDeferredImageGPUImpeller::Make(
       builder.Build(), size, snapshot_delegate_weak_ptr, task_runner);
 
   // Flush raster events.
-  {
-    fml::AutoResetWaitableEvent destroy_latch;
-    task_runner->PostTask([&]() { destroy_latch.Signal(); });
-    destroy_latch.Wait();
-  }
+  PostTaskSync(task_runner, []() {});
 
   EXPECT_TRUE(image->impeller_texture());
   // EXPECT_FALSE(image->wrapper_->display_list_);
 
-  fml::AutoResetWaitableEvent destroy_latch;
-  task_runner->PostTask([&]() {
-    snapshot_delegate.reset();
-    destroy_latch.Signal();
-  });
-  destroy_latch.Wait();
+  PostTaskSync(task_runner, [&]() { snapshot_delegate.reset(); });
 }
 
 }  // namespace testing
