@@ -1569,6 +1569,24 @@ void main() {
       SystemMouseCursors.grab,
     );
   });
+
+  testWidgets('SegmentedButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: SegmentedButton<String>(
+              segments: const <ButtonSegment<String>>[
+                ButtonSegment<String>(value: 'X', label: Text('X')),
+              ],
+              selected: const <String>{'X'},
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SegmentedButton<String>)), Size.zero);
+  });
 }
 
 Set<WidgetState> enabled = const <WidgetState>{};
