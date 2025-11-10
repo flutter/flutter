@@ -321,6 +321,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     _hoverAnimationController.addListener(() {
       updateScrollbarPainter();
     });
+    scrollbarPainter.color = Color(0x00000000);
   }
 
   @override
@@ -342,7 +343,6 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       case TargetPlatform.windows:
         _useAndroidScrollbar = false;
     }
-    scrollbarPainter.color = Color(0x00000000);
     super.didChangeDependencies();
   }
 
@@ -418,7 +418,6 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       scrollbarPainter.color = shouldRevealAssistiveScrollbar
           ? _thumbColor.resolve(_states)
           : const Color(0x00000000);
-      // super.showScrollbar = shouldRevealAssistiveScrollbar && (_scrollbarTheme.thumbVisibility?.resolve(_states) ?? false);
       scrollbarPainter.ignorePointer = !shouldRevealAssistiveScrollbar && enableGestures;
     });
     _assistiveScrollbarIsVisible = shouldRevealAssistiveScrollbar;

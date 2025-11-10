@@ -639,7 +639,7 @@ void main() {
           strokeWidth: 1.0,
           color: Colors.transparent,
         )
-        ..rect(rect: const Rect.fromLTRB(780.0, 0.0, 800.0, 300.0), color: _kAndroidThumbIdleColor),
+        ..rect(rect: const Rect.fromLTRB(780.0, 0.0, 800.0, 300.0), color: Colors.transparent),
     );
     await tester.pumpWidget(viewWithScroll(radius: const Radius.circular(10)));
     expect(
