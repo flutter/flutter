@@ -18,10 +18,10 @@ namespace flutter {
 namespace testing {
 namespace {
 
-void PostTaskSync(fml::RefPtr<fml::TaskRunner> task_runner,
+void PostTaskSync(const fml::RefPtr<fml::TaskRunner>& task_runner,
                   std::function<void()> task) {
   fml::AutoResetWaitableEvent latch;
-  task_runner->PostTask([&latch, &task]() {
+  task_runner->PostTask([&latch, task = std::move(task)]() {
     task();
     latch.Signal();
   });
