@@ -7,7 +7,7 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/thread.h"
 #include "flutter/lib/ui/painting/display_list_deferred_image_gpu_impeller.h"
-#include "flutter/lib/ui/snapshot_delegate.h"
+#include "flutter/lib/ui/painting/testing/mocks.h"
 #include "flutter/testing/testing.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -17,11 +17,6 @@
 namespace flutter {
 namespace testing {
 namespace {
-class MockTextureRegistry : public TextureRegistry {
- public:
-  MockTextureRegistry() = default;
-  virtual ~MockTextureRegistry() = default;
-};
 
 class MockDlImage : public DlImage {
  public:
@@ -35,55 +30,6 @@ class MockDlImage : public DlImage {
               (const, override));
   MOCK_METHOD(size_t, GetApproximateByteSize, (), (const, override));
   MOCK_METHOD(bool, isUIThreadSafe, (), (const, override));
-};
-
-class MockSnapshotDelegate : public SnapshotDelegate {
- public:
-  MockSnapshotDelegate()
-      : weak_factory_(this),
-        texture_registry_(std::make_shared<MockTextureRegistry>()) {}
-  virtual ~MockSnapshotDelegate() = default;
-
-  MOCK_METHOD(std::unique_ptr<GpuImageResult>,
-              MakeSkiaGpuImage,
-              (sk_sp<DisplayList>, const SkImageInfo&),
-              (override));
-  MOCK_METHOD(std::shared_ptr<TextureRegistry>,
-              GetTextureRegistry,
-              (),
-              (override));
-  MOCK_METHOD(GrDirectContext*, GetGrContext, (), (override));
-  MOCK_METHOD(void,
-              MakeRasterSnapshot,
-              (sk_sp<DisplayList>,
-               DlISize,
-               std::function<void(sk_sp<DlImage>)>),
-              (override));
-  MOCK_METHOD(sk_sp<DlImage>,
-              MakeRasterSnapshotSync,
-              (sk_sp<DisplayList>, DlISize),
-              (override));
-  MOCK_METHOD(sk_sp<SkImage>,
-              ConvertToRasterImage,
-              (sk_sp<SkImage>),
-              (override));
-  MOCK_METHOD(void,
-              CacheRuntimeStage,
-              (const std::shared_ptr<impeller::RuntimeStage>&),
-              (override));
-  MOCK_METHOD(bool, MakeRenderContextCurrent, (), (override));
-
-  fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> GetWeakPtr() {
-    return weak_factory_.GetWeakPtr();
-  }
-
-  std::shared_ptr<MockTextureRegistry> GetMockTextureRegistry() {
-    return texture_registry_;
-  }
-
- private:
-  fml::TaskRunnerAffineWeakPtrFactory<MockSnapshotDelegate> weak_factory_;
-  std::shared_ptr<MockTextureRegistry> texture_registry_;
 };
 
 void PostTaskSync(fml::RefPtr<fml::TaskRunner> task_runner,

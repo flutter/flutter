@@ -280,6 +280,7 @@ if (enable_unittests) {
     deps = [
       ":display_list_deferred_image_unittests",
       ":ui",
+      ":ui_testing_mocks",
       ":ui_unittests_fixtures",
       "$dart_src/runtime/bin:elf_loader",
       "//flutter/common",
@@ -308,10 +309,21 @@ if (enable_unittests) {
         [ "painting/display_list_deferred_image_gpu_impeller_unittests.cc" ]
     deps = [
       ":ui",
+      ":ui_testing_mocks",
       "//flutter/display_list",
       "//flutter/fml",
       "//flutter/impeller/renderer/testing:mocks",
       "//flutter/testing:testing_lib",
+    ]
+  }
+
+  source_set("ui_testing_mocks") {
+    testonly = true
+    sources = [ "painting/testing/mocks.h" ]
+    public_deps = [
+      ":ui",
+      "//flutter/common/graphics",
+      "//third_party/googletest:gmock",
     ]
   }
 }
