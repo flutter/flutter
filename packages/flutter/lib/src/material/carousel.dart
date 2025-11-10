@@ -254,6 +254,7 @@ class CarouselView extends StatefulWidget {
     required double this.itemExtent,
     required this.itemBuilder,
     this.itemCount,
+    this.onIndexChanged,
   }) : consumeMaxWeight = true,
        flexWeights = null,
        children = const <Widget>[];
@@ -311,6 +312,7 @@ class CarouselView extends StatefulWidget {
     required List<int> this.flexWeights,
     required this.itemBuilder,
     this.itemCount,
+    this.onIndexChanged,
   }) : itemExtent = null,
        children = const <Widget>[];
 
@@ -464,7 +466,9 @@ class CarouselView extends StatefulWidget {
   /// This callback is triggered only by an actual change in the index,
   /// whether from user scrolling or programmatic control.
   ///
+  /// {@tool dartpad}
   /// Example:
+  ///
   /// ```dart
   /// CarouselView(
   ///   itemExtent: 200.0,
@@ -478,8 +482,9 @@ class CarouselView extends StatefulWidget {
   ///   ],
   /// )
   /// ```
+  /// {@end-tool}
   final ValueChanged<int>? onIndexChanged;
-  
+
   /// Called to build carousel item on demand.
   ///
   /// Will be called only for indices greater than or equal to zero and less
@@ -638,9 +643,6 @@ class _CarouselViewState extends State<CarouselView> {
         itemExtent: _itemExtent!,
         minExtent: widget.shrinkExtent,
         onIndexChanged: _handleIndexChanged,
-        delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-          return _buildCarouselItem(index);
-        }, childCount: widget.children.length),
         delegate: SliverChildBuilderDelegate(effectiveBuilder, childCount: childCount),
       );
     }
@@ -654,9 +656,6 @@ class _CarouselViewState extends State<CarouselView> {
       shrinkExtent: widget.shrinkExtent,
       weights: _flexWeights!,
       onIndexChanged: _handleIndexChanged,
-      delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-        return _buildCarouselItem(index);
-      }, childCount: widget.children.length),
       delegate: SliverChildBuilderDelegate(effectiveBuilder, childCount: childCount),
     );
   }
@@ -790,7 +789,7 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
     if (_onIndexChanged == value) {
       return;
     }
-    _onIndexChanged = value ?? (int index) {};
+    _onIndexChanged = value;
     markNeedsLayout();
   }
 
@@ -1065,7 +1064,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     if (_onIndexChanged == value) {
       return;
     }
-    _onIndexChanged = value ?? (int index) {};
+    _onIndexChanged = value;
     markNeedsLayout();
   }
 
@@ -1847,23 +1846,19 @@ class CarouselController extends ScrollController {
   /// The item that expands to the maximum size when first creating the [CarouselView].
   final int initialItem;
 
-  /// The index of the primary item currently selected by the carousel logic.
+  /// The index of the primary item determined by the carousel layout.
   ///
-  /// This value is initialized to [initialItem], and it updates dynamically
-  /// after each layout pass to reflect the most prominent visible item.
+  /// Initialized to [initialItem]. Updated after each layout pass to reflect
+  /// the most prominent visible item according to the carousel's layout logic.
   ///
-  /// The definition of "primary" depends on the carousel configuration:
+  /// Interpretation of "primary":
+  /// - For [CarouselView] (fixed-size items): the item nearest the leading
+  ///   edge of the viewport. This item may be only partially visible.
+  /// - For [CarouselView.weighted] (variable-weight items): the item with the
+  ///   largest visible extent in the viewport (the most prominently shown).
   ///
-  /// - For [CarouselView] (fixed-size items):
-  ///   Refers to the first fully visible item near the leading edge
-  ///   of the viewport.
-  ///
-  /// - For [CarouselView.weighted] (variable-weight items):
-  ///   Refers to the visible item with the greatest layout weight,
-  ///   typically the one most central or prominent.
-  ///
-  /// This property is managed internally and always reflects the current
-  /// layout state.
+  /// This value is maintained internally and mirrors the current layout state.
+  /// Prefer [onIndexChanged] for callbacks when the primary item changes.
   int get currentIndex => _currentIndex;
   int _currentIndex;
 
