@@ -3280,12 +3280,8 @@ class _SelectableFragment
     final TextPosition newPosition;
     switch (granularity) {
       case TextGranularity.character:
-        final String text = range.textInside(fullText);
-        newPosition = _moveBeyondTextBoundaryAtDirection(
-          targetedEdge,
-          forward,
-          CharacterBoundary(text),
-        );
+        final TextBoundary textBoundary = paragraph._textPainter.glyphBoundaries.moveByGlyphBoundary;
+        newPosition = _moveBeyondTextBoundaryAtDirection(targetedEdge, forward, textBoundary);
         result = SelectionResult.end;
       case TextGranularity.word:
         final TextBoundary textBoundary = paragraph._textPainter.wordBoundaries.moveByWordBoundary;

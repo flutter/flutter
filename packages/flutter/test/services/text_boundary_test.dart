@@ -105,6 +105,49 @@ void main() {
     expect(boundary.getTrailingTextBoundaryAt(text.length), null);
   });
 
+  test('glyphBoundary.moveByGlyphBoundary', () {
+    const String text =
+        'abcאבגabc\n'
+        'ę̄́\n'
+        'هَّ\n'
+        '𑗋';
+
+    final TextPainter textPainter = TextPainter()
+      ..textDirection = TextDirection.ltr
+      ..text = const TextSpan(text: text)
+      ..layout();
+
+    final TextBoundary boundary = textPainter.glyphBoundaries.moveByGlyphBoundary;
+
+    // Before text
+    expect(boundary.getLeadingTextBoundaryAt(-1), isNull);
+    expect(boundary.getTrailingTextBoundaryAt(-1), isNull);
+    // LTR
+    expect(boundary.getLeadingTextBoundaryAt(0), 0);
+    expect(boundary.getTrailingTextBoundaryAt(0), 1);
+    // RTL
+    expect(boundary.getLeadingTextBoundaryAt(3), 4);
+    expect(boundary.getTrailingTextBoundaryAt(3), 3);
+    // Complex Latin character.
+    expect(boundary.getLeadingTextBoundaryAt(10), 10);
+    expect(boundary.getTrailingTextBoundaryAt(10), 13);
+    expect(boundary.getLeadingTextBoundaryAt(12), 10);
+    expect(boundary.getTrailingTextBoundaryAt(12), 13);
+    // Complex Arabic character.
+    expect(boundary.getLeadingTextBoundaryAt(14), 17);
+    expect(boundary.getTrailingTextBoundaryAt(14), 14);
+    expect(boundary.getLeadingTextBoundaryAt(16), 17);
+    expect(boundary.getTrailingTextBoundaryAt(16), 14);
+    // Surrogates.
+    expect(boundary.getLeadingTextBoundaryAt(18), 18);
+    expect(boundary.getTrailingTextBoundaryAt(18), 20);
+    expect(boundary.getLeadingTextBoundaryAt(19), 18);
+    expect(boundary.getTrailingTextBoundaryAt(19), 20);
+    // End of text.
+    expect(boundary.getLeadingTextBoundaryAt(20), isNull);
+    expect(boundary.getTrailingTextBoundaryAt(20), isNull);
+  });
+
   test('wordBoundary.moveByWordBoundary', () {
     const String text =
         'ABC   ABC\n' // [0, 10)

@@ -5237,6 +5237,118 @@ class EditableTextState extends State<EditableText>
     return TextPosition(offset: newOffset);
   }
 
+  // Returns the closest visual boundary location to `extent` but not including `extent`
+  // itself (unless already at the start/end of the text), in the direction
+  // specified by `forward`.
+  TextPosition _moveBeyondGlyphBoundary(
+    TextPosition extent,
+    bool forward,
+    TextBoundary textBoundary,
+  ) {
+    assert(extent.offset >= 0);
+
+    // Glyph boundaries, expressed as offset into text, can point to different positions on LTR/RTL
+    // boundaries. Take the following [LTR][RTL][LTR] text example:
+    // caret     |   ▮       ▮       ▮       ▮       ▮       ▮       ▮       ▮       ▮       ▮   |
+    // position: | 0u/0d   1u/1d   2u/2d   3u/6u   5u/5d   4u/4d   3d/6d   7u/7d   8u/8d   9u/9d |
+    //           |-------------------------------------------------------------------------------|
+    //           |       a       b       c       C       B       A       a       b       c       |
+    //           |     (LTR)   (LTR)   (LTR)   (RTL)   (RTL)   (RTL)   (LTR)   (LTR)   (LTR)     |
+    //           |-------------------------------------------------------------------------------|
+    // boundary: |     [0-1]   [1-2]   [2-3]   [6-5]   [5-4]   [4-3]   [6-7]   [7-8]   [8-9]     |
+    //
+    // This yields the following possible upstream/downstream positions:
+    // 0u -> 1d | 0d -> 1d
+    // 1u -> 2d | 1d -> 2d
+    // 2u -> 3u | 2d -> 3u
+    // 3u -> 5d | 6u -> 5d
+    // 5u -> 4d | 5d -> 4d
+    // 4u -> 6d | 4d -> 6d
+    // 3d -> 7d | 6d -> 7d
+    // 7u -> 8d | 7d -> 8d
+    // 8u -> 9d | 8d -> 9d
+    // 9u -> 9u | 9d -> 9u
+
+    if (_value.text.isEmpty) {
+      return const TextPosition(offset: 0);
+    }
+
+    int offset = extent.offset, nextOffset;
+    // Correct for affinity.
+    if (extent.affinity == TextAffinity.upstream && extent.offset >= 0 && extent.offset < _value.text.length) {
+      offset--;
+    }
+
+    // TODO(tgucio): test newlines at RTL / LTR (skip one glyph?) -> FAIL
+    // TODO(tgucio): handle line ends after a single LTR/RTL change? [test]
+
+    TextAffinity affinity = TextAffinity.downstream;
+    TextRange boundary = textBoundary.getTextBoundaryAt(offset);
+    // Use current boundary ends to find the next boundary.
+    if (boundary.isValid) {
+      nextOffset = switch ((forward, boundary.isNormalized)) {
+        (true, true) => boundary.end,        // LTR, forward
+        (true, false) => boundary.end - 1,   // RTL, forward
+        (false, true) => boundary.start - 1, // LTR, reverse
+        (false, false) => boundary.start,    // RTL, reverse
+      };
+    } else {
+      // Handle starting outside of text bounds.
+      nextOffset = _value.text.length - 1;
+    }
+    TextRange nextBoundary = textBoundary.getTextBoundaryAt(nextOffset);
+
+    if (!boundary.isValid || !nextBoundary.isValid) {
+      // Either boundary is invalid.
+      if (boundary.isValid) {
+        // Next boundary invalid: move to the right end of the current boundary.
+        offset = forward ? boundary.end : boundary.start;
+      } else {
+        // Current boundary invalid: move to the right end of the next boundary
+        // or stay at the current position.
+        offset = forward
+            ? (nextBoundary.isNormalized ? offset : nextBoundary.end)
+            : (nextBoundary.isNormalized ? nextBoundary.start : offset);
+      }
+    } else if (nextBoundary.isNormalized == boundary.isNormalized) {
+      offset = extent.affinity == TextAffinity.downstream
+          ? (nextBoundary.isNormalized ? nextBoundary.start : nextBoundary.end)
+          : (nextBoundary.isNormalized ? nextBoundary.end : nextBoundary.start);
+    } else {
+      // LTR/RTL or RTL/LTR boundary: resort to searching for the next glyph.
+      if (boundary.isNormalized) {
+        // LTR->RTL: start skipping at the next boundary.
+        do {
+          boundary = nextBoundary;
+          offset = math.max(0, nextOffset);
+          nextOffset = forward ? boundary.start : boundary.end - 1;
+          nextBoundary = textBoundary.getTextBoundaryAt(nextOffset);
+        } while (nextOffset < _value.text.length
+            && nextOffset >= 0
+            && nextBoundary.isValid
+            && nextBoundary.isNormalized == boundary.isNormalized);
+          offset = math.max(0, boundary.start);
+          affinity = forward ? TextAffinity.upstream : TextAffinity.downstream;
+      } else {
+        // RTL->LTR: start skipping at the current boundary.
+        nextBoundary = boundary;
+        do {
+          boundary = nextBoundary;
+          offset = math.max(0, nextOffset);
+          nextOffset = forward ? boundary.start : boundary.end - 1;
+          nextBoundary = textBoundary.getTextBoundaryAt(nextOffset);
+        } while (nextOffset < _value.text.length
+            && nextOffset >= 0
+            && nextBoundary.isValid
+            && nextBoundary.isNormalized == boundary.isNormalized);
+          offset = math.max(0, nextBoundary.end);
+          affinity = forward ? TextAffinity.downstream : TextAffinity.upstream;
+      }
+    }
+
+    return TextPosition(offset: offset, affinity: affinity);
+  }
+
   // Returns the closest boundary location to `extent`, including `extent`
   // itself, in the direction specified by `forward`.
   //
@@ -5280,7 +5392,7 @@ class EditableTextState extends State<EditableText>
   // --------------------------- Text Editing Actions ---------------------------
 
   TextBoundary _characterBoundary() =>
-      widget.obscureText ? _CodePointBoundary(_value.text) : CharacterBoundary(_value.text);
+      widget.obscureText ? _CodePointBoundary(_value.text) : renderEditable.glyphBoundaries.moveByGlyphBoundary;
   TextBoundary _nextWordBoundary() =>
       widget.obscureText ? _documentBoundary() : renderEditable.wordBoundaries.moveByWordBoundary;
   TextBoundary _linebreak() =>
@@ -5532,7 +5644,7 @@ class EditableTextState extends State<EditableText>
 
     // Delete
     DeleteCharacterIntent: _makeOverridable(
-      _DeleteTextAction<DeleteCharacterIntent>(this, _characterBoundary, _moveBeyondTextBoundary),
+      _DeleteTextAction<DeleteCharacterIntent>(this, _characterBoundary, _moveBeyondGlyphBoundary),
     ),
     DeleteToNextWordBoundaryIntent: _makeOverridable(
       _DeleteTextAction<DeleteToNextWordBoundaryIntent>(
@@ -5550,7 +5662,7 @@ class EditableTextState extends State<EditableText>
       _UpdateTextSelectionAction<ExtendSelectionByCharacterIntent>(
         this,
         _characterBoundary,
-        _moveBeyondTextBoundary,
+        _moveBeyondGlyphBoundary,
         ignoreNonCollapsedSelection: false,
       ),
     ),
