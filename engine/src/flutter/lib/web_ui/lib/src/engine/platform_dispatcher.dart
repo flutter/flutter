@@ -48,6 +48,19 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     /// and ensures proper focus is set, enabling Flutter's focus restoration to work correctly
     /// when users navigate between pages.
     _addNavigationFocusHandler();
+
+    /// Check for query parameter to enable semantics programmatically after initialization.
+    /// This must be done asynchronously to avoid circular dependency during construction.
+    scheduleMicrotask(_checkQueryParameterForSemantics);
+  }
+
+  /// Check for query parameter to enable semantics programmatically.
+  /// This allows automation testing tools to enable semantics without modifying the app.
+  /// Usage: https://example.com/?flutter-semantics
+  void _checkQueryParameterForSemantics() {
+    if (Uri.base.queryParameters.containsKey('flutter-semantics')) {
+      EngineSemantics.instance.semanticsEnabled = true;
+    }
   }
 
   late StreamSubscription<int> _onViewDisposedListener;
