@@ -179,20 +179,24 @@ void main() {
             initialEntries: <OverlayEntry>[
               overlayEntry = OverlayEntry(
                 builder: (BuildContext context) {
-                  return StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setter) {
-                      setState = setter;
-                      return OverlayPortal(
-                        controller: controller1,
-                        overlayChildBuilder: (BuildContext context) {
-                          return Semantics(
-                            label: msg,
-                            child: const SizedBox(width: 100, height: 100),
-                          );
-                        },
-                        child: const Text('overlay child'),
-                      );
-                    },
+                  return Semantics(
+                    container: true,
+                    explicitChildNodes: true,
+                    child: StatefulBuilder(
+                      builder: (BuildContext context, StateSetter setter) {
+                        setState = setter;
+                        return OverlayPortal(
+                          controller: controller1,
+                          overlayChildBuilder: (BuildContext context) {
+                            return Semantics(
+                              label: msg,
+                              child: const SizedBox(width: 100, height: 100),
+                            );
+                          },
+                          child: const Text('overlay child'),
+                        );
+                      },
+                    ),
                   );
                 },
               ),
