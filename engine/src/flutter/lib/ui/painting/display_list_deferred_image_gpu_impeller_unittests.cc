@@ -11,8 +11,8 @@
 #include "flutter/testing/testing.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-
 #include "impeller/core/texture_descriptor.h"
+#include "impeller/renderer/testing/mocks.h"
 
 namespace flutter {
 namespace testing {
@@ -21,29 +21,6 @@ class MockTextureRegistry : public TextureRegistry {
  public:
   MockTextureRegistry() = default;
   virtual ~MockTextureRegistry() = default;
-};
-
-// Local mock texture for testing purposes.
-class MockTexture : public impeller::Texture {
- public:
-  explicit MockTexture(const impeller::TextureDescriptor& desc)
-      : impeller::Texture(desc) {}
-
-  MOCK_METHOD(void, SetLabel, (std::string_view label), (override));
-  MOCK_METHOD(void,
-              SetLabel,
-              (std::string_view label, std::string_view trailing),
-              (override));
-  MOCK_METHOD(bool, IsValid, (), (const, override));
-  MOCK_METHOD(impeller::ISize, GetSize, (), (const, override));
-  MOCK_METHOD(bool,
-              OnSetContents,
-              (const uint8_t* contents, size_t length, size_t slice),
-              (override));
-  MOCK_METHOD(bool,
-              OnSetContents,
-              (std::shared_ptr<const fml::Mapping> mapping, size_t slice),
-              (override));
 };
 
 class MockDlImage : public DlImage {
@@ -163,7 +140,7 @@ TEST(DlDeferredImageGPUImpeller, TrashesDisplayList) {
     auto mock_image = sk_make_sp<MockDlImage>();
     impeller::TextureDescriptor desc;
     desc.size = {1, 1};
-    auto mock_texture = std::make_shared<MockTexture>(desc);
+    auto mock_texture = std::make_shared<impeller::testing::MockTexture>(desc);
     EXPECT_CALL(*mock_image, impeller_texture)
         .WillOnce(::testing::Return(mock_texture));
     EXPECT_CALL(*snapshot_delegate,
