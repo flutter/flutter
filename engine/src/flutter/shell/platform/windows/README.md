@@ -30,7 +30,7 @@ See:
 
 1. [Setting up the Engine development environment](https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Setting-up-the-Engine-development-environment.md)
 2. [Compiling for Windows](https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Compiling-the-engine.md#compiling-for-windows)
-3. [Debugging Windows builds with Visual Studio](https://github.com/flutter/flutter/wiki/Debugging-the-engine#debugging-windows-builds-with-visual-studio)
+3. [Debugging Windows builds with Visual Studio](https://github.com/flutter/flutter/blob/main/docs/engine/Debugging-the-engine.md#debugging-windows-builds-with-visual-studio)
 
 ### Notable files
 
