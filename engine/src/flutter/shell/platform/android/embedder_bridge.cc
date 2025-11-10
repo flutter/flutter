@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/android/embedder_bridge.h"
+#include "flutter/shell/common/run_configuration.h"
 #include "flutter/shell/common/shell.h"
+#include "flutter/shell/platform/android/platform_view_android.h"
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 
 namespace flutter {
@@ -11,113 +13,58 @@ namespace flutter {
 EmbedderBridge::EmbedderBridge(
     const flutter::TaskRunners& task_runners,
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-    const flutter::Settings& settings)
+    const flutter::Settings& settings,
+    AndroidRenderingAPI rendering_api)
     : task_runners_(task_runners),
       jni_facade_(jni_facade),
-      settings_(settings) {
-  FlutterRendererConfig renderer_config = {};
-  renderer_config.type = kOpenGL;
-  renderer_config.open_gl.struct_size = sizeof(FlutterOpenGLRendererConfig);
-  renderer_config.open_gl.make_current = &EmbedderBridge::MakeCurrent;
-  renderer_config.open_gl.clear_current = &EmbedderBridge::ClearCurrent;
-  renderer_config.open_gl.present = &EmbedderBridge::Present;
-  renderer_config.open_gl.fbo_callback = &EmbedderBridge::GetFBO;
+      settings_(settings),
+      rendering_api_(rendering_api) {
+  auto on_create_platform_view =
+      [this](Shell& shell) -> std::unique_ptr<PlatformView> {
+    auto platform_view = std::make_unique<PlatformViewAndroid>(
+        shell, task_runners_, jni_facade_, rendering_api_);
+    platform_view_ = platform_view->GetWeakPtr();
+    return platform_view;
+  };
 
-  FlutterProjectArgs args = {};
-  args.struct_size = sizeof(FlutterProjectArgs);
-  std::filesystem::path p(settings.application_kernel_asset);
-  args.assets_path = p.parent_path().c_str();
-  args.platform_message_callback = &EmbedderBridge::OnPlatformMessage;
+  auto on_create_rasterizer = [](Shell& shell) {
+    return std::make_unique<Rasterizer>(shell);
+  };
 
-  FlutterEngineResult result = FlutterEngineInitialize(
-      FLUTTER_ENGINE_VERSION, &renderer_config, &args, this, &engine_);
-  if (result != kSuccess || engine_ == nullptr) {
-    FML_LOG(ERROR) << "Failed to initialize Flutter engine: " << result;
-  }
+  // TODO(justinmc): What should the thread host be?
+  embedder_engine_ = std::make_unique<EmbedderEngine>(
+      nullptr, task_runners_, settings_, RunConfiguration(),
+      on_create_platform_view, on_create_rasterizer, nullptr);
 }
 
-EmbedderBridge::~EmbedderBridge() {
-  if (engine_) {
-    FlutterEngineShutdown(engine_);
-  }
-}
+EmbedderBridge::~EmbedderBridge() = default;
 
 bool EmbedderBridge::IsValid() const {
-  return engine_ != nullptr;
+  return embedder_engine_ && embedder_engine_->IsValid();
 }
 
 void EmbedderBridge::Run(const std::string& entrypoint) {
   FML_LOG(ERROR) << "Running";
-  FlutterRendererConfig renderer_config = {};
-  renderer_config.type = kOpenGL;
-  renderer_config.open_gl.struct_size = sizeof(FlutterOpenGLRendererConfig);
-  renderer_config.open_gl.make_current = &EmbedderBridge::MakeCurrent;
-  renderer_config.open_gl.clear_current = &EmbedderBridge::ClearCurrent;
-  renderer_config.open_gl.present = &EmbedderBridge::Present;
-  renderer_config.open_gl.fbo_callback = &EmbedderBridge::GetFBO;
-
-  FlutterProjectArgs args = {};
-  FML_LOG(ERROR) << "Creating Project args";
-  args.struct_size = sizeof(FlutterProjectArgs);
-  args.assets_path = settings_.assets_path.c_str();
-  args.custom_dart_entrypoint = entrypoint.c_str();
-  args.platform_message_callback = &EmbedderBridge::OnPlatformMessage;
-
-  FlutterEngineResult result = FlutterEngineRun(
-      FLUTTER_ENGINE_VERSION, &renderer_config, &args, this, &engine_);
-
-  if (result != kSuccess || engine_ == nullptr) {
-    FML_LOG(ERROR) << "Failed to run Flutter engine.";
+  if (!embedder_engine_) {
+    return;
   }
+  RunConfiguration config;
+  config.SetEntrypoint(entrypoint);
+  embedder_engine_->RunRootIsolate();
 }
 
 shell::Shell& EmbedderBridge::GetShell() {
-  if (!engine_) {
-    return nullptr;
-  }
-  auto embedder_engine = reinterpret_cast<EmbedderEngine*>(engine_);
+  return embedder_engine_->GetShell();
+}
 
-  return &embedder_engine->GetShell();
+fml::WeakPtr<PlatformViewAndroid> EmbedderBridge::GetPlatformView() {
+  return platform_view_;
 }
 
 void EmbedderBridge::OnVsync(int64_t baton,
                              fml::TimePoint frame_start_time,
                              fml::TimePoint frame_target_time) {
-  FlutterEngineOnVsync(engine_, baton,
-                       frame_start_time.ToEpochDelta().ToNanoseconds(),
-                       frame_target_time.ToEpochDelta().ToNanoseconds());
-}
-
-// --- Embedder API Callbacks ---
-
-bool EmbedderBridge::MakeCurrent(void* user_data) {
-  // Implementation to make the GL context current.
-  return true;
-}
-
-bool EmbedderBridge::ClearCurrent(void* user_data) {
-  // Implementation to clear the GL context.
-  return true;
-}
-
-bool EmbedderBridge::Present(void* user_data) {
-  // Implementation to present the rendered frame.
-  return true;
-}
-
-uint32_t EmbedderBridge::GetFBO(void* user_data) {
-  // Implementation to get the framebuffer object.
-  return 0;
-}
-
-void EmbedderBridge::OnPlatformMessage(const FlutterPlatformMessage* message,
-                                       void* user_data) {
-  // Implementation to handle platform messages.
-  FML_LOG(ERROR) << "Platform Message: " << message;
-}
-
-void EmbedderBridge::VsyncCallback(void* user_data, intptr_t baton) {
-  // Implementation to request a vsync signal from the platform.
+  embedder_engine_->OnVsyncEvent(baton, frame_start_time, frame_target_time);
 }
 
 }  // namespace flutter
