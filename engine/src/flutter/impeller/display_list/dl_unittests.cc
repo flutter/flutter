@@ -1360,6 +1360,51 @@ TEST_P(DisplayListTest, DrawShapes) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(DisplayListTest, DrawCirclesWithTransformations) {
+  auto callback = [&]() {
+    static float filled_radius = 100.0;
+    static float filled_alpha = 255.0;
+    static float filled_scale[2] = {1.0, 1.0};
+    static float stroked_radius = 20.0;
+    static float stroke_width = 10.0;
+    static float stroked_alpha = 255.0;
+    static float stroked_scale[2] = {1.0, 1.0};
+
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    {
+      ImGui::SliderFloat("Filled Radius", &filled_radius, 0, 500);
+      ImGui::SliderFloat("Filled Alpha", &filled_alpha, 0, 255);
+      ImGui::SliderFloat2("Filled Scale", filled_scale, 0, 10.0);
+      ImGui::SliderFloat("Stroked Radius", &stroked_radius, 0, 10.0);
+      ImGui::SliderFloat("Stroked Width", &stroke_width, 0, 500);
+      ImGui::SliderFloat("Stroked Alpha", &stroked_alpha, 0, 10.0);
+      ImGui::SliderFloat2("Stroked Scale", stroked_scale, 0, 10.0);
+    }
+    ImGui::End();
+
+    flutter::DisplayListBuilder builder;
+    flutter::DlPaint paint;
+
+    paint.setColor(flutter::DlColor::kBlue().withAlpha(filled_alpha));
+    paint.setDrawStyle(flutter::DlDrawStyle::kFill);
+    builder.Save();
+    builder.Scale(filled_scale[0], filled_scale[1]);
+    builder.DrawCircle(DlPoint(500, 750), filled_radius, paint);
+    builder.Restore();
+
+    paint.setColor(flutter::DlColor::kRed().withAlpha(stroked_alpha));
+    paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
+    paint.setStrokeWidth(stroke_width);
+    builder.Save();
+    builder.Scale(stroked_scale[0], stroked_scale[1]);
+    builder.DrawCircle(DlPoint(1250, 750), stroked_radius, paint);
+    builder.Restore();
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(DisplayListTest, ClipDrawRRectWithNonCircularRadii) {
   flutter::DisplayListBuilder builder;
 

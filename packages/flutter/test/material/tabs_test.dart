@@ -9335,4 +9335,28 @@ void main() {
     );
     expect(tester.getSize(find.byType(Tab)), Size.zero);
   });
+
+  testWidgets('Tab can have children with other semantics roles', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: DefaultTabController(
+              length: 1,
+              child: TabBar(
+                isScrollable: true,
+                tabs: <Widget>[
+                  Tab(
+                    child: Semantics(role: SemanticsRole.listItem, child: const Text('A')),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
 }
