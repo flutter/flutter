@@ -2050,15 +2050,13 @@ void main() {
     expect(isItemHighlighted(tester, themeData, 'Menu 1'), true);
 
     // Press up to the upper item (Item 0).
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowUp);
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pumpAndSettle();
     expect(find.widgetWithText(TextField, 'Item 0'), findsOneWidget);
     expect(isItemHighlighted(tester, themeData, 'Item 0'), true);
 
     // Continue to move up to the last item (Item 5).
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowUp);
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pumpAndSettle();
     expect(find.widgetWithText(TextField, 'Item 5'), findsOneWidget);
     expect(isItemHighlighted(tester, themeData, 'Item 5'), true);
@@ -2273,9 +2271,9 @@ void main() {
     final ThemeData themeData = ThemeData();
     final List<DropdownMenuEntry<TestMenu>> menuWithDisabledItems = <DropdownMenuEntry<TestMenu>>[
       const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
-      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 1', enabled: false),
-      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 2'),
-      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 3'),
+      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu1, label: 'Item 1', enabled: false),
+      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu2, label: 'Item 2'),
+      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu3, label: 'Item 3'),
     ];
     final TextEditingController controller = TextEditingController();
     addTearDown(controller.dispose);
@@ -2311,7 +2309,7 @@ void main() {
     int expectedCount = 1;
 
     // Test onSelected on key press
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
 
     // On mobile platforms, the TextField cannot gain focus by default; the focus is
@@ -4063,6 +4061,97 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/177993.
+  testWidgets('Pressing ESC key closes the menu when requestFocusOnTap is false', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              requestFocusOnTap: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Move focus to the TextField and open the menu.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(findMenuPanel(), findsOne);
+
+    // Press ESC to close the menu.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(findMenuPanel(), findsNothing);
+  });
+
+  testWidgets('Pressing ESC key closes the menu when requestFocusOnTap is true', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              requestFocusOnTap: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Move focus to the TextField and open the menu.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(findMenuPanel(), findsOne);
+
+    // Press ESC to close the menu.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(findMenuPanel(), findsNothing);
+  });
+
+  testWidgets(
+    'Pressing ESC key after changing the selected item closes the menu',
+    (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Material(
+            child: Center(
+              child: DropdownMenu<TestMenu>(
+                dropdownMenuEntries: menuChildren,
+                initialSelection: menuChildren[2].value,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Move focus to the TextField and open the menu.
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+      expect(findMenuPanel(), findsOne);
+
+      // Move the selection.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(isItemHighlighted(tester, themeData, menuChildren[3].label), isTrue);
+
+      // Press ESC to close the menu.
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pump();
+      expect(findMenuPanel(), findsNothing);
+    },
+    variant: TargetPlatformVariant.all(),
+  );
+
   testWidgets('DropdownMenu passes maxLines to TextField', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -4853,6 +4942,119 @@ void main() {
       expect(controller.text, TestMenu.mainMenu1.label);
     },
   );
+
+  testWidgets('DropdownMenu does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final TextEditingController controller = TextEditingController(text: 'I');
+    addTearDown(controller.dispose);
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DropdownMenu<TestMenu>)), Size.zero);
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    await tester.pump();
+    expect(find.byType(MenuItemButton), findsWidgets);
+  });
+
+  // The variants to test in the focus handling test.
+  final ValueVariant<TextInputAction> focusVariants = ValueVariant<TextInputAction>(
+    TextInputAction.values.toSet(),
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/177009.
+  testWidgets('Handles focus correctly when TextInputAction is invoked', (
+    WidgetTester tester,
+  ) async {
+    Future<void> ensureCorrectFocusHandlingForAction(
+      TextInputAction textInputAction, {
+      required bool shouldLoseFocus,
+      bool shouldFocusNext = false,
+      bool shouldFocusPrevious = false,
+    }) async {
+      final FocusNode previousFocusNode = FocusNode();
+      final FocusNode textFieldFocusNode = FocusNode();
+      final FocusNode nextFocusNode = FocusNode();
+      addTearDown(previousFocusNode.dispose);
+      addTearDown(textFieldFocusNode.dispose);
+      addTearDown(nextFocusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                TextButton(
+                  focusNode: previousFocusNode,
+                  child: const Text('Previous'),
+                  onPressed: () {},
+                ),
+                DropdownMenu<TestMenu>(
+                  dropdownMenuEntries: menuChildren,
+                  focusNode: textFieldFocusNode,
+                  textInputAction: textInputAction,
+                  requestFocusOnTap: true,
+                  showTrailingIcon: false,
+                ),
+                TextButton(focusNode: nextFocusNode, child: const Text('Next'), onPressed: () {}),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(textFieldFocusNode.hasFocus, isFalse);
+
+      // Tap on DropdownMenu to request focus on the TextField.
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pumpAndSettle();
+      expect(textFieldFocusNode.hasFocus, isTrue);
+
+      await tester.testTextInput.receiveAction(textInputAction);
+      await tester.pumpAndSettle();
+
+      expect(previousFocusNode.hasFocus, equals(shouldFocusPrevious));
+      expect(textFieldFocusNode.hasFocus, equals(!shouldLoseFocus));
+      expect(nextFocusNode.hasFocus, equals(shouldFocusNext));
+    }
+
+    // The expectations for each of the types of TextInputAction.
+    const Map<TextInputAction, bool> actionShouldLoseFocus = <TextInputAction, bool>{
+      TextInputAction.none: false,
+      TextInputAction.unspecified: false,
+      TextInputAction.done: true,
+      TextInputAction.go: true,
+      TextInputAction.search: true,
+      TextInputAction.send: true,
+      TextInputAction.continueAction: false,
+      TextInputAction.join: false,
+      TextInputAction.route: false,
+      TextInputAction.emergencyCall: false,
+      TextInputAction.newline: true,
+      TextInputAction.next: true,
+      TextInputAction.previous: true,
+    };
+
+    final TextInputAction textInputAction = focusVariants.currentValue!;
+    expect(actionShouldLoseFocus.containsKey(textInputAction), isTrue);
+
+    await ensureCorrectFocusHandlingForAction(
+      textInputAction,
+      shouldLoseFocus: actionShouldLoseFocus[textInputAction]!,
+      shouldFocusNext: textInputAction == TextInputAction.next,
+      shouldFocusPrevious: textInputAction == TextInputAction.previous,
+    );
+  }, variant: focusVariants);
 }
 
 enum TestMenu {
