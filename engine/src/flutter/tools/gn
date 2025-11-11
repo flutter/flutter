@@ -858,7 +858,6 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['skia_use_expat'] = False
   gn_args['skia_use_vulkan'] = False
   gn_args['skia_use_webgpu'] = False
-  gn_args['skia_use_libheif'] = False
   gn_args['skia_use_libjpeg_turbo_encode'] = False
   gn_args['skia_use_no_jpeg_encode'] = True
   # TODO(yjbanov): https://github.com/flutter/flutter/issues/122759
@@ -878,7 +877,6 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['skia_use_harfbuzz'] = True
   gn_args['skia_use_fontations'] = False
   gn_args['skia_use_fontconfig'] = False
-  gn_args['skia_use_libheif'] = False
   gn_args['skia_enable_fontmgr_custom_directory'] = False
   gn_args['skia_enable_fontmgr_custom_embedded'] = True
   gn_args['skia_enable_fontmgr_custom_empty'] = True
