@@ -728,6 +728,8 @@ void main() {
         flagsCollection: allFlags,
         actions: actions,
         identifier: 'i',
+        traversalParentIdentifier: '01',
+        traversalChildIdentifier: '01',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -753,6 +755,8 @@ void main() {
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
         locale: null,
+        minValue: '0',
+        maxValue: '0',
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1028,6 +1032,8 @@ void main() {
         flagsCollection: allFlags,
         actions: actions,
         identifier: 'i',
+        traversalChildIdentifier: '01',
+        traversalParentIdentifier: '01',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -1053,6 +1059,8 @@ void main() {
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
         locale: null,
+        minValue: '0',
+        maxValue: '0',
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1129,6 +1137,8 @@ void main() {
         flagsCollection: SemanticsFlags.none,
         actions: 0,
         identifier: 'i',
+        traversalParentIdentifier: '01',
+        traversalChildIdentifier: '01',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -1153,6 +1163,8 @@ void main() {
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
         locale: null,
+        minValue: '0',
+        maxValue: '0',
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1234,6 +1246,8 @@ void main() {
         flagsCollection: SemanticsFlags.none,
         actions: 0,
         identifier: 'i',
+        traversalChildIdentifier: '01',
+        traversalParentIdentifier: '01',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -1258,6 +1272,8 @@ void main() {
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
         locale: null,
+        minValue: '0',
+        maxValue: '0',
       );
       final _FakeSemanticsNode emptyNode = _FakeSemanticsNode(emptyData);
 
@@ -1266,6 +1282,8 @@ void main() {
         flagsCollection: allFlags,
         actions: allActions,
         identifier: 'i',
+        traversalChildIdentifier: '01',
+        traversalParentIdentifier: '01',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -1291,6 +1309,8 @@ void main() {
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
         locale: null,
+        minValue: '0',
+        maxValue: '0',
       );
       final _FakeSemanticsNode fullNode = _FakeSemanticsNode(fullData);
 
@@ -1398,6 +1418,8 @@ void main() {
         flagsCollection: SemanticsFlags.none,
         actions: SemanticsAction.customAction.index,
         identifier: 'i',
+        traversalChildIdentifier: '01',
+        traversalParentIdentifier: '01',
         attributedLabel: AttributedString('a'),
         attributedIncreasedValue: AttributedString('b'),
         attributedValue: AttributedString('c'),
@@ -1423,6 +1445,8 @@ void main() {
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
         locale: null,
+        minValue: '0',
+        maxValue: '0',
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 

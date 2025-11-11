@@ -56,10 +56,12 @@ class LocaleInitialization extends Scenario {
         currentValueLength: 0,
         scrollChildren: 0,
         scrollIndex: 0,
+        traversalParent: -1,
         scrollPosition: 0.0,
         scrollExtentMax: 0.0,
         scrollExtentMin: 0.0,
         transform: Matrix4.identity().storage,
+        hitTestTransform: Matrix4.identity().storage,
         hint: '',
         hintAttributes: <StringAttribute>[],
         value: '',
@@ -75,6 +77,8 @@ class LocaleInitialization extends Scenario {
         controlsNodes: null,
         inputType: SemanticsInputType.none,
         locale: null,
+        minValue: '0',
+        maxValue: '0',
       );
 
     final SemanticsUpdate semanticsUpdate = semanticsUpdateBuilder.build();
@@ -116,10 +120,12 @@ class LocaleInitialization extends Scenario {
         currentValueLength: 0,
         scrollChildren: 0,
         scrollIndex: 0,
+        traversalParent: -1,
         scrollPosition: 0.0,
         scrollExtentMax: 0.0,
         scrollExtentMin: 0.0,
         transform: Matrix4.identity().storage,
+        hitTestTransform: Matrix4.identity().storage,
         hint: '',
         hintAttributes: <StringAttribute>[],
         value: '',
@@ -135,6 +141,8 @@ class LocaleInitialization extends Scenario {
         controlsNodes: null,
         inputType: SemanticsInputType.none,
         locale: null,
+        minValue: '0',
+        maxValue: '0',
       );
 
     final SemanticsUpdate semanticsUpdate = semanticsUpdateBuilder.build();
