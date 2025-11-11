@@ -41,6 +41,7 @@ void SemanticsUpdateBuilder::updateNode(
     int platformViewId,
     int scrollChildren,
     int scrollIndex,
+    int traversalParent,
     double scrollPosition,
     double scrollExtentMax,
     double scrollExtentMin,
@@ -62,6 +63,7 @@ void SemanticsUpdateBuilder::updateNode(
     std::string tooltip,
     int textDirection,
     const tonic::Float64List& transform,
+    const tonic::Float64List& hitTestTransform,
     const tonic::Int32List& childrenInTraversalOrder,
     const tonic::Int32List& childrenInHitTestOrder,
     const tonic::Int32List& localContextActions,
@@ -72,7 +74,9 @@ void SemanticsUpdateBuilder::updateNode(
     int validationResult,
     int hitTestBehavior,
     int inputType,
-    std::string locale) {
+    std::string locale,
+    std::string minValue,
+    std::string maxValue) {
   FML_CHECK(scrollChildren == 0 ||
             (scrollChildren > 0 && childrenInHitTestOrder.data()))
       << "Semantics update contained scrollChildren but did not have "
@@ -90,9 +94,12 @@ void SemanticsUpdateBuilder::updateNode(
   node.platformViewId = platformViewId;
   node.scrollChildren = scrollChildren;
   node.scrollIndex = scrollIndex;
+  node.traversalParent = traversalParent;
   node.scrollPosition = scrollPosition;
   node.scrollExtentMax = scrollExtentMax;
   node.scrollExtentMin = scrollExtentMin;
+  node.minValue = std::move(minValue);
+  node.maxValue = std::move(maxValue);
   node.rect = SkRect::MakeLTRB(SafeNarrow(left), SafeNarrow(top),
                                SafeNarrow(right), SafeNarrow(bottom));
   node.identifier = std::move(identifier);
@@ -113,6 +120,11 @@ void SemanticsUpdateBuilder::updateNode(
     scalarTransform[i] = SafeNarrow(transform.data()[i]);
   }
   node.transform = SkM44::ColMajor(scalarTransform);
+  SkScalar scalarHitTestTransform[16];
+  for (int i = 0; i < 16; ++i) {
+    scalarHitTestTransform[i] = SafeNarrow(hitTestTransform.data()[i]);
+  }
+  node.hitTestTransform = SkM44::ColMajor(scalarHitTestTransform);
   node.childrenInTraversalOrder =
       std::vector<int32_t>(childrenInTraversalOrder.data(),
                            childrenInTraversalOrder.data() +
