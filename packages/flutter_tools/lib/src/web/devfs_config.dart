@@ -212,20 +212,19 @@ class HttpsConfig {
   /// If they are both `null`, return `null`.
   ///
   /// Otherwise, throw an [Exception].
-  static HttpsConfig? parse(Object? tlsCertPath, Object? tlsCertKeyPath) {
-    return switch ((tlsCertPath, tlsCertKeyPath)) {
-      (final String certPath, final String certKeyPath) => HttpsConfig(
-        certPath: certPath,
-        certKeyPath: certKeyPath,
-      ),
-      (null, null) => null,
-      (final Object? certPath, final Object? certKeyPath) => throw ArgumentError(
-        'When providing TLS certificates, both `tlsCertPath` and '
-        '`tlsCertKeyPath` must be provided as strings. '
-        'Found: tlsCertPath: ${certPath ?? 'null'}, tlsCertKeyPath: ${certKeyPath ?? 'null'}',
-      ),
-    };
-  }
+  static HttpsConfig? parse(Object? tlsCertPath, Object? tlsCertKeyPath) =>
+      switch ((tlsCertPath, tlsCertKeyPath)) {
+        (final String certPath, final String certKeyPath) => HttpsConfig(
+          certPath: certPath,
+          certKeyPath: certKeyPath,
+        ),
+        (null, null) => null,
+        (final Object? certPath, final Object? certKeyPath) => throw ArgumentError(
+          'When providing TLS certificates, both `tlsCertPath` and '
+          '`tlsCertKeyPath` must be provided as strings. '
+          'Found: tlsCertPath: ${certPath ?? 'null'}, tlsCertKeyPath: ${certKeyPath ?? 'null'}',
+        ),
+      };
 
   /// Creates a copy of this [HttpsConfig] with optional overrides.
   HttpsConfig copyWith({String? certPath, String? certKeyPath}) => HttpsConfig(
