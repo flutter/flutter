@@ -323,10 +323,10 @@ void main() {
 
         // This is the main check of this test.
         //
-        // We are checking that, even though crash reporting failed with an
-        // exception on the first attempt, the second attempt tries to report the
-        // *original* crash, and not the crash from the first crash report
-        // attempt.
+        // We are checking that, even though multiple asynchronous errors were
+        // thrown, only a single crash report is sent. This ensures that a
+        // single process crash can't result in multiple crash events.
+
         // This test only makes sense if we've thrown more than one exception.
         expect(exceptionCount, greaterThan(1));
         expect(exceptionCount, command.exceptionCount);
