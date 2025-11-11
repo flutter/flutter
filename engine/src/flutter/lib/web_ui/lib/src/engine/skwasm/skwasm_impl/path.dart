@@ -14,8 +14,7 @@ enum PathDirection { clockwise, counterClockwise }
 
 enum PathArcSize { small, large }
 
-class SkwasmPath extends SkwasmObjectWrapper<RawPath>
-    implements DisposablePath, DisposablePathBuilder {
+class SkwasmPath implements DisposablePath, DisposablePathBuilder {
   factory SkwasmPath() {
     return SkwasmPath.fromHandle(pathCreate());
   }
@@ -24,11 +23,17 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath>
     return SkwasmPath.fromHandle(pathCopy(source.handle));
   }
 
-  SkwasmPath.fromHandle(PathHandle handle) : super(handle, _registry);
+  SkwasmPath.fromHandle(this.handle);
 
-  static final SkwasmFinalizationRegistry<RawPath> _registry = SkwasmFinalizationRegistry<RawPath>(
-    (PathHandle handle) => pathDispose(handle),
-  );
+  final Pointer<RawPath> handle;
+  bool _isDisposed = false;
+
+  @override
+  void dispose() {
+    assert(!_isDisposed, 'SkwasmPath has already been disposed.');
+    pathDispose(handle);
+    _isDisposed = true;
+  }
 
   @override
   SkwasmPath build() => this;
