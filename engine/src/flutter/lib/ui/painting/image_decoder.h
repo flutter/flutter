@@ -35,7 +35,9 @@ class ImageDecoder {
   using ImageResult = std::function<void(sk_sp<DlImage>, std::string)>;
 
   enum TargetPixelFormat {
+    /// An unknown pixel format, reserved for error cases.
     kUnknown,
+    /// Explicitly declare the target pixel is left for the engine to decide.
     kDontCare,
     kR32G32B32A32Float,
   };
