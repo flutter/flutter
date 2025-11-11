@@ -280,6 +280,7 @@ void main() {
     expect(tester.widget<Overlay>(find.byType(Overlay)).clipBehavior, Clip.none);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/170250.
   testWidgets('Can remove page before they are added', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
     Future<void> buildPages(List<Page<void>> pages) {
@@ -334,6 +335,52 @@ void main() {
     await buildPages(<Page<void>>[page, page4, page5, page6]);
     await tester.pumpAndSettle();
     expect(find.text('page6'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/177322.
+  testWidgets('Can remove page before they are added - case 2', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+    Future<void> buildPages(List<Page<void>> pages) {
+      return tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData.fromView(tester.view),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Navigator(key: key, pages: pages, onDidRemovePage: (_) {}),
+          ),
+        ),
+      );
+    }
+
+    const MaterialPage<void> page = MaterialPage<void>(
+      key: ValueKey<String>('page'),
+      child: Text('page'),
+    );
+    const MaterialPage<void> page1 = MaterialPage<void>(
+      key: ValueKey<String>('page1'),
+      child: Text('page1'),
+    );
+    const MaterialPage<void> page2 = MaterialPage<void>(
+      key: ValueKey<String>('page2'),
+      child: Text('page2'),
+    );
+    const MaterialPage<void> page3 = MaterialPage<void>(
+      key: ValueKey<String>('page3'),
+      child: Text('page3'),
+    );
+    await buildPages(<Page<void>>[page]);
+
+    expect(find.text('page'), findsOneWidget);
+
+    await buildPages(<Page<void>>[page, page1, page2, page3]);
+
+    // In mid transition;
+    await tester.pump(const Duration(microseconds: 150));
+    // Cause page1 and page2 to be removed before they are added.
+    await buildPages(<Page<void>>[page]);
+    await tester.pumpAndSettle();
+    expect(find.text('page'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -1263,6 +1310,77 @@ void main() {
     await tester.tap(find.text('B'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('popUntilWithResult return value to the last popped route', (
+    WidgetTester tester,
+  ) async {
+    bool? firstReturnValue;
+    bool? secondReturnValue;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        initialRoute: '/',
+        onGenerateRoute: (RouteSettings settings) {
+          final String? routeName = settings.name;
+
+          switch (routeName) {
+            case '/':
+              return MaterialPageRoute<bool>(
+                builder: (BuildContext context) => OnTapPage(
+                  id: '/',
+                  onTap: () async {
+                    firstReturnValue = await Navigator.pushNamed(context, '/A');
+                  },
+                ),
+                settings: settings,
+              );
+            case '/A':
+              return MaterialPageRoute<bool>(
+                builder: (BuildContext context) => OnTapPage(
+                  id: 'A',
+                  onTap: () async {
+                    secondReturnValue = await Navigator.pushNamed(context, '/B');
+                  },
+                ),
+                settings: settings,
+              );
+            case '/B':
+              return MaterialPageRoute<bool>(
+                builder: (BuildContext context) => OnTapPage(
+                  id: 'B',
+                  onTap: () async {
+                    Navigator.popUntilWithResult<bool>(
+                      context,
+                      (Route<dynamic> route) => route.isFirst,
+                      true,
+                    );
+                  },
+                ),
+                settings: settings,
+              );
+            default:
+              return null;
+          }
+        },
+      ),
+    );
+    expect(find.text('/'), findsOneWidget);
+
+    await tester.tap(find.text('/'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('A'));
+    await tester.pumpAndSettle();
+    expect(find.text('B'), findsOneWidget);
+
+    await tester.tap(find.text('B'));
+    await tester.pumpAndSettle();
+    expect(find.text('/'), findsOneWidget);
+
+    // Only the first return value should be set.
+    expect(firstReturnValue, isTrue);
+    expect(secondReturnValue, isNull);
   });
 
   testWidgets('pushAndRemoveUntil triggers secondaryAnimation', (WidgetTester tester) async {

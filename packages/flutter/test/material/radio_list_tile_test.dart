@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -863,7 +864,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test default cursor when disabled
@@ -2305,5 +2306,16 @@ void main() {
 
     final Radio<bool> radio = tester.widget(find.byType(Radio<bool>));
     expect(radio.innerRadius, innerRadius);
+  });
+
+  testWidgets('RadioListTile does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(child: SizedBox.shrink(child: RadioListTile<bool>(value: true))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RadioListTile<bool>)), Size.zero);
   });
 }

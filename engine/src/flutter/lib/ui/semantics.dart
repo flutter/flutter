@@ -1156,6 +1156,59 @@ enum Tristate {
   }
 }
 
+/// Describes how a semantic node should behave during hit testing.
+///
+/// This enum allows the framework to communicate pointer event handling
+/// behavior to the platform's accessibility layer. Different platforms
+/// may implement this behavior differently based on their accessibility
+/// infrastructure.
+///
+/// See also:
+///  * [SemanticsUpdateBuilder.updateNode], which accepts this enum.
+enum SemanticsHitTestBehavior {
+  /// Defer to the platform's default hit test behavior inference.
+  ///
+  /// When set to defer, the platform will infer the appropriate behavior
+  /// based on the semantic node's properties such as interactive behaviors,
+  /// route scoping, etc.
+  ///
+  /// On the web, the default inferred behavior is `transparent` for
+  /// non-interactive semantic nodes, allowing pointer events to pass through.
+  ///
+  /// This is the default value and provides backward compatibility.
+  defer,
+
+  /// The semantic element is opaque to hit testing, consuming any pointer
+  /// events within its bounds and preventing them from reaching elements
+  /// behind it in Z-order (siblings and ancestors).
+  ///
+  /// Children of this node can still receive pointer events normally.
+  /// Only elements that are visually behind this node (lower in the stacking
+  /// order) will be blocked from receiving events.
+  ///
+  /// This is typically used for modal surfaces like dialogs, bottom sheets,
+  /// and drawers that should block interaction with content behind them while
+  /// still allowing interaction with their own content.
+  ///
+  /// Platform implementations:
+  ///  * On the web, this results in `pointer-events: all` CSS property.
+  opaque,
+
+  /// The semantic element is transparent to hit testing.
+  ///
+  /// Transparent nodes do not receive hit test events and allow events to pass
+  /// through to elements behind them.
+  ///
+  /// Note: This differs from the framework's `HitTestBehavior.translucent`,
+  /// which receives events while also allowing pass-through. Web's binary
+  /// `pointer-events` property (all or none) cannot support true translucent
+  /// behavior.
+  ///
+  /// Platform implementations:
+  ///  * On the web, this results in `pointer-events: none` CSS property.
+  transparent,
+}
+
 /// Represents a collection of boolean flags that convey semantic information
 /// about a widget's accessibility state and properties.
 ///
@@ -1188,6 +1241,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     this.isLink = false,
     this.isSlider = false,
     this.isKeyboardKey = false,
+    this.isAccessibilityFocusBlocked = false,
   }) {
     _initSemanticsFlags(
       this,
@@ -1214,6 +1268,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       isLink,
       isSlider,
       isKeyboardKey,
+      isAccessibilityFocusBlocked,
     );
   }
 
@@ -1227,6 +1282,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       Int,
       Int,
       Int,
+      Bool,
       Bool,
       Bool,
       Bool,
@@ -1270,6 +1326,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     bool isLink,
     bool isSlider,
     bool isKeyboardKey,
+    bool isAccessibilityFocusBlocked,
   );
 
   /// The set of semantics flags with every flag set to false.
@@ -1295,6 +1352,17 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
 
   /// {@macro dart.ui.semantics.isFocused}
   final Tristate isFocused;
+
+  /// whether this node's accessibility focus is blocked.
+  ///
+  /// If `true`, this node is not accessibility focusable.
+  /// If `false`, the a11y focusability is determined based on
+  /// the node's role and other properties, such as whether it is a button.
+  ///
+  /// This is for accessibility focus, which is the focus used by screen readers
+  /// like TalkBack and VoiceOver. It is different from input focus, which is
+  /// usually held by the element that currently responds to keyboard inputs.
+  final bool isAccessibilityFocusBlocked;
 
   /// {@macro dart.ui.semantics.isButton}
   final bool isButton;
@@ -1370,6 +1438,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       isLink: isLink || other.isLink,
       isSlider: isSlider || other.isSlider,
       isKeyboardKey: isKeyboardKey || other.isKeyboardKey,
+      isAccessibilityFocusBlocked: isAccessibilityFocusBlocked || other.isAccessibilityFocusBlocked,
     );
   }
 
@@ -1398,6 +1467,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     bool? isLink,
     bool? isSlider,
     bool? isKeyboardKey,
+    bool? isAccessibilityFocusBlocked,
   }) {
     return SemanticsFlags(
       isChecked: isChecked ?? this.isChecked,
@@ -1423,6 +1493,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       isKeyboardKey: isKeyboardKey ?? this.isKeyboardKey,
       isExpanded: isExpanded ?? this.isExpanded,
       isRequired: isRequired ?? this.isRequired,
+      isAccessibilityFocusBlocked: isAccessibilityFocusBlocked ?? this.isAccessibilityFocusBlocked,
     );
   }
 
@@ -1453,7 +1524,8 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
           isReadOnly == other.isReadOnly &&
           isLink == other.isLink &&
           isSlider == other.isSlider &&
-          isKeyboardKey == other.isKeyboardKey;
+          isKeyboardKey == other.isKeyboardKey &&
+          isAccessibilityFocusBlocked == other.isAccessibilityFocusBlocked;
 
   @override
   int get hashCode => Object.hashAll(<Object?>[
@@ -1480,6 +1552,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     isLink,
     isSlider,
     isKeyboardKey,
+    isAccessibilityFocusBlocked,
   ]);
 
   /// Convert flags to a list of string.
@@ -1507,6 +1580,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       if (isMultiline) 'isMultiline',
       if (isReadOnly) 'isReadOnly',
       if (isFocused != Tristate.none) 'isFocusable',
+      if (isAccessibilityFocusBlocked) 'isAccessibilityFocusBlocked',
       if (isLink) 'isLink',
       if (isSlider) 'isSlider',
       if (isKeyboardKey) 'isKeyboardKey',
@@ -1519,6 +1593,10 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     ];
   }
 
+  @Deprecated(
+    'Use hasConflictingFlags instead.'
+    'This feature was deprecated after v3.39.0-0.0.pre',
+  )
   /// Checks if any of the boolean semantic flags are set to true
   /// in both this instance and the [other] instance.
   bool hasRepeatedFlags(SemanticsFlags other) {
@@ -1546,6 +1624,35 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
         (isLink && other.isLink) ||
         (isSlider && other.isSlider) ||
         (isKeyboardKey && other.isKeyboardKey);
+  }
+
+  /// Checks if any flags are conflicted in this instance and the [other] instance.
+  bool hasConflictingFlags(SemanticsFlags other) {
+    return isChecked.hasConflict(other.isChecked) ||
+        isSelected.hasConflict(other.isSelected) ||
+        isEnabled.hasConflict(other.isEnabled) ||
+        isToggled.hasConflict(other.isToggled) ||
+        isEnabled.hasConflict(other.isEnabled) ||
+        isExpanded.hasConflict(other.isExpanded) ||
+        isRequired.hasConflict(other.isRequired) ||
+        isFocused.hasConflict(other.isFocused) ||
+        (isButton && other.isButton) ||
+        (isTextField && other.isTextField) ||
+        (isInMutuallyExclusiveGroup && other.isInMutuallyExclusiveGroup) ||
+        (isHeader && other.isHeader) ||
+        (isObscured && other.isObscured) ||
+        (scopesRoute && other.scopesRoute) ||
+        (namesRoute && other.namesRoute) ||
+        (isHidden && other.isHidden) ||
+        (isImage && other.isImage) ||
+        (isLiveRegion && other.isLiveRegion) ||
+        (hasImplicitScrolling && other.hasImplicitScrolling) ||
+        (isMultiline && other.isMultiline) ||
+        (isReadOnly && other.isReadOnly) ||
+        (isLink && other.isLink) ||
+        (isSlider && other.isSlider) ||
+        (isKeyboardKey && other.isKeyboardKey) ||
+        (isAccessibilityFocusBlocked != other.isAccessibilityFocusBlocked);
   }
 }
 
@@ -1764,6 +1871,21 @@ abstract class SemanticsUpdateBuilder {
   /// total number of child nodes that contribute semantics and `scrollIndex`
   /// is the index of the first visible child node that contributes semantics.
   ///
+  /// The `traversalParent` specifies the ID of the semantics node that serves as
+  /// the logical parent of this node for accessibility traversal. This
+  /// parameter is only used by the web engine to establish parent-child
+  /// relationships between nodes that are not directly connected in paint order.
+  /// To ensure correct accessibility traversal, `traversalParent` should be set
+  /// to the logical traversal parent node ID. This parameter is web-specific
+  /// because other platforms can complete grafting when generating the
+  /// semantics tree in traversal order. After grafting, the traversal order and
+  /// hit-test order will be different, which is acceptable for other platforms.
+  /// However, the web engine assumes these two orders are exactly the same, so
+  /// grafting cannot be performed ahead of time on web. Instead, the traversal
+  /// order is updated in the web engine by setting the `aria-owns` attribute
+  /// through this parameter. A value of -1 indicates no special traversal
+  /// parent. This parameter has no effect on other platforms.
+  ///
   /// The `rect` is the region occupied by this node in its own coordinate
   /// system.
   ///
@@ -1792,12 +1914,25 @@ abstract class SemanticsUpdateBuilder {
   /// not use this argument should use other ways to communicate validation
   /// errors to the user, such as embedding validation error text in the label.
   ///
+  /// The `hitTestBehavior` describes how this node should behave during hit
+  /// testing. When set to [SemanticsHitTestBehavior.defer] (the default), the
+  /// platform will infer appropriate behavior based on other semantic properties
+  /// of the node itself (not inherited from parent). Different platforms may
+  /// implement this differently.
+  ///
+  /// For example, modal surfaces like dialogs can set this to
+  /// [SemanticsHitTestBehavior.opaque] to block pointer events from reaching
+  /// content behind them, while non-interactive decorative elements can set it
+  /// to [SemanticsHitTestBehavior.transparent] to allow pointer events to pass
+  /// through.
+  ///
   /// See also:
   ///
   ///  * https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/heading_role
   ///  * https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-level
   ///  * [SemanticsValidationResult], that describes possible values for the
   ///    `validationResult` argument.
+  ///  * [SemanticsHitTestBehavior], which describes how hit testing behaves.
   void updateNode({
     required int id,
     required SemanticsFlags flags,
@@ -1809,6 +1944,7 @@ abstract class SemanticsUpdateBuilder {
     required int platformViewId,
     required int scrollChildren,
     required int scrollIndex,
+    required int traversalParent,
     required double scrollPosition,
     required double scrollExtentMax,
     required double scrollExtentMin,
@@ -1827,6 +1963,7 @@ abstract class SemanticsUpdateBuilder {
     required String tooltip,
     required TextDirection? textDirection,
     required Float64List transform,
+    required Float64List hitTestTransform,
     required Int32List childrenInTraversalOrder,
     required Int32List childrenInHitTestOrder,
     required Int32List additionalActions,
@@ -1835,8 +1972,11 @@ abstract class SemanticsUpdateBuilder {
     SemanticsRole role = SemanticsRole.none,
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+    SemanticsHitTestBehavior hitTestBehavior = SemanticsHitTestBehavior.defer,
     required SemanticsInputType inputType,
     required Locale? locale,
+    required String minValue,
+    required String maxValue,
   });
 
   /// Update the custom semantics action associated with the given `id`.
@@ -1887,6 +2027,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     required int platformViewId,
     required int scrollChildren,
     required int scrollIndex,
+    required int traversalParent,
     required double scrollPosition,
     required double scrollExtentMax,
     required double scrollExtentMin,
@@ -1905,6 +2046,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     required String tooltip,
     required TextDirection? textDirection,
     required Float64List transform,
+    required Float64List hitTestTransform,
     required Int32List childrenInTraversalOrder,
     required Int32List childrenInHitTestOrder,
     required Int32List additionalActions,
@@ -1913,8 +2055,11 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     SemanticsRole role = SemanticsRole.none,
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+    SemanticsHitTestBehavior hitTestBehavior = SemanticsHitTestBehavior.defer,
     required SemanticsInputType inputType,
     required Locale? locale,
+    required String minValue,
+    required String maxValue,
   }) {
     assert(_matrix4IsValid(transform));
     assert(
@@ -1932,6 +2077,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       platformViewId,
       scrollChildren,
       scrollIndex,
+      traversalParent,
       scrollPosition,
       scrollExtentMax,
       scrollExtentMin,
@@ -1953,6 +2099,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       tooltip,
       textDirection != null ? textDirection.index + 1 : 0,
       transform,
+      hitTestTransform,
       childrenInTraversalOrder,
       childrenInHitTestOrder,
       additionalActions,
@@ -1961,8 +2108,11 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       role.index,
       controlsNodes,
       validationResult.index,
+      hitTestBehavior.index,
       inputType.index,
       locale?.toLanguageTag() ?? '',
+      minValue,
+      maxValue,
     );
   }
 
@@ -1979,6 +2129,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       Int32,
       Int32,
       Int32,
+      Int32,
       Double,
       Double,
       Double,
@@ -2003,12 +2154,16 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       Handle,
       Handle,
       Handle,
-      Int32,
       Handle,
       Int32,
       Handle,
       Int32,
+      Handle,
       Int32,
+      Int32,
+      Int32,
+      Handle,
+      Handle,
       Handle,
     )
   >(symbol: 'SemanticsUpdateBuilder::updateNode')
@@ -2023,6 +2178,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     int platformViewId,
     int scrollChildren,
     int scrollIndex,
+    int traversalParent,
     double scrollPosition,
     double scrollExtentMax,
     double scrollExtentMin,
@@ -2044,6 +2200,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     String tooltip,
     int textDirection,
     Float64List transform,
+    Float64List hitTestTransform,
     Int32List childrenInTraversalOrder,
     Int32List childrenInHitTestOrder,
     Int32List additionalActions,
@@ -2052,8 +2209,11 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     int role,
     List<String>? controlsNodes,
     int validationResultIndex,
+    int hitTestBehaviorIndex,
     int inputType,
     String locale,
+    String minValue,
+    String maxValue,
   );
 
   @override

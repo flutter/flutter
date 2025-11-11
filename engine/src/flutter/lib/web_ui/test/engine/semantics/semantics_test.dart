@@ -145,6 +145,9 @@ void runSemanticsTests() {
   group('requirable', () {
     _testRequirable();
   });
+  group('traversalOrder', () {
+    _testSemanticsTraversalOrder();
+  });
   group('SemanticsValidationResult', () {
     _testSemanticsValidationResult();
   });
@@ -156,6 +159,12 @@ void runSemanticsTests() {
   });
   group('forms', () {
     _testForms();
+  });
+  group('progressBar', () {
+    _testProgressBar();
+  });
+  group('loadingSpinner', () {
+    _testLoadingSpinner();
   });
 }
 
@@ -1422,8 +1431,8 @@ void _testContainer() {
       childrenInTraversalOrder: Int32List.fromList(<int>[1, 2]),
       childrenInHitTestOrder: Int32List.fromList(<int>[1, 2]),
     );
-    updateNode(builder, id: 1);
-    updateNode(builder, id: 2);
+    updateNode(builder, id: 1, actions: ui.SemanticsAction.tap.index);
+    updateNode(builder, id: 2, actions: ui.SemanticsAction.tap.index);
 
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
@@ -1502,6 +1511,208 @@ void _testContainer() {
     expect(root.style.pointerEvents, 'all');
 
     semantics().semanticsEnabled = false;
+  });
+
+  group('pointer events acceptance', () {
+    setUp(() {
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
+    });
+
+    tearDown(() {
+      semantics().semanticsEnabled = false;
+    });
+
+    test('non-interactive leaf nodes do not accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      // Create a non-interactive leaf node (no actions, no interactive flags)
+      updateNode(builder);
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        element.style.pointerEvents,
+        'none',
+        reason: 'Non-interactive leaf nodes should not intercept pointer events',
+      );
+    });
+
+    test('tappable leaf nodes accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(builder, actions: ui.SemanticsAction.tap.index);
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        element.style.pointerEvents,
+        'all',
+        reason: 'Tappable nodes should accept pointer events',
+      );
+    });
+
+    test('button leaf nodes accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        flags: const ui.SemanticsFlags(isButton: true),
+        actions: ui.SemanticsAction.tap.index,
+      );
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        element.style.pointerEvents,
+        'all',
+        reason: 'Button nodes should accept pointer events',
+      );
+    });
+
+    test('checkable leaf nodes accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(builder, flags: const ui.SemanticsFlags(isChecked: ui.CheckedState.isFalse));
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        element.style.pointerEvents,
+        'all',
+        reason: 'Checkable nodes should accept pointer events',
+      );
+    });
+
+    test('text field leaf nodes accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(builder, flags: const ui.SemanticsFlags(isTextField: true));
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        element.style.pointerEvents,
+        'all',
+        reason: 'Text field nodes should accept pointer events',
+      );
+    });
+
+    test('link leaf nodes accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(builder, flags: const ui.SemanticsFlags(isLink: true));
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(element.style.pointerEvents, 'all', reason: 'Link nodes should accept pointer events');
+    });
+
+    test('incrementable leaf nodes accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(builder, actions: ui.SemanticsAction.increase.index);
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        element.style.pointerEvents,
+        'all',
+        reason: 'Incrementable nodes should accept pointer events',
+      );
+    });
+
+    test('non-interactive containers do not accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      // Create a container with children but no explicit hitTestBehavior
+      updateNode(
+        builder,
+        childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+      );
+      updateNode(builder, id: 1);
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement container = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        container.style.pointerEvents,
+        'none',
+        reason:
+            'Non-interactive containers should not accept pointer events when hitTestBehavior is defer',
+      );
+    });
+
+    test('hitTestBehavior.opaque makes nodes accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(builder, hitTestBehavior: ui.SemanticsHitTestBehavior.opaque);
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        element.style.pointerEvents,
+        'all',
+        reason: 'Nodes with hitTestBehavior.opaque should accept pointer events',
+      );
+    });
+
+    test('hitTestBehavior.transparent makes nodes not accept pointer events', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(builder, hitTestBehavior: ui.SemanticsHitTestBehavior.transparent);
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        element.style.pointerEvents,
+        'none',
+        reason: 'Nodes with hitTestBehavior.transparent should not accept pointer events',
+      );
+    });
+
+    test('hitTestBehavior takes precedence over interactive behaviors', () async {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      // Create a tappable node with explicit transparent behavior
+      updateNode(
+        builder,
+        actions: ui.SemanticsAction.tap.index,
+        hitTestBehavior: ui.SemanticsHitTestBehavior.transparent,
+      );
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        element.style.pointerEvents,
+        'none',
+        reason:
+            'Framework declaration (Tier 1) should take precedence over interactive behaviors (Tier 2)',
+      );
+    });
   });
 
   test('descendant nodes are removed from the node map, unless reparented', () async {
@@ -3651,7 +3862,12 @@ void _testPlatformView() {
       childrenInHitTestOrder: Int32List.fromList(<int>[1, 2, 3]),
       transform: Float64List.fromList(Matrix4.diagonal3Values(dpr, dpr, 1).storage),
     );
-    updateNode(builder, id: 1, rect: const ui.Rect.fromLTRB(0, 0, 20, 25));
+    updateNode(
+      builder,
+      id: 1,
+      actions: ui.SemanticsAction.tap.index,
+      rect: const ui.Rect.fromLTRB(0, 0, 20, 25),
+    );
     updateNode(
       builder,
       id: 2,
@@ -3659,7 +3875,12 @@ void _testPlatformView() {
       rect: const ui.Rect.fromLTRB(0, 15, 20, 45),
       platformViewId: 0,
     );
-    updateNode(builder, id: 3, rect: const ui.Rect.fromLTRB(0, 35, 20, 60));
+    updateNode(
+      builder,
+      id: 3,
+      actions: ui.SemanticsAction.tap.index,
+      rect: const ui.Rect.fromLTRB(0, 35, 20, 60),
+    );
 
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
@@ -3675,7 +3896,11 @@ void _testPlatformView() {
     final DomElement child1 = owner().semanticsHost.querySelector(
       '#${kFlutterSemanticNodePrefix}1',
     )!;
-    expect(child1.style.pointerEvents, 'all');
+    expect(
+      child1.style.pointerEvents,
+      'all',
+      reason: 'Tappable nodes should accept pointer events',
+    );
     final DomRect child1Rect = child1.getBoundingClientRect();
     expect(child1Rect.left, 0);
     expect(child1Rect.top, 0);
@@ -3695,7 +3920,11 @@ void _testPlatformView() {
     final DomElement child3 = owner().semanticsHost.querySelector(
       '#${kFlutterSemanticNodePrefix}3',
     )!;
-    expect(child3.style.pointerEvents, 'all');
+    expect(
+      child3.style.pointerEvents,
+      'all',
+      reason: 'Tappable nodes should accept pointer events',
+    );
     final DomRect child3Rect = child3.getBoundingClientRect();
     expect(child3Rect.left, 0);
     expect(child3Rect.top, 35);
@@ -3737,6 +3966,43 @@ void _testPlatformView() {
 
     // Hit test child 3
     expect(domDocument.elementFromPoint(10, 50), child3);
+
+    semantics().semanticsEnabled = false;
+  });
+
+  test('removes aria-owns when platform view is hidden', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    // Create a platform view that is visible (has aria-owns).
+    {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(builder, platformViewId: 5, rect: const ui.Rect.fromLTRB(0, 0, 100, 50));
+      owner().updateSemantics(builder.build());
+      expectSemanticsTree(owner(), '<sem aria-owns="flt-pv-5"></sem>');
+    }
+
+    // Hide the platform view (should remove aria-owns).
+    {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        platformViewId: 5,
+        flags: const ui.SemanticsFlags(isHidden: true),
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      owner().updateSemantics(builder.build());
+      expectSemanticsTree(owner(), '<sem></sem>');
+    }
+
+    // Show the platform view again (should restore aria-owns).
+    {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(builder, platformViewId: 5, rect: const ui.Rect.fromLTRB(0, 0, 100, 50));
+      owner().updateSemantics(builder.build());
+      expectSemanticsTree(owner(), '<sem aria-owns="flt-pv-5"></sem>');
+    }
 
     semantics().semanticsEnabled = false;
   });
@@ -5271,6 +5537,152 @@ void _testRequirable() {
   });
 }
 
+void _testSemanticsTraversalOrder() {
+  test('aria-owns is correctly set', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 20),
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(
+              id: 4,
+              children: <SemanticsNodeUpdate>[tester.updateNode(id: 6), tester.updateNode(id: 7)],
+            ),
+            tester.updateNode(id: 5),
+          ],
+        ),
+        tester.updateNode(id: 2, rect: const ui.Rect.fromLTRB(0, 20, 100, 40), traversalParent: 4),
+        tester.updateNode(id: 3, rect: const ui.Rect.fromLTRB(0, 40, 100, 60)),
+      ],
+    );
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem>
+    <sem>
+        <sem id="flt-semantic-node-4" aria-owns="flt-semantic-node-2">
+            <sem></sem>
+            <sem></sem>
+        </sem>
+        <sem></sem>
+    </sem>
+    <sem id="flt-semantic-node-2"></sem>
+    <sem></sem>
+</sem>
+''');
+
+    final SemanticsObject node4 = tester.getSemanticsObject(4);
+    expect(node4.element.getAttribute('aria-owns'), 'flt-semantic-node-2');
+  });
+
+  test('aria-owns is correctly set with nested traversalParent relationship', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 20),
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(
+              id: 4,
+              children: <SemanticsNodeUpdate>[tester.updateNode(id: 6), tester.updateNode(id: 7)],
+            ),
+            tester.updateNode(id: 5),
+          ],
+        ),
+        tester.updateNode(id: 2, rect: const ui.Rect.fromLTRB(0, 20, 100, 40), traversalParent: 4),
+        tester.updateNode(id: 3, rect: const ui.Rect.fromLTRB(0, 40, 100, 60)),
+        tester.updateNode(id: 8, rect: const ui.Rect.fromLTRB(0, 40, 100, 60), traversalParent: 6),
+      ],
+    );
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem>
+    <sem>
+        <sem id="flt-semantic-node-4" aria-owns="flt-semantic-node-2">
+            <sem id="flt-semantic-node-6" aria-owns="flt-semantic-node-8"></sem>
+            <sem></sem>
+        </sem>
+        <sem></sem>
+    </sem>
+    <sem id="flt-semantic-node-2"></sem>
+    <sem></sem>
+    <sem id="flt-semantic-node-8"></sem>
+</sem>
+''');
+
+    final SemanticsObject node4 = tester.getSemanticsObject(4);
+    expect(node4.element.getAttribute('aria-owns'), 'flt-semantic-node-2');
+    final SemanticsObject node6 = tester.getSemanticsObject(6);
+    expect(node6.element.getAttribute('aria-owns'), 'flt-semantic-node-8');
+  });
+
+  test('aria-owns is correctly set when one traversalParent has multiple children', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 20),
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(
+              id: 4,
+              children: <SemanticsNodeUpdate>[tester.updateNode(id: 6), tester.updateNode(id: 7)],
+            ),
+            tester.updateNode(id: 5),
+          ],
+        ),
+        tester.updateNode(id: 2, rect: const ui.Rect.fromLTRB(0, 20, 100, 40), traversalParent: 4),
+        tester.updateNode(id: 3, rect: const ui.Rect.fromLTRB(0, 40, 100, 60), traversalParent: 4),
+        tester.updateNode(id: 8, rect: const ui.Rect.fromLTRB(0, 40, 100, 60), traversalParent: 4),
+      ],
+    );
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem>
+    <sem>
+        <sem id="flt-semantic-node-4" aria-owns="flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-8">
+            <sem></sem>
+            <sem></sem>
+        </sem>
+        <sem></sem>
+    </sem>
+    <sem id="flt-semantic-node-2"></sem>
+    <sem id="flt-semantic-node-3"></sem>
+    <sem id="flt-semantic-node-8"></sem>
+</sem>
+''');
+
+    final SemanticsObject node4 = tester.getSemanticsObject(4);
+    expect(
+      node4.element.getAttribute('aria-owns'),
+      'flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-8',
+    );
+  });
+}
+
 void _testSemanticsValidationResult() {
   test('renders validation result', () {
     semantics()
@@ -5747,6 +6159,55 @@ void _testForms() {
   semantics().semanticsEnabled = false;
 }
 
+void _testProgressBar() {
+  test('nodes with progress bar role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.progressBar,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.progressBar);
+    expect(object.element.getAttribute('role'), 'progressbar');
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
+void _testLoadingSpinner() {
+  test('nodes with loading spinner role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.loadingSpinner,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.loadingSpinner);
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
 /// A facade in front of [ui.SemanticsUpdateBuilder.updateNode] that
 /// supplies default values for semantics attributes.
 void updateNode(
@@ -5761,6 +6222,7 @@ void updateNode(
   int platformViewId = -1, // -1 means not a platform view
   int scrollChildren = 0,
   int scrollIndex = 0,
+  int traversalParent = -1,
   double scrollPosition = 0.0,
   double scrollExtentMax = 0.0,
   double scrollExtentMin = 0.0,
@@ -5779,6 +6241,7 @@ void updateNode(
   String tooltip = '',
   ui.TextDirection textDirection = ui.TextDirection.ltr,
   Float64List? transform,
+  Float64List? hitTestTransform,
   Int32List? childrenInTraversalOrder,
   Int32List? childrenInHitTestOrder,
   Int32List? additionalActions,
@@ -5786,10 +6249,14 @@ void updateNode(
   String? linkUrl,
   List<String>? controlsNodes,
   ui.SemanticsRole role = ui.SemanticsRole.none,
+  ui.SemanticsHitTestBehavior hitTestBehavior = ui.SemanticsHitTestBehavior.defer,
   ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
   ui.Locale? locale,
+  String minValue = '0',
+  String maxValue = '0',
 }) {
   transform ??= Float64List.fromList(Matrix4.identity().storage);
+  hitTestTransform ??= Float64List.fromList(Matrix4.identity().storage);
   childrenInTraversalOrder ??= Int32List(0);
   childrenInHitTestOrder ??= Int32List(0);
   additionalActions ??= Int32List(0);
@@ -5805,6 +6272,7 @@ void updateNode(
     platformViewId: platformViewId,
     scrollChildren: scrollChildren,
     scrollIndex: scrollIndex,
+    traversalParent: traversalParent,
     scrollPosition: scrollPosition,
     scrollExtentMax: scrollExtentMax,
     scrollExtentMin: scrollExtentMin,
@@ -5823,14 +6291,18 @@ void updateNode(
     tooltip: tooltip,
     textDirection: textDirection,
     transform: transform,
+    hitTestTransform: hitTestTransform,
     childrenInTraversalOrder: childrenInTraversalOrder,
     childrenInHitTestOrder: childrenInHitTestOrder,
     additionalActions: additionalActions,
     headingLevel: headingLevel,
     linkUrl: linkUrl,
     controlsNodes: controlsNodes,
+    hitTestBehavior: hitTestBehavior,
     inputType: inputType,
     locale: locale,
+    minValue: minValue,
+    maxValue: maxValue,
   );
 }
 
