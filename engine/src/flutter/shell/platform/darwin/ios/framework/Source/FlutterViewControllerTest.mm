@@ -1009,7 +1009,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   id mockVC = OCMPartialMock(realVC);
   mockEngine.viewController = mockVC;
 
-  OCMExpect([mockVC checkAndUpdateAutoResizeConstraints]);
   OCMExpect([mockVC updateAutoResizeConstraints]);
 
   [mockVC setAutoResizable:YES];
@@ -1029,7 +1028,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   id mockVC = OCMPartialMock(realVC);
   mockEngine.viewController = mockVC;
 
-  OCMExpect([mockVC checkAndUpdateAutoResizeConstraints]);
   OCMReject([mockVC updateAutoResizeConstraints]);
 
   [mockVC setAutoResizable:NO];
