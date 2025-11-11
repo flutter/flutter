@@ -250,10 +250,9 @@ class Tessellator {
   ///
   /// This method only exists for the ease of benchmarking without using the
   /// real allocator needed by the [host_buffer].
-  template <typename IndexT>
   static void TessellateConvexInternal(const PathSource& path,
                                        std::vector<Point>& point_buffer,
-                                       std::vector<IndexT>& index_buffer,
+                                       std::vector<uint16_t>& index_buffer,
                                        Scalar tolerance);
 
   //----------------------------------------------------------------------------

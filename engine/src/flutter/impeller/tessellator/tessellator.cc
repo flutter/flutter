@@ -303,6 +303,19 @@ class GLESPathVertexWriter : public impeller::PathTessellator::VertexWriter {
   std::vector<IndexT>& indices_;
 };
 
+template <typename IndexT>
+void DoTessellateConvexInternal(const impeller::PathSource& path,
+                                std::vector<impeller::Point>& point_buffer,
+                                std::vector<IndexT>& index_buffer,
+                                impeller::Scalar tolerance) {
+  point_buffer.clear();
+  index_buffer.clear();
+
+  GLESPathVertexWriter writer(point_buffer, index_buffer);
+
+  impeller::PathTessellator::PathToFilledVertices(path, writer, tolerance);
+}
+
 }  // namespace
 
 namespace impeller {
@@ -362,8 +375,7 @@ class ConvexTessellatorImpl : public Tessellator::ConvexTessellator {
       }
     }
 
-    Tessellator::TessellateConvexInternal(path, point_buffer_, index_buffer_,
-                                          tolerance);
+    DoTessellateConvexInternal(path, point_buffer_, index_buffer_, tolerance);
 
     if (point_buffer_.empty()) {
       return VertexBuffer{
@@ -425,17 +437,11 @@ VertexBuffer Tessellator::TessellateConvex(const PathSource& path,
       supports_primitive_restart, supports_triangle_fan);
 }
 
-template <typename IndexT>
 void Tessellator::TessellateConvexInternal(const PathSource& path,
                                            std::vector<Point>& point_buffer,
-                                           std::vector<IndexT>& index_buffer,
+                                           std::vector<uint16_t>& index_buffer,
                                            Scalar tolerance) {
-  point_buffer.clear();
-  index_buffer.clear();
-
-  GLESPathVertexWriter writer(point_buffer, index_buffer);
-
-  PathTessellator::PathToFilledVertices(path, writer, tolerance);
+  DoTessellateConvexInternal(path, point_buffer, index_buffer, tolerance);
 }
 
 Tessellator::Trigs::Trigs(Scalar pixel_radius)
