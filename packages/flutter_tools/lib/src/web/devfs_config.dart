@@ -191,7 +191,7 @@ WebDevServerConfig:
 class HttpsConfig {
   const HttpsConfig({required this.certPath, required this.certKeyPath});
 
-  /// If [tlsCertPath] and [tlsCertKeyPath] are bath [String] return an instance.
+  /// If [tlsCertPath] and [tlsCertKeyPath] are both [String] return an instance.
   ///
   /// If they are both `null`, return `null`.
   ///
