@@ -190,6 +190,22 @@ WebDevServerConfig:
 @immutable
 class HttpsConfig {
   const HttpsConfig({required this.certPath, required this.certKeyPath});
+  factory HttpsConfig.fromYaml(YamlMap yaml) {
+    final String? certPath = _validateType<String>(value: yaml[_kCertPath], fieldName: _kCertPath);
+    if (certPath == null) {
+      throw ArgumentError.value(yaml, 'yaml', '"$_kCertPath" must be defined');
+    }
+
+    final String? certKeyPath = _validateType<String>(
+      value: yaml[_kCertKeyPath],
+      fieldName: _kCertKeyPath,
+    );
+    if (certKeyPath == null) {
+      throw ArgumentError.value(yaml, 'yaml', '"$_kCertKeyPath" must be defined');
+    }
+
+    return HttpsConfig(certPath: certPath, certKeyPath: certKeyPath);
+  }
 
   /// If [tlsCertPath] and [tlsCertKeyPath] are both [String] return an instance.
   ///
@@ -209,23 +225,6 @@ class HttpsConfig {
         'Found: tlsCertPath: ${certPath ?? 'null'}, tlsCertKeyPath: ${certKeyPath ?? 'null'}',
       ),
     };
-  }
-
-  factory HttpsConfig.fromYaml(YamlMap yaml) {
-    final String? certPath = _validateType<String>(value: yaml[_kCertPath], fieldName: _kCertPath);
-    if (certPath == null) {
-      throw ArgumentError.value(yaml, 'yaml', '"$_kCertPath" must be defined');
-    }
-
-    final String? certKeyPath = _validateType<String>(
-      value: yaml[_kCertKeyPath],
-      fieldName: _kCertKeyPath,
-    );
-    if (certKeyPath == null) {
-      throw ArgumentError.value(yaml, 'yaml', '"$_kCertKeyPath" must be defined');
-    }
-
-    return HttpsConfig(certPath: certPath, certKeyPath: certKeyPath);
   }
 
   /// Creates a copy of this [HttpsConfig] with optional overrides.
