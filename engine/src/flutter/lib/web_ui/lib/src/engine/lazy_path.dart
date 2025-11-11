@@ -734,8 +734,12 @@ class LazyPath implements ui.Path, Collectable {
   @override
   void collect() {
     _cachedPath?.dispose();
+    if (!identical(_cachedBuilder, _cachedPath)) {
+      // In some implementations (*cough* skwasm *cough*), the built path and the builder might be the same
+      // object. In that case, disposing the path is sufficient.
+      _cachedBuilder?.dispose();
+    }
     _cachedPath = null;
-    _cachedBuilder?.dispose();
     _cachedBuilder = null;
   }
 }
