@@ -4938,12 +4938,6 @@ mixin SemanticsAnnotationsMixin on RenderObject {
     if (_properties.inputType != null) {
       config.inputType = _properties.inputType!;
     }
-    if (_properties.minValue != null) {
-      config.minValue = _properties.minValue;
-    }
-    if (_properties.maxValue != null) {
-      config.maxValue = _properties.maxValue;
-    }
 
     // Registering _perform* as action handlers instead of the user provided
     // ones to ensure that changing a user provided handler from a non-null to
