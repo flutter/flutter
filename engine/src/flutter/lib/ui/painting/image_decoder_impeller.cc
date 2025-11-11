@@ -19,7 +19,6 @@
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/skia_conversions.h"
 #include "impeller/geometry/size.h"
-#include "third_party/abseil-cpp/absl/status/statusor.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
@@ -221,7 +220,7 @@ absl::StatusOr<DecodedBitmap> HandlePremultiplication(
   return DecodedBitmap{.bitmap = premul_bitmap, .allocator = premul_allocator};
 }
 
-ImageDecoderImpeller::DecompressResult ResizeOnCpu(
+absl::StatusOr<ImageDecoderImpeller::DecompressResult> ResizeOnCpu(
     const std::shared_ptr<SkBitmap>& bitmap,
     const SkISize& target_size,
     const std::shared_ptr<impeller::Allocator>& allocator) {
@@ -237,7 +236,7 @@ ImageDecoderImpeller::DecompressResult ResizeOnCpu(
     std::string error =
         "Could not allocate scaled bitmap for image decompression.";
     FML_DLOG(ERROR) << error;
-    return {.decode_error = error};
+    return absl::ResourceExhaustedError(error);
   }
   if (!bitmap->pixmap().scalePixels(
           scaled_bitmap->pixmap(),
@@ -249,17 +248,18 @@ ImageDecoderImpeller::DecompressResult ResizeOnCpu(
   std::shared_ptr<impeller::DeviceBuffer> buffer =
       scaled_allocator->GetDeviceBuffer();
   if (!buffer) {
-    return {.decode_error = "Unable to get device buffer"};
+    return absl::InternalError("Unable to get device buffer");
   }
   buffer->Flush();
 
   absl::StatusOr<ImageDecoderImpeller::ImageInfo> decoded_image_info =
       ToImageInfo(scaled_bitmap->info());
   if (!decoded_image_info.ok()) {
-    return {.decode_error = std::string(decoded_image_info.status().message())};
+    return decoded_image_info.status();
   }
-  return {.device_buffer = std::move(buffer),
-          .image_info = decoded_image_info.value()};
+  return ImageDecoderImpeller::DecompressResult{
+      .device_buffer = std::move(buffer),
+      .image_info = decoded_image_info.value()};
 }
 
 }  // namespace
@@ -306,7 +306,8 @@ ImageDecoderImpeller::ImageDecoderImpeller(
 
 ImageDecoderImpeller::~ImageDecoderImpeller() = default;
 
-ImageDecoderImpeller::DecompressResult ImageDecoderImpeller::DecompressTexture(
+absl::StatusOr<ImageDecoderImpeller::DecompressResult>
+ImageDecoderImpeller::DecompressTexture(
     ImageDescriptor* descriptor,
     const ImageDecoder::Options& options,
     impeller::ISize max_texture_size,
@@ -317,7 +318,7 @@ ImageDecoderImpeller::DecompressResult ImageDecoderImpeller::DecompressTexture(
   if (!descriptor) {
     std::string decode_error("Invalid descriptor (should never happen)");
     FML_DLOG(ERROR) << decode_error;
-    return DecompressResult{.decode_error = decode_error};
+    return absl::InvalidArgumentError(decode_error);
   }
 
   const SkISize source_size = descriptor->image_info().dimensions();
@@ -338,7 +339,7 @@ ImageDecoderImpeller::DecompressResult ImageDecoderImpeller::DecompressTexture(
       base_image_info, decode_size, supports_wide_gamut, options.target_format);
 
   if (!image_info.ok()) {
-    return {.decode_error = std::string(image_info.status().message())};
+    return image_info.status();
   }
 
   if (!ToPixelFormat(image_info.value().colorType()).has_value()) {
@@ -346,19 +347,19 @@ ImageDecoderImpeller::DecompressResult ImageDecoderImpeller::DecompressTexture(
         std::format("Codec pixel format is not supported (SkColorType={})",
                     static_cast<int>(image_info.value().colorType()));
     FML_DLOG(ERROR) << decode_error;
-    return {.decode_error = decode_error};
+    return absl::InvalidArgumentError(decode_error);
   }
 
   absl::StatusOr<DecodedBitmap> decoded = DecodeToBitmap(
       descriptor, image_info.value(), base_image_info, allocator);
   if (!decoded.ok()) {
-    return {.decode_error = std::string(decoded.status().message())};
+    return decoded.status();
   }
 
   absl::StatusOr<DecodedBitmap> premultiplied =
       HandlePremultiplication(decoded->bitmap, decoded->allocator, allocator);
   if (!premultiplied.ok()) {
-    return {.decode_error = std::string(premultiplied.status().message())};
+    return premultiplied.status();
   }
   std::shared_ptr<SkBitmap> bitmap = premultiplied->bitmap;
   std::shared_ptr<ImpellerAllocator> bitmap_allocator =
@@ -373,7 +374,7 @@ ImageDecoderImpeller::DecompressResult ImageDecoderImpeller::DecompressTexture(
   std::shared_ptr<impeller::DeviceBuffer> buffer =
       bitmap_allocator->GetDeviceBuffer();
   if (!buffer) {
-    return {.decode_error = "Unable to get device buffer"};
+    return absl::InternalError("Unable to get device buffer");
   }
   buffer->Flush();
 
@@ -386,12 +387,13 @@ ImageDecoderImpeller::DecompressResult ImageDecoderImpeller::DecompressTexture(
   absl::StatusOr<ImageDecoderImpeller::ImageInfo> decoded_image_info =
       ToImageInfo(bitmap->info());
   if (!decoded_image_info.ok()) {
-    return {.decode_error = std::string(decoded_image_info.status().message())};
+    return decoded_image_info.status();
   }
 
-  return {.device_buffer = std::move(buffer),
-          .image_info = decoded_image_info.value(),
-          .resize_info = resize_info};
+  return ImageDecoderImpeller::DecompressResult{
+      .device_buffer = std::move(buffer),
+      .image_info = decoded_image_info.value(),
+      .resize_info = resize_info};
 }
 
 // static
@@ -659,18 +661,18 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
             /*supports_wide_gamut=*/wide_gamut_enabled &&
                 context->GetCapabilities()->SupportsExtendedRangeFormats(),
             context->GetCapabilities(), context->GetResourceAllocator());
-        if (!bitmap_result.device_buffer) {
-          result(nullptr, bitmap_result.decode_error);
+        if (!bitmap_result.ok()) {
+          result(nullptr, std::string(bitmap_result.status().message()));
           return;
         }
 
         auto upload_texture_and_invoke_result = [result, context, bitmap_result,
                                                  gpu_disabled_switch]() {
-          UploadTextureToPrivate(result, context,              //
-                                 bitmap_result.device_buffer,  //
-                                 bitmap_result.image_info,     //
-                                 bitmap_result.resize_info,    //
-                                 gpu_disabled_switch           //
+          UploadTextureToPrivate(result, context,               //
+                                 bitmap_result->device_buffer,  //
+                                 bitmap_result->image_info,     //
+                                 bitmap_result->resize_info,    //
+                                 gpu_disabled_switch            //
           );
         };
         // The I/O image uploads are not threadsafe on GLES.

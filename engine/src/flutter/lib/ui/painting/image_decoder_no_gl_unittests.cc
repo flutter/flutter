@@ -103,12 +103,12 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutDisplayP3) {
 #if IMPELLER_SUPPORTS_RENDERING
   std::shared_ptr<impeller::Allocator> allocator =
       std::make_shared<impeller::TestImpellerAllocator>();
-  std::optional<ImageDecoderImpeller::DecompressResult> wide_result =
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> wide_result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), {.target_width = 100, .target_height = 100},
           {100, 100},
           /*supports_wide_gamut=*/true, capabilities, allocator);
-  ASSERT_TRUE(wide_result.has_value());
+  ASSERT_TRUE(wide_result.ok());
   ASSERT_EQ(wide_result->image_info.format,
             impeller::PixelFormat::kR16G16B16A16Float);
 
@@ -130,13 +130,13 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutDisplayP3) {
   }
 
   ASSERT_TRUE(found_deep_red);
-  std::optional<ImageDecoderImpeller::DecompressResult> narrow_result =
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> narrow_result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), {.target_width = 100, .target_height = 100},
           {100, 100},
           /*supports_wide_gamut=*/false, capabilities, allocator);
 
-  ASSERT_TRUE(narrow_result.has_value());
+  ASSERT_TRUE(narrow_result.ok());
   ASSERT_EQ(narrow_result->image_info.format,
             impeller::PixelFormat::kR8G8B8A8UNormInt);
 #endif  // IMPELLER_SUPPORTS_RENDERING
@@ -169,11 +169,12 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutIndexedPng) {
 #if IMPELLER_SUPPORTS_RENDERING
   std::shared_ptr<impeller::Allocator> allocator =
       std::make_shared<impeller::TestImpellerAllocator>();
-  std::optional<ImageDecoderImpeller::DecompressResult> wide_result =
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> wide_result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), {.target_width = 100, .target_height = 100},
           {100, 100},
           /*supports_wide_gamut=*/true, capabilities, allocator);
+  ASSERT_TRUE(wide_result.ok());
   ASSERT_EQ(wide_result->image_info.format,
             impeller::PixelFormat::kB10G10R10XR);
 
@@ -195,13 +196,13 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutIndexedPng) {
   }
 
   ASSERT_TRUE(found_deep_red);
-  std::optional<ImageDecoderImpeller::DecompressResult> narrow_result =
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> narrow_result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), {.target_width = 100, .target_height = 100},
           {100, 100},
           /*supports_wide_gamut=*/false, capabilities, allocator);
 
-  ASSERT_TRUE(narrow_result.has_value());
+  ASSERT_TRUE(narrow_result.ok());
   ASSERT_EQ(narrow_result->image_info.format,
             impeller::PixelFormat::kR8G8B8A8UNormInt);
 #endif  // IMPELLER_SUPPORTS_RENDERING
@@ -235,7 +236,7 @@ TEST(ImageDecoderNoGLTest, ImpellerRGBA32FDecode) {
       std::make_shared<impeller::TestImpellerAllocator>();
 
   // 3. Call ImageDecoderImpeller::DecompressTexture with this ImageDescriptor.
-  std::optional<ImageDecoderImpeller::DecompressResult> result =
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(),
           /*options=*/
@@ -248,7 +249,7 @@ TEST(ImageDecoderNoGLTest, ImpellerRGBA32FDecode) {
 
   // 4. Assert that wide_result->image_info.format is
   // impeller::PixelFormat::kR32G32B32A32Float.
-  ASSERT_TRUE(result.has_value());
+  ASSERT_TRUE(result.ok());
   ASSERT_EQ(result->image_info.format,
             impeller::PixelFormat::kR32G32B32A32Float);
 
@@ -288,10 +289,11 @@ TEST(ImageDecoderNoGLTest, ImpellerUnmultipliedAlphaPng) {
 #if IMPELLER_SUPPORTS_RENDERING
   std::shared_ptr<impeller::Allocator> allocator =
       std::make_shared<impeller::TestImpellerAllocator>();
-  std::optional<ImageDecoderImpeller::DecompressResult> result =
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), {.target_width = 11, .target_height = 11}, {11, 11},
           /*supports_wide_gamut=*/true, capabilities, allocator);
+  ASSERT_TRUE(result.ok());
   ASSERT_EQ(result->image_info.format,
             impeller::PixelFormat::kR8G8B8A8UNormInt);
 

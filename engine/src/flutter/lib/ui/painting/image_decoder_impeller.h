@@ -13,6 +13,7 @@
 #include "impeller/geometry/size.h"
 #include "impeller/renderer/capabilities.h"
 #include "include/core/SkImageInfo.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 
 namespace impeller {
@@ -65,11 +66,10 @@ class ImageDecoderImpeller final : public ImageDecoder {
   struct DecompressResult {
     std::shared_ptr<impeller::DeviceBuffer> device_buffer;
     ImageInfo image_info;
-    std::optional<SkImageInfo> resize_info = std::nullopt;
-    std::string decode_error;
+    std::optional<SkImageInfo> resize_info;
   };
 
-  static DecompressResult DecompressTexture(
+  static absl::StatusOr<DecompressResult> DecompressTexture(
       ImageDescriptor* descriptor,
       const ImageDecoder::Options& options,
       impeller::ISize max_texture_size,
