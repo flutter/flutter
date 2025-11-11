@@ -110,13 +110,14 @@ mixin CreateBase on FlutterCommand {
   ///
   /// The help message of the argument is replaced with `customHelp` if `customHelp` is not null.
   @protected
-  void addPlatformsOptions({String? customHelp}) {
+  void addPlatformsOptions({String? customHelp, required Map<String, String> allowedHelp}) {
     argParser.addMultiOption(
       'platforms',
       help: customHelp ?? _kDefaultPlatformArgumentHelp,
       aliases: <String>['platform'],
       defaultsTo: <String>[..._kAvailablePlatforms],
       allowed: <String>[..._kAvailablePlatforms],
+      allowedHelp: allowedHelp,
     );
   }
 

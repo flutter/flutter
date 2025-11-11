@@ -3537,6 +3537,33 @@ void main() {
     overrides: {FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false), Logger: () => logger},
   );
 
+  testUsingContext(
+    'should show warning when darwin is requested and ios is disabled, but still create macos',
+    () async {
+      final command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>[
+        'create',
+        '--no-pub',
+        '--template=plugin',
+        '--platforms=darwin,macos',
+        projectDir.path,
+      ]);
+      expect(
+        logger.warningText,
+        contains('To use the "darwin" platform, you must have both iOS and macOS enabled.'),
+      );
+      expect(projectDir.childDirectory('darwin').existsSync(), isFalse);
+      expect(projectDir.childDirectory('ios').existsSync(), isFalse);
+      expect(projectDir.childDirectory('macos').existsSync(), isTrue);
+    },
+    overrides: {
+      FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false, isMacOSEnabled: true),
+      Logger: () => logger,
+    },
+  );
+
   testUsingContext('Android FFI plugin contains 16kb page support', () async {
     final command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
