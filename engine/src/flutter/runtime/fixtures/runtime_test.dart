@@ -290,6 +290,7 @@ void sendSemanticsUpdate() {
     platformViewId: -1,
     scrollChildren: 0,
     scrollIndex: 0,
+    traversalParent: 0,
     scrollPosition: 0,
     scrollExtentMax: 0,
     scrollExtentMin: 0,
@@ -308,12 +309,15 @@ void sendSemanticsUpdate() {
     tooltip: tooltip,
     textDirection: TextDirection.ltr,
     transform: transform,
+    hitTestTransform: transform,
     childrenInTraversalOrder: childrenInTraversalOrder,
     childrenInHitTestOrder: childrenInHitTestOrder,
     additionalActions: additionalActions,
     controlsNodes: null,
     inputType: SemanticsInputType.none,
     locale: null,
+    minValue: '0',
+    maxValue: '0',
   );
   _semanticsUpdate(builder.build());
 }
