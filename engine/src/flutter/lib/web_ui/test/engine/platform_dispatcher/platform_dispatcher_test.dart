@@ -303,6 +303,76 @@ void testMain() {
       expect(ui.PlatformDispatcher.instance.textScaleFactor, findBrowserTextScaleFactor());
     });
 
+    test('calls onMetricsChanged when the typography measurement element size changes', () async {
+      final DomElement root = domDocument.documentElement!;
+      final DomElement style = createDomHTMLStyleElement(null);
+      final ui.VoidCallback? oldCallback = ui.PlatformDispatcher.instance.onMetricsChanged;
+
+      // Wait for next frame.
+      Future<void> waitForResizeObserver() {
+        final Completer<void> completer = Completer<void>();
+        domWindow.requestAnimationFrame((_) {
+          Timer.run(completer.complete);
+        });
+        return completer.future;
+      }
+
+      addTearDown(() {
+        style.text = null;
+        style.remove();
+        ui.PlatformDispatcher.instance.onMetricsChanged = oldCallback;
+      });
+
+      bool isCalled = false;
+      ui.PlatformDispatcher.instance.onMetricsChanged = () {
+        isCalled = true;
+      };
+
+      const double expectedLineHeightScaleFactor = 2.0;
+      const double expectedLetterSpacing = 1.0;
+      const double expectedWordSpacing = 4.0;
+      const double expectedParagraphSpacing = 10.0;
+
+      style.text =
+          'html *{ line-height: 2 !important; word-spacing: 4px !important; letter-spacing: 1px !important; margin-bottom: 10px !important; }';
+      root.append(style);
+      await waitForResizeObserver();
+      expect(root.contains(style), isTrue);
+      expect(isCalled, isTrue);
+      expect(
+        ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride,
+        expectedLineHeightScaleFactor,
+      );
+      expect(ui.PlatformDispatcher.instance.letterSpacingOverride, expectedLetterSpacing);
+      expect(ui.PlatformDispatcher.instance.wordSpacingOverride, expectedWordSpacing);
+      expect(ui.PlatformDispatcher.instance.paragraphSpacingOverride, expectedParagraphSpacing);
+
+      isCalled = false;
+
+      style.remove();
+      await waitForResizeObserver();
+      expect(root.contains(style), isFalse);
+      expect(isCalled, isTrue);
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, null);
+      expect(ui.PlatformDispatcher.instance.letterSpacingOverride, null);
+      expect(ui.PlatformDispatcher.instance.wordSpacingOverride, null);
+      expect(ui.PlatformDispatcher.instance.paragraphSpacingOverride, null);
+
+      isCalled = false;
+
+      root.append(style);
+      await waitForResizeObserver();
+      expect(root.contains(style), isTrue);
+      expect(isCalled, isTrue);
+      expect(
+        ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride,
+        expectedLineHeightScaleFactor,
+      );
+      expect(ui.PlatformDispatcher.instance.letterSpacingOverride, expectedLetterSpacing);
+      expect(ui.PlatformDispatcher.instance.wordSpacingOverride, expectedWordSpacing);
+      expect(ui.PlatformDispatcher.instance.paragraphSpacingOverride, expectedParagraphSpacing);
+    });
+
     test('disposes all its views', () {
       final EngineFlutterView view1 = EngineFlutterView(dispatcher, createDomHTMLDivElement());
       final EngineFlutterView view2 = EngineFlutterView(dispatcher, createDomHTMLDivElement());
