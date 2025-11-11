@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 
 import 'canvaskit_api.dart';
-import 'path.dart';
 
 /// An error related to the CanvasKit rendering backend.
 class CanvasKitError extends Error {
