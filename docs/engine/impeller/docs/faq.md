@@ -303,9 +303,10 @@ while taking advantage of newer GPU features.
 One of the goals of Graphite is to allow for easier pre-compilation of shaders
 at startup time. But it still aims to support Skia’s general 2D API and has the
 same spec. requirements. The design decisions made to support those requirements
-make offline shader compilation impossible.
+make it impossible to completely avoid runtime shader compilation. This results
+in increased binary size and unpredictable frame times.
 
-As of May 2025, Flutter has no plans to use Graphite. However, we, the
+As of November 2025, Flutter has no plans to use Graphite. However, we, the
 Flutter team, are in constant communication with the Skia team and freely share
 insights and ideas across Impeller and Graphite.
 
