@@ -7,7 +7,6 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
-import '../../base/io.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../darwin/darwin.dart';
@@ -111,55 +110,12 @@ class ReleaseUnpackMacOS extends UnpackMacOS {
   String get name => 'release_unpack_macos';
 
   @override
-  List<Source> get outputs =>
-      super.outputs +
-      const <Source>[
-        Source.pattern(
-          '{OUTPUT_DIR}/FlutterMacOS.framework.dSYM/Contents/Resources/DWARF/FlutterMacOS',
-        ),
-      ];
-
-  @override
   List<Source> get inputs =>
       super.inputs +
       const <Source>[Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.release)];
 
   @override
-  Future<void> build(Environment environment) async {
-    await super.build(environment);
-
-    // Copy Flutter framework dSYM (debug symbol) bundle, if present.
-    final String? buildModeEnvironment = environment.defines[kBuildMode];
-    if (buildModeEnvironment == null) {
-      throw MissingDefineException(kBuildMode, 'unpack_macos');
-    }
-    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
-    final Directory frameworkDsym = environment.fileSystem.directory(
-      environment.artifacts.getArtifactPath(
-        Artifact.flutterMacOSFrameworkDsym,
-        platform: TargetPlatform.darwin,
-        mode: buildMode,
-      ),
-    );
-    if (frameworkDsym.existsSync()) {
-      final ProcessResult result = await environment.processManager.run(<String>[
-        'rsync',
-        '-av',
-        '--delete',
-        '--filter',
-        '- .DS_Store/',
-        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-        frameworkDsym.path,
-        environment.outputDir.path,
-      ]);
-      if (result.exitCode != 0) {
-        throw Exception(
-          'Failed to copy framework dSYM (exit ${result.exitCode}:\n'
-          '${result.stdout}\n---\n${result.stderr}',
-        );
-      }
-    }
-  }
+  List<Target> get dependencies => [...super.dependencies, const ReleaseUnpackMacOSDsym()];
 }
 
 /// Unpack the profile prebuilt engine framework.
@@ -188,6 +144,39 @@ class DebugUnpackMacOS extends UnpackMacOS {
     ...super.inputs,
     const Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.debug),
   ];
+}
+
+class ReleaseUnpackMacOSDsym extends ReleaseUnpackDarwinDsym {
+  const ReleaseUnpackMacOSDsym();
+
+  @override
+  String get name => 'release_unpack_macos_dsym';
+
+  @override
+  TargetPlatform get targetPlatform => TargetPlatform.darwin;
+
+  @override
+  Artifact get dsymArtifact => Artifact.flutterMacOSFrameworkDsym;
+
+  @override
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart',
+    ),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern(
+      '{OUTPUT_DIR}/FlutterMacOS.framework.dSYM/Contents/Resources/DWARF/FlutterMacOS',
+    ),
+  ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    await copyFrameworkDsym(environment);
+  }
 }
 
 /// Create an App.framework for debug macOS targets.
