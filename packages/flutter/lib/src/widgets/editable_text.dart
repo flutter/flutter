@@ -5275,22 +5275,21 @@ class EditableTextState extends State<EditableText>
 
     int offset = extent.offset, nextOffset;
     // Correct for affinity.
-    if (extent.affinity == TextAffinity.upstream && extent.offset >= 0 && extent.offset < _value.text.length) {
+    if (extent.affinity == TextAffinity.upstream &&
+        extent.offset >= 0 &&
+        extent.offset < _value.text.length) {
       offset--;
     }
-
-    // TODO(tgucio): test newlines at RTL / LTR (skip one glyph?) -> FAIL
-    // TODO(tgucio): handle line ends after a single LTR/RTL change? [test]
 
     TextAffinity affinity = TextAffinity.downstream;
     TextRange boundary = textBoundary.getTextBoundaryAt(offset);
     // Use current boundary ends to find the next boundary.
     if (boundary.isValid) {
       nextOffset = switch ((forward, boundary.isNormalized)) {
-        (true, true) => boundary.end,        // LTR, forward
-        (true, false) => boundary.end - 1,   // RTL, forward
+        (true, true) => boundary.end, // LTR, forward
+        (true, false) => boundary.end - 1, // RTL, forward
         (false, true) => boundary.start - 1, // LTR, reverse
-        (false, false) => boundary.start,    // RTL, reverse
+        (false, false) => boundary.start, // RTL, reverse
       };
     } else {
       // Handle starting outside of text bounds.
@@ -5323,12 +5322,12 @@ class EditableTextState extends State<EditableText>
           offset = math.max(0, nextOffset);
           nextOffset = forward ? boundary.start : boundary.end - 1;
           nextBoundary = textBoundary.getTextBoundaryAt(nextOffset);
-        } while (nextOffset < _value.text.length
-            && nextOffset >= 0
-            && nextBoundary.isValid
-            && nextBoundary.isNormalized == boundary.isNormalized);
-          offset = math.max(0, boundary.start);
-          affinity = forward ? TextAffinity.upstream : TextAffinity.downstream;
+        } while (nextOffset < _value.text.length &&
+            nextOffset >= 0 &&
+            nextBoundary.isValid &&
+            nextBoundary.isNormalized == boundary.isNormalized);
+        offset = math.max(0, boundary.start);
+        affinity = forward ? TextAffinity.upstream : TextAffinity.downstream;
       } else {
         // RTL->LTR: start skipping at the current boundary.
         nextBoundary = boundary;
@@ -5337,12 +5336,12 @@ class EditableTextState extends State<EditableText>
           offset = math.max(0, nextOffset);
           nextOffset = forward ? boundary.start : boundary.end - 1;
           nextBoundary = textBoundary.getTextBoundaryAt(nextOffset);
-        } while (nextOffset < _value.text.length
-            && nextOffset >= 0
-            && nextBoundary.isValid
-            && nextBoundary.isNormalized == boundary.isNormalized);
-          offset = math.max(0, nextBoundary.end);
-          affinity = forward ? TextAffinity.downstream : TextAffinity.upstream;
+        } while (nextOffset < _value.text.length &&
+            nextOffset >= 0 &&
+            nextBoundary.isValid &&
+            nextBoundary.isNormalized == boundary.isNormalized);
+        offset = math.max(0, nextBoundary.end);
+        affinity = forward ? TextAffinity.downstream : TextAffinity.upstream;
       }
     }
 
@@ -5391,8 +5390,9 @@ class EditableTextState extends State<EditableText>
 
   // --------------------------- Text Editing Actions ---------------------------
 
-  TextBoundary _characterBoundary() =>
-      widget.obscureText ? _CodePointBoundary(_value.text) : renderEditable.glyphBoundaries.moveByGlyphBoundary;
+  TextBoundary _characterBoundary() => widget.obscureText
+      ? _CodePointBoundary(_value.text)
+      : renderEditable.glyphBoundaries.moveByGlyphBoundary;
   TextBoundary _nextWordBoundary() =>
       widget.obscureText ? _documentBoundary() : renderEditable.wordBoundaries.moveByWordBoundary;
   TextBoundary _linebreak() =>
@@ -5644,7 +5644,7 @@ class EditableTextState extends State<EditableText>
 
     // Delete
     DeleteCharacterIntent: _makeOverridable(
-      _DeleteTextAction<DeleteCharacterIntent>(this, _characterBoundary, _moveBeyondGlyphBoundary),
+      _DeleteTextAction<DeleteCharacterIntent>(this, _characterBoundary, _moveBeyondTextBoundary),
     ),
     DeleteToNextWordBoundaryIntent: _makeOverridable(
       _DeleteTextAction<DeleteToNextWordBoundaryIntent>(
