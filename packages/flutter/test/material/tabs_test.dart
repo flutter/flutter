@@ -9323,6 +9323,19 @@ void main() {
     expect((innerMaterial as dynamic).debugInkFeatures, hasLength(1));
   });
 
+  testWidgets('Tab does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(child: Tab(child: Text('X'))),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Tab)), Size.zero);
+  });
+
   testWidgets('Tab can have children with other semantics roles', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -9345,5 +9358,24 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('TabPageSelectorIndicator does not crash in 0x0 environment', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: TabPageSelectorIndicator(
+              backgroundColor: Colors.red,
+              borderColor: Colors.blue,
+              size: 1,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TabPageSelectorIndicator)), Size.zero);
   });
 }

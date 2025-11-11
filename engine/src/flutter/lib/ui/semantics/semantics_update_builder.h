@@ -40,6 +40,7 @@ class SemanticsUpdateBuilder
       int platformViewId,
       int scrollChildren,
       int scrollIndex,
+      int traversalParent,
       double scrollPosition,
       double scrollExtentMax,
       double scrollExtentMin,
@@ -61,6 +62,7 @@ class SemanticsUpdateBuilder
       std::string tooltip,
       int textDirection,
       const tonic::Float64List& transform,
+      const tonic::Float64List& hitTestTransform,
       const tonic::Int32List& childrenInTraversalOrder,
       const tonic::Int32List& childrenInHitTestOrder,
       const tonic::Int32List& customAccessibilityActions,
@@ -71,7 +73,9 @@ class SemanticsUpdateBuilder
       int validationResult,
       int hitTestBehavior,
       int inputType,
-      std::string locale);
+      std::string locale,
+      std::string minValue,
+      std::string maxValue);
 
   void updateCustomAction(int id,
                           std::string label,
