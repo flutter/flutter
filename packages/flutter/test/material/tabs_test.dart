@@ -9350,6 +9350,7 @@ void main() {
   testWidgets('TabBarView does not crash at zero area', (WidgetTester tester) async {
     tester.view.physicalSize = Size.zero;
     final TabController controller = TabController(length: 2, vsync: tester);
+    addTearDown(tester.view.reset);
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
