@@ -2210,7 +2210,7 @@ void main() {
 
   testWidgets('SwitchListTile horizontalTitleGap = 0.0', (WidgetTester tester) async {
     Widget buildFrame(
-∑      TextDirection textDirection, {
+      TextDirection textDirection, {
       double? themeHorizontalTitleGap,
       double? widgetHorizontalTitleGap,
     }) {
