@@ -203,12 +203,14 @@ void main() {
       } else {
         // Check framework dSYM file copied.
         _checkFatBinary(frameworkDsymBinary, buildModeLower, 'dSYM companion file');
+        final List<String> symbols = AppleTestUtils.getExportedSymbols(frameworkDsymBinary.path);
+        expect(symbols, containsAll(AppleTestUtils.expectedFlutterSymbols));
 
         // Check extracted dSYM file.
         _checkFatBinary(libDsymBinary, buildModeLower, 'dSYM companion file');
-        expect(libSymbols, equals(AppleTestUtils.requiredSymbols));
+        expect(libSymbols, equals(AppleTestUtils.requiredAppSymbols));
         final List<String> dSymSymbols = AppleTestUtils.getExportedSymbols(libDsymBinary.path);
-        expect(dSymSymbols, containsAll(AppleTestUtils.requiredSymbols));
+        expect(dSymSymbols, containsAll(AppleTestUtils.requiredAppSymbols));
         // The actual number of symbols is going to vary but there should
         // be "many" in the dSYM. At the time of writing, it was 19195.
         expect(dSymSymbols.length, greaterThanOrEqualTo(15000));
