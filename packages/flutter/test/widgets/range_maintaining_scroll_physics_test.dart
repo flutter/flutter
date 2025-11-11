@@ -7,6 +7,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../material/scrollbar_utils.dart';
+
 class ExpandingBox extends StatefulWidget {
   const ExpandingBox({super.key, required this.collapsedSize, required this.expandedSize});
 
@@ -101,6 +103,8 @@ void main() {
   testWidgets('shrink listview while dragging', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        // Do not build MaterialApp's default Scrollbar.
+        scrollBehavior: const NoScrollbarBehavior(),
         home: ListView.builder(
           itemBuilder: (BuildContext context, int index) => index == 0
               ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)

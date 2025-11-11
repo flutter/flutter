@@ -9,6 +9,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import '../material/scrollbar_utils.dart';
+
 List<Widget> children(int n) {
   return List<Widget>.generate(n, (int i) {
     return SizedBox(height: 100.0, child: Text('$i'));
@@ -23,6 +25,8 @@ void main() {
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
+        // Do not build MaterialApp's default Scrollbar.
+        scrollBehavior: const NoScrollbarBehavior(),
         home: ListView(controller: controller, children: children(30)),
       ),
     );

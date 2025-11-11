@@ -11,6 +11,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../material/scrollbar_utils.dart';
 import 'semantics_tester.dart';
 
 Future<void> pumpTest(
@@ -51,11 +52,8 @@ Future<void> pumpTest(
   await tester.pump(const Duration(seconds: 5)); // to let the theme animate
 }
 
-class NoScrollbarBehavior extends MaterialScrollBehavior {
-  const NoScrollbarBehavior();
-
-  @override
-  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
+Widget _buildMaterialAppWithNoScrollbarBehavior({required Widget home}) {
+  return MaterialApp(scrollBehavior: const NoScrollbarBehavior(), home: home);
 }
 
 // Pump a nested scrollable. The outer scrollable contains a sliver of a
@@ -115,34 +113,42 @@ void main() {
     }
 
     await tester.pumpWidget(
-      const MaterialApp(home: SingleChildScrollView(hitTestBehavior: HitTestBehavior.translucent)),
+      _buildMaterialAppWithNoScrollbarBehavior(
+        home: const SingleChildScrollView(hitTestBehavior: HitTestBehavior.translucent),
+      ),
     );
     expect(getBehavior(SingleChildScrollView), HitTestBehavior.translucent);
 
     await tester.pumpWidget(
-      const MaterialApp(home: CustomScrollView(hitTestBehavior: HitTestBehavior.translucent)),
+      _buildMaterialAppWithNoScrollbarBehavior(
+        home: const CustomScrollView(hitTestBehavior: HitTestBehavior.translucent),
+      ),
     );
     expect(getBehavior(CustomScrollView), HitTestBehavior.translucent);
 
     await tester.pumpWidget(
-      MaterialApp(home: ListView(hitTestBehavior: HitTestBehavior.translucent)),
+      _buildMaterialAppWithNoScrollbarBehavior(
+        home: ListView(hitTestBehavior: HitTestBehavior.translucent),
+      ),
     );
     expect(getBehavior(ListView), HitTestBehavior.translucent);
 
     await tester.pumpWidget(
-      MaterialApp(
+      _buildMaterialAppWithNoScrollbarBehavior(
         home: GridView.extent(maxCrossAxisExtent: 1, hitTestBehavior: HitTestBehavior.translucent),
       ),
     );
     expect(getBehavior(GridView), HitTestBehavior.translucent);
 
     await tester.pumpWidget(
-      MaterialApp(home: PageView(hitTestBehavior: HitTestBehavior.translucent)),
+      _buildMaterialAppWithNoScrollbarBehavior(
+        home: PageView(hitTestBehavior: HitTestBehavior.translucent),
+      ),
     );
     expect(getBehavior(PageView), HitTestBehavior.translucent);
 
     await tester.pumpWidget(
-      MaterialApp(
+      _buildMaterialAppWithNoScrollbarBehavior(
         home: ListWheelScrollView(
           itemExtent: 10,
           hitTestBehavior: HitTestBehavior.translucent,
@@ -1440,7 +1446,7 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     final UniqueKey listView = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
+      _buildMaterialAppWithNoScrollbarBehavior(
         home: TickerMode(
           enabled: true,
           child: ListView.builder(
@@ -1467,7 +1473,7 @@ void main() {
     // This can happen when a route is push or pop from top.
     // It will reconstruct the scroll position and apply content dimensions.
     await tester.pumpWidget(
-      MaterialApp(
+      _buildMaterialAppWithNoScrollbarBehavior(
         home: TickerMode(
           enabled: false,
           child: ListView.builder(

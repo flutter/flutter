@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'scrollbar_utils.dart';
+
 const Color _kAndroidThumbIdleColor = Color(0xffbcbcbc);
 
 Widget _buildSingleChildScrollViewWithScrollbar({
@@ -70,6 +72,9 @@ void main() {
   testWidgets('works with MaterialApp and Scaffold', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        // Manually insert Scrollbar into widget tree versus using MaterialApp's default
+        // for clarity.
+        scrollBehavior: const NoScrollbarBehavior(),
         home: MediaQuery(
           data: const MediaQueryData(padding: EdgeInsets.fromLTRB(0, 20, 0, 34)),
           child: Scaffold(
