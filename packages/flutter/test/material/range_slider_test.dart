@@ -1927,28 +1927,32 @@ void main() {
           matchesSemantics(
             children: <Matcher>[
               matchesSemantics(
-                isEnabled: true,
-                isSlider: true,
-                isFocusable: true,
-                hasEnabledState: true,
-                hasIncreaseAction: true,
-                hasDecreaseAction: true,
-                value: '10%',
-                increasedValue: '10%',
-                decreasedValue: '5%',
-                label: '',
-              ),
-              matchesSemantics(
-                isEnabled: true,
-                isSlider: true,
-                isFocusable: true,
-                hasEnabledState: true,
-                hasIncreaseAction: true,
-                hasDecreaseAction: true,
-                value: '12%',
-                increasedValue: '17%',
-                decreasedValue: '12%',
-                label: '',
+                children: <Matcher>[
+                  matchesSemantics(
+                    isEnabled: true,
+                    isSlider: true,
+                    isFocusable: true,
+                    hasEnabledState: true,
+                    hasIncreaseAction: true,
+                    hasDecreaseAction: true,
+                    value: '10%',
+                    increasedValue: '10%',
+                    decreasedValue: '5%',
+                    label: '',
+                  ),
+                  matchesSemantics(
+                    isEnabled: true,
+                    isSlider: true,
+                    isFocusable: true,
+                    hasEnabledState: true,
+                    hasIncreaseAction: true,
+                    hasDecreaseAction: true,
+                    value: '12%',
+                    increasedValue: '17%',
+                    decreasedValue: '12%',
+                    label: '',
+                  ),
+                ],
               ),
             ],
           ),
@@ -1987,28 +1991,32 @@ void main() {
           matchesSemantics(
             children: <Matcher>[
               matchesSemantics(
-                isEnabled: true,
-                isSlider: true,
-                isFocusable: true,
-                hasEnabledState: true,
-                hasIncreaseAction: true,
-                hasDecreaseAction: true,
-                value: '10%',
-                increasedValue: '15%',
-                decreasedValue: '5%',
-                rect: const Rect.fromLTRB(75.2, 276.0, 123.2, 324.0),
-              ),
-              matchesSemantics(
-                isEnabled: true,
-                isSlider: true,
-                isFocusable: true,
-                hasEnabledState: true,
-                hasIncreaseAction: true,
-                hasDecreaseAction: true,
-                value: '30%',
-                increasedValue: '35%',
-                decreasedValue: '25%',
-                rect: const Rect.fromLTRB(225.6, 276.0, 273.6, 324.0),
+                children: <Matcher>[
+                  matchesSemantics(
+                    isEnabled: true,
+                    isSlider: true,
+                    isFocusable: true,
+                    hasEnabledState: true,
+                    hasIncreaseAction: true,
+                    hasDecreaseAction: true,
+                    value: '10%',
+                    increasedValue: '15%',
+                    decreasedValue: '5%',
+                    rect: const Rect.fromLTRB(75.2, 276.0, 123.2, 324.0),
+                  ),
+                  matchesSemantics(
+                    isEnabled: true,
+                    isSlider: true,
+                    isFocusable: true,
+                    hasEnabledState: true,
+                    hasIncreaseAction: true,
+                    hasDecreaseAction: true,
+                    value: '30%',
+                    increasedValue: '35%',
+                    decreasedValue: '25%',
+                    rect: const Rect.fromLTRB(225.6, 276.0, 273.6, 324.0),
+                  ),
+                ],
               ),
             ],
           ),
@@ -2023,15 +2031,18 @@ void main() {
     final List<Rect> rects = <Rect>[];
     semanticsNode.visitChildren((SemanticsNode node) {
       node.visitChildren((SemanticsNode node) {
-        // Round rect values to avoid floating point errors.
-        rects.add(
-          Rect.fromLTRB(
-            node.rect.left.roundToDouble(),
-            node.rect.top.roundToDouble(),
-            node.rect.right.roundToDouble(),
-            node.rect.bottom.roundToDouble(),
-          ),
-        );
+        node.visitChildren((SemanticsNode node) {
+          // Round rect values to avoid floating point errors.
+          rects.add(
+            Rect.fromLTRB(
+              node.rect.left.roundToDouble(),
+              node.rect.top.roundToDouble(),
+              node.rect.right.roundToDouble(),
+              node.rect.bottom.roundToDouble(),
+            ),
+          );
+          return true;
+        });
         return true;
       });
       return true;
@@ -2073,26 +2084,30 @@ void main() {
           matchesSemantics(
             children: <Matcher>[
               matchesSemantics(
-                isEnabled: true,
-                isSlider: true,
-                isFocusable: true,
-                hasEnabledState: true,
-                hasIncreaseAction: true,
-                hasDecreaseAction: true,
-                value: '10%',
-                increasedValue: '15%',
-                decreasedValue: '5%',
-              ),
-              matchesSemantics(
-                isEnabled: true,
-                isSlider: true,
-                isFocusable: true,
-                hasEnabledState: true,
-                hasIncreaseAction: true,
-                hasDecreaseAction: true,
-                value: '30%',
-                increasedValue: '35%',
-                decreasedValue: '25%',
+                children: <Matcher>[
+                  matchesSemantics(
+                    isEnabled: true,
+                    isSlider: true,
+                    isFocusable: true,
+                    hasEnabledState: true,
+                    hasIncreaseAction: true,
+                    hasDecreaseAction: true,
+                    value: '10%',
+                    increasedValue: '15%',
+                    decreasedValue: '5%',
+                  ),
+                  matchesSemantics(
+                    isEnabled: true,
+                    isSlider: true,
+                    isFocusable: true,
+                    hasEnabledState: true,
+                    hasIncreaseAction: true,
+                    hasDecreaseAction: true,
+                    value: '30%',
+                    increasedValue: '35%',
+                    decreasedValue: '25%',
+                  ),
+                ],
               ),
             ],
           ),
@@ -2107,15 +2122,18 @@ void main() {
     final List<Rect> rects = <Rect>[];
     semanticsNode.visitChildren((SemanticsNode node) {
       node.visitChildren((SemanticsNode node) {
-        // Round rect values to avoid floating point errors.
-        rects.add(
-          Rect.fromLTRB(
-            node.rect.left.roundToDouble(),
-            node.rect.top.roundToDouble(),
-            node.rect.right.roundToDouble(),
-            node.rect.bottom.roundToDouble(),
-          ),
-        );
+        node.visitChildren((SemanticsNode node) {
+          // Round rect values to avoid floating point errors.
+          rects.add(
+            Rect.fromLTRB(
+              node.rect.left.roundToDouble(),
+              node.rect.top.roundToDouble(),
+              node.rect.right.roundToDouble(),
+              node.rect.bottom.roundToDouble(),
+            ),
+          );
+          return true;
+        });
         return true;
       });
       return true;
@@ -2621,29 +2639,33 @@ void main() {
           matchesSemantics(
             children: <Matcher>[
               matchesSemantics(
-                isEnabled: true,
-                isSlider: true,
-                isFocusable: true,
-                isFocused: true,
-                hasEnabledState: true,
-                hasIncreaseAction: true,
-                hasDecreaseAction: true,
-                value: '10%',
-                increasedValue: '15%',
-                decreasedValue: '5%',
-                rect: const Rect.fromLTRB(75.2, 276.0, 123.2, 324.0),
-              ),
-              matchesSemantics(
-                isEnabled: true,
-                isSlider: true,
-                isFocusable: true,
-                hasEnabledState: true,
-                hasIncreaseAction: true,
-                hasDecreaseAction: true,
-                value: '30%',
-                increasedValue: '35%',
-                decreasedValue: '25%',
-                rect: const Rect.fromLTRB(225.6, 276.0, 273.6, 324.0),
+                children: <Matcher>[
+                  matchesSemantics(
+                    isEnabled: true,
+                    isSlider: true,
+                    isFocusable: true,
+                    isFocused: true,
+                    hasEnabledState: true,
+                    hasIncreaseAction: true,
+                    hasDecreaseAction: true,
+                    value: '10%',
+                    increasedValue: '15%',
+                    decreasedValue: '5%',
+                    rect: const Rect.fromLTRB(75.2, 276.0, 123.2, 324.0),
+                  ),
+                  matchesSemantics(
+                    isEnabled: true,
+                    isSlider: true,
+                    isFocusable: true,
+                    hasEnabledState: true,
+                    hasIncreaseAction: true,
+                    hasDecreaseAction: true,
+                    value: '30%',
+                    increasedValue: '35%',
+                    decreasedValue: '25%',
+                    rect: const Rect.fromLTRB(225.6, 276.0, 273.6, 324.0),
+                  ),
+                ],
               ),
             ],
           ),
@@ -2664,29 +2686,33 @@ void main() {
           matchesSemantics(
             children: <Matcher>[
               matchesSemantics(
-                isEnabled: true,
-                isSlider: true,
-                isFocusable: true,
-                hasEnabledState: true,
-                hasIncreaseAction: true,
-                hasDecreaseAction: true,
-                value: '10%',
-                increasedValue: '15%',
-                decreasedValue: '5%',
-                rect: const Rect.fromLTRB(75.2, 276.0, 123.2, 324.0),
-              ),
-              matchesSemantics(
-                isEnabled: true,
-                isSlider: true,
-                isFocusable: true,
-                isFocused: true,
-                hasEnabledState: true,
-                hasIncreaseAction: true,
-                hasDecreaseAction: true,
-                value: '30%',
-                increasedValue: '35%',
-                decreasedValue: '25%',
-                rect: const Rect.fromLTRB(225.6, 276.0, 273.6, 324.0),
+                children: <Matcher>[
+                  matchesSemantics(
+                    isEnabled: true,
+                    isSlider: true,
+                    isFocusable: true,
+                    hasEnabledState: true,
+                    hasIncreaseAction: true,
+                    hasDecreaseAction: true,
+                    value: '10%',
+                    increasedValue: '15%',
+                    decreasedValue: '5%',
+                    rect: const Rect.fromLTRB(75.2, 276.0, 123.2, 324.0),
+                  ),
+                  matchesSemantics(
+                    isEnabled: true,
+                    isSlider: true,
+                    isFocusable: true,
+                    isFocused: true,
+                    hasEnabledState: true,
+                    hasIncreaseAction: true,
+                    hasDecreaseAction: true,
+                    value: '30%',
+                    increasedValue: '35%',
+                    decreasedValue: '25%',
+                    rect: const Rect.fromLTRB(225.6, 276.0, 273.6, 324.0),
+                  ),
+                ],
               ),
             ],
           ),
