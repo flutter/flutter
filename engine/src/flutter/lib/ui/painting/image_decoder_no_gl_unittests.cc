@@ -276,7 +276,7 @@ TEST(ImageDecoderNoGLTest, ImpellerR32FDecode) {
   GTEST_SKIP() << "test only supported on impeller";
 #else
   // 1. Create a 1x1 pixel with float RGBA values.
-  float pixel_data[] = {1.0f, 0.5f, 0.25f, 1.0f};  // R, G, B, A
+  float pixel_data[] = {1.0f};
   sk_sp<SkData> sk_data = SkData::MakeWithCopy(pixel_data, sizeof(pixel_data));
   auto immutable_buffer =
       fml::MakeRefCounted<ImmutableBuffer>(std::move(sk_data));
@@ -285,7 +285,7 @@ TEST(ImageDecoderNoGLTest, ImpellerR32FDecode) {
   ImageDescriptor::ImageInfo image_info = {
       .width = 1,
       .height = 1,
-      .format = ImageDescriptor::PixelFormat::kRGBAFloat32,
+      .format = ImageDescriptor::PixelFormat::kR32Float,
       .premultiplied = false,
   };
   auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
@@ -307,7 +307,7 @@ TEST(ImageDecoderNoGLTest, ImpellerR32FDecode) {
           {.target_width = 1,
            .target_height = 1,
            .target_format =
-               ImageDecoder::TargetPixelFormat::kR32G32B32A32Float},
+               ImageDecoder::TargetPixelFormat::kR32Float},
           /*max_texture_size=*/{1, 1},
           /*supports_wide_gamut=*/true, capabilities, allocator);
 
@@ -315,16 +315,13 @@ TEST(ImageDecoderNoGLTest, ImpellerR32FDecode) {
   // impeller::PixelFormat::kR32G32B32A32Float.
   ASSERT_TRUE(result.ok());
   ASSERT_EQ(result->image_info.format,
-            impeller::PixelFormat::kR32G32B32A32Float);
+            impeller::PixelFormat::kR32Float);
 
   // Optionally, verify the pixel data if needed.
   const float* decompressed_pixel_ptr =
       reinterpret_cast<const float*>(result->device_buffer->OnGetContents());
   ASSERT_NE(decompressed_pixel_ptr, nullptr);
-  EXPECT_EQ(decompressed_pixel_ptr[0], 1.0f);   // R
-  EXPECT_EQ(decompressed_pixel_ptr[1], 0.5f);   // G
-  EXPECT_EQ(decompressed_pixel_ptr[2], 0.25f);  // B
-  EXPECT_EQ(decompressed_pixel_ptr[3], 1.0f);   // A
+  EXPECT_EQ(decompressed_pixel_ptr[0], 1.0f);
 
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
