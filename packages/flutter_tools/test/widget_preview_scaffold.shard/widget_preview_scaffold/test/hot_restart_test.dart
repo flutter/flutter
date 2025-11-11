@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:widget_preview_scaffold/src/controls.dart';
-import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart';
 
 import 'utils/widget_preview_scaffold_test_utils.dart';
 
@@ -12,9 +11,8 @@ void main() {
   testWidgets(
     'Restart Widget Previewer button invokes the DTD hot restart endpoint',
     (tester) async {
-      final FakeWidgetPreviewScaffoldDtdServices dtdServices =
-          FakeWidgetPreviewScaffoldDtdServices();
-      final WidgetPreviewScaffold widgetPreview = WidgetPreviewScaffold(
+      final dtdServices = FakeWidgetPreviewScaffoldDtdServices();
+      final widgetPreview = TestWidgetPreviewScaffold(
         controller: FakeWidgetPreviewScaffoldController(
           dtdServicesOverride: dtdServices,
         ),

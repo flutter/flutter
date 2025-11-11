@@ -15,8 +15,7 @@ import 'package:path/path.dart' as path;
 ///  - Copies the contents of $FLUTTER_ROOT/packages/flutter_tools/test/widget_preview_scaffold.shard/widget_preview_scaffold/lib/
 ///    to $FLUTTER_ROOT/packages/flutter_tools/templates/widget_preview_scaffold/lib/ with the
 ///    correct template extension
-///  - Runs `flutter widget-preview start`, with --dtd-uri=${args.first} if a DTD URI is provided
-///    as an argument
+///  - Runs `flutter widget-preview start` with all arguments passed to this script.
 ///
 /// NOTE: this script does not update the template_manifest.json, which must be done manually.
 Future<void> main(List<String> args) async {
@@ -57,7 +56,7 @@ Future<void> main(List<String> args) async {
   final Process process = await Process.start(flutterDev, <String>[
     'widget-preview',
     'start',
-    if (args.isNotEmpty) '--dtd-url=${args.first}',
+    ...args,
   ]);
   process.stdout.transform(utf8.decoder).listen(stdout.writeln);
   process.stderr.transform(utf8.decoder).listen(stderr.writeln);
