@@ -154,10 +154,9 @@ absl::StatusOr<SkImageInfo> CreateImageInfo(
 struct DecodedBitmap {
   std::shared_ptr<SkBitmap> bitmap;
   std::shared_ptr<ImpellerAllocator> allocator;
-  std::string error;
 };
 
-DecodedBitmap DecodeToBitmap(
+absl::StatusOr<DecodedBitmap> DecodeToBitmap(
     ImageDescriptor* descriptor,
     const SkImageInfo& image_info,
     const SkImageInfo& base_image_info,
@@ -172,12 +171,12 @@ DecodedBitmap DecodeToBitmap(
       std::string error =
           "Could not allocate intermediate for image decompression.";
       FML_DLOG(ERROR) << error;
-      return {.error = error};
+      return absl::InvalidArgumentError(error);
     }
     if (!descriptor->get_pixels(bitmap->pixmap())) {
       std::string error = "Could not decompress image.";
       FML_DLOG(ERROR) << error;
-      return {.error = error};
+      return absl::InvalidArgumentError(error);
     }
   } else {
     std::shared_ptr<SkBitmap> temp_bitmap = std::make_shared<SkBitmap>();
@@ -190,20 +189,21 @@ DecodedBitmap DecodeToBitmap(
       std::string error =
           "Could not allocate intermediate for pixel conversion.";
       FML_DLOG(ERROR) << error;
-      return {.error = error};
+      return absl::ResourceExhaustedError(error);
     }
     temp_bitmap->readPixels(bitmap->pixmap());
     bitmap->setImmutable();
   }
-  return {.bitmap = bitmap, .allocator = bitmap_allocator};
+  return DecodedBitmap{.bitmap = bitmap, .allocator = bitmap_allocator};
 }
 
-DecodedBitmap HandlePremultiplication(
+absl::StatusOr<DecodedBitmap> HandlePremultiplication(
     const std::shared_ptr<SkBitmap>& bitmap,
     std::shared_ptr<ImpellerAllocator> bitmap_allocator,
     const std::shared_ptr<impeller::Allocator>& allocator) {
   if (bitmap->alphaType() != SkAlphaType::kUnpremul_SkAlphaType) {
-    return {.bitmap = bitmap, .allocator = std::move(bitmap_allocator)};
+    return DecodedBitmap{.bitmap = bitmap,
+                         .allocator = std::move(bitmap_allocator)};
   }
 
   std::shared_ptr<ImpellerAllocator> premul_allocator =
@@ -214,11 +214,11 @@ DecodedBitmap HandlePremultiplication(
     std::string error =
         "Could not allocate intermediate for premultiplication conversion.";
     FML_DLOG(ERROR) << error;
-    return {.error = error};
+    return absl::ResourceExhaustedError(error);
   }
   bitmap->readPixels(premul_bitmap->pixmap());
   premul_bitmap->setImmutable();
-  return {.bitmap = premul_bitmap, .allocator = premul_allocator};
+  return DecodedBitmap{.bitmap = premul_bitmap, .allocator = premul_allocator};
 }
 
 ImageDecoderImpeller::DecompressResult ResizeOnCpu(
@@ -349,19 +349,20 @@ ImageDecoderImpeller::DecompressResult ImageDecoderImpeller::DecompressTexture(
     return {.decode_error = decode_error};
   }
 
-  DecodedBitmap decoded = DecodeToBitmap(descriptor, image_info.value(),
-                                         base_image_info, allocator);
-  if (!decoded.error.empty()) {
-    return {.decode_error = decoded.error};
+  absl::StatusOr<DecodedBitmap> decoded = DecodeToBitmap(
+      descriptor, image_info.value(), base_image_info, allocator);
+  if (!decoded.ok()) {
+    return {.decode_error = std::string(decoded.status().message())};
   }
 
-  DecodedBitmap premultiplied =
-      HandlePremultiplication(decoded.bitmap, decoded.allocator, allocator);
-  if (!premultiplied.error.empty()) {
-    return {.decode_error = premultiplied.error};
+  absl::StatusOr<DecodedBitmap> premultiplied =
+      HandlePremultiplication(decoded->bitmap, decoded->allocator, allocator);
+  if (!premultiplied.ok()) {
+    return {.decode_error = std::string(premultiplied.status().message())};
   }
-  std::shared_ptr<SkBitmap> bitmap = premultiplied.bitmap;
-  std::shared_ptr<ImpellerAllocator> bitmap_allocator = premultiplied.allocator;
+  std::shared_ptr<SkBitmap> bitmap = premultiplied->bitmap;
+  std::shared_ptr<ImpellerAllocator> bitmap_allocator =
+      premultiplied->allocator;
 
   if (source_size.width() > max_texture_size.width ||
       source_size.height() > max_texture_size.height ||
