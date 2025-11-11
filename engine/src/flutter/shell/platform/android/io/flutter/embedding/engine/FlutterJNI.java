@@ -49,7 +49,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -114,11 +113,6 @@ public class FlutterJNI {
   // a message response.  Typically accessing the shell holder happens on the
   // platform thread and doesn't require locking.
   private ReentrantReadWriteLock shellHolderLock = new ReentrantReadWriteLock();
-
-  // Boolean that gates if view port metrics should be sent.  When the
-  // engine informs the embedder of a resize, it is not necessary send
-  // the viewport metrics back to the engine.
-  private AtomicBoolean shouldSendViewportMetrics = new AtomicBoolean(true);
 
   // Prefer using the FlutterJNI.Factory so it's easier to test.
   public FlutterJNI() {
@@ -396,15 +390,6 @@ public class FlutterJNI {
 
   @NonNull
   private final Set<FlutterUiResizeListener> flutterUiResizeListeners = new CopyOnWriteArraySet<>();
-
-  @NonNull
-  private final FlutterUiResizeListener flutterUiResizeListener =
-      new FlutterUiResizeListener() {
-        @Override
-        public void resizeEngineView(int width, int height) {
-          shouldSendViewportMetrics.set(false);
-        }
-      };
 
   @NonNull private final Looper mainLooper; // cached to avoid synchronization on repeat access.
 
@@ -718,10 +703,6 @@ public class FlutterJNI {
       int maxHeight) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
-    if (shouldSendViewportMetrics.compareAndSet(false, true)) {
-      Log.d(TAG, "Not sending viewport metrics.");
-      return;
-    }
     Log.d(TAG, "Sending viewport metrics to the engine.");
     nativeSetViewportMetrics(
         nativeShellHolderId,
@@ -1318,8 +1299,6 @@ public class FlutterJNI {
   // This will get called on the raster thread.
   @SuppressWarnings("unused")
   public void maybeResizeSurfaceView(int width, int height) {
-    flutterUiResizeListener.resizeEngineView(width, height);
-
     for (FlutterUiResizeListener listener : flutterUiResizeListeners) {
       listener.resizeEngineView(width, height);
     }
