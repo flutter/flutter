@@ -219,7 +219,7 @@ class HttpsConfig {
         certKeyPath: certKeyPath,
       ),
       (null, null) => null,
-      (final Object? certPath, final Object? certKeyPath) => throw Exception(
+      (final Object? certPath, final Object? certKeyPath) => throw ArgumentError(
         'When providing TLS certificates, both `tlsCertPath` and '
         '`tlsCertKeyPath` must be provided as strings. '
         'Found: tlsCertPath: ${certPath ?? 'null'}, tlsCertKeyPath: ${certKeyPath ?? 'null'}',
