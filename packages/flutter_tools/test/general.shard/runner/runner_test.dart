@@ -882,8 +882,6 @@ class CrashingFlutterCommand extends FlutterCommand {
 }
 
 class MultipleExceptionCrashingFlutterCommand extends FlutterCommand {
-  MultipleExceptionCrashingFlutterCommand();
-
   final _completer = Completer<void>();
 
   @override
