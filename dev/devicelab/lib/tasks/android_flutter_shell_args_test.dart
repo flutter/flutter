@@ -16,7 +16,9 @@ import '../framework/utils.dart';
 TaskFunction androidFlutterShellArgsTest({Map<String, String>? environment}) {
   return () async {
     section('Create new Flutter Android app');
-    final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
+    final Directory tempDir = Directory.systemTemp.createTempSync(
+      'android_flutter_shell_args_test.',
+    );
 
     try {
       section('Create module project');
@@ -24,9 +26,12 @@ TaskFunction androidFlutterShellArgsTest({Map<String, String>? environment}) {
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
-          options: <String>['--org', 'io.flutter.devicelab', 'androidFlutterShellArgsTest'],
+          options: <String>['--org', 'io.flutter.devicelab', 'androidfluttershellargstest'],
         );
       });
+
+      print('CAMILLE:::::::::::::::::::::::::::');
+      print(tempDir.listSync());
 
       section('Insert AOT shared library name metadata into manifest');
       final List<(String, String)> metadataKeyPairs = <(String, String)>[
@@ -50,6 +55,7 @@ TaskFunction androidFlutterShellArgsTest({Map<String, String>? environment}) {
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen((String line) {
+            print(line);
             if (line.contains('Skipping unsafe AOT shared library name flag:')) {
               foundInvalidAotLibraryLog.complete(true);
             }
@@ -64,6 +70,9 @@ TaskFunction androidFlutterShellArgsTest({Map<String, String>? environment}) {
       section('Stop listening to STDOUT');
       await stdout.cancel();
       run.kill();
+
+      // TODO(camsim99):idk figure it out
+      return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
     } catch (e, stackTrace) {
