@@ -97,7 +97,8 @@ DlDeferredImageGPUImpeller::ImageWrapper::Make(
   auto wrapper = std::shared_ptr<ImageWrapper>(new ImageWrapper(
       std::move(display_list), size, std::move(snapshot_delegate),
       std::move(raster_task_runner)));
-  wrapper->SnapshotDisplayList();
+  wrapper->SnapshotDisplayList(/*display_list=*/std::move(display_list),
+                               /*layer_tree=*/nullptr);
   return wrapper;
 }
 
@@ -109,7 +110,8 @@ DlDeferredImageGPUImpeller::ImageWrapper::Make(
   auto wrapper = std::shared_ptr<ImageWrapper>(new ImageWrapper(
       nullptr, layer_tree->frame_size(), std::move(snapshot_delegate),
       std::move(raster_task_runner)));
-  wrapper->SnapshotDisplayList(std::move(layer_tree));
+  wrapper->SnapshotDisplayList(/*display_list=*/nullptr,
+                               /*layer_tree=*/std::move(layer_tree));
   return wrapper;
 }
 
@@ -119,11 +121,10 @@ DlDeferredImageGPUImpeller::ImageWrapper::ImageWrapper(
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner)
     : size_(size),
-      display_list_(std::move(display_list)),
       snapshot_delegate_(std::move(snapshot_delegate)),
       raster_task_runner_(std::move(raster_task_runner)) {}
 
-DlDeferredImageGPUImpeller::ImageWrapper::~ImageWrapper() {}
+DlDeferredImageGPUImpeller::ImageWrapper::~ImageWrapper() = default;
 
 void DlDeferredImageGPUImpeller::ImageWrapper::OnGrContextCreated() {}
 
@@ -134,38 +135,39 @@ bool DlDeferredImageGPUImpeller::ImageWrapper::isTextureBacked() const {
 }
 
 void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
+    sk_sp<DisplayList> display_list,
     std::unique_ptr<LayerTree> layer_tree) {
   fml::TaskRunner::RunNowOrPostTask(
       raster_task_runner_,
-      fml::MakeCopyable(
-          [weak_this = weak_from_this(), layer_tree = std::move(layer_tree)]() {
-            TRACE_EVENT0("flutter", "SnapshotDisplayList (impeller)");
-            auto wrapper = weak_this.lock();
-            if (!wrapper) {
-              return;
-            }
-            auto snapshot_delegate = wrapper->snapshot_delegate_;
-            if (!snapshot_delegate) {
-              return;
-            }
+      fml::MakeCopyable([weak_this = weak_from_this(),
+                         display_list = std::move(display_list),
+                         layer_tree = std::move(layer_tree)]() mutable {
+        TRACE_EVENT0("flutter", "SnapshotDisplayList (impeller)");
+        auto wrapper = weak_this.lock();
+        if (!wrapper) {
+          return;
+        }
+        auto snapshot_delegate = wrapper->snapshot_delegate_;
+        if (!snapshot_delegate) {
+          return;
+        }
 
-            std::shared_ptr<TextureRegistry> texture_registry =
-                snapshot_delegate->GetTextureRegistry();
-            if (layer_tree) {
-              wrapper->display_list_ = layer_tree->Flatten(
-                  DlRect::MakeWH(wrapper->size_.width, wrapper->size_.height),
-                  texture_registry);
-            }
-            auto snapshot = snapshot_delegate->MakeRasterSnapshotSync(
-                wrapper->display_list_, wrapper->size_);
-            if (!snapshot) {
-              std::scoped_lock lock(wrapper->error_mutex_);
-              wrapper->error_ = "Failed to create snapshot.";
-              return;
-            }
-            wrapper->texture_ = snapshot->impeller_texture();
-            wrapper->display_list_ = nullptr;
-          }));
+        std::shared_ptr<TextureRegistry> texture_registry =
+            snapshot_delegate->GetTextureRegistry();
+        if (layer_tree) {
+          display_list = layer_tree->Flatten(
+              DlRect::MakeWH(wrapper->size_.width, wrapper->size_.height),
+              texture_registry);
+        }
+        auto snapshot = snapshot_delegate->MakeRasterSnapshotSync(
+            display_list, wrapper->size_);
+        if (!snapshot) {
+          std::scoped_lock lock(wrapper->error_mutex_);
+          wrapper->error_ = "Failed to create snapshot.";
+          return;
+        }
+        wrapper->texture_ = snapshot->impeller_texture();
+      }));
 }
 
 std::optional<std::string>

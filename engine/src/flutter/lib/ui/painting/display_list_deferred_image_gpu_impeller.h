@@ -94,7 +94,6 @@ class DlDeferredImageGPUImpeller final : public DlImage {
    private:
     FML_FRIEND_TEST(testing::DlDeferredImageGPUImpeller, TrashesDisplayList);
     DlISize size_;
-    sk_sp<DisplayList> display_list_;
     std::shared_ptr<impeller::Texture> texture_;
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate_;
     fml::RefPtr<fml::TaskRunner> raster_task_runner_;
@@ -112,7 +111,8 @@ class DlDeferredImageGPUImpeller final : public DlImage {
     // thread task spawned by this method. After being flattened into a display
     // list, the image wrapper will be updated to hold this display list and the
     // layer tree can be dropped.
-    void SnapshotDisplayList(std::unique_ptr<LayerTree> layer_tree = nullptr);
+    void SnapshotDisplayList(sk_sp<DisplayList> display_list,
+                             std::unique_ptr<LayerTree> layer_tree);
 
     // |ContextListener|
     void OnGrContextCreated() override;

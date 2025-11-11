@@ -89,14 +89,12 @@ TEST(DlDeferredImageGPUImpeller, TrashesDisplayList) {
       builder.Build(), size, snapshot_delegate_weak_ptr, task_runner);
 
   EXPECT_FALSE(image->impeller_texture());
-  EXPECT_TRUE(image->wrapper_->display_list_);
 
   // Unpause raster thread.
   latch.Signal();
 
   PostTaskSync(task_runner, [&]() {
     EXPECT_TRUE(image->impeller_texture());
-    EXPECT_FALSE(image->wrapper_->display_list_);
     snapshot_delegate.reset();
   });
 }
