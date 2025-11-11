@@ -14,6 +14,11 @@ import '../base/os.dart';
 import 'devfs_proxy.dart';
 
 const webDevServerConfigFilePath = 'web_dev_config.yaml';
+
+/// Represents the default value for the web dev server.
+///
+/// Maps to `localhost` and/or `127.0.0.1`.
+const webDevAnyHostDefault = 'any';
 const _kLogEntryPrefix = '[WebDevServer]';
 const _kServer = 'server';
 const _kName = 'name';
@@ -41,7 +46,7 @@ T? _validateType<T>({required Object? value, required String fieldName}) {
 class WebDevServerConfig {
   const WebDevServerConfig({
     this.headers = const <String, String>{},
-    this.host = 'any',
+    this.host = webDevAnyHostDefault,
     this.port = 0,
     this.https,
     this.proxy = const <ProxyRule>[],
@@ -97,7 +102,7 @@ class WebDevServerConfig {
 
     return WebDevServerConfig(
       headers: headers,
-      host: host ?? 'any',
+      host: host ?? webDevAnyHostDefault,
       port: port ?? 0,
       https: https == null ? null : HttpsConfig.fromYaml(https),
       proxy: proxyRules,
