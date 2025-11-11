@@ -169,6 +169,7 @@ class AOTSnapshotter {
 
       const frameworkSnapshotName = 'App';
       aotSharedLibrary = _fileSystem.path.join(frameworkPath, frameworkSnapshotName);
+      final String relocatableObject = _fileSystem.path.join(outputPath, 'app.o');
       // When the minimum version is updated, remember to update
       // template MinimumOSVersion.
       // https://github.com/flutter/flutter/pull/62902
@@ -178,6 +179,7 @@ class AOTSnapshotter {
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-macho-dylib',
         '--macho=$aotSharedLibrary',
+        '--macho-object=$relocatableObject',
         '--macho-min-os-version=$minOSVersion',
         '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
         '--macho-install-name=@rpath/$frameworkName/$frameworkSnapshotName',

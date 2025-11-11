@@ -182,7 +182,8 @@ void main() {
             genSnapshotPath,
             '--deterministic',
             '--snapshot_kind=app-aot-macho-dylib',
-            '--macho=build/foo/App.framework/App',
+            '--macho=$outputPath/App.framework/App',
+            '--macho-object=$outputPath/app.o',
             '--macho-min-os-version=13.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
@@ -194,23 +195,23 @@ void main() {
         ),
         kWhichSysctlCommand,
         kARMCheckCommand,
-        const FakeCommand(
+        FakeCommand(
           command: <String>[
             'xcrun',
             'dsymutil',
             '-o',
-            'build/foo/App.framework.dSYM',
-            'build/foo/App.framework/App',
+            '$outputPath/App.framework.dSYM',
+            '$outputPath/App.framework/App',
           ],
         ),
-        const FakeCommand(
+        FakeCommand(
           command: <String>[
             'xcrun',
             'strip',
             '-x',
-            'build/foo/App.framework/App',
+            '$outputPath/App.framework/App',
             '-o',
-            'build/foo/App.framework/App',
+            '$outputPath/App.framework/App',
           ],
         ),
       ]);
@@ -243,7 +244,8 @@ void main() {
             genSnapshotPath,
             '--deterministic',
             '--snapshot_kind=app-aot-macho-dylib',
-            '--macho=build/foo/App.framework/App',
+            '--macho=$outputPath/App.framework/App',
+            '--macho-object=$outputPath/app.o',
             '--macho-min-os-version=13.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
@@ -253,23 +255,23 @@ void main() {
         ),
         kWhichSysctlCommand,
         kARMCheckCommand,
-        const FakeCommand(
+        FakeCommand(
           command: <String>[
             'xcrun',
             'dsymutil',
             '-o',
-            'build/foo/App.framework.dSYM',
-            'build/foo/App.framework/App',
+            '$outputPath/App.framework.dSYM',
+            '$outputPath/App.framework/App',
           ],
         ),
-        const FakeCommand(
+        FakeCommand(
           command: <String>[
             'xcrun',
             'strip',
             '-x',
-            'build/foo/App.framework/App',
+            '$outputPath/App.framework/App',
             '-o',
-            'build/foo/App.framework/App',
+            '$outputPath/App.framework/App',
           ],
         ),
       ]);
@@ -301,7 +303,8 @@ void main() {
             genSnapshotPath,
             '--deterministic',
             '--snapshot_kind=app-aot-macho-dylib',
-            '--macho=build/foo/App.framework/App',
+            '--macho=$outputPath/App.framework/App',
+            '--macho-object=$outputPath/app.o',
             '--macho-min-os-version=13.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
@@ -310,23 +313,23 @@ void main() {
         ),
         kWhichSysctlCommand,
         kARMCheckCommand,
-        const FakeCommand(
+        FakeCommand(
           command: <String>[
             'xcrun',
             'dsymutil',
             '-o',
-            'build/foo/App.framework.dSYM',
-            'build/foo/App.framework/App',
+            '$outputPath/App.framework.dSYM',
+            '$outputPath/App.framework/App',
           ],
         ),
-        const FakeCommand(
+        FakeCommand(
           command: <String>[
             'xcrun',
             'strip',
             '-x',
-            'build/foo/App.framework/App',
+            '$outputPath/App.framework/App',
             '-o',
-            'build/foo/App.framework/App',
+            '$outputPath/App.framework/App',
           ],
         ),
       ]);

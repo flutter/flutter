@@ -807,6 +807,7 @@ void main() {
             '--trace-precompiler-to=code_size_1/trace.arm64.json',
             kMachoDylibAot,
             '--macho=$build/arm64/App.framework/App',
+            '--macho-object=$build/arm64/app.o',
             '--macho-min-os-version=13.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
