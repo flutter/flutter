@@ -195,7 +195,7 @@ abstract class AssetBundle {
     String manifestPath = defaultManifestPath,
     required String packageConfigPath,
     bool deferredComponentsEnabled = false,
-    TargetPlatform? targetPlatform,
+    required TargetPlatform targetPlatform,
     String? flavor,
     bool includeAssetsFromDevDependencies = false,
   });
@@ -326,7 +326,7 @@ class ManifestAssetBundle implements AssetBundle {
     FlutterProject? flutterProject,
     required String packageConfigPath,
     bool deferredComponentsEnabled = false,
-    TargetPlatform? targetPlatform,
+    required TargetPlatform targetPlatform,
     String? flavor,
     bool includeAssetsFromDevDependencies = false,
   }) async {
@@ -402,6 +402,7 @@ class ManifestAssetBundle implements AssetBundle {
           assetBasePath,
           wildcardDirectories,
           flutterProject.directory,
+          targetPlatform: targetPlatform,
           flavor: flavor,
         );
     if (!_splitDeferredAssets || !deferredComponentsEnabled) {
@@ -716,7 +717,7 @@ class ManifestAssetBundle implements AssetBundle {
     }
   }
 
-  void _setLicenseIfChanged(String combinedLicenses, TargetPlatform? targetPlatform) {
+  void _setLicenseIfChanged(String combinedLicenses, TargetPlatform targetPlatform) {
     // On the web, don't compress the NOTICES file since the client doesn't have
     // dart:io to decompress it. So use the standard _setIfChanged to check if
     // the strings still match.
@@ -838,6 +839,7 @@ class ManifestAssetBundle implements AssetBundle {
     String assetBasePath,
     List<Uri> wildcardDirectories,
     Directory projectDirectory, {
+    required TargetPlatform targetPlatform,
     String? flavor,
   }) {
     final List<DeferredComponent>? components = flutterManifest.deferredComponents;
@@ -859,6 +861,7 @@ class ManifestAssetBundle implements AssetBundle {
             componentAssets,
             assetsEntry.uri,
             flavors: assetsEntry.flavors,
+            platforms: assetsEntry.platforms,
             transformers: assetsEntry.transformers,
           );
         } else {
@@ -870,13 +873,15 @@ class ManifestAssetBundle implements AssetBundle {
             componentAssets,
             assetsEntry.uri,
             flavors: assetsEntry.flavors,
+            platforms: assetsEntry.platforms,
             transformers: assetsEntry.transformers,
           );
         }
       }
 
       componentAssets.removeWhere(
-        (_Asset asset, List<_Asset> variants) => !asset.matchesFlavor(flavor),
+        (_Asset asset, List<_Asset> variants) =>
+            !asset.matchesFlavor(flavor) || !asset.matchesPlatform(targetPlatform),
       );
       deferredComponentsAssetVariants[component.name] = componentAssets;
     }
@@ -1018,7 +1023,7 @@ class ManifestAssetBundle implements AssetBundle {
     FlutterManifest flutterManifest,
     List<Uri> wildcardDirectories,
     String assetBase,
-    TargetPlatform? targetPlatform, {
+    TargetPlatform targetPlatform, {
     String? packageName,
     Package? attributedPackage,
     required String? flavor,
@@ -1039,6 +1044,7 @@ class ManifestAssetBundle implements AssetBundle {
           packageName: packageName,
           attributedPackage: attributedPackage,
           flavors: assetsEntry.flavors,
+          platforms: assetsEntry.platforms,
           transformers: assetsEntry.transformers,
         );
       } else {
@@ -1052,6 +1058,7 @@ class ManifestAssetBundle implements AssetBundle {
           packageName: packageName,
           attributedPackage: attributedPackage,
           flavors: assetsEntry.flavors,
+          platforms: assetsEntry.platforms,
           transformers: assetsEntry.transformers,
         );
       }
@@ -1063,6 +1070,15 @@ class ManifestAssetBundle implements AssetBundle {
           'Skipping assets entry "${asset.entryUri.path}" since '
           'its configured flavor(s) did not match the provided flavor (if any).\n'
           'Configured flavors: ${asset.flavors.join(', ')}\n',
+        );
+        return true;
+      }
+      if (!asset.matchesPlatform(targetPlatform)) {
+        _logger.printTrace(
+          'Skipping assets entry "${asset.entryUri.path}" since '
+          'its configured platform(s) did not match the target platform.\n'
+          'Configured platforms: ${asset.platforms.join(', ')}\n'
+          'Target platform: ${targetPlatform.osName}\n',
         );
         return true;
       }
@@ -1101,6 +1117,7 @@ class ManifestAssetBundle implements AssetBundle {
         attributedPackage: attributedPackage,
         assetKind: AssetKind.shader,
         flavors: <String>{},
+        platforms: <String>{},
         transformers: <AssetTransformerEntry>[],
       );
     }
@@ -1116,6 +1133,7 @@ class ManifestAssetBundle implements AssetBundle {
           attributedPackage,
           assetKind: AssetKind.font,
           flavors: <String>{},
+          platforms: <String>{},
           transformers: <AssetTransformerEntry>[],
         );
         final File baseAssetFile = baseAsset.lookupAssetFile(_fileSystem);
@@ -1142,6 +1160,7 @@ class ManifestAssetBundle implements AssetBundle {
     String? packageName,
     Package? attributedPackage,
     required Set<String> flavors,
+    required Set<String> platforms,
     required List<AssetTransformerEntry> transformers,
   }) {
     final String directoryPath;
@@ -1174,6 +1193,7 @@ class ManifestAssetBundle implements AssetBundle {
         attributedPackage: attributedPackage,
         originUri: assetUri,
         flavors: flavors,
+        platforms: platforms,
         transformers: transformers,
       );
     }
@@ -1191,6 +1211,7 @@ class ManifestAssetBundle implements AssetBundle {
     Package? attributedPackage,
     AssetKind assetKind = AssetKind.regular,
     required Set<String> flavors,
+    required Set<String> platforms,
     required List<AssetTransformerEntry> transformers,
   }) {
     final _Asset asset = _resolveAsset(
@@ -1202,6 +1223,7 @@ class ManifestAssetBundle implements AssetBundle {
       assetKind: assetKind,
       originUri: originUri,
       flavors: flavors,
+      platforms: platforms,
       transformers: transformers,
     );
 
@@ -1225,6 +1247,7 @@ class ManifestAssetBundle implements AssetBundle {
             package: attributedPackage,
             kind: assetKind,
             flavors: flavors,
+            platforms: platforms,
             transformers: transformers,
           ),
         );
@@ -1335,6 +1358,7 @@ class ManifestAssetBundle implements AssetBundle {
     Uri? originUri,
     AssetKind assetKind = AssetKind.regular,
     required Set<String> flavors,
+    required Set<String> platforms,
     required List<AssetTransformerEntry> transformers,
   }) {
     _ensureAssetPathIsValid(assetsBaseDir: assetsBaseDir, assetUri: assetUri);
@@ -1351,6 +1375,7 @@ class ManifestAssetBundle implements AssetBundle {
         assetKind: assetKind,
         originUri: originUri,
         flavors: flavors,
+        platforms: platforms,
         transformers: transformers,
       );
       if (packageAsset != null) {
@@ -1370,6 +1395,7 @@ class ManifestAssetBundle implements AssetBundle {
       originUri: originUri,
       kind: assetKind,
       flavors: flavors,
+      platforms: platforms,
       transformers: transformers,
     );
   }
@@ -1381,6 +1407,7 @@ class ManifestAssetBundle implements AssetBundle {
     AssetKind assetKind = AssetKind.regular,
     Uri? originUri,
     Set<String>? flavors,
+    Set<String>? platforms,
     List<AssetTransformerEntry>? transformers,
   }) {
     assert(assetUri.pathSegments.first == 'packages');
@@ -1397,6 +1424,7 @@ class ManifestAssetBundle implements AssetBundle {
           kind: assetKind,
           originUri: originUri,
           flavors: flavors,
+          platforms: platforms,
           transformers: transformers,
         );
       }
@@ -1420,9 +1448,11 @@ class _Asset {
     required this.package,
     this.kind = AssetKind.regular,
     Set<String>? flavors,
+    Set<String>? platforms,
     List<AssetTransformerEntry>? transformers,
   }) : originUri = originUri ?? entryUri,
        flavors = flavors ?? const <String>{},
+       platforms = platforms ?? const <String>{},
        transformers = transformers ?? const <AssetTransformerEntry>[];
 
   final String baseDir;
@@ -1443,6 +1473,8 @@ class _Asset {
   final AssetKind kind;
 
   final Set<String> flavors;
+
+  final Set<String> platforms;
 
   final List<AssetTransformerEntry> transformers;
 
@@ -1472,11 +1504,20 @@ class _Asset {
     return flavors.contains(flavor);
   }
 
+  bool matchesPlatform(TargetPlatform targetPlatform) {
+    if (platforms.isEmpty || targetPlatform == TargetPlatform.tester) {
+      return true;
+    }
+
+    return platforms.contains(targetPlatform.osName);
+  }
+
   bool hasEquivalentFlavorsWith(_Asset other) {
-    final Set<String> assetFlavors = flavors.toSet();
-    final Set<String> otherFlavors = other.flavors.toSet();
-    return assetFlavors.length == otherFlavors.length &&
-        assetFlavors.every((String e) => otherFlavors.contains(e));
+    return setEquals(flavors, other.flavors);
+  }
+
+  bool hasEquivalentPlatformsWith(_Asset other) {
+    return setEquals(platforms, other.platforms);
   }
 
   @override
@@ -1495,11 +1536,13 @@ class _Asset {
         other.relativeUri == relativeUri &&
         other.entryUri == entryUri &&
         other.kind == kind &&
-        hasEquivalentFlavorsWith(other);
+        hasEquivalentFlavorsWith(other) &&
+        hasEquivalentPlatformsWith(other);
   }
 
   @override
-  int get hashCode => Object.hashAll(<Object>[baseDir, relativeUri, entryUri, kind, ...flavors]);
+  int get hashCode =>
+      Object.hashAll(<Object>[baseDir, relativeUri, entryUri, kind, ...flavors, ...platforms]);
 }
 
 // Given an assets directory like this:

@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 
 import 'package:flutter_tools/src/project.dart';
@@ -86,6 +87,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fs.currentDirectory),
+          targetPlatform: TargetPlatform.tester,
         );
 
         final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(
@@ -133,6 +135,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fs.currentDirectory),
+          targetPlatform: TargetPlatform.tester,
         );
 
         final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(
@@ -176,6 +179,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       await bundle.build(
         packageConfigPath: '.dart_tool/package_config.json',
         flutterProject: FlutterProject.fromDirectoryTest(fs.currentDirectory),
+        targetPlatform: TargetPlatform.tester,
       );
 
       final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(
@@ -215,6 +219,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       await bundle.build(
         packageConfigPath: '.dart_tool/package_config.json',
         flutterProject: FlutterProject.fromDirectoryTest(fs.currentDirectory),
+        targetPlatform: TargetPlatform.tester,
       );
 
       final expectedManifest = <String, List<Map<String, Object>>>{
@@ -282,6 +287,7 @@ flutter:
       await bundle.build(
         packageConfigPath: '.dart_tool/package_config.json',
         flutterProject: FlutterProject.fromDirectoryTest(fs.currentDirectory),
+        targetPlatform: TargetPlatform.tester,
       );
 
       final expectedAssetManifest = <String, List<Map<String, Object>>>{
