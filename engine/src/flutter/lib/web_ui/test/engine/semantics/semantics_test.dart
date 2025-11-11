@@ -160,6 +160,12 @@ void runSemanticsTests() {
   group('forms', () {
     _testForms();
   });
+  group('progressBar', () {
+    _testProgressBar();
+  });
+  group('loadingSpinner', () {
+    _testLoadingSpinner();
+  });
 }
 
 void _testSemanticRole() {
@@ -3963,6 +3969,43 @@ void _testPlatformView() {
 
     semantics().semanticsEnabled = false;
   });
+
+  test('removes aria-owns when platform view is hidden', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    // Create a platform view that is visible (has aria-owns).
+    {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(builder, platformViewId: 5, rect: const ui.Rect.fromLTRB(0, 0, 100, 50));
+      owner().updateSemantics(builder.build());
+      expectSemanticsTree(owner(), '<sem aria-owns="flt-pv-5"></sem>');
+    }
+
+    // Hide the platform view (should remove aria-owns).
+    {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        platformViewId: 5,
+        flags: const ui.SemanticsFlags(isHidden: true),
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      owner().updateSemantics(builder.build());
+      expectSemanticsTree(owner(), '<sem></sem>');
+    }
+
+    // Show the platform view again (should restore aria-owns).
+    {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(builder, platformViewId: 5, rect: const ui.Rect.fromLTRB(0, 0, 100, 50));
+      owner().updateSemantics(builder.build());
+      expectSemanticsTree(owner(), '<sem aria-owns="flt-pv-5"></sem>');
+    }
+
+    semantics().semanticsEnabled = false;
+  });
 }
 
 void _testGroup() {
@@ -6116,6 +6159,55 @@ void _testForms() {
   semantics().semanticsEnabled = false;
 }
 
+void _testProgressBar() {
+  test('nodes with progress bar role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.progressBar,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.progressBar);
+    expect(object.element.getAttribute('role'), 'progressbar');
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
+void _testLoadingSpinner() {
+  test('nodes with loading spinner role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.loadingSpinner,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.loadingSpinner);
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
 /// A facade in front of [ui.SemanticsUpdateBuilder.updateNode] that
 /// supplies default values for semantics attributes.
 void updateNode(
@@ -6160,6 +6252,8 @@ void updateNode(
   ui.SemanticsHitTestBehavior hitTestBehavior = ui.SemanticsHitTestBehavior.defer,
   ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
   ui.Locale? locale,
+  String minValue = '0',
+  String maxValue = '0',
 }) {
   transform ??= Float64List.fromList(Matrix4.identity().storage);
   hitTestTransform ??= Float64List.fromList(Matrix4.identity().storage);
@@ -6207,6 +6301,8 @@ void updateNode(
     hitTestBehavior: hitTestBehavior,
     inputType: inputType,
     locale: locale,
+    minValue: minValue,
+    maxValue: maxValue,
   );
 }
 
