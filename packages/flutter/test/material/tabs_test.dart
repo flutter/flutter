@@ -9346,4 +9346,23 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('TabPageSelectorIndicator does not crash in 0x0 environment', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: TabPageSelectorIndicator(
+              backgroundColor: Colors.red,
+              borderColor: Colors.blue,
+              size: 1,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TabPageSelectorIndicator)), Size.zero);
+  });
 }
