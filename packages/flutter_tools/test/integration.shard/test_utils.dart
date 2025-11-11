@@ -101,11 +101,17 @@ Future<void> pollForServiceExtensionValue<T>({
 }
 
 abstract final class AppleTestUtils {
-  static const requiredSymbols = <String>[
+  static const requiredAppSymbols = <String>[
     '_kDartIsolateSnapshotData',
     '_kDartIsolateSnapshotInstructions',
     '_kDartVmSnapshotData',
     '_kDartVmSnapshotInstructions',
+  ];
+
+  /// A small subset of expected symbols for the Flutter/FlutterMacOS framework
+  static const expectedFlutterSymbols = <String>[
+    r'_OBJC_CLASS_$_FlutterViewController',
+    r'_OBJC_CLASS_$_FlutterEngine',
   ];
 
   static List<String> getExportedSymbols(String dwarfPath) {
