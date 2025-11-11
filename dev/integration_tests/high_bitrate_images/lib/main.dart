@@ -98,7 +98,7 @@ class _SdfCanvasState extends State<SdfCanvas> {
       width,
       height,
       ui.PixelFormat.rgbaFloat32,
-      targetFormat: ui.PixelFormat.rgbaFloat32,
+      targetFormat: ui.TargetPixelFormat.rgbaFloat32,
       (ui.Image image) {
         completer.complete(image);
       },

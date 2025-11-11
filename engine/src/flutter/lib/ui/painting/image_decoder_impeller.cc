@@ -107,9 +107,9 @@ SkAlphaType ChooseCompatibleAlphaType(SkAlphaType type) {
 }
 
 absl::StatusOr<SkColorType> ChooseCompatibleColorType(
-    ImageDecoder::PixelFormat format) {
+    ImageDecoder::TargetPixelFormat format) {
   switch (format) {
-    case ImageDecoder::PixelFormat::kR32G32B32A32Float:
+    case ImageDecoder::TargetPixelFormat::kR32G32B32A32Float:
       return kRGBA_F32_SkColorType;
     default:
       return absl::InvalidArgumentError("unsupported target pixel format");
@@ -120,12 +120,12 @@ absl::StatusOr<SkImageInfo> CreateImageInfo(
     const SkImageInfo& base_image_info,
     const SkISize& decode_size,
     bool supports_wide_gamut,
-    ImageDecoder::PixelFormat target_format) {
+    ImageDecoder::TargetPixelFormat target_format) {
   const bool is_wide_gamut =
       supports_wide_gamut ? IsWideGamut(base_image_info.colorSpace()) : false;
   SkAlphaType alpha_type =
       ChooseCompatibleAlphaType(base_image_info.alphaType());
-  if (target_format != ImageDecoder::PixelFormat::kOptimal) {
+  if (target_format != ImageDecoder::TargetPixelFormat::kDontCare) {
     absl::StatusOr<SkColorType> target_skia_color_type =
         ChooseCompatibleColorType(target_format);
     if (!target_skia_color_type.ok()) {

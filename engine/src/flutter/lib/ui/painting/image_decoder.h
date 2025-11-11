@@ -34,16 +34,16 @@ class ImageDecoder {
 
   using ImageResult = std::function<void(sk_sp<DlImage>, std::string)>;
 
-  enum PixelFormat {
+  enum TargetPixelFormat {
     kUnknown,
-    kOptimal,
+    kDontCare,
     kR32G32B32A32Float,
   };
 
   struct Options {
     uint32_t target_width = 0;
     uint32_t target_height = 0;
-    PixelFormat target_format = PixelFormat::kOptimal;
+    TargetPixelFormat target_format = TargetPixelFormat::kDontCare;
   };
 
   // Takes an image descriptor and returns a handle to a texture resident on the

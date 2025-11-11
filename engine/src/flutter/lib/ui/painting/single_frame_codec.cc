@@ -13,7 +13,7 @@ SingleFrameCodec::SingleFrameCodec(
     const fml::RefPtr<ImageDescriptor>& descriptor,
     uint32_t target_width,
     uint32_t target_height,
-    ImageDecoder::PixelFormat target_format)
+    ImageDecoder::TargetPixelFormat target_format)
     : descriptor_(descriptor),
       target_width_(target_width),
       target_height_(target_height),

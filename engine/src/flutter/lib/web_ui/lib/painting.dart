@@ -591,7 +591,9 @@ enum ColorSpace { sRGB, extendedSRGB, displayP3 }
 enum ImageByteFormat { rawRgba, rawStraightRgba, rawUnmodified, png }
 
 // This must be kept in sync with the `PixelFormat` enum in Skwasm's image.cpp.
-enum PixelFormat { rgba8888, bgra8888, rgbaFloat32, optimal }
+enum PixelFormat { rgba8888, bgra8888, rgbaFloat32 }
+
+enum TargetPixelFormat { dontCare, rgbaFloat32 }
 
 typedef ImageDecoderCallback = void Function(Image result);
 
@@ -776,6 +778,7 @@ void decodeImageFromPixels(
   int? targetWidth,
   int? targetHeight,
   bool allowUpscaling = true,
+  TargetPixelFormat targetFormat = TargetPixelFormat.dontCare,
 }) => engine.renderer.decodeImageFromPixels(
   pixels,
   width,

@@ -241,7 +241,8 @@ TEST(ImageDecoderNoGLTest, ImpellerRGBA32FDecode) {
           /*options=*/
           {.target_width = 1,
            .target_height = 1,
-           .target_format = ImageDecoder::PixelFormat::kR32G32B32A32Float},
+           .target_format =
+               ImageDecoder::TargetPixelFormat::kR32G32B32A32Float},
           /*max_texture_size=*/{1, 1},
           /*supports_wide_gamut=*/true, capabilities, allocator);
 

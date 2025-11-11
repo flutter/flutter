@@ -107,21 +107,17 @@ void ImageDescriptor::initRaw(Dart_Handle descriptor_handle,
   descriptor->AssociateWithDartWrapper(descriptor_handle);
 }
 
-// This should match the order of `PixelFormat` in
+// This should match the order of `TargetPixelFormat` in
 // //engine/src/flutter/lib/ui/painting.dart.
-ImageDecoder::PixelFormat ToImageDecoderPixelFormat(int32_t value) {
+ImageDecoder::TargetPixelFormat ToImageDecoderTargetPixelFormat(int32_t value) {
   switch (value) {
     case 0:
-      return ImageDecoder::PixelFormat::kUnknown;
+      return ImageDecoder::TargetPixelFormat::kDontCare;
     case 1:
-      return ImageDecoder::PixelFormat::kUnknown;
-    case 2:
-      return ImageDecoder::PixelFormat::kR32G32B32A32Float;
-    case 3:
-      return ImageDecoder::PixelFormat::kOptimal;
+      return ImageDecoder::TargetPixelFormat::kR32G32B32A32Float;
     default:
       FML_DCHECK(false) << "Unknown pixel format.";
-      return ImageDecoder::PixelFormat::kUnknown;
+      return ImageDecoder::TargetPixelFormat::kUnknown;
   }
 }
 
@@ -135,7 +131,7 @@ void ImageDescriptor::instantiateCodec(Dart_Handle codec_handle,
         static_cast<fml::RefPtr<ImageDescriptor>>(this),  //
         target_width,                                     //
         target_height,                                    //
-        ToImageDecoderPixelFormat(destination_format));
+        ToImageDecoderTargetPixelFormat(destination_format));
   } else {
     ui_codec = fml::MakeRefCounted<MultiFrameCodec>(generator_);
   }
