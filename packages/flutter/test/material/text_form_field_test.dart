@@ -1875,4 +1875,21 @@ void main() {
         .copyWith(enabled: true, hintMaxLines: 1);
     expect(decorator.decoration, expectedDecoration);
   });
+
+  testWidgets('TextFormField does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final TextEditingController controller = TextEditingController(text: 'X');
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(child: TextFormField(controller: controller)),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TextFormField)), Size.zero);
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    tester.pump();
+  });
 }
