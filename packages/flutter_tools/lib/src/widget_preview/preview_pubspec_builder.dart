@@ -76,6 +76,7 @@ class PreviewPubspecBuilder {
     return AssetsEntry(
       uri: transformAssetUri(asset.uri),
       flavors: asset.flavors,
+      platforms: asset.platforms,
       transformers: asset.transformers,
     );
   }
