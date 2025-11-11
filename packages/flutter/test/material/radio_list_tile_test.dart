@@ -2321,10 +2321,10 @@ void main() {
 
   testWidgets('RadioListTile horizontalTitleGap = 0.0', (WidgetTester tester) async {
     Widget buildFrame(
-        TextDirection textDirection, {
-          double? themeHorizontalTitleGap,
-          double? widgetHorizontalTitleGap,
-        }) {
+      TextDirection textDirection, {
+      double? themeHorizontalTitleGap,
+      double? widgetHorizontalTitleGap,
+    }) {
       return MaterialApp(
         home: Directionality(
           textDirection: textDirection,
@@ -2380,7 +2380,7 @@ void main() {
 
   testWidgets(
     'RadioListTile horizontalTitleGap = (default) && ListTile minLeadingWidth = (default)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       Widget buildFrame(TextDirection textDirection) {
         return MaterialApp(
           home: Directionality(
@@ -2416,9 +2416,7 @@ void main() {
     },
   );
 
-  testWidgets('RadioListTile horizontalTitleGap with visualDensity', (
-      WidgetTester tester,
-      ) async {
+  testWidgets('RadioListTile horizontalTitleGap with visualDensity', (WidgetTester tester) async {
     Widget buildFrame({double? horizontalTitleGap, VisualDensity? visualDensity}) {
       return MaterialApp(
         home: Directionality(
@@ -2465,10 +2463,10 @@ void main() {
 
   testWidgets('RadioListTile minVerticalPadding = 80.0 Material 3', (WidgetTester tester) async {
     Widget buildFrame(
-        TextDirection textDirection, {
-          double? themeMinVerticalPadding,
-          double? widgetMinVerticalPadding,
-        }) {
+      TextDirection textDirection, {
+      double? themeMinVerticalPadding,
+      double? widgetMinVerticalPadding,
+    }) {
       return MaterialApp(
         home: Directionality(
           textDirection: textDirection,
@@ -2516,10 +2514,10 @@ void main() {
 
   testWidgets('RadioListTile minVerticalPadding = 80.0 Material 2', (WidgetTester tester) async {
     Widget buildFrame(
-        TextDirection textDirection, {
-          double? themeMinVerticalPadding,
-          double? widgetMinVerticalPadding,
-        }) {
+      TextDirection textDirection, {
+      double? themeMinVerticalPadding,
+      double? widgetMinVerticalPadding,
+    }) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: false),
         home: Directionality(
@@ -2568,10 +2566,10 @@ void main() {
 
   testWidgets('RadioListTile minLeadingWidth = 60.0', (WidgetTester tester) async {
     Widget buildFrame(
-        TextDirection textDirection, {
-          double? themeMinLeadingWidth,
-          double? widgetMinLeadingWidth,
-        }) {
+      TextDirection textDirection, {
+      double? themeMinLeadingWidth,
+      double? widgetMinLeadingWidth,
+    }) {
       return MediaQuery(
         data: const MediaQueryData(),
         child: Directionality(
