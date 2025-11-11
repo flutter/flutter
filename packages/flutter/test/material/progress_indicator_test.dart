@@ -378,7 +378,12 @@ void main() {
 
       expect(
         tester.getSemantics(find.byType(CircularProgressIndicator)),
-        matchesSemantics(value: '0%', textDirection: TextDirection.ltr),
+        matchesSemantics(
+          value: '0',
+          textDirection: TextDirection.ltr,
+          minValue: '0',
+          maxValue: '100',
+        ),
       );
       handle.dispose();
     },
@@ -940,7 +945,7 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
     const String label = 'Label';
-    const String value = '25%';
+    const String value = '25';
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -982,7 +987,7 @@ void main() {
 
     expect(
       tester.getSemantics(find.byKey(key)),
-      matchesSemantics(textDirection: TextDirection.ltr, label: label, value: '25%'),
+      matchesSemantics(textDirection: TextDirection.ltr, label: label, value: '25'),
     );
 
     handle.dispose();
@@ -1037,7 +1042,7 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
     const String label = 'Label';
-    const String value = '25%';
+    const String value = '25';
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -1065,7 +1070,7 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
     const String label = 'Label';
-    const String value = '25%';
+    const String value = '25';
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -1968,6 +1973,33 @@ void main() {
       find.byType(CircularProgressIndicator),
       paints..arc(startAngle: 1.5707963267948966, sweepAngle: 0.001),
     );
+  });
+
+  testWidgets('RefreshProgressIndicator does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: RefreshProgressIndicator())),
+      ),
+    );
+    expect(tester.getSize(find.byType(RefreshProgressIndicator)), Size.zero);
+  });
+
+  testWidgets('CircularProgressIndicator does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: CircularProgressIndicator())),
+      ),
+    );
+    expect(tester.getSize(find.byType(CircularProgressIndicator)), Size.zero);
+  });
+
+  testWidgets('LinearProgressIndicator does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: LinearProgressIndicator())),
+      ),
+    );
+    expect(tester.getSize(find.byType(LinearProgressIndicator)), Size.zero);
   });
 }
 

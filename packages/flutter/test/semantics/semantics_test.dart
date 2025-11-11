@@ -704,6 +704,8 @@ void main() {
       '   invisible\n'
       '   isHidden: false\n'
       '   identifier: ""\n'
+      '   traversalParentIdentifier: null\n'
+      '   traversalChildIdentifier: null\n'
       '   label: ""\n'
       '   value: ""\n'
       '   increasedValue: ""\n'
@@ -721,7 +723,9 @@ void main() {
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
       '   indexInParent: null\n'
-      '   headingLevel: 0\n',
+      '   headingLevel: 0\n'
+      '   minValue: null\n'
+      '   maxValue: null\n',
     );
 
     final SemanticsConfiguration config = SemanticsConfiguration()
@@ -850,6 +854,8 @@ void main() {
       '   invisible\n'
       '   isHidden: false\n'
       '   identifier: ""\n'
+      '   traversalParentIdentifier: null\n'
+      '   traversalChildIdentifier: null\n'
       '   label: ""\n'
       '   value: ""\n'
       '   increasedValue: ""\n'
@@ -867,7 +873,9 @@ void main() {
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
       '   indexInParent: null\n'
-      '   headingLevel: 0\n',
+      '   headingLevel: 0\n'
+      '   minValue: null\n'
+      '   maxValue: null\n',
     );
   });
 

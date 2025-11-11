@@ -358,6 +358,13 @@ bool DriverInfoVK::IsEmulator() const {
 }
 
 bool DriverInfoVK::IsKnownBadDriver() const {
+  // Fall back to OpenGL ES on older Adreno devices that require additional
+  // workarounds in the Impeller Vulkan back end such as disabling framebuffer
+  // fetch.
+  if (adreno_gpu_ && *adreno_gpu_ <= AdrenoGPU::kAdreno630) {
+    return true;
+  }
+
   // Disable Maleoon series GPUs, see:
   // https://github.com/flutter/flutter/issues/156623
   if (vendor_ == VendorVK::kHuawei) {
