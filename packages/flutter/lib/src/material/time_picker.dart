@@ -929,9 +929,11 @@ class _RenderInputPadding extends RenderShiftedBox {
     if (result == null) {
       return null;
     }
+    // Calculate the size and child offset using the same logic as performLayout
+    final Size drySize = getDryLayout(constraints);
     final Size childSize = child.getDryLayout(constraints);
-    return result +
-        Alignment.center.alongOffset(getDryLayout(constraints) - childSize as Offset).dy;
+    final Offset childOffset = Alignment.center.alongOffset(drySize - childSize as Offset);
+    return result + childOffset.dy;
   }
 
   @override
@@ -1931,7 +1933,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                     children: <Widget>[
                       Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: <Widget>[
                             Padding(
                               padding: const EdgeInsets.only(bottom: 10),
@@ -1964,7 +1966,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                       _TimeSelectorSeparator(timeOfDayFormat: timeOfDayFormat),
                       Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: <Widget>[
                             Padding(
                               padding: const EdgeInsets.only(bottom: 10),

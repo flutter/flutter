@@ -1192,7 +1192,7 @@ Future<T?> showMenu<T>({
     'Either position or positionBuilder must be provided.',
   );
 
-  switch (Theme.of(context).platform) {
+  switch (defaultTargetPlatform) {
     case TargetPlatform.iOS:
     case TargetPlatform.macOS:
       break;

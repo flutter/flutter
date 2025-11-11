@@ -61,6 +61,8 @@ class TestSemantics {
     this.maxValueLength,
     this.currentValueLength,
     this.identifier = '',
+    this.traversalParentIdentifier,
+    this.traversalChildIdentifier,
     this.hintOverrides,
   }) : assert(flags is int || flags is List<SemanticsFlag> || flags is SemanticsFlags),
        assert(actions is int || actions is List<SemanticsAction>),
@@ -93,6 +95,8 @@ class TestSemantics {
     this.maxValueLength,
     this.currentValueLength,
     this.identifier = '',
+    this.traversalParentIdentifier,
+    this.traversalChildIdentifier,
     this.hintOverrides,
   }) : id = 0,
        assert(flags is int || flags is List<SemanticsFlag> || flags is SemanticsFlags),
@@ -137,6 +141,8 @@ class TestSemantics {
     this.maxValueLength,
     this.currentValueLength,
     this.identifier = '',
+    this.traversalParentIdentifier,
+    this.traversalChildIdentifier,
     this.hintOverrides,
   }) : assert(flags is int || flags is List<SemanticsFlag> || flags is SemanticsFlags),
        assert(actions is int || actions is List<SemanticsAction>),
@@ -285,6 +291,16 @@ class TestSemantics {
   /// Defaults to an empty string if not set.
   final String identifier;
 
+  /// The expected traversalParentIdentifier for the node.
+  ///
+  /// Defaults to null if not set.
+  final Object? traversalParentIdentifier;
+
+  /// The expected traversalChildIdentifier for the node.
+  ///
+  /// Defaults to null if not set.
+  final Object? traversalChildIdentifier;
+
   /// The expected hint overrides for the node.
   ///
   /// Defaults to null if not set.
@@ -310,6 +326,7 @@ class TestSemantics {
     bool ignoreRect = false,
     bool ignoreTransform = false,
     bool ignoreId = false,
+    bool ignoreTraversalIdentifier = false,
     DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.inverseHitTest,
   }) {
     bool fail(String message) {
@@ -426,7 +443,14 @@ class TestSemantics {
         'expected node id $id to have scrollIndex $scrollChildren but found scrollIndex ${nodeData.scrollChildCount}.',
       );
     }
-    final int childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
+
+    final int childrenCount;
+    if (childOrder == DebugSemanticsDumpOrder.traversalOrder) {
+      childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCountInTraversalOrder;
+    } else {
+      childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
+    }
+
     if (children.length != childrenCount) {
       return fail(
         'expected node id $id to have ${children.length} child${children.length == 1 ? "" : "ren"} but found $childrenCount.',
@@ -474,10 +498,17 @@ class TestSemantics {
         'expected node id $id to have current value length $currentValueLength but found current value length ${node.currentValueLength}',
       );
     }
-    if (identifier != node.identifier) {
-      return fail(
-        'expected node id $id to have identifier $identifier but found identifier ${node.identifier}',
-      );
+    if (!ignoreTraversalIdentifier) {
+      if (traversalChildIdentifier != node.traversalChildIdentifier) {
+        return fail(
+          'expected node id $id to have traversalChildIdentifier $traversalChildIdentifier but found identifier ${node.traversalChildIdentifier}',
+        );
+      }
+      if (traversalParentIdentifier != node.traversalParentIdentifier) {
+        return fail(
+          'expected node id $id to have traversalParentIdentifier $traversalParentIdentifier but found identifier ${node.traversalParentIdentifier}',
+        );
+      }
     }
     if (hintOverrides != node.hintOverrides) {
       return fail(
@@ -498,6 +529,7 @@ class TestSemantics {
         ignoreRect: ignoreRect,
         ignoreTransform: ignoreTransform,
         ignoreId: ignoreId,
+        ignoreTraversalIdentifier: ignoreTraversalIdentifier,
         childOrder: childOrder,
       );
       if (!childMatches) {
@@ -681,6 +713,8 @@ class SemanticsTester {
     double? scrollExtentMin,
     int? currentValueLength,
     int? maxValueLength,
+    String? maxValue,
+    String? minValue,
     SemanticsNode? ancestor,
     SemanticsInputType? inputType,
   }) {
@@ -776,6 +810,12 @@ class SemanticsTester {
         return false;
       }
       if (inputType != null && node.inputType != inputType) {
+        return false;
+      }
+      if (maxValue != null && node.maxValue != maxValue) {
+        return false;
+      }
+      if (minValue != null && node.minValue != minValue) {
         return false;
       }
       return true;
@@ -973,6 +1013,7 @@ class _HasSemantics extends Matcher {
     required this.ignoreRect,
     required this.ignoreTransform,
     required this.ignoreId,
+    required this.ignoreTraversalIdentifier,
     required this.childOrder,
   });
 
@@ -980,6 +1021,7 @@ class _HasSemantics extends Matcher {
   final bool ignoreRect;
   final bool ignoreTransform;
   final bool ignoreId;
+  final bool ignoreTraversalIdentifier;
   final DebugSemanticsDumpOrder childOrder;
 
   @override
@@ -990,6 +1032,7 @@ class _HasSemantics extends Matcher {
       ignoreTransform: ignoreTransform,
       ignoreRect: ignoreRect,
       ignoreId: ignoreId,
+      ignoreTraversalIdentifier: ignoreTraversalIdentifier,
       childOrder: childOrder,
     );
     if (!doesMatch) {
@@ -1051,6 +1094,7 @@ Matcher hasSemantics(
   bool ignoreRect = false,
   bool ignoreTransform = false,
   bool ignoreId = false,
+  bool ignoreTraversalIdentifier = true,
   DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
 }) {
   return _HasSemantics(
@@ -1058,6 +1102,7 @@ Matcher hasSemantics(
     ignoreRect: ignoreRect,
     ignoreTransform: ignoreTransform,
     ignoreId: ignoreId,
+    ignoreTraversalIdentifier: ignoreTraversalIdentifier,
     childOrder: childOrder,
   );
 }
@@ -1083,6 +1128,8 @@ class _IncludesNodeWith extends Matcher {
     this.maxValueLength,
     this.currentValueLength,
     this.inputType,
+    this.minValue,
+    this.maxValue,
   }) : assert(
          label != null ||
              value != null ||
@@ -1098,6 +1145,7 @@ class _IncludesNodeWith extends Matcher {
              maxValueLength != null ||
              currentValueLength != null ||
              inputType != null,
+         minValue != null || maxValue != null,
        );
   final AttributedString? attributedLabel;
   final AttributedString? attributedValue;
@@ -1118,6 +1166,8 @@ class _IncludesNodeWith extends Matcher {
   final int? currentValueLength;
   final int? maxValueLength;
   final SemanticsInputType? inputType;
+  final String? minValue;
+  final String? maxValue;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
@@ -1142,6 +1192,8 @@ class _IncludesNodeWith extends Matcher {
           currentValueLength: currentValueLength,
           maxValueLength: maxValueLength,
           inputType: inputType,
+          minValue: minValue,
+          maxValue: maxValue,
         )
         .isNotEmpty;
   }
@@ -1178,6 +1230,8 @@ class _IncludesNodeWith extends Matcher {
       if (currentValueLength != null) 'currentValueLength "$currentValueLength"',
       if (maxValueLength != null) 'maxValueLength "$maxValueLength"',
       if (inputType != null) 'inputType $inputType',
+      if (minValue != null) 'minValue "$minValue"',
+      if (maxValue != null) 'maxValue "$maxValue"',
     ];
     return strings.join(', ');
   }
@@ -1207,6 +1261,8 @@ Matcher includesNodeWith({
   int? maxValueLength,
   int? currentValueLength,
   SemanticsInputType? inputType,
+  String? minValue,
+  String? maxValue,
 }) {
   return _IncludesNodeWith(
     label: label,
@@ -1228,5 +1284,7 @@ Matcher includesNodeWith({
     maxValueLength: maxValueLength,
     currentValueLength: currentValueLength,
     inputType: inputType,
+    minValue: minValue,
+    maxValue: maxValue,
   );
 }
