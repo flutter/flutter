@@ -321,7 +321,8 @@ ImageDecoderImpeller::DecompressTexture(
     return absl::InvalidArgumentError(decode_error);
   }
 
-  const SkISize source_size = descriptor->image_info().dimensions();
+  const SkISize source_size = SkISize::Make(descriptor->image_info().width,
+                                            descriptor->image_info().height);
   const SkISize target_size =
       SkISize::Make(std::min(max_texture_size.width,
                              static_cast<int64_t>(options.target_width)),
@@ -334,7 +335,8 @@ ImageDecoderImpeller::DecompressTexture(
         static_cast<float>(target_size.height()) / source_size.height()));
   }
 
-  const SkImageInfo& base_image_info = descriptor->image_info();
+  const SkImageInfo base_image_info =
+      ImageDescriptor::ToSkImageInfo(descriptor->image_info());
   const absl::StatusOr<SkImageInfo> image_info = CreateImageInfo(
       base_image_info, decode_size, supports_wide_gamut, options.target_format);
 

@@ -17,13 +17,51 @@ namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, ImageDescriptor);
 
-const SkImageInfo ImageDescriptor::CreateImageInfo() const {
-  FML_DCHECK(generator_);
-  return generator_->GetInfo();
+ImageDescriptor::ImageInfo ImageDescriptor::CreateImageInfo(
+    const SkImageInfo& sk_image_info) {
+  PixelFormat format;
+  switch (sk_image_info.colorType()) {
+    case kRGBA_8888_SkColorType:
+      format = kRGBA8888;
+      break;
+    case kBGRA_8888_SkColorType:
+      format = kBGRA8888;
+      break;
+    case kRGBA_F32_SkColorType:
+      format = kRGBAFloat32;
+      break;
+    default:
+      FML_DCHECK(false) << "Unsupported pixel format.";
+      format = kRGBA8888;
+  }
+  return ImageInfo{
+      .width = static_cast<uint32_t>(sk_image_info.width()),
+      .height = static_cast<uint32_t>(sk_image_info.height()),
+      .format = format,
+      .premultiplied = sk_image_info.alphaType() == kPremul_SkAlphaType,
+  };
+}
+
+SkImageInfo ImageDescriptor::ToSkImageInfo(const ImageInfo& image_info) {
+  SkColorType color_type = kUnknown_SkColorType;
+  switch (image_info.format) {
+    case PixelFormat::kRGBA8888:
+      color_type = kRGBA_8888_SkColorType;
+      break;
+    case PixelFormat::kBGRA8888:
+      color_type = kBGRA_8888_SkColorType;
+      break;
+    case PixelFormat::kRGBAFloat32:
+      color_type = kRGBA_F32_SkColorType;
+      break;
+  }
+  return SkImageInfo::Make(
+      image_info.width, image_info.height, color_type,
+      image_info.premultiplied ? kPremul_SkAlphaType : kUnpremul_SkAlphaType);
 }
 
 ImageDescriptor::ImageDescriptor(sk_sp<SkData> buffer,
-                                 const SkImageInfo& image_info,
+                                 const ImageInfo& image_info,
                                  std::optional<size_t> row_bytes)
     : buffer_(std::move(buffer)),
       generator_(nullptr),
@@ -34,7 +72,7 @@ ImageDescriptor::ImageDescriptor(sk_sp<SkData> buffer,
                                  std::shared_ptr<ImageGenerator> generator)
     : buffer_(std::move(buffer)),
       generator_(std::move(generator)),
-      image_info_(CreateImageInfo()),
+      image_info_(CreateImageInfo(generator->GetInfo())),
       row_bytes_(std::nullopt) {}
 
 Dart_Handle ImageDescriptor::initEncoded(Dart_Handle descriptor_handle,
@@ -84,25 +122,15 @@ void ImageDescriptor::initRaw(Dart_Handle descriptor_handle,
                               int height,
                               int row_bytes,
                               PixelFormat pixel_format) {
-  SkColorType color_type = kUnknown_SkColorType;
-  SkAlphaType alpha_type = kPremul_SkAlphaType;
-  switch (pixel_format) {
-    case PixelFormat::kRGBA8888:
-      color_type = kRGBA_8888_SkColorType;
-      break;
-    case PixelFormat::kBGRA8888:
-      color_type = kBGRA_8888_SkColorType;
-      break;
-    case PixelFormat::kRGBAFloat32:
-      // `PixelFormat.rgbaFloat32` is documented to not use premultiplied alpha.
-      color_type = kRGBA_F32_SkColorType;
-      alpha_type = kUnpremul_SkAlphaType;
-      break;
-  }
-  FML_DCHECK(color_type != kUnknown_SkColorType);
-  auto image_info = SkImageInfo::Make(width, height, color_type, alpha_type);
+  const ImageInfo image_info = {
+      .width = static_cast<uint32_t>(width),
+      .height = static_cast<uint32_t>(height),
+      .format = pixel_format,
+      .premultiplied = pixel_format == PixelFormat::kRGBAFloat32 ? false : true,
+  };
+
   auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
-      data->data(), std::move(image_info),
+      data->data(), image_info,
       row_bytes == -1 ? std::nullopt : std::optional<size_t>(row_bytes));
   descriptor->AssociateWithDartWrapper(descriptor_handle);
 }
@@ -146,6 +174,16 @@ bool ImageDescriptor::get_pixels(const SkPixmap& pixmap) const {
   FML_DCHECK(generator_);
   return generator_->GetPixels(pixmap.info(), pixmap.writable_addr(),
                                pixmap.rowBytes());
+}
+
+int ImageDescriptor::bytesPerPixel() const {
+  switch (image_info_.format) {
+    case kRGBA8888:
+    case kBGRA8888:
+      return 4;
+    case kRGBAFloat32:
+      return 16;
+  }
 }
 
 }  // namespace flutter
