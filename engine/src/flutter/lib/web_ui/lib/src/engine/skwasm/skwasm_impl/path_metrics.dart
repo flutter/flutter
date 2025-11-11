@@ -8,14 +8,19 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-class SkwasmPathMetricIterator extends SkwasmObjectWrapper<RawContourMeasureIter>
-    implements DisposablePathMetricIterator {
+class SkwasmPathMetricIterator implements DisposablePathMetricIterator {
   SkwasmPathMetricIterator(SkwasmPath path, bool forceClosed)
-    : super(
-        contourMeasureIterCreate(path.handle, forceClosed, 1.0),
-        (ContourMeasureIterHandle h) => contourMeasureIterDispose(h),
-        'PathMetricIterator',
-      );
+    : handle = contourMeasureIterCreate(path.handle, forceClosed, 1.0);
+
+  final Pointer<RawContourMeasureIter> handle;
+  bool _isDisposed = false;
+
+  @override
+  void dispose() {
+    assert(!_isDisposed, 'SkwasmPathMetricIterator has already been disposed.');
+    contourMeasureIterDispose(handle);
+    _isDisposed = true;
+  }
 
   SkwasmPathMetric? _current;
 
@@ -44,10 +49,18 @@ class SkwasmPathMetricIterator extends SkwasmObjectWrapper<RawContourMeasureIter
   }
 }
 
-class SkwasmPathMetric extends SkwasmObjectWrapper<RawContourMeasure>
-    implements DisposablePathMetric {
-  SkwasmPathMetric(ContourMeasureHandle handle)
-    : super(handle, (ContourMeasureHandle h) => contourMeasureDispose(h), 'PathMetric');
+class SkwasmPathMetric implements DisposablePathMetric {
+  SkwasmPathMetric(this.handle);
+
+  final Pointer<RawContourMeasure> handle;
+  bool _isDisposed = false;
+
+  @override
+  void dispose() {
+    assert(!_isDisposed, 'SkwasmPathMetric has already been disposed.');
+    contourMeasureDispose(handle);
+    _isDisposed = true;
+  }
 
   @override
   DisposablePathBuilder extractPath(double start, double end, {bool startWithMoveTo = true}) {
