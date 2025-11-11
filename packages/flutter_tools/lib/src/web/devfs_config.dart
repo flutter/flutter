@@ -191,6 +191,26 @@ WebDevServerConfig:
 class HttpsConfig {
   const HttpsConfig({required this.certPath, required this.certKeyPath});
 
+  /// If [tlsCertPath] and [tlsCertKeyPath] are bath [String] return an instance.
+  ///
+  /// If they are both `null`, return `null`.
+  ///
+  /// Otherwise, throw an [Exception].
+  static HttpsConfig? parse(Object? tlsCertPath, Object? tlsCertKeyPath) {
+    return switch ((tlsCertPath, tlsCertKeyPath)) {
+      (final String certPath, final String certKeyPath) => HttpsConfig(
+        certPath: certPath,
+        certKeyPath: certKeyPath,
+      ),
+      (null, null) => null,
+      (final Object? certPath, final Object? certKeyPath) => throw Exception(
+        'When providing TLS certificates, both `tlsCertPath` and '
+        '`tlsCertKeyPath` must be provided as strings. '
+        'Found: tlsCertPath: ${certPath ?? 'null'}, tlsCertKeyPath: ${certKeyPath ?? 'null'}',
+      ),
+    };
+  }
+
   factory HttpsConfig.fromYaml(YamlMap yaml) {
     final String? certPath = _validateType<String>(value: yaml[_kCertPath], fieldName: _kCertPath);
     if (certPath == null) {

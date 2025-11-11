@@ -1374,18 +1374,7 @@ class DebuggingOptions {
         webDevServerConfig: WebDevServerConfig(
           port: json['port'] is int ? json['port']! as int : 8080,
           host: json['hostname'] is String ? json['hostname']! as String : 'localhost',
-          https: switch ((json['tlsCertPath'], json['tlsCertKeyPath'])) {
-            (final String certPath, final String certKeyPath) => HttpsConfig(
-              certPath: certPath,
-              certKeyPath: certKeyPath,
-            ),
-            (null, null) => null,
-            (final Object? certPath, final Object? certKeyPath) => throw Exception(
-              'When providing TLS certificates, both `tlsCertPath` and '
-              '`tlsCertKeyPath` must be provided as strings. '
-              'Found: tlsCertPath: ${certPath ?? 'null'}, tlsCertKeyPath: ${certKeyPath ?? 'null'}',
-            ),
-          },
+          https: HttpsConfig.parse(json['tlsCertPath'], json['tlsCertKeyPath']),
           headers: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
         ),
       );
