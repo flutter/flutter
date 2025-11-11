@@ -61,6 +61,7 @@ class TestSemantics {
     this.maxValueLength,
     this.currentValueLength,
     this.identifier = '',
+    this.locale,
     this.hintOverrides,
   }) : assert(flags is int || flags is List<SemanticsFlag> || flags is SemanticsFlags),
        assert(actions is int || actions is List<SemanticsAction>),
@@ -93,6 +94,7 @@ class TestSemantics {
     this.maxValueLength,
     this.currentValueLength,
     this.identifier = '',
+    this.locale,
     this.hintOverrides,
   }) : id = 0,
        assert(flags is int || flags is List<SemanticsFlag> || flags is SemanticsFlags),
@@ -137,6 +139,7 @@ class TestSemantics {
     this.maxValueLength,
     this.currentValueLength,
     this.identifier = '',
+    this.locale,
     this.hintOverrides,
   }) : assert(flags is int || flags is List<SemanticsFlag> || flags is SemanticsFlags),
        assert(actions is int || actions is List<SemanticsAction>),
@@ -284,6 +287,11 @@ class TestSemantics {
   ///
   /// Defaults to an empty string if not set.
   final String identifier;
+
+  /// The expected identifier for the node.
+  ///
+  /// Defaults to an empty string if not set.
+  final Locale? locale;
 
   /// The expected hint overrides for the node.
   ///
@@ -482,6 +490,11 @@ class TestSemantics {
     if (hintOverrides != node.hintOverrides) {
       return fail(
         'expected node id $id to have hint overrides $hintOverrides but found hint overrides ${node.hintOverrides}',
+      );
+    }
+    if (locale != null && locale != node.getSemanticsData().locale) {
+      return fail(
+        'expected node id $id to have locale $locale but found locale ${node.getSemanticsData().locale}',
       );
     }
 

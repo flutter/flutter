@@ -1468,6 +1468,7 @@ void main() {
                               label: 'Flexible Space',
                               textDirection: TextDirection.ltr,
                             ),
+
                             TestSemantics(
                               id: 7,
                               flags: <SemanticsFlag>[
