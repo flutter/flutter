@@ -224,6 +224,7 @@
     "templates/module/ios/host_app_ephemeral_cocoapods/Config.tmpl/Debug.xcconfig",
     "templates/module/ios/host_app_ephemeral_cocoapods/Config.tmpl/Release.xcconfig",
     "templates/module/ios/host_app_ephemeral_cocoapods/Podfile.copy.tmpl",
+    "templates/module/ios/host_app_ephemeral_cocoapods/Runner.tmpl/AppDelegate.h",
     "templates/module/ios/host_app_ephemeral_cocoapods/Runner.tmpl/AppDelegate.m",
     "templates/module/ios/library/Flutter.tmpl/AppFrameworkInfo.plist",
     "templates/module/ios/library/Flutter.tmpl/podhelper.rb.tmpl",
