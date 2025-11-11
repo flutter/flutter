@@ -1241,6 +1241,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     this.isLink = false,
     this.isSlider = false,
     this.isKeyboardKey = false,
+    this.isAccessibilityFocusBlocked = false,
   }) {
     _initSemanticsFlags(
       this,
@@ -1267,6 +1268,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       isLink,
       isSlider,
       isKeyboardKey,
+      isAccessibilityFocusBlocked,
     );
   }
 
@@ -1280,6 +1282,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       Int,
       Int,
       Int,
+      Bool,
       Bool,
       Bool,
       Bool,
@@ -1323,6 +1326,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     bool isLink,
     bool isSlider,
     bool isKeyboardKey,
+    bool isAccessibilityFocusBlocked,
   );
 
   /// The set of semantics flags with every flag set to false.
@@ -1348,6 +1352,17 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
 
   /// {@macro dart.ui.semantics.isFocused}
   final Tristate isFocused;
+
+  /// whether this node's accessibility focus is blocked.
+  ///
+  /// If `true`, this node is not accessibility focusable.
+  /// If `false`, the a11y focusability is determined based on
+  /// the node's role and other properties, such as whether it is a button.
+  ///
+  /// This is for accessibility focus, which is the focus used by screen readers
+  /// like TalkBack and VoiceOver. It is different from input focus, which is
+  /// usually held by the element that currently responds to keyboard inputs.
+  final bool isAccessibilityFocusBlocked;
 
   /// {@macro dart.ui.semantics.isButton}
   final bool isButton;
@@ -1423,6 +1438,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       isLink: isLink || other.isLink,
       isSlider: isSlider || other.isSlider,
       isKeyboardKey: isKeyboardKey || other.isKeyboardKey,
+      isAccessibilityFocusBlocked: isAccessibilityFocusBlocked || other.isAccessibilityFocusBlocked,
     );
   }
 
@@ -1451,6 +1467,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     bool? isLink,
     bool? isSlider,
     bool? isKeyboardKey,
+    bool? isAccessibilityFocusBlocked,
   }) {
     return SemanticsFlags(
       isChecked: isChecked ?? this.isChecked,
@@ -1476,6 +1493,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       isKeyboardKey: isKeyboardKey ?? this.isKeyboardKey,
       isExpanded: isExpanded ?? this.isExpanded,
       isRequired: isRequired ?? this.isRequired,
+      isAccessibilityFocusBlocked: isAccessibilityFocusBlocked ?? this.isAccessibilityFocusBlocked,
     );
   }
 
@@ -1506,7 +1524,8 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
           isReadOnly == other.isReadOnly &&
           isLink == other.isLink &&
           isSlider == other.isSlider &&
-          isKeyboardKey == other.isKeyboardKey;
+          isKeyboardKey == other.isKeyboardKey &&
+          isAccessibilityFocusBlocked == other.isAccessibilityFocusBlocked;
 
   @override
   int get hashCode => Object.hashAll(<Object?>[
@@ -1533,6 +1552,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     isLink,
     isSlider,
     isKeyboardKey,
+    isAccessibilityFocusBlocked,
   ]);
 
   /// Convert flags to a list of string.
@@ -1560,6 +1580,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       if (isMultiline) 'isMultiline',
       if (isReadOnly) 'isReadOnly',
       if (isFocused != Tristate.none) 'isFocusable',
+      if (isAccessibilityFocusBlocked) 'isAccessibilityFocusBlocked',
       if (isLink) 'isLink',
       if (isSlider) 'isSlider',
       if (isKeyboardKey) 'isKeyboardKey',
@@ -1572,6 +1593,10 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     ];
   }
 
+  @Deprecated(
+    'Use hasConflictingFlags instead.'
+    'This feature was deprecated after v3.39.0-0.0.pre',
+  )
   /// Checks if any of the boolean semantic flags are set to true
   /// in both this instance and the [other] instance.
   bool hasRepeatedFlags(SemanticsFlags other) {
@@ -1599,6 +1624,35 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
         (isLink && other.isLink) ||
         (isSlider && other.isSlider) ||
         (isKeyboardKey && other.isKeyboardKey);
+  }
+
+  /// Checks if any flags are conflicted in this instance and the [other] instance.
+  bool hasConflictingFlags(SemanticsFlags other) {
+    return isChecked.hasConflict(other.isChecked) ||
+        isSelected.hasConflict(other.isSelected) ||
+        isEnabled.hasConflict(other.isEnabled) ||
+        isToggled.hasConflict(other.isToggled) ||
+        isEnabled.hasConflict(other.isEnabled) ||
+        isExpanded.hasConflict(other.isExpanded) ||
+        isRequired.hasConflict(other.isRequired) ||
+        isFocused.hasConflict(other.isFocused) ||
+        (isButton && other.isButton) ||
+        (isTextField && other.isTextField) ||
+        (isInMutuallyExclusiveGroup && other.isInMutuallyExclusiveGroup) ||
+        (isHeader && other.isHeader) ||
+        (isObscured && other.isObscured) ||
+        (scopesRoute && other.scopesRoute) ||
+        (namesRoute && other.namesRoute) ||
+        (isHidden && other.isHidden) ||
+        (isImage && other.isImage) ||
+        (isLiveRegion && other.isLiveRegion) ||
+        (hasImplicitScrolling && other.hasImplicitScrolling) ||
+        (isMultiline && other.isMultiline) ||
+        (isReadOnly && other.isReadOnly) ||
+        (isLink && other.isLink) ||
+        (isSlider && other.isSlider) ||
+        (isKeyboardKey && other.isKeyboardKey) ||
+        (isAccessibilityFocusBlocked != other.isAccessibilityFocusBlocked);
   }
 }
 
@@ -1921,6 +1975,8 @@ abstract class SemanticsUpdateBuilder {
     SemanticsHitTestBehavior hitTestBehavior = SemanticsHitTestBehavior.defer,
     required SemanticsInputType inputType,
     required Locale? locale,
+    required String minValue,
+    required String maxValue,
   });
 
   /// Update the custom semantics action associated with the given `id`.
@@ -2002,6 +2058,8 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     SemanticsHitTestBehavior hitTestBehavior = SemanticsHitTestBehavior.defer,
     required SemanticsInputType inputType,
     required Locale? locale,
+    required String minValue,
+    required String maxValue,
   }) {
     assert(_matrix4IsValid(transform));
     assert(
@@ -2053,6 +2111,8 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       hitTestBehavior.index,
       inputType.index,
       locale?.toLanguageTag() ?? '',
+      minValue,
+      maxValue,
     );
   }
 
@@ -2103,6 +2163,8 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       Int32,
       Int32,
       Handle,
+      Handle,
+      Handle,
     )
   >(symbol: 'SemanticsUpdateBuilder::updateNode')
   external void _updateNode(
@@ -2150,6 +2212,8 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     int hitTestBehaviorIndex,
     int inputType,
     String locale,
+    String minValue,
+    String maxValue,
   );
 
   @override
