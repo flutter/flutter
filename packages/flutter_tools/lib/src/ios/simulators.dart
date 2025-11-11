@@ -832,40 +832,22 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     // Unified logging iOS 11 and greater (introduced in iOS 10).
     if (await device.sdkMajorVersion >= 11) {
       _deviceProcess = await launchDeviceUnifiedLogging(device, _appName);
-      _deviceProcess?.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen(_onUnifiedLoggingLine);
-      _deviceProcess?.stderr
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen(_onUnifiedLoggingLine);
+      _deviceProcess?.stdout.transform(utf8LineDecoder).listen(_onUnifiedLoggingLine);
+      _deviceProcess?.stderr.transform(utf8LineDecoder).listen(_onUnifiedLoggingLine);
     } else {
       // Fall back to syslog parsing.
       await device.ensureLogsExists();
       _deviceProcess = await launchDeviceSystemLogTool(device);
-      _deviceProcess?.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen(_onSysLogDeviceLine);
-      _deviceProcess?.stderr
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen(_onSysLogDeviceLine);
+      _deviceProcess?.stdout.transform(utf8LineDecoder).listen(_onSysLogDeviceLine);
+      _deviceProcess?.stderr.transform(utf8LineDecoder).listen(_onSysLogDeviceLine);
     }
 
     // Track system.log crashes.
     // ReportCrash[37965]: Saved crash report for FlutterRunner[37941]...
     _systemProcess = await launchSystemLogTool(device);
     if (_systemProcess != null) {
-      _systemProcess?.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen(_onSystemLine);
-      _systemProcess?.stderr
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen(_onSystemLine);
+      _systemProcess?.stdout.transform(utf8LineDecoder).listen(_onSystemLine);
+      _systemProcess?.stderr.transform(utf8LineDecoder).listen(_onSystemLine);
     }
 
     // We don't want to wait for the process or its callback. Best effort
