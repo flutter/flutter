@@ -86,7 +86,7 @@ Set the `--enable-flutter-gpu` flag:
 ```xml
 <meta-data
     android:name="io.flutter.embedding.android.EnableFlutterGPU"
-    android:value="true" />
+/>
 ```
 
 ### Release-mode restrictions
