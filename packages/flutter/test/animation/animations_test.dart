@@ -134,7 +134,10 @@ void main() {
   });
 
   test('TrainHoppingAnimation notifies status listeners correctly', () {
-    final AnimationController currentTrain = AnimationController(vsync: const TestVSync());
+    final AnimationController currentTrain = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
+    );
     final TrainHoppingAnimation animation = TrainHoppingAnimation(
       currentTrain,
       const AlwaysStoppedAnimation<double>(0.5),
@@ -158,8 +161,8 @@ void main() {
 
     statusLog.clear();
 
-    // Complete the animation
-    currentTrain.value = 1.0;
+    // Advance to completion
+    tick(const Duration(milliseconds: 100));
     expect(animation.status, AnimationStatus.completed);
     expect(statusLog, <AnimationStatus>[AnimationStatus.completed]);
 
