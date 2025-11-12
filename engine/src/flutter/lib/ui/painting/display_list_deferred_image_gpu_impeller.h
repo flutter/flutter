@@ -5,6 +5,7 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_DISPLAY_LIST_DEFERRED_IMAGE_GPU_IMPELLER_H_
 #define FLUTTER_LIB_UI_PAINTING_DISPLAY_LIST_DEFERRED_IMAGE_GPU_IMPELLER_H_
 
+#include <variant>
 #include "flutter/common/graphics/texture.h"
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/flow/layers/layer_tree.h"
@@ -102,17 +103,14 @@ class DlDeferredImageGPUImpeller final : public DlImage {
     std::optional<std::string> error_;
 
     ImageWrapper(
-        sk_sp<DisplayList> display_list,
         const DlISize& size,
         fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
         fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
-    // If a layer tree is provided, it will be flattened during the raster
-    // thread task spawned by this method. After being flattened into a display
-    // list, the image wrapper will be updated to hold this display list and the
-    // layer tree can be dropped.
-    void SnapshotDisplayList(sk_sp<DisplayList> display_list,
-                             std::unique_ptr<LayerTree> layer_tree);
+    // If a layer tree is provided, it will be flattened into a display list
+    // during the raster thread task spawned by this method.
+    void SnapshotDisplayList(
+        std::variant<sk_sp<DisplayList>, std::unique_ptr<LayerTree>> content);
 
     // |ContextListener|
     void OnGrContextCreated() override;

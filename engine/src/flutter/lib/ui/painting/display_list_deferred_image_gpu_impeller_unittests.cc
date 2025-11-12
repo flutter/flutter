@@ -8,6 +8,7 @@
 #include "flutter/fml/thread.h"
 #include "flutter/lib/ui/painting/display_list_deferred_image_gpu_impeller.h"
 #include "flutter/lib/ui/painting/testing/mocks.h"
+#include "flutter/testing/post_task_sync.h"
 #include "flutter/testing/testing.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -16,19 +17,6 @@
 
 namespace flutter {
 namespace testing {
-namespace {
-
-void PostTaskSync(const fml::RefPtr<fml::TaskRunner>& task_runner,
-                  std::function<void()> task) {
-  fml::AutoResetWaitableEvent latch;
-  task_runner->PostTask([&latch, task = std::move(task)]() {
-    task();
-    latch.Signal();
-  });
-  latch.Wait();
-}
-
-}  // namespace
 
 TEST(DlDeferredImageGPUImpeller, GetSize) {
   fml::Thread raster_thread("raster");

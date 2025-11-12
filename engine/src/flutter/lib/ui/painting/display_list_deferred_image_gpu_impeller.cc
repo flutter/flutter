@@ -5,6 +5,7 @@
 #include "flutter/lib/ui/painting/display_list_deferred_image_gpu_impeller.h"
 
 #include <utility>
+#include <variant>
 
 #include "flutter/fml/make_copyable.h"
 
@@ -95,10 +96,8 @@ DlDeferredImageGPUImpeller::ImageWrapper::Make(
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner) {
   auto wrapper = std::shared_ptr<ImageWrapper>(new ImageWrapper(
-      std::move(display_list), size, std::move(snapshot_delegate),
-      std::move(raster_task_runner)));
-  wrapper->SnapshotDisplayList(/*display_list=*/std::move(display_list),
-                               /*layer_tree=*/nullptr);
+      size, std::move(snapshot_delegate), std::move(raster_task_runner)));
+  wrapper->SnapshotDisplayList(std::move(display_list));
   return wrapper;
 }
 
@@ -107,16 +106,14 @@ DlDeferredImageGPUImpeller::ImageWrapper::Make(
     std::unique_ptr<LayerTree> layer_tree,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner) {
-  auto wrapper = std::shared_ptr<ImageWrapper>(new ImageWrapper(
-      nullptr, layer_tree->frame_size(), std::move(snapshot_delegate),
-      std::move(raster_task_runner)));
-  wrapper->SnapshotDisplayList(/*display_list=*/nullptr,
-                               /*layer_tree=*/std::move(layer_tree));
+  auto wrapper = std::shared_ptr<ImageWrapper>(
+      new ImageWrapper(layer_tree->frame_size(), std::move(snapshot_delegate),
+                       std::move(raster_task_runner)));
+  wrapper->SnapshotDisplayList(std::move(layer_tree));
   return wrapper;
 }
 
 DlDeferredImageGPUImpeller::ImageWrapper::ImageWrapper(
-    sk_sp<DisplayList> display_list,
     const DlISize& size,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner)
@@ -135,13 +132,11 @@ bool DlDeferredImageGPUImpeller::ImageWrapper::isTextureBacked() const {
 }
 
 void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
-    sk_sp<DisplayList> display_list,
-    std::unique_ptr<LayerTree> layer_tree) {
+    std::variant<sk_sp<DisplayList>, std::unique_ptr<LayerTree>> content) {
   fml::TaskRunner::RunNowOrPostTask(
       raster_task_runner_,
       fml::MakeCopyable([weak_this = weak_from_this(),
-                         display_list = std::move(display_list),
-                         layer_tree = std::move(layer_tree)]() mutable {
+                         content = std::move(content)]() mutable {
         TRACE_EVENT0("flutter", "SnapshotDisplayList (impeller)");
         auto wrapper = weak_this.lock();
         if (!wrapper) {
@@ -152,15 +147,23 @@ void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
           return;
         }
 
-        std::shared_ptr<TextureRegistry> texture_registry =
-            snapshot_delegate->GetTextureRegistry();
-        if (layer_tree) {
+        sk_sp<DisplayList> display_list;
+        DlISize snapshot_size = wrapper->size_;
+
+        if (std::holds_alternative<sk_sp<DisplayList>>(content)) {
+          display_list = std::get<sk_sp<DisplayList>>(std::move(content));
+        } else if (std::holds_alternative<std::unique_ptr<LayerTree>>(
+                       content)) {
+          std::unique_ptr<LayerTree> layer_tree =
+              std::get<std::unique_ptr<LayerTree>>(std::move(content));
+          snapshot_size = layer_tree->frame_size();
           display_list = layer_tree->Flatten(
-              DlRect::MakeWH(wrapper->size_.width, wrapper->size_.height),
-              texture_registry);
+              DlRect::MakeWH(snapshot_size.width, snapshot_size.height),
+              snapshot_delegate->GetTextureRegistry());
         }
+
         auto snapshot = snapshot_delegate->MakeRasterSnapshotSync(
-            display_list, wrapper->size_);
+            display_list, snapshot_size);
         if (!snapshot) {
           std::scoped_lock lock(wrapper->error_mutex_);
           wrapper->error_ = "Failed to create snapshot.";
