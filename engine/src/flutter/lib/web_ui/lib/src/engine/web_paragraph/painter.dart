@@ -72,10 +72,6 @@ abstract class Painter {
       'resizePaintCanvas: ${_paintCanvas.width}x${_paintCanvas.height} @ $devicePixelRatio',
     );
   }
-
-  void clearCanvas(ui.Rect sourceRect) {
-    paintContext.clearRect(0, 0, _paintCanvas.width!.ceil(), _paintCanvas.height!.ceil());
-  }
 }
 
 class CanvasKitPainter extends Painter {
