@@ -237,10 +237,17 @@ class Visibility extends StatelessWidget {
   /// Tells the visibility state of an element in the tree based off its
   /// ancestor [Visibility] elements.
   ///
-  /// If there's one or more [Visibility] widgets in the ancestor tree, this
-  /// will return true if and only if all of those widgets have [visible] set
-  /// to true. If there is no [Visibility] widget in the ancestor tree of the
-  /// specified build context, this will return true.
+  /// This method returns `true` if there are no [Visibility] widgets in the
+  /// ancestor tree, or if all ancestor [Visibility] widgets are effectively
+  /// visible.
+  ///
+  /// A [Visibility] widget is "effectively visible" if its [visible]
+  /// property is `true`, or if its [visible] property is `false` but it
+  /// is currently showing its [replacement] widget.
+  ///
+  /// If *any* ancestor [Visibility] widget is "effectively invisible" (meaning
+  /// its [visible] property is `false` and it is *not* showing its
+  /// [replacement]), then this method will return `false`.
   ///
   /// This will register a dependency from the specified context on any
   /// [Visibility] elements in the ancestor tree, such that if any of their
@@ -286,7 +293,8 @@ class Visibility extends StatelessWidget {
         result = visible ? child : replacement;
       }
     }
-    return _VisibilityScope(isVisible: visible, child: result);
+    // return _VisibilityScope(isVisible: visible, child: result);
+    return _VisibilityScope(isVisible: visible || result == replacement, child: result);
   }
 
   @override

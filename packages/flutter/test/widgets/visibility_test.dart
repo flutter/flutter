@@ -621,6 +621,51 @@ void main() {
     expect(didChangeDependencies, isTrue);
     expect(find.text('is visible ? false', skipOffstage: false), findsOneWidget);
   });
+
+  testWidgets('Visibility.of returns correct value for replacement', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Visibility(visible: false, replacement: _ShowVisibility(), child: SizedBox.shrink()),
+      ),
+    );
+    expect(find.text('is visible ? true'), findsOneWidget);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Visibility(
+          maintainState: true,
+          child: Center(
+            child: Visibility(
+              visible: false,
+              replacement: _ShowVisibility(),
+              child: SizedBox.shrink(),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('is visible ? true'), findsOneWidget);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Visibility(
+          visible: false,
+          maintainState: true,
+          child: Center(
+            child: Visibility(
+              visible: false,
+              replacement: _ShowVisibility(),
+              child: SizedBox.shrink(),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('is visible ? false', skipOffstage: false), findsOneWidget);
+  });
 }
 
 class _ShowVisibility extends StatefulWidget {

@@ -795,6 +795,29 @@ void main() {
     box = tester.renderObject(find.byType(Material));
     expect(box, isNot(paints..rect(color: testColor)));
   });
+
+  testWidgets('Ink with isVisible=false paints when used as replacement', (
+    WidgetTester tester,
+  ) async {
+    const Color testColor = Color(0xFFFF0000);
+    Widget inkWidget({required bool isVisible}) {
+      return Material(
+        child: Visibility(
+          visible: isVisible,
+          replacement: Ink(decoration: const BoxDecoration(color: testColor)),
+          child: const SizedBox.shrink(),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(inkWidget(isVisible: true));
+    RenderBox box = tester.renderObject(find.byType(Material));
+    expect(box, isNot(paints..rect(color: testColor)));
+
+    await tester.pumpWidget(inkWidget(isVisible: false));
+    box = tester.renderObject(find.byType(Material));
+    expect(box, paints..rect(color: testColor));
+  });
 }
 
 class _InkRippleFactory extends InteractiveInkFeatureFactory {
