@@ -289,8 +289,8 @@ public class FlutterLoader {
               + DEFAULT_LIBRARY);
 
       // Add engine flags provided by the command line. These settings will take
-      // precedent over any overlapping flags set in the application manifest and
-      // any defaults set below.
+      // precedent over any flag settings specified by application manifest
+      // metadata and any defaults set below.
       if (args != null) {
         for (String arg : args) {
           // Only allow known flags to be passed to the engine.
@@ -303,7 +303,7 @@ public class FlutterLoader {
                 arg.substring(
                     FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.commandLineArgument.length());
             maybeAddAotSharedLibraryNameArg(applicationContext, aotSharedLibraryPath, shellArgs);
-            return;
+            continue;
           }
 
           shellArgs.add(arg);
@@ -515,7 +515,7 @@ public class FlutterLoader {
   }
 
   /**
-   * Returns the canonical path to the AOT shared library that the engine will use to load
+   * Returns the canonical path to the AOT shared library that the engine will use to load the
    * application's Dart code if it lives within a path we consider safe, which is a path within the
    * application's internal storage. Otherwise, returns null.
    *
