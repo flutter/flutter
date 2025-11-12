@@ -547,7 +547,14 @@ bool Canvas::IsShadowBlurDrawOperation(const Paint& paint) {
   }
 
   // A blur sigma that is not positive enough should not result in a blur.
+  // We test both the sigma value and the converted radius value as the
+  // algorithms might use either and either indicates the blur is too small
+  // to be noticeable.
   if (paint.mask_blur_descriptor->sigma.sigma <= kEhCloseEnough) {
+    return false;
+  }
+  Radius radius = paint.mask_blur_descriptor->sigma;
+  if (radius.radius <= kEhCloseEnough) {
     return false;
   }
 
