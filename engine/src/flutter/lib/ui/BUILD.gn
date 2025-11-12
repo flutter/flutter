@@ -305,8 +305,13 @@ if (enable_unittests) {
 
   source_set("display_list_deferred_image_unittests") {
     testonly = true
-    sources =
-        [ "painting/display_list_deferred_image_gpu_impeller_unittests.cc" ]
+    sources = []
+
+    if (!is_fuchsia) {
+      sources +=
+          [ "painting/display_list_deferred_image_gpu_impeller_unittests.cc" ]
+    }
+
     deps = [
       ":ui",
       ":ui_testing_mocks",
