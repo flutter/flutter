@@ -596,21 +596,14 @@ enum PixelFormat { rgba8888, bgra8888, rgbaFloat32 }
 typedef ImageDecoderCallback = void Function(Image result);
 
 abstract class FrameInfo {
-  FrameInfo._();
-  Duration get duration => Duration(milliseconds: _durationMillis);
-  int get _durationMillis => 0;
+  Duration get duration;
   Image get image;
 }
 
-class Codec {
-  Codec._();
-  int get frameCount => 0;
-  int get repetitionCount => 0;
-  Future<FrameInfo> getNextFrame() {
-    return engine.futurize<FrameInfo>(_getNextFrame);
-  }
-
-  String? _getNextFrame(engine.Callback<FrameInfo> callback) => null;
+abstract class Codec {
+  int get frameCount;
+  int get repetitionCount;
+  Future<FrameInfo> getNextFrame();
   void dispose() {}
 }
 
@@ -993,17 +986,22 @@ abstract class FragmentProgram {
   FragmentShader fragmentShader();
 }
 
-base class UniformFloatSlot {
+abstract class UniformFloatSlot {
   UniformFloatSlot(this.name, this.index);
-  void set(double val) {
-    throw UnsupportedError('UniformFloatSlot is not supported on the web.');
-  }
 
-  int get shaderIndex => -1;
+  void set(double val);
+
+  int get shaderIndex;
 
   final String name;
 
   final int index;
+}
+
+abstract class ImageSamplerSlot {
+  void set(Image val);
+  int get shaderIndex;
+  String get name;
 }
 
 abstract class FragmentShader implements Shader {
@@ -1017,5 +1015,7 @@ abstract class FragmentShader implements Shader {
   @override
   bool get debugDisposed;
 
-  UniformFloatSlot getUniformFloat(String name, [int? index]) => UniformFloatSlot(name, index ?? 0);
+  UniformFloatSlot getUniformFloat(String name, [int? index]);
+
+  ImageSamplerSlot getImageSampler(String name);
 }

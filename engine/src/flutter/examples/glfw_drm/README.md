@@ -24,7 +24,7 @@ The example has the following dependencies:
  * [GLFW](https://www.glfw.org/) - This can be installed by running `sudo apt-get install libglfw3`
  * [CMake](https://cmake.org/) - This can be installed by running `sudo apt-get install cmake`
  * [EGL](https://docs.mesa3d.org/egl.html) - This can be installed by running  `sudo apt-get install libglfw3-dev`
- * [Flutter](https://flutter.dev/) - This can be installed from the [Flutter webpage](https://flutter.dev/docs/get-started/install)
+ * [Flutter](https://flutter.dev/) - This can be installed from the [Flutter webpage](https://docs.flutter.dev/get-started)
  * [Flutter Engine](https://flutter.dev) - This can be built or downloaded, see [Custom Flutter Engine Embedders](https://github.com/flutter/flutter/wiki/Custom-Flutter-Engine-Embedders) for more information.
 
 In order to **build** and **run** the example you should be able to go into this directory and run

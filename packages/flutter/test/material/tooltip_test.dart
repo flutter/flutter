@@ -1993,10 +1993,20 @@ void main() {
 
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    expect(semantics, hasSemantics(expected, ignoreTransform: true, ignoreRect: true));
+    final TestSemantics expected1 = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          id: 1,
+          tooltip: 'TIP',
+          textDirection: TextDirection.ltr,
+          children: <TestSemantics>[TestSemantics(id: 2)],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expected1, ignoreTransform: true, ignoreRect: true));
 
     semantics.dispose();
-  });
+  }, skip: kIsWeb); // [intended] the web traversal order by using ARIA-OWNS.
 
   testWidgets('Tooltip semantics does not merge into child', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -2047,17 +2057,25 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics(
+              id: 1,
               children: <TestSemantics>[
                 TestSemantics(
+                  id: 5,
                   flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                   children: <TestSemantics>[
-                    TestSemantics(label: 'before'),
+                    TestSemantics(id: 2, label: 'before'),
                     TestSemantics(
+                      id: 3,
                       label: 'child',
                       tooltip: 'B',
-                      children: <TestSemantics>[TestSemantics(label: 'B')],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 6,
+                          children: <TestSemantics>[TestSemantics(id: 7, label: 'B')],
+                        ),
+                      ],
                     ),
-                    TestSemantics(label: 'after'),
+                    TestSemantics(id: 4, label: 'after'),
                   ],
                 ),
               ],
@@ -2071,7 +2089,7 @@ void main() {
     );
 
     semantics.dispose();
-  });
+  }, skip: kIsWeb); // [intended] the web traversal order by using ARIA-OWNS.
 
   testWidgets('Material2 - Tooltip text scales with textScaler', (WidgetTester tester) async {
     Widget buildApp(String text, {required TextScaler textScaler}) {
