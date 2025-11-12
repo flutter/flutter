@@ -2811,11 +2811,17 @@ void main() {
                   // The crossAxisAlignment is set to `end`. The size of node 1 is 30 x 10.
                   TestSemantics(
                     id: 4,
-                    label: 'BBBB',
                     rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
                     transform: Matrix4.identity()
                       ..scale(1 / 3, 1 / 3, 1)
                       ..setTranslationRaw(0, -rowOriginY, 0),
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 5,
+                        label: 'BBBB',
+                        rect: const Rect.fromLTRB(0.0, 0.0, 40.0, 10.0),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -2946,15 +2952,10 @@ void main() {
       final SemanticsNode clippedOverlayChild = semantics.nodesWith(label: 'B').single;
 
       expect(clippedOverlayPortal.rect, Offset.zero & const Size(800, 10));
-      expect(clippedOverlayChild.rect, Offset.zero & const Size(800, 600));
+      expect(clippedOverlayChild.rect, Offset.zero & const Size(10.0, 10.0));
 
       expect(clippedOverlayPortal.transform, isNull);
-      expect(
-        clippedOverlayChild.transform,
-        Matrix4.identity()
-          ..scale(1 / 3, 1 / 3, 1)
-          ..setTranslationRaw(0, -200, 0),
-      );
+      expect(clippedOverlayChild.transform, isNull);
 
       semantics.dispose();
     });

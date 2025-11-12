@@ -596,6 +596,7 @@ class _Decoration {
     required this.visualDensity,
     required this.inputGap,
     required this.maintainHintSize,
+    required this.maintainLabelSize,
     this.icon,
     this.input,
     this.label,
@@ -622,6 +623,7 @@ class _Decoration {
   final VisualDensity visualDensity;
   final double inputGap;
   final bool maintainHintSize;
+  final bool maintainLabelSize;
   final Widget? icon;
   final Widget? input;
   final Widget? label;
@@ -656,6 +658,7 @@ class _Decoration {
         other.visualDensity == visualDensity &&
         other.inputGap == inputGap &&
         other.maintainHintSize == maintainHintSize &&
+        other.maintainLabelSize == maintainLabelSize &&
         other.icon == icon &&
         other.input == input &&
         other.label == label &&
@@ -683,14 +686,14 @@ class _Decoration {
     visualDensity,
     inputGap,
     maintainHintSize,
+    maintainLabelSize,
     icon,
     input,
     label,
     hint,
     prefix,
     suffix,
-    prefixIcon,
-    Object.hash(suffixIcon, helperError, counter, container),
+    Object.hash(prefixIcon, suffixIcon, helperError, counter, container),
   );
 }
 
@@ -1212,9 +1215,12 @@ class _RenderDecoration extends RenderBox
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    final double contentWidth = decoration.isEmpty || decoration.maintainHintSize
+    final double inputWidth = decoration.isEmpty || decoration.maintainHintSize
         ? math.max(_minWidth(input, height), _minWidth(hint, height))
         : _minWidth(input, height);
+    final double contentWidth = decoration.maintainLabelSize
+        ? math.max(inputWidth, _minWidth(label, height))
+        : inputWidth;
     return _minWidth(icon, height) +
         (prefixIcon != null ? prefixToInputGap : contentPadding.start + decoration.inputGap) +
         _minWidth(prefixIcon, height) +
@@ -1227,9 +1233,12 @@ class _RenderDecoration extends RenderBox
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    final double contentWidth = decoration.isEmpty || decoration.maintainHintSize
+    final double inputWidth = decoration.isEmpty || decoration.maintainHintSize
         ? math.max(_maxWidth(input, height), _maxWidth(hint, height))
         : _maxWidth(input, height);
+    final double contentWidth = decoration.maintainLabelSize
+        ? math.max(inputWidth, _maxWidth(label, height))
+        : inputWidth;
     return _maxWidth(icon, height) +
         (prefixIcon != null ? prefixToInputGap : contentPadding.start + decoration.inputGap) +
         _maxWidth(prefixIcon, height) +
@@ -2651,6 +2660,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         isEmpty: isEmpty,
         visualDensity: visualDensity,
         maintainHintSize: maintainHintSize,
+        maintainLabelSize: decoration.maintainLabelSize,
         icon: icon,
         input: input,
         label: label,
@@ -2787,6 +2797,7 @@ class InputDecoration {
     )
     this.maintainHintHeight = true,
     this.maintainHintSize = true,
+    this.maintainLabelSize = false,
     this.error,
     this.errorText,
     this.errorStyle,
@@ -2884,6 +2895,7 @@ class InputDecoration {
     )
     this.maintainHintHeight = true,
     this.maintainHintSize = true,
+    this.maintainLabelSize = false,
     this.filled = false,
     this.fillColor,
     this.focusColor,
@@ -3174,13 +3186,22 @@ class InputDecoration {
   final bool maintainHintHeight;
 
   /// Whether the input field's size should always be greater than or equal to
-  /// the size of the [hintText], even if the [hintText] is not visible.
+  /// the size of the [hint] or [hintText], even if the [hint] or [hintText] are not visible.
   ///
-  /// The [InputDecorator] widget ignores [hintText] during layout when
-  /// it's not visible, if this flag is set to false.
+  /// The [InputDecorator] widget ignores [hint] and [hintText] during layout when
+  /// they are not visible, if this flag is set to false.
   ///
   /// Defaults to true.
   final bool maintainHintSize;
+
+  /// Whether the input field's size should always be greater than or equal to
+  /// the size of the [label] or [labelText], even if the [label] or [labelText] are not visible.
+  ///
+  /// The [InputDecorator] widget ignores [label] and [labelText] during layout when
+  /// this flag is set to false.
+  ///
+  /// Defaults to false for compatibility reason.
+  final bool maintainLabelSize;
 
   /// Optional widget that appears below the [InputDecorator.child] and the border.
   ///
@@ -3893,6 +3914,7 @@ class InputDecoration {
     int? hintMaxLines,
     bool? maintainHintHeight,
     bool? maintainHintSize,
+    bool? maintainLabelSize,
     Widget? error,
     String? errorText,
     TextStyle? errorStyle,
@@ -3953,6 +3975,7 @@ class InputDecoration {
       hintFadeDuration: hintFadeDuration ?? this.hintFadeDuration,
       maintainHintHeight: maintainHintHeight ?? this.maintainHintHeight,
       maintainHintSize: maintainHintSize ?? this.maintainHintSize,
+      maintainLabelSize: maintainLabelSize ?? this.maintainLabelSize,
       error: error ?? this.error,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
@@ -4077,6 +4100,7 @@ class InputDecoration {
         other.hintFadeDuration == hintFadeDuration &&
         other.maintainHintHeight == maintainHintHeight &&
         other.maintainHintSize == maintainHintSize &&
+        other.maintainLabelSize == maintainLabelSize &&
         other.error == error &&
         other.errorText == errorText &&
         other.errorStyle == errorStyle &&
@@ -4139,6 +4163,7 @@ class InputDecoration {
       hintFadeDuration,
       maintainHintHeight,
       maintainHintSize,
+      maintainLabelSize,
       error,
       errorText,
       errorStyle,
@@ -4199,6 +4224,7 @@ class InputDecoration {
       if (hintFadeDuration != null) 'hintFadeDuration: "$hintFadeDuration"',
       if (!maintainHintHeight) 'maintainHintHeight: false',
       if (!maintainHintSize) 'maintainHintSize: false',
+      if (maintainLabelSize) 'maintainLabelSize: true',
       if (error != null) 'error: "$error"',
       if (errorText != null) 'errorText: "$errorText"',
       if (errorStyle != null) 'errorStyle: "$errorStyle"',
