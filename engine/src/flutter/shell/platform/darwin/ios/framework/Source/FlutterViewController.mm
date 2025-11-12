@@ -1538,7 +1538,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   // maxWidth or maxHeight may be 0 when the width/height are ambiguous, eg. for
   // unsized widgets
   if (maxWidth == 0) {
-    maxWidth = DBL_MAX;
+    maxWidth = CGFLOAT_MAX;
     [FlutterLogger
         logWarning:
             @"Warning: The outermost widget in the autoresizable Flutter view is unsized or has "
@@ -1548,7 +1548,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
             @"constraints (e.g., using SizedBox or Container)."];
   }
   if (maxHeight == 0) {
-    maxHeight = DBL_MAX;
+    maxHeight = CGFLOAT_MAX;
     [FlutterLogger
         logWarning:
             @"Warning: The outermost widget in the autoresizable Flutter view is unsized or has "

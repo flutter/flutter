@@ -65,6 +65,9 @@ class TaskRunner : public fml::RefCountedThreadSafe<TaskRunner>,
   static void RunNowOrPostTask(const fml::RefPtr<fml::TaskRunner>& runner,
                                const fml::closure& task);
 
+  static void PostTaskSync(const fml::RefPtr<fml::TaskRunner>& task_runner, const fml::closure& task);
+
+
   /// Like RunNowOrPostTask, except that if the task can be immediately
   /// executed, an empty task will still be posted to the runner afterwards.
   ///

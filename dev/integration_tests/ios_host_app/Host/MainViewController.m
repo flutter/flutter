@@ -80,7 +80,7 @@
   DynamicResizingViewController *resizingViewController =
       [[DynamicResizingViewController alloc] init];
   [self.navigationController pushViewController:resizingViewController
-                                       animated:YES];
+                                       animated:NO];
 }
 
 - (void)showFullScreenCold {

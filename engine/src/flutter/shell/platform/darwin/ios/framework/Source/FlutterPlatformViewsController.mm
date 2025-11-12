@@ -669,16 +669,13 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   if (self.flutterView == nil || (self.compositionOrder.empty() && !self.hadPlatformViews)) {
     // No platform views to render but the FlutterView may need to be resized.
     if (self.flutterView != nil) {
-      // If the raster thread isn't merged, resize the view on the platform thread and block until
-      // complete.
-      auto latch = std::make_shared<fml::CountDownLatch>(1u);
-      fml::TaskRunner::RunNowOrPostTask(self.platformTaskRunner,
-                                        [self, frameSize = self.frameSize, latch]() mutable {
-                                          [self performResize:frameSize];
-                                          latch->CountDown();
-                                        });
-      if (![[NSThread currentThread] isMainThread]) {
-        latch->Wait();
+
+      if (self.platformTaskRunner->RunsTasksOnCurrentThread()) {
+        [self performResize:self.frameSize];
+      } else {
+        fml::TaskRunner::PostTaskSync(self.platformTaskRunner, [self, frameSize = self.frameSize]() mutable {
+          [self performResize:frameSize];
+        });
       }
     }
 
