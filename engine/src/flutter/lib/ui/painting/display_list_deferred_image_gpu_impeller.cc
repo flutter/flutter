@@ -148,7 +148,6 @@ void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
         }
 
         sk_sp<DisplayList> display_list;
-        DlISize snapshot_size = wrapper->size_;
 
         if (std::holds_alternative<sk_sp<DisplayList>>(content)) {
           display_list = std::get<sk_sp<DisplayList>>(std::move(content));
@@ -156,14 +155,13 @@ void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
                        content)) {
           std::unique_ptr<LayerTree> layer_tree =
               std::get<std::unique_ptr<LayerTree>>(std::move(content));
-          snapshot_size = layer_tree->frame_size();
           display_list = layer_tree->Flatten(
-              DlRect::MakeWH(snapshot_size.width, snapshot_size.height),
+              DlRect::MakeWH(wrapper->size_.width, wrapper->size_.height),
               snapshot_delegate->GetTextureRegistry());
         }
 
         auto snapshot = snapshot_delegate->MakeRasterSnapshotSync(
-            display_list, snapshot_size);
+            display_list, wrapper->size_);
         if (!snapshot) {
           std::scoped_lock lock(wrapper->error_mutex_);
           wrapper->error_ = "Failed to create snapshot.";
