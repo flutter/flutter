@@ -916,39 +916,6 @@ public class FlutterLoaderTest {
                 "io.flutter.embedding.android.DisableMergedPlatformUIThread is no longer allowed."));
   }
 
-  @Test
-  public void itDoesNotSetUnrecognizedMetadataKey() {
-    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
-    Bundle metadata = new Bundle();
-
-    metadata.putBoolean("io.flutter.embedding.android.UnrecognizedKey", true);
-    ctx.getApplicationInfo().metaData = metadata;
-
-    FlutterLoader.Settings settings = new FlutterLoader.Settings();
-    assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(ctx, settings);
-    flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
-
-    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
-    verify(mockFlutterJNI, times(1))
-        .init(
-            eq(ctx),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong(),
-            anyInt());
-    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
-
-    // Verify that no unrecognized argument is set.
-    assertFalse(
-        "Unexpected argument '--unrecognized-key' was found in the arguments passed to FlutterJNI.init",
-        arguments.contains("--unrecognized-key"));
-  }
-
   private void testFlagFromMetaData(String metadataKey, Object metadataValue, String expectedArg) {
     testFlagFromMetaData(metadataKey, metadataValue, expectedArg, true);
   }

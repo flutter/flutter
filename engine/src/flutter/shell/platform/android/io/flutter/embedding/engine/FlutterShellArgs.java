@@ -16,9 +16,11 @@ import java.util.*;
  * for more information.
  *
  * <p>All of these flags map to a flag listed in shell/common/switches.cc, which contains the full
- * list of flags that can potentially be set. They can either be set via the manifest metadata in a
- * Flutter component's AndroidManifest.xml or via the command line. See the inner {@code Flag} class
- * for the specification of how to set each flag via the command line and manifest metadata.
+ * list of flags that can be set across all platforms.
+ *
+ * <p>These flags can either be set via the manifest metadata in a Flutter component's
+ * AndroidManifest.xml or via the command line. See the inner {@code Flag} class for the
+ * specification of how to set each flag via the command line and manifest metadata.
  *
  * <p>If the same flag is provided both via command line arguments and via AndroidManifest.xml
  * metadata, the command line value will take precedence at runtime.
@@ -36,8 +38,8 @@ public final class FlutterShellArgs {
      * The metadata key name used to specify the flag in AndroidManifest.xml.
      *
      * <p>To specify a flag in a manifest, it must be prefixed with {@code
-     * io.flutter.embedding.android.}. This is done to avoid potential naming collisions with other
-     * metadata keys.
+     * io.flutter.embedding.android.}. This is enforced to avoid potential naming collisions with
+     * other metadata keys.
      */
     public final String metadataKey;
 

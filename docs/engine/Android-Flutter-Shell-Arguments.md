@@ -5,12 +5,12 @@ You can set flags for the Flutter engine on Android in two different ways:
 - From the command line when launching an app with the Flutter tool
 - Via `AndroidManifest.xml` metadata (static, per-build configuration)
 
-All flags available on Android can be set via the command line *and** via
-manifest metada. See `src/flutter/shell/common/switches.cc` for
+All flags available on Android can be set via the command line **and** via
+manifest metadata. See `src/flutter/shell/common/switches.cc` for
 the list of all supported flags, and see
 `src/flutter/shell/platform/android/io/flutter/embedding/engine/`
-`FlutterShellArgs.java` for the list of flags that can be set via
-manifest metadata.
+`FlutterShellArgs.java` for the list of flags that can be set for the
+Android shell.
 
 ## When to use manifest metadata versus the command line
 
@@ -44,8 +44,7 @@ Notes:
 - Flags that take values use the `--flag=value` form (with `=`). The Flutter
     tool forwards them in that form to the Android embedding.
 - If you wish to statically set flags for your application, setting them via
-    the manifest is recommended and modifying the embedding to allow that is
-    encouraged.
+    the manifest is recommended.
 
 **Note: If a flag is specified both on the command line and in the manifest,
 the command-line value takes precedence at runtime.**
@@ -61,8 +60,7 @@ command line flag corresponds to the metadata key
 `io.flutter.embedding.android.ImpellerLazyShaderMode`.
 
 For flags that take values, set the numeric, string, or boolean value (without
-the leading `--flag=` prefix). For boolean flags, use `android:value=true` to
-enable; omit or set `false` to disable.
+the leading `--flag=` prefix).
 
 **Note: Manifest-provided values are overridden by command-line flags if both
 are present.**
@@ -97,8 +95,8 @@ Set the `--enable-flutter-gpu` flag:
     this policy (see `FlutterShellArgs`, which marks allowed flags
     with `allowedInRelease`). If a disallowed flag is set in release, it will
     be ignored.
-- If you need different behavior in release vs debug/profile, configure it via
-    variant-specific manifests or product flavors.
+- If you need different behavior in release vs debug/profile mode, configure it
+    via variant-specific manifests or product flavors.
 
 ## How to set engine flags dynamically
 
@@ -138,8 +136,8 @@ class MyApp : Application() {
 }
 ```
 
-Then, your `Activity` can launch a `FlutterActivity` or `FlutterFragment
-with that cached`FlutterEngine`:
+Then, your `Activity` can launch a `FlutterActivity` or `FlutterFragment`
+with that cached `FlutterEngine`:
 
 ```kotlin
 // Start a FlutterActivity using the cached engine...
@@ -154,7 +152,7 @@ supportFragmentManager
     .commit()
 ```
 
-For a normal Flutter Android app, you can create an initialize a `FlutterEngine`
+For a normal Flutter Android app, you can create and initialize a `FlutterEngine`
 with your desired flags the same as in the example above, then override
 `provideFlutterEngine` in your app's `FlutterActivity` to provide the
 configured `FlutterEngine`. For example:
