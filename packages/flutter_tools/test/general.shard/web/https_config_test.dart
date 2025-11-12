@@ -4,9 +4,10 @@
 
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:test/test.dart';
+import 'package:yaml/yaml.dart';
 
 void main() {
-  group('HttpsConfig.parse', () {
+  group('parse', () {
     test('returns HttpsConfig when both paths are provided', () {
       final HttpsConfig result = HttpsConfig.parse('/path/to/cert', '/path/to/key')!;
       expect(result.certPath, '/path/to/cert');
@@ -27,5 +28,36 @@ void main() {
       expect(() => HttpsConfig.parse(1, '/path/to/key'), throwsArgumentError);
       expect(() => HttpsConfig.parse('/path/to/cert', 1), throwsArgumentError);
     });
+  });
+
+  group('fromYaml', () {
+    test('fromYaml throws an ArgumentError if cert-path is not defined', () {
+      expect(
+        () => HttpsConfig.fromYaml(loadYaml('cert-key-path: /path/to/key') as YamlMap),
+        throwsArgumentError,
+      );
+    });
+
+    test('fromYaml throws an ArgumentError if cert-key-path is not defined', () {
+      expect(
+        () => HttpsConfig.fromYaml(loadYaml('cert-path: /path/to/cert') as YamlMap),
+        throwsArgumentError,
+      );
+    });
+
+    test(
+      'fromYaml creates an HttpsConfig object when both certificate and key paths are provided',
+      () {
+        final https = HttpsConfig.fromYaml(
+          loadYaml('''
+cert-path: /path/to/cert
+cert-key-path: /path/to/key''')
+              as YamlMap,
+        );
+
+        expect(https.certPath, '/path/to/cert');
+        expect(https.certKeyPath, '/path/to/key');
+      },
+    );
   });
 }
