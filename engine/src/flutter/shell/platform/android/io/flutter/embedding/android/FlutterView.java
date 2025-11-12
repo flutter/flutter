@@ -196,17 +196,13 @@ public class FlutterView extends FrameLayout
           boolean changed = false;
           if (flutterEngineView != null) {
             ViewGroup.LayoutParams surfaceParams = flutterEngineView.getLayoutParams();
-            if (heightMode == MeasureSpec.UNSPECIFIED) {
-              if (flutterEngineView.getHeight() != height) {
-                changed = true;
-                surfaceParams.height = height;
-              }
+            if (flutterEngineView.getHeight() != height) {
+              changed = true;
+              surfaceParams.height = height;
             }
-            if (widthMode == MeasureSpec.UNSPECIFIED) {
-              if (flutterEngineView.getWidth() != width) {
-                changed = true;
-                surfaceParams.width = width;
-              }
+            if (flutterEngineView.getWidth() != width) {
+              changed = true;
+              surfaceParams.width = width;
             }
             if (changed) {
               shouldSendViewportMetrics.set(false);
