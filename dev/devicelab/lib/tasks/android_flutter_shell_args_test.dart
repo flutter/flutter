@@ -13,7 +13,9 @@ import '../framework/framework.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
-TaskFunction androidFlutterShellArgsTest({Map<String, String>? environment}) {
+// TODO(camsim99): Test in release mode.
+
+TaskFunction androidFlutterShellArgsTest() {
   return () async {
     section('Create new Flutter Android app');
     final Directory tempDir = Directory.systemTemp.createTempSync(
@@ -21,17 +23,18 @@ TaskFunction androidFlutterShellArgsTest({Map<String, String>? environment}) {
     );
 
     try {
-      section('Create module project');
-
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
-          options: <String>['--org', 'io.flutter.devicelab', 'androidfluttershellargstest'],
+          options: <String>[
+            '--platforms',
+            'android',
+            '--org',
+            'io.flutter.devicelab',
+            'androidfluttershellargstest',
+          ],
         );
       });
-
-      print('CAMILLE:::::::::::::::::::::::::::');
-      print(tempDir.listSync());
 
       section('Insert AOT shared library name metadata into manifest');
       final List<(String, String)> metadataKeyPairs = <(String, String)>[
@@ -39,39 +42,49 @@ TaskFunction androidFlutterShellArgsTest({Map<String, String>? environment}) {
           'io.flutter.embedding.android.AOTSharedLibraryName',
           'something/completely/and/totally/invalid.so',
         ),
+        ('io.flutter.embedding.android.UseTestFonts', 'true'),
       ];
       _addMetadataToManifest(tempDir.path, metadataKeyPairs);
 
       section('Run Flutter Android app in debug mode with modified manifest');
-      Completer<bool> foundInvalidAotLibraryLog = Completer<bool>();
+      final Completer<bool> foundInvalidAotLibraryLog = Completer<bool>();
+      final Completer<bool> foundUseTestFontsNotAllowedLog = Completer<bool>();
       late Process run;
-      await inDirectory(path.join(tempDir.path, 'app'), () async {
-        run = await startFlutter('run', options: <String>['--debug', '--verbose']);
+      await inDirectory(path.join(tempDir.path, 'androidfluttershellargstest'), () async {
+        run = await startFlutter('run', options: <String>['--release', '--verbose']);
       });
-      // "Skipping unsafe AOT shared library name flag: "
-      //         + aotSharedLibraryPath
-      //         + ". Please ensure that the library is vetted and placed in your application's internal storage."
-      final StreamSubscription<void> stdout = run.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen((String line) {
-            print(line);
-            if (line.contains('Skipping unsafe AOT shared library name flag:')) {
-              foundInvalidAotLibraryLog.complete(true);
-            }
-          });
+      final StreamSubscription<void>
+      stdout = run.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((
+        String line,
+      ) {
+        print('stdout: $line');
+        if (line.contains(
+          "Skipping unsafe AOT shared library name flag: something/completely/and/totally/invalid.so. Please ensure that the library is vetted and placed in your application's internal storage.",
+        )) {
+          foundInvalidAotLibraryLog.complete(true);
+        } else if (line.contains(
+          'Flag with metadata key io.flutter.embedding.android.UseTestFonts is not allowed in release builds and will be ignored. Please remove this flag from your release build manifest.',
+        )) {
+          foundUseTestFontsNotAllowedLog.complete(true);
+        }
+      });
 
       section('Check that warning log for invalid AOT shared library name is in STDOUT');
       final Object result = await Future.any(<Future<Object>>[
-        foundInvalidAotLibraryLog.future,
+        Future.wait<bool>(<Future<bool>>[
+          foundInvalidAotLibraryLog.future,
+          foundUseTestFontsNotAllowedLog.future,
+        ]),
         run.exitCode,
       ]);
+      if (result is int) {
+        throw Exception('flutter run failed, exitCode=$result');
+      }
 
       section('Stop listening to STDOUT');
       await stdout.cancel();
       run.kill();
 
-      // TODO(camsim99):idk figure it out
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
@@ -82,51 +95,18 @@ TaskFunction androidFlutterShellArgsTest({Map<String, String>? environment}) {
       rmTree(tempDir);
     }
   };
-
-  //   section('Build APK');
-  //   await flutter(
-  //     'build',
-  //     options: <String>['apk', '--config-only'],
-  //     environment: environment,
-  //     workingDirectory: '${flutterDirectory.path}/dev/integration_tests/android_views',
-  //   );
-
-  //   /// Any gradle command downloads gradle if not already present in the cache.
-  //   /// ./gradlew dependencies downloads any gradle defined dependencies to the cache.
-  //   /// https://docs.gradle.org/current/userguide/viewing_debugging_dependencies.html
-  //   /// Downloading gradle and downloading dependencies are a common source of flakes
-  //   /// and moving those to an infra step that can be retried shifts the blame
-  //   /// individual tests to the infra itself.
-  //   section('Download android dependencies');
-  //   final int exitCode = await exec(
-  //     './gradlew',
-  //     <String>['-q', 'dependencies'],
-  //     workingDirectory: '${flutterDirectory.path}/dev/integration_tests/android_views/android',
-  //   );
-  //   if (exitCode != 0) {
-  //     return TaskResult.failure('Failed to download gradle dependencies');
-  //   }
-  //   section('Run flutter drive on android views');
-  //   await flutter(
-  //     'drive',
-  //     options: <String>[
-  //       '--browser-name=android-chrome',
-  //       '--android-emulator',
-  //       '--no-start-paused',
-  //       '--purge-persistent-cache',
-  //       '--device-timeout=30',
-  //     ],
-  //     environment: environment,
-  //     workingDirectory: '${flutterDirectory.path}/dev/integration_tests/android_views',
-  //   );
-  //   return TaskResult.success(null);
-  // };
 }
+
+// TODO(camsim99): Write second test--
+// "Flag with metadata key "
+//     + metadataKey
+//     + " is not allowed in release builds and will be ignored. Please remove this flag from your release build manifest.");
 
 // TODO(camsim99): De-dupe from perf_tests.dart
 void _addMetadataToManifest(String testDirectory, List<(String, String)> keyPairs) {
   final String manifestPath = path.join(
     testDirectory,
+    'androidfluttershellargstest',
     'android',
     'app',
     'src',
