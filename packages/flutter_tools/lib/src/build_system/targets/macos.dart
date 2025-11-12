@@ -43,7 +43,7 @@ abstract class UnpackMacOS extends UnpackDarwin {
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/FlutterMacOS.framework/Versions/A/FlutterMacOS'),
+    kFlutterMacOSFrameworkBinarySource,
   ];
 
   @override
