@@ -96,7 +96,9 @@ FlDisplayMonitor* fl_engine_get_display_monitor(FlEngine* engine);
  * fl_engine_start:
  * @engine: an #FlEngine.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore. If `error` is not %NULL, `*error` must not be uninitialized.
+ * to ignore. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is explicitly
+ * valid).
  *
  * Starts the Flutter engine.
  *
