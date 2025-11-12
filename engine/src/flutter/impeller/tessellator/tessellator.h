@@ -223,7 +223,7 @@ class Tessellator {
                        Cap cap);
   };
 
-  Tessellator(bool supports_32bit_primitive_indices = true);
+  explicit Tessellator(bool supports_32bit_primitive_indices = true);
 
   virtual ~Tessellator();
 
