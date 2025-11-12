@@ -146,7 +146,6 @@ class Table extends RenderObjectWidget {
        assert(() {
          if (children.isNotEmpty) {
            final int expectedColumnCount = children.first.children.length;
-           final int expectedRowCount = children.length;
 
            // Check if the first row has cells before using it as a reference
            if (expectedColumnCount == 0) {
@@ -164,46 +163,6 @@ class Table extends RenderObjectWidget {
              final TableRow row = children[y];
              final List<Widget> cellList = row.children;
              final int cellCount = cellList.length;
-
-             // Check if rowSpan or colSpan exceeds the table bounds
-             for (int x = 0; x < cellCount; x++) {
-               if (cellList[x] is TableCell) {
-                 final TableCell cell = cellList[x] as TableCell;
-                 // Check if colSpan exceeds available columns
-                 if (x + cell.colSpan > expectedColumnCount) {
-                   throw FlutterError.fromParts(<DiagnosticsNode>[
-                     ErrorSummary('Invalid TableCell.colSpan.'),
-                     ErrorDescription(
-                       'In row $y, the cell at column $x has a colSpan of ${cell.colSpan}, '
-                       'which extends beyond the total number of columns ($expectedColumnCount).',
-                     ),
-                     ErrorHint(
-                       'Ensure that colSpan does not exceed the remaining columns in the row.\n'
-                       'For example, if a table has $expectedColumnCount columns, '
-                       'and you are at column index $x, the maximum valid colSpan is '
-                       '${expectedColumnCount - x}.',
-                     ),
-                   ]);
-                 }
-
-                 // Check if rowSpan exceeds available rows
-                 if (y + cell.rowSpan > expectedRowCount) {
-                   throw FlutterError.fromParts(<DiagnosticsNode>[
-                     ErrorSummary('Invalid TableCell.rowSpan.'),
-                     ErrorDescription(
-                       'In row $y, the cell at column $x has a rowSpan of ${cell.rowSpan}, '
-                       'which extends beyond the total number of rows ($expectedRowCount).',
-                     ),
-                     ErrorHint(
-                       'Ensure that rowSpan does not exceed the remaining rows in the table.\n'
-                       'For example, if a table has $expectedRowCount rows, '
-                       'and you are at row index $y, the maximum valid rowSpan is '
-                       '${expectedRowCount - y}.',
-                     ),
-                   ]);
-                 }
-               }
-             }
 
              // Check if this row has the correct number of cells
              if (cellCount != expectedColumnCount) {

@@ -1281,6 +1281,44 @@ class RenderTable extends RenderBox {
           continue;
         }
 
+        // Check if rowSpan or colSpan exceeds the table bounds
+        assert(() {
+          // Check if colSpan exceeds available columns
+          if (x + colSpan > columns) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('Invalid TableCell.colSpan'),
+              ErrorDescription(
+                'In row $y, the cell at column $x has a colSpan of $colSpan, '
+                'which extends beyond the total number of columns ($columns).',
+              ),
+              ErrorHint(
+                'Ensure that colSpan does not exceed the remaining columns in the row.\n'
+                'For example, if a table has $columns columns, '
+                'and you are at column index $x, the maximum valid colSpan is '
+                '${columns - x}.',
+              ),
+            ]);
+          }
+
+          // Check if rowSpan exceeds available rows
+          if (y + rowSpan > rows) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('Invalid TableCell.rowSpan'),
+              ErrorDescription(
+                'In row $y, the cell at column $x has a rowSpan of $rowSpan, '
+                'which extends beyond the total number of rows ($rows).',
+              ),
+              ErrorHint(
+                'Ensure that rowSpan does not exceed the remaining rows in the table.\n'
+                'For example, if a table has $rows rows, '
+                'and you are at row index $y, the maximum valid rowSpan is '
+                '${rows - y}.',
+              ),
+            ]);
+          }
+          return true;
+        }());
+
         // Calculate bounds once to avoid repeated boundary checks
         final int maxColSpan = math.min(colSpan, columns - x);
         final int maxRowSpan = math.min(rowSpan, rows - y);
