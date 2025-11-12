@@ -75,7 +75,7 @@ Set the `--old-gen-heap-size=` flag to 322 MB:
     <application ...>
         <meta-data
             android:name="io.flutter.embedding.android.OldGenHeapSize"
-            android:value=true/>
+            android:value="322"/>
             ...
     </application>
 </manifest>
