@@ -11,6 +11,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/context.dart';
+import 'base/dds.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
@@ -89,7 +90,6 @@ class HotRunner extends ResidentRunner {
     super.dillOutputPath,
     super.stayResident,
     super.machine,
-    super.devtoolsHandler,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
     ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
     ReassembleHelper reassembleHelper = _defaultReassembleHelper,
@@ -272,17 +272,6 @@ class HotRunner extends ResidentRunner {
       globals.printError('Error connecting to the service protocol: $error');
       return 2;
     }
-    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-    if (debuggingOptions.enableDevTools) {
-      // The method below is guaranteed never to return a failing future.
-      unawaited(
-        residentDevtoolsHandler!.serveAndAnnounceDevTools(
-          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-          flutterDevices: flutterDevices,
-          isStartPaused: debuggingOptions.startPaused,
-        ),
-      );
-    }
 
     for (final FlutterDevice? device in flutterDevices) {
       device!.developmentShaderCompiler.configureCompiler(device.targetPlatform);
@@ -290,12 +279,16 @@ class HotRunner extends ResidentRunner {
     try {
       final List<Uri?> baseUris = await _initDevFS();
       if (connectionInfoCompleter != null) {
+        final FlutterVmService vmService = flutterDevices.first.vmService!;
+        final DartDevelopmentService dds = flutterDevices.first.device!.dds;
         // Only handle one debugger connection.
         connectionInfoCompleter.complete(
           DebugConnectionInfo(
-            httpUri: flutterDevices.first.vmService!.httpAddress,
-            wsUri: flutterDevices.first.vmService!.wsAddress,
+            httpUri: vmService.httpAddress,
+            wsUri: vmService.wsAddress,
             baseUri: baseUris.first.toString(),
+            devToolsUri: dds.devToolsUri,
+            dtdUri: dds.dtdUri,
           ),
         );
       }
@@ -506,6 +499,7 @@ class HotRunner extends ResidentRunner {
         ),
         packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
         flavor: debuggingOptions.buildInfo.flavor,
+        targetPlatform: targetPlatform,
       );
       if (result != 0) {
         return UpdateFSReport();
@@ -805,11 +799,9 @@ class HotRunner extends ResidentRunner {
       if (!silent) {
         globals.printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
       }
-      // TODO(bkonyi): remove when ready to serve DevTools from DDS.
-      unawaited(residentDevtoolsHandler!.hotRestart(flutterDevices));
-      // for (final FlutterDevice? device in flutterDevices) {
-      //   unawaited(device?.handleHotRestart());
-      // }
+      for (final FlutterDevice? device in flutterDevices) {
+        unawaited(device?.handleHotRestart());
+      }
       return result;
     }
     final OperationResult result = await _hotReloadHelper(
@@ -1242,7 +1234,6 @@ class HotRunner extends ResidentRunner {
 
   @override
   Future<void> cleanupAfterSignal() async {
-    await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
     await hotRunnerConfig!.runPreShutdownOperations();
     shutdownDartDevelopmentService();
@@ -1265,7 +1256,6 @@ class HotRunner extends ResidentRunner {
       await flutterDevice!.device!.dispose();
     }
     await _cleanupDevFS();
-    await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
   }
 }

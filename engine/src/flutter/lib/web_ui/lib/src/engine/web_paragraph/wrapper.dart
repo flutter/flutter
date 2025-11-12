@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'code_unit_flags.dart';
 import 'debug.dart';
 import 'layout.dart';
@@ -9,178 +10,130 @@ import 'paragraph.dart';
 
 /// Wraps the text by a given width.
 class TextWrapper {
-  TextWrapper(this._text, this._layout) {
-    startNewLine(0, 0.0);
-  }
+  TextWrapper(this._layout);
 
-  final String _text;
   final TextLayout _layout;
 
-  int _startLine = 0;
-  double _top = 0.0;
+  double get maxIntrinsicWidth => _maxIntrinsicWidth;
+  double _maxIntrinsicWidth = 0.0;
 
-  // Whitespaces always separates text from clusters even if it's empty
-  late ClusterRange _whitespaces;
+  double get minIntrinsicWidth => _minIntrinsicWidth;
+  double _minIntrinsicWidth = 0.0;
 
-  double _widthText = 0.0; // English: contains all whole words on the line
-  double _widthWhitespaces = 0.0;
-  double _widthLetters = 0.0; // English: contains all the letters that didn't make the word yet
+  double get longestLine => _longestLine;
+  double _longestLine = 0.0;
 
-  bool isWhitespace(ExtendedTextCluster cluster) {
-    return _hasCodeUnitFlag(cluster, CodeUnitFlags.kWhitespaceFlag);
+  double get maxLineWidthWithTrailingSpaces => _maxLineWidthWithTrailingSpaces;
+  double _maxLineWidthWithTrailingSpaces = 0.0;
+
+  double get height => _height;
+  double _height = 0.0;
+
+  bool _isWhitespace(WebCluster cluster) {
+    return _layout.codeUnitFlags.hasFlag(cluster.start, CodeUnitFlag.whitespace);
   }
 
-  bool isSoftLineBreak(ExtendedTextCluster cluster) {
-    return _hasCodeUnitFlag(cluster, CodeUnitFlags.kSoftLineBreakFlag);
+  bool _isSoftLineBreak(WebCluster cluster) {
+    return _layout.codeUnitFlags.hasFlag(cluster.start, CodeUnitFlag.softLineBreak);
   }
 
-  bool isHardLineBreak(ExtendedTextCluster cluster) {
-    return _hasCodeUnitFlag(cluster, CodeUnitFlags.kHardLineBreakFlag);
+  bool _isHardLineBreak(WebCluster cluster) {
+    return _layout.codeUnitFlags.hasFlag(cluster.start, CodeUnitFlag.hardLineBreak);
   }
 
-  bool _hasCodeUnitFlag(ExtendedTextCluster cluster, int flag) {
-    return _layout.codeUnitFlags[cluster.start].hasFlag(flag);
-  }
+  void breakLines(double maxWidth) {
+    // LTR: "words":[startLine:whitespaces.start) "whitespaces":[whitespaces.start:whitespaces.end) "letters":[whitespaces.end:...)
+    // RTL: "letters":(...:whitespaces.end] "whitespaces":(whitespaces.end:whitespaces.start] "words":(whitespaces.start:startLine]
 
-  // TODO(jlavrova): Consider combining this with `_layout.addLine`.
-  void startNewLine(int start, double clusterWidth) {
-    _startLine = start;
-    _whitespaces = ClusterRange.collapsed(start);
-    _widthText = 0.0;
-    _widthWhitespaces = 0.0;
-    _widthLetters = clusterWidth;
-    _top = 0.0;
-  }
-
-  void breakLines(double width) {
-    // "words":[startLine:whitespaces.start) whitespaces:[whitespaces.start:whitespaces.end) "letters":[whitespaces.end:...)
-
-    startNewLine(0, 0.0);
+    final _LineBuilder line = _LineBuilder(_layout, maxWidth);
 
     bool hardLineBreak = false;
-    for (int index = 0; index < _layout.textClusters.length - 1; index++) {
-      final ExtendedTextCluster cluster = _layout.textClusters[index];
-      // TODO(jlavrova): This is a temporary simplification, needs to be addressed later
-      double widthCluster = cluster.bounds.width;
-      hardLineBreak = isHardLineBreak(cluster);
+    for (int index = 0; index < _layout.allClusters.length - 1; index += 1) {
+      final WebCluster cluster = _layout.allClusters[index];
+      final double widthCluster = cluster.advance.width;
+      hardLineBreak = _isHardLineBreak(cluster);
 
       if (hardLineBreak) {
         // Break the line and then continue with the current cluster as usual
-        if (_whitespaces.end < index) {
-          // Take letters into account
-          _widthText += _widthWhitespaces + _widthLetters;
-          _whitespaces.start = _whitespaces.end = index;
-        }
-        _top += _layout.addLine(
-          ClusterRange(start: _startLine, end: _whitespaces.start),
-          _widthText,
-          _whitespaces.clone(),
-          _widthWhitespaces,
-          hardLineBreak,
-          _top,
-        );
+        WebParagraphDebug.log('isHardLineBreak: $index');
 
-        // Start a new line
-        startNewLine(index, 0.0);
-      } else if (isSoftLineBreak(cluster) && index != _startLine) {
+        line.consumePendingText();
+        line.build(hardLineBreak);
+      } else if (_isSoftLineBreak(cluster) && line.isNotEmpty) {
         // Mark the potential line break and then continue with the current cluster as usual
-        if (_whitespaces.start == _startLine) {
+        WebParagraphDebug.log('isSoftLineBreak: $index');
+        if (line.hasLeadingWhitespaces) {
           // There is one case when we have to ignore this soft line break: if we only had whitespaces so far -
           // these are the leading spaces and Flutter wants them to be preserved
           // We need to pretend that these are not whitespaces
         } else {
-          if (_whitespaces.end != index) {
-            // Line break without whitespaces before, add all collected letters to the text as a word
-            _widthText += _widthLetters;
-            _whitespaces.start = index;
-          }
-          // Close the softBreak sequence
-          _whitespaces.end = index;
-          // Start a new cluster sequence
-          _widthLetters = 0.0;
+          line.markSoftLineBreak(index);
         }
       }
 
-      // Check if we have a (hanging) whitespace which does not affect the line width
-      if (isWhitespace(cluster)) {
-        if (_whitespaces.end < index) {
-          // Start a new (empty) whitespace sequence
-          _widthText += _widthWhitespaces + _widthLetters;
-          _widthLetters = 0.0;
-          _whitespaces = ClusterRange.collapsed(index);
-          _widthWhitespaces = 0.0;
-        }
+      // Check if this is a (trailing) whitespace that does not affect the line width
+      if (_isWhitespace(cluster)) {
+        line.consumePendingText();
         // Add the cluster to the current whitespace sequence (empty or not)
-        _whitespaces.end = index + 1;
-        _widthWhitespaces += widthCluster;
+        line.addWhitespace(index, widthCluster);
         continue;
       }
 
       // Check if we exceeded the line width
-      if (_widthText + _widthWhitespaces + _widthLetters + widthCluster > width) {
-        if (_whitespaces.start != _startLine) {
+      if (!line.canFit(widthCluster)) {
+        bool clusterAdded = false;
+
+        if (line.hasSoftLineBreak) {
           // There was at least one possible line break so we can use it to break the text
-        } else if (index > _startLine) {
-          // There was some text without line break, we will have to break the text by cluster
-          assert(_widthText == 0.0);
-          if (_widthLetters > 0) {
-            // We possibly have some leading spaces and some text after
-            _widthText = _widthWhitespaces + _widthLetters;
-            _widthWhitespaces = 0.0;
-            _widthLetters = 0.0;
-            _whitespaces.start = _whitespaces.end = index;
-          } else {
-            // We only have whitespaces on the line
-            _widthText = 0.0;
-          }
+        } else if (line.isNotEmpty) {
+          // There was some text without line break, we will have to force-break the text at this cluster.
+          assert(!line.hasConsumedText);
+          // We possibly have some leading spaces and some text after
+          line.consumePendingText();
         } else {
           // We have only one cluster and it's too big to fit the line but we place it anyway
-          assert(
-            _startLine == index &&
-                _widthText == 0.0 &&
-                _widthWhitespaces == 0.0 &&
-                _widthLetters == 0.0,
-          );
-          _widthText = widthCluster;
-          _whitespaces.start = _whitespaces.end = index + 1;
-          widthCluster = 0.0; // Since we already processed this cluster
+          assert(line.isEmpty);
+          line.addPendingText(index, widthCluster);
+          line.consumePendingText();
+          clusterAdded = true;
         }
 
         // Add the line
-        _top += _layout.addLine(
-          ClusterRange(start: _startLine, end: _whitespaces.start),
-          _widthText,
-          _whitespaces.clone(),
-          _widthWhitespaces,
-          hardLineBreak,
-          _top,
-        );
+        line.build(hardLineBreak);
 
-        // Start a new line but keep the clusters sequence
-        startNewLine(_whitespaces.end, _widthLetters);
+        if (clusterAdded) {
+          continue;
+        }
       }
 
-      // This is just a regular cluster, keep track of it
-      _widthLetters += widthCluster;
+      // This is just a regular cluster, add it as pending text.
+      line.addPendingText(index, widthCluster);
     }
 
-    // Assume a soft line break at the end of the text
-    if (_whitespaces.end < _layout.textClusters.length - 1) {
-      // We have letters at the end, make them into a word
-      _widthText += _widthWhitespaces;
-      _whitespaces = ClusterRange.collapsed(_layout.textClusters.length - 1);
-      _widthWhitespaces = 0.0;
-      _widthText += _widthLetters;
+    // Make sure we didn't miss anything from the text.
+    // TODO(jlavrova): This assert may need to change when we implement text overflow.
+    assert(line.reachedEndOfText());
+
+    // Special case: we have only whitespaces in the whole paragraph
+    if (_layout.lines.isEmpty && line.hasOnlyWhitespaces) {
+      line._maxIntrinsicWidth = line._widthWhitespaces;
+      line._minIntrinsicWidth = line._widthWhitespaces;
+      line._longestLine = line._widthWhitespaces;
+      line._maxLineWidthWithTrailingSpaces = line._widthWhitespaces;
+      line.build(hardLineBreak);
+    }
+    // Add the last line if there's anything left to add
+    else if (line.isNotEmpty) {
+      // Treat the end of text as a soft line break
+      line.markSoftLineBreak(_layout.allClusters.length - 1);
+      line.build(hardLineBreak);
     }
 
-    _top += _layout.addLine(
-      ClusterRange(start: _startLine, end: _whitespaces.start),
-      _widthText,
-      _whitespaces.clone(),
-      _widthWhitespaces,
-      hardLineBreak,
-      _top,
-    );
+    _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, line._maxIntrinsicWidth);
+    _minIntrinsicWidth = math.max(_minIntrinsicWidth, line._minIntrinsicWidth);
+    _longestLine = math.max(_longestLine, line._longestLine);
+    _maxLineWidthWithTrailingSpaces = math.max(_longestLine, line._maxLineWidthWithTrailingSpaces);
+    _height = line._top;
 
     // TODO(jlavrova): Discuss with Mouad
     // Flutter wants to have another (empty) line if \n is the last codepoint in the text
@@ -194,17 +147,226 @@ class TextWrapper {
       _top +=_layout.addLine(emptyClusterRange, 0.0, emptyClusterRange, 0.0, false, _top,);
     }
     */
+    /*
     if (WebParagraphDebug.logging) {
       for (int i = 0; i < _layout.lines.length; ++i) {
         final TextLine line = _layout.lines[i];
-        // TODO(jlavrova): Cluster index being used as text index.
-        final String text = _text.substring(line.clusters.start, line.clusters.end);
-        final String whitespaces = !line.whitespaces.isEmpty ? '${line.whitespaces.size}' : 'no';
-        final String hardLineBreak = line.hardBreak ? 'hardlineBreak' : '';
+        final String text = _text.substring(line.textRange.start, line.textRange.end);
+        final String whitespaces =
+            !line.whitespacesRange.isEmpty ? '${line.whitespacesRange.width}' : 'no';
+        final String hardLineBreak = line.hardLineBreak ? 'hardlineBreak' : '';
         WebParagraphDebug.log(
-          '$i: "$text" [${line.clusters.start}:${line.clusters.end}) $width $hardLineBreak ($whitespaces trailing whitespaces)',
+          '$i: "$text" [${line.textRange.start}:${line.textRange.end}) $width $hardLineBreak ($whitespaces trailing whitespaces)',
         );
       }
     }
+    */
+  }
+}
+
+class _LineBuilder {
+  _LineBuilder(this._layout, this._maxWidth)
+    : start = 0,
+      _whitespaceStart = 0,
+      _whitespaceEnd = 0,
+      _pendingTextEnd = 0,
+      _top = 0.0;
+
+  final TextLayout _layout;
+  final double _maxWidth;
+
+  double _top;
+
+  // TODO(mdebbar): Make all these properties private, and maybe add getters when necessary.
+  int start;
+
+  int _whitespaceStart;
+  int _whitespaceEnd;
+
+  int _pendingTextEnd;
+
+  double _widthConsumedText = 0.0;
+  double _widthWhitespaces = 0.0;
+  double _widthPendingText = 0.0;
+
+  double get minIntrinsicWidth => _minIntrinsicWidth;
+  double _minIntrinsicWidth = 0.0;
+
+  double get maxIntrinsicWidth => _maxIntrinsicWidth;
+  double _maxIntrinsicWidth = 0.0;
+
+  double get longestLine => _longestLine;
+  double _longestLine = 0.0;
+
+  double get maxLineWidthWithTrailingSpaces => _maxLineWidthWithTrailingSpaces;
+  double _maxLineWidthWithTrailingSpaces = 0.0;
+
+  double get height => _top;
+
+  bool get isEmpty {
+    // When `start` and `pendingTextEnd` are equal, we know there was no text, whitespaces
+    // or pending text added to the line.
+    final bool empty = start == _pendingTextEnd;
+
+    if (empty) {
+      assert(
+        // Check that all widths are zero when the line is empty.
+        _widthConsumedText == 0.0 &&
+            _widthWhitespaces == 0.0 &&
+            _widthPendingText == 0.0 &&
+            // Check that there's no text, whitespace, or pending text.
+            !hasConsumedText &&
+            !hasWhitespaces &&
+            !hasPendingText,
+      );
+    } else {
+      // Check that there's some text or whitespace or pending text.
+      assert(hasConsumedText || hasWhitespaces || hasPendingText);
+    }
+
+    return empty;
+  }
+
+  bool get isNotEmpty => !isEmpty;
+
+  bool get hasConsumedText {
+    final bool result = _whitespaceStart > start;
+
+    if (!result) {
+      // When there's no consumed text, the width is also 0.
+      assert(_widthConsumedText == 0.0);
+    }
+
+    return result;
+  }
+
+  bool get hasWhitespaces {
+    final bool result = _whitespaceStart != _whitespaceEnd;
+
+    if (!result) {
+      // When there's no whitespaces, the width of whitespaces is also 0.
+      assert(_widthWhitespaces == 0.0);
+    }
+
+    return result;
+  }
+
+  bool get hasLeadingWhitespaces => !hasConsumedText && hasWhitespaces;
+
+  bool get hasOnlyWhitespaces => !hasConsumedText && !hasPendingText && hasWhitespaces;
+
+  bool get hasPendingText {
+    final bool result = _pendingTextEnd > _whitespaceEnd;
+
+    assert(() {
+      if (!result) {
+        // When there's no pending text, make sure the width of pending text is also 0.
+        return _widthPendingText == 0.0;
+      }
+      return true;
+    }());
+
+    return result;
+  }
+
+  bool get hasSoftLineBreak => _hasSoftLineBreak;
+  bool _hasSoftLineBreak = false;
+
+  void markSoftLineBreak(int index) {
+    _hasSoftLineBreak = true;
+
+    if (hasPendingText) {
+      assert(_pendingTextEnd == index);
+    } else {
+      assert(_whitespaceEnd == index);
+    }
+
+    consumePendingText();
+    assert(_whitespaceEnd == index);
+  }
+
+  bool canFit(double extraWidth) {
+    return _widthConsumedText + _widthWhitespaces + _widthPendingText + extraWidth <= _maxWidth;
+  }
+
+  bool reachedEndOfText() {
+    return _pendingTextEnd == _layout.allClusters.length - 1;
+  }
+
+  void addWhitespace(int index, double width) {
+    assert(!hasPendingText);
+
+    _whitespaceEnd = index + 1;
+    _pendingTextEnd = index + 1;
+
+    _widthWhitespaces += width;
+
+    assert(hasWhitespaces);
+  }
+
+  void addPendingText(int index, double width) {
+    _pendingTextEnd = index + 1;
+    _widthPendingText += width;
+
+    assert(hasPendingText);
+  }
+
+  // TODO(mdebbar): Can we inline this in `markSoftLineBreak` and use that everywhere?
+  void consumePendingText() {
+    // Update min intrinsic width.
+    _minIntrinsicWidth = math.max(_minIntrinsicWidth, _widthPendingText);
+
+    if (!hasPendingText) {
+      return;
+    }
+
+    _whitespaceStart = _pendingTextEnd;
+    _whitespaceEnd = _pendingTextEnd;
+
+    _widthConsumedText += _widthWhitespaces + _widthPendingText;
+    _widthWhitespaces = 0.0;
+    _widthPendingText = 0.0;
+
+    assert(!hasWhitespaces);
+    assert(!hasPendingText);
+  }
+
+  /// Builds a line and adds it to [_layout].
+  ///
+  /// After calling [build], the line builder instance is ready for the next line.
+  ///
+  /// Returns the height of the line.
+  double build(bool hardLineBreak) {
+    // Update max intrinsic width.
+    _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthConsumedText);
+    _longestLine = math.max(_longestLine, _widthConsumedText);
+    _maxLineWidthWithTrailingSpaces = math.max(
+      _maxLineWidthWithTrailingSpaces,
+      _widthConsumedText + _widthWhitespaces,
+    );
+
+    final double height = _layout.addLine(
+      ClusterRange(start: start, end: _whitespaceStart),
+      ClusterRange(start: _whitespaceStart, end: _whitespaceEnd),
+      hardLineBreak,
+      _top,
+    );
+
+    // Reset the line builder to be ready for the next line.
+
+    _hasSoftLineBreak = false;
+
+    start = _whitespaceEnd;
+    _whitespaceStart = start;
+    _whitespaceEnd = start;
+
+    _widthConsumedText = 0.0;
+    _widthWhitespaces = 0.0;
+
+    // Leave `pendingTextEnd` and `widthPendingText` untouched so they are used in the next line.
+
+    _top += height;
+
+    return height;
   }
 }

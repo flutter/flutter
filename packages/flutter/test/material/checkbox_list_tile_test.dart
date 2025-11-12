@@ -592,7 +592,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test default cursor when disabled
@@ -647,7 +647,7 @@ void main() {
       return activeEnabledFillColor;
     }
 
-    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = WidgetStateColor.resolveWith(getFillColor);
 
     Widget buildFrame({required bool enabled}) {
       return wrap(
@@ -683,7 +683,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final WidgetStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = WidgetStateColor.resolveWith(getFillColor);
 
     Widget buildFrame() {
       return wrap(
@@ -1843,9 +1843,26 @@ void main() {
     expect(checkboxOffset.dy - tileOffset.dy, bottomPositionCheckbox);
     expect(secondaryOffset.dy - tileOffset.dy, bottomPositionSecondary);
   });
+
+  testWidgets('CheckboxListTile does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(
+              body: wrap(
+                child: CheckboxListTile(value: true, onChanged: (_) {}, title: const Text('X')),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CheckboxListTile)), Size.zero);
+  });
 }
 
-class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
+class _SelectedGrabMouseCursor extends WidgetStateMouseCursor {
   const _SelectedGrabMouseCursor();
 
   @override

@@ -3991,6 +3991,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required bool? readOnly,
     required bool? focusable,
     required bool? focused,
+    required AccessiblityFocusBlockType? accessiblityFocusBlockType,
     required bool? inMutuallyExclusiveGroup,
     required bool? obscured,
     required bool? multiline,
@@ -4004,6 +4005,8 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required int? maxValueLength,
     required int? currentValueLength,
     required String? identifier,
+    required Object? traversalParentIdentifier,
+    required Object? traversalChildIdentifier,
     required String? label,
     required AttributedString? attributedLabel,
     required String? value,
@@ -4039,6 +4042,8 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required VoidCallback? onDidGainAccessibilityFocus,
     required VoidCallback? onDidLoseAccessibilityFocus,
     required VoidCallback? onFocus,
+    required VoidCallback? onExpand,
+    required VoidCallback? onCollapse,
     required Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions,
     required SemanticsRole? role,
     required Set<String>? controlsNodes,
@@ -4071,6 +4076,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            readOnly: readOnly,
            focusable: focusable,
            focused: focused,
+           accessiblityFocusBlockType: accessiblityFocusBlockType,
            inMutuallyExclusiveGroup: inMutuallyExclusiveGroup,
            obscured: obscured,
            multiline: multiline,
@@ -4083,6 +4089,8 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            maxValueLength: maxValueLength,
            currentValueLength: currentValueLength,
            identifier: identifier,
+           traversalParentIdentifier: traversalParentIdentifier,
+           traversalChildIdentifier: traversalChildIdentifier,
            label: label,
            attributedLabel: attributedLabel,
            value: value,
@@ -4116,6 +4124,8 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            onDismiss: onDismiss,
            onSetSelection: onSetSelection,
            onSetText: onSetText,
+           onExpand: onExpand,
+           onCollapse: onCollapse,
            customSemanticsActions: customSemanticsActions,
            hintOverrides: onTapHint != null || onLongPressHint != null
                ? SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint)
@@ -4315,6 +4325,7 @@ class SliverSemantics extends _SemanticsBase {
     super.readOnly,
     super.focusable,
     super.focused,
+    super.accessiblityFocusBlockType,
     super.inMutuallyExclusiveGroup,
     super.obscured,
     super.multiline,
@@ -4328,6 +4339,8 @@ class SliverSemantics extends _SemanticsBase {
     super.maxValueLength,
     super.currentValueLength,
     super.identifier,
+    super.traversalParentIdentifier,
+    super.traversalChildIdentifier,
     super.label,
     super.attributedLabel,
     super.value,
@@ -4363,6 +4376,8 @@ class SliverSemantics extends _SemanticsBase {
     super.onDidGainAccessibilityFocus,
     super.onDidLoseAccessibilityFocus,
     super.onFocus,
+    super.onExpand,
+    super.onCollapse,
     super.customSemanticsActions,
     super.role,
     super.controlsNodes,
@@ -6443,7 +6458,11 @@ class Flow extends MultiChildRenderObjectWidget {
 ///
 /// Text displayed in a [RichText] widget must be explicitly styled. When
 /// picking which style to use, consider using [DefaultTextStyle.of] the current
-/// [BuildContext] to provide defaults. For more details on how to style text in
+/// [BuildContext] to provide defaults. [MediaQuery.maybeBoldTextOf],
+/// [MediaQuery.maybeLineHeightScaleFactorOverrideOf],
+/// [MediaQuery.maybeLetterSpacingOverrideOf], [MediaQuery.maybeWordSpacingOverrideOf],
+/// and [MediaQuery.maybeParagraphSpacingOverrideOf] can also be used to ensure the styling
+/// for your text is accessible. For more details on how to style text in
 /// a [RichText] widget, see the documentation for [TextStyle].
 ///
 /// Consider using the [Text] widget to integrate with the [DefaultTextStyle]
@@ -7888,6 +7907,7 @@ class Semantics extends _SemanticsBase {
     super.readOnly,
     super.focusable,
     super.focused,
+    super.accessiblityFocusBlockType,
     super.inMutuallyExclusiveGroup,
     super.obscured,
     super.multiline,
@@ -7901,6 +7921,8 @@ class Semantics extends _SemanticsBase {
     super.maxValueLength,
     super.currentValueLength,
     super.identifier,
+    super.traversalParentIdentifier,
+    super.traversalChildIdentifier,
     super.label,
     super.attributedLabel,
     super.value,
@@ -7936,6 +7958,8 @@ class Semantics extends _SemanticsBase {
     super.onDidGainAccessibilityFocus,
     super.onDidLoseAccessibilityFocus,
     super.onFocus,
+    super.onExpand,
+    super.onCollapse,
     super.customSemanticsActions,
     super.role,
     super.controlsNodes,
@@ -8384,31 +8408,59 @@ class _StatefulBuilderState extends State<StatefulBuilder> {
 /// child on top of that color.
 class ColoredBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that paints its area with the specified [Color].
-  const ColoredBox({required this.color, super.child, super.key});
+  const ColoredBox({required this.color, this.isAntiAlias = true, super.child, super.key});
 
   /// The color to paint the background area with.
   final Color color;
 
+  /// {@template flutter.widgets.ColoredBox.isAntiAlias}
+  /// Whether to apply anti-aliasing when painting the box.
+  ///
+  /// Defaults to `true`.
+  ///
+  /// When `true`, the painted box will have smooth edges. This is crucial for
+  /// animations and transformations (such as rotation or scaling) where the
+  /// widget's edges may not align perfectly with the physical pixel grid.
+  /// Anti-aliasing allows for sub-pixel rendering, which prevents a 'jagged'
+  /// appearance during motion and ensures visually smooth transitions.
+  ///
+  /// Set this to `false` for specific use cases where multiple `ColoredBox`
+  /// widgets are positioned adjacent to each other to form a larger, seamless
+  /// area of solid color. With anti-aliasing enabled (`true`), faint seams or
+  /// gaps might appear between the boxes due to the semi-transparent pixels at
+  /// their edges. Disabling anti-aliasing ensures that the boxes align perfectly
+  /// without such visual artifacts.
+  ///
+  /// See also:
+  ///
+  ///  * [Paint.isAntiAlias], the underlying property that this controls.
+  /// {@endtemplate}
+  final bool isAntiAlias;
+
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderColoredBox(color: color);
+    return _RenderColoredBox(color: color, isAntiAlias: isAntiAlias);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderObject renderObject) {
-    (renderObject as _RenderColoredBox).color = color;
+    (renderObject as _RenderColoredBox)
+      ..color = color
+      ..isAntiAlias = isAntiAlias;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Color>('color', color));
+    properties.add(DiagnosticsProperty<bool>('isAntiAlias', isAntiAlias, defaultValue: true));
   }
 }
 
 class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
-  _RenderColoredBox({required Color color})
+  _RenderColoredBox({required Color color, required bool isAntiAlias})
     : _color = color,
+      _isAntiAlias = isAntiAlias,
       super(behavior: HitTestBehavior.opaque);
 
   /// The fill color for this render object.
@@ -8422,6 +8474,16 @@ class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
     markNeedsPaint();
   }
 
+  bool get isAntiAlias => _isAntiAlias;
+  bool _isAntiAlias;
+  set isAntiAlias(bool value) {
+    if (value == _isAntiAlias) {
+      return;
+    }
+    _isAntiAlias = value;
+    markNeedsPaint();
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
     // It's tempting to want to optimize out this `drawRect()` call if the
@@ -8429,7 +8491,12 @@ class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
     // https://github.com/flutter/flutter/pull/72526#issuecomment-749185938 for
     // a good description of why.
     if (size > Size.zero) {
-      context.canvas.drawRect(offset & size, Paint()..color = color);
+      context.canvas.drawRect(
+        offset & size,
+        Paint()
+          ..isAntiAlias = isAntiAlias
+          ..color = color,
+      );
     }
     if (child != null) {
       context.paintChild(child!, offset);

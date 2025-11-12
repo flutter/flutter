@@ -18,7 +18,7 @@ if (!is_fuchsia) {
 }
 
 # Overrides for ANGLE's dependencies.
-angle_abseil_cpp_dir = "//flutter/third_party/abseil-cpp"
+angle_abseil_cpp_dir = "//third_party/abseil-cpp"
 angle_glslang_dir = "//flutter/third_party/vulkan-deps/glslang/src"
 angle_googletest_dir = "//third_party/googletest/googletest/src"
 
@@ -32,6 +32,8 @@ angle_spirv_tools_dir = "//flutter/third_party/vulkan-deps/spirv-tools/src"
 angle_spirv_cross_dir = "//flutter/third_party/vulkan-deps/spirv-cross/src"
 angle_spirv_headers_dir = "//flutter/third_party/vulkan-deps/spirv-headers/src"
 angle_vulkan_memory_allocator_dir = "//flutter/flutter_vma"
+ozone_platform_drm = false
+use_system_xcode = true
 
 # This is a general Chromium flag, but in the Flutter build only ANGLE needs it
 # so it is defined here.

@@ -613,7 +613,7 @@ void main() {
     await tester.pumpWidget(
       boilerplate(
         child: ToggleButtons(
-          fillColor: MaterialStateColor.resolveWith(getFillColor),
+          fillColor: WidgetStateColor.resolveWith(getFillColor),
           isSelected: const <bool>[false, true],
           onPressed: (int index) {},
           children: const <Widget>[Text('First child'), Text('Second child')],
@@ -630,7 +630,7 @@ void main() {
     await tester.pumpWidget(
       boilerplate(
         child: ToggleButtons(
-          fillColor: MaterialStateColor.resolveWith(getFillColor),
+          fillColor: WidgetStateColor.resolveWith(getFillColor),
           isSelected: const <bool>[false, true],
           children: const <Widget>[Text('First child'), Text('Second child')],
         ),
@@ -1755,7 +1755,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test default cursor when disabled

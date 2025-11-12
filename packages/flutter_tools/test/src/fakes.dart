@@ -369,6 +369,11 @@ class FakePlistParser implements PlistParser {
     setProperty(key, value);
     return true;
   }
+
+  @override
+  bool insertKeyWithJson(String plistFilePath, {required String key, required String json}) {
+    return false;
+  }
 }
 
 class FakeBotDetector implements BotDetector {
@@ -526,6 +531,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isOmitLegacyVersionFileEnabled = false,
     this.isWindowingEnabled = false,
     this.isLLDBDebuggingEnabled = false,
+    this.isUISceneMigrationEnabled = false,
   });
 
   @override
@@ -574,6 +580,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isLLDBDebuggingEnabled;
 
   @override
+  final bool isUISceneMigrationEnabled;
+
+  @override
   bool isEnabled(Feature feature) {
     return switch (feature) {
       flutterWebFeature => isWebEnabled,
@@ -590,6 +599,7 @@ class TestFeatureFlags implements FeatureFlags {
       omitLegacyVersionFile => isOmitLegacyVersionFileEnabled,
       windowingFeature => isWindowingEnabled,
       lldbDebugging => isLLDBDebuggingEnabled,
+      uiSceneMigration => isUISceneMigrationEnabled,
       _ => false,
     };
   }
@@ -611,6 +621,7 @@ class TestFeatureFlags implements FeatureFlags {
     omitLegacyVersionFile,
     windowingFeature,
     lldbDebugging,
+    uiSceneMigration,
   ];
 
   @override

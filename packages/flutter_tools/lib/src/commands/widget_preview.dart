@@ -111,7 +111,7 @@ abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
   FlutterProject validateFlutterProjectForPreview(Directory directory) {
     logger.printTrace('Verifying that ${directory.path} is a Flutter project.');
     final FlutterProject flutterProject = projectFactory.fromDirectory(directory);
-    if (!flutterProject.dartTool.existsSync()) {
+    if (!flutterProject.pubspecFile.existsSync()) {
       throwToolExit('${flutterProject.directory.path} is not a valid Flutter project.');
     }
     return flutterProject;
@@ -250,10 +250,13 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   );
 
   late var _dtdService = WidgetPreviewDtdServices(
+    previewAnalytics: previewAnalytics,
+    fs: fs,
     logger: logger,
     shutdownHooks: shutdownHooks,
     onHotRestartPreviewerRequest: onHotRestartRequest,
     dtdLauncher: DtdLauncher(logger: logger, artifacts: artifacts, processManager: processManager),
+    project: rootProject.widgetPreviewScaffoldProject,
   );
 
   /// The currently running instance of the widget preview scaffold.
@@ -277,7 +280,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     final bool generateScaffoldProject =
         customPreviewScaffoldOutput != null || _previewManifest.shouldGenerateProject();
     // TODO(bkonyi): can this be moved?
-    widgetPreviewScaffold.createSync();
+    widgetPreviewScaffold.createSync(recursive: true);
     fs.currentDirectory = widgetPreviewScaffold;
 
     if (generateScaffoldProject) {
@@ -447,6 +450,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             widgetPreviewScaffoldProject.packageConfig.readAsBytesSync(),
             widgetPreviewScaffoldProject.packageConfig.uri,
           ),
+          trackWidgetCreation: true,
           // Don't try and download canvaskit from the CDN.
           useLocalCanvasKit: true,
           webEnableHotReload: true,

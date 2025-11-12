@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -969,6 +970,69 @@ void main() {
     },
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/177005
+  testWidgets('Drawer semantics for mismatched platforms', (WidgetTester tester) async {
+    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+
+    Future<void> pumpDrawerWithTheme(TargetPlatform themePlatform) async {
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: themePlatform),
+          home: Scaffold(
+            key: scaffoldKey,
+            drawer: const Drawer(child: Text('Drawer')),
+            body: Container(),
+          ),
+        ),
+      );
+
+      scaffoldKey.currentState!.openDrawer();
+      await tester.pumpAndSettle();
+
+      // Test label semantics.
+      final Finder drawerLabelFinder = find.bySemanticsLabel(localizations.drawerLabel);
+      if (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS) {
+        expect(drawerLabelFinder, findsNothing); // Apple platforms don't show drawer label.
+      } else {
+        expect(drawerLabelFinder, findsOneWidget); // Non-Apple platforms show drawer label.
+      }
+
+      // Test barrier semantics.
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final bool expectBarrierExcluded = defaultTargetPlatform == TargetPlatform.android;
+
+      if (expectBarrierExcluded) {
+        expect(
+          semantics,
+          isNot(
+            includesNodeWith(
+              label: localizations.modalBarrierDismissLabel,
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+            ),
+          ),
+        );
+      } else {
+        expect(
+          semantics,
+          includesNodeWith(
+            label: localizations.modalBarrierDismissLabel,
+            actions: <SemanticsAction>[SemanticsAction.tap],
+          ),
+        );
+      }
+
+      semantics.dispose();
+    }
+
+    // Test with theme.platform = Android on different real platforms.
+    await pumpDrawerWithTheme(TargetPlatform.android);
+
+    // Test with theme.platform = iOS on different real platforms.
+    await pumpDrawerWithTheme(TargetPlatform.iOS);
+  }, variant: TargetPlatformVariant.all());
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests
@@ -1058,5 +1122,20 @@ void main() {
       material = tester.widget<Material>(drawerMaterial);
       expect(material.clipBehavior, Clip.hardEdge);
     });
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/6537
+  testWidgets('Drawer and DrawerHeader do not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Drawer(child: DrawerHeader(child: Text('X'))),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Drawer)), Size.zero);
+    expect(tester.getSize(find.byType(DrawerHeader)), Size.zero);
   });
 }

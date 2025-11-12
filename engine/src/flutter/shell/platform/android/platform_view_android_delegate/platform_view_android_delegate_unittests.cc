@@ -41,6 +41,7 @@ TEST(PlatformViewShell, UpdateSemanticsDoesFlutterViewUpdateSemantics) {
   buffer_int32[position++] = node0.platformViewId;
   buffer_int32[position++] = node0.scrollChildren;
   buffer_int32[position++] = node0.scrollIndex;
+  buffer_int32[position++] = node0.traversalParent;
   buffer_float32[position++] = static_cast<float>(node0.scrollPosition);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMax);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMin);
@@ -61,12 +62,15 @@ TEST(PlatformViewShell, UpdateSemanticsDoesFlutterViewUpdateSemantics) {
   expected_strings.push_back(node0.tooltip);
   buffer_int32[position++] = -1;  // node0.linkUrl
   buffer_int32[position++] = -1;  // node0.locale
+  buffer_int32[position++] = node0.headingLevel;
   buffer_int32[position++] = node0.textDirection;
   buffer_float32[position++] = node0.rect.left();
   buffer_float32[position++] = node0.rect.top();
   buffer_float32[position++] = node0.rect.right();
   buffer_float32[position++] = node0.rect.bottom();
   node0.transform.getColMajor(&buffer_float32[position]);
+  position += 16;
+  node0.hitTestTransform.getColMajor(&buffer_float32[position]);
   position += 16;
   buffer_int32[position++] = 0;  // node0.childrenInTraversalOrder.size();
   buffer_int32[position++] = 0;  // node0.customAccessibilityActions.size();
@@ -108,6 +112,7 @@ TEST(PlatformViewShell, UpdateSemanticsDoesUpdateLinkUrl) {
   buffer_int32[position++] = node0.platformViewId;
   buffer_int32[position++] = node0.scrollChildren;
   buffer_int32[position++] = node0.scrollIndex;
+  buffer_int32[position++] = node0.traversalParent;
   buffer_float32[position++] = static_cast<float>(node0.scrollPosition);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMax);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMin);
@@ -128,12 +133,15 @@ TEST(PlatformViewShell, UpdateSemanticsDoesUpdateLinkUrl) {
   buffer_int32[position++] = expected_strings.size();  // node0.linkUrl
   expected_strings.push_back(node0.linkUrl);
   buffer_int32[position++] = -1;  // node0.locale
+  buffer_int32[position++] = node0.headingLevel;
   buffer_int32[position++] = node0.textDirection;
   buffer_float32[position++] = node0.rect.left();
   buffer_float32[position++] = node0.rect.top();
   buffer_float32[position++] = node0.rect.right();
   buffer_float32[position++] = node0.rect.bottom();
   node0.transform.getColMajor(&buffer_float32[position]);
+  position += 16;
+  node0.hitTestTransform.getColMajor(&buffer_float32[position]);
   position += 16;
   buffer_int32[position++] = 0;  // node0.childrenInTraversalOrder.size();
   buffer_int32[position++] = 0;  // node0.customAccessibilityActions.size();
@@ -155,6 +163,7 @@ TEST(PlatformViewShell, UpdateSemanticsDoesUpdateLocale) {
   node0.identifier = "identifier";
   node0.label = "label";
   node0.locale = "es-MX";
+  node0.traversalParent = -1;
   update.insert(std::make_pair(0, node0));
 
   std::vector<uint8_t> expected_buffer(
@@ -175,6 +184,7 @@ TEST(PlatformViewShell, UpdateSemanticsDoesUpdateLocale) {
   buffer_int32[position++] = node0.platformViewId;
   buffer_int32[position++] = node0.scrollChildren;
   buffer_int32[position++] = node0.scrollIndex;
+  buffer_int32[position++] = node0.traversalParent;
   buffer_float32[position++] = static_cast<float>(node0.scrollPosition);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMax);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMin);
@@ -195,12 +205,15 @@ TEST(PlatformViewShell, UpdateSemanticsDoesUpdateLocale) {
   buffer_int32[position++] = -1;  // node0.linkUrl
   buffer_int32[position++] = expected_strings.size();
   expected_strings.push_back(node0.locale);  // node0.locale
+  buffer_int32[position++] = node0.headingLevel;
   buffer_int32[position++] = node0.textDirection;
   buffer_float32[position++] = node0.rect.left();
   buffer_float32[position++] = node0.rect.top();
   buffer_float32[position++] = node0.rect.right();
   buffer_float32[position++] = node0.rect.bottom();
   node0.transform.getColMajor(&buffer_float32[position]);
+  position += 16;
+  node0.hitTestTransform.getColMajor(&buffer_float32[position]);
   position += 16;
   buffer_int32[position++] = 0;  // node0.childrenInTraversalOrder.size();
   buffer_int32[position++] = 0;  // node0.customAccessibilityActions.size();
@@ -258,6 +271,7 @@ TEST(PlatformViewShell,
   buffer_int32[position++] = node0.platformViewId;
   buffer_int32[position++] = node0.scrollChildren;
   buffer_int32[position++] = node0.scrollIndex;
+  buffer_int32[position++] = node0.traversalParent;
   buffer_float32[position++] = static_cast<float>(node0.scrollPosition);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMax);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMin);
@@ -289,12 +303,15 @@ TEST(PlatformViewShell,
   buffer_int32[position++] = -1;  // node0.tooltip
   buffer_int32[position++] = -1;  // node0.linkUrl
   buffer_int32[position++] = -1;  // node0.locale
+  buffer_int32[position++] = node0.headingLevel;
   buffer_int32[position++] = node0.textDirection;
   buffer_float32[position++] = node0.rect.left();
   buffer_float32[position++] = node0.rect.top();
   buffer_float32[position++] = node0.rect.right();
   buffer_float32[position++] = node0.rect.bottom();
   node0.transform.getColMajor(&buffer_float32[position]);
+  position += 16;
+  node0.hitTestTransform.getColMajor(&buffer_float32[position]);
   position += 16;
   buffer_int32[position++] = 0;  // node0.childrenInTraversalOrder.size();
   buffer_int32[position++] = 0;  // node0.customAccessibilityActions.size();
