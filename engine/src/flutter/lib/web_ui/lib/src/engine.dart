@@ -116,6 +116,7 @@ export 'engine/semantics/list.dart';
 export 'engine/semantics/live_region.dart';
 export 'engine/semantics/menus.dart';
 export 'engine/semantics/platform_view.dart';
+export 'engine/semantics/progress_bar.dart';
 export 'engine/semantics/requirable.dart';
 export 'engine/semantics/route.dart';
 export 'engine/semantics/scrollable.dart';
