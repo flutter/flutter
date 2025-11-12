@@ -1163,6 +1163,23 @@ void main() {
       expect(theme.primaryContrastingColor, CupertinoColors.destructiveRed);
     });
   });
+
+  testWidgets('Theme does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Theme(
+              key: const Key('Theme'),
+              data: ThemeData(colorScheme: const ColorScheme.light(primary: Colors.green)),
+              child: const Text('X'),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byKey(const Key('Theme'))), Size.zero);
+  });
 }
 
 int testBuildCalled = 0;
