@@ -12,9 +12,9 @@ frame_info;
 in vec2 position;
 in float gaussian;
 
-out float v_gaussian;
+out float16_t v_gaussian;
 
 void main() {
   gl_Position = frame_info.mvp * vec4(position, 0.0, 1.0);
-  v_gaussian = gaussian;
+  v_gaussian = float16_t(gaussian);
 }

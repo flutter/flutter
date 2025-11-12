@@ -9,7 +9,7 @@ uniform FragInfo {
   // shadow_color is the color supplied to DrawShadow. It will be modulated
   // by the gaussian opacity of the shadow, computed from the coefficient
   // in the mesh vertex data.
-  vec4 shadow_color;
+  f16vec4 shadow_color;
 }
 frag_info;
 
@@ -17,7 +17,7 @@ frag_info;
 // mesh per-vertex data. It determines where in the gaussian curve of the
 // umbra and penumbra we are with 0.0 representing the outermost part of
 // the penumbra and 1.0 representing the innermost umbra.
-in float v_gaussian;
+in float16_t v_gaussian;
 
 out f16vec4 frag_color;
 
