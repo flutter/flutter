@@ -622,6 +622,7 @@ void main() {
     expect(find.text('is visible ? false', skipOffstage: false), findsOneWidget);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/177989.
   testWidgets('Visibility.of returns correct value for replacement', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
