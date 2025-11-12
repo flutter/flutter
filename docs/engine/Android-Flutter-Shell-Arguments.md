@@ -168,7 +168,7 @@ class MyApplication : FlutterApplication() {
             "--old-gen-heap-size=256",
             "--enable-software-rendering"
         )
-        FlutterEngine flutterEngine = FlutterEngine(this, args)
+        val flutterEngine = FlutterEngine(this, args)
         flutterEngine.dartExecutor.executeDartEntrypoint(
             DartExecutor.DartEntrypoint.createDefault()
         )
