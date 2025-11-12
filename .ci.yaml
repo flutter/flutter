@@ -7200,3 +7200,12 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
     drone_dimensions:
       - os=Windows
+
+  - name: Linux_android_emu android_flutter_shell_args_test
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "linux"]
+      task_name: android_flutter_shell_args_test
