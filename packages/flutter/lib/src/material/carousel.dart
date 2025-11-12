@@ -713,18 +713,6 @@ class _CarouselViewState extends State<CarouselView> {
       },
     );
   }
-
-  // if (maxExtent > 0.0) {
-  //     final int newIndex = (constraints.scrollOffset / maxExtent).round().clamp(
-  //       0,
-  //       childManager.childCount - 1,
-  //     );
-
-  //     if (newIndex != _currentIndex) {
-  //       _currentIndex = newIndex;
-  //       _onIndexChanged?.call(_currentIndex);
-  //     }
-  //   }
 }
 
 /// A sliver that displays its box children in a linear array with a fixed extent
