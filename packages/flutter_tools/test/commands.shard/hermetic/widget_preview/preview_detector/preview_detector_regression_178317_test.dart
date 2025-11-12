@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
-import 'package:path/path.dart' as path;
 import 'package:test/fake.dart';
 import 'package:watcher/watcher.dart';
 
@@ -61,7 +60,7 @@ void main() {
     });
 
     String buildDartFilePathIn(Directory root) {
-      final String filePath = path.join(root.path, 'foo.dart');
+      final String filePath = fs.path.join(root.path, 'foo.dart');
       root.childFile(filePath).createSync(recursive: true);
       return filePath;
     }

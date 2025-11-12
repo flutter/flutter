@@ -247,7 +247,7 @@ class FlutterProject {
   late final _ephemeralDirectories = <Directory>{
     buildDirectory,
     android.ephemeralDirectory,
-    ios.ephemeralModuleDirectory,
+    ios.ephemeralDirectory,
     ios.ephemeralModuleDirectory,
     linux.ephemeralDirectory,
     macos.ephemeralDirectory,
