@@ -256,7 +256,7 @@ platform_properties:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      os: Mac-15.1|Mac-15.5|Mac-15.6
+      os: Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7
       cpu: x86
       device_type: "mokey"
 
