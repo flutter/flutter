@@ -481,6 +481,42 @@ void testMain() {
       expect(dispatcher.accessibilityPlaceholder.isConnected, isFalse);
     });
 
+    test('query parameter enables semantics when present', () {
+      semantics().semanticsEnabled = false;
+      final Uri uriWithParameter = Uri.parse('https://example.com/?flutter-semantics');
+
+      dispatcher.checkUriForSemanticsParameter(uriWithParameter);
+
+      expect(semantics().semanticsEnabled, isTrue);
+    });
+
+    test('query parameter enables semantics when set to true', () {
+      semantics().semanticsEnabled = false;
+      final Uri uriWithTrue = Uri.parse('https://example.com/?flutter-semantics=true');
+
+      dispatcher.checkUriForSemanticsParameter(uriWithTrue);
+
+      expect(semantics().semanticsEnabled, isTrue);
+    });
+
+    test('query parameter does not enable semantics when set to false', () {
+      semantics().semanticsEnabled = false;
+      final Uri uriWithFalse = Uri.parse('https://example.com/?flutter-semantics=false');
+
+      dispatcher.checkUriForSemanticsParameter(uriWithFalse);
+
+      expect(semantics().semanticsEnabled, isFalse);
+    });
+
+    test('query parameter does not enable semantics when absent', () {
+      semantics().semanticsEnabled = false;
+      final Uri uriWithoutParameter = Uri.parse('https://example.com/');
+
+      dispatcher.checkUriForSemanticsParameter(uriWithoutParameter);
+
+      expect(semantics().semanticsEnabled, isFalse);
+    });
+
     test('scheduleWarmupFrame should call both callbacks', () async {
       bool beginFrameCalled = false;
       final Completer<void> drawFrameCalled = Completer<void>();
