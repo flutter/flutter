@@ -411,6 +411,24 @@ void testMain() {
       expect(dispatcher.accessibilityPlaceholder.isConnected, isFalse);
     });
 
+    test('query parameter enables semantics when present', () {
+      semantics().semanticsEnabled = false;
+      final Uri uriWithParameter = Uri.parse('https://example.com/?flutter-semantics');
+
+      dispatcher.checkUriForSemanticsParameter(uriWithParameter);
+
+      expect(semantics().semanticsEnabled, isTrue);
+    });
+
+    test('query parameter does not enable semantics when absent', () {
+      semantics().semanticsEnabled = false;
+      final Uri uriWithoutParameter = Uri.parse('https://example.com/');
+
+      dispatcher.checkUriForSemanticsParameter(uriWithoutParameter);
+
+      expect(semantics().semanticsEnabled, isFalse);
+    });
+
     test('scheduleWarmupFrame should call both callbacks', () async {
       bool beginFrameCalled = false;
       final Completer<void> drawFrameCalled = Completer<void>();
