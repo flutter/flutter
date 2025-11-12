@@ -74,7 +74,7 @@ ImageDescriptor::ImageDescriptor(sk_sp<SkData> buffer,
 ImageDescriptor::ImageDescriptor(sk_sp<SkData> buffer,
                                  std::shared_ptr<ImageGenerator> generator)
     : buffer_(std::move(buffer)),
-      generator_(std::move(generator)),
+      generator_(generator),
       image_info_(CreateImageInfo(generator->GetInfo())),
       row_bytes_(std::nullopt) {}
 

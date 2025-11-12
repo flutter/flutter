@@ -9,6 +9,7 @@
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/make_copyable.h"
+#include "flutter/fml/mapping.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/impeller/core/allocator.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
@@ -262,6 +263,26 @@ absl::StatusOr<ImageDecoderImpeller::DecompressResult> ResizeOnCpu(
       .image_info = decoded_image_info.value()};
 }
 
+bool IsZeroOpConversion(ImageDescriptor::PixelFormat input,
+                        ImageDecoder::TargetPixelFormat output) {
+  switch (input) {
+    case ImageDescriptor::PixelFormat::kR32Float:
+      return output == ImageDecoder::TargetPixelFormat::kR32Float;
+    default:
+      return false;
+  }
+}
+
+impeller::PixelFormat ToImpellerPixelFormat(
+    ImageDecoder::TargetPixelFormat format) {
+  switch (format) {
+    case ImageDecoder::TargetPixelFormat::kR32Float:
+      return impeller::PixelFormat::kR32Float;
+    default:
+      FML_DCHECK(false) << "Unsupported pixel format";
+      return impeller::PixelFormat::kUnknown;
+  }
+}
 }  // namespace
 
 std::optional<impeller::PixelFormat> ImageDecoderImpeller::ToPixelFormat(
@@ -328,6 +349,34 @@ ImageDecoderImpeller::DecompressTexture(
                              static_cast<int64_t>(options.target_width)),
                     std::min(max_texture_size.height,
                              static_cast<int64_t>(options.target_height)));
+
+  // Fast path for when the input requires no decompressing or conversion.
+  if (!descriptor->is_compressed() && source_size == target_size &&
+      IsZeroOpConversion(descriptor->image_info().format,
+                         options.target_format)) {
+    impeller::DeviceBufferDescriptor desc;
+    desc.storage_mode = impeller::StorageMode::kHostVisible;
+    desc.size = descriptor->data()->size();
+    std::shared_ptr<impeller::DeviceBuffer> buffer =
+        allocator->CreateBuffer(desc);
+    if (!buffer) {
+      return absl::ResourceExhaustedError("Could not create buffer for image.");
+    }
+    sk_sp<SkData> data = descriptor->data();
+    memcpy(buffer->OnGetContents(), data->bytes(), data->size());
+    buffer->Flush();
+
+    return ImageDecoderImpeller::DecompressResult{
+        .device_buffer = std::move(buffer),
+        .image_info =
+            {
+                .size =
+                    impeller::ISize(source_size.width(), source_size.height()),
+                .format = ToImpellerPixelFormat(options.target_format),
+            },
+    };
+  }
+
   SkISize decode_size = source_size;
   if (descriptor->is_compressed()) {
     decode_size = descriptor->get_scaled_dimensions(std::max(
