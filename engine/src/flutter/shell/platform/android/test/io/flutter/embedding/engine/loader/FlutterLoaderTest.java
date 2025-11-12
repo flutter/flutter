@@ -916,6 +916,180 @@ public class FlutterLoaderTest {
                 "io.flutter.embedding.android.DisableMergedPlatformUIThread is no longer allowed."));
   }
 
+  @Test
+  public void itDoesNotSetUnrecognizedCommandLineArgument() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metadata = new Bundle();
+
+    String[] unrecognizedArg = {"--unrecognized-argument"};
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, unrecognizedArg);
+    shadowOf(getMainLooper()).idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+
+    assertFalse(
+        "Unrecognized argument '"
+            + unrecognizedArg[0]
+            + "' was found in the arguments passed to FlutterJNI.init",
+        arguments.contains(unrecognizedArg[0]));
+  }
+
+  @Test
+  public void itDoesSetRecognizedCommandLineArgument() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metadata = new Bundle();
+
+    String[] recognizedArg = {FlutterShellArgs.ENABLE_IMPELLER.commandLineArgument + "true"};
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, recognizedArg);
+    shadowOf(getMainLooper()).idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+
+    assertTrue(
+        "Recognized argument '"
+            + recognizedArg[0]
+            + "' was not found in the arguments passed to FlutterJNI.init",
+        arguments.contains(recognizedArg[0]));
+  }
+
+  @Test
+  public void ifFlagSetViaManifestAndCommandLineThenCommandLineTakesPrecedence() {
+    String expectedImpellerArgFromMetadata =
+        FlutterShellArgs.ENABLE_IMPELLER.commandLineArgument + "true";
+    String expectedImpellerArgFromCommandLine =
+        FlutterShellArgs.ENABLE_IMPELLER.commandLineArgument + "false";
+
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metadata = new Bundle();
+
+    // Place metadata key and value into the metadata bundle used to mock the manifest.
+    metadata.putBoolean("io.flutter.embedding.android.EnableImpeller", true);
+    ctx.getApplicationInfo().metaData = metadata;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(
+        ctx, new String[] {expectedImpellerArgFromCommandLine});
+    shadowOf(getMainLooper()).idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+
+    // Verify that the command line argument takes precedence over the manifest metadata.
+    assertTrue(
+        arguments.indexOf(expectedImpellerArgFromMetadata)
+            < arguments.indexOf(expectedImpellerArgFromCommandLine));
+  }
+
+  @Test
+  public void ifAOTSharedLibraryNameSetViaManifestAndCommandLineThenCommandLineTakesPrecedence()
+      throws IOException {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = spy(new FlutterLoader(mockFlutterJNI));
+    File internalStorageDir = ctx.getFilesDir();
+    Path internalStorageDirAsPathObj = internalStorageDir.toPath();
+
+    ctx.getApplicationInfo().nativeLibraryDir =
+        Paths.get("some", "path", "doesnt", "matter").toString();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx);
+
+    // Test paths for library living within internal storage.
+    Path pathWithDirectInternalStoragePath1 = internalStorageDirAsPathObj.resolve("library1.so");
+    Path pathWithDirectInternalStoragePath2 = internalStorageDirAsPathObj.resolve("library2.so");
+
+    String expectedAotSharedLibraryNameFromMetadata =
+        "--aot-shared-library-name="
+            + pathWithDirectInternalStoragePath1.toFile().getCanonicalPath();
+    String expectedAotSharedLibraryNameFromCommandLine =
+        "--aot-shared-library-name="
+            + pathWithDirectInternalStoragePath2.toFile().getCanonicalPath();
+
+    Bundle metadata = new Bundle();
+
+    // Place metadata key and value into the metadata bundle used to mock the manifest.
+    metadata.putString(
+        "io.flutter.embedding.android.AOTSharedLibraryName",
+        pathWithDirectInternalStoragePath1.toFile().getCanonicalPath());
+    ctx.getApplicationInfo().metaData = metadata;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(
+        ctx,
+        new String[] {
+          expectedAotSharedLibraryNameFromCommandLine,
+          FlutterShellArgs.ENABLE_OPENGL_GPU_TRACING.commandLineArgument
+        });
+    shadowOf(getMainLooper()).idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+
+    // Verify that the command line argument takes precedence over the manifest metadata.
+    assertTrue(
+        arguments.indexOf(expectedAotSharedLibraryNameFromCommandLine)
+            < arguments.indexOf(expectedAotSharedLibraryNameFromMetadata));
+
+    // Verify other command line arguments are still passed through.
+    assertTrue(
+        "Expected argument '"
+            + FlutterShellArgs.ENABLE_OPENGL_GPU_TRACING.commandLineArgument
+            + "' was not found in the arguments passed to FlutterJNI.init",
+        arguments.contains(FlutterShellArgs.ENABLE_OPENGL_GPU_TRACING.commandLineArgument));
+  }
+
   private void testFlagFromMetaData(String metadataKey, Object metadataValue, String expectedArg) {
     testFlagFromMetaData(metadataKey, metadataValue, expectedArg, true);
   }
