@@ -307,7 +307,7 @@ if (enable_unittests) {
     testonly = true
     sources = []
 
-    if (!is_fuchsia) {
+    if (impeller_supports_rendering) {
       sources +=
           [ "painting/display_list_deferred_image_gpu_impeller_unittests.cc" ]
     }
