@@ -51,18 +51,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
     /// Check for query parameter to enable semantics programmatically after initialization.
     /// This must be done asynchronously to avoid circular dependency during construction.
-    scheduleMicrotask(_checkQueryParameterForSemantics);
-  }
-
-  /// Check for query parameter to enable semantics programmatically.
-  /// This allows automation testing tools to enable semantics without modifying the app.
-  /// Usage: https://example.com/?flutter-semantics
-  void _checkQueryParameterForSemantics() {
-    checkUriForSemanticsParameter(Uri.base);
+    /// Usage: https://example.com/?flutter-semantics
+    scheduleMicrotask(() => checkUriForSemanticsParameter(Uri.base));
   }
 
   /// Checks if the given URI contains the flutter-semantics query parameter.
-  /// If present, enables semantics.
+  /// If present, enables semantics. This allows automation testing tools to
+  /// enable semantics without modifying the app.
   ///
   /// This method is separated for testing purposes.
   @visibleForTesting
