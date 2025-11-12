@@ -597,7 +597,7 @@ abstract class BuildSystem {
 }
 
 class FlutterBuildSystem extends BuildSystem {
-  FlutterBuildSystem({
+  const FlutterBuildSystem({
     required FileSystem fileSystem,
     required Platform platform,
     required Logger logger,
@@ -610,7 +610,7 @@ class FlutterBuildSystem extends BuildSystem {
   final Logger _logger;
 
   /// Sources that should not be deleted when removed from output list.
-  final _preservedOutputSources = <Source>[
+  static const _preservedOutputSources = <Source>[
     // Xcode handles the Flutter framework output when using SwiftPM so it should not be deleted
     // from the build.
     kFlutterMacOSFrameworkBinarySource,
