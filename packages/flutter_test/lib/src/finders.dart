@@ -9,7 +9,6 @@ library;
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
