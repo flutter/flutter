@@ -133,6 +133,36 @@ void main() {
     );
   });
 
+  test('TrainHoppingAnimation notifies status listeners correctly', () {
+    final AnimationController currentTrain = AnimationController(vsync: const TestVSync());
+    final TrainHoppingAnimation animation = TrainHoppingAnimation(currentTrain, currentTrain);
+
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+    void logStatus(AnimationStatus status) {
+      statusLog.add(status);
+    }
+
+    animation.addStatusListener(logStatus);
+
+    // Initially, status should be dismissed
+    expect(animation.status, AnimationStatus.dismissed);
+    expect(statusLog, isEmpty); // No change yet
+
+    // Forward the animation
+    currentTrain.forward();
+    expect(animation.status, AnimationStatus.forward);
+    expect(statusLog, <AnimationStatus>[AnimationStatus.forward]);
+
+    statusLog.clear();
+
+    // Complete the animation
+    currentTrain.value = 1.0;
+    expect(animation.status, AnimationStatus.completed);
+    expect(statusLog, <AnimationStatus>[AnimationStatus.completed]);
+
+    animation.removeStatusListener(logStatus);
+  });
+
   test('AnimationMean control test', () {
     final AnimationController left = AnimationController(value: 0.5, vsync: const TestVSync());
     final AnimationController right = AnimationController(vsync: const TestVSync());

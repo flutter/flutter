@@ -543,13 +543,11 @@ class TrainHoppingAnimation extends Animation<double>
   void _statusChangeHandler(AnimationStatus status) {
     assert(_currentTrain != null);
     if (status != _lastStatus) {
-      notifyListeners();
+      notifyStatusListeners(status);
       _lastStatus = status;
     }
     assert(_lastStatus != null);
-  }
-
-  @override
+  }  @override
   AnimationStatus get status => _currentTrain!.status;
 
   double? _lastValue;
