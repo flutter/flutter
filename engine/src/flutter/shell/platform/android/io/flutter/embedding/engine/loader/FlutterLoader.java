@@ -252,6 +252,16 @@ public class FlutterLoader {
     }
   }
 
+  // Returns the base part of a command line argument, i.e. the part before any '=' character.
+  private String getArgBase(String arg) {
+    int equalsIndex = arg.indexOf('=');
+    if (equalsIndex == -1) {
+      return arg;
+    }
+    // Return the part of the string including the '='
+    return arg.substring(0, equalsIndex + 1);
+  }
+
   /**
    * Blocks until initialization of the native system has completed.
    *
@@ -288,30 +298,27 @@ public class FlutterLoader {
               + File.separator
               + DEFAULT_LIBRARY);
 
-      // Add engine flags provided by the command line. These settings will take
-      // precedent over any flag settings specified by application manifest
-      // metadata and any defaults set below.
+      // Add AOT shared library name flag if set via the command line. This flag,
+      // unlike others, gives precedence to the first occurrence found in shellArgs,
+      // so we must add it here before adding flags from the manifest.
       if (args != null) {
         for (String arg : args) {
-          // Only allow known flags to be passed to the engine.
-          if (!FlutterShellArgs.containsCommandLineArgument(arg)) {
-            continue;
-          } else if (arg.startsWith(FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.commandLineArgument)) {
+          System.out.println("arg: " + arg);
+          if (arg.startsWith(FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.commandLineArgument)) {
             // Perform security check for path containing application's compiled Dart
             // code and potentially user-provided compiled native code.
             String aotSharedLibraryPath =
                 arg.substring(
                     FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.commandLineArgument.length());
             maybeAddAotSharedLibraryNameArg(applicationContext, aotSharedLibraryPath, shellArgs);
-            continue;
+            break;
           }
-
-          shellArgs.add(arg);
         }
       }
 
       // Add engine flags provided by metadata in the application manifest. These settings will take
-      // precedent over any defaults set below, but can be overridden by command line args.
+      // precedent over any defaults set below, but will be overridden if additionally set by the
+      // command line.
       ApplicationInfo applicationInfo =
           applicationContext
               .getPackageManager()
@@ -391,6 +398,23 @@ public class FlutterLoader {
 
                   shellArgs.add(arg);
                 });
+      }
+
+      // Add any remaining engine flags provided by the command line. These settings will take
+      // precedent over any flag settings specified by application manifest
+      // metadata and any defaults set below.
+      if (args != null) {
+        for (String arg : args) {
+          // Only allow known flags to be passed to the engine.
+          if (!FlutterShellArgs.containsCommandLineArgument(getArgBase(arg))) {
+            continue;
+          } else if (arg.startsWith(FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.commandLineArgument)) {
+            // This flag has already been handled.
+            continue;
+          }
+
+          shellArgs.add(arg);
+        }
       }
 
       // Add engine flags set by default internally. Some of these settings can be overridden
