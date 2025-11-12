@@ -293,7 +293,6 @@ class Visibility extends StatelessWidget {
         result = visible ? child : replacement;
       }
     }
-    // return _VisibilityScope(isVisible: visible, child: result);
     return _VisibilityScope(isVisible: visible || result == replacement, child: result);
   }
 
