@@ -934,7 +934,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           || semanticsNode.hasAction(Action.SCROLL_RIGHT)) {
         // This code will only run on devices with API level 32 or lower.
         // The obtain method was deprecated in API 33.
-        if (Build.VERSION.SDK_INT < 33) {
+        if (Build.VERSION.SDK_INT < API_LEVELS.API_33) {
           result.setCollectionInfo(
               AccessibilityNodeInfo.CollectionInfo.obtain(
                   1, // row count
@@ -953,7 +953,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       } else {
         // This code will only run on devices with API level 32 or lower.
         // The obtain method was deprecated in API 33.
-        if (Build.VERSION.SDK_INT < 33) {
+        if (Build.VERSION.SDK_INT < API_LEVELS.API_33) {
           result.setCollectionInfo(
               AccessibilityNodeInfo.CollectionInfo.obtain(
                   semanticsNode.scrollChildren, // row count

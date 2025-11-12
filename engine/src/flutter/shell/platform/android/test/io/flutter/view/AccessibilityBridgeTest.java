@@ -2218,7 +2218,8 @@ public class AccessibilityBridgeTest {
     assertTrue(actions.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK));
   }
 
-  @Test
+  // Setup method for testing CollectionInfo
+  // The logic has branching based on SDK version. The version tests are below
   public void itAddsCollectionInfo() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
 
@@ -2238,16 +2239,29 @@ public class AccessibilityBridgeTest {
     AccessibilityNodeInfo.CollectionInfo collectionInfo = nodeInfo.getCollectionInfo();
     assertNotNull(collectionInfo);
 
-    boolean rowCount = collectionInfo.getRowCount() == testSemanticsNode.scrollChildren;
-    boolean colCount = collectionInfo.getColumnCount() == 1; // 1 column for a list
-    boolean isHierarchical =
-        !collectionInfo.isHierarchical(); // this should currently always be false
     assertTrue(collectionInfo.getRowCount() == testSemanticsNode.scrollChildren);
     assertTrue(collectionInfo.getColumnCount() == 1); // 1 column for a list
     assertFalse(collectionInfo.isHierarchical());
   }
 
+  @Config(sdk = API_LEVELS.API_32)
+  @TargetApi(API_LEVELS.API_32)
   @Test
+  public void itAddsCollectionInfoAPI32() {
+    // Testing CollectionInfo creation for API 32
+    itAddsCollectionInfo();
+  }
+
+  @Config(sdk = API_LEVELS.API_33)
+  @TargetApi(API_LEVELS.API_33)
+  @Test
+  public void itAddsCollectionInfoAPI33() {
+    // Testing CollectionInfo creation for API 33
+    itAddsCollectionInfo();
+  }
+
+  // Setup method for testing CollectionItemInfo
+  // The logic has branching based on SDK version. The version tests are below
   public void itAddsCollectionItemInfo() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
 
@@ -2270,14 +2284,32 @@ public class AccessibilityBridgeTest {
     AccessibilityNodeInfo.CollectionItemInfo itemInfo = nodeInfo.getCollectionItemInfo();
     assertNotNull(itemInfo);
 
-    boolean rowIndex = itemInfo.getRowIndex() == 0; // first item in the list
-    boolean rowSpan = itemInfo.getRowSpan() == 1;
-    boolean colIndex = itemInfo.getColumnIndex() == 0; // only a single column
-    boolean colSpan = itemInfo.getColumnSpan() == 1;
-    // Note: isHeading() is deprecated, and since this test node doesn't have IS_HEADER flag,
+    assertEquals(0, itemInfo.getRowIndex()); // first item in the list
+    assertEquals(1, itemInfo.getRowSpan());
+    assertEquals(0, itemInfo.getColumnIndex()); // only a single column
+    assertEquals(1, itemInfo.getColumnSpan());
+    // Note: CollectionItemInfo.isHeading() was deprecated in API 28, and since this test node
+    // doesn't have IS_HEADER flag,
     // we expect it to not be a heading. The heading state is set during CollectionItemInfo
     // construction.
-    assertTrue(rowIndex && rowSpan && colIndex && colSpan);
+    // Documentation says to check AccessibilityNodeInfo.isHeading() instead.
+    assertFalse(nodeInfo.isHeading());
+  }
+
+  @Config(sdk = API_LEVELS.API_32)
+  @TargetApi(API_LEVELS.API_32)
+  @Test
+  public void itAddsCollectionItemInfoAPI32() {
+    // Testing CollectionItemInfo creation for API 32
+    itAddsCollectionItemInfo();
+  }
+
+  @Config(sdk = API_LEVELS.API_33)
+  @TargetApi(API_LEVELS.API_33)
+  @Test
+  public void itAddsCollectionItemInfoAPI33() {
+    // Testing CollectionItemInfo creation for API 33
+    itAddsCollectionItemInfo();
   }
 
   @Config(sdk = API_LEVELS.API_36)
