@@ -1768,20 +1768,15 @@ class CarouselController extends ScrollController {
   /// The item that expands to the maximum size when first creating the [CarouselView].
   final int initialItem;
 
-  // TODO(Mairramer): Improve documentation
-
-  /// The index of the primary item determined by the carousel layout.
+  /// The index of the leading item in the controlled carousel.
   ///
-  /// Initialized to [initialItem]. Updated after each layout pass to reflect
-  /// the most prominent visible item according to the carousel's layout logic.
+  /// If there are no clients attached to this controller, returns [initialItem].
+  /// Otherwise, returns the index of the leading item in the first attached carousel.
   ///
-  /// Interpretation of "primary":
-  /// - For [CarouselView] (fixed-size items): the item nearest the leading
-  ///   edge of the viewport. This item may be only partially visible.
-  /// - For [CarouselView.weighted] (variable-weight items): the item with the
-  ///   largest visible extent in the viewport (the most prominently shown).
-  ///
-  /// This value is maintained internally and mirrors the current layout state.
+  /// For [CarouselView], this is the index of the item that is fully visible
+  /// at the start of the carousel.
+  /// For [CarouselView.weighted], this is the index of the item that occupies
+  /// the primary, most prominent position determined by the largest weight in `flexWeights`.
   int get leadingIndex {
     if (!hasClients) {
       return initialItem;
