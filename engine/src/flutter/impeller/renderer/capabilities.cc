@@ -96,6 +96,9 @@ class StandardCapabilities final : public Capabilities {
   bool SupportsPrimitiveRestart() const override { return true; }
 
   // |Capabilities|
+  bool Supports32BitPrimitiveIndices() const override { return true; }
+
+  // |Capabilities|
   bool SupportsExtendedRangeFormats() const override {
     return supports_extended_range_formats_;
   }

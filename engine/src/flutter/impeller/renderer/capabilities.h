@@ -89,6 +89,10 @@ class Capabilities {
   /// @brief Whether primitive restart is supported.
   virtual bool SupportsPrimitiveRestart() const = 0;
 
+  /// @brief Whether 32-bit values are supported in index buffers used to draw
+  ///        primitives.
+  virtual bool Supports32BitPrimitiveIndices() const = 0;
+
   /// @brief  Returns a supported `PixelFormat` for textures that store
   ///         4-channel colors (red/green/blue/alpha).
   virtual PixelFormat GetDefaultColorFormat() const = 0;
