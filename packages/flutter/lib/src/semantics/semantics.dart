@@ -4022,12 +4022,28 @@ class SemanticsNode with DiagnosticableTreeMixin {
     final List<SemanticsNode> updatedChildren = <SemanticsNode>[];
     for (final SemanticsNode child in _children!) {
       if (child._isTraversalChild && !_isTraversalParent) {
-        // If the child node is an overlay portal child, but the current node is
-        // not an overlay portal parent, it means the child node should be
-        // grafted to be a child of an overlay portal parent node that has the
+        // If the child node is a traversal child, but the current node is
+        // not a traversal parent, it means the child node should be
+        // grafted to be a child of a traversal parent node that has the
         // same identifier as the child. So this child should be removed from
         // the current node's children list; i.e., we don't add it to
         // updatedChildren list.
+        //
+        // A corner case is the traversal parent of the traversal child, in paint
+        // order, is the child of the traversal child. In this case, no grafting
+        // needed, otherwise, it will cause infinite loop.
+        SemanticsNode? traversalParent =
+            owner!._traversalParentNodes[child.getSemanticsData().traversalChildIdentifier];
+        final int? traversalParentId = traversalParent?.id;
+        while (traversalParent != null) {
+          if (traversalParent == child) {
+            throw FlutterError(
+              'The traversalParent $traversalParentId cannot be the child of the traversalChild ${child.id} in hit-test order',
+            );
+          }
+          traversalParent = traversalParent.parent;
+        }
+
         continue;
       }
 
@@ -4043,6 +4059,19 @@ class SemanticsNode with DiagnosticableTreeMixin {
       if (owner != null && owner!._traversalChildNodes.containsKey(traversalParentIdentifier)) {
         final Set<SemanticsNode> traversalChildren =
             owner!._traversalChildNodes[traversalParentIdentifier]!;
+
+        // When traversal children are grafted from other branches, make sure
+        // these children are not ancestors of the traversal parent. Otherwise,
+        // it will cause infinite loop.
+        SemanticsNode currentNode = this;
+        while (currentNode.parent != null) {
+          currentNode = currentNode.parent!;
+          if (traversalChildren.contains(currentNode)) {
+            throw FlutterError(
+              'The traversalParent $id cannot be the child of the traversalChild ${currentNode.id} in hit-test order',
+            );
+          }
+        }
         for (final SemanticsNode node in traversalChildren) {
           if (node.attached) {
             updatedChildren.add(node);
@@ -6471,7 +6500,16 @@ class SemanticsConfiguration {
   /// Two configurations are said to be compatible if they can be added to the
   /// same [SemanticsNode] without losing any semantics information.
   bool isCompatibleWith(SemanticsConfiguration? other) {
-    if (other == null || !other.hasBeenAnnotated || !hasBeenAnnotated) {
+    if (other == null || !other.hasBeenAnnotated) {
+      return true;
+    }
+    // The parent node should reject child node as long as their
+    // traversalChildIdentifiers are different, even if the parent node has not
+    // been annotated.
+    if (_traversalChildIdentifier != other._traversalChildIdentifier) {
+      return false;
+    }
+    if (!hasBeenAnnotated) {
       return true;
     }
     if (_actionsAsBits & other._actionsAsBits != 0) {
