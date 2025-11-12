@@ -64,7 +64,8 @@ void TaskRunner::RunNowOrPostTask(const fml::RefPtr<fml::TaskRunner>& runner,
   }
 }
 
-void TaskRunner::PostTaskSync(const fml::RefPtr<fml::TaskRunner>& task_runner, const fml::closure& task) {
+void TaskRunner::PostTaskSync(const fml::RefPtr<fml::TaskRunner>& task_runner,
+                              const fml::closure& task) {
   fml::AutoResetWaitableEvent latch;
   task_runner->PostTask([&latch, task = std::move(task)]() {
     task();

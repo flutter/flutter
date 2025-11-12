@@ -669,13 +669,12 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   if (self.flutterView == nil || (self.compositionOrder.empty() && !self.hadPlatformViews)) {
     // No platform views to render but the FlutterView may need to be resized.
     if (self.flutterView != nil) {
-
       if (self.platformTaskRunner->RunsTasksOnCurrentThread()) {
         [self performResize:self.frameSize];
       } else {
-        fml::TaskRunner::PostTaskSync(self.platformTaskRunner, [self, frameSize = self.frameSize]() mutable {
-          [self performResize:frameSize];
-        });
+        fml::TaskRunner::PostTaskSync(
+            self.platformTaskRunner,
+            [self, frameSize = self.frameSize]() mutable { [self performResize:frameSize]; });
       }
     }
 
