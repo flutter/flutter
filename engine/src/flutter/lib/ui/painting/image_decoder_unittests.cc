@@ -468,12 +468,12 @@ TEST_F(ImageDecoderFixtureTest, ImpellerNullColorspace) {
           .Build();
   std::shared_ptr<impeller::Allocator> allocator =
       std::make_shared<impeller::TestImpellerAllocator>();
-  std::optional<ImageDecoderImpeller::DecompressResult> decompressed =
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> decompressed =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), {.target_width = 100, .target_height = 100},
           {100, 100},
           /*supports_wide_gamut=*/true, capabilities, allocator);
-  ASSERT_TRUE(decompressed.has_value());
+  ASSERT_TRUE(decompressed.ok());
   EXPECT_EQ(decompressed->image_info.format,
             impeller::PixelFormat::kR8G8B8A8UNormInt);
 #endif  // IMPELLER_SUPPORTS_RENDERING
@@ -501,13 +501,13 @@ TEST_F(ImageDecoderFixtureTest, ImpellerPixelConversion32F) {
           .Build();
   std::shared_ptr<impeller::Allocator> allocator =
       std::make_shared<impeller::TestImpellerAllocator>();
-  std::optional<ImageDecoderImpeller::DecompressResult> decompressed =
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> decompressed =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), {.target_width = 100, .target_height = 100},
           {100, 100},
           /*supports_wide_gamut=*/true, capabilities, allocator);
 
-  ASSERT_TRUE(decompressed.has_value());
+  ASSERT_TRUE(decompressed.ok());
   EXPECT_EQ(decompressed->image_info.format,
             impeller::PixelFormat::kR16G16B16A16Float);
 #endif  // IMPELLER_SUPPORTS_RENDERING
@@ -534,13 +534,13 @@ TEST_F(ImageDecoderFixtureTest, ImpellerWideGamutDisplayP3Opaque) {
           .Build();
   std::shared_ptr<impeller::Allocator> allocator =
       std::make_shared<impeller::TestImpellerAllocator>();
-  std::optional<ImageDecoderImpeller::DecompressResult> wide_result =
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> wide_result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), {.target_width = 100, .target_height = 100},
           {100, 100},
           /*supports_wide_gamut=*/true, capabilities, allocator);
 
-  ASSERT_TRUE(wide_result.has_value());
+  ASSERT_TRUE(wide_result.ok());
   ASSERT_EQ(wide_result->image_info.format,
             impeller::PixelFormat::kB10G10R10XR);
 
@@ -562,13 +562,13 @@ TEST_F(ImageDecoderFixtureTest, ImpellerWideGamutDisplayP3Opaque) {
   }
   ASSERT_TRUE(found_deep_red);
 
-  std::optional<ImageDecoderImpeller::DecompressResult> narrow_result =
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> narrow_result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), {.target_width = 100, .target_height = 100},
           {100, 100},
           /*supports_wide_gamut=*/false, capabilities, allocator);
 
-  ASSERT_TRUE(narrow_result.has_value());
+  ASSERT_TRUE(narrow_result.ok());
   ASSERT_EQ(narrow_result->image_info.format,
             impeller::PixelFormat::kR8G8B8A8UNormInt);
 #endif  // IMPELLER_SUPPORTS_RENDERING
@@ -595,13 +595,13 @@ TEST_F(ImageDecoderFixtureTest, ImpellerNonWideGamut) {
           .Build();
   std::shared_ptr<impeller::Allocator> allocator =
       std::make_shared<impeller::TestImpellerAllocator>();
-  std::optional<ImageDecoderImpeller::DecompressResult> result =
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(), {.target_width = 600, .target_height = 200},
           {600, 200},
           /*supports_wide_gamut=*/true, capabilities, allocator);
 
-  ASSERT_TRUE(result.has_value());
+  ASSERT_TRUE(result.ok());
   ASSERT_EQ(result->image_info.format,
             impeller::PixelFormat::kR8G8B8A8UNormInt);
 #endif  // IMPELLER_SUPPORTS_RENDERING
@@ -873,31 +873,35 @@ TEST(ImageDecoderTest, VerifySimpleDecoding) {
   auto result_1 = ImageDecoderImpeller::DecompressTexture(
       descriptor.get(), {.target_width = 6, .target_height = 2}, {1000, 1000},
       /*supports_wide_gamut=*/false, capabilities, allocator);
-  EXPECT_EQ(result_1.image_info.size.width, 75);
-  EXPECT_EQ(result_1.image_info.size.height, 25);
+  ASSERT_TRUE(result_1.ok());
+  EXPECT_EQ(result_1->image_info.size.width, 75);
+  EXPECT_EQ(result_1->image_info.size.height, 25);
 
   // Bitmap sizes reflect the scaled size if the source size is larger than
   // max texture size even if destination size isn't max texture size.
   auto result_2 = ImageDecoderImpeller::DecompressTexture(
       descriptor.get(), {.target_width = 6, .target_height = 2}, {10, 10},
       /*supports_wide_gamut=*/false, capabilities, allocator);
-  EXPECT_EQ(result_2.image_info.size.width, 6);
-  EXPECT_EQ(result_2.image_info.size.height, 2);
+  ASSERT_TRUE(result_2.ok());
+  EXPECT_EQ(result_2->image_info.size.width, 6);
+  EXPECT_EQ(result_2->image_info.size.height, 2);
 
   // If the destination size is larger than the max texture size the image
   // is scaled down.
   auto result_3 = ImageDecoderImpeller::DecompressTexture(
       descriptor.get(), {.target_width = 60, .target_height = 20}, {10, 10},
       /*supports_wide_gamut=*/false, capabilities, allocator);
-  EXPECT_EQ(result_3.image_info.size.width, 10);
-  EXPECT_EQ(result_3.image_info.size.height, 10);
+  ASSERT_TRUE(result_3.ok());
+  EXPECT_EQ(result_3->image_info.size.width, 10);
+  EXPECT_EQ(result_3->image_info.size.height, 10);
 
   // CPU resize is forced.
   auto result_4 = ImageDecoderImpeller::DecompressTexture(
       descriptor.get(), {.target_width = 6, .target_height = 2}, {1000, 1000},
       /*supports_wide_gamut=*/false, capabilities_no_blit, allocator);
-  EXPECT_EQ(result_4.image_info.size.width, 6);
-  EXPECT_EQ(result_4.image_info.size.height, 2);
+  ASSERT_TRUE(result_4.ok());
+  EXPECT_EQ(result_4->image_info.size.width, 6);
+  EXPECT_EQ(result_4->image_info.size.height, 2);
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
