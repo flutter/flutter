@@ -547,7 +547,9 @@ class TrainHoppingAnimation extends Animation<double>
       _lastStatus = status;
     }
     assert(_lastStatus != null);
-  }  @override
+  }
+
+  @override
   AnimationStatus get status => _currentTrain!.status;
 
   double? _lastValue;
