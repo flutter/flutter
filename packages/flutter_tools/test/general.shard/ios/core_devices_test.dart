@@ -55,7 +55,7 @@ class LocalFileSystemFake extends Fake implements LocalFileSystem {
   var _disposed = false;
 }
 
-var _interactiveModeArgs = <String>['script', '-t', '0', '/dev/null'];
+final _interactiveModeArgs = <String>['script', '-t', '0', '/dev/null'];
 
 void main() {
   late MemoryFileSystem fileSystem;
