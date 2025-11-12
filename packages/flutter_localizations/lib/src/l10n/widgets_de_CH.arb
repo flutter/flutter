@@ -8,5 +8,6 @@
   "copyButtonLabel": "Kopieren",
   "cutButtonLabel": "Ausschneiden",
   "pasteButtonLabel": "Einsetzen",
-  "selectAllButtonLabel": "Alle auswählen"
+  "selectAllButtonLabel": "Alle auswählen",
+  "radioButtonUnselectedLabel": "Not selected"
 }

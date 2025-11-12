@@ -385,6 +385,10 @@ class Canvas {
   /// operation.
   bool IsShadowBlurDrawOperation(const Paint& paint);
 
+  bool AttemptDrawAntialiasedCircle(const Point& center,
+                                    Scalar radius,
+                                    const Paint& paint);
+
   /// Returns the radius common to both width and height of all corners,
   /// or -1 if the radii are not uniform.
   Scalar GetCommonRRectLikeRadius(const RoundingRadii& radii);

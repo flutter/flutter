@@ -19,8 +19,6 @@ import 'common.dart';
 import 'environment.dart';
 import 'package_lock.dart';
 
-const String kBlankPageUrl = 'about:blank';
-
 /// Provides an environment for desktop Chrome.
 class ChromeEnvironment implements BrowserEnvironment {
   ChromeEnvironment({required bool useDwarf, required List<String> flags})
@@ -91,7 +89,7 @@ class Chrome extends Browser {
         final String dir = await generateUserDirectory(installation, useDwarf);
         final List<String> args = <String>[
           '--user-data-dir=$dir',
-          kBlankPageUrl,
+          url.toString(),
           if (!debug) '--headless',
           if (isChromeNoSandbox) '--no-sandbox',
           // When headless, this is the actual size of the viewport.
@@ -389,7 +387,7 @@ Future<Uri> getRemoteDebuggerUrl(Uri base) async {
 Future<void> setupChromiumTab(Uri url, Completer<String> exceptionCompleter) async {
   final wip.ChromeConnection chromeConnection = wip.ChromeConnection('localhost', kDevtoolsPort);
   final wip.ChromeTab? chromeTab = await chromeConnection.getTab(
-    (wip.ChromeTab chromeTab) => chromeTab.url == kBlankPageUrl,
+    (wip.ChromeTab chromeTab) => chromeTab.url == url.toString(),
   );
   final wip.WipConnection wipConnection = await chromeTab!.connect();
 
@@ -402,8 +400,4 @@ Future<void> setupChromiumTab(Uri url, Completer<String> exceptionCompleter) asy
       exceptionCompleter.complete('$text: $description');
     }
   });
-
-  await wipConnection.page.enable();
-
-  await wipConnection.page.navigate(url.toString());
 }

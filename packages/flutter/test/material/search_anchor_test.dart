@@ -4242,6 +4242,60 @@ void main() {
     variant: TargetPlatformVariant.all(),
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
   );
+
+  testWidgets('smartDashesType and smartQuotesType are properly forwarded to inner text fields', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor.bar(
+            smartDashesType: SmartDashesType.disabled,
+            smartQuotesType: SmartQuotesType.disabled,
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Check anchor's text field.
+    final TextField anchorTextField = tester.widget(find.byType(TextField));
+    expect(anchorTextField.smartDashesType, SmartDashesType.disabled);
+    expect(anchorTextField.smartQuotesType, SmartQuotesType.disabled);
+
+    // Open view and check view's text field.
+    await tester.tap(find.byType(SearchBar));
+    await tester.pumpAndSettle();
+
+    final Finder viewTextFieldFinder = find.descendant(
+      of: find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_ViewContent',
+      ),
+      matching: find.byType(TextField),
+    );
+    expect(viewTextFieldFinder, findsOneWidget);
+    final TextField viewTextField = tester.widget(viewTextFieldFinder);
+    expect(viewTextField.smartDashesType, SmartDashesType.disabled);
+    expect(viewTextField.smartQuotesType, SmartQuotesType.disabled);
+  });
+
+  testWidgets('SearchBar does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final TextEditingController controller = TextEditingController(text: 'X');
+    addTearDown(controller.dispose);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(child: SearchBar(controller: controller)),
+      ),
+    );
+    expect(tester.getSize(find.byType(SearchBar)), Size.zero);
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    await tester.pump();
+    expect(find.text('X'), findsOne);
+  });
 }
 
 Future<void> checkSearchBarDefaults(
