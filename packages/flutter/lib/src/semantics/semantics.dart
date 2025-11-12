@@ -114,6 +114,40 @@ typedef SemanticsUpdateCallback = void Function(SemanticsUpdate update);
 typedef ChildSemanticsConfigurationsDelegate =
     ChildSemanticsConfigurationsResult Function(List<SemanticsConfiguration>);
 
+/// Controls how accessibility focus is blocked.
+///
+/// This is typically used to prevent screen readers
+/// from focusing on parts of the UI.
+enum AccessiblityFocusBlockType {
+  /// Accessibility focus is **not blocked**.
+  none,
+
+  /// Blocks accessibility focus for the entire subtree.
+  blockSubtree,
+
+  /// Blocks accessibility focus for the **current node only**. Its descendants
+  /// may still be focusable.
+  blockNode;
+
+  /// The AccessiblityFocusBlockType when two nodes get merged.
+  AccessiblityFocusBlockType _merge(AccessiblityFocusBlockType other) {
+    // 1. If either is blockSubtree, the result is blockSubtree.
+    if (this == AccessiblityFocusBlockType.blockSubtree ||
+        other == AccessiblityFocusBlockType.blockSubtree) {
+      return AccessiblityFocusBlockType.blockSubtree;
+    }
+
+    // 2. If either is blockNode, the result is blockNode
+    if (this == AccessiblityFocusBlockType.blockNode ||
+        other == AccessiblityFocusBlockType.blockNode) {
+      return AccessiblityFocusBlockType.blockNode;
+    }
+
+    // 3. If neither is blockSubtree nor blockNode, both must be none.
+    return AccessiblityFocusBlockType.none;
+  }
+}
+
 final int _kUnblockedUserActions =
     SemanticsAction.didGainAccessibilityFocus.index |
     SemanticsAction.didLoseAccessibilityFocus.index;
@@ -488,6 +522,12 @@ sealed class _DebugSemanticsRoleChecks {
       if (!isExpanded && hasCollapseAction) {
         return FlutterError('A collapsed node cannot have a collapse action.');
       }
+    }
+    if (data.flagsCollection.isAccessibilityFocusBlocked &&
+        data.flagsCollection.isFocused != Tristate.none) {
+      return FlutterError(
+        'A node that is keyboard focusable cannot be set to accessibility unfocusable',
+      );
     }
 
     return null;
@@ -1537,6 +1577,7 @@ class SemanticsProperties extends DiagnosticableTree {
     )
     this.focusable,
     this.focused,
+    this.accessiblityFocusBlockType,
     this.inMutuallyExclusiveGroup,
     this.hidden,
     this.obscured,
@@ -1742,6 +1783,13 @@ class SemanticsProperties extends DiagnosticableTree {
   /// green/black rectangular highlight that TalkBack/VoiceOver draws around the
   /// element it is reading, and is separate from input focus.
   final bool? focused;
+
+  /// If non-null, indicates if this subtree or current node is blocked in a11y focus.
+  ///
+  /// This is for accessibility focus, which is the focus used by screen readers
+  /// like TalkBack and VoiceOver. It is different from input focus, which is
+  /// usually held by the element that currently responds to keyboard inputs.
+  final AccessiblityFocusBlockType? accessiblityFocusBlockType;
 
   /// If non-null, whether a semantic node is in a mutually exclusive group.
   ///
@@ -3974,12 +4022,28 @@ class SemanticsNode with DiagnosticableTreeMixin {
     final List<SemanticsNode> updatedChildren = <SemanticsNode>[];
     for (final SemanticsNode child in _children!) {
       if (child._isTraversalChild && !_isTraversalParent) {
-        // If the child node is an overlay portal child, but the current node is
-        // not an overlay portal parent, it means the child node should be
-        // grafted to be a child of an overlay portal parent node that has the
+        // If the child node is a traversal child, but the current node is
+        // not a traversal parent, it means the child node should be
+        // grafted to be a child of a traversal parent node that has the
         // same identifier as the child. So this child should be removed from
         // the current node's children list; i.e., we don't add it to
         // updatedChildren list.
+        //
+        // A corner case is the traversal parent of the traversal child, in paint
+        // order, is the child of the traversal child. In this case, no grafting
+        // needed, otherwise, it will cause infinite loop.
+        SemanticsNode? traversalParent =
+            owner!._traversalParentNodes[child.getSemanticsData().traversalChildIdentifier];
+        final int? traversalParentId = traversalParent?.id;
+        while (traversalParent != null) {
+          if (traversalParent == child) {
+            throw FlutterError(
+              'The traversalParent $traversalParentId cannot be the child of the traversalChild ${child.id} in hit-test order',
+            );
+          }
+          traversalParent = traversalParent.parent;
+        }
+
         continue;
       }
 
@@ -3995,6 +4059,19 @@ class SemanticsNode with DiagnosticableTreeMixin {
       if (owner != null && owner!._traversalChildNodes.containsKey(traversalParentIdentifier)) {
         final Set<SemanticsNode> traversalChildren =
             owner!._traversalChildNodes[traversalParentIdentifier]!;
+
+        // When traversal children are grafted from other branches, make sure
+        // these children are not ancestors of the traversal parent. Otherwise,
+        // it will cause infinite loop.
+        SemanticsNode currentNode = this;
+        while (currentNode.parent != null) {
+          currentNode = currentNode.parent!;
+          if (traversalChildren.contains(currentNode)) {
+            throw FlutterError(
+              'The traversalParent $id cannot be the child of the traversalChild ${currentNode.id} in hit-test order',
+            );
+          }
+        }
         for (final SemanticsNode node in traversalChildren) {
           if (node.attached) {
             updatedChildren.add(node);
@@ -6109,6 +6186,17 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  AccessiblityFocusBlockType _accessiblityFocusBlockType = AccessiblityFocusBlockType.none;
+
+  /// Whether the owning [RenderObject] and its subtree
+  /// is blocked in the a11y focus (different from input focus).
+  AccessiblityFocusBlockType get accessiblityFocusBlockType => _accessiblityFocusBlockType;
+  set accessiblityFocusBlockType(AccessiblityFocusBlockType value) {
+    _accessiblityFocusBlockType = value;
+    _flags = _flags.copyWith(isAccessibilityFocusBlocked: value != AccessiblityFocusBlockType.none);
+    _hasBeenAnnotated = true;
+  }
+
   /// Whether the owning [RenderObject] is a button (true) or not (false).
   bool get isButton => _flags.isButton;
   set isButton(bool value) {
@@ -6412,15 +6500,25 @@ class SemanticsConfiguration {
   /// Two configurations are said to be compatible if they can be added to the
   /// same [SemanticsNode] without losing any semantics information.
   bool isCompatibleWith(SemanticsConfiguration? other) {
-    if (other == null || !other.hasBeenAnnotated || !hasBeenAnnotated) {
+    if (other == null || !other.hasBeenAnnotated) {
+      return true;
+    }
+    // The parent node should reject child node as long as their
+    // traversalChildIdentifiers are different, even if the parent node has not
+    // been annotated.
+    if (_traversalChildIdentifier != other._traversalChildIdentifier) {
+      return false;
+    }
+    if (!hasBeenAnnotated) {
       return true;
     }
     if (_actionsAsBits & other._actionsAsBits != 0) {
       return false;
     }
-    if (_flags.hasRepeatedFlags(other._flags)) {
+    if (_flags.hasConflictingFlags(other._flags)) {
       return false;
     }
+
     if (_platformViewId != null && other._platformViewId != null) {
       return false;
     }
@@ -6542,6 +6640,9 @@ class SemanticsConfiguration {
         _validationResult = child._validationResult;
       }
     }
+    _accessiblityFocusBlockType = _accessiblityFocusBlockType._merge(
+      child._accessiblityFocusBlockType,
+    );
 
     _hasBeenAnnotated = hasBeenAnnotated || child.hasBeenAnnotated;
   }
@@ -6564,6 +6665,7 @@ class SemanticsConfiguration {
       .._attributedValue = _attributedValue
       .._attributedDecreasedValue = _attributedDecreasedValue
       .._attributedHint = _attributedHint
+      .._accessiblityFocusBlockType = _accessiblityFocusBlockType
       .._hintOverrides = _hintOverrides
       .._tooltip = _tooltip
       .._flags = _flags

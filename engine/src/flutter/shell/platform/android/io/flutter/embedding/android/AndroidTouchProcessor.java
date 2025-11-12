@@ -106,9 +106,15 @@ public class AndroidTouchProcessor {
   @VisibleForTesting static final int DEFAULT_VERTICAL_SCROLL_FACTOR = 48;
   @VisibleForTesting static final int DEFAULT_HORIZONTAL_SCROLL_FACTOR = 48;
 
-  // This value must match the value in framework's platform_view.dart.
+  // These values must match the values in the framework's platform_views.dart.
   // This flag indicates whether the original Android pointer events were batched together.
   private static final int POINTER_DATA_FLAG_BATCHED = 1;
+  // This flag indicates that this message is part of a group of messages representing
+  // a change that affects multiple pointers.
+  private static final int POINTER_DATA_FLAG_MULTIPLE = 2;
+
+  // Bit shift for encoding the pointer count when using POINTER_DATA_FLAG_MULTIPLE
+  private static final int POINTER_DATA_MULTIPLE_POINTER_COUNT_SHIFT = 8;
 
   // The view ID for the only view in a single-view Flutter app.
   private static final int IMPLICIT_VIEW_ID = 0;
@@ -212,7 +218,10 @@ public class AndroidTouchProcessor {
       // but it's the responsibility of a later part of the system to
       // ignore 0-deltas if desired.
       for (int p = 0; p < originalPointerCount; p++) {
-        addPointerForIndex(event, p, pointerChange, 0, transformMatrix, packet);
+        int pointerData =
+            POINTER_DATA_FLAG_MULTIPLE
+                | (originalPointerCount << POINTER_DATA_MULTIPLE_POINTER_COUNT_SHIFT);
+        addPointerForIndex(event, p, pointerChange, pointerData, transformMatrix, packet);
       }
     }
 

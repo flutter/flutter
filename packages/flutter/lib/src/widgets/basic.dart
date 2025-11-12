@@ -3991,6 +3991,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required bool? readOnly,
     required bool? focusable,
     required bool? focused,
+    required AccessiblityFocusBlockType? accessiblityFocusBlockType,
     required bool? inMutuallyExclusiveGroup,
     required bool? obscured,
     required bool? multiline,
@@ -4005,7 +4006,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required int? currentValueLength,
     required String? identifier,
     required Object? traversalParentIdentifier,
-    required Set<Object>? traversalChildIdentifier,
+    required Object? traversalChildIdentifier,
     required String? label,
     required AttributedString? attributedLabel,
     required String? value,
@@ -4075,6 +4076,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            readOnly: readOnly,
            focusable: focusable,
            focused: focused,
+           accessiblityFocusBlockType: accessiblityFocusBlockType,
            inMutuallyExclusiveGroup: inMutuallyExclusiveGroup,
            obscured: obscured,
            multiline: multiline,
@@ -4323,6 +4325,7 @@ class SliverSemantics extends _SemanticsBase {
     super.readOnly,
     super.focusable,
     super.focused,
+    super.accessiblityFocusBlockType,
     super.inMutuallyExclusiveGroup,
     super.obscured,
     super.multiline,
@@ -6455,7 +6458,11 @@ class Flow extends MultiChildRenderObjectWidget {
 ///
 /// Text displayed in a [RichText] widget must be explicitly styled. When
 /// picking which style to use, consider using [DefaultTextStyle.of] the current
-/// [BuildContext] to provide defaults. For more details on how to style text in
+/// [BuildContext] to provide defaults. [MediaQuery.maybeBoldTextOf],
+/// [MediaQuery.maybeLineHeightScaleFactorOverrideOf],
+/// [MediaQuery.maybeLetterSpacingOverrideOf], [MediaQuery.maybeWordSpacingOverrideOf],
+/// and [MediaQuery.maybeParagraphSpacingOverrideOf] can also be used to ensure the styling
+/// for your text is accessible. For more details on how to style text in
 /// a [RichText] widget, see the documentation for [TextStyle].
 ///
 /// Consider using the [Text] widget to integrate with the [DefaultTextStyle]
@@ -7900,6 +7907,7 @@ class Semantics extends _SemanticsBase {
     super.readOnly,
     super.focusable,
     super.focused,
+    super.accessiblityFocusBlockType,
     super.inMutuallyExclusiveGroup,
     super.obscured,
     super.multiline,
