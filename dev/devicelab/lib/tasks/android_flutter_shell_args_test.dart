@@ -12,8 +12,7 @@ import 'package:xml/xml.dart';
 import '../framework/framework.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
-
-// TODO(camsim99): Test in release mode.
+import 'android_utils.dart';
 
 TaskFunction androidFlutterShellArgsTest() {
   return () async {
@@ -36,7 +35,7 @@ TaskFunction androidFlutterShellArgsTest() {
         );
       });
 
-      section('Insert AOT shared library name metadata into manifest');
+      section('Insert metadata for testing into AndroidManifest.xml');
       final List<(String, String)> metadataKeyPairs = <(String, String)>[
         (
           'io.flutter.embedding.android.AOTSharedLibraryName',
@@ -44,20 +43,24 @@ TaskFunction androidFlutterShellArgsTest() {
         ),
         ('io.flutter.embedding.android.UseTestFonts', 'true'),
       ];
-      _addMetadataToManifest(tempDir.path, metadataKeyPairs);
+      addMetadataToManifest(
+        path.join(tempDir.path, 'androidfluttershellargstest'),
+        metadataKeyPairs,
+      );
 
       section('Run Flutter Android app in debug mode with modified manifest');
       final Completer<bool> foundInvalidAotLibraryLog = Completer<bool>();
       final Completer<bool> foundUseTestFontsNotAllowedLog = Completer<bool>();
       late Process run;
+
       await inDirectory(path.join(tempDir.path, 'androidfluttershellargstest'), () async {
         run = await startFlutter('run', options: <String>['--release', '--verbose']);
       });
+
       final StreamSubscription<void>
       stdout = run.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((
         String line,
       ) {
-        print('stdout: $line');
         if (line.contains(
           "Skipping unsafe AOT shared library name flag: something/completely/and/totally/invalid.so. Please ensure that the library is vetted and placed in your application's internal storage.",
         )) {
@@ -95,51 +98,4 @@ TaskFunction androidFlutterShellArgsTest() {
       rmTree(tempDir);
     }
   };
-}
-
-// TODO(camsim99): Write second test--
-// "Flag with metadata key "
-//     + metadataKey
-//     + " is not allowed in release builds and will be ignored. Please remove this flag from your release build manifest.");
-
-// TODO(camsim99): De-dupe from perf_tests.dart
-void _addMetadataToManifest(String testDirectory, List<(String, String)> keyPairs) {
-  final String manifestPath = path.join(
-    testDirectory,
-    'androidfluttershellargstest',
-    'android',
-    'app',
-    'src',
-    'main',
-    'AndroidManifest.xml',
-  );
-  final File file = File(manifestPath);
-
-  if (!file.existsSync()) {
-    throw Exception('AndroidManifest.xml not found at $manifestPath');
-  }
-
-  final String xmlStr = file.readAsStringSync();
-  final XmlDocument xmlDoc = XmlDocument.parse(xmlStr);
-  final XmlElement applicationNode = xmlDoc.findAllElements('application').first;
-
-  // Check if the meta-data node already exists.
-  for (final (String key, String value) in keyPairs) {
-    final Iterable<XmlElement> existingMetaData = applicationNode
-        .findAllElements('meta-data')
-        .where((XmlElement node) => node.getAttribute('android:name') == key);
-
-    if (existingMetaData.isNotEmpty) {
-      final XmlElement existingEntry = existingMetaData.first;
-      existingEntry.setAttribute('android:value', value);
-    } else {
-      final XmlElement metaData = XmlElement(XmlName('meta-data'), <XmlAttribute>[
-        XmlAttribute(XmlName('android:name'), key),
-        XmlAttribute(XmlName('android:value'), value),
-      ]);
-      applicationNode.children.add(metaData);
-    }
-  }
-
-  file.writeAsStringSync(xmlDoc.toXmlString(pretty: true, indent: '    '));
 }
