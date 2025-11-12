@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-import 'package:xml/xml.dart';
 
 import '../framework/framework.dart';
 import '../framework/task_result.dart';
