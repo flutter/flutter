@@ -481,6 +481,17 @@ void testMain() {
       expect(dispatcher.accessibilityPlaceholder.isConnected, isFalse);
     });
 
+    test('accessibility placeholder label can be updated', () {
+      final placeholder = domDocument.querySelector('flt-semantics-placeholder')!;
+
+      const String testLabel = 'Test accessibility label';
+      ui_web.accessibilityPlaceholderMessage = testLabel;
+      expect(placeholder.getAttribute('aria-label'), testLabel);
+
+      ui_web.accessibilityPlaceholderMessage = 'Enable accessibility';
+      expect(placeholder.getAttribute('aria-label'), 'Enable accessibility');
+    });
+
     test('scheduleWarmupFrame should call both callbacks', () async {
       bool beginFrameCalled = false;
       final Completer<void> drawFrameCalled = Completer<void>();
