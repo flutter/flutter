@@ -967,7 +967,7 @@ class ImageDescriptor {
   Future<Codec> instantiateCodec({
     int? targetWidth,
     int? targetHeight,
-    PixelFormat targetFormat = PixelFormat.optimal,
+    TargetPixelFormat targetFormat = TargetPixelFormat.dontCare,
   }) async {
     if (_data == null) {
       throw StateError('Object is disposed');
