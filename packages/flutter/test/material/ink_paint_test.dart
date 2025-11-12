@@ -796,9 +796,7 @@ void main() {
     expect(box, isNot(paints..rect(color: testColor)));
   });
 
-  testWidgets('Ink paints when used as replacement of the Visibility', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Ink paints when used as replacement of the Visibility', (WidgetTester tester) async {
     const Color testColor = Color(0xFFFF0000);
     Widget inkWidget({required bool isVisible}) {
       return Material(
