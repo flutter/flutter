@@ -2242,7 +2242,9 @@ public class AccessibilityBridgeTest {
     boolean colCount = collectionInfo.getColumnCount() == 1; // 1 column for a list
     boolean isHierarchical =
         !collectionInfo.isHierarchical(); // this should currently always be false
-    assertTrue(rowCount && colCount && isHierarchical);
+    assertTrue(collectionInfo.getRowCount() == testSemanticsNode.scrollChildren);
+    assertTrue(collectionInfo.getColumnCount() == 1); // 1 column for a list
+    assertFalse(collectionInfo.isHierarchical());
   }
 
   @Test
