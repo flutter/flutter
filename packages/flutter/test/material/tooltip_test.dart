@@ -1891,8 +1891,8 @@ void main() {
       ),
     );
 
-    tester.state<TooltipState>(find.byTooltip('message1')).ensureTooltipVisible();
-    tester.state<TooltipState>(find.byTooltip('message2')).ensureTooltipVisible();
+    tester.state<RawTooltipState>(find.byTooltip('message1')).ensureTooltipVisible();
+    tester.state<RawTooltipState>(find.byTooltip('message2')).ensureTooltipVisible();
     await tester.pump();
     await tester.pump(waitDuration);
     // Make sure both messages are on the screen.

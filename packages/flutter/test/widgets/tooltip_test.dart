@@ -1388,7 +1388,12 @@ void main() {
                       id: 3,
                       label: 'child',
                       tooltip: 'B',
-                      children: <TestSemantics>[TestSemantics(id: 6, label: 'B')],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 6,
+                          children: <TestSemantics>[TestSemantics(id: 7, label: 'B')],
+                        ),
+                      ],
                     ),
                     TestSemantics(id: 4, label: 'after'),
                   ],
