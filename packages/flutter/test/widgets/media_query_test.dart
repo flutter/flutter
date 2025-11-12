@@ -1104,6 +1104,68 @@ void main() {
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
+  testWidgets('MediaQuery.applyTextStyleOverrides applies the specified text style overrides', (
+    WidgetTester tester,
+  ) async {
+    late MediaQueryData withTextStyleOverrides;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          lineHeightScaleFactorOverride: 9.0,
+          letterSpacingOverride: 9.0,
+          wordSpacingOverride: 9.0,
+          paragraphSpacingOverride: 9.0,
+        ),
+        child: MediaQuery.applyTextStyleOverrides(
+          lineHeightScaleFactorOverride: 2.0,
+          letterSpacingOverride: 2.0,
+          wordSpacingOverride: 2.0,
+          paragraphSpacingOverride: 2.0,
+          child: Builder(
+            builder: (BuildContext context) {
+              withTextStyleOverrides = MediaQuery.of(context);
+              return Container();
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(withTextStyleOverrides.lineHeightScaleFactorOverride, 2.0);
+    expect(withTextStyleOverrides.letterSpacingOverride, 2.0);
+    expect(withTextStyleOverrides.wordSpacingOverride, 2.0);
+    expect(withTextStyleOverrides.paragraphSpacingOverride, 2.0);
+
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          lineHeightScaleFactorOverride: 9.0,
+          letterSpacingOverride: 9.0,
+          wordSpacingOverride: 9.0,
+          paragraphSpacingOverride: 9.0,
+        ),
+        child: MediaQuery.applyTextStyleOverrides(
+          lineHeightScaleFactorOverride: null,
+          letterSpacingOverride: null,
+          wordSpacingOverride: null,
+          paragraphSpacingOverride: null,
+          child: Builder(
+            builder: (BuildContext context) {
+              withTextStyleOverrides = MediaQuery.of(context);
+              return Container();
+            },
+          ),
+        ),
+      ),
+    );
+    expect(withTextStyleOverrides.lineHeightScaleFactorOverride, isNull);
+    expect(withTextStyleOverrides.letterSpacingOverride, isNull);
+    expect(withTextStyleOverrides.wordSpacingOverride, isNull);
+    expect(withTextStyleOverrides.paragraphSpacingOverride, isNull);
+  });
+
   testWidgets('MediaQuery.textScalerOf', (WidgetTester tester) async {
     late TextScaler outsideTextScaler;
     late TextScaler insideTextScaler;
