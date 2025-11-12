@@ -135,6 +135,7 @@ void main() {
     );
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/178336.
   test('TrainHoppingAnimation notifies status listeners', () {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
