@@ -135,7 +135,10 @@ void main() {
 
   test('TrainHoppingAnimation notifies status listeners correctly', () {
     final AnimationController currentTrain = AnimationController(vsync: const TestVSync());
-    final TrainHoppingAnimation animation = TrainHoppingAnimation(currentTrain, currentTrain);
+    final TrainHoppingAnimation animation = TrainHoppingAnimation(
+      currentTrain,
+      const AlwaysStoppedAnimation<double>(0.5),
+    );
 
     final List<AnimationStatus> statusLog = <AnimationStatus>[];
     void logStatus(AnimationStatus status) {
@@ -161,6 +164,8 @@ void main() {
     expect(statusLog, <AnimationStatus>[AnimationStatus.completed]);
 
     animation.removeStatusListener(logStatus);
+    animation.dispose();
+    currentTrain.dispose();
   });
 
   test('AnimationMean control test', () {
