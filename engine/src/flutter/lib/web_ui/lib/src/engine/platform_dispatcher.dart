@@ -56,14 +56,21 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   /// Checks if the given URI contains the flutter-semantics query parameter.
-  /// If present, enables semantics. This allows automation testing tools to
-  /// enable semantics without modifying the app.
+  /// If present and not explicitly set to false, enables semantics. This allows
+  /// automation testing tools to enable semantics without modifying the app.
+  ///
+  /// Accepted values:
+  /// - `?flutter-semantics` or `?flutter-semantics=true` → enables
+  /// - `?flutter-semantics=false` → does not enable
   ///
   /// This method is separated for testing purposes.
   @visibleForTesting
   void checkUriForSemanticsParameter(Uri uri) {
-    if (uri.queryParameters.containsKey('flutter-semantics')) {
-      EngineSemantics.instance.semanticsEnabled = true;
+    final String? value = uri.queryParameters['flutter-semantics'];
+    if (value != null) {
+      if (value.toLowerCase() != 'false') {
+        EngineSemantics.instance.semanticsEnabled = true;
+      }
     }
   }
 
