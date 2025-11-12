@@ -281,6 +281,9 @@ abstract mixin class WidgetsBindingObserver {
   ///
   /// class _TextScaleFactorReactorState extends State<TextScaleFactorReactor>
   ///     with WidgetsBindingObserver {
+  ///   double _lastTextScaleFactor =
+  ///       WidgetsBinding.instance.platformDispatcher.textScaleFactor;
+  ///
   ///   @override
   ///   void initState() {
   ///     super.initState();
@@ -292,9 +295,6 @@ abstract mixin class WidgetsBindingObserver {
   ///     WidgetsBinding.instance.removeObserver(this);
   ///     super.dispose();
   ///   }
-  ///
-  ///   double _lastTextScaleFactor =
-  ///       WidgetsBinding.instance.platformDispatcher.textScaleFactor;
   ///
   ///   @override
   ///   void didChangeTextScaleFactor() {
