@@ -618,12 +618,12 @@ class FlutterBuildSystem extends BuildSystem {
   ];
 
   @visibleForTesting
-  List<String> convertSourcesToPaths(List<Source> sources, Environment environment) {
+  Set<String> convertSourcesToPaths(List<Source> sources, Environment environment) {
     final collection = SourceVisitor(environment, false);
     for (final source in sources) {
       source.accept(collection);
     }
-    return collection.sources.map((file) => file.path).toList();
+    return collection.sources.map((file) => file.path).toSet();
   }
 
   @override
@@ -642,7 +642,7 @@ class FlutterBuildSystem extends BuildSystem {
     // Perform sanity checks on build.
     checkCycles(target);
 
-    final List<String> preservedOutputFilePaths = convertSourcesToPaths(
+    final Set<String> preservedOutputFilePaths = convertSourcesToPaths(
       _preservedOutputSources,
       environment,
     );
@@ -771,7 +771,7 @@ class FlutterBuildSystem extends BuildSystem {
     Environment environment,
     FileSystem fileSystem,
     Map<String, File> currentOutputs,
-    List<String> preservedOutputFilePaths,
+    Set<String> preservedOutputFilePaths,
   ) {
     if (environment.defines[kXcodePreAction] == 'PrepareFramework') {
       // If the current build is the PrepareFramework Xcode pre-action, skip
@@ -828,7 +828,7 @@ class _BuildInstance {
     required this.buildSystemConfig,
     required this.logger,
     required this.fileSystem,
-    this.preservedOutputFilePaths = const <String>[],
+    this.preservedOutputFilePaths = const <String>{},
     Platform? platform,
   }) : resourcePool = Pool(buildSystemConfig.resourcePoolSize ?? platform?.numberOfProcessors ?? 1);
 
@@ -841,7 +841,7 @@ class _BuildInstance {
   final FileStore fileCache;
   final inputFiles = <String, File>{};
   final outputFiles = <String, File>{};
-  final List<String> preservedOutputFilePaths;
+  final Set<String> preservedOutputFilePaths;
 
   // Timings collected during target invocation.
   final stepTimings = <String, PerformanceMeasurement>{};

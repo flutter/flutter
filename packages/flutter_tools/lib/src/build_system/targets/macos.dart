@@ -42,9 +42,7 @@ abstract class UnpackMacOS extends UnpackDarwin {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    kFlutterMacOSFrameworkBinarySource,
-  ];
+  List<Source> get outputs => const <Source>[kFlutterMacOSFrameworkBinarySource];
 
   @override
   List<Target> get dependencies => <Target>[];

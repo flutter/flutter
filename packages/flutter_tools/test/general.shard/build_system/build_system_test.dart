@@ -640,7 +640,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       platform: FakePlatform(),
-    ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{}, []);
+    ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{}, {});
 
     expect(environment.outputDir.childFile('.last_build_id'), exists);
     expect(
@@ -662,7 +662,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       platform: FakePlatform(),
-    ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{}, []);
+    ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{}, {});
 
     expect(environment.outputDir.childFile('.last_build_id'), exists);
     expect(
@@ -681,7 +681,7 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(),
-      ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{}, []);
+      ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{}, {});
 
       expect(
         environment.outputDir.childFile('.last_build_id').lastModifiedSync(),
@@ -700,7 +700,7 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(),
-      ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{}, []);
+      ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{}, {});
 
       expect(
         environment.outputDir.childFile('.last_build_id').readAsStringSync(),
@@ -724,7 +724,7 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(),
-      ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{}, []);
+      ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{}, {});
 
       expect(
         environment.outputDir.childFile('.last_build_id').readAsStringSync(),
@@ -746,9 +746,9 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       platform: FakePlatform(),
-    ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{}, [
+    ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{}, {
       preservedFile.absolute.path,
-    ]);
+    });
 
     expect(
       environment.outputDir.childFile('.last_build_id').readAsStringSync(),
