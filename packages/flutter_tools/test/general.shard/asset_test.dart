@@ -96,6 +96,7 @@ dependencies:
           packageConfigPath: packageConfigPath,
           manifestPath: manifestPath,
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.directory('main')),
+          targetPlatform: TargetPlatform.tester,
         );
 
         expect(assetBundle.entries, contains('FontManifest.json'));
@@ -254,6 +255,7 @@ flutter:
             packageConfigPath: packageConfigPath,
             manifestPath: manifestPath,
             flutterProject: FlutterProject.fromDirectoryTest(fileSystem.directory('main')),
+            targetPlatform: TargetPlatform.tester,
           );
 
           expect(assetBundle.entries, contains('FontManifest.json'));
@@ -298,6 +300,7 @@ flutter:
           manifestPath: manifestPath, // file doesn't exist
           packageConfigPath: packageConfigPath,
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.file(manifestPath).parent),
+          targetPlatform: TargetPlatform.tester,
         );
 
         expect(assetBundle.wasBuiltOnce(), true);
@@ -397,6 +400,7 @@ flutter:
         final int result = await assetBundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          targetPlatform: TargetPlatform.tester,
         );
         expect(result, isNot(0));
         expect(
@@ -426,6 +430,7 @@ flutter:
         final int result = await assetBundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          targetPlatform: TargetPlatform.tester,
         );
         expect(result, isNot(0));
         expect(
