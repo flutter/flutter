@@ -369,9 +369,38 @@ void main() {
       expect(find.byTooltip('Tooltip Message'), findsOneWidget);
     });
 
+    testWidgets('finds widgets by tooltip - RawTooltip', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(
+          RawTooltip(
+            message: 'Tooltip Message',
+            tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+                const Text('Tooltip Message'),
+            child: const Text('+'),
+          ),
+        ),
+      );
+      expect(find.byTooltip('Tooltip Message'), findsOneWidget);
+    });
+
     testWidgets('finds widgets with tooltip by RegExp', (WidgetTester tester) async {
       await tester.pumpWidget(
         _boilerplate(const Tooltip(message: 'Tooltip Message', child: Text('+'))),
+      );
+      expect(find.byTooltip('Tooltip'), findsNothing);
+      expect(find.byTooltip(RegExp(r'^Tooltip')), findsOneWidget);
+    });
+
+    testWidgets('finds widgets with tooltip by RegExp - RawTooltip', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(
+          RawTooltip(
+            message: 'Tooltip Message',
+            tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+                const Text('Tooltip Message'),
+            child: const Text('+'),
+          ),
+        ),
       );
       expect(find.byTooltip('Tooltip'), findsNothing);
       expect(find.byTooltip(RegExp(r'^Tooltip')), findsOneWidget);

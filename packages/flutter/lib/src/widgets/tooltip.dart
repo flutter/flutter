@@ -7,6 +7,7 @@ library;
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -37,7 +38,12 @@ class _TooltipVisibilityScope extends InheritedWidget {
   }
 }
 
+/// Signature for building the tooltip overlay child.
 ///
+/// The animation property exposes the underlying tooltip overlay child show and
+/// hide animation. This can be used to drive animations that sync up with the
+/// tooltip overlay child show/hide animation, for example to fade the tooltip
+/// in and out.
 typedef TooltipComponentBuilder =
     Widget Function(BuildContext context, Animation<double> animation);
 
@@ -331,6 +337,54 @@ class RawTooltip extends StatefulWidget {
 
   @override
   State<RawTooltip> createState() => RawTooltipState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      StringProperty(
+        'message',
+        message,
+        showName: message.isEmpty,
+        defaultValue: message.isEmpty ? null : kNoDefaultValue,
+      ),
+    );
+    properties.add(DoubleProperty('vertical offset', verticalOffset, defaultValue: null));
+    properties.add(
+      FlagProperty(
+        'position',
+        value: preferBelow,
+        ifTrue: 'below',
+        ifFalse: 'above',
+        showName: true,
+      ),
+    );
+    properties.add(
+      FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true),
+    );
+    properties.add(
+      DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<Duration>('exit duration', exitDuration, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null),
+    );
+    properties.add(
+      FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true),
+    );
+    properties.add(
+      DiagnosticsProperty<TooltipPositionDelegate>(
+        'positionDelegate',
+        positionDelegate,
+        defaultValue: null,
+      ),
+    );
+  }
 }
 
 ///
