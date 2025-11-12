@@ -1168,56 +1168,50 @@ void main() {
     testWidgets('TableCell colSpan exceeds table columns - throws error', (
       WidgetTester tester,
     ) async {
-      FlutterError? error;
-      try {
-        await tester.pumpWidget(
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: Table(
-              children: const <TableRow>[
-                TableRow(
-                  children: <Widget>[
-                    TableCell(colSpan: 3, child: Text('Too Wide')),
-                    Text('Cell 1'),
-                  ],
-                ),
-              ],
-            ),
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(colSpan: 3, child: Text('Too Wide')),
+                  Text('Cell 1'),
+                ],
+              ),
+            ],
           ),
-        );
-      } on FlutterError catch (e) {
-        error = e;
-      }
+        ),
+      );
 
-      expect(error, isNotNull);
-      expect(error!.toStringDeep(), contains('Invalid TableCell.colSpan'));
+      final Object? exception = tester.takeException();
+
+      expect(exception, isA<FlutterError>());
+      expect(exception.toString(), contains('Invalid TableCell.colSpan'));
     });
 
     testWidgets('TableCell rowSpan exceeds table rows - throws error', (WidgetTester tester) async {
-      FlutterError? error;
-      try {
-        await tester.pumpWidget(
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: Table(
-              children: const <TableRow>[
-                TableRow(
-                  children: <Widget>[
-                    TableCell(rowSpan: 3, child: Text('Too Tall')),
-                    Text('Cell 1'),
-                  ],
-                ),
-                TableRow(children: <Widget>[TableCell.none, Text('Cell 2')]),
-              ],
-            ),
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(rowSpan: 3, child: Text('Too Tall')),
+                  Text('Cell 1'),
+                ],
+              ),
+              TableRow(children: <Widget>[TableCell.none, Text('Cell 2')]),
+            ],
           ),
-        );
-      } on FlutterError catch (e) {
-        error = e;
-      }
+        ),
+      );
 
-      expect(error, isNotNull);
-      expect(error!.toStringDeep(), contains('Invalid TableCell.rowSpan'));
+      final Object? exception = tester.takeException();
+
+      expect(exception, isNotNull);
+      expect(exception.toString(), contains('Invalid TableCell.rowSpan'));
     });
 
     testWidgets('TableCell with colSpan at last column - valid edge case', (
