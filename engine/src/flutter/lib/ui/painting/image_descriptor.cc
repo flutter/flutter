@@ -54,6 +54,9 @@ SkImageInfo ImageDescriptor::ToSkImageInfo(const ImageInfo& image_info) {
     case PixelFormat::kRGBAFloat32:
       color_type = kRGBA_F32_SkColorType;
       break;
+    case PixelFormat::kR32Float:
+      FML_DCHECK(false) << "not a supported skia format";
+      break;
   }
   return SkImageInfo::Make(
       image_info.width, image_info.height, color_type,
@@ -180,6 +183,7 @@ int ImageDescriptor::bytesPerPixel() const {
   switch (image_info_.format) {
     case kRGBA8888:
     case kBGRA8888:
+    case kR32Float:
       return 4;
     case kRGBAFloat32:
       return 16;

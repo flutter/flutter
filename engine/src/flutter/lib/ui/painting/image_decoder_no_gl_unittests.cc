@@ -239,19 +239,19 @@ TEST(ImageDecoderNoGLTest, ImpellerRGBA32FDecode) {
       std::make_shared<impeller::TestImpellerAllocator>();
 
   // 3. Call ImageDecoderImpeller::DecompressTexture with this ImageDescriptor.
-  std::optional<ImageDecoderImpeller::DecompressResult> result =
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> result =
       ImageDecoderImpeller::DecompressTexture(
           descriptor.get(),
           /*options=*/
           {.target_width = 1,
            .target_height = 1,
-           .target_format = ImageDecoder::PixelFormat::kR32G32B32A32Float},
+           .target_format = ImageDecoder::TargetPixelFormat::kR32G32B32A32Float},
           /*max_texture_size=*/{1, 1},
           /*supports_wide_gamut=*/true, capabilities, allocator);
 
   // 4. Assert that wide_result->image_info.format is
   // impeller::PixelFormat::kR32G32B32A32Float.
-  ASSERT_TRUE(result.has_value());
+  ASSERT_TRUE(result.ok());
   ASSERT_EQ(result->image_info.format,
             impeller::PixelFormat::kR32G32B32A32Float);
 
