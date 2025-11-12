@@ -5,7 +5,6 @@
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:test/test.dart';
 
-
 void main() {
   group('HttpsConfig.parse', () {
     test('returns HttpsConfig when both paths are provided', () {
