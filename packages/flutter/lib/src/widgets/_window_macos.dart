@@ -91,11 +91,6 @@ class WindowingOwnerMacOS extends WindowingOwner {
     return res;
   }
 
-  @override
-  bool hasTopLevelWindows() {
-    return _activeControllers.isNotEmpty;
-  }
-
   final List<BaseWindowController> _activeControllers = <BaseWindowController>[];
 
   /// Returns the window handle for the given [view], or null is the window

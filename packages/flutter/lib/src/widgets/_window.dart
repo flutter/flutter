@@ -816,13 +816,6 @@ abstract class WindowingOwner {
     required WindowPositioner positioner,
     required BaseWindowController parent,
   });
-
-  /// Returns whether the application has any top level windows created by this
-  /// windowing owner.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  bool hasTopLevelWindows();
 }
 
 /// Creates default windowing owner for standard desktop embedders.
@@ -868,6 +861,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
   }) {
     throw UnsupportedError(errorMessage);
   }
+<<<<<<< HEAD
 
   @override
   TooltipWindowController createTooltipWindowController({
@@ -884,6 +878,8 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
   bool hasTopLevelWindows() {
     throw UnsupportedError(errorMessage);
   }
+=======
+>>>>>>> upstream/master
 }
 
 /// The [RegularWindow] widget provides a way to render a regular window in the

@@ -159,21 +159,6 @@ void main() {
         );
       });
 
-      test('default WindowingOwner throws when accessing hasTopLevelWindows', () {
-        final WindowingOwner owner = createDefaultWindowingOwner();
-        expect(() => owner.hasTopLevelWindows(), throwsUnsupportedError);
-      });
-
-      testWidgets('RegularWindow throws UnsupportedError', (WidgetTester tester) async {
-        expect(
-          () => RegularWindow(
-            controller: _StubRegularWindowController(tester),
-            child: const Text('Test'),
-          ),
-          throwsUnsupportedError,
-        );
-      });
-
       testWidgets('DialogWindow throws UnsupportedError', (WidgetTester tester) async {
         expect(
           () => DialogWindow(

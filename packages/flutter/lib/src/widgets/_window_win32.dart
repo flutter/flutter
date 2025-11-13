@@ -232,12 +232,6 @@ class WindowingOwnerWin32 extends WindowingOwner {
       }
     }
   }
-
-  @internal
-  @override
-  bool hasTopLevelWindows() {
-    return _Win32PlatformInterface.hasTopLevelWindows(PlatformDispatcher.instance.engineId!);
-  }
 }
 
 class _RegularWindowMesageHandler implements _WindowsMessageHandler {
@@ -686,11 +680,6 @@ class DialogWindowControllerWin32 extends DialogWindowController {
 }
 
 class _Win32PlatformInterface {
-  @ffi.Native<ffi.Bool Function(ffi.Int64)>(
-    symbol: 'InternalFlutterWindows_WindowManager_HasTopLevelWindows',
-  )
-  external static bool hasTopLevelWindows(int engineId);
-
   static void initializeWindowing(
     ffi.Allocator allocator,
     int engineId,

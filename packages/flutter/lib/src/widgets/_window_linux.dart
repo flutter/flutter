@@ -513,9 +513,6 @@ class WindowingOwnerLinux extends WindowingOwner {
     );
   }
 
-  /// Number of windows being managed by Flutter.
-  int _windowCount = 0;
-
   @internal
   @override
   RegularWindowController createRegularWindowController({
@@ -524,9 +521,7 @@ class WindowingOwnerLinux extends WindowingOwner {
     String? title,
     required RegularWindowControllerDelegate delegate,
   }) {
-    _windowCount++;
     return RegularWindowControllerLinux(
-      owner: this,
       delegate: delegate,
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
@@ -557,12 +552,6 @@ class WindowingOwnerLinux extends WindowingOwner {
   }) {
     throw UnimplementedError('Tooltip windows are not yet implemented on Linux.');
   }
-
-  @internal
-  @override
-  bool hasTopLevelWindows() {
-    return _windowCount > 0;
-  }
 }
 
 /// Implementation of [RegularWindowController] for the Linux platform.
@@ -585,13 +574,11 @@ class RegularWindowControllerLinux extends RegularWindowController {
   ///  * [RegularWindowController], the base class for regular windows.
   @internal
   RegularWindowControllerLinux({
-    required WindowingOwnerLinux owner,
     required RegularWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
-  }) : _owner = owner,
-       _delegate = delegate,
+  }) : _delegate = delegate,
        _window = _GtkWindow(),
        super.empty() {
     if (!isWindowingEnabled) {
@@ -634,7 +621,6 @@ class RegularWindowControllerLinux extends RegularWindowController {
     _window.present();
   }
 
-  final WindowingOwnerLinux _owner;
   final RegularWindowControllerDelegate _delegate;
   final _GtkWindow _window;
   late final _FlWindowMonitor _windowMonitor;
@@ -653,7 +639,6 @@ class RegularWindowControllerLinux extends RegularWindowController {
     _windowMonitor.close();
     _windowMonitor.unref();
     _destroyed = true;
-    _owner._windowCount--;
   }
 
   @override
