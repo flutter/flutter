@@ -325,7 +325,7 @@ Future<void> testMain() async {
     paragraph.paint(canvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_multicolored_background.png', region: region);
-  }, solo: true);
+  });
 
   test('Draw WebParagraph multiple font styles text', () async {
     final PictureRecorder recorder = PictureRecorder();
@@ -1050,7 +1050,7 @@ Future<void> testMain() async {
     }
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('ellipsisLTR.png', region: region);
-  }, solo: false);
+  });
 
   test('Ellipsis RTL', () async {
     final PictureRecorder recorder = PictureRecorder();
@@ -1087,5 +1087,5 @@ Future<void> testMain() async {
     }
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('ellipsisRTL.png', region: region);
-  }, solo: true);
+  });
 }

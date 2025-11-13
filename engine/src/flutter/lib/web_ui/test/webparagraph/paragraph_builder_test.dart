@@ -31,6 +31,7 @@ Future<void> testMain() async {
         end: 7,
         style: paragraphStyle.textStyle.mergeWith(textStyle),
         text: 'Options',
+        textDirection: TextDirection.ltr,
       ),
     );
   });

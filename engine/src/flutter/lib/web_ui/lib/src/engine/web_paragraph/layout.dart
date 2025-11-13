@@ -275,9 +275,6 @@ class TextLayout {
         ellipsisBlock != null && paragraph.paragraphStyle.textDirection == ui.TextDirection.rtl
         ? ellipsisBlock.advance.width
         : 0.0;
-    print(
-      'ELLIPSIS WIDTH: ${ellipsisBlock != null ? ellipsisBlock.advance.width : 0.0} blockShiftFromLineStart: $blockShiftFromLineStart',
-    );
     for (final BidiRun bidiRun in lineVisualRuns) {
       // TODO(jlavrova): we (almost always true) assume that trailing whitespaces do not affect the line height
       final ClusterRange textIntersection = bidiRun.clusterRange.intersect(contentRange);
@@ -410,7 +407,6 @@ class TextLayout {
     if (ellipsisBlock != null) {
       if (paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr) {
         // We need to adjust the block shift from line start because we are adding the ellipsis block at the end
-        print('blockShiftFromLineStart: $blockShiftFromLineStart');
         ellipsisBlock.shiftFromLineStart = blockShiftFromLineStart;
         ellipsisBlock.spanShiftFromLineStart = blockShiftFromLineStart;
         line.visualBlocks.add(ellipsisBlock);
@@ -456,12 +452,6 @@ class TextLayout {
       'Line [${line.textClusterRange.start}:${line.textClusterRange.end}) ${line.advance.left},${line.advance.top} ${line.advance.width}x${line.advance.height} '
       '${ellipsisClusters.isNotEmpty ? 'Ellipsis: "${paragraph.paragraphStyle.ellipsis}" ${ellipsisClusters.length}' : ''}',
     );
-
-    for (final LineBlock block in line.visualBlocks) {
-      print(
-        'Block: ${block.textRange} ${block.clusterRange} ltr: ${block.isLtr} left: ${line.advance.left} + formatting: ${line.formattingShift} + shiftFromLineStart: ${block.shiftFromLineStart}',
-      );
-    }
     return line.advance.height;
   }
 
