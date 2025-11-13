@@ -130,9 +130,15 @@ abstract class _BaseGenerateCommand extends FlutterCommand {
     targetFile.writeAsStringSync(widgetCode);
 
     final String widgetType = isStateful ? 'stateful' : 'stateless';
-    globals.printStatus(
-      globals.terminal.color('✓ Generated $widgetType $componentTypeDisplay: ${targetFile.path}', TerminalColor.cyan),
+    final String successMessage = globals.terminal.color(
+      '✓ Generated $widgetType $componentTypeDisplay:',
+      TerminalColor.green,
     );
+    final String filePath = globals.terminal.color(
+      targetFile.path,
+      TerminalColor.blue,
+    );
+    globals.printStatus('$successMessage $filePath');
     globals.printStatus('');
     return FlutterCommandResult.success();
   }
