@@ -16,39 +16,40 @@ import 'package:watcher/watcher.dart';
 
 import '../../../../src/common.dart';
 import '../../../../src/fakes.dart';
-import '../utils/preview_detector_test_utils.dart';
 
 void main() {
-  initializeTestPreviewDetectorState();
   group('$PreviewDetector', () {
     late MemoryFileSystem fs;
+    late FlutterProject project;
     late PreviewDetector previewDetector;
     late FakeWatcher watcher;
     late BufferLogger logger;
 
+    var changeCounter = 0;
+    void onChangeDetected(_) {
+      changeCounter++;
+    }
+
     setUp(() {
-      fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      fs = MemoryFileSystem.test(
+        style: const LocalPlatform().isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+      );
       watcher = FakeWatcher();
       logger = BufferLogger.test();
-      final FlutterProject project = FlutterProject.fromDirectoryTest(
-        fs.systemTempDirectory.createTempSync('root'),
-      );
+      project = FlutterProject.fromDirectoryTest(fs.systemTempDirectory.createTempSync('root'));
       previewDetector = PreviewDetector(
-        // Explicitly set the platform to Windows.
-        platform: FakePlatform(operatingSystem: 'windows'),
+        platform: FakePlatform(),
         previewAnalytics: WidgetPreviewAnalytics(
           analytics: getInitializedFakeAnalyticsInstance(
             fakeFlutterVersion: FakeFlutterVersion(),
-            // We don't care about anything written by fake analytics, so we're safe to use a different
-            // file system here.
-            fs: MemoryFileSystem.test(),
+            fs: fs,
           ),
         ),
         project: project,
         logger: logger,
         fs: fs,
-        onChangeDetected: (_) {},
-        onPubspecChangeDetected: (_) {},
+        onChangeDetected: onChangeDetected,
+        onPubspecChangeDetected: onChangeDetected,
         watcherBuilder: (_) => watcher,
       );
     });
@@ -58,23 +59,25 @@ void main() {
       await watcher.close();
     });
 
-    test(
-      'regression test https://github.com/flutter/flutter/issues/173895',
-      () async {
-        // The Windows directory watcher sometimes decides to shutdown on its own. It's
-        // automatically restarted by package:watcher, but the FileSystemException is rethrown and
-        // needs to be handled. This test verifies that we no longer crash if this exception is
-        // encountered on Windows.
-        await previewDetector.initialize();
-        watcher.controller.addError(
-          const FileSystemException(PreviewDetector.kDirectoryWatcherClosedUnexpectedlyPrefix),
-        );
-        // Insert an asynchronous gap so the onError handler for the Watcher can be invoked.
-        await Future<void>.delayed(Duration.zero);
-        expect(logger.traceText, contains(PreviewDetector.kWindowsFileWatcherRestartedMessage));
-      },
-      skip: !const LocalPlatform().isWindows, // [intended] Test is only valid on Windows.
-    );
+    String buildDartFilePathIn(Directory root) {
+      final String filePath = fs.path.join(root.path, 'foo.dart');
+      root.childFile(filePath).createSync(recursive: true);
+      return filePath;
+    }
+
+    test('regression test https://github.com/flutter/flutter/issues/178317', () async {
+      await previewDetector.initialize();
+      expect(project.ephemeralDirectories, isNotEmpty);
+      for (final Directory dir in project.ephemeralDirectories) {
+        watcher.controller.add(WatchEvent(ChangeType.ADD, buildDartFilePathIn(dir)));
+      }
+      // Simulates the watcher detecting a change that doesn't have a valid analysis context.
+      watcher.controller.add(WatchEvent(ChangeType.ADD, fs.path.join('foo', 'bar.dart')));
+
+      // Changes to .dart sources under ephemeral directories or sources that don't have valid
+      // analysis contexts shouldn't trigger the change detection callback.
+      expect(changeCounter, 0);
+    });
   });
 }
 
