@@ -8,9 +8,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
-
 import 'package:high_bitrate_images/main.dart' as app;
+import 'package:integration_test/integration_test.dart';
 
 // See: https://developer.apple.com/documentation/metal/mtlpixelformat/mtlpixelformatbgr10_xr.
 double _decodeBGR10(int x) {
@@ -56,8 +55,8 @@ Future<ui.Image> _getScreenshot() async {
 
   expect(format, equals('MTLPixelFormatBGRA10_XR'));
 
-  var completer = Completer<ui.Image>();
-  Uint8List pixels = _convertBGRA10XRToBGRA8888(bytes);
+  final Completer<ui.Image> completer = Completer<ui.Image>();
+  final Uint8List pixels = _convertBGRA10XRToBGRA8888(bytes);
   ui.decodeImageFromPixels(
     pixels,
     width,

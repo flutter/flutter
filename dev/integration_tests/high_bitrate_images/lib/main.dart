@@ -63,7 +63,7 @@ class _SdfCanvasState extends State<SdfCanvas> {
   }
 
   Future<ui.FragmentShader> _loadShader() async {
-    final program = await ui.FragmentProgram.fromAsset('shaders/sdf.frag');
+    final ui.FragmentProgram program = await ui.FragmentProgram.fromAsset('shaders/sdf.frag');
     return program.fragmentShader();
   }
 
@@ -71,24 +71,24 @@ class _SdfCanvasState extends State<SdfCanvas> {
     const int width = 1024;
     const int height = 1024;
     const double radius = width / 4.0;
-    List<double> floats = List.filled(width * height * 4, 0.0);
+    final List<double> floats = List<double>.filled(width * height * 4, 0.0);
     for (int i = 0; i < height; ++i) {
       for (int j = 0; j < width; ++j) {
         double x = j.toDouble();
         double y = i.toDouble();
         x -= width / 2.0;
         y -= height / 2.0;
-        double length = sqrt(x * x + y * y) - radius;
-        int idx = i * width * 4 + j * 4;
+        final double length = sqrt(x * x + y * y) - radius;
+        final int idx = i * width * 4 + j * 4;
         floats[idx + 0] = length - radius;
         floats[idx + 1] = 0.0;
         floats[idx + 2] = 0.0;
         floats[idx + 3] = 1.0;
       }
     }
-    Float32List floatList = Float32List.fromList(floats);
-    Uint8List intList = Uint8List.view(floatList.buffer);
-    Completer<ui.Image> completer = Completer();
+    final Float32List floatList = Float32List.fromList(floats);
+    final Uint8List intList = Uint8List.view(floatList.buffer);
+    final Completer<ui.Image> completer = Completer<ui.Image>();
     ui.decodeImageFromPixels(
       intList,
       width,
@@ -126,7 +126,7 @@ class SdfPainter extends CustomPainter {
     shader.setFloat(0, size.width);
     shader.setFloat(1, size.height);
     shader.setImageSampler(0, image);
-    final paint = Paint()..shader = shader;
+    final Paint paint = Paint()..shader = shader;
     canvas.drawRect(Offset.zero & size, paint);
   }
 
