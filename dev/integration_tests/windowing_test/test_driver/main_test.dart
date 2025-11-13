@@ -130,7 +130,6 @@ void main() {
         await driver.requestData(jsonEncode({'type': 'close_dialog'}));
       },
       timeout: Timeout.none,
-      onPlatform: {'linux': Skip('Dialogs are not yet supported on Wayland')},
     );
 
     test(
