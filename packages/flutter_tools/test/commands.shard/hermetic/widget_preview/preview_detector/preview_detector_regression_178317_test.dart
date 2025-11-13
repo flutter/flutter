@@ -16,10 +16,8 @@ import 'package:watcher/watcher.dart';
 
 import '../../../../src/common.dart';
 import '../../../../src/fakes.dart';
-import '../utils/preview_detector_test_utils.dart';
 
 void main() {
-  initializeTestPreviewDetectorState();
   group('$PreviewDetector', () {
     late MemoryFileSystem fs;
     late FlutterProject project;
@@ -33,12 +31,14 @@ void main() {
     }
 
     setUp(() {
-      fs = MemoryFileSystem.test();
+      fs = MemoryFileSystem.test(
+        style: const LocalPlatform().isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+      );
       watcher = FakeWatcher();
       logger = BufferLogger.test();
       project = FlutterProject.fromDirectoryTest(fs.systemTempDirectory.createTempSync('root'));
       previewDetector = PreviewDetector(
-        platform: const LocalPlatform(),
+        platform: FakePlatform(),
         previewAnalytics: WidgetPreviewAnalytics(
           analytics: getInitializedFakeAnalyticsInstance(
             fakeFlutterVersion: FakeFlutterVersion(),
@@ -72,7 +72,7 @@ void main() {
         watcher.controller.add(WatchEvent(ChangeType.ADD, buildDartFilePathIn(dir)));
       }
       // Simulates the watcher detecting a change that doesn't have a valid analysis context.
-      watcher.controller.add(WatchEvent(ChangeType.ADD, '/foo/bar.dart'));
+      watcher.controller.add(WatchEvent(ChangeType.ADD, fs.path.join('foo', 'bar.dart')));
 
       // Changes to .dart sources under ephemeral directories or sources that don't have valid
       // analysis contexts shouldn't trigger the change detection callback.
