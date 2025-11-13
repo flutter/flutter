@@ -763,29 +763,23 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::vector<std::shared_ptr<flutter::OverlayLayer>> unusedLayers =
       self.layerPool->RemoveUnusedLayers();
   self.layerPool->RecycleLayers();
-
-  auto latch = std::make_shared<fml::CountDownLatch>(1u);
   auto task = [self,                                                      //
                platformViewLayers = std::move(platformViewLayers),        //
                currentCompositionParams = self.currentCompositionParams,  //
                viewsToRecomposite = self.viewsToRecomposite,              //
                compositionOrder = self.compositionOrder,                  //
                unusedLayers = std::move(unusedLayers),                    //
-               surfaceFrames = std::move(surfaceFrames),                  //
-               latch]() mutable {
+               surfaceFrames = std::move(surfaceFrames)
+      ]() mutable {
     [self performSubmit:platformViewLayers
         currentCompositionParams:currentCompositionParams
               viewsToRecomposite:viewsToRecomposite
                 compositionOrder:compositionOrder
                     unusedLayers:unusedLayers
                    surfaceFrames:surfaceFrames];
-    latch->CountDown();
   };
 
   fml::TaskRunner::RunNowOrPostTask(self.platformTaskRunner, fml::MakeCopyable(std::move(task)));
-  if (![[NSThread currentThread] isMainThread]) {
-    latch->Wait();
-  }
   return didEncode;
 }
 

@@ -29,6 +29,20 @@
 - (void)flutterViewAccessibilityDidCall;
 @end
 
+/**
+* A custom NSLayoutConstraint subclass for autoresizing the FlutterView
+* This class is a special NSLayoutConstraint used internally to
+* manage the dynamic resizing of a FlutterView, based on its content.
+*
+* In native, `intrinsicContentSize` is a public property that determines the preferred
+* sized of an UIView, based on it's internal content. Given a position and layout constraints,
+* this allows the UIView to size itself.
+* However, the mechanism in which this sizing occurs based on`intrinsicContentSize`
+* and the layout constraints is private.
+*
+* This custom NSLayoutConstraint allows us to replicate this mechanizm without needing to rely
+* on private APIs.
+*/
 @interface FlutterAutoResizeLayoutConstraint : NSLayoutConstraint
 @end
 
