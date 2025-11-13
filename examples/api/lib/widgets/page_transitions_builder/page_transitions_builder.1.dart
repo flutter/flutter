@@ -23,8 +23,9 @@ class PageTransitionsThemeApp extends StatelessWidget {
         pageTransitionsTheme: PageTransitionsTheme(
           builders: Map<TargetPlatform, PageTransitionsBuilder>.fromIterable(
             TargetPlatform.values,
-            value: (_) =>
-                const FadeForwardsPageTransitionsBuilder(backgroundColor: Color(0xff121212)),
+            value: (_) => const FadeForwardsPageTransitionsBuilder(
+              backgroundColor: Color(0xff121212),
+            ),
           ),
         ),
       ),
@@ -57,7 +58,9 @@ class HomePage extends StatelessWidget {
                 elevation: 0,
                 color: Theme.of(context).colorScheme.surfaceContainerLowest,
                 child: ListView(
-                  children: List<Widget>.generate(Colors.primaries.length, (int index) {
+                  children: List<Widget>.generate(Colors.primaries.length, (
+                    int index,
+                  ) {
                     final Text kittenName = Text('Kitten $index');
                     final CircleAvatar avatar = CircleAvatar(
                       backgroundColor: Colors.primaries[index],

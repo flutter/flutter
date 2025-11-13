@@ -644,7 +644,7 @@ void main() {
   testWidgets(
     'Default background color in FadeForwardsPageTransitionsBuilder',
     (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => Material(
           child: TextButton(
             child: const Text('push'),
@@ -662,7 +662,7 @@ void main() {
             pageTransitionsTheme: const PageTransitionsTheme(
               builders: <TargetPlatform, PageTransitionsBuilder>{
                 TargetPlatform.android: FadeForwardsPageTransitionsBuilder(
-                  backgroundColor: Colors.pink,
+                  backgroundColor: Colors.black,
                 ),
               },
             ),
@@ -701,7 +701,7 @@ void main() {
   testWidgets(
     'Override background color in FadeForwardsPageTransitionBuilder',
     (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => Material(
           child: TextButton(
             child: const Text('push'),
@@ -759,7 +759,7 @@ void main() {
     testWidgets(
       'opacity fades out during forward secondary animation',
       (WidgetTester tester) async {
-        final AnimationController controller = AnimationController(
+        final controller = AnimationController(
           duration: const Duration(milliseconds: 100),
           vsync: const TestVSync(),
         );
@@ -805,7 +805,7 @@ void main() {
     testWidgets(
       'opacity fades in during reverse secondary animaation',
       (WidgetTester tester) async {
-        final AnimationController controller = AnimationController(
+        final controller = AnimationController(
           duration: const Duration(milliseconds: 100),
           vsync: const TestVSync(),
         );
@@ -927,7 +927,7 @@ void main() {
   testWidgets(
     'FadeForwardsPageTransitionBuilder default duration is 800ms',
     (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => Material(
           child: TextButton(
             child: const Text('push'),
