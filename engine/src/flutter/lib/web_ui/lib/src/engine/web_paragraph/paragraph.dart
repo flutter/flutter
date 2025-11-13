@@ -228,9 +228,9 @@ class WebTextStyle implements ui.TextStyle {
   final ui.Paint? background;
   final List<ui.Shadow>? shadows;
   final ui.TextDecoration? decoration;
-  final ui.Color? decorationColor;
-  final ui.TextDecorationStyle? decorationStyle;
-  final double? decorationThickness;
+  final ui.Color? decorationColor; // Defaults to foreground color
+  final ui.TextDecorationStyle? decorationStyle; // Defaults to none
+  final double? decorationThickness; // Defaults to 1
   final double? letterSpacing;
   final double? wordSpacing;
   final double? height;
@@ -336,8 +336,6 @@ class WebTextStyle implements ui.TextStyle {
   }
 
   ui.Color getForegroundColor() {
-    //print('foreground: ${foreground == null ? 'null' : foreground!.color.toCssString()}');
-    //print('color: ${color == null ? 'null' : color!.toCssString()}');
     return foreground != null
         ? foreground!.color
         : (color != null ? color! : const ui.Color(0xFFFFFFFF));
@@ -469,11 +467,17 @@ class WebTextStyle implements ui.TextStyle {
   bool hasElement(StyleElements element) {
     switch (element) {
       case StyleElements.background:
-        return background != null;
+        // Transparent background is equivalent to no background
+        // We do not check for transparency in other paints (like foreground) because
+        // it seems unnatural to have a transparent paint on them
+        return background != null && background!.color.a != 0;
       case StyleElements.shadows:
         return shadows != null && shadows!.isNotEmpty;
       case StyleElements.decorations:
-        return decoration != null && decoration! != ui.TextDecoration.none;
+        return decoration != null &&
+            decoration! != ui.TextDecoration.none &&
+            decorationStyle != null &&
+            decorationColor != null;
       case StyleElements.text:
         return true;
     }
@@ -625,7 +629,6 @@ class TextSpan extends ParagraphSpan {
   DomTextMetrics _getMetrics() {
     // TODO(jlavrova): Is this necessary?
     // layoutContext.direction = isDefaultLtr ? 'ltr' : 'rtl';
-
     style.applyToContext(layoutContext);
     return layoutContext.measureText(text);
   }
@@ -950,6 +953,7 @@ class WebParagraph implements ui.Paragraph {
   }
 
   void paint(ui.Canvas canvas, ui.Offset offset) {
+    _paint.painter.resizePaintCanvas(ui.window.devicePixelRatio);
     for (final line in _layout.lines) {
       _paint.paintLine(canvas, _layout, line, offset.dx, offset.dy);
     }

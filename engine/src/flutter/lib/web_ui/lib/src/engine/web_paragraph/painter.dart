@@ -14,6 +14,15 @@ import 'debug.dart';
 import 'layout.dart';
 import 'paragraph.dart';
 
+// TODO(mdebbar): Discuss it: we use this canvas for painting the entire block (entire line)
+// so we need to make sure it's big enough to hold the biggest line.
+// Also, we use it to paint shadows (with vertical shifts) so we need to make it tall enough as well.
+const int _paintWidth = 1000;
+const int _paintHeight = 500;
+double? currentDevicePixelRatio;
+final DomOffscreenCanvas _paintCanvas = createDomOffscreenCanvas(_paintWidth, _paintHeight);
+final paintContext = _paintCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
+
 /// Abstracts the interface for painting text clusters, shadows, and decorations.
 abstract class Painter {
   Painter();
@@ -38,13 +47,32 @@ abstract class Painter {
 
   /// Paints the decorations previously filled by [fillDecorations].
   void paintDecorations(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
-}
 
-// TODO(jlavrova): precalculate the size of the canvas based on the text to be painted
-// (including shadows, decorations, etc) and make sure it does not exceed the maximum canvas size
-// supported by the browser.
-final DomOffscreenCanvas _paintCanvas = createDomOffscreenCanvas(500, 500);
-final paintContext = _paintCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
+  /// Adjust the _paintCanvas scale based on device pixel ratio
+  void resizePaintCanvas(double devicePixelRatio) {
+    if (currentDevicePixelRatio == devicePixelRatio) {
+      // Nothing changed
+      return;
+    }
+
+    // Since the output canvas is zoomed by device pixel ratio,
+    // we need to adjust our offscreen canvas accordingly to avoid pixelation
+    // that would happen if didn't resize it.
+    if (currentDevicePixelRatio != null) {
+      paintContext.restore(); // Restore to unscaled state
+    }
+    _paintCanvas.width = (_paintWidth * devicePixelRatio).ceilToDouble();
+    _paintCanvas.height = (_paintHeight * devicePixelRatio).ceilToDouble();
+    paintContext.scale(devicePixelRatio, devicePixelRatio);
+    paintContext.save();
+
+    currentDevicePixelRatio = devicePixelRatio;
+
+    WebParagraphDebug.log(
+      'resizePaintCanvas: ${_paintCanvas.width}x${_paintCanvas.height} @ $devicePixelRatio',
+    );
+  }
+}
 
 class CanvasKitPainter extends Painter {
   @override
@@ -224,7 +252,7 @@ class CanvasKitPainter extends Painter {
   }
 
   double calculateThickness(WebTextStyle textStyle) {
-    return (textStyle.fontSize! / 14.0) * textStyle.decorationThickness!;
+    return (textStyle.fontSize! / 14.0) * (textStyle.decorationThickness ?? 1.0);
   }
 
   double calculatePosition(

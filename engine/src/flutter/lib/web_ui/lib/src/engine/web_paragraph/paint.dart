@@ -38,15 +38,23 @@ class TextPaint {
       if (block is PlaceholderBlock) {
         continue;
       }
+
       // Let's calculate the sizes
       final (ui.Rect sourceRect, ui.Rect targetRect) = calculateBlock(
         layout,
         block as TextBlock,
         ui.Offset(
-          line.advance.left + line.formattingShift,
+          line.advance.left + line.formattingShift + block.shiftFromLineStart,
           line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
         ),
         ui.Offset(x, y),
+        ui.window.devicePixelRatio,
+      );
+
+      WebParagraphDebug.log(
+        '+_paintByBlocks: ${block.textRange} ${block.spanShiftFromLineStart} ${block.shiftFromLineStart} '
+        '${line.advance} + ${line.formattingShift} '
+        '\nsourceRect: $sourceRect targetRect: $targetRect',
       );
       // Let's draw whatever has to be drawn
       switch (styleElement) {
@@ -84,6 +92,7 @@ class TextPaint {
       WebParagraphDebug.log(
         '+paintByClusters: ${block.textRange} ${block.clusterRange} ${(block as TextBlock).clusterRangeWithoutWhitespaces} ${block.whitespacesWidth} ${block.isLtr} ${line.advance.left} + ${line.formattingShift} + ${block.shiftFromLineStart}',
       );
+
       // We are painting clusters in visual order so that if they step on each other, the paint
       // order is correct.
       final int start = block.isLtr
@@ -95,6 +104,7 @@ class TextPaint {
       final int step = block.isLtr ? 1 : -1;
       for (int i = start; i != end; i += step) {
         final clusterText = layout.allClusters[i];
+        // We need to adjust the canvas size to fit the block in case there is scaling or zoom involved
         final (ui.Rect sourceRect, ui.Rect targetRect) = calculateCluster(
           layout,
           block,
@@ -105,7 +115,13 @@ class TextPaint {
             line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
           ),
           ui.Offset(x, y),
+          ui.window.devicePixelRatio,
         );
+
+        if (sourceRect.isEmpty) {
+          // Let's skip empty clusters
+          continue;
+        }
         switch (styleElement) {
           case StyleElements.shadows:
             paintContext.save();
@@ -130,33 +146,44 @@ class TextPaint {
     WebCluster webTextCluster,
     ui.Offset clusterOffset,
     ui.Offset lineOffset,
+    double devicePixelRatio,
   ) {
     // Define the text cluster bounds
     final pos = webTextCluster.bounds.left - webTextCluster.advance.left;
+
+    // Define the text cluster bounds
+    // Source rect must take in account the scaling
+    final ui.Rect sourceRect = ui.Rect.fromLTWH(
+      pos * devicePixelRatio,
+      0,
+      webTextCluster.bounds.width.ceilToDouble() * devicePixelRatio,
+      webTextCluster.advance.height.ceilToDouble() * devicePixelRatio,
+    );
+    // Target rect will be scaled by the canvas transform, so we don't scale it here
     final ui.Rect zeroRect = ui.Rect.fromLTWH(
       pos,
       0,
-      webTextCluster.bounds.width,
-      webTextCluster.advance.height,
+      webTextCluster.bounds.width.ceilToDouble(),
+      webTextCluster.advance.height.ceilToDouble(),
     );
-    final ui.Rect sourceRect = zeroRect;
 
     // We shift the target rect to the correct x position inside the line and
     // the correct y position of the line itself
     // (and then to the paragraph.paint x and y)
 
-    final double left = clusterOffset.dx + webTextCluster.advance.left + lineOffset.dx;
-    final double shift = left - left.floorToDouble();
     // TODO(jlavrova): Make translation in a single operation so it's actually an integer
     final ui.Rect targetRect = zeroRect
         .translate(clusterOffset.dx + webTextCluster.advance.left, clusterOffset.dy)
-        .translate(lineOffset.dx, lineOffset.dy)
-        .translate(-shift, 0);
+        .translate(lineOffset.dx, lineOffset.dy);
 
     if (WebParagraphDebug.logging) {
       final String text = paragraph.getText1(webTextCluster.start, webTextCluster.end);
+      final double left = clusterOffset.dx + webTextCluster.advance.left + lineOffset.dx;
+      final double shift = left - left.floorToDouble();
       WebParagraphDebug.log(
-        'calculateCluster "$text" webTextCluster.bounds.width=${webTextCluster.bounds.width} clusterOffset.dx=${clusterOffset.dx}+webTextCluster.advance.left=${webTextCluster.advance.left}+lineOffset.dx=${lineOffset.dx}\nsource: $sourceRect => target: $targetRect',
+        'calculateCluster "$text" bounds: ${webTextCluster.bounds} advance: ${webTextCluster.advance} shift $shift\n'
+        'clusterOffset: $clusterOffset lineOffset: $lineOffset\n'
+        'source: $sourceRect => target: $targetRect',
       );
     }
 
@@ -168,12 +195,20 @@ class TextPaint {
     TextBlock block,
     ui.Offset blockOffset,
     ui.Offset paragraphOffset,
+    double devicePixelRatio,
   ) {
     final ui.Rect advance = block.advance;
 
     // Define the text clusters rect (using advances, not selected rects)
+    // Source rect must take in account the scaling
+    final ui.Rect sourceRect = ui.Rect.fromLTWH(
+      0,
+      0,
+      advance.width * devicePixelRatio,
+      advance.height * devicePixelRatio,
+    );
+    // Target rect will be scaled by the canvas transform, so we don't scale it here
     final ui.Rect zeroRect = ui.Rect.fromLTWH(0, 0, advance.width, advance.height);
-    final ui.Rect sourceRect = zeroRect;
 
     // We shift the target rect to the correct x position inside the line and
     // the correct y position of the line itself
@@ -182,7 +217,7 @@ class TextPaint {
     final ui.Rect targetRect = zeroRect
         // TODO(jlavrova): Can we use `block.advance.left` instead of the cluster? That way
         //                 we don't have to worry about LTR vs RTL to get first cluster.
-        .translate(blockOffset.dx + block.advance.left, blockOffset.dy)
+        .translate(blockOffset.dx, blockOffset.dy)
         .translate(paragraphOffset.dx, paragraphOffset.dy);
 
     final String text = paragraph.getText(block.textRange);
