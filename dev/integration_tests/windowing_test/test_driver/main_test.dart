@@ -14,7 +14,22 @@ Future<String> _requestDataWithRetry(
 }) async {
   for (int attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      return await driver.requestData(message);
+      final String response = await driver.requestData(message);
+      if (response.isNotEmpty) {
+        // Check for an error returned from the driver extension handler.
+        try {
+          final Map<String, dynamic> data =
+              jsonDecode(response) as Map<String, dynamic>;
+          if (data.containsKey('error')) {
+            throw Exception(
+              'Driver extension handler reported an error: ${data['error']}',
+            );
+          }
+        } on FormatException {
+          // Not a JSON map, which is fine for some responses.
+        }
+      }
+      return response;
     } catch (e) {
       print('Request attempt $attempt failed: $e');
       if (attempt == maxRetries) {
