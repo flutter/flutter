@@ -65,7 +65,9 @@ void main() {
             ),
             // A route that uses FadeForwardsPageTransitionsBuilder.
             '/3' => _TestTransitionRoute<void>(
-              pageTransitionsBuilder: const FadeForwardsPageTransitionsBuilder(),
+              pageTransitionsBuilder: const FadeForwardsPageTransitionsBuilder(
+                backgroundColor: Color(0xff121212),
+              ),
               builder: (BuildContext context) {
                 return Scaffold(
                   body: Center(

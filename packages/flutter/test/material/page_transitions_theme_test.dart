@@ -194,7 +194,9 @@ void main() {
         );
       }
 
-      await tester.pumpWidget(buildApp(const FadeForwardsPageTransitionsBuilder()));
+      await tester.pumpWidget(
+        buildApp(const FadeForwardsPageTransitionsBuilder(backgroundColor: Color(0xff121212))),
+      );
 
       Finder findFadeForwardsPageTransition() {
         return find.descendant(
@@ -1158,7 +1160,9 @@ void main() {
           theme: ThemeData(
             pageTransitionsTheme: const PageTransitionsTheme(
               builders: <TargetPlatform, PageTransitionsBuilder>{
-                TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+                TargetPlatform.android: FadeForwardsPageTransitionsBuilder(
+                  backgroundColor: Color(0xff121212),
+                ),
               },
             ),
             colorScheme: ThemeData().colorScheme.copyWith(surface: Colors.pink),
