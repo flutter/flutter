@@ -286,4 +286,7 @@ void main() {
     bodyBuilder: (BuildContext context, Animation<double> animation) =>
         Container(),
   );
+
+  // Changes made in https://github.com/flutter/flutter/pull/177428
+  FadeForwardsPageTransitionsBuilder(backgroundColor: ColorScheme.of(context).surface);
 }

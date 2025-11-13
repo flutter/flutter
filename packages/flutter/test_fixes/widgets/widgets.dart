@@ -291,4 +291,7 @@ void main() {
     curve: Curves.elasticIn,
     reverseCurve: Curves.elasticOut,
   );
+
+  // Changes made in https://github.com/flutter/flutter/pull/177428
+  FadeForwardsPageTransitionsBuilder();
 }
