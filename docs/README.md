@@ -35,3 +35,4 @@ If you intend to contribute to Flutter, welcome! You are encouraged to start wit
 * [Threading in the Engine](./about/The-Engine-architecture.md#threading)
 * [When will my bug be fixed?](./contributing/issue_hygiene/README.md#when-will-my-bug-be-fixed)
 * [Security best practices](./infra/Security.md#best-practices)
+* [forceSingleThreadedSkwasm configuration option](forceSingleThreadedSkwasm.md): Details about forcing the `skwasm` WebAssembly renderer to single-threaded mode for compatibility.
