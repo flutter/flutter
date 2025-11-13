@@ -92,8 +92,6 @@ class SemanticsTester {
     ui.SemanticsHitTestBehavior hitTestBehavior = ui.SemanticsHitTestBehavior.defer,
     ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
     ui.Locale? locale,
-    String? minValue,
-    String? maxValue,
   }) {
     // Actions
     if (hasTap ?? false) {
@@ -230,8 +228,6 @@ class SemanticsTester {
       hitTestBehavior: hitTestBehavior,
       inputType: inputType,
       locale: locale,
-      minValue: minValue ?? '0',
-      maxValue: maxValue ?? '0',
     );
     _nodeUpdates.add(update);
     return update;
