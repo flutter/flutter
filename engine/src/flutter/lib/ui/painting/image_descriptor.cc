@@ -38,7 +38,7 @@ ImageDescriptor::ImageInfo ImageDescriptor::CreateImageInfo(
       .width = static_cast<uint32_t>(sk_image_info.width()),
       .height = static_cast<uint32_t>(sk_image_info.height()),
       .format = format,
-      .premultiplied = sk_image_info.alphaType() == kPremul_SkAlphaType,
+      .alpha_type = sk_image_info.alphaType(),
       .color_space = sk_image_info.refColorSpace(),
   };
 }
@@ -59,10 +59,8 @@ SkImageInfo ImageDescriptor::ToSkImageInfo(const ImageInfo& image_info) {
       FML_DCHECK(false) << "not a supported skia format";
       break;
   }
-  return SkImageInfo::Make(
-      image_info.width, image_info.height, color_type,
-      image_info.premultiplied ? kPremul_SkAlphaType : kUnpremul_SkAlphaType,
-      image_info.color_space);
+  return SkImageInfo::Make(image_info.width, image_info.height, color_type,
+                           image_info.alpha_type, image_info.color_space);
 }
 
 ImageDescriptor::ImageDescriptor(sk_sp<SkData> buffer,
@@ -131,7 +129,9 @@ void ImageDescriptor::initRaw(Dart_Handle descriptor_handle,
       .width = static_cast<uint32_t>(width),
       .height = static_cast<uint32_t>(height),
       .format = pixel_format,
-      .premultiplied = pixel_format == PixelFormat::kRGBAFloat32 ? false : true,
+      .alpha_type = pixel_format == PixelFormat::kRGBAFloat32
+                        ? kUnpremul_SkAlphaType
+                        : kPremul_SkAlphaType,
       .color_space = SkColorSpace::MakeSRGB(),
   };
 

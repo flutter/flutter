@@ -46,7 +46,7 @@ class ImageDescriptor : public RefCountedDartWrappable<ImageDescriptor> {
     const uint32_t width;
     const uint32_t height;
     const PixelFormat format;
-    const bool premultiplied;
+    const SkAlphaType alpha_type;
     const sk_sp<SkColorSpace> color_space;
   };
 

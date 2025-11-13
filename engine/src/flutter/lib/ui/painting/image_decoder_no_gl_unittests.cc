@@ -225,7 +225,7 @@ TEST(ImageDecoderNoGLTest, ImpellerRGBA32FDecode) {
       .width = 1,
       .height = 1,
       .format = ImageDescriptor::PixelFormat::kRGBAFloat32,
-      .premultiplied = false,
+      .alpha_type = kUnpremul_SkAlphaType,
   };
   auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
       immutable_buffer->data(), image_info, sizeof(pixel_data));
@@ -245,7 +245,8 @@ TEST(ImageDecoderNoGLTest, ImpellerRGBA32FDecode) {
           /*options=*/
           {.target_width = 1,
            .target_height = 1,
-           .target_format = ImageDecoder::TargetPixelFormat::kR32G32B32A32Float},
+           .target_format =
+               ImageDecoder::TargetPixelFormat::kR32G32B32A32Float},
           /*max_texture_size=*/{1, 1},
           /*supports_wide_gamut=*/true, capabilities, allocator);
 
@@ -286,7 +287,7 @@ TEST(ImageDecoderNoGLTest, ImpellerR32FDecode) {
       .width = 1,
       .height = 1,
       .format = ImageDescriptor::PixelFormat::kR32Float,
-      .premultiplied = false,
+      .alpha_type = kUnpremul_SkAlphaType,
   };
   auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
       immutable_buffer->data(), image_info, sizeof(pixel_data));
@@ -306,16 +307,14 @@ TEST(ImageDecoderNoGLTest, ImpellerR32FDecode) {
           /*options=*/
           {.target_width = 1,
            .target_height = 1,
-           .target_format =
-               ImageDecoder::TargetPixelFormat::kR32Float},
+           .target_format = ImageDecoder::TargetPixelFormat::kR32Float},
           /*max_texture_size=*/{1, 1},
           /*supports_wide_gamut=*/true, capabilities, allocator);
 
   // 4. Assert that wide_result->image_info.format is
   // impeller::PixelFormat::kR32G32B32A32Float.
   ASSERT_TRUE(result.ok());
-  ASSERT_EQ(result->image_info.format,
-            impeller::PixelFormat::kR32Float);
+  ASSERT_EQ(result->image_info.format, impeller::PixelFormat::kR32Float);
 
   // Optionally, verify the pixel data if needed.
   const float* decompressed_pixel_ptr =
