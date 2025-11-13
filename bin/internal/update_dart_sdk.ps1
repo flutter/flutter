@@ -30,7 +30,6 @@ $psMajorVersionRequired = 5
 $psMajorVersionLocal = $PSVersionTable.PSVersion.Major
 if ($psMajorVersionLocal -lt $psMajorVersionRequired) {
     Write-Host "Flutter requires PowerShell $psMajorVersionRequired.0 or newer."
-    Write-Host "See https://flutter.dev/docs/get-started/install/windows for more."
     Write-Host "Current version is $psMajorVersionLocal."
     # Use exit code 2 to signal that shared.bat should exit immediately instead of retrying.
     exit 2

@@ -1312,6 +1312,7 @@ Future<void> injectPlugins(
           featureFlags: featureFlags,
           logger: globals.logger,
           analytics: globals.analytics,
+          platform: globals.platform,
         );
     if (iosPlatform) {
       await darwinDependencyManagerSetup.setUp(platform: FlutterDarwinPlatform.ios);
