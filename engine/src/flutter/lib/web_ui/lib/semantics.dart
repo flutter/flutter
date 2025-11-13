@@ -355,6 +355,7 @@ class SemanticsFlags {
     this.isLink = false,
     this.isSlider = false,
     this.isKeyboardKey = false,
+    this.isAccessibilityFocusBlocked = false,
   });
   static const SemanticsFlags none = SemanticsFlags();
   final CheckedState isChecked;
@@ -380,6 +381,7 @@ class SemanticsFlags {
   final bool isLink;
   final bool isSlider;
   final bool isKeyboardKey;
+  final bool isAccessibilityFocusBlocked;
 
   SemanticsFlags merge(SemanticsFlags other) {
     return SemanticsFlags(
@@ -406,6 +408,7 @@ class SemanticsFlags {
       isLink: isLink || other.isLink,
       isSlider: isSlider || other.isSlider,
       isKeyboardKey: isKeyboardKey || other.isKeyboardKey,
+      isAccessibilityFocusBlocked: isAccessibilityFocusBlocked || other.isAccessibilityFocusBlocked,
     );
   }
 
@@ -433,6 +436,7 @@ class SemanticsFlags {
     bool? isLink,
     bool? isSlider,
     bool? isKeyboardKey,
+    bool? isAccessibilityFocusBlocked,
   }) {
     return SemanticsFlags(
       isChecked: isChecked ?? this.isChecked,
@@ -458,6 +462,7 @@ class SemanticsFlags {
       isKeyboardKey: isKeyboardKey ?? this.isKeyboardKey,
       isExpanded: isExpanded ?? this.isExpanded,
       isRequired: isRequired ?? this.isRequired,
+      isAccessibilityFocusBlocked: isAccessibilityFocusBlocked ?? this.isAccessibilityFocusBlocked,
     );
   }
 
@@ -488,7 +493,8 @@ class SemanticsFlags {
           isReadOnly == other.isReadOnly &&
           isLink == other.isLink &&
           isSlider == other.isSlider &&
-          isKeyboardKey == other.isKeyboardKey;
+          isKeyboardKey == other.isKeyboardKey &&
+          isAccessibilityFocusBlocked == other.isAccessibilityFocusBlocked;
 
   @override
   int get hashCode => Object.hashAll([
@@ -515,6 +521,7 @@ class SemanticsFlags {
     isLink,
     isSlider,
     isKeyboardKey,
+    isAccessibilityFocusBlocked,
   ]);
 
   List<String> toStrings() {
@@ -541,6 +548,7 @@ class SemanticsFlags {
       if (isMultiline) 'isMultiline',
       if (isReadOnly) 'isReadOnly',
       if (isFocused != Tristate.none) 'isFocusable',
+      if (isAccessibilityFocusBlocked) 'isAccessibilityFocusBlocked',
       if (isLink) 'isLink',
       if (isSlider) 'isSlider',
       if (isKeyboardKey) 'isKeyboardKey',
@@ -578,6 +586,34 @@ class SemanticsFlags {
         (isLink && other.isLink) ||
         (isSlider && other.isSlider) ||
         (isKeyboardKey && other.isKeyboardKey);
+  }
+
+  bool hasConflictingFlags(SemanticsFlags other) {
+    return isChecked.hasConflict(other.isChecked) ||
+        isSelected.hasConflict(other.isSelected) ||
+        isEnabled.hasConflict(other.isEnabled) ||
+        isToggled.hasConflict(other.isToggled) ||
+        isEnabled.hasConflict(other.isEnabled) ||
+        isExpanded.hasConflict(other.isExpanded) ||
+        isRequired.hasConflict(other.isRequired) ||
+        isFocused.hasConflict(other.isFocused) ||
+        (isButton && other.isButton) ||
+        (isTextField && other.isTextField) ||
+        (isInMutuallyExclusiveGroup && other.isInMutuallyExclusiveGroup) ||
+        (isHeader && other.isHeader) ||
+        (isObscured && other.isObscured) ||
+        (scopesRoute && other.scopesRoute) ||
+        (namesRoute && other.namesRoute) ||
+        (isHidden && other.isHidden) ||
+        (isImage && other.isImage) ||
+        (isLiveRegion && other.isLiveRegion) ||
+        (hasImplicitScrolling && other.hasImplicitScrolling) ||
+        (isMultiline && other.isMultiline) ||
+        (isReadOnly && other.isReadOnly) ||
+        (isLink && other.isLink) ||
+        (isSlider && other.isSlider) ||
+        (isKeyboardKey && other.isKeyboardKey) ||
+        (isAccessibilityFocusBlocked != other.isAccessibilityFocusBlocked);
   }
 }
 
