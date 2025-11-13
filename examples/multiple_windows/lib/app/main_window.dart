@@ -101,7 +101,7 @@ class _WindowsTable extends StatelessWidget {
         context: context,
         controller: dialog,
       ),
-      final TooltipWindowController tooltip => null,
+      TooltipWindowController() => null,
     };
   }
 
