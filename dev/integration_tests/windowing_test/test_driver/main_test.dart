@@ -122,15 +122,11 @@ void main() {
       onPlatform: {'linux': Skip('isMinimized is not supported on Wayland')},
     );
 
-    test(
-      'Can open dialog',
-      () async {
-        await driver.requestData(jsonEncode({'type': 'open_dialog'}));
-        await driver.waitFor(find.byValueKey('close_dialog'));
-        await driver.requestData(jsonEncode({'type': 'close_dialog'}));
-      },
-      timeout: Timeout.none,
-    );
+    test('Can open dialog', () async {
+      await driver.requestData(jsonEncode({'type': 'open_dialog'}));
+      await driver.waitFor(find.byValueKey('close_dialog'));
+      await driver.requestData(jsonEncode({'type': 'close_dialog'}));
+    }, timeout: Timeout.none);
 
     test(
       'Can set constraints and see the resize',
