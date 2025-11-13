@@ -6,6 +6,7 @@ import 'package:args/command_runner.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/terminal.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
@@ -129,7 +130,10 @@ abstract class _BaseGenerateCommand extends FlutterCommand {
     targetFile.writeAsStringSync(widgetCode);
 
     final String widgetType = isStateful ? 'stateful' : 'stateless';
-    globals.printStatus('✓ Generated $widgetType $componentTypeDisplay: ${targetFile.path}');
+    globals.printStatus(
+      globals.terminal.color('✓ Generated $widgetType $componentTypeDisplay: ${targetFile.path}', TerminalColor.cyan),
+    );
+    globals.printStatus('');
     return FlutterCommandResult.success();
   }
 
