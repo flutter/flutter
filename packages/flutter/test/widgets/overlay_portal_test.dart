@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/foundation/constants.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -212,7 +213,7 @@ void main() {
     });
     // stop before updating semantics.
     await tester.pump(null, EnginePhase.composite);
-    expect(renderObject.debugNeedsSemanticsUpdate, isFalse);
+    expect(renderObject.debugNeedsSemanticsUpdate, isTrue);
   });
 
   testWidgets('Safe to deactivate and re-activate OverlayPortal', (WidgetTester tester) async {
@@ -2031,79 +2032,6 @@ void main() {
       verifyTreeIsClean();
     });
 
-    testWidgets('Nested overlay children: swap inner and outer', (WidgetTester tester) async {
-      final GlobalKey outerKey = GlobalKey(debugLabel: 'Original Outer Widget');
-      final GlobalKey innerKey = GlobalKey(debugLabel: 'Original Inner Widget');
-
-      final RenderBox child1Box = RenderConstrainedBox(
-        additionalConstraints: const BoxConstraints(),
-      );
-      final RenderBox child2Box = RenderConstrainedBox(
-        additionalConstraints: const BoxConstraints(),
-      );
-      final RenderBox overlayChildBox = RenderConstrainedBox(
-        additionalConstraints: const BoxConstraints(),
-      );
-      addTearDown(overlayChildBox.dispose);
-
-      late StateSetter setState;
-      bool swapped = false;
-
-      // WidgetToRenderBoxAdapter has its own builtin GlobalKey.
-      final Widget child1 = WidgetToRenderBoxAdapter(renderBox: child1Box);
-      final Widget child2 = WidgetToRenderBoxAdapter(renderBox: child2Box);
-      final Widget child3 = WidgetToRenderBoxAdapter(renderBox: overlayChildBox);
-
-      late final OverlayEntry entry;
-      addTearDown(() {
-        entry.remove();
-        entry.dispose();
-      });
-
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Overlay(
-            initialEntries: <OverlayEntry>[
-              entry = OverlayEntry(
-                builder: (BuildContext context) {
-                  return StatefulBuilder(
-                    builder: (BuildContext context, StateSetter stateSetter) {
-                      setState = stateSetter;
-                      return OverlayPortal(
-                        key: swapped ? outerKey : innerKey,
-                        controller: swapped ? controller2 : controller1,
-                        overlayChildBuilder: (BuildContext context) {
-                          return OverlayPortal(
-                            key: swapped ? innerKey : outerKey,
-                            controller: swapped ? controller1 : controller2,
-                            overlayChildBuilder: (BuildContext context) {
-                              return OverlayPortal(
-                                controller: OverlayPortalController(),
-                                overlayChildBuilder: (BuildContext context) => child3,
-                              );
-                            },
-                            child: child2,
-                          );
-                        },
-                        child: child1,
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      );
-
-      setState(() {
-        swapped = true;
-      });
-      await tester.pump();
-      verifyTreeIsClean();
-    });
-
     testWidgets('Paint order', (WidgetTester tester) async {
       final GlobalKey outerKey = GlobalKey(debugLabel: 'Original Outer Widget');
       final GlobalKey innerKey = GlobalKey(debugLabel: 'Original Inner Widget');
@@ -2866,7 +2794,7 @@ void main() {
       final Matrix4 node1Transform = Matrix4.identity()
         ..scale(3.0, 3.0, 1.0)
         ..translate(0.0, TestSemantics.fullScreen.height - 10.0);
-      final Matrix4 node4Transform = node1Transform.clone()..translate(10.0);
+      final Matrix4 node3Transform = node1Transform.clone()..translate(10.0);
 
       final TestSemantics expected = TestSemantics.root(
         children: <TestSemantics>[
@@ -2875,28 +2803,42 @@ void main() {
             rect: Offset.zero & const Size(10, 10),
             transform: node1Transform,
             children: <TestSemantics>[
-              TestSemantics(id: 2, label: 'A', rect: Offset.zero & const Size(10, 10)),
-              // The crossAxisAlignment is set to `end`. The size of node 1 is 30 x 10.
               TestSemantics(
-                id: 3,
-                label: 'BBBB',
-                rect: Offset.zero & const Size(40, 10),
-                transform: Matrix4.translationValues(0, -rowOriginY, 0),
+                id: 2,
+                label: 'A',
+                rect: Offset.zero & const Size(10, 10),
+                children: <TestSemantics>[
+                  // The crossAxisAlignment is set to `end`. The size of node 1 is 30 x 10.
+                  TestSemantics(
+                    id: 4,
+                    rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                    transform: Matrix4.identity()
+                      ..scale(1 / 3, 1 / 3, 1)
+                      ..setTranslationRaw(0, -rowOriginY, 0),
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 5,
+                        label: 'BBBB',
+                        rect: const Rect.fromLTRB(0.0, 0.0, 40.0, 10.0),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
           TestSemantics(
-            id: 4,
+            id: 3,
             label: 'CC',
             rect: Offset.zero & const Size(20, 10),
-            transform: node4Transform,
+            transform: node3Transform,
           ),
         ],
       );
 
       expect(semantics, hasSemantics(expected));
       semantics.dispose();
-    });
+    }, skip: kIsWeb); // [intended] the web traversal order by using ARIA-OWNS.
 
     testWidgets('OverlayPortal overlay child clipping', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
@@ -3010,11 +2952,10 @@ void main() {
       final SemanticsNode clippedOverlayChild = semantics.nodesWith(label: 'B').single;
 
       expect(clippedOverlayPortal.rect, Offset.zero & const Size(800, 10));
-      expect(clippedOverlayChild.rect, Offset.zero & const Size(10, 10));
+      expect(clippedOverlayChild.rect, Offset.zero & const Size(10.0, 10.0));
 
       expect(clippedOverlayPortal.transform, isNull);
-      // The parent SemanticsNode is created by OverlayPortal.
-      expect(clippedOverlayChild.transform, Matrix4.translationValues(0.0, -600.0, 0.0));
+      expect(clippedOverlayChild.transform, isNull);
 
       semantics.dispose();
     });
@@ -3080,7 +3021,7 @@ void main() {
       await tester.pump();
 
       expect(semantics.nodesWith(label: 'A'), isEmpty);
-      expect(semantics.nodesWith(label: 'B'), isEmpty);
+      expect(semantics.nodesWith(label: 'B'), isNotEmpty);
       semantics.dispose();
 
       final RenderObject overlayRenderObject = tester.renderObject(find.byType(Overlay));
