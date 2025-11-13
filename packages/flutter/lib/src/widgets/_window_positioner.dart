@@ -180,7 +180,7 @@ enum WindowPositionerAnchor {
   }
 }
 
-/// The [WindowPositionerConstraintAdjustment] how a window will adjust
+/// The [WindowPositionerConstraintAdjustment] describes how a window will adjust
 /// its position when it would be partly constrained by the platform.
 ///
 /// {@template flutter.widgets.window_positioner.constraint_adjustment}
@@ -234,9 +234,9 @@ class WindowPositionerConstraintAdjustment {
   @internal
   final bool flipX;
 
-  /// If [flipY] is `true` and then window would be displayed off the screen in the Y-axis in one direction, then
+  /// If [flipY] is `true` and the window would be displayed off the screen in the Y-axis in one direction, then
   /// it will be flipped to the opposite side of its parent in order
-  /// it on screen.
+  /// to best display the window on screen.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -346,6 +346,7 @@ class WindowPositioner {
   final Offset offset;
 
   /// Defines how Flutter will adjust the position of the window if the unadjusted
+  /// position would result in the window being partly constrained by the platform.
   ///
   /// {@macro flutter.widgets.window_positioner.constraint_adjustment}
   ///

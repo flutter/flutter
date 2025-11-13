@@ -682,102 +682,10 @@ mixin class TooltipWindowControllerDelegate {
 /// When the window is no longer needed, the user should call [destroy] on this
 /// controller to release the resources associated with the window.
 ///
-/// {@tool snippet}
-/// An example usage might look like:
+/// {@tool dartpad}
+/// An example usage of [TooltipWindowController] looks like:
 ///
-/// ```dart
-/// // TODO(mattkae): remove invalid_use_of_internal_member ignore comment when this API is stable.
-/// // ignore_for_file: invalid_use_of_internal_member
-/// import 'package:flutter/material.dart';
-/// import 'package:flutter/src/widgets/_window.dart';
-/// import 'package:flutter/src/widgets/_window_positioner.dart';
-///
-/// void main() {
-///   runWidget(
-///     RegularWindow(
-///       controller: RegularWindowController(
-///         preferredSize: const Size(800, 600),
-///         preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
-///         title: 'Example Window',
-///       ),
-///       child: const MaterialApp(home: MyApp()),
-///     ),
-///   );
-/// }
-///
-/// class MyApp extends StatefulWidget {
-///   const MyApp({super.key});
-///
-///   @override
-///   State<MyApp> createState() {
-///     return _MyAppState();
-///   }
-/// }
-///
-/// class _MyAppState extends State<MyApp> {
-///   final GlobalKey _key = GlobalKey();
-///   TooltipWindowController? _tooltipController;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     final List<Widget> children = [
-///       Text(
-///         key: _key,
-///         'Hover Me',
-///         style: const TextStyle(color: Colors.white),
-///       ),
-///     ];
-///
-///     if (_tooltipController != null) {
-///       children.add(
-///         TooltipWindow(
-///           controller: _tooltipController!,
-///           child: Container(
-///             padding: const EdgeInsets.all(8),
-///             color: Colors.black,
-///             child: const Text('This is a tooltip', style: TextStyle(color: Colors.white)),
-///           ),
-///         ),
-///       );
-///     }
-///
-///     return MouseRegion(
-///       onEnter: (_) => setState(
-///         () => _tooltipController = TooltipWindowController(
-///           parent: WindowScope.of(context),
-///           anchorRect: _getAnchorRect()!,
-///           positioner: const WindowPositioner(
-///             parentAnchor: WindowPositionerAnchor.right,
-///             childAnchor: WindowPositionerAnchor.left,
-///           ),
-///         ),
-///       ),
-///       onExit: (_) => setState(() {
-///         _tooltipController?.destroy();
-///         _tooltipController = null;
-///       }),
-///       cursor: SystemMouseCursors.click,
-///       child: AnimatedContainer(
-///         duration: const Duration(milliseconds: 200),
-///         color: _tooltipController != null ? Colors.blueAccent : Colors.blue,
-///         padding: const EdgeInsets.all(12),
-///         child: Row(children: children),
-///       ),
-///     );
-///   }
-///
-///   Rect? _getAnchorRect() {
-///     final RenderBox? renderBox = _key.currentContext?.findRenderObject() as RenderBox?;
-///     if (renderBox != null) {
-///       final Offset position = renderBox.localToGlobal(Offset.zero);
-///       final Size size = renderBox.size;
-///       return position & size; // creates a Rect
-///     }
-///
-///     return null;
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/windows/tooltip.0.dart **
 /// {@end-tool}
 ///
 /// Children of a [TooltipWindow] widget can access the [TooltipWindowController]
