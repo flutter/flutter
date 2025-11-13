@@ -311,7 +311,10 @@ optional("fontmgr_fuchsia") {
   enabled = is_fuchsia
   public_defines = [ "SK_FONTMGR_FUCHSIA_AVAILABLE" ]
 
-  deps = [ ":typeface_freetype" ]
+  deps = [
+    ":typeface_freetype",
+    ":typeface_proxy",
+  ]
 
   if (is_fuchsia) {
     deps += [ "${fuchsia_sdk}/fidl/fuchsia.fonts" ]
