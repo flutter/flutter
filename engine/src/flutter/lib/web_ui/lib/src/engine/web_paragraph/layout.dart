@@ -30,12 +30,11 @@ class TextLayout {
   final lines = <TextLine>[];
 
   final allClusters = <WebCluster>[];
-  late var ellipsisClusters = <WebCluster>[];
   late final _mapping = _TextClusterMapping(paragraph.text.length + 1, allClusters);
 
-  bool get isDefaultLtr => paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr;
-
-  bool get isDefaultRtl => !isDefaultLtr;
+  // This list will be filled only if needed and AFTER line breaking when we know the text style that will be used for ellipsis
+  late List<WebCluster> ellipsisClusters = <WebCluster>[];
+  late final int ellipsisBidiLevel;
 
   void performLayout(double width) {
     // TODO(jlavrova): I suggest with go with the general code flow for an empty text
@@ -106,6 +105,7 @@ class TextLayout {
           ? paragraph.paragraphStyle.textStyle
           : paragraph.spans.last.style,
       text: '',
+      textDirection: paragraph.paragraphStyle.textDirection,
     );
     allClusters.add(EmptyCluster(emptySpan));
     _mapping.add(textIndex: paragraph.text.length, clusterIndex: allClusters.length - 1);
@@ -133,6 +133,20 @@ class TextLayout {
         'region ${region.level.isEven ? 'ltr' : 'rtl'} [${region.start}:${region.end}) => $clusterRange',
       );
       bidiRuns.add(run);
+    }
+    // Calculate ellipsis bidi level in advance
+    if (paragraph.paragraphStyle.ellipsis != null) {
+      final List<BidiRegion> regions1 = canvasKit.Bidi.getBidiRegions(
+        paragraph.paragraphStyle.ellipsis!,
+        ui.TextDirection.ltr,
+      );
+      assert(
+        regions1.isNotEmpty && regions1.length == 1,
+        'Ellipsis must be in a single direction only',
+      );
+      ellipsisBidiLevel = regions1.first.level;
+    } else {
+      ellipsisBidiLevel = 0;
     }
   }
 
@@ -176,12 +190,31 @@ class TextLayout {
     ClusterRange whitespaceRange,
     bool hardLineBreak,
     double top,
-    List<TextCluster> ellipsisClusters,
   ) {
     assert(contentRange.end == whitespaceRange.start);
     if (WebParagraphDebug.logging) {
       final allLineText = paragraph.getText(contentRange.start, whitespaceRange.end);
       WebParagraphDebug.log('LINE "$allLineText" clusters:$contentRange+$whitespaceRange');
+    }
+
+    // Add the ellipsis blocks if any
+    EllipsisBlock? ellipsisBlock;
+    if (ellipsisClusters.isNotEmpty) {
+      final TextSpan ellipsisSpan = TextSpan(
+        start: ellipsisClusters.first.start,
+        end: ellipsisClusters.last.end,
+        style: ellipsisClusters.first.style,
+        text: paragraph.paragraphStyle.ellipsis!,
+        textDirection: ellipsisBidiLevel.isEven ? ui.TextDirection.ltr : ui.TextDirection.rtl,
+      );
+      ellipsisBlock = EllipsisBlock(
+        ellipsisSpan,
+        ellipsisBidiLevel,
+        ClusterRange(start: 0, end: ellipsisSpan.size),
+        ui.TextRange(start: 0, end: ellipsisSpan.text.length),
+        0.0,
+        0.0,
+      );
     }
 
     // Arrange line vertically, calculate metrics and bounds
@@ -236,8 +269,15 @@ class TextLayout {
     // We need to take the VISUALLY first cluster on the line (in case of LTR/RTL it could be anywhere)
     // and shift all runs for this line so this first cluster starts from 0
     // Break the line into the blocks that belong to the same bidi run (monodirectional text) and to the same style block (the same text metrics)
-    double blockShiftFromLineStart = 0.0;
     double trailingSpacesWidth = 0.0;
+    // In case we attach the ellipsis block at the left (RTL paragraph) we need to reserve its width
+    double blockShiftFromLineStart =
+        ellipsisBlock != null && paragraph.paragraphStyle.textDirection == ui.TextDirection.rtl
+        ? ellipsisBlock.advance.width
+        : 0.0;
+    print(
+      'ELLIPSIS WIDTH: ${ellipsisBlock != null ? ellipsisBlock.advance.width : 0.0} blockShiftFromLineStart: $blockShiftFromLineStart',
+    );
     for (final BidiRun bidiRun in lineVisualRuns) {
       // TODO(jlavrova): we (almost always true) assume that trailing whitespaces do not affect the line height
       final ClusterRange textIntersection = bidiRun.clusterRange.intersect(contentRange);
@@ -256,7 +296,7 @@ class TextLayout {
         // TODO(jlavrova): what to do with trailing whitespaces? (After implementing queries)
         continue;
       }
-*/
+      */
       // We cannot ignore whitespaces because they are expected to be counted in some query apis (getBoxesForRange)
       assert(contentRange.isNotEmpty || whitespaceRange.isNotEmpty);
       final fullIntersection = textIntersection.merge(whitespacesIntersection);
@@ -367,24 +407,17 @@ class TextLayout {
     }
 
     // Add the ellipsis blocks if any
-    if (ellipsisClusters.isNotEmpty) {
-      this.ellipsisClusters = ellipsisClusters;
-      final TextSpan ellipsisSpan = TextSpan(
-        start: ellipsisClusters.first.start,
-        end: ellipsisClusters.last.end,
-        style: ellipsisClusters.first.style,
-        text: paragraph.paragraphStyle.ellipsis!,
-      );
-      line.visualBlocks.add(
-        EllipsisBlock(
-          ellipsisSpan,
-          paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr ? 0 : 1,
-          ClusterRange(start: 0, end: ellipsisSpan.extractClusters().length),
-          ui.TextRange(start: 0, end: ellipsisSpan.text.length),
-          blockShiftFromLineStart,
-          0.0,
-        ),
-      );
+    if (ellipsisBlock != null) {
+      if (paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr) {
+        // We need to adjust the block shift from line start because we are adding the ellipsis block at the end
+        print('blockShiftFromLineStart: $blockShiftFromLineStart');
+        ellipsisBlock.shiftFromLineStart = blockShiftFromLineStart;
+        ellipsisBlock.spanShiftFromLineStart = blockShiftFromLineStart;
+        line.visualBlocks.add(ellipsisBlock);
+      } else {
+        // We place the ellipsis block aat the beginning of the line (for RTL paragraph)
+        line.visualBlocks.insert(0, ellipsisBlock);
+      }
     }
 
     // Now when we calculated all line metrics we have to correct placeholders that depend on it
@@ -424,6 +457,11 @@ class TextLayout {
       '${ellipsisClusters.isNotEmpty ? 'Ellipsis: "${paragraph.paragraphStyle.ellipsis}" ${ellipsisClusters.length}' : ''}',
     );
 
+    for (final LineBlock block in line.visualBlocks) {
+      print(
+        'Block: ${block.textRange} ${block.clusterRange} ltr: ${block.isLtr} left: ${line.advance.left} + formatting: ${line.formattingShift} + shiftFromLineStart: ${block.shiftFromLineStart}',
+      );
+    }
     return line.advance.height;
   }
 
@@ -1078,7 +1116,7 @@ abstract class LineBlock {
   //          ^----^ shiftFromSpanStart
   // ^-------------^ shiftFromLineStart
   // ^--------^      spanShiftFromLineStart
-  final double shiftFromLineStart;
+  double shiftFromLineStart;
 
   // TODO(mdebbar): Remove when possible!
   double get spanShiftFromLineStart;
@@ -1108,7 +1146,7 @@ class TextBlock extends LineBlock {
   late final ui.Rect advance = span.getBlockSelection(this);
 
   @override
-  final double spanShiftFromLineStart;
+  double spanShiftFromLineStart;
 
   @override
   // TODO(jlavrova): Why are we defaulting to 1.0? In Chrome, the default line-height is `1.2` most of the time.

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 class WebParagraphDebug {
-  static bool logging = true;
+  static bool logging = false;
   static bool apiLogging = false;
 
   static void log(String arg) {

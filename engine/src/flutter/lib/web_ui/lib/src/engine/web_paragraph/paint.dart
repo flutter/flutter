@@ -128,12 +128,12 @@ class TextPaint {
           case StyleElements.shadows:
             paintContext.save();
             for (final ui.Shadow shadow in clusterText.style.shadows!) {
-              painter.fillShadow(clusterText, shadow, layout.isDefaultLtr);
+              painter.fillShadow(clusterText, shadow, block.isLtr);
               painter.paintShadow(canvas, sourceRect, targetRect);
             }
             paintContext.restore();
           case StyleElements.text:
-            painter.fillTextCluster(clusterText, layout.isDefaultLtr);
+            painter.fillTextCluster(clusterText, block.isLtr);
             painter.paintTextCluster(canvas, sourceRect, targetRect);
           default:
             assert(false);
@@ -236,13 +236,10 @@ class TextPaint {
   void paintLine(ui.Canvas canvas, TextLayout layout, TextLine line, double x, double y) {
     WebParagraphDebug.log('paintLineOnCanvasKit.Background: ${line.textRange}');
     _paintByBlocks(StyleElements.background, canvas, layout, line, x, y);
-
     WebParagraphDebug.log('paintLineOnCanvasKit.Shadows: ${line.textRange}');
     _paintByClusters(StyleElements.shadows, canvas, layout, line, x, y);
-
     WebParagraphDebug.log('paintLineOnCanvasKit.Text: ${line.textRange}');
     _paintByClusters(StyleElements.text, canvas, layout, line, x, y);
-
     WebParagraphDebug.log('paintLineOnCanvasKit.Decorations: ${line.textRange}');
     _paintByBlocks(StyleElements.decorations, canvas, layout, line, x, y);
   }

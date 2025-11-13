@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import '../../../ui.dart';
 import 'code_unit_flags.dart';
 import 'debug.dart';
 import 'layout.dart';
@@ -189,7 +190,6 @@ class _LineBuilder {
   final double _maxWidth;
 
   double _top;
-  List<TextCluster> ellipsisClusters = <TextCluster>[];
 
   // TODO(mdebbar): Make all these properties private, and maybe add getters when necessary.
   int start;
@@ -364,7 +364,6 @@ class _LineBuilder {
       ClusterRange(start: _whitespaceStart, end: _whitespaceEnd),
       hardLineBreak,
       _top,
-      ellipsisClusters,
     );
 
     // Reset the line builder to be ready for the next line.
@@ -404,6 +403,7 @@ class _LineBuilder {
     }
     // We need to shape the ellipsis here because only here we know the span/textStyle we ellipsize with
     final String ellipsis = _layout.paragraph.paragraphStyle.ellipsis!;
+
     // Let's walk backwards and see how many clusters we need to remove to fit the ellipsis in the line
     double cutOffWidth = 0.0;
     while (true) {
@@ -421,13 +421,14 @@ class _LineBuilder {
         end: ellipsis.length,
         style: cluster.style,
         text: ellipsis,
+        textDirection: _layout.ellipsisBidiLevel.isEven ? TextDirection.ltr : TextDirection.rtl,
       );
       WebParagraphDebug.log(
         'Ellipsize: $clusterIndex $_widthConsumedText $_widthWhitespaces $_widthPendingText - $cutOffWidth - $widthCluster + ${ellipsisSpan.advanceWidth!} ??? $_maxWidth',
       );
       cutOffWidth += widthCluster;
       if (_isWhitespace(cluster)) {
-        // We skip whitespaces when cuttin off for ellipsis, so just continue
+        // We skip whitespaces when cutting off for ellipsis, so just continue
         WebParagraphDebug.log('Ellipsize: whitespace');
       } else if (_widthConsumedText +
               _widthWhitespaces +
@@ -437,7 +438,7 @@ class _LineBuilder {
           _maxWidth) {
         WebParagraphDebug.log('Ellipsize: stop $clusterIndex');
         // We can fit the ellipsis now
-        ellipsisClusters = ellipsisSpan.extractClusters();
+        _layout.ellipsisClusters = ellipsisSpan.extractClusters();
         break;
       } else {
         WebParagraphDebug.log('Ellipsize: continue $clusterIndex');

@@ -611,9 +611,16 @@ class PlaceholderSpan extends ParagraphSpan {
 }
 
 class TextSpan extends ParagraphSpan {
-  TextSpan({required super.start, required super.end, required super.style, required this.text});
+  TextSpan({
+    required super.start,
+    required super.end,
+    required super.style,
+    required this.text,
+    required this.textDirection,
+  });
 
   final String text;
+  final ui.TextDirection? textDirection;
 
   late final DomTextMetrics _metrics = _getMetrics();
 
@@ -626,16 +633,11 @@ class TextSpan extends ParagraphSpan {
   late final double? advanceWidth = _metrics.width;
 
   DomTextMetrics _getMetrics() {
-    // TODO(jlavrova): Is this necessary?
-    // layoutContext.direction = isDefaultLtr ? 'ltr' : 'rtl';
-
+    // We need to set in up because we otherwise in RTL text without textDirection
+    // Canvas2D will return all clusters placed right to left starting from 0.
+    // Also, we have a separate (possibly, different) textDirection for the ellipsis.
     style.applyToContext(layoutContext);
-    if (text.length == 1) {
-      print(
-        'layoutContext.font:${layoutContext.font} letter:${layoutContext.letterSpacing} word:${layoutContext.wordSpacing} '
-        'caps:${layoutContext.fontVariantCaps} dir:${layoutContext.direction} kerning:${layoutContext.fontKerning} rendering:${layoutContext.textRendering}',
-      );
-    }
+    layoutContext.direction = textDirection == ui.TextDirection.ltr ? 'ltr' : 'rtl';
     return layoutContext.measureText(text);
   }
 
@@ -943,11 +945,6 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   void layout(ui.ParagraphConstraints constraints) {
-    // We need to set in up because we otherwise in RTL text without textDirection
-    // Canvas2D will return all clusters placed right to left starting from 0.
-    // If we go with that we will have to take it in account EVERYWHERE (lots of places)
-    layoutContext.direction = paragraphStyle.textDirection == ui.TextDirection.ltr ? 'ltr' : 'rtl';
-
     _layout.performLayout(constraints.width);
     WebParagraphDebug.apiTrace(
       'layout("$text", ${constraints.width.toStringAsFixed(4)}}): '
@@ -1261,6 +1258,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
         end: _fullTextBuffer.length,
         style: _spanStyle!,
         text: _spanTextBuffer.toString(),
+        textDirection: _paragraphStyle.textDirection,
       ),
     );
 
