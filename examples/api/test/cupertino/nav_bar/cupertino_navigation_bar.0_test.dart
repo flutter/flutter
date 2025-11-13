@@ -15,6 +15,9 @@ void main() {
     final CupertinoNavigationBar cupertinoNavigationBar = tester.widget<CupertinoNavigationBar>(
       navBarFinder,
     );
-    expect(cupertinoNavigationBar.backgroundColor, CupertinoColors.systemGrey.withOpacity(0.5));
+    expect(
+      cupertinoNavigationBar.backgroundColor,
+      CupertinoColors.systemGrey.withValues(alpha: 0.5),
+    );
   });
 }

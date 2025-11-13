@@ -223,7 +223,7 @@ class Tessellator {
                        Cap cap);
   };
 
-  Tessellator();
+  explicit Tessellator(bool supports_32bit_primitive_indices = true);
 
   virtual ~Tessellator();
 
@@ -375,14 +375,26 @@ class Tessellator {
   /// circle quadrant of the specified pixel radius
   Trigs GetTrigsForDeviceRadius(Scalar pixel_radius);
 
- protected:
+ private:
+  class ConvexTessellator {
+   public:
+    virtual ~ConvexTessellator() = default;
+    virtual VertexBuffer TessellateConvex(const PathSource& path,
+                                          HostBuffer& data_host_buffer,
+                                          HostBuffer& indexes_host_buffer,
+                                          Scalar tolerance,
+                                          bool supports_primitive_restart,
+                                          bool supports_triangle_fan) = 0;
+  };
+  template <typename IndexT>
+  friend class ConvexTessellatorImpl;
+
   /// Used for polyline generation.
-  std::unique_ptr<std::vector<Point>> point_buffer_;
-  std::unique_ptr<std::vector<uint16_t>> index_buffer_;
+  std::unique_ptr<ConvexTessellator> convex_tessellator_;
+
   /// Used for stroke path generation.
   std::vector<Point> stroke_points_;
 
- private:
   // Data for various Circle/EllipseGenerator classes, cached per
   // Tessellator instance which is usually the foreground life of an app
   // if not longer.
