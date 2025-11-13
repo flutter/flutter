@@ -34,11 +34,17 @@ below explain how to fetch the license information for the dependencies.
    new tag: `last_updated:"$version_tag"`.
 1. Update the GN list `embedding_dependencies_jars` in
    `src/flutter/shell/platform/android/BUILD.gn`.
-
-## Updating Gradle Lockfiles in the Framework After Adding Dependencies
-If you land a pr that changes the versions of the embedding dependencies,
-or adds a new dependency and makes use of it, you will also need to
-perform a manual roll of that change to the framework that re-generates
-the Gradle lockfiles using the script at
-`<framework_repo>/dev/tools/bin/generate_gradle_lockfiles.dart`
-(run with the `--no-gradle-generation` and `--no-exclusion` flags).
+1. The Gradle lockfiles will need to be updated, but they cannot be
+   updated in this PR. They will need to be updated in a follow-up
+   PR. Instead run
+   `<repo_root>/dev/tools/bin/generate_gradle_lockfiles.dart
+     --no-gradle-generation --no-exclusion --ignore-locking=Reason: <ISSUE>`.
+   Replace <ISSUE> with a link to an issue. This will create a 
+   '.ignore-locking.md' file that will disable Grdle locking and allow
+   tests to pass without locking.
+1. Once the initial PR is submitted, you will need to create a follow-up
+   PR that updates the Gradle lockfiles and deletes the ignore file.
+   Run 
+   `<repo_root>/dev/tools/bin/generate_gradle_lockfiles.dart
+     --no-gradle-generation --no-exclusion --stop-ignoring` to delete the
+   ignore file and update the Gradle lockfiles. Submit this PR as well.
