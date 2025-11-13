@@ -163,7 +163,7 @@ Future<T?> showCupertinoSheet<T>({
   bool enableDrag = true,
   double? topGap,
 }) {
-  assert(topGap == null || (topGap >= 0.0 && topGap <= 1.0), 'topGap must be between 0.0 and 1.0');
+  assert(topGap == null || (topGap >= 0.0 && topGap <= 0.9), 'topGap must be between 0.0 and 0.9');
   assert(pageBuilder != null || builder != null);
 
   final WidgetBuilder? effectivePageBuilder = builder ?? pageBuilder;
