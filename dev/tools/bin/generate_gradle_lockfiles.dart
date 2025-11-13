@@ -15,7 +15,6 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
-import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
 void main(List<String> arguments) {
@@ -26,8 +25,6 @@ void main(List<String> arguments) {
       'This tool automatically excludes a set of android subdirectories, '
       'defined at dev/tools/bin/config/lockfile_exclusion.yaml.\n'
       'To disable this behavior, run with `--no-exclusion`.\n';
-
-  const String ignoreFileName = '.ignore-locking.md';
 
   final ArgParser argParser = ArgParser()
     ..addFlag(
@@ -40,11 +37,6 @@ void main(List<String> arguments) {
       help:
           'Run the script using the config file at ./configs/lockfile_exclusion.yaml to skip the specified subdirectories.',
       defaultsTo: true,
-    )
-    ..addOption(
-      'ignore-locking',
-      help:
-          'Reason to disable gradle dependency locking. A reason must be given if --ignore-locking is used.',
     );
 
   ArgResults args;
@@ -64,15 +56,6 @@ void main(List<String> arguments) {
   // Skip android subdirectories specified in the ./config/lockfile_exclusion.yaml file.
   final bool useExclusion = (args['exclusion'] as bool?) ?? true;
 
-  final bool ignoreLocking = args['ignore-locking'] != null;
-  final String ignoreReason = (args['ignore-locking'] as String?) ?? '';
-
-  if (ignoreLocking && ignoreReason.isEmpty) {
-    stderr.writeln('A reason must be provided for --ignore-locking.');
-    stderr.writeln(usageMessage);
-    exit(1);
-  }
-
   const FileSystem fileSystem = LocalFileSystem();
 
   final Directory repoRoot = (() {
@@ -83,19 +66,6 @@ void main(List<String> arguments) {
     }
     return repoRoot;
   })();
-
-  final File ignoreFile = repoRoot
-      .childDirectory('dev')
-      .childDirectory('tools')
-      .childDirectory('bin')
-      .childDirectory('config')
-      .childFile(ignoreFileName);
-  if (ignoreLocking) {
-    print('Writing ignore file in ${ignoreFile.path}');
-    ignoreFile.writeAsStringSync(ignoreReason);
-  } else if (ignoreFile.existsSync()) {
-    ignoreFile.deleteSync();
-  }
 
   final Iterable<Directory> androidDirectories = discoverAndroidDirectories(repoRoot);
 
@@ -201,12 +171,11 @@ void main(List<String> arguments) {
     }
 
     if (gradleGeneration) {
-      final String relativeIgnorePath = path.relative(ignoreFile.path, from: androidDirectory.path);
       // Write file content corresponding to original file language.
       if (rootBuildGradle.basename.endsWith('.kts')) {
-        rootBuildGradle.writeAsStringSync(createGradleKtsFileContent(relativeIgnorePath));
+        rootBuildGradle.writeAsStringSync(rootGradleKtsFileContent);
       } else {
-        rootBuildGradle.writeAsStringSync(createGradleFileContent(relativeIgnorePath));
+        rootBuildGradle.writeAsStringSync(rootGradleFileContent);
       }
 
       if (settingsGradle.basename.endsWith('.kts')) {
@@ -248,8 +217,7 @@ String exec(String cmd, List<String> args, {String? workingDirectory}) {
   return result.stdout as String;
 }
 
-String createGradleFileContent(String path) {
-  const String rootGradleFileContent = r'''
+const String rootGradleFileContent = r'''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -275,8 +243,7 @@ subprojects {
     dependencyLocking {
         ignoredDependencies.add('io.flutter:*')
         lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")
-        var ignoreFile = file("${rootProject.projectDir}/<IGNORE_FILE>")
-        if (!ignoreFile.exists() && !project.hasProperty('local-engine-repo')) {
+        if (!project.hasProperty('local-engine-repo')) {
           lockAllConfigurations()
         }
     }
@@ -286,8 +253,6 @@ tasks.register("clean", Delete) {
     delete rootProject.layout.buildDirectory
 }
 ''';
-  return rootGradleFileContent.replaceAll('<IGNORE_FILE>', path);
-}
 
 const String settingGradleFileContent = r'''
 // Copyright 2014 The Flutter Authors. All rights reserved.
@@ -333,12 +298,11 @@ plugins {
 include ":app"
 ''';
 
-String createGradleKtsFileContent(String path) {
-  // Consider updating this file to reflect the latest updates to app templates
-  // when performing batch updates (this file is modeled after
-  // root_app/android/build.gradle.kts).
-  // After modification verify formatting with ktlint.
-  const String rootGradleKtsFileContent = r'''
+// Consider updating this file to reflect the latest updates to app templates
+// when performing batch updates (this file is modeled after
+// root_app/android/build.gradle.kts).
+// After modification verify formatting with ktlint.
+const String rootGradleKtsFileContent = r'''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -372,8 +336,7 @@ subprojects {
     dependencyLocking {
         ignoredDependencies.add("io.flutter:*")
         lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")
-        var ignoreFile = file("${rootProject.projectDir}/<IGNORE_FILE>")
-        if (!ignoreFile.exists() && !project.hasProperty("local-engine-repo")) {
+        if (!project.hasProperty("local-engine-repo")) {
             lockAllConfigurations()
         }
     }
@@ -383,8 +346,6 @@ tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
 ''';
-  return rootGradleKtsFileContent.replaceAll('<IGNORE_FILE>', path);
-}
 
 // Consider updating this file to reflect the latest updates to app templates
 // when performing batch updates (this file is modeled after
