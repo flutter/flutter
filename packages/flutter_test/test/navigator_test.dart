@@ -18,7 +18,9 @@ void main() {
           return switch (settings.name) {
             // A route that uses FadeForwardsPageTransitionsBuilder.
             '/' => _TestTransitionRoute<void>(
-              pageTransitionsBuilder: const FadeForwardsPageTransitionsBuilder(),
+              pageTransitionsBuilder: const FadeForwardsPageTransitionsBuilder(
+                backgroundColor: Color(0xff121212),
+              ),
               builder: (BuildContext context) {
                 return Scaffold(
                   body: Center(
@@ -68,7 +70,9 @@ void main() {
             ),
             // A route that uses FadeForwardsPageTransitionsBuilder with custom durations.
             '/3' => _TestTransitionRoute<void>(
-              pageTransitionsBuilder: const FadeForwardsPageTransitionsBuilder(),
+              pageTransitionsBuilder: const FadeForwardsPageTransitionsBuilder(
+                backgroundColor: Color(0xff121212),
+              ),
               transitionDurationOverride: const Duration(milliseconds: 678),
               reverseTransitionDurationOverride: const Duration(milliseconds: 789),
               builder: (BuildContext context) {
@@ -129,7 +133,9 @@ void main() {
 
     expect(
       observer.transitionDuration,
-      const FadeForwardsPageTransitionsBuilder().transitionDuration,
+      const FadeForwardsPageTransitionsBuilder(
+        backgroundColor: Color(0xff121212),
+      ).transitionDuration,
     );
 
     await tester.tap(find.text('Next'));
