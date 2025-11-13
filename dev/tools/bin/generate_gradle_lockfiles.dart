@@ -213,7 +213,8 @@ void main(List<String> arguments) {
     }
 
     if (gradleGeneration) {
-      final String relativeIgnorePath = path.relative(ignoreFile.path, from: androidDirectory.path);
+      // Ensure forward slashes are used.
+      final String relativeIgnorePath = path.relative(ignoreFile.path, from: androidDirectory.path).replaceAll(r'\', '/');
       // Write file content corresponding to original file language.
       if (rootBuildGradle.basename.endsWith('.kts')) {
         rootBuildGradle.writeAsStringSync(createGradleKtsFileContent(relativeIgnorePath));
