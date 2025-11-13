@@ -7,13 +7,33 @@ import 'dart:convert';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
+Future<String> _requestDataWithRetry(
+  FlutterDriver driver,
+  String message, {
+  int maxRetries = 3,
+}) async {
+  for (int attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await driver.requestData(message);
+    } catch (e) {
+      print('Request attempt $attempt failed: $e');
+      if (attempt == maxRetries) {
+        rethrow;
+      }
+
+      await Future.delayed(Duration(milliseconds: 100 * attempt));
+    }
+  }
+  throw StateError('Should not reach here');
+}
+
 void main() {
   group('end-to-end test', () {
     late final FlutterDriver driver;
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
-      await driver.requestData(jsonEncode({'type': 'ping'}));
+      await _requestDataWithRetry(driver, jsonEncode({'type': 'ping'}));
     });
 
     tearDownAll(() async {
@@ -21,10 +41,12 @@ void main() {
     });
 
     test('Can set and get title', () async {
-      await driver.requestData(
+      await _requestDataWithRetry(
+        driver,
         jsonEncode({'type': 'set_title', 'title': 'Hello World'}),
       );
-      final response = await driver.requestData(
+      final response = await _requestDataWithRetry(
+        driver,
         jsonEncode({'type': 'get_title'}),
       );
       final data = jsonDecode(response);
@@ -32,7 +54,8 @@ void main() {
     }, timeout: Timeout.none);
 
     test('Initial controller size is correct', () async {
-      final response = await driver.requestData(
+      final response = await _requestDataWithRetry(
+        driver,
         jsonEncode({'type': 'get_size'}),
       );
       final data = jsonDecode(response);
@@ -41,10 +64,12 @@ void main() {
     }, timeout: Timeout.none);
 
     test('Can set and get size', () async {
-      await driver.requestData(
+      await _requestDataWithRetry(
+        driver,
         jsonEncode({'type': 'set_size', 'width': 800, 'height': 600}),
       );
-      final response = await driver.requestData(
+      final response = await _requestDataWithRetry(
+        driver,
         jsonEncode({'type': 'get_size'}),
       );
       final data = jsonDecode(response);
@@ -53,53 +78,77 @@ void main() {
     }, timeout: Timeout.none);
 
     test('Can set and get fullscreen', () async {
-      await driver.requestData(jsonEncode({'type': 'set_fullscreen'}));
-      var response = await driver.requestData(
+      await _requestDataWithRetry(
+        driver,
+        jsonEncode({'type': 'set_fullscreen'}),
+      );
+      var response = await _requestDataWithRetry(
+        driver,
         jsonEncode({'type': 'get_fullscreen'}),
       );
       var data = jsonDecode(response);
-      expect(data["isFullscreen"], true);
+      expect(data['isFullscreen'], true);
 
-      await driver.requestData(jsonEncode({'type': 'unset_fullscreen'}));
-      response = await driver.requestData(
+      await _requestDataWithRetry(
+        driver,
+        jsonEncode({'type': 'unset_fullscreen'}),
+      );
+      response = await _requestDataWithRetry(
+        driver,
         jsonEncode({'type': 'get_fullscreen'}),
       );
       data = jsonDecode(response);
-      expect(data["isFullscreen"], false);
+      expect(data['isFullscreen'], false);
     }, timeout: Timeout.none);
 
     test('Can set and get maximized', () async {
-      await driver.requestData(jsonEncode({'type': 'set_maximized'}));
-      var response = await driver.requestData(
+      await _requestDataWithRetry(
+        driver,
+        jsonEncode({'type': 'set_maximized'}),
+      );
+      var response = await _requestDataWithRetry(
+        driver,
         jsonEncode({'type': 'get_maximized'}),
       );
       var data = jsonDecode(response);
-      expect(data["isMaximized"], true);
+      expect(data['isMaximized'], true);
 
-      await driver.requestData(jsonEncode({'type': 'unset_maximized'}));
-      response = await driver.requestData(
+      await _requestDataWithRetry(
+        driver,
+        jsonEncode({'type': 'unset_maximized'}),
+      );
+      response = await _requestDataWithRetry(
+        driver,
         jsonEncode({'type': 'get_maximized'}),
       );
       data = jsonDecode(response);
-      expect(data["isMaximized"], false);
+      expect(data['isMaximized'], false);
     }, timeout: Timeout.none);
 
     test(
       'Can set and get minimized',
       () async {
-        await driver.requestData(jsonEncode({'type': 'set_minimized'}));
-        var response = await driver.requestData(
+        await _requestDataWithRetry(
+          driver,
+          jsonEncode({'type': 'set_minimized'}),
+        );
+        var response = await _requestDataWithRetry(
+          driver,
           jsonEncode({'type': 'get_minimized'}),
         );
         var data = jsonDecode(response);
-        expect(data["isMinimized"], true);
+        expect(data['isMinimized'], true);
 
-        await driver.requestData(jsonEncode({'type': 'unset_minimized'}));
-        response = await driver.requestData(
+        await _requestDataWithRetry(
+          driver,
+          jsonEncode({'type': 'unset_minimized'}),
+        );
+        response = await _requestDataWithRetry(
+          driver,
           jsonEncode({'type': 'get_minimized'}),
         );
         data = jsonDecode(response);
-        expect(data["isMinimized"], false);
+        expect(data['isMinimized'], false);
       },
       timeout: Timeout.none,
       onPlatform: {'linux': Skip('isMinimized is not supported on Wayland')},
@@ -108,15 +157,20 @@ void main() {
     test(
       'Can set and get activated',
       () async {
-        await driver.requestData(
+        await _requestDataWithRetry(
+          driver,
           jsonEncode({'type': 'set_minimized'}),
         ); // Minimize first so that the window is not active
-        await driver.requestData(jsonEncode({'type': 'set_activated'}));
-        final response = await driver.requestData(
+        await _requestDataWithRetry(
+          driver,
+          jsonEncode({'type': 'set_activated'}),
+        );
+        final response = await _requestDataWithRetry(
+          driver,
           jsonEncode({'type': 'get_activated'}),
         );
         final data = jsonDecode(response);
-        expect(data["isActivated"], true);
+        expect(data['isActivated'], true);
       },
       timeout: Timeout.none,
       onPlatform: {'linux': Skip('isMinimized is not supported on Wayland')},
@@ -125,9 +179,18 @@ void main() {
     test(
       'Can open dialog',
       () async {
-        await driver.requestData(jsonEncode({'type': 'open_dialog'}));
-        await driver.waitFor(find.byValueKey('close_dialog'));
-        await driver.requestData(jsonEncode({'type': 'close_dialog'}));
+        await _requestDataWithRetry(
+          driver,
+          jsonEncode({'type': 'open_dialog'}),
+        );
+        await driver.waitFor(
+          find.byValueKey('close_dialog'),
+          timeout: Duration(seconds: 10),
+        );
+        await _requestDataWithRetry(
+          driver,
+          jsonEncode({'type': 'close_dialog'}),
+        );
       },
       timeout: Timeout.none,
       onPlatform: {'linux': Skip('Dialogs are not yet supported on Wayland')},
@@ -136,7 +199,8 @@ void main() {
     test(
       'Can set constraints and see the resize',
       () async {
-        await driver.requestData(
+        await _requestDataWithRetry(
+          driver,
           jsonEncode({
             'type': 'set_constraints',
             'min_width': 0,
@@ -145,7 +209,8 @@ void main() {
             'max_height': 501,
           }),
         );
-        final response = await driver.requestData(
+        final response = await _requestDataWithRetry(
+          driver,
           jsonEncode({'type': 'get_size'}),
         );
         final data = jsonDecode(response);
@@ -159,7 +224,8 @@ void main() {
     test(
       'Can set constraints and see the resize (Linux)',
       () async {
-        await driver.requestData(
+        await _requestDataWithRetry(
+          driver,
           jsonEncode({
             'type': 'set_constraints',
             'min_width': 0,
@@ -168,7 +234,8 @@ void main() {
             'max_height': 501,
           }),
         );
-        final response = await driver.requestData(
+        final response = await _requestDataWithRetry(
+          driver,
           jsonEncode({'type': 'get_size'}),
         );
         final data = jsonDecode(response);
