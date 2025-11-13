@@ -1909,6 +1909,10 @@ enum PixelFormat {
   /// component, followed by: green, blue and alpha. Premultiplied alpha isn't
   /// used, matching [ImageByteFormat.rawExtendedRgba128].
   rgbaFloat32,
+
+  /// This is an unspecified pixel format that leaves it to Flutter's discretion
+  /// to choose the optimal pixel format.
+  optimal,
 }
 
 /// Signature for [Image] lifecycle events.
@@ -2678,6 +2682,7 @@ void decodeImageFromPixels(
   int? targetWidth,
   int? targetHeight,
   bool allowUpscaling = true,
+  PixelFormat targetFormat = PixelFormat.optimal,
 }) {
   if (targetWidth != null) {
     assert(allowUpscaling || targetWidth <= width);
@@ -2705,7 +2710,11 @@ void decodeImageFromPixels(
     }
 
     descriptor
-        .instantiateCodec(targetWidth: targetWidth, targetHeight: targetHeight)
+        .instantiateCodec(
+          targetWidth: targetWidth,
+          targetHeight: targetHeight,
+          targetFormat: targetFormat,
+        )
         .then((Codec codec) {
           final Future<FrameInfo> frameInfo = codec.getNextFrame();
           codec.dispose();
@@ -8085,7 +8094,11 @@ abstract class ImageDescriptor {
   ///
   /// If either targetWidth or targetHeight is less than or equal to zero, it
   /// will be treated as if it is null.
-  Future<Codec> instantiateCodec({int? targetWidth, int? targetHeight});
+  Future<Codec> instantiateCodec({
+    int? targetWidth,
+    int? targetHeight,
+    PixelFormat targetFormat = PixelFormat.optimal,
+  });
 }
 
 base class _NativeImageDescriptor extends NativeFieldWrapperClass1 implements ImageDescriptor {
@@ -8159,7 +8172,11 @@ base class _NativeImageDescriptor extends NativeFieldWrapperClass1 implements Im
   external void dispose();
 
   @override
-  Future<Codec> instantiateCodec({int? targetWidth, int? targetHeight}) async {
+  Future<Codec> instantiateCodec({
+    int? targetWidth,
+    int? targetHeight,
+    PixelFormat targetFormat = PixelFormat.optimal,
+  }) async {
     if (targetWidth != null && targetWidth <= 0) {
       targetWidth = null;
     }
@@ -8179,14 +8196,19 @@ base class _NativeImageDescriptor extends NativeFieldWrapperClass1 implements Im
     assert(targetHeight != null);
 
     final Codec codec = _NativeCodec._();
-    _instantiateCodec(codec, targetWidth!, targetHeight!);
+    _instantiateCodec(codec, targetWidth!, targetHeight!, targetFormat.index);
     return codec;
   }
 
-  @Native<Void Function(Pointer<Void>, Handle, Int32, Int32)>(
+  @Native<Void Function(Pointer<Void>, Handle, Int32, Int32, Int32)>(
     symbol: 'ImageDescriptor::instantiateCodec',
   )
-  external void _instantiateCodec(Codec outCodec, int targetWidth, int targetHeight);
+  external void _instantiateCodec(
+    Codec outCodec,
+    int targetWidth,
+    int targetHeight,
+    int targetFormat,
+  );
 
   @override
   String toString() =>

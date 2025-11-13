@@ -34,14 +34,25 @@ class ImageDecoder {
 
   using ImageResult = std::function<void(sk_sp<DlImage>, std::string)>;
 
+  enum PixelFormat {
+    kUnknown,
+    kOptimal,
+    kR32G32B32A32Float,
+  };
+
+  struct Options {
+    uint32_t target_width = 0;
+    uint32_t target_height = 0;
+    PixelFormat target_format = PixelFormat::kOptimal;
+  };
+
   // Takes an image descriptor and returns a handle to a texture resident on the
   // GPU. All image decompression and resizes are done on a worker thread
   // concurrently. Texture upload is done on the IO thread and the result
   // returned back on the UI thread. On error, the texture is null but the
   // callback is guaranteed to return on the UI thread.
   virtual void Decode(fml::RefPtr<ImageDescriptor> descriptor,
-                      uint32_t target_width,
-                      uint32_t target_height,
+                      const Options& options,
                       const ImageResult& result) = 0;
 
   fml::TaskRunnerAffineWeakPtr<ImageDecoder> GetWeakPtr() const;
