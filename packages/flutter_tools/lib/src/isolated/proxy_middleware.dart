@@ -30,11 +30,9 @@ shelf.Request proxyRequest(shelf.Request originalRequest, Uri finalTargetUrl) {
 /// 3. Resolving the final target URL by combining the target URI, the rewritten
 ///    request path and the request query
 Uri getFinalTargetUri(shelf.Request request, ProxyRule rule) {
-  final String requestPath = request.requestedUri.path;
-  final String requestQuery = request.requestedUri.query;
-  final String rewrittenPath = rule.replace(requestPath);
+  final String rewrittenPath = rule.replace(request.requestedUri.path);
   final Uri targetUri = rule.getTargetUri();
-  return targetUri.resolveUri(Uri(path: rewrittenPath, query: requestQuery));
+  return targetUri.resolveUri(Uri(path: rewrittenPath, query: request.requestedUri.query));
 }
 
 /// Iterates through the provided [effectiveProxy] rules for each incoming [shelf.Request].
