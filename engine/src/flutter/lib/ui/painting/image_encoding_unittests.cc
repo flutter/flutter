@@ -10,7 +10,7 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/lib/ui/painting/image.h"
-#include "flutter/lib/ui/snapshot_delegate.h"
+#include "flutter/lib/ui/painting/testing/mocks.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/common/shell_test.h"
 #include "flutter/shell/common/thread_host.h"
@@ -34,22 +34,6 @@ namespace testing {
 namespace {
 fml::AutoResetWaitableEvent message_latch;
 
-class MockDlImage : public DlImage {
- public:
-  MOCK_METHOD(sk_sp<SkImage>, skia_image, (), (const, override));
-  MOCK_METHOD(std::shared_ptr<impeller::Texture>,
-              impeller_texture,
-              (),
-              (const, override));
-  MOCK_METHOD(bool, isOpaque, (), (const, override));
-  MOCK_METHOD(bool, isTextureBacked, (), (const, override));
-  MOCK_METHOD(bool, isUIThreadSafe, (), (const, override));
-  MOCK_METHOD(DlISize, GetSize, (), (const, override));
-  MOCK_METHOD(size_t, GetApproximateByteSize, (), (const, override));
-};
-
-}  // namespace
-
 class MockSyncSwitch {
  public:
   struct Handlers {
@@ -68,47 +52,7 @@ class MockSyncSwitch {
   MOCK_METHOD(void, Execute, (const Handlers& handlers), (const));
   MOCK_METHOD(void, SetSwitch, (bool value));
 };
-
-class MockSnapshotDelegate : public SnapshotDelegate {
- public:
-  MockSnapshotDelegate() : weak_factory_(this) {}
-
-  MOCK_METHOD(std::unique_ptr<GpuImageResult>,
-              MakeSkiaGpuImage,
-              (sk_sp<DisplayList>, const SkImageInfo&),
-              (override));
-  MOCK_METHOD(std::shared_ptr<TextureRegistry>,
-              GetTextureRegistry,
-              (),
-              (override));
-  MOCK_METHOD(GrDirectContext*, GetGrContext, (), (override));
-  MOCK_METHOD(void,
-              MakeRasterSnapshot,
-              (sk_sp<DisplayList>,
-               DlISize,
-               std::function<void(sk_sp<DlImage>)>),
-              (override));
-  MOCK_METHOD(sk_sp<DlImage>,
-              MakeRasterSnapshotSync,
-              (sk_sp<DisplayList>, DlISize),
-              (override));
-  MOCK_METHOD(sk_sp<SkImage>,
-              ConvertToRasterImage,
-              (sk_sp<SkImage>),
-              (override));
-  MOCK_METHOD(void,
-              CacheRuntimeStage,
-              (const std::shared_ptr<impeller::RuntimeStage>&),
-              (override));
-  MOCK_METHOD(bool, MakeRenderContextCurrent, (), (override));
-
-  fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> GetWeakPtr() {
-    return weak_factory_.GetWeakPtr();
-  }
-
- private:
-  fml::TaskRunnerAffineWeakPtrFactory<MockSnapshotDelegate> weak_factory_;
-};
+}  // namespace
 
 TEST_F(ShellTest, EncodeImageGivesExternalTypedData) {
   auto native_encode_image = [&](Dart_NativeArguments args) {
