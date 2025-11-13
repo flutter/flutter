@@ -747,9 +747,6 @@ void Canvas::DrawArc(const Arc& arc, const Paint& paint) {
     // of the arc - which is not true for elliptical arcs where the inner
     // and outer samples are perpendicular to the traveling direction of the
     // elliptical curve which may not line up with the center of the bounds.
-    //
-    // TODO(flar): It also only supports Butt and Square caps for now.
-    // See https://github.com/flutter/flutter/issues/169400
     if (oval_bounds.IsSquare()) {
       ArcGeometry geom(arc, paint.stroke);
       AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
