@@ -25,6 +25,9 @@ class GenerateCommand extends FlutterCommand {
   String get name => 'generate';
 
   @override
+  String get category => FlutterCommandCategory.project;
+
+  @override
   List<String> get aliases => const <String>['g'];
 
   @override
