@@ -96,19 +96,6 @@ void main(List<String> arguments) {
     return repoRoot;
   })();
 
-  final File ignoreFile = repoRoot
-      .childDirectory('dev')
-      .childDirectory('tools')
-      .childDirectory('bin')
-      .childDirectory('config')
-      .childFile(ignoreFilename);
-  if (ignoreLocking) {
-    print('Writing ignore file in ${ignoreFile.path}');
-    ignoreFile.writeAsStringSync(ignoreReason);
-  } else if (stopIgnoring && ignoreFile.existsSync()) {
-    ignoreFile.deleteSync();
-  }
-
   final Iterable<Directory> androidDirectories = discoverAndroidDirectories(repoRoot);
 
   final File exclusionFile = repoRoot
@@ -206,6 +193,14 @@ void main(List<String> arguments) {
 
     print('Processing ${androidDirectory.path}');
 
+    final File ignoreFile = androidDirectory.childFile(ignoreFilename);
+    if (ignoreLocking) {
+      print('Writing ignore file in ${ignoreFile.path}');
+      ignoreFile.writeAsStringSync(ignoreReason);
+    } else if (stopIgnoring && ignoreFile.existsSync()) {
+      ignoreFile.deleteSync();
+    }
+
     try {
       androidDirectory.childFile('buildscript-gradle.lockfile').deleteSync();
     } on FileSystemException {
@@ -213,13 +208,11 @@ void main(List<String> arguments) {
     }
 
     if (gradleGeneration) {
-      // Ensure forward slashes are used.
-      final String relativeIgnorePath = path.relative(ignoreFile.path, from: androidDirectory.path).replaceAll(r'\', '/');
       // Write file content corresponding to original file language.
       if (rootBuildGradle.basename.endsWith('.kts')) {
-        rootBuildGradle.writeAsStringSync(createGradleKtsFileContent(relativeIgnorePath));
+        rootBuildGradle.writeAsStringSync(rootGradleKtsFileContent);
       } else {
-        rootBuildGradle.writeAsStringSync(createGradleFileContent(relativeIgnorePath));
+        rootBuildGradle.writeAsStringSync(rootGradleFileContent);
       }
 
       if (settingsGradle.basename.endsWith('.kts')) {
@@ -261,8 +254,7 @@ String exec(String cmd, List<String> args, {String? workingDirectory}) {
   return result.stdout as String;
 }
 
-String createGradleFileContent(String path) {
-  const String rootGradleFileContent = r'''
+const String rootGradleFileContent = r'''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -288,7 +280,7 @@ subprojects {
     dependencyLocking {
         ignoredDependencies.add('io.flutter:*')
         lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")
-        def ignoreFile = file("${rootProject.projectDir}/<IGNORE_FILE>")
+        def ignoreFile = file("${rootProject.projectDir}/.ignore-locking.md")
         if (!ignoreFile.exists() && !project.hasProperty('local-engine-repo')) {
           lockAllConfigurations()
         }
@@ -299,8 +291,6 @@ tasks.register("clean", Delete) {
     delete rootProject.layout.buildDirectory
 }
 ''';
-  return rootGradleFileContent.replaceAll('<IGNORE_FILE>', path);
-}
 
 const String settingGradleFileContent = r'''
 // Copyright 2014 The Flutter Authors. All rights reserved.
@@ -346,12 +336,11 @@ plugins {
 include ":app"
 ''';
 
-String createGradleKtsFileContent(String path) {
-  // Consider updating this file to reflect the latest updates to app templates
-  // when performing batch updates (this file is modeled after
-  // root_app/android/build.gradle.kts).
-  // After modification verify formatting with ktlint.
-  const String rootGradleKtsFileContent = r'''
+// Consider updating this file to reflect the latest updates to app templates
+// when performing batch updates (this file is modeled after
+// root_app/android/build.gradle.kts).
+// After modification verify formatting with ktlint.
+const String rootGradleKtsFileContent = r'''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -385,7 +374,7 @@ subprojects {
     dependencyLocking {
         ignoredDependencies.add("io.flutter:*")
         lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")
-        var ignoreFile = file("${rootProject.projectDir}/<IGNORE_FILE>")
+        var ignoreFile = file("${rootProject.projectDir}/.ignore-locking.md")
         if (!ignoreFile.exists() && !project.hasProperty("local-engine-repo")) {
             lockAllConfigurations()
         }
@@ -396,8 +385,6 @@ tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
 ''';
-  return rootGradleKtsFileContent.replaceAll('<IGNORE_FILE>', path);
-}
 
 // Consider updating this file to reflect the latest updates to app templates
 // when performing batch updates (this file is modeled after
