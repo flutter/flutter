@@ -234,7 +234,7 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
     );
     return Uri.parse(
       <String>[
-        if (namePrefix != null) namePrefix!,
+        ?namePrefix,
         basedir.pathSegments[basedir.pathSegments.length - 2],
         golden.toString(),
       ].join('.'),

@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 abstract class FallbackFontRegistry {
   List<int> getMissingCodePoints(List<int> codePoints, List<String> fontFamilies);
@@ -92,7 +93,7 @@ class FontFallbackManager {
   void ensureFontsSupportText(String text, List<String> fontFamilies) {
     // TODO(hterkelsen): Make this faster for the common case where the text
     // is supported by the given fonts.
-    if (debugDisableFontFallbacks) {
+    if (ui_web.TestEnvironment.instance.disableFontFallbacks) {
       return;
     }
 
@@ -239,7 +240,7 @@ class FontFallbackManager {
         printWarning(
           'Could not find a set of Noto fonts to display all missing '
           'characters. Please add a font asset for the missing characters.'
-          ' See: https://flutter.dev/docs/cookbook/design/fonts',
+          ' See: https://docs.flutter.dev/cookbook/design/fonts',
         );
         _codePointsWithNoKnownFont.addAll(missingCodePoints);
       }

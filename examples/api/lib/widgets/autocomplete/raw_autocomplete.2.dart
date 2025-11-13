@@ -44,7 +44,7 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
       child: Column(
         children: <Widget>[
           DropdownButtonFormField<String>(
-            value: _dropdownValue,
+            initialValue: _dropdownValue,
             icon: const Icon(Icons.arrow_downward),
             hint: const Text('This is a regular DropdownButtonFormField'),
             elevation: 16,
@@ -54,12 +54,11 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
                 _dropdownValue = newValue;
               });
             },
-            items:
-                <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((
-                  String value,
-                ) {
-                  return DropdownMenuItem<String>(value: value, child: Text(value));
-                }).toList(),
+            items: <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((
+              String value,
+            ) {
+              return DropdownMenuItem<String>(value: value, child: Text(value));
+            }).toList(),
             validator: (String? value) {
               if (value == null) {
                 return 'Must make a selection.';
@@ -88,55 +87,57 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
                 _autocompleteSelection = selection;
               });
             },
-            fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController textEditingController,
-              FocusNode focusNode,
-              VoidCallback onFieldSubmitted,
-            ) {
-              return TextFormField(
-                controller: textEditingController,
-                decoration: const InputDecoration(hintText: 'This is a RawAutocomplete!'),
-                focusNode: focusNode,
-                onFieldSubmitted: (String value) {
-                  onFieldSubmitted();
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController textEditingController,
+                  FocusNode focusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  return TextFormField(
+                    controller: textEditingController,
+                    decoration: const InputDecoration(hintText: 'This is a RawAutocomplete!'),
+                    focusNode: focusNode,
+                    onFieldSubmitted: (String value) {
+                      onFieldSubmitted();
+                    },
+                    validator: (String? value) {
+                      if (!_options.contains(value)) {
+                        return 'Nothing selected.';
+                      }
+                      return null;
+                    },
+                  );
                 },
-                validator: (String? value) {
-                  if (!_options.contains(value)) {
-                    return 'Nothing selected.';
-                  }
-                  return null;
-                },
-              );
-            },
-            optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options,
-            ) {
-              return Align(
-                alignment: Alignment.topLeft,
-                child: Material(
-                  elevation: 4.0,
-                  child: SizedBox(
-                    height: 200.0,
-                    child: ListView.builder(
-                      padding: const EdgeInsets.all(8.0),
-                      itemCount: options.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final String option = options.elementAt(index);
-                        return GestureDetector(
-                          onTap: () {
-                            onSelected(option);
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  return Align(
+                    alignment: Alignment.topLeft,
+                    child: Material(
+                      elevation: 4.0,
+                      child: SizedBox(
+                        height: 200.0,
+                        child: ListView.builder(
+                          padding: const EdgeInsets.all(8.0),
+                          itemCount: options.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final String option = options.elementAt(index);
+                            return GestureDetector(
+                              onTap: () {
+                                onSelected(option);
+                              },
+                              child: ListTile(title: Text(option)),
+                            );
                           },
-                          child: ListTile(title: Text(option)),
-                        );
-                      },
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              );
-            },
+                  );
+                },
           ),
           ElevatedButton(
             onPressed: () {

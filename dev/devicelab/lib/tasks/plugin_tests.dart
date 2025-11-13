@@ -214,7 +214,8 @@ class _FlutterProject {
     // Add the Dart registration hook that the build will generate a call to.
     final File dartCode = File(path.join(rootPath, 'lib', '$name.dart'));
     content = await dartCode.readAsString();
-    content = '''
+    content =
+        '''
 $content
 
 class $dartPluginClass {
@@ -288,7 +289,8 @@ class $dartPluginClass {
     if (!pluginRegister.existsSync()) {
       pluginRegister = File(path.join(darwinDir.path, name, 'Sources', name, '$pluginClass.swift'));
     }
-    final String pluginRegisterContent = '''
+    final String pluginRegisterContent =
+        '''
 #if os(macOS)
 import FlutterMacOS
 #elseif os(iOS)
@@ -418,15 +420,6 @@ public class $pluginClass: NSObject, FlutterPlugin {
     Map<String, String>? environment,
   }) async {
     final bool isDarwin = target == 'ios' || target == 'macos';
-    if (template != 'plugin' && isDarwin) {
-      // ios-language option is only supported for plugins. Remove the -i flag and the next parameter, "swift" or
-      // "objc". This isn't proper arg parsing (for example doesn't handle -i=objc, but good enough for these tests
-      // since they blow up if -i is passed incorrectly.
-      final int indexOfIOSLanguage = options.indexOf('-i');
-      if (indexOfIOSLanguage != -1) {
-        options.removeRange(indexOfIOSLanguage, indexOfIOSLanguage + 2);
-      }
-    }
     await inDirectory(directory, () async {
       await flutter(
         'create',
@@ -501,8 +494,9 @@ end
     if (!podspec.existsSync()) {
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
-    final String versionString =
-        target == 'ios' ? "s.platform = :ios, '13.0'" : "s.platform = :osx, '10.11'";
+    final String versionString = target == 'ios'
+        ? "s.platform = :ios, '13.0'"
+        : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
     if (!podspecContent.contains(versionString)) {
       throw TaskResult.failure(

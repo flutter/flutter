@@ -164,10 +164,9 @@ class Logger {
       _status = null;
     }
 
-    _status =
-        io.stdout.hasTerminal && !_test
-            ? FlutterSpinner(onFinish: finishCallback)
-            : Spinner(onFinish: finishCallback);
+    _status = io.stdout.hasTerminal && !_test
+        ? FlutterSpinner(onFinish: finishCallback)
+        : Spinner(onFinish: finishCallback);
     _status!.start();
     return _status!;
   }
@@ -272,8 +271,9 @@ class FlutterSpinner extends Spinner {
   /// The frames of the animation.
   static const String frames = '⢸⡯⠭⠅⢸⣇⣀⡀⢸⣇⣸⡇⠈⢹⡏⠁⠈⢹⡏⠁⢸⣯⣭⡅⢸⡯⢕⡂⠀⠀';
 
-  static final List<String> _flutterAnimation =
-      frames.runes.map<String>((int scalar) => String.fromCharCode(scalar)).toList();
+  static final List<String> _flutterAnimation = frames.runes
+      .map<String>((int scalar) => String.fromCharCode(scalar))
+      .toList();
 
   Timer? _timer;
   int _ticks = 0;

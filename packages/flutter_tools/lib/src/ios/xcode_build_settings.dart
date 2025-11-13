@@ -5,6 +5,7 @@
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../flutter_manifest.dart';
@@ -66,17 +67,16 @@ void _updateGeneratedXcodePropertiesFile({
   required List<String> xcodeBuildSettings,
   bool useMacOSConfig = false,
 }) {
-  final StringBuffer buffer = StringBuffer();
+  final buffer = StringBuffer();
 
   buffer.writeln('// This is a generated file; do not edit or check into version control.');
   xcodeBuildSettings.forEach(buffer.writeln);
 
-  final String newContent = buffer.toString();
+  final newContent = buffer.toString();
 
-  final File generatedXcodePropertiesFile =
-      useMacOSConfig
-          ? project.macos.generatedXcodePropertiesFile
-          : project.ios.generatedXcodePropertiesFile;
+  final File generatedXcodePropertiesFile = useMacOSConfig
+      ? project.macos.generatedXcodePropertiesFile
+      : project.ios.generatedXcodePropertiesFile;
 
   if (!generatedXcodePropertiesFile.existsSync()) {
     generatedXcodePropertiesFile.createSync(recursive: true);
@@ -100,21 +100,20 @@ void _updateGeneratedEnvironmentVariablesScript({
   required List<String> xcodeBuildSettings,
   bool useMacOSConfig = false,
 }) {
-  final StringBuffer localsBuffer = StringBuffer();
+  final localsBuffer = StringBuffer();
 
   localsBuffer.writeln('#!/bin/sh');
   localsBuffer.writeln('# This is a generated file; do not edit or check into version control.');
-  for (final String line in xcodeBuildSettings) {
+  for (final line in xcodeBuildSettings) {
     if (!line.contains('[')) {
       // Exported conditional Xcode build settings do not work.
       localsBuffer.writeln('export "$line"');
     }
   }
 
-  final File generatedModuleBuildPhaseScript =
-      useMacOSConfig
-          ? project.macos.generatedEnvironmentVariableExportScript
-          : project.ios.generatedEnvironmentVariableExportScript;
+  final File generatedModuleBuildPhaseScript = useMacOSConfig
+      ? project.macos.generatedEnvironmentVariableExportScript
+      : project.ios.generatedEnvironmentVariableExportScript;
   generatedModuleBuildPhaseScript.createSync(recursive: true);
   generatedModuleBuildPhaseScript.writeAsStringSync(localsBuffer.toString());
   globals.os.chmod(generatedModuleBuildPhaseScript, '755');
@@ -152,7 +151,7 @@ Future<List<String>> _xcodeBuildSettingsLines({
   String? buildDirOverride,
   String? configurationBuildDir,
 }) async {
-  final List<String> xcodeBuildSettings = <String>[];
+  final xcodeBuildSettings = <String>[];
 
   final String flutterRoot = globals.fs.path.normalize(Cache.flutterRoot!);
   xcodeBuildSettings.add('FLUTTER_ROOT=$flutterRoot');
@@ -181,9 +180,6 @@ Future<List<String>> _xcodeBuildSettingsLines({
   final String buildNumber =
       parsedBuildNumber(manifest: project.manifest, buildInfo: buildInfo) ?? '1';
   xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
-
-  // The current build mode being targeted.
-  xcodeBuildSettings.add('FLUTTER_CLI_BUILD_MODE=${buildInfo.mode.cliName}');
 
   // CoreDevices in debug and profile mode are launched, but not built, via Xcode.
   // Set the CONFIGURATION_BUILD_DIR so Xcode knows where to find the app
@@ -237,10 +233,11 @@ Future<List<String>> _xcodeBuildSettingsLines({
     // If any plugins or their dependencies do not support arm64 simulators
     // (to run natively without Rosetta translation on an ARM Mac),
     // the app will fail to build unless it also excludes arm64 simulators.
-    String excludedSimulatorArchs = 'i386';
-    if (!(await project.ios.pluginsSupportArmSimulator())) {
-      excludedSimulatorArchs += ' arm64';
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    if (xcodeVersion != null && xcodeVersion.major >= 26) {
+      await project.ios.checkForPluginsExcludingArmSimulator();
     }
+    const excludedSimulatorArchs = 'i386';
     xcodeBuildSettings.add(
       'EXCLUDED_ARCHS[sdk=${XcodeSdk.IPhoneSimulator.platformName}*]=$excludedSimulatorArchs',
     );

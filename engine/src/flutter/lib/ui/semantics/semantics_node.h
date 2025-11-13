@@ -45,6 +45,8 @@ enum class SemanticsAction : int32_t {
   kSetText = 1 << 21,
   kFocus = 1 << 22,
   kScrollToOffset = 1 << 23,
+  kExpand = 1 << 24,
+  kCollapse = 1 << 25,
 };
 
 constexpr int kVerticalScrollSemanticsActions =
@@ -139,6 +141,7 @@ struct SemanticsNode {
   int32_t platformViewId = -1;
   int32_t scrollChildren = 0;
   int32_t scrollIndex = 0;
+  int32_t traversalParent = 0;
   double scrollPosition = std::nan("");
   double scrollExtentMax = std::nan("");
   double scrollExtentMin = std::nan("");
@@ -158,6 +161,7 @@ struct SemanticsNode {
 
   SkRect rect = SkRect::MakeEmpty();  // Local space, relative to parent.
   SkM44 transform = SkM44{};          // Identity
+  SkM44 hitTestTransform = SkM44{};   // Identity
   std::vector<int32_t> childrenInTraversalOrder;
   std::vector<int32_t> childrenInHitTestOrder;
   std::vector<int32_t> customAccessibilityActions;
@@ -166,6 +170,8 @@ struct SemanticsNode {
   std::string linkUrl;
   SemanticsRole role;
   SemanticsValidationResult validationResult = SemanticsValidationResult::kNone;
+  // A locale string in BCP 47 format
+  std::string locale;
 };
 
 // Contains semantic nodes that need to be updated.

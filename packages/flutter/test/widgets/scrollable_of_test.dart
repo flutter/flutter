@@ -243,7 +243,10 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: TestScrollable(key: verticalKey, child: TestChild(key: childKey)),
+          child: TestScrollable(
+            key: verticalKey,
+            child: TestChild(key: childKey),
+          ),
         ),
       ),
     );
@@ -262,7 +265,10 @@ void main() {
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           controller: controller,
-          child: TestScrollable(key: verticalKey, child: TestChild(key: childKey)),
+          child: TestScrollable(
+            key: verticalKey,
+            child: TestChild(key: childKey),
+          ),
         ),
       ),
     );

@@ -15,14 +15,14 @@ Future<void> test(WidgetTester tester, double offset) {
       child: Viewport(
         offset: viewportOffset,
         slivers: <Widget>[
-          SliverList(
-            delegate: SliverChildListDelegate(const <Widget>[
+          SliverList.list(
+            children: const <Widget>[
               SizedBox(height: 400.0, child: Text('a')),
               SizedBox(height: 400.0, child: Text('b')),
               SizedBox(height: 400.0, child: Text('c')),
               SizedBox(height: 400.0, child: Text('d')),
               SizedBox(height: 400.0, child: Text('e')),
-            ]),
+            ],
           ),
         ],
       ),
@@ -55,11 +55,10 @@ Future<void> testWithConstChildDelegate(WidgetTester tester, double offset) {
 }
 
 void verify(WidgetTester tester, List<Offset> answerKey, String text) {
-  final List<Offset> testAnswers =
-      tester
-          .renderObjectList<RenderBox>(find.byType(SizedBox))
-          .map<Offset>((RenderBox target) => target.localToGlobal(Offset.zero))
-          .toList();
+  final List<Offset> testAnswers = tester
+      .renderObjectList<RenderBox>(find.byType(SizedBox))
+      .map<Offset>((RenderBox target) => target.localToGlobal(Offset.zero))
+      .toList();
   expect(testAnswers, equals(answerKey));
   final String foundText = tester
       .widgetList<Text>(find.byType(Text))
@@ -123,12 +122,12 @@ void main() {
         child: Viewport(
           offset: offset,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(<Widget>[
+            SliverList.list(
+              children: <Widget>[
                 const SizedBox(height: 251.0, child: Text('a')),
                 const SizedBox(height: 252.0, child: Text('b')),
                 SizedBox(key: key1, height: 253.0, child: const Text('c')),
-              ]),
+              ],
             ),
           ],
         ),
@@ -145,12 +144,12 @@ void main() {
         child: Viewport(
           offset: offset,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(<Widget>[
+            SliverList.list(
+              children: <Widget>[
                 SizedBox(key: key1, height: 253.0, child: const Text('c')),
                 const SizedBox(height: 251.0, child: Text('a')),
                 const SizedBox(height: 252.0, child: Text('b')),
-              ]),
+              ],
             ),
           ],
         ),
@@ -167,12 +166,12 @@ void main() {
         child: Viewport(
           offset: offset,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(<Widget>[
+            SliverList.list(
+              children: <Widget>[
                 const SizedBox(height: 251.0, child: Text('a')),
                 SizedBox(key: key1, height: 253.0, child: const Text('c')),
                 const SizedBox(height: 252.0, child: Text('b')),
-              ]),
+              ],
             ),
           ],
         ),
@@ -189,11 +188,11 @@ void main() {
         child: Viewport(
           offset: offset,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(const <Widget>[
+            SliverList.list(
+              children: const <Widget>[
                 SizedBox(height: 251.0, child: Text('a')),
                 SizedBox(height: 252.0, child: Text('b')),
-              ]),
+              ],
             ),
           ],
         ),
@@ -206,12 +205,12 @@ void main() {
         child: Viewport(
           offset: offset,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(<Widget>[
+            SliverList.list(
+              children: <Widget>[
                 const SizedBox(height: 251.0, child: Text('a')),
                 SizedBox(key: key1, height: 253.0, child: const Text('c')),
                 const SizedBox(height: 252.0, child: Text('b')),
-              ]),
+              ],
             ),
           ],
         ),
@@ -304,11 +303,7 @@ void main() {
         child: Viewport(
           offset: offset1,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(const <Widget>[
-                SizedBox(height: 400.0, child: Text('a')),
-              ]),
-            ),
+            SliverList.list(children: const <Widget>[SizedBox(height: 400.0, child: Text('a'))]),
           ],
         ),
       ),
@@ -325,11 +320,7 @@ void main() {
         child: Viewport(
           offset: offset2,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(const <Widget>[
-                SizedBox(height: 400.0, child: Text('a')),
-              ]),
-            ),
+            SliverList.list(children: const <Widget>[SizedBox(height: 400.0, child: Text('a'))]),
           ],
         ),
       ),
@@ -346,11 +337,7 @@ void main() {
         child: Viewport(
           offset: offset3,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(const <Widget>[
-                SizedBox(height: 4000.0, child: Text('a')),
-              ]),
-            ),
+            SliverList.list(children: const <Widget>[SizedBox(height: 4000.0, child: Text('a'))]),
           ],
         ),
       ),
@@ -367,11 +354,7 @@ void main() {
         child: Viewport(
           offset: offset4,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(const <Widget>[
-                SizedBox(height: 4000.0, child: Text('a')),
-              ]),
-            ),
+            SliverList.list(children: const <Widget>[SizedBox(height: 4000.0, child: Text('a'))]),
           ],
         ),
       ),

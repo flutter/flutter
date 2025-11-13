@@ -18,6 +18,10 @@ compile-configs:
     renderer: skwasm
 
 test-sets:
+  # Tests for the new WebParagraph
+  - name: experimental-webparagraph
+    directory: webparagraph
+
   # Tests for non-renderer logic
   - name: engine
     directory: engine
@@ -35,6 +39,10 @@ test-sets:
     directory: fallbacks
 
 test-bundles:
+  - name: dart2js-canvaskit-experimental-webparagraph
+    test-set: experimental-webparagraph
+    compile-configs: dart2js-canvaskit
+
   - name: dart2js-canvaskit-engine
     test-set: engine
     compile-configs: dart2js-canvaskit
@@ -65,7 +73,10 @@ run-configs:
   - name: chrome-experimental-webparagraph
     browser: chrome
     browser-flags:
-      - --enable-features=ExtendedTextMetrics
+      - --enable-experimental-web-platform-features
+      # This is supposed to be the right flag, but for some reason it doesn't work at the moment so
+      # we are using the more general one above.
+      # - --enable-features=ExtendedTextMetrics
     canvaskit-variant: experimentalWebParagraph
 
   - name: chrome
@@ -118,7 +129,7 @@ run-configs:
 
 test-suites:
   - name: chrome-dart2js-experimental-webparagraph-ui
-    test-bundle: dart2js-canvaskit-ui
+    test-bundle: dart2js-canvaskit-experimental-webparagraph
     run-config: chrome-experimental-webparagraph
     artifact-deps: [ canvaskit_experimental_webparagraph ]
     enable-ci: false

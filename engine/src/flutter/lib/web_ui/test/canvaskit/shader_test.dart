@@ -10,8 +10,8 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../common/test_data.dart';
 import 'common.dart';
-import 'test_data.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -56,8 +56,9 @@ void testMain() {
     });
 
     test('Image shader initialize/dispose cycle', () {
-      final SkImage skImage =
-          canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!.makeImageAtCurrentFrame();
+      final SkImage skImage = canvasKit.MakeAnimatedImageFromEncoded(
+        kTransparentImage,
+      )!.makeImageAtCurrentFrame();
       final CkImage image = CkImage(skImage);
       final CkImageShader imageShader =
           ui.ImageShader(
@@ -82,8 +83,9 @@ void testMain() {
     });
 
     test('Image shader withQuality', () {
-      final SkImage skImage =
-          canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!.makeImageAtCurrentFrame();
+      final SkImage skImage = canvasKit.MakeAnimatedImageFromEncoded(
+        kTransparentImage,
+      )!.makeImageAtCurrentFrame();
       final CkImage image = CkImage(skImage);
       final CkImageShader imageShader =
           ui.ImageShader(
@@ -164,8 +166,9 @@ void testMain() {
       expect(conicalGradient.isGradient, isTrue);
       conicalGradient.dispose();
 
-      final SkImage skImage =
-          canvasKit.MakeAnimatedImageFromEncoded(kTransparentImage)!.makeImageAtCurrentFrame();
+      final SkImage skImage = canvasKit.MakeAnimatedImageFromEncoded(
+        kTransparentImage,
+      )!.makeImageAtCurrentFrame();
       final CkImage image = CkImage(skImage);
       final CkImageShader imageShader =
           ui.ImageShader(

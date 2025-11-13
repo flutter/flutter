@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -19,7 +21,9 @@ void main() {
           drawer: Drawer(
             child: ListView(
               children: <Widget>[
-                DrawerHeader(child: Container(key: containerKey, child: const Text('header'))),
+                DrawerHeader(
+                  child: Container(key: containerKey, child: const Text('header')),
+                ),
                 const ListTile(leading: Icon(Icons.archive), title: Text('Archive')),
               ],
             ),
@@ -58,7 +62,9 @@ void main() {
           drawer: Drawer(
             child: ListView(
               children: <Widget>[
-                DrawerHeader(child: Container(key: containerKey, child: const Text('header'))),
+                DrawerHeader(
+                  child: Container(key: containerKey, child: const Text('header')),
+                ),
                 const ListTile(leading: Icon(Icons.archive), title: Text('Archive')),
               ],
             ),
@@ -179,31 +185,28 @@ void main() {
       );
     }
 
+    Future<void> checkScrim(Color color) async {
+      scaffoldKey.currentState!.openDrawer();
+      await tester.pump();
+      ColoredBox scrim = getScrim() as ColoredBox;
+      expect(scrim.color, isSameColorAs(color.withValues(alpha: 0)));
+
+      await tester.pumpAndSettle();
+      scrim = getScrim() as ColoredBox;
+      expect(scrim.color, isSameColorAs(color));
+
+      await tester.tap(find.byType(Drawer));
+      await tester.pumpAndSettle();
+      expect(find.byType(Drawer), findsNothing);
+    }
+
     // Default drawerScrimColor
-
     await tester.pumpWidget(buildFrame());
-    scaffoldKey.currentState!.openDrawer();
-    await tester.pumpAndSettle();
-
-    ColoredBox scrim = getScrim() as ColoredBox;
-    expect(scrim.color, Colors.black54);
-
-    await tester.tap(find.byType(Drawer));
-    await tester.pumpAndSettle();
-    expect(find.byType(Drawer), findsNothing);
+    await checkScrim(Colors.black54);
 
     // Specific drawerScrimColor
-
     await tester.pumpWidget(buildFrame(drawerScrimColor: const Color(0xFF323232)));
-    scaffoldKey.currentState!.openDrawer();
-    await tester.pumpAndSettle();
-
-    scrim = getScrim() as ColoredBox;
-    expect(scrim.color, const Color(0xFF323232));
-
-    await tester.tap(find.byType(Drawer));
-    await tester.pumpAndSettle();
-    expect(find.byType(Drawer), findsNothing);
+    await checkScrim(const Color(0xFF323232));
   });
 
   testWidgets('Open/close drawers by flinging', (WidgetTester tester) async {
@@ -249,7 +252,12 @@ void main() {
 
   testWidgets('Open/close drawer by dragging', (WidgetTester tester) async {
     final ThemeData draggable = ThemeData(platform: TargetPlatform.android);
-    await tester.pumpWidget(MaterialApp(theme: draggable, home: const Scaffold(drawer: Drawer())));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: draggable,
+        home: const Scaffold(drawer: Drawer()),
+      ),
+    );
 
     final TestGesture gesture = await tester.createGesture();
     final Finder finder = find.byType(Drawer);
@@ -603,7 +611,11 @@ void main() {
   testWidgets('Drawer width can be customized by parameter', (WidgetTester tester) async {
     const double smallWidth = 200;
 
-    await tester.pumpWidget(const MaterialApp(home: Scaffold(drawer: Drawer(width: smallWidth))));
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(drawer: Drawer(width: smallWidth)),
+      ),
+    );
 
     final ScaffoldState state = tester.firstState(find.byType(Scaffold));
     state.openDrawer();
@@ -750,7 +762,9 @@ void main() {
 
     // Provide a custom clip behavior.
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(drawer: Drawer(clipBehavior: Clip.antiAlias))),
+      const MaterialApp(
+        home: Scaffold(drawer: Drawer(clipBehavior: Clip.antiAlias)),
+      ),
     );
 
     // Open the drawer again.
@@ -786,8 +800,11 @@ void main() {
     final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
     expect(scaffold.drawerBarrierDismissible, true);
 
-    // Open the drawer initially.
+    // Verify whether the drawer barrier is dimissible by default via the state
     final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    expect(state.isDrawerBarrierDismissible, true);
+
+    // Open the drawer initially.
     state.openEndDrawer();
 
     await tester.pumpAndSettle();
@@ -850,8 +867,11 @@ void main() {
     final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
     expect(scaffold.drawerBarrierDismissible, false);
 
-    // Open the drawer initially.
+    // Verify the drawer barrier is not dimissible by checking the state's getter
     final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    expect(state.isDrawerBarrierDismissible, false);
+
+    // Open the drawer initially.
     state.openEndDrawer();
 
     await tester.pumpAndSettle();
@@ -890,6 +910,128 @@ void main() {
     // didn't dismiss it, since the drawerBarrierDismissible property is set to false.
     expect(find.byType(Drawer), findsExactly(1));
   });
+
+  testWidgets('Drawer can be dismissed with the escape key by default', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+    // Test with drawerBarrierDismissible: true (default)
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: const Drawer(child: Text('drawer')),
+        ),
+      ),
+    );
+
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    expect(state.isDrawerBarrierDismissible, isTrue);
+
+    // Open the drawer.
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+    expect(find.text('drawer'), findsOneWidget);
+
+    // Close the drawer with the escape key.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text('drawer'), findsNothing);
+  });
+
+  testWidgets(
+    'Drawer cannot be dismissed with the escape key when drawerBarrierDismissible is false',
+    (WidgetTester tester) async {
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            key: scaffoldKey,
+            drawer: const Drawer(child: Text('drawer')),
+            drawerBarrierDismissible: false,
+          ),
+        ),
+      );
+
+      // Verify that the [Scaffold.drawerBarrierDismissible] flag is false
+      final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+      expect(state.isDrawerBarrierDismissible, isFalse);
+
+      // Open the drawer.
+      scaffoldKey.currentState!.openDrawer();
+      await tester.pumpAndSettle();
+      expect(find.text('drawer'), findsOneWidget);
+
+      // Try to close the drawer with the escape key, and verify it does not close.
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(find.text('drawer'), findsOneWidget);
+    },
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/177005
+  testWidgets('Drawer semantics for mismatched platforms', (WidgetTester tester) async {
+    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+
+    Future<void> pumpDrawerWithTheme(TargetPlatform themePlatform) async {
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: themePlatform),
+          home: Scaffold(
+            key: scaffoldKey,
+            drawer: const Drawer(child: Text('Drawer')),
+            body: Container(),
+          ),
+        ),
+      );
+
+      scaffoldKey.currentState!.openDrawer();
+      await tester.pumpAndSettle();
+
+      // Test label semantics.
+      final Finder drawerLabelFinder = find.bySemanticsLabel(localizations.drawerLabel);
+      if (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS) {
+        expect(drawerLabelFinder, findsNothing); // Apple platforms don't show drawer label.
+      } else {
+        expect(drawerLabelFinder, findsOneWidget); // Non-Apple platforms show drawer label.
+      }
+
+      // Test barrier semantics.
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final bool expectBarrierExcluded = defaultTargetPlatform == TargetPlatform.android;
+
+      if (expectBarrierExcluded) {
+        expect(
+          semantics,
+          isNot(
+            includesNodeWith(
+              label: localizations.modalBarrierDismissLabel,
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+            ),
+          ),
+        );
+      } else {
+        expect(
+          semantics,
+          includesNodeWith(
+            label: localizations.modalBarrierDismissLabel,
+            actions: <SemanticsAction>[SemanticsAction.tap],
+          ),
+        );
+      }
+
+      semantics.dispose();
+    }
+
+    // Test with theme.platform = Android on different real platforms.
+    await pumpDrawerWithTheme(TargetPlatform.android);
+
+    // Test with theme.platform = iOS on different real platforms.
+    await pumpDrawerWithTheme(TargetPlatform.iOS);
+  }, variant: TargetPlatformVariant.all());
 
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
@@ -936,7 +1078,10 @@ void main() {
 
     testWidgets('Material2 - Drawer clip behavior', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(theme: ThemeData(useMaterial3: false), home: const Scaffold(drawer: Drawer())),
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: const Scaffold(drawer: Drawer()),
+        ),
       );
 
       final Finder drawerMaterial = find.descendant(
@@ -977,5 +1122,20 @@ void main() {
       material = tester.widget<Material>(drawerMaterial);
       expect(material.clipBehavior, Clip.hardEdge);
     });
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/6537
+  testWidgets('Drawer and DrawerHeader do not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Drawer(child: DrawerHeader(child: Text('X'))),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Drawer)), Size.zero);
+    expect(tester.getSize(find.byType(DrawerHeader)), Size.zero);
   });
 }

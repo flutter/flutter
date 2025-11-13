@@ -271,7 +271,7 @@ class ToggleButtons extends StatelessWidget {
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
-  /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
+  /// If this property is null, [WidgetStateMouseCursor.adaptiveClickable] is used.
   final MouseCursor? mouseCursor;
 
   /// Configures the minimum size of the area within which the buttons may
@@ -735,9 +735,9 @@ class ToggleButtons extends StatelessWidget {
         toggleButtonsTheme,
       );
 
-      final Set<MaterialState> states = <MaterialState>{
-        if (isSelected[index] && onPressed != null) MaterialState.selected,
-        if (onPressed == null) MaterialState.disabled,
+      final Set<WidgetState> states = <WidgetState>{
+        if (isSelected[index] && onPressed != null) WidgetState.selected,
+        if (onPressed == null) WidgetState.disabled,
       };
       final Color effectiveFillColor =
           _ResolveFillColor(fillColor ?? toggleButtonsTheme.fillColor).resolve(states) ??
@@ -818,12 +818,11 @@ class ToggleButtons extends StatelessWidget {
               alignment: Alignment.center,
               splashFactory: InkRipple.splashFactory,
             ),
-            onPressed:
-                onPressed != null
-                    ? () {
-                      onPressed!(index);
-                    }
-                    : null,
+            onPressed: onPressed != null
+                ? () {
+                    onPressed!(index);
+                  }
+                : null,
             child: children[index],
           ),
         ),
@@ -904,29 +903,29 @@ class ToggleButtons extends StatelessWidget {
 }
 
 @immutable
-class _ResolveFillColor extends MaterialStateProperty<Color?> with Diagnosticable {
+class _ResolveFillColor extends WidgetStateProperty<Color?> with Diagnosticable {
   _ResolveFillColor(this.primary);
 
   final Color? primary;
 
   @override
-  Color? resolve(Set<MaterialState> states) {
-    if (primary is MaterialStateProperty<Color>) {
-      return MaterialStateProperty.resolveAs<Color?>(primary, states);
+  Color? resolve(Set<WidgetState> states) {
+    if (primary is WidgetStateProperty<Color>) {
+      return WidgetStateProperty.resolveAs<Color?>(primary, states);
     }
-    return states.contains(MaterialState.selected) ? primary : null;
+    return states.contains(WidgetState.selected) ? primary : null;
   }
 }
 
 @immutable
-class _DefaultFillColor extends MaterialStateProperty<Color> with Diagnosticable {
+class _DefaultFillColor extends WidgetStateProperty<Color> with Diagnosticable {
   _DefaultFillColor(this.colorScheme);
 
   final ColorScheme colorScheme;
 
   @override
-  Color resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.selected)) {
+  Color resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.selected)) {
       return colorScheme.primary.withOpacity(0.12);
     }
     return colorScheme.surface.withOpacity(0.0);
@@ -934,7 +933,7 @@ class _DefaultFillColor extends MaterialStateProperty<Color> with Diagnosticable
 }
 
 @immutable
-class _ToggleButtonDefaultOverlay extends MaterialStateProperty<Color?> {
+class _ToggleButtonDefaultOverlay extends WidgetStateProperty<Color?> {
   _ToggleButtonDefaultOverlay({
     required this.selected,
     required this.unselected,
@@ -956,25 +955,25 @@ class _ToggleButtonDefaultOverlay extends MaterialStateProperty<Color?> {
   final Color? disabledColor;
 
   @override
-  Color? resolve(Set<MaterialState> states) {
+  Color? resolve(Set<WidgetState> states) {
     if (selected) {
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return splashColor ?? colorScheme?.primary.withOpacity(0.16);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverColor ?? colorScheme?.primary.withOpacity(0.04);
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusColor ?? colorScheme?.primary.withOpacity(0.12);
       }
     } else if (unselected) {
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return splashColor ?? highlightColor ?? colorScheme?.onSurface.withOpacity(0.16);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverColor ?? colorScheme?.onSurface.withOpacity(0.04);
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusColor ?? colorScheme?.onSurface.withOpacity(0.12);
       }
     }
@@ -1205,7 +1204,12 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     final BaselineOffset childOffset = BaselineOffset(child?.getDistanceToActualBaseline(baseline));
     return switch (direction) {
       Axis.horizontal => childOffset + borderSide.width,
-      Axis.vertical => childOffset + leadingBorderSide.width,
+      Axis.vertical =>
+        childOffset +
+            switch (verticalDirection) {
+              VerticalDirection.down => leadingBorderSide.width,
+              VerticalDirection.up => trailingBorderSide.width,
+            },
     }.offset;
   }
 
@@ -1327,26 +1331,21 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     final Rect outer = Rect.fromLTRB(offset.dx, offset.dy, bottomRight.dx, bottomRight.dy);
     final Rect center = outer.deflate(borderSide.width / 2.0);
     const double sweepAngle = math.pi / 2.0;
-    final RRect rrect =
-        RRect.fromRectAndCorners(
-          center,
-          topLeft:
-              (borderRadius.topLeft.x * borderRadius.topLeft.y != 0.0)
-                  ? borderRadius.topLeft
-                  : Radius.zero,
-          topRight:
-              (borderRadius.topRight.x * borderRadius.topRight.y != 0.0)
-                  ? borderRadius.topRight
-                  : Radius.zero,
-          bottomLeft:
-              (borderRadius.bottomLeft.x * borderRadius.bottomLeft.y != 0.0)
-                  ? borderRadius.bottomLeft
-                  : Radius.zero,
-          bottomRight:
-              (borderRadius.bottomRight.x * borderRadius.bottomRight.y != 0.0)
-                  ? borderRadius.bottomRight
-                  : Radius.zero,
-        ).scaleRadii();
+    final RRect rrect = RRect.fromRectAndCorners(
+      center,
+      topLeft: (borderRadius.topLeft.x * borderRadius.topLeft.y != 0.0)
+          ? borderRadius.topLeft
+          : Radius.zero,
+      topRight: (borderRadius.topRight.x * borderRadius.topRight.y != 0.0)
+          ? borderRadius.topRight
+          : Radius.zero,
+      bottomLeft: (borderRadius.bottomLeft.x * borderRadius.bottomLeft.y != 0.0)
+          ? borderRadius.bottomLeft
+          : Radius.zero,
+      bottomRight: (borderRadius.bottomRight.x * borderRadius.bottomRight.y != 0.0)
+          ? borderRadius.bottomRight
+          : Radius.zero,
+    ).scaleRadii();
 
     final Rect tlCorner = Rect.fromLTWH(
       rrect.left,
@@ -1663,9 +1662,9 @@ class _RenderInputPadding extends RenderShiftedBox {
   Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
     if (child != null) {
       final Size childSize = layoutChild(child!, constraints);
-      final double height = math.max(childSize.width, minSize.width);
-      final double width = math.max(childSize.height, minSize.height);
-      return constraints.constrain(Size(height, width));
+      final double width = math.max(childSize.width, minSize.width);
+      final double height = math.max(childSize.height, minSize.height);
+      return constraints.constrain(Size(width, height));
     }
     return Size.zero;
   }
@@ -1685,9 +1684,11 @@ class _RenderInputPadding extends RenderShiftedBox {
     if (result == null) {
       return null;
     }
+    // Calculate the size and child offset using the same logic as performLayout
+    final Size drySize = getDryLayout(constraints);
     final Size childSize = child.getDryLayout(constraints);
-    return result +
-        Alignment.center.alongOffset(getDryLayout(constraints) - childSize as Offset).dy;
+    final Offset childOffset = Alignment.center.alongOffset(drySize - childSize as Offset);
+    return result + childOffset.dy;
   }
 
   @override

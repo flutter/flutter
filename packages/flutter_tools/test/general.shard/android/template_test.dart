@@ -13,20 +13,20 @@ import '../../src/common.dart';
 void main() {
   testWithoutContext('kotlin reserved keywords', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final BufferLogger logger = BufferLogger.test();
+    final logger = BufferLogger.test();
     final Directory rootDir = fileSystem.currentDirectory;
     final Directory templateSource = rootDir.childDirectory('src');
-    final Directory imageSourceDir = templateSource;
+    final imageSourceDir = templateSource;
     final Directory destination = rootDir.childDirectory('dest');
 
-    const String outputClass = 'SomeClass.kt';
+    const outputClass = 'SomeClass.kt';
 
     final File sourceFile = templateSource.childFile('$outputClass.tmpl');
 
     templateSource.createSync();
     sourceFile.writeAsStringSync('package {{androidIdentifier}};');
 
-    final Template template = Template(
+    final template = Template(
       templateSource,
       imageSourceDir,
       fileSystem: fileSystem,
@@ -34,7 +34,7 @@ void main() {
       templateRenderer: const MustacheTemplateRenderer(),
     );
 
-    final Map<String, Object> context = <String, Object>{'androidIdentifier': 'is.in.when.there'};
+    final context = <String, Object>{'androidIdentifier': 'is.in.when.there'};
     template.render(destination, context);
 
     final File destinationFile = destination.childFile(outputClass);

@@ -865,7 +865,9 @@ void main() {
     testWidgets('IconButton with enabled feedback', (WidgetTester tester) async {
       final Widget button = Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: IconButton(onPressed: () {}, icon: const Icon(Icons.link))),
+        child: Center(
+          child: IconButton(onPressed: () {}, icon: const Icon(Icons.link)),
+        ),
       );
 
       await tester.pumpWidget(
@@ -880,7 +882,9 @@ void main() {
     testWidgets('IconButton with enabled feedback by default', (WidgetTester tester) async {
       final Widget button = Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: IconButton(onPressed: () {}, icon: const Icon(Icons.link))),
+        child: Center(
+          child: IconButton(onPressed: () {}, icon: const Icon(Icons.link)),
+        ),
       );
 
       await tester.pumpWidget(
@@ -970,14 +974,16 @@ void main() {
       SystemMouseCursors.forbidden,
     );
 
-    // Test default is click
+    // Test default is click on web, basic on non-web
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
         home: Material(
           child: Directionality(
             textDirection: TextDirection.ltr,
-            child: Center(child: IconButton(onPressed: () {}, icon: const Icon(Icons.play_arrow))),
+            child: Center(
+              child: IconButton(onPressed: () {}, icon: const Icon(Icons.play_arrow)),
+            ),
           ),
         ),
       ),
@@ -985,7 +991,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
 
@@ -1125,7 +1131,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: themeM3,
-        home: Center(child: IconButton(onPressed: () {}, icon: const Icon(Icons.ac_unit))),
+        home: Center(
+          child: IconButton(onPressed: () {}, icon: const Icon(Icons.ac_unit)),
+        ),
       ),
     );
 
@@ -1262,7 +1270,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: themeM3,
-        home: Center(child: IconButton.filled(onPressed: () {}, icon: const Icon(Icons.ac_unit))),
+        home: Center(
+          child: IconButton.filled(onPressed: () {}, icon: const Icon(Icons.ac_unit)),
+        ),
       ),
     );
 
@@ -1781,7 +1791,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: themeM3,
-        home: Center(child: IconButton.outlined(onPressed: () {}, icon: const Icon(Icons.ac_unit))),
+        home: Center(
+          child: IconButton.outlined(onPressed: () {}, icon: const Icon(Icons.ac_unit)),
+        ),
       ),
     );
 
@@ -2096,17 +2108,17 @@ void main() {
     const Color defaultColor = Color(0x00000004);
     const Color selectedColor = Color(0x00000005);
 
-    Color getIconColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    Color getIconColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedColor;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverColor;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedColor;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return selectedColor;
       }
       return defaultColor;
@@ -2121,7 +2133,7 @@ void main() {
               body: Center(
                 child: IconButton(
                   style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.resolveWith<Color>(getIconColor),
+                    foregroundColor: WidgetStateProperty.resolveWith<Color>(getIconColor),
                   ),
                   isSelected: isSelected,
                   onPressed: () {
@@ -2564,7 +2576,9 @@ void main() {
             visualDensity: themeVisualDensity,
           ),
           home: Material(
-            child: Center(child: IconButton(onPressed: () {}, icon: const Icon(Icons.play_arrow))),
+            child: Center(
+              child: IconButton(onPressed: () {}, icon: const Icon(Icons.play_arrow)),
+            ),
           ),
         ),
       );
@@ -2745,6 +2759,37 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pumpAndSettle();
     expect(getOverlayColor(tester), paints..rect(color: overlayColor));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/174511.
+  testWidgets('IconButton.color takes precedence over ambient IconButtonThemeData.iconColor', (
+    WidgetTester tester,
+  ) async {
+    const Color iconButtonColor = Color(0xFFFF1234);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          iconButtonTheme: const IconButtonThemeData(
+            style: ButtonStyle(
+              iconColor: WidgetStateColor.fromMap(<WidgetStatesConstraint, Color>{
+                WidgetState.any: Colors.purple,
+              }),
+            ),
+          ),
+        ),
+        home: Material(
+          child: Center(
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.add, size: 64),
+              color: iconButtonColor,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(_iconStyle(tester, Icons.add)?.color, iconButtonColor);
   });
 
   group('IconTheme tests in Material 3', () {
@@ -2940,7 +2985,9 @@ void main() {
       // This is a regression test for https://github.com/flutter/flutter/issues/130708.
       Widget buildWidget(bool showIconButton) {
         return showIconButton
-            ? MaterialApp(home: IconButton(onPressed: () {}, icon: const Icon(Icons.search)))
+            ? MaterialApp(
+                home: IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
+              )
             : const SizedBox();
       }
 
@@ -3011,7 +3058,9 @@ void main() {
       ),
     );
 
-    final Offset topLeft = tester.getTopLeft(find.byType(ColoredBox));
+    final Offset topLeft = tester.getTopLeft(
+      find.descendant(of: find.byType(Center), matching: find.byType(ColoredBox)),
+    );
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(topLeft);
@@ -3405,6 +3454,123 @@ void main() {
 
     await expectLater(find.byType(IconButton), matchesGoldenFile('icon_button.badge.outline.png'));
   });
+
+  Future<void> testStatesController(WidgetTester tester, IconButton iconButton) async {
+    int count = 0;
+    void valueChanged() {
+      count += 1;
+    }
+
+    final MaterialStatesController controller = iconButton.statesController!;
+    addTearDown(controller.dispose);
+    controller.addListener(valueChanged);
+
+    await tester.pumpWidget(MaterialApp(home: Center(child: iconButton)));
+
+    expect(controller.value, <WidgetState>{});
+    expect(count, 0);
+
+    final Offset center = tester.getCenter(find.byType(Icon));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <WidgetState>{WidgetState.hovered});
+    expect(count, 1);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <WidgetState>{});
+    expect(count, 2);
+
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <WidgetState>{WidgetState.hovered});
+    expect(count, 3);
+
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <WidgetState>{WidgetState.hovered, WidgetState.pressed});
+    expect(count, 4);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <WidgetState>{WidgetState.hovered});
+    expect(count, 5);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <WidgetState>{});
+    expect(count, 6);
+
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(controller.value, <WidgetState>{WidgetState.hovered, WidgetState.pressed});
+    expect(count, 8); // adds hovered and pressed - two changes
+  }
+
+  testWidgets('IconButton statesController', (WidgetTester tester) async {
+    await testStatesController(
+      tester,
+      IconButton(
+        icon: const Icon(Icons.add),
+        onPressed: () {},
+        statesController: MaterialStatesController(),
+      ),
+    );
+  });
+
+  testWidgets('IconButton.filled statesController', (WidgetTester tester) async {
+    await testStatesController(
+      tester,
+      IconButton.filled(
+        onPressed: () {},
+        icon: const Icon(Icons.add),
+        statesController: MaterialStatesController(),
+      ),
+    );
+  });
+
+  testWidgets('IconButton.filledTonal statesController', (WidgetTester tester) async {
+    await testStatesController(
+      tester,
+      IconButton.filledTonal(
+        onPressed: () {},
+        icon: const Icon(Icons.add),
+        statesController: MaterialStatesController(),
+      ),
+    );
+  });
+
+  testWidgets('IconButton.outlined statesController', (WidgetTester tester) async {
+    await testStatesController(
+      tester,
+      IconButton.outlined(
+        onPressed: () {},
+        icon: const Icon(Icons.add),
+        statesController: MaterialStatesController(),
+      ),
+    );
+  });
+
+  testWidgets('IconButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(IconButton)), Size.zero);
+  });
 }
 
 Widget buildAllVariants({
@@ -3454,19 +3620,22 @@ Widget buildAllVariants({
 Widget wrap({required Widget child, required bool useMaterial3}) {
   return useMaterial3
       ? MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
-        home: FocusTraversalGroup(
-          policy: ReadingOrderTraversalPolicy(),
-          child: Directionality(textDirection: TextDirection.ltr, child: Center(child: child)),
-        ),
-      )
+          theme: ThemeData.from(colorScheme: const ColorScheme.light()),
+          home: FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(child: child),
+            ),
+          ),
+        )
       : FocusTraversalGroup(
-        policy: ReadingOrderTraversalPolicy(),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(child: Center(child: child)),
-        ),
-      );
+          policy: ReadingOrderTraversalPolicy(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Material(child: Center(child: child)),
+          ),
+        );
 }
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {

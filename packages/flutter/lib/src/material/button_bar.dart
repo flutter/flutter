@@ -22,7 +22,7 @@ import 'dialog.dart';
 ///
 /// ## Updating to [OverflowBar]
 ///
-/// [ButtonBar] has been replace by a more efficient widget, [OverflowBar].
+/// [ButtonBar] has been replaced by a more efficient widget, [OverflowBar].
 ///
 /// ```dart
 /// // Before
@@ -236,10 +236,12 @@ class ButtonBar extends StatelessWidget {
         overflowDirection:
             overflowDirection ?? barTheme.overflowDirection ?? VerticalDirection.down,
         overflowButtonSpacing: overflowButtonSpacing,
-        children:
-            children.map<Widget>((Widget child) {
-              return Padding(padding: EdgeInsets.symmetric(horizontal: paddingUnit), child: child);
-            }).toList(),
+        children: children.map<Widget>((Widget child) {
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: paddingUnit),
+            child: child,
+          );
+        }).toList(),
       ),
     );
     switch (buttonTheme.layoutBehavior) {

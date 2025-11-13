@@ -1,0 +1,3 @@
+rapidjson
+(?s)^Tencent is pleased.*RapidJSON.*If you have downloaded a copy
+(?s)^Tencent is pleased.*RapidJSON.*MIT License.*OR OTHER DEALINGS IN THE SOFTWARE\.

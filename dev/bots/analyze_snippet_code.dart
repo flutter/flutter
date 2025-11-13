@@ -515,28 +515,28 @@ class _SnippetChecker {
 
   /// Computes the headers needed for each snippet file.
   List<_Line> get headersWithoutImports {
-    return _headersWithoutImports ??=
-        ignoresDirectives.map<_Line>((String code) => _Line.generated(code: code)).toList();
+    return _headersWithoutImports ??= ignoresDirectives
+        .map<_Line>((String code) => _Line.generated(code: code))
+        .toList();
   }
 
   List<_Line>? _headersWithoutImports;
 
   /// Computes the headers needed for each snippet file.
   List<_Line> get headersWithImports {
-    return _headersWithImports ??=
-        <String>[
-          ...ignoresDirectives,
-          '// ignore_for_file: unused_import',
-          "import 'dart:async';",
-          "import 'dart:convert';",
-          "import 'dart:io';",
-          "import 'dart:math' as math;",
-          "import 'dart:typed_data';",
-          "import 'dart:ui' as ui;",
-          "import 'package:flutter_test/flutter_test.dart';",
-          for (final File file in _listDartFiles(Directory(_packageFlutter)))
-            "import 'package:flutter/${path.basename(file.path)}';",
-        ].map<_Line>((String code) => _Line.generated(code: code)).toList();
+    return _headersWithImports ??= <String>[
+      ...ignoresDirectives,
+      '// ignore_for_file: unused_import',
+      "import 'dart:async';",
+      "import 'dart:convert';",
+      "import 'dart:io';",
+      "import 'dart:math' as math;",
+      "import 'dart:typed_data';",
+      "import 'dart:ui' as ui;",
+      "import 'package:flutter_test/flutter_test.dart';",
+      for (final File file in _listDartFiles(Directory(_packageFlutter)))
+        "import 'package:flutter/${path.basename(file.path)}';",
+    ].map<_Line>((String code) => _Line.generated(code: code)).toList();
   }
 
   List<_Line>? _headersWithImports;
@@ -851,10 +851,12 @@ class _SnippetChecker {
         ...assumptions,
       ];
     }
-    final String firstCodeLine =
-        block.firstWhere((String line) => !line.startsWith(_nonCodeRegExp)).trim();
-    final String lastCodeLine =
-        block.lastWhere((String line) => !line.startsWith(_nonCodeRegExp)).trim();
+    final String firstCodeLine = block
+        .firstWhere((String line) => !line.startsWith(_nonCodeRegExp))
+        .trim();
+    final String lastCodeLine = block
+        .lastWhere((String line) => !line.startsWith(_nonCodeRegExp))
+        .trim();
     if (firstCodeLine.startsWith('import ')) {
       // probably an entire program
       if (importPreviousExample) {
@@ -1046,8 +1048,10 @@ class _SnippetChecker {
     );
     final File outputFile = File(path.join(_contentDirectory.path, '$snippetFileId.dart'))
       ..createSync(recursive: true);
-    final String contents =
-        snippetFile.code.map<String>((_Line line) => line.code).join('\n').trimRight();
+    final String contents = snippetFile.code
+        .map<String>((_Line line) => line.code)
+        .join('\n')
+        .trimRight();
     outputFile.writeAsStringSync('$contents\n');
     return outputFile;
   }

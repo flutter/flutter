@@ -84,10 +84,9 @@ class CompileBundleStep implements PipelineStep {
   Future<void> run() async {
     print('Compiling test bundle ${bundle.name.ansiMagenta}...');
     final List<FilePath> allTests = _findTestFiles();
-    final List<TestCompiler> compilers =
-        bundle.compileConfigs
-            .map((CompileConfiguration config) => _createCompiler(config))
-            .toList();
+    final List<TestCompiler> compilers = bundle.compileConfigs
+        .map((CompileConfiguration config) => _createCompiler(config))
+        .toList();
     final Stopwatch stopwatch = Stopwatch()..start();
     final String testSetDirectoryPath = testSetDirectory.path;
 
@@ -107,10 +106,9 @@ class CompileBundleStep implements PipelineStep {
           }
           final bool success = await compiler.compileTest(testFile);
           const int maxTestNameLength = 80;
-          final String truncatedPath =
-              relativePath.length > maxTestNameLength
-                  ? relativePath.replaceRange(maxTestNameLength - 3, relativePath.length, '...')
-                  : relativePath;
+          final String truncatedPath = relativePath.length > maxTestNameLength
+              ? relativePath.replaceRange(maxTestNameLength - 3, relativePath.length, '...')
+              : relativePath;
           final String expandedPath = truncatedPath.padRight(maxTestNameLength);
           io.stdout.write('\r  ${success ? expandedPath.ansiGreen : expandedPath.ansiRed}');
           return success
@@ -128,15 +126,14 @@ class CompileBundleStep implements PipelineStep {
     final String resultsJson = const JsonEncoder.withIndent('  ').convert(<String, dynamic>{
       'name': bundle.name,
       'directory': bundle.testSet.directory,
-      'builds':
-          bundle.compileConfigs
-              .map(
-                (CompileConfiguration config) => <String, dynamic>{
-                  'compiler': config.compiler.name,
-                  'renderer': config.renderer.name,
-                },
-              )
-              .toList(),
+      'builds': bundle.compileConfigs
+          .map(
+            (CompileConfiguration config) => <String, dynamic>{
+              'compiler': config.compiler.name,
+              'renderer': config.renderer.name,
+            },
+          )
+          .toList(),
       'compileTimeInMs': stopwatch.elapsedMilliseconds,
       'results': results.map((String k, CompileResult v) => MapEntry<String, String>(k, v.name)),
     });

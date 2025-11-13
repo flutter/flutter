@@ -51,8 +51,8 @@ class InvalidDidUpdateWidgetLifecycleWidgetState
 void main() {
   testWidgets(
     'async onInit throws FlutterError',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       await tester.pumpWidget(const InvalidOnInitLifecycleWidget());
 
@@ -62,8 +62,8 @@ void main() {
 
   testWidgets(
     'async didUpdateWidget throws FlutterError',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(color: Colors.green));
       await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(color: Colors.red));

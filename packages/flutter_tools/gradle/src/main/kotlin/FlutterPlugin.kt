@@ -8,6 +8,7 @@ import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
+import com.android.build.gradle.api.ApkVariant
 import com.android.build.gradle.tasks.PackageAndroidArtifact
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.flutter.gradle.FlutterPluginUtils.readPropertiesIfExist
@@ -20,7 +21,6 @@ import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.Directory
 import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
@@ -98,13 +98,6 @@ class FlutterPlugin : Plugin<Project> {
             repositories.maven {
                 url = uri(repository!!)
             }
-            if (plugins.hasPlugin("com.android.application") && isInvokedFromAndroidStudio()) {
-                dependencies.add("compileOnly", "io.flutter:flutter_embedding_debug:$engineVersion")
-                dependencies.add("compileOnly", "io.flutter:armeabi_v7a_debug:$engineVersion")
-                dependencies.add("compileOnly", "io.flutter:arm64_v8a_debug:$engineVersion")
-                dependencies.add("compileOnly", "io.flutter:x86_debug:$engineVersion")
-                dependencies.add("compileOnly", "io.flutter:x86_64_debug:$engineVersion")
-            }
         }
 
         project.apply {
@@ -173,14 +166,16 @@ class FlutterPlugin : Plugin<Project> {
             //
             // If the user has specified abiFilters in their build.gradle file, those
             // settings will take precedence over these defaults.
-            FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
-                buildType.ndk.abiFilters.clear()
-                FlutterPluginConstants.DEFAULT_PLATFORMS.forEach({ platform ->
-                    val abiValue: String =
-                        FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]
-                            ?: throw GradleException("Invalid platform: $platform")
-                    buildType.ndk.abiFilters.add(abiValue)
-                })
+            if (!FlutterPluginUtils.shouldProjectDisableAbiFiltering(project)) {
+                FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
+                    buildType.ndk.abiFilters.clear()
+                    FlutterPluginConstants.DEFAULT_PLATFORMS.forEach { platform ->
+                        val abiValue: String =
+                            FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]
+                                ?: throw GradleException("Invalid platform: $platform")
+                        buildType.ndk.abiFilters.add(abiValue)
+                    }
+                }
             }
         }
         val propDeferredComponentNames = "deferred-component-names"
@@ -217,8 +212,7 @@ class FlutterPlugin : Plugin<Project> {
         val shouldSkipDependencyChecks: Boolean =
             project.hasProperty("skipDependencyChecks") &&
                 (
-                    project.properties["skipDependencyChecks"] as? Boolean
-                        ?: false
+                    project.properties["skipDependencyChecks"].toString().toBoolean()
                 )
         if (!shouldSkipDependencyChecks) {
             try {
@@ -271,15 +265,18 @@ class FlutterPlugin : Plugin<Project> {
                     // Enables resource shrinking, which is performed by the Android Gradle plugin.
                     // The resource shrinker can't be used for libraries.
                     isShrinkResources = FlutterPluginUtils.isBuiltAsApp(project)
-                    // Fallback to `android/app/proguard-rules.pro`.
-                    // This way, custom Proguard rules can be configured as needed.
                     proguardFiles(
                         FlutterPluginUtils
                             .getAndroidExtension(project)
                             .getDefaultProguardFile("proguard-android-optimize.txt"),
-                        flutterProguardRules,
-                        "proguard-rules.pro"
+                        flutterProguardRules
                     )
+
+                    // Optionally adds custom Proguard rules as needed from `android/app/proguard-rules.pro`.
+                    // Starting AGP 9.0 Proguard files must exist to be added to the configuration.
+                    if (File("${project.projectDir}/proguard-rules.pro").exists()) {
+                        proguardFile("proguard-rules.pro")
+                    }
                 }
             }
         }
@@ -333,23 +330,19 @@ class FlutterPlugin : Plugin<Project> {
     }
 
     private fun addTaskForLockfileGeneration(rootProject: Project) {
-        try {
-            rootProject.tasks.register("generateLockfiles") {
-                doLast {
-                    rootProject.subprojects.forEach { subproject ->
-                        val gradlew: String =
-                            getExecutableNameForPlatform("${rootProject.projectDir}/gradlew")
-                        val execOps = rootProject.serviceOf<ExecOperations>()
-                        execOps.exec {
-                            workingDir(rootProject.projectDir)
-                            executable(gradlew)
-                            args(":${subproject.name}:dependencies", "--write-locks")
-                        }
+        rootProject.tasks.register("generateLockfiles") {
+            doLast {
+                rootProject.subprojects.forEach { subproject ->
+                    val gradlew: String =
+                        getExecutableNameForPlatform("${rootProject.projectDir}/gradlew")
+                    val execOps = rootProject.serviceOf<ExecOperations>()
+                    execOps.exec {
+                        workingDir(rootProject.projectDir)
+                        executable(gradlew)
+                        args(":${subproject.name}:dependencies", "--write-locks")
                     }
                 }
             }
-        } catch (e: TaskInstantiationException) {
-            // ignored
         }
     }
 
@@ -407,7 +400,7 @@ class FlutterPlugin : Plugin<Project> {
                 //
                 // The filename consists of `app<-abi>?<-flavor-name>?-<build-mode>.apk`.
                 // Where:
-                //   * `abi` can be `armeabi-v7a|arm64-v8a|x86|x86_64` only if the flag `split-per-abi` is set.
+                //   * `abi` can be `armeabi-v7a|arm64-v8a|x86_64` only if the flag `split-per-abi` is set.
                 //   * `flavor-name` is the flavor used to build the app in lower case if the assemble task is called.
                 //   * `build-mode` can be `release|debug|profile`.
                 variant.outputs.forEach { output ->
@@ -436,14 +429,7 @@ class FlutterPlugin : Plugin<Project> {
                         filename += "-${FlutterPluginUtils.buildModeFor(variant.buildType)}"
                         projectToAddTasksTo.copy {
                             from(File("$outputDirectoryStr/${output.outputFileName}"))
-                            into(
-                                File(
-                                    "${
-                                        projectToAddTasksTo.layout.buildDirectory.dir("outputs/flutter-apk")
-                                            .get()
-                                    }"
-                                )
-                            )
+                            into(projectToAddTasksTo.layout.buildDirectory.dir("outputs/flutter-apk"))
                             rename { "$filename.apk" }
                         }
                     }
@@ -625,14 +611,19 @@ class FlutterPlugin : Plugin<Project> {
                     //    https://github.com/flutter/flutter/issues/166550
                     @Suppress("DEPRECATION")
                     output as com.android.build.gradle.api.ApkVariantOutput
+                    val versionCodeIfPresent: Int? = if (variant is ApkVariant) variant.versionCode else null
+
                     // TODO(gmackall): Migrate to AGPs variant api.
                     //    https://github.com/flutter/flutter/issues/166550
                     @Suppress("DEPRECATION")
-                    val filterIdentifier: String =
+                    val filterIdentifier: String? =
                         output.getFilter(com.android.build.VariantOutput.FilterType.ABI)
                     val abiVersionCode: Int? = FlutterPluginConstants.ABI_VERSION[filterIdentifier]
                     if (abiVersionCode != null) {
-                        output.versionCodeOverride = abiVersionCode * 1000 + variant.mergedFlavor.versionCode as Int
+                        output.versionCodeOverride = abiVersionCode * 1000 + (
+                            versionCodeIfPresent
+                                ?: variant.mergedFlavor.versionCode as Int
+                        )
                     }
                 }
             }
@@ -686,7 +677,6 @@ class FlutterPlugin : Plugin<Project> {
                     localEngineSrcPath = flutterPlugin.localEngineSrcPath
                     targetPath = FlutterPluginUtils.getFlutterTarget(project)
                     verbose = FlutterPluginUtils.isProjectVerbose(project)
-                    fastStart = FlutterPluginUtils.isProjectFastStart(project)
                     fileSystemRoots = fileSystemRootsValue
                     fileSystemScheme = fileSystemSchemeValue
                     trackWidgetCreation = trackWidgetCreationValue
@@ -709,7 +699,7 @@ class FlutterPlugin : Plugin<Project> {
                     validateDeferredComponents = validateDeferredComponentsValue
                     flavor = flavorValue
                 }
-            val compileTask: FlutterTask = compileTaskProvider.get()
+            val flutterCompileTask: FlutterTask = compileTaskProvider.get()
             val libJar: File =
                 project.file(
                     project.layout.buildDirectory.dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/libs.jar")
@@ -721,10 +711,10 @@ class FlutterPlugin : Plugin<Project> {
                 ) {
                     destinationDirectory.set(libJar.parentFile)
                     archiveFileName.set(libJar.name)
-                    dependsOn(compileTask)
+                    dependsOn(flutterCompileTask)
                     targetPlatforms.forEach { targetPlatform ->
                         val abi: String? = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetPlatform]
-                        from("${compileTask.intermediateDir}/$abi") {
+                        from("${flutterCompileTask.intermediateDir}/$abi") {
                             include("*.so")
                             // Move `app.so` to `lib/<abi>/libapp.so`
                             rename { filename: String -> "lib/$abi/lib$filename" }
@@ -754,12 +744,14 @@ class FlutterPlugin : Plugin<Project> {
                     "copyFlutterAssets${FlutterPluginUtils.capitalize(variant.name)}",
                     Copy::class.java
                 ) {
-                    dependsOn(compileTask)
-                    with(compileTask.assets)
-                    // TODO(gmackall): Replace with filePermissions.user.read/write = true once
-                    //   minimum supported Gradle version is 8.3.
-                    @Suppress("DEPRECATION")
-                    fileMode = 420 // corresponds to unix 0644 in base 8
+                    dependsOn(flutterCompileTask)
+                    with(flutterCompileTask.assets)
+                    filePermissions {
+                        user {
+                            read = true
+                            write = true
+                        }
+                    }
                     if (isUsedAsSubproject) {
                         // TODO(gmackall): above is always false, can delete
                         dependsOn(packageAssets)

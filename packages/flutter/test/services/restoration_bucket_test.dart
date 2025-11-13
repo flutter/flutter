@@ -674,12 +674,11 @@ void main() {
     addTearDown(parent.dispose);
     await expectLater(
       await memoryEvents(
-        () =>
-            RestorationBucket.child(
-              restorationId: 'child1',
-              parent: parent,
-              debugOwner: null,
-            ).dispose(),
+        () => RestorationBucket.child(
+          restorationId: 'child1',
+          parent: parent,
+          debugOwner: null,
+        ).dispose(),
         RestorationBucket,
       ),
       areCreateAndDispose,

@@ -742,24 +742,25 @@ class RenderFlex extends RenderBox
       };
 
       Size layoutChild(RenderBox child, BoxConstraints constraints) {
-        final double mainAxisSizeFromConstraints =
-            isHorizontal ? constraints.maxWidth : constraints.maxHeight;
+        final double mainAxisSizeFromConstraints = isHorizontal
+            ? constraints.maxWidth
+            : constraints.maxHeight;
         // A infinite mainAxisSizeFromConstraints means this child is flexible (or extent is double.infinity).
         assert((_getFlex(child) != 0 && extent.isFinite) == mainAxisSizeFromConstraints.isFinite);
-        final double maxMainAxisSize =
-            mainAxisSizeFromConstraints.isFinite
-                ? mainAxisSizeFromConstraints
-                : (isHorizontal
-                    ? child.getMaxIntrinsicWidth(double.infinity)
-                    : child.getMaxIntrinsicHeight(double.infinity));
+        final double maxMainAxisSize = mainAxisSizeFromConstraints.isFinite
+            ? mainAxisSizeFromConstraints
+            : (isHorizontal
+                  ? child.getMaxIntrinsicWidth(double.infinity)
+                  : child.getMaxIntrinsicHeight(double.infinity));
         return isHorizontal
             ? Size(maxMainAxisSize, childSize(child, maxMainAxisSize))
             : Size(childSize(child, maxMainAxisSize), maxMainAxisSize);
       }
 
       return _computeSizes(
-        constraints:
-            isHorizontal ? BoxConstraints(maxWidth: extent) : BoxConstraints(maxHeight: extent),
+        constraints: isHorizontal
+            ? BoxConstraints(maxWidth: extent)
+            : BoxConstraints(maxHeight: extent),
         layoutChild: layoutChild,
         getBaseline: ChildLayoutHelper.getDryBaseline,
       ).axisSize.crossAxisExtent;
@@ -943,6 +944,22 @@ class RenderFlex extends RenderBox
       return sizes.baselineOffset;
     }
 
+    // For non-baseline-aligned, match the logic of computeDistanceToActualBaseline exactly
+    return switch (_direction) {
+      Axis.horizontal => _computeDryDistanceToHighestBaseline(constraints, baseline, sizes),
+      Axis.vertical => _computeDryDistanceToFirstBaseline(constraints, baseline, sizes),
+    };
+  }
+
+  // Dry layout equivalent of defaultComputeDistanceToHighestActualBaseline
+  double? _computeDryDistanceToHighestBaseline(
+    BoxConstraints constraints,
+    TextBaseline baseline,
+    _LayoutSizes sizes,
+  ) {
+    // Simulate the exact logic from defaultComputeDistanceToHighestActualBaseline
+    // The key insight: the actual method uses childParentData.offset.dy, so we need to simulate that
+
     final BoxConstraints nonFlexConstraints = _constraintsForNonFlexChild(constraints);
     BoxConstraints constraintsForChild(RenderBox child) {
       final double? spacePerFlex = sizes.spacePerFlex;
@@ -952,52 +969,111 @@ class RenderFlex extends RenderBox
           : nonFlexConstraints;
     }
 
-    BaselineOffset baselineOffset = BaselineOffset.noBaseline;
-    switch (direction) {
-      case Axis.vertical:
-        final double freeSpace = math.max(0.0, sizes.mainAxisFreeSpace);
-        final bool flipMainAxis = _flipMainAxis;
-        final (double leadingSpaceY, double spaceBetween) = mainAxisAlignment._distributeSpace(
-          freeSpace,
-          childCount,
-          flipMainAxis,
-          spacing,
-        );
-        double y =
-            flipMainAxis
-                ? leadingSpaceY +
-                    (childCount - 1) * spaceBetween +
-                    (sizes.axisSize.mainAxisExtent - sizes.mainAxisFreeSpace)
-                : leadingSpaceY;
-        final double directionUnit = flipMainAxis ? -1.0 : 1.0;
-        for (
-          RenderBox? child = firstChild;
-          baselineOffset == BaselineOffset.noBaseline && child != null;
-          child = childAfter(child)
-        ) {
-          final BoxConstraints childConstraints = constraintsForChild(child);
+    // Simulate the layout positioning logic from performLayout
+    final bool flipMainAxis = _flipMainAxis;
+    final bool flipCrossAxis = _flipCrossAxis;
+    final (RenderBox? Function(RenderBox) nextChild, RenderBox? topLeftChild) = flipMainAxis
+        ? (childBefore, lastChild)
+        : (childAfter, firstChild);
+    final double? baselineOffset = _isBaselineAligned && textBaseline != null
+        ? sizes.baselineOffset
+        : null;
+
+    BaselineOffset minBaseline = BaselineOffset.noBaseline;
+
+    for (RenderBox? child = topLeftChild; child != null; child = nextChild(child)) {
+      final BoxConstraints childConstraints = constraintsForChild(child);
+      final double? childBaseline = child.getDryBaseline(childConstraints, baseline);
+      if (childBaseline != null) {
+        // Calculate cross-axis position to match performLayout exactly
+        final double? childBaselineOffset = _isBaselineAligned && textBaseline != null
+            ? child.getDryBaseline(childConstraints, textBaseline!)
+            : null;
+        final bool baselineAlign = baselineOffset != null && childBaselineOffset != null;
+
+        final double childCrossPosition;
+        if (baselineAlign) {
+          childCrossPosition = baselineOffset - childBaselineOffset;
+        } else if (crossAxisAlignment == CrossAxisAlignment.baseline &&
+            direction == Axis.horizontal) {
+          // Baseline mode with a child that lacks a baseline: align to the top (dy = 0),
+          // regardless of verticalDirection. Ignore flipCrossAxis here to match performLayout.
           final Size childSize = child.getDryLayout(childConstraints);
-          final double? childBaselineOffset = child.getDryBaseline(childConstraints, baseline);
-          final double additionalY = flipMainAxis ? -childSize.height : 0.0;
-          baselineOffset = BaselineOffset(childBaselineOffset) + y + additionalY;
-          y += directionUnit * (spaceBetween + childSize.height);
-        }
-      case Axis.horizontal:
-        final bool flipCrossAxis = _flipCrossAxis;
-        for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
-          final BoxConstraints childConstraints = constraintsForChild(child);
-          final BaselineOffset distance = BaselineOffset(
-            child.getDryBaseline(childConstraints, baseline),
+          childCrossPosition = CrossAxisAlignment.start._getChildCrossAxisOffset(
+            sizes.axisSize.crossAxisExtent - _getCrossSize(childSize),
+            false,
           );
-          final double freeCrossAxisSpace =
-              sizes.axisSize.crossAxisExtent - child.getDryLayout(childConstraints).height;
-          final BaselineOffset childBaseline =
-              distance +
-              crossAxisAlignment._getChildCrossAxisOffset(freeCrossAxisSpace, flipCrossAxis);
-          baselineOffset = baselineOffset.minOf(childBaseline);
+        } else {
+          // Non-baseline: respect configured crossAxisAlignment.
+          final Size childSize = child.getDryLayout(childConstraints);
+          childCrossPosition = crossAxisAlignment._getChildCrossAxisOffset(
+            sizes.axisSize.crossAxisExtent - _getCrossSize(childSize),
+            flipCrossAxis,
+          );
         }
+
+        // For horizontal flex: offset.dy = childCrossPosition
+        // This simulates childParentData.offset.dy from the actual method
+        final BaselineOffset candidate = BaselineOffset(childBaseline) + childCrossPosition;
+        minBaseline = minBaseline.minOf(candidate);
+      }
+
+      // Main-axis advancement is irrelevant for highest-baseline computation.
     }
-    return baselineOffset.offset;
+
+    return minBaseline.offset;
+  }
+
+  // Dry layout equivalent of defaultComputeDistanceToFirstActualBaseline
+  double? _computeDryDistanceToFirstBaseline(
+    BoxConstraints constraints,
+    TextBaseline baseline,
+    _LayoutSizes sizes,
+  ) {
+    // We must mimic defaultComputeDistanceToFirstActualBaseline which walks children
+    // in child-list order (not painting order) but uses actual offsets.
+    final BoxConstraints nonFlexConstraints = _constraintsForNonFlexChild(constraints);
+    BoxConstraints constraintsForChild(RenderBox child) {
+      final double? spacePerFlex = sizes.spacePerFlex;
+      final int flex;
+      return spacePerFlex != null && (flex = _getFlex(child)) > 0
+          ? _constraintsForFlexChild(child, constraints, flex * spacePerFlex)
+          : nonFlexConstraints;
+    }
+
+    // First, compute each child's main-axis position in painting order.
+    final double remainingSpace = math.max(0.0, sizes.mainAxisFreeSpace);
+    final bool flipMainAxis = _flipMainAxis;
+    final (double leadingSpace, double betweenSpace) = mainAxisAlignment._distributeSpace(
+      remainingSpace,
+      childCount,
+      flipMainAxis,
+      spacing,
+    );
+
+    final Map<RenderBox, double> mainPositions = <RenderBox, double>{};
+    final (RenderBox? Function(RenderBox) nextChildPaintOrder, RenderBox? startChild) = flipMainAxis
+        ? (childBefore, lastChild)
+        : (childAfter, firstChild);
+    double pos = leadingSpace;
+    for (RenderBox? child = startChild; child != null; child = nextChildPaintOrder(child)) {
+      mainPositions[child] = pos;
+      final BoxConstraints cc = constraintsForChild(child);
+      final Size cs = child.getDryLayout(cc);
+      pos += _getMainSize(cs) + betweenSpace;
+    }
+
+    // Then, find the first child with a baseline in child-list order and return its baseline + position.
+    for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
+      final BoxConstraints cc = constraintsForChild(child);
+      final double? childBaseline = child.getDryBaseline(cc, baseline);
+      if (childBaseline != null) {
+        final double? position = mainPositions[child];
+        // If somehow missing (no children), fall back to leadingSpace.
+        return childBaseline + (position ?? leadingSpace);
+      }
+    }
+    return null;
   }
 
   @override
@@ -1029,8 +1105,9 @@ class RenderFlex extends RenderBox
   }) {
     FlutterError? result;
     assert(() {
-      final double maxMainSize =
-          _direction == Axis.horizontal ? constraints.maxWidth : constraints.maxHeight;
+      final double maxMainSize = _direction == Axis.horizontal
+          ? constraints.maxWidth
+          : constraints.maxHeight;
       final bool canFlex = maxMainSize < double.infinity;
       RenderBox? child = firstChild;
       while (child != null) {
@@ -1137,13 +1214,12 @@ class RenderFlex extends RenderBox
     final bool canFlex = maxMainSize.isFinite;
     final BoxConstraints nonFlexChildConstraints = _constraintsForNonFlexChild(constraints);
     // Null indicates the children are not baseline aligned.
-    final TextBaseline? textBaseline =
-        _isBaselineAligned
-            ? (this.textBaseline ??
-                (throw FlutterError(
-                  'To use CrossAxisAlignment.baseline, you must also specify which baseline to use using the "textBaseline" argument.',
-                )))
-            : null;
+    final TextBaseline? textBaseline = _isBaselineAligned
+        ? (this.textBaseline ??
+              (throw FlutterError(
+                'To use CrossAxisAlignment.baseline, you must also specify which baseline to use using the "textBaseline" argument.',
+              )))
+        : null;
 
     // The first pass lays out non-flex children and computes total flex.
     int totalFlex = 0;
@@ -1163,8 +1239,9 @@ class RenderFlex extends RenderBox
         );
         accumulatedSize += childSize;
         // Baseline-aligned children contributes to the cross axis extent separately.
-        final double? baselineOffset =
-            textBaseline == null ? null : getBaseline(child, nonFlexChildConstraints, textBaseline);
+        final double? baselineOffset = textBaseline == null
+            ? null
+            : getBaseline(child, nonFlexChildConstraints, textBaseline);
         accumulatedAscentDescent += _AscentDescent(
           baselineOffset: baselineOffset,
           crossSize: childSize.crossAxisExtent,
@@ -1203,8 +1280,9 @@ class RenderFlex extends RenderBox
         direction: direction,
       );
       accumulatedSize += childSize;
-      final double? baselineOffset =
-          textBaseline == null ? null : getBaseline(child, childConstraints, textBaseline);
+      final double? baselineOffset = textBaseline == null
+          ? null
+          : getBaseline(child, childConstraints, textBaseline);
       accumulatedAscentDescent += _AscentDescent(
         baselineOffset: baselineOffset,
         crossSize: childSize.crossAxisExtent,
@@ -1271,8 +1349,9 @@ class RenderFlex extends RenderBox
       flipMainAxis,
       spacing,
     );
-    final (_NextChild nextChild, RenderBox? topLeftChild) =
-        flipMainAxis ? (childBefore, lastChild) : (childAfter, firstChild);
+    final (_NextChild nextChild, RenderBox? topLeftChild) = flipMainAxis
+        ? (childBefore, lastChild)
+        : (childAfter, firstChild);
     final double? baselineOffset = sizes.baselineOffset;
     assert(
       baselineOffset == null ||
@@ -1288,13 +1367,25 @@ class RenderFlex extends RenderBox
           baselineOffset != null &&
           (childBaselineOffset = child.getDistanceToBaseline(textBaseline!, onlyReal: true)) !=
               null;
-      final double childCrossPosition =
-          baselineAlign
-              ? baselineOffset - childBaselineOffset!
-              : crossAxisAlignment._getChildCrossAxisOffset(
-                crossAxisExtent - _getCrossSize(child.size),
-                flipCrossAxis,
-              );
+      final double childCrossPosition;
+      if (baselineAlign) {
+        childCrossPosition = baselineOffset - childBaselineOffset!;
+      } else if (crossAxisAlignment == CrossAxisAlignment.baseline &&
+          direction == Axis.horizontal) {
+        // In a baseline-aligned horizontal flex, a child without a baseline is aligned to the
+        // top of the cross axis (dy = 0), regardless of verticalDirection or crossAxisAlignment.
+        // That is, we intentionally ignore flipCrossAxis here.
+        childCrossPosition = CrossAxisAlignment.start._getChildCrossAxisOffset(
+          crossAxisExtent - _getCrossSize(child.size),
+          false,
+        );
+      } else {
+        // Non-baseline alignment respects the configured crossAxisAlignment.
+        childCrossPosition = crossAxisAlignment._getChildCrossAxisOffset(
+          crossAxisExtent - _getCrossSize(child.size),
+          flipCrossAxis,
+        );
+      }
       final FlexParentData childParentData = child.parentData! as FlexParentData;
       childParentData.offset = switch (direction) {
         Axis.horizontal => Offset(childMainPosition, childCrossPosition),

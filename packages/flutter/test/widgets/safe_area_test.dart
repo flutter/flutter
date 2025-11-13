@@ -51,7 +51,10 @@ void main() {
         child: SafeArea(left: false, bottom: false, child: Placeholder()),
       );
       await tester.pumpWidget(
-        const MediaQuery(data: MediaQueryData(padding: EdgeInsets.all(20.0)), child: child),
+        const MediaQuery(
+          data: MediaQueryData(padding: EdgeInsets.all(20.0)),
+          child: child,
+        ),
       );
       expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(20.0, 20.0));
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(780.0, 600.0));
@@ -270,12 +273,14 @@ void main() {
     }
 
     void verify(WidgetTester tester, List<Rect> expectedRects) {
-      final List<Rect> testAnswers =
-          tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Rect>((RenderBox target) {
+      final List<Rect> testAnswers = tester
+          .renderObjectList<RenderBox>(find.byType(SizedBox))
+          .map<Rect>((RenderBox target) {
             final Offset topLeft = target.localToGlobal(Offset.zero);
             final Offset bottomRight = target.localToGlobal(target.size.bottomRight(Offset.zero));
             return Rect.fromPoints(topLeft, bottomRight);
-          }).toList();
+          })
+          .toList();
       expect(testAnswers, equals(expectedRects));
     }
 

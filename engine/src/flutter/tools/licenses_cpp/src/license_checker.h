@@ -8,18 +8,34 @@
 #include <iosfwd>
 #include <string_view>
 #include <vector>
-#include "flutter/third_party/abseil-cpp/absl/status/status.h"
 #include "flutter/tools/licenses_cpp/src/data.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 class LicenseChecker {
  public:
+  struct Flags {
+    bool treat_unmatched_comments_as_errors = false;
+    std::optional<std::string> root_package_name;
+  };
+
   static const char* kHeaderLicenseRegex;
   static std::vector<absl::Status> Run(std::string_view working_dir,
                                        std::ostream& licenses,
                                        const Data& data);
+  static std::vector<absl::Status> Run(std::string_view working_dir,
+                                       std::ostream& licenses,
+                                       const Data& data,
+                                       const Flags& flags);
   static int Run(std::string_view working_dir,
                  std::ostream& licenses,
-                 std::string_view data_dir);
+                 std::string_view data_dir,
+                 const Flags& flags);
+  /// Run on a single file.
+  static int FileRun(std::string_view working_dir,
+                     std::string_view full_path,
+                     std::ostream& licenses,
+                     std::string_view data_dir,
+                     const Flags& flags);
 };
 
 #endif  // FLUTTER_TOOLS_LICENSES_CPP_SRC_LICENSE_CHECKER_H_

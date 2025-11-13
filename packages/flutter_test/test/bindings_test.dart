@@ -125,7 +125,7 @@ void main() {
   ) async {
     bool responded = false;
     // The particular asset does not matter, as long as it exists.
-    rootBundle.load('AssetManifest.json').then((ByteData data) {
+    rootBundle.load('AssetManifest.bin').then((ByteData data) {
       responded = true;
     });
     expect(responded, true);

@@ -19,19 +19,18 @@ void main() {
         addTearDown(() => delegate1.dispose());
         await tester.pumpWidget(
           simpleBuilderTest(
-            delegate:
-                delegate1 = TwoDimensionalChildBuilderDelegate(
-                  // Only build 1 child
-                  maxXIndex: 0,
-                  maxYIndex: 0,
-                  builder: (BuildContext context, ChildVicinity vicinity) {
-                    return SizedBox(
-                      height: 200,
-                      width: 200,
-                      child: Center(child: Text('C${vicinity.xIndex}:R${vicinity.yIndex}')),
-                    );
-                  },
-                ),
+            delegate: delegate1 = TwoDimensionalChildBuilderDelegate(
+              // Only build 1 child
+              maxXIndex: 0,
+              maxYIndex: 0,
+              builder: (BuildContext context, ChildVicinity vicinity) {
+                return SizedBox(
+                  height: 200,
+                  width: 200,
+                  child: Center(child: Text('C${vicinity.xIndex}:R${vicinity.yIndex}')),
+                );
+              },
+            ),
           ),
         );
         await tester.pumpAndSettle();
@@ -52,20 +51,19 @@ void main() {
         addTearDown(() => delegate2.dispose());
         await tester.pumpWidget(
           simpleBuilderTest(
-            delegate:
-                delegate2 = TwoDimensionalChildBuilderDelegate(
-                  // Only build 1 child
-                  maxXIndex: 0,
-                  maxYIndex: 0,
-                  addRepaintBoundaries: false,
-                  builder: (BuildContext context, ChildVicinity vicinity) {
-                    return SizedBox(
-                      height: 200,
-                      width: 200,
-                      child: Center(child: Text('C${vicinity.xIndex}:R${vicinity.yIndex}')),
-                    );
-                  },
-                ),
+            delegate: delegate2 = TwoDimensionalChildBuilderDelegate(
+              // Only build 1 child
+              maxXIndex: 0,
+              maxYIndex: 0,
+              addRepaintBoundaries: false,
+              builder: (BuildContext context, ChildVicinity vicinity) {
+                return SizedBox(
+                  height: 200,
+                  width: 200,
+                  child: Center(child: Text('C${vicinity.xIndex}:R${vicinity.yIndex}')),
+                );
+              },
+            ),
           ),
         );
         await tester.pumpAndSettle();
@@ -244,10 +242,9 @@ void main() {
                 return SizedBox.square(
                   dimension: 200,
                   child: Center(
-                    child:
-                        vicinity == firstCell
-                            ? KeepAliveCheckBox(key: checkBoxKey)
-                            : Text('R${vicinity.xIndex}:C${vicinity.yIndex}'),
+                    child: vicinity == firstCell
+                        ? KeepAliveCheckBox(key: checkBoxKey)
+                        : Text('R${vicinity.xIndex}:C${vicinity.yIndex}'),
                   ),
                 );
               },
@@ -323,10 +320,9 @@ void main() {
                   child: SizedBox.square(
                     dimension: 200,
                     child: Center(
-                      child:
-                          vicinity == firstCell
-                              ? KeepAliveCheckBox(key: checkBoxKey)
-                              : Text('R${vicinity.xIndex}:C${vicinity.yIndex}'),
+                      child: vicinity == firstCell
+                          ? KeepAliveCheckBox(key: checkBoxKey)
+                          : Text('R${vicinity.xIndex}:C${vicinity.yIndex}'),
                     ),
                   ),
                 );
@@ -424,10 +420,9 @@ void main() {
                 return SizedBox.square(
                   dimension: 200,
                   child: Center(
-                    child:
-                        vicinity == firstCell
-                            ? KeepAliveCheckBox(key: checkBoxKey)
-                            : Text('R${vicinity.xIndex}:C${vicinity.yIndex}'),
+                    child: vicinity == firstCell
+                        ? KeepAliveCheckBox(key: checkBoxKey)
+                        : Text('R${vicinity.xIndex}:C${vicinity.yIndex}'),
                   ),
                 );
               },
@@ -497,11 +492,10 @@ void main() {
         addTearDown(() => delegate1.dispose());
         await tester.pumpWidget(
           simpleListTest(
-            delegate:
-                delegate1 = TwoDimensionalChildListDelegate(
-                  // Only builds 1 child
-                  children: children,
-                ),
+            delegate: delegate1 = TwoDimensionalChildListDelegate(
+              // Only builds 1 child
+              children: children,
+            ),
           ),
         );
         await tester.pumpAndSettle();
@@ -538,14 +532,13 @@ void main() {
         addTearDown(() => delegate2.dispose());
         await tester.pumpWidget(
           simpleListTest(
-            delegate:
-                delegate2 = TwoDimensionalChildListDelegate(
-                  // Different children triggers rebuild
-                  children: <List<Widget>>[
-                    <Widget>[Container()],
-                  ],
-                  addRepaintBoundaries: false,
-                ),
+            delegate: delegate2 = TwoDimensionalChildListDelegate(
+              // Different children triggers rebuild
+              children: <List<Widget>>[
+                <Widget>[Container()],
+              ],
+              addRepaintBoundaries: false,
+            ),
           ),
         );
         await tester.pumpAndSettle();
@@ -922,13 +915,14 @@ void main() {
           TwoDimensionalScrollable(
             horizontalDetails: const ScrollableDetails.horizontal(),
             verticalDetails: const ScrollableDetails.horizontal(),
-            viewportBuilder: (
-              BuildContext context,
-              ViewportOffset verticalPosition,
-              ViewportOffset horizontalPosition,
-            ) {
-              return Container();
-            },
+            viewportBuilder:
+                (
+                  BuildContext context,
+                  ViewportOffset verticalPosition,
+                  ViewportOffset horizontalPosition,
+                ) {
+                  return Container();
+                },
           ),
         );
 
@@ -937,13 +931,14 @@ void main() {
           TwoDimensionalScrollable(
             horizontalDetails: const ScrollableDetails.vertical(),
             verticalDetails: const ScrollableDetails.vertical(),
-            viewportBuilder: (
-              BuildContext context,
-              ViewportOffset verticalPosition,
-              ViewportOffset horizontalPosition,
-            ) {
-              return Container();
-            },
+            viewportBuilder:
+                (
+                  BuildContext context,
+                  ViewportOffset verticalPosition,
+                  ViewportOffset horizontalPosition,
+                ) {
+                  return Container();
+                },
           ),
         );
 
@@ -952,13 +947,14 @@ void main() {
           TwoDimensionalScrollable(
             horizontalDetails: const ScrollableDetails.vertical(),
             verticalDetails: const ScrollableDetails.horizontal(),
-            viewportBuilder: (
-              BuildContext context,
-              ViewportOffset verticalPosition,
-              ViewportOffset horizontalPosition,
-            ) {
-              return Container();
-            },
+            viewportBuilder:
+                (
+                  BuildContext context,
+                  ViewportOffset verticalPosition,
+                  ViewportOffset horizontalPosition,
+                ) {
+                  return Container();
+                },
           ),
         );
 
@@ -979,12 +975,12 @@ void main() {
         WidgetsApp(
           color: const Color(0xFFFFFFFF),
           restorationScopeId: 'Test ID',
-          builder:
-              (BuildContext context, Widget? child) => TwoDimensionalScrollable(
-                restorationId: 'Custom Restoration ID',
-                horizontalDetails: const ScrollableDetails.horizontal(),
-                verticalDetails: const ScrollableDetails.vertical(),
-                viewportBuilder: (
+          builder: (BuildContext context, Widget? child) => TwoDimensionalScrollable(
+            restorationId: 'Custom Restoration ID',
+            horizontalDetails: const ScrollableDetails.horizontal(),
+            verticalDetails: const ScrollableDetails.vertical(),
+            viewportBuilder:
+                (
                   BuildContext context,
                   ViewportOffset verticalPosition,
                   ViewportOffset horizontalPosition,
@@ -999,7 +995,7 @@ void main() {
                     ),
                   );
                 },
-              ),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -1019,21 +1015,22 @@ void main() {
         TwoDimensionalScrollable(
           horizontalDetails: const ScrollableDetails.horizontal(),
           verticalDetails: const ScrollableDetails.vertical(),
-          viewportBuilder: (
-            BuildContext context,
-            ViewportOffset verticalPosition,
-            ViewportOffset horizontalPosition,
-          ) {
-            return SizedBox.square(
-              dimension: 200,
-              child: Builder(
-                builder: (BuildContext context) {
-                  capturedContext = context;
-                  return Container();
-                },
-              ),
-            );
-          },
+          viewportBuilder:
+              (
+                BuildContext context,
+                ViewportOffset verticalPosition,
+                ViewportOffset horizontalPosition,
+              ) {
+                return SizedBox.square(
+                  dimension: 200,
+                  child: Builder(
+                    builder: (BuildContext context) {
+                      capturedContext = context;
+                      return Container();
+                    },
+                  ),
+                );
+              },
         ),
       );
       await tester.pumpAndSettle();
@@ -1054,12 +1051,12 @@ void main() {
         WidgetsApp(
           color: const Color(0xFFFFFFFF),
           restorationScopeId: 'Test ID',
-          builder:
-              (BuildContext context, Widget? child) => TwoDimensionalScrollable(
-                restorationId: 'Custom Restoration ID',
-                horizontalDetails: const ScrollableDetails.horizontal(),
-                verticalDetails: const ScrollableDetails.vertical(),
-                viewportBuilder: (
+          builder: (BuildContext context, Widget? child) => TwoDimensionalScrollable(
+            restorationId: 'Custom Restoration ID',
+            horizontalDetails: const ScrollableDetails.horizontal(),
+            verticalDetails: const ScrollableDetails.vertical(),
+            viewportBuilder:
+                (
                   BuildContext context,
                   ViewportOffset verticalPosition,
                   ViewportOffset horizontalPosition,
@@ -1073,7 +1070,7 @@ void main() {
                     mainAxis: Axis.vertical,
                   );
                 },
-              ),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -1090,21 +1087,22 @@ void main() {
           TwoDimensionalScrollable(
             horizontalDetails: const ScrollableDetails.horizontal(),
             verticalDetails: const ScrollableDetails.vertical(),
-            viewportBuilder: (
-              BuildContext context,
-              ViewportOffset verticalPosition,
-              ViewportOffset horizontalPosition,
-            ) {
-              return SizedBox.square(
-                dimension: 200,
-                child: Builder(
-                  builder: (BuildContext context) {
-                    capturedContext = context;
-                    return Container();
-                  },
-                ),
-              );
-            },
+            viewportBuilder:
+                (
+                  BuildContext context,
+                  ViewportOffset verticalPosition,
+                  ViewportOffset horizontalPosition,
+                ) {
+                  return SizedBox.square(
+                    dimension: 200,
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        capturedContext = context;
+                        return Container();
+                      },
+                    ),
+                  );
+                },
           ),
         );
         await tester.pumpAndSettle();
@@ -1156,21 +1154,22 @@ void main() {
               physics: const AlwaysScrollableScrollPhysics(),
               decorationClipBehavior: Clip.antiAliasWithSaveLayer,
             ),
-            viewportBuilder: (
-              BuildContext context,
-              ViewportOffset verticalPosition,
-              ViewportOffset horizontalPosition,
-            ) {
-              return SizedBox.square(
-                dimension: 200,
-                child: Builder(
-                  builder: (BuildContext context) {
-                    capturedContext = context;
-                    return Container();
-                  },
-                ),
-              );
-            },
+            viewportBuilder:
+                (
+                  BuildContext context,
+                  ViewportOffset verticalPosition,
+                  ViewportOffset horizontalPosition,
+                ) {
+                  return SizedBox.square(
+                    dimension: 200,
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        capturedContext = context;
+                        return Container();
+                      },
+                    ),
+                  );
+                },
           ),
         );
         await tester.pumpAndSettle();
@@ -1999,10 +1998,40 @@ void main() {
         result.first.toString(),
         equalsIgnoringHashCodes('(xIndex: 0, yIndex: 0): RenderRepaintBoundary#00000'),
       );
-      expect(
-        result.last.toString(),
-        equalsIgnoringHashCodes('(xIndex: 4, yIndex: 3): RenderRepaintBoundary#00000 NEEDS-PAINT'),
+    });
+
+    testWidgets('use cacheExtentStyle', (WidgetTester tester) async {
+      final Map<ChildVicinity, UniqueKey> childKeys = <ChildVicinity, UniqueKey>{};
+      final TwoDimensionalChildBuilderDelegate delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 5,
+        maxYIndex: 5,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
+          return SizedBox.square(key: childKeys[vicinity], dimension: 200);
+        },
       );
+      addTearDown(delegate.dispose);
+
+      await tester.pumpWidget(
+        simpleBuilderTest(
+          delegate: delegate,
+          cacheExtent: 1.0,
+          cacheExtentStyle: CacheExtentStyle.viewport,
+          useCacheExtent: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final RenderTwoDimensionalViewport viewport = getViewport(tester, childKeys.values.first);
+      // The viewport is 800x600. The children are 200x200.
+      // Without cache extent, it should show 4x3 = 12 children, but with the
+      // trailing edge calculation it is 5x4 = 20.
+      // With cacheExtent: 1.0 and cacheExtentStyle: CacheExtentStyle.viewport,
+      // The visible area will be from -800 to 800 + 800 = 1600 horizontally,
+      // and -600 to 600 + 600 = 1200 vertically.
+      // So, it should lay out children from (0,0) to (5,5).
+      // This is a total of 6 * 6 = 36 children.
+      expect(viewport.debugDescribeChildren().length, 36);
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('asserts that both axes are bounded', (WidgetTester tester) async {
@@ -2015,9 +2044,8 @@ void main() {
       await tester.pumpWidget(
         WidgetsApp(
           color: const Color(0xFFFFFFFF),
-          builder:
-              (BuildContext context, Widget? child) =>
-                  Column(children: <Widget>[SimpleBuilderTableView(delegate: builderDelegate)]),
+          builder: (BuildContext context, Widget? child) =>
+              Column(children: <Widget>[SimpleBuilderTableView(delegate: builderDelegate)]),
         ),
       );
       await tester.pumpAndSettle();
@@ -2033,9 +2061,8 @@ void main() {
       await tester.pumpWidget(
         WidgetsApp(
           color: const Color(0xFFFFFFFF),
-          builder:
-              (BuildContext context, Widget? child) =>
-                  Row(children: <Widget>[SimpleBuilderTableView(delegate: builderDelegate)]),
+          builder: (BuildContext context, Widget? child) =>
+              Row(children: <Widget>[SimpleBuilderTableView(delegate: builderDelegate)]),
         ),
       );
       await tester.pumpAndSettle();
@@ -2450,8 +2477,9 @@ void main() {
       testWidgets('getOffsetToReveal', (WidgetTester tester) async {
         await tester.pumpWidget(simpleBuilderTest(useCacheExtent: true));
 
-        RenderAbstractViewport viewport =
-            tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+        RenderAbstractViewport viewport = tester.allRenderObjects
+            .whereType<RenderAbstractViewport>()
+            .first;
         final RevealedOffset verticalOffset = viewport.getOffsetToReveal(
           tester.renderObject(findKey(const ChildVicinity(xIndex: 5, yIndex: 5))),
           1.0,

@@ -7,6 +7,9 @@
         "Tests to run on linux hosts should go in one of the other linux_ build ",
         "definition files."
     ],
+    "luci_flags": {
+      "upload_content_hash": true
+    },
     "builds": [
         {
             "archives": [
@@ -34,10 +37,10 @@
                 "ci/linux_profile_arm64",
                 "--runtime-mode",
                 "profile",
-                "--no-lto",
                 "--target-os=linux",
                 "--linux-cpu=arm64",
                 "--prebuilt-dart-sdk",
+                "--no-lto",
                 "--rbe",
                 "--no-goma"
             ],
@@ -59,6 +62,7 @@
                     "include_paths": [
                         "out/ci/linux_debug_arm64/zip_archives/linux-arm64/artifacts.zip",
                         "out/ci/linux_debug_arm64/zip_archives/linux-arm64/impeller_sdk.zip",
+                        "out/ci/linux_debug_arm64/zip_archives/linux-arm64/linux-arm64-embedder.zip",
                         "out/ci/linux_debug_arm64/zip_archives/linux-arm64/font-subset.zip",
                         "out/ci/linux_debug_arm64/zip_archives/linux-arm64-debug/linux-arm64-flutter-gtk.zip",
                         "out/ci/linux_debug_arm64/zip_archives/dart-sdk-linux-arm64.zip"
@@ -83,6 +87,7 @@
                 "--target-os=linux",
                 "--linux-cpu=arm64",
                 "--prebuilt-dart-sdk",
+                "--no-lto",
                 "--rbe",
                 "--no-goma"
             ],
@@ -95,7 +100,8 @@
                     "flutter/build/archives:dart_sdk_archive",
                     "flutter/tools/font_subset",
                     "flutter/shell/platform/linux:flutter_gtk",
-                    "flutter/impeller/toolkit/interop:sdk"
+                    "flutter/impeller/toolkit/interop:sdk",
+                    "flutter/build/archives:embedder"
                 ]
             }
         },
@@ -128,6 +134,7 @@
                 "--target-os=linux",
                 "--linux-cpu=arm64",
                 "--prebuilt-dart-sdk",
+                "--no-lto",
                 "--rbe",
                 "--no-goma"
             ],

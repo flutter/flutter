@@ -25,10 +25,9 @@ void doTests() {
         styleNonce: 'testing',
         cssSelectorPrefix: DomManager.flutterViewTagName,
       );
-      final String expected =
-          ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox
-              ? 'rgb(0, 0, 0) 0px'
-              : 'rgb(0, 0, 0) none 0px';
+      final String expected = ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox
+          ? 'rgb(0, 0, 0) 0px'
+          : 'rgb(0, 0, 0) none 0px';
       final String got = domWindow.getComputedStyle(flutterViewElement, 'focus').outline;
 
       expect(got, expected);

@@ -228,7 +228,7 @@ bool TextContents::Render(const ContentContext& renderer,
   GlyphAtlas::Type type = frame_->GetAtlasType();
   const std::shared_ptr<GlyphAtlas>& atlas =
       renderer.GetLazyGlyphAtlas()->CreateOrGetGlyphAtlas(
-          *renderer.GetContext(), renderer.GetTransientsBuffer(), type);
+          *renderer.GetContext(), renderer.GetTransientsDataBuffer(), type);
 
   if (!atlas || !atlas->IsValid()) {
     VALIDATION_LOG << "Cannot render glyphs without prepared atlas.";
@@ -252,16 +252,16 @@ bool TextContents::Render(const ContentContext& renderer,
   bool is_translation_scale = entity.GetTransform().IsTranslationScaleOnly();
   Matrix entity_transform = entity.GetTransform();
 
-  VS::BindFrameInfo(pass,
-                    renderer.GetTransientsBuffer().EmplaceUniform(frame_info));
+  VS::BindFrameInfo(
+      pass, renderer.GetTransientsDataBuffer().EmplaceUniform(frame_info));
 
   FS::FragInfo frag_info;
   frag_info.use_text_color = force_text_color_ ? 1.0 : 0.0;
   frag_info.text_color = ToVector(color.Premultiply());
   frag_info.is_color_glyph = type == GlyphAtlas::Type::kColorBitmap;
 
-  FS::BindFragInfo(pass,
-                   renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
+  FS::BindFragInfo(
+      pass, renderer.GetTransientsDataBuffer().EmplaceUniform(frag_info));
 
   SamplerDescriptor sampler_desc;
   if (is_translation_scale) {
@@ -287,7 +287,8 @@ bool TextContents::Render(const ContentContext& renderer,
           sampler_desc)  // sampler
   );
 
-  HostBuffer& host_buffer = renderer.GetTransientsBuffer();
+  HostBuffer& data_host_buffer = renderer.GetTransientsDataBuffer();
+  HostBuffer& indexes_host_buffer = renderer.GetTransientsIndexesBuffer();
   size_t glyph_count = 0;
   for (const auto& run : frame_->GetRuns()) {
     glyph_count += run.GetGlyphPositions().size();
@@ -295,7 +296,7 @@ bool TextContents::Render(const ContentContext& renderer,
   size_t vertex_count = glyph_count * 4;
   size_t index_count = glyph_count * 6;
 
-  BufferView buffer_view = host_buffer.Emplace(
+  BufferView buffer_view = data_host_buffer.Emplace(
       vertex_count * sizeof(VS::PerVertexData), alignof(VS::PerVertexData),
       [&](uint8_t* data) {
         VS::PerVertexData* vtx_contents =
@@ -308,7 +309,7 @@ bool TextContents::Render(const ContentContext& renderer,
                           /*glyph_properties=*/GetGlyphProperties(),
                           /*atlas=*/atlas);
       });
-  BufferView index_buffer_view = host_buffer.Emplace(
+  BufferView index_buffer_view = indexes_host_buffer.Emplace(
       index_count * sizeof(uint16_t), alignof(uint16_t), [&](uint8_t* data) {
         uint16_t* indices = reinterpret_cast<uint16_t*>(data);
         size_t j = 0;

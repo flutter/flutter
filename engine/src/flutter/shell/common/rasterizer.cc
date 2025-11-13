@@ -437,7 +437,7 @@ std::unique_ptr<Rasterizer::GpuImageResult> Rasterizer::MakeSkiaGpuImage(
 
 void Rasterizer::MakeRasterSnapshot(
     sk_sp<DisplayList> display_list,
-    SkISize picture_size,
+    DlISize picture_size,
     std::function<void(sk_sp<DlImage>)> callback) {
   return snapshot_controller_->MakeRasterSnapshot(display_list, picture_size,
                                                   callback);
@@ -445,7 +445,7 @@ void Rasterizer::MakeRasterSnapshot(
 
 sk_sp<DlImage> Rasterizer::MakeRasterSnapshotSync(
     sk_sp<DisplayList> display_list,
-    SkISize picture_size) {
+    DlISize picture_size) {
   return snapshot_controller_->MakeRasterSnapshotSync(display_list,
                                                       picture_size);
 }
@@ -461,6 +461,11 @@ void Rasterizer::CacheRuntimeStage(
   if (snapshot_controller_) {
     snapshot_controller_->CacheRuntimeStage(runtime_stage);
   }
+}
+
+// |SnapshotDelegate|
+bool Rasterizer::MakeRenderContextCurrent() {
+  return snapshot_controller_->MakeRenderContextCurrent();
 }
 
 fml::Milliseconds Rasterizer::GetFrameBudget() const {
@@ -705,8 +710,8 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
 
   DlCanvas* embedder_root_canvas = nullptr;
   if (external_view_embedder_) {
-    external_view_embedder_->PrepareFlutterView(
-        ToSkISize(layer_tree.frame_size()), device_pixel_ratio);
+    external_view_embedder_->PrepareFlutterView(layer_tree.frame_size(),
+                                                device_pixel_ratio);
     // TODO(dkwingsmt): Add view ID here.
     embedder_root_canvas = external_view_embedder_->GetRootCanvas();
   }
@@ -715,7 +720,7 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
   //
   // Deleting a surface also clears the GL context. Therefore, acquire the
   // frame after calling `BeginFrame` as this operation resets the GL context.
-  auto frame = surface_->AcquireFrame(ToSkISize(layer_tree.frame_size()));
+  auto frame = surface_->AcquireFrame(layer_tree.frame_size());
   if (frame == nullptr) {
     return DrawSurfaceStatus::kFailed;
   }
@@ -723,8 +728,8 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
   // If the external view embedder has specified an optional root surface, the
   // root surface transformation is set by the embedder instead of
   // having to apply it here.
-  SkMatrix root_surface_transformation =
-      embedder_root_canvas ? SkMatrix{} : surface_->GetRootTransformation();
+  DlMatrix root_surface_transformation =
+      embedder_root_canvas ? DlMatrix() : surface_->GetRootTransformation();
 
   auto root_surface_canvas =
       embedder_root_canvas ? embedder_root_canvas : frame->Canvas();
@@ -758,7 +763,7 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
       auto existing_damage = frame->framebuffer_info().existing_damage;
       if (existing_damage.has_value() && !force_full_repaint) {
         damage->SetPreviousLayerTree(GetLastLayerTree(view_id));
-        damage->AddAdditionalDamage(ToDlIRect(existing_damage.value()));
+        damage->AddAdditionalDamage(existing_damage.value());
         damage->SetClipAlignment(
             frame->framebuffer_info().horizontal_clip_alignment,
             frame->framebuffer_info().vertical_clip_alignment);
@@ -782,8 +787,8 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
     SurfaceFrame::SubmitInfo submit_info;
     submit_info.presentation_time = presentation_time;
     if (damage) {
-      submit_info.frame_damage = ToOptSkIRect(damage->GetFrameDamage());
-      submit_info.buffer_damage = ToOptSkIRect(damage->GetBufferDamage());
+      submit_info.frame_damage = damage->GetFrameDamage();
+      submit_info.buffer_damage = damage->GetBufferDamage();
     }
 
     frame->set_submit_info(submit_info);
@@ -832,8 +837,7 @@ static sk_sp<SkData> ScreenshotLayerTreeAsPicture(
   recorder.beginRecording(
       SkRect::MakeWH(tree->frame_size().width, tree->frame_size().height));
 
-  SkMatrix root_surface_transformation;
-  root_surface_transformation.reset();
+  DlMatrix root_surface_transformation;
   DlSkCanvasAdapter canvas(recorder.getRecordingCanvas());
 
   // TODO(amirh): figure out how to take a screenshot with embedded UIView.
@@ -867,8 +871,7 @@ static void RenderFrameForScreenshot(
     const std::shared_ptr<impeller::AiksContext>& aiks_context) {
   // There is no root surface transformation for the screenshot layer. Reset
   // the matrix to identity.
-  SkMatrix root_surface_transformation;
-  root_surface_transformation.reset();
+  DlMatrix root_surface_transformation;
 
   auto frame = compositor_context.AcquireFrame(
       /*gr_context=*/surface_context,
@@ -1074,12 +1077,12 @@ Rasterizer::Screenshot Rasterizer::ScreenshotLastLayerTree(
     auto b64_data = SkData::MakeUninitialized(b64_size);
     Base64::Encode(data.first->data(), data.first->size(),
                    b64_data->writable_data());
-    return Rasterizer::Screenshot{b64_data, ToSkISize(layer_tree->frame_size()),
-                                  format, data.second};
+    return Rasterizer::Screenshot{b64_data, layer_tree->frame_size(), format,
+                                  data.second};
   }
 
-  return Rasterizer::Screenshot{data.first, ToSkISize(layer_tree->frame_size()),
-                                format, data.second};
+  return Rasterizer::Screenshot{data.first, layer_tree->frame_size(), format,
+                                data.second};
 }
 
 void Rasterizer::SetNextFrameCallback(const fml::closure& callback) {
@@ -1155,7 +1158,7 @@ std::optional<size_t> Rasterizer::GetResourceCacheMaxBytes() const {
 Rasterizer::Screenshot::Screenshot() {}
 
 Rasterizer::Screenshot::Screenshot(sk_sp<SkData> p_data,
-                                   SkISize p_size,
+                                   DlISize p_size,
                                    const std::string& p_format,
                                    ScreenshotFormat p_pixel_format)
     : data(std::move(p_data)),

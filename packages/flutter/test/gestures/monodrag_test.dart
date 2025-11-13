@@ -150,11 +150,14 @@ void main() {
                 child: RawGestureDetector(
                   behavior: HitTestBehavior.translucent,
                   gestures: <Type, GestureRecognizerFactory>{
-                    _EagerPanGestureRecognizer: GestureRecognizerFactoryWithHandlers<
-                      _EagerPanGestureRecognizer
-                    >(() => _EagerPanGestureRecognizer(), (_EagerPanGestureRecognizer recognizer) {
-                      recognizer.onStart = (DragStartDetails details) => wasPanStartCalled = true;
-                    }),
+                    _EagerPanGestureRecognizer:
+                        GestureRecognizerFactoryWithHandlers<_EagerPanGestureRecognizer>(
+                          () => _EagerPanGestureRecognizer(),
+                          (_EagerPanGestureRecognizer recognizer) {
+                            recognizer.onStart = (DragStartDetails details) =>
+                                wasPanStartCalled = true;
+                          },
+                        ),
                   },
                   child: SizedBox(key: tapTargetKey, width: 100, height: 100),
                 ),
@@ -186,18 +189,20 @@ void main() {
     late HorizontalDragGestureRecognizer primaryRecognizer;
     late HorizontalDragGestureRecognizer secondaryRecognizer;
     setUp(() {
-      primaryRecognizer = HorizontalDragGestureRecognizer(
-          allowedButtonsFilter: (int buttons) => kPrimaryButton == buttons,
-        )
-        ..onStart = (DragStartDetails details) {
-          recognized.add('onStartPrimary');
-        };
-      secondaryRecognizer = HorizontalDragGestureRecognizer(
-          allowedButtonsFilter: (int buttons) => kSecondaryButton == buttons,
-        )
-        ..onStart = (DragStartDetails details) {
-          recognized.add('onStartSecondary');
-        };
+      primaryRecognizer =
+          HorizontalDragGestureRecognizer(
+              allowedButtonsFilter: (int buttons) => kPrimaryButton == buttons,
+            )
+            ..onStart = (DragStartDetails details) {
+              recognized.add('onStartPrimary');
+            };
+      secondaryRecognizer =
+          HorizontalDragGestureRecognizer(
+              allowedButtonsFilter: (int buttons) => kSecondaryButton == buttons,
+            )
+            ..onStart = (DragStartDetails details) {
+              recognized.add('onStartSecondary');
+            };
     });
 
     tearDown(() {

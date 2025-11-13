@@ -6,7 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
-  runApp(const MaterialApp(title: 'Menu Tester', home: Material(child: Home())));
+  runApp(
+    const MaterialApp(
+      title: 'Menu Tester',
+      home: Material(child: Home()),
+    ),
+  );
 }
 
 class Home extends StatefulWidget {
@@ -67,17 +72,16 @@ class _HomeState extends State<Home> {
           child: Theme(
             data: theme.copyWith(
               visualDensity: _density,
-              menuTheme:
-                  _transparent
-                      ? MenuThemeData(
-                        style: MenuStyle(
-                          backgroundColor: MaterialStatePropertyAll<Color>(
-                            Colors.blue.withOpacity(0.12),
-                          ),
-                          elevation: const MaterialStatePropertyAll<double>(0),
+              menuTheme: _transparent
+                  ? MenuThemeData(
+                      style: MenuStyle(
+                        backgroundColor: MaterialStatePropertyAll<Color>(
+                          Colors.blue.withOpacity(0.12),
                         ),
-                      )
-                      : menuTheme,
+                        elevation: const MaterialStatePropertyAll<double>(0),
+                      ),
+                    )
+                  : menuTheme,
               menuBarTheme: menuBarTheme,
               menuButtonTheme: menuButtonTheme,
             ),
@@ -589,10 +593,9 @@ List<Widget> createTestMenus({
       key: key,
       value: checkboxValue,
       tristate: tristate,
-      onChanged:
-          enabled && onCheckboxChanged != null
-              ? (bool? value) => onCheckboxChanged(menu, value)
-              : null,
+      onChanged: enabled && onCheckboxChanged != null
+          ? (bool? value) => onCheckboxChanged(menu, value)
+          : null,
       shortcut: menu.shortcut,
       trailingIcon: trailingIcon,
       child: accelerators ? MenuAcceleratorLabel(menu.acceleratorLabel) : Text(menu.label),
@@ -654,25 +657,22 @@ List<Widget> createTestMenus({
       TestMenu.mainMenu2,
       menuChildren: <Widget>[
         MenuAcceleratorCallbackBinding(
-          onInvoke:
-              onPressed != null
-                  ? () {
+          onInvoke: onPressed != null
+              ? () {
+                  onPressed.call(TestMenu.testButton);
+                  menuController?.close();
+                }
+              : null,
+          child: TextButton(
+            onPressed: onPressed != null
+                ? () {
                     onPressed.call(TestMenu.testButton);
                     menuController?.close();
                   }
-                  : null,
-          child: TextButton(
-            onPressed:
-                onPressed != null
-                    ? () {
-                      onPressed.call(TestMenu.testButton);
-                      menuController?.close();
-                    }
-                    : null,
-            child:
-                accelerators
-                    ? MenuAcceleratorLabel(TestMenu.testButton.acceleratorLabel)
-                    : Text(TestMenu.testButton.label),
+                : null,
+            child: accelerators
+                ? MenuAcceleratorLabel(TestMenu.testButton.acceleratorLabel)
+                : Text(TestMenu.testButton.label),
           ),
         ),
         menuItemButton(TestMenu.subMenu3),

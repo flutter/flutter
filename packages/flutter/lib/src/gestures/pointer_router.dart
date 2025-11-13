@@ -98,12 +98,11 @@ class PointerRouter {
     } catch (exception, stack) {
       InformationCollector? collector;
       assert(() {
-        collector =
-            () => <DiagnosticsNode>[
-              DiagnosticsProperty<PointerRouter>('router', this, level: DiagnosticLevel.debug),
-              DiagnosticsProperty<PointerRoute>('route', route, level: DiagnosticLevel.debug),
-              DiagnosticsProperty<PointerEvent>('event', event, level: DiagnosticLevel.debug),
-            ];
+        collector = () => <DiagnosticsNode>[
+          DiagnosticsProperty<PointerRouter>('router', this, level: DiagnosticLevel.debug),
+          DiagnosticsProperty<PointerRoute>('route', route, level: DiagnosticLevel.debug),
+          DiagnosticsProperty<PointerEvent>('event', event, level: DiagnosticLevel.debug),
+        ];
         return true;
       }());
       FlutterError.reportError(

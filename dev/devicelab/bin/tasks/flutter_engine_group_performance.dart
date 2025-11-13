@@ -81,7 +81,6 @@ Future<TaskResult> _doTest() async {
     _copyGradleFromModule(modulePath, androidPath);
 
     await utils.eval(gradlewExecutable, <String>['assembleRelease'], workingDirectory: androidPath);
-
     final String apkPath = path.join(
       multipleFluttersPath,
       'android',
@@ -119,7 +118,8 @@ Future<TaskResult> _doTest() async {
     });
 
     return result ?? TaskResult.failure('no results found');
-  } catch (ex) {
+  } catch (ex, stackTrace) {
+    print('Task exception stack trace:\n$stackTrace');
     return TaskResult.failure(ex.toString());
   }
 }

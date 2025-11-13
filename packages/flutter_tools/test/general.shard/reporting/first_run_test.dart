@@ -36,8 +36,7 @@ void main() {
   });
 
   testWithoutContext('FirstRunMessenger requires redisplay if the license terms have changed', () {
-    final TestFirstRunMessenger messenger =
-        setUpFirstRunMessenger(test: true) as TestFirstRunMessenger;
+    final messenger = setUpFirstRunMessenger(test: true) as TestFirstRunMessenger;
     messenger.confirmLicenseTermsDisplayed();
 
     expect(messenger.shouldDisplayLicenseTerms(), false);
@@ -58,8 +57,8 @@ void main() {
 }
 
 FirstRunMessenger setUpFirstRunMessenger({bool? redisplayWelcomeMessage, bool test = false}) {
-  final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-  final PersistentToolState state = PersistentToolState.test(
+  final fileSystem = MemoryFileSystem.test();
+  final state = PersistentToolState.test(
     directory: fileSystem.currentDirectory,
     logger: BufferLogger.test(),
   );

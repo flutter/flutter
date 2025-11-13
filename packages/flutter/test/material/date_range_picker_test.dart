@@ -485,15 +485,12 @@ void main() {
     await preparePicker(
       tester,
       (Future<DateTimeRange?> range) async {},
-      selectableDayPredicate: (
-        DateTime day,
-        DateTime? selectedStartDate,
-        DateTime? selectedEndDate,
-      ) {
-        expect(selectedStartDate, DateTime(2017, DateTime.january, 13));
-        expect(selectedEndDate, DateTime(2017, DateTime.january, 15));
-        return true;
-      },
+      selectableDayPredicate:
+          (DateTime day, DateTime? selectedStartDate, DateTime? selectedEndDate) {
+            expect(selectedStartDate, DateTime(2017, DateTime.january, 13));
+            expect(selectedEndDate, DateTime(2017, DateTime.january, 15));
+            return true;
+          },
     );
   });
 
@@ -971,16 +968,18 @@ void main() {
 
     testWidgets('Default InputDecoration', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
-        final InputDecoration startDateDecoration =
-            tester.widget<TextField>(find.byType(TextField).first).decoration!;
+        final InputDecoration startDateDecoration = tester
+            .widget<TextField>(find.byType(TextField).first)
+            .decoration!;
         expect(startDateDecoration.border, const OutlineInputBorder());
         expect(startDateDecoration.filled, false);
         expect(startDateDecoration.hintText, 'mm/dd/yyyy');
         expect(startDateDecoration.labelText, 'Start Date');
         expect(startDateDecoration.errorText, null);
 
-        final InputDecoration endDateDecoration =
-            tester.widget<TextField>(find.byType(TextField).last).decoration!;
+        final InputDecoration endDateDecoration = tester
+            .widget<TextField>(find.byType(TextField).last)
+            .decoration!;
         expect(endDateDecoration.border, const OutlineInputBorder());
         expect(endDateDecoration.filled, false);
         expect(endDateDecoration.hintText, 'mm/dd/yyyy');
@@ -1163,7 +1162,7 @@ void main() {
       });
     });
 
-    testWidgets('InputDecorationTheme is honored', (WidgetTester tester) async {
+    testWidgets('Input decoration theme is honored', (WidgetTester tester) async {
       // Given a custom paint for an input decoration, extract the border and
       // fill color and test them against the expected values.
       void testInputDecorator(
@@ -1189,7 +1188,7 @@ void main() {
       const InputBorder border = InputBorder.none;
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(inputDecorationTheme: const InputDecorationTheme(border: border)),
+          theme: ThemeData(inputDecorationTheme: const InputDecorationThemeData(border: border)),
           home: Material(
             child: Builder(
               builder: (BuildContext context) {
@@ -1513,7 +1512,7 @@ void main() {
       const InputBorder border = InputBorder.none;
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(inputDecorationTheme: const InputDecorationTheme(border: border)),
+          theme: ThemeData(inputDecorationTheme: const InputDecorationThemeData(border: border)),
           home: Material(
             child: Builder(
               builder: (BuildContext context) {
@@ -1812,16 +1811,18 @@ void main() {
 
       testWidgets('Default InputDecoration', (WidgetTester tester) async {
         await preparePicker(tester, (Future<DateTimeRange?> range) async {
-          final InputDecoration startDateDecoration =
-              tester.widget<TextField>(find.byType(TextField).first).decoration!;
+          final InputDecoration startDateDecoration = tester
+              .widget<TextField>(find.byType(TextField).first)
+              .decoration!;
           expect(startDateDecoration.border, const UnderlineInputBorder());
           expect(startDateDecoration.filled, false);
           expect(startDateDecoration.hintText, 'mm/dd/yyyy');
           expect(startDateDecoration.labelText, 'Start Date');
           expect(startDateDecoration.errorText, null);
 
-          final InputDecoration endDateDecoration =
-              tester.widget<TextField>(find.byType(TextField).last).decoration!;
+          final InputDecoration endDateDecoration = tester
+              .widget<TextField>(find.byType(TextField).last)
+              .decoration!;
           expect(endDateDecoration.border, const UnderlineInputBorder());
           expect(endDateDecoration.filled, false);
           expect(endDateDecoration.hintText, 'mm/dd/yyyy');
@@ -1836,7 +1837,6 @@ void main() {
     testWidgets('Defaults to Gregorian calendar system', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: DateRangePickerDialog(
               initialDateRange: initialDateRange,
@@ -1854,7 +1854,6 @@ void main() {
     testWidgets('Using custom calendar delegate implementation', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: DateRangePickerDialog(
               initialDateRange: initialDateRange,
@@ -1946,7 +1945,6 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: DateRangePickerDialog(
               initialDateRange: initialDateRange,
@@ -1968,6 +1966,64 @@ void main() {
       expect(getMonthYear(secondMonthItem).data, 'February 2016');
       expect(getDayCount(secondMonthItem), 21);
     });
+  });
+
+  testWidgets('DateRangePickerDialog does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: DateRangePickerDialog(firstDate: firstDate, lastDate: lastDate),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DateRangePickerDialog)), Size.zero);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/177083.
+  testWidgets('Local InputDecorationTheme is honored', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: InputDecorationTheme(
+            data: const InputDecorationThemeData(filled: true),
+            child: DateRangePickerDialog(
+              firstDate: firstDate,
+              lastDate: lastDate,
+              currentDate: DateTime(2016, DateTime.january, 30),
+              initialEntryMode: DatePickerEntryMode.inputOnly,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final InputDecoration startDateDecoration = tester
+        .widget<TextField>(find.byType(TextField).first)
+        .decoration!;
+
+    expect(startDateDecoration.filled, isTrue);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/177441.
+  testWidgets('DateRangePickerDialog.currentDate is optional', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: InputDecorationTheme(
+            data: const InputDecorationThemeData(filled: true),
+            child: DateRangePickerDialog(
+              firstDate: firstDate,
+              lastDate: lastDate,
+              initialEntryMode: DatePickerEntryMode.inputOnly,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), null);
   });
 }
 

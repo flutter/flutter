@@ -178,4 +178,63 @@ ScopedObject<Context> PlaygroundTest::GetInteropContext() {
   return interop_context_;
 }
 
+hpp::Context PlaygroundTest::GetHPPContext() {
+  auto c_context = GetInteropContext().GetC();
+  ImpellerContextRetain(c_context);
+  return hpp::Context{c_context, hpp::AdoptTag::kAdopt};
+}
+
+std::unique_ptr<hpp::Mapping> PlaygroundTest::OpenAssetAsHPPMapping(
+    std::string asset_name) const {
+  std::shared_ptr<fml::Mapping> data =
+      OpenAssetAsMapping(std::move(asset_name));
+  if (!data) {
+    return nullptr;
+  }
+  return std::make_unique<hpp::Mapping>(data->GetMapping(),  //
+                                        data->GetSize(),     //
+                                        [data]() {}          //
+  );
+}
+
+hpp::Texture PlaygroundTest::OpenAssetAsHPPTexture(std::string asset_name) {
+  auto compressed_data = OpenAssetAsMapping(std::move(asset_name));
+  if (!compressed_data) {
+    return {nullptr, hpp::AdoptTag::kAdopt};
+  }
+  auto compressed_image =
+      LoadFixtureImageCompressed(std::move(compressed_data));
+  if (!compressed_image) {
+    return {nullptr, hpp::AdoptTag::kAdopt};
+  }
+  auto decompressed_image = DecodeImageRGBA(compressed_image);
+  if (!decompressed_image.has_value()) {
+    return {nullptr, hpp::AdoptTag::kAdopt};
+  }
+  auto rgba_decompressed_image =
+      std::make_shared<DecompressedImage>(decompressed_image->ConvertToRGBA());
+  if (!rgba_decompressed_image || !rgba_decompressed_image->IsValid()) {
+    return {nullptr, hpp::AdoptTag::kAdopt};
+  }
+  auto context = GetHPPContext();
+  if (!context) {
+    return {nullptr, hpp::AdoptTag::kAdopt};
+  }
+
+  auto rgba_mapping = std::make_unique<hpp::Mapping>(
+      rgba_decompressed_image->GetAllocation()->GetMapping(),
+      rgba_decompressed_image->GetAllocation()->GetSize(),
+      [rgba_decompressed_image]() {});
+
+  return hpp::Texture::WithContents(
+      context,
+      ImpellerTextureDescriptor{
+          .pixel_format = kImpellerPixelFormatRGBA8888,
+          .size = {rgba_decompressed_image->GetSize().width,
+                   rgba_decompressed_image->GetSize().height},
+          .mip_count = 1u,
+      },
+      std::move(rgba_mapping));
+}
+
 }  // namespace impeller::interop::testing

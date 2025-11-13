@@ -40,7 +40,7 @@ void main() {
 
 final class _PrintEnvironmentVariablesInTestDriverProject extends Project {
   @override
-  final String pubspec = '''
+  final pubspec = '''
   name: test
   environment:
     sdk: ^3.7.0-0
@@ -51,7 +51,7 @@ final class _PrintEnvironmentVariablesInTestDriverProject extends Project {
   ''';
 
   @override
-  final String main = r'void main() {}';
+  final main = r'void main() {}';
 
   @override
   Future<void> setUpIn(Directory dir) async {

@@ -124,13 +124,27 @@ void testMain() {
         ui.SemanticsInputType.url: 'url',
         ui.SemanticsInputType.phone: 'tel',
         ui.SemanticsInputType.search: 'search',
-        ui.SemanticsInputType.email: 'email',
+        // Email uses type="text" to preserve selection APIs under semantics.
+        ui.SemanticsInputType.email: 'text',
       };
       for (final ui.SemanticsInputType type in ui.SemanticsInputType.values) {
         createTextFieldSemantics(value: 'text', inputType: type);
 
         expectSemanticsTree(owner(), '<sem><input type="${inputTypeEnumToString[type]}" /></sem>');
       }
+    });
+
+    test('email input uses type=text with inputmode=email and autocomplete=email', () {
+      createTextFieldSemantics(value: 'text', inputType: ui.SemanticsInputType.email);
+
+      final node = owner().debugSemanticsTree![0]!;
+      final textFieldRole = node.semanticRole! as SemanticTextField;
+      final inputElement = textFieldRole.editableElement as DomHTMLInputElement;
+
+      expect(inputElement.type, 'text');
+      expect(inputElement.getAttribute('inputmode'), 'email');
+      expect(inputElement.getAttribute('autocapitalize'), 'none');
+      expect(inputElement.autocomplete, 'email');
     });
 
     test('renders a disabled text field', () {
@@ -147,8 +161,9 @@ void testMain() {
       final logger = SemanticsActionLogger();
       createTextFieldSemantics(value: 'hello');
 
-      final textField =
-          owner().semanticsHost.querySelector('input[data-semantics-role="text-field"]')!;
+      final textField = owner().semanticsHost.querySelector(
+        'input[data-semantics-role="text-field"]',
+      )!;
 
       expect(owner().semanticsHost.ownerDocument?.activeElement, isNot(textField));
 
@@ -450,9 +465,9 @@ void testMain() {
           builder.updateNode(
             id: 1,
             flags: ui.SemanticsFlags(
-              isEnabled: true,
+              isEnabled: ui.Tristate.isTrue,
               isTextField: true,
-              isFocused: focusFieldId == 1,
+              isFocused: focusFieldId == 1 ? ui.Tristate.isTrue : ui.Tristate.isFalse,
             ),
             value: 'Hello',
 
@@ -461,9 +476,9 @@ void testMain() {
           builder.updateNode(
             id: 2,
             flags: ui.SemanticsFlags(
-              isEnabled: true,
+              isEnabled: ui.Tristate.isTrue,
               isTextField: true,
-              isFocused: focusFieldId == 2,
+              isFocused: focusFieldId == 2 ? ui.Tristate.isTrue : ui.Tristate.isFalse,
             ),
             value: 'World',
             rect: const ui.Rect.fromLTRB(0, 20, 50, 10),
@@ -529,13 +544,14 @@ SemanticsObject createTextFieldSemantics({
     label: label,
     value: value,
     flags: ui.SemanticsFlags(
-      isEnabled: isEnabled,
+      isEnabled: isEnabled ? ui.Tristate.isTrue : ui.Tristate.none,
       isTextField: true,
-      isFocused: isFocused,
+      isFocused: isFocused ? ui.Tristate.isTrue : ui.Tristate.isFalse,
       isMultiline: isMultiline,
       isObscured: isObscured,
-      hasRequiredState: isRequired != null,
-      isRequired: isRequired ?? false,
+      isRequired: isRequired == null
+          ? ui.Tristate.none
+          : (isRequired ? ui.Tristate.isTrue : ui.Tristate.isFalse),
     ),
     hasTap: true,
     rect: rect,

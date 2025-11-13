@@ -5,6 +5,9 @@
 #include "impeller/toolkit/interop/image_filter.h"
 
 #include "flutter/display_list/effects/dl_image_filters.h"
+#include "flutter/display_list/effects/dl_runtime_effect.h"
+#include "flutter/impeller/display_list/dl_runtime_effect_impeller.h"
+#include "impeller/base/validation.h"
 
 namespace impeller::interop {
 
@@ -46,6 +49,35 @@ ScopedObject<ImageFilter> ImageFilter::MakeMatrix(
     flutter::DlImageSampling sampling) {
   auto filter = flutter::DlMatrixImageFilter::Make(matrix, sampling);
   if (!filter) {
+    return nullptr;
+  }
+  return Create<ImageFilter>(std::move(filter));
+}
+
+ScopedObject<ImageFilter> ImageFilter::MakeFragmentProgram(
+    const Context& context,
+    const FragmentProgram& program,
+    std::vector<std::shared_ptr<flutter::DlColorSource>> samplers,
+    std::shared_ptr<std::vector<uint8_t>> uniform_data) {
+  auto runtime_stage =
+      program.FindRuntimeStage(context.GetContext()->GetRuntimeStageBackend());
+  if (!runtime_stage) {
+    VALIDATION_LOG << "Could not find runtime stage for backend.";
+    return nullptr;
+  }
+  auto runtime_effect =
+      flutter::DlRuntimeEffectImpeller::Make(std::move(runtime_stage));
+  if (!runtime_effect) {
+    VALIDATION_LOG << "Could not make runtime effect.";
+    return nullptr;
+  }
+  auto filter =
+      flutter::DlRuntimeEffectImageFilter::Make(std::move(runtime_effect),  //
+                                                std::move(samplers),        //
+                                                std::move(uniform_data)     //
+      );
+  if (!filter) {
+    VALIDATION_LOG << "Could not create runtime effect image filter.";
     return nullptr;
   }
   return Create<ImageFilter>(std::move(filter));

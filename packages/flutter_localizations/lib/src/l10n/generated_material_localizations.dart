@@ -1581,10 +1581,10 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get dateHelpText => 'mm/dd/yyyy';
 
   @override
-  String get dateInputLabel => 'তাৰিখটো দিয়ক';
+  String get dateInputLabel => 'তাৰিখ দিয়ক';
 
   @override
-  String get dateOutOfRangeLabel => 'সীমাৰ বাহিৰত।';
+  String get dateOutOfRangeLabel => 'পৰিসৰৰ বাহিৰত।';
 
   @override
   String get datePickerHelpText => 'তাৰিখ বাছনি কৰক';
@@ -1614,7 +1614,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get dialModeButtonLabel => 'ডায়েল বাছনিকৰ্তাৰ ম’ডলৈ সলনি কৰক';
 
   @override
-  String get dialogLabel => "ডায়ল'গ";
+  String get dialogLabel => 'ডায়লগ';
 
   @override
   String get drawerLabel => 'নেভিগেশ্বন মেনু';
@@ -1665,16 +1665,16 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get keyboardKeyAltGraph => 'AltGr';
 
   @override
-  String get keyboardKeyBackspace => 'বেকস্পেচ';
+  String get keyboardKeyBackspace => 'Backspace';
 
   @override
-  String get keyboardKeyCapsLock => 'কেপ্‌ছ লক';
+  String get keyboardKeyCapsLock => 'Caps Lock';
 
   @override
-  String get keyboardKeyChannelDown => 'চেনেল ডাউন';
+  String get keyboardKeyChannelDown => 'Channel Down';
 
   @override
-  String get keyboardKeyChannelUp => 'চেনেল আপ';
+  String get keyboardKeyChannelUp => 'Channel Up';
 
   @override
   String get keyboardKeyControl => 'Ctrl';
@@ -1683,7 +1683,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get keyboardKeyDelete => 'Del';
 
   @override
-  String get keyboardKeyEject => 'ইজেক্ট';
+  String get keyboardKeyEject => 'Eject';
 
   @override
   String get keyboardKeyEnd => 'End';
@@ -1701,7 +1701,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get keyboardKeyInsert => 'Insert';
 
   @override
-  String get keyboardKeyMeta => 'মেটা';
+  String get keyboardKeyMeta => 'Meta';
 
   @override
   String get keyboardKeyMetaMacOs => 'Command';
@@ -1713,64 +1713,64 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get keyboardKeyNumLock => 'Num Lock';
 
   @override
-  String get keyboardKeyNumpad0 => 'নং ০';
+  String get keyboardKeyNumpad0 => 'Num 0';
 
   @override
-  String get keyboardKeyNumpad1 => 'নং ১';
+  String get keyboardKeyNumpad1 => 'Num 1';
 
   @override
-  String get keyboardKeyNumpad2 => 'নং ২';
+  String get keyboardKeyNumpad2 => 'Num 2';
 
   @override
-  String get keyboardKeyNumpad3 => 'নং ৩';
+  String get keyboardKeyNumpad3 => 'Num 3';
 
   @override
-  String get keyboardKeyNumpad4 => 'নং ৪';
+  String get keyboardKeyNumpad4 => 'Num 4';
 
   @override
-  String get keyboardKeyNumpad5 => 'নং ৫';
+  String get keyboardKeyNumpad5 => 'Num 5';
 
   @override
-  String get keyboardKeyNumpad6 => 'নং ৬';
+  String get keyboardKeyNumpad6 => 'Num 6';
 
   @override
-  String get keyboardKeyNumpad7 => 'নং ৭';
+  String get keyboardKeyNumpad7 => 'Num 7';
 
   @override
-  String get keyboardKeyNumpad8 => 'নং ৮';
+  String get keyboardKeyNumpad8 => 'Num 8';
 
   @override
-  String get keyboardKeyNumpad9 => 'নং ৯';
+  String get keyboardKeyNumpad9 => 'Num 9';
 
   @override
-  String get keyboardKeyNumpadAdd => 'নং +';
+  String get keyboardKeyNumpadAdd => 'Num +';
 
   @override
-  String get keyboardKeyNumpadComma => 'নং ,';
+  String get keyboardKeyNumpadComma => 'Num ,';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'নং .';
+  String get keyboardKeyNumpadDecimal => 'Num .';
 
   @override
-  String get keyboardKeyNumpadDivide => 'নং /';
+  String get keyboardKeyNumpadDivide => 'Num /';
 
   @override
   String get keyboardKeyNumpadEnter => 'Num Enter';
 
   @override
-  String get keyboardKeyNumpadEqual => 'নং =';
+  String get keyboardKeyNumpadEqual => 'Num =';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'নং *';
+  String get keyboardKeyNumpadMultiply => 'Num *';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'নং (';
+  String get keyboardKeyNumpadParenLeft => 'Num (';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'নং )';
+  String get keyboardKeyNumpadParenRight => 'Num )';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'নং -';
+  String get keyboardKeyNumpadSubtract => 'Num -';
 
   @override
   String get keyboardKeyPageDown => 'PgDown';
@@ -1779,25 +1779,25 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get keyboardKeyPageUp => 'PgUp';
 
   @override
-  String get keyboardKeyPower => 'পাৱাৰ';
+  String get keyboardKeyPower => 'Power';
 
   @override
-  String get keyboardKeyPowerOff => 'পাৱাৰ অফ';
+  String get keyboardKeyPowerOff => 'Power Off';
 
   @override
-  String get keyboardKeyPrintScreen => 'প্ৰিণ্ট স্ক্ৰীন';
+  String get keyboardKeyPrintScreen => 'Print Screen';
 
   @override
-  String get keyboardKeyScrollLock => 'স্ক্ৰ’ল লক';
+  String get keyboardKeyScrollLock => 'Scroll Lock';
 
   @override
-  String get keyboardKeySelect => 'ছিলেক্ট';
+  String get keyboardKeySelect => 'Select';
 
   @override
-  String get keyboardKeyShift => 'শ্বিফ্ট';
+  String get keyboardKeyShift => 'Shift';
 
   @override
-  String get keyboardKeySpace => 'স্পেচ';
+  String get keyboardKeySpace => 'Space';
 
   @override
   String get lastPageTooltip => 'অন্তিম পৃষ্ঠা';
@@ -1821,7 +1821,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
-  String get licensesPageTitle => 'অনুজ্ঞাপত্ৰসমূহ';
+  String get licensesPageTitle => 'অনুজ্ঞাপত্ৰ';
 
   @override
   String get lookUpButtonLabel => 'ওপৰলৈ চাওক';
@@ -1854,13 +1854,13 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$rowCountৰ $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$rowCountৰ $firstRow–$lastRow';
+  String get pageRowsInfoTitleApproximateRaw => r'প্ৰায় $rowCountৰ $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => "পে'ষ্ট কৰক";
 
   @override
-  String get popupMenuLabel => "প'পআপ মেনু";
+  String get popupMenuLabel => 'পপআপ মেনু';
 
   @override
   String get postMeridiemAbbreviation => 'অপৰাহ্ন';
@@ -1881,10 +1881,10 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String? get remainingTextFieldCharacterCountOne => '১টা বর্ণ বাকী আছে';
+  String? get remainingTextFieldCharacterCountOne => '১ টা বর্ণসংখ্যা বাকী আছে';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCountটা বর্ণ বাকী আছে';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount টা বর্ণসংখ্যা বাকী আছে';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -1893,19 +1893,19 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => null;
 
   @override
-  String get reorderItemDown => 'তললৈ স্থানান্তৰ কৰক';
+  String get reorderItemDown => 'তললৈ নিয়ক';
 
   @override
   String get reorderItemLeft => 'বাওঁফাললৈ স্থানান্তৰ কৰক';
 
   @override
-  String get reorderItemRight => 'সোঁফাললৈ স্থানান্তৰ কৰক';
+  String get reorderItemRight => 'সোঁফাললৈ নিয়ক';
 
   @override
-  String get reorderItemToEnd => 'শেষলৈ স্থানান্তৰ কৰক';
+  String get reorderItemToEnd => 'শেষলৈ নিয়ক';
 
   @override
-  String get reorderItemToStart => 'আৰম্ভণিলৈ স্থানান্তৰ কৰক';
+  String get reorderItemToStart => 'আৰম্ভণিলৈ নিয়ক';
 
   @override
   String get reorderItemUp => 'ওপৰলৈ নিয়ক';
@@ -1935,7 +1935,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get searchWebButtonLabel => 'ৱেবত সন্ধান কৰক';
 
   @override
-  String get selectAllButtonLabel => 'সকলো বাছনি কৰক';
+  String get selectAllButtonLabel => 'আটাইবোৰ বাছনি কৰক';
 
   @override
   String get selectYearSemanticsLabel => 'বছৰ বাছনি কৰক';
@@ -1950,10 +1950,10 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleMany => null;
 
   @override
-  String? get selectedRowCountTitleOne => "১টা বস্তু বাছনি কৰা হ'ল";
+  String? get selectedRowCountTitleOne => '১ টা বস্তু বাছনি কৰা হ’ল';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCountটা বস্তু বাছনি কৰা হ’ল';
+  String get selectedRowCountTitleOther => r'$selectedRowCount টা বস্তু বাছনি কৰা হ’ল';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -1974,7 +1974,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get signedInLabel => 'ছাইন ইন কৰা হ’ল';
 
   @override
-  String get tabLabelRaw => r'$tabCountৰ $tabIndexটা টেব';
+  String get tabLabelRaw => r'$tabCount টাৰ ভিতৰত $tabIndex টা টেব';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -1986,7 +1986,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get timePickerHourLabel => 'ঘণ্টা';
 
   @override
-  String get timePickerHourModeAnnouncement => 'সময় বাছনি কৰক';
+  String get timePickerHourModeAnnouncement => 'ঘণ্টা বাছনি কৰক';
 
   @override
   String get timePickerInputHelpText => 'সময় দিয়ক';
@@ -5510,7 +5510,7 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get backButtonTooltip => 'Zpět';
 
   @override
-  String get bottomSheetLabel => 'Spodní tabulka';
+  String get bottomSheetLabel => 'Spodní panel';
 
   @override
   String get calendarModeButtonLabel => 'Přepnout na kalendář';
@@ -5994,7 +5994,7 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   });
 
   @override
-  String get aboutListTileTitleRaw => r'Ynghylch $applicationName';
+  String get aboutListTileTitleRaw => r'Ynglŷn â $applicationName';
 
   @override
   String get alertDialogLabel => 'Rhybudd';
@@ -6150,7 +6150,7 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   String get keyboardKeyEject => 'Eject';
 
   @override
-  String get keyboardKeyEnd => 'Gorffen';
+  String get keyboardKeyEnd => 'End';
 
   @override
   String get keyboardKeyEscape => 'Esc';
@@ -6273,7 +6273,7 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   String? get licensesPackageDetailTextMany => r'$licenseCount thrwydded';
 
   @override
-  String? get licensesPackageDetailTextOne => '1 trwydded';
+  String? get licensesPackageDetailTextOne => '1 drwydded';
 
   @override
   String get licensesPackageDetailTextOther => r'$licenseCount trwydded';
@@ -6399,7 +6399,7 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   String get searchWebButtonLabel => "Chwilio'r We";
 
   @override
-  String get selectAllButtonLabel => 'Dewis y Cyfan';
+  String get selectAllButtonLabel => 'Dewis y cyfan';
 
   @override
   String get selectYearSemanticsLabel => 'Dewiswch flwyddyn';
@@ -6408,19 +6408,19 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   String get selectedDateLabel => "Wedi'i ddewis";
 
   @override
-  String? get selectedRowCountTitleFew => r"Mae $selectedRowCount eitem wedi'u dewis";
+  String? get selectedRowCountTitleFew => r"$selectedRowCount eitem wedi'u dewis";
 
   @override
-  String? get selectedRowCountTitleMany => r"Mae $selectedRowCount eitem wedi'u dewis";
+  String? get selectedRowCountTitleMany => r"$selectedRowCount eitem wedi'u dewis";
 
   @override
-  String? get selectedRowCountTitleOne => "Mae 1 eitem wedi'i dewis";
+  String? get selectedRowCountTitleOne => "1 eitem wedi'i dewis";
 
   @override
-  String get selectedRowCountTitleOther => r"Mae $selectedRowCount eitem wedi'u dewis";
+  String get selectedRowCountTitleOther => r"$selectedRowCount eitem wedi'u dewis";
 
   @override
-  String? get selectedRowCountTitleTwo => r"Mae $selectedRowCount eitem wedi'u dewis";
+  String? get selectedRowCountTitleTwo => r"$selectedRowCount eitem wedi'u dewis";
 
   @override
   String? get selectedRowCountTitleZero => "Nid oes unrhyw eitemau wedi'u dewis";
@@ -6793,7 +6793,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get menuDismissLabel => 'Luk menu';
 
   @override
-  String get modalBarrierDismissLabel => 'Afvis';
+  String get modalBarrierDismissLabel => 'Luk';
 
   @override
   String get moreButtonTooltip => 'Mere';
@@ -14490,7 +14490,7 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get tabLabelRaw => r'$tabIndex/$tabCount fitxa';
 
   @override
-  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
 
   @override
   String get timePickerDialHelpText => 'Hautatu ordua';
@@ -14620,7 +14620,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'حذف';
 
   @override
-  String get dialModeButtonLabel => 'رفتن به حالت انتخابگر صفحه ساعت';
+  String get dialModeButtonLabel => 'رفتن به حالت انتخاب‌گر صفحه ساعت';
 
   @override
   String get dialogLabel => 'کادر گفتگو';
@@ -14671,7 +14671,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get keyboardKeyAlt => 'دگرساز';
 
   @override
-  String get keyboardKeyAltGraph => 'دگرساز راست';
+  String get keyboardKeyAltGraph => 'AltGr';
 
   @override
   String get keyboardKeyBackspace => 'پس‌بَر';
@@ -14686,7 +14686,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get keyboardKeyChannelUp => 'کانال بالا';
 
   @override
-  String get keyboardKeyControl => 'مهار';
+  String get keyboardKeyControl => 'Ctrl';
 
   @override
   String get keyboardKeyDelete => 'حذف';
@@ -14698,7 +14698,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get keyboardKeyEnd => 'پایان';
 
   @override
-  String get keyboardKeyEscape => 'گریز';
+  String get keyboardKeyEscape => 'Esc';
 
   @override
   String get keyboardKeyFn => 'عملکرد';
@@ -14707,79 +14707,79 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get keyboardKeyHome => 'صفحه اصلی';
 
   @override
-  String get keyboardKeyInsert => 'درج';
+  String get keyboardKeyInsert => 'Insert';
 
   @override
   String get keyboardKeyMeta => 'متا';
 
   @override
-  String get keyboardKeyMetaMacOs => 'فرمان';
+  String get keyboardKeyMetaMacOs => 'Command';
 
   @override
   String get keyboardKeyMetaWindows => 'Win';
 
   @override
-  String get keyboardKeyNumLock => 'قفل اعداد';
+  String get keyboardKeyNumLock => 'Num Lock';
 
   @override
-  String get keyboardKeyNumpad0 => 'عدد ۰';
+  String get keyboardKeyNumpad0 => 'Numpad 0';
 
   @override
-  String get keyboardKeyNumpad1 => 'عدد ۱';
+  String get keyboardKeyNumpad1 => 'Numpad 1';
 
   @override
-  String get keyboardKeyNumpad2 => 'عدد ۲';
+  String get keyboardKeyNumpad2 => 'Numpad 2';
 
   @override
-  String get keyboardKeyNumpad3 => 'عدد ۳';
+  String get keyboardKeyNumpad3 => 'Numpad 3';
 
   @override
-  String get keyboardKeyNumpad4 => 'عدد ۴';
+  String get keyboardKeyNumpad4 => 'Numpad 4';
 
   @override
-  String get keyboardKeyNumpad5 => 'عدد ۵';
+  String get keyboardKeyNumpad5 => 'Numpad 5';
 
   @override
-  String get keyboardKeyNumpad6 => 'عدد ۶';
+  String get keyboardKeyNumpad6 => 'Numpad 6';
 
   @override
-  String get keyboardKeyNumpad7 => 'عدد ۷';
+  String get keyboardKeyNumpad7 => 'Numpad 7';
 
   @override
-  String get keyboardKeyNumpad8 => 'عدد ۸';
+  String get keyboardKeyNumpad8 => 'Numpad 8';
 
   @override
-  String get keyboardKeyNumpad9 => 'عدد ۹';
+  String get keyboardKeyNumpad9 => 'Numpad 9';
 
   @override
-  String get keyboardKeyNumpadAdd => 'عدد +';
+  String get keyboardKeyNumpadAdd => 'Numpad +‎';
 
   @override
-  String get keyboardKeyNumpadComma => 'عدد ,';
+  String get keyboardKeyNumpadComma => 'Numpad ,‎';
 
   @override
-  String get keyboardKeyNumpadDecimal => 'عدد .';
+  String get keyboardKeyNumpadDecimal => 'Numpad .‎';
 
   @override
-  String get keyboardKeyNumpadDivide => 'عدد /';
+  String get keyboardKeyNumpadDivide => 'Numpad /‎';
 
   @override
-  String get keyboardKeyNumpadEnter => 'ورود اعداد';
+  String get keyboardKeyNumpadEnter => 'Numpad Enter';
 
   @override
-  String get keyboardKeyNumpadEqual => 'عدد =';
+  String get keyboardKeyNumpadEqual => 'Numpad =‎';
 
   @override
-  String get keyboardKeyNumpadMultiply => 'عدد *';
+  String get keyboardKeyNumpadMultiply => 'Numpad *‎';
 
   @override
-  String get keyboardKeyNumpadParenLeft => 'عدد (';
+  String get keyboardKeyNumpadParenLeft => 'Numpad (‎';
 
   @override
-  String get keyboardKeyNumpadParenRight => 'عدد )';
+  String get keyboardKeyNumpadParenRight => 'Numpad )‎';
 
   @override
-  String get keyboardKeyNumpadSubtract => 'عدد -';
+  String get keyboardKeyNumpadSubtract => 'Numpad -‎';
 
   @override
   String get keyboardKeyPageDown => 'صفحه پایین';
@@ -14803,7 +14803,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get keyboardKeySelect => 'انتخاب';
 
   @override
-  String get keyboardKeyShift => 'کلید تبدیل';
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'فاصله';
@@ -17257,7 +17257,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Eliminar';
 
   @override
-  String get dialModeButtonLabel => 'Cambiar a modo de selector en esfera';
+  String get dialModeButtonLabel => 'Cambiar ao modo de selector en esfera';
 
   @override
   String get dialogLabel => 'Cadro de diálogo';
@@ -17278,7 +17278,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedTapHint => 'Despregar para obter máis detalles';
 
   @override
-  String get expansionTileExpandedHint => 'toca dúas veces para contraer';
+  String get expansionTileExpandedHint => 'tocar dúas veces para contraer';
 
   @override
   String get expansionTileExpandedTapHint => 'Contraer';
@@ -17293,7 +17293,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Cambiar ao modo de introdución de texto';
 
   @override
-  String get inputTimeModeButtonLabel => 'Cambiar ao modo de escritura dos números';
+  String get inputTimeModeButtonLabel => 'Cambiar ao modo de introdución de texto';
 
   @override
   String get invalidDateFormatLabel => 'O formato non é válido.';
@@ -17479,7 +17479,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get menuDismissLabel => 'Pechar menú';
 
   @override
-  String get modalBarrierDismissLabel => 'Ignorar';
+  String get modalBarrierDismissLabel => 'Pechar';
 
   @override
   String get moreButtonTooltip => 'Máis';
@@ -17575,7 +17575,7 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
-  String get searchFieldLabel => 'Buscar';
+  String get searchFieldLabel => 'Fai unha busca';
 
   @override
   String get searchWebButtonLabel => 'Buscar na Web';
@@ -24655,7 +24655,7 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get continueButtonLabel => '\u{cae}\u{cc1}\u{c82}\u{ca6}\u{cc1}\u{cb5}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get copyButtonLabel => '\u{ca8}\u{c95}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
+  String get copyButtonLabel => '\u{c95}\u{cbe}\u{caa}\u{cbf}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
   String get currentDateLabel => '\u{c87}\u{c82}\u{ca6}\u{cc1}';
@@ -32567,7 +32567,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get bottomSheetLabel => 'ବଟମ ସିଟ';
 
   @override
-  String get calendarModeButtonLabel => 'କ୍ୟାଲେଣ୍ଡରକୁ ସ୍ୱିଚ୍ କରନ୍ତୁ';
+  String get calendarModeButtonLabel => 'କେଲେଣ୍ଡରକୁ ସ୍ୱିଚ କରନ୍ତୁ';
 
   @override
   String get cancelButtonLabel => 'ବାତିଲ କରନ୍ତୁ';
@@ -32585,7 +32585,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get collapsedHint => 'ବିସ୍ତାର କରାଯାଇଛି';
 
   @override
-  String get collapsedIconTapHint => 'ପ୍ରସାରିତ କରନ୍ତୁ';
+  String get collapsedIconTapHint => 'ବିସ୍ତାର କରନ୍ତୁ';
 
   @override
   String get continueButtonLabel => 'ଜାରି ରଖନ୍ତୁ';
@@ -32597,16 +32597,16 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get currentDateLabel => 'ଆଜି';
 
   @override
-  String get cutButtonLabel => 'କଟ୍ କରନ୍ତୁ';
+  String get cutButtonLabel => 'କଟ କରନ୍ତୁ';
 
   @override
-  String get dateHelpText => 'mm/dd/yyyy';
+  String get dateHelpText => 'dd/mm/yyyy';
 
   @override
   String get dateInputLabel => 'ତାରିଖ ଲେଖନ୍ତୁ';
 
   @override
-  String get dateOutOfRangeLabel => 'ସୀମା ବାହାରେ।';
+  String get dateOutOfRangeLabel => 'ରେଞ୍ଜ ବାହାରେ।';
 
   @override
   String get datePickerHelpText => 'ତାରିଖ ଚୟନ କରନ୍ତୁ';
@@ -32630,16 +32630,16 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get dateSeparator => '/';
 
   @override
-  String get deleteButtonTooltip => 'ଡିଲିଟ୍ କରନ୍ତୁ';
+  String get deleteButtonTooltip => 'ଡିଲିଟ କରନ୍ତୁ';
 
   @override
-  String get dialModeButtonLabel => 'ଡାଏଲ୍ ପିକର୍ ମୋଡକୁ ସ୍ୱିଚ୍ କରନ୍ତୁ';
+  String get dialModeButtonLabel => 'ଡାଏଲ ପିକର ମୋଡକୁ ସ୍ୱିଚ କରନ୍ତୁ';
 
   @override
-  String get dialogLabel => 'ଡାୟଲଗ୍';
+  String get dialogLabel => 'ଡାଏଲଗ';
 
   @override
-  String get drawerLabel => 'ନେଭିଗେସନ୍ ମେନୁ';
+  String get drawerLabel => 'ନାଭିଗେସନ ମେନୁ';
 
   @override
   String get expandedHint => 'ସଙ୍କୁଚିତ କରାଯାଇଛି';
@@ -32666,16 +32666,16 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get hideAccountsLabel => 'ଆକାଉଣ୍ଟଗୁଡ଼ିକୁ ଲୁଚାନ୍ତୁ';
 
   @override
-  String get inputDateModeButtonLabel => 'ଇନପୁଟକୁ ସ୍ୱିଚ୍ କରନ୍ତୁ';
+  String get inputDateModeButtonLabel => 'ଇନପୁଟକୁ ସ୍ୱିଚ କରନ୍ତୁ';
 
   @override
-  String get inputTimeModeButtonLabel => 'ଟେକ୍ସଟ୍ ଇନପୁଟ୍ ମୋଡକୁ ସ୍ୱିଚ୍ କରନ୍ତୁ';
+  String get inputTimeModeButtonLabel => 'ଟେକ୍ସଟ ଇନପୁଟ ମୋଡକୁ ସ୍ୱିଚ କରନ୍ତୁ';
 
   @override
-  String get invalidDateFormatLabel => 'ଅବୈଧ ଫର୍ମାଟ୍।';
+  String get invalidDateFormatLabel => 'ଅବୈଧ ଫର୍ମାଟ।';
 
   @override
-  String get invalidDateRangeLabel => 'ଅବୈଧ ସୀମା।';
+  String get invalidDateRangeLabel => 'ଅବୈଧ ରେଞ୍ଜ।';
 
   @override
   String get invalidTimeLabel => 'ଏକ ବୈଧ ସମୟ ଲେଖନ୍ତୁ';
@@ -32831,10 +32831,10 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String? get licensesPackageDetailTextMany => null;
 
   @override
-  String? get licensesPackageDetailTextOne => '1ଟି ଲାଇସେନ୍ସ';
+  String? get licensesPackageDetailTextOne => '1 ଲାଇସେନ୍ସ';
 
   @override
-  String get licensesPackageDetailTextOther => r'$licenseCountଟି ଲାଇସେନ୍ସ';
+  String get licensesPackageDetailTextOther => r'$licenseCount ଲାଇସେନ୍ସ';
 
   @override
   String? get licensesPackageDetailTextTwo => null;
@@ -32864,37 +32864,37 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get nextMonthTooltip => 'ପରବର୍ତ୍ତୀ ମାସ';
 
   @override
-  String get nextPageTooltip => 'ପରବର୍ତ୍ତୀ ପେଜ୍';
+  String get nextPageTooltip => 'ପରବର୍ତ୍ତୀ ପୃଷ୍ଠା';
 
   @override
-  String get okButtonLabel => 'ଠିକ୍ ଅଛି';
+  String get okButtonLabel => 'ଠିକ ଅଛି';
 
   @override
-  String get openAppDrawerTooltip => 'ନାଭିଗେସନ୍ ମେନୁ ଖୋଲନ୍ତୁ';
+  String get openAppDrawerTooltip => 'ନାଭିଗେସନ ମେନୁ ଖୋଲନ୍ତୁ';
 
   @override
   String get pageRowsInfoTitleRaw => r'$rowCountର $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'ପାଖାପାଖି $rowCountର $firstRow–$lastRow';
+  String get pageRowsInfoTitleApproximateRaw => r'$rowCountର ପାଖାପାଖି $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'ପେଷ୍ଟ କରନ୍ତୁ';
 
   @override
-  String get popupMenuLabel => 'ପପ୍-ଅପ୍ ମେନୁ';
+  String get popupMenuLabel => 'ପପଅପ ମେନୁ';
 
   @override
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get previousMonthTooltip => 'ପୂର୍ବ ମାସ';
+  String get previousMonthTooltip => 'ପୂର୍ବବର୍ତ୍ତୀ ମାସ';
 
   @override
-  String get previousPageTooltip => 'ପୂର୍ବବର୍ତ୍ତୀ ପେଜ୍';
+  String get previousPageTooltip => 'ପୂର୍ବବର୍ତ୍ତୀ ପୃଷ୍ଠା';
 
   @override
-  String get refreshIndicatorSemanticLabel => 'ରିଫ୍ରେସ୍ କରନ୍ତୁ';
+  String get refreshIndicatorSemanticLabel => 'ରିଫ୍ରେସ କରନ୍ତୁ';
 
   @override
   String? get remainingTextFieldCharacterCountFew => null;
@@ -32903,10 +32903,10 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String? get remainingTextFieldCharacterCountOne => '1ଟି ଅକ୍ଷର ବାକି ଅଛି';
+  String? get remainingTextFieldCharacterCountOne => '1 କେରେକ୍ଟର ବାକି ଅଛି';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCountଟି ଅକ୍ଷର ବାକି ଅଛି';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount କେରେକ୍ଟର ବାକି ଅଛି';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -32915,31 +32915,31 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => null;
 
   @override
-  String get reorderItemDown => 'ତଳକୁ ଯାଆନ୍ତୁ';
+  String get reorderItemDown => 'ତଳକୁ ମୁଭ କରନ୍ତୁ';
 
   @override
-  String get reorderItemLeft => 'ବାମକୁ ଯାଆନ୍ତୁ';
+  String get reorderItemLeft => 'ବାମକୁ ମୁଭ କରନ୍ତୁ';
 
   @override
-  String get reorderItemRight => 'ଡାହାଣକୁ ଯାଆନ୍ତୁ';
+  String get reorderItemRight => 'ଡାହାଣକୁ ମୁଭ କରନ୍ତୁ';
 
   @override
-  String get reorderItemToEnd => 'ଶେଷକୁ ଯାଆନ୍ତୁ';
+  String get reorderItemToEnd => 'ଶେଷକୁ ମୁଭ କରନ୍ତୁ';
 
   @override
-  String get reorderItemToStart => 'ଆରମ୍ଭକୁ ଯାଆନ୍ତୁ';
+  String get reorderItemToStart => 'ଆରମ୍ଭକୁ ମୁଭ କରନ୍ତୁ';
 
   @override
-  String get reorderItemUp => 'ଉପରକୁ ନିଅନ୍ତୁ';
+  String get reorderItemUp => 'ଉପରକୁ ମୁଭ କରନ୍ତୁ';
 
   @override
-  String get rowsPerPageTitle => 'ପୃଷ୍ଠା ପିଛା ଧାଡ଼ି:';
+  String get rowsPerPageTitle => 'ପ୍ରତି ପୃଷ୍ଠାରେ ଧାଡ଼ି:';
 
   @override
   String get saveButtonLabel => 'ସେଭ କରନ୍ତୁ';
 
   @override
-  String get scanTextButtonLabel => 'ଟେକ୍ସଟ୍ ସ୍କାନ୍ କରନ୍ତୁ';
+  String get scanTextButtonLabel => 'ଟେକ୍ସଟ ସ୍କାନ କରନ୍ତୁ';
 
   @override
   String get scrimLabel => 'ସ୍କ୍ରିମ';
@@ -32951,7 +32951,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   ScriptCategory get scriptCategory => ScriptCategory.tall;
 
   @override
-  String get searchFieldLabel => 'ସନ୍ଧାନ କରନ୍ତୁ';
+  String get searchFieldLabel => 'ସର୍ଚ୍ଚ କରନ୍ତୁ';
 
   @override
   String get searchWebButtonLabel => 'ୱେବ ସର୍ଚ୍ଚ କରନ୍ତୁ';
@@ -32972,10 +32972,10 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleMany => null;
 
   @override
-  String? get selectedRowCountTitleOne => '1ଟି ଆଇଟମ୍ ଚୟନ କରାଯାଇଛି';
+  String? get selectedRowCountTitleOne => '1 ଆଇଟମ ଚୟନ କରାଯାଇଛି';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCountଟି ଆଇଟମ୍ ଚୟନ କରାଯାଇଛି';
+  String get selectedRowCountTitleOther => r'$selectedRowCountଟି ଆଇଟମ ଚୟନ କରାଯାଇଛି';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -32993,10 +32993,10 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get showMenuTooltip => 'ମେନୁ ଦେଖାନ୍ତୁ';
 
   @override
-  String get signedInLabel => 'ସାଇନ୍ ଇନ୍ କରାଯାଇଛି';
+  String get signedInLabel => 'ସାଇନ ଇନ କରାଯାଇଛି';
 
   @override
-  String get tabLabelRaw => r'$tabCountର $tabIndex ଟାବ୍';
+  String get tabLabelRaw => r'$tabCountର $tabIndex ଟାବ';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
@@ -33014,19 +33014,19 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get timePickerInputHelpText => 'ସମୟ ଲେଖନ୍ତୁ';
 
   @override
-  String get timePickerMinuteLabel => 'ମିନିଟ୍';
+  String get timePickerMinuteLabel => 'ମିନିଟ';
 
   @override
-  String get timePickerMinuteModeAnnouncement => 'ମିନିଟ୍ ଚୟନ କରନ୍ତୁ';
+  String get timePickerMinuteModeAnnouncement => 'ମିନିଟ ଚୟନ କରନ୍ତୁ';
 
   @override
   String get unspecifiedDate => 'ତାରିଖ';
 
   @override
-  String get unspecifiedDateRange => 'ତାରିଖ ସୀମା';
+  String get unspecifiedDateRange => 'ତାରିଖ ରେଞ୍ଜ';
 
   @override
-  String get viewLicensesButtonLabel => 'ଲାଇସେନ୍ସ ଦେଖନ୍ତୁ';
+  String get viewLicensesButtonLabel => 'ଲାଇସେନ୍ସ ଭ୍ୟୁ କରନ୍ତୁ';
 }
 
 /// The translations for Panjabi Punjabi (`pa`).
@@ -39134,13 +39134,13 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Dölj';
 
   @override
-  String get expansionTileCollapsedHint => 'tryck snabbt två gånger för att utöka';
+  String get expansionTileCollapsedHint => 'dubbeltryck för att utöka';
 
   @override
   String get expansionTileCollapsedTapHint => 'Utöka för mer information';
 
   @override
-  String get expansionTileExpandedHint => 'tryck snabbt två gånger för att komprimera';
+  String get expansionTileExpandedHint => 'dubbeltryck för att komprimera';
 
   @override
   String get expansionTileExpandedTapHint => 'Komprimera';
@@ -45808,7 +45808,7 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get searchWebButtonLabel => '搜尋';
 
   @override
-  String get selectAllButtonLabel => '全部選取';
+  String get selectAllButtonLabel => '全選';
 
   @override
   String get selectYearSemanticsLabel => '揀年份';
@@ -45984,16 +45984,13 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
   String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow - $lastRow 列 (總共約 $rowCount 列)';
 
   @override
-  String get selectAllButtonLabel => '全選';
-
-  @override
   String get timePickerHourModeAnnouncement => '選取小時數';
 
   @override
   String get timePickerMinuteModeAnnouncement => '選取分鐘數';
 
   @override
-  String get alertDialogLabel => '快訊';
+  String get alertDialogLabel => '警告';
 
   @override
   String get reorderItemToStart => '移至開頭';

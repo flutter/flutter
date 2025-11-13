@@ -112,6 +112,8 @@ class MenuApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: Scaffold(body: SafeArea(child: MyRadioMenu())));
+    return const MaterialApp(
+      home: Scaffold(body: SafeArea(child: MyRadioMenu())),
+    );
   }
 }

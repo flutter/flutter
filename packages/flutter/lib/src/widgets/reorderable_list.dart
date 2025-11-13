@@ -588,8 +588,8 @@ class SliverReorderableList extends StatefulWidget {
   ///  * [maybeOf], a similar function that will return null if no
   ///    [SliverReorderableList] ancestor is found.
   static SliverReorderableListState of(BuildContext context) {
-    final SliverReorderableListState? result =
-        context.findAncestorStateOfType<SliverReorderableListState>();
+    final SliverReorderableListState? result = context
+        .findAncestorStateOfType<SliverReorderableListState>();
     assert(() {
       if (result == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -756,10 +756,9 @@ class SliverReorderableListState extends State<SliverReorderableList>
 
       if (_items.containsKey(index)) {
         _dragIndex = index;
-        _recognizer =
-            recognizer
-              ..onStart = _dragStart
-              ..addPointer(event);
+        _recognizer = recognizer
+          ..onStart = _dragStart
+          ..addPointer(event);
         _recognizerPointer = event.pointer;
       } else {
         // TODO(darrenaustin): Can we handle this better, maybe scroll to the item?
@@ -853,7 +852,13 @@ class SliverReorderableListState extends State<SliverReorderableList>
 
   void _dragEnd(_DragInfo item) {
     setState(() {
-      if (_insertIndex == item.index) {
+      if (_insertIndex! - item.index == 1) {
+        // When returning to original position from below, _insertIndex equals
+        // item.index + 1 because insertion index is calculated with the dragged
+        // item still present. Use the actual target position for animation.
+        _finalDropPosition = _itemOffsetAt(_insertIndex! - 1);
+      } else if (_insertIndex == item.index) {
+        // No movement - animate to current position
         _finalDropPosition = _itemOffsetAt(_insertIndex!);
       } else if (_reverse) {
         if (_insertIndex! >= _items.length) {
@@ -946,8 +951,9 @@ class SliverReorderableListState extends State<SliverReorderableList>
 
       final Rect geometry = item.targetGeometry();
       final double itemStart = _scrollDirection == Axis.vertical ? geometry.top : geometry.left;
-      final double itemExtent =
-          _scrollDirection == Axis.vertical ? geometry.height : geometry.width;
+      final double itemExtent = _scrollDirection == Axis.vertical
+          ? geometry.height
+          : geometry.width;
       final double itemEnd = itemStart + itemExtent;
       final double itemMiddle = itemStart + itemExtent / 2;
 
@@ -1070,10 +1076,9 @@ class SliverReorderableListState extends State<SliverReorderableList>
           moveToStart;
       String reorderItemBefore = localizations.reorderItemUp;
       if (isHorizontal) {
-        reorderItemBefore =
-            Directionality.of(context) == TextDirection.ltr
-                ? localizations.reorderItemLeft
-                : localizations.reorderItemRight;
+        reorderItemBefore = Directionality.of(context) == TextDirection.ltr
+            ? localizations.reorderItemLeft
+            : localizations.reorderItemRight;
       }
       semanticsActions[CustomSemanticsAction(label: reorderItemBefore)] = moveBefore;
     }
@@ -1082,10 +1087,9 @@ class SliverReorderableListState extends State<SliverReorderableList>
     if (index < widget.itemCount - 1) {
       String reorderItemAfter = localizations.reorderItemDown;
       if (isHorizontal) {
-        reorderItemAfter =
-            Directionality.of(context) == TextDirection.ltr
-                ? localizations.reorderItemRight
-                : localizations.reorderItemLeft;
+        reorderItemAfter = Directionality.of(context) == TextDirection.ltr
+            ? localizations.reorderItemRight
+            : localizations.reorderItemLeft;
       }
       semanticsActions[CustomSemanticsAction(label: reorderItemAfter)] = moveAfter;
       semanticsActions[CustomSemanticsAction(label: localizations.reorderItemToEnd)] = moveToEnd;
@@ -1229,6 +1233,7 @@ class _ReorderableItemState extends State<_ReorderableItem> {
       newTargetOffset = Offset.zero;
     }
     if (newTargetOffset != _targetOffset) {
+      final Offset previousTarget = _targetOffset;
       _targetOffset = newTargetOffset;
       if (animate) {
         if (_offsetAnimation == null) {
@@ -1244,7 +1249,14 @@ class _ReorderableItemState extends State<_ReorderableItem> {
                 })
                 ..forward();
         } else {
-          _startOffset = offset;
+          // Animation interrupted - calculate current position from previous animation
+          final double currentAnimValue = Curves.easeInOut.transform(_offsetAnimation!.value);
+          final Offset currentPosition = Offset.lerp(
+            _startOffset,
+            previousTarget,
+            currentAnimValue,
+          )!;
+          _startOffset = currentPosition;
           _offsetAnimation!.forward(from: 0.0);
         }
       } else {
@@ -1481,11 +1493,10 @@ class _DragInfo extends Drag {
     if (boundary == null) {
       return offset;
     }
-    final Offset adjOffset =
-        boundary!
-            .nearestPositionWithinBoundary((offset - dragOffset) & itemSize)
-            .shift(dragOffset)
-            .topLeft;
+    final Offset adjOffset = boundary!
+        .nearestPositionWithinBoundary((offset - dragOffset) & itemSize)
+        .shift(dragOffset)
+        .topLeft;
     return adjOffset;
   }
 
@@ -1553,12 +1564,11 @@ class _DragItemProxy extends StatelessWidget {
           Offset effectivePosition = position;
           final Offset? dropPosition = listState._finalDropPosition;
           if (dropPosition != null) {
-            effectivePosition =
-                Offset.lerp(
-                  dropPosition - overlayOrigin,
-                  effectivePosition,
-                  Curves.easeOut.transform(animation.value),
-                )!;
+            effectivePosition = Offset.lerp(
+              dropPosition - overlayOrigin,
+              effectivePosition,
+              Curves.easeOut.transform(animation.value),
+            )!;
           }
           return Positioned(
             left: effectivePosition.dx,
@@ -1571,10 +1581,9 @@ class _DragItemProxy extends StatelessWidget {
                 minHeight: constraints.minHeight,
                 maxWidth: constraints.maxWidth,
                 maxHeight: constraints.maxHeight,
-                alignment:
-                    listState._scrollDirection == Axis.horizontal
-                        ? Alignment.centerLeft
-                        : Alignment.topCenter,
+                alignment: listState._scrollDirection == Axis.horizontal
+                    ? Alignment.centerLeft
+                    : Alignment.topCenter,
                 child: child,
               ),
             ),

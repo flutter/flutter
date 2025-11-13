@@ -58,7 +58,7 @@ class IconTreeShaker {
   }
 
   /// The MIME types for supported font sets.
-  static const Set<String> kTtfMimeTypes = <String>{
+  static const kTtfMimeTypes = <String>{
     'font/ttf', // based on internet search
     'font/opentype',
     'font/otf',
@@ -70,7 +70,7 @@ class IconTreeShaker {
   /// The [Source] inputs that targets using this should depend on.
   ///
   /// See [Target.inputs].
-  static const List<Source> inputs = <Source>[
+  static const inputs = <Source>[
     Source.pattern(
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/icon_tree_shaker.dart',
     ),
@@ -129,8 +129,8 @@ class IconTreeShaker {
       );
     }
 
-    final Map<String, _IconTreeShakerData> result = <String, _IconTreeShakerData>{};
-    const int kSpacePoint = 32;
+    final result = <String, _IconTreeShakerData>{};
+    const kSpacePoint = 32;
     for (final MapEntry<String, String> entry in fonts.entries) {
       final List<int>? codePoints = iconData[entry.key];
       if (codePoints == null) {
@@ -140,8 +140,9 @@ class IconTreeShaker {
       }
 
       // Add space as an optional code point, as web uses it to measure the font height.
-      final List<int> optionalCodePoints =
-          _targetPlatform == TargetPlatform.web_javascript ? <int>[kSpacePoint] : <int>[];
+      final optionalCodePoints = _targetPlatform == TargetPlatform.web_javascript
+          ? <int>[kSpacePoint]
+          : <int>[];
       result[entry.value] = _IconTreeShakerData(
         family: entry.key,
         relativePath: entry.value,
@@ -190,7 +191,7 @@ class IconTreeShaker {
       throw IconTreeShakerException._('The font-subset utility is missing. Run "flutter doctor".');
     }
 
-    final List<String> cmd = <String>[fontSubset.path, outputPath, input.path];
+    final cmd = <String>[fontSubset.path, outputPath, input.path];
     final Iterable<String> requiredCodePointStrings = iconTreeShakerData.codePoints.map(
       (int codePoint) => codePoint.toString(),
     );
@@ -241,13 +242,13 @@ class IconTreeShaker {
 
   /// Returns a map of { fontFamily: relativePath } pairs.
   Future<Map<String, String>> _parseFontJson(String fontManifestData, Set<String> families) async {
-    final Map<String, String> result = <String, String>{};
+    final result = <String, String>{};
     final List<Map<String, Object?>> fontList = _getList(
       json.decode(fontManifestData),
       'FontManifest.json invalid: expected top level to be a list of objects.',
     );
 
-    for (final Map<String, Object?> map in fontList) {
+    for (final map in fontList) {
       final Object? familyKey = map['family'];
       if (familyKey is! String) {
         throw IconTreeShakerException._(
@@ -281,7 +282,7 @@ class IconTreeShaker {
   }
 
   Future<Map<String, List<int>>> _findConstants(File dart, File constFinder, File appDill) async {
-    final List<String> cmd = <String>[
+    final cmd = <String>[
       dart.path,
       constFinder.path,
       '--kernel-file',
@@ -308,7 +309,7 @@ class IconTreeShaker {
         'got $constFinderMap.',
       );
     }
-    final _ConstFinderResult constFinderResult = _ConstFinderResult(constFinderMap);
+    final constFinderResult = _ConstFinderResult(constFinderMap);
     if (constFinderResult.hasNonConstantLocations) {
       _logger.printError(
         'This application cannot tree shake icons fonts. '
@@ -332,7 +333,7 @@ class IconTreeShaker {
   }
 
   Map<String, List<int>> _parseConstFinderResult(_ConstFinderResult constants) {
-    final Map<String, List<int>> result = <String, List<int>>{};
+    final result = <String, List<int>>{};
     for (final Map<String, Object?> iconDataMap in constants.constantInstances) {
       final Object? package = iconDataMap['fontPackage'];
       final Object? fontFamily = iconDataMap['fontFamily'];
@@ -354,8 +355,8 @@ class IconTreeShaker {
         );
         continue;
       }
-      final String family = fontFamily as String;
-      final String key = package == null ? family : 'packages/$package/$family';
+      final family = fontFamily as String;
+      final key = package == null ? family : 'packages/$package/$family';
       result[key] ??= <int>[];
       result[key]!.add(codePoint.round());
     }

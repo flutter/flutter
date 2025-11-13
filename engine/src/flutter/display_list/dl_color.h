@@ -37,7 +37,7 @@ struct DlColor {
                     DlScalar green,
                     DlScalar blue,
                     DlColorSpace colorspace)
-      : alpha_(alpha),
+      : alpha_(std::clamp(alpha, 0.0f, 1.0f)),
         red_(red),
         green_(green),
         blue_(blue),
@@ -156,6 +156,9 @@ struct DlColor {
   ///\deprecated Use floating point accessors to avoid data loss when using wide
   /// gamut colors.
   inline uint32_t argb() const {
+    if (color_space_ != DlColorSpace::kSRGB) {
+      return withColorSpace(DlColorSpace::kSRGB).argb();
+    }
     return toC(alpha_) << 24 |  //
            toC(red_) << 16 |    //
            toC(green_) << 8 |   //
@@ -177,9 +180,6 @@ struct DlColor {
     return alpha_ == other.alpha_ && red_ == other.red_ &&
            green_ == other.green_ && blue_ == other.blue_ &&
            color_space_ == other.color_space_;
-  }
-  bool operator!=(DlColor const& other) const {
-    return !this->operator==(other);
   }
 
  private:

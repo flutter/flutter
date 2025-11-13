@@ -168,7 +168,10 @@ void main() {
                 onTap: () {
                   snackBarCount += 1;
                   lastController = ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('bar$snackBarCount'), duration: Duration(seconds: time)),
+                    SnackBar(
+                      content: Text('bar$snackBarCount'),
+                      duration: Duration(seconds: time),
+                    ),
                   );
                 },
                 behavior: HitTestBehavior.opaque,
@@ -573,13 +576,10 @@ void main() {
     await tester.pump(); // start animation
     await tester.pump(const Duration(milliseconds: 750));
 
-    final TextStyle buttonTextStyle =
-        tester
-            .widget<RichText>(
-              find.descendant(of: find.text('ACTION'), matching: find.byType(RichText)),
-            )
-            .text
-            .style!;
+    final TextStyle buttonTextStyle = tester
+        .widget<RichText>(find.descendant(of: find.text('ACTION'), matching: find.byType(RichText)))
+        .text
+        .style!;
     expect(buttonTextStyle.color, equals(darkTheme.colorScheme.primary));
   });
 
@@ -615,13 +615,10 @@ void main() {
     await tester.pump(); // start animation
     await tester.pump(const Duration(milliseconds: 750));
 
-    final TextStyle buttonTextStyle =
-        tester
-            .widget<RichText>(
-              find.descendant(of: find.text('ACTION'), matching: find.byType(RichText)),
-            )
-            .text
-            .style!;
+    final TextStyle buttonTextStyle = tester
+        .widget<RichText>(find.descendant(of: find.text('ACTION'), matching: find.byType(RichText)))
+        .text
+        .style!;
     expect(buttonTextStyle.color, equals(darkTheme.colorScheme.inversePrimary));
   });
 
@@ -1008,9 +1005,9 @@ void main() {
     final Widget textButton = actionTextButton.widget;
     if (textButton is TextButton) {
       final ButtonStyle buttonStyle = textButton.style!;
-      if (buttonStyle.foregroundColor is MaterialStateColor) {
+      if (buttonStyle.foregroundColor is WidgetStateColor) {
         // Same color when resolved
-        expect(buttonStyle.foregroundColor!.resolve(<MaterialState>{}), usedColor);
+        expect(buttonStyle.foregroundColor!.resolve(<WidgetState>{}), usedColor);
       } else {
         expect(false, true);
       }
@@ -1019,7 +1016,7 @@ void main() {
     }
   });
 
-  testWidgets('Snackbar labels can be colored as MaterialStateColor (Material 3)', (
+  testWidgets('Snackbar labels can be colored as WidgetStateColor (Material 3)', (
     WidgetTester tester,
   ) async {
     const _TestMaterialStateColor usedColor = _TestMaterialStateColor();
@@ -1059,7 +1056,7 @@ void main() {
     final Widget textButton = actionTextButton.widget;
     if (textButton is TextButton) {
       final ButtonStyle buttonStyle = textButton.style!;
-      if (buttonStyle.foregroundColor is MaterialStateColor) {
+      if (buttonStyle.foregroundColor is WidgetStateColor) {
         // Exactly the same object
         expect(buttonStyle.foregroundColor, usedColor);
       } else {
@@ -1668,6 +1665,33 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(closedReason, equals(SnackBarClosedReason.hide));
 
+    // Remove action to test SnackBarClosedReason.timeout because Snackbar with
+    // action doesn't timeout.
+    await tester.pumpWidget(
+      MaterialApp(
+        scaffoldMessengerKey: scaffoldMessengerKey,
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(
+                        const SnackBar(content: Text('snack'), duration: Duration(seconds: 2)),
+                      )
+                      .closed
+                      .then<void>((SnackBarClosedReason reason) {
+                        closedReason = reason;
+                      });
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
     // Pop up the snack bar and then let it time out.
     await tester.tap(find.text('X'));
     await tester.pump(const Duration(milliseconds: 750));
@@ -1827,10 +1851,10 @@ void main() {
   testWidgets('SnackBar handles updates to accessibleNavigation', (WidgetTester tester) async {
     Future<void> boilerplate({required bool accessibleNavigation}) {
       return tester.pumpWidget(
-        MaterialApp(
-          home: MediaQuery(
-            data: MediaQueryData(accessibleNavigation: accessibleNavigation),
-            child: Scaffold(
+        MediaQuery(
+          data: MediaQueryData(accessibleNavigation: accessibleNavigation),
+          child: MaterialApp(
+            home: Scaffold(
               body: Builder(
                 builder: (BuildContext context) {
                   return GestureDetector(
@@ -1872,7 +1896,10 @@ void main() {
     // disable accessible navigation
     await boilerplate(accessibleNavigation: false);
     await tester.pumpAndSettle(const Duration(milliseconds: 5750));
+    expect(find.text('test'), findsOneWidget);
 
+    await tester.tap(find.text('foo'));
+    await tester.pumpAndSettle();
     expect(find.text('test'), findsNothing);
   });
 
@@ -2409,7 +2436,9 @@ void main() {
         // Regression test for https://github.com/flutter/flutter/issues/84263
         Future<void> boilerplate({required double? fabHeight}) {
           return tester.pumpWidget(
-            MaterialApp(home: Scaffold(floatingActionButton: Container(height: fabHeight))),
+            MaterialApp(
+              home: Scaffold(floatingActionButton: Container(height: fabHeight)),
+            ),
           );
         }
 
@@ -2724,8 +2753,8 @@ void main() {
               ),
             );
           },
-          '/second':
-              (BuildContext context) => Scaffold(appBar: AppBar(title: const Text(secondHeader))),
+          '/second': (BuildContext context) =>
+              Scaffold(appBar: AppBar(title: const Text(secondHeader))),
         },
       );
     }
@@ -2754,7 +2783,7 @@ void main() {
     expect(find.text(snackBarText), findsOneWidget);
     expect(find.text(firstHeader), findsOneWidget);
     expect(find.text(secondHeader), findsOneWidget);
-    await tester.pump(const Duration(milliseconds: 750));
+    await tester.pump(const Duration(milliseconds: 1500));
     expect(find.text(snackBarText), findsOneWidget);
     expect(find.text(firstHeader), findsNothing);
     expect(find.text(secondHeader), findsOneWidget);
@@ -2932,8 +2961,8 @@ void main() {
                           actions: <Widget>[
                             TextButton(
                               child: const Text('DISMISS'),
-                              onPressed:
-                                  () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                              onPressed: () =>
+                                  ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
                             ),
                           ],
                         ),
@@ -3752,13 +3781,13 @@ void main() {
     expect(materialAfterDismissed.color, Colors.transparent);
   });
 
-  testWidgets('SnackBarAction backgroundColor works as a MaterialStateColor', (
+  testWidgets('SnackBarAction backgroundColor works as a WidgetStateColor', (
     WidgetTester tester,
   ) async {
-    final MaterialStateColor backgroundColor = MaterialStateColor.resolveWith((
-      Set<MaterialState> states,
+    final WidgetStateColor backgroundColor = WidgetStateColor.resolveWith((
+      Set<WidgetState> states,
     ) {
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         return Colors.blue;
       }
       return Colors.purple;
@@ -3872,10 +3901,10 @@ void main() {
   });
 
   testWidgets(
-    'SnackBarAction asserts when backgroundColor is a MaterialStateColor and disabledBackgroundColor is also provided',
+    'SnackBarAction asserts when backgroundColor is a WidgetStateColor and disabledBackgroundColor is also provided',
     (WidgetTester tester) async {
-      final Color backgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      final Color backgroundColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return Colors.blue;
         }
         return Colors.purple;
@@ -3919,7 +3948,7 @@ void main() {
           (AssertionError e) => e.toString(),
           'description',
           contains(
-            'disabledBackgroundColor must not be provided when background color is a MaterialStateColor',
+            'disabledBackgroundColor must not be provided when background color is a WidgetStateColor',
           ),
         ),
       );
@@ -4163,10 +4192,11 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    final ButtonStyle? actionButtonStyle =
-        tester.widget<TextButton>(find.widgetWithText(TextButton, 'ACTION')).style;
+    final ButtonStyle? actionButtonStyle = tester
+        .widget<TextButton>(find.widgetWithText(TextButton, 'ACTION'))
+        .style;
     expect(
-      actionButtonStyle?.overlayColor?.resolve(<MaterialState>{MaterialState.hovered}),
+      actionButtonStyle?.overlayColor?.resolve(<WidgetState>{WidgetState.hovered}),
       theme.colorScheme.inversePrimary.withOpacity(0.08),
     );
   });
@@ -4233,6 +4263,146 @@ void main() {
       expect(completer.isCompleted, true);
     },
   );
+
+  testWidgets('Setting persist to true prevents timeout', (WidgetTester tester) async {
+    const String buttonText = 'Show snackbar';
+    const String snackbarContent = 'Snackbar';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      duration: Duration(seconds: 1),
+                      persist: true,
+                      showCloseIcon: true,
+                      content: Text(snackbarContent),
+                    ),
+                  );
+                },
+                child: const Text(buttonText),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text(buttonText));
+    await tester.pump(const Duration(milliseconds: 750));
+    // The snackbar shows up before the timeout.
+    expect(find.text(snackbarContent), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 1500));
+    await tester.pumpAndSettle();
+    // The snackbar is still there after the timeout.
+    expect(find.text(snackbarContent), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+    // The snackbar is dismissed.
+    expect(find.text(snackbarContent), findsNothing);
+  });
+
+  testWidgets('Setting persist to false so snackbar auto dismisses', (WidgetTester tester) async {
+    const String buttonText = 'Show';
+    const String snackbarContent = 'SnackbarContent';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      duration: Duration(seconds: 1),
+                      persist: false,
+                      showCloseIcon: true,
+                      content: Text(snackbarContent),
+                    ),
+                  );
+                },
+                child: const Text(buttonText),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 750));
+    // The snackbar shows up before the timeout.
+    expect(find.text(snackbarContent), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 1500));
+    await tester.pumpAndSettle();
+    // The snackbar auto dismisses after the timeout.
+    expect(find.text(snackbarContent), findsNothing);
+  });
+
+  testWidgets('Setting persist to false overrides accessibleNavigation', (
+    WidgetTester tester,
+  ) async {
+    const String buttonText = 'Show';
+    const String snackbarContent = 'SnackbarContent';
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(accessibleNavigation: true),
+        child: MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        duration: const Duration(seconds: 1),
+                        persist: false,
+                        action: SnackBarAction(label: 'Action', onPressed: () {}),
+                        content: const Text(snackbarContent),
+                      ),
+                    );
+                  },
+                  child: const Text(buttonText),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(find.text(snackbarContent), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 10));
+    await tester.pumpAndSettle();
+    // The snackbar auto dismisses after the timeout.
+    expect(find.text(snackbarContent), findsNothing);
+  });
+
+  testWidgets('SnackBarAction does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: SnackBarAction(label: 'X', onPressed: () {}),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SnackBarAction)), Size.zero);
+  });
 }
 
 /// Start test for "SnackBar dismiss test".
@@ -4315,15 +4485,15 @@ Map<DismissDirection, List<Offset>> _getDragGesturesOfDismissDirections(double s
   return dragGestures;
 }
 
-class _TestMaterialStateColor extends MaterialStateColor {
+class _TestMaterialStateColor extends WidgetStateColor {
   const _TestMaterialStateColor() : super(_colorRed);
 
   static const int _colorRed = 0xFFF44336;
   static const int _colorBlue = 0xFF2196F3;
 
   @override
-  Color resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.pressed)) {
+  Color resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.pressed)) {
       return const Color(_colorBlue);
     }
 

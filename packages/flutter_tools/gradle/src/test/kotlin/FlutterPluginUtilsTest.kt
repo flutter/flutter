@@ -6,11 +6,8 @@ package com.flutter.gradle
 
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
-import com.android.build.gradle.api.ApplicationVariant
-import com.android.build.gradle.api.BaseVariantOutput
 import com.android.build.gradle.internal.dsl.CmakeOptions
 import com.android.build.gradle.internal.dsl.DefaultConfig
-import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import io.mockk.called
@@ -20,8 +17,6 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.verify
 import org.gradle.api.Action
-import org.gradle.api.DomainObjectCollection
-import org.gradle.api.DomainObjectSet
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -29,8 +24,6 @@ import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.logging.Logger
-import org.gradle.api.tasks.TaskContainer
-import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
@@ -330,23 +323,6 @@ class FlutterPluginUtilsTest {
         val project = mockk<Project>()
         every { project.findProperty(FlutterPluginUtils.PROP_IS_VERBOSE) } returns true
         val result = FlutterPluginUtils.isProjectVerbose(project)
-        assertEquals(true, result)
-    }
-
-    // isProjectFastStart
-    @Test
-    fun `isProjectFastStart returns false by default`() {
-        val project = mockk<Project>()
-        every { project.findProperty(FlutterPluginUtils.PROP_IS_FAST_START) } returns null
-        val result = FlutterPluginUtils.isProjectFastStart(project)
-        assertEquals(false, result)
-    }
-
-    @Test
-    fun `isProjectFastStart returns true when the property is set to true`() {
-        val project = mockk<Project>()
-        every { project.findProperty(FlutterPluginUtils.PROP_IS_FAST_START) } returns true
-        val result = FlutterPluginUtils.isProjectFastStart(project)
         assertEquals(true, result)
     }
 
@@ -1087,159 +1063,5 @@ class FlutterPluginUtilsTest {
         verify {
             mockTask.description = "Prints out all build variants for this Android project"
         }
-    }
-
-    @Test
-    fun addTasksForOutputsAppLinkSettingsActual(
-        @TempDir tempDir: Path
-    ) {
-        val variants: MutableList<ApplicationVariant> = mutableListOf()
-        val registerTaskList = mutableListOf<Task>()
-        val descriptionSlot = slot<String>()
-        // vars so variables can be overridden below.
-        var mockLogger = mockk<Logger>()
-        var variantWithLinks = mockk<ApplicationVariant>()
-
-        val mockProject =
-            mockk<Project> {
-                every { logger } returns
-                    mockk {
-                        mockLogger = this
-                        every { info(any()) } returns Unit
-                        every { warn(any()) } returns Unit
-                    }
-                every { extensions.findByType(AbstractAppExtension::class.java) } returns
-                    mockk<AbstractAppExtension> {
-                        val variant1 =
-                            mockk<ApplicationVariant> {
-                                every { name } returns "one"
-                                every { applicationId } returns "com.example.FlutterActivity1"
-                            }
-                        variants.add(variant1)
-                        mockk<ApplicationVariant> {
-                            variantWithLinks = this
-                            every { name } returns "two"
-                            every { applicationId } returns "com.example.FlutterActivity2"
-                        }
-                        variants.add(variantWithLinks)
-                        // Capture the "action" that needs to be run for each variant.
-                        val actionSlot = slot<Action<ApplicationVariant>>()
-                        every { applicationVariants } returns
-                            mockk<DomainObjectSet<ApplicationVariant>> {
-                                every { configureEach(capture(actionSlot)) } answers {
-                                    // Execute the action for each variant.
-                                    variants.forEach { variant ->
-                                        actionSlot.captured.execute(variant)
-                                    }
-                                }
-                            }
-                    }
-
-                val registerTaskSlot = slot<Action<Task>>()
-                every { tasks } returns
-                    mockk<TaskContainer> {
-                        val registerTaskNameSlot = slot<String>()
-                        every {
-                            register(
-                                capture(registerTaskNameSlot),
-                                capture(registerTaskSlot)
-                            )
-                        } answers registerAnswer@{
-                            val mockRegisterTask =
-                                mockk<Task> {
-                                    every { name } returns registerTaskNameSlot.captured
-                                    every {
-                                        description = capture(descriptionSlot)
-                                    } returns Unit
-                                    every { dependsOn(any<ProcessAndroidResources>()) } returns mockk()
-                                    val doLastActionSlot = slot<Action<Task>>()
-                                    every { doLast(capture(doLastActionSlot)) } answers doLastAnswer@{
-                                        // We need to capture the task as well
-                                        doLastActionSlot.captured.execute(mockk())
-                                        return@doLastAnswer mockk()
-                                    }
-                                }
-                            registerTaskList.add(mockRegisterTask)
-                            registerTaskSlot.captured.execute(mockRegisterTask)
-                            return@registerAnswer mockk()
-                        }
-
-                        every { named(any<String>()) } returns
-                            mockk {
-                                every { configure(any<Action<Task>>()) } returns mockk()
-                            }
-                    }
-            }
-
-        variants.forEach { variant ->
-            val testOutputs: DomainObjectCollection<BaseVariantOutput> =
-                mockk<DomainObjectCollection<BaseVariantOutput>>()
-            val baseVariantSlot = slot<Action<BaseVariantOutput>>()
-            val baseVariantOutput = mockk<BaseVariantOutput>()
-            // Create a real file in a temp directory.
-            val manifest =
-                tempDir
-                    .resolve("${tempDir.toAbsolutePath()}/AndroidManifest.xml")
-                    .toFile()
-            manifest.writeText(manifestText)
-            val mockProcessResourcesProvider = mockk<TaskProvider<ProcessAndroidResources>>()
-            val mockProcessResources = mockk<ProcessAndroidResources>()
-            every {
-                mockProcessResourcesProvider.hint(ProcessAndroidResources::class).get()
-            } returns mockProcessResources
-            every { baseVariantOutput.processResourcesProvider } returns mockProcessResourcesProvider
-            // Fallback processing.
-            every { mockProcessResources.manifestFile } returns manifest
-
-            every { testOutputs.configureEach(capture(baseVariantSlot)) } answers {
-                // Execute the action for each output.
-                baseVariantSlot.captured.execute(baseVariantOutput)
-            }
-            every { variant.outputs } returns testOutputs
-        }
-        val outputFile =
-            tempDir
-                .resolve("${tempDir.toAbsolutePath()}/app-link-settings-build-variant.json")
-                .toFile()
-        every { mockProject.property("outputPath") } returns outputFile
-
-        FlutterPluginUtils.addTasksForOutputsAppLinkSettings(mockProject)
-
-        verify(exactly = 0) { mockLogger.info(any()) }
-        assert(descriptionSlot.captured.contains("stores app links settings for the given build variant"))
-        assertEquals(variants.size, registerTaskList.size)
-        for (i in 0 until variants.size) {
-            assertEquals(
-                "output${FlutterPluginUtils.capitalize(variants[i].name)}AppLinkSettings",
-                registerTaskList[i].name
-            )
-            verify(exactly = 1) { registerTaskList[i].dependsOn(any<ProcessAndroidResources>()) }
-        }
-        // Output assertions are minimal which ensures code is running but is not exhaustive testing.
-        // Integration test for more exhaustive behavior is defined in
-        // flutter/flutter/packages/flutter_tools/test/integration.shard/android_gradle_outputs_app_link_settings_test.dart
-        val outputFileText = outputFile.readText()
-        // Only variant2 since that one has app links.
-        assertContains(outputFileText, variantWithLinks.applicationId)
-        // Host.
-        assertContains(outputFileText, "deeplink.flutter.dev")
-        // pathPrefix used in variant2 combined with prefix logic.
-        assertContains(outputFileText, "some.prefix.*")
-        // Deep linking
-        assertContains(outputFileText, "deeplinkingFlagEnabled\":true")
-    }
-
-    @Test
-    fun addTasksForOutputsAppLinkSettingsNoAndroid(
-        @TempDir tempDir: Path
-    ) {
-        val mockProject = mockk<Project>()
-        val mockLogger = mockk<Logger>()
-        every { mockProject.logger } returns mockLogger
-        every { mockLogger.info(any()) } returns Unit
-        every { mockProject.extensions.findByType(AbstractAppExtension::class.java) } returns null
-
-        FlutterPluginUtils.addTasksForOutputsAppLinkSettings(mockProject)
-        verify(exactly = 1) { mockLogger.info("addTasksForOutputsAppLinkSettings called on project without android extension.") }
     }
 }

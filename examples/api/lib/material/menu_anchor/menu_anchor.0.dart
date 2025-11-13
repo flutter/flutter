@@ -203,7 +203,9 @@ class MenuApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(body: SafeArea(child: MyCascadingMenu(message: kMessage))),
+      home: Scaffold(
+        body: SafeArea(child: MyCascadingMenu(message: kMessage)),
+      ),
     );
   }
 }

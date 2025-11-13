@@ -83,7 +83,9 @@ void main() {
         );
         final List<String> currentOriginalListItems = originalListItems.take(1).toList();
         await tester.pumpWidget(
-          MaterialApp(home: SizedBox(height: itemHeight * 10, child: reorderableListView)),
+          MaterialApp(
+            home: SizedBox(height: itemHeight * 10, child: reorderableListView),
+          ),
         );
         expect(currentListItems, orderedEquals(currentOriginalListItems));
         final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 1')));
@@ -189,7 +191,9 @@ void main() {
           ],
         );
         await tester.pumpWidget(
-          MaterialApp(home: SizedBox(height: itemHeight * 10, child: reorderableListView)),
+          MaterialApp(
+            home: SizedBox(height: itemHeight * 10, child: reorderableListView),
+          ),
         );
 
         double getListHeight() {
@@ -259,10 +263,9 @@ void main() {
 
         late final OverlayEntry entry;
         addTearDown(
-          () =>
-              entry
-                ..remove()
-                ..dispose(),
+          () => entry
+            ..remove()
+            ..dispose(),
         );
 
         await tester.pumpWidget(
@@ -527,10 +530,9 @@ void main() {
 
         late final OverlayEntry entry;
         addTearDown(
-          () =>
-              entry
-                ..remove()
-                ..dispose(),
+          () => entry
+            ..remove()
+            ..dispose(),
         );
 
         final Widget overlay = Overlay(
@@ -784,7 +786,9 @@ void main() {
             ],
           );
           await tester.pumpWidget(
-            MaterialApp(home: SizedBox(height: itemHeight * 10, child: reorderableListView)),
+            MaterialApp(
+              home: SizedBox(height: itemHeight * 10, child: reorderableListView),
+            ),
           );
 
           // Get the switch tile's semantics:
@@ -845,7 +849,9 @@ void main() {
         );
         final List<String> currentOriginalListItems = originalListItems.take(1).toList();
         await tester.pumpWidget(
-          MaterialApp(home: SizedBox(height: itemHeight * 10, child: reorderableListView)),
+          MaterialApp(
+            home: SizedBox(height: itemHeight * 10, child: reorderableListView),
+          ),
         );
         expect(currentListItems, orderedEquals(currentOriginalListItems));
         final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 1')));
@@ -965,7 +971,9 @@ void main() {
           ],
         );
         await tester.pumpWidget(
-          MaterialApp(home: SizedBox(width: itemHeight * 10, child: reorderableListView)),
+          MaterialApp(
+            home: SizedBox(width: itemHeight * 10, child: reorderableListView),
+          ),
         );
 
         double getListWidth() {
@@ -1036,10 +1044,9 @@ void main() {
 
         late final OverlayEntry entry;
         addTearDown(
-          () =>
-              entry
-                ..remove()
-                ..dispose(),
+          () => entry
+            ..remove()
+            ..dispose(),
         );
 
         await tester.pumpWidget(
@@ -1792,7 +1799,9 @@ void main() {
         ],
       );
       await tester.pumpWidget(
-        MaterialApp(home: SizedBox(height: itemHeight * 10, child: reorderableListView)),
+        MaterialApp(
+          home: SizedBox(height: itemHeight * 10, child: reorderableListView),
+        ),
       );
 
       Offset getTestItemPosition() {

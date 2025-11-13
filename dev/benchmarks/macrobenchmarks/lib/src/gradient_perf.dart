@@ -11,8 +11,8 @@ import '../common.dart';
 
 Map<String, WidgetBuilder> gradientPerfRoutes = <String, WidgetBuilder>{
   kGradientPerfRecreateDynamicRouteName: (BuildContext _) => const RecreateDynamicPainterPage(),
-  kGradientPerfRecreateConsistentRouteName:
-      (BuildContext _) => const RecreateConsistentPainterPage(),
+  kGradientPerfRecreateConsistentRouteName: (BuildContext _) =>
+      const RecreateConsistentPainterPage(),
   kGradientPerfStaticConsistentRouteName: (BuildContext _) => const StaticConsistentPainterPage(),
 };
 

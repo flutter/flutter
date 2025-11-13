@@ -14,7 +14,7 @@ import 'fakes.dart';
 
 /// A list of fake devices to test JSON serialization
 /// (`Device.toJson()` and `--machine` flag for `devices` command)
-List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
+var fakeDevices = <FakeDeviceJsonData>[
   FakeDeviceJsonData(
     FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
     <String, Object>{
@@ -28,7 +28,6 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
         'hotReload': true,
         'hotRestart': true,
         'screenshot': false,
-        'fastStart': false,
         'flutterExit': true,
         'hardwareRendering': true,
         'startPaused': true,
@@ -50,7 +49,6 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
         'hotReload': true,
         'hotRestart': true,
         'screenshot': false,
-        'fastStart': false,
         'flutterExit': true,
         'hardwareRendering': true,
         'startPaused': true,
@@ -75,7 +73,6 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
         'hotReload': true,
         'hotRestart': true,
         'screenshot': false,
-        'fastStart': false,
         'flutterExit': true,
         'hardwareRendering': true,
         'startPaused': true,
@@ -102,7 +99,6 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
         'hotReload': true,
         'hotRestart': true,
         'screenshot': false,
-        'fastStart': false,
         'flutterExit': true,
         'hardwareRendering': true,
         'startPaused': true,
@@ -171,7 +167,7 @@ class FakeDevice extends Device {
   Future<void> dispose() async {}
 
   @override
-  Future<TargetPlatform> targetPlatform = Future<TargetPlatform>.value(TargetPlatform.android_arm);
+  var targetPlatform = Future<TargetPlatform>.value(TargetPlatform.android_arm);
 
   @override
   void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -180,7 +176,7 @@ class FakeDevice extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) => _isSupportedForProject;
 
   @override
-  bool isSupported() => _isSupported;
+  Future<bool> isSupported() async => _isSupported;
 
   @override
   bool get supportsFlavors => _supportsFlavors;
@@ -192,10 +188,10 @@ class FakeDevice extends Device {
   DeviceConnectionInterface connectionInterface;
 
   @override
-  Future<bool> isLocalEmulator = Future<bool>.value(true);
+  var isLocalEmulator = Future<bool>.value(true);
 
   @override
-  Future<String> sdkNameAndVersion = Future<String>.value('Test SDK (1.2.3)');
+  var sdkNameAndVersion = Future<String>.value('Test SDK (1.2.3)');
 
   @override
   FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) =>
@@ -214,12 +210,15 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
   FakePollingDeviceDiscovery({this.requiresExtendedWirelessDeviceDiscovery = false})
     : super('mock');
 
-  final List<Device> _devices = <Device>[];
-  final StreamController<Device> _onAddedController = StreamController<Device>.broadcast();
-  final StreamController<Device> _onRemovedController = StreamController<Device>.broadcast();
+  final _devices = <Device>[];
+  final _onAddedController = StreamController<Device>.broadcast();
+  final _onRemovedController = StreamController<Device>.broadcast();
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     lastPollingTimeout = timeout;
     return _devices;
   }
@@ -252,12 +251,20 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
     devices.forEach(addDevice);
   }
 
-  bool discoverDevicesCalled = false;
+  var discoverDevicesCalled = false;
 
   @override
-  Future<List<Device>> discoverDevices({Duration? timeout, DeviceDiscoveryFilter? filter}) {
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+    bool forWirelessDiscovery = false,
+  }) {
     discoverDevicesCalled = true;
-    return super.discoverDevices(timeout: timeout);
+    return super.discoverDevices(
+      timeout: timeout,
+      filter: filter,
+      forWirelessDiscovery: forWirelessDiscovery,
+    );
   }
 
   @override
@@ -267,9 +274,9 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
   Stream<Device> get onRemoved => _onRemovedController.stream;
 
   @override
-  List<String> wellKnownIds = <String>[];
+  var wellKnownIds = <String>[];
 
-  List<String> diagnostics = <String>[];
+  var diagnostics = <String>[];
 
   @override
   Future<List<String>> getDiagnostics() => Future<List<String>>.value(diagnostics);
@@ -280,18 +287,18 @@ class FakeDeviceLogReader extends DeviceLogReader {
   @override
   String get name => 'FakeLogReader';
 
-  bool disposed = false;
+  var disposed = false;
 
-  final List<String> _lineQueue = <String>[];
-  late final StreamController<String> _linesController = StreamController<String>.broadcast(
-    onListen: () {
-      _lineQueue.forEach(_linesController.add);
-      _lineQueue.clear();
-    },
-  );
+  final _lineQueue = <String>[];
+  late final _linesController = StreamController<String>.broadcast(onListen: _onListen);
 
   @override
   Stream<String> get logLines => _linesController.stream;
+
+  void _onListen() {
+    _lineQueue.forEach(_linesController.add);
+    _lineQueue.clear();
+  }
 
   void addLine(String line) {
     if (_linesController.hasListener) {

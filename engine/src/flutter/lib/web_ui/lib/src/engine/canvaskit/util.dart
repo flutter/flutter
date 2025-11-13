@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../vector_math.dart';
 import 'canvaskit_api.dart';
 import 'path.dart';
 
@@ -73,78 +71,6 @@ const double ckShadowLightXOffset = 0;
 const double ckShadowLightYOffset = -450;
 const double ckShadowLightHeight = 600;
 const double ckShadowLightRadius = 800;
-const double ckShadowLightXTangent = ckShadowLightXOffset / ckShadowLightHeight;
-const double ckShadowLightYTangent = ckShadowLightYOffset / ckShadowLightHeight;
-
-/// Computes the smallest rectangle that contains the shadow.
-// Most of this logic is borrowed from SkDrawShadowInfo.cpp in Skia.
-// TODO(yjbanov): switch to SkDrawShadowMetrics::GetLocalBounds when available
-//                See:
-//                  - https://bugs.chromium.org/p/skia/issues/detail?id=11146
-//                  - https://github.com/flutter/flutter/issues/73492
-ui.Rect computeSkShadowBounds(
-  CkPath path,
-  double elevation,
-  double devicePixelRatio,
-  Matrix4 matrix,
-) {
-  ui.Rect pathBounds = path.getBounds();
-
-  if (elevation == 0) {
-    return pathBounds;
-  }
-
-  // For visual correctness the shadow offset and blur does not change with
-  // parent transforms. Therefore, in general case we have to first transform
-  // the shape bounds to device coordinates, then compute the shadow bounds,
-  // then transform the bounds back to local coordinates. However, if the
-  // transform is an identity or translation (a common case), we can skip this
-  // step. With directional lighting translation does not affect the size or
-  // shape of the shadow. Skipping this step saves us two transformRects and
-  // one matrix inverse.
-  final bool isComplex = !matrix.isIdentityOrTranslation();
-  if (isComplex) {
-    pathBounds = matrix.transformRect(pathBounds);
-  }
-
-  double left = pathBounds.left;
-  double top = pathBounds.top;
-  double right = pathBounds.right;
-  double bottom = pathBounds.bottom;
-
-  final double ambientBlur = ambientBlurRadius(elevation);
-  final double spotBlur = ckShadowLightRadius * elevation;
-  final double spotOffsetX = -elevation * ckShadowLightXTangent;
-  final double spotOffsetY = -elevation * ckShadowLightYTangent;
-
-  // The extra +1/-1 are to cover possible floating point errors.
-  left = left - 1 + (spotOffsetX - ambientBlur - spotBlur) * devicePixelRatio;
-  top = top - 1 + (spotOffsetY - ambientBlur - spotBlur) * devicePixelRatio;
-  right = right + 1 + (spotOffsetX + ambientBlur + spotBlur) * devicePixelRatio;
-  bottom = bottom + 1 + (spotOffsetY + ambientBlur + spotBlur) * devicePixelRatio;
-
-  final ui.Rect shadowBounds = ui.Rect.fromLTRB(left, top, right, bottom);
-
-  if (isComplex) {
-    final Matrix4 inverse = Matrix4.zero();
-    // The inverse only makes sense if the determinat is non-zero.
-    if (inverse.copyInverse(matrix) != 0.0) {
-      return inverse.transformRect(shadowBounds);
-    } else {
-      return shadowBounds;
-    }
-  } else {
-    return shadowBounds;
-  }
-}
-
-const double kAmbientHeightFactor = 1.0 / 128.0;
-const double kAmbientGeomFactor = 64.0;
-const double kMaxAmbientRadius = 300 * kAmbientHeightFactor * kAmbientGeomFactor;
-
-double ambientBlurRadius(double height) {
-  return math.min(height * kAmbientHeightFactor * kAmbientGeomFactor, kMaxAmbientRadius);
-}
 
 void drawSkShadow(
   SkCanvas skCanvas,
@@ -154,10 +80,9 @@ void drawSkShadow(
   bool transparentOccluder,
   double devicePixelRatio,
 ) {
-  int flags =
-      transparentOccluder
-          ? SkiaShadowFlags.kTransparentOccluderShadowFlags
-          : SkiaShadowFlags.kDefaultShadowFlags;
+  int flags = transparentOccluder
+      ? SkiaShadowFlags.kTransparentOccluderShadowFlags
+      : SkiaShadowFlags.kDefaultShadowFlags;
   flags |= SkiaShadowFlags.kDirectionalLight_ShadowFlag;
 
   final ui.Color inAmbient = color.withAlpha((color.alpha * ckShadowAmbientAlpha).round());
@@ -170,8 +95,9 @@ void drawSkShadow(
 
   final SkTonalColors tonalColors = canvasKit.computeTonalColors(inTonalColors);
 
+  final SkPath skPath = path.snapshotSkPath();
   skCanvas.drawShadow(
-    path.skiaObject,
+    skPath,
     Float32List(3)..[2] = devicePixelRatio * elevation,
     Float32List(3)
       ..[0] = 0
@@ -182,4 +108,5 @@ void drawSkShadow(
     tonalColors.spot,
     flags.toDouble(),
   );
+  skPath.delete();
 }

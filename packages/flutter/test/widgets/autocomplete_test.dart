@@ -60,29 +60,31 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController fieldTextEditingController,
-              FocusNode fieldFocusNode,
-              VoidCallback onFieldSubmitted,
-            ) {
-              focusNode = fieldFocusNode;
-              textEditingController = fieldTextEditingController;
-              return TextField(
-                key: fieldKey,
-                focusNode: focusNode,
-                controller: textEditingController,
-              );
-            },
-            optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options,
-            ) {
-              lastOptions = options;
-              lastOnSelected = onSelected;
-              return Container(key: optionsKey);
-            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  textEditingController = fieldTextEditingController;
+                  return TextField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: textEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  lastOptions = options;
+                  lastOnSelected = onSelected;
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       ),
@@ -174,19 +176,19 @@ void main() {
                   return option.contains(textEditingValue.text.toLowerCase());
                 }).toList();
               },
-              optionsViewBuilder: (
-                BuildContext context,
-                AutocompleteOnSelected<String> onSelected,
-                Iterable<String> options,
-              ) {
-                lastOptions = options;
-                lastOnSelected = onSelected;
-                return Material(
-                  key: optionsKey,
-                  elevation: 4.0,
-                  child: ListView(
-                    children:
-                        options
+              optionsViewBuilder:
+                  (
+                    BuildContext context,
+                    AutocompleteOnSelected<String> onSelected,
+                    Iterable<String> options,
+                  ) {
+                    lastOptions = options;
+                    lastOnSelected = onSelected;
+                    return Material(
+                      key: optionsKey,
+                      elevation: 4.0,
+                      child: ListView(
+                        children: options
                             .map(
                               (String option) => GestureDetector(
                                 onTap: () {
@@ -196,9 +198,9 @@ void main() {
                               ),
                             )
                             .toList(),
-                  ),
-                );
-              },
+                      ),
+                    );
+                  },
             ),
           ),
         ),
@@ -275,44 +277,46 @@ void main() {
                       return option.contains(textEditingValue.text.toLowerCase());
                     });
                   },
-                  fieldViewBuilder: (
-                    BuildContext context,
-                    TextEditingController fieldTextEditingController,
-                    FocusNode fieldFocusNode,
-                    VoidCallback onFieldSubmitted,
-                  ) {
-                    focusNode = fieldFocusNode;
-                    textEditingController = fieldTextEditingController;
-                    return TextField(
-                      key: fieldKey,
-                      focusNode: focusNode,
-                      controller: textEditingController,
-                    );
-                  },
-                  optionsViewBuilder: (
-                    BuildContext context,
-                    AutocompleteOnSelected<String> onSelected,
-                    Iterable<String> options,
-                  ) {
-                    lastOptions = options;
-                    return Material(
-                      elevation: 4.0,
-                      child: ListView.builder(
-                        key: optionsKey,
-                        padding: const EdgeInsets.all(8.0),
-                        itemCount: options.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          final String option = options.elementAt(index);
-                          return GestureDetector(
-                            onTap: () {
-                              onSelected(option);
+                  fieldViewBuilder:
+                      (
+                        BuildContext context,
+                        TextEditingController fieldTextEditingController,
+                        FocusNode fieldFocusNode,
+                        VoidCallback onFieldSubmitted,
+                      ) {
+                        focusNode = fieldFocusNode;
+                        textEditingController = fieldTextEditingController;
+                        return TextField(
+                          key: fieldKey,
+                          focusNode: focusNode,
+                          controller: textEditingController,
+                        );
+                      },
+                  optionsViewBuilder:
+                      (
+                        BuildContext context,
+                        AutocompleteOnSelected<String> onSelected,
+                        Iterable<String> options,
+                      ) {
+                        lastOptions = options;
+                        return Material(
+                          elevation: 4.0,
+                          child: ListView.builder(
+                            key: optionsKey,
+                            padding: const EdgeInsets.all(8.0),
+                            itemCount: options.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              final String option = options.elementAt(index);
+                              return GestureDetector(
+                                onTap: () {
+                                  onSelected(option);
+                                },
+                                child: ListTile(title: Text(option)),
+                              );
                             },
-                            child: ListTile(title: Text(option)),
-                          );
-                        },
-                      ),
-                    );
-                  },
+                          ),
+                        );
+                      },
                 ),
               ],
             ),
@@ -364,42 +368,44 @@ void main() {
                           return option.contains(textEditingValue.text.toLowerCase());
                         });
                       },
-                      optionsViewBuilder: (
-                        BuildContext context,
-                        AutocompleteOnSelected<String> onSelected,
-                        Iterable<String> options,
-                      ) {
-                        return ListView.builder(
-                          key: optionsKey,
-                          padding: EdgeInsets.zero,
-                          shrinkWrap: true,
-                          itemCount: options.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            final String option = options.elementAt(index);
-                            return InkWell(
-                              onTap: () {
-                                onSelected(option);
+                      optionsViewBuilder:
+                          (
+                            BuildContext context,
+                            AutocompleteOnSelected<String> onSelected,
+                            Iterable<String> options,
+                          ) {
+                            return ListView.builder(
+                              key: optionsKey,
+                              padding: EdgeInsets.zero,
+                              shrinkWrap: true,
+                              itemCount: options.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                final String option = options.elementAt(index);
+                                return InkWell(
+                                  onTap: () {
+                                    onSelected(option);
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Text(option),
+                                  ),
+                                );
                               },
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Text(option),
-                              ),
                             );
                           },
-                        );
-                      },
-                      fieldViewBuilder: (
-                        BuildContext context,
-                        TextEditingController textEditingController,
-                        FocusNode focusNode,
-                        VoidCallback onSubmitted,
-                      ) {
-                        return TextField(
-                          key: fieldKey,
-                          focusNode: focusNode,
-                          controller: textEditingController,
-                        );
-                      },
+                      fieldViewBuilder:
+                          (
+                            BuildContext context,
+                            TextEditingController textEditingController,
+                            FocusNode focusNode,
+                            VoidCallback onSubmitted,
+                          ) {
+                            return TextField(
+                              key: fieldKey,
+                              focusNode: focusNode,
+                              controller: textEditingController,
+                            );
+                          },
                     ),
                   ),
                 );
@@ -442,6 +448,16 @@ void main() {
             tester.getTopLeft(find.byKey(optionsKey)),
             Offset(padding, bottomOfField - optionsSize.height),
           );
+        case OptionsViewOpenDirection.mostSpace:
+          // Behaves like OptionsViewOpenDirection.up.
+          expect(find.byType(InkWell), findsNWidgets(3));
+          final double optionHeight = tester.getSize(find.byType(InkWell).first).height;
+          final double topOfField = tester.getTopLeft(find.byKey(fieldKey)).dy;
+          expect(
+            tester.getTopLeft(find.byType(InkWell).first),
+            Offset(padding, topOfField - 3 * optionHeight),
+          );
+          expect(tester.getBottomLeft(find.byType(InkWell).at(2)), Offset(padding, topOfField));
       }
 
       setState(() {
@@ -464,6 +480,16 @@ void main() {
           expect(tester.getBottomLeft(find.byKey(optionsKey)), Offset(padding, optionsSize.height));
         case OptionsViewOpenDirection.down:
           // Options are positioned and sized like normal.
+          expect(find.byType(InkWell), findsNWidgets(3));
+          final double optionHeight = tester.getSize(find.byType(InkWell).first).height;
+          final double bottomOfField = tester.getBottomLeft(find.byKey(fieldKey)).dy;
+          expect(tester.getTopLeft(find.byType(InkWell).first), Offset(padding, bottomOfField));
+          expect(
+            tester.getBottomLeft(find.byType(InkWell).at(2)),
+            Offset(padding, bottomOfField + 3 * optionHeight),
+          );
+        case OptionsViewOpenDirection.mostSpace:
+          // Behaves like OptionsViewOpenDirection.down.
           expect(find.byType(InkWell), findsNWidgets(3));
           final double optionHeight = tester.getSize(find.byType(InkWell).first).height;
           final double bottomOfField = tester.getBottomLeft(find.byKey(fieldKey)).dy;
@@ -495,25 +521,27 @@ void main() {
                       return option.contains(textEditingValue.text.toLowerCase());
                     });
                   },
-                  fieldViewBuilder: (
-                    BuildContext context,
-                    TextEditingController textEditingController,
-                    FocusNode focusNode,
-                    VoidCallback onSubmitted,
-                  ) {
-                    return TextField(
-                      key: fieldKey,
-                      focusNode: focusNode,
-                      controller: textEditingController,
-                    );
-                  },
-                  optionsViewBuilder: (
-                    BuildContext context,
-                    AutocompleteOnSelected<String> onSelected,
-                    Iterable<String> options,
-                  ) {
-                    return SizedBox(width: kOptionsWidth, key: optionsKey);
-                  },
+                  fieldViewBuilder:
+                      (
+                        BuildContext context,
+                        TextEditingController textEditingController,
+                        FocusNode focusNode,
+                        VoidCallback onSubmitted,
+                      ) {
+                        return TextField(
+                          key: fieldKey,
+                          focusNode: focusNode,
+                          controller: textEditingController,
+                        );
+                      },
+                  optionsViewBuilder:
+                      (
+                        BuildContext context,
+                        AutocompleteOnSelected<String> onSelected,
+                        Iterable<String> options,
+                      ) {
+                        return SizedBox(width: kOptionsWidth, key: optionsKey);
+                      },
                 ),
               ),
             ),
@@ -557,25 +585,27 @@ void main() {
                       return option.contains(textEditingValue.text.toLowerCase());
                     });
                   },
-                  fieldViewBuilder: (
-                    BuildContext context,
-                    TextEditingController textEditingController,
-                    FocusNode focusNode,
-                    VoidCallback onSubmitted,
-                  ) {
-                    return TextField(
-                      key: fieldKey,
-                      focusNode: focusNode,
-                      controller: textEditingController,
-                    );
-                  },
-                  optionsViewBuilder: (
-                    BuildContext context,
-                    AutocompleteOnSelected<String> onSelected,
-                    Iterable<String> options,
-                  ) {
-                    return Container(key: optionsKey);
-                  },
+                  fieldViewBuilder:
+                      (
+                        BuildContext context,
+                        TextEditingController textEditingController,
+                        FocusNode focusNode,
+                        VoidCallback onSubmitted,
+                      ) {
+                        return TextField(
+                          key: fieldKey,
+                          focusNode: focusNode,
+                          controller: textEditingController,
+                        );
+                      },
+                  optionsViewBuilder:
+                      (
+                        BuildContext context,
+                        AutocompleteOnSelected<String> onSelected,
+                        Iterable<String> options,
+                      ) {
+                        return Container(key: optionsKey);
+                      },
                 ),
               ),
             ),
@@ -600,6 +630,8 @@ void main() {
           tester.getTopLeft(find.byKey(fieldKey)).dy + fieldBox.size.height,
         OptionsViewOpenDirection.up =>
           tester.getTopLeft(find.byKey(fieldKey)).dy - optionsBox.size.height,
+        OptionsViewOpenDirection.mostSpace =>
+          tester.getTopLeft(find.byKey(fieldKey)).dy + fieldBox.size.height,
       });
     });
   }
@@ -625,29 +657,31 @@ void main() {
             onSelected: (User selected) {
               lastUserSelected = selected;
             },
-            fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController fieldTextEditingController,
-              FocusNode fieldFocusNode,
-              VoidCallback onFieldSubmitted,
-            ) {
-              focusNode = fieldFocusNode;
-              textEditingController = fieldTextEditingController;
-              return TextField(
-                key: fieldKey,
-                focusNode: focusNode,
-                controller: fieldTextEditingController,
-              );
-            },
-            optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<User> onSelected,
-              Iterable<User> options,
-            ) {
-              lastOptions = options;
-              lastOnSelected = onSelected;
-              return Container(key: optionsKey);
-            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  textEditingController = fieldTextEditingController;
+                  return TextField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: fieldTextEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<User> onSelected,
+                  Iterable<User> options,
+                ) {
+                  lastOptions = options;
+                  lastOnSelected = onSelected;
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       ),
@@ -716,29 +750,31 @@ void main() {
             onSelected: (User selected) {
               lastUserSelected = selected;
             },
-            fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController fieldTextEditingController,
-              FocusNode fieldFocusNode,
-              VoidCallback onFieldSubmitted,
-            ) {
-              textEditingController = fieldTextEditingController;
-              focusNode = fieldFocusNode;
-              return TextField(
-                key: fieldKey,
-                focusNode: focusNode,
-                controller: fieldTextEditingController,
-              );
-            },
-            optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<User> onSelected,
-              Iterable<User> options,
-            ) {
-              lastOptions = options;
-              lastOnSelected = onSelected;
-              return Container(key: optionsKey);
-            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  textEditingController = fieldTextEditingController;
+                  focusNode = fieldFocusNode;
+                  return TextField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: fieldTextEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<User> onSelected,
+                  Iterable<User> options,
+                ) {
+                  lastOptions = options;
+                  lastOnSelected = onSelected;
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       ),
@@ -800,29 +836,31 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController fieldTextEditingController,
-              FocusNode fieldFocusNode,
-              VoidCallback onFieldSubmitted,
-            ) {
-              textEditingController = fieldTextEditingController;
-              focusNode = fieldFocusNode;
-              lastOnFieldSubmitted = onFieldSubmitted;
-              return TextField(
-                key: fieldKey,
-                focusNode: focusNode,
-                controller: fieldTextEditingController,
-              );
-            },
-            optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options,
-            ) {
-              lastOptions = options;
-              return Container(key: optionsKey);
-            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  textEditingController = fieldTextEditingController;
+                  focusNode = fieldFocusNode;
+                  lastOnFieldSubmitted = onFieldSubmitted;
+                  return TextField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: fieldTextEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  lastOptions = options;
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       ),
@@ -861,21 +899,23 @@ void main() {
             body: Center(
               child: RawAutocomplete<String>(
                 optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
-                fieldViewBuilder: (
-                  BuildContext context,
-                  TextEditingController controller,
-                  FocusNode focusNode,
-                  VoidCallback onFieldSubmitted,
-                ) {
-                  return TextField(controller: controller, focusNode: focusNode);
-                },
-                optionsViewBuilder: (
-                  BuildContext context,
-                  AutocompleteOnSelected<String> onSelected,
-                  Iterable<String> options,
-                ) {
-                  return const Text('a');
-                },
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController controller,
+                      FocusNode focusNode,
+                      VoidCallback onFieldSubmitted,
+                    ) {
+                      return TextField(controller: controller, focusNode: focusNode);
+                    },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) {
+                      return const Text('a');
+                    },
               ),
             ),
           ),
@@ -895,24 +935,26 @@ void main() {
           home: Scaffold(
             body: Center(
               child: RawAutocomplete<String>(
-                optionsViewOpenDirection:
-                    OptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
+                // ignore: avoid_redundant_argument_values
+                optionsViewOpenDirection: OptionsViewOpenDirection.down,
                 optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
-                fieldViewBuilder: (
-                  BuildContext context,
-                  TextEditingController controller,
-                  FocusNode focusNode,
-                  VoidCallback onFieldSubmitted,
-                ) {
-                  return TextField(controller: controller, focusNode: focusNode);
-                },
-                optionsViewBuilder: (
-                  BuildContext context,
-                  AutocompleteOnSelected<String> onSelected,
-                  Iterable<String> options,
-                ) {
-                  return const Text('a');
-                },
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController controller,
+                      FocusNode focusNode,
+                      VoidCallback onFieldSubmitted,
+                    ) {
+                      return TextField(controller: controller, focusNode: focusNode);
+                    },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) {
+                      return const Text('a');
+                    },
               ),
             ),
           ),
@@ -934,21 +976,23 @@ void main() {
               child: RawAutocomplete<String>(
                 optionsViewOpenDirection: OptionsViewOpenDirection.up,
                 optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
-                fieldViewBuilder: (
-                  BuildContext context,
-                  TextEditingController controller,
-                  FocusNode focusNode,
-                  VoidCallback onFieldSubmitted,
-                ) {
-                  return TextField(controller: controller, focusNode: focusNode);
-                },
-                optionsViewBuilder: (
-                  BuildContext context,
-                  AutocompleteOnSelected<String> onSelected,
-                  Iterable<String> options,
-                ) {
-                  return const Text('a');
-                },
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController controller,
+                      FocusNode focusNode,
+                      VoidCallback onFieldSubmitted,
+                    ) {
+                      return TextField(controller: controller, focusNode: focusNode);
+                    },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) {
+                      return const Text('a');
+                    },
               ),
             ),
           ),
@@ -959,6 +1003,76 @@ void main() {
       expect(
         tester.getTopLeft(find.byType(TextField)),
         offsetMoreOrLessEquals(tester.getBottomLeft(find.text('a'))),
+      );
+    });
+
+    testWidgets('auto: open in the direction with more space', (WidgetTester tester) async {
+      final GlobalKey fieldKey = GlobalKey();
+      final GlobalKey optionsKey = GlobalKey();
+      late StateSetter setState;
+      Alignment alignment = Alignment.topCenter;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return Align(
+                  alignment: alignment,
+                  child: RawAutocomplete<String>(
+                    key: fieldKey,
+                    optionsViewOpenDirection: OptionsViewOpenDirection.mostSpace,
+                    optionsBuilder: (TextEditingValue textEditingValue) => <String>['a', 'b', 'c'],
+                    fieldViewBuilder:
+                        (
+                          BuildContext context,
+                          TextEditingController controller,
+                          FocusNode focusNode,
+                          VoidCallback onFieldSubmitted,
+                        ) {
+                          return TextField(controller: controller, focusNode: focusNode);
+                        },
+                    optionsViewBuilder:
+                        (
+                          BuildContext context,
+                          AutocompleteOnSelected<String> onSelected,
+                          Iterable<String> options,
+                        ) {
+                          return Material(
+                            child: ListView(
+                              key: optionsKey,
+                              children: options.map((String option) => Text(option)).toList(),
+                            ),
+                          );
+                        },
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Show the options. It should open downwards since there is more space.
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+
+      expect(
+        tester.getBottomLeft(find.byKey(fieldKey)),
+        offsetMoreOrLessEquals(tester.getTopLeft(find.byKey(optionsKey))),
+      );
+
+      // Move the field to the bottom.
+      setState(() {
+        alignment = Alignment.bottomCenter;
+      });
+      await tester.pump();
+
+      // The options should now open upwards, since there is more space above.
+      expect(
+        tester.getTopLeft(find.byKey(fieldKey)),
+        offsetMoreOrLessEquals(tester.getBottomLeft(find.byKey(optionsKey))),
       );
     });
 
@@ -980,16 +1094,17 @@ void main() {
                     key: autocompleteKey,
                     textEditingController: controller,
                     focusNode: focusNode,
-                    optionsViewOpenDirection:
-                        OptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
+                    // ignore: avoid_redundant_argument_values
+                    optionsViewOpenDirection: OptionsViewOpenDirection.down,
                     optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
-                    optionsViewBuilder: (
-                      BuildContext context,
-                      AutocompleteOnSelected<String> onSelected,
-                      Iterable<String> options,
-                    ) {
-                      return const Text('a');
-                    },
+                    optionsViewBuilder:
+                        (
+                          BuildContext context,
+                          AutocompleteOnSelected<String> onSelected,
+                          Iterable<String> options,
+                        ) {
+                          return const Text('a');
+                        },
                   ),
                 ],
               ),
@@ -1023,13 +1138,14 @@ void main() {
                     focusNode: focusNode,
                     optionsViewOpenDirection: OptionsViewOpenDirection.up,
                     optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
-                    optionsViewBuilder: (
-                      BuildContext context,
-                      AutocompleteOnSelected<String> onSelected,
-                      Iterable<String> options,
-                    ) {
-                      return const Text('a');
-                    },
+                    optionsViewBuilder:
+                        (
+                          BuildContext context,
+                          AutocompleteOnSelected<String> onSelected,
+                          Iterable<String> options,
+                        ) {
+                          return const Text('a');
+                        },
                   ),
                   TextField(controller: controller, focusNode: focusNode),
                 ],
@@ -1069,27 +1185,29 @@ void main() {
                       return option.contains(textEditingValue.text.toLowerCase());
                     });
                   },
-                  fieldViewBuilder: (
-                    BuildContext context,
-                    TextEditingController fieldTextEditingController,
-                    FocusNode fieldFocusNode,
-                    VoidCallback onFieldSubmitted,
-                  ) {
-                    focusNode = fieldFocusNode;
-                    textEditingController = fieldTextEditingController;
-                    return TextFormField(
-                      controller: fieldTextEditingController,
-                      focusNode: focusNode,
-                      key: fieldKey,
-                    );
-                  },
-                  optionsViewBuilder: (
-                    BuildContext context,
-                    AutocompleteOnSelected<String> onSelected,
-                    Iterable<String> options,
-                  ) {
-                    return Container(key: optionsKey);
-                  },
+                  fieldViewBuilder:
+                      (
+                        BuildContext context,
+                        TextEditingController fieldTextEditingController,
+                        FocusNode fieldFocusNode,
+                        VoidCallback onFieldSubmitted,
+                      ) {
+                        focusNode = fieldFocusNode;
+                        textEditingController = fieldTextEditingController;
+                        return TextFormField(
+                          controller: fieldTextEditingController,
+                          focusNode: focusNode,
+                          key: fieldKey,
+                        );
+                      },
+                  optionsViewBuilder:
+                      (
+                        BuildContext context,
+                        AutocompleteOnSelected<String> onSelected,
+                        Iterable<String> options,
+                      ) {
+                        return Container(key: optionsKey);
+                      },
                 ),
               );
             },
@@ -1147,28 +1265,30 @@ void main() {
                   return option.contains(textEditingValue.text.toLowerCase());
                 });
               },
-              fieldViewBuilder: (
-                BuildContext context,
-                TextEditingController fieldTextEditingController,
-                FocusNode fieldFocusNode,
-                VoidCallback onFieldSubmitted,
-              ) {
-                return TextFormField(
-                  controller: fieldTextEditingController,
-                  focusNode: fieldFocusNode,
-                  key: fieldKey,
-                );
-              },
-              optionsViewBuilder: (
-                BuildContext context,
-                AutocompleteOnSelected<String> onSelected,
-                Iterable<String> options,
-              ) {
-                return ListView(
-                  key: optionsKey,
-                  children: options.map((String option) => Text(option)).toList(),
-                );
-              },
+              fieldViewBuilder:
+                  (
+                    BuildContext context,
+                    TextEditingController fieldTextEditingController,
+                    FocusNode fieldFocusNode,
+                    VoidCallback onFieldSubmitted,
+                  ) {
+                    return TextFormField(
+                      controller: fieldTextEditingController,
+                      focusNode: fieldFocusNode,
+                      key: fieldKey,
+                    );
+                  },
+              optionsViewBuilder:
+                  (
+                    BuildContext context,
+                    AutocompleteOnSelected<String> onSelected,
+                    Iterable<String> options,
+                  ) {
+                    return ListView(
+                      key: optionsKey,
+                      children: options.map((String option) => Text(option)).toList(),
+                    );
+                  },
             ),
           ),
         ),
@@ -1209,28 +1329,30 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController fieldTextEditingController,
-              FocusNode fieldFocusNode,
-              VoidCallback onFieldSubmitted,
-            ) {
-              focusNode = fieldFocusNode;
-              textEditingController = fieldTextEditingController;
-              return TextField(
-                key: fieldKey,
-                focusNode: focusNode,
-                controller: fieldTextEditingController,
-              );
-            },
-            optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options,
-            ) {
-              lastOptions = options;
-              return Container(key: optionsKey);
-            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  textEditingController = fieldTextEditingController;
+                  return TextField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: fieldTextEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  lastOptions = options;
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       ),
@@ -1295,14 +1417,15 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options,
-            ) {
-              lastOptions = options;
-              return Container(key: optionsKey);
-            },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  lastOptions = options;
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       ),
@@ -1353,29 +1476,31 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController fieldTextEditingController,
-              FocusNode fieldFocusNode,
-              VoidCallback onFieldSubmitted,
-            ) {
-              focusNode = fieldFocusNode;
-              textEditingController = fieldTextEditingController;
-              return TextField(
-                key: fieldKey,
-                focusNode: focusNode,
-                controller: textEditingController,
-              );
-            },
-            optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options,
-            ) {
-              lastOptions = options;
-              lastOnSelected = onSelected;
-              return Container(key: optionsKey);
-            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  textEditingController = fieldTextEditingController;
+                  return TextField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: textEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  lastOptions = options;
+                  lastOnSelected = onSelected;
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       ),
@@ -1423,21 +1548,23 @@ void main() {
             return option.contains(textEditingValue.text.toLowerCase());
           });
         },
-        optionsViewBuilder: (
-          BuildContext context,
-          AutocompleteOnSelected<String> onSelected,
-          Iterable<String> options,
-        ) {
-          return Container();
-        },
-        fieldViewBuilder: (
-          BuildContext context,
-          TextEditingController fieldTextEditingController,
-          FocusNode fieldFocusNode,
-          VoidCallback onFieldSubmitted,
-        ) {
-          return TextField(focusNode: focusNode, controller: textEditingController);
-        },
+        optionsViewBuilder:
+            (
+              BuildContext context,
+              AutocompleteOnSelected<String> onSelected,
+              Iterable<String> options,
+            ) {
+              return Container();
+            },
+        fieldViewBuilder:
+            (
+              BuildContext context,
+              TextEditingController fieldTextEditingController,
+              FocusNode fieldFocusNode,
+              VoidCallback onFieldSubmitted,
+            ) {
+              return TextField(focusNode: focusNode, controller: textEditingController);
+            },
       );
     }, throwsAssertionError);
   });
@@ -1463,28 +1590,30 @@ void main() {
               }
               return Future<Iterable<String>>.delayed(delay, () => options);
             },
-            fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController fieldTextEditingController,
-              FocusNode fieldFocusNode,
-              VoidCallback onFieldSubmitted,
-            ) {
-              focusNode = fieldFocusNode;
-              textEditingController = fieldTextEditingController;
-              return TextField(
-                key: fieldKey,
-                focusNode: focusNode,
-                controller: textEditingController,
-              );
-            },
-            optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options,
-            ) {
-              lastOptions = options;
-              return Container(key: optionsKey);
-            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  textEditingController = fieldTextEditingController;
+                  return TextField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: textEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  lastOptions = options;
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       ),
@@ -1528,32 +1657,34 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController fieldTextEditingController,
-              FocusNode fieldFocusNode,
-              VoidCallback onFieldSubmitted,
-            ) {
-              focusNode = fieldFocusNode;
-              textEditingController = fieldTextEditingController;
-              return TextFormField(
-                key: fieldKey,
-                focusNode: focusNode,
-                controller: textEditingController,
-                onFieldSubmitted: (String value) {
-                  onFieldSubmitted();
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  textEditingController = fieldTextEditingController;
+                  return TextFormField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: textEditingController,
+                    onFieldSubmitted: (String value) {
+                      onFieldSubmitted();
+                    },
+                  );
                 },
-              );
-            },
-            optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options,
-            ) {
-              lastHighlighted = AutocompleteHighlightedOption.of(context);
-              lastOptions = options;
-              return Container(key: optionsKey);
-            },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  lastHighlighted = AutocompleteHighlightedOption.of(context);
+                  lastOptions = options;
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       ),
@@ -1639,32 +1770,34 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController fieldTextEditingController,
-              FocusNode fieldFocusNode,
-              VoidCallback onFieldSubmitted,
-            ) {
-              focusNode = fieldFocusNode;
-              textEditingController = fieldTextEditingController;
-              return TextFormField(
-                key: fieldKey,
-                focusNode: focusNode,
-                controller: textEditingController,
-                onFieldSubmitted: (String value) {
-                  onFieldSubmitted();
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  textEditingController = fieldTextEditingController;
+                  return TextFormField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: textEditingController,
+                    onFieldSubmitted: (String value) {
+                      onFieldSubmitted();
+                    },
+                  );
                 },
-              );
-            },
-            optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options,
-            ) {
-              lastHighlighted = AutocompleteHighlightedOption.of(context);
-              lastOptions = options;
-              return Container(key: optionsKey);
-            },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  lastHighlighted = AutocompleteHighlightedOption.of(context);
+                  lastOptions = options;
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       ),
@@ -1730,32 +1863,34 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController fieldTextEditingController,
-              FocusNode fieldFocusNode,
-              VoidCallback onFieldSubmitted,
-            ) {
-              focusNode = fieldFocusNode;
-              textEditingController = fieldTextEditingController;
-              return TextFormField(
-                key: fieldKey,
-                focusNode: focusNode,
-                controller: textEditingController,
-                onFieldSubmitted: (String value) {
-                  onFieldSubmitted();
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  textEditingController = fieldTextEditingController;
+                  return TextFormField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: textEditingController,
+                    onFieldSubmitted: (String value) {
+                      onFieldSubmitted();
+                    },
+                  );
                 },
-              );
-            },
-            optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options,
-            ) {
-              lastHighlighted = AutocompleteHighlightedOption.of(context);
-              lastOptions = options;
-              return Container(key: optionsKey);
-            },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  lastHighlighted = AutocompleteHighlightedOption.of(context);
+                  lastOptions = options;
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       ),
@@ -1814,31 +1949,33 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController fieldTextEditingController,
-              FocusNode fieldFocusNode,
-              VoidCallback onFieldSubmitted,
-            ) {
-              focusNode = fieldFocusNode;
-              textEditingController = fieldTextEditingController;
-              return TextFormField(
-                key: fieldKey,
-                focusNode: focusNode,
-                controller: textEditingController,
-                onFieldSubmitted: (String value) {
-                  onFieldSubmitted();
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  textEditingController = fieldTextEditingController;
+                  return TextFormField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: textEditingController,
+                    onFieldSubmitted: (String value) {
+                      onFieldSubmitted();
+                    },
+                  );
                 },
-              );
-            },
-            optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options,
-            ) {
-              lastOptions = options;
-              return Container(key: optionsKey);
-            },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  lastOptions = options;
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       ),
@@ -1918,29 +2055,31 @@ void main() {
                   return option.contains(textEditingValue.text.toLowerCase());
                 });
               },
-              fieldViewBuilder: (
-                BuildContext context,
-                TextEditingController fieldTextEditingController,
-                FocusNode fieldFocusNode,
-                VoidCallback onFieldSubmitted,
-              ) {
-                focusNode = fieldFocusNode;
-                return TextFormField(
-                  key: fieldKey,
-                  focusNode: focusNode,
-                  controller: fieldTextEditingController,
-                  onFieldSubmitted: (String value) {
-                    onFieldSubmitted();
+              fieldViewBuilder:
+                  (
+                    BuildContext context,
+                    TextEditingController fieldTextEditingController,
+                    FocusNode fieldFocusNode,
+                    VoidCallback onFieldSubmitted,
+                  ) {
+                    focusNode = fieldFocusNode;
+                    return TextFormField(
+                      key: fieldKey,
+                      focusNode: focusNode,
+                      controller: fieldTextEditingController,
+                      onFieldSubmitted: (String value) {
+                        onFieldSubmitted();
+                      },
+                    );
                   },
-                );
-              },
-              optionsViewBuilder: (
-                BuildContext context,
-                AutocompleteOnSelected<String> onSelected,
-                Iterable<String> options,
-              ) {
-                return Container(key: optionsKey);
-              },
+              optionsViewBuilder:
+                  (
+                    BuildContext context,
+                    AutocompleteOnSelected<String> onSelected,
+                    Iterable<String> options,
+                  ) {
+                    return Container(key: optionsKey);
+                  },
             ),
           ),
         ),
@@ -1984,32 +2123,34 @@ void main() {
                   return option.contains(textEditingValue.text.toLowerCase());
                 });
               },
-              fieldViewBuilder: (
-                BuildContext context,
-                TextEditingController fieldTextEditingController,
-                FocusNode fieldFocusNode,
-                VoidCallback onFieldSubmitted,
-              ) {
-                focusNode = fieldFocusNode;
-                textEditingController = fieldTextEditingController;
-                return TextFormField(
-                  key: fieldKey,
-                  focusNode: focusNode,
-                  controller: textEditingController,
-                  onFieldSubmitted: (String value) {
-                    onFieldSubmitted();
+              fieldViewBuilder:
+                  (
+                    BuildContext context,
+                    TextEditingController fieldTextEditingController,
+                    FocusNode fieldFocusNode,
+                    VoidCallback onFieldSubmitted,
+                  ) {
+                    focusNode = fieldFocusNode;
+                    textEditingController = fieldTextEditingController;
+                    return TextFormField(
+                      key: fieldKey,
+                      focusNode: focusNode,
+                      controller: textEditingController,
+                      onFieldSubmitted: (String value) {
+                        onFieldSubmitted();
+                      },
+                    );
                   },
-                );
-              },
-              optionsViewBuilder: (
-                BuildContext context,
-                AutocompleteOnSelected<String> onSelected,
-                Iterable<String> options,
-              ) {
-                lastOptions = options;
-                lastHighlighted = AutocompleteHighlightedOption.of(context);
-                return Container(key: optionsKey);
-              },
+              optionsViewBuilder:
+                  (
+                    BuildContext context,
+                    AutocompleteOnSelected<String> onSelected,
+                    Iterable<String> options,
+                  ) {
+                    lastOptions = options;
+                    lastHighlighted = AutocompleteHighlightedOption.of(context);
+                    return Container(key: optionsKey);
+                  },
             ),
           ),
         ),
@@ -2088,28 +2229,30 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController fieldTextEditingController,
-              FocusNode fieldFocusNode,
-              VoidCallback onFieldSubmitted,
-            ) {
-              focusNode = fieldFocusNode;
-              textEditingController = fieldTextEditingController;
-              return TextField(
-                key: fieldKey,
-                focusNode: focusNode,
-                controller: textEditingController,
-              );
-            },
-            optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options,
-            ) {
-              lastOnSelected = onSelected;
-              return Container(key: optionsKey);
-            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  textEditingController = fieldTextEditingController;
+                  return TextField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: textEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  lastOnSelected = onSelected;
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       ),
@@ -2152,25 +2295,27 @@ void main() {
                         return option.contains(textEditingValue.text.toLowerCase());
                       });
                     },
-                    optionsViewBuilder: (
-                      BuildContext context,
-                      AutocompleteOnSelected<String> onSelected,
-                      Iterable<String> options,
-                    ) {
-                      return Container(key: optionsKey);
-                    },
-                    fieldViewBuilder: (
-                      BuildContext context,
-                      TextEditingController textEditingController,
-                      FocusNode focusNode,
-                      VoidCallback onSubmitted,
-                    ) {
-                      return TextField(
-                        key: fieldKey,
-                        focusNode: focusNode,
-                        controller: textEditingController,
-                      );
-                    },
+                    optionsViewBuilder:
+                        (
+                          BuildContext context,
+                          AutocompleteOnSelected<String> onSelected,
+                          Iterable<String> options,
+                        ) {
+                          return Container(key: optionsKey);
+                        },
+                    fieldViewBuilder:
+                        (
+                          BuildContext context,
+                          TextEditingController textEditingController,
+                          FocusNode focusNode,
+                          VoidCallback onSubmitted,
+                        ) {
+                          return TextField(
+                            key: fieldKey,
+                            focusNode: focusNode,
+                            controller: textEditingController,
+                          );
+                        },
                   ),
                 );
               },
@@ -2217,33 +2362,35 @@ void main() {
           return option.contains(textEditingValue.text.toLowerCase());
         });
       },
-      optionsViewBuilder: (
-        BuildContext context,
-        AutocompleteOnSelected<String> onSelected,
-        Iterable<String> options,
-      ) {
-        return Container(key: optionsKey);
-      },
-      fieldViewBuilder: (
-        BuildContext context,
-        TextEditingController textEditingController,
-        FocusNode focusNode,
-        VoidCallback onSubmitted,
-      ) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter localStateSetter) {
-            setState = localStateSetter;
-            return SizedBox(
-              width: width,
-              child: TextField(
-                key: fieldKey,
-                focusNode: focusNode,
-                controller: textEditingController,
-              ),
+      optionsViewBuilder:
+          (
+            BuildContext context,
+            AutocompleteOnSelected<String> onSelected,
+            Iterable<String> options,
+          ) {
+            return Container(key: optionsKey);
+          },
+      fieldViewBuilder:
+          (
+            BuildContext context,
+            TextEditingController textEditingController,
+            FocusNode focusNode,
+            VoidCallback onSubmitted,
+          ) {
+            return StatefulBuilder(
+              builder: (BuildContext context, StateSetter localStateSetter) {
+                setState = localStateSetter;
+                return SizedBox(
+                  width: width,
+                  child: TextField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: textEditingController,
+                  ),
+                );
+              },
             );
           },
-        );
-      },
     );
 
     await tester.pumpWidget(
@@ -2302,39 +2449,44 @@ void main() {
                       return option.contains(textEditingValue.text.toLowerCase());
                     });
                   },
-                  optionsViewBuilder: (
-                    BuildContext context,
-                    AutocompleteOnSelected<String> onSelected,
-                    Iterable<String> options,
-                  ) {
-                    return ListView.builder(
-                      key: optionsKey,
-                      padding: EdgeInsets.zero,
-                      shrinkWrap: true,
-                      itemCount: options.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final String option = options.elementAt(index);
-                        return InkWell(
-                          onTap: () {
-                            onSelected(option);
+                  optionsViewBuilder:
+                      (
+                        BuildContext context,
+                        AutocompleteOnSelected<String> onSelected,
+                        Iterable<String> options,
+                      ) {
+                        return ListView.builder(
+                          key: optionsKey,
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          itemCount: options.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final String option = options.elementAt(index);
+                            return InkWell(
+                              onTap: () {
+                                onSelected(option);
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Text(option),
+                              ),
+                            );
                           },
-                          child: Padding(padding: const EdgeInsets.all(16.0), child: Text(option)),
                         );
                       },
-                    );
-                  },
-                  fieldViewBuilder: (
-                    BuildContext context,
-                    TextEditingController textEditingController,
-                    FocusNode focusNode,
-                    VoidCallback onSubmitted,
-                  ) {
-                    return TextField(
-                      key: fieldKey,
-                      focusNode: focusNode,
-                      controller: textEditingController,
-                    );
-                  },
+                  fieldViewBuilder:
+                      (
+                        BuildContext context,
+                        TextEditingController textEditingController,
+                        FocusNode focusNode,
+                        VoidCallback onSubmitted,
+                      ) {
+                        return TextField(
+                          key: fieldKey,
+                          focusNode: focusNode,
+                          controller: textEditingController,
+                        );
+                      },
                 ),
               ),
             ),
@@ -2694,39 +2846,44 @@ void main() {
                       return option.contains(textEditingValue.text.toLowerCase());
                     });
                   },
-                  optionsViewBuilder: (
-                    BuildContext context,
-                    AutocompleteOnSelected<String> onSelected,
-                    Iterable<String> options,
-                  ) {
-                    return ListView.builder(
-                      key: optionsKey,
-                      padding: EdgeInsets.zero,
-                      shrinkWrap: true,
-                      itemCount: options.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final String option = options.elementAt(index);
-                        return InkWell(
-                          onTap: () {
-                            onSelected(option);
+                  optionsViewBuilder:
+                      (
+                        BuildContext context,
+                        AutocompleteOnSelected<String> onSelected,
+                        Iterable<String> options,
+                      ) {
+                        return ListView.builder(
+                          key: optionsKey,
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          itemCount: options.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final String option = options.elementAt(index);
+                            return InkWell(
+                              onTap: () {
+                                onSelected(option);
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Text(option),
+                              ),
+                            );
                           },
-                          child: Padding(padding: const EdgeInsets.all(16.0), child: Text(option)),
                         );
                       },
-                    );
-                  },
-                  fieldViewBuilder: (
-                    BuildContext context,
-                    TextEditingController textEditingController,
-                    FocusNode focusNode,
-                    VoidCallback onSubmitted,
-                  ) {
-                    return TextField(
-                      key: fieldKey,
-                      focusNode: focusNode,
-                      controller: textEditingController,
-                    );
-                  },
+                  fieldViewBuilder:
+                      (
+                        BuildContext context,
+                        TextEditingController textEditingController,
+                        FocusNode focusNode,
+                        VoidCallback onSubmitted,
+                      ) {
+                        return TextField(
+                          key: fieldKey,
+                          focusNode: focusNode,
+                          controller: textEditingController,
+                        );
+                      },
                 ),
                 const SizedBox(height: 1000.0),
               ],
@@ -2797,39 +2954,44 @@ void main() {
                       return option.contains(textEditingValue.text.toLowerCase());
                     });
                   },
-                  optionsViewBuilder: (
-                    BuildContext context,
-                    AutocompleteOnSelected<String> onSelected,
-                    Iterable<String> options,
-                  ) {
-                    return ListView.builder(
-                      key: optionsKey,
-                      padding: EdgeInsets.zero,
-                      shrinkWrap: true,
-                      itemCount: options.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final String option = options.elementAt(index);
-                        return InkWell(
-                          onTap: () {
-                            onSelected(option);
+                  optionsViewBuilder:
+                      (
+                        BuildContext context,
+                        AutocompleteOnSelected<String> onSelected,
+                        Iterable<String> options,
+                      ) {
+                        return ListView.builder(
+                          key: optionsKey,
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          itemCount: options.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final String option = options.elementAt(index);
+                            return InkWell(
+                              onTap: () {
+                                onSelected(option);
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Text(option),
+                              ),
+                            );
                           },
-                          child: Padding(padding: const EdgeInsets.all(16.0), child: Text(option)),
                         );
                       },
-                    );
-                  },
-                  fieldViewBuilder: (
-                    BuildContext context,
-                    TextEditingController textEditingController,
-                    FocusNode focusNode,
-                    VoidCallback onSubmitted,
-                  ) {
-                    return TextField(
-                      key: fieldKey,
-                      focusNode: focusNode,
-                      controller: textEditingController,
-                    );
-                  },
+                  fieldViewBuilder:
+                      (
+                        BuildContext context,
+                        TextEditingController textEditingController,
+                        FocusNode focusNode,
+                        VoidCallback onSubmitted,
+                      ) {
+                        return TextField(
+                          key: fieldKey,
+                          focusNode: focusNode,
+                          controller: textEditingController,
+                        );
+                      },
                 ),
                 const SizedBox(height: 1000.0),
               ],
@@ -2904,28 +3066,30 @@ void main() {
               }
               return Future<Iterable<String>>.delayed(delay, () => options);
             },
-            fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController fieldTextEditingController,
-              FocusNode fieldFocusNode,
-              VoidCallback onFieldSubmitted,
-            ) {
-              focusNode = fieldFocusNode;
-              textEditingController = fieldTextEditingController;
-              return TextField(
-                key: fieldKey,
-                focusNode: focusNode,
-                controller: textEditingController,
-              );
-            },
-            optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options,
-            ) {
-              lastOptions = options;
-              return Container(key: optionsKey);
-            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  textEditingController = fieldTextEditingController;
+                  return TextField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: textEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  lastOptions = options;
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       ),
@@ -2982,28 +3146,30 @@ void main() {
               }
               return Future<Iterable<String>>.delayed(delay, () => options);
             },
-            fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController fieldTextEditingController,
-              FocusNode fieldFocusNode,
-              VoidCallback onFieldSubmitted,
-            ) {
-              focusNode = fieldFocusNode;
-              textEditingController = fieldTextEditingController;
-              return TextField(
-                key: fieldKey,
-                focusNode: focusNode,
-                controller: textEditingController,
-              );
-            },
-            optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options,
-            ) {
-              lastOptions = options;
-              return Container(key: optionsKey);
-            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  textEditingController = fieldTextEditingController;
+                  return TextField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: textEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  lastOptions = options;
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       ),
@@ -3066,28 +3232,30 @@ void main() {
               });
               return Future<Iterable<String>>.delayed(delay, () => options);
             },
-            fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController fieldTextEditingController,
-              FocusNode fieldFocusNode,
-              VoidCallback onFieldSubmitted,
-            ) {
-              focusNode = fieldFocusNode;
-              textEditingController = fieldTextEditingController;
-              return TextField(
-                key: fieldKey,
-                focusNode: focusNode,
-                controller: textEditingController,
-              );
-            },
-            optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options,
-            ) {
-              lastOptions = options;
-              return Container(key: optionsKey);
-            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  textEditingController = fieldTextEditingController;
+                  return TextField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: textEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  lastOptions = options;
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       ),
@@ -3147,28 +3315,30 @@ void main() {
               });
               return Future<Iterable<String>>.delayed(delay, () => options);
             },
-            fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController fieldTextEditingController,
-              FocusNode fieldFocusNode,
-              VoidCallback onFieldSubmitted,
-            ) {
-              focusNode = fieldFocusNode;
-              textEditingController = fieldTextEditingController;
-              return TextField(
-                key: fieldKey,
-                focusNode: focusNode,
-                controller: textEditingController,
-              );
-            },
-            optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options,
-            ) {
-              lastOptions = options;
-              return Container(key: optionsKey);
-            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  textEditingController = fieldTextEditingController;
+                  return TextField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: textEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  lastOptions = options;
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       ),
@@ -3191,5 +3361,109 @@ void main() {
     await tester.pump(delay);
     expect(lastOptions, altEleOptions);
     expect(find.byKey(optionsKey), findsOneWidget);
+  });
+
+  testWidgets('Autocomplete Semantics announcement', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late Iterable<String> lastOptions;
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+    const DefaultWidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  textEditingController = fieldTextEditingController;
+                  return TextField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: textEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  lastOptions = options;
+                  return Container(key: optionsKey);
+                },
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsNothing);
+
+    expect(tester.takeAnnouncements(), isEmpty);
+
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions.length, kOptions.length);
+    expect(tester.takeAnnouncements().first.message, localizations.searchResultsFound);
+
+    await tester.enterText(find.byKey(fieldKey), 'a');
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions.length, greaterThan(0));
+    expect(tester.takeAnnouncements(), isEmpty);
+
+    await tester.enterText(find.byKey(fieldKey), 'zzzz');
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsNothing);
+    expect(tester.takeAnnouncements().first.message, localizations.noResultsFound);
+
+    handle.dispose();
+  });
+
+  testWidgets('RawAutocomplete renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(
+              body: RawAutocomplete<String>(
+                initialValue: const TextEditingValue(text: 'X'),
+                optionsBuilder: (TextEditingValue textEditingValue) => <String>['Y'],
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController textEditingController,
+                      FocusNode focusNode,
+                      VoidCallback voidCallBack,
+                    ) => TextField(controller: textEditingController),
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) => Container(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
   });
 }

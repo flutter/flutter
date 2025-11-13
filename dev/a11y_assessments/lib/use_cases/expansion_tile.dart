@@ -7,6 +7,8 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class ExpansionTileUseCase extends UseCase {
+  ExpansionTileUseCase() : super(useCaseCategory: UseCaseCategory.core);
+
   @override
   String get name => 'ExpansionTile';
 

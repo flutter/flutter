@@ -111,8 +111,9 @@ Finder flying(WidgetTester tester, Finder finder) {
 }
 
 void checkBackgroundBoxOffset(WidgetTester tester, int boxIndex, Offset offset) {
-  final Widget transitionBackgroundBox =
-      tester.widget<Stack>(flying(tester, find.byType(Stack))).children[boxIndex];
+  final Widget transitionBackgroundBox = tester
+      .widget<Stack>(flying(tester, find.byType(Stack)))
+      .children[boxIndex];
   final Offset testOffset = tester.getBottomRight(
     find.descendant(of: find.byWidget(transitionBackgroundBox), matching: find.byType(SizedBox)),
   );
@@ -208,7 +209,7 @@ void main() {
       flying(tester, find.text('Page 1')).first,
     );
     expect(bottomMiddle.text.style!.color, isSameColorAs(const Color(0xff000306)));
-    expect(bottomMiddle.text.style!.fontWeight, FontWeight.w600);
+    expect(bottomMiddle.text.style!.fontWeight, const FontWeight(595));
     expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
@@ -220,7 +221,7 @@ void main() {
       flying(tester, find.text('Page 1')).last,
     );
     expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff000306)));
-    expect(topBackLabel.text.style!.fontWeight, FontWeight.w600);
+    expect(topBackLabel.text.style!.fontWeight, const FontWeight(595));
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
@@ -229,14 +230,14 @@ void main() {
     // Move animation further a bit.
     await tester.pump(const Duration(milliseconds: 200));
     expect(bottomMiddle.text.style!.color, isSameColorAs(const Color(0xff005ec5)));
-    expect(bottomMiddle.text.style!.fontWeight, FontWeight.w400);
+    expect(bottomMiddle.text.style!.fontWeight, const FontWeight(445));
     expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.0);
 
     expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff005ec5)));
-    expect(topBackLabel.text.style!.fontWeight, FontWeight.w400);
+    expect(topBackLabel.text.style!.fontWeight, const FontWeight(445));
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
@@ -258,7 +259,7 @@ void main() {
       flying(tester, find.text('Page 1')).first,
     );
     expect(bottomMiddle.text.style!.color, isSameColorAs(const Color(0xfff8fbff)));
-    expect(bottomMiddle.text.style!.fontWeight, FontWeight.w600);
+    expect(bottomMiddle.text.style!.fontWeight, const FontWeight(595));
     expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
@@ -270,7 +271,7 @@ void main() {
       flying(tester, find.text('Page 1')).last,
     );
     expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xfff8fbff)));
-    expect(topBackLabel.text.style!.fontWeight, FontWeight.w600);
+    expect(topBackLabel.text.style!.fontWeight, const FontWeight(595));
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
@@ -279,14 +280,14 @@ void main() {
     // Move animation further a bit.
     await tester.pump(const Duration(milliseconds: 200));
     expect(bottomMiddle.text.style!.color, isSameColorAs(const Color(0xff409fff)));
-    expect(bottomMiddle.text.style!.fontWeight, FontWeight.w400);
+    expect(bottomMiddle.text.style!.fontWeight, const FontWeight(445));
     expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.0);
 
     expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff409fff)));
-    expect(topBackLabel.text.style!.fontWeight, FontWeight.w400);
+    expect(topBackLabel.text.style!.fontWeight, const FontWeight(445));
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
@@ -361,9 +362,8 @@ void main() {
         .state<NavigatorState>(find.byType(Navigator))
         .push(
           CupertinoSheetRoute<void>(
-            builder:
-                (BuildContext context) =>
-                    scaffoldForNavBar(const CupertinoNavigationBar(middle: Text('Page 1')))!,
+            builder: (BuildContext context) =>
+                scaffoldForNavBar(const CupertinoNavigationBar(middle: Text('Page 1')))!,
           ),
         );
 
@@ -374,11 +374,8 @@ void main() {
         .state<NavigatorState>(find.byType(Navigator))
         .push(
           CupertinoSheetRoute<void>(
-            builder:
-                (BuildContext context) =>
-                    scaffoldForNavBar(
-                      const CupertinoSliverNavigationBar(largeTitle: Text('Page 2')),
-                    )!,
+            builder: (BuildContext context) =>
+                scaffoldForNavBar(const CupertinoSliverNavigationBar(largeTitle: Text('Page 2')))!,
           ),
         );
 
@@ -672,8 +669,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    final int numComponents =
-        tester.widget<Stack>(flying(tester, find.byType(Stack))).children.length;
+    final int numComponents = tester
+        .widget<Stack>(flying(tester, find.byType(Stack)))
+        .children
+        .length;
 
     await tester.pumpAndSettle();
     tester.state<NavigatorState>(find.byType(Navigator)).pop();
@@ -737,8 +736,10 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
 
-      final int numComponents =
-          tester.widget<Stack>(flying(tester, find.byType(Stack))).children.length;
+      final int numComponents = tester
+          .widget<Stack>(flying(tester, find.byType(Stack)))
+          .children
+          .length;
 
       await tester.pumpAndSettle();
       tester.state<NavigatorState>(find.byType(Navigator)).pop();
@@ -842,10 +843,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Middle widget is visible when nav bar is collapsed.
-    final RenderAnimatedOpacity userMiddleOpacity =
-        tester
-            .element(find.byWidget(userMiddle))
-            .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+    final RenderAnimatedOpacity userMiddleOpacity = tester
+        .element(find.byWidget(userMiddle))
+        .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
     expect(userMiddleOpacity.opacity.value, 1.0);
 
     tester
@@ -1269,16 +1269,14 @@ void main() {
           .push(
             CupertinoPageRoute<void>(
               title: 'Page 1',
-              builder:
-                  (BuildContext context) =>
-                      scaffoldForNavBar(
-                        const CupertinoSliverNavigationBar.search(
-                          searchField: CupertinoSearchTextField(
-                            suffixMode: OverlayVisibilityMode.always,
-                            suffixIcon: Icon(CupertinoIcons.mic_solid),
-                          ),
-                        ),
-                      )!,
+              builder: (BuildContext context) => scaffoldForNavBar(
+                const CupertinoSliverNavigationBar.search(
+                  searchField: CupertinoSearchTextField(
+                    suffixMode: OverlayVisibilityMode.always,
+                    suffixIcon: Icon(CupertinoIcons.mic_solid),
+                  ),
+                ),
+              )!,
             ),
           );
 
@@ -1299,16 +1297,14 @@ void main() {
           .push(
             CupertinoPageRoute<void>(
               title: 'Page 2',
-              builder:
-                  (BuildContext context) =>
-                      scaffoldForNavBar(
-                        const CupertinoSliverNavigationBar.search(
-                          searchField: CupertinoSearchTextField(
-                            suffixMode: OverlayVisibilityMode.always,
-                            suffixIcon: Icon(CupertinoIcons.mic_solid),
-                          ),
-                        ),
-                      )!,
+              builder: (BuildContext context) => scaffoldForNavBar(
+                const CupertinoSliverNavigationBar.search(
+                  searchField: CupertinoSearchTextField(
+                    suffixMode: OverlayVisibilityMode.always,
+                    suffixIcon: Icon(CupertinoIcons.mic_solid),
+                  ),
+                ),
+              )!,
             ),
           );
 
@@ -1412,7 +1408,7 @@ void main() {
       flying(tester, find.text('Page 1')).first,
     );
     expect(bottomLargeTitle.text.style!.color, isSameColorAs(const Color(0xff000306)));
-    expect(bottomLargeTitle.text.style!.fontWeight, FontWeight.w700);
+    expect(bottomLargeTitle.text.style!.fontWeight, const FontWeight(692));
     expect(bottomLargeTitle.text.style!.fontFamily, 'CupertinoSystemDisplay');
     expect(bottomLargeTitle.text.style!.letterSpacing, moreOrLessEquals(0.35967791542410854));
 
@@ -1421,19 +1417,19 @@ void main() {
       flying(tester, find.text('Page 1')).last,
     );
     expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff000306)));
-    expect(topBackLabel.text.style!.fontWeight, FontWeight.w700);
+    expect(topBackLabel.text.style!.fontWeight, const FontWeight(692));
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemDisplay');
     expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(0.35967791542410854));
 
     // Move animation further a bit.
     await tester.pump(const Duration(milliseconds: 200));
     expect(bottomLargeTitle.text.style!.color, isSameColorAs(const Color(0xff005ec5)));
-    expect(bottomLargeTitle.text.style!.fontWeight, FontWeight.w500);
+    expect(bottomLargeTitle.text.style!.fontWeight, const FontWeight(467));
     expect(bottomLargeTitle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomLargeTitle.text.style!.letterSpacing, moreOrLessEquals(-0.23270857974886894));
 
     expect(topBackLabel.text.style!.color, isSameColorAs(const Color(0xff005ec5)));
-    expect(topBackLabel.text.style!.fontWeight, FontWeight.w500);
+    expect(topBackLabel.text.style!.fontWeight, const FontWeight(467));
     expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(-0.23270857974886894));
   });
@@ -1585,16 +1581,15 @@ void main() {
     expect(flying(tester, find.text('Page 2')), findsOneWidget);
     expect(flying(tester, find.byType(Placeholder)), findsOneWidget);
 
-    final double largeTitleOpacity =
-        tester
-            .firstRenderObject<RenderAnimatedOpacity>(
-              find.ancestor(
-                of: flying(tester, find.text('Page 2')),
-                matching: find.byType(FadeTransition),
-              ),
-            )
-            .opacity
-            .value;
+    final double largeTitleOpacity = tester
+        .firstRenderObject<RenderAnimatedOpacity>(
+          find.ancestor(
+            of: flying(tester, find.text('Page 2')),
+            matching: find.byType(FadeTransition),
+          ),
+        )
+        .opacity
+        .value;
 
     checkOpacity(tester, flying(tester, find.byType(Placeholder)), largeTitleOpacity);
 
@@ -1799,8 +1794,9 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 50));
 
-    final TextScaler scaler =
-        tester.firstWidget<RichText>(flying(tester, find.byType(RichText))).textScaler;
+    final TextScaler scaler = tester
+        .firstWidget<RichText>(flying(tester, find.byType(RichText)))
+        .textScaler;
     final List<double> fontSizes = List<double>.generate(100, (int index) => index / 3 + 1);
     expect(fontSizes.map(scaler.scale), fontSizes);
   });

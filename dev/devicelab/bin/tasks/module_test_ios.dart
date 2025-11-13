@@ -529,8 +529,9 @@ dependencies:
 
       section('Run platform unit tests');
 
-      final String resultBundleTemp =
-          Directory.systemTemp.createTempSync('flutter_module_test_ios_xcresult.').path;
+      final String resultBundleTemp = Directory.systemTemp
+          .createTempSync('flutter_module_test_ios_xcresult.')
+          .path;
       await testWithNewIOSSimulator('TestAdd2AppSim', (String deviceId) async {
         simulatorDeviceId = deviceId;
         final String resultBundlePath = path.join(resultBundleTemp, 'result');
@@ -654,7 +655,8 @@ dependencies:
       }
 
       return TaskResult.success(null);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     } finally {
       unawaited(removeIOSSimulator(simulatorDeviceId));
@@ -701,7 +703,8 @@ Future<void> _createFakeDartPlugin(String name, Directory parent) async {
   // Add the Dart registration hook that the build will generate a call to.
   final File dartCode = File(path.join(pluginDir, 'lib', '$name.dart'));
   content = await dartCode.readAsString();
-  content = '''
+  content =
+      '''
 $content
 
 class $dartPluginClass {

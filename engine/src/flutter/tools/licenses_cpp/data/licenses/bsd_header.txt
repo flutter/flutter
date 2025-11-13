@@ -1,0 +1,3 @@
+bsd header
+(?s)Copyright.*governed\s+by\s+a\s+BSD-style\s+license.*in\s+the[^\n]+LICENSE\s+file
+(?s)Copyright .*(?:\. All rights reserved.\s+)?Use\s+of\s+this\s+source\s+code\s+is\s+governed\s+by\s+a\s+BSD-style\s+license\s+that\s+can\s+be\s+found\s+in\s+the[^\n]+LICENSE\s+file.

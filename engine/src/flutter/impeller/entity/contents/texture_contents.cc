@@ -73,11 +73,7 @@ std::optional<Rect> TextureContents::GetCoverage(const Entity& entity) const {
 std::optional<Snapshot> TextureContents::RenderToSnapshot(
     const ContentContext& renderer,
     const Entity& entity,
-    std::optional<Rect> coverage_limit,
-    const std::optional<SamplerDescriptor>& sampler_descriptor,
-    bool msaa_enabled,
-    int32_t mip_count,
-    std::string_view label) const {
+    const SnapshotOptions& options) const {
   // Passthrough textures that have simple rectangle paths and complete source
   // rects.
   auto bounds = destination_rect_;
@@ -85,22 +81,23 @@ std::optional<Snapshot> TextureContents::RenderToSnapshot(
   if (source_rect_ == Rect::MakeSize(texture_->GetSize()) &&
       (opacity >= 1 - kEhCloseEnough || defer_applying_opacity_)) {
     auto scale = Vector2(bounds.GetSize() / Size(texture_->GetSize()));
-    return Snapshot{
-        .texture = texture_,
-        .transform = entity.GetTransform() *
-                     Matrix::MakeTranslation(bounds.GetOrigin()) *
-                     Matrix::MakeScale(scale),
-        .sampler_descriptor = sampler_descriptor.value_or(sampler_descriptor_),
-        .opacity = opacity};
+    return Snapshot{.texture = texture_,
+                    .transform = entity.GetTransform() *
+                                 Matrix::MakeTranslation(bounds.GetOrigin()) *
+                                 Matrix::MakeScale(scale),
+                    .sampler_descriptor = options.sampler_descriptor.value_or(
+                        sampler_descriptor_),
+                    .opacity = opacity};
   }
   return Contents::RenderToSnapshot(
-      renderer,                                          // renderer
-      entity,                                            // entity
-      std::nullopt,                                      // coverage_limit
-      sampler_descriptor.value_or(sampler_descriptor_),  // sampler_descriptor
-      true,                                              // msaa_enabled
-      /*mip_count=*/mip_count,
-      label);  // label
+      renderer, entity,
+      {.coverage_limit = std::nullopt,
+       .sampler_descriptor =
+           options.sampler_descriptor.value_or(sampler_descriptor_),
+       .msaa_enabled = true,
+       .mip_count = options.mip_count,
+       .label = options.label,
+       .coverage_expansion = options.coverage_expansion});
 }
 
 bool TextureContents::Render(const ContentContext& renderer,
@@ -123,7 +120,7 @@ bool TextureContents::Render(const ContentContext& renderer,
 
   auto texture_coords =
       Rect::MakeSize(texture_->GetSize()).Project(source_rect_);
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 
   std::array<VS::PerVertexData, 4> vertices = {
       VS::PerVertexData{destination_rect_.GetLeftTop(),
@@ -135,7 +132,7 @@ bool TextureContents::Render(const ContentContext& renderer,
       VS::PerVertexData{destination_rect_.GetRightBottom(),
                         texture_coords.GetRightBottom()},
   };
-  auto vertex_buffer = CreateVertexBuffer(vertices, host_buffer);
+  auto vertex_buffer = CreateVertexBuffer(vertices, data_host_buffer);
 
   VS::FrameInfo frame_info;
   frame_info.mvp = entity.GetShaderTransform(pass);
@@ -175,7 +172,7 @@ bool TextureContents::Render(const ContentContext& renderer,
 #endif  // IMPELLER_ENABLE_OPENGLES
 
   pass.SetVertexBuffer(vertex_buffer);
-  VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
+  VS::BindFrameInfo(pass, data_host_buffer.EmplaceUniform(frame_info));
 
   if (strict_source_rect_enabled_) {
     // For a strict source rect, shrink the texture coordinate range by half a
@@ -187,7 +184,7 @@ bool TextureContents::Render(const ContentContext& renderer,
     FSStrict::FragInfo frag_info;
     frag_info.source_rect = Vector4(strict_texture_coords.GetLTRB());
     frag_info.alpha = GetOpacity();
-    FSStrict::BindFragInfo(pass, host_buffer.EmplaceUniform((frag_info)));
+    FSStrict::BindFragInfo(pass, data_host_buffer.EmplaceUniform((frag_info)));
     FSStrict::BindTextureSampler(
         pass, texture_,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
@@ -200,7 +197,7 @@ bool TextureContents::Render(const ContentContext& renderer,
     frag_info.y_tile_mode =
         static_cast<Scalar>(sampler_descriptor_.height_address_mode);
     frag_info.alpha = GetOpacity();
-    FSExternal::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+    FSExternal::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
 
     SamplerDescriptor sampler_desc;
     // OES_EGL_image_external states that only CLAMP_TO_EDGE is valid, so
@@ -219,7 +216,7 @@ bool TextureContents::Render(const ContentContext& renderer,
   } else {
     FS::FragInfo frag_info;
     frag_info.alpha = GetOpacity();
-    FS::BindFragInfo(pass, host_buffer.EmplaceUniform((frag_info)));
+    FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform((frag_info)));
     FS::BindTextureSampler(
         pass, texture_,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(

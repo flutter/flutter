@@ -15,12 +15,12 @@ import 'package:flutter_tools/src/devfs.dart';
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
 
-const String fragDir = '/shaders';
-const String shaderLibDir = '/./shader_lib';
-const String fragPath = '/shaders/my_shader.frag';
-const String notFragPath = '/shaders/not_a_frag.file';
-const String outputSpirvPath = '/output/shaders/my_shader.frag.spirv';
-const String outputPath = '/output/shaders/my_shader.frag';
+const fragDir = '/shaders';
+const shaderLibDir = '/./shader_lib';
+const fragPath = '/shaders/my_shader.frag';
+const notFragPath = '/shaders/not_a_frag.file';
+const outputSpirvPath = '/output/shaders/my_shader.frag.spirv';
+const outputPath = '/output/shaders/my_shader.frag';
 
 void main() {
   late BufferLogger logger;
@@ -40,7 +40,7 @@ void main() {
   });
 
   testWithoutContext('compileShader invokes impellerc for .frag files and web target', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
           impellerc,
@@ -60,7 +60,7 @@ void main() {
         },
       ),
     ]);
-    final ShaderCompiler shaderCompiler = ShaderCompiler(
+    final shaderCompiler = ShaderCompiler(
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
@@ -82,7 +82,7 @@ void main() {
   testWithoutContext(
     'compileShader invokes impellerc for .frag files and metal ios target',
     () async {
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>[
             impellerc,
@@ -100,7 +100,7 @@ void main() {
           },
         ),
       ]);
-      final ShaderCompiler shaderCompiler = ShaderCompiler(
+      final shaderCompiler = ShaderCompiler(
         processManager: processManager,
         logger: logger,
         fileSystem: fileSystem,
@@ -120,7 +120,7 @@ void main() {
   );
 
   testWithoutContext('compileShader invokes impellerc for .frag files and Android', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
           impellerc,
@@ -141,7 +141,7 @@ void main() {
         },
       ),
     ]);
-    final ShaderCompiler shaderCompiler = ShaderCompiler(
+    final shaderCompiler = ShaderCompiler(
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
@@ -160,7 +160,7 @@ void main() {
   });
 
   testWithoutContext('compileShader invokes impellerc for non-.frag files', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
           impellerc,
@@ -180,7 +180,7 @@ void main() {
         },
       ),
     ]);
-    final ShaderCompiler shaderCompiler = ShaderCompiler(
+    final shaderCompiler = ShaderCompiler(
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
@@ -200,7 +200,7 @@ void main() {
   });
 
   testWithoutContext('compileShader throws an exception when impellerc fails', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
           impellerc,
@@ -219,7 +219,7 @@ void main() {
         exitCode: 1,
       ),
     ]);
-    final ShaderCompiler shaderCompiler = ShaderCompiler(
+    final shaderCompiler = ShaderCompiler(
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
@@ -242,7 +242,7 @@ void main() {
   });
 
   testWithoutContext('DevelopmentShaderCompiler can compile for android non-impeller', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
           impellerc,
@@ -267,13 +267,13 @@ void main() {
       ),
     ]);
     fileSystem.file(fragPath).writeAsBytesSync(<int>[1, 2, 3, 4]);
-    final ShaderCompiler shaderCompiler = ShaderCompiler(
+    final shaderCompiler = ShaderCompiler(
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
       artifacts: artifacts,
     );
-    final DevelopmentShaderCompiler developmentShaderCompiler = DevelopmentShaderCompiler(
+    final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: shaderCompiler,
       fileSystem: fileSystem,
       random: math.Random(0),
@@ -293,7 +293,7 @@ void main() {
   testWithoutContext(
     'DevelopmentShaderCompiler can compile for Flutter Tester with Impeller and Vulkan',
     () async {
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>[
             impellerc,
@@ -316,13 +316,13 @@ void main() {
         ),
       ]);
       fileSystem.file(fragPath).writeAsBytesSync(<int>[1, 2, 3, 4]);
-      final ShaderCompiler shaderCompiler = ShaderCompiler(
+      final shaderCompiler = ShaderCompiler(
         processManager: processManager,
         logger: logger,
         fileSystem: fileSystem,
         artifacts: artifacts,
       );
-      final DevelopmentShaderCompiler developmentShaderCompiler = DevelopmentShaderCompiler(
+      final developmentShaderCompiler = DevelopmentShaderCompiler(
         shaderCompiler: shaderCompiler,
         fileSystem: fileSystem,
         random: math.Random(0),
@@ -340,7 +340,7 @@ void main() {
   );
 
   testWithoutContext('DevelopmentShaderCompiler can compile for android with impeller', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
           impellerc,
@@ -365,13 +365,13 @@ void main() {
       ),
     ]);
     fileSystem.file(fragPath).writeAsBytesSync(<int>[1, 2, 3, 4]);
-    final ShaderCompiler shaderCompiler = ShaderCompiler(
+    final shaderCompiler = ShaderCompiler(
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
       artifacts: artifacts,
     );
-    final DevelopmentShaderCompiler developmentShaderCompiler = DevelopmentShaderCompiler(
+    final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: shaderCompiler,
       fileSystem: fileSystem,
       random: math.Random(0),
@@ -391,7 +391,7 @@ void main() {
   testWithoutContext(
     'DevelopmentShaderCompiler can compile for Flutter Tester with Impeller and Vulkan',
     () async {
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <String>[
             impellerc,
@@ -414,13 +414,13 @@ void main() {
         ),
       ]);
       fileSystem.file(fragPath).writeAsBytesSync(<int>[1, 2, 3, 4]);
-      final ShaderCompiler shaderCompiler = ShaderCompiler(
+      final shaderCompiler = ShaderCompiler(
         processManager: processManager,
         logger: logger,
         fileSystem: fileSystem,
         artifacts: artifacts,
       );
-      final DevelopmentShaderCompiler developmentShaderCompiler = DevelopmentShaderCompiler(
+      final developmentShaderCompiler = DevelopmentShaderCompiler(
         shaderCompiler: shaderCompiler,
         fileSystem: fileSystem,
         random: math.Random(0),
@@ -438,7 +438,7 @@ void main() {
   );
 
   testWithoutContext('DevelopmentShaderCompiler can compile for android with impeller', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
           impellerc,
@@ -463,13 +463,13 @@ void main() {
       ),
     ]);
     fileSystem.file(fragPath).writeAsBytesSync(<int>[1, 2, 3, 4]);
-    final ShaderCompiler shaderCompiler = ShaderCompiler(
+    final shaderCompiler = ShaderCompiler(
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
       artifacts: artifacts,
     );
-    final DevelopmentShaderCompiler developmentShaderCompiler = DevelopmentShaderCompiler(
+    final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: shaderCompiler,
       fileSystem: fileSystem,
       random: math.Random(0),
@@ -487,7 +487,7 @@ void main() {
   });
 
   testWithoutContext('DevelopmentShaderCompiler can compile JSON for web targets', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
           impellerc,
@@ -510,13 +510,13 @@ void main() {
       ),
     ]);
     fileSystem.file(fragPath).writeAsBytesSync(<int>[1, 2, 3, 4]);
-    final ShaderCompiler shaderCompiler = ShaderCompiler(
+    final shaderCompiler = ShaderCompiler(
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
       artifacts: artifacts,
     );
-    final DevelopmentShaderCompiler developmentShaderCompiler = DevelopmentShaderCompiler(
+    final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: shaderCompiler,
       fileSystem: fileSystem,
       random: math.Random(0),

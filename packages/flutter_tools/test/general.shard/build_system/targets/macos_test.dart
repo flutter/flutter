@@ -173,10 +173,12 @@ void main() {
       final File entitlements = environment.outputDir.childFile('entitlements.txt');
       final File withoutEntitlements = environment.outputDir.childFile('without_entitlements.txt');
       final File unsignedBinaries = environment.outputDir.childFile('unsigned_binaries.txt');
-      final File nestedEntitlements = environment.outputDir
-        .childDirectory('first_level')
-        .childDirectory('second_level')
-        .childFile('entitlements.txt')..createSync(recursive: true);
+      final File nestedEntitlements =
+          environment.outputDir
+              .childDirectory('first_level')
+              .childDirectory('second_level')
+              .childFile('entitlements.txt')
+            ..createSync(recursive: true);
 
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
@@ -327,13 +329,17 @@ void main() {
       binary.createSync(recursive: true);
       frameworkDsym.createSync(recursive: true);
       processManager.addCommands(<FakeCommand>[
+        copyFrameworkDsymCommand,
         releaseCopyFrameworkCommand,
         lipoInfoNonFatCommand,
         lipoVerifyX86_64Command,
-        copyFrameworkDsymCommand,
       ]);
 
-      await const ReleaseUnpackMacOS().build(environment..defines[kBuildMode] = 'release');
+      const Target target = ReleaseUnpackMacOS();
+      for (final Target dep in target.dependencies) {
+        await dep.build(environment..defines[kBuildMode] = 'release');
+      }
+      await target.build(environment..defines[kBuildMode] = 'release');
 
       expect(processManager, hasNoRemainingExpectations);
     },
@@ -348,7 +354,7 @@ void main() {
     () async {
       binary.createSync(recursive: true);
       frameworkDsym.createSync(recursive: true);
-      final FakeCommand failedCopyFrameworkDsymCommand = FakeCommand(
+      final failedCopyFrameworkDsymCommand = FakeCommand(
         command: <String>[
           'rsync',
           '-av',
@@ -361,16 +367,10 @@ void main() {
         ],
         exitCode: 1,
       );
-      processManager.addCommands(<FakeCommand>[
-        releaseCopyFrameworkCommand,
-        lipoInfoFatCommand,
-        lipoVerifyX86_64Command,
-        lipoExtractX86_64Command,
-        failedCopyFrameworkDsymCommand,
-      ]);
+      processManager.addCommands(<FakeCommand>[failedCopyFrameworkDsymCommand]);
 
       await expectLater(
-        const ReleaseUnpackMacOS().build(environment..defines[kBuildMode] = 'release'),
+        const ReleaseUnpackMacOSDsym().build(environment..defines[kBuildMode] = 'release'),
         throwsA(
           isException.having(
             (Exception exception) => exception.toString(),
@@ -435,7 +435,7 @@ void main() {
           .createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
 
-      final String inputKernel = '${environment.buildDir.path}/app.dill';
+      final inputKernel = '${environment.buildDir.path}/app.dill';
       fileSystem.file(inputKernel)
         ..createSync(recursive: true)
         ..writeAsStringSync('testing');
@@ -496,7 +496,7 @@ void main() {
           .createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
 
-      final String inputKernel = '${environment.buildDir.path}/app.dill';
+      final inputKernel = '${environment.buildDir.path}/app.dill';
       fileSystem.file(inputKernel)
         ..createSync(recursive: true)
         ..writeAsStringSync('testing');
@@ -547,8 +547,8 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      XcodeProjectInterpreter:
-          () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
     },
   );
 

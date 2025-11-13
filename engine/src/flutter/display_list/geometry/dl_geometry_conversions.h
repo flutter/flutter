@@ -27,10 +27,6 @@ inline const DlPoint& ToDlPoint(const SkPoint& point) {
   return *reinterpret_cast<const DlPoint*>(&point);
 }
 
-inline const DlPoint* ToDlPoints(const SkPoint* points) {
-  return points == nullptr ? nullptr : reinterpret_cast<const DlPoint*>(points);
-}
-
 inline const DlRect& ToDlRect(const SkRect& rect) {
   return *reinterpret_cast<const DlRect*>(&rect);
 }
@@ -41,22 +37,6 @@ inline const DlRect ToDlRect(const SkIRect& rect) {
 
 inline const DlIRect& ToDlIRect(const SkIRect& rect) {
   return *reinterpret_cast<const DlIRect*>(&rect);
-}
-
-inline DlRect* ToDlRect(SkRect* rect) {
-  return rect == nullptr ? nullptr : reinterpret_cast<DlRect*>(rect);
-}
-
-inline const DlRect* ToDlRect(const SkRect* rect) {
-  return rect == nullptr ? nullptr : reinterpret_cast<const DlRect*>(rect);
-}
-
-inline std::optional<const DlRect> ToOptDlRect(const SkRect* rect) {
-  return rect == nullptr ? std::nullopt : std::optional(ToDlRect(*rect));
-}
-
-inline const DlRect* ToDlRects(const SkRect* rects) {
-  return rects == nullptr ? nullptr : reinterpret_cast<const DlRect*>(rects);
 }
 
 inline const DlISize& ToDlISize(const SkISize& size) {

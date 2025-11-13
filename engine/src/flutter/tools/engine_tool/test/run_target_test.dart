@@ -63,6 +63,7 @@ void main() {
       TargetPlatform.androidX86: 'android_debug_x86',
       TargetPlatform.androidX64: 'android_debug_x64',
       TargetPlatform.androidArm64: 'android_debug_arm64',
+      TargetPlatform.androidRiscv64: 'android_debug_riscv64',
       TargetPlatform.darwinUnspecified: 'host_debug',
       TargetPlatform.darwinX64: 'host_debug',
       TargetPlatform.darwinArm64: 'host_debug_arm64',
@@ -100,6 +101,9 @@ void main() {
       TargetPlatform.androidX86: [Label.parseGn('//flutter/shell/platform/android:android_jar')],
       TargetPlatform.androidX64: [Label.parseGn('//flutter/shell/platform/android:android_jar')],
       TargetPlatform.androidArm64: [Label.parseGn('//flutter/shell/platform/android:android_jar')],
+      TargetPlatform.androidRiscv64: [
+        Label.parseGn('//flutter/shell/platform/android:android_jar'),
+      ],
       TargetPlatform.iOSUnspecified: [
         Label.parseGn('//flutter/shell/platform/darwin/ios:flutter_framework'),
       ],

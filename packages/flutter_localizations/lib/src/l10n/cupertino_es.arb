@@ -29,5 +29,11 @@
   "shareButtonLabel": "Compartir...",
   "clearButtonLabel": "Borrar",
   "cancelButtonLabel": "Cancelar",
-  "backButtonLabel": "Atrás"
+  "backButtonLabel": "Atrás",
+  "expansionTileExpandedHint": "toca dos veces para contraer",
+  "expansionTileCollapsedHint": "toca dos veces para desplegar",
+  "expansionTileExpandedTapHint": "Contraer",
+  "expansionTileCollapsedTapHint": "Desplegar para ver más detalles",
+  "expandedHint": "Contraído",
+  "collapsedHint": "Desplegado"
 }

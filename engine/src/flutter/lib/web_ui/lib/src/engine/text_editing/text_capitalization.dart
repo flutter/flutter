@@ -37,14 +37,13 @@ class TextCapitalizationConfig {
     : textCapitalization = TextCapitalization.none;
 
   const TextCapitalizationConfig.fromInputConfiguration(String inputConfiguration)
-    : textCapitalization =
-          inputConfiguration == 'TextCapitalization.words'
-              ? TextCapitalization.words
-              : inputConfiguration == 'TextCapitalization.characters'
-              ? TextCapitalization.characters
-              : inputConfiguration == 'TextCapitalization.sentences'
-              ? TextCapitalization.sentences
-              : TextCapitalization.none;
+    : textCapitalization = inputConfiguration == 'TextCapitalization.words'
+          ? TextCapitalization.words
+          : inputConfiguration == 'TextCapitalization.characters'
+          ? TextCapitalization.characters
+          : inputConfiguration == 'TextCapitalization.sentences'
+          ? TextCapitalization.sentences
+          : TextCapitalization.none;
 
   final TextCapitalization textCapitalization;
 

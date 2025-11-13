@@ -32,10 +32,9 @@ class VeryLongPictureScrollingPerfState extends State<VeryLongPictureScrollingPe
               const Text('list:'),
               Checkbox(
                 value: useList,
-                onChanged:
-                    (bool? value) => setState(() {
-                      useList = value!;
-                    }),
+                onChanged: (bool? value) => setState(() {
+                  useList = value!;
+                }),
               ),
             ],
           ),
@@ -44,10 +43,9 @@ class VeryLongPictureScrollingPerfState extends State<VeryLongPictureScrollingPe
               const Text('consolidate:'),
               Checkbox(
                 value: consolidate,
-                onChanged:
-                    (bool? value) => setState(() {
-                      consolidate = value!;
-                    }),
+                onChanged: (bool? value) => setState(() {
+                  consolidate = value!;
+                }),
               ),
             ],
           ),
@@ -57,37 +55,35 @@ class VeryLongPictureScrollingPerfState extends State<VeryLongPictureScrollingPe
       body: SizedBox(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
-        child:
-            useList
-                ? ListView.builder(
-                  key: const ValueKey<String>('vlp_list_view_scrollable'),
-                  scrollDirection: Axis.horizontal,
-                  clipBehavior: Clip.none,
-                  itemCount: (waveData.length / 200).ceil(),
-                  itemExtent: 100,
-                  itemBuilder:
-                      (BuildContext context, int index) => CustomPaint(
-                        painter: PaintSomeTest(
-                          waveData: waveData,
-                          from: index * 200,
-                          to: min((index + 1) * 200, waveData.length - 1),
-                        ),
-                      ),
-                )
-                : SingleChildScrollView(
-                  key: const ValueKey<String>('vlp_single_child_scrollable'),
-                  scrollDirection: Axis.horizontal,
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 20,
-                    height: MediaQuery.of(context).size.height,
-                    child: RepaintBoundary(
-                      child: CustomPaint(
-                        isComplex: true,
-                        painter: PaintTest(consolidate: consolidate, waveData: waveData),
-                      ),
+        child: useList
+            ? ListView.builder(
+                key: const ValueKey<String>('vlp_list_view_scrollable'),
+                scrollDirection: Axis.horizontal,
+                clipBehavior: Clip.none,
+                itemCount: (waveData.length / 200).ceil(),
+                itemExtent: 100,
+                itemBuilder: (BuildContext context, int index) => CustomPaint(
+                  painter: PaintSomeTest(
+                    waveData: waveData,
+                    from: index * 200,
+                    to: min((index + 1) * 200, waveData.length - 1),
+                  ),
+                ),
+              )
+            : SingleChildScrollView(
+                key: const ValueKey<String>('vlp_single_child_scrollable'),
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * 20,
+                  height: MediaQuery.of(context).size.height,
+                  child: RepaintBoundary(
+                    child: CustomPaint(
+                      isComplex: true,
+                      painter: PaintTest(consolidate: consolidate, waveData: waveData),
                     ),
                   ),
                 ),
+              ),
       ),
     );
   }
@@ -106,26 +102,23 @@ class PaintTest extends CustomPainter {
     const double strokeSize = .5;
     const double zoomFactor = .5;
 
-    final Paint paintPos =
-        Paint()
-          ..color = Colors.pink
-          ..strokeWidth = strokeSize
-          ..isAntiAlias = false
-          ..style = PaintingStyle.stroke;
+    final Paint paintPos = Paint()
+      ..color = Colors.pink
+      ..strokeWidth = strokeSize
+      ..isAntiAlias = false
+      ..style = PaintingStyle.stroke;
 
-    final Paint paintNeg =
-        Paint()
-          ..color = Colors.pink
-          ..strokeWidth = strokeSize
-          ..isAntiAlias = false
-          ..style = PaintingStyle.stroke;
+    final Paint paintNeg = Paint()
+      ..color = Colors.pink
+      ..strokeWidth = strokeSize
+      ..isAntiAlias = false
+      ..style = PaintingStyle.stroke;
 
-    final Paint paintZero =
-        Paint()
-          ..color = Colors.green
-          ..strokeWidth = strokeSize
-          ..isAntiAlias = false
-          ..style = PaintingStyle.stroke;
+    final Paint paintZero = Paint()
+      ..color = Colors.green
+      ..strokeWidth = strokeSize
+      ..isAntiAlias = false
+      ..style = PaintingStyle.stroke;
 
     int index = 0;
     Paint? listPaint;
@@ -182,26 +175,23 @@ class PaintSomeTest extends CustomPainter {
     const double strokeSize = .5;
     const double zoomFactor = .5;
 
-    final Paint paintPos =
-        Paint()
-          ..color = Colors.pink
-          ..strokeWidth = strokeSize
-          ..isAntiAlias = false
-          ..style = PaintingStyle.stroke;
+    final Paint paintPos = Paint()
+      ..color = Colors.pink
+      ..strokeWidth = strokeSize
+      ..isAntiAlias = false
+      ..style = PaintingStyle.stroke;
 
-    final Paint paintNeg =
-        Paint()
-          ..color = Colors.pink
-          ..strokeWidth = strokeSize
-          ..isAntiAlias = false
-          ..style = PaintingStyle.stroke;
+    final Paint paintNeg = Paint()
+      ..color = Colors.pink
+      ..strokeWidth = strokeSize
+      ..isAntiAlias = false
+      ..style = PaintingStyle.stroke;
 
-    final Paint paintZero =
-        Paint()
-          ..color = Colors.green
-          ..strokeWidth = strokeSize
-          ..isAntiAlias = false
-          ..style = PaintingStyle.stroke;
+    final Paint paintZero = Paint()
+      ..color = Colors.green
+      ..strokeWidth = strokeSize
+      ..isAntiAlias = false
+      ..style = PaintingStyle.stroke;
 
     for (int index = from; index <= to; index++) {
       final (Paint curPaint, Offset p1) = switch (waveData[index]) {

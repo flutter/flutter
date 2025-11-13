@@ -439,6 +439,31 @@ TEST(FlEngineTest, EngineId) {
   EXPECT_EQ(fl_engine_for_id(engine_id), engine);
 }
 
+TEST(FlEngineTest, UIIsolateDefaultThreadPolicy) {
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  fl_dart_project_set_ui_thread_policy(project, FL_UI_THREAD_POLICY_DEFAULT);
+
+  bool same_task_runner = false;
+
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize,
+      ([&same_task_runner](size_t version, const FlutterRendererConfig* config,
+                           const FlutterProjectArgs* args, void* user_data,
+                           FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+        same_task_runner = args->custom_task_runners->platform_task_runner ==
+                           args->custom_task_runners->ui_task_runner;
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+  EXPECT_TRUE(same_task_runner);
+}
+
 TEST(FlEngineTest, UIIsolateOnPlatformTaskRunner) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
@@ -989,6 +1014,7 @@ TEST(FlEngineTest, SendKeyEventError) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   g_autoptr(GError) error = nullptr;
+  // NOLINTNEXTLINE(clang-analyzer-core.uninitialized.Assign)
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
 
@@ -1032,7 +1058,6 @@ TEST(FlEngineTest, ChildObjects) {
 
   // Check objects exist before engine started.
   EXPECT_NE(fl_engine_get_binary_messenger(engine), nullptr);
-  EXPECT_NE(fl_engine_get_compositor(engine), nullptr);
   EXPECT_NE(fl_engine_get_display_monitor(engine), nullptr);
   EXPECT_NE(fl_engine_get_task_runner(engine), nullptr);
   EXPECT_NE(fl_engine_get_keyboard_manager(engine), nullptr);

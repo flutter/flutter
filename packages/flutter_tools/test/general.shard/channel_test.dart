@@ -41,7 +41,7 @@ void main() {
               '  origin/beta',
         ),
       ]);
-      final ChannelCommand command = ChannelCommand();
+      final command = ChannelCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(args);
       expect(testLogger.errorText, hasLength(0));
@@ -54,7 +54,7 @@ void main() {
     testUsingContext(
       'usage (--help) explains how to use channel',
       () async {
-        final ChannelCommand command = ChannelCommand();
+        final command = ChannelCommand();
 
         // Required because otherwise command.usage fails as it is not hooked up.
         createTestCommandRunner(command);
@@ -106,7 +106,7 @@ void main() {
     testUsingContext(
       'sorted by stability',
       () async {
-        final ChannelCommand command = ChannelCommand();
+        final command = ChannelCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         fakeProcessManager.addCommand(
@@ -181,8 +181,8 @@ void main() {
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(testLogger.errorText, hasLength(0));
         // check if available official channels are in order of stability
-        int prev = -1;
-        int next = -1;
+        var prev = -1;
+        var next = -1;
         for (final String branch in kOfficialChannels) {
           next = testLogger.statusText.indexOf(branch);
           if (next != -1) {
@@ -212,7 +212,7 @@ void main() {
           ),
         );
 
-        final ChannelCommand command = ChannelCommand();
+        final command = ChannelCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel']);
 
@@ -245,7 +245,7 @@ void main() {
           ),
         );
 
-        final ChannelCommand command = ChannelCommand();
+        final command = ChannelCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel']);
 
@@ -282,7 +282,7 @@ void main() {
           ),
         );
 
-        final ChannelCommand command = ChannelCommand();
+        final command = ChannelCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel']);
 
@@ -316,7 +316,7 @@ void main() {
           ),
         ]);
 
-        final ChannelCommand command = ChannelCommand();
+        final command = ChannelCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel', 'beta']);
 
@@ -362,7 +362,7 @@ void main() {
           ),
         ]);
 
-        final ChannelCommand command = ChannelCommand();
+        final command = ChannelCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel', 'beta']);
 
@@ -416,7 +416,7 @@ void main() {
         }
       ''');
 
-        final ChannelCommand command = ChannelCommand();
+        final command = ChannelCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel', 'beta']);
 

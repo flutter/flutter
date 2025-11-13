@@ -55,12 +55,11 @@ class _ExpansionTileAnimationStyleAppState extends State<ExpansionTileAnimationS
                     }
                   });
                 },
-                segments:
-                    animationStyleSegments.map<ButtonSegment<AnimationStyles>>((
-                      (AnimationStyles, String) shirt,
-                    ) {
-                      return ButtonSegment<AnimationStyles>(value: shirt.$1, label: Text(shirt.$2));
-                    }).toList(),
+                segments: animationStyleSegments.map<ButtonSegment<AnimationStyles>>((
+                  (AnimationStyles, String) shirt,
+                ) {
+                  return ButtonSegment<AnimationStyles>(value: shirt.$1, label: Text(shirt.$2));
+                }).toList(),
               ),
               const SizedBox(height: 20),
               ExpansionTile(

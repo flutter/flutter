@@ -83,10 +83,9 @@ class _ChipsTile extends StatelessWidget {
           ),
           if (children!.isNotEmpty)
             Wrap(
-              children:
-                  children!.map<Widget>((Widget chip) {
-                    return Padding(padding: const EdgeInsets.all(2.0), child: chip);
-                  }).toList(),
+              children: children!.map<Widget>((Widget chip) {
+                return Padding(padding: const EdgeInsets.all(2.0), child: chip);
+              }).toList(),
             )
           else
             Semantics(
@@ -199,69 +198,64 @@ class _ChipDemoState extends State<ChipDemo> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final List<Widget> chips =
-        _materialsA.map<Widget>((String name) {
-          return Chip(
-            key: ValueKey<String>(name),
-            backgroundColor: _nameToColor(name, theme),
-            label: Text(_capitalize(name)),
-            onDeleted: () {
-              setState(() {
-                _removeMaterial(name);
-              });
-            },
-          );
-        }).toList();
+    final List<Widget> chips = _materialsA.map<Widget>((String name) {
+      return Chip(
+        key: ValueKey<String>(name),
+        backgroundColor: _nameToColor(name, theme),
+        label: Text(_capitalize(name)),
+        onDeleted: () {
+          setState(() {
+            _removeMaterial(name);
+          });
+        },
+      );
+    }).toList();
 
-    final List<Widget> inputChips =
-        _toolsA.map<Widget>((String name) {
-          return InputChip(
-            key: ValueKey<String>(name),
-            avatar: CircleAvatar(backgroundImage: _nameToAvatar(name)),
-            label: Text(_capitalize(name)),
-            onDeleted: () {
-              setState(() {
-                _removeTool(name);
-              });
-            },
-          );
-        }).toList();
+    final List<Widget> inputChips = _toolsA.map<Widget>((String name) {
+      return InputChip(
+        key: ValueKey<String>(name),
+        avatar: CircleAvatar(backgroundImage: _nameToAvatar(name)),
+        label: Text(_capitalize(name)),
+        onDeleted: () {
+          setState(() {
+            _removeTool(name);
+          });
+        },
+      );
+    }).toList();
 
-    final List<Widget> choiceChips =
-        _materialsB.map<Widget>((String name) {
-          return ChoiceChip(
-            key: ValueKey<String>(name),
-            backgroundColor: _nameToColor(name, theme),
-            label: Text(_capitalize(name)),
-            selected: _selectedMaterial == name,
-            onSelected: (bool value) {
-              setState(() {
-                _selectedMaterial = value ? name : '';
-              });
-            },
-          );
-        }).toList();
+    final List<Widget> choiceChips = _materialsB.map<Widget>((String name) {
+      return ChoiceChip(
+        key: ValueKey<String>(name),
+        backgroundColor: _nameToColor(name, theme),
+        label: Text(_capitalize(name)),
+        selected: _selectedMaterial == name,
+        onSelected: (bool value) {
+          setState(() {
+            _selectedMaterial = value ? name : '';
+          });
+        },
+      );
+    }).toList();
 
-    final List<Widget> filterChips =
-        _toolsB.map<Widget>((String name) {
-          return FilterChip(
-            key: ValueKey<String>(name),
-            label: Text(_capitalize(name)),
-            selected: _toolsB.contains(name) && _selectedTools.contains(name),
-            onSelected:
-                !_toolsB.contains(name)
-                    ? null
-                    : (bool value) {
-                      setState(() {
-                        if (!value) {
-                          _selectedTools.remove(name);
-                        } else {
-                          _selectedTools.add(name);
-                        }
-                      });
-                    },
-          );
-        }).toList();
+    final List<Widget> filterChips = _toolsB.map<Widget>((String name) {
+      return FilterChip(
+        key: ValueKey<String>(name),
+        label: Text(_capitalize(name)),
+        selected: _toolsB.contains(name) && _selectedTools.contains(name),
+        onSelected: !_toolsB.contains(name)
+            ? null
+            : (bool value) {
+                setState(() {
+                  if (!value) {
+                    _selectedTools.remove(name);
+                  } else {
+                    _selectedTools.add(name);
+                  }
+                });
+              },
+      );
+    }).toList();
 
     Set<String> allowedActions = <String>{};
     if (_selectedMaterial.isNotEmpty) {
@@ -271,17 +265,16 @@ class _ChipDemoState extends State<ChipDemo> {
       allowedActions = allowedActions.intersection(_materialActions[_selectedMaterial]!);
     }
 
-    final List<Widget> actionChips =
-        allowedActions.map<Widget>((String name) {
-          return ActionChip(
-            label: Text(_capitalize(name)),
-            onPressed: () {
-              setState(() {
-                _selectedAction = name;
-              });
-            },
-          );
-        }).toList();
+    final List<Widget> actionChips = allowedActions.map<Widget>((String name) {
+      return ActionChip(
+        label: Text(_capitalize(name)),
+        onPressed: () {
+          setState(() {
+            _selectedAction = name;
+          });
+        },
+      );
+    }).toList();
 
     final List<Widget> tiles = <Widget>[
       const SizedBox(height: 8.0, width: 0.0),
@@ -313,15 +306,14 @@ class _ChipDemoState extends State<ChipDemo> {
         ],
       ),
       body: ChipTheme(
-        data:
-            _showShapeBorder
-                ? theme.chipTheme.copyWith(
-                  shape: BeveledRectangleBorder(
-                    side: const BorderSide(width: 0.66, color: Colors.grey),
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                )
-                : theme.chipTheme,
+        data: _showShapeBorder
+            ? theme.chipTheme.copyWith(
+                shape: BeveledRectangleBorder(
+                  side: const BorderSide(width: 0.66, color: Colors.grey),
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              )
+            : theme.chipTheme,
         child: Scrollbar(child: ListView(primary: true, children: tiles)),
       ),
       floatingActionButton: FloatingActionButton(

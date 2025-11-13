@@ -147,7 +147,9 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
    *        ←-------- a ---------→
    */
 
-  if (radius <= 0) {
+  if (radius <= kEhCloseEnough) {
+    // Corners with really small radii are treated as sharp corners, since they
+    // might lead to NaNs due to `ratio` being too large.
     return RoundSuperellipseParam::Octant{
         .offset = center,
 
@@ -206,9 +208,11 @@ RoundSuperellipseParam::Quadrant ComputeQuadrant(Point center,
                                                  Size in_radii,
                                                  Size sign) {
   Point corner_vector = corner - center;
-  Size radii = in_radii.Abs();
+  Size radii = {std::min(std::abs(in_radii.width), std::abs(corner_vector.x)),
+                std::min(std::abs(in_radii.height), std::abs(corner_vector.y))};
 
-  // The prefix "norm" is short for "normalized".
+  // The prefix "norm" is short for "normalized", meaning a rounded superellipse
+  // that has a uniform radius. The quadrant is scaled from this normalized one.
   //
   // Be extra careful to avoid NaNs in cases that some coordinates of `in_radii`
   // or `corner_vector` are zero.
@@ -311,6 +315,10 @@ class RoundSuperellipseBuilder {
   // If `reverse` is false, the resulting arc spans from 0 to pi/2, moving
   // clockwise starting from the positive Y-axis. Otherwise it moves from pi/2
   // to 0.
+  //
+  // The `scale_sign` is an additional scaling transformation that potentially
+  // flips the result. This is useful for uniform radii where the same quadrant
+  // parameter set should be drawn to 4 quadrants.
   void AddQuadrant(const RoundSuperellipseParam::Quadrant& param,
                    bool reverse,
                    Point scale_sign = Point(1, 1)) {
@@ -321,7 +329,7 @@ class RoundSuperellipseBuilder {
                                     Point(param.top.se_a, param.top.se_a)));
       if (!reverse) {
         receiver_.LineTo(transform *
-                         (param.top.offset + Point(param.top.se_a, 0)));
+                         (param.right.offset + Point(param.right.se_a, 0)));
       } else {
         receiver_.LineTo(transform *
                          (param.top.offset + Point(0, param.top.se_a)));

@@ -101,10 +101,6 @@ flutter:
       await const CopyAssets().build(environment);
 
       expect(
-        fileSystem.file('${environment.buildDir.path}/flutter_assets/AssetManifest.json'),
-        exists,
-      );
-      expect(
         fileSystem.file('${environment.buildDir.path}/flutter_assets/FontManifest.json'),
         exists,
       );
@@ -237,7 +233,7 @@ flutter:
         userMessages: UserMessages(),
       );
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: globals.processManager,
         artifacts: Artifacts.test(),
@@ -275,22 +271,22 @@ flutter:
       Logger: () => logger,
       FileSystem: () => fileSystem,
       Platform: () => FakePlatform(),
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[
-            FakeCommand(
-              command: <Pattern>[
-                Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
-                'run',
-                'my_capitalizer_transformer',
-                RegExp('--input=.*'),
-                RegExp('--output=.*'),
-                '-a',
-                '-b',
-                '--color',
-                'green',
-              ],
-              onRun: (List<String> args) {
-                final ArgResults parsedArgs = (ArgParser()
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <Pattern>[
+            Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
+            'run',
+            'my_capitalizer_transformer',
+            RegExp('--input=.*'),
+            RegExp('--output=.*'),
+            '-a',
+            '-b',
+            '--color',
+            'green',
+          ],
+          onRun: (List<String> args) {
+            final ArgResults parsedArgs =
+                (ArgParser()
                       ..addOption('input')
                       ..addOption('output')
                       ..addOption('color')
@@ -298,20 +294,20 @@ flutter:
                       ..addFlag('bbb', abbr: 'b'))
                     .parse(args);
 
-                expect(parsedArgs['aaa'], true);
-                expect(parsedArgs['bbb'], true);
-                expect(parsedArgs['color'], 'green');
+            expect(parsedArgs['aaa'], true);
+            expect(parsedArgs['bbb'], true);
+            expect(parsedArgs['color'], 'green');
 
-                final File input = fileSystem.file(parsedArgs['input'] as String);
-                expect(input, exists);
-                final String inputContents = input.readAsStringSync();
-                expect(inputContents, 'abc');
-                fileSystem.file(parsedArgs['output'])
-                  ..createSync()
-                  ..writeAsStringSync(inputContents.toUpperCase());
-              },
-            ),
-          ]),
+            final File input = fileSystem.file(parsedArgs['input'] as String);
+            expect(input, exists);
+            final String inputContents = input.readAsStringSync();
+            expect(inputContents, 'abc');
+            fileSystem.file(parsedArgs['output'])
+              ..createSync()
+              ..writeAsStringSync(inputContents.toUpperCase());
+          },
+        ),
+      ]),
     },
   );
 
@@ -324,7 +320,7 @@ flutter:
         userMessages: UserMessages(),
       );
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: globals.processManager,
         artifacts: Artifacts.test(),
@@ -360,33 +356,32 @@ flutter:
       Logger: () => logger,
       FileSystem: () => fileSystem,
       Platform: () => FakePlatform(),
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[
-            FakeCommand(
-              command: <Pattern>[
-                Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
-                'run',
-                'my_transformer',
-                RegExp('--input=.*'),
-                RegExp('--output=.*'),
-                '-a',
-                '-b',
-                '--color',
-                'green',
-              ],
-              exitCode: 1,
-            ),
-          ]),
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <Pattern>[
+            Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
+            'run',
+            'my_transformer',
+            RegExp('--input=.*'),
+            RegExp('--output=.*'),
+            '-a',
+            '-b',
+            '--color',
+            'green',
+          ],
+          exitCode: 1,
+        ),
+      ]),
     },
   );
 
   testUsingContext(
     'asset transformation, per each asset, uses unique paths for temporary files',
     () async {
-      final List<String> inputFilePaths = <String>[];
-      final List<String> outputFilePaths = <String>[];
+      final inputFilePaths = <String>[];
+      final outputFilePaths = <String>[];
 
-      final FakeCommand transformerCommand = FakeCommand(
+      final transformerCommand = FakeCommand(
         command: <Pattern>[
           Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
           'run',
@@ -395,13 +390,14 @@ flutter:
           RegExp('--output=.*'),
         ],
         onRun: (List<String> args) {
-          final ArgResults parsedArgs = (ArgParser()
-                ..addOption('input')
-                ..addOption('output'))
-              .parse(args);
+          final ArgResults parsedArgs =
+              (ArgParser()
+                    ..addOption('input')
+                    ..addOption('output'))
+                  .parse(args);
 
-          final String input = parsedArgs['input'] as String;
-          final String output = parsedArgs['output'] as String;
+          final input = parsedArgs['input'] as String;
+          final output = parsedArgs['output'] as String;
 
           inputFilePaths.add(input);
           outputFilePaths.add(output);
@@ -418,7 +414,7 @@ flutter:
         userMessages: UserMessages(),
       );
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: FakeProcessManager.list(<FakeCommand>[
           transformerCommand,
@@ -465,17 +461,172 @@ flutter:
     },
   );
 
+  group('platform-specific assets', () {
+    /// All supported platforms that should be validated.
+    const kValidPluginPlatforms = <String>{'android', 'ios', 'web', 'windows', 'linux', 'macos'};
+
+    TargetPlatform targetFor(String platform) =>
+        TargetPlatform.values.firstWhere((p) => p.osName == platform);
+
+    /// Writes a `pubspec.yaml` with an asset, optionally restricted to
+    /// certain [platforms], then runs the build for [targetPlatform] and
+    /// returns whether the asset was bundled.
+    ///
+    /// This helper reflects how Flutter decides which assets to include
+    /// depending on the `platforms:` key in `pubspec.yaml`.
+    Future<bool> setupAndBuildPlatformAsset(String platform, TargetPlatform targetPlatform) async {
+      final filePath = 'assets/test-$platform.txt';
+
+      final pubspec = platform.isEmpty
+          ? '''
+name: example
+flutter:
+  assets:
+    - path: $filePath
+'''
+          : '''
+name: example
+flutter:
+  assets:
+    - path: $filePath
+      platforms:
+        - $platform
+''';
+
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(pubspec);
+      writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+      fileSystem.file(filePath).createSync(recursive: true);
+
+      await const CopyAssets().build(environment, targetPlatform: targetPlatform);
+
+      final File file = fileSystem.file('${environment.buildDir.path}/flutter_assets/$filePath');
+      return file.existsSync();
+    }
+
+    group('includes assets only for matching platform', () {
+      for (final platform in kValidPluginPlatforms) {
+        testUsingContext(
+          platform,
+          () async {
+            final TargetPlatform targetPlatform = targetFor(platform);
+            final bool didInclude = await setupAndBuildPlatformAsset(platform, targetPlatform);
+
+            expect(didInclude, isTrue, reason: 'Expected asset for $platform to be included');
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fileSystem,
+            ProcessManager: () => FakeProcessManager.any(),
+          },
+        );
+      }
+    });
+
+    group('skips assets for non-matching platform', () {
+      for (final platform in kValidPluginPlatforms) {
+        testUsingContext(
+          platform,
+          () async {
+            final TargetPlatform targetPlatform = platform == 'android'
+                ? TargetPlatform.ios
+                : TargetPlatform.android;
+            final bool didInclude = await setupAndBuildPlatformAsset(platform, targetPlatform);
+
+            expect(
+              didInclude,
+              isFalse,
+              reason: 'Expected asset for $platform to be skipped when target is $targetPlatform',
+            );
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fileSystem,
+            ProcessManager: () => FakeProcessManager.any(),
+          },
+        );
+      }
+    });
+
+    group('includes assets for all platforms when no restriction is set', () {
+      for (final platform in kValidPluginPlatforms) {
+        testUsingContext(
+          platform,
+          () async {
+            final TargetPlatform targetPlatform = targetFor(platform);
+            final bool didInclude = await setupAndBuildPlatformAsset('', targetPlatform);
+
+            expect(
+              didInclude,
+              isTrue,
+              reason:
+                  'Expected asset to be included for all platforms when no platforms are specified (platform: $platform)',
+            );
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fileSystem,
+            ProcessManager: () => FakeProcessManager.any(),
+          },
+        );
+      }
+    });
+
+    group('includes assets only for declared multiple platforms', () {
+      for (final platform in kValidPluginPlatforms) {
+        testUsingContext(
+          platform,
+          () async {
+            const filePath = 'assets/test-multi.txt';
+            final targetPlatforms = <String>['android', 'ios'];
+
+            fileSystem.file('pubspec.yaml')
+              ..createSync()
+              ..writeAsStringSync('''
+name: example
+flutter:
+  assets:
+    - path: $filePath
+      platforms: [${targetPlatforms.join(',')}]
+''');
+
+            writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+            fileSystem.file(filePath).createSync(recursive: true);
+
+            final TargetPlatform targetPlatform = targetFor(platform);
+
+            await const CopyAssets().build(environment, targetPlatform: targetPlatform);
+
+            final File bundledFile = fileSystem.file(
+              '${environment.buildDir.path}/flutter_assets/$filePath',
+            );
+
+            final bool exists = bundledFile.existsSync();
+
+            if (targetPlatforms.contains(platform)) {
+              expect(exists, isTrue, reason: 'Expected asset to be included for $platform');
+            } else {
+              expect(exists, isFalse, reason: 'Expected asset to be skipped for $platform');
+            }
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fileSystem,
+            ProcessManager: () => FakeProcessManager.any(),
+          },
+        );
+      }
+    });
+  });
+
   testUsingContext(
     'Uses processors~/2 to transform assets',
     () async {
-      const int assetsToTransform = 5;
+      const assetsToTransform = 5;
 
-      final List<String> inputFilePaths = <String>[];
-      final List<String> outputFilePaths = <String>[];
-      final Completer<void> markTransformDone = Completer<void>();
-      int totalTransformsRunning = 0;
+      final inputFilePaths = <String>[];
+      final outputFilePaths = <String>[];
+      final markTransformDone = Completer<void>();
+      var totalTransformsRunning = 0;
 
-      final FakeCommand transformerCommand = FakeCommand(
+      final transformerCommand = FakeCommand(
         command: <Pattern>[
           Artifacts.test().getArtifactPath(Artifact.engineDartBinary),
           'run',
@@ -485,13 +636,14 @@ flutter:
         ],
         onRun: (List<String> args) {
           totalTransformsRunning++;
-          final ArgResults parsedArgs = (ArgParser()
-                ..addOption('input')
-                ..addOption('output'))
-              .parse(args);
+          final ArgResults parsedArgs =
+              (ArgParser()
+                    ..addOption('input')
+                    ..addOption('output'))
+                  .parse(args);
 
-          final String input = parsedArgs['input'] as String;
-          final String output = parsedArgs['output'] as String;
+          final input = parsedArgs['input'] as String;
+          final output = parsedArgs['output'] as String;
 
           inputFilePaths.add(input);
           outputFilePaths.add(output);
@@ -509,7 +661,7 @@ flutter:
         userMessages: UserMessages(),
       );
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: FakeProcessManager.list(
           List<FakeCommand>.filled(assetsToTransform, transformerCommand, growable: true),
@@ -538,7 +690,7 @@ flutter:
         ..createSync(recursive: true)
         ..writeAsStringSync('abc');
 
-      for (int i = 0; i < assetsToTransform - 1; i++) {
+      for (var i = 0; i < assetsToTransform - 1; i++) {
         fileSystem.directory('${i + 2}x').childFile('input.txt')
           ..createSync(recursive: true)
           ..writeAsStringSync('def');

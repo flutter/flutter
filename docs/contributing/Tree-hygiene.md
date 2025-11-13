@@ -61,6 +61,12 @@ The general process for submitting code to a Flutter repository is as follows:
 6. Submit this branch as a PR to the relevant Flutter repository.
    _(See also: [Signing commits](./Signing-commits.md))_
 
+   All submissions to Google Open Source projects need to follow
+   [Google’s Contributor License Agreement (CLA)](https://cla.developers.google.com/),
+   in which contributors agree that their contribution is an original work of authorship.
+   This doesn’t prohibit the use of coding assistance tools, but what’s submitted does
+   need to be a contributor’s original creation.
+
 7. Get your code reviewed (see below). You should probably reach out to the relevant
    expert(s) for the areas you touched and ask them to review your PR directly.
    GitHub sometimes recommends specific reviewers; if you're not sure who to ask,
@@ -146,7 +152,7 @@ feel empowered to ask for tests.
 ## Using git
 
 Assuming your environment has been configured according to the instructions in
-[Setting up the Engine development environment](../../engine/src/flutter/docs/contributing/Setting-up-the-Engine-development-environment.md),
+[Setting up the Engine development environment](../../docs/engine/contributing/Setting-up-the-Engine-development-environment.md),
 [Setting up the Framework development environment](Setting-up-the-Framework-development-environment.md), or
 [Setting up the Packages development environment](../ecosystem/contributing/Setting-up-the-Packages-development-environment.md),
 follow these steps to start working on a patch:
@@ -398,7 +404,7 @@ If you're working on a feature that requires changes in both the [framework](htt
 
 ## Handling breaking changes
 
-In general, we want to avoid making changes to Flutter, our plugins, or our packages, that force developers using Flutter to change their code in order to upgrade to new versions of Flutter. See [our compatibility policy](https://flutter.dev/docs/resources/compatibility).
+In general, we want to avoid making changes to Flutter, our plugins, or our packages, that force developers using Flutter to change their code in order to upgrade to new versions of Flutter. See [our compatibility policy](https://docs.flutter.dev/resources/compatibility).
 
 Sometimes, however, doing this is necessary for the greater good. We want our APIs to be
 intuitive; if being backwards-compatible requires making an API into something that we would
@@ -452,7 +458,7 @@ During this process, each individual PR does not break any tests, so it should n
 Once everything has landed:
 
 * update your migration guide based on your experience migrating everyone,
-* update the timeline on the guide, and push it to [the flutter.dev Web site](https://flutter.dev/docs/release/breaking-changes) (don't forget to update the [index](https://github.com/flutter/website/blob/main/src/content/release/breaking-changes/index.md) of that directory as well),
+* update the timeline on the guide, and push it to [the flutter.dev Web site](https://docs.flutter.dev/release/breaking-changes) (don't forget to update the [index](https://github.com/flutter/website/blob/main/src/content/release/breaking-changes/index.md) of that directory as well),
 * e-mail a copy to [flutter-announce@](https://groups.google.com/g/flutter-announce),
 * notify the `#announcements` channel on our [Chat](Chat.md), and
 * add the [**c: API break** label](https://github.com/flutter/flutter/labels/c%3A%20API%20break) to the relevant issues, so they get listed in the upcoming Release notes.
@@ -483,7 +489,7 @@ In other words:
 
 Using this standard form ensures that we can write a script to detect all deprecated APIs and remove them. We have a test that verifies that this syntax is followed.
 
-To determine the latest beta version, see <https://flutter.dev/docs/development/tools/sdk/releases>.
+To determine the latest beta version, see <https://docs.flutter.dev/install/archive>.
 
 When adding a deprecation notice to the framework, a flutter fix should be included with your change. This helps users migrate to the new API as easily as possible. To learn more about authoring fixes, see [Data driven Fixes](Data-driven-Fixes.md). If a fix cannot be written for the new API, please file an issue in https://github.com/dart-lang/sdk and link to it in your change.
 

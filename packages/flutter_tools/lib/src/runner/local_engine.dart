@@ -154,8 +154,15 @@ class LocalEngineLocator {
     String? engineSourcePath;
     final String? engineUriPath = engineUri?.path;
     if (engineUriPath != null) {
-      engineSourcePath =
-          _fileSystem.directory(engineUriPath).parent.parent.parent.parent.parent.parent.path;
+      engineSourcePath = _fileSystem
+          .directory(engineUriPath)
+          .parent
+          .parent
+          .parent
+          .parent
+          .parent
+          .parent
+          .path;
       if (engineSourcePath == _fileSystem.path.dirname(engineSourcePath) ||
           engineSourcePath.isEmpty) {
         engineSourcePath = null;

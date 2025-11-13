@@ -45,6 +45,15 @@ void main() {
     );
   });
 
+  Future<void> setAppLifecycleState(AppLifecycleState state) async {
+    final ByteData? message = const StringCodec().encodeMessage(state.toString());
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/lifecycle',
+      message,
+      (ByteData? data) {},
+    );
+  }
+
   group('SelectableRegion', () {
     testWidgets('mouse selection single click sends correct events', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
@@ -236,6 +245,56 @@ void main() {
         isTrue,
       );
     });
+
+    testWidgets(
+      'tapping outside the selectable region dismisses selection',
+      (WidgetTester tester) async {
+        const String text = 'Hello world';
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: SelectableRegion(
+                  selectionControls: materialTextSelectionControls,
+                  child: const Text(text),
+                ),
+              ),
+            ),
+          ),
+        );
+        // The selection only dismisses when unfocused if the app
+        // was currently active.
+        await setAppLifecycleState(AppLifecycleState.resumed);
+        await tester.pumpAndSettle();
+
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+          find.descendant(of: find.text(text), matching: find.byType(RichText)),
+        );
+
+        // Drag to select.
+        final Offset textTopLeft = tester.getTopLeft(find.text(text));
+        final Offset textBottomRight = tester.getBottomRight(find.text(text));
+        final TestGesture gesture = await tester.startGesture(
+          textTopLeft,
+          kind: PointerDeviceKind.mouse,
+        );
+        addTearDown(gesture.removePointer);
+        await gesture.moveTo(textBottomRight);
+        await gesture.up();
+        await tester.pump();
+
+        expect(paragraph.selections, isNotEmpty);
+
+        // Tap just outside the top-left corner of the selectable region
+        // to dismiss the selection.
+        final Rect selectableRegionRect = tester.getRect(find.byType(SelectableRegion));
+        await tester.tapAt(selectableRegionRect.topLeft - const Offset(10.0, 10.0));
+        await tester.pump();
+        expect(paragraph.selections, isEmpty);
+      },
+      // [intended] Tap outside to dismiss the selection is only supported on web.
+      skip: !kIsWeb,
+    );
 
     testWidgets('does not merge semantics node of the children', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
@@ -594,6 +653,86 @@ void main() {
       expect(selectionEvent.globalPosition, const Offset(200.0, 200.0));
     });
 
+    testWidgets(
+      'ending a drag on a selection handle does not show the context menu on mobile web',
+      (WidgetTester tester) async {
+        const String text = 'Hello world, how are you today?';
+        final UniqueKey toolbarKey = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              selectionControls: materialTextSelectionControls,
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    return SizedBox(key: toolbarKey);
+                  },
+              child: const Text(text),
+            ),
+          ),
+        );
+
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+          find.descendant(of: find.text(text), matching: find.byType(RichText)),
+        );
+
+        // Long press to select 'world'.
+        await tester.longPressAt(textOffsetToPosition(paragraph, 7));
+        await tester.pumpAndSettle();
+
+        // Verify selection, handle visibility, and toolbar visibility.
+        expect(paragraph.selections, isNotEmpty);
+        expect(paragraph.selections.length, 1);
+        expect(paragraph.selections.first, const TextSelection(baseOffset: 6, extentOffset: 11));
+        final List<FadeTransition> transitions = find
+            .descendant(
+              of: find.byWidgetPredicate(
+                (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
+              ),
+              matching: find.byType(FadeTransition),
+            )
+            .evaluate()
+            .map((Element e) => e.widget)
+            .cast<FadeTransition>()
+            .toList();
+        expect(transitions.length, 2);
+        expect(find.byKey(toolbarKey), findsNothing);
+
+        // Drag start handle.
+        List<TextBox> boxes = paragraph.getBoxesForSelection(paragraph.selections.first);
+        expect(boxes, hasLength(1));
+        Offset handlePos = globalize(boxes.first.toRect().bottomLeft, paragraph);
+        TestGesture gesture = await tester.startGesture(handlePos);
+        await gesture.moveTo(textOffsetToPosition(paragraph, 1));
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+
+        // Verify selection and toolbar visibility.
+        expect(find.byKey(toolbarKey), findsNothing);
+        expect(paragraph.selections, isNotEmpty);
+        expect(paragraph.selections.length, 1);
+        expect(paragraph.selections.first, const TextSelection(baseOffset: 1, extentOffset: 11));
+
+        // Drag end handle.
+        boxes = paragraph.getBoxesForSelection(paragraph.selections.first);
+        expect(boxes, hasLength(1));
+        handlePos = globalize(boxes.first.toRect().bottomRight, paragraph);
+        gesture = await tester.startGesture(handlePos);
+        await gesture.moveTo(textOffsetToPosition(paragraph, 20));
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+
+        // Verify selection and toolbar visibility.
+        expect(find.byKey(toolbarKey), findsNothing);
+        expect(paragraph.selections, isNotEmpty);
+        expect(paragraph.selections.length, 1);
+        expect(paragraph.selections.first, const TextSelection(baseOffset: 1, extentOffset: 20));
+      },
+      variant: TargetPlatformVariant.mobile(),
+      skip: !kIsWeb, // [intended] This test verifies mobile web behavior.
+    );
+
     testWidgets('touch long press and drag sends correct events', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
 
@@ -862,12 +1001,6 @@ void main() {
     testWidgets(
       'selection is not cleared when app loses focus on desktop',
       (WidgetTester tester) async {
-        Future<void> setAppLifecycleState(AppLifecycleState state) async {
-          final ByteData? message = const StringCodec().encodeMessage(state.toString());
-          await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-              .handlePlatformMessage('flutter/lifecycle', message, (_) {});
-        }
-
         final FocusNode focusNode = FocusNode();
         final GlobalKey selectableKey = GlobalKey();
         addTearDown(focusNode.dispose);
@@ -2716,16 +2849,13 @@ void main() {
           MaterialApp(
             home: SelectableRegion(
               selectionControls: materialTextSelectionHandleControls,
-              contextMenuBuilder: (
-                BuildContext context,
-                SelectableRegionState selectableRegionState,
-              ) {
-                buttonTypes =
-                    selectableRegionState.contextMenuButtonItems
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    buttonTypes = selectableRegionState.contextMenuButtonItems
                         .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
                         .toSet();
-                return SizedBox.shrink(key: toolbarKey);
-              },
+                    return SizedBox.shrink(key: toolbarKey);
+                  },
               child: const Text('How are you?'),
             ),
           ),
@@ -2744,18 +2874,17 @@ void main() {
 
         // All platform except Android should show the selection handles when the
         // long press starts.
-        List<FadeTransition> transitions =
-            find
-                .descendant(
-                  of: find.byWidgetPredicate(
-                    (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
-                  ),
-                  matching: find.byType(FadeTransition),
-                )
-                .evaluate()
-                .map((Element e) => e.widget)
-                .cast<FadeTransition>()
-                .toList();
+        List<FadeTransition> transitions = find
+            .descendant(
+              of: find.byWidgetPredicate(
+                (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
+              ),
+              matching: find.byType(FadeTransition),
+            )
+            .evaluate()
+            .map((Element e) => e.widget)
+            .cast<FadeTransition>()
+            .toList();
         expect(transitions.length, isPlatformAndroid ? 0 : 2);
         FadeTransition? left;
         FadeTransition? right;
@@ -2770,18 +2899,17 @@ void main() {
 
         await gesture.moveTo(textOffsetToPosition(paragraph, 8));
         await tester.pumpAndSettle();
-        transitions =
-            find
-                .descendant(
-                  of: find.byWidgetPredicate(
-                    (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
-                  ),
-                  matching: find.byType(FadeTransition),
-                )
-                .evaluate()
-                .map((Element e) => e.widget)
-                .cast<FadeTransition>()
-                .toList();
+        transitions = find
+            .descendant(
+              of: find.byWidgetPredicate(
+                (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
+              ),
+              matching: find.byType(FadeTransition),
+            )
+            .evaluate()
+            .map((Element e) => e.widget)
+            .cast<FadeTransition>()
+            .toList();
         // All platform except Android should show the selection handles while doing
         // a long press drag.
         expect(transitions.length, isPlatformAndroid ? 0 : 2);
@@ -2796,18 +2924,17 @@ void main() {
 
         await gesture.up();
         await tester.pumpAndSettle();
-        transitions =
-            find
-                .descendant(
-                  of: find.byWidgetPredicate(
-                    (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
-                  ),
-                  matching: find.byType(FadeTransition),
-                )
-                .evaluate()
-                .map((Element e) => e.widget)
-                .cast<FadeTransition>()
-                .toList();
+        transitions = find
+            .descendant(
+              of: find.byWidgetPredicate(
+                (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
+              ),
+              matching: find.byType(FadeTransition),
+            )
+            .evaluate()
+            .map((Element e) => e.widget)
+            .cast<FadeTransition>()
+            .toList();
         expect(transitions.length, 2);
         left = transitions[0];
         right = transitions[1];
@@ -2836,16 +2963,13 @@ void main() {
           MaterialApp(
             home: SelectableRegion(
               selectionControls: materialTextSelectionHandleControls,
-              contextMenuBuilder: (
-                BuildContext context,
-                SelectableRegionState selectableRegionState,
-              ) {
-                buttonTypes =
-                    selectableRegionState.contextMenuButtonItems
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    buttonTypes = selectableRegionState.contextMenuButtonItems
                         .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
                         .toSet();
-                return SizedBox.shrink(key: toolbarKey);
-              },
+                    return SizedBox.shrink(key: toolbarKey);
+                  },
               child: const Column(
                 children: <Widget>[
                   Text('How are you?'),
@@ -2912,16 +3036,13 @@ void main() {
           MaterialApp(
             home: SelectableRegion(
               selectionControls: materialTextSelectionHandleControls,
-              contextMenuBuilder: (
-                BuildContext context,
-                SelectableRegionState selectableRegionState,
-              ) {
-                buttonTypes =
-                    selectableRegionState.contextMenuButtonItems
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    buttonTypes = selectableRegionState.contextMenuButtonItems
                         .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
                         .toSet();
-                return SizedBox.shrink(key: toolbarKey);
-              },
+                    return SizedBox.shrink(key: toolbarKey);
+                  },
               child: const Center(child: Text('How are you')),
             ),
           ),
@@ -3003,16 +3124,13 @@ void main() {
           MaterialApp(
             home: SelectableRegion(
               selectionControls: materialTextSelectionHandleControls,
-              contextMenuBuilder: (
-                BuildContext context,
-                SelectableRegionState selectableRegionState,
-              ) {
-                buttonTypes =
-                    selectableRegionState.contextMenuButtonItems
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    buttonTypes = selectableRegionState.contextMenuButtonItems
                         .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
                         .toSet();
-                return SizedBox.shrink(key: toolbarKey);
-              },
+                    return SizedBox.shrink(key: toolbarKey);
+                  },
               child: const Column(
                 children: <Widget>[
                   Text('How are you?'),
@@ -3091,16 +3209,13 @@ void main() {
           MaterialApp(
             home: SelectableRegion(
               selectionControls: materialTextSelectionHandleControls,
-              contextMenuBuilder: (
-                BuildContext context,
-                SelectableRegionState selectableRegionState,
-              ) {
-                buttonTypes =
-                    selectableRegionState.contextMenuButtonItems
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    buttonTypes = selectableRegionState.contextMenuButtonItems
                         .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
                         .toSet();
-                return SizedBox.shrink(key: toolbarKey);
-              },
+                    return SizedBox.shrink(key: toolbarKey);
+                  },
               child: const Center(child: Text('How are you')),
             ),
           ),
@@ -3202,16 +3317,13 @@ void main() {
           MaterialApp(
             home: SelectableRegion(
               selectionControls: materialTextSelectionHandleControls,
-              contextMenuBuilder: (
-                BuildContext context,
-                SelectableRegionState selectableRegionState,
-              ) {
-                buttonTypes =
-                    selectableRegionState.contextMenuButtonItems
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    buttonTypes = selectableRegionState.contextMenuButtonItems
                         .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
                         .toSet();
-                return SizedBox.shrink(key: toolbarKey);
-              },
+                    return SizedBox.shrink(key: toolbarKey);
+                  },
               child: const Center(child: Text('How are you')),
             ),
           ),
@@ -3333,16 +3445,13 @@ void main() {
           MaterialApp(
             home: SelectableRegion(
               selectionControls: materialTextSelectionHandleControls,
-              contextMenuBuilder: (
-                BuildContext context,
-                SelectableRegionState selectableRegionState,
-              ) {
-                buttonTypes =
-                    selectableRegionState.contextMenuButtonItems
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    buttonTypes = selectableRegionState.contextMenuButtonItems
                         .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
                         .toSet();
-                return SizedBox.shrink(key: toolbarKey);
-              },
+                    return SizedBox.shrink(key: toolbarKey);
+                  },
               child: const Center(child: Text('How are you')),
             ),
           ),
@@ -5222,14 +5331,15 @@ void main() {
           MaterialApp(
             home: SelectableRegion(
               magnifierConfiguration: TextMagnifierConfiguration(
-                magnifierBuilder: (
-                  _,
-                  MagnifierController controller,
-                  ValueNotifier<MagnifierInfo> localMagnifierInfo,
-                ) {
-                  magnifierInfo = localMagnifierInfo;
-                  return fakeMagnifier;
-                },
+                magnifierBuilder:
+                    (
+                      _,
+                      MagnifierController controller,
+                      ValueNotifier<MagnifierInfo> localMagnifierInfo,
+                    ) {
+                      magnifierInfo = localMagnifierInfo;
+                      return fakeMagnifier;
+                    },
               ),
               selectionControls: materialTextSelectionControls,
               child: const Text(text),
@@ -5252,8 +5362,9 @@ void main() {
         await tester.pump(const Duration(milliseconds: 500));
 
         // Drag the handle around so that the magnifier shows.
-        final TextBox selectionBox =
-            paragraph.getBoxesForSelection(paragraph.selections.first).first;
+        final TextBox selectionBox = paragraph
+            .getBoxesForSelection(paragraph.selections.first)
+            .first;
         final Offset leftHandlePos = globalize(selectionBox.toRect().bottomLeft, paragraph);
         final TestGesture gesture = await tester.startGesture(leftHandlePos);
         await gesture.moveTo(textOffsetToPosition(paragraph, text.length - 2));
@@ -5339,7 +5450,10 @@ void main() {
         const MaterialApp(
           home: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[SelectionArea(child: Text('row 1')), Text('row 2')],
+            children: <Widget>[
+              SelectionArea(child: Text('row 1')),
+              Text('row 2'),
+            ],
           ),
         ),
       );
@@ -5360,13 +5474,11 @@ void main() {
         MaterialApp(
           home: SelectableRegion(
             selectionControls: materialTextSelectionHandleControls,
-            contextMenuBuilder: (
-              BuildContext context,
-              SelectableRegionState selectableRegionState,
-            ) {
-              buttonItems = selectableRegionState.contextMenuButtonItems;
-              return const SizedBox.shrink();
-            },
+            contextMenuBuilder:
+                (BuildContext context, SelectableRegionState selectableRegionState) {
+                  buttonItems = selectableRegionState.contextMenuButtonItems;
+                  return const SizedBox.shrink();
+                },
             child: const Text('How are you?'),
           ),
         ),
@@ -5420,13 +5532,11 @@ void main() {
         MaterialApp(
           home: SelectableRegion(
             selectionControls: materialTextSelectionHandleControls,
-            contextMenuBuilder: (
-              BuildContext context,
-              SelectableRegionState selectableRegionState,
-            ) {
-              buttonItems = selectableRegionState.contextMenuButtonItems;
-              return const SizedBox.shrink();
-            },
+            contextMenuBuilder:
+                (BuildContext context, SelectableRegionState selectableRegionState) {
+                  buttonItems = selectableRegionState.contextMenuButtonItems;
+                  return const SizedBox.shrink();
+                },
             child: const Text('How are you?'),
           ),
         ),
@@ -5490,13 +5600,11 @@ void main() {
         MaterialApp(
           home: SelectableRegion(
             selectionControls: materialTextSelectionHandleControls,
-            contextMenuBuilder: (
-              BuildContext context,
-              SelectableRegionState selectableRegionState,
-            ) {
-              buttonItems = selectableRegionState.contextMenuButtonItems;
-              return const SizedBox.shrink();
-            },
+            contextMenuBuilder:
+                (BuildContext context, SelectableRegionState selectableRegionState) {
+                  buttonItems = selectableRegionState.contextMenuButtonItems;
+                  return const SizedBox.shrink();
+                },
             child: const Text('How are you?'),
           ),
         ),
@@ -5555,13 +5663,11 @@ void main() {
         MaterialApp(
           home: SelectableRegion(
             selectionControls: materialTextSelectionHandleControls,
-            contextMenuBuilder: (
-              BuildContext context,
-              SelectableRegionState selectableRegionState,
-            ) {
-              buttonItems = selectableRegionState.contextMenuButtonItems;
-              return const SizedBox.shrink();
-            },
+            contextMenuBuilder:
+                (BuildContext context, SelectableRegionState selectableRegionState) {
+                  buttonItems = selectableRegionState.contextMenuButtonItems;
+                  return const SizedBox.shrink();
+                },
             child: const Text('How are you?'),
           ),
         ),
@@ -5690,16 +5796,13 @@ void main() {
         MaterialApp(
           home: SelectableRegion(
             selectionControls: materialTextSelectionHandleControls,
-            contextMenuBuilder: (
-              BuildContext context,
-              SelectableRegionState selectableRegionState,
-            ) {
-              buttonLabels =
-                  selectableRegionState.contextMenuButtonItems
+            contextMenuBuilder:
+                (BuildContext context, SelectableRegionState selectableRegionState) {
+                  buttonLabels = selectableRegionState.contextMenuButtonItems
                       .map((ContextMenuButtonItem buttonItem) => buttonItem.label)
                       .toSet();
-              return const SizedBox.shrink();
-            },
+                  return const SizedBox.shrink();
+                },
             child: const Text('How are you?'),
           ),
         ),
@@ -6342,6 +6445,56 @@ void main() {
         expect(find.text('Copy'), findsNothing);
       },
       skip: !kIsWeb, // [intended] This test verifies web behavior.
+    );
+
+    testWidgets(
+      'uses contextMenuBuilder by default on Android and iOS web',
+      (WidgetTester tester) async {
+        final UniqueKey contextMenu = UniqueKey();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              selectionControls: materialTextSelectionHandleControls,
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    return SizedBox.shrink(key: contextMenu);
+                  },
+              child: const Text('How are you?'),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(contextMenu), findsNothing);
+
+        // Show the toolbar by longpressing.
+        final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(
+          find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)),
+        );
+        final TestGesture gesture = await tester.startGesture(
+          textOffsetToPosition(paragraph1, 6),
+        ); // at the 'r'
+        addTearDown(gesture.removePointer);
+        await tester.pump(const Duration(milliseconds: 500));
+        // `are` is selected.
+        expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(contextMenu), findsOneWidget);
+      },
+      // TODO(Renzo-Olivares): Remove this test when the web context menu
+      // for Android and iOS is re-enabled.
+      // See: https://github.com/flutter/flutter/issues/177123.
+      // [intended] Android and iOS use the flutter rendered menu on the web.
+      skip:
+          !kIsWeb ||
+          !<TargetPlatform>{
+            TargetPlatform.android,
+            TargetPlatform.iOS,
+          }.contains(defaultTargetPlatform),
     );
   });
 

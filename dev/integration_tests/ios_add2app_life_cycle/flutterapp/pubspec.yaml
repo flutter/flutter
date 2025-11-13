@@ -9,12 +9,12 @@ description: A new flutter module project.
 # Read more about versioning at semver.org.
 #
 # This version is used _only_ for the Runner app, which is used if you just do
-# a `flutter run` or a `flutter make-host-app-editable`. It has no impact
-# on any other native host app that you embed your Flutter project into.
+# a `flutter run`. It has no impact on any other native host app that you embed
+# your Flutter project into.
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.7.0-0
+  sdk: ^3.8.0-0
 
 resolution: workspace
 
@@ -35,7 +35,6 @@ dev_dependencies:
 
   # For information on the generic Dart part of this file, see the
   # following page: https://dart.dev/tools/pub/pubspec
-
 
 flutter:
   # The following line ensures that the Material Icons font is
@@ -84,5 +83,4 @@ flutter:
   module:
     androidPackage: com.example.iosadd2appflutter
     iosBundleIdentifier: com.example.iosAdd2appFlutter
-
 # PUBSPEC CHECKSUM: fvge9g

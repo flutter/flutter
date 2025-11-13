@@ -232,14 +232,13 @@ abstract class FormatChecker {
       processRunner: _processRunner,
       printReport: namedReport('patch'),
     );
-    final List<WorkerJob> jobs =
-        patches.map<WorkerJob>((String patch) {
-          return WorkerJob(<String>[
-            'git',
-            'apply',
-            '--ignore-space-change',
-          ], stdinRaw: codeUnitsAsStream(patch.codeUnits));
-        }).toList();
+    final List<WorkerJob> jobs = patches.map<WorkerJob>((String patch) {
+      return WorkerJob(<String>[
+        'git',
+        'apply',
+        '--ignore-space-change',
+      ], stdinRaw: codeUnitsAsStream(patch.codeUnits));
+    }).toList();
     final List<WorkerJob> completedJobs = await patchPool.runToCompletion(jobs);
     if (patchPool.failedJobs != 0) {
       error(
@@ -293,8 +292,9 @@ abstract class FormatChecker {
   @protected
   ProcessPoolProgressReporter namedReport(String name) {
     return (int total, int completed, int inProgress, int pending, int failed) {
-      final String percent =
-          total == 0 ? '100' : ((100 * completed) ~/ total).toString().padLeft(3);
+      final String percent = total == 0
+          ? '100'
+          : ((100 * completed) ~/ total).toString().padLeft(3);
       final String completedStr = completed.toString().padLeft(3);
       final String totalStr = total.toString().padRight(3);
       final String inProgressStr = inProgress.toString().padLeft(2);
@@ -334,10 +334,9 @@ class ClangFormatChecker extends FormatChecker {
       Abi.macosArm64 => 'mac-arm64',
       Abi.macosX64 => 'mac-x64',
       Abi.windowsX64 => 'windows-x64',
-      (_) =>
-        throw FormattingException(
-          "Unknown operating system: don't know how to run clang-format here.",
-        ),
+      (_) => throw FormattingException(
+        "Unknown operating system: don't know how to run clang-format here.",
+      ),
     };
     clangFormat = File(
       path.join(

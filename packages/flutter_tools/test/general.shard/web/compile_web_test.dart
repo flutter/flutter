@@ -53,7 +53,7 @@ environement:
   testUsingContext(
     'WebBuilder sets environment on success',
     () async {
-      final TestBuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true), (
+      final buildSystem = TestBuildSystem.all(BuildResult(success: true), (
         Target target,
         Environment environment,
       ) {
@@ -72,7 +72,7 @@ environement:
         expect(environment.generateDartPluginRegistry, isFalse);
       });
 
-      final WebBuilder webBuilder = WebBuilder(
+      final webBuilder = WebBuilder(
         logger: logger,
         processManager: FakeProcessManager.any(),
         buildSystem: buildSystem,
@@ -105,7 +105,8 @@ environement:
           Event.flutterBuildInfo(
             label: 'web-compile',
             buildType: 'web',
-            settings: 'optimizationLevel: 0; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
+            settings:
+                'dryRun: false; optimizationLevel: 0; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
           ),
         ]),
       );
@@ -126,9 +127,94 @@ environement:
   );
 
   testUsingContext(
+    'WebBuilder prints deprecation warning for --pwa-strategy',
+    () async {
+      final buildSystem = TestBuildSystem.all(BuildResult(success: true), (
+        Target target,
+        Environment environment,
+      ) {
+        expect(target, isA<WebServiceWorker>());
+        expect(
+          environment.defines,
+          containsPair('ServiceWorkerStrategy', ServiceWorkerStrategy.offlineFirst.cliName),
+        );
+      });
+
+      final webBuilder = WebBuilder(
+        logger: logger,
+        processManager: FakeProcessManager.any(),
+        buildSystem: buildSystem,
+        flutterVersion: flutterVersion,
+        fileSystem: fileSystem,
+        analytics: fakeAnalytics,
+      );
+      await webBuilder.buildWeb(
+        flutterProject,
+        'target',
+        BuildInfo.debug,
+        ServiceWorkerStrategy.offlineFirst,
+        compilerConfigs: <WebCompilerConfig>[],
+      );
+
+      expect(logger.statusText, contains('Compiling target for the Web...'));
+      expect(
+        logger.warningText,
+        contains(
+          'The --pwa-strategy option is deprecated and will be removed in a future Flutter release.',
+        ),
+      );
+      expect(logger.errorText, isEmpty);
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
+    'WebBuilder skips deprecation warning when --pwa-strategy is omitted',
+    () async {
+      final buildSystem = TestBuildSystem.all(BuildResult(success: true), (
+        Target target,
+        Environment environment,
+      ) {
+        expect(target, isA<WebServiceWorker>());
+        expect(
+          environment.defines,
+          containsPair('ServiceWorkerStrategy', ServiceWorkerStrategy.offlineFirst.cliName),
+        );
+      });
+
+      final webBuilder = WebBuilder(
+        logger: logger,
+        processManager: FakeProcessManager.any(),
+        buildSystem: buildSystem,
+        flutterVersion: flutterVersion,
+        fileSystem: fileSystem,
+        analytics: fakeAnalytics,
+      );
+      await webBuilder.buildWeb(
+        flutterProject,
+        'target',
+        BuildInfo.debug,
+        null, // serviceWorkerStrategy is omitted
+        compilerConfigs: <WebCompilerConfig>[],
+      );
+
+      expect(logger.statusText, contains('Compiling target for the Web...'));
+      expect(logger.warningText, isNot(contains('--pwa-strategy')));
+      expect(logger.errorText, isEmpty);
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
     'WebBuilder throws tool exit on failure',
     () async {
-      final TestBuildSystem buildSystem = TestBuildSystem.all(
+      final buildSystem = TestBuildSystem.all(
         BuildResult(
           success: false,
           exceptions: <String, ExceptionMeasurement>{
@@ -141,7 +227,7 @@ environement:
         ),
       );
 
-      final WebBuilder webBuilder = WebBuilder(
+      final webBuilder = WebBuilder(
         logger: logger,
         processManager: FakeProcessManager.any(),
         buildSystem: buildSystem,
@@ -182,10 +268,7 @@ environement:
     testUsingContext(
       'WebRendererMode.${webRenderer.name} can be initialized from dart defines',
       () {
-        final WebRendererMode computed = WebRendererMode.fromDartDefines(
-          webRenderer.dartDefines,
-          useWasm: true,
-        );
+        final computed = WebRendererMode.fromDartDefines(webRenderer.dartDefines, useWasm: true);
 
         expect(computed, webRenderer);
       },
@@ -198,7 +281,7 @@ environement:
   testUsingContext(
     'WebRendererMode.fromDartDefines sets a wasm-aware default for unknown dart defines.',
     () async {
-      WebRendererMode computed = WebRendererMode.fromDartDefines(<String>{}, useWasm: false);
+      var computed = WebRendererMode.fromDartDefines(<String>{}, useWasm: false);
       expect(computed, WebRendererMode.getDefault(useWasm: false));
 
       computed = WebRendererMode.fromDartDefines(<String>{}, useWasm: true);

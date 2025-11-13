@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -72,7 +74,7 @@ void main() {
         tryToDelete(tempDir);
       });
 
-      for (final BuildMode buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
+      for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
         group('build in ${buildMode.cliName} mode', () {
           late Directory outputPath;
           late Directory outputApp;
@@ -86,6 +88,8 @@ void main() {
           late Directory buildPath;
           late Directory buildAppFrameworkDsym;
           late File buildAppFrameworkDsymBinary;
+          late Directory flutterFrameworkDsym;
+          late File flutterFrameworkDsymBinary;
           late ProcessResult buildResult;
 
           setUpAll(() {
@@ -135,6 +139,11 @@ void main() {
             buildAppFrameworkDsymBinary = buildAppFrameworkDsym.childFile(
               'Contents/Resources/DWARF/App',
             );
+
+            flutterFrameworkDsym = buildPath.childDirectory('Flutter.framework.dSYM');
+            flutterFrameworkDsymBinary = flutterFrameworkDsym.childFile(
+              'Contents/Resources/DWARF/Flutter',
+            );
           });
 
           testWithoutContext('flutter build ios builds a valid app', () {
@@ -162,6 +171,7 @@ void main() {
             expect(outputAppFramework.childFile('Info.plist'), exists);
 
             expect(buildAppFrameworkDsymBinary.existsSync(), buildMode != BuildMode.debug);
+            expect(flutterFrameworkDsymBinary.existsSync(), buildMode != BuildMode.debug);
 
             final File vmSnapshot = fileSystem.file(
               fileSystem.path.join(outputAppFramework.path, 'flutter_assets', 'vm_snapshot_data'),
@@ -195,7 +205,7 @@ void main() {
               '-',
               infoPlistPath,
             ]);
-            final bool localNetworkUsageFound = localNetworkUsage.exitCode == 0;
+            final localNetworkUsageFound = localNetworkUsage.exitCode == 0;
             expect(localNetworkUsageFound, buildMode == BuildMode.debug);
           });
 
@@ -206,22 +216,36 @@ void main() {
             if (buildMode == BuildMode.debug) {
               expect(symbols, isEmpty);
             } else {
-              expect(symbols, equals(AppleTestUtils.requiredSymbols));
+              expect(symbols, equals(AppleTestUtils.requiredAppSymbols));
             }
+
+            final List<String> flutterSymbols = AppleTestUtils.getExportedSymbols(
+              outputFlutterFrameworkBinary.path,
+            );
+            expect(flutterSymbols, containsAll(AppleTestUtils.expectedFlutterSymbols));
           });
 
           testWithoutContext('check symbols in dSYM', () {
             if (buildMode == BuildMode.debug) {
               // dSYM is not created for a debug build.
               expect(buildAppFrameworkDsymBinary.existsSync(), isFalse);
+              expect(flutterFrameworkDsymBinary.existsSync(), isFalse);
             } else {
-              final List<String> symbols = AppleTestUtils.getExportedSymbols(
+              final List<String> appSymbols = AppleTestUtils.getExportedSymbols(
                 buildAppFrameworkDsymBinary.path,
               );
-              expect(symbols, containsAll(AppleTestUtils.requiredSymbols));
+              expect(appSymbols, containsAll(AppleTestUtils.requiredAppSymbols));
               // The actual number of symbols is going to vary but there should
               // be "many" in the dSYM. At the time of writing, it was 7656.
-              expect(symbols.length, greaterThanOrEqualTo(5000));
+              expect(appSymbols.length, greaterThanOrEqualTo(5000));
+
+              final List<String> flutterSymbols = AppleTestUtils.getExportedSymbols(
+                flutterFrameworkDsymBinary.path,
+              );
+              expect(flutterSymbols, containsAll(AppleTestUtils.expectedFlutterSymbols));
+              // The actual number of symbols is going to vary but there should
+              // be "many" in the dSYM. At the time of writing, it was 35940.
+              expect(flutterSymbols.length, greaterThanOrEqualTo(35000));
             }
           });
 
@@ -297,12 +321,8 @@ void main() {
         });
       }
 
-      for (final BuildMode buildMode in <BuildMode>[
-        BuildMode.debug,
-        BuildMode.profile,
-        BuildMode.release,
-      ]) {
-        for (final String arch in <String>['ios-arm64', 'ios-arm64_x86_64-simulator']) {
+      for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]) {
+        for (final arch in <String>['ios-arm64', 'ios-arm64_x86_64-simulator']) {
           test('verify ${buildMode.cliName} $arch Flutter.framework Info.plist', () {
             final String artifactDir;
             switch (buildMode) {
@@ -326,11 +346,19 @@ void main() {
               ),
             );
             // Verify Info.plist has correct engine version and build mode
-            final File engineStamp = fileSystem.file(
-              fileSystem.path.join(flutterRoot, 'bin', 'cache', 'engine.stamp'),
+            final File engineInfo = fileSystem.file(
+              fileSystem.path.join(flutterRoot, 'bin', 'cache', 'engine_stamp.json'),
             );
-            expect(engineStamp, exists);
-            final String engineVersion = engineStamp.readAsStringSync().trim();
+            expect(engineInfo, exists);
+
+            final String engineVersion;
+            if (json.decode(engineInfo.readAsStringSync().trim()) as Map<String, Object?> case {
+              'git_revision': final String parsedVersion,
+            }) {
+              engineVersion = parsedVersion;
+            } else {
+              fail('engine_stamp.json missing "git_revision" key');
+            }
 
             final File infoPlist = fileSystem.file(
               fileSystem.path.joinAll(<String>[
@@ -475,7 +503,7 @@ void main() {
         expect(output.stdout, contains('Sending archive event if usage enabled'));
 
         // The output contains extra time related prefix, so cannot use a single string.
-        const List<String> expectedValidationMessages = <String>[
+        const expectedValidationMessages = <String>[
           '[!] App Settings Validation\n',
           '    • Version Number: 1.0.0\n',
           '    • Build Number: 1\n',

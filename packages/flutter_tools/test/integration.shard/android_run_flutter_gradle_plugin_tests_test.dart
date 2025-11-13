@@ -14,8 +14,8 @@ import 'test_utils.dart';
 
 void main() {
   testUsingContext('Flutter Gradle Plugin unit tests pass', () async {
-    final String gradleFileName = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-    final String gradleExecutable = Platform.isWindows ? '.\\$gradleFileName' : './$gradleFileName';
+    final gradleFileName = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
+    final gradleExecutable = Platform.isWindows ? '.\\$gradleFileName' : './$gradleFileName';
     final Directory flutterGradlePluginDirectory = fileSystem
         .directory(getFlutterRoot())
         .childDirectory('packages')

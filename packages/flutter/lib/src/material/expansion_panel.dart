@@ -412,10 +412,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       if (!child.canTapOnHeader) {
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
         expandIconPadded = Semantics(
-          label:
-              _isChildExpanded(index)
-                  ? localizations.expandedIconTapHint
-                  : localizations.collapsedIconTapHint,
+          label: _isChildExpanded(index)
+              ? localizations.expandedIconTapHint
+              : localizations.collapsedIconTapHint,
           container: true,
           child: expandIconPadded,
         );
@@ -462,8 +461,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
                 firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
                 secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
                 sizeCurve: Curves.fastOutSlowIn,
-                crossFadeState:
-                    _isChildExpanded(index) ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                crossFadeState: _isChildExpanded(index)
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
                 duration: widget.animationDuration,
               ),
             ],

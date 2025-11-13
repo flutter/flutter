@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -17,11 +19,7 @@ void main() {
     processManager.runSync(<String>[flutterBin, 'config', '--enable-macos-desktop']);
   });
 
-  for (final BuildMode buildMode in <BuildMode>[
-    BuildMode.debug,
-    BuildMode.profile,
-    BuildMode.release,
-  ]) {
+  for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]) {
     test('verify ${buildMode.cliName} FlutterMacOS.xcframework artifact', () {
       final String flutterRoot = getFlutterRoot();
 
@@ -72,11 +70,19 @@ void main() {
       expect(artifactStat, '40755');
 
       // Verify Info.plist has correct engine version and build mode
-      final File engineStamp = fileSystem.file(
-        fileSystem.path.join(flutterRoot, 'bin', 'cache', 'engine.stamp'),
+      final File engineInfo = fileSystem.file(
+        fileSystem.path.join(flutterRoot, 'bin', 'cache', 'engine_stamp.json'),
       );
-      expect(engineStamp, exists);
-      final String engineVersion = engineStamp.readAsStringSync().trim();
+      expect(engineInfo, exists);
+
+      final String engineVersion;
+      if (json.decode(engineInfo.readAsStringSync().trim()) as Map<String, Object?> case {
+        'git_revision': final String parsedVersion,
+      }) {
+        engineVersion = parsedVersion;
+      } else {
+        fail('engine_stamp.json missing "git_revision" key');
+      }
 
       final File infoPlist = fileSystem.file(
         fileSystem.path.joinAll(<String>[
@@ -114,7 +120,7 @@ void main() {
     });
   }
 
-  for (final String buildMode in <String>['Debug', 'Release']) {
+  for (final buildMode in <String>['Debug', 'Release']) {
     final String buildModeLower = buildMode.toLowerCase();
 
     test('flutter build macos --$buildModeLower builds a valid app', () {
@@ -145,7 +151,7 @@ void main() {
       podfileLock.setLastModifiedSync(DateTime.now().subtract(const Duration(days: 1)));
       expect(podfileLock.lastModifiedSync().isBefore(podfile.lastModifiedSync()), isTrue);
 
-      final List<String> buildCommand = <String>[
+      final buildCommand = <String>[
         flutterBin,
         ...getLocalEngineArguments(),
         'build',
@@ -197,12 +203,14 @@ void main() {
       } else {
         // Check framework dSYM file copied.
         _checkFatBinary(frameworkDsymBinary, buildModeLower, 'dSYM companion file');
+        final List<String> symbols = AppleTestUtils.getExportedSymbols(frameworkDsymBinary.path);
+        expect(symbols, containsAll(AppleTestUtils.expectedFlutterSymbols));
 
         // Check extracted dSYM file.
         _checkFatBinary(libDsymBinary, buildModeLower, 'dSYM companion file');
-        expect(libSymbols, equals(AppleTestUtils.requiredSymbols));
+        expect(libSymbols, equals(AppleTestUtils.requiredAppSymbols));
         final List<String> dSymSymbols = AppleTestUtils.getExportedSymbols(libDsymBinary.path);
-        expect(dSymSymbols, containsAll(AppleTestUtils.requiredSymbols));
+        expect(dSymSymbols, containsAll(AppleTestUtils.requiredAppSymbols));
         // The actual number of symbols is going to vary but there should
         // be "many" in the dSYM. At the time of writing, it was 19195.
         expect(dSymSymbols.length, greaterThanOrEqualTo(15000));
@@ -287,7 +295,7 @@ void main() {
 }
 
 void _checkFatBinary(File file, String buildModeLower, String expectedType) {
-  final String archs = processManager.runSync(<String>['file', file.path]).stdout as String;
+  final archs = processManager.runSync(<String>['file', file.path]).stdout as String;
 
   final bool containsX64 = archs.contains('Mach-O 64-bit $expectedType x86_64');
   final bool containsArm = archs.contains('Mach-O 64-bit $expectedType arm64');

@@ -14,7 +14,8 @@ class BannerTemplate extends TokenTemplate {
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends MaterialBannerThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(elevation: ${elevation("md.comp.banner.container")});

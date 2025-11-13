@@ -38,16 +38,15 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
   using VS = FramebufferBlendScreenPipeline::VertexShader;
   using FS = FramebufferBlendScreenPipeline::FragmentShader;
 
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 
   auto src_snapshot = child_contents_->RenderToSnapshot(
-      renderer,                                    // renderer
-      entity,                                      // entity
-      Rect::MakeSize(pass.GetRenderTargetSize()),  // coverage_limit
-      std::nullopt,                                // sampler_descriptor
-      true,                                        // msaa_enabled
-      /*mip_count=*/1,
-      "FramebufferBlendContents Snapshot");  // label
+      renderer, entity,
+      {.coverage_limit = Rect::MakeSize(pass.GetRenderTargetSize()),
+       .sampler_descriptor = std::nullopt,
+       .msaa_enabled = true,
+       .mip_count = 1,
+       .label = "FramebufferBlendContents Snapshot"});
 
   if (!src_snapshot.has_value()) {
     return true;
@@ -68,7 +67,7 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
 
   pass.SetCommandLabel("Framebuffer Advanced Blend Filter");
   pass.SetVertexBuffer(
-      CreateVertexBuffer(vertices, renderer.GetTransientsBuffer()));
+      CreateVertexBuffer(vertices, renderer.GetTransientsDataBuffer()));
 
   switch (blend_mode_) {
     case BlendMode::kScreen:
@@ -136,11 +135,11 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
   frame_info.mvp = Entity::GetShaderTransform(entity.GetShaderClipDepth(), pass,
                                               src_snapshot->transform);
   frame_info.src_y_coord_scale = src_snapshot->texture->GetYCoordScale();
-  VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
+  VS::BindFrameInfo(pass, data_host_buffer.EmplaceUniform(frame_info));
 
   frag_info.src_input_alpha = src_snapshot->opacity;
   frag_info.dst_input_alpha = 1.0;
-  FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+  FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
 
   return pass.Draw().ok();
 }

@@ -24,13 +24,6 @@ const int kMaxSemanticsActivationAttempts = 20;
 /// Otherwise these events can cause unintended gestures on the framework side.
 const Duration _periodToConsumeEvents = Duration(milliseconds: 300);
 
-/// The message in the label for the placeholder element used to enable
-/// accessibility.
-///
-/// This uses US English as the default message. Set this value prior to
-/// calling `runApp` to translate to another language.
-String placeholderMessage = 'Enable accessibility';
-
 /// A helper for [EngineSemanticsOwner].
 ///
 /// [SemanticsHelper] prepares and placeholder to enable semantics.
@@ -43,8 +36,9 @@ String placeholderMessage = 'Enable accessibility';
 ///
 /// See [DesktopSemanticsEnabler], [MobileSemanticsEnabler].
 class SemanticsHelper {
-  SemanticsEnabler _semanticsEnabler =
-      ui_web.browser.isDesktop ? DesktopSemanticsEnabler() : MobileSemanticsEnabler();
+  SemanticsEnabler _semanticsEnabler = ui_web.browser.isDesktop
+      ? DesktopSemanticsEnabler()
+      : MobileSemanticsEnabler();
 
   @visibleForTesting
   set semanticsEnabler(SemanticsEnabler semanticsEnabler) {
@@ -55,8 +49,10 @@ class SemanticsHelper {
     return _semanticsEnabler.shouldEnableSemantics(event);
   }
 
-  DomElement prepareAccessibilityPlaceholder() {
-    return _semanticsEnabler.prepareAccessibilityPlaceholder();
+  DomElement get accessibilityPlaceholder => _semanticsEnabler.accessibilityPlaceholder;
+
+  void updatePlaceholderLabel(String message) {
+    _semanticsEnabler.updatePlaceholderLabel(message);
   }
 
   /// Stops waiting for the user to enable semantics and removes the
@@ -102,13 +98,16 @@ abstract class SemanticsEnabler {
   /// should be forwarded to the framework.
   bool tryEnableSemantics(DomEvent event);
 
-  /// Creates the placeholder for accessibility.
-  ///
-  /// Puts it inside the glasspane.
+  /// The placeholder element for enabling accessibility.
   ///
   /// On focus the element announces that accessibility can be enabled by
   /// tapping/clicking. (Announcement depends on the assistive technology)
-  DomElement prepareAccessibilityPlaceholder();
+  late final DomElement accessibilityPlaceholder = _prepareAccessibilityPlaceholder();
+
+  DomElement _prepareAccessibilityPlaceholder();
+
+  /// Updates the placeholder's label to the given [message].
+  void updatePlaceholderLabel(String message);
 
   /// Whether platform is still considering enabling semantics.
   ///
@@ -183,9 +182,10 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
   }
 
   @override
-  DomElement prepareAccessibilityPlaceholder() {
-    final DomElement placeholder =
-        _semanticsPlaceholder = createDomElement('flt-semantics-placeholder');
+  DomElement _prepareAccessibilityPlaceholder() {
+    final DomElement placeholder = _semanticsPlaceholder = createDomElement(
+      'flt-semantics-placeholder',
+    );
 
     // Only listen to "click" because other kinds of events are reported via
     // PointerBinding.
@@ -205,8 +205,9 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
     placeholder
       ..setAttribute('role', 'button')
       ..setAttribute('aria-live', 'polite')
-      ..setAttribute('tabindex', '0')
-      ..setAttribute('aria-label', placeholderMessage);
+      ..setAttribute('tabindex', '0');
+
+    updatePlaceholderLabel(ui_web.accessibilityPlaceholderMessage);
 
     // The placeholder sits just outside the window so only AT can reach it.
     placeholder.style
@@ -216,6 +217,11 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
       ..width = '1px'
       ..height = '1px';
     return placeholder;
+  }
+
+  @override
+  void updatePlaceholderLabel(String message) {
+    _semanticsPlaceholder?.setAttribute('aria-label', message);
   }
 
   @override
@@ -381,9 +387,10 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
   }
 
   @override
-  DomElement prepareAccessibilityPlaceholder() {
-    final DomElement placeholder =
-        _semanticsPlaceholder = createDomElement('flt-semantics-placeholder');
+  DomElement _prepareAccessibilityPlaceholder() {
+    final DomElement placeholder = _semanticsPlaceholder = createDomElement(
+      'flt-semantics-placeholder',
+    );
 
     // Only listen to "click" because other kinds of events are reported via
     // PointerBinding.
@@ -395,9 +402,8 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
       true.toJS,
     );
 
-    placeholder
-      ..setAttribute('role', 'button')
-      ..setAttribute('aria-label', placeholderMessage);
+    placeholder.setAttribute('role', 'button');
+    updatePlaceholderLabel(ui_web.accessibilityPlaceholderMessage);
     placeholder.style
       ..position = 'absolute'
       ..left = '0'
@@ -406,6 +412,11 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
       ..bottom = '0';
 
     return placeholder;
+  }
+
+  @override
+  void updatePlaceholderLabel(String message) {
+    _semanticsPlaceholder?.setAttribute('aria-label', message);
   }
 
   @override

@@ -38,10 +38,12 @@ Future<void> runTasks(
   String? localEngine,
   String? localEngineHost,
   String? localEngineSrcPath,
+  String? localWebSdk,
   String? luciBuilder,
   String? resultsPath,
   List<String>? taskArgs,
   bool useEmulator = false,
+  String buildMode = 'profile',
   @visibleForTesting Map<String, String>? isolateParams,
   @visibleForTesting void Function(String) print = print,
   @visibleForTesting List<String>? logs,
@@ -56,6 +58,7 @@ Future<void> runTasks(
         localEngine: localEngine,
         localEngineHost: localEngineHost,
         localEngineSrcPath: localEngineSrcPath,
+        localWebSdk: localWebSdk,
         terminateStrayDartProcesses: terminateStrayDartProcesses,
         silent: silent,
         taskArgs: taskArgs,
@@ -64,6 +67,7 @@ Future<void> runTasks(
         luciBuilder: luciBuilder,
         isolateParams: isolateParams,
         useEmulator: useEmulator,
+        buildMode: buildMode,
       );
 
       if (!result.succeeded) {
@@ -109,6 +113,7 @@ Future<TaskResult> rerunTask(
   String? localEngine,
   String? localEngineHost,
   String? localEngineSrcPath,
+  String? localWebSdk,
   bool terminateStrayDartProcesses = false,
   bool silent = false,
   List<String>? taskArgs,
@@ -116,6 +121,7 @@ Future<TaskResult> rerunTask(
   String? gitBranch,
   String? luciBuilder,
   bool useEmulator = false,
+  String buildMode = 'profile',
   @visibleForTesting Map<String, String>? isolateParams,
 }) async {
   section('Running task "$taskName"');
@@ -125,11 +131,13 @@ Future<TaskResult> rerunTask(
     localEngine: localEngine,
     localEngineHost: localEngineHost,
     localEngineSrcPath: localEngineSrcPath,
+    localWebSdk: localWebSdk,
     terminateStrayDartProcesses: terminateStrayDartProcesses,
     silent: silent,
     taskArgs: taskArgs,
     isolateParams: isolateParams,
     useEmulator: useEmulator,
+    buildMode: buildMode,
   );
 
   print('Task result:');
@@ -169,6 +177,7 @@ Future<TaskResult> runTask(
   String? deviceId,
   List<String>? taskArgs,
   bool useEmulator = false,
+  String buildMode = 'profile',
   @visibleForTesting Map<String, String>? isolateParams,
 }) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
@@ -192,6 +201,7 @@ Future<TaskResult> runTask(
     <String>[
       '--enable-vm-service=0', // zero causes the system to choose a free port
       '--no-pause-isolates-on-exit',
+      '-DbuildMode=$buildMode',
       if (localEngine != null) '-DlocalEngine=$localEngine',
       if (localEngineHost != null) '-DlocalEngineHost=$localEngineHost',
       if (localWebSdk != null) '-DlocalWebSdk=$localWebSdk',
@@ -199,7 +209,7 @@ Future<TaskResult> runTask(
       taskExecutable,
       ...?taskArgs,
     ],
-    environment: <String, String>{if (deviceId != null) DeviceIdEnvName: deviceId},
+    environment: <String, String>{DeviceIdEnvName: ?deviceId},
   );
 
   bool runnerFinished = false;
@@ -240,17 +250,17 @@ Future<TaskResult> runTask(
   try {
     final ConnectionResult result = await _connectToRunnerIsolate(await uri.future);
     print('[$taskName] Connected to VM server.');
-    isolateParams =
-        isolateParams == null ? <String, String>{} : Map<String, String>.of(isolateParams);
+    isolateParams = isolateParams == null
+        ? <String, String>{}
+        : Map<String, String>.of(isolateParams);
     isolateParams['runProcessCleanup'] = terminateStrayDartProcesses.toString();
     final VmService service = result.vmService;
     final String isolateId = result.isolate.id!;
-    final Map<String, dynamic> taskResultJson =
-        (await service.callServiceExtension(
-          'ext.cocoonRunTask',
-          args: isolateParams,
-          isolateId: isolateId,
-        )).json!;
+    final Map<String, dynamic> taskResultJson = (await service.callServiceExtension(
+      'ext.cocoonRunTask',
+      args: isolateParams,
+      isolateId: isolateId,
+    )).json!;
     // Notify the task process that the task result has been received and it
     // can proceed to shutdown.
     await _acknowledgeTaskResultReceived(service: service, isolateId: isolateId);

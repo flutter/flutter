@@ -160,7 +160,10 @@ void main() {
       const Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Positioned(right: 10.0, child: FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB)),
+          Positioned(
+            right: 10.0,
+            child: FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB),
+          ),
         ],
       ),
     );
@@ -176,7 +179,10 @@ void main() {
       const Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Positioned(top: 7.0, child: FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB)),
+          Positioned(
+            top: 7.0,
+            child: FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB),
+          ),
         ],
       ),
     );
@@ -459,13 +465,17 @@ void main() {
     expect(parentData.string, isNull);
 
     await tester.pumpWidget(
-      OneAncestorWidget(child: TestParentDataWidget(string: 'Foo', child: Container())),
+      OneAncestorWidget(
+        child: TestParentDataWidget(string: 'Foo', child: Container()),
+      ),
     );
     parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
     expect(parentData.string, 'Foo');
 
     await tester.pumpWidget(
-      AnotherAncestorWidget(child: TestParentDataWidget(string: 'Bar', child: Container())),
+      AnotherAncestorWidget(
+        child: TestParentDataWidget(string: 'Bar', child: Container()),
+      ),
     );
     parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
     expect(parentData.string, 'Bar');

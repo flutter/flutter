@@ -3,7 +3,7 @@ description: A framework for writing Flutter applications
 homepage: https://flutter.dev
 
 environment:
-  sdk: ^3.7.0-0
+  sdk: ^3.8.0-0
 
 resolution: workspace
 
@@ -15,7 +15,7 @@ dependencies:
   characters: 1.4.0
   collection: 1.19.1
   material_color_utilities: 0.13.0
-  meta: 1.16.0
+  meta: 1.17.0
   vector_math: 2.2.0
   sky_engine:
     sdk: flutter
@@ -39,5 +39,3 @@ dev_dependencies:
   file: any
   path: any
   platform: any
-
-# PUBSPEC CHECKSUM: fj4nkl

@@ -121,8 +121,8 @@ class MenuButtonTheme extends InheritedTheme {
   /// MenuButtonThemeData theme = MenuButtonTheme.of(context);
   /// ```
   static MenuButtonThemeData of(BuildContext context) {
-    final MenuButtonTheme? buttonTheme =
-        context.dependOnInheritedWidgetOfExactType<MenuButtonTheme>();
+    final MenuButtonTheme? buttonTheme = context
+        .dependOnInheritedWidgetOfExactType<MenuButtonTheme>();
     return buttonTheme?.data ?? Theme.of(context).menuButtonTheme;
   }
 

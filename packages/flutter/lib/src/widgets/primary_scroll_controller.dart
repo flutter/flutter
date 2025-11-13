@@ -123,8 +123,8 @@ class PrimaryScrollController extends InheritedWidget {
   /// not called by ScrollView as it will have determined whether or not to
   /// inherit the PrimaryScrollController.
   static bool shouldInherit(BuildContext context, Axis scrollDirection) {
-    final PrimaryScrollController? result =
-        context.findAncestorWidgetOfExactType<PrimaryScrollController>();
+    final PrimaryScrollController? result = context
+        .findAncestorWidgetOfExactType<PrimaryScrollController>();
     if (result == null) {
       return false;
     }
@@ -150,8 +150,8 @@ class PrimaryScrollController extends InheritedWidget {
   /// * [PrimaryScrollController.maybeOf], which is similar to this method, but
   ///   asserts if no [PrimaryScrollController] ancestor is found.
   static ScrollController? maybeOf(BuildContext context) {
-    final PrimaryScrollController? result =
-        context.dependOnInheritedWidgetOfExactType<PrimaryScrollController>();
+    final PrimaryScrollController? result = context
+        .dependOnInheritedWidgetOfExactType<PrimaryScrollController>();
     return result?.controller;
   }
 

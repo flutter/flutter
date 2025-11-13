@@ -14,7 +14,10 @@ class CardExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(appBar: AppBar(title: const Text('Card Sample')), body: const CardExample()),
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Card Sample')),
+        body: const CardExample(),
+      ),
     );
   }
 }

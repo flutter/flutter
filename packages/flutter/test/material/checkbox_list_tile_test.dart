@@ -14,7 +14,10 @@ import '../widgets/feedback_tester.dart';
 Widget wrap({required Widget child}) {
   return MediaQuery(
     data: const MediaQueryData(),
-    child: Directionality(textDirection: TextDirection.ltr, child: Material(child: child)),
+    child: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(child: child),
+    ),
   );
 }
 
@@ -119,8 +122,8 @@ void main() {
         child: Theme(
           data: ThemeData(
             checkboxTheme: CheckboxThemeData(
-              fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-                return states.contains(MaterialState.selected) ? themeColor : null;
+              fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+                return states.contains(WidgetState.selected) ? themeColor : null;
               }),
             ),
           ),
@@ -353,8 +356,8 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           checkboxTheme: CheckboxThemeData(
-            fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-              return states.contains(MaterialState.selected) ? fillColor : null;
+            fillColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+              return states.contains(WidgetState.selected) ? fillColor : null;
             }),
           ),
         ),
@@ -589,7 +592,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test default cursor when disabled
@@ -637,14 +640,14 @@ void main() {
     const Color activeEnabledFillColor = Color(0xFF000001);
     const Color activeDisabledFillColor = Color(0xFF000002);
 
-    Color getFillColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    Color getFillColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return activeDisabledFillColor;
       }
       return activeEnabledFillColor;
     }
 
-    final MaterialStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = WidgetStateColor.resolveWith(getFillColor);
 
     Widget buildFrame({required bool enabled}) {
       return wrap(
@@ -673,14 +676,14 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredFillColor = Color(0xFF000001);
 
-    Color getFillColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.hovered)) {
+    Color getFillColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredFillColor;
       }
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> fillColor = MaterialStateColor.resolveWith(getFillColor);
+    final WidgetStateProperty<Color> fillColor = WidgetStateColor.resolveWith(getFillColor);
 
     Widget buildFrame() {
       return wrap(
@@ -717,14 +720,13 @@ void main() {
           builder: (BuildContext context, StateSetter setState) {
             return CheckboxListTile(
               value: value,
-              onChanged:
-                  enabled
-                      ? (bool? newValue) {
-                        setState(() {
-                          value = newValue;
-                        });
-                      }
-                      : null,
+              onChanged: enabled
+                  ? (bool? newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    }
+                  : null,
               hoverColor: Colors.orange[500],
             );
           },
@@ -777,14 +779,14 @@ void main() {
       const Color hoverOverlayColor = Color(0xFF000003);
       const Color hoverColor = Color(0xFF000005);
 
-      Color? getOverlayColor(Set<MaterialState> states) {
-        if (states.contains(MaterialState.pressed)) {
-          if (states.contains(MaterialState.selected)) {
+      Color? getOverlayColor(Set<WidgetState> states) {
+        if (states.contains(WidgetState.pressed)) {
+          if (states.contains(WidgetState.selected)) {
             return activePressedOverlayColor;
           }
           return inactivePressedOverlayColor;
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return hoverOverlayColor;
         }
         return null;
@@ -800,7 +802,7 @@ void main() {
               value: active,
               onChanged: (_) {},
               fillColor: const MaterialStatePropertyAll<Color>(fillColor),
-              overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+              overlayColor: useOverlay ? WidgetStateProperty.resolveWith(getOverlayColor) : null,
               hoverColor: hoverColor,
               splashRadius: splashRadius,
             ),
@@ -900,14 +902,14 @@ void main() {
       const Color hoverOverlayColor = Color(0xFF000003);
       const Color hoverColor = Color(0xFF000005);
 
-      Color? getOverlayColor(Set<MaterialState> states) {
-        if (states.contains(MaterialState.pressed)) {
-          if (states.contains(MaterialState.selected)) {
+      Color? getOverlayColor(Set<WidgetState> states) {
+        if (states.contains(WidgetState.pressed)) {
+          if (states.contains(WidgetState.selected)) {
             return activePressedOverlayColor;
           }
           return inactivePressedOverlayColor;
         }
-        if (states.contains(MaterialState.hovered)) {
+        if (states.contains(WidgetState.hovered)) {
           return hoverOverlayColor;
         }
         return null;
@@ -922,7 +924,7 @@ void main() {
               value: active,
               onChanged: (_) {},
               fillColor: const MaterialStatePropertyAll<Color>(fillColor),
-              overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+              overlayColor: useOverlay ? WidgetStateProperty.resolveWith(getOverlayColor) : null,
               hoverColor: hoverColor,
               splashRadius: splashRadius,
             ),
@@ -940,10 +942,10 @@ void main() {
         Material.of(tester.element(find.byType(Checkbox))),
         kIsWeb
             ? (paints
-              ..circle()
-              ..circle(color: fillColor.withAlpha(kRadialReactionAlpha), radius: splashRadius))
+                ..circle()
+                ..circle(color: fillColor.withAlpha(kRadialReactionAlpha), radius: splashRadius))
             : (paints
-              ..circle(color: fillColor.withAlpha(kRadialReactionAlpha), radius: splashRadius)),
+                ..circle(color: fillColor.withAlpha(kRadialReactionAlpha), radius: splashRadius)),
         reason: 'Default inactive pressed Checkbox should have overlay color from fillColor',
       );
 
@@ -957,10 +959,10 @@ void main() {
         Material.of(tester.element(find.byType(Checkbox))),
         kIsWeb
             ? (paints
-              ..circle()
-              ..circle(color: fillColor.withAlpha(kRadialReactionAlpha), radius: splashRadius))
+                ..circle()
+                ..circle(color: fillColor.withAlpha(kRadialReactionAlpha), radius: splashRadius))
             : (paints
-              ..circle(color: fillColor.withAlpha(kRadialReactionAlpha), radius: splashRadius)),
+                ..circle(color: fillColor.withAlpha(kRadialReactionAlpha), radius: splashRadius)),
         reason: 'Default active pressed Checkbox should have overlay color from fillColor',
       );
 
@@ -974,8 +976,8 @@ void main() {
         Material.of(tester.element(find.byType(Checkbox))),
         kIsWeb
             ? (paints
-              ..circle()
-              ..circle(color: inactivePressedOverlayColor, radius: splashRadius))
+                ..circle()
+                ..circle(color: inactivePressedOverlayColor, radius: splashRadius))
             : (paints..circle(color: inactivePressedOverlayColor, radius: splashRadius)),
         reason: 'Inactive pressed Checkbox should have overlay color: $inactivePressedOverlayColor',
       );
@@ -990,8 +992,8 @@ void main() {
         Material.of(tester.element(find.byType(Checkbox))),
         kIsWeb
             ? (paints
-              ..circle()
-              ..circle(color: activePressedOverlayColor, radius: splashRadius))
+                ..circle()
+                ..circle(color: activePressedOverlayColor, radius: splashRadius))
             : (paints..circle(color: activePressedOverlayColor, radius: splashRadius)),
         reason: 'Active pressed Checkbox should have overlay color: $activePressedOverlayColor',
       );
@@ -1346,14 +1348,14 @@ void main() {
     Widget buildFrame({bool? themeDataIsThreeLine, bool? themeIsThreeLine, bool? isThreeLine}) {
       return MaterialApp(
         key: UniqueKey(),
-        theme:
-            themeDataIsThreeLine != null
-                ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: themeDataIsThreeLine))
-                : null,
+        theme: themeDataIsThreeLine != null
+            ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: themeDataIsThreeLine))
+            : null,
         home: Material(
           child: ListTileTheme(
-            data:
-                themeIsThreeLine != null ? ListTileThemeData(isThreeLine: themeIsThreeLine) : null,
+            data: themeIsThreeLine != null
+                ? ListTileThemeData(isThreeLine: themeIsThreeLine)
+                : null,
             child: ListView(
               children: <Widget>[
                 CheckboxListTile(
@@ -1462,15 +1464,15 @@ void main() {
         key: UniqueKey(),
         theme: ThemeData(
           platform: TargetPlatform.iOS,
-          listTileTheme:
-              themeDataIsThreeLine != null
-                  ? ListTileThemeData(isThreeLine: themeDataIsThreeLine)
-                  : null,
+          listTileTheme: themeDataIsThreeLine != null
+              ? ListTileThemeData(isThreeLine: themeDataIsThreeLine)
+              : null,
         ),
         home: Material(
           child: ListTileTheme(
-            data:
-                themeIsThreeLine != null ? ListTileThemeData(isThreeLine: themeIsThreeLine) : null,
+            data: themeIsThreeLine != null
+                ? ListTileThemeData(isThreeLine: themeIsThreeLine)
+                : null,
             child: ListView(
               children: <Widget>[
                 CheckboxListTile.adaptive(
@@ -1841,14 +1843,31 @@ void main() {
     expect(checkboxOffset.dy - tileOffset.dy, bottomPositionCheckbox);
     expect(secondaryOffset.dy - tileOffset.dy, bottomPositionSecondary);
   });
+
+  testWidgets('CheckboxListTile does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(
+              body: wrap(
+                child: CheckboxListTile(value: true, onChanged: (_) {}, title: const Text('X')),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CheckboxListTile)), Size.zero);
+  });
 }
 
-class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
+class _SelectedGrabMouseCursor extends WidgetStateMouseCursor {
   const _SelectedGrabMouseCursor();
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.selected)) {
+  MouseCursor resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.selected)) {
       return SystemMouseCursors.grab;
     }
     return SystemMouseCursors.basic;

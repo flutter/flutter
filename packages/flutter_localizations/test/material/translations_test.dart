@@ -508,7 +508,7 @@ void main() {
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
     expect(localizations, isA<MaterialLocalizationZhHantTw>());
-    expect(localizations.alertDialogLabel, '快訊');
+    expect(localizations.alertDialogLabel, '警告');
     expect(localizations.anteMeridiemAbbreviation, '上午');
     expect(localizations.closeButtonLabel, '關閉');
     expect(localizations.okButtonLabel, '確定');
@@ -574,7 +574,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/141764
   testWidgets('zh-CN translation for look up label', (WidgetTester tester) async {
     const Locale locale = Locale('zh');
-    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
       locale,
     );
@@ -587,7 +587,7 @@ void main() {
     WidgetTester tester,
   ) async {
     const Locale locale = Locale('ko');
-    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
       locale,
     );
@@ -600,11 +600,22 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/156954
   testWidgets('Italian translation for dateHelpText', (WidgetTester tester) async {
     const Locale locale = Locale('it');
-    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
       locale,
     );
     expect(localizations, isA<MaterialLocalizationIt>());
     expect(localizations.dateHelpText, 'gg/mm/aaaa');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/176677
+  testWidgets('Basque translation for timeOfDayFormat', (WidgetTester tester) async {
+    const Locale locale = Locale('eu');
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
+    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(
+      locale,
+    );
+    expect(localizations, isA<MaterialLocalizationEu>());
+    expect(localizations.timeOfDayFormat(), TimeOfDayFormat.HH_colon_mm);
   });
 }

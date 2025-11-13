@@ -13,11 +13,11 @@ import '../../integration.shard/test_utils.dart';
 import '../../src/common.dart';
 
 // Created here as multiple groups use it.
-final RegExp stackTraceCurrentRegexp = RegExp(r'\.dart\s+[0-9]+:[0-9]+\s+get current');
+final stackTraceCurrentRegexp = RegExp(r'\.dart\s+[0-9]+:[0-9]+\s+get current');
 
 Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
   group('Flutter run for web, DDC library bundle format: $useDDCLibraryBundleFormat', () {
-    final BasicProject project = BasicProject();
+    final project = BasicProject();
     late Directory tempDir;
     late FlutterRunTestDriver flutter;
 
@@ -45,6 +45,7 @@ Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
         expressionEvaluation: expressionEvaluation,
         additionalCommandArgs: <String>[
           '--verbose',
+          '--no-web-resources-cdn',
           if (useDDCLibraryBundleFormat)
             '--web-experimental-hot-reload'
           else
@@ -107,7 +108,7 @@ Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
   });
 
   group('Flutter test for web, DDC library bundle format: $useDDCLibraryBundleFormat', () {
-    final TestsProject project = TestsProject();
+    final project = TestsProject();
     late Directory tempDir;
     late FlutterRunTestDriver flutter;
 
@@ -139,6 +140,7 @@ Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
         script: project.testFilePath,
         additionalCommandArgs: <String>[
           '--verbose',
+          '--no-web-resources-cdn',
           if (useDDCLibraryBundleFormat)
             '--web-experimental-hot-reload'
           else

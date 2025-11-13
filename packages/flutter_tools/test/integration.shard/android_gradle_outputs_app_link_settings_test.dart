@@ -13,11 +13,11 @@ import 'package:xml/xml.dart';
 import '../src/common.dart';
 import 'test_utils.dart';
 
-final XmlElement deeplinkFlagMetaData = XmlElement(XmlName('meta-data'), <XmlAttribute>[
+final deeplinkFlagMetaData = XmlElement(XmlName('meta-data'), <XmlAttribute>[
   XmlAttribute(XmlName('name', 'android'), 'flutter_deeplinking_enabled'),
   XmlAttribute(XmlName('value', 'android'), 'true'),
 ]);
-final XmlElement pureHttpIntentFilter = XmlElement(
+final pureHttpIntentFilter = XmlElement(
   XmlName('intent-filter'),
   <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
   <XmlElement>[
@@ -37,7 +37,7 @@ final XmlElement pureHttpIntentFilter = XmlElement(
   ],
 );
 
-final XmlElement nonHttpIntentFilter = XmlElement(
+final nonHttpIntentFilter = XmlElement(
   XmlName('intent-filter'),
   <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
   <XmlElement>[
@@ -57,7 +57,7 @@ final XmlElement nonHttpIntentFilter = XmlElement(
   ],
 );
 
-final XmlElement hybridIntentFilter = XmlElement(
+final hybridIntentFilter = XmlElement(
   XmlName('intent-filter'),
   <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
   <XmlElement>[
@@ -78,7 +78,7 @@ final XmlElement hybridIntentFilter = XmlElement(
   ],
 );
 
-final XmlElement nonAutoVerifyIntentFilter = XmlElement(
+final nonAutoVerifyIntentFilter = XmlElement(
   XmlName('intent-filter'),
   <XmlAttribute>[],
   <XmlElement>[
@@ -97,7 +97,7 @@ final XmlElement nonAutoVerifyIntentFilter = XmlElement(
     ]),
   ],
 );
-final XmlElement nonActionIntentFilter = XmlElement(
+final nonActionIntentFilter = XmlElement(
   XmlName('intent-filter'),
   <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
   <XmlElement>[
@@ -113,7 +113,7 @@ final XmlElement nonActionIntentFilter = XmlElement(
     ]),
   ],
 );
-final XmlElement nonDefaultCategoryIntentFilter = XmlElement(
+final nonDefaultCategoryIntentFilter = XmlElement(
   XmlName('intent-filter'),
   <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
   <XmlElement>[
@@ -129,7 +129,7 @@ final XmlElement nonDefaultCategoryIntentFilter = XmlElement(
     ]),
   ],
 );
-final XmlElement nonBrowsableCategoryIntentFilter = XmlElement(
+final nonBrowsableCategoryIntentFilter = XmlElement(
   XmlName('intent-filter'),
   <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
   <XmlElement>[
@@ -145,7 +145,7 @@ final XmlElement nonBrowsableCategoryIntentFilter = XmlElement(
     ]),
   ],
 );
-final XmlElement nonSchemeCategoryIntentFilter = XmlElement(
+final nonSchemeCategoryIntentFilter = XmlElement(
   XmlName('intent-filter'),
   <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
   <XmlElement>[
@@ -163,7 +163,7 @@ final XmlElement nonSchemeCategoryIntentFilter = XmlElement(
     ]),
   ],
 );
-final XmlElement nonHostCategoryIntentFilter = XmlElement(
+final nonHostCategoryIntentFilter = XmlElement(
   XmlName('intent-filter'),
   <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
   <XmlElement>[
@@ -208,8 +208,7 @@ void main() {
     expect(deeplink['scheme'], scheme);
     expect(deeplink['host'], host);
     expect(deeplink['path'], path);
-    final Map<String, dynamic> intentFilterCheck =
-        deeplink['intentFilterCheck'] as Map<String, dynamic>;
+    final intentFilterCheck = deeplink['intentFilterCheck'] as Map<String, dynamic>;
     expect(intentFilterCheck['hasAutoVerify'], hasAutoVerify);
     expect(intentFilterCheck['hasActionView'], hasActionView);
     expect(intentFilterCheck['hasDefaultCategory'], hasDefaultCategory);
@@ -237,8 +236,8 @@ void main() {
         'main',
         'AndroidManifest.xml',
       );
-      final io.File androidManifestFile = io.File(androidManifestPath);
-      final XmlDocument androidManifest = XmlDocument.parse(androidManifestFile.readAsStringSync());
+      final androidManifestFile = io.File(androidManifestPath);
+      final androidManifest = XmlDocument.parse(androidManifestFile.readAsStringSync());
       final XmlElement activity = androidManifest.findAllElements('activity').first;
       activity.children.add(deeplinkFlagMetaData);
       activity.children.add(pureHttpIntentFilter);
@@ -276,11 +275,10 @@ void main() {
 
       expect(result, const ProcessResultMatcher());
       expect(fileDump.existsSync(), true);
-      final Map<String, dynamic> json =
-          jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
+      final json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
       expect(json['applicationId'], 'com.example.testapp');
       expect(json['deeplinkingFlagEnabled'], true);
-      final List<dynamic> deeplinks = json['deeplinks']! as List<dynamic>;
+      final deeplinks = json['deeplinks']! as List<dynamic>;
       expect(deeplinks.length, 10);
       testDeeplink(
         deeplinks[0],
@@ -421,11 +419,10 @@ void main() {
 
       expect(result, const ProcessResultMatcher());
       expect(fileDump.existsSync(), true);
-      final Map<String, dynamic> json =
-          jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
+      final json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
       expect(json['applicationId'], 'com.example.testapp');
       expect(json['deeplinkingFlagEnabled'], false);
-      final List<dynamic> deeplinks = json['deeplinks']! as List<dynamic>;
+      final deeplinks = json['deeplinks']! as List<dynamic>;
       expect(deeplinks.length, 0);
     },
   );

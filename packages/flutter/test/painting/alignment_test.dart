@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -343,11 +344,48 @@ void main() {
     expect(AlignmentGeometry.topLeft, Alignment.topLeft);
     expect(AlignmentGeometry.topCenter, Alignment.topCenter);
     expect(AlignmentGeometry.topRight, Alignment.topRight);
+    expect(AlignmentGeometry.topStart, AlignmentDirectional.topStart);
+    expect(AlignmentGeometry.topEnd, AlignmentDirectional.topEnd);
     expect(AlignmentGeometry.centerLeft, Alignment.centerLeft);
     expect(AlignmentGeometry.center, Alignment.center);
     expect(AlignmentGeometry.centerRight, Alignment.centerRight);
+    expect(AlignmentGeometry.centerStart, AlignmentDirectional.centerStart);
+    expect(AlignmentGeometry.centerEnd, AlignmentDirectional.centerEnd);
     expect(AlignmentGeometry.bottomLeft, Alignment.bottomLeft);
     expect(AlignmentGeometry.bottomCenter, Alignment.bottomCenter);
     expect(AlignmentGeometry.bottomRight, Alignment.bottomRight);
+    expect(AlignmentGeometry.bottomStart, AlignmentDirectional.bottomStart);
+    expect(AlignmentGeometry.bottomEnd, AlignmentDirectional.bottomEnd);
+  });
+
+  test('AlignmentDirectional.resolve with null TextDirection asserts', () {
+    const AlignmentDirectional alignmentDirectional = AlignmentDirectional(1.0, 2.0);
+
+    expect(
+      () => alignmentDirectional.resolve(null),
+      throwsA(
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
+        ),
+      ),
+    );
+  });
+
+  test('AlignmentDirectional.resolve with null TextDirection asserts', () {
+    const Alignment a = Alignment(5.0, 6.0);
+    const AlignmentDirectional b = AlignmentDirectional(15.0, 16.0);
+
+    expect(
+      () => a.add(b).resolve(null),
+      throwsA(
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
+        ),
+      ),
+    );
   });
 }

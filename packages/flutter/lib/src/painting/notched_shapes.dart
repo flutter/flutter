@@ -82,7 +82,7 @@ class CircularNotchedRectangle extends NotchedShape {
     // Segment C - a Bezier curve from segment B back to the host's top edge.
     //
     // A detailed explanation and the derivation of the formulas below is
-    // available at: https://goo.gl/Ufzrqn
+    // available at: https://docs.google.com/document/d/e/2PACX-1vRVPWGtR85bawGynRSWzYTKgQtqrxCnxXCKC5xM9ab3IvtRHueku4rRIuJ4TbedzyMz2oy2pkzM71-_/pub
 
     const double s1 = 15.0;
     const double s2 = 1.0;

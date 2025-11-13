@@ -5,7 +5,6 @@
 package io.flutter.plugin.platform;
 
 import static android.os.Looper.getMainLooper;
-import static io.flutter.embedding.engine.systemchannels.PlatformViewsChannel.PlatformViewTouch;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -42,8 +41,8 @@ import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
-import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
-import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel.PlatformViewTouch;
+import io.flutter.embedding.engine.systemchannels.PlatformViewCreationRequest;
+import io.flutter.embedding.engine.systemchannels.PlatformViewTouch;
 import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
@@ -84,7 +83,7 @@ public class PlatformViewsControllerTest {
 
     @Override
     public void dispose() {
-      // We have been removed from the view hierarhy before the call to dispose.
+      // We have been removed from the view hierarchy before the call to dispose.
       assertNull(view.getParent());
       disposeCalls++;
     }
@@ -106,8 +105,10 @@ public class PlatformViewsControllerTest {
   }
 
   @Test
-  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
-  public void itRemovesPlatformViewBeforeDiposeIsCalled() {
+  @Config(
+      shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class},
+      minSdk = 35)
+  public void itRemovesPlatformViewBeforeDisposeIsCalled() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
     FlutterJNI jni = new FlutterJNI();
     platformViewsController.setFlutterJNI(jni);
@@ -127,8 +128,8 @@ public class PlatformViewsControllerTest {
 
     // Create the platform view.
     int viewId = 0;
-    final PlatformViewsChannel.PlatformViewCreationRequest request =
-        new PlatformViewsChannel.PlatformViewCreationRequest(
+    final PlatformViewCreationRequest request =
+        new PlatformViewCreationRequest(
             viewId,
             CountingPlatformView.VIEW_TYPE_ID,
             0,
@@ -141,9 +142,54 @@ public class PlatformViewsControllerTest {
     assertTrue(pView instanceof CountingPlatformView);
     CountingPlatformView cpv = (CountingPlatformView) pView;
     platformViewsController.configureForTextureLayerComposition(pView, request);
+    verify(platformViewsController.textureRegistry, times(1))
+        .createSurfaceProducer(TextureRegistry.SurfaceLifecycle.manual);
     assertEquals(0, cpv.disposeCalls);
     platformViewsController.disposePlatformView(viewId);
     assertEquals(1, cpv.disposeCalls);
+  }
+
+  @Test
+  @Config(
+      shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class},
+      minSdk = 29,
+      maxSdk = 34)
+  public void itPassesSurfaceLifecycleResetInBackgroundLeqApi34() {
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+    FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
+    attach(jni, platformViewsController);
+    // Get the platform view registry.
+    PlatformViewRegistry registry = platformViewsController.getRegistry();
+
+    // Register a factory for our platform view.
+    registry.registerViewFactory(
+        CountingPlatformView.VIEW_TYPE_ID,
+        new PlatformViewFactory(StandardMessageCodec.INSTANCE) {
+          @Override
+          public PlatformView create(Context context, int viewId, Object args) {
+            return new CountingPlatformView(context);
+          }
+        });
+
+    // Create the platform view.
+    int viewId = 0;
+    final PlatformViewCreationRequest request =
+        new PlatformViewCreationRequest(
+            viewId,
+            CountingPlatformView.VIEW_TYPE_ID,
+            0,
+            0,
+            128,
+            128,
+            View.LAYOUT_DIRECTION_LTR,
+            null);
+    PlatformView pView = platformViewsController.createPlatformView(request, true);
+    assertTrue(pView instanceof CountingPlatformView);
+    CountingPlatformView cpv = (CountingPlatformView) pView;
+    platformViewsController.configureForTextureLayerComposition(pView, request);
+    verify(platformViewsController.textureRegistry, times(1))
+        .createSurfaceProducer(TextureRegistry.SurfaceLifecycle.resetInBackground);
   }
 
   @Test
@@ -168,8 +214,8 @@ public class PlatformViewsControllerTest {
 
     // Create the platform view.
     int viewId = 0;
-    final PlatformViewsChannel.PlatformViewCreationRequest request =
-        new PlatformViewsChannel.PlatformViewCreationRequest(
+    final PlatformViewCreationRequest request =
+        new PlatformViewCreationRequest(
             viewId,
             CountingPlatformView.VIEW_TYPE_ID,
             0,
@@ -445,6 +491,268 @@ public class PlatformViewsControllerTest {
   }
 
   @Test
+  public void toMotionEvent_handlesPointerCountMatch() {
+    // This test verifies that when pointer counts match between original and framework events,
+    // the original event is reused (preserving verifiable input flag).
+    MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+
+    // Original event at position (100, 100) with 1 pointer
+    MotionEvent original =
+        MotionEvent.obtain(
+            10, // downTime
+            10, // eventTime
+            MotionEvent.ACTION_DOWN,
+            100, // x
+            100, // y
+            0 // metaState
+            );
+
+    MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(original);
+
+    // Framework event with same pointer count (1)
+    List<List<Integer>> pointerProperties =
+        Arrays.asList(Arrays.asList(original.getPointerId(0), original.getToolType(0)));
+    List<List<Double>> pointerCoords =
+        Arrays.asList(
+            Arrays.asList(
+                (double) original.getOrientation(),
+                (double) original.getPressure(),
+                (double) original.getSize(),
+                (double) original.getToolMajor(),
+                (double) original.getToolMinor(),
+                (double) original.getTouchMajor(),
+                (double) original.getTouchMinor(),
+                110.0, // x - slightly offset
+                110.0 // y - slightly offset
+                ));
+
+    PlatformViewTouch touch =
+        new PlatformViewTouch(
+            0, // viewId
+            original.getDownTime(),
+            original.getEventTime(),
+            original.getAction(),
+            1, // pointerCount - matches original
+            pointerProperties,
+            pointerCoords,
+            original.getMetaState(),
+            original.getButtonState(),
+            original.getXPrecision(),
+            original.getYPrecision(),
+            original.getDeviceId(),
+            original.getEdgeFlags(),
+            original.getSource(),
+            original.getFlags(),
+            motionEventId.getId());
+
+    MotionEvent resolvedEvent =
+        platformViewsController.toMotionEvent(
+            1, // density
+            touch,
+            false // usingVirtualDisplays
+            );
+
+    // Verify the resolved event uses the offset coordinates
+    assertEquals(110.0f, resolvedEvent.getX(), 0.001f);
+    assertEquals(110.0f, resolvedEvent.getY(), 0.001f);
+
+    // Verify other properties are preserved
+    assertEquals(original.getDownTime(), resolvedEvent.getDownTime());
+    assertEquals(original.getEventTime(), resolvedEvent.getEventTime());
+    assertEquals(original.getAction(), resolvedEvent.getAction());
+  }
+
+  @Test
+  public void toMotionEvent_handlesPointerCountMismatch() {
+    // This test verifies the fix for issue #169486 - gestures blocked after zoom.
+    // When the original event has more pointers than the framework event (e.g., due to
+    // filtering by gesture recognizers), we must reconstruct the event with the correct
+    // pointer count.
+    MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+
+    // Original multi-touch event with 2 pointers (e.g., zoom gesture)
+    MotionEvent.PointerProperties[] properties = new MotionEvent.PointerProperties[2];
+    properties[0] = new MotionEvent.PointerProperties();
+    properties[0].id = 0;
+    properties[0].toolType = MotionEvent.TOOL_TYPE_FINGER;
+    properties[1] = new MotionEvent.PointerProperties();
+    properties[1].id = 1;
+    properties[1].toolType = MotionEvent.TOOL_TYPE_FINGER;
+
+    MotionEvent.PointerCoords[] coords = new MotionEvent.PointerCoords[2];
+    coords[0] = new MotionEvent.PointerCoords();
+    coords[0].x = 100;
+    coords[0].y = 100;
+    coords[1] = new MotionEvent.PointerCoords();
+    coords[1].x = 200;
+    coords[1].y = 200;
+
+    MotionEvent original =
+        MotionEvent.obtain(
+            10, // downTime
+            10, // eventTime
+            MotionEvent.ACTION_MOVE,
+            2, // pointerCount
+            properties,
+            coords,
+            0, // metaState
+            0, // buttonState
+            1.0f, // xPrecision
+            1.0f, // yPrecision
+            0, // deviceId
+            0, // edgeFlags
+            0, // source
+            0 // flags
+            );
+
+    MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(original);
+
+    // Framework filtered event with only 1 pointer (filtered by SingleTouchContainer or similar)
+    List<List<Integer>> frameworkPointerProperties =
+        Arrays.asList(Arrays.asList(0, MotionEvent.TOOL_TYPE_FINGER));
+
+    List<List<Double>> frameworkPointerCoords =
+        Arrays.asList(Arrays.asList(0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 100.0, 100.0));
+
+    PlatformViewTouch touch =
+        new PlatformViewTouch(
+            0, // viewId
+            original.getDownTime(),
+            original.getEventTime(),
+            original.getAction(),
+            1, // pointerCount - mismatch! (original has 2)
+            frameworkPointerProperties,
+            frameworkPointerCoords,
+            original.getMetaState(),
+            original.getButtonState(),
+            original.getXPrecision(),
+            original.getYPrecision(),
+            original.getDeviceId(),
+            original.getEdgeFlags(),
+            original.getSource(),
+            original.getFlags(),
+            motionEventId.getId());
+
+    MotionEvent resolvedEvent =
+        platformViewsController.toMotionEvent(
+            1, // density
+            touch,
+            false // usingVirtualDisplays
+            );
+
+    // Verify that the resolved event uses the framework's pointer count
+    assertEquals(1, resolvedEvent.getPointerCount());
+
+    // Verify coordinates from framework are used
+    assertEquals(100.0f, resolvedEvent.getX(0), 0.001f);
+    assertEquals(100.0f, resolvedEvent.getY(0), 0.001f);
+
+    // Verify other properties are preserved from the original event
+    assertEquals(original.getDownTime(), resolvedEvent.getDownTime());
+    assertEquals(original.getEventTime(), resolvedEvent.getEventTime());
+    assertEquals(original.getAction(), resolvedEvent.getAction());
+    assertEquals(original.getMetaState(), resolvedEvent.getMetaState());
+  }
+
+  @Test
+  public void toMotionEvent_multiTouchWithPointerCountMismatch() {
+    // Test that verifies multi-pointer framework events are handled correctly
+    // even when the original event has a different pointer count.
+    MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+
+    // Original event with 3 pointers
+    MotionEvent.PointerProperties[] properties = new MotionEvent.PointerProperties[3];
+    properties[0] = new MotionEvent.PointerProperties();
+    properties[0].id = 0;
+    properties[0].toolType = MotionEvent.TOOL_TYPE_FINGER;
+    properties[1] = new MotionEvent.PointerProperties();
+    properties[1].id = 1;
+    properties[1].toolType = MotionEvent.TOOL_TYPE_FINGER;
+    properties[2] = new MotionEvent.PointerProperties();
+    properties[2].id = 2;
+    properties[2].toolType = MotionEvent.TOOL_TYPE_FINGER;
+
+    MotionEvent.PointerCoords[] coords = new MotionEvent.PointerCoords[3];
+    coords[0] = new MotionEvent.PointerCoords();
+    coords[0].x = 100;
+    coords[0].y = 100;
+    coords[1] = new MotionEvent.PointerCoords();
+    coords[1].x = 200;
+    coords[1].y = 200;
+    coords[2] = new MotionEvent.PointerCoords();
+    coords[2].x = 300;
+    coords[2].y = 300;
+
+    MotionEvent original =
+        MotionEvent.obtain(
+            10, // downTime
+            10, // eventTime
+            MotionEvent.ACTION_MOVE,
+            3, // pointerCount
+            properties,
+            coords,
+            0, // metaState
+            0, // buttonState
+            1.0f, // xPrecision
+            1.0f, // yPrecision
+            0, // deviceId
+            0, // edgeFlags
+            0, // source
+            0 // flags
+            );
+
+    MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(original);
+
+    // Framework filtered to 2 pointers
+    List<List<Integer>> frameworkPointerProperties =
+        Arrays.asList(
+            Arrays.asList(0, MotionEvent.TOOL_TYPE_FINGER),
+            Arrays.asList(1, MotionEvent.TOOL_TYPE_FINGER));
+
+    List<List<Double>> frameworkPointerCoords =
+        Arrays.asList(
+            Arrays.asList(0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 50.0, 50.0), // pointer 0
+            Arrays.asList(0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 100.0, 100.0) // pointer 1
+            );
+
+    PlatformViewTouch touch =
+        new PlatformViewTouch(
+            0, // viewId
+            original.getDownTime(),
+            original.getEventTime(),
+            original.getAction(),
+            2, // pointerCount - mismatch! (original has 3)
+            frameworkPointerProperties,
+            frameworkPointerCoords,
+            original.getMetaState(),
+            original.getButtonState(),
+            original.getXPrecision(),
+            original.getYPrecision(),
+            original.getDeviceId(),
+            original.getEdgeFlags(),
+            original.getSource(),
+            original.getFlags(),
+            motionEventId.getId());
+
+    MotionEvent resolvedEvent =
+        platformViewsController.toMotionEvent(
+            1, // density
+            touch,
+            false // usingVirtualDisplays
+            );
+
+    // Verify both pointers use framework's pointer count and coordinates
+    assertEquals(2, resolvedEvent.getPointerCount());
+    assertEquals(50.0f, resolvedEvent.getX(0), 0.001f);
+    assertEquals(50.0f, resolvedEvent.getY(0), 0.001f);
+    assertEquals(100.0f, resolvedEvent.getX(1), 0.001f);
+    assertEquals(100.0f, resolvedEvent.getY(1), 0.001f);
+  }
+
+  @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void getPlatformViewById_hybridComposition() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
@@ -554,6 +862,8 @@ public class PlatformViewsControllerTest {
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void createPlatformViewMessage_setsAndroidViewLayoutDirection() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
+    PlatformViewsControllerDelegator platformViewsControllerDelegator =
+        new PlatformViewsControllerDelegator(platformViewsController, null);
     platformViewsController.setSoftwareRendering(true);
 
     int platformViewId = 0;
@@ -783,9 +1093,7 @@ public class PlatformViewsControllerTest {
 
     assertThrows(
         IllegalStateException.class,
-        () -> {
-          platformViewsController.initializePlatformViewIfNeeded(platformViewId);
-        });
+        () -> platformViewsController.initializePlatformViewIfNeeded(platformViewId));
   }
 
   @Test
@@ -815,9 +1123,7 @@ public class PlatformViewsControllerTest {
 
     assertThrows(
         IllegalStateException.class,
-        () -> {
-          platformViewsController.initializePlatformViewIfNeeded(platformViewId);
-        });
+        () -> platformViewsController.initializePlatformViewIfNeeded(platformViewId));
   }
 
   @Test
@@ -1609,100 +1915,107 @@ public class PlatformViewsControllerTest {
 
     final Context context = ApplicationProvider.getApplicationContext();
     final TextureRegistry registry =
-        new TextureRegistry() {
-          public void TextureRegistry() {}
+        spy(
+            new TextureRegistry() {
+              public void TextureRegistry() {}
 
-          @NonNull
-          @Override
-          public SurfaceTextureEntry createSurfaceTexture() {
-            return registerSurfaceTexture(mock(SurfaceTexture.class));
-          }
-
-          @NonNull
-          @Override
-          public SurfaceTextureEntry registerSurfaceTexture(
-              @NonNull SurfaceTexture surfaceTexture) {
-            return new SurfaceTextureEntry() {
               @NonNull
               @Override
-              public SurfaceTexture surfaceTexture() {
-                return mock(SurfaceTexture.class);
+              public SurfaceTextureEntry createSurfaceTexture() {
+                return registerSurfaceTexture(mock(SurfaceTexture.class));
               }
 
+              @NonNull
               @Override
-              public long id() {
-                return 0;
+              public SurfaceTextureEntry registerSurfaceTexture(
+                  @NonNull SurfaceTexture surfaceTexture) {
+                return new SurfaceTextureEntry() {
+                  @NonNull
+                  @Override
+                  public SurfaceTexture surfaceTexture() {
+                    return mock(SurfaceTexture.class);
+                  }
+
+                  @Override
+                  public long id() {
+                    return 0;
+                  }
+
+                  @Override
+                  public void release() {}
+                };
               }
 
+              @NonNull
               @Override
-              public void release() {}
-            };
-          }
+              public ImageTextureEntry createImageTexture() {
+                return new ImageTextureEntry() {
+                  @Override
+                  public long id() {
+                    return 0;
+                  }
 
-          @NonNull
-          @Override
-          public ImageTextureEntry createImageTexture() {
-            return new ImageTextureEntry() {
-              @Override
-              public long id() {
-                return 0;
+                  @Override
+                  public void release() {}
+
+                  @Override
+                  public void pushImage(Image image) {}
+                };
               }
 
+              @NonNull
               @Override
-              public void release() {}
+              public SurfaceProducer createSurfaceProducer(SurfaceLifecycle lifecycle) {
+                return new SurfaceProducer() {
+                  @Override
+                  public void setCallback(SurfaceProducer.Callback cb) {}
 
-              @Override
-              public void pushImage(Image image) {}
-            };
-          }
+                  @Override
+                  public long id() {
+                    return 0;
+                  }
 
-          @NonNull
-          @Override
-          public SurfaceProducer createSurfaceProducer(SurfaceLifecycle lifecycle) {
-            return new SurfaceProducer() {
-              @Override
-              public void setCallback(SurfaceProducer.Callback cb) {}
+                  @Override
+                  public void release() {}
 
-              @Override
-              public long id() {
-                return 0;
+                  @Override
+                  public int getWidth() {
+                    return 0;
+                  }
+
+                  @Override
+                  public int getHeight() {
+                    return 0;
+                  }
+
+                  @Override
+                  public void setSize(int width, int height) {}
+
+                  @Override
+                  public Surface getSurface() {
+                    return null;
+                  }
+
+                  @Override
+                  public Surface getForcedNewSurface() {
+                    return null;
+                  }
+
+                  @Override
+                  public boolean handlesCropAndRotation() {
+                    return false;
+                  }
+
+                  public void scheduleFrame() {}
+                };
               }
-
-              @Override
-              public void release() {}
-
-              @Override
-              public int getWidth() {
-                return 0;
-              }
-
-              @Override
-              public int getHeight() {
-                return 0;
-              }
-
-              @Override
-              public void setSize(int width, int height) {}
-
-              @Override
-              public Surface getSurface() {
-                return null;
-              }
-
-              @Override
-              public boolean handlesCropAndRotation() {
-                return false;
-              }
-
-              public void scheduleFrame() {}
-            };
-          }
-        };
-
-    platformViewsController.attach(context, registry, executor);
+            });
 
     PlatformViewsController2 secondController = new PlatformViewsController2();
     secondController.setRegistry(new PlatformViewRegistryImpl());
+
+    PlatformViewsControllerDelegator platformViewsControllerDelegator =
+        new PlatformViewsControllerDelegator(platformViewsController, secondController);
 
     final FlutterEngine engine = mock(FlutterEngine.class);
     when(engine.getRenderer()).thenReturn(new FlutterRenderer(jni));
@@ -1712,12 +2025,14 @@ public class PlatformViewsControllerTest {
     when(engine.getScribeChannel()).thenReturn(mock(ScribeChannel.class));
     when(engine.getPlatformViewsController()).thenReturn(platformViewsController);
     when(engine.getPlatformViewsController2()).thenReturn(secondController);
+    when(engine.getPlatformViewsControllerDelegator()).thenReturn(platformViewsControllerDelegator);
     when(engine.getLocalizationPlugin()).thenReturn(mock(LocalizationPlugin.class));
     when(engine.getAccessibilityChannel()).thenReturn(mock(AccessibilityChannel.class));
     when(engine.getDartExecutor()).thenReturn(executor);
 
     flutterView.attachToFlutterEngine(engine);
     platformViewsController.attachToView(flutterView);
+    platformViewsControllerDelegator.attach(context, registry, executor);
   }
 
   /**

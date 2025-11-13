@@ -43,6 +43,7 @@ import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
+import io.flutter.plugin.platform.PlatformViewsControllerDelegator;
 import io.flutter.plugin.text.ProcessTextPlugin;
 import io.flutter.util.ViewUtils;
 import java.util.HashMap;
@@ -115,6 +116,7 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   // Platform Views.
   @NonNull private final PlatformViewsController platformViewsController;
   @NonNull private final PlatformViewsController2 platformViewsController2;
+  @NonNull private final PlatformViewsControllerDelegator platformViewsControllerDelegator;
 
   // Engine Lifecycle.
   @NonNull private final Set<EngineLifecycleListener> engineLifecycleListeners = new HashSet<>();
@@ -409,6 +411,9 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     this.platformViewsController = platformViewsController;
     this.platformViewsController2 = platformViewsController2;
 
+    this.platformViewsControllerDelegator =
+        new PlatformViewsControllerDelegator(platformViewsController, platformViewsController2);
+
     this.pluginRegistry =
         new FlutterEngineConnectionRegistry(
             context.getApplicationContext(), this, flutterLoader, group);
@@ -690,6 +695,11 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   @NonNull
   public PlatformViewsController2 getPlatformViewsController2() {
     return platformViewsController2;
+  }
+
+  @NonNull
+  public PlatformViewsControllerDelegator getPlatformViewsControllerDelegator() {
+    return platformViewsControllerDelegator;
   }
 
   @NonNull

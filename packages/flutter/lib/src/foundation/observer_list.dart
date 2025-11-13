@@ -106,7 +106,7 @@ class ObserverList<T> extends Iterable<T> {
 ///
 ///  * [ObserverList] for a list that is fast for small numbers of observers.
 class HashedObserverList<T> extends Iterable<T> {
-  final LinkedHashMap<T, int> _map = LinkedHashMap<T, int>();
+  final Map<T, int> _map = <T, int>{};
 
   /// Adds an item to the end of this list.
   ///

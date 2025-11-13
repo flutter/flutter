@@ -1,4 +1,8 @@
 #!/bin/bash
+#
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
 # This script requires depot_tools to be on path.
 
@@ -114,7 +118,7 @@ for platform in "${platforms[@]}"; do
     # for upload. sdkmanager creates extra files that we don't need.
     array_length=${#split[@]}
     for (( i=1; i<${array_length}; i++ )); do
-      cp -r "$sdk_root/${split[$i]}" "$upload_dir/sdk"
+      cp -a "$sdk_root/${split[$i]}" "$upload_dir/sdk"
     done
   done
 
@@ -137,7 +141,7 @@ for platform in "${platforms[@]}"; do
 
   # Accept all licenses to ensure they are generated and uploaded.
   yes "y" | $sdkmanager_path --licenses --sdk_root=$sdk_root
-  cp -r "$sdk_root/licenses" "$upload_dir/sdk"
+  cp -a "$sdk_root/licenses" "$upload_dir/sdk"
 
   archs=("amd64")
   if [[ $platform == "macosx" ]]; then

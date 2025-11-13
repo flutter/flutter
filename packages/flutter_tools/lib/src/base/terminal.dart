@@ -42,7 +42,7 @@ class OutputPreferences {
 
   /// The terminal width used by the [wrapText] function if there is no terminal
   /// attached to [io.Stdio], --wrap is on, and --wrap-columns was not specified.
-  static const int kDefaultTerminalColumns = 100;
+  static const kDefaultTerminalColumns = 100;
 
   /// The column at which output sent to the context's [Logger] instance,
   /// such as from the [Logger.printError] and [Logger.printStatus] functions,
@@ -174,30 +174,30 @@ class AnsiTerminal implements Terminal {
   final Platform _platform;
   final DateTime _now;
 
-  static const String bold = '\u001B[1m';
-  static const String resetAll = '\u001B[0m';
-  static const String resetColor = '\u001B[39m';
-  static const String resetBold = '\u001B[22m';
-  static const String clear = '\u001B[2J\u001B[H';
+  static const bold = '\u001B[1m';
+  static const resetAll = '\u001B[0m';
+  static const resetColor = '\u001B[39m';
+  static const resetBold = '\u001B[22m';
+  static const clear = '\u001B[2J\u001B[H';
 
-  static const String red = '\u001b[31m';
-  static const String green = '\u001b[32m';
-  static const String blue = '\u001b[34m';
-  static const String cyan = '\u001b[36m';
-  static const String magenta = '\u001b[35m';
-  static const String yellow = '\u001b[33m';
-  static const String grey = '\u001b[90m';
+  static const red = '\u001b[31m';
+  static const green = '\u001b[32m';
+  static const blue = '\u001b[34m';
+  static const cyan = '\u001b[36m';
+  static const magenta = '\u001b[35m';
+  static const yellow = '\u001b[33m';
+  static const grey = '\u001b[90m';
 
   // Moves cursor up 1 line.
-  static const String cursorUpLineCode = '\u001b[1A';
+  static const cursorUpLineCode = '\u001b[1A';
 
   // Moves cursor to the beginning of the line.
-  static const String cursorBeginningOfLineCode = '\u001b[1G';
+  static const cursorBeginningOfLineCode = '\u001b[1G';
 
   // Clear the entire line, cursor position does not change.
-  static const String clearEntireLineCode = '\u001b[2K';
+  static const clearEntireLineCode = '\u001b[2K';
 
-  static const Map<TerminalColor, String> _colorMap = <TerminalColor, String>{
+  static const _colorMap = <TerminalColor, String>{
     TerminalColor.red: red,
     TerminalColor.green: green,
     TerminalColor.blue: blue,
@@ -209,8 +209,11 @@ class AnsiTerminal implements Terminal {
 
   static String colorCode(TerminalColor color) => _colorMap[color]!;
 
+  // See https://no-color.org/.
+  bool get _noColorSet => _platform.environment.containsKey('NO_COLOR');
+
   @override
-  bool get supportsColor => _platform.stdoutSupportsAnsi;
+  bool get supportsColor => _platform.stdoutSupportsAnsi && !_noColorSet;
 
   @override
   bool get isCliAnimationEnabled => _isCliAnimationEnabled;
@@ -238,10 +241,10 @@ class AnsiTerminal implements Terminal {
     return _now.hour + workdays;
   }
 
-  final RegExp _boldControls = RegExp('(${RegExp.escape(resetBold)}|${RegExp.escape(bold)})');
+  final _boldControls = RegExp('(${RegExp.escape(resetBold)}|${RegExp.escape(bold)})');
 
   @override
-  bool usesTerminalUi = false;
+  var usesTerminalUi = false;
 
   @override
   String get warningMark {
@@ -258,7 +261,7 @@ class AnsiTerminal implements Terminal {
     if (!supportsColor || message.isEmpty) {
       return message;
     }
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     for (String line in message.split('\n')) {
       // If there were bolds or resetBolds in the string before, then nuke them:
       // they're redundant. This prevents previously embedded resets from
@@ -266,7 +269,7 @@ class AnsiTerminal implements Terminal {
       line = line.replaceAll(_boldControls, '');
       buffer.writeln('$bold$line$resetBold');
     }
-    final String result = buffer.toString();
+    final result = buffer.toString();
     // avoid introducing a new newline to the emboldened text
     return (!message.endsWith('\n') && result.endsWith('\n'))
         ? result.substring(0, result.length - 1)
@@ -278,7 +281,7 @@ class AnsiTerminal implements Terminal {
     if (!supportsColor || message.isEmpty) {
       return message;
     }
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     final String colorCodes = _colorMap[color]!;
     for (String line in message.split('\n')) {
       // If there were resets in the string before, then keep them, but
@@ -287,7 +290,7 @@ class AnsiTerminal implements Terminal {
       line = line.replaceAll(resetColor, '$resetColor$colorCodes');
       buffer.writeln('$colorCodes$line$resetColor');
     }
-    final String result = buffer.toString();
+    final result = buffer.toString();
     // avoid introducing a new newline to the colored text
     return (!message.endsWith('\n') && result.endsWith('\n'))
         ? result.substring(0, result.length - 1)
@@ -315,7 +318,7 @@ class AnsiTerminal implements Terminal {
     if (!_stdio.stdinHasTerminal) {
       return false;
     }
-    final io.Stdin stdin = _stdio.stdin as io.Stdin;
+    final stdin = _stdio.stdin as io.Stdin;
     return !stdin.lineMode && !stdin.echoMode;
   }
 
@@ -324,7 +327,7 @@ class AnsiTerminal implements Terminal {
     if (!_stdio.stdinHasTerminal) {
       return;
     }
-    final io.Stdin stdin = _stdio.stdin as io.Stdin;
+    final stdin = _stdio.stdin as io.Stdin;
 
     try {
       // The order of setting lineMode and echoMode is important on Windows.
@@ -348,8 +351,9 @@ class AnsiTerminal implements Terminal {
 
   @override
   Stream<String> get keystrokes {
-    return _broadcastStdInString ??=
-        _stdio.stdin.transform<String>(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
+    return _broadcastStdInString ??= _stdio.stdin
+        .transform<String>(const AsciiDecoder(allowInvalid: true))
+        .asBroadcastStream();
   }
 
   @override
@@ -365,7 +369,7 @@ class AnsiTerminal implements Terminal {
     if (!usesTerminalUi) {
       throw StateError('cannot prompt without a terminal ui');
     }
-    List<String> charactersToDisplay = acceptedCharacters;
+    var charactersToDisplay = acceptedCharacters;
     if (defaultChoiceIndex != null) {
       assert(defaultChoiceIndex >= 0 && defaultChoiceIndex < acceptedCharacters.length);
       charactersToDisplay = List<String>.of(charactersToDisplay);
@@ -398,7 +402,7 @@ class _TestTerminal implements Terminal {
   _TestTerminal({this.supportsColor = false, this.supportsEmoji = false});
 
   @override
-  bool usesTerminalUi = false;
+  var usesTerminalUi = false;
 
   @override
   String bolden(String message) => message;
@@ -434,7 +438,7 @@ class _TestTerminal implements Terminal {
   @override
   bool get isCliAnimationEnabled => supportsColor && _isCliAnimationEnabled;
 
-  bool _isCliAnimationEnabled = true;
+  var _isCliAnimationEnabled = true;
 
   @override
   void applyFeatureFlags(FeatureFlags flags) {

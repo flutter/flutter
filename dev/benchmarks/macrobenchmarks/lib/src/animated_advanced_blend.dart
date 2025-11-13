@@ -19,20 +19,18 @@ class _MultiplyPainter extends CustomPainter {
     for (int y = 0; y < yDenominator; y++) {
       for (int x = 0; x < xDenominator; x++) {
         final Rect rect = Offset(x * width, y * height) & Size(width, height);
-        final Paint basePaint =
-            Paint()
-              ..color = Color.fromARGB(
-                (((x + 1) * width) / size.width * 255.0).floor(),
-                (((y + 1) * height) / size.height * 255.0).floor(),
-                255,
-                127,
-              );
+        final Paint basePaint = Paint()
+          ..color = Color.fromARGB(
+            (((x + 1) * width) / size.width * 255.0).floor(),
+            (((y + 1) * height) / size.height * 255.0).floor(),
+            255,
+            127,
+          );
         canvas.drawRect(rect, basePaint);
 
-        final Paint multiplyPaint =
-            Paint()
-              ..color = _color
-              ..blendMode = BlendMode.multiply;
+        final Paint multiplyPaint = Paint()
+          ..color = _color
+          ..blendMode = BlendMode.multiply;
         canvas.drawRect(rect, multiplyPaint);
       }
     }
@@ -80,7 +78,9 @@ class _AnimatedAdvancedBlendState extends State<AnimatedAdvancedBlend>
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(body: CustomPaint(painter: _MultiplyPainter(_color), child: Container())),
+      home: Scaffold(
+        body: CustomPaint(painter: _MultiplyPainter(_color), child: Container()),
+      ),
     );
   }
 }

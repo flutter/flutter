@@ -60,15 +60,14 @@ Future<void> matchGoldenFile(String filename, {Rect? region}) async {
   }
   final Map<String, dynamic> serverParams = <String, dynamic>{
     'filename': filename,
-    'region':
-        region == null
-            ? null
-            : <String, dynamic>{
-              'x': region.left,
-              'y': region.top,
-              'width': region.width,
-              'height': region.height,
-            },
+    'region': region == null
+        ? null
+        : <String, dynamic>{
+            'x': region.left,
+            'y': region.top,
+            'width': region.width,
+            'height': region.height,
+          },
     // We use the renderer tag here rather than `renderer is CanvasKitRenderer`
     // because these unit tests operate on the post-transformed (sdk_rewriter)
     // sdk where the internal classes like `CanvasKitRenderer` are no longer

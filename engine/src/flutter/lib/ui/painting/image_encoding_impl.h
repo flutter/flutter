@@ -53,7 +53,7 @@ sk_sp<SkImage> ConvertToRasterUsingResourceContext(
     return nullptr;
   }
 
-  return snapshot->makeRasterImage();
+  return snapshot->makeRasterImage(resource_context.get());
 }
 
 }  // namespace flutter

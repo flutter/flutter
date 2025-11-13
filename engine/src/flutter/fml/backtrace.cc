@@ -10,12 +10,12 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
-#include "flutter/third_party/abseil-cpp/absl/debugging/symbolize.h"
+#include "third_party/abseil-cpp/absl/debugging/symbolize.h"
 
 #ifdef FML_OS_WIN
-#include <Windows.h>
 #include <crtdbg.h>
 #include <debugapi.h>
+#include "flutter/fml/platform/win/windows_shim.h"
 #else  // FML_OS_WIN
 #include <execinfo.h>
 #endif  // FML_OS_WIN

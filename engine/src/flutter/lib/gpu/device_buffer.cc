@@ -56,7 +56,7 @@ bool InternalFlutterGpu_DeviceBuffer_Initialize(
   desc.storage_mode = flutter::gpu::ToImpellerStorageMode(storage_mode);
   desc.size = size_in_bytes;
   auto device_buffer =
-      gpu_context->GetContext()->GetResourceAllocator()->CreateBuffer(desc);
+      gpu_context->GetContext().GetResourceAllocator()->CreateBuffer(desc);
   if (!device_buffer) {
     FML_LOG(ERROR) << "Failed to create device buffer.";
     return false;
@@ -82,7 +82,7 @@ bool InternalFlutterGpu_DeviceBuffer_InitializeWithHostData(
     auto mapping = fml::NonOwnedMapping(reinterpret_cast<uint8_t*>(data.data()),
                                         data.length_in_bytes());
     device_buffer =
-        gpu_context->GetContext()->GetResourceAllocator()->CreateBufferWithCopy(
+        gpu_context->GetContext().GetResourceAllocator()->CreateBufferWithCopy(
             mapping);
   }
   if (!device_buffer) {

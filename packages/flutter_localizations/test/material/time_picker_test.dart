@@ -6,6 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+final Finder dialCustomPaintFinder = find.descendant(
+  of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
+  matching: find.byType(CustomPaint),
+);
+
 void main() {
   testWidgets('Material2 - can localize the header in all known formats - portrait', (
     WidgetTester tester,
@@ -15,20 +20,17 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    final Finder timeSelectorSeparatorFinder =
-        find
-            .descendant(
-              of: find.byWidgetPredicate(
-                (Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator',
-              ),
-              matching: find.byType(Text),
-            )
-            .first;
-    final Finder hourControlFinder = find.byWidgetPredicate(
-      (Widget w) => '${w.runtimeType}' == '_HourControl',
+    final Finder timeSelectorSeparatorFinder = find
+        .descendant(
+          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator'),
+          matching: find.byType(Text),
+        )
+        .first;
+    final Finder dialHourControlFinder = find.byWidgetPredicate(
+      (Widget w) => '${w.runtimeType}' == '_DialHourControl',
     );
-    final Finder minuteControlFinder = find.byWidgetPredicate(
-      (Widget w) => '${w.runtimeType}' == '_MinuteControl',
+    final Finder dialMinuteControlFinder = find.byWidgetPredicate(
+      (Widget w) => '${w.runtimeType}' == '_DialMinuteControl',
     );
     final Finder dayPeriodControlFinder = find.byWidgetPredicate(
       (Widget w) => '${w.runtimeType}' == '_DayPeriodControl',
@@ -52,8 +54,8 @@ void main() {
         useMaterial3: false,
       );
       final Text stringFragmentText = tester.widget(timeSelectorSeparatorFinder);
-      final double hourLeftOffset = tester.getTopLeft(hourControlFinder).dx;
-      final double minuteLeftOffset = tester.getTopLeft(minuteControlFinder).dx;
+      final double hourLeftOffset = tester.getTopLeft(dialHourControlFinder).dx;
+      final double minuteLeftOffset = tester.getTopLeft(dialMinuteControlFinder).dx;
       final double stringFragmentLeftOffset = tester.getTopLeft(timeSelectorSeparatorFinder).dx;
 
       if (locale == const Locale('en', 'US')) {
@@ -103,20 +105,17 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    final Finder timeSelectorSeparatorFinder =
-        find
-            .descendant(
-              of: find.byWidgetPredicate(
-                (Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator',
-              ),
-              matching: find.byType(Text),
-            )
-            .first;
-    final Finder hourControlFinder = find.byWidgetPredicate(
-      (Widget w) => '${w.runtimeType}' == '_HourControl',
+    final Finder timeSelectorSeparatorFinder = find
+        .descendant(
+          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator'),
+          matching: find.byType(Text),
+        )
+        .first;
+    final Finder dialHourControlFinder = find.byWidgetPredicate(
+      (Widget w) => '${w.runtimeType}' == '_DialHourControl',
     );
-    final Finder minuteControlFinder = find.byWidgetPredicate(
-      (Widget w) => '${w.runtimeType}' == '_MinuteControl',
+    final Finder dialMinuteControlFinder = find.byWidgetPredicate(
+      (Widget w) => '${w.runtimeType}' == '_DialMinuteControl',
     );
     final Finder dayPeriodControlFinder = find.byWidgetPredicate(
       (Widget w) => '${w.runtimeType}' == '_DayPeriodControl',
@@ -140,8 +139,8 @@ void main() {
         useMaterial3: true,
       );
       final Text stringFragmentText = tester.widget(timeSelectorSeparatorFinder);
-      final double hourLeftOffset = tester.getTopLeft(hourControlFinder).dx;
-      final double minuteLeftOffset = tester.getTopLeft(minuteControlFinder).dx;
+      final double hourLeftOffset = tester.getTopLeft(dialHourControlFinder).dx;
+      final double minuteLeftOffset = tester.getTopLeft(dialMinuteControlFinder).dx;
       final double stringFragmentLeftOffset = tester.getTopLeft(timeSelectorSeparatorFinder).dx;
 
       if (locale == const Locale('en', 'US')) {
@@ -191,20 +190,17 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    final Finder timeSelectorSeparatorFinder =
-        find
-            .descendant(
-              of: find.byWidgetPredicate(
-                (Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator',
-              ),
-              matching: find.byType(Text),
-            )
-            .first;
-    final Finder hourControlFinder = find.byWidgetPredicate(
-      (Widget w) => '${w.runtimeType}' == '_HourControl',
+    final Finder timeSelectorSeparatorFinder = find
+        .descendant(
+          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator'),
+          matching: find.byType(Text),
+        )
+        .first;
+    final Finder dialHourControlFinder = find.byWidgetPredicate(
+      (Widget w) => '${w.runtimeType}' == '_DialHourControl',
     );
-    final Finder minuteControlFinder = find.byWidgetPredicate(
-      (Widget w) => '${w.runtimeType}' == '_MinuteControl',
+    final Finder dialMinuteControlFinder = find.byWidgetPredicate(
+      (Widget w) => '${w.runtimeType}' == '_DialMinuteControl',
     );
     final Finder dayPeriodControlFinder = find.byWidgetPredicate(
       (Widget w) => '${w.runtimeType}' == '_DayPeriodControl',
@@ -228,9 +224,9 @@ void main() {
         useMaterial3: false,
       );
       final Text stringFragmentText = tester.widget(timeSelectorSeparatorFinder);
-      final double hourLeftOffset = tester.getTopLeft(hourControlFinder).dx;
-      final double hourTopOffset = tester.getTopLeft(hourControlFinder).dy;
-      final double minuteLeftOffset = tester.getTopLeft(minuteControlFinder).dx;
+      final double hourLeftOffset = tester.getTopLeft(dialHourControlFinder).dx;
+      final double hourTopOffset = tester.getTopLeft(dialHourControlFinder).dy;
+      final double minuteLeftOffset = tester.getTopLeft(dialMinuteControlFinder).dx;
       final double stringFragmentLeftOffset = tester.getTopLeft(timeSelectorSeparatorFinder).dx;
 
       if (locale == const Locale('en', 'US')) {
@@ -284,20 +280,17 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    final Finder timeSelectorSeparatorFinder =
-        find
-            .descendant(
-              of: find.byWidgetPredicate(
-                (Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator',
-              ),
-              matching: find.byType(Text),
-            )
-            .first;
-    final Finder hourControlFinder = find.byWidgetPredicate(
-      (Widget w) => '${w.runtimeType}' == '_HourControl',
+    final Finder timeSelectorSeparatorFinder = find
+        .descendant(
+          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator'),
+          matching: find.byType(Text),
+        )
+        .first;
+    final Finder dialHourControlFinder = find.byWidgetPredicate(
+      (Widget w) => '${w.runtimeType}' == '_DialHourControl',
     );
-    final Finder minuteControlFinder = find.byWidgetPredicate(
-      (Widget w) => '${w.runtimeType}' == '_MinuteControl',
+    final Finder dialMinuteControlFinder = find.byWidgetPredicate(
+      (Widget w) => '${w.runtimeType}' == '_DialMinuteControl',
     );
     final Finder dayPeriodControlFinder = find.byWidgetPredicate(
       (Widget w) => '${w.runtimeType}' == '_DayPeriodControl',
@@ -321,9 +314,9 @@ void main() {
         useMaterial3: true,
       );
       final Text stringFragmentText = tester.widget(timeSelectorSeparatorFinder);
-      final double hourLeftOffset = tester.getTopLeft(hourControlFinder).dx;
-      final double hourTopOffset = tester.getTopLeft(hourControlFinder).dy;
-      final double minuteLeftOffset = tester.getTopLeft(minuteControlFinder).dx;
+      final double hourLeftOffset = tester.getTopLeft(dialHourControlFinder).dx;
+      final double hourTopOffset = tester.getTopLeft(dialHourControlFinder).dy;
+      final double minuteLeftOffset = tester.getTopLeft(dialMinuteControlFinder).dx;
       final double stringFragmentLeftOffset = tester.getTopLeft(timeSelectorSeparatorFinder).dx;
 
       if (locale == const Locale('en', 'US')) {
@@ -372,24 +365,21 @@ void main() {
   testWidgets('Material2 - can localize input mode in all known formats', (
     WidgetTester tester,
   ) async {
-    final Finder hourControlFinder = find.byWidgetPredicate(
+    final Finder inputHourControlFinder = find.byWidgetPredicate(
       (Widget w) => '${w.runtimeType}' == '_HourTextField',
     );
-    final Finder minuteControlFinder = find.byWidgetPredicate(
+    final Finder inputMinuteControlFinder = find.byWidgetPredicate(
       (Widget w) => '${w.runtimeType}' == '_MinuteTextField',
     );
     final Finder dayPeriodControlFinder = find.byWidgetPredicate(
       (Widget w) => '${w.runtimeType}' == '_DayPeriodControl',
     );
-    final Finder timeSelectorSeparatorFinder =
-        find
-            .descendant(
-              of: find.byWidgetPredicate(
-                (Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator',
-              ),
-              matching: find.byType(Text),
-            )
-            .first;
+    final Finder timeSelectorSeparatorFinder = find
+        .descendant(
+          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator'),
+          matching: find.byType(Text),
+        )
+        .first;
 
     // TODO(yjbanov): also test `HH.mm` (in_ID), `a h:mm` (ko_KR) and `HH:mm น.` (th_TH) when we have .arb files for them
     final List<Locale> locales = <Locale>[
@@ -414,8 +404,8 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
       final Text stringFragmentText = tester.widget(timeSelectorSeparatorFinder);
-      final double hourLeftOffset = tester.getTopLeft(hourControlFinder).dx;
-      final double minuteLeftOffset = tester.getTopLeft(minuteControlFinder).dx;
+      final double hourLeftOffset = tester.getTopLeft(inputHourControlFinder).dx;
+      final double minuteLeftOffset = tester.getTopLeft(inputMinuteControlFinder).dx;
       final double stringFragmentLeftOffset = tester.getTopLeft(timeSelectorSeparatorFinder).dx;
 
       if (locale == const Locale('en', 'US')) {
@@ -460,24 +450,21 @@ void main() {
   testWidgets('Material3 - can localize input mode in all known formats', (
     WidgetTester tester,
   ) async {
-    final Finder hourControlFinder = find.byWidgetPredicate(
+    final Finder inputHourControlFinder = find.byWidgetPredicate(
       (Widget w) => '${w.runtimeType}' == '_HourTextField',
     );
-    final Finder minuteControlFinder = find.byWidgetPredicate(
+    final Finder inputMinuteControlFinder = find.byWidgetPredicate(
       (Widget w) => '${w.runtimeType}' == '_MinuteTextField',
     );
     final Finder dayPeriodControlFinder = find.byWidgetPredicate(
       (Widget w) => '${w.runtimeType}' == '_DayPeriodControl',
     );
-    final Finder timeSelectorSeparatorFinder =
-        find
-            .descendant(
-              of: find.byWidgetPredicate(
-                (Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator',
-              ),
-              matching: find.byType(Text),
-            )
-            .first;
+    final Finder timeSelectorSeparatorFinder = find
+        .descendant(
+          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator'),
+          matching: find.byType(Text),
+        )
+        .first;
 
     // TODO(yjbanov): also test `HH.mm` (in_ID), `a h:mm` (ko_KR) and `HH:mm น.` (th_TH) when we have .arb files for them
     final List<Locale> locales = <Locale>[
@@ -502,8 +489,8 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
       final Text stringFragmentText = tester.widget(timeSelectorSeparatorFinder);
-      final double hourLeftOffset = tester.getTopLeft(hourControlFinder).dx;
-      final double minuteLeftOffset = tester.getTopLeft(minuteControlFinder).dx;
+      final double hourLeftOffset = tester.getTopLeft(inputHourControlFinder).dx;
+      final double minuteLeftOffset = tester.getTopLeft(inputMinuteControlFinder).dx;
       final double stringFragmentLeftOffset = tester.getTopLeft(timeSelectorSeparatorFinder).dx;
 
       if (locale == const Locale('en', 'US')) {
@@ -567,7 +554,7 @@ void main() {
           locale: locale,
           useMaterial3: false,
         );
-        final Size size = tester.getSize(find.byKey(const Key('time-picker-dial')));
+        final Size size = tester.getSize(dialCustomPaintFinder);
         final double dy = (size.height / 2.0 / 10) * i;
         await tester.tapAt(Offset(center.dx, center.dy - dy));
         await finishPicker(tester);
@@ -598,7 +585,7 @@ void main() {
           locale: locale,
           useMaterial3: true,
         );
-        final Size size = tester.getSize(find.byKey(const Key('time-picker-dial')));
+        final Size size = tester.getSize(dialCustomPaintFinder);
         final double dy = (size.height / 2.0 / 10) * factor;
         await tester.tapAt(Offset(center.dx, center.dy - dy));
         await finishPicker(tester);
@@ -740,9 +727,7 @@ void main() {
   ) async {
     await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: false, useMaterial3: false);
 
-    final CustomPaint dialPaint = tester.widget(
-      find.byKey(const ValueKey<String>('time-picker-dial')),
-    );
+    final CustomPaint dialPaint = tester.widget(dialCustomPaintFinder);
     final dynamic dialPainter = dialPaint.painter;
     // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
@@ -770,9 +755,7 @@ void main() {
   ) async {
     await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: false, useMaterial3: true);
 
-    final CustomPaint dialPaint = tester.widget(
-      find.byKey(const ValueKey<String>('time-picker-dial')),
-    );
+    final CustomPaint dialPaint = tester.widget(dialCustomPaintFinder);
     final dynamic dialPainter = dialPaint.painter;
     // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
@@ -800,9 +783,7 @@ void main() {
   ) async {
     await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: true, useMaterial3: true);
 
-    final CustomPaint dialPaint = tester.widget(
-      find.byKey(const ValueKey<String>('time-picker-dial')),
-    );
+    final CustomPaint dialPaint = tester.widget(dialCustomPaintFinder);
     final dynamic dialPainter = dialPaint.painter;
     // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
@@ -830,9 +811,7 @@ void main() {
   ) async {
     await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: true, useMaterial3: false);
 
-    final CustomPaint dialPaint = tester.widget(
-      find.byKey(const ValueKey<String>('time-picker-dial')),
-    );
+    final CustomPaint dialPaint = tester.widget(dialCustomPaintFinder);
     final dynamic dialPainter = dialPaint.painter;
     // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
@@ -968,7 +947,7 @@ Future<Offset> startPicker(
   );
   await tester.tap(find.text('X'));
   await tester.pumpAndSettle(const Duration(seconds: 1));
-  return tester.getCenter(find.byKey(const Key('time-picker-dial')));
+  return tester.getCenter(dialCustomPaintFinder);
 }
 
 Future<void> finishPicker(WidgetTester tester) async {

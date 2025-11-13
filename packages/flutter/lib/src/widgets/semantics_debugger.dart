@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' show CheckedState;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -226,8 +227,10 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     final List<String> annotations = <String>[];
 
     bool wantsTap = false;
-    if (data.flagsCollection.hasCheckedState) {
-      annotations.add(data.flagsCollection.isChecked ? 'checked' : 'unchecked');
+    if (data.flagsCollection.isChecked != CheckedState.none) {
+      annotations.add(
+        data.flagsCollection.isChecked == CheckedState.isTrue ? 'checked' : 'unchecked',
+      );
       wantsTap = true;
     }
     if (data.flagsCollection.isTextField) {
@@ -309,14 +312,12 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     final Rect rect = node.rect;
     canvas.save();
     canvas.clipRect(rect);
-    final TextPainter textPainter =
-        TextPainter()
-          ..text = TextSpan(style: labelStyle, text: message)
-          ..textDirection =
-              TextDirection
-                  .ltr // _getMessage always returns LTR text, even if node.label is RTL
-          ..textAlign = TextAlign.center
-          ..layout(maxWidth: rect.width);
+    final TextPainter textPainter = TextPainter()
+      ..text = TextSpan(style: labelStyle, text: message)
+      ..textDirection = TextDirection
+          .ltr // _getMessage always returns LTR text, even if node.label is RTL
+      ..textAlign = TextAlign.center
+      ..layout(maxWidth: rect.width);
 
     textPainter.paint(canvas, Alignment.center.inscribe(textPainter.size, rect).topLeft);
     textPainter.dispose();
@@ -336,6 +337,9 @@ class _SemanticsDebuggerPainter extends CustomPainter {
   }
 
   void _paint(Canvas canvas, SemanticsNode node, int rank, int indexInParent, int level) {
+    if (node.traversalChildIdentifier != null) {
+      return;
+    }
     canvas.save();
     if (node.transform != null) {
       canvas.transform(node.transform!.storage);
@@ -345,22 +349,19 @@ class _SemanticsDebuggerPainter extends CustomPainter {
       final Color lineColor = _colorForNode(indexInParent, level);
       final Rect innerRect = rect.deflate(rank * 1.0);
       if (innerRect.isEmpty) {
-        final Paint fill =
-            Paint()
-              ..color = lineColor
-              ..style = PaintingStyle.fill;
+        final Paint fill = Paint()
+          ..color = lineColor
+          ..style = PaintingStyle.fill;
         canvas.drawRect(rect, fill);
       } else {
-        final Paint fill =
-            Paint()
-              ..color = const Color(0xFFFFFFFF)
-              ..style = PaintingStyle.fill;
+        final Paint fill = Paint()
+          ..color = const Color(0xFFFFFFFF)
+          ..style = PaintingStyle.fill;
         canvas.drawRect(rect, fill);
-        final Paint line =
-            Paint()
-              ..strokeWidth = rank * 2.0
-              ..color = lineColor
-              ..style = PaintingStyle.stroke;
+        final Paint line = Paint()
+          ..strokeWidth = rank * 2.0
+          ..color = lineColor
+          ..style = PaintingStyle.stroke;
         canvas.drawRect(innerRect, line);
       }
       _paintMessage(canvas, node);

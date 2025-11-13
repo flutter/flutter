@@ -21,10 +21,12 @@ base class Texture extends NativeFieldWrapperClass1 {
     this.height,
     this.sampleCount,
     TextureCoordinateSystem coordinateSystem,
+    this.textureType,
     this.enableRenderTargetUsage,
     this.enableShaderReadUsage,
     this.enableShaderWriteUsage,
-  ) : _coordinateSystem = coordinateSystem {
+  ) : _gpuContext = gpuContext,
+      _coordinateSystem = coordinateSystem {
     if (sampleCount != 1 && sampleCount != 4) {
       throw Exception("Only a sample count of 1 or 4 is currently supported");
     }
@@ -36,17 +38,21 @@ base class Texture extends NativeFieldWrapperClass1 {
       height,
       sampleCount,
       coordinateSystem.index,
+      textureType.index,
       enableRenderTargetUsage,
       enableShaderReadUsage,
       enableShaderWriteUsage,
     );
   }
 
+  GpuContext _gpuContext;
+
   final StorageMode storageMode;
   final PixelFormat format;
   final int width;
   final int height;
   final int sampleCount;
+  final TextureType textureType;
 
   /// Enable using this texture as a render pass attachment.
   final bool enableRenderTargetUsage;
@@ -99,7 +105,7 @@ base class Texture extends NativeFieldWrapperClass1 {
         'The length of sourceBytes (bytes: ${sourceBytes.lengthInBytes}) must exactly match the size of the base mip level (bytes: ${baseMipSize})',
       );
     }
-    bool success = _overwrite(sourceBytes);
+    bool success = _overwrite(_gpuContext, sourceBytes);
     if (!success) {
       throw Exception("Texture overwrite failed");
     }
@@ -125,6 +131,7 @@ base class Texture extends NativeFieldWrapperClass1 {
       Int,
       Int,
       Int,
+      Int,
       Bool,
       Bool,
       Bool,
@@ -138,6 +145,7 @@ base class Texture extends NativeFieldWrapperClass1 {
     int height,
     int sampleCount,
     int coordinateSystem,
+    int textureType,
     bool enableRenderTargetUsage,
     bool enableShaderReadUsage,
     bool enableShaderWriteUsage,
@@ -153,10 +161,10 @@ base class Texture extends NativeFieldWrapperClass1 {
   )
   external int _bytesPerTexel();
 
-  @Native<Bool Function(Pointer<Void>, Handle)>(
+  @Native<Bool Function(Pointer<Void>, Pointer<Void>, Handle)>(
     symbol: 'InternalFlutterGpu_Texture_Overwrite',
   )
-  external bool _overwrite(ByteData bytes);
+  external bool _overwrite(GpuContext gpuContext, ByteData bytes);
 
   @Native<Handle Function(Pointer<Void>)>(
     symbol: 'InternalFlutterGpu_Texture_AsImage',

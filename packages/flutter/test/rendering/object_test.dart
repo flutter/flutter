@@ -174,10 +174,9 @@ void main() {
   test('ContainerParentDataMixin requires nulled out pointers to siblings before detach', () {
     expect(() => TestParentData().detach(), isNot(throwsAssertionError));
 
-    final TestParentData data1 =
-        TestParentData()
-          ..nextSibling = RenderOpacity()
-          ..previousSibling = RenderOpacity();
+    final TestParentData data1 = TestParentData()
+      ..nextSibling = RenderOpacity()
+      ..previousSibling = RenderOpacity();
     expect(() => data1.detach(), throwsAssertionError);
 
     final TestParentData data2 = TestParentData()..previousSibling = RenderOpacity();
@@ -532,6 +531,11 @@ void main() {
         ),
       ),
     );
+  });
+
+  test('PictureRecorder getter', () {
+    final PaintingContext context = PaintingContext(ContainerLayer(), Rect.zero);
+    expect(context.recorder.isRecording, isTrue);
   });
 }
 

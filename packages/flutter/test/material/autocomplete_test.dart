@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/semantics_tester.dart';
+
 class User {
   const User({required this.email, required this.name});
 
@@ -210,14 +212,15 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController textEditingController,
-              FocusNode focusNode,
-              VoidCallback onFieldSubmitted,
-            ) {
-              return Container(key: fieldKey);
-            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController textEditingController,
+                  FocusNode focusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  return Container(key: fieldKey);
+                },
           ),
         ),
       ),
@@ -239,13 +242,14 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options,
-            ) {
-              return Container(key: optionsKey);
-            },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       ),
@@ -545,10 +549,9 @@ void main() {
           ),
         ),
       );
-      final OptionsViewOpenDirection actual =
-          tester
-              .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
-              .optionsViewOpenDirection;
+      final OptionsViewOpenDirection actual = tester
+          .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
+          .optionsViewOpenDirection;
       expect(actual, equals(OptionsViewOpenDirection.down));
     });
 
@@ -557,17 +560,16 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Autocomplete<String>(
-              optionsViewOpenDirection:
-                  OptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
+              // ignore: avoid_redundant_argument_values
+              optionsViewOpenDirection: OptionsViewOpenDirection.down,
               optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
             ),
           ),
         ),
       );
-      final OptionsViewOpenDirection actual =
-          tester
-              .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
-              .optionsViewOpenDirection;
+      final OptionsViewOpenDirection actual = tester
+          .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
+          .optionsViewOpenDirection;
       expect(actual, equals(OptionsViewOpenDirection.down));
     });
 
@@ -584,16 +586,100 @@ void main() {
           ),
         ),
       );
-      final OptionsViewOpenDirection actual =
-          tester
-              .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
-              .optionsViewOpenDirection;
+      final OptionsViewOpenDirection actual = tester
+          .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
+          .optionsViewOpenDirection;
       expect(actual, equals(OptionsViewOpenDirection.up));
 
       await tester.tap(find.byType(RawAutocomplete<String>));
       await tester.enterText(find.byType(RawAutocomplete<String>), 'a');
       await tester.pump();
       expect(find.text('aa').hitTestable(), findsOneWidget);
+    });
+
+    testWidgets('automatic: open in the direction with more space', (WidgetTester tester) async {
+      final GlobalKey fieldKey = GlobalKey();
+      final GlobalKey optionsKey = GlobalKey();
+      late StateSetter setState;
+      Alignment alignment = Alignment.topCenter;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return Align(
+                  alignment: alignment,
+                  child: Autocomplete<String>(
+                    optionsViewOpenDirection: OptionsViewOpenDirection.mostSpace,
+                    optionsBuilder: (TextEditingValue textEditingValue) => <String>['a', 'b', 'c'],
+                    fieldViewBuilder:
+                        (
+                          BuildContext context,
+                          TextEditingController controller,
+                          FocusNode focusNode,
+                          VoidCallback onFieldSubmitted,
+                        ) {
+                          return TextField(
+                            key: fieldKey,
+                            controller: controller,
+                            focusNode: focusNode,
+                          );
+                        },
+                    optionsViewBuilder:
+                        (
+                          BuildContext context,
+                          AutocompleteOnSelected<String> onSelected,
+                          Iterable<String> options,
+                        ) {
+                          return Material(
+                            child: ListView(
+                              key: optionsKey,
+                              children: options.map((String option) => Text(option)).toList(),
+                            ),
+                          );
+                        },
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Show the options. It should open downwards since there is more space.
+      await tester.tap(find.byKey(fieldKey));
+      await tester.pump();
+
+      expect(
+        tester.getBottomLeft(find.byKey(fieldKey)),
+        offsetMoreOrLessEquals(tester.getTopLeft(find.byKey(optionsKey))),
+      );
+
+      // Move the field to the bottom.
+      setState(() {
+        alignment = Alignment.bottomCenter;
+      });
+      await tester.pump();
+
+      // The options should now open upwards, since there is more space above.
+      expect(
+        tester.getTopLeft(find.byKey(fieldKey)),
+        offsetMoreOrLessEquals(tester.getBottomLeft(find.byKey(optionsKey))),
+      );
+
+      // Move the field to the center.
+      setState(() {
+        alignment = Alignment.center;
+      });
+      await tester.pump();
+
+      // Show the options. It should open downwards since there is more space.
+      expect(
+        tester.getBottomLeft(find.byKey(fieldKey)),
+        offsetMoreOrLessEquals(tester.getTopLeft(find.byKey(optionsKey))),
+      );
     });
   });
 
@@ -647,5 +733,177 @@ void main() {
     expect(optionFinder(0), findsOneWidget);
     expect(optionFinder(kOptions.length - 1), findsNothing);
     checkOptionHighlight(tester, kOptions.first, highlightColor);
+  });
+
+  testWidgets(
+    'passes textEditingController, focusNode to textEditingController, focusNode RawAutocomplete',
+    (WidgetTester tester) async {
+      final TextEditingController textEditingController = TextEditingController();
+      final FocusNode focusNode = FocusNode();
+      addTearDown(textEditingController.dispose);
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: Autocomplete<String>(
+                focusNode: focusNode,
+                textEditingController: textEditingController,
+                optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final RawAutocomplete<String> rawAutocomplete = tester.widget(
+        find.byType(RawAutocomplete<String>),
+      );
+      expect(rawAutocomplete.textEditingController, textEditingController);
+      expect(rawAutocomplete.focusNode, focusNode);
+    },
+  );
+
+  testWidgets('when field scrolled offscreen, reshown selected value when scrolled back', (
+    WidgetTester tester,
+  ) async {
+    final ScrollController scrollController = ScrollController();
+    final TextEditingController textEditingController = TextEditingController();
+    final FocusNode focusNode = FocusNode();
+    addTearDown(textEditingController.dispose);
+    addTearDown(focusNode.dispose);
+    addTearDown(scrollController.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ListView(
+            controller: scrollController,
+            children: <Widget>[
+              Autocomplete<String>(
+                focusNode: focusNode,
+                textEditingController: textEditingController,
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  return kOptions.where((String option) {
+                    return option.contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+              ),
+              const SizedBox(height: 1000.0),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    /// Select an option.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    const String textSelection = 'chameleon';
+    await tester.tap(find.text(textSelection));
+
+    // Unfocus and scroll to deconstruct the widge
+    final TextField field = find.byType(TextField).evaluate().first.widget as TextField;
+    field.focusNode?.unfocus();
+    scrollController.jumpTo(2000.0);
+    await tester.pumpAndSettle();
+
+    /// Scroll to go back to the widget.
+    scrollController.jumpTo(0.0);
+    await tester.pumpAndSettle();
+
+    /// Checks that the option selected is still present.
+    final TextField field2 = find.byType(TextField).evaluate().first.widget as TextField;
+    expect(field2.controller!.text, textSelection);
+  });
+
+  testWidgets('Autocomplete suggestions are hit-tested before ListTiles', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              Autocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  const List<String> options = <String>['Apple', 'Banana', 'Cherry'];
+                  return options.where(
+                    (String option) => option.toLowerCase().contains(textEditingValue.text),
+                  );
+                },
+              ),
+              for (int i = 0; i < 3; i++) ListTile(title: Text('Item $i'), onTap: () {}),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    final Finder cherryFinder = find.text('Cherry');
+    expect(cherryFinder, findsOneWidget);
+
+    await tester.tap(cherryFinder);
+    await tester.pump();
+
+    expect(find.widgetWithText(TextField, 'Cherry'), findsOneWidget);
+    semantics.dispose();
+  });
+
+  testWidgets('Autocomplete renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(
+              body: Autocomplete<String>(
+                initialValue: const TextEditingValue(text: 'X'),
+                optionsBuilder: (TextEditingValue textEditingValue) => <String>['Y'],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText), Size.zero);
+  });
+
+  testWidgets('autocomplete options have button semantics', (WidgetTester tester) async {
+    const Color highlightColor = Color(0xFF112233);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(focusColor: highlightColor),
+        home: Scaffold(
+          body: Autocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    await tester.enterText(find.byType(TextField), 'aa');
+    await tester.pump();
+    expect(
+      tester.getSemantics(find.text('aardvark')),
+      matchesSemantics(
+        isButton: true,
+        isFocusable: true,
+        hasTapAction: true,
+        hasFocusAction: true,
+        label: 'aardvark',
+      ),
+    );
   });
 }

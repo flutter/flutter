@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_2_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_2_H_
 
+#include <atomic>
 #include <unordered_map>
 
 #include "flutter/common/task_runners.h"
@@ -13,6 +14,7 @@
 #include "flutter/shell/platform/android/external_view_embedder/surface_pool.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
+#include "third_party/abseil-cpp/absl/container/flat_hash_set.h"
 
 namespace flutter {
 
@@ -66,7 +68,7 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
                       raster_thread_merger) override;
 
   // |ExternalViewEmbedder|
-  void PrepareFlutterView(SkISize frame_size,
+  void PrepareFlutterView(DlISize frame_size,
                           double device_pixel_ratio) override;
 
   // |ExternalViewEmbedder|
@@ -85,7 +87,7 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
 
   // Gets the rect based on the device pixel ratio of a platform view displayed
   // on the screen.
-  static SkRect GetViewRect(
+  static DlRect GetViewRect(
       int64_t view_id,
       const std::unordered_map<int64_t, EmbeddedViewParams>& view_params);
 
@@ -112,8 +114,11 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   // The task runners.
   const TaskRunners task_runners_;
 
+  // If the overlay layer is currently shown.
+  std::atomic_bool overlay_layer_is_shown_{false};
+
   // The size of the root canvas.
-  SkISize frame_size_;
+  DlISize frame_size_;
 
   // The pixel ratio used to determinate the size of a platform view layer
   // relative to the device layout system.
@@ -132,8 +137,8 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   // mutation stack.
   std::unordered_map<int64_t, EmbeddedViewParams> view_params_;
 
-  // The number of platform views in the previous frame.
-  int64_t previous_frame_view_count_;
+  // The set of platform views that were visible in the last frame.
+  absl::flat_hash_set<int64_t> views_visible_last_frame_;
 
   // Destroys the surfaces created from the surface factory.
   // This method schedules a task on the platform thread, and waits for
@@ -145,6 +150,13 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
 
   // Whether the layer tree in the current frame has platform layers.
   bool FrameHasPlatformLayers();
+
+  // Shows the overlay layer if it has content and the previous frame did not.
+  void ShowOverlayLayerIfNeeded();
+
+  // Hides the overlay layer if it does not have content and the previous
+  // frame did have content.
+  void HideOverlayLayerIfNeeded();
 };
 
 }  // namespace flutter

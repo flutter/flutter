@@ -45,7 +45,8 @@ void main() {
 
     // Anonymous closures cannot be looked up.
     final Function anon = // ignore: prefer_function_declarations_over_variables
-        (int a, int b) => a + b;
+    (int a, int b) =>
+        a + b;
     expect(PluginUtilities.getCallbackHandle(anon), isNull);
   });
 }

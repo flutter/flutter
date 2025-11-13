@@ -20,7 +20,7 @@ import '../src/common.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fakes.dart' hide FakeProcess;
 
-const List<String> kChromeArgs = <String>[
+const kChromeArgs = <String>[
   '--disable-background-timer-throttling',
   '--disable-extensions',
   '--disable-popup-blocking',
@@ -30,11 +30,12 @@ const List<String> kChromeArgs = <String>[
   '--disable-default-apps',
   '--disable-translate',
   '--disable-search-engine-choice-screen',
+  '--no-sandbox',
 ];
 
-const List<String> kCodeCache = <String>['Cache', 'Code Cache', 'GPUCache'];
+const kCodeCache = <String>['Cache', 'Code Cache', 'GPUCache'];
 
-const String kDevtoolsStderr = '\n\nDevTools listening\n\n';
+const kDevtoolsStderr = '\n\nDevTools listening\n\n';
 
 void main() {
   late FileExceptionHandler exceptionHandler;
@@ -165,13 +166,13 @@ void main() {
   });
 
   testWithoutContext('exits normally using SIGTERM', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final FakeAsync fakeAsync = FakeAsync();
+    final logger = BufferLogger.test();
+    final fakeAsync = FakeAsync();
 
     fakeAsync.run((_) {
       () async {
-        final FakeChromeConnection chromeConnection = FakeChromeConnection(maxRetries: 4);
-        final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+        final chromeConnection = FakeChromeConnection(maxRetries: 4);
+        final chromiumLauncher = ChromiumLauncher(
           fileSystem: fileSystem,
           platform: platform,
           processManager: processManager,
@@ -180,9 +181,9 @@ void main() {
           logger: logger,
         );
 
-        final FakeProcess process = FakeProcess(duration: const Duration(seconds: 3));
+        final process = FakeProcess(duration: const Duration(seconds: 3));
 
-        final Chromium chrome = Chromium(
+        final chrome = Chromium(
           0,
           chromeConnection,
           chromiumLauncher: chromiumLauncher,
@@ -203,13 +204,13 @@ void main() {
   });
 
   testWithoutContext('falls back to SIGKILL if SIGTERM did not work', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final FakeAsync fakeAsync = FakeAsync();
+    final logger = BufferLogger.test();
+    final fakeAsync = FakeAsync();
 
     fakeAsync.run((_) {
       () async {
-        final FakeChromeConnection chromeConnection = FakeChromeConnection(maxRetries: 4);
-        final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+        final chromeConnection = FakeChromeConnection(maxRetries: 4);
+        final chromiumLauncher = ChromiumLauncher(
           fileSystem: fileSystem,
           platform: platform,
           processManager: processManager,
@@ -218,9 +219,9 @@ void main() {
           logger: logger,
         );
 
-        final FakeProcess process = FakeProcess(duration: const Duration(seconds: 6));
+        final process = FakeProcess(duration: const Duration(seconds: 6));
 
-        final Chromium chrome = Chromium(
+        final chrome = Chromium(
           0,
           chromeConnection,
           chromiumLauncher: chromiumLauncher,
@@ -247,13 +248,13 @@ void main() {
   });
 
   testWithoutContext('falls back to a warning if SIGKILL did not work', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final FakeAsync fakeAsync = FakeAsync();
+    final logger = BufferLogger.test();
+    final fakeAsync = FakeAsync();
 
     fakeAsync.run((_) {
       () async {
-        final FakeChromeConnection chromeConnection = FakeChromeConnection(maxRetries: 4);
-        final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+        final chromeConnection = FakeChromeConnection(maxRetries: 4);
+        final chromiumLauncher = ChromiumLauncher(
           fileSystem: fileSystem,
           platform: platform,
           processManager: processManager,
@@ -262,9 +263,9 @@ void main() {
           logger: logger,
         );
 
-        final FakeProcess process = FakeProcess(duration: const Duration(seconds: 20));
+        final process = FakeProcess(duration: const Duration(seconds: 20));
 
-        final Chromium chrome = Chromium(
+        final chrome = Chromium(
           0,
           chromeConnection,
           chromiumLauncher: chromiumLauncher,
@@ -295,7 +296,7 @@ void main() {
   testWithoutContext(
     'does not crash if saving profile information fails due to a file system exception.',
     () async {
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
       chromeLauncher = ChromiumLauncher(
         fileSystem: fileSystem,
         platform: platform,
@@ -325,7 +326,7 @@ void main() {
 
       // Create cache dir that the Chrome launcher will attempt to persist, and a file
       // that will thrown an exception when it is read.
-      const String directoryPrefix = '/.tmp_rand0/flutter_tools_chrome_device.rand0/Default';
+      const directoryPrefix = '/.tmp_rand0/flutter_tools_chrome_device.rand0/Default';
       fileSystem.directory('$directoryPrefix/Local Storage').createSync(recursive: true);
       final File file = fileSystem.file('$directoryPrefix/Local Storage/foo')
         ..createSync(recursive: true);
@@ -339,7 +340,7 @@ void main() {
   testWithoutContext(
     'does not crash if restoring profile information fails due to a file system exception.',
     () async {
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
       final File file = fileSystem.file('/Default/foo')..createSync(recursive: true);
       exceptionHandler.addError(file, FileSystemOp.read, const FileSystemException());
       chromeLauncher = ChromiumLauncher(
@@ -385,7 +386,7 @@ void main() {
     final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(
       hostPlatform: HostPlatform.darwin_x64,
     );
-    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+    final chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
       processManager: processManager,
@@ -414,7 +415,7 @@ void main() {
     final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(
       hostPlatform: HostPlatform.darwin_arm64,
     );
-    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+    final chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
       processManager: processManager,
@@ -447,7 +448,7 @@ void main() {
     final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(
       hostPlatform: HostPlatform.darwin_arm64,
     );
-    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+    final chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
       processManager: processManager,
@@ -537,7 +538,6 @@ void main() {
           ...kChromeArgs,
           '--headless',
           '--disable-gpu',
-          '--no-sandbox',
           '--window-size=2400,1800',
           'example_url',
         ],
@@ -553,7 +553,7 @@ void main() {
   testWithoutContext(
     'can seed chrome temp directory with existing session data, excluding Cache folder',
     () async {
-      final Completer<void> exitCompleter = Completer<void>.sync();
+      final exitCompleter = Completer<void>.sync();
       final Directory dataDir = fileSystem.directory('chrome-stuff');
       final File preferencesFile = dataDir.childDirectory('Default').childFile('preferences');
       preferencesFile
@@ -616,20 +616,19 @@ void main() {
   );
 
   testWithoutContext('can retry launch when glibc bug happens', () async {
-    const List<String> args = <String>[
+    const args = <String>[
       'example_chrome',
       '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
       '--remote-debugging-port=12345',
       ...kChromeArgs,
       '--headless',
       '--disable-gpu',
-      '--no-sandbox',
       '--window-size=2400,1800',
       'example_url',
     ];
 
     // Pretend to hit glibc bug 3 times.
-    for (int i = 0; i < 3; i++) {
+    for (var i = 0; i < 3; i++) {
       processManager.addCommand(
         const FakeCommand(
           command: args,
@@ -650,20 +649,19 @@ void main() {
   });
 
   testWithoutContext('can retry launch when chrome fails to start', () async {
-    const List<String> args = <String>[
+    const args = <String>[
       'example_chrome',
       '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
       '--remote-debugging-port=12345',
       ...kChromeArgs,
       '--headless',
       '--disable-gpu',
-      '--no-sandbox',
       '--window-size=2400,1800',
       'example_url',
     ];
 
     // Pretend to random error 3 times.
-    for (int i = 0; i < 3; i++) {
+    for (var i = 0; i < 3; i++) {
       processManager.addCommand(const FakeCommand(command: args, stderr: 'BLAH BLAH'));
     }
 
@@ -676,8 +674,8 @@ void main() {
   });
 
   testWithoutContext('gives up retrying when an error happens more than 3 times', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+    final logger = BufferLogger.test();
+    final chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
       processManager: processManager,
@@ -685,7 +683,7 @@ void main() {
       browserFinder: findChromeExecutable,
       logger: logger,
     );
-    for (int i = 0; i < 4; i++) {
+    for (var i = 0; i < 4; i++) {
       processManager.addCommand(
         const FakeCommand(
           command: <String>[
@@ -695,7 +693,6 @@ void main() {
             ...kChromeArgs,
             '--headless',
             '--disable-gpu',
-            '--no-sandbox',
             '--window-size=2400,1800',
             'example_url',
           ],
@@ -712,8 +709,8 @@ void main() {
   });
 
   testWithoutContext('Logs an error and exits if connection check fails.', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+    final logger = BufferLogger.test();
+    final chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
       processManager: processManager,
@@ -742,9 +739,9 @@ void main() {
   });
 
   testWithoutContext('can recover if getTabs throws a connection exception', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final FakeChromeConnection chromeConnection = FakeChromeConnection(maxRetries: 4);
-    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+    final logger = BufferLogger.test();
+    final chromeConnection = FakeChromeConnection(maxRetries: 4);
+    final chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
       processManager: processManager,
@@ -752,8 +749,8 @@ void main() {
       browserFinder: findChromeExecutable,
       logger: logger,
     );
-    final FakeProcess process = FakeProcess();
-    final Chromium chrome = Chromium(
+    final process = FakeProcess();
+    final chrome = Chromium(
       0,
       chromeConnection,
       chromiumLauncher: chromiumLauncher,
@@ -765,15 +762,15 @@ void main() {
   });
 
   testWithoutContext('can recover if getTabs throws an HttpException', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final FakeChromeConnection chromeConnection = FakeChromeConnection(
+    final logger = BufferLogger.test();
+    final chromeConnection = FakeChromeConnection(
       maxRetries: 4,
       error: io.HttpException(
         'Connection closed before full header was received',
         uri: Uri.parse('http://localhost:52097/json'),
       ),
     );
-    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+    final chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
       processManager: processManager,
@@ -781,8 +778,8 @@ void main() {
       browserFinder: findChromeExecutable,
       logger: logger,
     );
-    final FakeProcess process = FakeProcess();
-    final Chromium chrome = Chromium(
+    final process = FakeProcess();
+    final chrome = Chromium(
       0,
       chromeConnection,
       chromiumLauncher: chromiumLauncher,
@@ -794,13 +791,13 @@ void main() {
   });
 
   testWithoutContext('chrome.close can recover if getTab throws a StateError', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final FakeChromeConnectionWithTab chromeConnection = FakeChromeConnectionWithTab(
+    final logger = BufferLogger.test();
+    final chromeConnection = FakeChromeConnectionWithTab(
       onGetTab: () {
         throw StateError('Client is closed.');
       },
     );
-    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+    final chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
       processManager: processManager,
@@ -808,8 +805,8 @@ void main() {
       browserFinder: findChromeExecutable,
       logger: logger,
     );
-    final FakeProcess process = FakeProcess();
-    final Chromium chrome = Chromium(
+    final process = FakeProcess();
+    final chrome = Chromium(
       0,
       chromeConnection,
       chromiumLauncher: chromiumLauncher,
@@ -822,9 +819,9 @@ void main() {
   });
 
   testWithoutContext('exits if getTabs throws a connection exception consistently', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final FakeChromeConnection chromeConnection = FakeChromeConnection();
-    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+    final logger = BufferLogger.test();
+    final chromeConnection = FakeChromeConnection();
+    final chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
       processManager: processManager,
@@ -832,8 +829,8 @@ void main() {
       browserFinder: findChromeExecutable,
       logger: logger,
     );
-    final FakeProcess process = FakeProcess();
-    final Chromium chrome = Chromium(
+    final process = FakeProcess();
+    final chrome = Chromium(
       0,
       chromeConnection,
       chromiumLauncher: chromiumLauncher,
@@ -851,16 +848,14 @@ void main() {
   });
 
   testWithoutContext('Chromium close sends browser close command', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final List<String> commands = <String>[];
+    final logger = BufferLogger.test();
+    final commands = <String>[];
     void onSendCommand(String cmd) {
       commands.add(cmd);
     }
 
-    final FakeChromeConnectionWithTab chromeConnection = FakeChromeConnectionWithTab(
-      onSendCommand: onSendCommand,
-    );
-    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+    final chromeConnection = FakeChromeConnectionWithTab(onSendCommand: onSendCommand);
+    final chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
       processManager: processManager,
@@ -868,8 +863,8 @@ void main() {
       browserFinder: findChromeExecutable,
       logger: logger,
     );
-    final FakeProcess process = FakeProcess();
-    final Chromium chrome = Chromium(
+    final process = FakeProcess();
+    final chrome = Chromium(
       0,
       chromeConnection,
       chromiumLauncher: chromiumLauncher,
@@ -884,9 +879,9 @@ void main() {
   testWithoutContext(
     'Chromium close handles a SocketException when connecting to Chrome',
     () async {
-      final BufferLogger logger = BufferLogger.test();
-      final FakeChromeConnectionWithTab chromeConnection = FakeChromeConnectionWithTab();
-      final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      final logger = BufferLogger.test();
+      final chromeConnection = FakeChromeConnectionWithTab();
+      final chromiumLauncher = ChromiumLauncher(
         fileSystem: fileSystem,
         platform: platform,
         processManager: processManager,
@@ -894,8 +889,8 @@ void main() {
         browserFinder: findChromeExecutable,
         logger: logger,
       );
-      final FakeProcess process = FakeProcess();
-      final Chromium chrome = Chromium(
+      final process = FakeProcess();
+      final chrome = Chromium(
         0,
         chromeConnection,
         chromiumLauncher: chromiumLauncher,
@@ -911,11 +906,9 @@ void main() {
   testWithoutContext(
     'Chromium close handles a WebSocketException when closing the WipConnection',
     () async {
-      final BufferLogger logger = BufferLogger.test();
-      final FakeChromeConnectionWithTab chromeConnection = FakeChromeConnectionWithTab(
-        throwWebSocketException: true,
-      );
-      final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      final logger = BufferLogger.test();
+      final chromeConnection = FakeChromeConnectionWithTab(throwWebSocketException: true);
+      final chromiumLauncher = ChromiumLauncher(
         fileSystem: fileSystem,
         platform: platform,
         processManager: processManager,
@@ -923,8 +916,8 @@ void main() {
         browserFinder: findChromeExecutable,
         logger: logger,
       );
-      final FakeProcess process = FakeProcess();
-      final Chromium chrome = Chromium(
+      final process = FakeProcess();
+      final chrome = Chromium(
         0,
         chromeConnection,
         chromiumLauncher: chromiumLauncher,
@@ -935,6 +928,30 @@ void main() {
       await chrome.close();
     },
   );
+
+  testWithoutContext('respects custom user data directory flag', () async {
+    const customUserDataDir = '/custom/chrome/data/dir';
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'example_chrome',
+          '--user-data-dir=$customUserDataDir',
+          '--remote-debugging-port=12345',
+          ...kChromeArgs,
+          'example_url',
+        ],
+        stderr: kDevtoolsStderr,
+      ),
+    );
+
+    await expectReturnsNormallyLater(
+      chromeLauncher.launch(
+        'example_url',
+        skipCheck: true,
+        webBrowserFlags: <String>['--user-data-dir=$customUserDataDir'],
+      ),
+    );
+  });
 }
 
 /// Fake chrome connection that fails to get tabs a few times.
@@ -952,7 +969,7 @@ class FakeChromeConnection extends Fake implements ChromeConnection {
         );
   }
 
-  final List<ChromeTab> tabs = <ChromeTab>[];
+  final tabs = <ChromeTab>[];
   final int? maxRetries;
   int _retries;
   late final Object error;
@@ -988,7 +1005,7 @@ class FakeChromeConnectionWithTab extends Fake implements ChromeConnection {
 
   final FakeChromeTab _tab;
   void Function()? onGetTab;
-  bool throwSocketExceptions = false;
+  var throwSocketExceptions = false;
 
   @override
   Future<ChromeTab?> getTab(bool Function(ChromeTab tab) accept, {Duration? retryFor}) async {

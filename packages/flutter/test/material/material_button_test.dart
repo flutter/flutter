@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -465,7 +466,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test default cursor when disabled
@@ -525,8 +526,8 @@ void main() {
     // Painter is translated to the center by the Center widget and not
     // the Material widget.
     const Rect expectedClipRect = Rect.fromLTRB(0.0, 0.0, 88.0, 36.0);
-    final Path expectedClipPath =
-        Path()..addRRect(RRect.fromRectAndRadius(expectedClipRect, const Radius.circular(2.0)));
+    final Path expectedClipPath = Path()
+      ..addRRect(RRect.fromRectAndRadius(expectedClipRect, const Radius.circular(2.0)));
     expect(
       Material.of(tester.element(find.byType(InkWell))),
       paints
@@ -639,11 +640,11 @@ void main() {
 
       const Rect expectedButtonSize = Rect.fromLTRB(0.0, 0.0, 116.0, 48.0);
       // Button is in center of screen
-      final Matrix4 expectedButtonTransform =
-          Matrix4.identity()..translate(
-            TestSemantics.fullScreen.width / 2 - expectedButtonSize.width / 2,
-            TestSemantics.fullScreen.height / 2 - expectedButtonSize.height / 2,
-          );
+      final Matrix4 expectedButtonTransform = Matrix4.identity()
+        ..translate(
+          TestSemantics.fullScreen.width / 2 - expectedButtonSize.width / 2,
+          TestSemantics.fullScreen.height / 2 - expectedButtonSize.height / 2,
+        );
 
       // enabled button
       await tester.pumpWidget(
@@ -873,15 +874,14 @@ void main() {
                 visualDensity: visualDensity,
                 key: key,
                 onPressed: () {},
-                child:
-                    useText
-                        ? const Text('Text', key: childKey)
-                        : Container(
-                          key: childKey,
-                          width: 100,
-                          height: 100,
-                          color: const Color(0xffff0000),
-                        ),
+                child: useText
+                    ? const Text('Text', key: childKey)
+                    : Container(
+                        key: childKey,
+                        width: 100,
+                        height: 100,
+                        color: const Color(0xffff0000),
+                      ),
               ),
             ),
           ),

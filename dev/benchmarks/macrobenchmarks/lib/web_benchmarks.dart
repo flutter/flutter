@@ -17,6 +17,7 @@ import 'src/web/bench_child_layers.dart';
 import 'src/web/bench_clipped_out_pictures.dart';
 import 'src/web/bench_default_target_platform.dart';
 import 'src/web/bench_draw_rect.dart';
+import 'src/web/bench_draw_rrect_rsuperellipse.dart';
 import 'src/web/bench_dynamic_clip_on_static_picture.dart';
 import 'src/web/bench_harness.dart';
 import 'src/web/bench_image_decoding.dart';
@@ -56,6 +57,9 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchClippedOutPictures.benchmarkName: () => BenchClippedOutPictures(),
   BenchDrawRect.benchmarkName: () => BenchDrawRect.staticPaint(),
   BenchDrawRect.variablePaintBenchmarkName: () => BenchDrawRect.variablePaint(),
+  BenchDrawRRectRSuperellipse.drawRRectName: () => BenchDrawRRectRSuperellipse.drawRRect(),
+  BenchDrawRRectRSuperellipse.drawRSuperellipseName: () =>
+      BenchDrawRRectRSuperellipse.drawRSuperellipse(),
   BenchPathRecording.benchmarkName: () => BenchPathRecording(),
   BenchTextOutOfPictureBounds.benchmarkName: () => BenchTextOutOfPictureBounds(),
   BenchSimpleLazyTextScroll.benchmarkName: () => BenchSimpleLazyTextScroll(),
@@ -69,8 +73,8 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchMouseRegionMixedGridHover.benchmarkName: () => BenchMouseRegionMixedGridHover(),
   BenchWrapBoxScroll.benchmarkName: () => BenchWrapBoxScroll(),
   BenchPlatformViewInfiniteScroll.benchmarkName: () => BenchPlatformViewInfiniteScroll.forward(),
-  BenchPlatformViewInfiniteScroll.benchmarkNameBackward:
-      () => BenchPlatformViewInfiniteScroll.backward(),
+  BenchPlatformViewInfiniteScroll.benchmarkNameBackward: () =>
+      BenchPlatformViewInfiniteScroll.backward(),
   BenchMaterial3Components.benchmarkName: () => BenchMaterial3Components(),
   BenchMaterial3Semantics.benchmarkName: () => BenchMaterial3Semantics(),
   BenchMaterial3ScrollSemantics.benchmarkName: () => BenchMaterial3ScrollSemantics(),
@@ -85,14 +89,14 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
 late final LocalBenchmarkServerClient _client;
 
 Future<void> main(List<String> args) async {
-  final ArgParser parser =
-      ArgParser()..addOption(
-        'port',
-        abbr: 'p',
-        help:
-            'The port of the local benchmark server used that implements the '
-            'API required for orchestrating macrobenchmarks.',
-      );
+  final ArgParser parser = ArgParser()
+    ..addOption(
+      'port',
+      abbr: 'p',
+      help:
+          'The port of the local benchmark server used that implements the '
+          'API required for orchestrating macrobenchmarks.',
+    );
   final ArgResults argResults = parser.parse(args);
   Uri serverOrigin;
   if (argResults.wasParsed('port')) {
@@ -135,14 +139,13 @@ Future<void> _runBenchmark(String benchmarkName) async {
   await runZoned<Future<void>>(
     () async {
       final Recorder recorder = recorderFactory();
-      final Runner runner =
-          recorder.isTracingEnabled && !_client.isInManualMode
-              ? Runner(
-                recorder: recorder,
-                setUpAllDidRun: () => _client.startPerformanceTracing(benchmarkName),
-                tearDownAllWillRun: _client.stopPerformanceTracing,
-              )
-              : Runner(recorder: recorder);
+      final Runner runner = recorder.isTracingEnabled && !_client.isInManualMode
+          ? Runner(
+              recorder: recorder,
+              setUpAllDidRun: () => _client.startPerformanceTracing(benchmarkName),
+              tearDownAllWillRun: _client.stopPerformanceTracing,
+            )
+          : Runner(recorder: recorder);
 
       final Profile profile = await runner.run();
       if (!_client.isInManualMode) {
@@ -160,20 +163,15 @@ Future<void> _runBenchmark(String benchmarkName) async {
           await _client.printToConsole(line);
         }
       },
-      handleUncaughtError: (
-        Zone self,
-        ZoneDelegate parent,
-        Zone zone,
-        Object error,
-        StackTrace stackTrace,
-      ) async {
-        if (_client.isInManualMode) {
-          parent.print(zone, '[$benchmarkName] $error, $stackTrace');
-          parent.handleUncaughtError(zone, error, stackTrace);
-        } else {
-          await _client.reportError(error, stackTrace);
-        }
-      },
+      handleUncaughtError:
+          (Zone self, ZoneDelegate parent, Zone zone, Object error, StackTrace stackTrace) async {
+            if (_client.isInManualMode) {
+              parent.print(zone, '[$benchmarkName] $error, $stackTrace');
+              parent.handleUncaughtError(zone, error, stackTrace);
+            } else {
+              await _client.reportError(error, stackTrace);
+            }
+          },
     ),
   );
 }

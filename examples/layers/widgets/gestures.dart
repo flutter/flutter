@@ -30,13 +30,12 @@ class _GesturePainter extends CustomPainter {
     final Offset center = size.center(Offset.zero) * zoom + offset;
     final double radius = size.width / 2.0 * zoom;
     final Gradient gradient = RadialGradient(
-      colors:
-          forward
-              ? <Color>[swatch.shade50, swatch.shade900]
-              : <Color>[swatch.shade900, swatch.shade50],
+      colors: forward
+          ? <Color>[swatch.shade50, swatch.shade900]
+          : <Color>[swatch.shade900, swatch.shade50],
     );
-    final Paint paint =
-        Paint()..shader = gradient.createShader(Rect.fromCircle(center: center, radius: radius));
+    final Paint paint = Paint()
+      ..shader = gradient.createShader(Rect.fromCircle(center: center, radius: radius));
     canvas.drawCircle(center, radius, paint);
   }
 
@@ -239,7 +238,10 @@ void main() {
   runApp(
     MaterialApp(
       theme: ThemeData.dark(),
-      home: Scaffold(appBar: AppBar(title: const Text('Gestures Demo')), body: const GestureDemo()),
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Gestures Demo')),
+        body: const GestureDemo(),
+      ),
     ),
   );
 }

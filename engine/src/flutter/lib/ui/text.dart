@@ -27,6 +27,8 @@ enum FontStyle {
 
 /// The thickness of the glyphs used to draw the text.
 ///
+/// Values must be in the range 1..1000.
+///
 /// Fonts are typically weighted on a 9-point scale, which, for historical
 /// reasons, uses the names 100 to 900. In Flutter, these are named `w100` to
 /// `w900` and have the following conventional meanings:
@@ -53,42 +55,50 @@ enum FontStyle {
 /// with the name "Roboto" and the weight [FontWeight.w500].
 ///
 /// Some modern fonts allow the weight to be adjusted in arbitrary increments.
-/// See [FontVariation.weight] for details.
+/// When using these fonts, applications can specify [FontWeight] instances
+/// constructed using values other than the predefined values. For these fonts,
+/// [FontWeight] will set the value of the `wght` axis (producing the same
+/// results as explicitly setting that attribute using [FontVariation.weight]).
 class FontWeight {
-  const FontWeight._(this.index, this.value);
+  /// Creates a [FontWeight] object, which can be added to a [TextStyle] to
+  /// select the thickness of a font's glyphs.
+  const FontWeight(this.value)
+    : assert(value >= 1, 'Font weight must be between 1 and 1000'),
+      assert(value <= 1000, 'Font weight must be between 1 and 1000');
 
   /// The encoded integer value of this font weight.
-  final int index;
+  @Deprecated('Use value, which is more precise.')
+  int get index => (value ~/ 100 - 1).clamp(0, 8);
 
   /// The thickness value of this font weight.
   final int value;
 
   /// Thin, the least thick.
-  static const FontWeight w100 = FontWeight._(0, 100);
+  static const FontWeight w100 = FontWeight(100);
 
   /// Extra-light.
-  static const FontWeight w200 = FontWeight._(1, 200);
+  static const FontWeight w200 = FontWeight(200);
 
   /// Light.
-  static const FontWeight w300 = FontWeight._(2, 300);
+  static const FontWeight w300 = FontWeight(300);
 
   /// Normal / regular / plain.
-  static const FontWeight w400 = FontWeight._(3, 400);
+  static const FontWeight w400 = FontWeight(400);
 
   /// Medium.
-  static const FontWeight w500 = FontWeight._(4, 500);
+  static const FontWeight w500 = FontWeight(500);
 
   /// Semi-bold.
-  static const FontWeight w600 = FontWeight._(5, 600);
+  static const FontWeight w600 = FontWeight(600);
 
   /// Bold.
-  static const FontWeight w700 = FontWeight._(6, 700);
+  static const FontWeight w700 = FontWeight(700);
 
   /// Extra-bold.
-  static const FontWeight w800 = FontWeight._(7, 800);
+  static const FontWeight w800 = FontWeight(800);
 
   /// Black, the most thick.
-  static const FontWeight w900 = FontWeight._(8, 900);
+  static const FontWeight w900 = FontWeight(900);
 
   /// The default font weight.
   static const FontWeight normal = w400;
@@ -109,13 +119,18 @@ class FontWeight {
     w900,
   ];
 
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is FontWeight && other.value == value;
+  }
+
+  @override
+  int get hashCode => value;
+
   /// Linearly interpolates between two font weights.
-  ///
-  /// Rather than using fractional weights, the interpolation rounds to the
-  /// nearest weight.
-  ///
-  /// For a smoother animation of font weight, consider using
-  /// [FontVariation.weight] if the font in question supports it.
   ///
   /// If both `a` and `b` are null, then this method will return null. Otherwise,
   /// any null values for `a` or `b` are interpreted as equivalent to [normal]
@@ -137,11 +152,16 @@ class FontWeight {
     if (a == null && b == null) {
       return null;
     }
-    return values[_lerpInt((a ?? normal).index, (b ?? normal).index, t).round().clamp(0, 8)];
+    return FontWeight(
+      _lerpInt((a ?? normal).value, (b ?? normal).value, t).round().clamp(100, 900),
+    );
   }
 
   @override
   String toString() {
+    if (value % 100 != 0) {
+      return 'FontWeight($value)';
+    }
     return const <int, String>{
       0: 'FontWeight.w100',
       1: 'FontWeight.w200',
@@ -992,7 +1012,7 @@ class FontFeature {
 /// For example:
 ///
 /// ```dart
-/// const TextStyle(fontVariations: <ui.FontVariation>[ui.FontVariation('wght', 800.0)])
+/// const TextStyle(fontVariations: <ui.FontVariation>[ui.FontVariation('slnt', -5.0)])
 /// ```
 ///
 /// Font variations are distinct from font features, as exposed by the
@@ -1110,8 +1130,12 @@ class FontVariation {
 
   /// Variable font weight. (`wght`)
   ///
-  /// Varies the stroke thickness of the font, similar to [FontWeight] but on a
-  /// continuous axis.
+  /// Applications should avoid using this and should instead declare font
+  /// weight by specifying a [FontWeight], which will implicitly set this
+  /// attribute. However, if a value is provided for this attribute, then it
+  /// will override the [FontWeight].
+  ///
+  /// Varies the stroke thickness of the font.
   ///
   /// Values must be in the range 1..1000, and are to be interpreted in a manner
   /// consistent with the values of [FontWeight]. For instance, `400` is the
@@ -1306,9 +1330,17 @@ enum TextAlign {
 /// A horizontal line used for aligning text.
 enum TextBaseline {
   /// The horizontal line used to align the bottom of glyphs for alphabetic characters.
+  ///
+  /// This baseline is often used for alphabetical scripts like Latin, Greek,
+  /// Cyrillic, etc.
+  ///
+  /// Characters with descenders (like 'p', 'g', or 'y') extend below this line.
   alphabetic,
 
   /// The horizontal line used to align ideographic characters.
+  ///
+  /// This baseline is often used for scripts with uniform square heights,
+  /// like Chinese, Japanese, Korean, etc.
   ideographic,
 }
 
@@ -1622,7 +1654,7 @@ Int32List _encodeTextStyle(
   }
   if (fontWeight != null) {
     result[0] |= 1 << 5;
-    result[5] = fontWeight.index;
+    result[5] = fontWeight.value;
   }
   if (fontStyle != null) {
     result[0] |= 1 << 6;
@@ -1851,10 +1883,9 @@ class TextStyle {
   @override
   String toString() {
     final List<String>? fontFamilyFallback = _fontFamilyFallback;
-    final String heightText =
-        _encoded[0] & 0x02000 == 0x02000
-            ? (_height == kTextHeightNone ? 'kTextHeightNone' : '${_height}x')
-            : 'unspecified';
+    final String heightText = _encoded[0] & 0x02000 == 0x02000
+        ? (_height == kTextHeightNone ? 'kTextHeightNone' : '${_height}x')
+        : 'unspecified';
     return 'TextStyle('
         'color: ${_encoded[0] & 0x00002 == 0x00002 ? Color(_encoded[1]) : "unspecified"}, '
         'decoration: ${_encoded[0] & 0x00004 == 0x00004 ? TextDecoration._(_encoded[2]) : "unspecified"}, '
@@ -1862,7 +1893,7 @@ class TextStyle {
         'decorationStyle: ${_encoded[0] & 0x00010 == 0x00010 ? TextDecorationStyle.values[_encoded[4]] : "unspecified"}, '
         // The decorationThickness is not in encoded order in order to keep it near the other decoration properties.
         'decorationThickness: ${_encoded[0] & 0x00100 == 0x00100 ? _decorationThickness : "unspecified"}, '
-        'fontWeight: ${_encoded[0] & 0x00020 == 0x00020 ? FontWeight.values[_encoded[5]] : "unspecified"}, '
+        'fontWeight: ${_encoded[0] & 0x00020 == 0x00020 ? FontWeight(_encoded[5]) : "unspecified"}, '
         'fontStyle: ${_encoded[0] & 0x00040 == 0x00040 ? FontStyle.values[_encoded[6]] : "unspecified"}, '
         'textBaseline: ${_encoded[0] & 0x00080 == 0x00080 ? TextBaseline.values[_encoded[7]] : "unspecified"}, '
         'fontFamily: ${_encoded[0] & 0x00200 == 0x00200 && _fontFamily != '' ? _fontFamily : "unspecified"}, '
@@ -1928,7 +1959,7 @@ Int32List _encodeParagraphStyle(
   }
   if (fontWeight != null) {
     result[0] |= 1 << 3;
-    result[3] = fontWeight.index;
+    result[3] = fontWeight.value;
   }
   if (fontStyle != null) {
     result[0] |= 1 << 4;
@@ -2114,7 +2145,7 @@ class ParagraphStyle {
     return 'ParagraphStyle('
         'textAlign: ${_encoded[0] & 0x002 == 0x002 ? TextAlign.values[_encoded[1]] : "unspecified"}, '
         'textDirection: ${_encoded[0] & 0x004 == 0x004 ? TextDirection.values[_encoded[2]] : "unspecified"}, '
-        'fontWeight: ${_encoded[0] & 0x008 == 0x008 ? FontWeight.values[_encoded[3]] : "unspecified"}, '
+        'fontWeight: ${_encoded[0] & 0x008 == 0x008 ? FontWeight(_encoded[3]) : "unspecified"}, '
         'fontStyle: ${_encoded[0] & 0x010 == 0x010 ? FontStyle.values[_encoded[4]] : "unspecified"}, '
         'maxLines: ${_encoded[0] & 0x020 == 0x020 ? _encoded[5] : "unspecified"}, '
         'textHeightBehavior: ${_encoded[0] & 0x040 == 0x040 ? TextHeightBehavior._fromEncoded(_encoded[6], _leadingDistribution).toString() : "unspecified"}, '
@@ -2162,18 +2193,18 @@ ByteData _encodeStrut(
     return ByteData(0);
   }
 
-  final ByteData data = ByteData(16); // Max size is 16 bytes
-  int bitmask = 0; // 8 bit mask
-  int byteCount = 1;
+  final ByteData data = ByteData(24); // Max size is 24 bytes
+  int bitmask = 0;
+  int byteCount = 4;
   if (fontWeight != null) {
     bitmask |= 1 << 0;
-    data.setInt8(byteCount, fontWeight.index);
-    byteCount += 1;
+    data.setInt32(byteCount, fontWeight.value, _kFakeHostEndian);
+    byteCount += 4;
   }
   if (fontStyle != null) {
     bitmask |= 1 << 1;
-    data.setInt8(byteCount, fontStyle.index);
-    byteCount += 1;
+    data.setInt32(byteCount, fontStyle.index, _kFakeHostEndian);
+    byteCount += 4;
   }
   if (fontFamily != null || (fontFamilyFallback != null && fontFamilyFallback.isNotEmpty)) {
     bitmask |= 1 << 2;
@@ -2201,10 +2232,10 @@ ByteData _encodeStrut(
     bitmask |= 1 << 7;
   }
 
-  data.setInt8(0, bitmask);
+  data.setInt32(0, bitmask, _kFakeHostEndian);
 
-  assert(byteCount <= 16);
-  assert(bitmask >> 8 == 0, 'strut bitmask overflow: $bitmask');
+  assert(byteCount <= 24);
+  assert(bitmask >> 32 == 0, 'strut bitmask overflow: $bitmask');
   return ByteData.view(data.buffer, 0, byteCount);
 }
 
@@ -3527,18 +3558,15 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
     final ByteData? encodedStrutStyle;
     if (strutStyle != null && strutStyle._enabled) {
       final String? fontFamily = strutStyle._fontFamily;
-      strutFontFamilies = <String>[
-        if (fontFamily != null) fontFamily,
-        ...?strutStyle._fontFamilyFallback,
-      ];
+      strutFontFamilies = <String>[?fontFamily, ...?strutStyle._fontFamilyFallback];
 
       assert(TextLeadingDistribution.values.length <= 2);
       final TextLeadingDistribution leadingDistribution =
           strutStyle._leadingDistribution ?? style._leadingDistribution;
       encodedStrutStyle = strutStyle._encoded;
-      int bitmask = encodedStrutStyle.getInt8(0);
+      int bitmask = encodedStrutStyle.getInt32(0, _kFakeHostEndian);
       bitmask |= (leadingDistribution.index) << 3;
-      encodedStrutStyle.setInt8(0, bitmask);
+      encodedStrutStyle.setInt32(0, bitmask, _kFakeHostEndian);
     } else {
       encodedStrutStyle = null;
     }
@@ -3764,8 +3792,10 @@ Future<void> loadFontFromList(Uint8List list, {String? fontFamily}) {
   }).then((_) => _sendFontChangeMessage());
 }
 
-final ByteData _fontChangeMessage =
-    utf8.encode(json.encode(<String, Object?>{'type': 'fontsChange'})).buffer.asByteData();
+final ByteData _fontChangeMessage = utf8
+    .encode(json.encode(<String, Object?>{'type': 'fontsChange'}))
+    .buffer
+    .asByteData();
 
 FutureOr<void> _sendFontChangeMessage() async {
   const String kSystemChannelName = 'flutter/system';
