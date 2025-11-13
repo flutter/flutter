@@ -16,6 +16,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/utils.dart';
+import '../project.dart';
 import 'analytics.dart';
 import 'dependency_graph.dart';
 import 'utils.dart';
@@ -30,16 +31,17 @@ class PreviewDetector {
   PreviewDetector({
     required this.platform,
     required this.previewAnalytics,
-    required this.projectRoot,
+    required this.project,
     required this.fs,
     required this.logger,
     required this.onChangeDetected,
     required this.onPubspecChangeDetected,
     @visibleForTesting this.watcherBuilder = _defaultWatcherBuilder,
-  });
+  }) : projectRoot = project.directory;
 
   final Platform platform;
   final WidgetPreviewAnalytics previewAnalytics;
+  final FlutterProject project;
   final Directory projectRoot;
   final FileSystem fs;
   final Logger logger;
@@ -117,15 +119,30 @@ class PreviewDetector {
     // in use when we call context.changeFile(...).
     await _mutex.runGuarded(() async {
       final String eventPath = event.path;
+      // Ignore any files under .dart_tool or ephemeral directories created by
+      // the tool (e.g., build/, plugin directories, etc.).
+      if (eventPath.doesContainDartTool ||
+          project.ephemeralDirectories.any((dir) => eventPath.contains(dir.path))) {
+        return;
+      }
       // If the pubspec has changed, new dependencies or assets could have been added, requiring
       // the preview scaffold's pubspec to be updated.
-      if (eventPath.isPubspec && !eventPath.doesContainDartTool) {
+      if (eventPath.isPubspec) {
         onPubspecChangeDetected(eventPath);
         return;
       }
       // Only trigger a reload when changes to Dart sources are detected. We
       // ignore the generated preview file to avoid getting stuck in a loop.
-      if (!eventPath.isDartFile || eventPath.doesContainDartTool) {
+      if (!eventPath.isDartFile) {
+        return;
+      }
+
+      AnalysisContext context;
+      try {
+        context = collection.contextFor(eventPath);
+      } on StateError {
+        // The modified file isn't part of the analysis context and is safe to
+        // ignore.
         return;
       }
 
@@ -143,7 +160,6 @@ class PreviewDetector {
       // extension which may be worth using here.
 
       // We need to notify the analyzer that this file has changed so it can reanalyze the file.
-      final AnalysisContext context = collection.contextFor(eventPath);
       final File file = fs.file(eventPath);
       context.changeFile(file.path);
       final List<String> potentiallyAffectedFiles = await context.applyPendingFileChanges();
