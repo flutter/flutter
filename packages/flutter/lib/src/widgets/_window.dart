@@ -861,7 +861,6 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
   }) {
     throw UnsupportedError(errorMessage);
   }
-<<<<<<< HEAD
 
   @override
   TooltipWindowController createTooltipWindowController({
@@ -873,13 +872,6 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
   }) {
     throw UnimplementedError(errorMessage);
   }
-
-  @override
-  bool hasTopLevelWindows() {
-    throw UnsupportedError(errorMessage);
-  }
-=======
->>>>>>> upstream/master
 }
 
 /// The [RegularWindow] widget provides a way to render a regular window in the
