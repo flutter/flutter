@@ -15,7 +15,6 @@ import 'package:flutter/src/widgets/_window.dart'
         RegularWindowControllerDelegate,
         TooltipWindow,
         TooltipWindowController,
-        TooltipWindowControllerDelegate,
         WindowScope,
         WindowingOwner,
         createDefaultWindowingOwner;

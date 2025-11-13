@@ -4,6 +4,7 @@
 
 // TODO(mattkae): remove invalid_use_of_internal_member ignore comment when this API is stable.
 // ignore_for_file: invalid_use_of_internal_member
+// ignore_for_file: implementation_imports
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
 import 'package:flutter/src/widgets/_window_positioner.dart';
@@ -36,7 +37,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> children = [
+    final List<Widget> children = <Widget>[
       Text(
         key: _key,
         'Hover Me',

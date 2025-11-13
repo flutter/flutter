@@ -8,31 +8,6 @@ import 'dart:ui';
 import 'package:flutter/src/widgets/_window_positioner.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-extension WindowPositionerAnchorExtension on WindowPositionerAnchor {
-  Offset anchorPositionFor(Rect rect) {
-    switch (this) {
-      case WindowPositionerAnchor.center:
-        return rect.center;
-      case WindowPositionerAnchor.top:
-        return rect.topCenter;
-      case WindowPositionerAnchor.bottom:
-        return rect.bottomCenter;
-      case WindowPositionerAnchor.left:
-        return rect.centerLeft;
-      case WindowPositionerAnchor.right:
-        return rect.centerRight;
-      case WindowPositionerAnchor.topLeft:
-        return rect.topLeft;
-      case WindowPositionerAnchor.bottomLeft:
-        return rect.bottomLeft;
-      case WindowPositionerAnchor.topRight:
-        return rect.topRight;
-      case WindowPositionerAnchor.bottomRight:
-        return rect.bottomRight;
-    }
-  }
-}
-
 void main() {
   group('WindowPlacementTest', () {
     const Rect clientDisplayArea = Rect.fromLTWH(0, 0, 800, 600);
