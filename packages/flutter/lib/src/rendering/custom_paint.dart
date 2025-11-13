@@ -953,6 +953,9 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.focused != null) {
       config.isFocused = properties.focused;
     }
+    if (properties.accessiblityFocusBlockType != null) {
+      config.accessiblityFocusBlockType = properties.accessiblityFocusBlockType!;
+    }
     if (properties.enabled != null) {
       config.isEnabled = properties.enabled;
     }
@@ -1015,6 +1018,12 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.identifier != null) {
       config.identifier = properties.identifier!;
+    }
+    if (properties.traversalParentIdentifier != null) {
+      config.traversalParentIdentifier = properties.traversalParentIdentifier;
+    }
+    if (properties.traversalChildIdentifier != null) {
+      config.traversalChildIdentifier = properties.traversalChildIdentifier;
     }
     if (properties.tooltip != null) {
       config.tooltip = properties.tooltip!;
