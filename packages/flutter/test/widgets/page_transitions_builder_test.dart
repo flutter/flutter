@@ -515,7 +515,9 @@ void main() {
           onGenerateRoute: (RouteSettings settings) {
             return _CustomPageRoute<void>(
               settings: settings,
-              transitionsBuilder: const FadeForwardsPageTransitionsBuilder(),
+              transitionsBuilder: const FadeForwardsPageTransitionsBuilder(
+                backgroundColor: Color(0xff121212),
+              ),
               builder: (BuildContext context) {
                 if (settings.name == '/') {
                   return ColoredBox(
@@ -588,7 +590,9 @@ void main() {
           theme: ThemeData(
             pageTransitionsTheme: const PageTransitionsTheme(
               builders: <TargetPlatform, PageTransitionsBuilder>{
-                TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+                TargetPlatform.android: FadeForwardsPageTransitionsBuilder(
+                  backgroundColor: Color(0xff121212),
+                ),
               },
             ),
           ),
@@ -657,7 +661,9 @@ void main() {
           theme: ThemeData(
             pageTransitionsTheme: const PageTransitionsTheme(
               builders: <TargetPlatform, PageTransitionsBuilder>{
-                TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+                TargetPlatform.android: FadeForwardsPageTransitionsBuilder(
+                  backgroundColor: Colors.pink,
+                ),
               },
             ),
             colorScheme: ThemeData().colorScheme.copyWith(surface: Colors.pink),
@@ -767,7 +773,9 @@ void main() {
         await tester.pumpWidget(
           Builder(
             builder: (BuildContext context) {
-              return const FadeForwardsPageTransitionsBuilder().delegatedTransition!(
+              return const FadeForwardsPageTransitionsBuilder(
+                backgroundColor: Color(0xff121212),
+              ).delegatedTransition!(
                 context,
                 animation,
                 secondaryAnimation,
@@ -811,7 +819,9 @@ void main() {
         await tester.pumpWidget(
           Builder(
             builder: (BuildContext context) {
-              return const FadeForwardsPageTransitionsBuilder().delegatedTransition!(
+              return const FadeForwardsPageTransitionsBuilder(
+                backgroundColor: Color(0xff121212),
+              ).delegatedTransition!(
                 context,
                 animation,
                 secondaryAnimation,
@@ -934,7 +944,9 @@ void main() {
           theme: ThemeData(
             pageTransitionsTheme: const PageTransitionsTheme(
               builders: <TargetPlatform, PageTransitionsBuilder>{
-                TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+                TargetPlatform.android: FadeForwardsPageTransitionsBuilder(
+                  backgroundColor: Color(0xff121212),
+                ),
               },
             ),
           ),

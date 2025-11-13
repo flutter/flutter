@@ -5,8 +5,6 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
-import 'package:flutter/foundation.dart';
-
 import 'basic.dart';
 import 'dual_transition_builder.dart';
 import 'framework.dart';
@@ -350,7 +348,7 @@ class _FadeForwardsPageTransition extends StatelessWidget {
   const _FadeForwardsPageTransition({
     required this.animation,
     required this.secondaryAnimation,
-    this.backgroundColor,
+    required this.backgroundColor,
     this.child,
   });
 
@@ -358,7 +356,7 @@ class _FadeForwardsPageTransition extends StatelessWidget {
 
   final Animation<double> secondaryAnimation;
 
-  final Color? backgroundColor;
+  final Color backgroundColor;
 
   final Widget? child;
 
@@ -442,7 +440,7 @@ class _FadeForwardsPageTransition extends StatelessWidget {
 class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the transition used on
   /// Android U.
-  const FadeForwardsPageTransitionsBuilder({this.backgroundColor});
+  const FadeForwardsPageTransitionsBuilder({required this.backgroundColor});
 
   /// The background color during transition between two routes.
   ///
@@ -450,7 +448,7 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   /// helps avoid a black background between two page.
   ///
   /// Defaults to black color.
-  final Color? backgroundColor;
+  final Color backgroundColor;
 
   /// The value of [transitionDuration] in milliseconds.
   ///
@@ -503,16 +501,10 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   // The default background color, used when no transition is active.
   static const Color _defaultBackgroundColor = Color(0x00000000);
 
-  // The default surface color for light theme, used as fallback during transitions.
-  static const Color _defaultLightSurfaceColor = Color(0xFF000000);
-
-  // The default surface color for dark theme, used as fallback during transitions.
-  static const Color _defaultDarkSurfaceColor = Color(0xff121212);
-
   static Widget _delegatedTransition(
     BuildContext context,
     Animation<double> secondaryAnimation,
-    Color? backgroundColor,
+    Color backgroundColor,
     Widget? child,
   ) {
     final Widget builder = DualTransitionBuilder(
@@ -545,14 +537,7 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
     }
 
     return ColoredBox(
-      color: secondaryAnimation.isAnimating
-          // TODO(rkishan516): Fallback when animating should be surface color.
-          ? backgroundColor ??
-                switch (PlatformDispatcher.instance.platformBrightness) {
-                  Brightness.light => _defaultLightSurfaceColor,
-                  Brightness.dark => _defaultDarkSurfaceColor,
-                }
-          : _defaultBackgroundColor,
+      color: secondaryAnimation.isAnimating ? backgroundColor : _defaultBackgroundColor,
       child: builder,
     );
   }

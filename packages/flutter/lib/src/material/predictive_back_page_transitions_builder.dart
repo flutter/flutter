@@ -83,13 +83,9 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
               );
             }
 
-            return const FadeForwardsPageTransitionsBuilder().buildTransitions(
-              route,
-              context,
-              animation,
-              secondaryAnimation,
-              child,
-            );
+            return const FadeForwardsPageTransitionsBuilder(
+              backgroundColor: Color(0xff121212),
+            ).buildTransitions(route, context, animation, secondaryAnimation, child);
           },
     );
   }
