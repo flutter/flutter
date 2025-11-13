@@ -24,8 +24,9 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     
     // Create a mock Flutter project structure in current directory
-    fileSystem.currentDirectory.childDirectory('lib').createSync();
-    fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+    final Directory projectDir = fileSystem.currentDirectory;
+    projectDir.childDirectory('lib').createSync();
+    projectDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: test_project
 description: A test Flutter project.
 version: 1.0.0+1
@@ -36,6 +37,26 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+''');
+    
+    // Create .dart_tool/package_config.json for FlutterProject.current()
+    projectDir.childDirectory('.dart_tool').createSync();
+    projectDir.childDirectory('.dart_tool').childFile('package_config.json').writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "test_project",
+      "rootUri": "../",
+      "packageUri": "lib/"
+    },
+    {
+      "name": "flutter",
+      "rootUri": "../packages/flutter",
+      "packageUri": "lib/"
+    }
+  ]
+}
 ''');
   });
 
