@@ -193,14 +193,6 @@ void main(List<String> arguments) {
 
     print('Processing ${androidDirectory.path}');
 
-    final File ignoreFile = androidDirectory.childFile(ignoreFilename);
-    if (ignoreLocking) {
-      print('Writing ignore file in ${ignoreFile.path}');
-      ignoreFile.writeAsStringSync(ignoreReason);
-    } else if (stopIgnoring && ignoreFile.existsSync()) {
-      ignoreFile.deleteSync();
-    }
-
     try {
       androidDirectory.childFile('buildscript-gradle.lockfile').deleteSync();
     } on FileSystemException {
@@ -222,6 +214,17 @@ void main(List<String> arguments) {
       }
 
       wrapperGradle.writeAsStringSync(wrapperGradleFileContent);
+    }
+
+    final File ignoreFile = androidDirectory.childFile(ignoreFilename);
+    if (ignoreLocking) {
+      print('Writing ignore file in ${ignoreFile.path}');
+      ignoreFile.writeAsStringSync(ignoreReason);
+      // When ignoring locking, we do not want to actually generate
+      // the lockfiles
+      continue;
+    } else if (stopIgnoring && ignoreFile.existsSync()) {
+      ignoreFile.deleteSync();
     }
 
     final String appDirectory = androidDirectory.parent.absolute.path;
