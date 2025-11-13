@@ -43,13 +43,9 @@ void main(List<String> arguments) {
     )
     ..addOption(
       'ignore-locking',
-      help:
-          'Reason to disable gradle dependency locking. A reason must be given.',
+      help: 'Reason to disable gradle dependency locking. A reason must be given.',
     )
-    ..addFlag(
-      'stop-ignoring',
-      help: 'Delete the ignore lockfile if it exists',
-    );
+    ..addFlag('stop-ignoring', help: 'Delete the ignore lockfile if it exists');
 
   ArgResults args;
   try {
@@ -75,7 +71,6 @@ void main(List<String> arguments) {
   // automated scripts from deleting the file when they shouldn't.
   final bool stopIgnoring = (args['stop-ignoring'] as bool?) ?? false;
 
-
   if (ignoreLocking && ignoreReason.isEmpty) {
     stderr.writeln('A reason must be provided for --ignore-locking.');
     stderr.writeln(usageMessage);
@@ -84,7 +79,8 @@ void main(List<String> arguments) {
 
   if (ignoreLocking && stopIgnoring) {
     stderr.writeln(
-        'Both --ignore-locking and --stop-ignoring cannot be used on the same invocation.');
+      'Both --ignore-locking and --stop-ignoring cannot be used on the same invocation.',
+    );
     stderr.writeln(usageMessage);
     exit(1);
   }
