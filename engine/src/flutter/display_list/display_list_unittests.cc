@@ -5943,18 +5943,19 @@ namespace {
 typedef void BuilderTransformer(DisplayListBuilder& builder);
 
 sk_sp<DisplayList> TestSaveLayerWithMatrix(BuilderTransformer transform) {
-  DlScalar xoffset = 50;
-  DlScalar yoffset = 50;
-  DlScalar sigma = 10.0;
+  const DlScalar xoffset = 50;
+  const DlScalar yoffset = 50;
+  const DlScalar sigma = 10.0;
 
   DisplayListBuilder builder;
 
-  auto blur_filter = DlImageFilter::MakeBlur(sigma, sigma, DlTileMode::kClamp);
+  const auto blur_filter =
+      DlImageFilter::MakeBlur(sigma, sigma, DlTileMode::kClamp);
 
   builder.Translate(xoffset, yoffset);
   transform(builder);
 
-  DlPaint paint;
+  const DlPaint paint;
   builder.DrawImage(kTestImage1, DlPoint(100.0, 100.0),
                     DlImageSampling::kNearestNeighbor, &paint);
 
