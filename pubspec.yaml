@@ -28,6 +28,7 @@ workspace:
   - dev/integration_tests/external_textures
   - dev/integration_tests/flavors
   - dev/integration_tests/flutter_gallery
+  - dev/integration_tests/high_bitrate_images
   - dev/integration_tests/hook_user_defines
   - dev/integration_tests/ios_add2app_life_cycle/flutterapp
   - dev/integration_tests/ios_app_with_extensions
