@@ -34,7 +34,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ### [3.38.1](https://github.com/flutter/flutter/releases/tag/3.38.1)
 
-- [flutter/178384](https://github.com/flutter/flutter/issues/178384) Fixes infrastructure "Out of resources" error.
+- [flutter/178384](https://github.com/flutter/flutter/issues/178384) Improves CI stability by addressing an "Out of resources" error on Mac_mokey test runners.
 - [flutter/178400](https://github.com/flutter/flutter/issues/178400) Adds support for Dart 3.10 stable.
 
 ### [3.38.0](https://github.com/flutter/flutter/releases/tag/3.38.0)
