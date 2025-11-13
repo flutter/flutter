@@ -180,6 +180,9 @@
         break;
       }
     }
+    if (parent == nil) {
+      FML_LOG(WARNING) << "Failed to find parent window for ID " << request->parent_view_id;
+    }
   }
 
   if (parent != nil) {
