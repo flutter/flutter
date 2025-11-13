@@ -1077,4 +1077,23 @@ transforms:
       - kind: 'rename'
         newName: 'markForComplete'
 
+  # Changes made in https://github.com/flutter/flutter/pull/177428
+  - title: "Add 'backgroundColor' parameter with default value"
+    date: 2025-11-13
+    element:
+      uris: [ 'widgets.dart', 'material.dart' ]
+      constructor: ''
+      inClass: 'FadeForwardsPageTransitionsBuilder'
+    changes:
+      - kind: 'addParameter'
+        index: 0
+        name: 'backgroundColor'
+        style: optional_named
+        argumentValue:
+          expression: 'ColorScheme.of(context).surface'
+          requiredIf: "backgroundColor == ''"
+    variables:
+      backgroundColor:
+        kind: 'fragment'
+        value: 'arguments[backgroundColor]'
 # Before adding a new fix: read instructions at the top of this file.

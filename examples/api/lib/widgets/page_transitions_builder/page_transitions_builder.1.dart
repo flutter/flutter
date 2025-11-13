@@ -23,8 +23,9 @@ class PageTransitionsThemeApp extends StatelessWidget {
         pageTransitionsTheme: PageTransitionsTheme(
           builders: Map<TargetPlatform, PageTransitionsBuilder>.fromIterable(
             TargetPlatform.values,
-            value: (_) =>
-                const FadeForwardsPageTransitionsBuilder(backgroundColor: Color(0xff121212)),
+            value: (_) => const FadeForwardsPageTransitionsBuilder(
+              backgroundColor: Color(0xff121212),
+            ),
           ),
         ),
       ),
