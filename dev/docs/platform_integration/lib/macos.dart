@@ -2,5 +2,5 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// [Flutter platform integration APIs for macOS.](https://api.flutter.dev/macos-embedder/)
+/// [Flutter macOS Embedder.](https://api.flutter.dev/macos-embedder/)
 library macOS;

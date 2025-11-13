@@ -596,21 +596,14 @@ enum PixelFormat { rgba8888, bgra8888, rgbaFloat32 }
 typedef ImageDecoderCallback = void Function(Image result);
 
 abstract class FrameInfo {
-  FrameInfo._();
-  Duration get duration => Duration(milliseconds: _durationMillis);
-  int get _durationMillis => 0;
+  Duration get duration;
   Image get image;
 }
 
-class Codec {
-  Codec._();
-  int get frameCount => 0;
-  int get repetitionCount => 0;
-  Future<FrameInfo> getNextFrame() {
-    return engine.futurize<FrameInfo>(_getNextFrame);
-  }
-
-  String? _getNextFrame(engine.Callback<FrameInfo> callback) => null;
+abstract class Codec {
+  int get frameCount;
+  int get repetitionCount;
+  Future<FrameInfo> getNextFrame();
   void dispose() {}
 }
 

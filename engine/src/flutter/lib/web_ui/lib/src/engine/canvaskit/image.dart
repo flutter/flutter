@@ -376,7 +376,7 @@ Future<Uint8List> fetchImage(String url, ui_web.ImageCodecChunkCallback? chunkCa
       '$_kNetworkImageMessage\n'
       'Image URL: $url\n'
       'Trying to load an image from another domain? Find answers at:\n'
-      'https://flutter.dev/docs/development/platform-integration/web-images',
+      'https://docs.flutter.dev/development/platform-integration/web-images',
     );
   }
 }

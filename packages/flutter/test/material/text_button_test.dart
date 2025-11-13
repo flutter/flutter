@@ -2680,4 +2680,17 @@ void main() {
     // The button should still be focused.
     expect(getButtonFocusNode().hasFocus, true);
   });
+
+  testWidgets('TextButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: TextButton(onPressed: () {}, child: const Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TextButton)), Size.zero);
+  });
 }

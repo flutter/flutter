@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:math' as math;
@@ -14,61 +13,6 @@ import 'package:ui/ui.dart' as ui;
 import 'browser_detection.dart' show isIOS15, isMacOrIOS;
 import 'dom.dart';
 import 'vector_math.dart';
-
-/// Generic callback signature, used by [futurize].
-typedef Callback<T> = void Function(T result);
-
-/// Signature for a method that receives a [Callback].
-///
-/// Return value should be null on success, and a string error message on
-/// failure.
-typedef Callbacker<T> = String? Function(Callback<T> callback);
-
-/// Converts a method that receives a value-returning callback to a method that
-/// returns a Future.
-///
-/// Return a [String] to cause an [Exception] to be synchronously thrown with
-/// that string as a message.
-///
-/// If the callback is called with null, the future completes with an error.
-///
-/// Example usage:
-///
-/// ```dart
-/// typedef IntCallback = void Function(int result);
-///
-/// String _doSomethingAndCallback(IntCallback callback) {
-///   Timer(const Duration(seconds: 1), () { callback(1); });
-/// }
-///
-/// Future<int> doSomething() {
-///   return futurize(_doSomethingAndCallback);
-/// }
-/// ```
-// Keep this in sync with _futurize in lib/ui/fixtures/ui_test.dart.
-Future<T> futurize<T>(Callbacker<T> callbacker) {
-  final Completer<T> completer = Completer<T>.sync();
-  // If the callback synchronously throws an error, then synchronously
-  // rethrow that error instead of adding it to the completer. This
-  // prevents the Zone from receiving an uncaught exception.
-  bool isSync = true;
-  final String? error = callbacker((T? t) {
-    if (t == null) {
-      if (isSync) {
-        throw Exception('operation failed');
-      } else {
-        completer.completeError(Exception('operation failed'));
-      }
-    } else {
-      completer.complete(t);
-    }
-  });
-  isSync = false;
-  if (error != null) {
-    throw Exception(error);
-  }
-  return completer.future;
-}
 
 /// Converts [matrix] to CSS transform value.
 String matrix4ToCssTransform(Matrix4 matrix) {

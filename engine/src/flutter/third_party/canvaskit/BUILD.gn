@@ -85,7 +85,6 @@ wasm_toolchain("canvaskit_experimental_webparagraph") {
     skia_enable_skparagraph = false
     skia_canvaskit_enable_paragraph = false
     skia_enable_shaper = false
-    skia_enable_harfbuzz = false
     skia_use_harfbuzz = false
     skia_use_freetype = false
     flutter_use_freetype_woff2 = false

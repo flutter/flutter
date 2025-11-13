@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import '../../artifacts.dart';
+import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../globals.dart' as globals show stdio;
@@ -109,6 +110,61 @@ abstract class UnpackDarwin extends Target {
         'lipo -info:\n'
         '$lipoInfo',
       );
+    }
+  }
+}
+
+abstract class ReleaseUnpackDarwinDsym extends Target {
+  const ReleaseUnpackDarwinDsym();
+
+  BuildMode get buildMode => BuildMode.release;
+
+  @visibleForOverriding
+  TargetPlatform get targetPlatform;
+
+  Artifact get dsymArtifact;
+
+  @override
+  List<Source> get inputs => <Source>[
+    const Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/darwin.dart',
+    ),
+    Source.artifact(dsymArtifact, platform: targetPlatform, mode: buildMode),
+  ];
+
+  @override
+  List<Target> get dependencies => [];
+
+  Future<void> copyFrameworkDsym(
+    Environment environment, {
+    EnvironmentType? environmentType,
+  }) async {
+    // Copy Flutter framework dSYM (debug symbol) bundle, if present.
+    final Directory frameworkDsym = environment.fileSystem.directory(
+      environment.artifacts.getArtifactPath(
+        dsymArtifact,
+        platform: targetPlatform,
+        mode: buildMode,
+        environmentType: environmentType,
+      ),
+    );
+    if (frameworkDsym.existsSync()) {
+      final ProcessResult result = await environment.processManager.run(<String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+        frameworkDsym.path,
+        environment.outputDir.path,
+      ]);
+      if (result.exitCode != 0) {
+        throw Exception(
+          'Failed to copy framework dSYM (exit ${result.exitCode}:\n'
+          '${result.stdout}\n---\n${result.stderr}',
+        );
+      }
     }
   }
 }

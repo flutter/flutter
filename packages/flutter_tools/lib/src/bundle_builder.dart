@@ -108,7 +108,7 @@ Future<AssetBundle?> buildAssets({
   required String manifestPath,
   String? assetDirPath,
   required String packageConfigPath,
-  TargetPlatform? targetPlatform,
+  required TargetPlatform targetPlatform,
   String? flavor,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();

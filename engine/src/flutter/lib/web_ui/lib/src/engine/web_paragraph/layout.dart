@@ -498,13 +498,17 @@ class TextLayout {
             assert((line.advance.height - (bottom - top).abs() < epsilon));
           case ui.BoxHeightStyle.strut:
             if (paragraph.paragraphStyle.strutStyle == null) {
-              top = firstRect.top;
-              bottom = firstRect.bottom;
+              top = firstRect.top + line.advance.top;
+              bottom = firstRect.top + line.advance.bottom;
               break;
             }
             final WebStrutStyle strutStyle = paragraph.paragraphStyle.strutStyle!;
-            top = line.fontBoundingBoxAscent - strutStyle.strutAscent;
-            bottom = top + strutStyle.strutDescent;
+            top =
+                firstRect.top +
+                line.advance.top +
+                line.fontBoundingBoxAscent -
+                strutStyle.strutAscent;
+            bottom = top + strutStyle.strutAscent + strutStyle.strutDescent;
           case ui.BoxHeightStyle.includeLineSpacingMiddle:
             top =
                 line.advance.top +
@@ -1183,7 +1187,7 @@ class TextLine {
       height: advance.height,
       width: advance.width,
       left: advance.left,
-      baseline: 0.0,
+      baseline: advance.top + fontBoundingBoxAscent,
       lineNumber: lineNumber,
     );
   }

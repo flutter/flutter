@@ -4,18 +4,20 @@
 
 #include "impeller/toolkit/interop/path.h"
 
+#include "third_party/skia/include/core/SkRect.h"
+
 namespace impeller::interop {
 
-Path::Path(const SkPath& path) : path_(path) {}
+Path::Path(const SkPath& path) : path_(SkPathBuilder(path)) {}
 
 Path::~Path() = default;
 
-const SkPath& Path::GetPath() const {
-  return path_;
+SkPath Path::GetPath() const {
+  return path_.snapshot();
 }
 
 ImpellerRect Path::GetBounds() const {
-  const auto bounds = path_.getBounds();
+  const auto bounds = path_.computeFiniteBounds().value_or(SkRect());
   return ImpellerRect{
       .x = bounds.x(),
       .y = bounds.y(),

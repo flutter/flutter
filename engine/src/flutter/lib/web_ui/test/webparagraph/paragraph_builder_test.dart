@@ -11,6 +11,13 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
+// We need to add a default background to all initial styles because
+// it will be set automatically by the ParagraphBuilder and we need them
+// to match in the tests.
+final WebTextStyle defaultBackground = WebTextStyle(
+  background: Paint()..color = const Color(0x00000000),
+);
+
 Future<void> testMain() async {
   test('Build paragraph for Flutter Gallery', () {
     final WebParagraphStyle paragraphStyle = WebParagraphStyle(
@@ -18,7 +25,8 @@ Future<void> testMain() async {
       fontSize: 20.0,
     );
     final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
-    builder.pushStyle(WebTextStyle(fontFamily: 'GoogleSans', fontSize: 20.0));
+    final textStyle = WebTextStyle(fontFamily: 'GoogleSans', fontSize: 20.0);
+    builder.pushStyle(textStyle);
     builder.addText('Options');
     builder.pop();
     final WebParagraph paragraph = builder.build();
@@ -28,7 +36,7 @@ Future<void> testMain() async {
       TextSpan(
         start: 0,
         end: 7,
-        style: WebTextStyle(fontFamily: 'GoogleSans', fontSize: 20.0),
+        style: paragraphStyle.textStyle.mergeWith(textStyle).mergeWith(defaultBackground),
         text: 'Options',
       ),
     );
@@ -56,7 +64,7 @@ Future<void> testMain() async {
 
     final span = paragraph.spans.single as TextSpan;
     expect(span.text, 'some text');
-    expect(span.style, paragraphStyle.textStyle);
+    expect(span.style, paragraphStyle.textStyle.mergeWith(defaultBackground));
     expect(span.start, 0);
     expect(span.end, paragraph.text.length);
   });
@@ -94,7 +102,7 @@ Future<void> testMain() async {
 
     final span = paragraph.spans.single as TextSpan;
     expect(span.text, 'some text');
-    expect(span.style, textStyle1);
+    expect(span.style, paragraphStyle.textStyle.mergeWith(textStyle1).mergeWith(defaultBackground));
     expect(span.start, 0);
     expect(span.end, paragraph.text.length);
   });
@@ -118,7 +126,7 @@ Future<void> testMain() async {
 
     final span = paragraph.spans.single as TextSpan;
     expect(span.text, 'some text');
-    expect(span.style, textStyle3);
+    expect(span.style, paragraphStyle.textStyle.mergeWith(textStyle3).mergeWith(defaultBackground));
     expect(span.start, 0);
     expect(span.end, paragraph.text.length);
   });
@@ -148,9 +156,18 @@ Future<void> testMain() async {
     expect(spans[0].text, '[1]');
     expect(spans[1].text, '[2]');
     expect(spans[2].text, '[3]');
-    expect(spans[0].style, textStyle1);
-    expect(spans[1].style, textStyle2);
-    expect(spans[2].style, textStyle3);
+    expect(
+      spans[0].style,
+      paragraphStyle.textStyle.mergeWith(textStyle1).mergeWith(defaultBackground),
+    );
+    expect(
+      spans[1].style,
+      paragraphStyle.textStyle.mergeWith(textStyle2).mergeWith(defaultBackground),
+    );
+    expect(
+      spans[2].style,
+      paragraphStyle.textStyle.mergeWith(textStyle3).mergeWith(defaultBackground),
+    );
 
     expect(spans[0].start, 0);
     expect(spans[0].end, 3);
@@ -182,9 +199,18 @@ Future<void> testMain() async {
     expect(spans[0].text, '[1');
     expect(spans[1].text, '[2');
     expect(spans[2].text, '[3]]]');
-    expect(spans[0].style, textStyle1);
-    expect(spans[1].style, textStyle2);
-    expect(spans[2].style, textStyle3);
+    expect(
+      spans[0].style,
+      paragraphStyle.textStyle.mergeWith(textStyle1).mergeWith(defaultBackground),
+    );
+    expect(
+      spans[1].style,
+      paragraphStyle.textStyle.mergeWith(textStyle2).mergeWith(defaultBackground),
+    ); // Technically it's a merge with textStyle1 too but it does not affect the result.
+    expect(
+      spans[2].style,
+      paragraphStyle.textStyle.mergeWith(textStyle3).mergeWith(defaultBackground),
+    ); // Same as above.
 
     expect(spans[0].start, 0);
     expect(spans[0].end, 2);
@@ -216,7 +242,9 @@ Future<void> testMain() async {
       builder.pop();
       builder.addText(']]]');
       final WebParagraph paragraph = builder.build();
-      final WebTextStyle merged1 = paragraph.paragraphStyle.textStyle.mergeWith(textStyle1);
+      final WebTextStyle merged1 = paragraph.paragraphStyle.textStyle
+          .mergeWith(textStyle1)
+          .mergeWith(defaultBackground);
       final WebTextStyle merged12 = merged1.mergeWith(textStyle2);
       final WebTextStyle merged123 = merged12.mergeWith(textStyle3);
 
@@ -265,7 +293,9 @@ Future<void> testMain() async {
     builder.pushStyle(textStyle3);
     builder.addText('[3]]]');
     final WebParagraph paragraph = builder.build();
-    final WebTextStyle merged1 = paragraph.paragraphStyle.textStyle.mergeWith(textStyle1);
+    final WebTextStyle merged1 = paragraph.paragraphStyle.textStyle
+        .mergeWith(textStyle1)
+        .mergeWith(defaultBackground);
     final WebTextStyle merged12 = merged1.mergeWith(textStyle2);
     final WebTextStyle merged123 = merged12.mergeWith(textStyle3);
 
@@ -375,7 +405,10 @@ Future<void> testMain() async {
     final span3 = paragraph.spans[3] as PlaceholderSpan;
 
     expect(span0.text, 'textStyle1. ');
-    expect(span0.style, textStyle1);
+    expect(
+      span0.style,
+      paragraphStyle.textStyle.mergeWith(textStyle1).mergeWith(defaultBackground),
+    );
     expect(span0.start, 0);
     expect(span0.end, 0 + 12);
 
@@ -384,12 +417,18 @@ Future<void> testMain() async {
     expect(span1.baselineOffset, 10.0 * 2.0);
     expect(span1.width, 20 * 2.0);
     expect(span1.height, 25 * 2.0);
-    expect(span1.style, textStyle2);
+    expect(
+      span1.style,
+      paragraphStyle.textStyle.mergeWith(textStyle2).mergeWith(defaultBackground),
+    );
     expect(span1.start, 12);
     expect(span1.end, 12 + 1);
 
     expect(span2.text, 'textStyle3. ');
-    expect(span2.style, textStyle3);
+    expect(
+      span2.style,
+      paragraphStyle.textStyle.mergeWith(textStyle3).mergeWith(defaultBackground),
+    );
     expect(span2.start, 13);
     expect(span2.end, 13 + 12);
 
@@ -398,7 +437,10 @@ Future<void> testMain() async {
     expect(span3.baselineOffset, 30.0 * 4.0);
     expect(span3.width, 40 * 4.0);
     expect(span3.height, 45 * 4.0);
-    expect(span3.style, textStyle2);
+    expect(
+      span3.style,
+      paragraphStyle.textStyle.mergeWith(textStyle2).mergeWith(defaultBackground),
+    );
     expect(span3.start, 25);
     expect(span3.end, 25 + 1);
   });

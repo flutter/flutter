@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -438,6 +439,62 @@ void main() {
       );
       await viewController.setOffset(const Offset(10, 20));
       expect(viewsController.offsets, equals(<int, Offset>{}));
+    });
+
+    testWidgets('motion event converter does not duplicate move events', (
+      WidgetTester tester,
+    ) async {
+      final List<MethodCall> log = <MethodCall>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform_views,
+        (MethodCall methodCall) async {
+          log.add(methodCall);
+          return null;
+        },
+      );
+
+      final AndroidViewController viewController = PlatformViewsService.initSurfaceAndroidView(
+        id: 7,
+        viewType: 'web',
+        layoutDirection: TextDirection.ltr,
+      );
+      viewController.pointTransformer = (Offset offset) => offset;
+
+      const int pointerCount = 10;
+      for (int i = 0; i < pointerCount; i++) {
+        final PointerEvent event = PointerDownEvent(
+          timeStamp: const Duration(milliseconds: 1),
+          pointer: i,
+        );
+        viewController.dispatchPointerEvent(event);
+      }
+
+      // Pointer event platform data constant from _AndroidMotionEventConverter
+      const int kPointerDataFlagMultiple = 2;
+
+      for (int i = 0; i < pointerCount; i++) {
+        final PointerEvent event = PointerMoveEvent(
+          timeStamp: const Duration(milliseconds: 2),
+          pointer: i,
+          platformData: kPointerDataFlagMultiple | (pointerCount << 8),
+        );
+        viewController.dispatchPointerEvent(event);
+      }
+
+      // Indexes in the list returned by AndroidMotionEvent._asList
+      const int kAndroidMotionEventListIndexAction = 3;
+      const int kAndroidMotionEventListIndexPointerCount = 4;
+
+      final List<MethodCall> moveCalls = log.where((MethodCall call) {
+        final List<dynamic> args = call.arguments as List<dynamic>;
+        return call.method == 'touch' &&
+            args[kAndroidMotionEventListIndexAction] == AndroidViewController.kActionMove;
+      }).toList();
+
+      // The _AndroidMotionEventConverter should yield one touch event containing all of the pointers.
+      expect(moveCalls.length, equals(1));
+      final List<dynamic> moveArgs = moveCalls.single.arguments as List<dynamic>;
+      expect(moveArgs[kAndroidMotionEventListIndexPointerCount], equals(pointerCount));
     });
   });
 

@@ -10510,8 +10510,8 @@ void main() {
   testWidgets('Placeholder is baseline aligned with text', (WidgetTester tester) async {
     const String placeholderTextContent = 'hint text';
     const String actualTextContent = 'text';
-    double currentPlaceholderFontSize = 0;
-    double currentTextFontSize = 0;
+    double currentPlaceholderFontSize = 1.0;
+    double currentTextFontSize = 1.0;
     late StateSetter setState;
 
     await tester.pumpWidget(

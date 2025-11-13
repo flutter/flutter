@@ -3389,7 +3389,7 @@ void main() {
       projectDir.path,
     ]);
 
-    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle');
+    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle.kts');
 
     expect(buildGradleFile.existsSync(), true);
 
@@ -3466,7 +3466,7 @@ void main() {
       projectDir.path,
     ]);
 
-    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle');
+    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle.kts');
 
     expect(buildGradleFile.existsSync(), true);
 
@@ -3492,7 +3492,7 @@ void main() {
       projectDir.path,
     ]);
 
-    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle');
+    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle.kts');
 
     expect(buildGradleFile.existsSync(), true);
 
@@ -3519,7 +3519,7 @@ void main() {
       projectDir.path,
     ]);
 
-    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle');
+    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle.kts');
 
     expect(buildGradleFile.existsSync(), true);
 
@@ -4752,6 +4752,19 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
     }, getCurrentDirectory: () => out);
     expect(logger.statusText, isNot(contains(r'  $ cd')));
   }, overrides: {Logger: () => logger});
+
+  testUsingContext('generated pubspec uses default build number (+1) for empty app', () async {
+    await projectDir.create(recursive: true);
+
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--template=app', '--empty'],
+      <String>['lib/main.dart', 'pubspec.yaml'],
+    );
+
+    final String pubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+    expect(pubspec, contains(RegExp(r'^version:\s*0\.1\.0\+1\s*$', multiLine: true)));
+  });
 }
 
 Future<void> _createProject(

@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/web_paragraph/paragraph.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -92,6 +93,7 @@ Future<void> testMain() async {
       );
     }
 
+    // TODO(jlavrova): apparently, event BoxWidthStyle.tight takes in account trailing spaces.
     {
       final rects = paragraph.getBoxesForRange(
         0,
@@ -111,12 +113,12 @@ Future<void> testMain() async {
       final double width4 = rects[3].toRect().width;
 
       expect(height, paragraph.height);
-      expect(width1 <= paragraph.longestLine, true);
-      expect(width2 <= paragraph.longestLine, true);
-      expect(width3 <= paragraph.longestLine, true);
-      expect(width4 <= paragraph.longestLine, true);
+      expect(width1 <= paragraph.maxLineWidthWithTrailingSpaces, true);
+      expect(width2 <= paragraph.maxLineWidthWithTrailingSpaces, true);
+      expect(width3 <= paragraph.maxLineWidthWithTrailingSpaces, true);
+      expect(width4 <= paragraph.maxLineWidthWithTrailingSpaces, true);
       expect(
-        paragraph.longestLine,
+        paragraph.maxLineWidthWithTrailingSpaces,
         math.max(
           math.max(rects[0].toRect().width, rects[1].toRect().width),
           math.max(rects[2].toRect().width, rects[3].toRect().width),
