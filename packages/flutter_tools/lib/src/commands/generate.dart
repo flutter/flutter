@@ -132,7 +132,7 @@ abstract class _BaseGenerateCommand extends FlutterCommand {
     // Write the file
     targetFile.writeAsStringSync(widgetCode);
 
-    final String widgetType = isStateful ? 'stateful' : 'stateless';
+    final widgetType = isStateful ? 'stateful' : 'stateless';
     final String successMessage = globals.terminal.color(
       '✓ Generated $widgetType $componentTypeDisplay:',
       TerminalColor.green,
@@ -294,4 +294,3 @@ class _PageCommand extends _ScreenCommand {
   @override
   String get componentTypeDisplay => 'page';
 }
-
