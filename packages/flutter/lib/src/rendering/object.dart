@@ -6320,8 +6320,6 @@ String _debugCollectRenderObjectSemanticsTrees() {
   ].join('\n\n');
 }
 
-typedef _SemanticsGeometryClips = (Rect? paintClipRect, Rect? semanticsClipRect);
-
 /// Helper class that keeps track of the geometry of a [SemanticsNode].
 ///
 /// It is used to annotate a [SemanticsNode] with the current information for
@@ -6470,46 +6468,6 @@ final class _SemanticsGeometry {
       return Rect.zero;
     }
     return apply(transform, rect);
-  }
-
-  // A matrix used to store transient transform data.
-  //
-  // Reusing this matrix avoids allocating a new matrix every time a temporary
-  // matrix is needed.
-  //
-  // This instance should never be returned to the caller. Otherwise, the data
-  // stored in it will be overwritten unpredictably by subsequent reuses.
-  static final Matrix4 _temporaryTransformHolder = Matrix4.zero();
-
-  // Computes the semantics and painting clip rects for the given child and
-  // assigns the rects to _semanticsClipRect and _paintClipRect respectively.
-  //
-  // The caller must guarantee that child.parent == parent. The resulting rects
-  // are in `child`'s coordinate system.
-  static _SemanticsGeometryClips _computeClipRect(
-    RenderObject parent,
-    RenderObject child,
-    Rect? parentSemanticsClipRect,
-    Rect? parentPaintClipRect,
-  ) {
-    assert(identical(child.parent, parent));
-    final Rect? additionalPaintClip = parent.describeApproximatePaintClip(child);
-    if (parentPaintClipRect == null && additionalPaintClip == null) {
-      return (null, null);
-    }
-    // Computes the paint transform from child to parent. The _transformRect
-    // method will compute the inverse.
-    _temporaryTransformHolder.setIdentity(); // clears data from previous call(s)
-    parent.applyPaintTransform(child, _temporaryTransformHolder);
-
-    final Rect paintClipRect = _transformRect(
-      _intersectRects(additionalPaintClip, parentPaintClipRect),
-      _temporaryTransformHolder,
-    )!;
-    final Rect? semanticsClip =
-        parent.describeSemanticsClip(child) ??
-        _intersectRects(parentSemanticsClipRect, additionalPaintClip);
-    return (paintClipRect, _transformRect(semanticsClip, _temporaryTransformHolder));
   }
 
   static Rect? _intersectRects(Rect? a, Rect? b) {
