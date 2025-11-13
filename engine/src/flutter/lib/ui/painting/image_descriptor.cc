@@ -39,6 +39,7 @@ ImageDescriptor::ImageInfo ImageDescriptor::CreateImageInfo(
       .height = static_cast<uint32_t>(sk_image_info.height()),
       .format = format,
       .premultiplied = sk_image_info.alphaType() == kPremul_SkAlphaType,
+      .color_space = sk_image_info.refColorSpace(),
   };
 }
 
@@ -60,7 +61,8 @@ SkImageInfo ImageDescriptor::ToSkImageInfo(const ImageInfo& image_info) {
   }
   return SkImageInfo::Make(
       image_info.width, image_info.height, color_type,
-      image_info.premultiplied ? kPremul_SkAlphaType : kUnpremul_SkAlphaType);
+      image_info.premultiplied ? kPremul_SkAlphaType : kUnpremul_SkAlphaType,
+      image_info.color_space);
 }
 
 ImageDescriptor::ImageDescriptor(sk_sp<SkData> buffer,
@@ -130,6 +132,7 @@ void ImageDescriptor::initRaw(Dart_Handle descriptor_handle,
       .height = static_cast<uint32_t>(height),
       .format = pixel_format,
       .premultiplied = pixel_format == PixelFormat::kRGBAFloat32 ? false : true,
+      .color_space = SkColorSpace::MakeSRGB(),
   };
 
   auto descriptor = fml::MakeRefCounted<ImageDescriptor>(

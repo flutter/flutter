@@ -13,6 +13,7 @@
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/image_generator_registry.h"
 #include "flutter/lib/ui/painting/immutable_buffer.h"
+#include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
@@ -46,6 +47,7 @@ class ImageDescriptor : public RefCountedDartWrappable<ImageDescriptor> {
     const uint32_t height;
     const PixelFormat format;
     const bool premultiplied;
+    const sk_sp<SkColorSpace> color_space;
   };
 
   /// @brief  Asynchronously initializes an ImageDescriptor for an encoded
