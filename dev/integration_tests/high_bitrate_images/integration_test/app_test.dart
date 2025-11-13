@@ -23,7 +23,9 @@ double _decodeBGR10(int x) {
 
 Uint8List _convertBGRA10XRToBGRA8888(Uint8List bgra10xr) {
   final ByteData inputByteData = ByteData.sublistView(bgra10xr);
-  final Uint8List bgra8888 = Uint8List(bgra10xr.lengthInBytes ~/ 2); // 8 bytes per pixel -> 4 bytes per pixel
+  final Uint8List bgra8888 = Uint8List(
+    bgra10xr.lengthInBytes ~/ 2,
+  ); // 8 bytes per pixel -> 4 bytes per pixel
   final ByteData outputByteData = ByteData.view(bgra8888.buffer);
 
   for (int i = 0, j = 0; i < bgra10xr.lengthInBytes; i += 8, j += 4) {
@@ -38,8 +40,7 @@ Uint8List _convertBGRA10XRToBGRA8888(Uint8List bgra10xr) {
     final int red8 = (red10.clamp(0.0, 1.0) * 255).round();
     const int alpha8 = 255; // Assuming opaque for BGRA8888
 
-    final int bgra8888Pixel =
-        (alpha8 << 24) | (red8 << 16) | (green8 << 8) | blue8;
+    final int bgra8888Pixel = (alpha8 << 24) | (red8 << 16) | (green8 << 8) | blue8;
     outputByteData.setUint32(j, bgra8888Pixel, Endian.host);
   }
   return bgra8888;
@@ -47,13 +48,11 @@ Uint8List _convertBGRA10XRToBGRA8888(Uint8List bgra10xr) {
 
 Future<ui.Image> _getScreenshot() async {
   const MethodChannel channel = MethodChannel('flutter/screenshot');
-  final List<Object?> result =
-      await channel.invokeMethod('test') as List<Object?>;
+  final List<Object?> result = await channel.invokeMethod('test') as List<Object?>;
 
   expect(result, isNotNull);
   expect(result.length, 4);
-  final [int width, int height, String format, Uint8List bytes] =
-      result as List<dynamic>;
+  final [int width, int height, String format, Uint8List bytes] = result as List<dynamic>;
 
   expect(format, equals('MTLPixelFormatBGRA10_XR'));
 

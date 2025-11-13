@@ -18,11 +18,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'SDF Demo',
-      theme: ThemeData.dark(),
-      home: const MyHomePage(),
-    );
+    return MaterialApp(title: 'SDF Demo', theme: ThemeData.dark(), home: const MyHomePage());
   }
 }
 
