@@ -142,10 +142,11 @@ class FlutterDevice {
         extraFrontEndOptions: extraFrontEndOptions,
         platformDill: globals.fs.file(platformDillPath).absolute.uri.toString(),
         dartDefines: buildInfo.dartDefines,
-        librariesSpec: globals.fs
-            .file(globals.artifacts!.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
-            .uri
-            .toString(),
+        librariesSpec:
+            globals.fs
+                .file(globals.artifacts!.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
+                .uri
+                .toString(),
         packagesPath: buildInfo.packageConfigPath,
         artifacts: globals.artifacts!,
         processManager: globals.processManager,
@@ -457,9 +458,10 @@ class FlutterDevice {
     }
     final Stream<String> logStream;
     if (device is IOSDevice) {
-      logStream = (device! as IOSDevice)
-          .getLogReader(app: package as IOSApp?, usingCISystem: debuggingOptions.usingCISystem)
-          .logLines;
+      logStream =
+          (device! as IOSDevice)
+              .getLogReader(app: package as IOSApp?, usingCISystem: debuggingOptions.usingCISystem)
+              .logLines;
     } else {
       logStream = (await device!.getLogReader(app: package)).logLines;
     }
@@ -701,11 +703,12 @@ abstract class ResidentHandlers {
   /// is run instead. On web devices, this only performs a hot restart regardless of
   /// the value of [fullRestart].
   Future<OperationResult> restart({bool fullRestart = false, bool pause = false, String? reason}) {
-    final mode = isRunningProfile
-        ? 'profile'
-        : isRunningRelease
-        ? 'release'
-        : 'this';
+    final mode =
+        isRunningProfile
+            ? 'profile'
+            : isRunningRelease
+            ? 'release'
+            : 'this';
     throw Exception('${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode');
   }
 
@@ -1065,9 +1068,10 @@ abstract class ResidentRunner extends ResidentHandlers {
        packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
        _dillOutputPath = dillOutputPath,
-       artifactDirectory = dillOutputPath == null
-           ? globals.fs.systemTempDirectory.createTempSync('flutter_tool.')
-           : globals.fs.file(dillOutputPath).parent,
+       artifactDirectory =
+           dillOutputPath == null
+               ? globals.fs.systemTempDirectory.createTempSync('flutter_tool.')
+               : globals.fs.file(dillOutputPath).parent,
        assetBundle = AssetBundleFactory.instance.createBundle(),
        commandHelp =
            commandHelp ??
@@ -1658,6 +1662,65 @@ class TerminalHandler {
   @visibleForTesting
   BufferLogger get logger => _logger as BufferLogger;
 
+  /// Maps non-Latin keyboard layout characters to their Latin equivalents
+  /// based on physical key positions.
+  ///
+  /// This allows users with non-Latin keyboard layouts to use terminal commands
+  /// without switching layouts. The mappings are based on the physical position
+  /// of keys on the keyboard, not their linguistic equivalents.
+  ///
+  /// Currently supports:
+  /// - Cyrillic (Russian ЙЦУКЕН layout) → QWERTY Latin
+  ///
+  /// Contributors can add mappings for additional layouts (Arabic, Hebrew,
+  /// Greek, etc.) by adding entries to this map.
+  ///
+  /// Related issues: #27021, #100456, #116658
+  static const _keyboardLayoutMappings = <String, String>{
+    // Cyrillic (Russian ЙЦУКЕН) layout → QWERTY Latin
+    // Maps based on physical key positions for terminal commands
+    'к': 'r', 'К': 'R',  // hot reload / hot restart
+    'й': 'q', 'Й': 'Q',  // quit
+    'ц': 'w', 'Ц': 'W',  // dump widget tree
+    'р': 'h', 'Р': 'H',  // help
+    'ы': 's', 'Ы': 'S',  // screenshot / semantics
+    'в': 'd', 'В': 'D',  // detach
+    'а': 'f', 'А': 'F',  // dump focus tree
+    'ф': 'a', 'Ф': 'A',  // toggle profile widget builds
+    'п': 'g', 'П': 'G',  // run source generators
+    'ш': 'i', 'Ш': 'I',  // widget inspector / invert images
+    'д': 'l', 'Д': 'L',  // dump layer tree
+    'щ': 'o', 'Щ': 'O',  // toggle platform
+    'з': 'p', 'З': 'P',  // debug paint / performance overlay
+    'т': 'n', 'Т': 'N',  // (reserved for future use)
+    'е': 't', 'Е': 'T',  // dump render tree
+    'г': 'u', 'Г': 'U',  // dump semantics (inverse hit test)
+    'м': 'v', 'М': 'V',  // open DevTools
+    'с': 'c', 'С': 'C',  // clear screen
+    'и': 'b', 'И': 'B',  // toggle brightness
+    // Contributors can add mappings for other non-Latin layouts as needed.
+    // Examples: Arabic, Hebrew, Greek keyboard layout mappings.
+  };
+
+  /// Maps a keyboard character to its Latin equivalent if a mapping exists.
+  ///
+  /// This method checks if the input character exists in [_keyboardLayoutMappings]
+  /// and returns the corresponding Latin character. If no mapping is found,
+  /// it returns the original character unchanged.
+  ///
+  /// This enables users with non-Latin keyboard layouts (e.g., Cyrillic, Arabic)
+  /// to use terminal commands without switching their keyboard layout.
+  ///
+  /// Examples:
+  /// ```dart
+  /// _mapKeyToLatin('к') // returns 'r' (hot reload)
+  /// _mapKeyToLatin('r') // returns 'r' (no mapping needed)
+  /// _mapKeyToLatin('й') // returns 'q' (quit)
+  /// ```
+  static String _mapKeyToLatin(String key) {
+    return _keyboardLayoutMappings[key] ?? key;
+  }
+
   void setupTerminal() {
     if (!_logger.quiet) {
       _logger.printStatus('');
@@ -1709,50 +1772,80 @@ class TerminalHandler {
   }
 
   /// Returns `true` if the input has been handled by this function.
+  ///
+  /// Supports both Latin and non-Latin keyboard layouts to allow developers
+  /// to use terminal commands without switching layouts. Currently supports:
+  /// - QWERTY (Latin, default)
+  /// - ЙЦУКЕН (Cyrillic)
+  ///
+  /// This can be extended to support other layouts (AZERTY, QWERTZ, etc.) by
+  /// adding additional case statements that map layout-specific characters to
+  /// their Latin equivalents based on physical key positions.
   Future<bool> _commonTerminalInputHandler(String character) async {
     _logger.printStatus(''); // the key the user tapped might be on this line
+    // Map non-Latin characters to Latin equivalents based on physical key position
+    character = _mapKeyToLatin(character);
     switch (character) {
       case 'a':
+      case 'ф': // 'a' in Cyrillic (QWERTY 'a' → ЙЦУКЕН 'ф')
         return residentRunner.debugToggleProfileWidgetBuilds();
       case 'b':
+      case 'и': // 'b' in Cyrillic (QWERTY 'b' → ЙЦУКЕН 'и')
         return residentRunner.debugToggleBrightness();
       case 'c':
+      case 'с': // 'c' in Cyrillic (QWERTY 'c' → ЙЦУКЕН 'с')
         _logger.clear();
         return true;
       case 'd':
       case 'D':
+      case 'в': // 'd' in Cyrillic (QWERTY 'd' → ЙЦУКЕН 'в')
+      case 'В': // 'D' in Cyrillic
         await residentRunner.detach();
         return true;
       case 'f':
+      case 'а': // 'f' in Cyrillic (QWERTY 'f' → ЙЦУКЕН 'а')
         return residentRunner.debugDumpFocusTree();
       case 'g':
+      case 'п': // 'g' in Cyrillic (QWERTY 'g' → ЙЦУКЕН 'п')
         await residentRunner.runSourceGenerators();
         return true;
       case 'h':
       case 'H':
+      case 'р': // 'h' in Cyrillic (QWERTY 'h' → ЙЦУКЕН 'р')
+      case 'Р': // 'H' in Cyrillic
       case '?':
         // help
         residentRunner.printHelp(details: true);
         return true;
       case 'i':
+      case 'ш': // 'i' in Cyrillic (QWERTY 'i' → ЙЦУКЕН 'ш')
         return residentRunner.debugToggleWidgetInspector();
       case 'I':
+      case 'Ш': // 'I' in Cyrillic
         return residentRunner.debugToggleInvertOversizedImages();
       case 'L':
+      case 'Д': // 'L' in Cyrillic (QWERTY 'L' → ЙЦУКЕН 'Д')
         return residentRunner.debugDumpLayerTree();
       case 'o':
       case 'O':
+      case 'щ': // 'o' in Cyrillic (QWERTY 'o' → ЙЦУКЕН 'щ')
+      case 'Щ': // 'O' in Cyrillic
         return residentRunner.debugTogglePlatform();
       case 'p':
+      case 'з': // 'p' in Cyrillic (QWERTY 'p' → ЙЦУКЕН 'з')
         return residentRunner.debugToggleDebugPaintSizeEnabled();
       case 'P':
+      case 'З': // 'P' in Cyrillic
         return residentRunner.debugTogglePerformanceOverlayOverride();
       case 'q':
       case 'Q':
+      case 'й': // 'q' in Cyrillic (QWERTY 'q' → ЙЦУКЕН 'й')
+      case 'Й': // 'Q' in Cyrillic
         // exit
         await residentRunner.exit();
         return true;
       case 'r':
+      case 'к': // 'r' in Cyrillic (QWERTY 'r' → ЙЦУКЕН 'к')
         if (!residentRunner.canHotReload) {
           return false;
         }
@@ -1765,6 +1858,7 @@ class TerminalHandler {
         }
         return true;
       case 'R':
+      case 'К': // 'R' in Cyrillic (QWERTY 'R' → ЙЦУКЕН 'К')
         // If hot restart is not supported for all devices, ignore the command.
         if (!residentRunner.supportsRestart || !residentRunner.hotMode) {
           return false;
@@ -1778,19 +1872,26 @@ class TerminalHandler {
         }
         return true;
       case 's':
+      case 'ы': // 's' in Cyrillic (QWERTY 's' → ЙЦУКЕН 'ы')
         for (final FlutterDevice? device in residentRunner.flutterDevices) {
           await residentRunner.screenshot(device!);
         }
         return true;
       case 'S':
+      case 'Ы': // 'S' in Cyrillic
         return residentRunner.debugDumpSemanticsTreeInTraversalOrder();
       case 't':
       case 'T':
+      case 'е': // 't' in Cyrillic (QWERTY 't' → ЙЦУКЕН 'е')
+      case 'Е': // 'T' in Cyrillic
         return residentRunner.debugDumpRenderTree();
       case 'U':
+      case 'Г': // 'U' in Cyrillic (QWERTY 'U' → ЙЦУКЕН 'Г')
         return residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
       case 'v':
       case 'V':
+      case 'м': // 'v' in Cyrillic (QWERTY 'v' → ЙЦУКЕН 'м')
+      case 'М': // 'V' in Cyrillic
         final bool isRunningOnWeb = residentRunner.flutterDevices.every((
           FlutterDevice? flutterDevice,
         ) {
@@ -1811,6 +1912,8 @@ class TerminalHandler {
         return false;
       case 'w':
       case 'W':
+      case 'ц': // 'w' in Cyrillic (QWERTY 'w' → ЙЦУКЕН 'ц')
+      case 'Ц': // 'W' in Cyrillic
         return residentRunner.debugDumpApp();
     }
     return false;
