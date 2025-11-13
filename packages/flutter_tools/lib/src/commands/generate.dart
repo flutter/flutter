@@ -13,6 +13,8 @@ import '../runner/flutter_command.dart';
 class GenerateCommand extends FlutterCommand {
   GenerateCommand() {
     addSubcommand(_WidgetCommand());
+    addSubcommand(_ScreenCommand());
+    addSubcommand(_PageCommand());
   }
 
   @override
@@ -40,14 +42,14 @@ class GenerateCommand extends FlutterCommand {
   }
 }
 
-/// Base class for widget generation commands
-abstract class _BaseWidgetCommand extends FlutterCommand {
-  _BaseWidgetCommand() {
-    argParser.addOption(
-      'name',
-      abbr: 'n',
-      help: 'The name of the widget to generate.',
-      mandatory: true,
+/// Base class for code generation commands
+abstract class _BaseGenerateCommand extends FlutterCommand {
+  _BaseGenerateCommand(this.componentType) {
+    argParser.addFlag(
+      'stateful',
+      abbr: 's',
+      negatable: false,
+      help: 'Generate a StatefulWidget instead of StatelessWidget.',
     );
     argParser.addOption(
       'output',
@@ -57,22 +59,30 @@ abstract class _BaseWidgetCommand extends FlutterCommand {
     );
   }
 
-  String get widgetType;
+  final String componentType;
+
+  String get componentTypeDisplay;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String? widgetName = stringArg('name');
-    final String? outputPath = stringArg('output');
-
-    if (widgetName == null || widgetName.isEmpty) {
-      throwToolExit('Widget name is required. Use --name or -n to specify.');
+    final List<String> args = argResults?.rest ?? <String>[];
+    
+    if (args.isEmpty) {
+      throwToolExit(
+        'Please provide a name for the $componentTypeDisplay.\n'
+        'Usage: flutter g $componentType <Name> [--stateful] [--output <path>]',
+      );
     }
+
+    final String widgetName = args.first;
+    final bool isStateful = boolArg('stateful');
+    final String? outputPath = stringArg('output');
 
     // Validate widget name (must be valid Dart class name)
     if (!RegExp(r'^[A-Z][a-zA-Z0-9]*$').hasMatch(widgetName)) {
       throwToolExit(
-        'Invalid widget name: "$widgetName".\n'
-        'Widget names must start with an uppercase letter and contain only letters and numbers.',
+        'Invalid name: "$widgetName".\n'
+        'Names must start with an uppercase letter and contain only letters and numbers.',
       );
     }
 
@@ -113,16 +123,17 @@ abstract class _BaseWidgetCommand extends FlutterCommand {
     }
 
     // Generate the widget code
-    final String widgetCode = _generateWidgetCode(widgetName, resolvedOutputPath);
+    final String widgetCode = _generateCode(widgetName, isStateful);
 
     // Write the file
     targetFile.writeAsStringSync(widgetCode);
 
-    globals.printStatus('✓ Generated $widgetType widget: ${targetFile.path}');
+    final String widgetType = isStateful ? 'stateful' : 'stateless';
+    globals.printStatus('✓ Generated $widgetType $componentTypeDisplay: ${targetFile.path}');
     return FlutterCommandResult.success();
   }
 
-  String _generateWidgetCode(String widgetName, String relativePath);
+  String _generateCode(String name, bool isStateful);
 
   String _toSnakeCase(String input) {
     return input
@@ -134,15 +145,12 @@ abstract class _BaseWidgetCommand extends FlutterCommand {
   }
 }
 
-/// Command to generate a widget (defaults to stateless)
-class _WidgetCommand extends FlutterCommand {
-  _WidgetCommand() {
-    addSubcommand(_StatelessWidgetCommand());
-    addSubcommand(_StatefulWidgetCommand());
-  }
+/// Command to generate a widget
+class _WidgetCommand extends _BaseGenerateCommand {
+  _WidgetCommand() : super('widget');
 
   @override
-  String get description => 'Generate Flutter widgets.';
+  String get description => 'Generate a Flutter widget (stateless by default).';
 
   @override
   String get name => 'widget';
@@ -151,70 +159,12 @@ class _WidgetCommand extends FlutterCommand {
   List<String> get aliases => const <String>['w'];
 
   @override
-  String get invocation => 'flutter generate widget <subcommand>';
+  String get componentTypeDisplay => 'widget';
 
   @override
-  Future<FlutterCommandResult> runCommand() async {
-    // Default to stateless widget if no subcommand provided
-    throw UsageException(
-      'Please specify a widget type: stateless or stateful.',
-      'Usage: flutter generate widget <stateless|stateful> --name <WidgetName> [--output <path>]',
-    );
-  }
-}
-
-/// Command to generate a stateless widget
-class _StatelessWidgetCommand extends _BaseWidgetCommand {
-  @override
-  String get description => 'Generate a StatelessWidget.';
-
-  @override
-  String get name => 'stateless';
-
-  @override
-  List<String> get aliases => const <String>['sl'];
-
-  @override
-  String get widgetType => 'stateless';
-
-  @override
-  String _generateWidgetCode(String widgetName, String relativePath) {
-    return '''
-import 'package:flutter/material.dart';
-
-class $widgetName extends StatelessWidget {
-  const $widgetName({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: const Center(
-        child: Text('$widgetName'),
-      ),
-    );
-  }
-}
-''';
-  }
-}
-
-/// Command to generate a stateful widget
-class _StatefulWidgetCommand extends _BaseWidgetCommand {
-  @override
-  String get description => 'Generate a StatefulWidget.';
-
-  @override
-  String get name => 'stateful';
-
-  @override
-  List<String> get aliases => const <String>['sf'];
-
-  @override
-  String get widgetType => 'stateful';
-
-  @override
-  String _generateWidgetCode(String widgetName, String relativePath) {
-    return '''
+  String _generateCode(String widgetName, bool isStateful) {
+    if (isStateful) {
+      return '''
 import 'package:flutter/material.dart';
 
 class $widgetName extends StatefulWidget {
@@ -227,13 +177,108 @@ class $widgetName extends StatefulWidget {
 class _${widgetName}State extends State<$widgetName> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: const Center(
+    return const Placeholder();
+  }
+}
+''';
+    } else {
+      return '''
+import 'package:flutter/material.dart';
+
+class $widgetName extends StatelessWidget {
+  const $widgetName({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
+  }
+}
+''';
+    }
+  }
+}
+
+/// Command to generate a screen/page with Scaffold
+class _ScreenCommand extends _BaseGenerateCommand {
+  _ScreenCommand() : super('screen');
+
+  @override
+  String get description => 'Generate a Flutter screen with Scaffold (stateless by default).';
+
+  @override
+  String get name => 'screen';
+
+  @override
+  List<String> get aliases => const <String>['s'];
+
+  @override
+  String get componentTypeDisplay => 'screen';
+
+  @override
+  String _generateCode(String widgetName, bool isStateful) {
+    if (isStateful) {
+      return '''
+import 'package:flutter/material.dart';
+
+class $widgetName extends StatefulWidget {
+  const $widgetName({super.key});
+
+  @override
+  State<$widgetName> createState() => _${widgetName}State();
+}
+
+class _${widgetName}State extends State<$widgetName> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('$widgetName'),
+      ),
+      body: const Center(
         child: Text('$widgetName'),
       ),
     );
   }
 }
 ''';
+    } else {
+      return '''
+import 'package:flutter/material.dart';
+
+class $widgetName extends StatelessWidget {
+  const $widgetName({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('$widgetName'),
+      ),
+      body: const Center(
+        child: Text('$widgetName'),
+      ),
+    );
   }
 }
+''';
+    }
+  }
+}
+
+/// Command to generate a page (alias for screen)
+class _PageCommand extends _ScreenCommand {
+  _PageCommand() : super();
+
+  @override
+  String get description => 'Generate a Flutter page with Scaffold (alias for screen).';
+
+  @override
+  String get name => 'page';
+
+  @override
+  List<String> get aliases => const <String>['p'];
+
+  @override
+  String get componentTypeDisplay => 'page';
+}
+
