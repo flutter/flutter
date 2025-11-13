@@ -156,8 +156,9 @@
   [window setReleasedWhenClosed:NO];
 
   window.contentViewController = c;
-  window.styleMask = NSWindowStyleMaskResizable | NSWindowStyleMaskTitled |
-                     NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable;
+  window.styleMask =
+      NSWindowStyleMaskResizable | NSWindowStyleMaskTitled | NSWindowStyleMaskClosable;
+  window.collectionBehavior = NSWindowCollectionBehaviorFullScreenAuxiliary;
   if (request->has_size) {
     [window flutterSetContentSize:request->size];
   }
