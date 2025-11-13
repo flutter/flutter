@@ -50,8 +50,7 @@ class FillPathSourceGeometry : public Geometry {
 };
 
 /// @brief A Geometry that produces fillable vertices from a |PathSource| object
-///        using the |FillPathSourceGeometry| base class and the inherent
-///        ability for a |DlPath| object to perform path iteration.
+///        using the |FillPathSourceGeometry|.
 class FillPathFromSourceGeometry final : public FillPathSourceGeometry {
  public:
   explicit FillPathFromSourceGeometry(
