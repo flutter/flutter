@@ -609,4 +609,19 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('UserAccountsDrawerHeader does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: UserAccountsDrawerHeader(accountName: Text('X'), accountEmail: Text('Y')),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(UserAccountsDrawerHeader)), Size.zero);
+  });
 }
