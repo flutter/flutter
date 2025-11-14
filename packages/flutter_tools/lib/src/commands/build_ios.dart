@@ -697,7 +697,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
             'Detected manual code signing. Generated ExportOptions.plist with '
             'teamID, signingStyle=manual, and provisioningProfiles for $bundleId.',
           );
-          return _createManualSigningExportPlistStatic(
+          return _createManualSigningExportPlist(
             exportMethod: exportMethod,
             teamId: teamId,
             bundleId: bundleId,
@@ -717,11 +717,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     }
 
     // Fall back to simple plist (current behavior)
-    return _createSimpleExportPlistStatic(exportMethod: exportMethod, fileSystem: fileSystem);
+    return _createSimpleExportPlist(exportMethod: exportMethod, fileSystem: fileSystem);
   }
 
-  /// Static version for testing.
-  static File _createSimpleExportPlistStatic({
+  File _createSimpleExportPlist({
     required String exportMethod,
     required FileSystem fileSystem,
   }) {
@@ -746,8 +745,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     return tempPlist;
   }
 
-  /// Static version for testing.
-  static File _createManualSigningExportPlistStatic({
+  File _createManualSigningExportPlist({
     required String exportMethod,
     required String teamId,
     required String bundleId,
