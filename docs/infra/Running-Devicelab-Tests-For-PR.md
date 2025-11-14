@@ -40,7 +40,7 @@ Engine artifacts for PRs are uploaded using their _commit hash_, not for their _
 
 ## Framework PRs
 
-Skip steps 1 and 2 above and:
+For Framework PRs, the process is simpler:
 
 1. Collect the following:
 
