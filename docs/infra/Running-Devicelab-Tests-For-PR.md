@@ -1,6 +1,6 @@
 # Running DeviceLab Tests For a PR
 
-From time to time you might find yourself needing to run a post submit test
+From time to time you might find yourself needing to run a post-submit test
 in a PR.  Maybe you landed a PR with clean pre-submits, but the dashboard
 ended up red. Maybe you are trying to deflake a test and just need to run it
 a few times before landing. Here's how you do that.
