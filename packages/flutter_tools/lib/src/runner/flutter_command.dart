@@ -1629,11 +1629,11 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   Map<String, String> extractWebDefines() {
-    final Map<String, String> webDefines = <String, String>{};
+    final webDefines = <String, String>{};
 
     if (argParser.options.containsKey(FlutterOptions.kWebDefinesOption)) {
       final List<String> defines = stringsArg(FlutterOptions.kWebDefinesOption);
-      for (final String define in defines) {
+      for (final define in defines) {
         final int separatorIndex = define.indexOf('=');
         if (separatorIndex == -1 || separatorIndex == 0) {
           throwToolExit(

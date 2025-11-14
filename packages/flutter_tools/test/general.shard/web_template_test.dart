@@ -482,7 +482,7 @@ void main() {
         flutterJsFile: flutterJs,
         webDefines: <String, String>{}, // Missing API_URL
       ),
-      throwsToolExit(message: ('Missing web-define variable: API_URL')),
+      throwsToolExit(message: 'Missing web-define variable: API_URL'),
     );
   });
 
@@ -513,7 +513,7 @@ void main() {
         flutterJsFile: flutterJs,
         webDefines: <String, String>{'API_URL': 'test'}, // Missing ENV, VERSION
       ),
-      throwsToolExit(message: ('Missing web-define variable')),
+      throwsToolExit(message: 'Missing web-define variable'),
     );
   });
 
@@ -543,7 +543,7 @@ void main() {
         buildConfig: 'test config',
         webDefines: <String, String>{}, // Missing CUSTOM_VAR but built-in vars should be ignored
       ),
-      throwsToolExit(message: ('Missing web-define variable: CUSTOM_VAR')),
+      throwsToolExit(message: 'Missing web-define variable: CUSTOM_VAR'),
     );
   });
 
