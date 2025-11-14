@@ -104,11 +104,15 @@ class CreateCommand extends FlutterCommand with CreateBase {
           'internally and should generally not be used manually.',
       hide: !verboseHelp,
     );
+
+    final Map<String, String> platformsAllowedHelp = {
+      for (final String p in kAllCreatePlatforms) p: '',
+    };
+    platformsAllowedHelp['darwin'] =
+        'A shared platform for iOS and macOS. (only supported for plugins)';
     addPlatformsOptions(
       customHelp: kPlatformHelp,
-      allowedHelp: <String, String>{
-        'darwin': 'A shared platform for iOS and macOS. (only supported for plugins)',
-      },
+      allowedHelp: platformsAllowedHelp,
     );
 
     final List<ParsedFlutterTemplateType> enabledTemplates =
@@ -385,25 +389,25 @@ class CreateCommand extends FlutterCommand with CreateBase {
       includeMacos = false;
       includeWindows = false;
       includeDarwin = false;
-    } else {
+    } else if (template == FlutterTemplateType.plugin) {
+      if (platforms.isEmpty) {
+        throwToolExit('Must specify at least one platform using --platforms', exitCode: 2);
+      }
       final bool darwinRequested = platforms.contains('darwin');
-      final bool darwinSupported =
-          (template == FlutterTemplateType.plugin) &&
-          featureFlags.isIOSEnabled &&
-          featureFlags.isMacOSEnabled;
-
-      if (darwinRequested && darwinSupported) {
-        includeDarwin = true;
-        includeIos = featureFlags.isIOSEnabled;
-        includeMacos = featureFlags.isMacOSEnabled;
-      } else if (darwinRequested && !darwinSupported) {
-        includeDarwin = false;
-        globals.printWarning(
-          'Warning: To use the "darwin" platform, you must have both iOS and macOS enabled.\n'
-          'Run "flutter config --enable-ios --enable-macos-desktop" and try again.',
-        );
-        includeIos = featureFlags.isIOSEnabled && platforms.contains('ios');
-        includeMacos = featureFlags.isMacOSEnabled && platforms.contains('macos');
+      if (darwinRequested) {
+        if (featureFlags.isIOSEnabled && featureFlags.isMacOSEnabled) {
+          includeDarwin = true;
+          includeIos = true;
+          includeMacos = true;
+        } else {
+          includeDarwin = false;
+          includeIos = false;
+          includeMacos = false;
+          globals.printWarning(
+            'Warning: To use the "darwin" platform, you must have both iOS and macOS enabled.\n'
+            'Run "flutter config --enable-ios --enable-macos-desktop" and try again.',
+          );
+        }
       } else {
         includeDarwin = false;
         includeIos = featureFlags.isIOSEnabled && platforms.contains('ios');
@@ -413,6 +417,14 @@ class CreateCommand extends FlutterCommand with CreateBase {
       includeWeb = featureFlags.isWebEnabled && platforms.contains('web');
       includeLinux = featureFlags.isLinuxEnabled && platforms.contains('linux');
       includeWindows = featureFlags.isWindowsEnabled && platforms.contains('windows');
+    } else {
+      includeIos = featureFlags.isIOSEnabled && platforms.contains('ios');
+      includeAndroid = featureFlags.isAndroidEnabled && platforms.contains('android');
+      includeWeb = featureFlags.isWebEnabled && platforms.contains('web');
+      includeLinux = featureFlags.isLinuxEnabled && platforms.contains('linux');
+      includeMacos = featureFlags.isMacOSEnabled && platforms.contains('macos');
+      includeWindows = featureFlags.isWindowsEnabled && platforms.contains('windows');
+      includeDarwin = false;
     }
 
     String? developmentTeam;

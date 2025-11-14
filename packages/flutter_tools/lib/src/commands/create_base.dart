@@ -25,7 +25,6 @@ const _kAvailablePlatforms = <String>[
   'linux',
   'macos',
   'web',
-  'darwin',
 ];
 
 /// A list of all possible create platforms, even those that may not be enabled
@@ -116,7 +115,7 @@ mixin CreateBase on FlutterCommand {
       help: customHelp ?? _kDefaultPlatformArgumentHelp,
       aliases: <String>['platform'],
       defaultsTo: <String>[..._kAvailablePlatforms],
-      allowed: <String>[..._kAvailablePlatforms],
+      allowed: <String>[...kAllCreatePlatforms],
       allowedHelp: allowedHelp,
     );
   }

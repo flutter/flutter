@@ -3556,7 +3556,7 @@ void main() {
       );
       expect(projectDir.childDirectory('darwin').existsSync(), isFalse);
       expect(projectDir.childDirectory('ios').existsSync(), isFalse);
-      expect(projectDir.childDirectory('macos').existsSync(), isTrue);
+      expect(projectDir.childDirectory('macos').existsSync(), isFalse);
     },
     overrides: {
       FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false, isMacOSEnabled: true),
