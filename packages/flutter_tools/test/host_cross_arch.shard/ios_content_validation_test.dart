@@ -8,6 +8,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/darwin/darwin.dart';
 
 import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
@@ -170,6 +171,55 @@ void main() {
             );
 
             expect(vmSnapshot.existsSync(), buildMode == BuildMode.debug);
+          });
+
+          testWithoutContext('App.framework Info.plist contains correct MinimumOSVersion', () {
+            final File templateInfoPlist = fileSystem.file(
+              fileSystem.path.join(projectRoot, 'ios', 'Flutter', 'AppFrameworkInfo.plist'),
+            );
+            expect(templateInfoPlist, exists);
+            final String originalContents = templateInfoPlist.readAsStringSync();
+
+            templateInfoPlist.writeAsStringSync(
+              originalContents.replaceFirst(
+                '</dict>',
+                '  <key>MinimumOSVersion</key>\n  <string>99.0</string>\n</dict>',
+              ),
+            );
+
+            final ProcessResult buildResult = processManager.runSync(<String>[
+              flutterBin,
+              ...getLocalEngineArguments(),
+              'build',
+              'ios',
+              '--verbose',
+              '--no-codesign',
+              '--${buildMode.cliName}',
+            ], workingDirectory: projectRoot);
+
+            templateInfoPlist.writeAsStringSync(originalContents);
+
+            printOnFailure('Output of flutter build ios with modified plist:');
+            printOnFailure(buildResult.stdout.toString());
+            printOnFailure(buildResult.stderr.toString());
+            expect(buildResult.exitCode, 0);
+
+            final File appFrameworkInfoPlist = outputAppFramework.childFile('Info.plist');
+            expect(appFrameworkInfoPlist, exists);
+
+            final expectedMinimumOSVersion = FlutterDarwinPlatform.ios
+                .deploymentTarget()
+                .toString();
+
+            final ProcessResult result = processManager.runSync(<String>[
+              'plutil',
+              '-p',
+              appFrameworkInfoPlist.path,
+            ]);
+
+            expect(result.exitCode, 0);
+            expect(result.stdout, contains('"MinimumOSVersion" => "$expectedMinimumOSVersion"'));
+            expect(result.stdout, isNot(contains('99.0')));
           });
 
           testWithoutContext('Info.plist dart VM Service Bonjour service', () {
