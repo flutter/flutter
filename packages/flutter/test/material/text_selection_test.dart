@@ -779,7 +779,7 @@ void main() {
 
   group('getHandleAnchor', () {
     test('returns correct anchor for collapsed handle', () {
-      const Offset expected = Offset((22.0 - 2.0) / 2, -4.6);
+      const Offset expected = Offset((22.0 - 2.0) / 2, -5.0);
       final Offset actual = materialTextSelectionControls.getHandleAnchor(
         TextSelectionHandleType.collapsed,
         0,

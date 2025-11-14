@@ -1272,7 +1272,6 @@ class SelectionOverlay {
   /// Cursor width
   /// This value is used for calculating the position of the text selection
   /// handles.
-  ///
   final double cursorWidth;
 
   void _handleStartHandleDragStart(DragStartDetails details) {
