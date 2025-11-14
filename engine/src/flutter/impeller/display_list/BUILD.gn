@@ -116,6 +116,7 @@ template("display_list_unittests_component") {
       "../playground:playground_test",
       "//flutter/display_list/testing:display_list_testing",
       "//flutter/impeller/golden_tests:screenshot",
+      "//flutter/impeller/renderer/testing:mocks",
       "//flutter/txt",
     ]
     if (defined(invoker.public_configs)) {

@@ -684,6 +684,9 @@ def to_gn_args(args):
   if args.arm_float_abi:
     gn_args['arm_float_abi'] = args.arm_float_abi
 
+  if args.arm_tune:
+    gn_args['arm_tune'] = args.arm_tune
+
   if args.dart_dynamic_modules:
     gn_args['dart_dynamic_modules'] = True
 
@@ -992,6 +995,16 @@ def parse_args(args):
   parser.add_argument('--windows-cpu', type=str, choices=['x64', 'arm64', 'x86'], default='x64')
   parser.add_argument('--simulator-cpu', type=str, choices=['x64', 'arm64'], default='x64')
   parser.add_argument('--arm-float-abi', type=str, choices=['hard', 'soft', 'softfp'])
+  parser.add_argument(
+      '--arm-tune',
+      type=str,
+      help='The specific cpu variant for which to generate code. '
+      'This value is passed directly to the compiler `-mtune` flag, '
+      'and is currently only supported for ARM. '
+      'See your compiler documentation for valid values to pass to this option, '
+      'for example for clang run `clang --target=aarch64-unknown-linux-gnu -mtune=?`. '
+      'The default is a generic cpu variant selected by the build system.'
+  )
 
   # Whether to compile in backtrace support.
   # Available for Windows and POSIX platforms whose libc includes execinfo.h.
