@@ -390,9 +390,6 @@ class CreateCommand extends FlutterCommand with CreateBase {
       includeWindows = false;
       includeDarwin = false;
     } else if (template == FlutterTemplateType.plugin) {
-      if (platforms.isEmpty) {
-        throwToolExit('Must specify at least one platform using --platforms', exitCode: 2);
-      }
       final bool darwinRequested = platforms.contains('darwin');
       if (darwinRequested) {
         if (featureFlags.isIOSEnabled && featureFlags.isMacOSEnabled) {
