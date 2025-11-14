@@ -207,8 +207,7 @@ void main() {
           jsonEncode({'type': 'close_dialog'}),
         );
       },
-      timeout: Timeout.none,
-      onPlatform: {'linux': Skip('Dialogs are not yet supported on Wayland')},
+      timeout: Timeout.none
     );
 
     test(
