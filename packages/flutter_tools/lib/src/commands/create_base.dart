@@ -18,14 +18,7 @@ import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
 
-const _kAvailablePlatforms = <String>[
-  'ios',
-  'android',
-  'windows',
-  'linux',
-  'macos',
-  'web',
-];
+const _kAvailablePlatforms = <String>['ios', 'android', 'windows', 'linux', 'macos', 'web'];
 
 /// A list of all possible create platforms, even those that may not be enabled
 /// with the current config.
