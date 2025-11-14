@@ -74,7 +74,9 @@ void main() {
           ..createSync(recursive: true);
         await previewDetector.initialize();
         await previewDetector.collection.dispose();
-        final PreviewDependencyGraph result = await previewDetector.findPreviewFunctions(file);
+        final PreviewDependencyGraph result = await previewDetector.mutex.runGuarded(
+          () => previewDetector.findPreviewFunctions(file),
+        );
         expect(result.entries, isEmpty);
       },
     );
