@@ -234,7 +234,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   id mockView = OCMClassMock([UIView class]);
   OCMStub([mockView frame]).andReturn(viewFrame);
   OCMStub([mockView convertRect:viewFrame toCoordinateSpace:[OCMArg any]])
-      .andReturn(convertedFrame);
+    .andReturn(convertedFrame);
   OCMStub([viewControllerMock viewIfLoaded]).andReturn(mockView);
 
   return mockView;
@@ -263,7 +263,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [viewControllerMock startKeyBoardAnimation:0.25];
 
   CAAnimation* keyboardAnimation =
-      [[viewControllerMock keyboardAnimationView].layer animationForKey:@"position"];
+  [[viewControllerMock keyboardAnimationView].layer animationForKey:@"position"];
 
   OCMVerify([viewControllerMock setUpKeyboardSpringAnimationIfNeeded:keyboardAnimation]);
 }
@@ -333,14 +333,14 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   CGRect initialShowKeyboardBeginFrame = CGRectMake(0, screenHeight, screenWidth, 250);
   CGRect initialShowKeyboardEndFrame = CGRectMake(0, screenHeight - 250, screenWidth, 500);
   NSNotification* fakeNotification = [NSNotification
-      notificationWithName:UIKeyboardWillChangeFrameNotification
-                    object:nil
-                  userInfo:@{
-                    @"UIKeyboardFrameBeginUserInfoKey" : @(initialShowKeyboardBeginFrame),
-                    @"UIKeyboardFrameEndUserInfoKey" : @(initialShowKeyboardEndFrame),
-                    @"UIKeyboardAnimationDurationUserInfoKey" : @(0.25),
-                    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
-                  }];
+                                      notificationWithName:UIKeyboardWillChangeFrameNotification
+                                      object:nil
+                                      userInfo:@{
+    @"UIKeyboardFrameBeginUserInfoKey" : @(initialShowKeyboardBeginFrame),
+    @"UIKeyboardFrameEndUserInfoKey" : @(initialShowKeyboardEndFrame),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @(0.25),
+    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
+  }];
   viewControllerMock.targetViewInsetBottom = 0;
   [viewControllerMock handleKeyboardNotification:fakeNotification];
   BOOL isShowingAnimation1 = viewControllerMock.keyboardAnimationIsShowing;
@@ -350,14 +350,14 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   CGRect compoundingShowKeyboardBeginFrame = CGRectMake(0, screenHeight - 250, screenWidth, 250);
   CGRect compoundingShowKeyboardEndFrame = CGRectMake(0, screenHeight - 500, screenWidth, 500);
   fakeNotification = [NSNotification
-      notificationWithName:UIKeyboardWillChangeFrameNotification
-                    object:nil
-                  userInfo:@{
-                    @"UIKeyboardFrameBeginUserInfoKey" : @(compoundingShowKeyboardBeginFrame),
-                    @"UIKeyboardFrameEndUserInfoKey" : @(compoundingShowKeyboardEndFrame),
-                    @"UIKeyboardAnimationDurationUserInfoKey" : @(0.25),
-                    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
-                  }];
+                      notificationWithName:UIKeyboardWillChangeFrameNotification
+                      object:nil
+                      userInfo:@{
+    @"UIKeyboardFrameBeginUserInfoKey" : @(compoundingShowKeyboardBeginFrame),
+    @"UIKeyboardFrameEndUserInfoKey" : @(compoundingShowKeyboardEndFrame),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @(0.25),
+    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
+  }];
 
   [viewControllerMock handleKeyboardNotification:fakeNotification];
   BOOL isShowingAnimation2 = viewControllerMock.keyboardAnimationIsShowing;
@@ -368,14 +368,14 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   CGRect initialHideKeyboardBeginFrame = CGRectMake(0, screenHeight - 500, screenWidth, 250);
   CGRect initialHideKeyboardEndFrame = CGRectMake(0, screenHeight - 250, screenWidth, 500);
   fakeNotification = [NSNotification
-      notificationWithName:UIKeyboardWillChangeFrameNotification
-                    object:nil
-                  userInfo:@{
-                    @"UIKeyboardFrameBeginUserInfoKey" : @(initialHideKeyboardBeginFrame),
-                    @"UIKeyboardFrameEndUserInfoKey" : @(initialHideKeyboardEndFrame),
-                    @"UIKeyboardAnimationDurationUserInfoKey" : @(0.25),
-                    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
-                  }];
+                      notificationWithName:UIKeyboardWillChangeFrameNotification
+                      object:nil
+                      userInfo:@{
+    @"UIKeyboardFrameBeginUserInfoKey" : @(initialHideKeyboardBeginFrame),
+    @"UIKeyboardFrameEndUserInfoKey" : @(initialHideKeyboardEndFrame),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @(0.25),
+    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
+  }];
 
   [viewControllerMock handleKeyboardNotification:fakeNotification];
   BOOL isShowingAnimation3 = viewControllerMock.keyboardAnimationIsShowing;
@@ -386,14 +386,14 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   CGRect compoundingHideKeyboardBeginFrame = CGRectMake(0, screenHeight - 250, screenWidth, 250);
   CGRect compoundingHideKeyboardEndFrame = CGRectMake(0, screenHeight, screenWidth, 500);
   fakeNotification = [NSNotification
-      notificationWithName:UIKeyboardWillChangeFrameNotification
-                    object:nil
-                  userInfo:@{
-                    @"UIKeyboardFrameBeginUserInfoKey" : @(compoundingHideKeyboardBeginFrame),
-                    @"UIKeyboardFrameEndUserInfoKey" : @(compoundingHideKeyboardEndFrame),
-                    @"UIKeyboardAnimationDurationUserInfoKey" : @(0.25),
-                    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
-                  }];
+                      notificationWithName:UIKeyboardWillChangeFrameNotification
+                      object:nil
+                      userInfo:@{
+    @"UIKeyboardFrameBeginUserInfoKey" : @(compoundingHideKeyboardBeginFrame),
+    @"UIKeyboardFrameEndUserInfoKey" : @(compoundingHideKeyboardEndFrame),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @(0.25),
+    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
+  }];
 
   [viewControllerMock handleKeyboardNotification:fakeNotification];
   BOOL isShowingAnimation4 = viewControllerMock.keyboardAnimationIsShowing;
@@ -424,13 +424,13 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   // Hide notification, valid keyboard
   NSNotification* notification =
-      [NSNotification notificationWithName:UIKeyboardWillHideNotification
-                                    object:nil
-                                  userInfo:@{
-                                    @"UIKeyboardFrameEndUserInfoKey" : @(validKeyboardEndFrame),
-                                    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
-                                    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
-                                  }];
+  [NSNotification notificationWithName:UIKeyboardWillHideNotification
+                                object:nil
+                              userInfo:@{
+    @"UIKeyboardFrameEndUserInfoKey" : @(validKeyboardEndFrame),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
+    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
+  }];
 
   BOOL shouldIgnore = [viewControllerMock shouldIgnoreKeyboardNotification:notification];
   XCTAssertTrue(shouldIgnore == NO);
@@ -440,49 +440,49 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   notification = [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
                                                object:nil
                                              userInfo:@{
-                                               @"UIKeyboardFrameEndUserInfoKey" : @(emptyKeyboard),
-                                               @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
-                                               @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
-                                             }];
+    @"UIKeyboardFrameEndUserInfoKey" : @(emptyKeyboard),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
+    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
+  }];
   shouldIgnore = [viewControllerMock shouldIgnoreKeyboardNotification:notification];
   XCTAssertTrue(shouldIgnore == YES);
 
   // Zero height keyboard
   isLocal = NO;
   notification =
-      [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
-                                    object:nil
-                                  userInfo:@{
-                                    @"UIKeyboardFrameEndUserInfoKey" : @(zeroHeightKeyboard),
-                                    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
-                                    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
-                                  }];
+  [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
+                                object:nil
+                              userInfo:@{
+    @"UIKeyboardFrameEndUserInfoKey" : @(zeroHeightKeyboard),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
+    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
+  }];
   shouldIgnore = [viewControllerMock shouldIgnoreKeyboardNotification:notification];
   XCTAssertTrue(shouldIgnore == NO);
 
   // Valid keyboard, triggered from another app
   isLocal = NO;
   notification =
-      [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
-                                    object:nil
-                                  userInfo:@{
-                                    @"UIKeyboardFrameEndUserInfoKey" : @(validKeyboardEndFrame),
-                                    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
-                                    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
-                                  }];
+  [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
+                                object:nil
+                              userInfo:@{
+    @"UIKeyboardFrameEndUserInfoKey" : @(validKeyboardEndFrame),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
+    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
+  }];
   shouldIgnore = [viewControllerMock shouldIgnoreKeyboardNotification:notification];
   XCTAssertTrue(shouldIgnore == YES);
 
   // Valid keyboard
   isLocal = YES;
   notification =
-      [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
-                                    object:nil
-                                  userInfo:@{
-                                    @"UIKeyboardFrameEndUserInfoKey" : @(validKeyboardEndFrame),
-                                    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
-                                    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
-                                  }];
+  [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
+                                object:nil
+                              userInfo:@{
+    @"UIKeyboardFrameEndUserInfoKey" : @(validKeyboardEndFrame),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
+    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
+  }];
   shouldIgnore = [viewControllerMock shouldIgnoreKeyboardNotification:notification];
   XCTAssertTrue(shouldIgnore == NO);
 }
@@ -547,13 +547,13 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   // hide notification
   CGRect keyboardFrame = CGRectZero;
   NSNotification* notification =
-      [NSNotification notificationWithName:UIKeyboardWillHideNotification
-                                    object:nil
-                                  userInfo:@{
-                                    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
-                                    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
-                                    @"UIKeyboardIsLocalUserInfoKey" : @(YES)
-                                  }];
+  [NSNotification notificationWithName:UIKeyboardWillHideNotification
+                                object:nil
+                              userInfo:@{
+    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
+    @"UIKeyboardIsLocalUserInfoKey" : @(YES)
+  }];
   FlutterKeyboardMode keyboardMode = [viewControllerMock calculateKeyboardAttachMode:notification];
   XCTAssertTrue(keyboardMode == FlutterKeyboardModeHidden);
 
@@ -562,10 +562,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   notification = [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
                                                object:nil
                                              userInfo:@{
-                                               @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
-                                               @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
-                                               @"UIKeyboardIsLocalUserInfoKey" : @(YES)
-                                             }];
+    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
+    @"UIKeyboardIsLocalUserInfoKey" : @(YES)
+  }];
   keyboardMode = [viewControllerMock calculateKeyboardAttachMode:notification];
   XCTAssertTrue(keyboardMode == FlutterKeyboardModeFloating);
 
@@ -574,10 +574,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   notification = [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
                                                object:nil
                                              userInfo:@{
-                                               @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
-                                               @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
-                                               @"UIKeyboardIsLocalUserInfoKey" : @(YES)
-                                             }];
+    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
+    @"UIKeyboardIsLocalUserInfoKey" : @(YES)
+  }];
   keyboardMode = [viewControllerMock calculateKeyboardAttachMode:notification];
   XCTAssertTrue(keyboardMode == FlutterKeyboardModeHidden);
 
@@ -586,10 +586,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   notification = [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
                                                object:nil
                                              userInfo:@{
-                                               @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
-                                               @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
-                                               @"UIKeyboardIsLocalUserInfoKey" : @(YES)
-                                             }];
+    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
+    @"UIKeyboardIsLocalUserInfoKey" : @(YES)
+  }];
   keyboardMode = [viewControllerMock calculateKeyboardAttachMode:notification];
   XCTAssertTrue(keyboardMode == FlutterKeyboardModeFloating);
 
@@ -598,10 +598,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   notification = [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
                                                object:nil
                                              userInfo:@{
-                                               @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
-                                               @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
-                                               @"UIKeyboardIsLocalUserInfoKey" : @(YES)
-                                             }];
+    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
+    @"UIKeyboardIsLocalUserInfoKey" : @(YES)
+  }];
   keyboardMode = [viewControllerMock calculateKeyboardAttachMode:notification];
   XCTAssertTrue(keyboardMode == FlutterKeyboardModeFloating);
 
@@ -610,10 +610,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   notification = [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
                                                object:nil
                                              userInfo:@{
-                                               @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
-                                               @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
-                                               @"UIKeyboardIsLocalUserInfoKey" : @(YES)
-                                             }];
+    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
+    @"UIKeyboardIsLocalUserInfoKey" : @(YES)
+  }];
   keyboardMode = [viewControllerMock calculateKeyboardAttachMode:notification];
   XCTAssertTrue(keyboardMode == FlutterKeyboardModeDocked);
 
@@ -623,10 +623,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   notification = [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
                                                object:nil
                                              userInfo:@{
-                                               @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
-                                               @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
-                                               @"UIKeyboardIsLocalUserInfoKey" : @(YES)
-                                             }];
+    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
+    @"UIKeyboardIsLocalUserInfoKey" : @(YES)
+  }];
   keyboardMode = [viewControllerMock calculateKeyboardAttachMode:notification];
   XCTAssertTrue(keyboardMode == FlutterKeyboardModeDocked);
 
@@ -635,10 +635,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   notification = [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
                                                object:nil
                                              userInfo:@{
-                                               @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
-                                               @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
-                                               @"UIKeyboardIsLocalUserInfoKey" : @(YES)
-                                             }];
+    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
+    @"UIKeyboardIsLocalUserInfoKey" : @(YES)
+  }];
   keyboardMode = [viewControllerMock calculateKeyboardAttachMode:notification];
   XCTAssertTrue(keyboardMode == FlutterKeyboardModeHidden);
 
@@ -647,10 +647,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   notification = [NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification
                                                object:nil
                                              userInfo:@{
-                                               @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
-                                               @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
-                                               @"UIKeyboardIsLocalUserInfoKey" : @(YES)
-                                             }];
+    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
+    @"UIKeyboardIsLocalUserInfoKey" : @(YES)
+  }];
   keyboardMode = [viewControllerMock calculateKeyboardAttachMode:notification];
   XCTAssertTrue(keyboardMode == FlutterKeyboardModeHidden);
 }
@@ -725,13 +725,13 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   CGRect viewFrame = screen.bounds;
   BOOL isLocal = YES;
   NSNotification* notification =
-      [NSNotification notificationWithName:UIKeyboardWillShowNotification
-                                    object:nil
-                                  userInfo:@{
-                                    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
-                                    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
-                                    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
-                                  }];
+  [NSNotification notificationWithName:UIKeyboardWillShowNotification
+                                object:nil
+                              userInfo:@{
+    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
+    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
+  }];
   FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
   [self setUpMockView:viewControllerMock
                screen:screen
@@ -760,13 +760,13 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   CGRect keyboardFrame = CGRectZero;
   BOOL isLocal = YES;
   NSNotification* fakeNotification =
-      [NSNotification notificationWithName:UIKeyboardWillHideNotification
-                                    object:nil
-                                  userInfo:@{
-                                    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
-                                    @"UIKeyboardAnimationDurationUserInfoKey" : @(0.25),
-                                    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
-                                  }];
+  [NSNotification notificationWithName:UIKeyboardWillHideNotification
+                                object:nil
+                              userInfo:@{
+    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @(0.25),
+    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
+  }];
 
   viewControllerMock.targetViewInsetBottom = 10;
   [viewControllerMock handleKeyboardNotification:fakeNotification];
@@ -797,25 +797,25 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   // Receive will show notification
   NSNotification* fakeShowNotification =
-      [NSNotification notificationWithName:UIKeyboardWillShowNotification
-                                    object:nil
-                                  userInfo:@{
-                                    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
-                                    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
-                                    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
-                                  }];
+  [NSNotification notificationWithName:UIKeyboardWillShowNotification
+                                object:nil
+                              userInfo:@{
+    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @0.25,
+    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
+  }];
   [viewControllerMock handleKeyboardNotification:fakeShowNotification];
   XCTAssertTrue(viewControllerMock.targetViewInsetBottom == 320 * screen.scale);
 
   // Receive will hide notification
   NSNotification* fakeHideNotification =
-      [NSNotification notificationWithName:UIKeyboardWillHideNotification
-                                    object:nil
-                                  userInfo:@{
-                                    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
-                                    @"UIKeyboardAnimationDurationUserInfoKey" : @(0.0),
-                                    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
-                                  }];
+  [NSNotification notificationWithName:UIKeyboardWillHideNotification
+                                object:nil
+                              userInfo:@{
+    @"UIKeyboardFrameEndUserInfoKey" : @(keyboardFrame),
+    @"UIKeyboardAnimationDurationUserInfoKey" : @(0.0),
+    @"UIKeyboardIsLocalUserInfoKey" : @(isLocal)
+  }];
   [viewControllerMock handleKeyboardNotification:fakeHideNotification];
   XCTAssertTrue(viewControllerMock.targetViewInsetBottom == 0);
 
@@ -841,9 +841,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterEnginePartialMock* mockEngine = [[FlutterEnginePartialMock alloc] init];
   mockEngine.lifecycleChannel = lifecycleChannel;
   FlutterViewController* viewControllerA =
-      [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
+  [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
   FlutterViewController* viewControllerB =
-      [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
+  [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
   id viewControllerMock = OCMPartialMock(viewControllerA);
   OCMStub([viewControllerMock surfaceUpdated:NO]);
   mockEngine.viewController = viewControllerB;
@@ -886,7 +886,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)
-    testEngineConfigSyncMethodWillExecuteWhenViewControllerInEngineIsCurrentViewControllerInViewWillAppear {
+testEngineConfigSyncMethodWillExecuteWhenViewControllerInEngineIsCurrentViewControllerInViewWillAppear {
   FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
   [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
@@ -897,7 +897,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)
-    testEngineConfigSyncMethodWillNotExecuteWhenViewControllerInEngineIsNotCurrentViewControllerInViewWillAppear {
+testEngineConfigSyncMethodWillNotExecuteWhenViewControllerInEngineIsNotCurrentViewControllerInViewWillAppear {
   FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
   [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
   FlutterViewController* viewControllerA = [[FlutterViewController alloc] initWithEngine:mockEngine
@@ -914,7 +914,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)
-    testEngineConfigSyncMethodWillExecuteWhenViewControllerInEngineIsCurrentViewControllerInViewDidAppear {
+testEngineConfigSyncMethodWillExecuteWhenViewControllerInEngineIsCurrentViewControllerInViewDidAppear {
   FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
   [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
@@ -925,7 +925,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)
-    testEngineConfigSyncMethodWillNotExecuteWhenViewControllerInEngineIsNotCurrentViewControllerInViewDidAppear {
+testEngineConfigSyncMethodWillNotExecuteWhenViewControllerInEngineIsNotCurrentViewControllerInViewDidAppear {
   FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
   [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
   FlutterViewController* viewControllerA = [[FlutterViewController alloc] initWithEngine:mockEngine
@@ -942,7 +942,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)
-    testEngineConfigSyncMethodWillExecuteWhenViewControllerInEngineIsCurrentViewControllerInViewWillDisappear {
+testEngineConfigSyncMethodWillExecuteWhenViewControllerInEngineIsCurrentViewControllerInViewWillDisappear {
   id lifecycleChannel = OCMClassMock([FlutterBasicMessageChannel class]);
   FlutterEnginePartialMock* mockEngine = [[FlutterEnginePartialMock alloc] init];
   mockEngine.lifecycleChannel = lifecycleChannel;
@@ -955,7 +955,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)
-    testEngineConfigSyncMethodWillNotExecuteWhenViewControllerInEngineIsNotCurrentViewControllerInViewWillDisappear {
+testEngineConfigSyncMethodWillNotExecuteWhenViewControllerInEngineIsNotCurrentViewControllerInViewWillDisappear {
   id lifecycleChannel = OCMClassMock([FlutterBasicMessageChannel class]);
   FlutterEnginePartialMock* mockEngine = [[FlutterEnginePartialMock alloc] init];
   mockEngine.lifecycleChannel = lifecycleChannel;
@@ -1086,8 +1086,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   // Should delay the engine call for half of the transition duration.
   // Wait for additional transitionDuration to allow updateViewportMetrics calls if any.
   XCTWaiterResult result = [XCTWaiter
-      waitForExpectations:@[ [self expectationWithDescription:@"Waiting for rotation duration"] ]
-                  timeout:transitionDuration];
+                            waitForExpectations:@[ [self expectationWithDescription:@"Waiting for rotation duration"] ]
+                            timeout:transitionDuration];
   XCTAssertEqual(result, XCTWaiterResultTimedOut);
 
   OCMVerifyAll(mockEngine);
@@ -1166,7 +1166,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:nil];
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
-      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   [flutterViewController setSplashScreenView:[[UIView alloc] init]];
   [flutterViewController setSplashScreenView:nil];
 }
@@ -1180,7 +1180,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
     [vc addInternalPlugins];
     FlutterKeyboardManager* keyboardManager = vc.keyboardManager;
     FlutterEmbedderKeyResponder* keyPrimaryResponder = (FlutterEmbedderKeyResponder*)
-        [(NSArray<id<FlutterKeyPrimaryResponder>>*)keyboardManager.primaryResponders firstObject];
+    [(NSArray<id<FlutterKeyPrimaryResponder>>*)keyboardManager.primaryResponders firstObject];
     sendEvent = [keyPrimaryResponder sendEvent];
   }
 
@@ -1252,8 +1252,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   // Verify behavior.
   OCMVerify([settingsChannel sendMessage:[OCMArg checkWithBlock:^BOOL(id message) {
-                               return [message[@"platformBrightness"] isEqualToString:@"light"];
-                             }]]);
+    return [message[@"platformBrightness"] isEqualToString:@"light"];
+  }]]);
 
   // Clean up mocks
   [settingsChannel stopMocking];
@@ -1274,8 +1274,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   // Verify behavior.
   OCMVerify([settingsChannel sendMessage:[OCMArg checkWithBlock:^BOOL(id message) {
-                               return [message[@"platformBrightness"] isEqualToString:@"light"];
-                             }]]);
+    return [message[@"platformBrightness"] isEqualToString:@"light"];
+  }]]);
 
   // Clean up mocks
   [settingsChannel stopMocking];
@@ -1286,7 +1286,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   id settingsChannel = OCMClassMock([FlutterBasicMessageChannel class]);
   OCMStub([self.mockEngine settingsChannel]).andReturn(settingsChannel);
   id mockTraitCollection =
-      [self fakeTraitCollectionWithUserInterfaceStyle:UIUserInterfaceStyleDark];
+  [self fakeTraitCollectionWithUserInterfaceStyle:UIUserInterfaceStyleDark];
 
   // We partially mock the real FlutterViewController to act as the OS and report
   // the UITraitCollection of our choice. Mocking the object under test is not
@@ -1302,8 +1302,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   // Verify behavior.
   OCMVerify([settingsChannel sendMessage:[OCMArg checkWithBlock:^BOOL(id message) {
-                               return [message[@"platformBrightness"] isEqualToString:@"dark"];
-                             }]]);
+    return [message[@"platformBrightness"] isEqualToString:@"dark"];
+  }]]);
 
   // Clean up mocks
   [partialMockVC stopMocking];
@@ -1335,8 +1335,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   // Verify behavior.
   OCMVerify([settingsChannel sendMessage:[OCMArg checkWithBlock:^BOOL(id message) {
-                               return [message[@"platformContrast"] isEqualToString:@"normal"];
-                             }]]);
+    return [message[@"platformContrast"] isEqualToString:@"normal"];
+  }]]);
 
   // Clean up mocks
   [settingsChannel stopMocking];
@@ -1358,8 +1358,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   // Verify behavior.
   OCMVerify([settingsChannel sendMessage:[OCMArg checkWithBlock:^BOOL(id message) {
-                               return [message[@"platformContrast"] isEqualToString:@"normal"];
-                             }]]);
+    return [message[@"platformContrast"] isEqualToString:@"normal"];
+  }]]);
 
   // Clean up mocks
   [settingsChannel stopMocking];
@@ -1386,8 +1386,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   // Verify behavior.
   OCMVerify([settingsChannel sendMessage:[OCMArg checkWithBlock:^BOOL(id message) {
-                               return [message[@"platformContrast"] isEqualToString:@"high"];
-                             }]]);
+    return [message[@"platformContrast"] isEqualToString:@"high"];
+  }]]);
 
   // Clean up mocks
   [partialMockVC stopMocking];
@@ -1406,8 +1406,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   id mockHourFormat = OCMClassMock([FlutterHourFormat class]);
   OCMStub([mockHourFormat isAlwaysUse24HourFormat]).andReturn(YES);
   OCMExpect([settingsChannel sendMessage:[OCMArg checkWithBlock:^BOOL(id message) {
-                               return [message[@"alwaysUse24HourFormat"] isEqual:@(YES)];
-                             }]]);
+    return [message[@"alwaysUse24HourFormat"] isEqual:@(YES)];
+  }]]);
   [vc onUserSettingsChanged:nil];
   [mockHourFormat stopMocking];
 
@@ -1415,8 +1415,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   mockHourFormat = OCMClassMock([FlutterHourFormat class]);
   OCMStub([mockHourFormat isAlwaysUse24HourFormat]).andReturn(NO);
   OCMExpect([settingsChannel sendMessage:[OCMArg checkWithBlock:^BOOL(id message) {
-                               return [message[@"alwaysUse24HourFormat"] isEqual:@(NO)];
-                             }]]);
+    return [message[@"alwaysUse24HourFormat"] isEqual:@(NO)];
+  }]]);
   [vc onUserSettingsChanged:nil];
   [mockHourFormat stopMocking];
 
@@ -1427,7 +1427,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)testItReportsAccessibilityOnOffSwitchLabelsFlagNotSet {
   // Setup test.
   FlutterViewController* viewController =
-      [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
+  [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
   id partialMockViewController = OCMPartialMock(viewController);
   OCMStub([partialMockViewController accessibilityIsOnOffSwitchLabelsEnabled]).andReturn(NO);
 
@@ -1441,7 +1441,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)testItReportsAccessibilityOnOffSwitchLabelsFlagSet {
   // Setup test.
   FlutterViewController* viewController =
-      [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
+  [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
   id partialMockViewController = OCMPartialMock(viewController);
   OCMStub([partialMockViewController accessibilityIsOnOffSwitchLabelsEnabled]).andReturn(YES);
 
@@ -1639,13 +1639,13 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
         // iOS 16 will decide whether to rotate based on the new preference, so always set it
         // when it changes.
         OCMExpect([mockWindowScene
-            requestGeometryUpdateWithPreferences:[OCMArg checkWithBlock:^BOOL(
-                                                             UIWindowSceneGeometryPreferencesIOS*
-                                                                 preferences) {
-              weakPreferences = preferences;
-              return preferences.interfaceOrientations == mask;
-            }]
-                                    errorHandler:[OCMArg any]]);
+                   requestGeometryUpdateWithPreferences:[OCMArg checkWithBlock:^BOOL(
+                                                                                     UIWindowSceneGeometryPreferencesIOS*
+                                                                                     preferences) {
+                                                                                       weakPreferences = preferences;
+                                                                                       return preferences.interfaceOrientations == mask;
+                                                                                     }]
+                   errorHandler:[OCMArg any]]);
       }
       OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
       OCMStub([mockApplication connectedScenes]).andReturn([NSSet setWithObject:mockWindowScene]);
@@ -1685,7 +1685,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 - (void)testWillDeallocNotification {
   XCTestExpectation* expectation =
-      [[XCTestExpectation alloc] initWithDescription:@"notification called"];
+  [[XCTestExpectation alloc] initWithDescription:@"notification called"];
   id engine = [[MockEngine alloc] init];
   @autoreleasepool {
     // NOLINTNEXTLINE(clang-analyzer-deadcode.DeadStores)
@@ -1696,8 +1696,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                     object:nil
                                                      queue:[NSOperationQueue mainQueue]
                                                 usingBlock:^(NSNotification* _Nonnull note) {
-                                                  [expectation fulfill];
-                                                }];
+      [expectation fulfill];
+    }];
     XCTAssertNotNil(realVC);
     realVC = nil;
   }
@@ -1765,8 +1765,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   self.messageSent = message;
   CFRunLoopPerformBlock(CFRunLoopGetCurrent(), fml::MessageLoopDarwin::kMessageLoopCFRunLoopMode,
                         ^() {
-                          callback(replyMessage);
-                        });
+    callback(replyMessage);
+  });
 }
 
 - (void)testValidKeyUpEvent API_AVAILABLE(ios(13.4)) {
@@ -1778,7 +1778,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterEnginePartialMock* mockEngine = [[FlutterEnginePartialMock alloc] init];
   mockEngine.keyEventChannel = OCMClassMock([FlutterBasicMessageChannel class]);
   OCMStub([mockEngine.keyEventChannel sendMessage:[OCMArg any] reply:[OCMArg any]])
-      .andCall(self, @selector(sendMessage:reply:));
+    .andCall(self, @selector(sendMessage:reply:));
   OCMStub([self.mockTextInputPlugin handlePress:[OCMArg any]]).andReturn(YES);
   mockEngine.textInputPlugin = self.mockTextInputPlugin;
 
@@ -1792,7 +1792,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   [vc handlePressEvent:keyUpEvent(UIKeyboardHIDUsageKeyboardA, UIKeyModifierShift, 123.0)
             nextAction:^(){
-            }];
+  }];
 
   XCTAssert(self.messageSent != nil);
   XCTAssert([self.messageSent[@"keymap"] isEqualToString:@"ios"]);
@@ -1814,7 +1814,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterEnginePartialMock* mockEngine = [[FlutterEnginePartialMock alloc] init];
   mockEngine.keyEventChannel = OCMClassMock([FlutterBasicMessageChannel class]);
   OCMStub([mockEngine.keyEventChannel sendMessage:[OCMArg any] reply:[OCMArg any]])
-      .andCall(self, @selector(sendMessage:reply:));
+    .andCall(self, @selector(sendMessage:reply:));
   OCMStub([self.mockTextInputPlugin handlePress:[OCMArg any]]).andReturn(YES);
   mockEngine.textInputPlugin = self.mockTextInputPlugin;
 
@@ -1828,7 +1828,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [vc handlePressEvent:keyDownEvent(UIKeyboardHIDUsageKeyboardA, UIKeyModifierShift, 123.0f, "A",
                                     "a")
             nextAction:^(){
-            }];
+  }];
 
   XCTAssert(self.messageSent != nil);
   XCTAssert([self.messageSent[@"keymap"] isEqualToString:@"ios"]);
@@ -1849,7 +1849,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   }
   id keyEventChannel = OCMClassMock([FlutterBasicMessageChannel class]);
   OCMStub([keyEventChannel sendMessage:[OCMArg any] reply:[OCMArg any]])
-      .andCall(self, @selector(sendMessage:reply:));
+    .andCall(self, @selector(sendMessage:reply:));
   OCMStub([self.mockTextInputPlugin handlePress:[OCMArg any]]).andReturn(YES);
   OCMStub([self.mockEngine keyEventChannel]).andReturn(keyEventChannel);
 
@@ -1864,15 +1864,15 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [vc handlePressEvent:keyEventWithPhase(UIPressPhaseStationary, UIKeyboardHIDUsageKeyboardA,
                                          UIKeyModifierShift, 123.0)
             nextAction:^(){
-            }];
+  }];
   [vc handlePressEvent:keyEventWithPhase(UIPressPhaseCancelled, UIKeyboardHIDUsageKeyboardA,
                                          UIKeyModifierShift, 123.0)
             nextAction:^(){
-            }];
+  }];
   [vc handlePressEvent:keyEventWithPhase(UIPressPhaseChanged, UIKeyboardHIDUsageKeyboardA,
                                          UIKeyModifierShift, 123.0)
             nextAction:^(){
-            }];
+  }];
 
   XCTAssert(self.messageSent == nil);
   OCMVerify(never(), [keyEventChannel sendMessage:[OCMArg any]]);
@@ -1925,7 +1925,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   // The mouse position within panGestureRecognizer should be checked
   [[mockPanGestureRecognizer verify] locationInView:[OCMArg any]];
   [[[self.mockEngine verify] ignoringNonObjectArgs]
-      dispatchPointerDataPacket:std::make_unique<flutter::PointerDataPacket>(0)];
+   dispatchPointerDataPacket:std::make_unique<flutter::PointerDataPacket>(0)];
 }
 
 - (void)testFakeEventTimeStamp {
@@ -1944,7 +1944,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 - (void)testSplashScreenViewCanSetNil {
   FlutterViewController* flutterViewController =
-      [[FlutterViewController alloc] initWithProject:nil nibName:nil bundle:nil];
+  [[FlutterViewController alloc] initWithProject:nil nibName:nil bundle:nil];
   [flutterViewController setSplashScreenView:nil];
 }
 
@@ -1952,17 +1952,17 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
-      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   UIWindow* window = [[UIWindow alloc] init];
   [window addSubview:flutterViewController.view];
   flutterViewController.view.bounds = CGRectMake(0, 0, 100, 100);
   [flutterViewController viewDidLayoutSubviews];
   NSNotification* sceneNotification =
-      [NSNotification notificationWithName:UISceneDidActivateNotification object:nil userInfo:nil];
+  [NSNotification notificationWithName:UISceneDidActivateNotification object:nil userInfo:nil];
   NSNotification* applicationNotification =
-      [NSNotification notificationWithName:UIApplicationDidBecomeActiveNotification
-                                    object:nil
-                                  userInfo:nil];
+  [NSNotification notificationWithName:UIApplicationDidBecomeActiveNotification
+                                object:nil
+                              userInfo:nil];
   id mockVC = OCMPartialMock(flutterViewController);
   [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
   [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
@@ -1971,13 +1971,13 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   XCTAssertFalse(flutterViewController.isKeyboardInOrTransitioningFromBackground);
   OCMVerify([mockVC surfaceUpdated:YES]);
   XCTestExpectation* timeoutApplicationLifeCycle =
-      [self expectationWithDescription:@"timeoutApplicationLifeCycle"];
+  [self expectationWithDescription:@"timeoutApplicationLifeCycle"];
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)),
                  dispatch_get_main_queue(), ^{
-                   [timeoutApplicationLifeCycle fulfill];
-                   OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.resumed"]);
-                   [flutterViewController deregisterNotifications];
-                 });
+    [timeoutApplicationLifeCycle fulfill];
+    OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.resumed"]);
+    [flutterViewController deregisterNotifications];
+  });
   [self waitForExpectationsWithTimeout:5.0 handler:nil];
 }
 
@@ -1989,17 +1989,17 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
-      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   UIWindow* window = [[UIWindow alloc] init];
   [window addSubview:flutterViewController.view];
   flutterViewController.view.bounds = CGRectMake(0, 0, 100, 100);
   [flutterViewController viewDidLayoutSubviews];
   NSNotification* sceneNotification =
-      [NSNotification notificationWithName:UISceneDidActivateNotification object:nil userInfo:nil];
+  [NSNotification notificationWithName:UISceneDidActivateNotification object:nil userInfo:nil];
   NSNotification* applicationNotification =
-      [NSNotification notificationWithName:UIApplicationDidBecomeActiveNotification
-                                    object:nil
-                                  userInfo:nil];
+  [NSNotification notificationWithName:UIApplicationDidBecomeActiveNotification
+                                object:nil
+                              userInfo:nil];
   id mockVC = OCMPartialMock(flutterViewController);
   [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
   [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
@@ -2008,13 +2008,13 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   XCTAssertFalse(flutterViewController.isKeyboardInOrTransitioningFromBackground);
   OCMVerify([mockVC surfaceUpdated:YES]);
   XCTestExpectation* timeoutApplicationLifeCycle =
-      [self expectationWithDescription:@"timeoutApplicationLifeCycle"];
+  [self expectationWithDescription:@"timeoutApplicationLifeCycle"];
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)),
                  dispatch_get_main_queue(), ^{
-                   [timeoutApplicationLifeCycle fulfill];
-                   OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.resumed"]);
-                   [flutterViewController deregisterNotifications];
-                 });
+    [timeoutApplicationLifeCycle fulfill];
+    OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.resumed"]);
+    [flutterViewController deregisterNotifications];
+  });
   [self waitForExpectationsWithTimeout:5.0 handler:nil];
   [mockBundle stopMocking];
 }
@@ -2023,15 +2023,15 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
-      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   NSNotification* sceneNotification =
-      [NSNotification notificationWithName:UISceneWillDeactivateNotification
-                                    object:nil
-                                  userInfo:nil];
+  [NSNotification notificationWithName:UISceneWillDeactivateNotification
+                                object:nil
+                              userInfo:nil];
   NSNotification* applicationNotification =
-      [NSNotification notificationWithName:UIApplicationWillResignActiveNotification
-                                    object:nil
-                                  userInfo:nil];
+  [NSNotification notificationWithName:UIApplicationWillResignActiveNotification
+                                object:nil
+                              userInfo:nil];
   id mockVC = OCMPartialMock(flutterViewController);
   [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
   [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
@@ -2049,15 +2049,15 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
-      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   NSNotification* sceneNotification =
-      [NSNotification notificationWithName:UISceneWillDeactivateNotification
-                                    object:nil
-                                  userInfo:nil];
+  [NSNotification notificationWithName:UISceneWillDeactivateNotification
+                                object:nil
+                              userInfo:nil];
   NSNotification* applicationNotification =
-      [NSNotification notificationWithName:UIApplicationWillResignActiveNotification
-                                    object:nil
-                                  userInfo:nil];
+  [NSNotification notificationWithName:UIApplicationWillResignActiveNotification
+                                object:nil
+                              userInfo:nil];
   id mockVC = OCMPartialMock(flutterViewController);
   [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
   [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
@@ -2072,15 +2072,15 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
-      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   NSNotification* sceneNotification =
-      [NSNotification notificationWithName:UISceneDidDisconnectNotification
-                                    object:nil
-                                  userInfo:nil];
+  [NSNotification notificationWithName:UISceneDidDisconnectNotification
+                                object:nil
+                              userInfo:nil];
   NSNotification* applicationNotification =
-      [NSNotification notificationWithName:UIApplicationWillTerminateNotification
-                                    object:nil
-                                  userInfo:nil];
+  [NSNotification notificationWithName:UIApplicationWillTerminateNotification
+                                object:nil
+                              userInfo:nil];
   id mockVC = OCMPartialMock(flutterViewController);
   id mockEngine = OCMPartialMock(engine);
   OCMStub([mockVC engine]).andReturn(mockEngine);
@@ -2101,15 +2101,15 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
-      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   NSNotification* sceneNotification =
-      [NSNotification notificationWithName:UISceneDidDisconnectNotification
-                                    object:nil
-                                  userInfo:nil];
+  [NSNotification notificationWithName:UISceneDidDisconnectNotification
+                                object:nil
+                              userInfo:nil];
   NSNotification* applicationNotification =
-      [NSNotification notificationWithName:UIApplicationWillTerminateNotification
-                                    object:nil
-                                  userInfo:nil];
+  [NSNotification notificationWithName:UIApplicationWillTerminateNotification
+                                object:nil
+                              userInfo:nil];
   id mockVC = OCMPartialMock(flutterViewController);
   id mockEngine = OCMPartialMock(engine);
   OCMStub([mockVC engine]).andReturn(mockEngine);
@@ -2127,15 +2127,15 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
-      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   NSNotification* sceneNotification =
-      [NSNotification notificationWithName:UISceneDidEnterBackgroundNotification
-                                    object:nil
-                                  userInfo:nil];
+  [NSNotification notificationWithName:UISceneDidEnterBackgroundNotification
+                                object:nil
+                              userInfo:nil];
   NSNotification* applicationNotification =
-      [NSNotification notificationWithName:UIApplicationDidEnterBackgroundNotification
-                                    object:nil
-                                  userInfo:nil];
+  [NSNotification notificationWithName:UIApplicationDidEnterBackgroundNotification
+                                object:nil
+                              userInfo:nil];
   id mockVC = OCMPartialMock(flutterViewController);
   [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
   [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
@@ -2155,15 +2155,15 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
-      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   NSNotification* sceneNotification =
-      [NSNotification notificationWithName:UISceneDidEnterBackgroundNotification
-                                    object:nil
-                                  userInfo:nil];
+  [NSNotification notificationWithName:UISceneDidEnterBackgroundNotification
+                                object:nil
+                              userInfo:nil];
   NSNotification* applicationNotification =
-      [NSNotification notificationWithName:UIApplicationDidEnterBackgroundNotification
-                                    object:nil
-                                  userInfo:nil];
+  [NSNotification notificationWithName:UIApplicationDidEnterBackgroundNotification
+                                object:nil
+                              userInfo:nil];
   id mockVC = OCMPartialMock(flutterViewController);
   [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
   [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
@@ -2180,15 +2180,15 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
-      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   NSNotification* sceneNotification =
-      [NSNotification notificationWithName:UISceneWillEnterForegroundNotification
-                                    object:nil
-                                  userInfo:nil];
+  [NSNotification notificationWithName:UISceneWillEnterForegroundNotification
+                                object:nil
+                              userInfo:nil];
   NSNotification* applicationNotification =
-      [NSNotification notificationWithName:UIApplicationWillEnterForegroundNotification
-                                    object:nil
-                                  userInfo:nil];
+  [NSNotification notificationWithName:UIApplicationWillEnterForegroundNotification
+                                object:nil
+                              userInfo:nil];
   id mockVC = OCMPartialMock(flutterViewController);
   [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
   [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
@@ -2206,15 +2206,15 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
-      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   NSNotification* sceneNotification =
-      [NSNotification notificationWithName:UISceneWillEnterForegroundNotification
-                                    object:nil
-                                  userInfo:nil];
+  [NSNotification notificationWithName:UISceneWillEnterForegroundNotification
+                                object:nil
+                              userInfo:nil];
   NSNotification* applicationNotification =
-      [NSNotification notificationWithName:UIApplicationWillEnterForegroundNotification
-                                    object:nil
-                                  userInfo:nil];
+  [NSNotification notificationWithName:UIApplicationWillEnterForegroundNotification
+                                object:nil
+                              userInfo:nil];
   id mockVC = OCMPartialMock(flutterViewController);
   [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
   [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
@@ -2229,35 +2229,35 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
-      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   NSNotification* applicationDidBecomeActiveNotification =
-      [NSNotification notificationWithName:UIApplicationDidBecomeActiveNotification
-                                    object:nil
-                                  userInfo:nil];
+  [NSNotification notificationWithName:UIApplicationDidBecomeActiveNotification
+                                object:nil
+                              userInfo:nil];
   NSNotification* applicationWillResignActiveNotification =
-      [NSNotification notificationWithName:UIApplicationWillResignActiveNotification
-                                    object:nil
-                                  userInfo:nil];
+  [NSNotification notificationWithName:UIApplicationWillResignActiveNotification
+                                object:nil
+                              userInfo:nil];
   id mockVC = OCMPartialMock(flutterViewController);
   [NSNotificationCenter.defaultCenter postNotification:applicationDidBecomeActiveNotification];
   [NSNotificationCenter.defaultCenter postNotification:applicationWillResignActiveNotification];
   OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.inactive"]);
 
   XCTestExpectation* timeoutApplicationLifeCycle =
-      [self expectationWithDescription:@"timeoutApplicationLifeCycle"];
+  [self expectationWithDescription:@"timeoutApplicationLifeCycle"];
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)),
                  dispatch_get_main_queue(), ^{
-                   OCMReject([mockVC goToApplicationLifecycle:@"AppLifecycleState.resumed"]);
-                   [timeoutApplicationLifeCycle fulfill];
-                   [flutterViewController deregisterNotifications];
-                 });
+    OCMReject([mockVC goToApplicationLifecycle:@"AppLifecycleState.resumed"]);
+    [timeoutApplicationLifeCycle fulfill];
+    [flutterViewController deregisterNotifications];
+  });
   [self waitForExpectationsWithTimeout:5.0 handler:nil];
 }
 
 - (void)testSetupKeyboardAnimationVsyncClientWillCreateNewVsyncClientForFlutterViewController {
   id bundleMock = OCMPartialMock([NSBundle mainBundle]);
   OCMStub([bundleMock objectForInfoDictionaryKey:kCADisableMinimumFrameDurationOnPhoneKey])
-      .andReturn(@YES);
+    .andReturn(@YES);
   id mockDisplayLinkManager = [OCMockObject mockForClass:[DisplayLinkManager class]];
   double maxFrameRate = 120;
   [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
@@ -2282,7 +2282,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)
-    testCreateTouchRateCorrectionVSyncClientWillCreateVsyncClientWhenRefreshRateIsLargerThan60HZ {
+testCreateTouchRateCorrectionVSyncClientWillCreateVsyncClientWhenRefreshRateIsLargerThan60HZ {
   id mockDisplayLinkManager = [OCMockObject mockForClass:[DisplayLinkManager class]];
   double maxFrameRate = 120;
   [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
@@ -2357,34 +2357,34 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   fakeTouchCancelled.phase = UITouchPhaseCancelled;
 
   [viewController
-      triggerTouchRateCorrectionIfNeeded:[[NSSet alloc] initWithObjects:fakeTouchBegan, nil]];
+   triggerTouchRateCorrectionIfNeeded:[[NSSet alloc] initWithObjects:fakeTouchBegan, nil]];
   XCTAssertFalse(link.isPaused);
 
   [viewController
-      triggerTouchRateCorrectionIfNeeded:[[NSSet alloc] initWithObjects:fakeTouchEnd, nil]];
+   triggerTouchRateCorrectionIfNeeded:[[NSSet alloc] initWithObjects:fakeTouchEnd, nil]];
   XCTAssertTrue(link.isPaused);
 
   [viewController
-      triggerTouchRateCorrectionIfNeeded:[[NSSet alloc] initWithObjects:fakeTouchMove, nil]];
+   triggerTouchRateCorrectionIfNeeded:[[NSSet alloc] initWithObjects:fakeTouchMove, nil]];
   XCTAssertFalse(link.isPaused);
 
   [viewController
-      triggerTouchRateCorrectionIfNeeded:[[NSSet alloc] initWithObjects:fakeTouchCancelled, nil]];
+   triggerTouchRateCorrectionIfNeeded:[[NSSet alloc] initWithObjects:fakeTouchCancelled, nil]];
   XCTAssertTrue(link.isPaused);
 
   [viewController
-      triggerTouchRateCorrectionIfNeeded:[[NSSet alloc]
-                                             initWithObjects:fakeTouchBegan, fakeTouchEnd, nil]];
+   triggerTouchRateCorrectionIfNeeded:[[NSSet alloc]
+                                       initWithObjects:fakeTouchBegan, fakeTouchEnd, nil]];
   XCTAssertFalse(link.isPaused);
 
   [viewController
-      triggerTouchRateCorrectionIfNeeded:[[NSSet alloc] initWithObjects:fakeTouchEnd,
-                                                                        fakeTouchCancelled, nil]];
+   triggerTouchRateCorrectionIfNeeded:[[NSSet alloc] initWithObjects:fakeTouchEnd,
+                                       fakeTouchCancelled, nil]];
   XCTAssertTrue(link.isPaused);
 
   [viewController
-      triggerTouchRateCorrectionIfNeeded:[[NSSet alloc]
-                                             initWithObjects:fakeTouchMove, fakeTouchEnd, nil]];
+   triggerTouchRateCorrectionIfNeeded:[[NSSet alloc]
+                                       initWithObjects:fakeTouchMove, fakeTouchEnd, nil]];
   XCTAssertFalse(link.isPaused);
 }
 
@@ -2400,7 +2400,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)
-    testSetupKeyboardAnimationVsyncClientWillNotCreateNewVsyncClientWhenKeyboardAnimationCallbackIsNil {
+testSetupKeyboardAnimationVsyncClientWillNotCreateNewVsyncClientWhenKeyboardAnimationCallbackIsNil {
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
@@ -2528,7 +2528,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   XCTAssertTrue([appDelegate respondsToSelector:@selector(setPluginRegistrant:)]);
   [appDelegate setPluginRegistrant:mockRegistrant];
   FlutterViewController* viewController =
-      (FlutterViewController*)[storyboard instantiateInitialViewController];
+  (FlutterViewController*)[storyboard instantiateInitialViewController];
   [appDelegate setPluginRegistrant:nil];
   OCMVerify([mockRegistrant registerWithRegistry:viewController]);
   OCMVerify([self.mockEngine performImplicitEngineCallback]);
@@ -2556,7 +2556,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMStub([mockApplication connectedScenes]).andReturn([NSSet setWithObject:mockScene]);
 
   FlutterPluginAppLifeCycleDelegate* mockLifecycleDelegate =
-      OCMClassMock([FlutterPluginAppLifeCycleDelegate class]);
+  OCMClassMock([FlutterPluginAppLifeCycleDelegate class]);
   OCMStub([mockApplicationDelegate lifeCycleDelegate]).andReturn(mockLifecycleDelegate);
 
   [viewControllerMock sharedSetupWithProject:nil initialRoute:nil];
@@ -2585,7 +2585,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMStub([mockApplication connectedScenes]).andReturn([NSSet setWithObject:mockScene]);
 
   FlutterPluginAppLifeCycleDelegate* mockLifecycleDelegate =
-      OCMClassMock([FlutterPluginAppLifeCycleDelegate class]);
+  OCMClassMock([FlutterPluginAppLifeCycleDelegate class]);
   OCMStub([mockApplicationDelegate lifeCycleDelegate]).andReturn(mockLifecycleDelegate);
 
   [viewControllerMock sharedSetupWithProject:nil initialRoute:nil];
@@ -2609,7 +2609,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMStub([mockApplicationDelegate takeLaunchEngine]).andReturn(mockEngine);
 
   FlutterPluginAppLifeCycleDelegate* mockLifecycleDelegate =
-      OCMClassMock([FlutterPluginAppLifeCycleDelegate class]);
+  OCMClassMock([FlutterPluginAppLifeCycleDelegate class]);
   OCMStub([mockApplicationDelegate lifeCycleDelegate]).andReturn(mockLifecycleDelegate);
 
   [viewControllerMock sharedSetupWithProject:nil initialRoute:nil];
@@ -2624,7 +2624,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"Flutter" bundle:nil];
   XCTAssertTrue(storyboard);
   FlutterViewController* viewController =
-      (FlutterViewController*)[storyboard instantiateInitialViewController];
+  (FlutterViewController*)[storyboard instantiateInitialViewController];
   XCTAssertTrue(viewController);
   XCTAssertTrue([viewController isKindOfClass:[FlutterViewController class]]);
   XCTAssertEqual(viewController.engine, self.mockEngine);
@@ -2652,14 +2652,14 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   CGFloat scale = vc.flutterScreenIfViewLoaded.scale;
 
   OCMExpect([mockEngine updateViewportMetrics:[OCMArg checkWithBlock:^BOOL(NSValue* value) {
-                          flutter::ViewportMetrics metrics;
-                          [value getValue:&metrics];
-                          XCTAssertEqual(metrics.physical_min_width_constraint, 320 * scale);
-                          XCTAssertEqual(metrics.physical_max_width_constraint, 320 * scale);
-                          XCTAssertEqual(metrics.physical_min_height_constraint, 480 * scale);
-                          XCTAssertEqual(metrics.physical_max_height_constraint, 480 * scale);
-                          return YES;
-                        }]]);
+    flutter::ViewportMetrics metrics;
+    [value getValue:&metrics];
+    XCTAssertEqual(metrics.physical_min_width_constraint, 320 * scale);
+    XCTAssertEqual(metrics.physical_max_width_constraint, 320 * scale);
+    XCTAssertEqual(metrics.physical_min_height_constraint, 480 * scale);
+    XCTAssertEqual(metrics.physical_max_height_constraint, 480 * scale);
+    return YES;
+  }]]);
 
   [vc performSelector:@selector(updateAutoResizeConstraints)];
 
@@ -2685,13 +2685,13 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   XCTAssertEqual(initialSize.width, 320);
 
   FlutterAutoResizeLayoutConstraint* fakeConstraint =
-      [FlutterAutoResizeLayoutConstraint constraintWithItem:vc.view
-                                                  attribute:NSLayoutAttributeWidth
-                                                  relatedBy:NSLayoutRelationEqual
-                                                     toItem:nil
-                                                  attribute:NSLayoutAttributeNotAnAttribute
-                                                 multiplier:1.0
-                                                   constant:320];
+  [FlutterAutoResizeLayoutConstraint constraintWithItem:vc.view
+                                              attribute:NSLayoutAttributeWidth
+                                              relatedBy:NSLayoutRelationEqual
+                                                 toItem:nil
+                                              attribute:NSLayoutAttributeNotAnAttribute
+                                             multiplier:1.0
+                                               constant:320];
   [vc.view addConstraint:fakeConstraint];
 
   vc.view.frame = CGRectMake(0, 0, 400, 600);
@@ -2704,5 +2704,5 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   XCTAssertEqual(subsequentSize.height, 480,
                  @"sizeBeforeAutoResized should not be updated after the initial layout.");
 
-  @end
 }
+@end
