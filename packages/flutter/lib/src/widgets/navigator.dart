@@ -3696,7 +3696,7 @@ class _History extends Iterable<_RouteEntry> with ChangeNotifier {
 class NavigatorState extends State<Navigator> with TickerProviderStateMixin, RestorationMixin {
   late GlobalKey<OverlayState> _overlayKey;
   final _History _history = _History();
-  bool _debugPushingRoute = false;
+  final bool _debugPushingRoute = false;
 
   /// A set for entries that are waiting to dispose until their subtrees are
   /// disposed.
