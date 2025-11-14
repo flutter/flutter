@@ -149,6 +149,8 @@ ImageDecoder::TargetPixelFormat ToImageDecoderTargetPixelFormat(int32_t value) {
       return ImageDecoder::TargetPixelFormat::kDontCare;
     case 1:
       return ImageDecoder::TargetPixelFormat::kR32G32B32A32Float;
+    case 2:
+      return ImageDecoder::TargetPixelFormat::kR32Float;
     default:
       FML_DCHECK(false) << "Unknown pixel format.";
       return ImageDecoder::TargetPixelFormat::kUnknown;
