@@ -2626,27 +2626,9 @@ void main() {
   // Unit tests for ExportOptions.plist generation have been moved to
   // build_ipa_export_plist_test.dart to avoid integration test complexity.
   // See that file for focused unit tests of the plist generation logic.
-  group('ExportOptions.plist generation for manual signing', () {
-    // TODO(mohamed): Integration test for full `flutter build ipa` flow with manual signing.
-    // This is currently skipped because `IosProject.buildSettingsForBuildInfo` does not
-    // return mocked settings in the test harness environment. The project discovery logic
-    // requires a fully-formed iOS project structure that is difficult to replicate in the
-    // current hermetic test setup. See https://github.com/flutter/flutter/issues/177853
-    // for the feature issue. Unit tests are available in build_ipa_export_plist_test.dart.
-    test(
-      'full build ipa path generates plist for manual signing (integration)',
-      () {
-        // Integration test skipped - see justification comment below.
-      },
-      // Integration test skipped because `IosProject.buildSettingsForBuildInfo` does not
-      // return mocked settings in the test harness environment. The project discovery logic
-      // requires a fully-formed iOS project structure that is difficult to replicate in the
-      // current hermetic test setup. See TODO comment above for full requirements.
-      // Unit tests are available in build_ipa_export_plist_test.dart that verify the
-      // ExportOptions.plist generation logic directly.
-      skip: 'Integration test requires hermetic iOS project fixture',
-    );
-  });
+  //
+  // TODO(flutter-team): Integration test for full `flutter build ipa` flow with manual signing.
+  // See https://github.com/flutter/flutter/issues/177853 for the feature issue.
 }
 
 const _xcBundleFilePath = '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle';
