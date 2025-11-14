@@ -110,10 +110,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
     };
     platformsAllowedHelp['darwin'] =
         'A shared platform for iOS and macOS. (only supported for plugins)';
-    addPlatformsOptions(
-      customHelp: kPlatformHelp,
-      allowedHelp: platformsAllowedHelp,
-    );
+    addPlatformsOptions(customHelp: kPlatformHelp, allowedHelp: platformsAllowedHelp);
 
     final List<ParsedFlutterTemplateType> enabledTemplates =
         ParsedFlutterTemplateType.enabledValues(featureFlags);
@@ -389,39 +386,32 @@ class CreateCommand extends FlutterCommand with CreateBase {
       includeMacos = false;
       includeWindows = false;
       includeDarwin = false;
-    } else if (template == FlutterTemplateType.plugin) {
+    } else {
       final bool darwinRequested = platforms.contains('darwin');
-      if (darwinRequested) {
-        if (featureFlags.isIOSEnabled && featureFlags.isMacOSEnabled) {
-          includeDarwin = true;
-          includeIos = true;
-          includeMacos = true;
-        } else {
-          includeDarwin = false;
-          includeIos = false;
-          includeMacos = false;
+      final bool darwinSupported =
+          (template == FlutterTemplateType.plugin) &&
+          featureFlags.isIOSEnabled &&
+          featureFlags.isMacOSEnabled;
+
+      if (darwinRequested && darwinSupported) {
+        includeDarwin = true;
+        includeIos = true;
+        includeMacos = true;
+      } else {
+        includeDarwin = false;
+        includeIos = featureFlags.isIOSEnabled && platforms.contains('ios');
+        includeMacos = featureFlags.isMacOSEnabled && platforms.contains('macos');
+        if (darwinRequested && !darwinSupported) {
           globals.printWarning(
             'Warning: To use the "darwin" platform, you must have both iOS and macOS enabled.\n'
             'Run "flutter config --enable-ios --enable-macos-desktop" and try again.',
           );
         }
-      } else {
-        includeDarwin = false;
-        includeIos = featureFlags.isIOSEnabled && platforms.contains('ios');
-        includeMacos = featureFlags.isMacOSEnabled && platforms.contains('macos');
       }
       includeAndroid = featureFlags.isAndroidEnabled && platforms.contains('android');
       includeWeb = featureFlags.isWebEnabled && platforms.contains('web');
       includeLinux = featureFlags.isLinuxEnabled && platforms.contains('linux');
       includeWindows = featureFlags.isWindowsEnabled && platforms.contains('windows');
-    } else {
-      includeIos = featureFlags.isIOSEnabled && platforms.contains('ios');
-      includeAndroid = featureFlags.isAndroidEnabled && platforms.contains('android');
-      includeWeb = featureFlags.isWebEnabled && platforms.contains('web');
-      includeLinux = featureFlags.isLinuxEnabled && platforms.contains('linux');
-      includeMacos = featureFlags.isMacOSEnabled && platforms.contains('macos');
-      includeWindows = featureFlags.isWindowsEnabled && platforms.contains('windows');
-      includeDarwin = false;
     }
 
     String? developmentTeam;

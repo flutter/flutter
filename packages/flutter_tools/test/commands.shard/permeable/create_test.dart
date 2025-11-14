@@ -3556,7 +3556,13 @@ void main() {
       );
       expect(projectDir.childDirectory('darwin').existsSync(), isFalse);
       expect(projectDir.childDirectory('ios').existsSync(), isFalse);
-      expect(projectDir.childDirectory('macos').existsSync(), isFalse);
+      expect(projectDir.childDirectory('macos').existsSync(), isTrue);
+      expect(projectDir.childDirectory('example').childDirectory('macos').existsSync(), isTrue);
+
+      final String pubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+      expect(pubspec.contains('macos:'), isTrue);
+      expect(pubspec.contains('ios:'), isFalse);
+      expect(pubspec.contains('darwin:'), isFalse);
     },
     overrides: {
       FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false, isMacOSEnabled: true),
