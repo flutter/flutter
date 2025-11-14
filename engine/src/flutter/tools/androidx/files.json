@@ -94,7 +94,7 @@
     "provides": ["com.getkeepsafe.relinker.ReLinker"]
   },
   {
-    "url": "https://maven.google.com/androidx/exifinterface/1.4.1/exifinterface:1.4.1.aar",
+    "url": "https://dl.google.com/android/maven2/androidx/exifinterface/exifinterface/1.4.1/exifinterface-1.4.1.aar",
     "out_file_name": "exifinterface.aar",
     "maven_dependency": "androidx.exifinterface:exifinterface:1.4.1",
     "provides": [
