@@ -769,8 +769,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
                viewsToRecomposite = self.viewsToRecomposite,              //
                compositionOrder = self.compositionOrder,                  //
                unusedLayers = std::move(unusedLayers),                    //
-               surfaceFrames = std::move(surfaceFrames)
-      ]() mutable {
+               surfaceFrames = std::move(surfaceFrames)]() mutable {
     [self performSubmit:platformViewLayers
         currentCompositionParams:currentCompositionParams
               viewsToRecomposite:viewsToRecomposite
