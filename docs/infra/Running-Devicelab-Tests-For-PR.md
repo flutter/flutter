@@ -10,7 +10,7 @@ a few times before landing. Here's how you do that.
 
 ## Engine PRs
 
-Engine artifacts for PRs are uploaded using their _commit hash_, not for their _content hash_. Failing to follow these steps will cause the tests to be run against post-submit artifacts which will **likely not exist** for you PR since the content hash is different.
+Engine artifacts for PRs are uploaded using their _commit hash_, not their _content hash_. Failing to follow these steps will cause the tests to be run against post-submit artifacts which will **likely not exist** for your PR since the content hash is different.
 
 1. Make your changes locally and upload to a PR.
 
