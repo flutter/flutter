@@ -105,6 +105,50 @@ void main() {
 
     expect(Localizations.maybeLocaleOf(contextKey.currentContext!), isNull);
   });
+  testWidgets('LocalizationsResolver.update notifies listeners when supportedLocales changes', (
+    WidgetTester tester,
+  ) async {
+    final LocalizationsResolver resolver = LocalizationsResolver(
+      supportedLocales: <Locale>[const Locale('en')],
+    );
+
+    bool notified = false;
+    resolver.addListener(() { notified = true; });
+
+    resolver.update(
+      locale: null,
+      localeListResolutionCallback: null,
+      localeResolutionCallback: null,
+      localizationsDelegates: null,
+      supportedLocales: <Locale>[const Locale('de')],
+    );
+
+    expect(notified, isTrue);
+    resolver.dispose();
+  });
+
+  testWidgets('LocalizationsResolver.update does not notify when resolved locale unchanged', (
+    WidgetTester tester,
+  ) async {
+    final LocalizationsResolver resolver = LocalizationsResolver(
+      supportedLocales: <Locale>[const Locale('en'), const Locale('de')],
+    );
+
+    bool notified = false;
+    resolver.addListener(() { notified = true; });
+
+    // Update with the same effective supportedLocales shouldn't change resolved locale.
+    resolver.update(
+      locale: null,
+      localeListResolutionCallback: null,
+      localeResolutionCallback: null,
+      localizationsDelegates: null,
+      supportedLocales: <Locale>[const Locale('en'), const Locale('de')],
+    );
+
+    expect(notified, isFalse);
+    resolver.dispose();
+  });
 
   group('Semantics', () {
     testWidgets('set locale semantics', (WidgetTester tester) async {

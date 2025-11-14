@@ -810,6 +810,17 @@ class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
     _localeResolutionCallback = localeResolutionCallback;
     _localizationsDelegates = localizationsDelegates;
     _supportedLocales = supportedLocales;
+
+    // Recompute the resolved locale from the current settings and notify
+    // listeners only if the resolved locale changed.
+    final Locale newLocale = _resolveLocales(
+      WidgetsBinding.instance.platformDispatcher.locales,
+      _supportedLocales,
+    );
+    if (newLocale != _resolvedLocale) {
+      _resolvedLocale = newLocale;
+      notifyListeners();
+    }
   }
 
   /// The currently resolved [Locale] based on the current platform locale and
