@@ -67,15 +67,15 @@ ImageDescriptor::ImageDescriptor(sk_sp<SkData> buffer,
                                  const ImageInfo& image_info,
                                  std::optional<size_t> row_bytes)
     : buffer_(std::move(buffer)),
-      generator_(nullptr),
       image_info_(image_info),
+      generator_(nullptr),
       row_bytes_(row_bytes) {}
 
 ImageDescriptor::ImageDescriptor(sk_sp<SkData> buffer,
                                  std::shared_ptr<ImageGenerator> generator)
     : buffer_(std::move(buffer)),
-      generator_(generator),
       image_info_(CreateImageInfo(generator->GetInfo())),
+      generator_(std::move(generator)),
       row_bytes_(std::nullopt) {}
 
 Dart_Handle ImageDescriptor::initEncoded(Dart_Handle descriptor_handle,
