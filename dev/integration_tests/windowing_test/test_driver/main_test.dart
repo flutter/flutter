@@ -52,54 +52,6 @@ void main() {
       expect(data["height"], 600);
     }, timeout: Timeout.none);
 
-    test(
-      'Can set constraints and see the resize',
-      () async {
-        await driver.requestData(
-          jsonEncode({
-            'type': 'set_constraints',
-            'min_width': 0,
-            'min_height': 0,
-            'max_width': 500,
-            'max_height': 501,
-          }),
-        );
-        final response = await driver.requestData(
-          jsonEncode({'type': 'get_size'}),
-        );
-        final data = jsonDecode(response);
-        expect(data["width"], 500);
-        expect(data["height"], 501);
-      },
-      timeout: Timeout.none,
-      onPlatform: {'linux': Skip('Unable to exactly set dimensions on Linux')},
-    );
-
-    test(
-      'Can set constraints and see the resize (Linux)',
-      () async {
-        await driver.requestData(
-          jsonEncode({
-            'type': 'set_constraints',
-            'min_width': 0,
-            'min_height': 0,
-            'max_width': 500,
-            'max_height': 501,
-          }),
-        );
-        final response = await driver.requestData(
-          jsonEncode({'type': 'get_size'}),
-        );
-        final data = jsonDecode(response);
-        // On Linux setting the constraints limits the window including the decorations,
-        // but the returned size is the usable area and always smaller.
-        expect(data["width"], lessThanOrEqualTo(500));
-        expect(data["height"], lessThanOrEqualTo(501));
-      },
-      timeout: Timeout.none,
-      testOn: "linux",
-    );
-
     test('Can set and get fullscreen', () async {
       await driver.requestData(jsonEncode({'type': 'set_fullscreen'}));
       var response = await driver.requestData(
@@ -170,15 +122,58 @@ void main() {
       onPlatform: {'linux': Skip('isMinimized is not supported on Wayland')},
     );
 
+    test('Can open dialog', () async {
+      await driver.requestData(jsonEncode({'type': 'open_dialog'}));
+      await driver.waitFor(find.byValueKey('close_dialog'));
+      await driver.requestData(jsonEncode({'type': 'close_dialog'}));
+    }, timeout: Timeout.none);
+
     test(
-      'Can open dialog',
+      'Can set constraints and see the resize',
       () async {
-        await driver.requestData(jsonEncode({'type': 'open_dialog'}));
-        await driver.waitFor(find.byValueKey('close_dialog'));
-        await driver.requestData(jsonEncode({'type': 'close_dialog'}));
+        await driver.requestData(
+          jsonEncode({
+            'type': 'set_constraints',
+            'min_width': 0,
+            'min_height': 0,
+            'max_width': 500,
+            'max_height': 501,
+          }),
+        );
+        final response = await driver.requestData(
+          jsonEncode({'type': 'get_size'}),
+        );
+        final data = jsonDecode(response);
+        expect(data["width"], 500);
+        expect(data["height"], 501);
       },
       timeout: Timeout.none,
-      onPlatform: {'linux': Skip('Dialogs are not yet supported on Wayland')},
+      onPlatform: {'linux': Skip('Unable to exactly set dimensions on Linux')},
+    );
+
+    test(
+      'Can set constraints and see the resize (Linux)',
+      () async {
+        await driver.requestData(
+          jsonEncode({
+            'type': 'set_constraints',
+            'min_width': 0,
+            'min_height': 0,
+            'max_width': 500,
+            'max_height': 501,
+          }),
+        );
+        final response = await driver.requestData(
+          jsonEncode({'type': 'get_size'}),
+        );
+        final data = jsonDecode(response);
+        // On Linux setting the constraints limits the window including the decorations,
+        // but the returned size is the usable area and always smaller.
+        expect(data["width"], lessThanOrEqualTo(500));
+        expect(data["height"], lessThanOrEqualTo(501));
+      },
+      timeout: Timeout.none,
+      testOn: "linux",
     );
   });
 }

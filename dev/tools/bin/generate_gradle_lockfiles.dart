@@ -26,6 +26,8 @@ void main(List<String> arguments) {
       'defined at dev/tools/bin/config/lockfile_exclusion.yaml.\n'
       'To disable this behavior, run with `--no-exclusion`.\n';
 
+  const String ignoreFilename = '.ignore-locking.md';
+
   final ArgParser argParser = ArgParser()
     ..addFlag(
       'gradle-generation',
@@ -37,7 +39,12 @@ void main(List<String> arguments) {
       help:
           'Run the script using the config file at ./configs/lockfile_exclusion.yaml to skip the specified subdirectories.',
       defaultsTo: true,
-    );
+    )
+    ..addOption(
+      'ignore-locking',
+      help: 'Reason to disable gradle dependency locking. A reason must be given.',
+    )
+    ..addFlag('stop-ignoring', help: 'Delete the ignore lockfile if it exists');
 
   ArgResults args;
   try {
@@ -55,6 +62,27 @@ void main(List<String> arguments) {
 
   // Skip android subdirectories specified in the ./config/lockfile_exclusion.yaml file.
   final bool useExclusion = (args['exclusion'] as bool?) ?? true;
+
+  final bool ignoreLocking = args['ignore-locking'] != null;
+  final String ignoreReason = (args['ignore-locking'] as String?) ?? '';
+  // This is an explicit flag that insures the ignore
+  // lockfile isn't deleted unless specified.  This should prevent
+  // automated scripts from deleting the file when they shouldn't.
+  final bool stopIgnoring = (args['stop-ignoring'] as bool?) ?? false;
+
+  if (ignoreLocking && ignoreReason.isEmpty) {
+    stderr.writeln('A reason must be provided for --ignore-locking.');
+    stderr.writeln(usageMessage);
+    exit(1);
+  }
+
+  if (ignoreLocking && stopIgnoring) {
+    stderr.writeln(
+      'Both --ignore-locking and --stop-ignoring cannot be used on the same invocation.',
+    );
+    stderr.writeln(usageMessage);
+    exit(1);
+  }
 
   const FileSystem fileSystem = LocalFileSystem();
 
@@ -164,6 +192,17 @@ void main(List<String> arguments) {
 
     print('Processing ${androidDirectory.path}');
 
+    final File ignoreFile = androidDirectory.childFile(ignoreFilename);
+    if (ignoreLocking) {
+      print('Writing ignore file in ${ignoreFile.path}');
+      ignoreFile.writeAsStringSync(ignoreReason);
+      // When ignoring locking, we do not want to actually generate
+      // the lockfiles
+      continue;
+    } else if (stopIgnoring && ignoreFile.existsSync()) {
+      ignoreFile.deleteSync();
+    }
+
     try {
       androidDirectory.childFile('buildscript-gradle.lockfile').deleteSync();
     } on FileSystemException {
@@ -243,7 +282,8 @@ subprojects {
     dependencyLocking {
         ignoredDependencies.add('io.flutter:*')
         lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")
-        if (!project.hasProperty('local-engine-repo')) {
+        def ignoreFile = file("${rootProject.projectDir}/.ignore-locking.md")
+        if (!ignoreFile.exists() && !project.hasProperty('local-engine-repo')) {
           lockAllConfigurations()
         }
     }
@@ -291,8 +331,8 @@ buildscript {
 
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
-    id "com.android.application" version "8.11.0" apply false
-    id "org.jetbrains.kotlin.android" version "2.2.0" apply false
+    id "com.android.application" version "8.11.1" apply false
+    id "org.jetbrains.kotlin.android" version "2.2.20" apply false
 }
 
 include ":app"
@@ -336,7 +376,8 @@ subprojects {
     dependencyLocking {
         ignoredDependencies.add("io.flutter:*")
         lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")
-        if (!project.hasProperty("local-engine-repo")) {
+        var ignoreFile = file("${rootProject.projectDir}/.ignore-locking.md")
+        if (!ignoreFile.exists() && !project.hasProperty("local-engine-repo")) {
             lockAllConfigurations()
         }
     }
@@ -387,8 +428,8 @@ buildscript {
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "8.11.0" apply false
-    id("org.jetbrains.kotlin.android") version "2.2.0" apply false
+    id("com.android.application") version "8.11.1" apply false
+    id("org.jetbrains.kotlin.android") version "2.2.20" apply false
 }
 
 include(":app")
@@ -399,7 +440,7 @@ distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-8.13-all.zip
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.14-all.zip
 ''';
 
 Iterable<Directory> discoverAndroidDirectories(Directory repoRoot) {

@@ -7639,6 +7639,65 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Paste'), isContextMenuProvidedByPlatform ? findsNothing : findsOneWidget);
     });
+
+    testWidgets('Placeholder and editable text with differing font sizes', (
+      WidgetTester tester,
+    ) async {
+      const Size size = Size(200.0, 200.0);
+      TextAlignVertical alignment = TextAlignVertical.top;
+      late StateSetter setState;
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return CupertinoPageScaffold(
+                  child: Align(
+                    child: SizedBox(
+                      width: size.width,
+                      height: size.height,
+                      child: CupertinoTextField(
+                        placeholder: 'hint text',
+                        placeholderStyle: const TextStyle(fontSize: 30.0),
+                        style: const TextStyle(fontSize: 20.0),
+                        textAlignVertical: alignment,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byType(CupertinoTextField), 'text');
+      await tester.pump();
+      expect(
+        tester.getTopLeft(find.byType(EditableText)).dy,
+        moreOrLessEquals(207.0, epsilon: .0001),
+      );
+
+      setState(() {
+        alignment = TextAlignVertical.center;
+      });
+      await tester.pump();
+      expect(
+        tester.getTopLeft(find.byType(EditableText)).dy,
+        moreOrLessEquals(290.0, epsilon: .0001),
+      );
+
+      setState(() {
+        alignment = TextAlignVertical.bottom;
+      });
+      await tester.pump();
+      expect(
+        tester.getTopLeft(find.byType(EditableText)).dy,
+        moreOrLessEquals(373.0, epsilon: .0001),
+      );
+    });
   });
 
   testWidgets("Arrow keys don't move input focus", (WidgetTester tester) async {
@@ -10455,8 +10514,8 @@ void main() {
   testWidgets('Placeholder is baseline aligned with text', (WidgetTester tester) async {
     const String placeholderTextContent = 'hint text';
     const String actualTextContent = 'text';
-    double currentPlaceholderFontSize = 0;
-    double currentTextFontSize = 0;
+    double currentPlaceholderFontSize = 1.0;
+    double currentTextFontSize = 1.0;
     late StateSetter setState;
 
     await tester.pumpWidget(
