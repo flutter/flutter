@@ -172,9 +172,7 @@ void main() {
           throw ArgumentError('Unknown message type: ${jsonMap['type']}');
         }
         return '';
-      } catch (e, stackTrace) {
-        print('Error in driver handler: $e');
-        print('Stack trace: $stackTrace');
+      } catch (e) {
         return jsonEncode({'error': e.toString()});
       }
     },

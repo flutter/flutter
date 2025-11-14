@@ -31,7 +31,6 @@ Future<String> _requestDataWithRetry(
       }
       return response;
     } catch (e) {
-      print('Request attempt $attempt failed: $e');
       if (attempt == maxRetries) {
         rethrow;
       }
@@ -191,24 +190,14 @@ void main() {
       onPlatform: {'linux': Skip('isMinimized is not supported on Wayland')},
     );
 
-    test(
-      'Can open dialog',
-      () async {
-        await _requestDataWithRetry(
-          driver,
-          jsonEncode({'type': 'open_dialog'}),
-        );
-        await driver.waitFor(
-          find.byValueKey('close_dialog'),
-          timeout: Duration(seconds: 10),
-        );
-        await _requestDataWithRetry(
-          driver,
-          jsonEncode({'type': 'close_dialog'}),
-        );
-      },
-      timeout: Timeout.none
-    );
+    test('Can open dialog', () async {
+      await _requestDataWithRetry(driver, jsonEncode({'type': 'open_dialog'}));
+      await driver.waitFor(
+        find.byValueKey('close_dialog'),
+        timeout: Duration(seconds: 10),
+      );
+      await _requestDataWithRetry(driver, jsonEncode({'type': 'close_dialog'}));
+    }, timeout: Timeout.none);
 
     test(
       'Can set constraints and see the resize',
