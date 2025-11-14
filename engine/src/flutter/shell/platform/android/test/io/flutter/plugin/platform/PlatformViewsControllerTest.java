@@ -407,8 +407,8 @@ public class PlatformViewsControllerTest {
             frameWorkTouch,
             false // usingVirtualDisplays
             );
-    assertEquals(resolvedEvent.getAction(), original.getAction());
-    assertNotEquals(resolvedEvent.getAction(), frameWorkTouch.action);
+    assertEquals(frameWorkTouch.action, resolvedEvent.getAction());
+    assertNotEquals(original.getAction(), resolvedEvent.getAction());
   }
 
   private MotionEvent makePlatformViewTouchAndInvokeToMotionEvent(
@@ -750,6 +750,109 @@ public class PlatformViewsControllerTest {
     assertEquals(50.0f, resolvedEvent.getY(0), 0.001f);
     assertEquals(100.0f, resolvedEvent.getX(1), 0.001f);
     assertEquals(100.0f, resolvedEvent.getY(1), 0.001f);
+  }
+
+  @Test
+  public void toMotionEvent_handlesActionMismatch() {
+    // This test verifies the fix for action mismatch after PR #178015.
+    // When framework sends different action than original (e.g., ACTION_MOVE instead of
+    // ACTION_POINTER_UP during multi-touch), we must reconstruct the event.
+    MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+
+    // Original multi-touch event with ACTION_POINTER_UP (action code 6)
+    // This happens when second finger lifts during zoom gesture
+    MotionEvent.PointerProperties[] properties = new MotionEvent.PointerProperties[2];
+    properties[0] = new MotionEvent.PointerProperties();
+    properties[0].id = 0;
+    properties[0].toolType = MotionEvent.TOOL_TYPE_FINGER;
+    properties[1] = new MotionEvent.PointerProperties();
+    properties[1].id = 1;
+    properties[1].toolType = MotionEvent.TOOL_TYPE_FINGER;
+
+    MotionEvent.PointerCoords[] coords = new MotionEvent.PointerCoords[2];
+    coords[0] = new MotionEvent.PointerCoords();
+    coords[0].x = 100;
+    coords[0].y = 100;
+    coords[1] = new MotionEvent.PointerCoords();
+    coords[1].x = 200;
+    coords[1].y = 200;
+
+    MotionEvent original =
+        MotionEvent.obtain(
+            10, // downTime
+            10, // eventTime
+            MotionEvent.ACTION_POINTER_UP, // action = 6
+            2, // pointerCount
+            properties,
+            coords,
+            0, // metaState
+            0, // buttonState
+            1.0f, // xPrecision
+            1.0f, // yPrecision
+            0, // deviceId
+            0, // edgeFlags
+            0, // source
+            0 // flags
+            );
+
+    MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(original);
+
+    // After PR #178015, framework sends ACTION_MOVE (2) instead of ACTION_POINTER_UP (6)
+    // Pointer count matches (2), but action is different
+    List<List<Integer>> frameworkPointerProperties =
+        Arrays.asList(
+            Arrays.asList(0, MotionEvent.TOOL_TYPE_FINGER),
+            Arrays.asList(1, MotionEvent.TOOL_TYPE_FINGER));
+
+    List<List<Double>> frameworkPointerCoords =
+        Arrays.asList(
+            Arrays.asList(0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 100.0, 100.0),
+            Arrays.asList(0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 200.0, 200.0));
+
+    PlatformViewTouch touch =
+        new PlatformViewTouch(
+            0, // viewId
+            original.getDownTime(),
+            original.getEventTime(),
+            MotionEvent.ACTION_MOVE, // Framework sends ACTION_MOVE (2)
+            2, // pointerCount - matches original!
+            frameworkPointerProperties,
+            frameworkPointerCoords,
+            original.getMetaState(),
+            original.getButtonState(),
+            original.getXPrecision(),
+            original.getYPrecision(),
+            original.getDeviceId(),
+            original.getEdgeFlags(),
+            original.getSource(),
+            original.getFlags(),
+            motionEventId.getId());
+
+    MotionEvent resolvedEvent =
+        platformViewsController.toMotionEvent(
+            1, // density
+            touch,
+            false // usingVirtualDisplays
+            );
+
+    // Verify that resolved event uses framework's action (ACTION_MOVE)
+    // not original (ACTION_POINTER_UP)
+    assertEquals(MotionEvent.ACTION_MOVE, resolvedEvent.getAction());
+    assertNotEquals(original.getAction(), resolvedEvent.getAction());
+
+    // Verify pointer count matches
+    assertEquals(2, resolvedEvent.getPointerCount());
+
+    // Verify coordinates are correct
+    assertEquals(100.0f, resolvedEvent.getX(0), 0.001f);
+    assertEquals(100.0f, resolvedEvent.getY(0), 0.001f);
+    assertEquals(200.0f, resolvedEvent.getX(1), 0.001f);
+    assertEquals(200.0f, resolvedEvent.getY(1), 0.001f);
+
+    // Verify other properties preserved
+    assertEquals(original.getDownTime(), resolvedEvent.getDownTime());
+    assertEquals(original.getEventTime(), resolvedEvent.getEventTime());
   }
 
   @Test
