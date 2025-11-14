@@ -125,27 +125,6 @@ class _ImageAssetFileKey {
 /// App Store submission.
 ///
 /// Can only be run on a macOS host.
-///
-/// ## Design Decision: Manual Signing Export Options Generation
-///
-/// **Problem**: `flutter build ipa` fails for manual signing when apps use Push Notifications
-/// or Sign in with Apple entitlements. Xcode's `xcodebuild -exportArchive` requires a complete
-/// ExportOptions.plist with `teamID`, `signingStyle`, and `provisioningProfiles` mapping.
-///
-/// **Solution**: Auto-generate an enhanced ExportOptions.plist for manual signing scenarios.
-///
-/// **Why this design:**
-/// - Scoped to Release/Profile only: Debug builds don't need App Store export options, avoiding
-///   unnecessary overhead during development.
-/// - Single provisioning profile lookup: Apps with extensions not yet supported (future enhancement).
-/// - Graceful fallback: If profile lookup fails, uses simple plist (original behavior preserved).
-/// - Backward compatible: No changes to automatic signing or existing workflows.
-///
-/// **Future enhancements:**
-/// - Support apps with extensions/widgets (multiple provisioning profiles).
-/// - Make plist values (`uploadBitcode`, `stripSwiftSymbols`) configurable.
-/// - Cache profile lookups within a single build invocation.
-///
 class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   BuildIOSArchiveCommand({required super.logger, required super.verboseHelp}) {
     argParser.addOption(
@@ -572,8 +551,16 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       final String exportMethodDisplayName = isAppStoreUpload ? 'App Store' : exportMethod;
       status = globals.logger.startProgress('Building $exportMethodDisplayName IPA...');
       if (exportOptions == null) {
-        final BuildInfo buildInfo = await cachedBuildInfo;
-        generatedExportPlist = await _createExportPlist(exportMethod, app, buildInfo);
+        final Map<String, String>? buildSettings = await app.project.buildSettingsForBuildInfo(
+          buildInfo,
+        );
+        generatedExportPlist = await createExportPlist(
+          exportMethod: exportMethod,
+          app: app,
+          buildInfo: buildInfo,
+          buildSettings: buildSettings,
+          fileSystem: globals.fs,
+        );
         exportOptions = generatedExportPlist.path;
       }
 
@@ -659,39 +646,6 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     return FlutterCommandResult.success();
   }
 
-  /// Test-only method to expose ExportOptions.plist generation logic for unit testing.
-  @visibleForTesting
-  static Future<File> createExportPlistForTesting({
-    required String exportMethod,
-    required BuildInfo buildInfo,
-    required String bundleId,
-    String? codeSignStyle,
-    String? profileSpecifier,
-    String? teamId,
-    String? profileUuid,
-    required FileSystem fileSystem,
-  }) async {
-    final isManualSigning = codeSignStyle == 'Manual';
-
-    // Only enhance for manual signing in Release/Profile builds
-    if (isManualSigning &&
-        (buildInfo.mode == BuildMode.release || buildInfo.mode == BuildMode.profile)) {
-      if (profileSpecifier != null && teamId != null && profileUuid != null) {
-        // Generate enhanced ExportOptions.plist for manual signing
-        return _createManualSigningExportPlistStatic(
-          exportMethod: exportMethod,
-          teamId: teamId,
-          bundleId: bundleId,
-          profileUuid: profileUuid,
-          fileSystem: fileSystem,
-        );
-      }
-    }
-
-    // Fall back to simple plist (current behavior)
-    return _createSimpleExportPlistStatic(exportMethod: exportMethod, fileSystem: fileSystem);
-  }
-
   /// Generates an ExportOptions.plist for use with `xcodebuild -exportArchive`.
   ///
   /// For manual signing configurations, generates an enhanced plist with complete signing
@@ -715,16 +669,13 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   ///
   /// Returns an enhanced plist with `teamID`, `signingStyle`, and `provisioningProfiles`
   /// mapping when conditions are met, otherwise returns a simple plist with just `method`.
-  Future<File> _createExportPlist(
-    String exportMethod,
-    BuildableIOSApp app,
-    BuildInfo buildInfo,
-  ) async {
-    // Check if we should generate enhanced ExportOptions.plist for manual signing
-    final Map<String, String>? buildSettings = await app.project.buildSettingsForBuildInfo(
-      buildInfo,
-    );
-
+  Future<File> createExportPlist({
+    required String exportMethod,
+    required BuildableIOSApp app,
+    required BuildInfo buildInfo,
+    required Map<String, String>? buildSettings,
+    required FileSystem fileSystem,
+  }) async {
     final String? codeSignStyle = buildSettings?['CODE_SIGN_STYLE'];
     final isManualSigning = codeSignStyle == 'Manual';
 
@@ -742,20 +693,21 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
         if (profileUuid != null) {
           // Generate enhanced ExportOptions.plist for manual signing
-          globals.logger.printTrace(
+          logger.printTrace(
             'Detected manual code signing. Generated ExportOptions.plist with '
             'teamID, signingStyle=manual, and provisioningProfiles for $bundleId.',
           );
-          return _createManualSigningExportPlist(
+          return _createManualSigningExportPlistStatic(
             exportMethod: exportMethod,
             teamId: teamId,
             bundleId: bundleId,
             profileUuid: profileUuid,
+            fileSystem: fileSystem,
           );
         }
         // Note: If profile lookup fails, we fall back to simple plist.
         // Trace-level logging is already emitted by _findProvisioningProfileUuid.
-        globals.logger.printTrace(
+        logger.printTrace(
           'Manual signing detected but no matching provisioning profile UUID was found '
           'for $bundleId. Falling back to default ExportOptions.plist. '
           'If exportArchive fails with provisioning profile errors, consider supplying '
@@ -765,12 +717,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     }
 
     // Fall back to simple plist (current behavior)
-    return _createSimpleExportPlist(exportMethod);
-  }
-
-  /// Creates a simple ExportOptions.plist (current behavior).
-  File _createSimpleExportPlist(String exportMethod) {
-    return _createSimpleExportPlistStatic(exportMethod: exportMethod, fileSystem: globals.fs);
+    return _createSimpleExportPlistStatic(exportMethod: exportMethod, fileSystem: fileSystem);
   }
 
   /// Static version for testing.
@@ -797,22 +744,6 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     tempPlist.writeAsStringSync(plistContents.toString());
 
     return tempPlist;
-  }
-
-  /// Creates an ExportOptions.plist for manual signing with provisioning profile mapping.
-  File _createManualSigningExportPlist({
-    required String exportMethod,
-    required String teamId,
-    required String bundleId,
-    required String profileUuid,
-  }) {
-    return _createManualSigningExportPlistStatic(
-      exportMethod: exportMethod,
-      teamId: teamId,
-      bundleId: bundleId,
-      profileUuid: profileUuid,
-      fileSystem: globals.fs,
-    );
   }
 
   /// Static version for testing.
@@ -879,37 +810,20 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   ///
   /// Returns the UUID of the matching profile, or null if not found or parsing fails.
   Future<String?> _findProvisioningProfileUuid(String profileSpecifier) async {
-    // Cannot locate provisioning profiles without home directory
-    final String? homeDir = globals.fsUtils.homeDirPath;
-    if (homeDir == null) {
-      globals.logger.printTrace(
+    final Directory? profileDirectory = _getProvisioningProfileDirectory();
+    if (profileDirectory == null) {
+      logger.printTrace(
         'Manual signing: provisioning profile "$profileSpecifier" not found. '
-        'Home directory not available (may be running in restricted environment). '
-        'Falling back to basic ExportOptions.plist. '
-        'Manual signing may fail during xcodebuild -exportArchive if entitlements require '
-        'specific provisioning profile configuration.',
+        'Home directory not available. Falling back to basic ExportOptions.plist.',
       );
       return null;
     }
 
-    final Directory profileDirectory = globals.fs.directory(
-      globals.fs.path.join(
-        homeDir,
-        'Library',
-        'Developer',
-        'Xcode',
-        'UserData',
-        'Provisioning Profiles',
-      ),
-    );
-
     if (!profileDirectory.existsSync()) {
-      globals.logger.printTrace(
+      logger.printTrace(
         'Manual signing: provisioning profile "$profileSpecifier" not found. '
-        'Expected profiles in: ${profileDirectory.path} (directory does not exist). '
-        'Falling back to basic ExportOptions.plist. '
-        'Manual signing may fail during xcodebuild -exportArchive if entitlements require '
-        'specific provisioning profile configuration.',
+        'Provisioning Profiles directory does not exist at: ${profileDirectory.path}. '
+        'Falling back to basic ExportOptions.plist.',
       );
       return null;
     }
@@ -930,14 +844,29 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       }
     }
 
-    globals.logger.printTrace(
-      'Manual signing: provisioning profile "$profileSpecifier" not found. '
-      'Expected profiles in: ${profileDirectory.path}. '
-      'Falling back to basic ExportOptions.plist. '
-      'Manual signing may fail during xcodebuild -exportArchive if entitlements require '
-      'specific provisioning profile configuration.',
+    logger.printTrace(
+      'Manual signing: provisioning profile "$profileSpecifier" not found in ${profileDirectory.path}. '
+      'Falling back to basic ExportOptions.plist.',
     );
     return null;
+  }
+
+  /// Returns the standard Provisioning Profiles directory, or null if home directory is unavailable.
+  Directory? _getProvisioningProfileDirectory() {
+    final String? homeDir = globals.fsUtils.homeDirPath;
+    if (homeDir == null) {
+      return null;
+    }
+    return globals.fs.directory(
+      globals.fs.path.join(
+        homeDir,
+        'Library',
+        'Developer',
+        'Xcode',
+        'UserData',
+        'Provisioning Profiles',
+      ),
+    );
   }
 
   /// Parses a provisioning profile file and extracts both UUID and name in a single decode operation.
@@ -997,7 +926,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         ErrorHandlingFileSystem.deleteIfExists(tempDir);
       }
     } on Exception catch (e) {
-      globals.logger.printTrace('Failed to parse provisioning profile ${profileFile.path}: $e');
+      logger.printTrace('Failed to parse provisioning profile ${profileFile.path}: $e');
       return null;
     }
   }
