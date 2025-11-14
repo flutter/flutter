@@ -720,10 +720,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     return _createSimpleExportPlist(exportMethod: exportMethod, fileSystem: fileSystem);
   }
 
-  File _createSimpleExportPlist({
-    required String exportMethod,
-    required FileSystem fileSystem,
-  }) {
+  File _createSimpleExportPlist({required String exportMethod, required FileSystem fileSystem}) {
     final plistContents = StringBuffer('''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
