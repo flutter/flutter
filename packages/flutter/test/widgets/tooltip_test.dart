@@ -43,7 +43,7 @@ void main() {
                       top: 0.0,
                       child: RawTooltip(
                         key: tooltipKey,
-                        message: tooltipText,
+                        semanticsTooltip: tooltipText,
                         tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                             const Placeholder(child: Text(tooltipText)),
                         verticalOffset: 20.0,
@@ -102,7 +102,7 @@ void main() {
                       top: 0.0,
                       child: RawTooltip(
                         key: tooltipKey,
-                        message: tooltipText,
+                        semanticsTooltip: tooltipText,
                         tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                             const Placeholder(
                               child: Padding(
@@ -165,7 +165,7 @@ void main() {
                       top: 300.0,
                       child: RawTooltip(
                         key: tooltipKey,
-                        message: tooltipText,
+                        semanticsTooltip: tooltipText,
                         tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                             const Placeholder(
                               child: SizedBox(height: 100, child: Text(tooltipText)),
@@ -227,7 +227,7 @@ void main() {
                       top: 299.0,
                       child: RawTooltip(
                         key: tooltipKey,
-                        message: tooltipText,
+                        semanticsTooltip: tooltipText,
                         tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                             const Placeholder(
                               child: SizedBox(height: 190, child: Text(tooltipText)),
@@ -300,7 +300,7 @@ void main() {
                       top: 300.0,
                       child: RawTooltip(
                         key: tooltipKey,
-                        message: tooltipText,
+                        semanticsTooltip: tooltipText,
                         tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                             const Placeholder(
                               child: SizedBox(height: 190, child: Text(tooltipText)),
@@ -360,7 +360,7 @@ void main() {
                       top: 300.0,
                       child: RawTooltip(
                         key: tooltipKey,
-                        message: tooltipText,
+                        semanticsTooltip: tooltipText,
                         tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                             const Placeholder(
                               child: Padding(
@@ -425,7 +425,7 @@ void main() {
                       top: 300.0,
                       child: RawTooltip(
                         key: tooltipKey,
-                        message: tooltipText,
+                        semanticsTooltip: tooltipText,
                         tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                             const Placeholder(
                               child: Padding(
@@ -485,7 +485,7 @@ void main() {
           textDirection: textDirection,
           child: Center(
             child: RawTooltip(
-              message: text,
+              semanticsTooltip: text,
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text(tooltipText),
               child: Container(width: 100.0, height: 100.0, color: const Color(0xff00ff00)),
@@ -530,10 +530,11 @@ void main() {
         },
         home: Center(
           child: RawTooltip(
-            message: tooltipText,
+            semanticsTooltip: tooltipText,
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text(tooltipText),
-            child: Container(width: 100.0, height: 100.0, color: const Color(0xff00ff00)),
+            verticalOffset: 24.0,
+            child: const SizedBox(height: 100, width: 100),
           ),
         ),
       ),
@@ -704,7 +705,7 @@ void main() {
               /* Do nothing */
             },
             child: RawTooltip(
-              message: tooltipText,
+              semanticsTooltip: tooltipText,
               triggerMode: TooltipTriggerMode.tap,
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text(tooltipText),
@@ -757,7 +758,7 @@ void main() {
         },
         home: Center(
           child: RawTooltip(
-            message: tooltipText,
+            semanticsTooltip: tooltipText,
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text(tooltipText),
             child: const SizedBox(width: 100.0, height: 100.0),
@@ -806,7 +807,7 @@ void main() {
         },
         home: Center(
           child: RawTooltip(
-            message: tooltipText,
+            semanticsTooltip: tooltipText,
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text(tooltipText),
             child: const SizedBox(width: 100.0, height: 100.0),
@@ -856,7 +857,7 @@ void main() {
         },
         home: Center(
           child: RawTooltip(
-            message: tooltipText,
+            semanticsTooltip: tooltipText,
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text(tooltipText),
             child: const SizedBox(width: 100.0, height: 100.0),
@@ -920,14 +921,14 @@ void main() {
         home: Column(
           children: <Widget>[
             RawTooltip(
-              message: 'first tooltip',
+              semanticsTooltip: 'first tooltip',
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text('first tooltip'),
               waitDuration: waitDuration,
               child: const SizedBox(width: 100.0, height: 100.0),
             ),
             RawTooltip(
-              message: 'last tooltip',
+              semanticsTooltip: 'last tooltip',
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text('last tooltip'),
               waitDuration: waitDuration,
@@ -981,7 +982,7 @@ void main() {
           },
           home: Center(
             child: RawTooltip(
-              message: tooltipText,
+              semanticsTooltip: tooltipText,
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text(tooltipText),
               waitDuration: waitDuration,
@@ -1078,7 +1079,7 @@ void main() {
           child: RawTooltip(
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text(tooltipText),
-            message: tooltipText,
+            semanticsTooltip: tooltipText,
             child: const Text('I am tool tip'),
           ),
         ),
@@ -1136,7 +1137,7 @@ void main() {
         },
         home: Center(
           child: RawTooltip(
-            message: 'Outer',
+            semanticsTooltip: 'Outer',
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text('Outer'),
             child: Container(
@@ -1145,7 +1146,7 @@ void main() {
               height: 100,
               alignment: Alignment.centerRight,
               child: RawTooltip(
-                message: 'Inner',
+                semanticsTooltip: 'Inner',
                 tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                     const Text('Inner'),
                 child: SizedBox(key: innerKey, width: 25, height: 100),
@@ -1221,7 +1222,7 @@ void main() {
         },
         home: Center(
           child: RawTooltip(
-            message: tooltipText,
+            semanticsTooltip: tooltipText,
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text(tooltipText),
             waitDuration: waitDuration,
@@ -1283,7 +1284,7 @@ void main() {
                       top: 300.0,
                       child: RawTooltip(
                         key: tooltipKey,
-                        message: tooltipText,
+                        semanticsTooltip: tooltipText,
                         tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                             FadeTransition(opacity: animation, child: const Text(tooltipText)),
                         child: const SizedBox(width: 10.0, height: 10.0),
@@ -1351,7 +1352,7 @@ void main() {
                       tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                           FadeTransition(opacity: animation, child: const Text('B')),
                       showDuration: const Duration(seconds: 50),
-                      message: 'B',
+                      semanticsTooltip: 'B',
                       child: const Text('child'),
                     ),
                     const Text('after'),
@@ -1428,7 +1429,7 @@ void main() {
         },
         home: Center(
           child: RawTooltip(
-            message: 'Foo',
+            semanticsTooltip: 'Foo',
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text('Foo'),
             child: const SizedBox(width: 100.0, height: 100.0),
@@ -1462,7 +1463,7 @@ void main() {
         },
         home: Center(
           child: RawTooltip(
-            message: 'Foo',
+            semanticsTooltip: 'Foo',
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text('Foo'),
             child: const Text('Bar'),
@@ -1521,7 +1522,7 @@ void main() {
         },
         home: Center(
           child: RawTooltip(
-            message: 'Foo',
+            semanticsTooltip: 'Foo',
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text('Foo'),
             excludeFromSemantics: true,
@@ -1581,7 +1582,7 @@ void main() {
         },
         home: Center(
           child: RawTooltip(
-            message: 'Foo',
+            semanticsTooltip: 'Foo',
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text('Foo'),
             child: const SizedBox(width: 100.0, height: 100.0),
@@ -1617,8 +1618,9 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     RawTooltip(
-      message: 'message',
+      semanticsTooltip: 'message',
       tooltipBuilder: (BuildContext context, Animation<double> animation) => const Text('message'),
+      child: const SizedBox.shrink(),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -1628,7 +1630,7 @@ void main() {
 
     expect(description, <String>[
       '"message"',
-      'vertical offset: 24.0',
+      'vertical offset: 0.0',
       'position: below',
       'wait duration: 0:00:00.000000',
       'show duration: 0:00:01.500000',
@@ -1645,13 +1647,14 @@ void main() {
     RawTooltip(
       key: const ValueKey<String>('foo'),
       tooltipBuilder: (BuildContext context, Animation<double> animation) => const Text('message'),
-      message: 'message',
+      semanticsTooltip: 'message',
       waitDuration: const Duration(seconds: 1),
       showDuration: const Duration(seconds: 2),
       excludeFromSemantics: true,
       preferBelow: false,
       verticalOffset: 50.0,
       triggerMode: TooltipTriggerMode.manual,
+      child: const SizedBox.shrink(),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -1764,7 +1767,7 @@ void main() {
         },
         home: Center(
           child: RawTooltip(
-            message: tooltipText,
+            semanticsTooltip: tooltipText,
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text(tooltipText),
             onTriggered: onTriggered,
@@ -1803,9 +1806,10 @@ void main() {
         },
         home: Center(
           child: RawTooltip(
-            message: tooltipText,
+            semanticsTooltip: tooltipText,
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text(tooltipText),
+            verticalOffset: 24.0,
             child: const SizedBox(width: 100.0, height: 100.0),
           ),
         ),
@@ -1848,7 +1852,7 @@ void main() {
         },
         home: Center(
           child: RawTooltip(
-            message: tooltipText,
+            semanticsTooltip: tooltipText,
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text(tooltipText),
             child: const SizedBox(width: 100.0, height: 100.0),
@@ -1904,7 +1908,7 @@ void main() {
         },
         home: Center(
           child: RawTooltip(
-            message: tooltipText,
+            semanticsTooltip: tooltipText,
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text(tooltipText),
             showDuration: showDuration,
@@ -1953,7 +1957,7 @@ void main() {
           child: SizedBox.square(
             dimension: 10.0,
             child: RawTooltip(
-              message: tooltipText,
+              semanticsTooltip: tooltipText,
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text(tooltipText),
               child: const SizedBox.expand(),
@@ -2004,7 +2008,7 @@ void main() {
           child: SizedBox.square(
             dimension: 10.0,
             child: RawTooltip(
-              message: tooltipText,
+              semanticsTooltip: tooltipText,
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text(tooltipText),
               exitDuration: exitDuration,
@@ -2060,7 +2064,7 @@ void main() {
           );
         },
         home: RawTooltip(
-          message: tooltipText,
+          semanticsTooltip: tooltipText,
           tooltipBuilder: (BuildContext context, Animation<double> animation) =>
               const Text(tooltipText),
           child: const Text(tooltipText),
@@ -2087,9 +2091,10 @@ void main() {
           );
         },
         home: RawTooltip(
-          message: tooltipText,
+          semanticsTooltip: tooltipText,
           tooltipBuilder: (BuildContext context, Animation<double> animation) =>
               const Text(tooltipText),
+          child: const SizedBox.shrink(),
         ),
       ),
     );
@@ -2114,7 +2119,7 @@ void main() {
           );
         },
         home: RawTooltip(
-          message: tooltipText,
+          semanticsTooltip: tooltipText,
           tooltipBuilder: (BuildContext context, Animation<double> animation) =>
               const Text(tooltipText),
           child: const SizedBox.expand(),
@@ -2165,7 +2170,7 @@ void main() {
             entered = true;
           },
           child: RawTooltip(
-            message: tooltipText,
+            semanticsTooltip: tooltipText,
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text(tooltipText),
             child: const SizedBox.expand(),
@@ -2201,7 +2206,7 @@ void main() {
           );
         },
         home: RawTooltip(
-          message: tooltipText,
+          semanticsTooltip: tooltipText,
           tooltipBuilder: (BuildContext context, Animation<double> animation) =>
               const Text(tooltipText),
           child: Builder(
@@ -2244,7 +2249,7 @@ void main() {
           child: SizedBox.square(
             dimension: 10.0,
             child: RawTooltip(
-              message: tooltipText,
+              semanticsTooltip: tooltipText,
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text(tooltipText),
               waitDuration: const Duration(seconds: 1),
@@ -2305,10 +2310,11 @@ void main() {
           child: SizedBox.square(
             dimension: 10.0,
             child: RawTooltip(
-              message: tooltipText,
+              semanticsTooltip: tooltipText,
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text(tooltipText),
               waitDuration: const Duration(seconds: 1),
+              verticalOffset: 24.0,
               child: const SizedBox.expand(),
             ),
           ),
@@ -2375,7 +2381,7 @@ void main() {
           child: SizedBox.square(
             dimension: 10.0,
             child: RawTooltip(
-              message: tooltipText,
+              semanticsTooltip: tooltipText,
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text(tooltipText),
               waitDuration: const Duration(seconds: 1),
@@ -2423,7 +2429,7 @@ void main() {
           child: SizedBox.square(
             dimension: 10.0,
             child: RawTooltip(
-              message: tooltipText,
+              semanticsTooltip: tooltipText,
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text(tooltipText),
               waitDuration: const Duration(seconds: 1),
@@ -2470,7 +2476,7 @@ void main() {
           child: SizedBox.square(
             dimension: 10.0,
             child: RawTooltip(
-              message: tooltipText,
+              semanticsTooltip: tooltipText,
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   FadeTransition(opacity: animation, child: const Text(tooltipText)),
               waitDuration: const Duration(seconds: 1),
@@ -2515,7 +2521,7 @@ void main() {
         },
         home: Center(
           child: RawTooltip(
-            message: tooltipText,
+            semanticsTooltip: tooltipText,
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text(tooltipText),
             waitDuration: const Duration(seconds: 1),
@@ -2554,7 +2560,7 @@ void main() {
           },
           home: Center(
             child: RawTooltip(
-              message: tooltipText,
+              semanticsTooltip: tooltipText,
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text(tooltipText),
               waitDuration: const Duration(seconds: 1),
@@ -2596,9 +2602,10 @@ void main() {
         },
         home: Center(
           child: RawTooltip(
-            message: tooltipText,
+            semanticsTooltip: tooltipText,
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text(tooltipText),
+            verticalOffset: 24.0,
             mouseCursor: customCursor,
             child: const SizedBox.square(dimension: 50),
           ),
@@ -2641,7 +2648,7 @@ void main() {
         },
         home: Center(
           child: RawTooltip(
-            message: tooltipText,
+            semanticsTooltip: tooltipText,
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Placeholder(child: Text(tooltipText)),
             positionDelegate: (TooltipPositionContext context) {
@@ -2695,12 +2702,13 @@ Future<void> setWidgetForTooltipMode(
       home: RawTooltip(
         tooltipBuilder: (BuildContext context, Animation<double> animation) =>
             const Text(tooltipText),
-        message: tooltipText,
+        semanticsTooltip: tooltipText,
         triggerMode: triggerMode,
         onTriggered: onTriggered,
         showDuration: showDuration ?? const Duration(milliseconds: 1500),
         enableTapToDismiss: enableTapToDismiss ?? true,
         ignorePointer: ignorePointer ?? false,
+        verticalOffset: 24.0,
         child: const SizedBox(width: 100.0, height: 100.0),
       ),
     ),

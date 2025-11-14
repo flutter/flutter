@@ -373,7 +373,7 @@ void main() {
       await tester.pumpWidget(
         _boilerplate(
           RawTooltip(
-            message: 'Tooltip Message',
+            semanticsTooltip: 'Tooltip Message',
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text('Tooltip Message'),
             child: const Text('+'),
@@ -395,7 +395,7 @@ void main() {
       await tester.pumpWidget(
         _boilerplate(
           RawTooltip(
-            message: 'Tooltip Message',
+            semanticsTooltip: 'Tooltip Message',
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text('Tooltip Message'),
             child: const Text('+'),

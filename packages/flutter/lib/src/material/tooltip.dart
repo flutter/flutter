@@ -554,7 +554,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
     return RawTooltip(
       key: _tooltipKey,
-      message: widget.message ?? widget.richMessage?.toPlainText() ?? '',
+      semanticsTooltip: widget.message ?? widget.richMessage?.toPlainText() ?? '',
       tooltipBuilder: (BuildContext context, Animation<double> animation) =>
           FadeTransition(opacity: animation, child: tooltipBox),
       verticalOffset:
@@ -575,7 +575,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       ignorePointer: widget.ignorePointer ?? widget.message != null,
       exitDuration: widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultExitDuration,
       positionDelegate: widget.positionDelegate,
-      child: widget.child,
+      child: widget.child ?? const SizedBox.shrink(),
     );
   }
 }

@@ -243,9 +243,9 @@ class RawTooltip extends StatefulWidget {
   ///
   const RawTooltip({
     super.key,
-    required this.message,
+    required this.semanticsTooltip,
     required this.tooltipBuilder,
-    this.verticalOffset = 24.0,
+    this.verticalOffset = 0.0,
     this.preferBelow = true,
     this.excludeFromSemantics = false,
     this.enableTapToDismiss = true,
@@ -259,11 +259,11 @@ class RawTooltip extends StatefulWidget {
     this.exitDuration = const Duration(milliseconds: 100),
     this.animationStyle = _kDefaultAnimationStyle,
     this.positionDelegate,
-    this.child,
+    required this.child,
   });
 
   ///
-  final String message;
+  final String semanticsTooltip;
 
   ///
   final TooltipComponentBuilder tooltipBuilder;
@@ -310,7 +310,7 @@ class RawTooltip extends StatefulWidget {
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget? child;
+  final Widget child;
 
   static final List<RawTooltipState> _openedTooltips = <RawTooltipState>[];
 
@@ -343,10 +343,10 @@ class RawTooltip extends StatefulWidget {
     super.debugFillProperties(properties);
     properties.add(
       StringProperty(
-        'message',
-        message,
-        showName: message.isEmpty,
-        defaultValue: message.isEmpty ? null : kNoDefaultValue,
+        'semantics tooltip',
+        semanticsTooltip,
+        showName: semanticsTooltip.isEmpty,
+        defaultValue: semanticsTooltip.isEmpty ? null : kNoDefaultValue,
       ),
     );
     properties.add(DoubleProperty('vertical offset', verticalOffset, defaultValue: null));
@@ -432,7 +432,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
       case (true, false):
         _overlayController.show();
         RawTooltip._openedTooltips.add(this);
-        SemanticsService.tooltip(widget.message);
+        SemanticsService.tooltip(widget.semanticsTooltip);
       case (true, true) || (false, false):
         break;
     }
@@ -682,19 +682,23 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     );
     final Size tooltipSize = layoutInfo.childSize;
 
-    final _TooltipOverlay overlayChild = _TooltipOverlay(
+    // Keep the tooltip displayed if the overlay child is hovered.
+    final Widget result = _ExclusiveMouseRegion(
       onEnter: _handleMouseEnter,
       onExit: _handleMouseExit,
-      animation: _overlayAnimation,
+      child: IgnorePointer(
+        ignoring: widget.ignorePointer,
+        child: widget.tooltipBuilder(context, _overlayAnimation),
+      ),
+    );
+    final Widget overlayChild = _TooltipOverlay(
       target: target,
       targetSize: tooltipSize,
       verticalOffset: widget.verticalOffset,
       preferBelow: widget.preferBelow,
       positionDelegate: widget.positionDelegate,
-      ignorePointer: widget.ignorePointer,
-      tooltip: widget.tooltipBuilder(context, _overlayAnimation),
+      tooltip: result,
     );
-
     return SelectionContainer.maybeOf(context) == null
         ? overlayChild
         : SelectionContainer.disabled(child: overlayChild);
@@ -724,13 +728,13 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     // If message is empty then no need to create a tooltip overlay to show
     // the empty black container so just return the wrapped child as is or
     // empty container if child is not specified.
-    if (widget.message.isEmpty) {
-      return widget.child ?? const SizedBox.shrink();
+    if (widget.semanticsTooltip.isEmpty) {
+      return widget.child;
     }
     assert(debugCheckHasOverlay(context));
     final bool excludeFromSemantics = widget.excludeFromSemantics;
     Widget result = Semantics(
-      tooltip: excludeFromSemantics ? null : widget.message,
+      tooltip: excludeFromSemantics ? null : widget.semanticsTooltip,
       child: widget.child,
     );
 
@@ -757,35 +761,23 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
 
 class _TooltipOverlay extends StatelessWidget {
   const _TooltipOverlay({
-    required this.animation,
     required this.target,
     required this.targetSize,
     required this.verticalOffset,
     required this.preferBelow,
-    required this.ignorePointer,
+    required this.positionDelegate,
     required this.tooltip,
-    this.positionDelegate,
-    this.onEnter,
-    this.onExit,
   });
 
-  final Animation<double> animation;
   final Offset target;
   final Size targetSize;
   final double verticalOffset;
   final bool preferBelow;
   final TooltipPositionDelegate? positionDelegate;
-  final PointerEnterEventListener? onEnter;
-  final PointerExitEventListener? onExit;
-  final bool ignorePointer;
   final Widget tooltip;
 
   @override
   Widget build(BuildContext context) {
-    Widget result = tooltip;
-    if (onEnter != null || onExit != null) {
-      result = _ExclusiveMouseRegion(onEnter: onEnter, onExit: onExit, child: result);
-    }
     return Positioned.fill(
       bottom: MediaQuery.maybeViewInsetsOf(context)?.bottom ?? 0.0,
       child: CustomSingleChildLayout(
@@ -796,7 +788,7 @@ class _TooltipOverlay extends StatelessWidget {
           preferBelow: preferBelow,
           positionDelegate: positionDelegate,
         ),
-        child: IgnorePointer(ignoring: ignorePointer, child: result),
+        child: tooltip,
       ),
     );
   }

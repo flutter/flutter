@@ -374,7 +374,9 @@ class CommonFinders {
   Finder byTooltip(Pattern message, {bool skipOffstage = true}) {
     return byWidgetPredicate((Widget widget) {
       return widget is RawTooltip &&
-          (message is RegExp ? message.hasMatch(widget.message) : (widget.message == message));
+          (message is RegExp
+              ? message.hasMatch(widget.semanticsTooltip)
+              : (widget.semanticsTooltip == message));
     }, skipOffstage: skipOffstage);
   }
 
