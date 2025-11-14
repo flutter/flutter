@@ -130,8 +130,8 @@ typedef struct MouseState {
 /// the same with frame rate of rendering.
 @property(nonatomic, strong) VSyncClient* touchRateCorrectionVSyncClient;
 
-/// Store FlutterView's frame size before as determiend by native's auto layout before flutter's custom
-/// auto resizing constraints are applied.
+/// Store FlutterView's frame size before as determiend by native's auto layout before flutter's
+/// custom auto resizing constraints are applied.
 @property(nonatomic, assign) CGSize sizeBeforeAutoResized;
 
 /*
@@ -1509,25 +1509,25 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 }
 
 /**
-  * Updates the FlutterAutoResizeLayoutConstraints based on the view's
-  * current frame.
-  *
-  * This method is invoked during viewDidLayoutSubviews, at which point the
-  * view has completed its subview layout and applied any existing Auto Layout
-  * constraints.
-  *
-  * Initially, the view's frame is used to determine the maximum size allowed
-  * by the native layout system. This size is then used to establish the viewport
-  * constraints for the Flutter engine.
-  *
-  * A critical consideration is that this initial frame-based sizing is only
-  * applicable if FlutterAutoResizeLayoutConstraints have not yet been applied
-  * by Flutter. Once Flutter applies its own FlutterAutoResizeLayoutConstraints,
-  * these constraints will subsequently dictate the view's frame.
-  *
-  * This interaction imposes a limitation: native layout constraints that are
-  * updated after Flutter has applied its auto-resize constraints may not
-  * function as expected or properly influence the FlutterView's size.
+ * Updates the FlutterAutoResizeLayoutConstraints based on the view's
+ * current frame.
+ *
+ * This method is invoked during viewDidLayoutSubviews, at which point the
+ * view has completed its subview layout and applied any existing Auto Layout
+ * constraints.
+ *
+ * Initially, the view's frame is used to determine the maximum size allowed
+ * by the native layout system. This size is then used to establish the viewport
+ * constraints for the Flutter engine.
+ *
+ * A critical consideration is that this initial frame-based sizing is only
+ * applicable if FlutterAutoResizeLayoutConstraints have not yet been applied
+ * by Flutter. Once Flutter applies its own FlutterAutoResizeLayoutConstraints,
+ * these constraints will subsequently dictate the view's frame.
+ *
+ * This interaction imposes a limitation: native layout constraints that are
+ * updated after Flutter has applied its auto-resize constraints may not
+ * function as expected or properly influence the FlutterView's size.
  */
 - (void)updateAutoResizeConstraints {
   BOOL hasBeenAutoResized = NO;

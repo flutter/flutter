@@ -58,7 +58,8 @@ FLUTTER_ASSERT_ARC
   CGSize scaledSize = CGSizeMake(roundf(size.width / scale), roundf(size.height / scale));
 
   CGSize roundedScaleSize = CGSizeMake(roundf(scaledSize.width), roundf(scaledSize.height));
-  CGSize roundedIntrinsicSize = CGSizeMake(roundf(_intrinsicSize.width), roundf(_intrinsicSize.height));
+  CGSize roundedIntrinsicSize =
+      CGSizeMake(roundf(_intrinsicSize.width), roundf(_intrinsicSize.height));
 
   // If the size has not changed, don't update constraints.
   if (CGSizeEqualToSize(roundedIntrinsicSize, roundedScaleSize)) {

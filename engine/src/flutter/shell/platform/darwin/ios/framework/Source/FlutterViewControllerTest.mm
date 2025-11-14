@@ -2641,7 +2641,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [appDelegate setMockLaunchEngine:nil];
 }
 
-
 - (void)testUpdateAutoResizeConstraintsSetsViewportMetricsOnInitialLayout {
   id mockEngine = OCMClassMock([FlutterEngine class]);
   FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:mockEngine
@@ -2653,14 +2652,14 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   CGFloat scale = vc.flutterScreenIfViewLoaded.scale;
 
   OCMExpect([mockEngine updateViewportMetrics:[OCMArg checkWithBlock:^BOOL(NSValue* value) {
-                           flutter::ViewportMetrics metrics;
-                           [value getValue:&metrics];
-                           XCTAssertEqual(metrics.physical_min_width_constraint, 320 * scale);
-                           XCTAssertEqual(metrics.physical_max_width_constraint, 320 * scale);
-                           XCTAssertEqual(metrics.physical_min_height_constraint, 480 * scale);
-                           XCTAssertEqual(metrics.physical_max_height_constraint, 480 * scale);
-                           return YES;
-                         }]]);
+                          flutter::ViewportMetrics metrics;
+                          [value getValue:&metrics];
+                          XCTAssertEqual(metrics.physical_min_width_constraint, 320 * scale);
+                          XCTAssertEqual(metrics.physical_max_width_constraint, 320 * scale);
+                          XCTAssertEqual(metrics.physical_min_height_constraint, 480 * scale);
+                          XCTAssertEqual(metrics.physical_max_height_constraint, 480 * scale);
+                          return YES;
+                        }]]);
 
   [vc performSelector:@selector(updateAutoResizeConstraints)];
 
@@ -2680,12 +2679,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   vc.autoResizable = YES;
   vc.view.frame = CGRectMake(0, 0, 320, 480);
 
-
   [vc performSelector:@selector(updateAutoResizeConstraints)];
 
   CGSize initialSize = [[vc valueForKey:@"sizeBeforeAutoResized"] CGSizeValue];
   XCTAssertEqual(initialSize.width, 320);
-
 
   FlutterAutoResizeLayoutConstraint* fakeConstraint =
       [FlutterAutoResizeLayoutConstraint constraintWithItem:vc.view
@@ -2707,6 +2704,5 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   XCTAssertEqual(subsequentSize.height, 480,
                  @"sizeBeforeAutoResized should not be updated after the initial layout.");
 
-@end
-
+  @end
 }
