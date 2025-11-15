@@ -344,12 +344,18 @@ void main() {
     expect(AlignmentGeometry.topLeft, Alignment.topLeft);
     expect(AlignmentGeometry.topCenter, Alignment.topCenter);
     expect(AlignmentGeometry.topRight, Alignment.topRight);
+    expect(AlignmentGeometry.topStart, AlignmentDirectional.topStart);
+    expect(AlignmentGeometry.topEnd, AlignmentDirectional.topEnd);
     expect(AlignmentGeometry.centerLeft, Alignment.centerLeft);
     expect(AlignmentGeometry.center, Alignment.center);
     expect(AlignmentGeometry.centerRight, Alignment.centerRight);
+    expect(AlignmentGeometry.centerStart, AlignmentDirectional.centerStart);
+    expect(AlignmentGeometry.centerEnd, AlignmentDirectional.centerEnd);
     expect(AlignmentGeometry.bottomLeft, Alignment.bottomLeft);
     expect(AlignmentGeometry.bottomCenter, Alignment.bottomCenter);
     expect(AlignmentGeometry.bottomRight, Alignment.bottomRight);
+    expect(AlignmentGeometry.bottomStart, AlignmentDirectional.bottomStart);
+    expect(AlignmentGeometry.bottomEnd, AlignmentDirectional.bottomEnd);
   });
 
   test('AlignmentDirectional.resolve with null TextDirection asserts', () {

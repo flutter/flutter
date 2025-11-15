@@ -31,12 +31,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
+import io.flutter.Build.API_LEVELS;
 import io.flutter.BuildConfig;
 import io.flutter.Log;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.plugin.platform.PlatformViewsAccessibilityDelegate;
 import io.flutter.util.Predicate;
 import io.flutter.util.ViewUtils;
+import io.flutter.view.AccessibilityBridge.Flag;
 import io.flutter.view.AccessibilityStringBuilder.LocaleStringAttribute;
 import io.flutter.view.AccessibilityStringBuilder.SpellOutStringAttribute;
 import io.flutter.view.AccessibilityStringBuilder.StringAttribute;
@@ -573,6 +575,16 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     return stringIndex == EMPTY_STRING_INDEX ? null : strings[stringIndex];
   }
 
+  private static float[] getMatrix4FromBuffer(@NonNull ByteBuffer buffer, float[] transform) {
+    if (transform == null) {
+      transform = new float[16];
+    }
+    for (int i = 0; i < 16; ++i) {
+      transform[i] = buffer.getFloat();
+    }
+    return transform;
+  }
+
   /**
    * Disconnects any listeners and/or delegates that were initialized in {@code
    * AccessibilityBridge}'s constructor, or added after.
@@ -624,18 +636,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // one that is currently available in the semantics tree.  However, we also want
     // to set it if we're exiting a list to a non-list, so that we can get the "out of list"
     // announcement when A11y focus moves out of a list and not into another list.
-    // Adding check for at least 1 scrollChild because we don't want a list with a single item.
-    return semanticsNode.scrollChildren > 1
+    return semanticsNode.scrollChildren > 0
         && (SemanticsNode.nullableHasAncestor(
                 accessibilityFocusedSemanticsNode, o -> o == semanticsNode)
             || !SemanticsNode.nullableHasAncestor(
                 accessibilityFocusedSemanticsNode, o -> o.hasFlag(Flag.HAS_IMPLICIT_SCROLLING)));
-  }
-
-  private boolean shouldSetCollectionItemInfo(final SemanticsNode semanticsNode) {
-    return semanticsNode.parent != null
-        && shouldSetCollectionInfo(semanticsNode.parent)
-        && semanticsNode.parent.hasFlag(Flag.HAS_IMPLICIT_SCROLLING);
   }
 
   @RequiresApi(API_LEVELS.API_31)
@@ -832,7 +837,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       result.addAction(AccessibilityNodeInfo.ACTION_SET_TEXT);
     }
 
-    if (semanticsNode.hasFlag(Flag.IS_BUTTON)) {
+    if (semanticsNode.shouldBeTreatedAsButton()) {
       result.setClassName("android.widget.Button");
     }
     if (semanticsNode.hasFlag(Flag.IS_IMAGE)) {
@@ -912,82 +917,59 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         || semanticsNode.hasAction(Action.SCROLL_UP)
         || semanticsNode.hasAction(Action.SCROLL_RIGHT)
         || semanticsNode.hasAction(Action.SCROLL_DOWN)) {
+      result.setScrollable(true);
+
       // This tells Android's a11y to send scroll events when reaching the end of
       // the visible viewport of a scrollable, unless the node itself does not
       // allow implicit scrolling - then we leave the className as view.View.
-      result.setScrollable(true);
-    }
-    // We should prefer setCollectionInfo to the class names, as this way we get "In List"
-    // and "Out of list" announcements.  But we don't always know the counts, so we
-    // can fallback to the generic scroll view class names.
-    //
-    // On older APIs, we always fall back to the generic scroll view class names here.
-    //
-    // TODO(dnfield): We should add semantics properties for rows and columns in 2 dimensional
-    // lists, e.g.
-    // GridView.  Right now, we're only supporting ListViews and only if they have scroll
-    // children.
-    if (shouldSetCollectionInfo(semanticsNode)) {
+      //
+      // We should prefer setCollectionInfo to the class names, as this way we get "In List"
+      // and "Out of list" announcements.  But we don't always know the counts, so we
+      // can fallback to the generic scroll view class names.
+      //
+      // On older APIs, we always fall back to the generic scroll view class names here.
+      //
+      // TODO(dnfield): We should add semantics properties for rows and columns in 2 dimensional
+      // lists, e.g.
+      // GridView.  Right now, we're only supporting ListViews and only if they have scroll
+      // children.
+      if (semanticsNode.hasFlag(Flag.HAS_IMPLICIT_SCROLLING)) {
+        if (semanticsNode.hasAction(Action.SCROLL_LEFT)
+            || semanticsNode.hasAction(Action.SCROLL_RIGHT)) {
+          if (shouldSetCollectionInfo(semanticsNode)) {
+            result.setCollectionInfo(
+                AccessibilityNodeInfo.CollectionInfo.obtain(
+                    0, // rows
+                    semanticsNode.scrollChildren, // columns
+                    false // hierarchical
+                    ));
+          } else {
+            result.setClassName("android.widget.HorizontalScrollView");
+          }
+        } else {
+          if (shouldSetCollectionInfo(semanticsNode)) {
+            result.setCollectionInfo(
+                AccessibilityNodeInfo.CollectionInfo.obtain(
+                    semanticsNode.scrollChildren, // rows
+                    0, // columns
+                    false // hierarchical
+                    ));
+          } else {
+            result.setClassName("android.widget.ScrollView");
+          }
+        }
+      }
+      // TODO(ianh): Once we're on SDK v23+, call addAction to
+      // expose AccessibilityAction.ACTION_SCROLL_LEFT, _RIGHT,
+      // _UP, and _DOWN when appropriate.
       if (semanticsNode.hasAction(Action.SCROLL_LEFT)
-          || semanticsNode.hasAction(Action.SCROLL_RIGHT)) {
-        result.setCollectionInfo(
-            new AccessibilityNodeInfo.CollectionInfo(
-                1, // row count
-                semanticsNode.scrollChildren, // column count
-                false // hierarchical
-                ));
-      } else {
-        result.setCollectionInfo(
-            new AccessibilityNodeInfo.CollectionInfo(
-                semanticsNode.scrollChildren, // row count
-                1, // column count
-                false // hierarchical
-                ));
+          || semanticsNode.hasAction(Action.SCROLL_UP)) {
+        result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
       }
-    }
-    if (semanticsNode.scrollChildren > 0 && !shouldSetCollectionInfo(semanticsNode)) {
-      if (semanticsNode.hasAction(Action.SCROLL_LEFT)
-          || semanticsNode.hasAction(Action.SCROLL_RIGHT)) {
-        result.setClassName("android.widget.HorizontalScrollView");
-      } else {
-        result.setClassName("android.widget.ScrollView");
+      if (semanticsNode.hasAction(Action.SCROLL_RIGHT)
+          || semanticsNode.hasAction(Action.SCROLL_DOWN)) {
+        result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
       }
-    }
-    if (shouldSetCollectionItemInfo(semanticsNode)) {
-      SemanticsNode parent = semanticsNode.parent;
-      List<SemanticsNode> scrollChildren = parent.childrenInTraversalOrder;
-      boolean verticalScroll =
-          !(parent.hasAction(Action.SCROLL_LEFT) || parent.hasAction(Action.SCROLL_RIGHT));
-      int nodeIndex = scrollChildren.indexOf(semanticsNode);
-      if (verticalScroll) {
-        result.setCollectionItemInfo(
-            new AccessibilityNodeInfo.CollectionItemInfo(
-                nodeIndex, // row index
-                1, // row span
-                0, // column index
-                1, // column span
-                semanticsNode.hasFlag(Flag.IS_HEADER) // is heading
-                ));
-      } else {
-        result.setCollectionItemInfo(
-            new AccessibilityNodeInfo.CollectionItemInfo(
-                0, // row index
-                1, // row span
-                nodeIndex, // column index
-                1, // column span
-                semanticsNode.hasFlag(Flag.IS_HEADER) // is heading
-                ));
-      }
-    }
-    // TODO(ianh): Once we're on SDK v23+, call addAction to
-    // expose AccessibilityAction.ACTION_SCROLL_LEFT, _RIGHT,
-    // _UP, and _DOWN when appropriate.
-    if (semanticsNode.hasAction(Action.SCROLL_LEFT) || semanticsNode.hasAction(Action.SCROLL_UP)) {
-      result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
-    }
-    if (semanticsNode.hasAction(Action.SCROLL_RIGHT)
-        || semanticsNode.hasAction(Action.SCROLL_DOWN)) {
-      result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
     }
     if (semanticsNode.hasAction(Action.INCREASE) || semanticsNode.hasAction(Action.DECREASE)) {
       // TODO(jonahwilliams): support AccessibilityAction.ACTION_SET_PROGRESS once SDK is
@@ -1650,6 +1632,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    * View#onHoverEvent(MotionEvent)}.
    */
   public boolean onAccessibilityHoverEvent(MotionEvent event, boolean ignorePlatformViews) {
+
     if (!accessibilityManager.isTouchExplorationEnabled()) {
       return false;
     }
@@ -1709,6 +1692,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     if (flutterSemanticsTree.isEmpty()) {
       return;
     }
+
     SemanticsNode semanticsNodeUnderCursor =
         getRootSemanticsNode().hitTest(new float[] {x, y, 0, 1}, ignorePlatformViews);
     if (semanticsNodeUnderCursor != hoveredObject) {
@@ -2291,7 +2275,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     IS_EXPANDED(1 << 27),
     HAS_SELECTED_STATE(1 << 28),
     HAS_REQUIRED_STATE(1 << 29),
-    IS_REQUIRED(1 << 30);
+    IS_REQUIRED(1 << 30),
+    IS_ACCESSIBILITY_FOCUS_BLOCKED(1 << 31);
 
     final int value;
 
@@ -2409,6 +2394,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private int platformViewId;
     private int scrollChildren;
     private int scrollIndex;
+    private int traversalParent;
     private float scrollPosition;
     private float scrollExtentMax;
     private float scrollExtentMin;
@@ -2471,6 +2457,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private float right;
     private float bottom;
     private float[] transform;
+    private float[] hitTestTransform;
 
     private SemanticsNode parent;
     private List<SemanticsNode> childrenInTraversalOrder = new ArrayList<>();
@@ -2532,6 +2519,18 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         Log.e(TAG, "Attempted to check hadFlag but had no previous config.");
       }
       return (previousFlags & flag.value) != 0;
+    }
+
+    private boolean shouldBeTreatedAsButton() {
+      if (hasFlag(Flag.IS_BUTTON)) {
+        return true;
+      }
+      if (linkUrl != null && !linkUrl.isEmpty()) {
+        // This will be represented as link through URLSpan.
+        return false;
+      }
+      // In Android, a link is treated as a button if and only if it does not have a URL
+      return hasFlag(Flag.IS_LINK);
     }
 
     private boolean didScroll() {
@@ -2618,6 +2617,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       platformViewId = buffer.getInt();
       scrollChildren = buffer.getInt();
       scrollIndex = buffer.getInt();
+      traversalParent = buffer.getInt();
       scrollPosition = buffer.getFloat();
       scrollExtentMax = buffer.getFloat();
       scrollExtentMin = buffer.getFloat();
@@ -2651,24 +2651,23 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       right = buffer.getFloat();
       bottom = buffer.getFloat();
 
-      if (transform == null) {
-        transform = new float[16];
-      }
-      for (int i = 0; i < 16; ++i) {
-        transform[i] = buffer.getFloat();
-      }
+      transform = getMatrix4FromBuffer(buffer, transform);
+      hitTestTransform = getMatrix4FromBuffer(buffer, hitTestTransform);
+
       inverseTransformDirty = true;
       globalGeometryDirty = true;
 
-      final int childCount = buffer.getInt();
+      final int traversalOrderChildCount = buffer.getInt();
       childrenInTraversalOrder.clear();
-      childrenInHitTestOrder.clear();
-      for (int i = 0; i < childCount; ++i) {
+      for (int i = 0; i < traversalOrderChildCount; ++i) {
         SemanticsNode child = accessibilityBridge.getOrCreateSemanticsNode(buffer.getInt());
         child.parent = this;
         childrenInTraversalOrder.add(child);
       }
-      for (int i = 0; i < childCount; ++i) {
+
+      final int hitTestOrderChildCount = buffer.getInt();
+      childrenInHitTestOrder.clear();
+      for (int i = 0; i < hitTestOrderChildCount; ++i) {
         SemanticsNode child = accessibilityBridge.getOrCreateSemanticsNode(buffer.getInt());
         child.parent = this;
         childrenInHitTestOrder.add(child);
@@ -2752,7 +2751,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (inverseTransform == null) {
         inverseTransform = new float[16];
       }
-      if (!Matrix.invertM(inverseTransform, 0, transform, 0)) {
+      if (!Matrix.invertM(inverseTransform, 0, hitTestTransform, 0)) {
         Arrays.fill(inverseTransform, 0);
       }
     }
@@ -2803,6 +2802,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       }
       if (hasFlag(Flag.IS_FOCUSABLE)) {
         return true;
+      }
+      if (hasFlag(Flag.IS_ACCESSIBILITY_FOCUS_BLOCKED)) {
+        return false;
       }
       // If not explicitly set as focusable, then use our legacy
       // algorithm. Once all focusable widgets have a Focus widget, then

@@ -1612,7 +1612,6 @@ class _TabBarState extends State<TabBar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    assert(debugCheckHasMaterial(context));
     _updateTabController();
     _initIndicatorPainter();
   }
@@ -1959,17 +1958,20 @@ class _TabBarState extends State<TabBar> {
             _defaults.splashBorderRadius,
         child: Padding(
           padding: EdgeInsets.only(bottom: widget.indicatorWeight),
-          child: Stack(
-            children: <Widget>[
-              wrappedTabs[index],
-              Semantics(
-                role: SemanticsRole.tab,
-                selected: index == _currentIndex,
-                label: kIsWeb
-                    ? null
-                    : localizations.tabLabel(tabIndex: index + 1, tabCount: tabCount),
-              ),
-            ],
+          child: Semantics(
+            // This has to be wrapped above the Stack to override any role set by the child.
+            role: SemanticsRole.tab,
+            child: Stack(
+              children: <Widget>[
+                wrappedTabs[index],
+                Semantics(
+                  selected: index == _currentIndex,
+                  label: kIsWeb
+                      ? null
+                      : localizations.tabLabel(tabIndex: index + 1, tabCount: tabCount),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -2055,11 +2057,14 @@ class _TabBarState extends State<TabBar> {
       tabBar = Padding(padding: widget.padding!, child: tabBar);
     }
 
-    return MediaQuery(
-      data: MediaQuery.of(
-        context,
-      ).copyWith(textScaler: widget.textScaler ?? tabBarTheme.textScaler),
-      child: tabBar,
+    return Material(
+      type: MaterialType.transparency,
+      child: MediaQuery(
+        data: MediaQuery.of(
+          context,
+        ).copyWith(textScaler: widget.textScaler ?? tabBarTheme.textScaler),
+        child: tabBar,
+      ),
     );
   }
 }
