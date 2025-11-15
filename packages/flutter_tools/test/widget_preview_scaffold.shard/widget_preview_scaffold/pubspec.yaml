@@ -62,8 +62,8 @@ dependencies:
 dev_dependencies:
   flutter_tools:
     path: ../../../
-  test: ^1.27.0
+  test: 1.27.0
 
 flutter:
   uses-material-design: true
-# PUBSPEC CHECKSUM: mr9k4n
+# PUBSPEC CHECKSUM: eo8n9j
