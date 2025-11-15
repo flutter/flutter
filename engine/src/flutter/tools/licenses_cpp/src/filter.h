@@ -16,7 +16,7 @@
 /// This is used for things like the include.txt and exclude.txt.
 class Filter {
  public:
-  static absl::StatusOr<Filter> Open(std::string_view path);
+  static absl::StatusOr<Filter> Open(const std::string& path);
 
   static absl::StatusOr<Filter> Open(std::istream& input);
 
