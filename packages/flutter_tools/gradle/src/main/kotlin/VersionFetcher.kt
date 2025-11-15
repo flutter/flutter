@@ -44,36 +44,16 @@ internal object VersionFetcher {
      * Returns the version of the Kotlin Gradle plugin.
      */
     internal fun getKGPVersion(project: Project): Version? {
-        // TODO(gmackall): AGP has a getKotlinAndroidPluginVersion(), and KGP has a
-        //                 getKotlinPluginVersion(). Consider replacing this implementation with one of
-        //                 those.
-        val kotlinVersionProperty = "kotlin_version"
-        val firstKotlinVersionFieldName = "pluginVersion"
-        val secondKotlinVersionFieldName = "kotlinPluginVersion"
-        // This property corresponds to application of the Kotlin Gradle plugin in the
-        // top-level build.gradle file.
-        if (project.hasProperty(kotlinVersionProperty)) {
-            return Version.fromString(project.properties[kotlinVersionProperty] as String)
-        }
+        // Look for the Kotlin plugin applied to the project
         val kotlinPlugin =
             project.plugins
-                .findPlugin(KotlinAndroidPluginWrapper::class.java)
-        // Partial implementation of getKotlinPluginVersion from the comment above.
-        var versionString: String? = kotlinPlugin?.pluginVersion
-        if (!versionString.isNullOrEmpty()) {
-            return Version.fromString(versionString)
-        }
-        // Fall back to reflection.
-        val versionField =
-            kotlinPlugin?.javaClass?.kotlin?.members?.firstOrNull {
-                it.name == firstKotlinVersionFieldName || it.name == secondKotlinVersionFieldName
-            }
-        versionString = versionField?.call(kotlinPlugin) as String?
-        return if (versionString == null) {
-            null
-        } else {
-            Version.fromString(versionString)
-        }
+                .filterIsInstance<KotlinPluginWrapper>()
+                .firstOrNull()
+
+        // Return the plugin version if available
+        val versionString = kotlinPlugin?.pluginVersion ?: return null
+
+        return Version.fromString(versionString)
     }
 }
 
