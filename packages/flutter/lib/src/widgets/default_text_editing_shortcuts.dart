@@ -291,7 +291,9 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
       forward: true,
       collapseSelection: false,
     ),
+  };
 
+  static final Map<ShortcutActivator, Intent> _clipboardShortcuts = <ShortcutActivator, Intent>{
     // Xerox/Apple: ^X ^C ^V
     // -> Standard on Windows
     // -> Standard on Linux
@@ -344,6 +346,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   //   * Meta + shift? + backspace
   static final Map<ShortcutActivator, Intent> _androidShortcuts = <ShortcutActivator, Intent>{
     ..._commonShortcuts,
+    ..._clipboardShortcuts,
     const SingleActivator(LogicalKeyboardKey.home): const ExtendSelectionToLineBreakIntent(
       forward: false,
       collapseSelection: true,
@@ -544,6 +547,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 
   static final Map<ShortcutActivator, Intent> _linuxShortcuts = <ShortcutActivator, Intent>{
     ..._commonShortcuts,
+    ..._clipboardShortcuts,
     ..._linuxNumpadShortcuts,
     const SingleActivator(LogicalKeyboardKey.home): const ExtendSelectionToLineBreakIntent(
       forward: false,
@@ -776,6 +780,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   //   * Meta + backspace
   static final Map<ShortcutActivator, Intent> _windowsShortcuts = <ShortcutActivator, Intent>{
     ..._commonShortcuts,
+    ..._clipboardShortcuts,
     const SingleActivator(
       LogicalKeyboardKey.pageUp,
     ): const ExtendSelectionVerticallyToAdjacentPageIntent(
@@ -843,15 +848,11 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
               const DoNothingAndStopPropagationTextIntent(),
         },
         ..._commonDisablingTextShortcuts,
-        const SingleActivator(LogicalKeyboardKey.keyX, control: true):
-            const DoNothingAndStopPropagationTextIntent(),
+        for (final ShortcutActivator activator in _clipboardShortcuts.keys)
+          activator as SingleActivator: const DoNothingAndStopPropagationTextIntent(),
         const SingleActivator(LogicalKeyboardKey.keyX, meta: true):
             const DoNothingAndStopPropagationTextIntent(),
-        const SingleActivator(LogicalKeyboardKey.keyC, control: true):
-            const DoNothingAndStopPropagationTextIntent(),
         const SingleActivator(LogicalKeyboardKey.keyC, meta: true):
-            const DoNothingAndStopPropagationTextIntent(),
-        const SingleActivator(LogicalKeyboardKey.keyV, control: true):
             const DoNothingAndStopPropagationTextIntent(),
         const SingleActivator(LogicalKeyboardKey.keyV, meta: true):
             const DoNothingAndStopPropagationTextIntent(),
