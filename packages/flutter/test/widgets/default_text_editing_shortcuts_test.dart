@@ -1153,7 +1153,7 @@ void main() {
     // Press ^V.
     await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyV, control: true));
     expect(state.lastIntent, isA<PasteTextIntent>());
-  }, variant: TargetPlatformVariant.desktop().except(TargetPlatform.macOS).and(TargetPlatform.android));
+  }, variant: TargetPlatformVariant.desktop().and(TargetPlatform.android).except(TargetPlatform.macOS));
 
   testWidgets('Clipboard shortcuts (IBM CUA)', (WidgetTester tester) async {
     final FocusNode editable = FocusNode();
@@ -1181,7 +1181,7 @@ void main() {
     // Press Shift-Insert.
     await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.insert, shift: true));
     expect(state.lastIntent, isA<PasteTextIntent>());
-  }, variant: TargetPlatformVariant.desktop().except(TargetPlatform.macOS).and(TargetPlatform.android));
+  }, variant: TargetPlatformVariant.desktop().and(TargetPlatform.android).except(TargetPlatform.macOS));
 }
 
 class ActionSpy extends StatefulWidget {
