@@ -166,13 +166,25 @@ MultiFrameCodec::State::GetNextFrameImage(
       return std::make_pair(nullptr, "Failed to allocate staging buffer.");
     }
 
+    const auto pixel_format =
+        ImageDecoderImpeller::ToPixelFormat(info.colorType());
+    if (!pixel_format.has_value()) {
+      std::string decode_error(
+          std::format("Unsupported pixel format (SkColorType={})",
+                      static_cast<int>(info.colorType())));
+      FML_DLOG(ERROR) << decode_error;
+      return std::make_pair(nullptr, decode_error);
+    }
+    ImageDecoderImpeller::ImageInfo image_info = {
+        .size = impeller::ISize(info.width(), info.height()),
+        .format = pixel_format.value()};
+
     ImageDecoderImpeller::UploadTextureToPrivate(
         [&](sk_sp<DlImage> image, std::string message) {
           dl_image = std::move(image);
           error_message = std::move(message);
         },
-        impeller_context, device_buffer, info,
-        std::make_shared<SkBitmap>(bitmap), std::nullopt,
+        impeller_context, device_buffer, image_info, std::nullopt,
         gpu_disable_sync_switch);
     return std::make_pair(dl_image, error_message);
 #endif

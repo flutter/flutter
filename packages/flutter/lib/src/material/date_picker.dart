@@ -1339,7 +1339,7 @@ class DateRangePickerDialog extends StatefulWidget {
     this.initialDateRange,
     required this.firstDate,
     required this.lastDate,
-    this.currentDate,
+    DateTime? currentDate,
     this.initialEntryMode = DatePickerEntryMode.calendar,
     this.helpText,
     this.cancelText,
@@ -1358,7 +1358,7 @@ class DateRangePickerDialog extends StatefulWidget {
     this.switchToCalendarEntryModeIcon,
     this.selectableDayPredicate,
     this.calendarDelegate = const GregorianCalendarDelegate(),
-  });
+  }) : _currentDate = currentDate;
 
   /// The date range that the date range picker starts with when it opens.
   ///
@@ -1382,8 +1382,12 @@ class DateRangePickerDialog extends StatefulWidget {
   ///
   /// This date will be highlighted in the day grid.
   ///
-  /// If `null`, the date of `DateTime.now()` will be used.
-  final DateTime? currentDate;
+  /// If `null`, the date of `calendarDelegate.now()` will be used.
+  DateTime get currentDate {
+    return calendarDelegate.dateOnly(_currentDate ?? calendarDelegate.now());
+  }
+
+  final DateTime? _currentDate;
 
   /// The initial date range picker entry mode.
   ///
@@ -2395,8 +2399,10 @@ class _MonthItemGridDelegate extends SliverGridDelegate {
 
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
-    final double tileWidth =
-        (constraints.crossAxisExtent - 2 * _horizontalPadding) / DateTime.daysPerWeek;
+    final double tileWidth = math.max(
+      (constraints.crossAxisExtent - 2 * _horizontalPadding) / DateTime.daysPerWeek,
+      0.0,
+    );
     return _MonthSliverGridLayout(
       crossAxisCount: DateTime.daysPerWeek + 2,
       dayChildWidth: tileWidth,
@@ -3434,7 +3440,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
     final ThemeData theme = Theme.of(context);
     final bool useMaterial3 = theme.useMaterial3;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final InputDecorationThemeData inputTheme = theme.inputDecorationTheme;
+    final InputDecorationThemeData inputTheme = InputDecorationTheme.of(context);
     final InputBorder inputBorder =
         inputTheme.border ??
         (useMaterial3 ? const OutlineInputBorder() : const UnderlineInputBorder());

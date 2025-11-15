@@ -1534,6 +1534,39 @@ void main() {
         },
       );
 
+      testWidgets(
+        'TimePicker dialog displays centered separator between hour and minute inputs for non-english locale',
+        (WidgetTester tester) async {
+          tester.view.physicalSize = const Size(400, 800);
+          tester.view.devicePixelRatio = 1.0;
+          addTearDown(tester.view.reset);
+
+          await tester.pumpWidget(
+            const MaterialApp(
+              localizationsDelegates: <LocalizationsDelegate<dynamic>>[
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: <Locale>[Locale('en'), Locale('es')],
+              locale: Locale('es'),
+              home: Material(
+                child: TimePickerDialog(
+                  initialTime: TimeOfDay(hour: 12, minute: 0),
+                  initialEntryMode: TimePickerEntryMode.input,
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          await expectLater(
+            find.byType(Dialog),
+            matchesGoldenFile('time_picker.dialog.separator.alignment.non_english_locale.png'),
+          );
+        },
+      );
+
       testWidgets('provides semantics information for text fields', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await mediaQueryBoilerplate(
@@ -2558,6 +2591,58 @@ void main() {
         dayPeriodLandscapeGap,
       );
     },
+  );
+
+  testWidgets(
+    'AM/PM buttons have correct selected/checked semantics for platform variant',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/173302
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return TextButton(
+                onPressed: () {
+                  showTimePicker(
+                    context: context,
+                    initialTime: const TimeOfDay(hour: 14, minute: 0),
+                  );
+                },
+                child: const Text('Open Picker'),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Picker'));
+      await tester.pumpAndSettle();
+
+      final Finder pmButtonSemantics = find.ancestor(
+        of: find.widgetWithText(InkWell, 'PM'),
+        matching: find.byWidgetPredicate(
+          (Widget widget) => widget is Semantics && (widget.properties.button ?? false),
+        ),
+      );
+
+      final Finder amButtonSemantics = find.ancestor(
+        of: find.widgetWithText(InkWell, 'AM'),
+        matching: find.byWidgetPredicate(
+          (Widget widget) => widget is Semantics && (widget.properties.button ?? false),
+        ),
+      );
+
+      bool? getPlatformSemanticProperty(Semantics semantics) {
+        return switch (defaultTargetPlatform) {
+          TargetPlatform.iOS => semantics.properties.selected,
+          _ => semantics.properties.checked,
+        };
+      }
+
+      expect(getPlatformSemanticProperty(tester.widget<Semantics>(pmButtonSemantics)), isTrue);
+      expect(getPlatformSemanticProperty(tester.widget<Semantics>(amButtonSemantics)), isFalse);
+    },
+    variant: TargetPlatformVariant.all(),
   );
 }
 

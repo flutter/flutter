@@ -219,8 +219,18 @@ abstract class DeviceManager {
     await Future.wait<List<Device>>(<Future<List<Device>>>[
       for (final DeviceDiscovery discoverer in _platformDiscoverers)
         if (discoverer.requiresExtendedWirelessDeviceDiscovery)
-          discoverer.discoverDevices(timeout: timeout),
+          discoverer.discoverDevices(timeout: timeout, forWirelessDiscovery: true),
     ]);
+  }
+
+  /// Stop any running extended wireless device discoverers.
+  void stopExtendedWirelessDeviceDiscoverers() {
+    for (final PollingDeviceDiscovery deviceDiscoverer
+        in _platformDiscoverers.whereType<PollingDeviceDiscovery>()) {
+      if (deviceDiscoverer.requiresExtendedWirelessDeviceDiscovery) {
+        deviceDiscoverer.cancelWirelessDiscovery();
+      }
+    }
   }
 
   /// Whether we're capable of listing any devices given the current environment configuration.
@@ -440,7 +450,11 @@ abstract class DeviceDiscovery {
   Future<List<Device>> devices({DeviceDiscoveryFilter? filter});
 
   /// Return all connected devices. Discards existing cache of devices.
-  Future<List<Device>> discoverDevices({Duration? timeout, DeviceDiscoveryFilter? filter});
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+    bool forWirelessDiscovery = false,
+  });
 
   /// Gets a list of diagnostic messages pertaining to issues with any connected
   /// devices (will be an empty list if there are no issues).
@@ -472,7 +486,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   Timer? _timer;
 
-  Future<List<Device>> pollingGetDevices({Duration? timeout});
+  Future<List<Device>> pollingGetDevices({Duration? timeout, bool forWirelessDiscovery = false});
 
   void startPolling() {
     // Make initial population the default, fast polling timeout.
@@ -498,6 +512,9 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     _timer = null;
   }
 
+  /// Cancels any in-progress, long-running wireless discovery processes.
+  Future<void> cancelWirelessDiscovery() async {}
+
   /// Get devices from cache filtered by [filter].
   ///
   /// If the cache is empty, populate the cache.
@@ -514,8 +531,17 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   ///
   /// If [filter] is null, it may return devices that are not connected.
   @override
-  Future<List<Device>> discoverDevices({Duration? timeout, DeviceDiscoveryFilter? filter}) {
-    return _populateDevices(timeout: timeout, filter: filter, resetCache: true);
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+    bool forWirelessDiscovery = false,
+  }) {
+    return _populateDevices(
+      timeout: timeout,
+      filter: filter,
+      resetCache: true,
+      forWirelessDiscovery: forWirelessDiscovery,
+    );
   }
 
   /// Get devices from cache filtered by [filter].
@@ -527,9 +553,13 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     Duration? timeout,
     DeviceDiscoveryFilter? filter,
     bool resetCache = false,
+    bool forWirelessDiscovery = false,
   }) async {
     if (!deviceNotifier.isPopulated || resetCache) {
-      final List<Device> devices = await pollingGetDevices(timeout: timeout);
+      final List<Device> devices = await pollingGetDevices(
+        timeout: timeout,
+        forWirelessDiscovery: forWirelessDiscovery,
+      );
       // If the cache was populated while the polling was ongoing, do not
       // overwrite the cache unless it's explicitly refreshing the cache.
       if (!deviceNotifier.isPopulated || resetCache) {
@@ -1344,13 +1374,7 @@ class DebuggingOptions {
         webDevServerConfig: WebDevServerConfig(
           port: json['port'] is int ? json['port']! as int : 8080,
           host: json['hostname'] is String ? json['hostname']! as String : 'localhost',
-
-          https: (json['tlsCertPath'] != null || json['tlsCertKeyPath'] != null)
-              ? HttpsConfig(
-                  certPath: json['tlsCertPath'] as String?,
-                  certKeyPath: json['tlsCertKeyPath'] as String?,
-                )
-              : null,
+          https: HttpsConfig.parse(json['tlsCertPath'], json['tlsCertKeyPath']),
           headers: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
         ),
       );

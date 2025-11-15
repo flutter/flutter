@@ -802,7 +802,9 @@ class _AmPmButton extends StatelessWidget {
     final TextScaler buttonTextScaler = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 2.0);
 
     return Semantics(
-      checked: selected,
+      // Platform-specific semantics vary slightly here on iOS.
+      selected: defaultTargetPlatform == TargetPlatform.iOS ? selected : null,
+      checked: defaultTargetPlatform == TargetPlatform.iOS ? null : selected,
       inMutuallyExclusiveGroup: true,
       button: true,
       child: Padding(
@@ -927,9 +929,11 @@ class _RenderInputPadding extends RenderShiftedBox {
     if (result == null) {
       return null;
     }
+    // Calculate the size and child offset using the same logic as performLayout
+    final Size drySize = getDryLayout(constraints);
     final Size childSize = child.getDryLayout(constraints);
-    return result +
-        Alignment.center.alongOffset(getDryLayout(constraints) - childSize as Offset).dy;
+    final Offset childOffset = Alignment.center.alongOffset(drySize - childSize as Offset);
+    return result + childOffset.dy;
   }
 
   @override
@@ -1929,7 +1933,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                     children: <Widget>[
                       Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: <Widget>[
                             Padding(
                               padding: const EdgeInsets.only(bottom: 10),
@@ -1962,7 +1966,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                       _TimeSelectorSeparator(timeOfDayFormat: timeOfDayFormat),
                       Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: <Widget>[
                             Padding(
                               padding: const EdgeInsets.only(bottom: 10),
@@ -3786,7 +3790,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   TextStyle get helpTextStyle {
-    return MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
+    return WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
       final TextStyle textStyle = _textTheme.labelMedium!;
       return textStyle.copyWith(color: _colors.onSurfaceVariant);
     });
@@ -3895,7 +3899,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
 
   @override
   TextStyle get hourMinuteTextStyle {
-    return MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
+    return WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
       // TODO(tahatesser): Update this when https://github.com/flutter/flutter/issues/131247 is fixed.
       // This is using the correct text style from Material 3 spec.
       // https://m3.material.io/components/time-pickers/specs#fd0b6939-edab-4058-82e1-93d163945215

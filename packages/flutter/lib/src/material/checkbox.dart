@@ -17,7 +17,6 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
-import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -195,8 +194,8 @@ class Checkbox extends StatefulWidget {
   /// When [value] is null and [tristate] is true, [WidgetState.selected] is
   /// included as a state.
   ///
-  /// If null, then the value of [CheckboxThemeData.mouseCursor] is used. If
-  /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
+  /// If this property is null, the value of [CheckboxThemeData.mouseCursor] is used.
+  /// If that is also null, [WidgetStateMouseCursor.adaptiveClickable] is used.
   final MouseCursor? mouseCursor;
 
   /// The color to use when this checkbox is checked.
@@ -462,7 +461,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
   }
 
   BorderSide? _resolveSide(BorderSide? side, Set<WidgetState> states) {
-    if (side is MaterialStateBorderSide) {
+    if (side is WidgetStateBorderSide) {
       return WidgetStateProperty.resolveAs<BorderSide?>(side, states);
     }
     if (!states.contains(WidgetState.selected)) {
@@ -531,7 +530,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
         WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
           return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
               checkboxTheme.mouseCursor?.resolve(states) ??
-              WidgetStateMouseCursor.clickable.resolve(states);
+              WidgetStateMouseCursor.adaptiveClickable.resolve(states);
         });
 
     // Colors need to be resolved in selected and non selected states separately
@@ -844,8 +843,8 @@ class _CheckboxDefaultsM2 extends CheckboxThemeData {
   final ColorScheme _colors;
 
   @override
-  MaterialStateBorderSide? get side {
-    return MaterialStateBorderSide.resolveWith((Set<WidgetState> states) {
+  WidgetStateBorderSide? get side {
+    return WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
         if (states.contains(WidgetState.selected)) {
           return const BorderSide(width: 2.0, color: Colors.transparent);
@@ -927,8 +926,8 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
   final ColorScheme _colors;
 
   @override
-  MaterialStateBorderSide? get side {
-    return MaterialStateBorderSide.resolveWith((Set<WidgetState> states) {
+  WidgetStateBorderSide? get side {
+    return WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
       if (states.contains(WidgetState.disabled)) {
         if (states.contains(WidgetState.selected)) {
           return const BorderSide(width: 2.0, color: Colors.transparent);

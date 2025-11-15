@@ -16,19 +16,18 @@ namespace txt {
 
 namespace {
 
-// Convert txt::FontWeight values (ranging from 0-8) to SkFontStyle::Weight
-// values (ranging from 100-900).
-SkFontStyle::Weight GetSkFontStyleWeight(txt::FontWeight font_weight) {
-  return static_cast<SkFontStyle::Weight>(static_cast<int>(font_weight) * 100 +
-                                          100);
+constexpr std::string_view kWeightAxisTag = "wght";
+
+template <typename T>
+SkFourByteTag GetFourByteTag(const T& tag) {
+  return SkSetFourByteTag(tag[0], tag[1], tag[2], tag[3]);
 }
 
-SkFontStyle MakeSkFontStyle(txt::FontWeight font_weight,
-                            txt::FontStyle font_style) {
-  return SkFontStyle(
-      GetSkFontStyleWeight(font_weight), SkFontStyle::Width::kNormal_Width,
-      font_style == txt::FontStyle::normal ? SkFontStyle::Slant::kUpright_Slant
-                                           : SkFontStyle::Slant::kItalic_Slant);
+SkFontStyle MakeSkFontStyle(int font_weight, txt::FontStyle font_style) {
+  return SkFontStyle(font_weight, SkFontStyle::Width::kNormal_Width,
+                     font_style == txt::FontStyle::normal
+                         ? SkFontStyle::Slant::kUpright_Slant
+                         : SkFontStyle::Slant::kItalic_Slant);
 }
 
 }  // anonymous namespace
@@ -106,6 +105,10 @@ skt::ParagraphStyle ParagraphBuilderSkia::TxtToSkia(const ParagraphStyle& txt) {
   text_style.setHeightOverride(txt.has_height_override);
   text_style.setFontFamilies({SkString(txt.font_family.c_str())});
   text_style.setLocale(SkString(txt.locale.c_str()));
+  SkFontArguments::VariationPosition::Coordinate weight_coord{
+      GetFourByteTag(kWeightAxisTag), static_cast<float>(txt.font_weight)};
+  text_style.setFontArguments(
+      SkFontArguments().setVariationDesignPosition({&weight_coord, 1}));
   skia.setTextStyle(text_style);
 
   skt::StrutStyle strut_style;
@@ -183,23 +186,29 @@ skt::TextStyle ParagraphBuilderSkia::TxtToSkia(const TextStyle& txt) {
     skia.addFontFeature(SkString(ff.first.c_str()), ff.second);
   }
 
+  std::vector<SkFontArguments::VariationPosition::Coordinate> coordinates;
+  bool weight_axis_set = false;
   if (!txt.font_variations.GetAxisValues().empty()) {
-    std::vector<SkFontArguments::VariationPosition::Coordinate> coordinates;
     for (const auto& it : txt.font_variations.GetAxisValues()) {
       const std::string& axis = it.first;
       if (axis.length() != 4) {
         continue;
       }
-      coordinates.push_back({
-          SkSetFourByteTag(axis[0], axis[1], axis[2], axis[3]),
-          it.second,
-      });
+      if (axis == kWeightAxisTag) {
+        weight_axis_set = true;
+      }
+      coordinates.push_back({GetFourByteTag(axis), it.second});
     }
-    SkFontArguments::VariationPosition position = {
-        coordinates.data(), static_cast<int>(coordinates.size())};
-    skia.setFontArguments(
-        SkFontArguments().setVariationDesignPosition(position));
   }
+  if (!weight_axis_set) {
+    coordinates.push_back({
+        GetFourByteTag(kWeightAxisTag),
+        static_cast<float>(txt.font_weight),
+    });
+  }
+  SkFontArguments::VariationPosition position = {
+      coordinates.data(), static_cast<int>(coordinates.size())};
+  skia.setFontArguments(SkFontArguments().setVariationDesignPosition(position));
 
   skia.resetShadows();
   for (const txt::TextShadow& txt_shadow : txt.text_shadows) {

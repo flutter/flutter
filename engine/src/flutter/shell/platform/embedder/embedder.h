@@ -352,6 +352,8 @@ typedef struct {
   bool is_slider;
   /// Whether the semantics node represents a keyboard key.
   bool is_keyboard_key;
+  /// Whether to block a11y focus for the semantics node.
+  bool is_accessibility_focus_blocked;
 } FlutterSemanticsFlags;
 
 typedef enum {
@@ -1590,6 +1592,10 @@ typedef struct {
   FlutterPlatformViewIdentifier platform_view_id;
   /// A textual tooltip attached to the node.
   const char* tooltip;
+  /// The heading level for this node. A value of 0 means the node is not a
+  /// heading; higher values (1, 2, …) indicate the heading rank, with lower
+  /// numbers being higher-level headings.
+  int32_t heading_level;
 } FlutterSemanticsNode;
 
 /// A node in the Flutter semantics tree.
@@ -1697,6 +1703,15 @@ typedef struct {
   // The set of semantics flags associated with this node. Prefer to use this
   // over `flags__deprecated__`.
   FlutterSemanticsFlags* flags2;
+  /// The heading level for this node. A value of 0 means the node is not a
+  /// heading; higher values (1, 2, …) indicate the heading rank, with lower
+  /// numbers being higher-level headings.
+  int32_t heading_level;
+  /// An identifier for the semantics node in native accessibility hierarchy.
+  /// This value should not be exposed to the users of the app.
+  /// This is usually used for UI testing with tools that work by querying the
+  /// native accessibility, like UI Automator, XCUITest, or Appium.
+  const char* identifier;
 } FlutterSemanticsNode2;
 
 /// `FlutterSemanticsCustomAction` ID used as a sentinel to signal the end of a
