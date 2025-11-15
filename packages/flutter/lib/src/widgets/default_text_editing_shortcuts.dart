@@ -291,12 +291,29 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
       collapseSelection: false,
     ),
 
+    // Xerox/Apple: ^X ^C ^V
+    // -> Standard on Windows
+    // -> Standard on Linux
+    // -> Standard on OS X (with Command as modifier)
     const SingleActivator(LogicalKeyboardKey.keyX, control: true):
         const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
     const SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent.copy,
     const SingleActivator(LogicalKeyboardKey.keyV, control: true): const PasteTextIntent(
       SelectionChangedCause.keyboard,
     ),
+
+    // IBM CUA guidelines: Shift-Del Ctrl-Ins Shift-Ins
+    // -> Standard on Windows
+    // -> Standard on Linux (traditionally mapped to the Selection buffer rather than the Clipboard,
+    //                       but the distinction is often no longer present with modern toolkits)
+    // -> Not standard on OS X
+    const SingleActivator(LogicalKeyboardKey.delete, shift: true):
+        const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
+    const SingleActivator(LogicalKeyboardKey.insert, control: true): CopySelectionTextIntent.copy,
+    const SingleActivator(LogicalKeyboardKey.insert, shift: true): const PasteTextIntent(
+      SelectionChangedCause.keyboard,
+    ),
+
     const SingleActivator(LogicalKeyboardKey.keyA, control: true): const SelectAllTextIntent(
       SelectionChangedCause.keyboard,
     ),
