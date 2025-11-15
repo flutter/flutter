@@ -810,6 +810,11 @@ class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
     _localeResolutionCallback = localeResolutionCallback;
     _localizationsDelegates = localizationsDelegates;
     _supportedLocales = supportedLocales;
+
+    // Re-resolve the locale when locale resolution parameters change.
+    // Delegates to _updateResolvedLocale for the actual resolution logic.
+    // See https://github.com/flutter/flutter/issues/117210
+    _updateResolvedLocale(WidgetsBinding.instance.platformDispatcher.locales);
   }
 
   /// The currently resolved [Locale] based on the current platform locale and
@@ -866,13 +871,27 @@ class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
   /// This is the resolved locale, and is one of the supportedLocales.
   Locale? _resolvedLocale;
 
-  @override
-  void didChangeLocales(List<Locale>? locales) {
-    final Locale newLocale = _resolveLocales(locales, supportedLocales);
+  /// Updates [_resolvedLocale] based on the given preferred locales.
+  ///
+  /// Uses [_resolveLocales] to compute the new locale from the given
+  /// [preferredLocales] and the current [supportedLocales]. If the resolved
+  /// locale differs from [_resolvedLocale], updates it and calls
+  /// [notifyListeners] to rebuild dependent widgets.
+  ///
+  /// This method is called from both [update] (when locale resolution
+  /// parameters change) and [didChangeLocales] (when system locales change)
+  /// to avoid code duplication.
+  void _updateResolvedLocale(List<Locale>? preferredLocales) {
+    final Locale newLocale = _resolveLocales(preferredLocales, supportedLocales);
     if (newLocale != _resolvedLocale) {
       _resolvedLocale = newLocale;
       notifyListeners();
     }
+  }
+
+  @override
+  void didChangeLocales(List<Locale>? locales) {
+    _updateResolvedLocale(locales);
   }
 
   Locale _resolveLocales(List<Locale>? preferredLocales, Iterable<Locale> supportedLocales) {

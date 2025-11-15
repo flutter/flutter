@@ -163,6 +163,47 @@ void main() {
       expect(node3.getSemanticsData().locale, isNull);
     });
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/117210
+  testWidgets('Changing supportedLocales updates the resolved locale', (WidgetTester tester) async {
+    // Create a StatefulWidget to test changing supportedLocales via setState
+    List<Locale> supportedLocales = const <Locale>[Locale('de')];
+    late StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          stateSetter = setState;
+          return WidgetsApp(
+            supportedLocales: supportedLocales,
+            localizationsDelegates: <LocalizationsDelegate<dynamic>>[
+              WidgetsLocalizationsDelegate(),
+            ],
+            builder: (BuildContext context, Widget? child) {
+              return Text(Localizations.localeOf(context).languageCode);
+            },
+            color: const Color(0xFF000000),
+          );
+        },
+      ),
+    );
+
+    await tester.pump();
+
+    // Initial locale should be 'de'
+    expect(find.text('de'), findsOneWidget);
+
+    // Change supportedLocales to English
+    stateSetter(() {
+      supportedLocales = const <Locale>[Locale('en')];
+    });
+
+    await tester.pump();
+
+    // Locale should now be 'en'
+    expect(find.text('en'), findsOneWidget);
+    expect(find.text('de'), findsNothing);
+  });
 }
 
 class FakeLocalizationsDelegate extends LocalizationsDelegate<String> {
