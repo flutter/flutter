@@ -72,7 +72,6 @@ Future<void> buildMacOS({
   bool configOnly = false,
   SizeAnalyzer? sizeAnalyzer,
   bool usingCISystem = false,
-  DarwinArch? activeArch,
 }) async {
   final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
   if (xcodeWorkspace == null) {
@@ -201,10 +200,7 @@ Future<void> buildMacOS({
 
   // Determine the build destination
   final String destination;
-  if (activeArch != null) {
-    // Build for specific architecture when --macos-arch is specified
-    destination = 'platform=${XcodeSdk.MacOSX.displayName},arch=${activeArch.name}';
-  } else if (buildInfo.isDebug) {
+  if (buildInfo.isDebug) {
     // Debug builds default to current host architecture
     destination = 'platform=${XcodeSdk.MacOSX.displayName},arch=$arch';
   } else {
@@ -212,8 +208,10 @@ Future<void> buildMacOS({
     destination = XcodeSdk.MacOSX.genericPlatform;
   }
 
-  // Determine if we're building for only the active architecture
-  final bool onlyActiveArch = activeArch != null && activeArch.name == arch;
+  // Get EXCLUDED_ARCHS from Xcode project build settings
+  // This allows developers to exclude specific architectures (e.g., x86_64)
+  // when dependencies don't support them
+  final String? excludedArches = buildSettings['EXCLUDED_ARCHS'];
 
   try {
     result = await globals.processUtils.stream(
@@ -237,11 +235,10 @@ Future<void> buildMacOS({
         'COMPILER_INDEX_STORE_ENABLE=NO',
         if (disabledSandboxEntitlementFile != null)
           'CODE_SIGN_ENTITLEMENTS=${disabledSandboxEntitlementFile.path}',
-        // Add architecture-specific build settings when building for a specific arch
-        if (activeArch != null) ...<String>[
-          'ONLY_ACTIVE_ARCH=${onlyActiveArch ? 'YES' : 'NO'}',
-          'ARCHS=${activeArch.name}',
-        ],
+        // Pass EXCLUDED_ARCHS from Xcode project to xcodebuild command
+        // This fixes Swift Package Manager not respecting EXCLUDED_ARCHS from the project
+        if (excludedArches != null && excludedArches.trim().isNotEmpty)
+          'EXCLUDED_ARCHS=$excludedArches',
         ...environmentVariablesAsXcodeBuildSettings(globals.platform),
       ],
       trace: true,

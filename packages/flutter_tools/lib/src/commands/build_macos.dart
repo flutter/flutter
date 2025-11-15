@@ -25,13 +25,6 @@ class BuildMacosCommand extends BuildSubCommand {
           'This can be used in CI/CD process that create an archive to avoid '
           'performing duplicate work.',
     );
-    argParser.addOption(
-      'macos-arch',
-      allowed: <String>['arm64', 'x86_64'],
-      help: 'Target architecture for the macOS build. '
-          'If not specified, builds a universal binary containing both arm64 and x86_64.',
-      hide: !verboseHelp,
-    );
   }
 
   @override
@@ -65,15 +58,6 @@ class BuildMacosCommand extends BuildSubCommand {
       throwToolExit('"build macos" only supported on macOS hosts.');
     }
 
-    // Parse the macos-arch flag
-    DarwinArch? activeArch;
-    final String? archString = stringArg('macos-arch');
-    if (archString != null) {
-      activeArch = DarwinArch.values.firstWhere(
-        (DarwinArch arch) => arch.name == archString,
-      );
-    }
-
     await buildMacOS(
       flutterProject: project,
       buildInfo: buildInfo,
@@ -87,7 +71,6 @@ class BuildMacosCommand extends BuildSubCommand {
         analytics: analytics,
       ),
       usingCISystem: usingCISystem,
-      activeArch: activeArch,
     );
     return FlutterCommandResult.success();
   }
