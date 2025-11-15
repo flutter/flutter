@@ -58,8 +58,7 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
   @NonNull private final DartMessengerTaskQueue platformTaskQueue = new PlatformTaskQueue();
 
   @NonNull
-  private WeakHashMap<TaskQueue, DartMessengerTaskQueue> createdTaskQueues =
-      new WeakHashMap<TaskQueue, DartMessengerTaskQueue>();
+  private WeakHashMap<TaskQueue, DartMessengerTaskQueue> createdTaskQueues = new WeakHashMap<>();
 
   @NonNull private TaskQueueFactory taskQueueFactory;
 
@@ -158,10 +157,7 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
     @Override
     public void dispatch(@NonNull Runnable runnable) {
       queue.add(runnable);
-      executor.execute(
-          () -> {
-            flush();
-          });
+      executor.execute(this::flush);
     }
 
     private void flush() {
@@ -176,10 +172,7 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
           isRunning.set(false);
           if (!queue.isEmpty()) {
             // Schedule the next event.
-            executor.execute(
-                () -> {
-                  flush();
-                });
+            executor.execute(this::flush);
           }
         }
       }
