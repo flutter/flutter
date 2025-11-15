@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_TYPOGRAPHER_FONT_H_
 #define FLUTTER_IMPELLER_TYPOGRAPHER_FONT_H_
 
+#include <cstdint>
 #include <memory>
 
 #include "fml/hash_combine.h"
