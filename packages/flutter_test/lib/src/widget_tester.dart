@@ -295,6 +295,20 @@ class TargetPlatformVariant extends TestVariant<TargetPlatform> {
   /// [TargetPlatform].
   TargetPlatformVariant.only(TargetPlatform platform) : values = <TargetPlatform>{platform};
 
+  /// Adds the supplied [TargetPlatform] value to the
+  /// [TargetPlatformVariant] and returns this.
+  TargetPlatformVariant and(TargetPlatform platform) {
+    values.add(platform);
+    return this;
+  }
+
+  /// Removes the supplied [TargetPlatform] value from the
+  /// [TargetPlatformVariant] and returns this.
+  TargetPlatformVariant except(TargetPlatform platform) {
+    values.remove(platform);
+    return this;
+  }
+
   @override
   final Set<TargetPlatform> values;
 

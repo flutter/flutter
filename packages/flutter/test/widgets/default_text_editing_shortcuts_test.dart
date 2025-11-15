@@ -1153,7 +1153,7 @@ void main() {
     // Press ^V.
     await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyV, control: true));
     expect(state.lastIntent, isA<PasteTextIntent>());
-  }, variant: TargetPlatformVariant.all());
+  }, variant: TargetPlatformVariant.desktop().except(TargetPlatform.macOS).and(TargetPlatform.android));
 
   testWidgets('Clipboard shortcuts (IBM CUA)', (WidgetTester tester) async {
     final FocusNode editable = FocusNode();
@@ -1181,7 +1181,7 @@ void main() {
     // Press Shift-Insert.
     await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.insert, shift: true));
     expect(state.lastIntent, isA<PasteTextIntent>());
-  }, variant: TargetPlatformVariant.all());
+  }, variant: TargetPlatformVariant.desktop().except(TargetPlatform.macOS).and(TargetPlatform.android));
 }
 
 class ActionSpy extends StatefulWidget {
@@ -1227,6 +1227,9 @@ class ActionSpyState extends State<ActionSpy> {
       onInvoke: _captureIntent,
     ),
     DeleteCharacterIntent: CallbackAction<DeleteCharacterIntent>(onInvoke: _captureIntent),
+
+    CopySelectionTextIntent: CallbackAction<CopySelectionTextIntent>(onInvoke: _captureIntent),
+    PasteTextIntent: CallbackAction<PasteTextIntent>(onInvoke: _captureIntent),
   };
 
   // ignore: use_setters_to_change_properties
