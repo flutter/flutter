@@ -499,63 +499,69 @@ void main() {
     expect(tooltipRenderParagraph.textDirection, TextDirection.ltr);
   });
 
-  // testWidgets('RawTooltip stays after long press', (WidgetTester tester) async {
-  //   await tester.pumpWidget(
-  //     WidgetsApp(
-  //       color: const Color(0x00000000),
-  //       pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-  //         return PageRouteBuilder<T>(
-  //           pageBuilder:
-  //               (
-  //                 BuildContext context,
-  //                 Animation<double> animation,
-  //                 Animation<double> secondaryAnimation,
-  //               ) => builder(context),
-  //         );
-  //       },
-  //       home: Center(
-  //         child: RawTooltip(
-  //           semanticsTooltip: tooltipText,
-  //           tooltipBuilder: (BuildContext context, Animation<double> animation) =>
-  //               const Text(tooltipText),
-  //           verticalOffset: 24.0,
-  //           child: const SizedBox(height: 100, width: 100),
-  //         ),
-  //       ),
-  //     ),
-  //   );
+  testWidgets('RawTooltip stays after long press', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0x00000000),
+        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+          return PageRouteBuilder<T>(
+            pageBuilder:
+                (
+                  BuildContext context,
+                  Animation<double> animation,
+                  Animation<double> secondaryAnimation,
+                ) => builder(context),
+          );
+        },
+        home: Center(
+          child: RawTooltip(
+            semanticsTooltip: tooltipText,
+            tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+                const Text(tooltipText),
+            positionDelegate: (TooltipPositionContext context) => positionDependentBox(
+              size: context.overlaySize,
+              childSize: context.tooltipSize,
+              target: context.target,
+              preferBelow: context.preferBelow,
+              verticalOffset: 24.0,
+            ),
+            child: const SizedBox(height: 100, width: 100),
+          ),
+        ),
+      ),
+    );
 
-  //   final Finder tooltip = find.byType(RawTooltip);
-  //   TestGesture gesture = await tester.startGesture(tester.getCenter(tooltip));
+    final Finder tooltip = find.byType(RawTooltip);
+    TestGesture gesture = await tester.startGesture(tester.getCenter(tooltip));
 
-  //   // long press reveals tooltip
-  //   await tester.pump(kLongPressTimeout);
-  //   await tester.pump(const Duration(milliseconds: 10));
-  //   expect(find.text(tooltipText), findsOneWidget);
-  //   await gesture.up();
+    // long press reveals tooltip
+    await tester.pump(kLongPressTimeout);
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text(tooltipText), findsOneWidget);
+    await gesture.up();
 
-  //   // tap (down, up) gesture hides tooltip, since its not
-  //   // a long press
-  //   await tester.tap(tooltip);
-  //   await tester.pump();
-  //   await tester.pumpAndSettle();
-  //   expect(find.text(tooltipText), findsNothing);
+    // tap (down, up) gesture hides tooltip, since its not
+    // a long press
+    await tester.tap(tooltip);
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
 
-  //   // long press once more
-  //   gesture = await tester.startGesture(tester.getCenter(tooltip));
-  //   await tester.pump();
-  //   await tester.pump(const Duration(milliseconds: 300));
-  //   expect(find.text(tooltipText), findsNothing);
+    // long press once more
+    gesture = await tester.startGesture(tester.getCenter(tooltip));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text(tooltipText), findsNothing);
 
-  //   await tester.pump(kLongPressTimeout);
-  //   await tester.pump(const Duration(milliseconds: 10));
-  //   expect(find.text(tooltipText), findsOneWidget);
+    await tester.pump(kLongPressTimeout);
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text(tooltipText), findsOneWidget);
 
-  //   // keep holding the long press, should still show tooltip
-  //   await tester.pump(kLongPressTimeout);
-  //   expect(find.text(tooltipText), findsOneWidget);
-  //   await gesture.up();
-  // });
+    // keep holding the long press, should still show tooltip
+    await tester.pump(kLongPressTimeout);
+    expect(find.text(tooltipText), findsOneWidget);
+    await gesture.up();
+  });
 
   testWidgets('RawTooltip dismiss countdown begins on long press release', (
     WidgetTester tester,
