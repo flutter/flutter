@@ -54,12 +54,22 @@ class RepeatingAnimationBuilder<T extends Object> extends StatefulWidget {
     this.child,
   });
 
-  /// The animatable to drive repeatedly. Typically this is a [Tween] or a
-  /// [TweenSequence], but any [Animatable] that produces values of type [T]
-  /// is accepted.
+  /// The animatable to drive repeatedly.
+  ///
+  /// Typically this is a [Tween] or a [TweenSequence], but any [Animatable]
+  /// that produces values of type [T] is accepted.
   final Animatable<T> animatable;
 
   /// The duration of the animation.
+  ///
+  /// If [repeatMode] is [RepeatMode.restart], this is the
+  /// duration of the entire animation sequence from 0.0 to 1.0.
+  ///
+  /// If [repeatMode] is [RepeatMode.reverse], both the
+  /// forward segment (0.0 to 1.0) and the backward segment
+  /// (1.0 to 0.0) will each take this duration separately.
+  /// The total time for one complete forward-and-reverse cycle
+  /// will be twice this value.
   final Duration duration;
 
   /// The curve applied to the animation input before it is passed to the
@@ -79,6 +89,17 @@ class RepeatingAnimationBuilder<T extends Object> extends StatefulWidget {
   final ValueWidgetBuilder<T> builder;
 
   /// An optional widget to pass to the builder.
+  ///
+  /// If a builder callback's return value contains a subtree that does not
+  /// depend on the animation, it's more efficient to build that subtree once
+  /// instead of rebuilding it on every animation tick.
+  ///
+  /// If the pre-built subtree is passed as the child parameter, the
+  /// [RepeatingAnimationBuilder] will pass it back to the [builder]
+  /// function so that it can be incorporated into the build.
+  ///
+  /// Using this pre-built child is entirely optional, but can improve
+  /// performance significantly in some cases and is therefore a good practice.
   final Widget? child;
 
   /// How the animation behaves after reaching 1.0.

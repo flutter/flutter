@@ -13,7 +13,6 @@ import 'package:flutter/animation.dart';
 
 import 'framework.dart';
 import 'implicit_animations.dart';
-import 'transitions.dart';
 import 'value_listenable_builder.dart';
 
 /// [Widget] builder that animates a property of a [Widget] to a target value
