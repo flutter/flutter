@@ -185,7 +185,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
           const DeleteToLineBreakIntent(forward: true),
     },
 
-    SingleActivator(LogicalKeyboardKey.delete): const DeleteCharacterIntent(
+    const SingleActivator(LogicalKeyboardKey.delete): const DeleteCharacterIntent(
       forward: true,
     ),
 
