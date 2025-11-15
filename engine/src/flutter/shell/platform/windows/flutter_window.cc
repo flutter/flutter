@@ -517,7 +517,7 @@ FlutterWindow::HandleMessage(UINT const message,
                              WPARAM const wparam,
                              LPARAM const lparam) noexcept {
   LPARAM result_lparam = lparam;
-  int xPos = 0, yPos = 0;
+  int x_pos = 0, y_pos = 0;
   UINT width = 0, height = 0;
   UINT button_pressed = 0;
   FlutterPointerDeviceKind device_kind;
@@ -547,7 +547,7 @@ FlutterWindow::HandleMessage(UINT const message,
     case WM_POINTERLEAVE: {
       x_pos = GET_X_LPARAM(lparam);
       y_pos = GET_Y_LPARAM(lparam);
-      auto x = static_cast<double>(x_ppos);
+      auto x = static_cast<double>(x_pos);
       auto y = static_cast<double>(y_pos);
       auto pointerId = GET_POINTERID_WPARAM(wparam);
       POINTER_INFO pointerInfo;
@@ -598,10 +598,10 @@ FlutterWindow::HandleMessage(UINT const message,
       if (device_kind == kFlutterPointerDeviceKindMouse) {
         TrackMouseLeaveEvent(window_handle_);
 
-        xPos = GET_X_LPARAM(lparam);
-        yPos = GET_Y_LPARAM(lparam);
-        mouse_x_ = static_cast<double>(xPos);
-        mouse_y_ = static_cast<double>(yPos);
+        x_pos = GET_X_LPARAM(lparam);
+        y_pos = GET_Y_LPARAM(lparam);
+        mouse_x_ = static_cast<double>(x_pos);
+        mouse_y_ = static_cast<double>(y_pos);
 
         int mods = 0;
         if (wparam & MK_CONTROL) {
@@ -664,9 +664,9 @@ FlutterWindow::HandleMessage(UINT const message,
       if (message == WM_XBUTTONDOWN) {
         button_pressed = GET_XBUTTON_WPARAM(wparam);
       }
-      xPos = GET_X_LPARAM(lparam);
-      yPos = GET_Y_LPARAM(lparam);
-      OnPointerDown(static_cast<double>(xPos), static_cast<double>(yPos),
+      x_pos = GET_X_LPARAM(lparam);
+      y_pos = GET_Y_LPARAM(lparam);
+      OnPointerDown(static_cast<double>(x_pos), static_cast<double>(y_pos),
                     device_kind, kDefaultPointerDeviceId, button_pressed,
                     /*rotation=*/0, /*pressure=*/0);
       break;
@@ -686,9 +686,9 @@ FlutterWindow::HandleMessage(UINT const message,
       if (message == WM_XBUTTONUP) {
         button_pressed = GET_XBUTTON_WPARAM(wparam);
       }
-      xPos = GET_X_LPARAM(lparam);
-      yPos = GET_Y_LPARAM(lparam);
-      OnPointerUp(static_cast<double>(xPos), static_cast<double>(yPos),
+      x_pos = GET_X_LPARAM(lparam);
+      y_pos = GET_Y_LPARAM(lparam);
+      OnPointerUp(static_cast<double>(x_pos), static_cast<double>(y_pos),
                   device_kind, kDefaultPointerDeviceId, button_pressed);
       break;
     case WM_MOUSEWHEEL:
