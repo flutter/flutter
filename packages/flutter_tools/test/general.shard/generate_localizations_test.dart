@@ -1235,6 +1235,7 @@ class AppLocalizationsEn extends AppLocalizations {
         templateArbFileName: 'pt.arb',
         outputFileString: defaultOutputFileString,
         classNameString: defaultClassNameString,
+        projectPathString: fs.currentDirectory.path,
         logger: logger,
       )..loadResources();
 
