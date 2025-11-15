@@ -1067,8 +1067,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         Container(key: UniqueKey(), child: _postTestMessage),
       ); // Unmount any remaining widgets.
       await pump();
-      _restorationManager?.dispose();
-      _restorationManager = null;
       if (registerTestTextInput) {
         _testTextInput.unregister();
       }
