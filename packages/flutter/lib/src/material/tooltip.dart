@@ -501,6 +501,27 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     };
   }
 
+  Offset _getDefaultPositionDelegate(TooltipPositionContext context) {
+    final double effectiveVerticalOffset =
+        widget.verticalOffset ?? _tooltipTheme.verticalOffset ?? _defaultVerticalOffset;
+    final TooltipPositionContext resolvedContext = TooltipPositionContext(
+      target: context.target,
+      targetSize: context.targetSize,
+      tooltipSize: context.tooltipSize,
+      overlaySize: context.overlaySize,
+      verticalOffset: effectiveVerticalOffset,
+      preferBelow: context.preferBelow,
+    );
+    return widget.positionDelegate?.call(resolvedContext) ??
+        positionDependentBox(
+          size: context.overlaySize,
+          childSize: context.tooltipSize,
+          target: context.target,
+          verticalOffset: effectiveVerticalOffset,
+          preferBelow: context.preferBelow,
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
     final (TextStyle defaultTextStyle, BoxDecoration defaultDecoration) = switch (Theme.of(
@@ -537,18 +558,17 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
           ),
         ),
     };
-    final TooltipThemeData tooltipTheme = _tooltipTheme;
     final BoxConstraints defaultConstraints = BoxConstraints(
-      minHeight: widget.height ?? tooltipTheme.height ?? _getDefaultTooltipHeight(),
+      minHeight: widget.height ?? _tooltipTheme.height ?? _getDefaultTooltipHeight(),
     );
 
     final Widget tooltipBox = _TooltipBox(
-      constraints: widget.constraints ?? tooltipTheme.constraints ?? defaultConstraints,
-      textStyle: widget.textStyle ?? tooltipTheme.textStyle ?? defaultTextStyle,
-      textAlign: widget.textAlign ?? tooltipTheme.textAlign ?? _defaultTextAlign,
-      decoration: widget.decoration ?? tooltipTheme.decoration ?? defaultDecoration,
-      padding: widget.padding ?? tooltipTheme.padding ?? _getDefaultPadding(),
-      margin: widget.margin ?? tooltipTheme.margin ?? _defaultMargin,
+      constraints: widget.constraints ?? _tooltipTheme.constraints ?? defaultConstraints,
+      textStyle: widget.textStyle ?? _tooltipTheme.textStyle ?? defaultTextStyle,
+      textAlign: widget.textAlign ?? _tooltipTheme.textAlign ?? _defaultTextAlign,
+      decoration: widget.decoration ?? _tooltipTheme.decoration ?? defaultDecoration,
+      padding: widget.padding ?? _tooltipTheme.padding ?? _getDefaultPadding(),
+      margin: widget.margin ?? _tooltipTheme.margin ?? _defaultMargin,
       richMessage: widget.richMessage ?? TextSpan(text: widget.message),
     );
 
@@ -557,9 +577,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       semanticsTooltip: widget.message ?? widget.richMessage?.toPlainText() ?? '',
       tooltipBuilder: (BuildContext context, Animation<double> animation) =>
           FadeTransition(opacity: animation, child: tooltipBox),
-      verticalOffset:
-          widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset,
-      preferBelow: widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow,
+      preferBelow: widget.preferBelow ?? _tooltipTheme.preferBelow ?? _defaultPreferBelow,
       excludeFromSemantics:
           widget.excludeFromSemantics ??
           _tooltipTheme.excludeFromSemantics ??
@@ -574,7 +592,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       mouseCursor: widget.mouseCursor,
       ignorePointer: widget.ignorePointer ?? widget.message != null,
       exitDuration: widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultExitDuration,
-      positionDelegate: widget.positionDelegate,
+      positionDelegate: _getDefaultPositionDelegate,
       child: widget.child ?? const SizedBox.shrink(),
     );
   }

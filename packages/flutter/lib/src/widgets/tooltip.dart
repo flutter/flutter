@@ -77,6 +77,7 @@ class TooltipPositionContext {
     required this.tooltipSize,
     required this.verticalOffset,
     required this.preferBelow,
+    this.overlaySize = Size.infinite,
   });
 
   /// The center point of the target widget in the global coordinate system.
@@ -87,6 +88,9 @@ class TooltipPositionContext {
 
   /// The size of the tooltip itself.
   final Size tooltipSize;
+
+  /// The size of the overlay within which the tooltip is displayed.
+  final Size overlaySize;
 
   /// The configured vertical offset.
   final double verticalOffset;
@@ -106,12 +110,14 @@ class TooltipPositionContext {
         other.target == target &&
         other.targetSize == targetSize &&
         other.tooltipSize == tooltipSize &&
+        other.overlaySize == overlaySize &&
         other.verticalOffset == verticalOffset &&
         other.preferBelow == preferBelow;
   }
 
   @override
-  int get hashCode => Object.hash(target, targetSize, tooltipSize, verticalOffset, preferBelow);
+  int get hashCode =>
+      Object.hash(target, targetSize, tooltipSize, overlaySize, verticalOffset, preferBelow);
 }
 
 /// Overrides the visibility of descendant [RawTooltip] widgets.
@@ -245,7 +251,6 @@ class RawTooltip extends StatefulWidget {
     super.key,
     required this.semanticsTooltip,
     required this.tooltipBuilder,
-    this.verticalOffset = 0.0,
     this.preferBelow = true,
     this.excludeFromSemantics = false,
     this.enableTapToDismiss = true,
@@ -267,9 +272,6 @@ class RawTooltip extends StatefulWidget {
 
   ///
   final TooltipComponentBuilder tooltipBuilder;
-
-  ///
-  final double verticalOffset;
 
   ///
   final bool preferBelow;
@@ -349,7 +351,6 @@ class RawTooltip extends StatefulWidget {
         defaultValue: semanticsTooltip.isEmpty ? null : kNoDefaultValue,
       ),
     );
-    properties.add(DoubleProperty('vertical offset', verticalOffset, defaultValue: null));
     properties.add(
       FlagProperty(
         'position',
@@ -680,10 +681,9 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
       layoutInfo.childPaintTransform,
       layoutInfo.childSize.center(Offset.zero),
     );
-    final Size tooltipSize = layoutInfo.childSize;
 
-    // Keep the tooltip displayed if the overlay child is hovered.
-    final Widget result = _ExclusiveMouseRegion(
+    // Keep the tooltip visible while the overlay child is hovered.
+    final Widget tooltip = _ExclusiveMouseRegion(
       onEnter: _handleMouseEnter,
       onExit: _handleMouseExit,
       child: IgnorePointer(
@@ -691,14 +691,20 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
         child: widget.tooltipBuilder(context, _overlayAnimation),
       ),
     );
-    final Widget overlayChild = _TooltipOverlay(
-      target: target,
-      targetSize: tooltipSize,
-      verticalOffset: widget.verticalOffset,
-      preferBelow: widget.preferBelow,
-      positionDelegate: widget.positionDelegate,
-      tooltip: result,
+
+    final Widget overlayChild = Positioned.fill(
+      bottom: MediaQuery.maybeViewInsetsOf(context)?.bottom ?? 0.0,
+      child: CustomSingleChildLayout(
+        delegate: _TooltipPositionDelegate(
+          target: target,
+          targetSize: layoutInfo.childSize,
+          preferBelow: widget.preferBelow,
+          positionDelegate: widget.positionDelegate,
+        ),
+        child: tooltip,
+      ),
     );
+
     return SelectionContainer.maybeOf(context) == null
         ? overlayChild
         : SelectionContainer.disabled(child: overlayChild);
@@ -759,41 +765,6 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
   }
 }
 
-class _TooltipOverlay extends StatelessWidget {
-  const _TooltipOverlay({
-    required this.target,
-    required this.targetSize,
-    required this.verticalOffset,
-    required this.preferBelow,
-    required this.positionDelegate,
-    required this.tooltip,
-  });
-
-  final Offset target;
-  final Size targetSize;
-  final double verticalOffset;
-  final bool preferBelow;
-  final TooltipPositionDelegate? positionDelegate;
-  final Widget tooltip;
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned.fill(
-      bottom: MediaQuery.maybeViewInsetsOf(context)?.bottom ?? 0.0,
-      child: CustomSingleChildLayout(
-        delegate: _TooltipPositionDelegate(
-          target: target,
-          targetSize: targetSize,
-          verticalOffset: verticalOffset,
-          preferBelow: preferBelow,
-          positionDelegate: positionDelegate,
-        ),
-        child: tooltip,
-      ),
-    );
-  }
-}
-
 /// A delegate for computing the layout of a tooltip to be displayed above or
 /// below a target specified in the global coordinate system.
 class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
@@ -801,7 +772,6 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   _TooltipPositionDelegate({
     required this.target,
     required this.targetSize,
-    required this.verticalOffset,
     required this.preferBelow,
     this.positionDelegate,
   });
@@ -812,10 +782,6 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 
   /// The size of the target widget that triggers the tooltip.
   final Size targetSize;
-
-  /// The amount of vertical distance between the target and the displayed
-  /// tooltip.
-  final double verticalOffset;
 
   /// Whether the tooltip is displayed below its widget by default.
   ///
@@ -840,7 +806,8 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
           target: target,
           targetSize: targetSize,
           tooltipSize: childSize,
-          verticalOffset: verticalOffset,
+          overlaySize: size,
+          verticalOffset: 0.0,
           preferBelow: preferBelow,
         ),
       );
@@ -849,7 +816,6 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
       size: size,
       childSize: childSize,
       target: target,
-      verticalOffset: verticalOffset,
       preferBelow: preferBelow,
     );
   }
@@ -858,7 +824,6 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   bool shouldRelayout(_TooltipPositionDelegate oldDelegate) {
     return target != oldDelegate.target ||
         targetSize != oldDelegate.targetSize ||
-        verticalOffset != oldDelegate.verticalOffset ||
         preferBelow != oldDelegate.preferBelow ||
         positionDelegate != oldDelegate.positionDelegate;
   }
