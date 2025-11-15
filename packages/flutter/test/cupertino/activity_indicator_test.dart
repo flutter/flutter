@@ -213,6 +213,17 @@ void main() {
       );
     });
   });
+
+  testWidgets('CupertinoActivityIndicator does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(child: SizedBox.shrink(child: CupertinoActivityIndicator())),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoActivityIndicator)), Size.zero);
+  });
 }
 
 Widget buildCupertinoActivityIndicator([bool? animating]) {
