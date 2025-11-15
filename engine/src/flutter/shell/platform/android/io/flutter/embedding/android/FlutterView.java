@@ -1019,9 +1019,7 @@ public class FlutterView extends FrameLayout
       }
     } catch (IllegalAccessException exception) {
       return null;
-    } catch (InvocationTargetException exception) {
-      return null;
-    }
+
     if (currentView instanceof ViewGroup) {
       for (int i = 0; i < ((ViewGroup) currentView).getChildCount(); i++) {
         View view =
