@@ -1127,61 +1127,91 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('Clipboard shortcuts (Xerox/Apple)', (WidgetTester tester) async {
-    final FocusNode editable = FocusNode();
-    addTearDown(editable.dispose);
-    final FocusNode spy = FocusNode();
-    addTearDown(spy.dispose);
+  testWidgets(
+    'Clipboard shortcuts (Xerox/Apple)',
+    (WidgetTester tester) async {
+      final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
+      final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
 
-    await tester.pumpWidget(
-      buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
-    );
-    spy.requestFocus();
-    await tester.pump();
-    final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
+      await tester.pumpWidget(
+        buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
+      );
+      spy.requestFocus();
+      await tester.pump();
+      final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
 
-    // Press ^X.
-    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyX, control: true));
-    expect(state.lastIntent, isA<CopySelectionTextIntent>());
-    expect((state.lastIntent! as CopySelectionTextIntent).collapseSelection, true);
+      // Press ^X.
+      await sendKeyCombination(
+        tester,
+        const SingleActivator(LogicalKeyboardKey.keyX, control: true),
+      );
+      expect(state.lastIntent, isA<CopySelectionTextIntent>());
+      expect((state.lastIntent! as CopySelectionTextIntent).collapseSelection, true);
 
-    // Press ^C.
-    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
-    expect(state.lastIntent, isA<CopySelectionTextIntent>());
-    expect((state.lastIntent! as CopySelectionTextIntent).collapseSelection, false);
+      // Press ^C.
+      await sendKeyCombination(
+        tester,
+        const SingleActivator(LogicalKeyboardKey.keyC, control: true),
+      );
+      expect(state.lastIntent, isA<CopySelectionTextIntent>());
+      expect((state.lastIntent! as CopySelectionTextIntent).collapseSelection, false);
 
-    // Press ^V.
-    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyV, control: true));
-    expect(state.lastIntent, isA<PasteTextIntent>());
-  }, variant: TargetPlatformVariant.desktop().and(TargetPlatform.android).except(TargetPlatform.macOS));
+      // Press ^V.
+      await sendKeyCombination(
+        tester,
+        const SingleActivator(LogicalKeyboardKey.keyV, control: true),
+      );
+      expect(state.lastIntent, isA<PasteTextIntent>());
+    },
+    variant: TargetPlatformVariant.desktop()
+        .and(TargetPlatform.android)
+        .except(TargetPlatform.macOS),
+  );
 
-  testWidgets('Clipboard shortcuts (IBM CUA)', (WidgetTester tester) async {
-    final FocusNode editable = FocusNode();
-    addTearDown(editable.dispose);
-    final FocusNode spy = FocusNode();
-    addTearDown(spy.dispose);
+  testWidgets(
+    'Clipboard shortcuts (IBM CUA)',
+    (WidgetTester tester) async {
+      final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
+      final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
 
-    await tester.pumpWidget(
-      buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
-    );
-    spy.requestFocus();
-    await tester.pump();
-    final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
+      await tester.pumpWidget(
+        buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
+      );
+      spy.requestFocus();
+      await tester.pump();
+      final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
 
-    // Press Shift-Delete.
-    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.delete, shift: true));
-    expect(state.lastIntent, isA<CopySelectionTextIntent>());
-    expect((state.lastIntent! as CopySelectionTextIntent).collapseSelection, true);
+      // Press Shift-Delete.
+      await sendKeyCombination(
+        tester,
+        const SingleActivator(LogicalKeyboardKey.delete, shift: true),
+      );
+      expect(state.lastIntent, isA<CopySelectionTextIntent>());
+      expect((state.lastIntent! as CopySelectionTextIntent).collapseSelection, true);
 
-    // Press Ctrl-Insert.
-    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.insert, control: true));
-    expect(state.lastIntent, isA<CopySelectionTextIntent>());
-    expect((state.lastIntent! as CopySelectionTextIntent).collapseSelection, false);
+      // Press Ctrl-Insert.
+      await sendKeyCombination(
+        tester,
+        const SingleActivator(LogicalKeyboardKey.insert, control: true),
+      );
+      expect(state.lastIntent, isA<CopySelectionTextIntent>());
+      expect((state.lastIntent! as CopySelectionTextIntent).collapseSelection, false);
 
-    // Press Shift-Insert.
-    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.insert, shift: true));
-    expect(state.lastIntent, isA<PasteTextIntent>());
-  }, variant: TargetPlatformVariant.desktop().and(TargetPlatform.android).except(TargetPlatform.macOS));
+      // Press Shift-Insert.
+      await sendKeyCombination(
+        tester,
+        const SingleActivator(LogicalKeyboardKey.insert, shift: true),
+      );
+      expect(state.lastIntent, isA<PasteTextIntent>());
+    },
+    variant: TargetPlatformVariant.desktop()
+        .and(TargetPlatform.android)
+        .except(TargetPlatform.macOS),
+  );
 }
 
 class ActionSpy extends StatefulWidget {
