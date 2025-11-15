@@ -7,7 +7,7 @@
 namespace flutter {
 namespace testing {
 
-MockTextInputManager::MockTextInputManager() : TextInputManager(){};
+MockTextInputManager::MockTextInputManager() : TextInputManager() {};
 
 MockTextInputManager::~MockTextInputManager() = default;
 

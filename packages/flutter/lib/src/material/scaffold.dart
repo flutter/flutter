@@ -198,23 +198,12 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       Queue<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>();
   AnimationController? _snackBarController;
   Timer? _snackBarTimer;
-  bool? _accessibleNavigation;
+  late bool _accessibleNavigation;
 
   @protected
   @override
   void didChangeDependencies() {
-    final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
-    // If we transition from accessible navigation to non-accessible navigation
-    // and there is a SnackBar that would have timed out that has already
-    // completed its timer, dismiss that SnackBar. If the timer hasn't finished
-    // yet, let it timeout as normal.
-    if ((_accessibleNavigation ?? false) &&
-        !accessibleNavigation &&
-        _snackBarTimer != null &&
-        !_snackBarTimer!.isActive) {
-      hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
-    }
-    _accessibleNavigation = accessibleNavigation;
+    _accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
     super.didChangeDependencies();
   }
 
@@ -453,7 +442,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       return;
     }
     final Completer<SnackBarClosedReason> completer = _snackBars.first._completer;
-    if (_accessibleNavigation!) {
+    if (_accessibleNavigation) {
       _snackBarController!.value = 0.0;
       completer.complete(reason);
     } else {
@@ -589,7 +578,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       return;
     }
     final Completer<MaterialBannerClosedReason> completer = _materialBanners.first._completer;
-    if (_accessibleNavigation!) {
+    if (_accessibleNavigation) {
       _materialBannerController!.value = 0.0;
       completer.complete(reason);
     } else {
@@ -629,7 +618,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
           _snackBarTimer = Timer(snackBar.duration, () {
             assert(_snackBarController!.isForwardOrCompleted);
             // Look up MediaQuery again in case the setting changed.
-            if (snackBar.action != null && MediaQuery.accessibleNavigationOf(context)) {
+            if (snackBar.persist) {
               return;
             }
             hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
@@ -1966,6 +1955,9 @@ class Scaffold extends StatefulWidget {
   /// If true then the height of the [appBar] will be extended by the height
   /// of the screen's status bar, i.e. the top padding for [MediaQuery].
   ///
+  /// If true, on iOS and macOS, tapping the status bar scrolls the app's
+  /// [PrimaryScrollController] to the top.
+  ///
   /// The default value of this property, like the default value of
   /// [AppBar.primary], is true.
   final bool primary;
@@ -2247,6 +2239,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///  * [ScaffoldState.openDrawer], which opens the [Scaffold.drawer] of a
   ///    [Scaffold].
   bool get isDrawerOpen => _drawerOpened.value;
+
+  /// Whether the [Scaffold.drawerBarrierDismissible] flag is set.
+  bool get isDrawerBarrierDismissible => widget.drawerBarrierDismissible;
 
   /// Whether the [Scaffold.endDrawer] is opened.
   ///
@@ -2752,8 +2747,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
   // iOS FEATURES - status bar tap, back gesture
 
-  // On iOS, tapping the status bar scrolls the app's primary scrollable to the
-  // top. We implement this by looking up the primary scroll controller and
+  // On iOS and macOS, if `primary` is true, tapping the status bar scrolls the app's primary scrollable
+  // to the top. We implement this by looking up the primary scroll controller and
   // scrolling it to the top when tapped.
   void _handleStatusBarTap() {
     final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(context);
@@ -3163,6 +3158,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     switch (themeData.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
+        if (!widget.primary) {
+          break;
+        }
         _addIfNonNull(
           children,
           GestureDetector(
@@ -3251,13 +3249,18 @@ class _DismissDrawerAction extends DismissAction {
 
   @override
   bool isEnabled(DismissIntent intent) {
-    return Scaffold.of(context).isDrawerOpen || Scaffold.of(context).isEndDrawerOpen;
+    final ScaffoldState scaffold = Scaffold.of(context);
+    return (scaffold.isDrawerOpen || scaffold.isEndDrawerOpen) &&
+        scaffold.isDrawerBarrierDismissible;
   }
 
   @override
   void invoke(DismissIntent intent) {
-    Scaffold.of(context).closeDrawer();
-    Scaffold.of(context).closeEndDrawer();
+    final ScaffoldState scaffold = Scaffold.of(context);
+    if (isEnabled(intent)) {
+      scaffold.closeDrawer();
+      scaffold.closeEndDrawer();
+    }
   }
 }
 

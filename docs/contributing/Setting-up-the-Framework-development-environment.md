@@ -13,7 +13,7 @@
    Verify that `adb` is in your [PATH](https://en.wikipedia.org/wiki/PATH_(variable)) (that `which adb` prints sensible output).
 
    If you're
-   [also working on the Flutter engine](../../engine/src/flutter/docs/contributing/Setting-up-the-Engine-development-environment.md),
+   [also working on the Flutter engine](../../docs/engine/contributing/Setting-up-the-Engine-development-environment.md),
    you can use the copy of the Android platform tools in
    `.../engine/src/third_party/android_tools/sdk/platform-tools`.
 

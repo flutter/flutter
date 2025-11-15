@@ -25,6 +25,84 @@ import 'license_collector.dart';
 import 'package_graph.dart';
 import 'project.dart';
 
+class FlutterHookResult {
+  const FlutterHookResult({
+    required this.buildStart,
+    required this.buildEnd,
+    required this.dataAssets,
+    required this.dependencies,
+  });
+
+  FlutterHookResult.empty()
+    : this(
+        buildStart: DateTime.fromMillisecondsSinceEpoch(0),
+        buildEnd: DateTime.fromMillisecondsSinceEpoch(0),
+        dataAssets: <HookAsset>[],
+        dependencies: <Uri>[],
+      );
+
+  final List<HookAsset> dataAssets;
+
+  /// The timestamp at which we start a build - so the timestamp of the inputs.
+  final DateTime buildStart;
+
+  /// The timestamp at which we finish a build - so the timestamp of the
+  /// outputs.
+  final DateTime buildEnd;
+
+  /// The dependencies of the build are used to check if the build needs to be
+  /// rerun.
+  final List<Uri> dependencies;
+
+  /// Whether caller may need to re-run the Dart build.
+  bool hasAnyModifiedFiles(FileSystem fileSystem) =>
+      _wasAnyFileModifiedSince(fileSystem, buildStart, dependencies);
+
+  /// Whether the files produced by the build are up-to-date.
+  ///
+  /// NOTICE: The build itself may be up-to-date but the output may not be (as
+  /// the output may be existing on disc and not be produced by the build
+  /// itself - in which case we may not need to re-build if the file changes,
+  /// but we may need to make a new asset bundle with the modified file).
+  bool isOutputDirty(FileSystem fileSystem) => _wasAnyFileModifiedSince(
+    fileSystem,
+    buildEnd,
+    dataAssets.map((HookAsset e) => e.file).toList(),
+  );
+
+  static bool _wasAnyFileModifiedSince(FileSystem fileSystem, DateTime since, List<Uri> uris) {
+    for (final uri in uris) {
+      final DateTime modified = fileSystem.statSync(uri.toFilePath()).modified;
+      if (modified.isAfter(since)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @override
+  String toString() {
+    return dataAssets.toString();
+  }
+}
+
+/// A convenience class to wrap native assets
+///
+/// When translating from a `DartHooksResult` to a [FlutterHookResult], where we
+/// need to have different classes to not import `isolated/` stuff.
+class HookAsset {
+  HookAsset({required this.file, required this.name, required this.package});
+
+  final Uri file;
+  final String name;
+  final String package;
+
+  @override
+  String toString() {
+    return 'HookAsset(file: $file, name: $name, package: $package)';
+  }
+}
+
 const defaultManifestPath = 'pubspec.yaml';
 
 const kFontManifestJson = 'FontManifest.json';
@@ -50,7 +128,7 @@ const kMaterialFonts = <Map<String, Object>>[
   },
 ];
 
-const kMaterialShaders = <String>['shaders/ink_sparkle.frag'];
+const kMaterialShaders = <String>['shaders/ink_sparkle.frag', 'shaders/stretch_effect.frag'];
 
 /// Injected factory class for spawning [AssetBundle] instances.
 abstract class AssetBundleFactory {
@@ -113,10 +191,11 @@ abstract class AssetBundle {
 
   /// Returns 0 for success; non-zero for failure.
   Future<int> build({
+    FlutterHookResult? flutterHookResult,
     String manifestPath = defaultManifestPath,
     required String packageConfigPath,
     bool deferredComponentsEnabled = false,
-    TargetPlatform? targetPlatform,
+    required TargetPlatform targetPlatform,
     String? flavor,
     bool includeAssetsFromDevDependencies = false,
   });
@@ -163,7 +242,8 @@ class ManifestAssetBundle implements AssetBundle {
        _platform = platform,
        _flutterRoot = flutterRoot,
        _splitDeferredAssets = splitDeferredAssets,
-       _licenseCollector = LicenseCollector(fileSystem: fileSystem);
+       _licenseCollector = LicenseCollector(fileSystem: fileSystem),
+       _lastHookResult = FlutterHookResult.empty();
 
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -188,6 +268,8 @@ class ManifestAssetBundle implements AssetBundle {
 
   DateTime? _lastBuildTimestamp;
 
+  FlutterHookResult _lastHookResult;
+
   // We assume the main asset is designed for a device pixel ratio of 1.0.
   static const _kAssetManifestBinFilename = 'AssetManifest.bin';
   static const _kAssetManifestBinJsonFilename = 'AssetManifest.bin.json';
@@ -206,13 +288,19 @@ class ManifestAssetBundle implements AssetBundle {
 
   @override
   bool needsBuild({String manifestPath = defaultManifestPath}) {
-    final DateTime? lastBuildTimestamp = _lastBuildTimestamp;
-    if (lastBuildTimestamp == null) {
+    if (!wasBuiltOnce() ||
+        // We need to re-run the Dart build.
+        _lastHookResult.hasAnyModifiedFiles(_fileSystem) ||
+        // We don't have to re-run the Dart build, but some files the Dart build
+        // wants us to bundle have changed contents.
+        _lastHookResult.isOutputDirty(_fileSystem)) {
       return true;
     }
+    final DateTime lastBuildTimestamp = _lastBuildTimestamp!;
 
     final FileStat manifestStat = _fileSystem.file(manifestPath).statSync();
-    if (manifestStat.type == FileSystemEntityType.notFound) {
+    if (manifestStat.type == FileSystemEntityType.notFound ||
+        manifestStat.modified.isAfter(lastBuildTimestamp)) {
       return true;
     }
 
@@ -221,23 +309,24 @@ class ManifestAssetBundle implements AssetBundle {
         return true; // directory was deleted.
       }
       for (final File file in directory.listSync().whereType<File>()) {
-        final DateTime dateTime = file.statSync().modified;
-        if (dateTime.isAfter(lastBuildTimestamp)) {
+        final DateTime lastModified = file.statSync().modified;
+        if (lastModified.isAfter(lastBuildTimestamp)) {
           return true;
         }
       }
     }
 
-    return manifestStat.modified.isAfter(lastBuildTimestamp);
+    return false;
   }
 
   @override
   Future<int> build({
+    FlutterHookResult? flutterHookResult,
     String manifestPath = defaultManifestPath,
     FlutterProject? flutterProject,
     required String packageConfigPath,
     bool deferredComponentsEnabled = false,
-    TargetPlatform? targetPlatform,
+    required TargetPlatform targetPlatform,
     String? flavor,
     bool includeAssetsFromDevDependencies = false,
   }) async {
@@ -256,6 +345,7 @@ class ManifestAssetBundle implements AssetBundle {
     // hang on hot reload, as the incremental dill files will never be copied to the
     // device.
     _lastBuildTimestamp = DateTime.now();
+    _lastHookResult = flutterHookResult ?? FlutterHookResult.empty();
     if (flutterManifest.isEmpty) {
       final ByteData emptyAssetManifest = const StandardMessageCodec().encodeMessage(
         <dynamic, dynamic>{},
@@ -312,6 +402,7 @@ class ManifestAssetBundle implements AssetBundle {
           assetBasePath,
           wildcardDirectories,
           flutterProject.directory,
+          targetPlatform: targetPlatform,
           flavor: flavor,
         );
     if (!_splitDeferredAssets || !deferredComponentsEnabled) {
@@ -418,9 +509,29 @@ class ManifestAssetBundle implements AssetBundle {
         );
       }
     }
+    for (final HookAsset dataAsset in flutterHookResult?.dataAssets ?? <HookAsset>[]) {
+      final Package package = packageConfig[dataAsset.package]!;
+      final Uri fileUri = dataAsset.file;
+
+      final String filePath = fileUri.toFilePath();
+
+      final asset = _Asset(
+        baseDir: _fileSystem.path.dirname(filePath),
+        relativeUri: Uri(path: _fileSystem.path.basename(filePath)),
+        entryUri: Uri.parse(_fileSystem.path.join('packages', dataAsset.package, dataAsset.name)),
+        package: package,
+      );
+      if (assetVariants.containsKey(asset)) {
+        _logger.printError(
+          'Conflicting assets: The asset "$asset" was declared in the pubspec and the hook.',
+        );
+        return 1;
+      }
+      assetVariants[asset] = <_Asset>[asset];
+    }
 
     // Save the contents of each image, image variant, and font
-    // asset in entries.
+    // asset in [entries].
     for (final _Asset asset in assetVariants.keys) {
       final File assetFile = asset.lookupAssetFile(_fileSystem);
       final List<_Asset> variants = assetVariants[asset]!;
@@ -606,7 +717,7 @@ class ManifestAssetBundle implements AssetBundle {
     }
   }
 
-  void _setLicenseIfChanged(String combinedLicenses, TargetPlatform? targetPlatform) {
+  void _setLicenseIfChanged(String combinedLicenses, TargetPlatform targetPlatform) {
     // On the web, don't compress the NOTICES file since the client doesn't have
     // dart:io to decompress it. So use the standard _setIfChanged to check if
     // the strings still match.
@@ -728,6 +839,7 @@ class ManifestAssetBundle implements AssetBundle {
     String assetBasePath,
     List<Uri> wildcardDirectories,
     Directory projectDirectory, {
+    required TargetPlatform targetPlatform,
     String? flavor,
   }) {
     final List<DeferredComponent>? components = flutterManifest.deferredComponents;
@@ -749,6 +861,7 @@ class ManifestAssetBundle implements AssetBundle {
             componentAssets,
             assetsEntry.uri,
             flavors: assetsEntry.flavors,
+            platforms: assetsEntry.platforms,
             transformers: assetsEntry.transformers,
           );
         } else {
@@ -760,13 +873,15 @@ class ManifestAssetBundle implements AssetBundle {
             componentAssets,
             assetsEntry.uri,
             flavors: assetsEntry.flavors,
+            platforms: assetsEntry.platforms,
             transformers: assetsEntry.transformers,
           );
         }
       }
 
       componentAssets.removeWhere(
-        (_Asset asset, List<_Asset> variants) => !asset.matchesFlavor(flavor),
+        (_Asset asset, List<_Asset> variants) =>
+            !asset.matchesFlavor(flavor) || !asset.matchesPlatform(targetPlatform),
       );
       deferredComponentsAssetVariants[component.name] = componentAssets;
     }
@@ -908,7 +1023,7 @@ class ManifestAssetBundle implements AssetBundle {
     FlutterManifest flutterManifest,
     List<Uri> wildcardDirectories,
     String assetBase,
-    TargetPlatform? targetPlatform, {
+    TargetPlatform targetPlatform, {
     String? packageName,
     Package? attributedPackage,
     required String? flavor,
@@ -929,6 +1044,7 @@ class ManifestAssetBundle implements AssetBundle {
           packageName: packageName,
           attributedPackage: attributedPackage,
           flavors: assetsEntry.flavors,
+          platforms: assetsEntry.platforms,
           transformers: assetsEntry.transformers,
         );
       } else {
@@ -942,6 +1058,7 @@ class ManifestAssetBundle implements AssetBundle {
           packageName: packageName,
           attributedPackage: attributedPackage,
           flavors: assetsEntry.flavors,
+          platforms: assetsEntry.platforms,
           transformers: assetsEntry.transformers,
         );
       }
@@ -956,10 +1073,39 @@ class ManifestAssetBundle implements AssetBundle {
         );
         return true;
       }
+      if (!asset.matchesPlatform(targetPlatform)) {
+        _logger.printTrace(
+          'Skipping assets entry "${asset.entryUri.path}" since '
+          'its configured platform(s) did not match the target platform.\n'
+          'Configured platforms: ${asset.platforms.join(', ')}\n'
+          'Target platform: ${targetPlatform.osName}\n',
+        );
+        return true;
+      }
       return false;
     });
 
     for (final Uri shaderUri in flutterManifest.shaders) {
+      for (final AssetsEntry assetEntry in flutterManifest.assets) {
+        final String assetPath = assetEntry.uri.path;
+        final String shaderPath = shaderUri.path;
+        if (assetPath == shaderPath) {
+          _logger.printError(
+            'Error: Shader "$shaderPath" is also defined as an asset. Shaders '
+            'should only be defined in the "shaders" section of the '
+            'pubspec.yaml, not in the "assets" section.',
+          );
+          return null;
+        }
+        if (assetPath.endsWith('/') && shaderPath.startsWith(assetPath)) {
+          _logger.printError(
+            'Error: Shader "$shaderPath" is included in the asset directory '
+            '"$assetPath". Shaders should only be defined in the "shaders" '
+            'section of the pubspec.yaml, not in the "assets" section.',
+          );
+          return null;
+        }
+      }
       _parseAssetFromFile(
         packageConfig,
         flutterManifest,
@@ -971,6 +1117,7 @@ class ManifestAssetBundle implements AssetBundle {
         attributedPackage: attributedPackage,
         assetKind: AssetKind.shader,
         flavors: <String>{},
+        platforms: <String>{},
         transformers: <AssetTransformerEntry>[],
       );
     }
@@ -986,6 +1133,7 @@ class ManifestAssetBundle implements AssetBundle {
           attributedPackage,
           assetKind: AssetKind.font,
           flavors: <String>{},
+          platforms: <String>{},
           transformers: <AssetTransformerEntry>[],
         );
         final File baseAssetFile = baseAsset.lookupAssetFile(_fileSystem);
@@ -1012,21 +1160,15 @@ class ManifestAssetBundle implements AssetBundle {
     String? packageName,
     Package? attributedPackage,
     required Set<String> flavors,
+    required Set<String> platforms,
     required List<AssetTransformerEntry> transformers,
   }) {
     final String directoryPath;
-    try {
-      directoryPath = _fileSystem.path.join(
-        assetBase,
-        assetUri.toFilePath(windows: _platform.isWindows),
-      );
-    } on UnsupportedError catch (e) {
-      throwToolExit(
-        'Unable to search for asset files in directory path "${assetUri.path}". '
-        'Please ensure that this entry in pubspec.yaml is a valid file path.\n'
-        'Error details:\n$e',
-      );
-    }
+    _ensureAssetPathIsValid(assetsBaseDir: assetBase, assetUri: assetUri);
+    directoryPath = _fileSystem.path.join(
+      assetBase,
+      assetUri.toFilePath(windows: _platform.isWindows),
+    );
 
     if (!_fileSystem.directory(directoryPath).existsSync()) {
       _logger.printError('Error: unable to find directory entry in pubspec.yaml: $directoryPath');
@@ -1051,6 +1193,7 @@ class ManifestAssetBundle implements AssetBundle {
         attributedPackage: attributedPackage,
         originUri: assetUri,
         flavors: flavors,
+        platforms: platforms,
         transformers: transformers,
       );
     }
@@ -1068,6 +1211,7 @@ class ManifestAssetBundle implements AssetBundle {
     Package? attributedPackage,
     AssetKind assetKind = AssetKind.regular,
     required Set<String> flavors,
+    required Set<String> platforms,
     required List<AssetTransformerEntry> transformers,
   }) {
     final _Asset asset = _resolveAsset(
@@ -1079,6 +1223,7 @@ class ManifestAssetBundle implements AssetBundle {
       assetKind: assetKind,
       originUri: originUri,
       flavors: flavors,
+      platforms: platforms,
       transformers: transformers,
     );
 
@@ -1102,6 +1247,7 @@ class ManifestAssetBundle implements AssetBundle {
             package: attributedPackage,
             kind: assetKind,
             flavors: flavors,
+            platforms: platforms,
             transformers: transformers,
           ),
         );
@@ -1182,6 +1328,27 @@ class ManifestAssetBundle implements AssetBundle {
     throwToolExit(errorMessage.toString());
   }
 
+  void _ensureAssetPathIsValid({required String assetsBaseDir, required Uri assetUri}) {
+    if (!assetUri.isScheme('file') && assetUri.scheme.isNotEmpty) {
+      throwToolExit(
+        'Asset path "$assetUri" has scheme "${assetUri.scheme}" and is not a valid file or '
+        'directory path. Please update this entry in the pubspec.yaml to point to a valid file '
+        'path.',
+      );
+    }
+    if (Uri.directory(
+          assetsBaseDir,
+          windows: _platform.isWindows,
+        ).resolveUri(assetUri).toFilePath(windows: _platform.isWindows) ==
+        assetUri.toFilePath(windows: _platform.isWindows)) {
+      throwToolExit(
+        '"${assetUri.toFilePath(windows: _platform.isWindows)}" is not a valid asset path. '
+        'Asset paths must be relative to the location of pubspec.yaml. Please update this entry '
+        'in the pubspec.yaml to use a relative path.',
+      );
+    }
+  }
+
   _Asset _resolveAsset(
     PackageConfig packageConfig,
     String assetsBaseDir,
@@ -1191,11 +1358,14 @@ class ManifestAssetBundle implements AssetBundle {
     Uri? originUri,
     AssetKind assetKind = AssetKind.regular,
     required Set<String> flavors,
+    required Set<String> platforms,
     required List<AssetTransformerEntry> transformers,
   }) {
-    final String assetPath = _fileSystem.path.fromUri(assetUri);
+    _ensureAssetPathIsValid(assetsBaseDir: assetsBaseDir, assetUri: assetUri);
     if (assetUri.pathSegments.first == 'packages' &&
-        !_fileSystem.isFileSync(_fileSystem.path.join(assetsBaseDir, assetPath))) {
+        !_fileSystem.isFileSync(
+          _fileSystem.path.join(assetsBaseDir, _fileSystem.path.fromUri(assetUri)),
+        )) {
       // The asset is referenced in the pubspec.yaml as
       // 'packages/PACKAGE_NAME/PATH/TO/ASSET .
       final _Asset? packageAsset = _resolvePackageAsset(
@@ -1205,6 +1375,7 @@ class ManifestAssetBundle implements AssetBundle {
         assetKind: assetKind,
         originUri: originUri,
         flavors: flavors,
+        platforms: platforms,
         transformers: transformers,
       );
       if (packageAsset != null) {
@@ -1224,6 +1395,7 @@ class ManifestAssetBundle implements AssetBundle {
       originUri: originUri,
       kind: assetKind,
       flavors: flavors,
+      platforms: platforms,
       transformers: transformers,
     );
   }
@@ -1235,6 +1407,7 @@ class ManifestAssetBundle implements AssetBundle {
     AssetKind assetKind = AssetKind.regular,
     Uri? originUri,
     Set<String>? flavors,
+    Set<String>? platforms,
     List<AssetTransformerEntry>? transformers,
   }) {
     assert(assetUri.pathSegments.first == 'packages');
@@ -1251,6 +1424,7 @@ class ManifestAssetBundle implements AssetBundle {
           kind: assetKind,
           originUri: originUri,
           flavors: flavors,
+          platforms: platforms,
           transformers: transformers,
         );
       }
@@ -1274,9 +1448,11 @@ class _Asset {
     required this.package,
     this.kind = AssetKind.regular,
     Set<String>? flavors,
+    Set<String>? platforms,
     List<AssetTransformerEntry>? transformers,
   }) : originUri = originUri ?? entryUri,
        flavors = flavors ?? const <String>{},
+       platforms = platforms ?? const <String>{},
        transformers = transformers ?? const <AssetTransformerEntry>[];
 
   final String baseDir;
@@ -1297,6 +1473,8 @@ class _Asset {
   final AssetKind kind;
 
   final Set<String> flavors;
+
+  final Set<String> platforms;
 
   final List<AssetTransformerEntry> transformers;
 
@@ -1326,11 +1504,20 @@ class _Asset {
     return flavors.contains(flavor);
   }
 
+  bool matchesPlatform(TargetPlatform targetPlatform) {
+    if (platforms.isEmpty || targetPlatform == TargetPlatform.tester) {
+      return true;
+    }
+
+    return platforms.contains(targetPlatform.osName);
+  }
+
   bool hasEquivalentFlavorsWith(_Asset other) {
-    final Set<String> assetFlavors = flavors.toSet();
-    final Set<String> otherFlavors = other.flavors.toSet();
-    return assetFlavors.length == otherFlavors.length &&
-        assetFlavors.every((String e) => otherFlavors.contains(e));
+    return setEquals(flavors, other.flavors);
+  }
+
+  bool hasEquivalentPlatformsWith(_Asset other) {
+    return setEquals(platforms, other.platforms);
   }
 
   @override
@@ -1349,11 +1536,13 @@ class _Asset {
         other.relativeUri == relativeUri &&
         other.entryUri == entryUri &&
         other.kind == kind &&
-        hasEquivalentFlavorsWith(other);
+        hasEquivalentFlavorsWith(other) &&
+        hasEquivalentPlatformsWith(other);
   }
 
   @override
-  int get hashCode => Object.hashAll(<Object>[baseDir, relativeUri, entryUri, kind, ...flavors]);
+  int get hashCode =>
+      Object.hashAll(<Object>[baseDir, relativeUri, entryUri, kind, ...flavors, ...platforms]);
 }
 
 // Given an assets directory like this:

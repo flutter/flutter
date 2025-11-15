@@ -6,14 +6,12 @@
 library;
 
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/web/chrome.dart';
-import 'package:flutter_tools/src/web/web_device.dart' show WebServerDevice;
-
+import 'package:flutter_tools/src/isolated/resident_web_runner.dart' show kNoClientConnectedMessage;
 import '../src/common.dart';
 import 'test_data/hot_reload_project.dart';
+import 'test_data/websocket_dwds_test_common.dart';
 import 'test_driver.dart';
 import 'test_utils.dart';
 import 'transition_test_utils.dart';
@@ -26,8 +24,6 @@ void testAll({List<String> additionalCommandArgs = const <String>[]}) {
   group('WebSocket DWDS connection'
       '${additionalCommandArgs.isEmpty ? '' : ' with args: $additionalCommandArgs'}', () {
     // Test configuration constants
-    const debugUrlTimeout = Duration(seconds: 20);
-    const appStartTimeout = Duration(seconds: 15);
     const hotReloadTimeout = Duration(seconds: 10);
 
     late Directory tempDir;
@@ -48,62 +44,17 @@ void testAll({List<String> additionalCommandArgs = const <String>[]}) {
     testWithoutContext(
       'hot reload with headless Chrome WebSocket connection',
       () async {
-        debugPrint('Starting WebSocket DWDS test with headless Chrome...');
+        debugPrint('Starting WebSocket DWDS test with headless Chrome for hot reload...');
 
-        // Set up listening for app output before starting
-        final stdout = StringBuffer();
-        final sawDebugUrl = Completer<String>();
-        final StreamSubscription<String> subscription = flutter.stdout.listen((String e) {
-          stdout.writeln(e);
-          // Extract the debug connection URL
-          if (e.contains('Waiting for connection from Dart debug extension at http://')) {
-            final debugUrlPattern = RegExp(
-              r'Waiting for connection from Dart debug extension at (http://[^\s]+)',
-            );
-            final Match? match = debugUrlPattern.firstMatch(e);
-            if (match != null && !sawDebugUrl.isCompleted) {
-              sawDebugUrl.complete(match.group(1)!);
-            }
-          }
-        });
+        // Set up WebSocket connection
+        final WebSocketDwdsTestSetup setup = await WebSocketDwdsTestUtils.setupWebSocketConnection(
+          flutter,
+          additionalCommandArgs: additionalCommandArgs,
+        );
 
-        io.Process? chromeProcess;
         try {
-          // Step 1: Start Flutter app with web-server device (will wait for debug connection)
-          debugPrint('Step 1: Starting Flutter app with web-server device...');
-          // Start the app but don't wait for it to complete - it won't complete until Chrome connects
-          final Future<void> appStartFuture = runFlutterWithWebServerDevice(
-            flutter,
-            additionalCommandArgs: [...additionalCommandArgs, '--no-web-resources-cdn'],
-          );
-
-          // Step 2: Wait for DWDS debug URL to be available
-          debugPrint('Step 2: Waiting for DWDS debug service URL...');
-          final String debugUrl = await sawDebugUrl.future.timeout(
-            debugUrlTimeout,
-            onTimeout: () {
-              throw Exception('DWDS debug URL not found - app may not have started correctly');
-            },
-          );
-          debugPrint('✓ DWDS debug service available at: $debugUrl');
-
-          // Step 3: Launch headless Chrome to connect to DWDS
-          debugPrint('Step 3: Launching headless Chrome to connect to DWDS...');
-          chromeProcess = await _launchHeadlessChrome(debugUrl);
-          debugPrint('✓ Headless Chrome launched and connecting to DWDS');
-
-          // Step 4: Wait for app to start (Chrome connection established)
-          debugPrint('Step 4: Waiting for Flutter app to start after Chrome connection...');
-          await appStartFuture.timeout(
-            appStartTimeout,
-            onTimeout: () {
-              throw Exception('App startup did not complete after Chrome connection');
-            },
-          );
-          debugPrint('✓ Flutter app started successfully with WebSocket connection');
-
-          // Step 5: Test hot reload functionality
-          debugPrint('Step 5: Testing hot reload with WebSocket connection...');
+          // Test hot reload functionality
+          debugPrint('Testing hot reload with WebSocket connection...');
           await flutter.hotReload().timeout(
             hotReloadTimeout,
             onTimeout: () {
@@ -114,80 +65,86 @@ void testAll({List<String> additionalCommandArgs = const <String>[]}) {
           // Give some time for logs to capture
           await Future<void>.delayed(const Duration(seconds: 2));
 
-          final output = stdout.toString();
+          final output = setup.stdout.toString();
           expect(output, contains('Reloaded'), reason: 'Hot reload should complete successfully');
           debugPrint('✓ Hot reload completed successfully with WebSocket connection');
 
           // Verify the correct infrastructure was used
-          expect(
-            output,
-            contains('Waiting for connection from Dart debug extension'),
-            reason: 'Should wait for debug connection (WebSocket infrastructure)',
-          );
-          expect(output, contains('web-server'), reason: 'Should use web-server device');
+          WebSocketDwdsTestUtils.verifyWebSocketInfrastructure(output);
 
           debugPrint('✓ WebSocket DWDS test completed successfully');
           debugPrint('✓ Verified: web-server device + DWDS + WebSocket connection + hot reload');
         } finally {
-          await _cleanupResources(chromeProcess, subscription);
+          await cleanupWebSocketTestResources(setup.chromeProcess, setup.subscription);
+        }
+      },
+      skip: !platform.isMacOS, // Skip on non-macOS platforms where Chrome paths may differ
+    );
+
+    testWithoutContext(
+      'hot reload gracefully handles closed browser (no clients available)',
+      () async {
+        debugPrint('Starting test for no clients available scenario...');
+
+        // Set up WebSocket connection
+        final WebSocketDwdsTestSetup setup = await WebSocketDwdsTestUtils.setupWebSocketConnection(
+          flutter,
+          additionalCommandArgs: additionalCommandArgs,
+        );
+
+        try {
+          // First, verify hot reload works with browser connected
+          debugPrint('Verifying initial hot reload with browser connected...');
+          await flutter.hotReload().timeout(
+            hotReloadTimeout,
+            onTimeout: () {
+              throw Exception('Initial hot reload timed out');
+            },
+          );
+
+          await Future<void>.delayed(const Duration(seconds: 1));
+          final initialOutput = setup.stdout.toString();
+          expect(initialOutput, contains('Reloaded'), reason: 'Initial hot reload should succeed');
+          debugPrint('✓ Initial hot reload succeeded');
+
+          // Close the browser to simulate no clients available
+          debugPrint('Closing browser to simulate no clients available...');
+          setup.chromeProcess.kill();
+          await setup.chromeProcess.exitCode;
+          debugPrint('✓ Browser closed');
+
+          // Give DWDS time to detect the disconnection
+          await Future<void>.delayed(const Duration(seconds: 2));
+
+          // Attempt hot reload with no browser connected
+          debugPrint('Attempting hot reload with no browser connected...');
+          await flutter.hotReload().timeout(
+            hotReloadTimeout,
+            onTimeout: () {
+              throw Exception('Hot reload with no clients timed out');
+            },
+          );
+
+          // Give some time for logs to capture
+          await Future<void>.delayed(const Duration(seconds: 2));
+
+          final output = setup.stdout.toString();
+
+          // Verify the graceful handling message
+          expect(
+            output,
+            contains(kNoClientConnectedMessage),
+            reason: 'Should show no client connected message',
+          );
+
+          debugPrint('✓ Hot reload handled no clients gracefully');
+          debugPrint('✓ Test completed: Verified graceful handling when browser is closed');
+        } finally {
+          // Note: Chrome process is already killed in the test, so just cancel subscription
+          await setup.subscription.cancel();
         }
       },
       skip: !platform.isMacOS, // Skip on non-macOS platforms where Chrome paths may differ
     );
   });
 }
-
-/// Launches headless Chrome with the given debug URL.
-/// Uses findChromeExecutable to locate Chrome on the current platform.
-Future<io.Process> _launchHeadlessChrome(String debugUrl) async {
-  const chromeArgs = [
-    '--headless',
-    '--disable-gpu',
-    '--no-sandbox',
-    '--disable-extensions',
-    '--disable-dev-shm-usage',
-    '--remote-debugging-port=0',
-  ];
-
-  final String chromePath = findChromeExecutable(platform, fileSystem);
-
-  try {
-    return await io.Process.start(chromePath, [...chromeArgs, debugUrl]);
-  } on Exception catch (e) {
-    throw Exception(
-      'Could not launch Chrome at $chromePath: $e. Please ensure Chrome is installed.',
-    );
-  }
-}
-
-/// Cleans up test resources (Chrome process and stdout subscription).
-Future<void> _cleanupResources(
-  io.Process? chromeProcess,
-  StreamSubscription<String> subscription,
-) async {
-  if (chromeProcess != null) {
-    try {
-      chromeProcess.kill();
-      await chromeProcess.exitCode;
-      debugPrint('Chrome process cleaned up');
-    } on Exception catch (e) {
-      debugPrint('Warning: Failed to clean up Chrome process: $e');
-    }
-  }
-  await subscription.cancel();
-}
-
-// Helper to run flutter with web-server device using WebSocket connection.
-Future<void> runFlutterWithWebServerDevice(
-  FlutterRunTestDriver flutter, {
-  bool verbose = false,
-  bool withDebugger = true, // Enable debugger by default for WebSocket connection
-  bool startPaused = false, // Don't start paused for this test
-  List<String> additionalCommandArgs = const <String>[],
-}) => flutter.run(
-  verbose: verbose,
-  withDebugger: withDebugger, // Enable debugger to establish WebSocket connection
-  startPaused: startPaused, // Let the app start normally after debugger connects
-  device: WebServerDevice.kWebServerDeviceId,
-  additionalCommandArgs: additionalCommandArgs,
-);

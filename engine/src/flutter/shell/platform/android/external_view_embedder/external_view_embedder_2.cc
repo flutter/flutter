@@ -72,15 +72,23 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
 
   if (!FrameHasPlatformLayers()) {
     frame->Submit();
-    // If the previous frame had platform views, hide the overlay surface.
-    if (previous_frame_view_count_ > 0) {
-      jni_facade_->hideOverlaySurface2();
-    }
-    jni_facade_->applyTransaction();
+    task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
+        [this, jni_facade = jni_facade_,
+         views_visible_last_frame = views_visible_last_frame_]() {
+          // This pointer is guaranteed to not be dangling as long as
+          // DestroySurfaces is called before the embedder is deleted. See
+          // https://github.com/flutter/flutter/pull/176742#discussion_r2415229396.
+          this->HideOverlayLayerIfNeeded();
+          for (int64_t view_id : views_visible_last_frame) {
+            jni_facade->hidePlatformView2(view_id);
+          }
+
+          jni_facade->applyTransaction();
+        }));
+    views_visible_last_frame_.clear();
     return;
   }
 
-  bool prev_frame_no_platform_views = previous_frame_view_count_ == 0;
   std::unordered_map<int64_t, DlRect> view_rects;
   for (auto platform_id : composition_order_) {
     view_rects[platform_id] = GetViewRect(platform_id, view_params_);
@@ -146,20 +154,28 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
       overlay_canvas->RestoreToCount(restore_count);
     }
   }
+  bool overlay_layer_has_content_this_frame_;
   if (overlay_frame != nullptr) {
     overlay_frame->set_submit_info({.frame_boundary = false});
     overlay_frame->Submit();
+    overlay_layer_has_content_this_frame_ = true;
+  } else {
+    overlay_layer_has_content_this_frame_ = false;
   }
-  frame->Submit();
 
+  frame->Submit();
   task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
       [&, composition_order = composition_order_, view_params = view_params_,
        jni_facade = jni_facade_, device_pixel_ratio = device_pixel_ratio_,
-       slices = std::move(slices_), prev_frame_no_platform_views]() -> void {
+       slices = std::move(slices_),
+       views_visible_last_frame = views_visible_last_frame_,
+       overlay_layer_has_content_this_frame_]() mutable -> void {
         jni_facade->swapTransaction();
 
-        if (prev_frame_no_platform_views) {
-          jni_facade_->showOverlaySurface2();
+        if (overlay_layer_has_content_this_frame_) {
+          ShowOverlayLayerIfNeeded();
+        } else {
+          HideOverlayLayerIfNeeded();
         }
 
         for (int64_t view_id : composition_order) {
@@ -175,9 +191,20 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
               params.sizePoints().height * device_pixel_ratio,
               params.mutatorsStack()  //
           );
+          // Remove from views visible last frame, so we can hide the rest.
+          views_visible_last_frame.erase(view_id);
         }
+        // Hide views that were visible last frame, but not in this frame.
+        for (int64_t view_id : views_visible_last_frame) {
+          jni_facade->hidePlatformView2(view_id);
+        }
+
         jni_facade_->onEndFrame2();
       }));
+
+  views_visible_last_frame_.clear();
+  views_visible_last_frame_.insert(composition_order_.begin(),
+                                   composition_order_.end());
 }
 
 // |ExternalViewEmbedder|
@@ -197,8 +224,6 @@ DlCanvas* AndroidExternalViewEmbedder2::GetRootCanvas() {
 }
 
 void AndroidExternalViewEmbedder2::Reset() {
-  previous_frame_view_count_ = composition_order_.size();
-
   composition_order_.clear();
   slices_.clear();
 }
@@ -257,6 +282,21 @@ void AndroidExternalViewEmbedder2::DestroySurfaces() {
                                       latch.Signal();
                                     });
   latch.Wait();
+  overlay_layer_is_shown_.store(false);
+}
+
+void AndroidExternalViewEmbedder2::ShowOverlayLayerIfNeeded() {
+  if (!overlay_layer_is_shown_.load()) {
+    jni_facade_->showOverlaySurface2();
+    overlay_layer_is_shown_.store(true);
+  }
+}
+
+void AndroidExternalViewEmbedder2::HideOverlayLayerIfNeeded() {
+  if (overlay_layer_is_shown_.load()) {
+    jni_facade_->hideOverlaySurface2();
+    overlay_layer_is_shown_.store(false);
+  }
 }
 
 }  // namespace flutter

@@ -125,16 +125,16 @@ bool ConicalGradientContents::RenderSSBO(const ContentContext& renderer,
           frag_info.focus_radius = 0.0;
         }
 
-        auto& host_buffer = renderer.GetTransientsBuffer();
+        auto& data_host_buffer = renderer.GetTransientsDataBuffer();
         auto colors = CreateGradientColors(colors_, stops_);
 
         frag_info.colors_length = colors.size();
-        auto color_buffer =
-            host_buffer.Emplace(colors.data(), colors.size() * sizeof(StopData),
-                                host_buffer.GetMinimumUniformAlignment());
+        auto color_buffer = data_host_buffer.Emplace(
+            colors.data(), colors.size() * sizeof(StopData),
+            renderer.GetDeviceCapabilities()
+                .GetMinimumStorageBufferAlignment());
 
-        FS::BindFragInfo(
-            pass, renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
+        FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
         FS::BindColorData(pass, color_buffer);
 
         pass.SetCommandLabel("ConicalGradientSSBOFill");
@@ -180,7 +180,7 @@ bool ConicalGradientContents::RenderUniform(const ContentContext& renderer,
         pass.SetCommandLabel("ConicalGradientUniformFill");
 
         FS::BindFragInfo(
-            pass, renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
+            pass, renderer.GetTransientsDataBuffer().EmplaceUniform(frag_info));
 
         return true;
       });
@@ -234,7 +234,7 @@ bool ConicalGradientContents::RenderTexture(const ContentContext& renderer,
         pass.SetCommandLabel("ConicalGradientFill");
 
         FS::BindFragInfo(
-            pass, renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
+            pass, renderer.GetTransientsDataBuffer().EmplaceUniform(frag_info));
         SamplerDescriptor sampler_desc;
         sampler_desc.min_filter = MinMagFilter::kLinear;
         sampler_desc.mag_filter = MinMagFilter::kLinear;

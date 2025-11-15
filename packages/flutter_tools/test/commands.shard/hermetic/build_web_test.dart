@@ -440,6 +440,38 @@ void main() {
   );
 
   testUsingContext(
+    'Does not build wasm when wasm-dry-run is disabled',
+    () async {
+      final buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+      final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+      setupFileSystemForEndToEndTest(fileSystem);
+      await runner.run(<String>['build', 'web', '--no-pub', '--no-wasm-dry-run']);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => fakePlatform,
+      FileSystem: () => fileSystem,
+      FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+      ProcessManager: () => processManager,
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            expect(target, isA<WebServiceWorker>());
+            final List<WebCompilerConfig> configs = (target as WebServiceWorker).compileConfigs;
+            expect(configs, hasLength(1));
+            final WebCompilerConfig jsConfig = configs[0];
+            expect(jsConfig.renderer, WebRendererMode.canvaskit);
+            expect(jsConfig.compileTarget, CompileTarget.js);
+            final List<String> jsOptions = jsConfig.toCommandOptions(BuildMode.release);
+            expect(jsOptions, <String>[
+              '--native-null-assertions',
+              '--no-source-maps',
+              '-O4',
+              '--minify',
+            ]);
+          }),
+    },
+  );
+
+  testUsingContext(
     'Defaults to web renderer skwasm mode and minify for wasm when no option is specified',
     () async {
       final buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
@@ -698,7 +730,13 @@ void main() {
         expect(command.usage, contains(option));
       }
 
-      expectVisible('pwa-strategy');
+      void expectHidden(String option) {
+        expect(command.argParser.options.keys, contains(option));
+        expect(command.argParser.options[option]!.hide, isTrue);
+        expect(command.usage, isNot(contains(option)));
+      }
+
+      expectHidden('pwa-strategy');
       expectVisible('web-resources-cdn');
       expectVisible('optimization-level');
       expectVisible('source-maps');

@@ -10,10 +10,12 @@
 #include "flutter/display_list/effects/dl_color_filters.h"
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
+#include "flutter/display_list/effects/dl_runtime_effect_skia.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 #include "flutter/third_party/skia/include/core/SkColorSpace.h"
 #include "flutter/third_party/skia/include/core/SkSamplingOptions.h"
 #include "flutter/third_party/skia/include/core/SkTileMode.h"
+#include "flutter/third_party/skia/include/effects/SkRuntimeEffect.h"
 
 #include "gtest/gtest.h"
 
@@ -213,9 +215,9 @@ TEST(DisplayListSkConversions, ToSkSamplingOptions) {
   FUNC(kLuminosity)                    \
   FUNC(kLastMode)
 
-TEST(DisplayListSkConversions, ToSkBlendMode){
+TEST(DisplayListSkConversions, ToSkBlendMode) {
 #define CHECK_TO_SKENUM(V) ASSERT_EQ(ToSk(DlBlendMode::V), SkBlendMode::V);
-    FOR_EACH_BLEND_MODE_ENUM(CHECK_TO_SKENUM)
+  FOR_EACH_BLEND_MODE_ENUM(CHECK_TO_SKENUM)
 #undef CHECK_TO_SKENUM
 }
 
@@ -292,11 +294,11 @@ TEST(DisplayListVertices, ConvertWithZeroAndNegativeVerticesAndIndices) {
 }
 
 TEST(DisplayListColorSource, ConvertRuntimeEffect) {
-  const sk_sp<DlRuntimeEffect> kTestRuntimeEffect1 = DlRuntimeEffect::MakeSkia(
+  const sk_sp<DlRuntimeEffect> kTestRuntimeEffect1 = DlRuntimeEffectSkia::Make(
       SkRuntimeEffect::MakeForShader(
           SkString("vec4 main(vec2 p) { return vec4(0); }"))
           .effect);
-  const sk_sp<DlRuntimeEffect> kTestRuntimeEffect2 = DlRuntimeEffect::MakeSkia(
+  const sk_sp<DlRuntimeEffect> kTestRuntimeEffect2 = DlRuntimeEffectSkia::Make(
       SkRuntimeEffect::MakeForShader(
           SkString("vec4 main(vec2 p) { return vec4(1); }"))
           .effect);
@@ -313,7 +315,7 @@ TEST(DisplayListColorSource, ConvertRuntimeEffect) {
 }
 
 TEST(DisplayListColorSource, ConvertRuntimeEffectWithNullSampler) {
-  const sk_sp<DlRuntimeEffect> kTestRuntimeEffect1 = DlRuntimeEffect::MakeSkia(
+  const sk_sp<DlRuntimeEffect> kTestRuntimeEffect1 = DlRuntimeEffectSkia::Make(
       SkRuntimeEffect::MakeForShader(
           SkString("vec4 main(vec2 p) { return vec4(0); }"))
           .effect);

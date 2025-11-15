@@ -13,6 +13,7 @@
 
 namespace impeller {
 
+namespace {
 const std::unordered_map<std::string_view, AdrenoGPU> kAdrenoVersions = {
     // X
     // Note: I don't know if these strings actually match as there don't seem to
@@ -105,6 +106,17 @@ const std::unordered_map<std::string_view, MaliGPU> kMaliVersions = {
     {"T760", MaliGPU::kT760},
 };
 
+constexpr std::array<std::pair<std::string_view, PowerVRGPU>, 6> kGpuSeriesMap =
+    {{
+        {"BXE", PowerVRGPU::kBXE},
+        {"BXM", PowerVRGPU::kBXM},
+        {"BXS", PowerVRGPU::kBXS},
+        {"BXT", PowerVRGPU::kBXT},
+        {"CXT", PowerVRGPU::kCXT},
+        {"DXT", PowerVRGPU::kDXT},
+    }};
+}  // namespace
+
 AdrenoGPU GetAdrenoVersion(std::string_view version) {
   /// The format that Adreno names follow is "Adreno (TM) VERSION".
   auto paren_pos = version.find("Adreno (TM) ");
@@ -120,13 +132,12 @@ AdrenoGPU GetAdrenoVersion(std::string_view version) {
 }
 
 PowerVRGPU GetPowerVRVersion(std::string_view version) {
-  // We don't really care about the specific model, just the series.
-  if (version.find("DXT") != std::string::npos) {
-    return PowerVRGPU::kDXT;
+  for (const auto& entry : kGpuSeriesMap) {
+    if (version.find(entry.first) != std::string::npos) {
+      return entry.second;
+    }
   }
-  if (version.find("CXT") != std::string::npos) {
-    return PowerVRGPU::kCXT;
-  }
+
   return PowerVRGPU::kUnknown;
 }
 
@@ -347,6 +358,13 @@ bool DriverInfoVK::IsEmulator() const {
 }
 
 bool DriverInfoVK::IsKnownBadDriver() const {
+  // Fall back to OpenGL ES on older Adreno devices that require additional
+  // workarounds in the Impeller Vulkan back end such as disabling framebuffer
+  // fetch.
+  if (adreno_gpu_ && *adreno_gpu_ <= AdrenoGPU::kAdreno630) {
+    return true;
+  }
+
   // Disable Maleoon series GPUs, see:
   // https://github.com/flutter/flutter/issues/156623
   if (vendor_ == VendorVK::kHuawei) {
@@ -370,7 +388,7 @@ bool DriverInfoVK::IsKnownBadDriver() const {
   // https://github.com/flutter/flutter/issues/160866
   // https://github.com/flutter/flutter/issues/160804
   // https://github.com/flutter/flutter/issues/160406
-  if (powervr_gpu_.has_value() && powervr_gpu_.value() < PowerVRGPU::kCXT) {
+  if (powervr_gpu_.has_value() && powervr_gpu_.value() < PowerVRGPU::kBXE) {
     return true;
   }
   return false;

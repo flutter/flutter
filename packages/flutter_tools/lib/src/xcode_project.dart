@@ -25,6 +25,7 @@ import 'ios/xcodeproj.dart';
 import 'macos/swift_package_manager.dart';
 import 'macos/xcode.dart';
 import 'platform_plugins.dart';
+import 'plugins.dart';
 import 'project.dart';
 import 'template.dart';
 
@@ -461,8 +462,12 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       _editableDirectory.childDirectory('Runner').childFile('AppDelegate.swift');
 
   /// The 'AppDelegate.m' file of the host app. This file might not exist if the app project uses Swift.
-  File get appDelegateObjc =>
+  File get appDelegateObjcImplementation =>
       _editableDirectory.childDirectory('Runner').childFile('AppDelegate.m');
+
+  /// The 'AppDelegate.h' file of the host app. This file might not exist if the app project uses Swift.
+  File get appDelegateObjcHeader =>
+      _editableDirectory.childDirectory('Runner').childFile('AppDelegate.h');
 
   File get infoPlist => _editableDirectory.childDirectory('Runner').childFile('Info.plist');
 
@@ -471,30 +476,77 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   /// True if the app project uses Swift.
   bool get isSwift => appDelegateSwift.existsSync();
 
-  /// Do all plugins support arm64 simulators to run natively on an ARM Mac?
-  Future<bool> pluginsSupportArmSimulator() async {
+  /// Prints a warning if any plugin(s) are excluding `arm64` architecture.
+  ///
+  /// Xcode 26 no longer allows you to build x86-only architecture for the simulator
+  Future<void> checkForPluginsExcludingArmSimulator() async {
     final Directory podXcodeProject = hostAppRoot
         .childDirectory('Pods')
         .childDirectory('Pods.xcodeproj');
     if (!podXcodeProject.existsSync()) {
-      // No plugins.
-      return true;
+      return;
     }
 
     final XcodeProjectInterpreter? xcodeProjectInterpreter = globals.xcodeProjectInterpreter;
     if (xcodeProjectInterpreter == null) {
-      // Xcode isn't installed, don't try to check.
-      return false;
+      return;
     }
     final String? buildSettings = await xcodeProjectInterpreter.pluginsBuildSettingsOutput(
       podXcodeProject,
     );
 
-    // See if any plugins or their dependencies exclude arm64 simulators
-    // as a valid architecture, usually because a binary is missing that slice.
-    // Example: EXCLUDED_ARCHS = arm64 i386
-    // NOT: EXCLUDED_ARCHS = i386
-    return buildSettings != null && !buildSettings.contains(RegExp('EXCLUDED_ARCHS.*arm64'));
+    if (buildSettings == null || buildSettings.isEmpty) {
+      return;
+    }
+
+    final List<Plugin> allPlugins = await findPlugins(parent);
+    final iosPluginTargetNames = <String>{
+      for (final Plugin plugin in allPlugins)
+        if (plugin.platforms.containsKey(IOSPlugin.kConfigKey)) plugin.name,
+    };
+    if (iosPluginTargetNames.isEmpty) {
+      return;
+    }
+
+    final targetHeader = RegExp(
+      r'^Build settings for action build and target "?([^":\r\n]+)"?:\s*$',
+    );
+
+    final pluginsExcludingArmArch = <String>{};
+    String? currentTarget;
+
+    for (final String eachLine in buildSettings.split('\n')) {
+      final String settingsLine = eachLine.trim();
+
+      final RegExpMatch? headerMatch = targetHeader.firstMatch(settingsLine);
+      if (headerMatch != null) {
+        currentTarget = headerMatch.group(1)!.trim();
+        continue;
+      }
+
+      if (currentTarget == null || !iosPluginTargetNames.contains(currentTarget)) {
+        continue;
+      }
+
+      if (!settingsLine.startsWith('EXCLUDED_ARCHS') || !settingsLine.contains('=')) {
+        continue;
+      }
+
+      final Iterable<String> tokens = settingsLine.split(' ');
+      if (tokens.contains('arm64')) {
+        pluginsExcludingArmArch.add(currentTarget);
+      }
+    }
+
+    if (pluginsExcludingArmArch.isNotEmpty) {
+      final String list = pluginsExcludingArmArch.map((String n) => '  - $n').join('\n');
+
+      globals.logger.printWarning(
+        'The following plugin(s) are excluding the arm64 architecture, which is a requirement for Xcode 26+:\n'
+        '$list\n'
+        'Consider installing the "Universal" Xcode or file an issue with the plugin(s) to support arm64.',
+      );
+    }
   }
 
   @override

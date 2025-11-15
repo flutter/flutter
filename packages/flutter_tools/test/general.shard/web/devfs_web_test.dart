@@ -924,7 +924,7 @@ void main() {
           packageConfigPath: '.dart_tool/package_config.json',
         ),
         enableDwds: false,
-        enableDds: false,
+        ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
         entrypoint: Uri.base,
         testMode: true,
         expressionCompiler: null,
@@ -1031,7 +1031,7 @@ void main() {
           packageConfigPath: '.dart_tool/package_config.json',
         ),
         enableDwds: false,
-        enableDds: false,
+        ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
         entrypoint: Uri.base,
         testMode: true,
         expressionCompiler: null,
@@ -1143,7 +1143,7 @@ void main() {
             packageConfigPath: '.dart_tool/package_config.json',
           ),
           enableDwds: true,
-          enableDds: false,
+          ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
           entrypoint: Uri.base,
           testMode: true,
           expressionCompiler: null,
@@ -1217,7 +1217,7 @@ void main() {
         useSseForInjectedClient: true,
         buildInfo: BuildInfo.debug,
         enableDwds: false,
-        enableDds: false,
+        ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
         entrypoint: Uri.base,
         testMode: true,
         expressionCompiler: null,
@@ -1266,7 +1266,7 @@ void main() {
           packageConfigPath: '.dart_tool/package_config.json',
         ),
         enableDwds: false,
-        enableDds: false,
+        ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
         entrypoint: Uri.base,
         testMode: true,
         expressionCompiler: null,
@@ -1308,6 +1308,7 @@ void main() {
       final String dummyCertPath = globals.fs.path.join(dataPath, 'tls_cert', 'dummy-cert.pem');
       final String dummyCertKeyPath = globals.fs.path.join(dataPath, 'tls_cert', 'dummy-key.pem');
       final webDevServerConfig = WebDevServerConfig(
+        host: '::1',
         https: HttpsConfig(certPath: dummyCertPath, certKeyPath: dummyCertKeyPath),
       );
       final webDevFS = WebDevFS(
@@ -1319,7 +1320,7 @@ void main() {
         nativeNullAssertions: true,
         buildInfo: BuildInfo.debug,
         enableDwds: false,
-        enableDds: false,
+        ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
         entrypoint: Uri.base,
         testMode: true,
         expressionCompiler: null,
@@ -1341,6 +1342,8 @@ void main() {
 
       // Ensure the connection established is secure
       expect(uri.scheme, 'https');
+      // Ensure that the host correctly support IPv6
+      expect(uri.host, '::1');
 
       await webDevFS.destroy();
     }, overrides: <Type, Generator>{Artifacts: () => Artifacts.test()}),
@@ -1365,7 +1368,7 @@ void main() {
           packageConfigPath: '.dart_tool/package_config.json',
         ),
         false,
-        false,
+        const DartDevelopmentServiceConfiguration(enable: false),
         Uri.base,
         null,
         webRenderer: WebRendererMode.canvaskit,
@@ -1404,7 +1407,7 @@ void main() {
           packageConfigPath: '.dart_tool/package_config.json',
         ),
         false,
-        false,
+        const DartDevelopmentServiceConfiguration(enable: false),
         Uri.base,
         null,
         webRenderer: WebRendererMode.canvaskit,
@@ -1494,7 +1497,7 @@ void main() {
         nativeNullAssertions: true,
         buildInfo: BuildInfo.debug,
         enableDwds: false,
-        enableDds: false,
+        ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
         entrypoint: Uri.base,
         testMode: true,
         expressionCompiler: null,

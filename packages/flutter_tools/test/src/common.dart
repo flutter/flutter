@@ -376,7 +376,7 @@ bool analyticsTimingEventExists({
   final lookup = <String, String>{
     'workflow': workflow,
     'variableName': variableName,
-    if (label != null) 'label': label,
+    'label': ?label,
   };
 
   for (final e in sentEvents) {

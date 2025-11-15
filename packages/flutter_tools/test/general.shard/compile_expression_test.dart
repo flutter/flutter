@@ -41,6 +41,7 @@ void main() {
       logger: testLogger,
       platform: FakePlatform(),
       fileSystem: fileSystem,
+      shutdownHooks: FakeShutdownHooks(),
     );
 
     stdErrStreamController = StreamController<String>();

@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "Vebdə axtarın",
   "shareButtonLabel": "Paylaşın",
   "pasteButtonLabel": "Yerləşdirin",
-  "selectAllButtonLabel": "Hamısını seçin"
+  "selectAllButtonLabel": "Hamısını seçin",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found",
+  "radioButtonUnselectedLabel": "Not selected"
 }

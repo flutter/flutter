@@ -47,6 +47,10 @@ const double _kFinalLabelScale = 0.75;
 // An extra padding should be added for the input content to comply with the 16 pixels padding.
 const double _kInputExtraPadding = 4.0;
 
+// Padding between the character counter and helper/error text to prevent overlap.
+// Based on Material 3 specification for text fields.
+const double _kSubtextCounterPadding = 16.0;
+
 typedef _SubtextSize = ({double ascent, double bottomHeight, double subtextHeight});
 typedef _ChildBaselineGetter = double Function(RenderBox child, BoxConstraints constraints);
 
@@ -401,8 +405,11 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
   Widget _buildError() {
     assert(widget.error != null || widget.errorText != null);
-    final Widget? capturedError = widget.error;
     final String? capturedErrorText = widget.errorText;
+    Widget? capturedError = widget.error;
+    if (capturedError != null && widget.errorStyle != null) {
+      capturedError = DefaultTextStyle(style: widget.errorStyle!, child: capturedError);
+    }
     return Builder(
       builder: (BuildContext context) {
         return Semantics(
@@ -589,6 +596,7 @@ class _Decoration {
     required this.visualDensity,
     required this.inputGap,
     required this.maintainHintSize,
+    required this.maintainLabelSize,
     this.icon,
     this.input,
     this.label,
@@ -615,6 +623,7 @@ class _Decoration {
   final VisualDensity visualDensity;
   final double inputGap;
   final bool maintainHintSize;
+  final bool maintainLabelSize;
   final Widget? icon;
   final Widget? input;
   final Widget? label;
@@ -649,6 +658,7 @@ class _Decoration {
         other.visualDensity == visualDensity &&
         other.inputGap == inputGap &&
         other.maintainHintSize == maintainHintSize &&
+        other.maintainLabelSize == maintainLabelSize &&
         other.icon == icon &&
         other.input == input &&
         other.label == label &&
@@ -676,14 +686,14 @@ class _Decoration {
     visualDensity,
     inputGap,
     maintainHintSize,
+    maintainLabelSize,
     icon,
     input,
     label,
     hint,
     prefix,
     suffix,
-    prefixIcon,
-    Object.hash(suffixIcon, helperError, counter, container),
+    Object.hash(prefixIcon, suffixIcon, helperError, counter, container),
   );
 }
 
@@ -919,8 +929,10 @@ class _RenderDecoration extends RenderBox
       null => (Size.zero, 0.0),
     };
 
+    // Only add padding when counter is present (maxLength is used).
+    final double counterPadding = counter != null ? _kSubtextCounterPadding : 0.0;
     final BoxConstraints helperErrorConstraints = constraints.deflate(
-      EdgeInsets.only(left: counterSize.width),
+      EdgeInsets.only(left: counterSize.width + counterPadding),
     );
     final double helperErrorHeight = layoutChild(helperError, helperErrorConstraints).height;
 
@@ -966,7 +978,10 @@ class _RenderDecoration extends RenderBox
       EdgeInsets.only(left: iconWidth),
     );
     final BoxConstraints contentConstraints = containerConstraints.deflate(
-      EdgeInsets.only(left: contentPadding.horizontal),
+      EdgeInsetsDirectional.only(
+        start: contentPadding.start + decoration.inputGap,
+        end: contentPadding.end + decoration.inputGap,
+      ),
     );
 
     // The helper or error text can occupy the full width less the space
@@ -1012,16 +1027,15 @@ class _RenderDecoration extends RenderBox
     final double topHeight;
     if (label != null) {
       final double suffixIconSpace = decoration.border.isOutline
-          ? lerpDouble(suffixIconSize.width, 0.0, decoration.floatingLabelProgress)!
+          ? lerpDouble(suffixIconSize.width, contentPadding.end, decoration.floatingLabelProgress)!
           : suffixIconSize.width;
       final double labelWidth = math.max(
         0.0,
         constraints.maxWidth -
             (decoration.inputGap * 2 +
                 iconWidth +
-                contentPadding.horizontal +
-                prefixIconSize.width +
-                suffixIconSpace),
+                (prefixIcon == null ? contentPadding.start : prefixIconSize.width) +
+                (suffixIcon == null ? contentPadding.end : suffixIconSpace)),
       );
 
       // Increase the available width for the label when it is scaled down.
@@ -1201,9 +1215,12 @@ class _RenderDecoration extends RenderBox
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    final double contentWidth = decoration.isEmpty || decoration.maintainHintSize
+    final double inputWidth = decoration.isEmpty || decoration.maintainHintSize
         ? math.max(_minWidth(input, height), _minWidth(hint, height))
         : _minWidth(input, height);
+    final double contentWidth = decoration.maintainLabelSize
+        ? math.max(inputWidth, _minWidth(label, height))
+        : inputWidth;
     return _minWidth(icon, height) +
         (prefixIcon != null ? prefixToInputGap : contentPadding.start + decoration.inputGap) +
         _minWidth(prefixIcon, height) +
@@ -1216,9 +1233,12 @@ class _RenderDecoration extends RenderBox
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    final double contentWidth = decoration.isEmpty || decoration.maintainHintSize
+    final double inputWidth = decoration.isEmpty || decoration.maintainHintSize
         ? math.max(_maxWidth(input, height), _maxWidth(hint, height))
         : _maxWidth(input, height);
+    final double contentWidth = decoration.maintainLabelSize
+        ? math.max(inputWidth, _maxWidth(label, height))
+        : inputWidth;
     return _maxWidth(icon, height) +
         (prefixIcon != null ? prefixToInputGap : contentPadding.start + decoration.inputGap) +
         _maxWidth(prefixIcon, height) +
@@ -1256,14 +1276,16 @@ class _RenderDecoration extends RenderBox
     final double suffixIconHeight = _minHeight(suffixIcon, width);
     final double suffixIconWidth = _minWidth(suffixIcon, suffixIconHeight);
 
-    width = math.max(width - contentPadding.horizontal, 0.0);
+    width = math.max(width - contentPadding.horizontal - decoration.inputGap * 2, 0.0);
 
     // TODO(LongCatIsLooong): use _computeSubtextSizes for subtext intrinsic sizes.
     // See https://github.com/flutter/flutter/issues/13715.
     final double counterHeight = _minHeight(counter, width);
     final double counterWidth = _minWidth(counter, counterHeight);
 
-    final double helperErrorAvailableWidth = math.max(width - counterWidth, 0.0);
+    // Only add padding when counter is present (maxLength is used).
+    final double counterPadding = counter != null ? _kSubtextCounterPadding : 0.0;
+    final double helperErrorAvailableWidth = math.max(width - counterWidth - counterPadding, 0.0);
     final double helperErrorHeight = _minHeight(helperError, helperErrorAvailableWidth);
     double subtextHeight = math.max(counterHeight, helperErrorHeight);
     if (subtextHeight > 0.0) {
@@ -2112,9 +2134,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       return Colors.transparent;
     }
     if (decoration.fillColor != null) {
-      return MaterialStateProperty.resolveAs(decoration.fillColor!, materialState);
+      return WidgetStateProperty.resolveAs(decoration.fillColor!, widgetState);
     }
-    return MaterialStateProperty.resolveAs(defaults.fillColor!, materialState);
+    return WidgetStateProperty.resolveAs(defaults.fillColor!, widgetState);
   }
 
   Color _getHoverColor(ThemeData themeData) {
@@ -2125,26 +2147,26 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getIconColor(ThemeData themeData, InputDecorationThemeData defaults) {
-    return MaterialStateProperty.resolveAs(decoration.iconColor, materialState) ??
-        MaterialStateProperty.resolveAs(defaults.iconColor!, materialState);
+    return WidgetStateProperty.resolveAs(decoration.iconColor, widgetState) ??
+        WidgetStateProperty.resolveAs(defaults.iconColor!, widgetState);
   }
 
   Color _getPrefixIconColor(
     IconButtonThemeData iconButtonTheme,
     InputDecorationThemeData defaults,
   ) {
-    return MaterialStateProperty.resolveAs(decoration.prefixIconColor, materialState) ??
-        iconButtonTheme.style?.foregroundColor?.resolve(materialState) ??
-        MaterialStateProperty.resolveAs(defaults.prefixIconColor!, materialState);
+    return WidgetStateProperty.resolveAs(decoration.prefixIconColor, widgetState) ??
+        iconButtonTheme.style?.foregroundColor?.resolve(widgetState) ??
+        WidgetStateProperty.resolveAs(defaults.prefixIconColor!, widgetState);
   }
 
   Color _getSuffixIconColor(
     IconButtonThemeData iconButtonTheme,
     InputDecorationThemeData defaults,
   ) {
-    return MaterialStateProperty.resolveAs(decoration.suffixIconColor, materialState) ??
-        iconButtonTheme.style?.foregroundColor?.resolve(materialState) ??
-        MaterialStateProperty.resolveAs(defaults.suffixIconColor!, materialState);
+    return WidgetStateProperty.resolveAs(decoration.suffixIconColor, widgetState) ??
+        iconButtonTheme.style?.foregroundColor?.resolve(widgetState) ??
+        WidgetStateProperty.resolveAs(defaults.suffixIconColor!, widgetState);
   }
 
   // True if the label will be shown and the hint will not.
@@ -2161,12 +2183,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // The base style for the inline label when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
   TextStyle _getInlineLabelStyle(ThemeData themeData, InputDecorationThemeData defaults) {
-    final TextStyle defaultStyle = MaterialStateProperty.resolveAs(
-      defaults.labelStyle!,
-      materialState,
-    );
+    final TextStyle defaultStyle = WidgetStateProperty.resolveAs(defaults.labelStyle!, widgetState);
 
-    final TextStyle? style = MaterialStateProperty.resolveAs(decoration.labelStyle, materialState);
+    final TextStyle? style = WidgetStateProperty.resolveAs(decoration.labelStyle, widgetState);
 
     return themeData.textTheme.titleMedium!
         .merge(widget.baseStyle)
@@ -2178,12 +2197,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // The base style for the inline hint when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
   TextStyle _getInlineHintStyle(ThemeData themeData, InputDecorationThemeData defaults) {
-    final TextStyle defaultStyle = MaterialStateProperty.resolveAs(
-      defaults.hintStyle!,
-      materialState,
-    );
+    final TextStyle defaultStyle = WidgetStateProperty.resolveAs(defaults.hintStyle!, widgetState);
 
-    final TextStyle? style = MaterialStateProperty.resolveAs(decoration.hintStyle, materialState);
+    final TextStyle? style = WidgetStateProperty.resolveAs(decoration.hintStyle, widgetState);
 
     return (themeData.useMaterial3
             ? themeData.textTheme.bodyLarge!
@@ -2194,9 +2210,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   TextStyle _getFloatingLabelStyle(ThemeData themeData, InputDecorationThemeData defaults) {
-    TextStyle defaultTextStyle = MaterialStateProperty.resolveAs(
+    TextStyle defaultTextStyle = WidgetStateProperty.resolveAs(
       defaults.floatingLabelStyle!,
-      materialState,
+      widgetState,
     );
     if (_hasError && decoration.errorStyle?.color != null) {
       defaultTextStyle = defaultTextStyle.copyWith(color: decoration.errorStyle?.color);
@@ -2205,9 +2221,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       decoration.floatingLabelStyle ?? decoration.labelStyle,
     );
 
-    final TextStyle? style = MaterialStateProperty.resolveAs(
+    final TextStyle? style = WidgetStateProperty.resolveAs(
       decoration.floatingLabelStyle,
-      materialState,
+      widgetState,
     );
 
     return themeData.textTheme.titleMedium!
@@ -2218,32 +2234,32 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   TextStyle _getHelperStyle(ThemeData themeData, InputDecorationThemeData defaults) {
-    return MaterialStateProperty.resolveAs(
+    return WidgetStateProperty.resolveAs(
       defaults.helperStyle!,
-      materialState,
-    ).merge(MaterialStateProperty.resolveAs(decoration.helperStyle, materialState));
+      widgetState,
+    ).merge(WidgetStateProperty.resolveAs(decoration.helperStyle, widgetState));
   }
 
   TextStyle _getErrorStyle(ThemeData themeData, InputDecorationThemeData defaults) {
-    return MaterialStateProperty.resolveAs(
+    return WidgetStateProperty.resolveAs(
       defaults.errorStyle!,
-      materialState,
+      widgetState,
     ).merge(decoration.errorStyle);
   }
 
-  Set<MaterialState> get materialState => <MaterialState>{
-    if (!decoration.enabled) MaterialState.disabled,
-    if (isFocused) MaterialState.focused,
-    if (isHovering) MaterialState.hovered,
-    if (_hasError) MaterialState.error,
+  Set<WidgetState> get widgetState => <WidgetState>{
+    if (!decoration.enabled) WidgetState.disabled,
+    if (isFocused) WidgetState.focused,
+    if (isHovering) WidgetState.hovered,
+    if (_hasError) WidgetState.error,
   };
 
   InputBorder _getDefaultBorder(ThemeData themeData, InputDecorationThemeData defaults) {
     final InputBorder border =
-        MaterialStateProperty.resolveAs(decoration.border, materialState) ??
+        WidgetStateProperty.resolveAs(decoration.border, widgetState) ??
         const UnderlineInputBorder();
 
-    if (decoration.border is MaterialStateProperty<InputBorder>) {
+    if (decoration.border is WidgetStateProperty<InputBorder>) {
       return border;
     }
 
@@ -2255,14 +2271,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       if (decoration.filled!) {
         final InputDecorationThemeData decorationTheme = InputDecorationTheme.of(context);
         return border.copyWith(
-          borderSide: MaterialStateProperty.resolveAs(
+          borderSide: WidgetStateProperty.resolveAs(
             decorationTheme.activeIndicatorBorder ?? defaults.activeIndicatorBorder,
-            materialState,
+            widgetState,
           ),
         );
       } else {
         return border.copyWith(
-          borderSide: MaterialStateProperty.resolveAs(defaults.outlineBorder, materialState),
+          borderSide: WidgetStateProperty.resolveAs(defaults.outlineBorder, widgetState),
         );
       }
     } else {
@@ -2406,8 +2422,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         ? _AffixText(
             labelIsFloating: labelShouldWithdraw,
             text: decoration.prefixText,
-            style:
-                MaterialStateProperty.resolveAs(decoration.prefixStyle, materialState) ?? hintStyle,
+            style: WidgetStateProperty.resolveAs(decoration.prefixStyle, widgetState) ?? hintStyle,
             semanticsSortKey: needsSemanticsSortOrder ? _prefixSemanticsSortOrder : null,
             semanticsTag: _kPrefixSemanticsTag,
             child: decoration.prefix,
@@ -2418,8 +2433,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         ? _AffixText(
             labelIsFloating: labelShouldWithdraw,
             text: decoration.suffixText,
-            style:
-                MaterialStateProperty.resolveAs(decoration.suffixStyle, materialState) ?? hintStyle,
+            style: WidgetStateProperty.resolveAs(decoration.suffixStyle, widgetState) ?? hintStyle,
             semanticsSortKey: needsSemanticsSortOrder ? _suffixSemanticsSortOrder : null,
             semanticsTag: _kSuffixSemanticsTag,
             child: decoration.suffix,
@@ -2550,7 +2564,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           style: _getHelperStyle(
             themeData,
             defaults,
-          ).merge(MaterialStateProperty.resolveAs(decoration.counterStyle, materialState)),
+          ).merge(WidgetStateProperty.resolveAs(decoration.counterStyle, widgetState)),
           overflow: TextOverflow.ellipsis,
           semanticsLabel: decoration.semanticCounterText,
         ),
@@ -2646,6 +2660,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         isEmpty: isEmpty,
         visualDensity: visualDensity,
         maintainHintSize: maintainHintSize,
+        maintainLabelSize: decoration.maintainLabelSize,
         icon: icon,
         input: input,
         label: label,
@@ -2782,6 +2797,7 @@ class InputDecoration {
     )
     this.maintainHintHeight = true,
     this.maintainHintSize = true,
+    this.maintainLabelSize = false,
     this.error,
     this.errorText,
     this.errorStyle,
@@ -2879,6 +2895,7 @@ class InputDecoration {
     )
     this.maintainHintHeight = true,
     this.maintainHintSize = true,
+    this.maintainLabelSize = false,
     this.filled = false,
     this.fillColor,
     this.focusColor,
@@ -3169,13 +3186,22 @@ class InputDecoration {
   final bool maintainHintHeight;
 
   /// Whether the input field's size should always be greater than or equal to
-  /// the size of the [hintText], even if the [hintText] is not visible.
+  /// the size of the [hint] or [hintText], even if the [hint] or [hintText] are not visible.
   ///
-  /// The [InputDecorator] widget ignores [hintText] during layout when
-  /// it's not visible, if this flag is set to false.
+  /// The [InputDecorator] widget ignores [hint] and [hintText] during layout when
+  /// they are not visible, if this flag is set to false.
   ///
   /// Defaults to true.
   final bool maintainHintSize;
+
+  /// Whether the input field's size should always be greater than or equal to
+  /// the size of the [label] or [labelText], even if the [label] or [labelText] are not visible.
+  ///
+  /// The [InputDecorator] widget ignores [label] and [labelText] during layout when
+  /// this flag is set to false.
+  ///
+  /// Defaults to false for compatibility reason.
+  final bool maintainLabelSize;
 
   /// Optional widget that appears below the [InputDecorator.child] and the border.
   ///
@@ -3888,6 +3914,7 @@ class InputDecoration {
     int? hintMaxLines,
     bool? maintainHintHeight,
     bool? maintainHintSize,
+    bool? maintainLabelSize,
     Widget? error,
     String? errorText,
     TextStyle? errorStyle,
@@ -3948,6 +3975,7 @@ class InputDecoration {
       hintFadeDuration: hintFadeDuration ?? this.hintFadeDuration,
       maintainHintHeight: maintainHintHeight ?? this.maintainHintHeight,
       maintainHintSize: maintainHintSize ?? this.maintainHintSize,
+      maintainLabelSize: maintainLabelSize ?? this.maintainLabelSize,
       error: error ?? this.error,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
@@ -4072,6 +4100,7 @@ class InputDecoration {
         other.hintFadeDuration == hintFadeDuration &&
         other.maintainHintHeight == maintainHintHeight &&
         other.maintainHintSize == maintainHintSize &&
+        other.maintainLabelSize == maintainLabelSize &&
         other.error == error &&
         other.errorText == errorText &&
         other.errorStyle == errorStyle &&
@@ -4134,6 +4163,7 @@ class InputDecoration {
       hintFadeDuration,
       maintainHintHeight,
       maintainHintSize,
+      maintainLabelSize,
       error,
       errorText,
       errorStyle,
@@ -4194,6 +4224,7 @@ class InputDecoration {
       if (hintFadeDuration != null) 'hintFadeDuration: "$hintFadeDuration"',
       if (!maintainHintHeight) 'maintainHintHeight: false',
       if (!maintainHintSize) 'maintainHintSize: false',
+      if (maintainLabelSize) 'maintainLabelSize: true',
       if (error != null) 'error: "$error"',
       if (errorText != null) 'errorText: "$errorText"',
       if (errorStyle != null) 'errorStyle: "$errorStyle"',
@@ -5259,9 +5290,9 @@ class InputDecorationThemeData with Diagnosticable {
 
   /// The shape of the border to draw around the decoration's container.
   ///
-  /// If [border] is a [MaterialStateUnderlineInputBorder]
-  /// or [MaterialStateOutlineInputBorder], then the effective border can depend on
-  /// the [WidgetState.focused] state, i.e. if the [TextField] is focused or not.
+  /// If [border] is a [WidgetStateInputBorder], then the effective border can
+  /// depend on the [WidgetState.focused] state, i.e. if the [TextField] is
+  /// focused or not.
   ///
   /// The decoration's container is the area which is filled if [filled] is
   /// true and bordered per the [border]. It's the area adjacent to
@@ -5777,40 +5808,39 @@ class _InputDecoratorDefaultsM2 extends InputDecorationThemeData {
   final BuildContext context;
 
   @override
-  TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  TextStyle? get hintStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return TextStyle(color: Theme.of(context).disabledColor);
     }
     return TextStyle(color: Theme.of(context).hintColor);
   });
 
   @override
-  TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  TextStyle? get labelStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return TextStyle(color: Theme.of(context).disabledColor);
     }
     return TextStyle(color: Theme.of(context).hintColor);
   });
 
   @override
-  TextStyle? get floatingLabelStyle =>
-      MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
-          return TextStyle(color: Theme.of(context).disabledColor);
-        }
-        if (states.contains(MaterialState.error)) {
-          return TextStyle(color: Theme.of(context).colorScheme.error);
-        }
-        if (states.contains(MaterialState.focused)) {
-          return TextStyle(color: Theme.of(context).colorScheme.primary);
-        }
-        return TextStyle(color: Theme.of(context).hintColor);
-      });
+  TextStyle? get floatingLabelStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
+      return TextStyle(color: Theme.of(context).disabledColor);
+    }
+    if (states.contains(WidgetState.error)) {
+      return TextStyle(color: Theme.of(context).colorScheme.error);
+    }
+    if (states.contains(WidgetState.focused)) {
+      return TextStyle(color: Theme.of(context).colorScheme.primary);
+    }
+    return TextStyle(color: Theme.of(context).hintColor);
+  });
 
   @override
-  TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  TextStyle? get helperStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
     final ThemeData themeData = Theme.of(context);
-    if (states.contains(MaterialState.disabled)) {
+    if (states.contains(WidgetState.disabled)) {
       return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
 
@@ -5818,17 +5848,17 @@ class _InputDecoratorDefaultsM2 extends InputDecorationThemeData {
   });
 
   @override
-  TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  TextStyle? get errorStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
     final ThemeData themeData = Theme.of(context);
-    if (states.contains(MaterialState.disabled)) {
+    if (states.contains(WidgetState.disabled)) {
       return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
     return themeData.textTheme.bodySmall!.copyWith(color: themeData.colorScheme.error);
   });
 
   @override
-  Color? get fillColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    return switch ((Theme.brightnessOf(context), states.contains(MaterialState.disabled))) {
+  Color? get fillColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
+    return switch ((Theme.brightnessOf(context), states.contains(WidgetState.disabled))) {
       (Brightness.dark, true) => const Color(0x0DFFFFFF), //  5% white
       (Brightness.dark, false) => const Color(0x1AFFFFFF), // 10% white
       (Brightness.light, true) => const Color(0x05000000), //  2% black
@@ -5837,11 +5867,11 @@ class _InputDecoratorDefaultsM2 extends InputDecorationThemeData {
   });
 
   @override
-  Color? get iconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused)) {
+  Color? get iconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled) && !states.contains(WidgetState.focused)) {
       return Theme.of(context).disabledColor;
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return Theme.of(context).colorScheme.primary;
     }
     return switch (Theme.brightnessOf(context)) {
@@ -5851,11 +5881,11 @@ class _InputDecoratorDefaultsM2 extends InputDecorationThemeData {
   });
 
   @override
-  Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused)) {
+  Color? get prefixIconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled) && !states.contains(WidgetState.focused)) {
       return Theme.of(context).disabledColor;
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return Theme.of(context).colorScheme.primary;
     }
     return switch (Theme.brightnessOf(context)) {
@@ -5865,14 +5895,14 @@ class _InputDecoratorDefaultsM2 extends InputDecorationThemeData {
   });
 
   @override
-  Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused)) {
+  Color? get suffixIconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled) && !states.contains(WidgetState.focused)) {
       return Theme.of(context).disabledColor;
     }
-    if (states.contains(MaterialState.error)) {
+    if (states.contains(WidgetState.error)) {
       return Theme.of(context).colorScheme.error;
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return Theme.of(context).colorScheme.primary;
     }
     return switch (Theme.brightnessOf(context)) {
@@ -5910,62 +5940,62 @@ class _InputDecoratorDefaultsM3 extends InputDecorationThemeData {
   // see https://github.com/flutter/flutter/pull/125905.
 
   @override
-  TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  TextStyle? get hintStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return TextStyle(color: _colors.onSurface.withOpacity(0.38));
     }
     return TextStyle(color: _colors.onSurfaceVariant);
   });
 
   @override
-  Color? get fillColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  Color? get fillColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return _colors.onSurface.withOpacity(0.04);
     }
     return _colors.surfaceContainerHighest;
   });
 
   @override
-  BorderSide? get activeIndicatorBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  BorderSide? get activeIndicatorBorder => WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return BorderSide(color: _colors.onSurface.withOpacity(0.38));
     }
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.error)) {
+      if (states.contains(WidgetState.focused)) {
         return BorderSide(color: _colors.error, width: 2.0);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return BorderSide(color: _colors.onErrorContainer);
       }
       return BorderSide(color: _colors.error);
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return BorderSide(color: _colors.primary, width: 2.0);
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return BorderSide(color: _colors.onSurface);
     }
     return BorderSide(color: _colors.onSurfaceVariant);
     });
 
   @override
-  BorderSide? get outlineBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  BorderSide? get outlineBorder => WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return BorderSide(color: _colors.onSurface.withOpacity(0.12));
     }
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.error)) {
+      if (states.contains(WidgetState.focused)) {
         return BorderSide(color: _colors.error, width: 2.0);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return BorderSide(color: _colors.onErrorContainer);
       }
       return BorderSide(color: _colors.error);
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return BorderSide(color: _colors.primary, width: 2.0);
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return BorderSide(color: _colors.onSurface);
     }
     return BorderSide(color: _colors.outline);
@@ -5975,20 +6005,20 @@ class _InputDecoratorDefaultsM3 extends InputDecorationThemeData {
   Color? get iconColor => _colors.onSurfaceVariant;
 
   @override
-  Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  Color? get prefixIconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return _colors.onSurface.withOpacity(0.38);
     }
     return _colors.onSurfaceVariant;
   });
 
   @override
-  Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  Color? get suffixIconColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return _colors.onSurface.withOpacity(0.38);
     }
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.error)) {
+      if (states.contains(WidgetState.hovered)) {
         return _colors.onErrorContainer;
       }
       return _colors.error;
@@ -5997,64 +6027,64 @@ class _InputDecoratorDefaultsM3 extends InputDecorationThemeData {
   });
 
   @override
-  TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  TextStyle? get labelStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
     final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
-    if (states.contains(MaterialState.disabled)) {
+    if (states.contains(WidgetState.disabled)) {
       return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.error)) {
+      if (states.contains(WidgetState.focused)) {
         return textStyle.copyWith(color: _colors.error);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return textStyle.copyWith(color: _colors.onErrorContainer);
       }
       return textStyle.copyWith(color: _colors.error);
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return textStyle.copyWith(color: _colors.primary);
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
     return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
   @override
-  TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  TextStyle? get floatingLabelStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
     final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
-    if (states.contains(MaterialState.disabled)) {
+    if (states.contains(WidgetState.disabled)) {
       return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
-    if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.error)) {
+      if (states.contains(WidgetState.focused)) {
         return textStyle.copyWith(color: _colors.error);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return textStyle.copyWith(color: _colors.onErrorContainer);
       }
       return textStyle.copyWith(color: _colors.error);
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return textStyle.copyWith(color: _colors.primary);
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
     return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
   @override
-  TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  TextStyle? get helperStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
     final TextStyle textStyle = _textTheme.bodySmall ?? const TextStyle();
-    if (states.contains(MaterialState.disabled)) {
+    if (states.contains(WidgetState.disabled)) {
       return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
     return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
   @override
-  TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  TextStyle? get errorStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
     final TextStyle textStyle = _textTheme.bodySmall ?? const TextStyle();
     return textStyle.copyWith(color: _colors.error);
   });

@@ -7,8 +7,10 @@
 #include <algorithm>
 #include <numeric>
 #include "display_list/dl_paint.h"
+#include "display_list/dl_text_skia.h"
 #include "display_list/geometry/dl_geometry_conversions.h"
 #include "fml/logging.h"
+#include "impeller/display_list/dl_text_impeller.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 #include "include/core/SkMatrix.h"
 #include "third_party/skia/src/core/SkTextBlobPriv.h"  // nogncheck
@@ -21,15 +23,6 @@ using PaintID = skt::ParagraphPainter::PaintID;
 using namespace flutter;
 
 namespace {
-
-// Convert SkFontStyle::Weight values (ranging from 100-900) to txt::FontWeight
-// values (ranging from 0-8).
-txt::FontWeight GetTxtFontWeight(int font_weight) {
-  int txt_weight = (font_weight - 100) / 100;
-  txt_weight = std::clamp(txt_weight, static_cast<int>(txt::FontWeight::w100),
-                          static_cast<int>(txt::FontWeight::w900));
-  return static_cast<txt::FontWeight>(txt_weight);
-}
 
 txt::FontStyle GetTxtFontStyle(SkFontStyle::Slant font_slant) {
   return font_slant == SkFontStyle::Slant::kUpright_Slant
@@ -81,8 +74,9 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
         // If there is no path, this is an emoji and should be drawn as is,
         // ignoring the color source.
         if (path.isEmpty()) {
-          builder_->DrawTextFrame(impeller::MakeTextFrameFromTextBlobSkia(blob),
-                                  x, y, dl_paints_[paint_id]);
+          builder_->DrawText(DlTextImpeller::Make(
+                                 impeller::MakeTextFrameFromTextBlobSkia(blob)),
+                             x, y, dl_paints_[paint_id]);
 
           return;
         }
@@ -92,12 +86,13 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
         builder_->DrawPath(DlPath(transformed), dl_paints_[paint_id]);
         return;
       }
-      builder_->DrawTextFrame(impeller::MakeTextFrameFromTextBlobSkia(blob), x,
-                              y, dl_paints_[paint_id]);
+      builder_->DrawText(
+          DlTextImpeller::Make(impeller::MakeTextFrameFromTextBlobSkia(blob)),
+          x, y, dl_paints_[paint_id]);
       return;
     }
 #endif  // IMPELLER_SUPPORTS_RENDERING
-    builder_->DrawTextBlob(blob, x, y, dl_paints_[paint_id]);
+    builder_->DrawText(DlTextSkia::Make(blob), x, y, dl_paints_[paint_id]);
   }
 
   void drawTextShadow(const sk_sp<SkTextBlob>& blob,
@@ -114,12 +109,18 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
       DlBlurMaskFilter filter(DlBlurStyle::kNormal, blur_sigma, false);
       paint.setMaskFilter(&filter);
     }
+    std::shared_ptr<DlText> text;
+#if IMPELLER_SUPPORTS_RENDERING
     if (impeller_enabled_) {
-      builder_->DrawTextFrame(impeller::MakeTextFrameFromTextBlobSkia(blob), x,
-                              y, paint);
-      return;
+      text =
+          DlTextImpeller::Make(impeller::MakeTextFrameFromTextBlobSkia(blob));
+    } else {
+      text = DlTextSkia::Make(blob);
     }
-    builder_->DrawTextBlob(blob, x, y, paint);
+#else
+    text = DlTextSkia::Make(blob);
+#endif
+    builder_->DrawText(text, x, y, paint);
   }
 
   void drawRect(const SkRect& rect, const SkPaintOrID& paint) override {
@@ -234,6 +235,7 @@ std::vector<LineMetrics>& ParagraphSkia::GetLineMetrics() {
                         }));
 
     for (const skt::LineMetrics& skm : metrics) {
+      // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
       LineMetrics& txtm = line_metrics_->emplace_back(
           skm.fStartIndex, skm.fEndIndex, skm.fEndExcludingWhitespaces,
           skm.fEndIncludingNewline, skm.fHardBreak);
@@ -257,6 +259,7 @@ std::vector<LineMetrics>& ParagraphSkia::GetLineMetrics() {
     }
   }
 
+  // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
   return line_metrics_.value();
 }
 
@@ -375,7 +378,7 @@ TextStyle ParagraphSkia::SkiaToTxt(const skt::TextStyle& skia) {
       static_cast<TextDecorationStyle>(skia.getDecorationStyle());
   txt.decoration_thickness_multiplier =
       SkScalarToDouble(skia.getDecorationThicknessMultiplier());
-  txt.font_weight = GetTxtFontWeight(skia.getFontStyle().weight());
+  txt.font_weight = skia.getFontStyle().weight();
   txt.font_style = GetTxtFontStyle(skia.getFontStyle().slant());
 
   txt.text_baseline = static_cast<TextBaseline>(skia.getTextBaseline());

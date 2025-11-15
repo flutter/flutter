@@ -15,6 +15,7 @@
 #include "flutter/testing/testing.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
+#include "impeller/display_list/dl_runtime_effect_impeller.h"
 
 namespace impeller {
 namespace testing {
@@ -483,7 +484,7 @@ TEST_P(AiksTest, DrawVerticesTextureCoordinatesWithFragmentShader) {
       runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
 
-  auto runtime_effect = DlRuntimeEffect::MakeImpeller(runtime_stage);
+  auto runtime_effect = DlRuntimeEffectImpeller::Make(runtime_stage);
   auto uniform_data = std::make_shared<std::vector<uint8_t>>();
   auto color_source = flutter::DlColorSource::MakeRuntimeEffect(
       runtime_effect, {}, uniform_data);
@@ -532,7 +533,7 @@ TEST_P(AiksTest,
       runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
 
-  auto runtime_effect = DlRuntimeEffect::MakeImpeller(runtime_stage);
+  auto runtime_effect = DlRuntimeEffectImpeller::Make(runtime_stage);
   auto rect_data = std::vector<Rect>{Rect::MakeLTRB(200, 200, 250, 250)};
 
   auto uniform_data = std::make_shared<std::vector<uint8_t>>();

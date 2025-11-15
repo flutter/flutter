@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/executable.dart';
 import 'package:flutter_tools/runner.dart' as runner;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
@@ -17,10 +18,12 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -288,6 +291,67 @@ void main() {
     );
 
     testUsingContext(
+      "doesn't send multiple events for additional asynchronous exceptions "
+      'thrown during shutdown',
+      () async {
+        // Regression test for https://github.com/flutter/flutter/issues/178318.
+        final command = MultipleExceptionCrashingFlutterCommand();
+        var exceptionCount = 0;
+        unawaited(
+          runZonedGuarded<Future<void>?>(
+            () {
+              unawaited(
+                runner.run(
+                  <String>['crash'],
+                  () => <FlutterCommand>[command],
+                  // This flutterVersion disables crash reporting.
+                  flutterVersion: '[user-branch]/',
+                  reportCrashes: true,
+                  shutdownHooks: ShutdownHooks(),
+                ),
+              );
+              return null;
+            },
+            (Object error, StackTrace stack) {
+              // Keep track of the number of exceptions thrown to ensure that
+              // the count matches the number of exceptions we expect.
+              exceptionCount++;
+            },
+          ),
+        );
+        await command.doneThrowing;
+
+        // This is the main check of this test.
+        //
+        // We are checking that, even though multiple asynchronous errors were
+        // thrown, only a single crash report is sent. This ensures that a
+        // single process crash can't result in multiple crash events.
+
+        // This test only makes sense if we've thrown more than one exception.
+        expect(exceptionCount, greaterThan(1));
+        expect(exceptionCount, command.exceptionCount);
+
+        // Ensure only a single exception analytics event was sent.
+        final List<Event> exceptionEvents = fakeAnalytics.sentEvents
+            .where((e) => e.eventName == DashEvent.exception)
+            .toList();
+        expect(exceptionEvents, hasLength(1));
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
+        ),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
+        Artifacts: () => Artifacts.test(),
+        HttpClientFactory: () =>
+            () => FakeHttpClient.any(),
+      },
+    );
+
+    testUsingContext(
       'create local report',
       () async {
         // Since crash reporting calls the doctor, which checks for the devtools
@@ -513,7 +577,7 @@ void main() {
           '\n'
           'An error was encountered when trying to run git.\n'
           "Please ensure git is installed and available in your system's search path. "
-          'See https://docs.flutter.dev/get-started/install for instructions on installing git for your platform.\n',
+          'See https://docs.flutter.dev/get-started for instructions on installing git for your platform.\n',
         );
       },
       overrides: <Type, Generator>{
@@ -543,7 +607,7 @@ void main() {
           '\n'
           'An error was encountered when trying to run git.\n'
           "Please ensure git is installed and available in your system's search path. "
-          'See https://docs.flutter.dev/get-started/install for instructions on installing git for your platform.\n',
+          'See https://docs.flutter.dev/get-started for instructions on installing git for your platform.\n',
         );
       },
       overrides: <Type, Generator>{
@@ -571,6 +635,48 @@ void main() {
       },
       overrides: <Type, Generator>{
         Logger: () => BufferLogger.test(),
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+        BotDetector: () => const FakeBotDetector(true),
+      },
+    );
+
+    testUsingContext(
+      'do not print download messages when --machine is provided',
+      () async {
+        // Regression test for https://github.com/flutter/flutter/issues/154119.
+        final stdio = FakeStdio();
+        await runner.run(
+          <String>['devices', '--machine'],
+          () => <FlutterCommand>[DevicesCommand()],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+          overrides: {
+            Logger: () {
+              final loggerFactory = LoggerFactory(
+                outputPreferences: globals.outputPreferences,
+                terminal: globals.terminal,
+                stdio: stdio,
+              );
+              return loggerFactory.createLogger(
+                daemon: false,
+                // This is set to true when --machine is detected as an argument in
+                // executable.dart.
+                machine: true,
+                verbose: false,
+                prefixedErrors: false,
+                widgetPreviews: false,
+                windows: globals.platform.isWindows,
+              );
+            },
+          },
+        );
+        expect(stdio.writtenToStdout.join(), isNot(contains('Downloading')));
+        expect(stdio.writtenToStderr.join(), isNot(contains('Downloading')));
+      },
+      overrides: <Type, Generator>{
+        Cache: () => FakeCache(),
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
         BotDetector: () => const FakeBotDetector(true),
@@ -775,6 +881,34 @@ class CrashingFlutterCommand extends FlutterCommand {
   }
 }
 
+class MultipleExceptionCrashingFlutterCommand extends FlutterCommand {
+  final _completer = Completer<void>();
+
+  @override
+  String get description => '';
+
+  @override
+  String get name => 'crash';
+
+  Future<void> get doneThrowing => _completer.future;
+
+  var exceptionCount = 0;
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    Timer.periodic(const Duration(milliseconds: 10), (timer) {
+      exceptionCount++;
+      if (exceptionCount < 5) {
+        throw Exception('ERROR: $exceptionCount');
+      }
+      timer.cancel();
+      _completer.complete();
+    });
+
+    return FlutterCommandResult.success();
+  }
+}
+
 class _GitNotFoundFlutterCommand extends FlutterCommand {
   @override
   String get description => '';
@@ -820,5 +954,18 @@ class _ErrorOnCanRunFakeProcessManager extends Fake implements FakeProcessManage
       throw Exception("oh no, we couldn't check for git!");
     }
     return delegate.canRun(executable, workingDirectory: workingDirectory);
+  }
+}
+
+class FakeCache extends Fake implements Cache {
+  @override
+  Future<void> lock() async {}
+
+  @override
+  void releaseLock() {}
+
+  @override
+  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
+    globals.logger.startProgress('Downloading package Foo').stop();
   }
 }

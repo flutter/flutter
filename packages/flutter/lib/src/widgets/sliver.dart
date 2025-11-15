@@ -216,6 +216,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
+    int semanticIndexOffset = 0,
   }) : super(
          delegate: SliverChildBuilderDelegate(
            itemBuilder,
@@ -224,6 +225,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
            addAutomaticKeepAlives: addAutomaticKeepAlives,
            addRepaintBoundaries: addRepaintBoundaries,
            addSemanticIndexes: addSemanticIndexes,
+           semanticIndexOffset: semanticIndexOffset,
          ),
        );
 
@@ -244,6 +246,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   ///
   /// {@macro flutter.widgets.PageView.findChildIndexCallback}
   ///
+  /// {@macro flutter.widgets.ListView.separated.findItemIndexCallback}
   ///
   /// The `separatorBuilder` is similar to `itemBuilder`, except it is the widget
   /// that gets placed between itemBuilder(context, index) and itemBuilder(context, index + 1).
@@ -276,13 +279,27 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   SliverList.separated({
     super.key,
     required NullableIndexedWidgetBuilder itemBuilder,
+    @Deprecated(
+      'Use findItemIndexCallback instead. '
+      'findChildIndexCallback returns child indices (which include separators), '
+      'while findItemIndexCallback returns item indices (which do not). '
+      'If you were multiplying results by 2 to account for separators, '
+      'you can remove that workaround when migrating to findItemIndexCallback. '
+      'This feature was deprecated after v3.37.0-1.0.pre.',
+    )
     ChildIndexGetter? findChildIndexCallback,
+    ChildIndexGetter? findItemIndexCallback,
     required NullableIndexedWidgetBuilder separatorBuilder,
     int? itemCount,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
-  }) : super(
+  }) : assert(
+         findItemIndexCallback == null || findChildIndexCallback == null,
+         'Cannot provide both findItemIndexCallback and findChildIndexCallback. '
+         'Use findItemIndexCallback as findChildIndexCallback is deprecated.',
+       ),
+       super(
          delegate: SliverChildBuilderDelegate(
            (BuildContext context, int index) {
              final int itemIndex = index ~/ 2;
@@ -300,7 +317,12 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
              }
              return widget;
            },
-           findChildIndexCallback: findChildIndexCallback,
+           findChildIndexCallback: findItemIndexCallback != null
+               ? (Key key) {
+                   final int? itemIndex = findItemIndexCallback(key);
+                   return itemIndex == null ? null : itemIndex * 2;
+                 }
+               : findChildIndexCallback,
            childCount: itemCount == null ? null : math.max(0, itemCount * 2 - 1),
            addAutomaticKeepAlives: addAutomaticKeepAlives,
            addRepaintBoundaries: addRepaintBoundaries,
@@ -471,6 +493,7 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
+    int semanticIndexOffset = 0,
   }) : super(
          delegate: SliverChildBuilderDelegate(
            itemBuilder,
@@ -479,6 +502,7 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
            addAutomaticKeepAlives: addAutomaticKeepAlives,
            addRepaintBoundaries: addRepaintBoundaries,
            addSemanticIndexes: addSemanticIndexes,
+           semanticIndexOffset: semanticIndexOffset,
          ),
        );
 
@@ -744,6 +768,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
+    int semanticIndexOffset = 0,
   }) : super(
          delegate: SliverChildBuilderDelegate(
            itemBuilder,
@@ -752,6 +777,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
            addAutomaticKeepAlives: addAutomaticKeepAlives,
            addRepaintBoundaries: addRepaintBoundaries,
            addSemanticIndexes: addSemanticIndexes,
+           semanticIndexOffset: semanticIndexOffset,
          ),
        );
 
@@ -802,6 +828,60 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
          childAspectRatio: childAspectRatio,
        ),
        super(delegate: SliverChildListDelegate(children));
+
+  /// Creates a sliver that places multiple box children in a two dimensional
+  /// arrangement.
+  ///
+  /// _To learn more about slivers, see [CustomScrollView.slivers]._
+  ///
+  /// Uses a [SliverChildListDelegate] as the [delegate].
+  ///
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildListDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildListDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildListDelegate.addSemanticIndexes] property. The
+  /// `semanticIndexOffset` argument corresponds to the
+  /// [SliverChildListDelegate.semanticIndexOffset] property.
+  ///
+  /// {@tool snippet}
+  /// This example, which would be inserted into a [CustomScrollView.slivers]
+  /// list, shows a grid of [Container] widgets.
+  ///
+  /// ```dart
+  /// SliverGrid.list(
+  ///   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+  ///     crossAxisCount: 3,
+  ///   ),
+  ///   children: <Widget>[
+  ///     Container(color: Colors.red),
+  ///     Container(color: Colors.green),
+  ///     Container(color: Colors.blue),
+  ///     Container(color: Colors.yellow),
+  ///     Container(color: Colors.orange),
+  ///     Container(color: Colors.purple),
+  ///   ],
+  /// );
+  /// ```
+  /// {@end-tool}
+  SliverGrid.list({
+    super.key,
+    required this.gridDelegate,
+    required List<Widget> children,
+    bool addAutomaticKeepAlives = true,
+    bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
+    int semanticIndexOffset = 0,
+  }) : super(
+         delegate: SliverChildListDelegate(
+           children,
+           addAutomaticKeepAlives: addAutomaticKeepAlives,
+           addRepaintBoundaries: addRepaintBoundaries,
+           addSemanticIndexes: addSemanticIndexes,
+           semanticIndexOffset: semanticIndexOffset,
+         ),
+       );
 
   /// The delegate that controls the size and position of the children.
   final SliverGridDelegate gridDelegate;

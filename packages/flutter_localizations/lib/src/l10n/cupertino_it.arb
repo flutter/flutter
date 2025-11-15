@@ -29,5 +29,11 @@
   "shareButtonLabel": "Condividi…",
   "clearButtonLabel": "Cancella",
   "cancelButtonLabel": "Annulla",
-  "backButtonLabel": "Indietro"
+  "backButtonLabel": "Indietro",
+  "expansionTileExpandedHint": "tocca due volte per comprimere",
+  "expansionTileCollapsedHint": "Tocca due volte per espandere",
+  "expansionTileExpandedTapHint": "comprimere",
+  "expansionTileCollapsedTapHint": "espandere e visualizzare altri dettagli",
+  "expandedHint": "Compresso",
+  "collapsedHint": "Espanso"
 }

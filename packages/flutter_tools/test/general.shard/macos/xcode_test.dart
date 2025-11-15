@@ -28,7 +28,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart';
+import '../../src/fakes.dart' hide FakeProcess;
 
 void main() {
   late BufferLogger logger;
@@ -1518,6 +1518,69 @@ void main() {
         }, overrides: <Type, Generator>{Platform: () => macPlatform});
 
         group('with CoreDevices', () {
+          testUsingContext('wireless discovery is cancelled', () async {
+            final getCoreDevicesCompleter = Completer<void>();
+            final coreDeviceControl = FakeIOSCoreDeviceControl(
+              getCoreDevicesCompleter: getCoreDevicesCompleter,
+            );
+            coreDeviceControl.devices.add(
+              FakeIOSCoreDevice(
+                udid: '00008110-00062D2E2632801E',
+                connectionInterface: DeviceConnectionInterface.wireless,
+                developerModeStatus: 'enabled',
+              ),
+            );
+            xcdevice = XCDevice(
+              processManager: fakeProcessManager,
+              logger: logger,
+              xcode: xcode,
+              platform: FakePlatform(operatingSystem: 'macos'),
+              artifacts: Artifacts.test(),
+              cache: Cache.test(processManager: FakeProcessManager.any()),
+              iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
+              fileSystem: fileSystem,
+              coreDeviceControl: coreDeviceControl,
+              xcodeDebug: FakeXcodeDebug(),
+              analytics: fakeAnalytics,
+              shutdownHooks: FakeShutdownHooks(),
+            );
+            const devicesOutput = '''
+[
+  {
+    "simulator" : false,
+    "operatingSystemVersion" : "17.0 (17C54)",
+    "interface" : "network",
+    "available" : true,
+    "platform" : "com.apple.platform.iphoneos",
+    "modelCode" : "iPhone15,1",
+    "identifier" : "234234234234234234345445687594e089dede3c44",
+    "architecture" : "arm64",
+    "modelName" : "iPhone 14",
+    "name" : "A networked iPhone"
+  }
+]
+''';
+
+            fakeProcessManager.addCommands(<FakeCommand>[
+              const FakeCommand(
+                command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
+                stdout: devicesOutput,
+              ),
+            ]);
+
+            final Future<List<IOSDevice>> futureDevices = xcdevice
+                .getAvailableIOSDevicesForWirelessDiscovery();
+
+            await pumpEventQueue();
+
+            xcdevice.cancelWirelessDiscovery();
+            getCoreDevicesCompleter.complete();
+
+            final List<IOSDevice> devices = await futureDevices;
+            expect(devices, isEmpty);
+
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+          });
           testUsingContext(
             'returns devices with corresponding CoreDevices',
             () async {
@@ -1908,16 +1971,20 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
 class FakeXcodeDebug extends Fake implements XcodeDebug {}
 
-class FakeShutdownHooks extends Fake implements ShutdownHooks {
-  @override
-  void addShutdownHook(ShutdownHook shutdownHook) {}
-}
-
 class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
+  FakeIOSCoreDeviceControl({this.getCoreDevicesCompleter});
+
+  final Completer<void>? getCoreDevicesCompleter;
   var devices = <FakeIOSCoreDevice>[];
 
   @override
-  Future<List<IOSCoreDevice>> getCoreDevices({Duration timeout = Duration.zero}) async {
+  Future<List<IOSCoreDevice>> getCoreDevices({
+    Duration timeout = Duration.zero,
+    Completer<void>? cancelCompleter,
+  }) async {
+    if (getCoreDevicesCompleter != null) {
+      await getCoreDevicesCompleter!.future;
+    }
     return devices;
   }
 }

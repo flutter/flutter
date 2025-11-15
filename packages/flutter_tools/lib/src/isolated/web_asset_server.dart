@@ -97,21 +97,7 @@ class WebAssetServer implements AssetReader {
 
   /// Given a list of [modules] that need to be loaded, compute module names and
   /// digests.
-  ///
-  /// If [writeRestartScripts] is true, writes a list of sources mapped to their
-  /// ids to the file system that can then be consumed by the hot restart
-  /// callback.
-  ///
-  /// For example:
-  /// ```json
-  /// [
-  ///   {
-  ///     "src": "<file_name>",
-  ///     "id": "<id>",
-  ///   },
-  /// ]
-  /// ```
-  void performRestart(List<String> modules, {required bool writeRestartScripts}) {
+  void updateModulesAndDigests(List<String> modules) {
     for (final module in modules) {
       // We skip computing the digest by using the hashCode of the underlying buffer.
       // Whenever a file is updated, the corresponding Uint8List.view it corresponds
@@ -122,18 +108,13 @@ class WebAssetServer implements AssetReader {
       _modules[name] = path;
       _digests[name] = _webMemoryFS.files[moduleName].hashCode.toString();
     }
-    if (writeRestartScripts) {
-      final srcIdsList = <Map<String, String>>[
-        for (final String src in modules) <String, String>{'src': '$baseUri/$src', 'id': src},
-      ];
-      writeFile('restart_scripts.json', json.encode(srcIdsList));
-    }
   }
 
-  static const _reloadScriptsFileName = 'reload_scripts.json';
+  static const _reloadedSourcesFileName = 'reloaded_sources.json';
 
-  /// Given a list of [modules] that need to be reloaded, writes a file that
-  /// contains a list of objects each with three fields:
+  /// Given a list of [modules] that need to be reloaded during a hot restart or
+  /// hot reload, writes a file that contains a list of objects each with three
+  /// fields:
   ///
   /// `src`: A string that corresponds to the file path containing a DDC library
   /// bundle. To support embedded libraries, the path should include the
@@ -155,7 +136,7 @@ class WebAssetServer implements AssetReader {
   ///
   /// The path of the output file should stay consistent across the lifetime of
   /// the app.
-  void performReload(List<String> modules) {
+  void writeReloadedSources(List<String> modules) {
     final moduleToLibrary = <Map<String, Object>>[];
     for (final module in modules) {
       final metadata = ModuleMetadata.fromJson(
@@ -170,7 +151,7 @@ class WebAssetServer implements AssetReader {
         'libraries': libraries,
       });
     }
-    writeFile(_reloadScriptsFileName, json.encode(moduleToLibrary));
+    writeFile(_reloadedSourcesFileName, json.encode(moduleToLibrary));
   }
 
   @visibleForTesting
@@ -196,7 +177,7 @@ class WebAssetServer implements AssetReader {
     bool useSseForInjectedClient,
     BuildInfo buildInfo,
     bool enableDwds,
-    bool enableDds,
+    DartDevelopmentServiceConfiguration ddsConfig,
     Uri entrypoint,
     ExpressionCompiler? expressionCompiler, {
     required WebDevServerConfig webDevServerConfig,
@@ -216,8 +197,7 @@ class WebAssetServer implements AssetReader {
   }) async {
     final String hostname = webDevServerConfig.host;
     final int port = webDevServerConfig.port;
-    final String? tlsCertPath = webDevServerConfig.https?.certPath;
-    final String? tlsCertKeyPath = webDevServerConfig.https?.certKeyPath;
+    final HttpsConfig? httpsConfig = webDevServerConfig.https;
     final Map<String, String> extraHeaders = webDevServerConfig.headers;
     final List<ProxyRule> proxy = webDevServerConfig.proxy;
 
@@ -226,8 +206,8 @@ class WebAssetServer implements AssetReader {
     if (ddcModuleSystem) {
       assert(canaryFeatures);
     }
-    InternetAddress address;
-    if (hostname == 'any') {
+    final InternetAddress address;
+    if (hostname == webDevAnyHostDefault) {
       address = InternetAddress.anyIPv4;
     } else {
       address = (await InternetAddress.lookup(hostname)).first;
@@ -236,10 +216,10 @@ class WebAssetServer implements AssetReader {
     const kMaxRetries = 4;
     for (var i = 0; i <= kMaxRetries; i++) {
       try {
-        if (tlsCertPath != null && tlsCertKeyPath != null) {
+        if (httpsConfig != null) {
           final serverContext = SecurityContext()
-            ..useCertificateChain(tlsCertPath)
-            ..usePrivateKey(tlsCertKeyPath);
+            ..useCertificateChain(httpsConfig.certPath)
+            ..usePrivateKey(httpsConfig.certKeyPath);
           httpServer = await HttpServer.bindSecure(address, port, serverContext);
         } else {
           httpServer = await HttpServer.bind(address, port);
@@ -277,14 +257,15 @@ class WebAssetServer implements AssetReader {
       fileSystem: fileSystem,
     );
     final int selectedPort = server.selectedPort;
-    var url = '$hostname:$selectedPort';
-    if (hostname == 'any') {
-      url = 'localhost:$selectedPort';
-    }
-    server._baseUri = Uri.http(url, server.basePath);
-    if (tlsCertPath != null && tlsCertKeyPath != null) {
-      server._baseUri = Uri.https(url, server.basePath);
-    }
+
+    final cleanHost = hostname == webDevAnyHostDefault ? 'localhost' : hostname;
+    final scheme = httpsConfig != null ? 'https' : 'http';
+    server._baseUri = Uri(
+      scheme: scheme,
+      host: cleanHost,
+      port: selectedPort,
+      path: server.basePath,
+    );
     if (testMode) {
       return server;
     }
@@ -356,9 +337,9 @@ class WebAssetServer implements AssetReader {
                   ),
                 ),
                 packageConfigPath: buildInfo.packageConfigPath,
-                hotReloadSourcesUri: server._baseUri.replace(
+                reloadedSourcesUri: server._baseUri.replace(
                   pathSegments: List<String>.from(server._baseUri.pathSegments)
-                    ..add(_reloadScriptsFileName),
+                    ..add(_reloadedSourcesFileName),
                 ),
               ).strategy
             : FrontendServerRequireStrategyProvider(
@@ -380,7 +361,7 @@ class WebAssetServer implements AssetReader {
           useSseForDebugBackend: useSseForDebugBackend,
           useSseForInjectedClient: useSseForInjectedClient,
           expressionCompiler: expressionCompiler,
-          spawnDds: enableDds,
+          ddsConfiguration: ddsConfig,
         ),
         appMetadata: AppMetadata(hostname: hostname),
       ),

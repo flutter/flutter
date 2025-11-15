@@ -694,7 +694,8 @@ void main() {
   group('copies Flutter.framework', () {
     late Directory outputDir;
     late File binary;
-    late FakeCommand copyPhysicalFrameworkCommand;
+    late FakeCommand copyPhysicalDebugFrameworkCommand;
+    late FakeCommand copyPhysicalReleaseFrameworkCommand;
     late FakeCommand copyPhysicalFrameworkDsymCommand;
     late FakeCommand copyPhysicalFrameworkDsymCommandFailure;
     late FakeCommand lipoCommandNonFatResult;
@@ -707,7 +708,7 @@ void main() {
       outputDir = fileSystem.directory('output');
       binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter');
 
-      copyPhysicalFrameworkCommand = FakeCommand(
+      copyPhysicalDebugFrameworkCommand = FakeCommand(
         command: <String>[
           'rsync',
           '-av',
@@ -716,6 +717,18 @@ void main() {
           '- .DS_Store/',
           '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
           'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
+          outputDir.path,
+        ],
+      );
+      copyPhysicalReleaseFrameworkCommand = FakeCommand(
+        command: <String>[
+          'rsync',
+          '-av',
+          '--delete',
+          '--filter',
+          '- .DS_Store/',
+          '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+          'Artifact.flutterFramework.TargetPlatform.ios.release.EnvironmentType.physical',
           outputDir.path,
         ],
       );
@@ -728,7 +741,7 @@ void main() {
           '--filter',
           '- .DS_Store/',
           '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-          'Artifact.flutterFrameworkDsym.TargetPlatform.ios.debug.EnvironmentType.physical',
+          'Artifact.flutterFrameworkDsym.TargetPlatform.ios.release.EnvironmentType.physical',
           outputDir.path,
         ],
       );
@@ -741,7 +754,7 @@ void main() {
           '--filter',
           '- .DS_Store/',
           '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-          'Artifact.flutterFrameworkDsym.TargetPlatform.ios.debug.EnvironmentType.physical',
+          'Artifact.flutterFrameworkDsym.TargetPlatform.ios.release.EnvironmentType.physical',
           outputDir.path,
         ],
         exitCode: 1,
@@ -814,7 +827,7 @@ void main() {
         outputDir: outputDir,
         defines: <String, String>{kIosArchs: 'arm64', kSdkRoot: 'path/to/iPhoneOS.sdk'},
       );
-      processManager.addCommand(copyPhysicalFrameworkCommand);
+      processManager.addCommand(copyPhysicalDebugFrameworkCommand);
       await expectLater(
         const DebugUnpackIOS().build(environment),
         throwsA(
@@ -833,7 +846,7 @@ void main() {
         artifacts.getArtifactPath(
           Artifact.flutterFrameworkDsym,
           platform: TargetPlatform.ios,
-          mode: BuildMode.debug,
+          mode: BuildMode.release,
           environmentType: EnvironmentType.physical,
         ),
       );
@@ -848,12 +861,9 @@ void main() {
         outputDir: outputDir,
         defines: <String, String>{kIosArchs: 'arm64', kSdkRoot: 'path/to/iPhoneOS.sdk'},
       );
-      processManager.addCommands(<FakeCommand>[
-        copyPhysicalFrameworkCommand,
-        copyPhysicalFrameworkDsymCommandFailure,
-      ]);
+      processManager.addCommands(<FakeCommand>[copyPhysicalFrameworkDsymCommandFailure]);
       await expectLater(
-        const DebugUnpackIOS().build(environment),
+        const ReleaseUnpackIOSDsym().build(environment),
         throwsA(
           isException.having(
             (Exception exception) => exception.toString(),
@@ -878,7 +888,7 @@ void main() {
       );
 
       processManager.addCommands(<FakeCommand>[
-        copyPhysicalFrameworkCommand,
+        copyPhysicalDebugFrameworkCommand,
         FakeCommand(
           command: <String>['lipo', '-info', binary.path],
           stdout: 'Architectures in the fat file:',
@@ -918,7 +928,7 @@ void main() {
       );
 
       processManager.addCommands(<FakeCommand>[
-        copyPhysicalFrameworkCommand,
+        copyPhysicalDebugFrameworkCommand,
         FakeCommand(
           command: <String>['lipo', '-info', binary.path],
           stdout: 'Architectures in the fat file:',
@@ -1052,7 +1062,7 @@ void main() {
       );
 
       processManager.addCommands(<FakeCommand>[
-        copyPhysicalFrameworkCommand,
+        copyPhysicalDebugFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         xattrCommand,
@@ -1082,7 +1092,7 @@ void main() {
       );
 
       processManager.addCommands(<FakeCommand>[
-        copyPhysicalFrameworkCommand,
+        copyPhysicalDebugFrameworkCommand,
         FakeCommand(
           command: <String>['lipo', '-info', binary.path],
           stdout: 'Architectures in the fat file:',
@@ -1122,7 +1132,7 @@ void main() {
       );
 
       processManager.addCommands(<FakeCommand>[
-        copyPhysicalFrameworkCommand,
+        copyPhysicalDebugFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         xattrCommand,
@@ -1151,7 +1161,7 @@ void main() {
       );
 
       processManager.addCommands(<FakeCommand>[
-        copyPhysicalFrameworkCommand,
+        copyPhysicalDebugFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         xattrCommand,
@@ -1186,13 +1196,13 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('codesigns framework', () async {
+    testWithoutContext('codesigns framework in release mode', () async {
       binary.createSync(recursive: true);
       final Directory dSYM = fileSystem.directory(
         artifacts.getArtifactPath(
           Artifact.flutterFrameworkDsym,
           platform: TargetPlatform.ios,
-          mode: BuildMode.debug,
+          mode: BuildMode.release,
           environmentType: EnvironmentType.physical,
         ),
       );
@@ -1213,8 +1223,41 @@ void main() {
       );
 
       processManager.addCommands(<FakeCommand>[
-        copyPhysicalFrameworkCommand,
         copyPhysicalFrameworkDsymCommand,
+        copyPhysicalReleaseFrameworkCommand,
+        lipoCommandNonFatResult,
+        lipoVerifyArm64Command,
+        xattrCommand,
+        FakeCommand(command: <String>['codesign', '--force', '--sign', 'ABC123', binary.path]),
+      ]);
+      const Target target = ReleaseUnpackIOS();
+      for (final Target dep in target.dependencies) {
+        await dep.build(environment);
+      }
+      await target.build(environment);
+
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('codesigns framework in debug mode', () async {
+      binary.createSync(recursive: true);
+
+      final environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{
+          kIosArchs: 'arm64',
+          kSdkRoot: 'path/to/iPhoneOS.sdk',
+          kCodesignIdentity: 'ABC123',
+        },
+      );
+
+      processManager.addCommands(<FakeCommand>[
+        copyPhysicalDebugFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         xattrCommand,
@@ -1229,7 +1272,11 @@ void main() {
           ],
         ),
       ]);
-      await const DebugUnpackIOS().build(environment);
+      const Target target = DebugUnpackIOS();
+      for (final Target dep in target.dependencies) {
+        await dep.build(environment);
+      }
+      await target.build(environment);
 
       expect(processManager, hasNoRemainingExpectations);
     });
@@ -1237,24 +1284,41 @@ void main() {
 
   group('DebugIosLLDBInit', () {
     late FakeStdio fakeStdio;
+    late MemoryFileSystem testFileSystem;
 
     setUp(() {
       fakeStdio = FakeStdio();
+      testFileSystem = MemoryFileSystem.test();
     });
 
     testUsingContext(
       'prints warning if missing LLDB Init File in all schemes',
       () async {
         const projectPath = 'path/to/project';
-        fileSystem.directory(projectPath).createSync(recursive: true);
-        environment.defines
+        testFileSystem.directory(projectPath).createSync(recursive: true);
+        final Directory projectDirectory = testFileSystem.directory(projectPath);
+        projectDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+flutter:
+  module:
+    iosBundleIdentifier: com.example.my_module
+''');
+        final testEnvironment = Environment.test(
+          testFileSystem.currentDirectory,
+          defines: <String, String>{kTargetPlatform: 'ios'},
+          processManager: processManager,
+          artifacts: artifacts,
+          logger: logger,
+          fileSystem: testFileSystem,
+          projectDir: projectDirectory,
+        );
+        testEnvironment.defines
           ..[kIosArchs] = 'arm64'
           ..[kSdkRoot] = 'path/to/iPhoneOS.sdk'
           ..[kBuildMode] = 'debug'
           ..[kSrcRoot] = projectPath
           ..[kTargetDeviceOSVersion] = '26.0.0';
 
-        await const DebugIosLLDBInit().build(environment);
+        await const DebugIosLLDBInit().build(testEnvironment);
 
         expect(
           fakeStdio.buffer.toString(),
@@ -1262,7 +1326,46 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => processManager,
+        Platform: () => macPlatform,
+        Stdio: () => fakeStdio,
+      },
+    );
+
+    testUsingContext(
+      'skips if not a module',
+      () async {
+        const projectPath = 'path/to/project';
+        testFileSystem.directory(projectPath).createSync(recursive: true);
+        final Directory projectDirectory = testFileSystem.directory(projectPath);
+        final testEnvironment = Environment.test(
+          testFileSystem.currentDirectory,
+          defines: <String, String>{kTargetPlatform: 'ios'},
+          processManager: processManager,
+          artifacts: artifacts,
+          logger: logger,
+          fileSystem: testFileSystem,
+          projectDir: projectDirectory,
+        );
+        testEnvironment.defines
+          ..[kIosArchs] = 'arm64'
+          ..[kSdkRoot] = 'path/to/iPhoneOS.sdk'
+          ..[kBuildMode] = 'debug'
+          ..[kSrcRoot] = projectPath
+          ..[kTargetDeviceOSVersion] = '26.0.0';
+
+        await const DebugIosLLDBInit().build(testEnvironment);
+
+        expect(
+          fakeStdio.buffer.toString(),
+          isNot(
+            contains('warning: Debugging Flutter on new iOS versions requires an LLDB Init File.'),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
         ProcessManager: () => processManager,
         Platform: () => macPlatform,
         Stdio: () => fakeStdio,
@@ -1273,18 +1376,39 @@ void main() {
       'skips if targetting simulator',
       () async {
         const projectPath = 'path/to/project';
-        fileSystem.directory(projectPath).createSync(recursive: true);
-        environment.defines
+        testFileSystem.directory(projectPath).createSync(recursive: true);
+        final Directory projectDirectory = testFileSystem.directory(projectPath);
+        projectDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+flutter:
+  module:
+    iosBundleIdentifier: com.example.my_module
+''');
+        final testEnvironment = Environment.test(
+          testFileSystem.currentDirectory,
+          defines: <String, String>{kTargetPlatform: 'ios'},
+          processManager: processManager,
+          artifacts: artifacts,
+          logger: logger,
+          fileSystem: testFileSystem,
+          projectDir: projectDirectory,
+        );
+        testEnvironment.defines
           ..[kIosArchs] = 'arm64'
           ..[kSdkRoot] = 'path/to/iPhoneSimulator.sdk'
           ..[kBuildMode] = 'debug'
           ..[kSrcRoot] = projectPath
           ..[kTargetDeviceOSVersion] = '26.0.0';
 
-        await const DebugIosLLDBInit().build(environment);
+        await const DebugIosLLDBInit().build(testEnvironment);
+        expect(
+          fakeStdio.buffer.toString(),
+          isNot(
+            contains('warning: Debugging Flutter on new iOS versions requires an LLDB Init File.'),
+          ),
+        );
       },
       overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
+        FileSystem: () => testFileSystem,
         ProcessManager: () => processManager,
         Platform: () => macPlatform,
       },
@@ -1294,18 +1418,39 @@ void main() {
       'skips if iOS version is less than 26.0',
       () async {
         const projectPath = 'path/to/project';
-        fileSystem.directory(projectPath).createSync(recursive: true);
-        environment.defines
+        testFileSystem.directory(projectPath).createSync(recursive: true);
+        final Directory projectDirectory = testFileSystem.directory(projectPath);
+        projectDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+flutter:
+  module:
+    iosBundleIdentifier: com.example.my_module
+''');
+        final testEnvironment = Environment.test(
+          testFileSystem.currentDirectory,
+          defines: <String, String>{kTargetPlatform: 'ios'},
+          processManager: processManager,
+          artifacts: artifacts,
+          logger: logger,
+          fileSystem: testFileSystem,
+          projectDir: projectDirectory,
+        );
+        testEnvironment.defines
           ..[kIosArchs] = 'arm64'
           ..[kSdkRoot] = 'path/to/iPhoneOS.sdk'
           ..[kBuildMode] = 'debug'
           ..[kSrcRoot] = projectPath
           ..[kTargetDeviceOSVersion] = '18.3.1';
 
-        await const DebugIosLLDBInit().build(environment);
+        await const DebugIosLLDBInit().build(testEnvironment);
+        expect(
+          fakeStdio.buffer.toString(),
+          isNot(
+            contains('warning: Debugging Flutter on new iOS versions requires an LLDB Init File.'),
+          ),
+        );
       },
       overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
+        FileSystem: () => testFileSystem,
         ProcessManager: () => processManager,
         Platform: () => macPlatform,
       },
@@ -1315,8 +1460,8 @@ void main() {
       'does not throw error if there is an LLDB Init File in any scheme',
       () async {
         const projectPath = 'path/to/project';
-        fileSystem.directory(projectPath).createSync(recursive: true);
-        fileSystem
+        testFileSystem.directory(projectPath).createSync(recursive: true);
+        testFileSystem
             .directory(projectPath)
             .childDirectory('MyProject.xcodeproj')
             .childDirectory('xcshareddata')
@@ -1324,17 +1469,32 @@ void main() {
             .childFile('MyProject.xcscheme')
           ..createSync(recursive: true)
           ..writeAsStringSync(r'customLLDBInitFile = "some/path/.lldbinit"');
-        environment.defines
+        final Directory projectDirectory = testFileSystem.directory(projectPath);
+        projectDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+flutter:
+  module:
+    iosBundleIdentifier: com.example.my_module
+''');
+        final testEnvironment = Environment.test(
+          testFileSystem.currentDirectory,
+          defines: <String, String>{kTargetPlatform: 'ios'},
+          processManager: processManager,
+          artifacts: artifacts,
+          logger: logger,
+          fileSystem: testFileSystem,
+          projectDir: projectDirectory,
+        );
+        testEnvironment.defines
           ..[kIosArchs] = 'arm64'
           ..[kSdkRoot] = 'path/to/iPhoneOS.sdk'
           ..[kBuildMode] = 'debug'
           ..[kSrcRoot] = projectPath
           ..[kTargetDeviceOSVersion] = '26.0.0';
 
-        await const DebugIosLLDBInit().build(environment);
+        await const DebugIosLLDBInit().build(testEnvironment);
       },
       overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
+        FileSystem: () => testFileSystem,
         ProcessManager: () => processManager,
         Platform: () => macPlatform,
       },

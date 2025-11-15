@@ -64,12 +64,19 @@ class WebBuilder {
     FlutterProject flutterProject,
     String target,
     BuildInfo buildInfo,
-    ServiceWorkerStrategy serviceWorkerStrategy, {
+    ServiceWorkerStrategy? serviceWorkerStrategy, {
     required List<WebCompilerConfig> compilerConfigs,
     String? baseHref,
     String? staticAssetsUrl,
     String? outputDirectoryPath,
   }) async {
+    if (serviceWorkerStrategy != null) {
+      _logger.printWarning(
+        'The --pwa-strategy option is deprecated and will be removed in a future Flutter release.\n'
+        'For more information, see: https://github.com/flutter/flutter/issues/156910',
+      );
+    }
+
     final bool hasWebPlugins = (await findPlugins(
       flutterProject,
     )).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
@@ -102,9 +109,10 @@ class WebBuilder {
           defines: <String, String>{
             kTargetFile: target,
             kHasWebPlugins: hasWebPlugins.toString(),
-            if (baseHref != null) kBaseHref: baseHref,
-            if (staticAssetsUrl != null) kStaticAssetsUrl: staticAssetsUrl,
-            kServiceWorkerStrategy: serviceWorkerStrategy.cliName,
+            kBaseHref: ?baseHref,
+            kStaticAssetsUrl: ?staticAssetsUrl,
+            kServiceWorkerStrategy:
+                serviceWorkerStrategy?.cliName ?? ServiceWorkerStrategy.offlineFirst.cliName,
             ...buildInfo.toBuildSystemEnvironment(),
           },
           packageConfigPath: buildInfo.packageConfigPath,

@@ -18,10 +18,10 @@ if (use_rbe) {
   local_wrapper =
       rebase_path("//flutter/build/rbe/local_wrapper.sh", root_build_dir)
   compiler_args = rewrapper_command + [
-    "--remote_wrapper=$remote_wrapper",
-    "--local_wrapper=$local_wrapper",
-    "--labels=type=compile,compiler=clang,lang=cpp ",
-  ]
+                    "--remote_wrapper=$remote_wrapper",
+                    "--local_wrapper=$local_wrapper",
+                    "--labels=type=compile,compiler=clang,lang=cpp ",
+                  ]
   compiler_prefix = string_join(" ", compiler_args)
   link_prefix = ""
 } else if (use_ccache) {

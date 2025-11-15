@@ -160,10 +160,11 @@ class RenderSliverCrossAxisGroup extends RenderSliver
   }) {
     RenderSliver? child = lastChild;
     while (child != null) {
+      final Offset paintOffset = (child.parentData! as SliverPhysicalParentData).paintOffset;
       final bool isHit = result.addWithAxisOffset(
         mainAxisPosition: mainAxisPosition,
         crossAxisPosition: crossAxisPosition,
-        paintOffset: null,
+        paintOffset: paintOffset,
         mainAxisOffset: childMainAxisPosition(child),
         crossAxisOffset: childCrossAxisPosition(child),
         hitTest: child.hitTest,
@@ -293,6 +294,10 @@ class RenderSliverMainAxisGroup extends RenderSliver
     double layoutOffset = 0;
     double maxPaintExtent = 0;
     double paintOffset = constraints.overlap;
+    double maxScrollObstructionExtent = 0;
+
+    double cacheOrigin = constraints.cacheOrigin;
+    double remainingCacheExtent = constraints.remainingCacheExtent;
 
     final (
       RenderSliver? leadingChild,
@@ -308,23 +313,38 @@ class RenderSliverMainAxisGroup extends RenderSliver
         from: 0.0,
         to: scrollOffset,
       );
+
+      final double childScrollOffset = math.max(0.0, constraints.scrollOffset - scrollOffset);
+      final double correctedCacheOrigin = math.max(cacheOrigin, -childScrollOffset);
+      final double cacheExtentCorrection = cacheOrigin - correctedCacheOrigin;
+
       child.layout(
         constraints.copyWith(
-          scrollOffset: math.max(0.0, constraints.scrollOffset - scrollOffset),
-          cacheOrigin: math.min(0.0, constraints.cacheOrigin + scrollOffset),
+          scrollOffset: childScrollOffset,
+          cacheOrigin: correctedCacheOrigin,
           overlap: math.max(0.0, _fixPrecisionError(paintOffset - beforeOffsetPaintExtent)),
           remainingPaintExtent: _fixPrecisionError(
             constraints.remainingPaintExtent - beforeOffsetPaintExtent,
           ),
-          remainingCacheExtent: _fixPrecisionError(
-            constraints.remainingCacheExtent -
-                calculateCacheOffset(constraints, from: 0.0, to: scrollOffset),
+          remainingCacheExtent: math.max(
+            0.0,
+            _fixPrecisionError(remainingCacheExtent + cacheExtentCorrection),
           ),
           precedingScrollExtent: scrollOffset + constraints.precedingScrollExtent,
         ),
         parentUsesSize: true,
       );
+
       final SliverGeometry childLayoutGeometry = child.geometry!;
+
+      final double? scrollOffsetCorrection = childLayoutGeometry.scrollOffsetCorrection;
+      if (scrollOffsetCorrection != null) {
+        geometry = SliverGeometry(scrollOffsetCorrection: scrollOffsetCorrection);
+        return;
+      }
+
+      assert(childLayoutGeometry.debugAssertIsValid());
+
       final double childPaintOffset = layoutOffset + childLayoutGeometry.paintOrigin;
       final SliverPhysicalParentData childParentData =
           child.parentData! as SliverPhysicalParentData;
@@ -335,7 +355,14 @@ class RenderSliverMainAxisGroup extends RenderSliver
       scrollOffset += childLayoutGeometry.scrollExtent;
       layoutOffset += childLayoutGeometry.layoutExtent;
       maxPaintExtent += childLayoutGeometry.maxPaintExtent;
+      maxScrollObstructionExtent += childLayoutGeometry.maxScrollObstructionExtent;
       paintOffset = math.max(childPaintOffset + childLayoutGeometry.paintExtent, paintOffset);
+      if (childLayoutGeometry.cacheExtent != 0.0) {
+        remainingCacheExtent = _fixPrecisionError(
+          remainingCacheExtent - childLayoutGeometry.cacheExtent - cacheExtentCorrection,
+        );
+        cacheOrigin = math.min(correctedCacheOrigin + childLayoutGeometry.cacheExtent, 0.0);
+      }
       child = advance(child);
       assert(() {
         if (child != null && maxPaintExtent.isInfinite) {
@@ -357,7 +384,10 @@ class RenderSliverMainAxisGroup extends RenderSliver
       child = firstChild;
       while (child != null) {
         final SliverGeometry childLayoutGeometry = child.geometry!;
-        if (childLayoutGeometry.paintExtent > 0) {
+        final bool childIsTooLarge = childLayoutGeometry.paintExtent > remainingExtent;
+        final bool pinnedHeadersOverflow = maxScrollObstructionExtent > remainingExtent;
+        final bool childIsPinnedHeader = childLayoutGeometry.maxScrollObstructionExtent > 0;
+        if (childIsTooLarge || (pinnedHeadersOverflow && childIsPinnedHeader)) {
           final SliverPhysicalParentData childParentData =
               child.parentData! as SliverPhysicalParentData;
           childParentData.paintOffset = switch (constraints.axis) {
@@ -436,10 +466,11 @@ class RenderSliverMainAxisGroup extends RenderSliver
   }) {
     RenderSliver? child = firstChild;
     while (child != null) {
+      final Offset paintOffset = (child.parentData! as SliverPhysicalParentData).paintOffset;
       final bool isHit = result.addWithAxisOffset(
         mainAxisPosition: mainAxisPosition,
         crossAxisPosition: crossAxisPosition,
-        paintOffset: null,
+        paintOffset: paintOffset,
         mainAxisOffset: childMainAxisPosition(child),
         crossAxisOffset: childCrossAxisPosition(child),
         hitTest: child.hitTest,
@@ -456,7 +487,7 @@ class RenderSliverMainAxisGroup extends RenderSliver
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     RenderSliver? child = firstChild;
     while (child != null) {
-      if (child.geometry!.visible) {
+      if (child.geometry!.visible || child.geometry!.cacheExtent > 0.0 || child.ensureSemantics) {
         visitor(child);
       }
       child = childAfter(child);

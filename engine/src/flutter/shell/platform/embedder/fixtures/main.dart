@@ -170,6 +170,8 @@ Future<void> a11y_main() async {
       labelAttributes: <StringAttribute>[],
       rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
       transform: kTestTransform,
+      hitTestTransform: kTestTransform,
+      traversalParent: 0,
       childrenInTraversalOrder: Int32List.fromList(<int>[84, 96]),
       childrenInHitTestOrder: Int32List.fromList(<int>[96, 84]),
       actions: 0,
@@ -206,6 +208,8 @@ Future<void> a11y_main() async {
       labelAttributes: <StringAttribute>[],
       rect: const Rect.fromLTRB(40.0, 40.0, 80.0, 80.0),
       transform: kTestTransform,
+      hitTestTransform: kTestTransform,
+      traversalParent: 0,
       actions: 0,
       flags: SemanticsFlags.none,
       maxValueLength: 0,
@@ -242,6 +246,8 @@ Future<void> a11y_main() async {
       labelAttributes: <StringAttribute>[],
       rect: const Rect.fromLTRB(40.0, 40.0, 80.0, 80.0),
       transform: kTestTransform,
+      hitTestTransform: kTestTransform,
+      traversalParent: 0,
       childrenInTraversalOrder: Int32List.fromList(<int>[128]),
       childrenInHitTestOrder: Int32List.fromList(<int>[128]),
       actions: 0,
@@ -278,6 +284,8 @@ Future<void> a11y_main() async {
       labelAttributes: <StringAttribute>[],
       rect: const Rect.fromLTRB(40.0, 40.0, 80.0, 80.0),
       transform: kTestTransform,
+      hitTestTransform: kTestTransform,
+      traversalParent: 0,
       additionalActions: Int32List.fromList(<int>[21]),
       platformViewId: 0x3f3,
       actions: 0,
@@ -309,6 +317,7 @@ Future<void> a11y_main() async {
     )
     ..updateCustomAction(id: 21, label: 'Archive', hint: 'archive message');
 
+  PlatformDispatcher.instance.setSemanticsTreeEnabled(true);
   PlatformDispatcher.instance.views.first.updateSemantics(builder.build());
 
   signalNativeTest();
@@ -349,6 +358,8 @@ Future<void> a11y_string_attributes() async {
       ],
       rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
       transform: kTestTransform,
+      hitTestTransform: kTestTransform,
+      traversalParent: 0,
       childrenInTraversalOrder: Int32List.fromList(<int>[84, 96]),
       childrenInHitTestOrder: Int32List.fromList(<int>[96, 84]),
       actions: 0,
@@ -390,6 +401,7 @@ Future<void> a11y_string_attributes() async {
       locale: null,
     );
 
+  PlatformDispatcher.instance.setSemanticsTreeEnabled(true);
   PlatformDispatcher.instance.views.first.updateSemantics(builder.build());
   signalNativeTest();
 }
@@ -1648,6 +1660,8 @@ Future<void> a11y_main_multi_view() async {
       labelAttributes: <StringAttribute>[],
       rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
       transform: kTestTransform,
+      hitTestTransform: kTestTransform,
+      traversalParent: 0,
       childrenInTraversalOrder: Int32List.fromList(<int>[84, 96]),
       childrenInHitTestOrder: Int32List.fromList(<int>[96, 84]),
       actions: 0,
@@ -1679,6 +1693,7 @@ Future<void> a11y_main_multi_view() async {
     );
   }
 
+  PlatformDispatcher.instance.setSemanticsTreeEnabled(true);
   for (final view in PlatformDispatcher.instance.views) {
     view.updateSemantics(createForView(view).build());
   }

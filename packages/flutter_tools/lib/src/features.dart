@@ -56,6 +56,9 @@ abstract class FeatureFlags {
   /// Whether native assets compilation and bundling is enabled.
   bool get isNativeAssetsEnabled;
 
+  /// Whether dart data assets building and bundling is enabled.
+  bool get isDartDataAssetsEnabled => false;
+
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled;
 
@@ -69,6 +72,9 @@ abstract class FeatureFlags {
 
   /// Whether physical iOS devices are debugging with LLDB.
   bool get isLLDBDebuggingEnabled;
+
+  /// Whether UIScene migration is enabled.
+  bool get isUISceneMigrationEnabled;
 
   /// Whether a particular feature is enabled for the current channel.
   ///
@@ -87,10 +93,12 @@ abstract class FeatureFlags {
     flutterCustomDevicesFeature,
     cliAnimation,
     nativeAssets,
+    dartDataAssets,
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,
     lldbDebugging,
+    uiSceneMigration,
   ];
 
   /// All current Flutter feature flags that can be configured.
@@ -184,6 +192,15 @@ const nativeAssets = Feature(
   environmentOverride: 'FLUTTER_NATIVE_ASSETS',
   master: FeatureChannelSetting(available: true, enabledByDefault: true),
   beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true, enabledByDefault: true),
+);
+
+/// Enable Dart data assets building and bundling.
+const dartDataAssets = Feature(
+  name: 'Dart data assets building and bundling',
+  configSetting: 'enable-dart-data-assets',
+  environmentOverride: 'FLUTTER_DART_DATA_ASSETS',
+  master: FeatureChannelSetting(available: true),
 );
 
 /// Enable Swift Package Manager as a darwin dependency manager.
@@ -199,16 +216,13 @@ const swiftPackageManager = Feature(
 /// Whether to continue writing the `{FLUTTER_ROOT}/version` legacy file.
 ///
 /// Tracking removal: <https://github.com/flutter/flutter/issues/171900>.
-const omitLegacyVersionFile = Feature(
+const omitLegacyVersionFile = Feature.fullyEnabled(
   name: 'stops writing the legacy version file',
   configSetting: 'omit-legacy-version-file',
   extraHelpText:
       'If set, the file {FLUTTER_ROOT}/version is no longer written as part of '
       'the flutter tool execution; a newer file format has existed for some '
       'time in {FLUTTER_ROOT}/bin/cache/flutter.version.json.',
-  master: FeatureChannelSetting(available: true),
-  beta: FeatureChannelSetting(available: true),
-  stable: FeatureChannelSetting(available: true),
 );
 
 /// Whether desktop windowing is enabled.
@@ -237,6 +251,21 @@ const lldbDebugging = Feature(
   master: FeatureChannelSetting(available: true, enabledByDefault: true),
   beta: FeatureChannelSetting(available: true, enabledByDefault: true),
   stable: FeatureChannelSetting(available: true, enabledByDefault: true),
+);
+
+/// Enable UIScene lifecycle migration for iOS apps. When enabled, if possible the tool will
+/// attempt to auto-migrate the app. Otherwise, it will print a warning with instructions on how to
+/// migrate manually.
+const uiSceneMigration = Feature(
+  name: 'support for migrating to UIScene lifecycle',
+  extraHelpText:
+      'If enabled, Flutter will migrate your app to iOS UIScene lifecycle if possible or '
+      'otherwise instruct you to migrate manually.',
+  configSetting: 'enable-uiscene-migration',
+  environmentOverride: 'FLUTTER_UISCENE_MIGRATION',
+  master: FeatureChannelSetting(available: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.

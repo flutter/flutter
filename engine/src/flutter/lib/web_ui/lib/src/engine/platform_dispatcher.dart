@@ -29,6 +29,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _addBrightnessMediaQueryListener();
     HighContrastSupport.instance.addListener(_updateHighContrast);
     _addFontSizeObserver();
+    _addTypographySettingsObserver();
     _addLocaleChangedListener();
     registerHotRestartListener(dispose);
     _appLifecycleState.addListener(_setAppLifecycleState);
@@ -59,8 +60,8 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   static final EnginePlatformDispatcher _instance = EnginePlatformDispatcher();
 
   @visibleForTesting
-  final DomElement accessibilityPlaceholder = EngineSemantics.instance.semanticsHelper
-      .prepareAccessibilityPlaceholder();
+  DomElement get accessibilityPlaceholder =>
+      EngineSemantics.instance.semanticsHelper.accessibilityPlaceholder;
 
   PlatformConfiguration configuration = PlatformConfiguration(
     locales: parseBrowserLanguages(),
@@ -80,6 +81,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   void dispose() {
     _removeBrightnessMediaQueryListener();
     _disconnectFontSizeObserver();
+    _disconnectTypographySettingsObserver();
     _removeLocaleChangedListener();
     HighContrastSupport.instance.removeListener(_updateHighContrast);
     _appLifecycleState.removeListener(_setAppLifecycleState);
@@ -480,17 +482,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         final MethodCall decoded = jsonCodec.decodeMethodCall(data);
         switch (decoded.method) {
           case 'Skia.setResourceCacheMaxBytes':
-            if (renderer is CanvasKitRenderer) {
-              assert(
-                decoded.arguments is int,
-                'Argument to Skia.setResourceCacheMaxBytes must be an int, but was ${(decoded.arguments as Object?).runtimeType}',
-              );
-              final int cacheSizeInBytes = decoded.arguments as int;
-              CanvasKitRenderer.instance.resourceCacheMaxBytes = cacheSizeInBytes;
-            }
+            assert(
+              decoded.arguments is int,
+              'Argument to Skia.setResourceCacheMaxBytes must be an int, but was ${(decoded.arguments as Object?).runtimeType}',
+            );
+            final int cacheSizeInBytes = decoded.arguments as int;
+            renderer.resourceCacheMaxBytes = cacheSizeInBytes;
 
-            // Also respond in HTML mode. Otherwise, apps would have to detect
-            // CanvasKit vs HTML before invoking this method.
             replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(<bool>[true]));
         }
         return;
@@ -685,6 +683,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       'HapticFeedbackType.mediumImpact' => vibrateMediumImpact,
       'HapticFeedbackType.heavyImpact' => vibrateHeavyImpact,
       'HapticFeedbackType.selectionClick' => vibrateSelectionClick,
+      'HapticFeedbackType.successNotification' => vibrateMediumImpact,
+      'HapticFeedbackType.warningNotification' => vibrateMediumImpact,
+      'HapticFeedbackType.errorNotification' => vibrateHeavyImpact,
       _ => vibrateLongPress,
     };
   }
@@ -707,6 +708,15 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     required ui.VoidCallback drawFrame,
   }) {
     FrameService.instance.scheduleWarmUpFrame(beginFrame: beginFrame, drawFrame: drawFrame);
+  }
+
+  @override
+  void setSemanticsTreeEnabled(bool enabled) {
+    if (!enabled) {
+      for (final EngineFlutterView view in views) {
+        view.semantics.reset();
+      }
+    }
   }
 
   /// Updates the application's rendering on the GPU with the newly provided
@@ -750,6 +760,18 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     }
   }
 
+  @override
+  double? get lineHeightScaleFactorOverride => configuration.lineHeightScaleFactorOverride;
+
+  @override
+  double? get letterSpacingOverride => configuration.letterSpacingOverride;
+
+  @override
+  double? get wordSpacingOverride => configuration.wordSpacingOverride;
+
+  @override
+  double? get paragraphSpacingOverride => configuration.paragraphSpacingOverride;
+
   /// Additional accessibility features that may be enabled by the platform.
   @override
   ui.AccessibilityFeatures get accessibilityFeatures => configuration.accessibilityFeatures;
@@ -792,6 +814,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ''')
   void updateSemantics(ui.SemanticsUpdate update) {
     implicitView?.semantics.updateSemantics(update);
+  }
+
+  @override
+  void setApplicationLocale(ui.Locale locale) {
+    for (final EngineFlutterView view in views) {
+      view.setLocale(locale);
+    }
   }
 
   /// This is equivalent to `locales.first`, except that it will provide an
@@ -1011,6 +1040,156 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   void _disconnectFontSizeObserver() {
     _fontSizeObserver?.disconnect();
     _fontSizeObserver = null;
+  }
+
+  /// Watches for resize changes on an off-screen invisible element to
+  /// recalculate [lineHeightScaleFactorOverride], [letterSpacingOverride],
+  /// [wordSpacingOverride], and [paragraphSpacingOverride].
+  ///
+  /// Updates [lineHeightScaleFactorOverride], [letterSpacingOverride],
+  /// [wordSpacingOverride], and [paragraphSpacingOverride] with the new values.
+  DomResizeObserver? _typographySettingsObserver;
+  DomElement? _typographyMeasurementElement;
+
+  /// Updates [lineHeightScaleFactorOverride] and return true if
+  /// [lineHeightScaleFactorOverride] changed. If not then returns false.
+  bool _updateLineHeightScaleFactorOverride(double? value) {
+    if (configuration.lineHeightScaleFactorOverride != value) {
+      configuration = configuration.apply(lineHeightScaleFactorOverride: value);
+      return true;
+    }
+    return false;
+  }
+
+  /// Updates [letterSpacingOverride] and return true if
+  /// [letterSpacingOverride] changed. If not then returns false.
+  bool _updateLetterSpacingOverride(double? value) {
+    if (configuration.letterSpacingOverride != value) {
+      configuration = configuration.apply(letterSpacingOverride: value);
+      return true;
+    }
+    return false;
+  }
+
+  /// Updates [wordSpacingOverride] and returns true if
+  /// [wordSpacingOverride] changed. If not then returns false.
+  bool _updateWordSpacingOverride(double? value) {
+    if (configuration.wordSpacingOverride != value) {
+      configuration = configuration.apply(wordSpacingOverride: value);
+      return true;
+    }
+    return false;
+  }
+
+  /// Updates [paragraphSpacingOverride] and returns true if
+  /// [paragraphSpacingOverride] changed. If not then returns false.
+  bool _updateParagraphSpacingOverride(double? value) {
+    if (configuration.paragraphSpacingOverride != value) {
+      configuration = configuration.apply(paragraphSpacingOverride: value);
+      return true;
+    }
+    return false;
+  }
+
+  /// Set the callback function for updating [lineHeightScaleFactorOverride],
+  /// [letterSpacingOverride], [wordSpacingOverride], and [paragraphSpacingOverride]
+  /// based on the sizing changes of an off-screen element with text.
+  void _addTypographySettingsObserver() {
+    _typographyMeasurementElement = createDomHTMLParagraphElement();
+    _typographyMeasurementElement!.text = 'flutter typography measurement';
+    // The element should be hidden from screen readers.
+    _typographyMeasurementElement!.setAttribute('aria-hidden', 'true');
+    const double spacingDefault = 9999.0;
+    _typographyMeasurementElement!.style
+      // The element should be positioned off-screen above
+      // the window and not visible.
+      ..position = 'fixed'
+      ..bottom = '100%'
+      ..visibility = 'hidden'
+      ..opacity = '0'
+      ..pointerEvents = 'none'
+      // The element should be sensitive to letter-spacing, word-spacing,
+      // and line-height changes.
+      ..width = 'auto'
+      ..height = 'auto'
+      ..whiteSpace = 'nowrap'
+      // Set text spacing properties defaults.
+      ..lineHeight = '${spacingDefault}px'
+      ..letterSpacing = '${spacingDefault}px'
+      ..wordSpacing = '${spacingDefault}px'
+      ..margin = '0px 0px ${spacingDefault}px 0px';
+    domDocument.body!.append(_typographyMeasurementElement!);
+    final double typographyMeasurementElementFontSize =
+        parseFontSize(_typographyMeasurementElement!)?.toDouble() ?? _defaultRootFontSize;
+    final double defaultLineHeightFactor = spacingDefault / typographyMeasurementElementFontSize;
+    _typographySettingsObserver = createDomResizeObserver((
+      List<DomResizeObserverEntry> entries,
+      DomResizeObserver observer,
+    ) {
+      final double? lineHeight = parseNumericStyleProperty(
+        _typographyMeasurementElement!,
+        'line-height',
+      )?.toDouble();
+      final double? fontSize = parseFontSize(_typographyMeasurementElement!)?.toDouble();
+      final double? computedLineHeightScaleFactor = fontSize != null && lineHeight != null
+          ? lineHeight / fontSize
+          : null;
+      final double? computedWordSpacing = parseNumericStyleProperty(
+        _typographyMeasurementElement!,
+        'word-spacing',
+      )?.toDouble();
+      final double? computedLetterSpacing = parseNumericStyleProperty(
+        _typographyMeasurementElement!,
+        'letter-spacing',
+      )?.toDouble();
+      // There is no direct CSS property for paragraph spacing,
+      // so on the web this feature is usually implemented
+      // by extension authors by leveraging `margin-bottom` on
+      // the `p` element.
+      final double? computedParagraphSpacing = parseNumericStyleProperty(
+        _typographyMeasurementElement!,
+        'margin-bottom',
+      )?.toDouble();
+
+      bool computedLineHeightScaleFactorChanged = false;
+      bool computedLetterSpacingChanged = false;
+      bool computedWordSpacingChanged = false;
+      bool computedParagraphSpacingChanged = false;
+
+      computedLineHeightScaleFactorChanged = _updateLineHeightScaleFactorOverride(
+        computedLineHeightScaleFactor == defaultLineHeightFactor
+            ? null
+            : computedLineHeightScaleFactor,
+      );
+      computedLetterSpacingChanged = _updateLetterSpacingOverride(
+        computedLetterSpacing == spacingDefault ? null : computedLetterSpacing,
+      );
+      computedWordSpacingChanged = _updateWordSpacingOverride(
+        computedWordSpacing == spacingDefault ? null : computedWordSpacing,
+      );
+      computedParagraphSpacingChanged = _updateParagraphSpacingOverride(
+        computedParagraphSpacing == spacingDefault ? null : computedParagraphSpacing,
+      );
+
+      if (computedLineHeightScaleFactorChanged ||
+          computedLetterSpacingChanged ||
+          computedWordSpacingChanged ||
+          computedParagraphSpacingChanged) {
+        invokeOnPlatformConfigurationChanged();
+        invokeOnMetricsChanged();
+      }
+    });
+
+    _typographySettingsObserver!.observe(_typographyMeasurementElement!);
+  }
+
+  /// Remove the observer for typography changes on the off-screen
+  /// typography measurement element.
+  void _disconnectTypographySettingsObserver() {
+    _typographySettingsObserver?.disconnect();
+    _typographySettingsObserver = null;
+    _typographyMeasurementElement?.remove();
+    _typographyMeasurementElement = null;
   }
 
   void _setAppLifecycleState(ui.AppLifecycleState state) {
@@ -1669,7 +1848,53 @@ class PlatformConfiguration {
     this.locales = const <ui.Locale>[],
     this.defaultRouteName = '/',
     this.systemFontFamily,
+    this.lineHeightScaleFactorOverride,
+    this.letterSpacingOverride,
+    this.wordSpacingOverride,
+    this.paragraphSpacingOverride,
   });
+
+  static const Object _noOverridePlaceholder = Object();
+
+  PlatformConfiguration apply({
+    ui.AccessibilityFeatures? accessibilityFeatures,
+    bool? alwaysUse24HourFormat,
+    bool? semanticsEnabled,
+    ui.Brightness? platformBrightness,
+    double? textScaleFactor,
+    List<ui.Locale>? locales,
+    String? defaultRouteName,
+    Object? systemFontFamily = _noOverridePlaceholder,
+    Object? lineHeightScaleFactorOverride = _noOverridePlaceholder,
+    Object? letterSpacingOverride = _noOverridePlaceholder,
+    Object? wordSpacingOverride = _noOverridePlaceholder,
+    Object? paragraphSpacingOverride = _noOverridePlaceholder,
+  }) {
+    return PlatformConfiguration(
+      accessibilityFeatures: accessibilityFeatures ?? this.accessibilityFeatures,
+      alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
+      semanticsEnabled: semanticsEnabled ?? this.semanticsEnabled,
+      platformBrightness: platformBrightness ?? this.platformBrightness,
+      textScaleFactor: textScaleFactor ?? this.textScaleFactor,
+      locales: locales ?? this.locales,
+      defaultRouteName: defaultRouteName ?? this.defaultRouteName,
+      systemFontFamily: systemFontFamily == _noOverridePlaceholder
+          ? this.systemFontFamily
+          : systemFontFamily as String?,
+      lineHeightScaleFactorOverride: lineHeightScaleFactorOverride == _noOverridePlaceholder
+          ? this.lineHeightScaleFactorOverride
+          : lineHeightScaleFactorOverride as double?,
+      letterSpacingOverride: letterSpacingOverride == _noOverridePlaceholder
+          ? this.letterSpacingOverride
+          : letterSpacingOverride as double?,
+      wordSpacingOverride: wordSpacingOverride == _noOverridePlaceholder
+          ? this.wordSpacingOverride
+          : wordSpacingOverride as double?,
+      paragraphSpacingOverride: paragraphSpacingOverride == _noOverridePlaceholder
+          ? this.paragraphSpacingOverride
+          : paragraphSpacingOverride as double?,
+    );
+  }
 
   PlatformConfiguration copyWith({
     ui.AccessibilityFeatures? accessibilityFeatures,
@@ -1680,6 +1905,10 @@ class PlatformConfiguration {
     List<ui.Locale>? locales,
     String? defaultRouteName,
     String? systemFontFamily,
+    double? lineHeightScaleFactorOverride,
+    double? letterSpacingOverride,
+    double? wordSpacingOverride,
+    double? paragraphSpacingOverride,
   }) {
     return PlatformConfiguration(
       accessibilityFeatures: accessibilityFeatures ?? this.accessibilityFeatures,
@@ -1690,6 +1919,11 @@ class PlatformConfiguration {
       locales: locales ?? this.locales,
       defaultRouteName: defaultRouteName ?? this.defaultRouteName,
       systemFontFamily: systemFontFamily ?? this.systemFontFamily,
+      lineHeightScaleFactorOverride:
+          lineHeightScaleFactorOverride ?? this.lineHeightScaleFactorOverride,
+      letterSpacingOverride: letterSpacingOverride ?? this.letterSpacingOverride,
+      wordSpacingOverride: wordSpacingOverride ?? this.wordSpacingOverride,
+      paragraphSpacingOverride: paragraphSpacingOverride ?? this.paragraphSpacingOverride,
     );
   }
 
@@ -1701,6 +1935,10 @@ class PlatformConfiguration {
   final List<ui.Locale> locales;
   final String defaultRouteName;
   final String? systemFontFamily;
+  final double? lineHeightScaleFactorOverride;
+  final double? letterSpacingOverride;
+  final double? wordSpacingOverride;
+  final double? paragraphSpacingOverride;
 }
 
 /// Helper class to hold navigation target information for AT focus restoration

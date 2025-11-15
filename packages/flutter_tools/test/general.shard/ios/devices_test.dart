@@ -27,6 +27,7 @@ import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -520,6 +521,7 @@ void main() {
           device: device,
           app: appPackage,
           iMobileDevice: IMobileDevice.test(processManager: FakeProcessManager.any()),
+          xcode: FakeXcode(),
         );
         logReader.idevicesyslogProcess = process;
         return logReader;
@@ -866,6 +868,26 @@ void main() {
 
       expect(devices, hasLength(1));
       expect(devices.first, same(device1));
+      expect(xcdevice.getAvailableIOSDevicesCount, 1);
+      expect(xcdevice.getAvailableIOSDevicesForWirelessDiscoveryCount, 0);
+    });
+
+    testWithoutContext('pollingGetDevices returns wireless devices', () async {
+      final iosDevices = IOSDevices(
+        platform: macPlatform,
+        xcdevice: xcdevice,
+        iosWorkflow: iosWorkflow,
+        logger: logger,
+      );
+      xcdevice.isInstalled = true;
+      xcdevice.devices.add(<IOSDevice>[device1]);
+
+      final List<Device> devices = await iosDevices.pollingGetDevices(forWirelessDiscovery: true);
+
+      expect(devices, hasLength(1));
+      expect(devices.first, same(device1));
+      expect(xcdevice.getAvailableIOSDevicesCount, 0);
+      expect(xcdevice.getAvailableIOSDevicesForWirelessDiscoveryCount, 1);
     });
   });
 
@@ -1072,6 +1094,7 @@ class FakeIOSWorkflow extends Fake implements IOSWorkflow {}
 
 class FakeXcdevice extends Fake implements XCDevice {
   var getAvailableIOSDevicesCount = 0;
+  var getAvailableIOSDevicesForWirelessDiscoveryCount = 0;
   final devices = <List<IOSDevice>>[];
   final diagnostics = <String>[];
   var deviceEventController = StreamController<XCDeviceEventNotification>();
@@ -1080,6 +1103,12 @@ class FakeXcdevice extends Fake implements XCDevice {
 
   @override
   var isInstalled = true;
+
+  @override
+  void dispose() {}
+
+  @override
+  void cancelWirelessDiscovery() {}
 
   @override
   Future<List<String>> getDiagnostics() async {
@@ -1094,6 +1123,11 @@ class FakeXcdevice extends Fake implements XCDevice {
   @override
   Future<List<IOSDevice>> getAvailableIOSDevices({Duration? timeout}) async {
     return devices[getAvailableIOSDevicesCount++];
+  }
+
+  @override
+  Future<List<IOSDevice>> getAvailableIOSDevicesForWirelessDiscovery({Duration? timeout}) async {
+    return devices[getAvailableIOSDevicesForWirelessDiscoveryCount++];
   }
 
   @override
@@ -1131,3 +1165,5 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {}
 class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {}
 
 class FakeAnalytics extends Fake implements Analytics {}
+
+class FakeXcode extends Fake implements Xcode {}

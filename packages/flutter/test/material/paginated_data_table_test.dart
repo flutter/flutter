@@ -1423,7 +1423,7 @@ void main() {
   });
 
   testWidgets('PaginatedDataTable custom heading row color', (WidgetTester tester) async {
-    const MaterialStateProperty<Color> headingRowColor = MaterialStatePropertyAll<Color>(
+    const WidgetStateProperty<Color> headingRowColor = MaterialStatePropertyAll<Color>(
       Color(0xffFF0000),
     );
 
@@ -1449,7 +1449,7 @@ void main() {
     final Table table = tester.widget(find.byType(Table));
     final TableRow tableRow = table.children[0];
     final BoxDecoration tableRowBoxDecoration = tableRow.decoration! as BoxDecoration;
-    expect(tableRowBoxDecoration.color, headingRowColor.resolve(<MaterialState>{}));
+    expect(tableRowBoxDecoration.color, headingRowColor.resolve(<WidgetState>{}));
   });
 
   testWidgets('PaginatedDataTable respects custom dividerThickness', (WidgetTester tester) async {
@@ -1515,5 +1515,25 @@ void main() {
 
     final Border? border = tableRowBoxDecoration?.border as Border?;
     expect(border?.bottom.width, defaultDividerThickness);
+  });
+
+  testWidgets('PaginatedDataTable does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: PaginatedDataTable(
+              columns: const <DataColumn>[
+                DataColumn(label: Text('X')),
+                DataColumn(label: Text('Y')),
+                DataColumn(label: Text('Z')),
+              ],
+              source: source,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(PaginatedDataTable)), Size.zero);
   });
 }

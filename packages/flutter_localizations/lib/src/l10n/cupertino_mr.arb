@@ -29,5 +29,11 @@
   "shareButtonLabel": "शेअर करा...",
   "clearButtonLabel": "साफ करा",
   "cancelButtonLabel": "रद्द करा",
-  "backButtonLabel": "मागे जा"
+  "backButtonLabel": "मागे जा",
+  "expansionTileExpandedHint": "कोलॅप्स करण्यासाठी दोनदा टॅप करा",
+  "expansionTileCollapsedHint": "विस्तार करण्‍यासाठी दोनदा टॅप करा",
+  "expansionTileExpandedTapHint": "कोलॅप्स करा",
+  "expansionTileCollapsedTapHint": "आणखी तपशिलांसाठी विस्तार करा",
+  "expandedHint": "कोलॅप्स केले",
+  "collapsedHint": "विस्तार केले"
 }

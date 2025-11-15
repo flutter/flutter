@@ -654,12 +654,12 @@ G_MODULE_EXPORT void fl_standard_message_codec_write_size(
   }
 }
 
-G_MODULE_EXPORT gboolean fl_standard_message_codec_read_size(
-    FlStandardMessageCodec* codec,
-    GBytes* buffer,
-    size_t* offset,
-    uint32_t* value,
-    GError** error) {
+G_MODULE_EXPORT gboolean
+fl_standard_message_codec_read_size(FlStandardMessageCodec* codec,
+                                    GBytes* buffer,
+                                    size_t* offset,
+                                    uint32_t* value,
+                                    GError** error) {
   uint8_t value8;
   if (!read_uint8(buffer, offset, &value8, error)) {
     return FALSE;
@@ -682,11 +682,11 @@ G_MODULE_EXPORT gboolean fl_standard_message_codec_read_size(
   return TRUE;
 }
 
-G_MODULE_EXPORT gboolean fl_standard_message_codec_write_value(
-    FlStandardMessageCodec* self,
-    GByteArray* buffer,
-    FlValue* value,
-    GError** error) {
+G_MODULE_EXPORT gboolean
+fl_standard_message_codec_write_value(FlStandardMessageCodec* self,
+                                      GByteArray* buffer,
+                                      FlValue* value,
+                                      GError** error) {
   return FL_STANDARD_MESSAGE_CODEC_GET_CLASS(self)->write_value(self, buffer,
                                                                 value, error);
 }
