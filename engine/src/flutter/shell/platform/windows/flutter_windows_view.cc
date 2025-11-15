@@ -21,7 +21,7 @@ namespace flutter {
 namespace {
 // The windows API sends pressure as a normalized value between 0 and 1024
 // See
-// https://learn.microsoft.com/en-ca/windows/win32/api/winuser/ns-winuser-pointer_pen_info
+// https://learn.microsoft.com/windows/win32/api/winuser/ns-winuser-pointer_pen_info
 static const int kMaxPenPressure = 1024;
 
 // The maximum duration to block the Windows event loop while waiting
