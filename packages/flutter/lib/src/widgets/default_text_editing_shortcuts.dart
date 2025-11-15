@@ -185,6 +185,10 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
           const DeleteToLineBreakIntent(forward: true),
     },
 
+    SingleActivator(LogicalKeyboardKey.delete): const DeleteCharacterIntent(
+      forward: true,
+    ),
+
     // Arrow: Move selection.
     const SingleActivator(LogicalKeyboardKey.arrowLeft): const ExtendSelectionByCharacterIntent(
       forward: false,
