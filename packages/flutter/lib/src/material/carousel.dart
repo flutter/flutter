@@ -452,19 +452,20 @@ class CarouselView extends StatefulWidget {
   /// The child widgets for the carousel.
   final List<Widget> children;
 
-  /// A callback invoked when the primary item's index changes.
+  /// A callback invoked when the leading item changes.
   ///
-  /// The "primary" item is the one considered most prominent within the viewport.
-  /// Its selection logic depends on the carousel type:
+  /// The “leading” item is the one resolved as primary within the viewport.
+  /// Its definition depends on the carousel configuration:
   ///
-  /// - For a standard [CarouselView] (fixed-size items), it is the item
-  ///   closest to the viewport's leading edge.
+  /// - For a standard [CarouselView], it is the item
+  ///   that becomes fully visible at the start of the viewport.
   ///
-  /// - For a [CarouselView.weighted] (variable-weight items), it is the
-  ///   visible item with the highest layout `weight`.
+  /// - For a [CarouselView.weighted], it is the
+  ///   visible item that occupies the primary position, determined by
+  ///   the largest effective `weight` in the current layout pass.
   ///
-  /// This callback is triggered only by an actual change in the index,
-  /// whether from user scrolling or programmatic control.
+  /// This callback is invoked only when the leading item index actually
+  /// changes, whether through user scrolling or programmatic movement.
   ///
   /// {@tool dartpad}
   /// Example:
@@ -473,7 +474,7 @@ class CarouselView extends StatefulWidget {
   /// CarouselView(
   ///   itemExtent: 200.0,
   ///   onIndexChanged: (int index) {
-  ///     print('Primary index changed to: $index');
+  ///     print('Leading item changed to: $index');
   ///   },
   ///   children: <Widget>[
   ///     Container(color: Colors.red),
@@ -509,7 +510,7 @@ class _CarouselViewState extends State<CarouselView> {
   bool get _consumeMaxWeight => widget.consumeMaxWeight;
   CarouselController? _internalController;
   CarouselController get _controller => widget.controller ?? _internalController!;
-  late int _lastReportedIndex;
+  late int _lastReportedLeadingIndex;
 
   @override
   void initState() {
@@ -518,7 +519,7 @@ class _CarouselViewState extends State<CarouselView> {
     if (widget.controller == null) {
       _internalController = CarouselController();
     }
-    _lastReportedIndex = _controller.leadingIndex;
+    _lastReportedLeadingIndex = _controller.leadingItem;
     _controller._attach(this);
   }
 
@@ -687,8 +688,8 @@ class _CarouselViewState extends State<CarouselView> {
               final ScrollPosition position = Scrollable.of(scrollContext).position;
 
               final int currentLeadingIndex = (position as _CarouselPosition).leadingItem;
-              if (currentLeadingIndex != _lastReportedIndex) {
-                _lastReportedIndex = currentLeadingIndex;
+              if (currentLeadingIndex != _lastReportedLeadingIndex) {
+                _lastReportedLeadingIndex = currentLeadingIndex;
                 widget.onIndexChanged?.call(currentLeadingIndex);
               }
             }
@@ -1628,7 +1629,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     _flexWeights = value;
   }
 
-  int get leadingItem => getItemFromPixels(pixels, viewportDimension).round();
+  int get leadingItem => getItemFromPixels(pixels, viewportDimension).toInt();
 
   double updateLeadingItem(List<int>? newFlexWeights, bool newConsumeMaxWeight) {
     final double maxItem;
@@ -1770,13 +1771,16 @@ class CarouselController extends ScrollController {
   /// The index of the leading item in the controlled carousel.
   ///
   /// If there are no clients attached to this controller, returns [initialItem].
-  /// Otherwise, returns the index of the leading item in the first attached carousel.
+  /// Otherwise, returns the index of the leading item as resolved by
+  /// the first attached carousel.
   ///
-  /// For [CarouselView], this is the index of the item that is fully visible
-  /// at the start of the carousel.
-  /// For [CarouselView.weighted], this is the index of the item that occupies
-  /// the primary, most prominent position determined by the largest weight in `flexWeights`.
-  int get leadingIndex {
+  /// For a standard [CarouselView], the leading item is
+  /// the one that becomes fully visible at the start of the viewport.
+  ///
+  /// For a [CarouselView.weighted], the leading item
+  /// is the visible child that occupies the primary position, determined by
+  /// the highest effective `weight` among the current layout weights.
+  int get leadingItem {
     if (!hasClients) {
       return initialItem;
     }

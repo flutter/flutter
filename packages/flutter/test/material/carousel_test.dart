@@ -2008,7 +2008,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(controller.leadingIndex, equals(3));
+      expect(controller.leadingItem, equals(3));
       expect(leadingIndex, equals(3));
 
       controller.animateToItem(
@@ -2018,7 +2018,7 @@ void main() {
       );
 
       await tester.pumpAndSettle();
-      expect(controller.leadingIndex, equals(1));
+      expect(controller.leadingItem, equals(1));
       expect(leadingIndex, equals(1));
     });
 
@@ -2053,7 +2053,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(controller.leadingIndex, equals(4));
+      expect(controller.leadingItem, equals(4));
       expect(leadingIndex, equals(4));
 
       final double visible4 = visiblePortionOf(tester, 'Item 4');
@@ -2069,7 +2069,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(controller.leadingIndex, equals(2));
+      expect(controller.leadingItem, equals(2));
       expect(leadingIndex, equals(2));
 
       final double visible2 = visiblePortionOf(tester, 'Item 2');
@@ -2110,7 +2110,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(controller.leadingIndex, equals(4));
+      expect(controller.leadingItem, equals(4));
       expect(leadingIndex, equals(4));
       expect(find.text('Item 4'), findsOneWidget);
 
@@ -2127,7 +2127,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(controller.leadingIndex, equals(2));
+      expect(controller.leadingItem, equals(2));
       expect(leadingIndex, equals(2));
       expect(find.text('Item 2'), findsOneWidget);
 
@@ -2165,7 +2165,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify the new index based on controller and callback.
-      expect(controller.leadingIndex, equals(2));
+      expect(controller.leadingItem, equals(2));
       expect(leadingIndex, equals(2));
 
       // Validate that the dragged item is now the most visible in the viewport.
@@ -2176,14 +2176,14 @@ void main() {
       final int mostVisibleIndexAfterLeftDrag = visibleAreasAfterLeftDrag.indexWhere(
         (double area) => area == visibleAreasAfterLeftDrag.reduce(math.max),
       );
-      expect(mostVisibleIndexAfterLeftDrag, equals(controller.leadingIndex));
+      expect(mostVisibleIndexAfterLeftDrag, equals(controller.leadingItem));
 
       // Drag to the right to return to the previous item.
       await tester.drag(find.byType(CarouselView), const Offset(150, 0));
       await tester.pumpAndSettle();
 
       // Verify the updated index.
-      expect(controller.leadingIndex, equals(1));
+      expect(controller.leadingItem, equals(1));
       expect(leadingIndex, equals(1));
 
       // Validate again which item is most visible after dragging back.
@@ -2194,7 +2194,78 @@ void main() {
       final int mostVisibleIndexAfterRightDrag = visibleAreasAfterRightDrag.indexWhere(
         (double area) => area == visibleAreasAfterRightDrag.reduce(math.max),
       );
-      expect(mostVisibleIndexAfterRightDrag, equals(controller.leadingIndex));
+      expect(mostVisibleIndexAfterRightDrag, equals(controller.leadingItem));
+    });
+
+    testWidgets('CarouselView leadingItem changes only after the previous item is fully passed', (
+      WidgetTester tester,
+    ) async {
+      final CarouselController controller = CarouselController();
+      addTearDown(controller.dispose);
+
+      int leadingItemCallback = controller.initialItem;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CarouselView(
+              itemExtent: 200,
+              controller: controller,
+              onIndexChanged: (int index) {
+                leadingItemCallback = index;
+              },
+              children: List<Widget>.generate(
+                5,
+                (int i) => Container(
+                  alignment: Alignment.center,
+                  color: Colors.blue,
+                  child: Text('Item $i'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Ensure initial state.
+      expect(controller.leadingItem, equals(0));
+      expect(leadingItemCallback, equals(0));
+
+      // Drag only HALF an item → item 0 should still be the leading item.
+      await tester.drag(find.byType(CarouselView), const Offset(-100, 0));
+      await tester.pumpAndSettle();
+
+      expect(controller.leadingItem, equals(0));
+      expect(leadingItemCallback, equals(0));
+
+      // Verify visibility: item 0 still has the largest visible portion.
+      final List<double> visibleHalfDrag = List<double>.generate(
+        5,
+        (int i) => visiblePortionOf(tester, 'Item $i'),
+      );
+      final int mostVisibleHalfDrag = visibleHalfDrag.indexWhere(
+        (double area) => area == visibleHalfDrag.reduce(math.max),
+      );
+      expect(mostVisibleHalfDrag, equals(0));
+
+      // Now drag past the FULL boundary → item 1 should become the leading item.
+      await tester.drag(find.byType(CarouselView), const Offset(-120, 0));
+      // Total = -220 → enough to fully pass item 0
+      await tester.pumpAndSettle();
+
+      expect(controller.leadingItem, equals(1));
+      expect(leadingItemCallback, equals(1));
+
+      // Check that item 1 is indeed the most visible now.
+      final List<double> visibleFullDrag = List<double>.generate(
+        5,
+        (int i) => visiblePortionOf(tester, 'Item $i'),
+      );
+      final int mostVisibleFullDrag = visibleFullDrag.indexWhere(
+        (double area) => area == visibleFullDrag.reduce(math.max),
+      );
+      expect(mostVisibleFullDrag, equals(1));
     });
 
     testWidgets('CarouselView starts with the correct initial item', (WidgetTester tester) async {
@@ -2215,7 +2286,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(controller.leadingIndex, equals(2));
+      expect(controller.leadingItem, equals(2));
       expect(find.text('Item 2'), findsOneWidget);
 
       // Verify that the initial item is centered.
