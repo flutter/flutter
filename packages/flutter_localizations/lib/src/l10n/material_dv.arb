@@ -1,0 +1,641 @@
+{
+  "scriptCategory": "English-like",
+  "@scriptCategory": {
+    "description": "The name of the language's script category (see https://material.io/design/typography/language-support.html#language-categories-reference).",
+    "x-flutter-type": "scriptCategory"
+  },
+  "timeOfDayFormat": "HH:mm",
+  "@timeOfDayFormat": {
+    "description": "The ICU 'Short Time' pattern, such as 'HH:mm', 'h:mm a', 'H:mm'. See: http://demo.icu-project.org/icu-bin/locexp?d_=en&_=en_US",
+    "x-flutter-type": "icuShortTimePattern"
+  },
+  "openAppDrawerTooltip": "އޯޕަން ނެވިގޭޝަން މެނޫ",
+  "@openAppDrawerTooltip": {
+    "description": "The tooltip for the leading app bar menu (aka 'hamburger') button."
+  },
+  "backButtonTooltip": "އެނބުރި",
+  "@backButtonTooltip": {
+    "description": "The tooltip for the back button, which closes the current page and returns to the previous one."
+  },
+  "clearButtonTooltip": "ސާފު",
+  "@clearButtonTooltip": {
+    "description": "The tooltip for the button that clears the text input on the search view."
+  },
+  "closeButtonTooltip": "ކައިރީގައި",
+  "@closeButtonTooltip": {
+    "description": "The tooltip for the close button, which closes the current page and returns to the previous one."
+  },
+  "deleteButtonTooltip": "ޑިލީޓް ކުރޭ",
+  "@deleteButtonTooltip": {
+    "description": "The tooltip for the delete button of chips."
+  },
+  "moreButtonTooltip": "އިތުރު",
+  "@moreButtonTooltip": {
+    "description": "The tooltip for the more button in the text selection menu, which shows the overflowing menu items."
+  },
+  "nextMonthTooltip": "އަންނަ މަހު",
+  "@nextMonthTooltip": {
+    "description": "The tooltip for the month picker's 'next month' button."
+  },
+  "previousMonthTooltip": "އޭގެ ކުރީ މަހު",
+  "@previousMonthTooltip": {
+    "description": "The tooltip for the month picker's 'previous month' button."
+  },
+  "nextPageTooltip": "ދެން އޮތް ޞަފްޙާ",
+  "@nextPageTooltip": {
+    "description": "The tooltip for the button that sends the user to the next page of a paginated data table."
+  },
+  "previousPageTooltip": "ކުރީ ސަފުހާ",
+  "@previousPageTooltip": {
+    "description": "The tooltip for the button that sends the user to the previous page of a paginated data table."
+  },
+  "firstPageTooltip": "ފުރަތަމަ ޞަފްޙާ",
+  "@firstPageTooltip": {
+    "description": "The tooltip for the button that sends the user to the first page of a paginated data table."
+  },
+  "lastPageTooltip": "އެންމެ ފަހު ސަފުހާ",
+  "@lastPageTooltip": {
+    "description": "The tooltip for the button that sends the user to the last page of a paginated data table."
+  },
+  "showMenuTooltip": "މެނޫ ދައްކާ",
+  "@showMenuTooltip": {
+    "description": "The tooltip for the button that shows a popup menu."
+  },
+  "scrimLabel": "Scrim",
+  "@scrimLabel": {
+    "description": "The label for the scrim rendered underneath the content of a bottom sheet (used as the 'modalRouteContentName' of the 'scrimOnTapHint' message)."
+  },
+  "bottomSheetLabel": "ތިރީ ޝީޓް",
+  "@bottomSheetLabel": {
+    "description": "The label for a BottomSheet."
+  },
+  "scrimOnTapHint": "Close $modalRouteContentName",
+  "@scrimOnTapHint": {
+    "description": "The onTapHint for the scrim rendered underneath the content of a modal route (especially a bottom sheet) which users can tap to dismiss the content.",
+    "parameters": "modalRouteContentName"
+  },
+  "aboutListTileTitle": "About $applicationName",
+  "@aboutListTileTitle": {
+    "description": "The default title for the drawer item that shows an about page for the application. The value of $applicationName is the name of the application, like GMail or Chrome.",
+    "parameters": "applicationName"
+  },
+  "licensesPageTitle": "ލައިސަންސް",
+  "@licensesPageTitle": {
+    "description": "The title for the Flutter licenses page."
+  },
+  "licensesPackageDetailTextZero": "No licenses",
+  "@licensesPackageDetailTextZero": {
+    "optional": true
+  },
+  "licensesPackageDetailTextOne": "1 license",
+  "@licensesPackageDetailTextOne": {
+    "optional": true
+  },
+  "@licensesPackageDetailTextTwo": {
+    "optional": true
+  },
+  "@licensesPackageDetailTextFew": {
+    "optional": true
+  },
+  "@licensesPackageDetailTextMany": {
+    "optional": true
+  },
+  "licensesPackageDetailTextOther": "$licenseCount licenses",
+  "@licensesPackageDetailText": {
+    "description": "The subtitle and detail text for a package displayed on the Flutter licenses page. The value of $licenseCount is an integer which indicates the number of licenses the package has.",
+    "plural": "licenseCount"
+  },
+  "pageRowsInfoTitle": "$firstRow–$lastRow of $rowCount",
+  "@pageRowsInfoTitle": {
+    "description": "The text shown in the footer of a paginated data table when the exact overall row count is known. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
+    "parameters": "firstRow, lastRow, rowCount"
+  },
+  "pageRowsInfoTitleApproximate": "$firstRow–$lastRow of about $rowCount",
+  "@pageRowsInfoTitleApproximate": {
+    "description": "The text shown in the footer of a paginated data table when the exact overall row count is unknown. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
+    "parameters": "firstRow, lastRow, rowCount"
+  },
+  "rowsPerPageTitle": "ސަފުތަކަށް ސަފުތައް:",
+  "@rowsPerPageTitle": {
+    "description": "The caption for the drop-down button on a paginated data table's footer that allows the user to control the number of rows of data per page of the table."
+  },
+  "tabLabel": "Tab $tabIndex of $tabCount",
+  "@tabLabel": {
+    "description": "The accessibility label used on a tab. This message describes the index of the selected tab and how many tabs there are, e.g. 'Tab 1 of 2'. All values are greater than or equal to one.",
+    "parameters": "tabIndex, tabCount"
+  },
+  "selectedRowCountTitleZero": "No items selected",
+  "@selectedRowCountTitleZero": {
+    "optional": true
+  },
+  "selectedRowCountTitleOne": "1 item selected",
+  "@selectedRowCountTitleOne": {
+    "optional": true
+  },
+  "@selectedRowCountTitleTwo": {
+    "optional": true
+  },
+  "@selectedRowCountTitleFew": {
+    "optional": true
+  },
+  "@selectedRowCountTitleMany": {
+    "optional": true
+  },
+  "selectedRowCountTitleOther": "$selectedRowCount items selected",
+  "@selectedRowCountTitle": {
+    "description": "The title for the header of a paginated data table when the user is selecting rows. The value of $selectedRowCount is an integer which indicates the number of data table row elements that have been selected.",
+    "plural": "selectedRowCount"
+  },
+  "cancelButtonLabel": "ބާތިލު",
+  "@cancelButtonLabel": {
+    "description": "The label for cancel buttons and menu items."
+  },
+  "closeButtonLabel": "ކައިރީގައި",
+  "@closeButtonLabel": {
+    "description": "The label for close buttons and menu items."
+  },
+  "continueButtonLabel": "ކުރިއަށް ގެންދިޔުން",
+  "@continueButtonLabel": {
+    "description": "The label for continue buttons and menu items."
+  },
+  "copyButtonLabel": "ކޮޕީ ކުރޭ",
+  "@copyButtonLabel": {
+    "description": "The label for copy buttons and menu items."
+  },
+  "cutButtonLabel": "ކަނޑާލުން",
+  "@cutButtonLabel": {
+    "description": "The label for cut buttons and menu items."
+  },
+  "scanTextButtonLabel": "ލިޔުން ސްކޭން ކުރޭ",
+  "@scanTextButtonLabel": {
+    "description": "The label for scan text buttons and menu items for starting the insertion of text via OCR."
+  },
+  "lookUpButtonLabel": "އިސްއުފުލާ ބަލާށެވެ.",
+  "@lookUpButtonLabel": {
+    "description": "The label for the Look Up button and menu items."
+  },
+  "searchWebButtonLabel": "ވެބް ސާޗް ކުރޭ",
+  "@searchWebButtonLabel": {
+    "description": "The label for the Search Web button and menu items."
+  },
+  "shareButtonLabel": "ޙިއްޞާ ކުރުން",
+  "@shareButtonLabel": {
+    "description": "The label for the Share button and menu items."
+  },
+  "okButtonLabel": "އެންމެ ރަނގަޅު",
+  "@okButtonLabel": {
+    "description": "The label for OK buttons and menu items."
+  },
+  "pasteButtonLabel": "ޕޭސްޓް ކުރުން",
+  "@pasteButtonLabel": {
+    "description": "The label for paste buttons and menu items."
+  },
+  "selectAllButtonLabel": "ހުރިހާ އެންމެން އިޚްތިޔާރު ކުރޭ",
+  "@selectAllButtonLabel": {
+    "description": "The label for select-all buttons and menu items."
+  },
+  "viewLicensesButtonLabel": "ލައިސަންސް ތައް ބަލާ",
+  "@viewLicensesButtonLabel": {
+    "description": "The label for the button in the about box that leads the user to a list of all licenses that apply to the application."
+  },
+  "anteMeridiemAbbreviation": "އޭ.އެމް.",
+  "@anteMeridiemAbbreviation": {
+    "description": "The abbreviation for ante meridiem (before noon) shown in the time picker. Translations for this abbreviation will only be provided for locales that support it."
+  },
+  "postMeridiemAbbreviation": "ބޮޑުވަޒީރު ޑރ.",
+  "@postMeridiemAbbreviation": {
+    "description": "The abbreviation for post meridiem (after noon) shown in the time picker. Translations for this abbreviation will only be provided for locales that support it."
+  },
+  "timePickerHourModeAnnouncement": "ގަޑިތައް އިޚްތިޔާރު ކުރޭ",
+  "@timePickerHourModeAnnouncement": {
+    "description": "The audio announcement made when the time picker dialog is set to hour mode."
+  },
+  "timePickerMinuteModeAnnouncement": "މިނިޓްތައް އިޚްތިޔާރު ކުރޭ",
+  "@timePickerMinuteModeAnnouncement": {
+    "description": "The audio announcement made when the time picker dialog is set to minute mode."
+  },
+  "modalBarrierDismissLabel": "މަގާމުން ވަކިކުރުން",
+  "@modalBarrierDismissLabel": {
+    "description": "Label read out by accessibility tools (TalkBack or VoiceOver) for a modal barrier to indicate that a tap dismisses the barrier. A modal barrier can for example be found behind a alert or popup to block user interaction with elements behind it."
+  },
+  "menuDismissLabel": "މެނޫ ބޭރުކޮށްލާ",
+  "@menuDismissLabel": {
+    "description": "Label read out by accessibility tools (TalkBack or VoiceOver) for the area around a menu to indicate that a tap dismisses the menu."
+  },
+  "dateSeparator": "/",
+  "@dateSeparator": {
+    "description": "The character string used to separate the parts of a compact date format. For example 'mm/dd/yyyy' has a separator of '/'."
+  },
+  "dateHelpText": "dd/mm/yyyyy",
+  "@dateHelpText": {
+    "description": "The help text used on an empty text input date field to indicate the date format being asked for."
+  },
+  "selectYearSemanticsLabel": "ހޮވާ އަހަރު",
+  "@selectYearSemanticsLabel": {
+    "description": "The accessibility label used to announce when the user has entered the year selection mode in the date picker."
+  },
+  "unspecifiedDate": "ކަނޑައެޅިފައި ނުވާ ތާރީޚެއް",
+  "@unspecifiedDate": {
+    "description": "The label used to indicate a date that has not been entered or selected in the date picker."
+  },
+  "unspecifiedDateRange": "ކަނޑައެޅިފައި ނުވާ ތާރީހު ރޭންޖް",
+  "@unspecifiedDateRange": {
+    "description": "The label used to indicate a date range that has not been entered or selected in the date range picker."
+  },
+  "dateInputLabel": "ތާރީޚަށް ވަންނާށެވެ",
+  "@dateInputLabel": {
+    "description": "The label used to describe the input text field used in the date picker."
+  },
+  "dateRangeStartLabel": "ފެށުނު ތާރީޚް",
+  "@dateRangeStartLabel": {
+    "description": "The label used to describe the starting date input text field used in the date range picker."
+  },
+  "dateRangeEndLabel": "ނިމޭ ތާރީޚް",
+  "@dateRangeEndLabel": {
+    "description": "The label used to describe the ending date input text field used in the date range picker."
+  },
+  "dateRangeStartDateSemanticLabel": "Start date $fullDate",
+  "@dateRangeStartDateSemanticLabel": {
+    "description": "Accessibility announcement that is used when the user navigates to the selected start date in the date range picker.",
+    "parameters": "$fullDate"
+  },
+  "dateRangeEndDateSemanticLabel": "End date $fullDate",
+  "@dateRangeEndDateSemanticLabel": {
+    "description": "Accessibility announcement that is used when the user navigates to the selected end date in the date range picker.",
+    "parameters": "$fullDate"
+  },
+  "invalidDateFormatLabel": "ބާޠިލު ތާރީޚް ފޯމެޓް",
+  "@invalidDateFormatLabel": {
+    "description": "Error message displayed to the user when they have entered a text string in an input field of the date picker that is not in a valid date format."
+  },
+  "invalidDateRangeLabel": "ބާޠިލު ތާރީޚް ރޭންޖް",
+  "@invalidDateRangeLabel": {
+    "description": "Error message displayed to the user when they have entered an invalid date range in the input fields of the date range picker."
+  },
+  "dateOutOfRangeLabel": "ރޭންޖުން ބޭރުގެ ތާރީޚް",
+  "@dateOutOfRangeLabel": {
+    "description": "Error message displayed to the user when they have entered a date that is outside the valid range for the date picker."
+  },
+  "saveButtonLabel": "ސޭވް ކުރޭ",
+  "@saveButtonLabel": {
+    "description": "Label for a 'Save' button used in full screen dialogs."
+  },
+  "datePickerHelpText": "ތާރީޚް އިޚްތިޔާރު ކުރޭ",
+  "@datePickerHelpText": {
+    "description": "Label used in the header of the date picker dialog"
+  },
+  "dateRangePickerHelpText": "ރޭންޖް އިޚްތިޔާރު ކުރޭ",
+  "@dateRangePickerHelpText": {
+    "description": "Label used in the header of the date range picker dialog."
+  },
+  "calendarModeButtonLabel": "ކަލަންޑަރު މޯޑަށް ބަދަލުވުން",
+  "@calendarModeButtonLabel": {
+    "description": "Tooltip used for the calendar mode button of the date pickers."
+  },
+  "inputDateModeButtonLabel": "އިންޕުޓް ޑޭޓް މޯޑަށް ބަދަލުވުން",
+  "@inputDateModeButtonLabel": {
+    "description": "Tooltip used for the text input mode button of the date pickers."
+  },
+  "timePickerDialHelpText": "ވަގުތު އިޚްތިޔާރު ކުރޭ",
+  "@timePickerDialHelpText": {
+    "description": "Label used in the header of the time picker dialog when using the clock dial to select a time."
+  },
+  "timePickerInputHelpText": "ވަގުތަށް ވަންނާށެވެ!",
+  "@timePickerInputHelpText": {
+    "description": "Label used in the header of the time picker dialog when using the text input to enter a time."
+  },
+  "timePickerHourLabel": "ގަޑި",
+  "@timePickerHourLabel": {
+    "description": "Label indicating the text field for inputting an hour when entering a time."
+  },
+  "timePickerMinuteLabel": "Minute",
+  "@timePickerMinuteLabel": {
+    "description": "Label indicating the text field for inputting a minute when entering a time."
+  },
+  "invalidTimeLabel": "ބާޠިލު ވަގުތު",
+  "@invalidTimeLabel": {
+    "description": "Error message displayed to the user when they have entered an invalid time."
+  },
+  "dialModeButtonLabel": "ޑައިލް މޯޑަށް ބަދަލުވުން",
+  "@dialModeButtonLabel": {
+    "description": "Tooltip used for the clock dial mode button of the time picker."
+  },
+  "inputTimeModeButtonLabel": "އިންޕުޓް ޓައިމް މޯޑަށް ބަދަލުވުން",
+  "@inputTimeModeButtonLabel": {
+    "description": "Tooltip used for the text input mode button of the time picker."
+  },
+  "signedInLabel": "ސޮއިކުރައްވާފައިވާ",
+  "@signedInLabel": {
+    "description": "The accessibility label used to indicate which account is signed in, in a UserAccountsDrawerHeader, when the accessibility user navigates the UI. This phrase serves as an adjective with respect to the user. The phrase indicates that the user is currently signed in."
+  },
+  "hideAccountsLabel": "އެކައުންޓްތައް ފޮރުވުން",
+  "@hideAccountsLabel": {
+    "description": "The accessibility label used for the button on a UserAccountsDrawerHeader that hides the list of accounts."
+  },
+  "showAccountsLabel": "އެކައުންޓްތައް ދައްކާ",
+  "@showAccountsLabel": {
+    "description": "The accessibility label used for the button on a UserAccountsDrawerHeader that shows the list of accounts."
+  },
+  "drawerLabel": "Navigation މެނޫ",
+  "@drawerLabel": {
+    "description": "The audio announcement made when the Drawer is opened."
+  },
+  "menuBarMenuLabel": "މެނޫ ބާ",
+  "@menuBarMenuLabel": {
+    "description": "The audio announcement made when a MenuBarMenu is opened."
+  },
+  "popupMenuLabel": "Popup މެނޫ",
+  "@popupMenuLabel": {
+    "description": "The audio announcement made when a PopupMenu is opened."
+  },
+  "dialogLabel": "ޑައިލޮގް ކުރުން",
+  "@dialogLabel": {
+    "description": "The audio announcement made when a Dialog is opened."
+  },
+  "alertDialogLabel": "އެލާޓް",
+  "@alertDialogLabel": {
+    "description": "The audio announcement made when an AlertDialog is opened."
+  },
+  "searchFieldLabel": "ހޯދުމުގެ މަސައްކަތް",
+  "@searchFieldLabel": {
+    "description": "Label indicating that a text field is a search field. This will be used as a hint text in the text field."
+  },
+  "currentDateLabel": "މިހާރުގެ ތާރީޚް",
+  "@currentDateLabel": {
+    "description": "Label indicating that the focused date is the current date."
+  },
+  "selectedDateLabel": "ހޮވުނު ތާރީޚް",
+  "@selectedDateLabel": {
+    "description": "The semantics label to describe the selected date in the calendar picker invoked using [showDatePicker]."
+  },
+  "reorderItemToStart": "ފަށަން ޖެހޭ ފިޔަވަޅެއް",
+  "@reorderItemToStart": {
+    "description": "The audio announcement to move an item in a Reorderable List to the start of the list."
+  },
+  "reorderItemToEnd": "ނިމުމަކަށް ގެނައުމަށް ކުރާ މަސައްކަތް",
+  "@reorderItemToEnd": {
+    "description": "The audio announcement to move an item in a Reorderable List to the end of the list."
+  },
+  "reorderItemUp": "މައްޗަށް ދާށެވެ.",
+  "@reorderItemUp": {
+    "description": "The audio announcement to move an item in a Reorderable List up in the list when it is oriented vertically."
+  },
+  "reorderItemDown": "ތިރިއަށް ދާށެވެ.",
+  "@reorderItemDown": {
+    "description": "The audio announcement to move an item in a Reorderable List down in the list when it is oriented vertically."
+  },
+  "reorderItemLeft": "ވާތް ފަރާތަށް މޫވް ކުރުން",
+  "@reorderItemLeft": {
+    "description": "The audio announcement to move an item in a Reorderable List left in the list when it is oriented horizontally."
+  },
+  "reorderItemRight": "ކަނާތް ފަރާތަށް ދާށެވެ.",
+  "@reorderItemRight": {
+    "description": "The audio announcement to move an item in a Reorderable List right in the list when it is oriented horizontally."
+  },
+  "expandedIconTapHint": "Collapse",
+  "@expandedIconTapHint": {
+    "description": "The verb which describes what happens when an expanded ExpandIcon toggle button is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to collapse.' The exact phrasing of the hint will vary based on locale"
+  },
+  "collapsedIconTapHint": "Expand",
+  "@collapsedIconTapHint": {
+    "description": "The verb which describes what happens when a collapsed ExpandIcon toggle button is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to expand.' The exact phrasing of the hint will vary based on locale"
+  },
+  "expansionTileExpandedHint": "double tap to collapse",
+  "@expansionTileExpandedHint": {
+    "description": "The verb which describes the tap action on an expanded ExpansionTile. This is used by VoiceOver on iOS and macOS. This string will be appended to the collapsedHint string which describes the action to be performed on an expanded ExpansionTile. In the case of US english, this would be 'Expanded\n double tap to collapse.' The exact phrasing of the hint will vary based on locale"
+  },
+  "expansionTileCollapsedHint": "double tap to expand",
+  "@expansionTileCollapsedHint": {
+    "description": "The verb which describes the tap action on a collapsed ExpansionTile. This is used by VoiceOver on iOS and macOS. This string will be appended to the expandedHint string which describes the action to be performed on a collapsed ExpansionTile. In the case of US english, this would be 'Collapsed\n double tap to expand.' The exact phrasing of the hint will vary based on locale"
+  },
+  "expansionTileExpandedTapHint": "Collapse",
+  "@expansionTileExpandedTapHint": {
+    "description": "The verb which describes what happens when an expanded ExpansionTile is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to collapse.' The exact phrasing of the hint will vary based on locale"
+  },
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "@expansionTileCollapsedTapHint": {
+    "description": "The verb which describes what happens when an expanded ExpansionTile is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to expand for more details.' The exact phrasing of the hint will vary based on locale"
+  },
+  "expandedHint": "Collapsed",
+  "@expandedHint": {
+    "description": "The verb which describes the ExpansionTile state when an expanded ExpansionTile is pressed."
+  },
+  "collapsedHint": "Expanded",
+  "@collapsedHint": {
+    "description": "The verb which describes the ExpansionTile state when a collapsed ExpansionTile is pressed."
+  },
+  "remainingTextFieldCharacterCountZero": "No characters remaining",
+  "@remainingTextFieldCharacterCountZero": {
+    "optional": true
+  },
+  "remainingTextFieldCharacterCountOne": "1 character remaining",
+  "@remainingTextFieldCharacterCountOne": {
+    "optional": true
+  },
+  "@remainingTextFieldCharacterCountTwo": {
+    "optional": true
+  },
+  "@remainingTextFieldCharacterCountFew": {
+    "optional": true
+  },
+  "@remainingTextFieldCharacterCountMany": {
+    "optional": true
+  },
+  "remainingTextFieldCharacterCountOther": "$remainingCount characters remaining",
+  "@remainingTextFieldCharacterCount": {
+    "description": "The label for the TextField's character counter. remainingCharacters is a integer representing how many more characters the user can type into the text field before using up a given budget. All values are greater than or equal to zero.",
+    "plural": "remainingCount"
+  },
+  "refreshIndicatorSemanticLabel": "ތާޒާކަން",
+  "@refreshIndicatorSemanticLabel": {
+    "description": "The verb which describes what happens when a RefreshIndicator is displayed on screen.  This is used by TalkBack on Android to announce that a refresh is happening."
+  },
+  "keyboardKeyAlt": "Alt",
+  "@keyboardKeyAlt": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Alt' (alt) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+  "keyboardKeyAltGraph": "އެލްޓް ގްރާފް",
+  "@keyboardKeyAltGraph": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'AltGr' (altGraph) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+  "keyboardKeyBackspace": "Backspace",
+  "@keyboardKeyBackspace": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Backspace' (backspace) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+  "keyboardKeyCapsLock": "ކެޕިޓަލް އަކުރު",
+  "@keyboardKeyCapsLock": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Caps Lock' (capsLock) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+  "keyboardKeyChannelDown": "ޗެނަލް ޑައުން",
+  "@keyboardKeyChannelDown": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Channel Down' (channelDown) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+  "keyboardKeyChannelUp": "ޗެނަލް އަޕް",
+  "@keyboardKeyChannelUp": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Channel Up' (channelUp) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+  "keyboardKeyControl": "ކޮންޓްރޯލް ކުރުން",
+  "@keyboardKeyControl": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Ctrl' (control) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+  "keyboardKeyDelete": "ޑިލީޓް ކުރޭ",
+  "@keyboardKeyDelete": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Del' (delete) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+  "keyboardKeyEject": "އިޖެކްޓް",
+  "@keyboardKeyEject": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Eject' (eject) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+  "keyboardKeyEnd": "ނިމުން",
+  "@keyboardKeyEnd": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'End' (end) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+  "keyboardKeyEscape": "ފިލައިގެން ދިއުން",
+  "@keyboardKeyEscape": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Esc' (escape) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+  "keyboardKeyFn": "އެފް.އެން.",
+  "@keyboardKeyFn": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Fn' (fn) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+  "keyboardKeyHome": "ގެއަށް",
+  "@keyboardKeyHome": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Home' (home) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+  "keyboardKeyInsert": "Insert",
+  "@keyboardKeyInsert": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Insert' (insert) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+  "keyboardKeyMeta": "މެޓާ",
+  "@keyboardKeyMeta": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Meta' (meta) to be displayed in an application menu next to the menu item that this keyboard key triggers on non-macOS and non-Windows hosts.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This key is usually designated by a Windows logo on non-macOS keyboards."
+  },
+  "keyboardKeyMetaMacOs": "ކޮމާންޑް",
+  "@keyboardKeyMetaMacOs": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Command' (meta) to be displayed in an application menu next to the menu item that this keyboard key triggers on a macOS host.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This key is usually designated by a ⌘ symbol on macOS keyboards."
+  },
+  "keyboardKeyMetaWindows": "Windows",
+  "@keyboardKeyMetaWindows": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Windows' (meta) to be displayed in an application menu next to the menu item that this keyboard key triggers on a Windows host.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This key is usually designated by a Windows logo on keyboards."
+  },
+  "keyboardKeyNumLock": "Num Lock",
+  "@keyboardKeyNumLock": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num Lock' (numLock) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+  "keyboardKeyNumpad1": "Numpad 1",
+  "@keyboardKeyNumpad1": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num 1' (numpad1) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular number '1', but on the number pad, accessed with the NumLock on."
+  },
+  "keyboardKeyNumpad2": "Numpad 2",
+  "@keyboardKeyNumpad2": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num 2' (numpad2) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular number '2', but on the number pad, accessed with the NumLock on."
+  },
+  "keyboardKeyNumpad3": "Numpad 3",
+  "@keyboardKeyNumpad3": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num 3' (numpad3) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular number '3', but on the number pad, accessed with the NumLock on."
+  },
+  "keyboardKeyNumpad4": "Numpad 4",
+  "@keyboardKeyNumpad4": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num 4' (numpad4) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular number '4', but on the number pad, accessed with the NumLock on."
+  },
+  "keyboardKeyNumpad5": "Numpad 5",
+  "@keyboardKeyNumpad5": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num 5' (numpad5) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular number '5', but on the number pad, accessed with the NumLock on."
+  },
+  "keyboardKeyNumpad6": "Numpad 6",
+  "@keyboardKeyNumpad6": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num 6' (numpad6) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular number '6', but on the number pad, accessed with the NumLock on."
+  },
+  "keyboardKeyNumpad7": "Numpad 7",
+  "@keyboardKeyNumpad7": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num 7' (numpad7) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular number '7', but on the number pad, accessed with the NumLock on."
+  },
+  "keyboardKeyNumpad8": "Numpad 8",
+  "@keyboardKeyNumpad8": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num 8' (numpad8) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular number '8', but on the number pad, accessed with the NumLock on."
+  },
+  "keyboardKeyNumpad9": "Numpad 9",
+  "@keyboardKeyNumpad9": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num 9' (numpad9) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular number '9', but on the number pad, accessed with the NumLock on."
+  },
+  "keyboardKeyNumpad0": "ނޫމްޕެޑް 0",
+  "@keyboardKeyNumpad0": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num 0' (numpad0) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular number '0', but on the number pad, accessed with the NumLock on."
+  },
+  "keyboardKeyNumpadAdd": "Numpad Add",
+  "@keyboardKeyNumpadAdd": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num +' (numpadAdd) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular '+', but on the number pad, accessed with the NumLock on."
+  },
+  "keyboardKeyNumpadComma": "Numpad Comma",
+  "@keyboardKeyNumpadComma": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num ,' (numpadComma) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular ',', but on the number pad, accessed with the NumLock on."
+  },
+  "keyboardKeyNumpadDecimal": "Numpad Decimal",
+  "@keyboardKeyNumpadDecimal": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num .' (numpadDecimal) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular '.', but on the number pad, accessed with the NumLock on."
+  },
+  "keyboardKeyNumpadDivide": "Numpad Divide",
+  "@keyboardKeyNumpadDivide": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num /' (numpadDivide) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular '/', but on the number pad, accessed with the NumLock on."
+  },
+  "keyboardKeyNumpadEnter": "Numpad Enter",
+  "@keyboardKeyNumpadEnter": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num Enter' (numpadEnter) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular Enter key, but on the number pad, accessed with the NumLock on."
+  },
+  "keyboardKeyNumpadEqual": "Numpad އިކުއަލް",
+  "@keyboardKeyNumpadEqual": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num =' (numpadEqual) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular '=', but on the number pad, accessed with the NumLock on."
+  },
+  "keyboardKeyNumpadMultiply": "ނޫމްޕެޑް ގުނަނީ",
+  "@keyboardKeyNumpadMultiply": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num *' (numpadMultiply) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular '*', but on the number pad, accessed with the NumLock on."
+  },
+  "keyboardKeyNumpadParenLeft": "Numpad Paren ލެފްޓް",
+  "@keyboardKeyNumpadParenLeft": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num (' (numpadParenLeft) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular '(', but on the number pad, accessed with the NumLock on."
+  },
+  "keyboardKeyNumpadParenRight": "Numpad Paren ރައިޓް",
+  "@keyboardKeyNumpadParenRight": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num )' (numpadParenRight) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular ')', but on the number pad, accessed with the NumLock on."
+  },
+  "keyboardKeyNumpadSubtract": "Numpad Subtract",
+  "@keyboardKeyNumpadSubtract": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Num -' (numpadSubtract) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is a regular '-', but on the number pad, accessed with the NumLock on."
+  },
+  "keyboardKeyPageDown": "ޞަފްޙާ ޑައުން",
+  "@keyboardKeyPageDown": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'PgDown' (pageDown) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+  "keyboardKeyPageUp": "ޕޭޖް އަޕް",
+  "@keyboardKeyPageUp": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'PgUp' (pageUp) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+  "keyboardKeyPower": "ބާރު",
+  "@keyboardKeyPower": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Power' (power) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. The key typically turns the computer off and on."
+  },
+  "keyboardKeyPowerOff": "ޕަވަރ އޮފް",
+  "@keyboardKeyPowerOff": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Power Off' (powerOff) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. The key typically turns off the computer."
+  },
+  "keyboardKeyPrintScreen": "ޕްރިންޓް ސްކްރީން",
+  "@keyboardKeyPrintScreen": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Print Screen' (printScreen) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+  "keyboardKeyScrollLock": "ސްކްރޯލް ލޮކް",
+  "@keyboardKeyScrollLock": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Scroll Lock' (scrollLock) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+  "keyboardKeySelect": "އިޚްތިޔާރު ކުރޭ",
+  "@keyboardKeySelect": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Select' (select) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale."
+  },
+  "keyboardKeyShift": "ޝިފްޓް",
+  "@keyboardKeyShift": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Shift' (shift) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is the shift modifier key on the left or right sides of the keyboard."
+  },
+  "keyboardKeySpace": "ޖާގަ",
+  "@keyboardKeySpace": {
+    "description": "Part of a keyboard shortcut label for the keyboard key 'Space' (space) to be displayed in an application menu next to the menu item that this keyboard key triggers.  Should be as short as possible, using standard computer keyboard symbols/terminology for the key in the locale. This is the space bar key."
+  }
+}

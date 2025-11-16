@@ -47915,4 +47915,649 @@ Description: Cantonese
 Added: 1999-12-18
 Deprecated: 2009-07-29
 Preferred-Value: yue
+%%
+Type: language
+Subtag: acm
+Description: ACM
+Added: 2024-01-01
+%%
+Type: language
+Subtag: acq
+Description: ACQ
+Added: 2024-01-01
+%%
+Type: language
+Subtag: aeb
+Description: AEB
+Added: 2024-01-01
+%%
+Type: language
+Subtag: als
+Description: ALS
+Added: 2024-01-01
+%%
+Type: language
+Subtag: apc
+Description: Levantine
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ars
+Description: ARS
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ary
+Description: Moroccan
+Added: 2024-01-01
+%%
+Type: language
+Subtag: arz
+Description: Egyptian
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ayr
+Description: AYR
+Added: 2024-01-01
+%%
+Type: language
+Subtag: azb
+Description: South
+Added: 2024-01-01
+%%
+Type: language
+Subtag: azj
+Description: AZJ
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ba
+Description: BA
+Added: 2024-01-01
+%%
+Type: language
+Subtag: bho
+Description: Bhojpuri
+Added: 2024-01-01
+%%
+Type: language
+Subtag: bo
+Description: BO
+Added: 2024-01-01
+%%
+Type: language
+Subtag: brx
+Description: BRX
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ceb
+Description: Cebuano
+Added: 2024-01-01
+%%
+Type: language
+Subtag: cjk
+Description: CJK
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ckb
+Description: CKB
+Added: 2024-01-01
+%%
+Type: language
+Subtag: crh
+Description: CRH
+Added: 2024-01-01
+%%
+Type: language
+Subtag: dik
+Description: DIK
+Added: 2024-01-01
+%%
+Type: language
+Subtag: doi
+Description: DOI
+Added: 2024-01-01
+%%
+Type: language
+Subtag: dsb
+Description: DSB
+Added: 2024-01-01
+%%
+Type: language
+Subtag: dv
+Description: DV
+Added: 2024-01-01
+%%
+Type: language
+Subtag: dyu
+Description: DYU
+Added: 2024-01-01
+%%
+Type: language
+Subtag: dzo
+Description: DZO
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ee
+Description: Ewe
+Added: 2024-01-01
+%%
+Type: language
+Subtag: epo
+Description: EPO
+Added: 2024-01-01
+%%
+Type: language
+Subtag: fj
+Description: FJ
+Added: 2024-01-01
+%%
+Type: language
+Subtag: fo
+Description: FO
+Added: 2024-01-01
+%%
+Type: language
+Subtag: fon
+Description: FON
+Added: 2024-01-01
+%%
+Type: language
+Subtag: fur
+Description: FUR
+Added: 2024-01-01
+%%
+Type: language
+Subtag: fuv
+Description: FUV
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ga
+Description: GA
+Added: 2024-01-01
+%%
+Type: language
+Subtag: gla
+Description: GLA
+Added: 2024-01-01
+%%
+Type: language
+Subtag: gn
+Description: Guarani
+Added: 2024-01-01
+%%
+Type: language
+Subtag: gom
+Description: GOM
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ha
+Description: Hausa
+Added: 2024-01-01
+%%
+Type: language
+Subtag: hne
+Description: HNE
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ht
+Description: Haitian
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ig
+Description: Igbo
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ikt
+Description: IKT
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ilo
+Description: ILO
+Added: 2024-01-01
+%%
+Type: language
+Subtag: iu
+Description: IU
+Added: 2024-01-01
+%%
+Type: language
+Subtag: jv
+Description: Javanese
+Added: 2024-01-01
+%%
+Type: language
+Subtag: kab
+Description: KAB
+Added: 2024-01-01
+%%
+Type: language
+Subtag: kac
+Description: KAC
+Added: 2024-01-01
+%%
+Type: language
+Subtag: kam
+Description: KAM
+Added: 2024-01-01
+%%
+Type: language
+Subtag: kbp
+Description: KBP
+Added: 2024-01-01
+%%
+Type: language
+Subtag: kea
+Description: KEA
+Added: 2024-01-01
+%%
+Type: language
+Subtag: kg
+Description: Kongo
+Added: 2024-01-01
+%%
+Type: language
+Subtag: khk
+Description: KHK
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ki
+Description: Kikuyu
+Added: 2024-01-01
+%%
+Type: language
+Subtag: kmb
+Description: KMB
+Added: 2024-01-01
+%%
+Type: language
+Subtag: kmr
+Description: KMR
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ks
+Description: Kashmiri
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ku
+Description: Kurdish
+Added: 2024-01-01
+%%
+Type: language
+Subtag: lg
+Description: Ganda
+Added: 2024-01-01
+%%
+Type: language
+Subtag: lij
+Description: LIJ
+Added: 2024-01-01
+%%
+Type: language
+Subtag: lim
+Description: LIM
+Added: 2024-01-01
+%%
+Type: language
+Subtag: lmo
+Description: LMO
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ln
+Description: Lingala
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ltg
+Description: LTG
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ltz
+Description: LTZ
+Added: 2024-01-01
+%%
+Type: language
+Subtag: lua
+Description: LUA
+Added: 2024-01-01
+%%
+Type: language
+Subtag: luo
+Description: LUO
+Added: 2024-01-01
+%%
+Type: language
+Subtag: lus
+Description: LUS
+Added: 2024-01-01
+%%
+Type: language
+Subtag: lvs
+Description: LVS
+Added: 2024-01-01
+%%
+Type: language
+Subtag: lzh
+Description: LZH
+Added: 2024-01-01
+%%
+Type: language
+Subtag: mag
+Description: MAG
+Added: 2024-01-01
+%%
+Type: language
+Subtag: mai
+Description: Maithili
+Added: 2024-01-01
+%%
+Type: language
+Subtag: mg
+Description: Malagasy
+Added: 2024-01-01
+%%
+Type: language
+Subtag: mi
+Description: MI
+Added: 2024-01-01
+%%
+Type: language
+Subtag: min
+Description: MIN
+Added: 2024-01-01
+%%
+Type: language
+Subtag: mni
+Description: MNI
+Added: 2024-01-01
+%%
+Type: language
+Subtag: mos
+Description: MOS
+Added: 2024-01-01
+%%
+Type: language
+Subtag: mt
+Description: MT
+Added: 2024-01-01
+%%
+Type: language
+Subtag: mww
+Description: MWW
+Added: 2024-01-01
+%%
+Type: language
+Subtag: nno
+Description: NNO
+Added: 2024-01-01
+%%
+Type: language
+Subtag: npi
+Description: NPI
+Added: 2024-01-01
+%%
+Type: language
+Subtag: nso
+Description: NSO
+Added: 2024-01-01
+%%
+Type: language
+Subtag: nus
+Description: NUS
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ny
+Description: Nyanja
+Added: 2024-01-01
+%%
+Type: language
+Subtag: oci
+Description: OCI
+Added: 2024-01-01
+%%
+Type: language
+Subtag: om
+Description: Oromo
+Added: 2024-01-01
+%%
+Type: language
+Subtag: otq
+Description: OTQ
+Added: 2024-01-01
+%%
+Type: language
+Subtag: pag
+Description: PAG
+Added: 2024-01-01
+%%
+Type: language
+Subtag: pap
+Description: PAP
+Added: 2024-01-01
+%%
+Type: language
+Subtag: pbt
+Description: PBT
+Added: 2024-01-01
+%%
+Type: language
+Subtag: pes
+Description: Persian
+Added: 2024-01-01
+%%
+Type: language
+Subtag: plt
+Description: PLT
+Added: 2024-01-01
+%%
+Type: language
+Subtag: prs
+Description: PRS
+Added: 2024-01-01
+%%
+Type: language
+Subtag: rn
+Description: Rundi
+Added: 2024-01-01
+%%
+Type: language
+Subtag: rw
+Description: Kinyarwanda
+Added: 2024-01-01
+%%
+Type: language
+Subtag: sag
+Description: SAG
+Added: 2024-01-01
+%%
+Type: language
+Subtag: san
+Description: SAN
+Added: 2024-01-01
+%%
+Type: language
+Subtag: scn
+Description: SCN
+Added: 2024-01-01
+%%
+Type: language
+Subtag: sd
+Description: Sindhi
+Added: 2024-01-01
+%%
+Type: language
+Subtag: shn
+Description: SHN
+Added: 2024-01-01
+%%
+Type: language
+Subtag: sm
+Description: SM
+Added: 2024-01-01
+%%
+Type: language
+Subtag: sn
+Description: Shona
+Added: 2024-01-01
+%%
+Type: language
+Subtag: so
+Description: Somali
+Added: 2024-01-01
+%%
+Type: language
+Subtag: srd
+Description: SRD
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ss
+Description: Swati
+Added: 2024-01-01
+%%
+Type: language
+Subtag: st
+Description: Sotho
+Added: 2024-01-01
+%%
+Type: language
+Subtag: su
+Description: Sundanese
+Added: 2024-01-01
+%%
+Type: language
+Subtag: szl
+Description: SZL
+Added: 2024-01-01
+%%
+Type: language
+Subtag: taq
+Description: TAQ
+Added: 2024-01-01
+%%
+Type: language
+Subtag: tg
+Description: Tajik
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ti
+Description: Tigrinya
+Added: 2024-01-01
+%%
+Type: language
+Subtag: tk
+Description: Turkmen
+Added: 2024-01-01
+%%
+Type: language
+Subtag: tn
+Description: Tswana
+Added: 2024-01-01
+%%
+Type: language
+Subtag: to
+Description: TO
+Added: 2024-01-01
+%%
+Type: language
+Subtag: tpi
+Description: TPI
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ts
+Description: Tsonga
+Added: 2024-01-01
+%%
+Type: language
+Subtag: tt
+Description: Tatar
+Added: 2024-01-01
+%%
+Type: language
+Subtag: tum
+Description: TUM
+Added: 2024-01-01
+%%
+Type: language
+Subtag: tw
+Description: Twi
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ty
+Description: TY
+Added: 2024-01-01
+%%
+Type: language
+Subtag: tzm
+Description: TZM
+Added: 2024-01-01
+%%
+Type: language
+Subtag: umb
+Description: UMB
+Added: 2024-01-01
+%%
+Type: language
+Subtag: uzn
+Description: Northern
+Added: 2024-01-01
+%%
+Type: language
+Subtag: vec
+Description: VEC
+Added: 2024-01-01
+%%
+Type: language
+Subtag: war
+Description: WAR
+Added: 2024-01-01
+%%
+Type: language
+Subtag: wo
+Description: Wolof
+Added: 2024-01-01
+%%
+Type: language
+Subtag: xh
+Description: Xhosa
+Added: 2024-01-01
+%%
+Type: language
+Subtag: ydd
+Description: YDD
+Added: 2024-01-01
+%%
+Type: language
+Subtag: yo
+Description: Yoruba
+Added: 2024-01-01
+%%
+Type: language
+Subtag: yua
+Description: YUA
+Added: 2024-01-01
+%%
+Type: language
+Subtag: zsm
+Description: Standard
+Added: 2024-01-01
 ''';
