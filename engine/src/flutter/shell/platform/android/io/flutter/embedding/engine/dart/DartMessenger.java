@@ -58,7 +58,8 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
   @NonNull private final DartMessengerTaskQueue platformTaskQueue = new PlatformTaskQueue();
 
   @NonNull
-  private WeakHashMap<TaskQueue, DartMessengerTaskQueue> createdTaskQueues = new WeakHashMap<>();
+  private WeakHashMap<TaskQueue, DartMessengerTaskQueue> createdTaskQueues =
+      new WeakHashMap<TaskQueue, DartMessengerTaskQueue>();
 
   @NonNull private TaskQueueFactory taskQueueFactory;
 
