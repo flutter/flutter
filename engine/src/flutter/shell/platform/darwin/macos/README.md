@@ -50,6 +50,6 @@ applying a filter such as `--gtest_filter='FlutterViewControllerTest.*Key*'`.
 
 More general details on testing can be found on the [Wiki][wiki_engine_testing].
 
-[wiki_arch]: https://github.com/flutter/flutter/wiki/The-Engine-architecture
-[wiki_engine_env]: https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment
-[wiki_engine_testing]: https://github.com/flutter/flutter/wiki/Testing-the-engine
+[wiki_arch]: https://github.com/flutter/flutter/blob/main/docs/about/The-Engine-architecture.md
+[wiki_engine_env]: https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Setting-up-the-Engine-development-environment.md
+[wiki_engine_testing]: https://github.com/flutter/flutter/blob/main/docs/engine/testing/Testing-the-engine.md

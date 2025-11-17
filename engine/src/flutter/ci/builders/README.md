@@ -625,7 +625,7 @@ it in your machine run the following steps:
 #### Gclient engine checkout
 
 Create a gclient checkout following instructions from
-[Setting up the engine environment](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment).
+[Setting up the engine environment](https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Setting-up-the-Engine-development-environment.md).
 
 ### Download sub-builds to the gclient checkout out folder
 
