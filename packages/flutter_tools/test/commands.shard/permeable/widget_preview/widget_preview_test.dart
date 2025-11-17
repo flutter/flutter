@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
@@ -265,6 +266,37 @@ void main() {
         }
         expectNoPreviewLaunchTimingEvents();
       });
+
+      testUsingContext(
+        'Flutter Web is disabled',
+        () async {
+          try {
+            await startWidgetPreview(rootProject: await createRootProject());
+            fail('Successfully executed with Flutter Web disabled.');
+          } on ToolExit catch (e) {
+            expect(
+              e.message,
+              'Error: Widget Previews requires Flutter Web to be enabled. Please run '
+              "'flutter config --enable-web' to enable Flutter Web and try again.",
+            );
+          }
+          expectNoPreviewLaunchTimingEvents();
+        },
+        overrides: {
+          FeatureFlags: () => TestFeatureFlags(
+            // ignore: avoid_redundant_argument_values, readability
+            isWebEnabled: false,
+          ),
+          Pub: () => Pub.test(
+            fileSystem: fs,
+            logger: logger,
+            processManager: loggingProcessManager,
+            botDetector: botDetector,
+            platform: platform,
+            stdio: mockStdio,
+          ),
+        },
+      );
     });
 
     testUsingContext(
