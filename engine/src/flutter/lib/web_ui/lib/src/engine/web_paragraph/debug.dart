@@ -17,7 +17,7 @@ class WebParagraphDebug {
 
   static void apiTrace(String arg) {
     assert(() {
-      if (apiLogging) {
+      if (apiLogging || logging) {
         print(arg);
       }
       return true;
