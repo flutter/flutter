@@ -391,17 +391,29 @@ void main() {
 
   testWithoutContext('Automatically cleans old outputs when build graph changes', () async {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
+    final File preservedMacOSFile = environment.outputDir.childFile(
+      'FlutterMacOS.framework/Versions/A/FlutterMacOS',
+    );
+    final File preservedIOSFile = environment.outputDir.childFile('Flutter.framework/Flutter');
     final testTarget =
         TestTarget((Environment environment) async {
             environment.buildDir.childFile('foo.out').createSync();
+            preservedMacOSFile.createSync(recursive: true);
+            preservedIOSFile.createSync(recursive: true);
           })
           ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
-          ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/foo.out')];
+          ..outputs = const <Source>[
+            Source.pattern('{BUILD_DIR}/foo.out'),
+            kFlutterMacOSFrameworkBinarySource,
+            kFlutterIOSFrameworkBinarySource,
+          ];
     fileSystem.file('foo.dart').createSync();
 
     await buildSystem.build(testTarget, environment);
 
     expect(environment.buildDir.childFile('foo.out'), exists);
+    expect(preservedMacOSFile, exists);
+    expect(preservedIOSFile, exists);
 
     final testTarget2 =
         TestTarget((Environment environment) async {
@@ -414,6 +426,8 @@ void main() {
 
     expect(environment.buildDir.childFile('bar.out'), exists);
     expect(environment.buildDir.childFile('foo.out'), isNot(exists));
+    expect(preservedMacOSFile, exists);
+    expect(preservedIOSFile, exists);
   });
 
   testWithoutContext('Does not crash when filesystem and cache are out of sync', () async {
@@ -626,7 +640,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       platform: FakePlatform(),
-    ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
+    ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{}, {});
 
     expect(environment.outputDir.childFile('.last_build_id'), exists);
     expect(
@@ -648,7 +662,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       platform: FakePlatform(),
-    ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
+    ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{}, {});
 
     expect(environment.outputDir.childFile('.last_build_id'), exists);
     expect(
@@ -667,7 +681,7 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(),
-      ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
+      ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{}, {});
 
       expect(
         environment.outputDir.childFile('.last_build_id').lastModifiedSync(),
@@ -686,7 +700,7 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(),
-      ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
+      ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{}, {});
 
       expect(
         environment.outputDir.childFile('.last_build_id').readAsStringSync(),
@@ -710,7 +724,7 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(),
-      ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
+      ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{}, {});
 
       expect(
         environment.outputDir.childFile('.last_build_id').readAsStringSync(),
@@ -719,6 +733,29 @@ void main() {
       expect(environment.outputDir.childFile('stale'), isNot(exists));
     },
   );
+
+  testWithoutContext('trackSharedBuildDirectory does not delete preserved outputs', () {
+    environment.outputDir.childFile('.last_build_id').writeAsStringSync('foo');
+    final Directory otherBuildDir = environment.buildDir.parent.childDirectory('foo')
+      ..createSync(recursive: true);
+    final File preservedFile = environment.outputDir.childFile('preserved')..createSync();
+    otherBuildDir
+        .childFile('outputs.json')
+        .writeAsStringSync(json.encode(<String>[preservedFile.absolute.path]));
+    FlutterBuildSystem(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(),
+    ).trackSharedBuildDirectory(environment, fileSystem, <String, File>{}, {
+      preservedFile.absolute.path,
+    });
+
+    expect(
+      environment.outputDir.childFile('.last_build_id').readAsStringSync(),
+      '6666cd76f96956469e7be39d750cc7d9',
+    );
+    expect(environment.outputDir.childFile('preserved'), exists);
+  });
 
   testWithoutContext(
     'multiple builds to the same output directory do no leave stale artifacts',

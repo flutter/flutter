@@ -55,5 +55,17 @@ void main() {
       HapticFeedback.selectionClick,
       'HapticFeedbackType.selectionClick',
     );
+    await callAndVerifyHapticFunction(
+      HapticFeedback.successNotification,
+      'HapticFeedbackType.successNotification',
+    );
+    await callAndVerifyHapticFunction(
+      HapticFeedback.warningNotification,
+      'HapticFeedbackType.warningNotification',
+    );
+    await callAndVerifyHapticFunction(
+      HapticFeedback.errorNotification,
+      'HapticFeedbackType.errorNotification',
+    );
   });
 }
