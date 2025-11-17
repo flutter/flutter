@@ -1239,6 +1239,11 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
           ),
         );
 
+        // The label used in _DropdownMenuBody to compute the preferred width.
+        final Widget? effectiveLabel =
+            effectiveDecoration.label ??
+            (effectiveDecoration.labelText != null ? Text(effectiveDecoration.labelText!) : null);
+
         // If [expandedInsets] is not null, the width of the text field should depend
         // on its parent width. So we don't need to use `_DropdownMenuBody` to
         // calculate the children's width.
@@ -1259,12 +1264,12 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
                 children: <Widget>[
                   textField,
                   ..._initialMenu!,
-                  if (widget.label != null)
+                  if (effectiveLabel != null)
                     ExcludeSemantics(
                       child: Padding(
                         // See RenderEditable.floatingCursorAddedMargin for the default horizontal padding.
                         padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: DefaultTextStyle(style: effectiveTextStyle!, child: widget.label!),
+                        child: DefaultTextStyle(style: effectiveTextStyle!, child: effectiveLabel),
                       ),
                     ),
                   effectiveDecoration.suffixIcon ?? const SizedBox.shrink(),
