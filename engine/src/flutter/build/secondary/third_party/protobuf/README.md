@@ -14,4 +14,4 @@ This repo should be checked out such that:
 * `//.gn` contains `secondary_source = "//build/secondary/"`
 
 See the
-[GN documentation on secondary_source](https://gn.googlesource.com/gn/+/master/docs/reference.md#other-help-topics-gn-file-variables).
+[GN documentation on secondary_source](https://gn.googlesource.com/gn/+/main/docs/reference.md#other-help-topics-gn-file-variables).

@@ -204,7 +204,7 @@ enum class Role {
   kGenericContainer,
   // --------------------------------------------------------------
   // ARIA Graphics module roles:
-  // https://rawgit.com/w3c/graphics-aam/master/#mapping_role_table
+  // https://www.w3.org/TR/graphics-aam-1.0/#mapping_role_table
   kGraphicsDocument,
   kGraphicsObject,
   kGraphicsSymbol,

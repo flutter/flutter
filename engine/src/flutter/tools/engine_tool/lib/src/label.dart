@@ -6,7 +6,7 @@ import 'package:meta/meta.dart';
 
 /// An identifier of a target that loosely follows [GN][] and [Bazel][] format.
 ///
-/// [gn]: https://gn.googlesource.com/gn/+/master/docs/reference.md#labels
+/// [gn]: https://gn.googlesource.com/gn/+/main/docs/reference.md#labels
 /// [bazel]: https://bazel.build/concepts/labels
 ///
 /// A label in `engine_tool` are two string components separated by a colon in
@@ -208,7 +208,7 @@ final class TargetPattern {
 
   /// Returns a string representation of the target pattern in [GN format][gn].
   ///
-  /// [gn]: https://gn.googlesource.com/gn/+/master/docs/reference.md#labels
+  /// [gn]: https://gn.googlesource.com/gn/+/main/docs/reference.md#labels
   ///
   /// Specifically:
   /// - `//package/to/package/...` is converted to `path/to/package/*`.
