@@ -30,8 +30,12 @@ ImageDescriptor::ImageInfo ImageDescriptor::CreateImageInfo(
     case kRGBA_F32_SkColorType:
       format = kRGBAFloat32;
       break;
+    case kGray_8_SkColorType:
+      format = kGray8;
+      break;
     default:
-      FML_DCHECK(false) << "Unsupported pixel format.";
+      FML_DCHECK(false) << "Unsupported pixel format: "
+                        << sk_image_info.colorType();
       format = kRGBA8888;
   }
   return ImageInfo{
@@ -54,6 +58,9 @@ SkImageInfo ImageDescriptor::ToSkImageInfo(const ImageInfo& image_info) {
       break;
     case PixelFormat::kRGBAFloat32:
       color_type = kRGBA_F32_SkColorType;
+      break;
+    case PixelFormat::kGray8:
+      color_type = kGray_8_SkColorType;
       break;
     case PixelFormat::kR32Float:
       FML_DCHECK(false) << "not a supported skia format";
@@ -186,6 +193,8 @@ bool ImageDescriptor::get_pixels(const SkPixmap& pixmap) const {
 
 int ImageDescriptor::bytesPerPixel() const {
   switch (image_info_.format) {
+    case kGray8:
+      return 1;
     case kRGBA8888:
     case kBGRA8888:
     case kR32Float:

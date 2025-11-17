@@ -40,6 +40,7 @@ class ImageDescriptor : public RefCountedDartWrappable<ImageDescriptor> {
     kBGRA8888,
     kRGBAFloat32,
     kR32Float,
+    kGray8,
   };
 
   struct ImageInfo {
