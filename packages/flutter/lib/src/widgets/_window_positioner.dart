@@ -503,7 +503,7 @@ bool _rectContains(Rect r1, Rect r2) {
 }
 
 Offset _constrainTo(Rect r, Offset p) {
-  return Offset(p.dx.clamp(r.left, r.right), p.dy.clamp(r.top, r.bottom));
+  return Offset(clampDouble(p.dx, r.left, r.right), clampDouble(p.dy, r.top, r.bottom));
 }
 
 Offset _flipX(Offset offset) {
