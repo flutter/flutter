@@ -1217,7 +1217,7 @@ std::shared_ptr<Texture> DisplayListToTexture(
     AiksContext& context,
     bool reset_host_buffer,
     bool generate_mips,
-    int32_t target_format) {
+    std::optional<PixelFormat> target_pixel_format) {
   int mip_count = 1;
   if (generate_mips) {
     mip_count = size.MipCount();
@@ -1240,7 +1240,7 @@ std::shared_ptr<Texture> DisplayListToTexture(
         nullptr,                                // existing_color_msaa_texture
         nullptr,                                // existing_color_resolve_texture
         nullptr,                                // existing_depth_stencil_texture
-        target_format                           // target_format
+        target_pixel_format                           // target_format
     );
   } else {
     target = render_target_allocator.CreateOffscreen(
@@ -1253,7 +1253,7 @@ std::shared_ptr<Texture> DisplayListToTexture(
         std::nullopt,                       // stencil_attachment_config
         nullptr,                            // existing_color_texture
         nullptr,                            // existing_depth_stencil_texture
-        target_format                       // target_format
+        target_pixel_format                       // target_format
     );
   }
   if (!target.IsValid()) {

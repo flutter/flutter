@@ -46,7 +46,7 @@ class RenderTargetCache : public RenderTargetAllocator {
       const std::shared_ptr<Texture>& existing_color_texture = nullptr,
       const std::shared_ptr<Texture>& existing_depth_stencil_texture =
           nullptr,
-      int32_t target_pixel_format_int = 0) override;
+      std::optional<PixelFormat> target_pixel_format = std::nullopt) override;
 
   RenderTarget CreateOffscreenMSAA(
       const Context& context,
@@ -61,7 +61,7 @@ class RenderTargetCache : public RenderTargetAllocator {
       const std::shared_ptr<Texture>& existing_color_resolve_texture = nullptr,
       const std::shared_ptr<Texture>& existing_depth_stencil_texture =
           nullptr,
-      int32_t target_pixel_format_int = 0) override;
+      std::optional<PixelFormat> target_pixel_format = std::nullopt) override;
 
   // visible for testing.
   size_t CachedTextureCount() const;

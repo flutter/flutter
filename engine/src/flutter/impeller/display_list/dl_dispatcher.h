@@ -404,7 +404,7 @@ std::shared_ptr<Texture> DisplayListToTexture(
     AiksContext& context,
     bool reset_host_buffer = true,
     bool generate_mips = false,
-    int32_t target_format = 0);
+    std::optional<PixelFormat> target_pixel_format = std::nullopt);
 
 /// @brief Render the provided display list to the render target.
 ///
