@@ -157,10 +157,15 @@ Future<Map<String, String>?> getCodeSigningIdentityDevelopmentTeamBuildSetting({
   // If the user already has it set in the project build settings itself,
   // continue with that.
   if (_isNotEmpty(buildSettings[_developmentTeamBuildSettingName])) {
-    logger.printStatus(
-      'Automatically signing iOS for device deployment using specified development '
-      'team in Xcode project: ${buildSettings[_developmentTeamBuildSettingName]}',
-    );
+    // Only log "Automatically signing..." if CODE_SIGN_STYLE is Automatic or not set.
+    // If it's Manual, the signing is not automatic.
+    final String? codeSignStyle = buildSettings[_codeSignStyleBuildSettingName];
+    if (codeSignStyle != _CodeSigningStyle.manual.label) {
+      logger.printStatus(
+        'Automatically signing iOS for device deployment using specified development '
+        'team in Xcode project: ${buildSettings[_developmentTeamBuildSettingName]}',
+      );
+    }
     return null;
   }
 
