@@ -260,6 +260,9 @@ FLUTTER_DARWIN_EXPORT
  * Cannot be used with unbounded height widgets, such as Scaffold.
  * This property is intended to be used with Add-to-App scenarios.
  *
+ * Once auto resizing is enabled, the FlutterView will rely on custom constraints from then on.
+ * Avoid disabling it after enabling, as behaviour will then be undefined.
+ *
  * Default is `NO`.
  */
 @property(nonatomic, getter=isAutoResizable) BOOL autoResizable;
