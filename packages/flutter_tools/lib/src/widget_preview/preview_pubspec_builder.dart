@@ -164,6 +164,13 @@ class PreviewPubspecBuilder {
       outputMode: outputMode,
     );
 
+    await generatePackageConfig(widgetPreviewScaffoldProject: widgetPreviewScaffoldProject);
+    previewManifest.updatePubspecHash(updatedPubspecPath: updatedPubspecPath);
+  }
+
+  /// Generates `widget_preview_scaffold/.dart_tool/package_config.json`.
+  Future<void> generatePackageConfig({required FlutterProject widgetPreviewScaffoldProject}) async {
+    final PubOutputMode outputMode = verbose ? PubOutputMode.all : PubOutputMode.failuresOnly;
     // Generate package_config.json.
     await pub.get(
       context: PubContext.create,
@@ -171,8 +178,6 @@ class PreviewPubspecBuilder {
       offline: offline,
       outputMode: outputMode,
     );
-
-    previewManifest.updatePubspecHash(updatedPubspecPath: updatedPubspecPath);
   }
 
   void onPubspecChangeDetected(String path) {
