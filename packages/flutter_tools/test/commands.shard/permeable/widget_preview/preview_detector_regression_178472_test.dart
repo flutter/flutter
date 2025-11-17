@@ -33,6 +33,7 @@ void main() {
       logger = BufferLogger.test();
       project = FlutterProject.fromDirectoryTest(fs.systemTempDirectory.createTempSync('root'));
       previewDetector = PreviewDetector(
+        projectRoot: project.directory,
         platform: FakePlatform(),
         previewAnalytics: WidgetPreviewAnalytics(
           analytics: getInitializedFakeAnalyticsInstance(
@@ -42,7 +43,6 @@ void main() {
             fs: MemoryFileSystem.test(),
           ),
         ),
-        project: project,
         logger: logger,
         fs: fs,
         onChangeDetected: (_) {},
