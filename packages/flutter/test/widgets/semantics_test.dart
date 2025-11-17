@@ -2388,6 +2388,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
