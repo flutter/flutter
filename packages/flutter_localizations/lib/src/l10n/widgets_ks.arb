@@ -1,0 +1,67 @@
+{
+  "reorderItemToStart": "شروع کرنْہ کُن پْکیو",
+  "@reorderItemToStart": {
+    "description": "The audio announcement to move an item in a Reorderable List to the start of the list."
+  },
+  "reorderItemToEnd": "اندس کُن پْکیو",
+  "@reorderItemToEnd": {
+    "description": "The audio announcement to move an item in a Reorderable List to the end of the list."
+  },
+  "reorderItemUp": "ہیور کْریو پْکیو",
+  "@reorderItemUp": {
+    "description": "The audio announcement to move an item in a Reorderable List up in the list when it is oriented vertically."
+  },
+  "reorderItemDown": "ڈاون کْریو پْکیو",
+  "@reorderItemDown": {
+    "description": "The audio announcement to move an item in a Reorderable List down in the list when it is oriented vertically."
+  },
+  "reorderItemLeft": "کھوفُر کْریو مو",
+  "@reorderItemLeft": {
+    "description": "The audio announcement to move an item in a Reorderable List left in the list when it is oriented horizontally."
+  },
+  "reorderItemRight": "دوچُھن کْریو منتقل",
+  "@reorderItemRight": {
+    "description": "The audio announcement to move an item in a Reorderable List right in the list when it is oriented horizontally."
+  },
+  "searchResultsFound": "Search results found",
+  "@searchResultsFound": {
+    "description": "The audio announcement when Autocomplete search results become available."
+  },
+  "noResultsFound": "No results found",
+  "@noResultsFound": {
+    "description": "The audio announcement when Autocomplete search results become unavailable."
+  },
+  "copyButtonLabel": "کاپی کْریو",
+  "@copyButtonLabel": {
+    "description": "The label for copy buttons and menu items."
+  },
+  "cutButtonLabel": "کٹ کْریو",
+  "@cutButtonLabel": {
+    "description": "The label for cut buttons and menu items."
+  },
+  "lookUpButtonLabel": "ہیور کْریو نظر",
+  "@lookUpButtonLabel": {
+    "description": "The label for the Look Up button and menu items."
+  },
+  "searchWebButtonLabel": "ویب کْریو تلاش",
+  "@searchWebButtonLabel": {
+    "description": "The label for the Search Web button and menu items."
+  },
+  "shareButtonLabel": "شییر کْریو",
+  "@shareButtonLabel": {
+    "description": "The label for the Share button and menu items."
+  },
+  "pasteButtonLabel": "پیسٹْہ کْریو",
+  "@pasteButtonLabel": {
+    "description": "The label for paste buttons and menu items."
+  },
+  "selectAllButtonLabel": "تمام ژأریو",
+  "@selectAllButtonLabel": {
+    "description": "The label for select-all buttons and menu items."
+  },
+  "radioButtonUnselectedLabel": "Not selected",
+  "@radioButtonUnselectedLabel": {
+    "description": "The accessibility hint for an unselected radio button.",
+    "type": "text"
+  }
+}

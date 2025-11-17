@@ -1,0 +1,67 @@
+{
+  "reorderItemToStart": "ንምጅማር ግዓዝ",
+  "@reorderItemToStart": {
+    "description": "The audio announcement to move an item in a Reorderable List to the start of the list."
+  },
+  "reorderItemToEnd": "ናብ መወዳእታ ግዓዝ",
+  "@reorderItemToEnd": {
+    "description": "The audio announcement to move an item in a Reorderable List to the end of the list."
+  },
+  "reorderItemUp": "ናብ ላዕሊ ግዓዝ",
+  "@reorderItemUp": {
+    "description": "The audio announcement to move an item in a Reorderable List up in the list when it is oriented vertically."
+  },
+  "reorderItemDown": "ናብ ታሕቲ ግዒዝካ",
+  "@reorderItemDown": {
+    "description": "The audio announcement to move an item in a Reorderable List down in the list when it is oriented vertically."
+  },
+  "reorderItemLeft": "ናብ ጸጋም ግዓዝ",
+  "@reorderItemLeft": {
+    "description": "The audio announcement to move an item in a Reorderable List left in the list when it is oriented horizontally."
+  },
+  "reorderItemRight": "ናብ የማን ግዓዝ",
+  "@reorderItemRight": {
+    "description": "The audio announcement to move an item in a Reorderable List right in the list when it is oriented horizontally."
+  },
+  "searchResultsFound": "Search results found",
+  "@searchResultsFound": {
+    "description": "The audio announcement when Autocomplete search results become available."
+  },
+  "noResultsFound": "No results found",
+  "@noResultsFound": {
+    "description": "The audio announcement when Autocomplete search results become unavailable."
+  },
+  "copyButtonLabel": "ቅዳሕ",
+  "@copyButtonLabel": {
+    "description": "The label for copy buttons and menu items."
+  },
+  "cutButtonLabel": "ቍረጽ",
+  "@cutButtonLabel": {
+    "description": "The label for cut buttons and menu items."
+  },
+  "lookUpButtonLabel": "ናብ ላዕሊ ጠምት",
+  "@lookUpButtonLabel": {
+    "description": "The label for the Look Up button and menu items."
+  },
+  "searchWebButtonLabel": "ነቲ መርበብ ሓበሬታ ድለዮ",
+  "@searchWebButtonLabel": {
+    "description": "The label for the Search Web button and menu items."
+  },
+  "shareButtonLabel": "ንኻልኦት ኣካፍሎም",
+  "@shareButtonLabel": {
+    "description": "The label for the Share button and menu items."
+  },
+  "pasteButtonLabel": "መቐመጢ",
+  "@pasteButtonLabel": {
+    "description": "The label for paste buttons and menu items."
+  },
+  "selectAllButtonLabel": "ንዅሉ ምረጽ",
+  "@selectAllButtonLabel": {
+    "description": "The label for select-all buttons and menu items."
+  },
+  "radioButtonUnselectedLabel": "Not selected",
+  "@radioButtonUnselectedLabel": {
+    "description": "The accessibility hint for an unselected radio button.",
+    "type": "text"
+  }
+}

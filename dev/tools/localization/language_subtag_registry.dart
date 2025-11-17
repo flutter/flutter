@@ -47915,4 +47915,219 @@ Description: Cantonese
 Added: 1999-12-18
 Deprecated: 2009-07-29
 Preferred-Value: yue
+%%
+Type: language
+Subtag: apc
+Description: Levantine Arabic
+Added: 2025-11-17
+%%
+Type: language
+Subtag: ary
+Description: Moroccan Arabic
+Added: 2025-11-17
+%%
+Type: language
+Subtag: arz
+Description: Egyptian Arabic
+Added: 2025-11-17
+%%
+Type: language
+Subtag: azb
+Description: South Azerbaijani
+Added: 2025-11-17
+%%
+Type: language
+Subtag: bho
+Description: Bhojpuri
+Added: 2025-11-17
+%%
+Type: language
+Subtag: ceb
+Description: Cebuano
+Added: 2025-11-17
+%%
+Type: language
+Subtag: ee
+Description: Ewe
+Added: 2025-11-17
+%%
+Type: language
+Subtag: gn
+Description: Guarani Latin
+Added: 2025-11-17
+%%
+Type: language
+Subtag: ha
+Description: Hausa
+Added: 2025-11-17
+%%
+Type: language
+Subtag: ht
+Description: Haitian
+Added: 2025-11-17
+%%
+Type: language
+Subtag: ig
+Description: Igbo
+Added: 2025-11-17
+%%
+Type: language
+Subtag: jv
+Description: Javanese basa Jawa
+Added: 2025-11-17
+%%
+Type: language
+Subtag: kg
+Description: Kongo
+Added: 2025-11-17
+%%
+Type: language
+Subtag: ki
+Description: Kikuyu
+Added: 2025-11-17
+%%
+Type: language
+Subtag: ks
+Description: Kashmiri
+Added: 2025-11-17
+%%
+Type: language
+Subtag: ku
+Description: Kurdish Central
+Added: 2025-11-17
+%%
+Type: language
+Subtag: lg
+Description: Ganda
+Added: 2025-11-17
+%%
+Type: language
+Subtag: ln
+Description: Lingala
+Added: 2025-11-17
+%%
+Type: language
+Subtag: mai
+Description: Maithili
+Added: 2025-11-17
+%%
+Type: language
+Subtag: mg
+Description: Malagasy
+Added: 2025-11-17
+%%
+Type: language
+Subtag: ny
+Description: Nyanja
+Added: 2025-11-17
+%%
+Type: language
+Subtag: om
+Description: Oromo West Central
+Added: 2025-11-17
+%%
+Type: language
+Subtag: pes
+Description: Persian Iranian Fārsi
+Added: 2025-11-17
+%%
+Type: language
+Subtag: rn
+Description: Rundi
+Added: 2025-11-17
+%%
+Type: language
+Subtag: rw
+Description: Kinyarwanda
+Added: 2025-11-17
+%%
+Type: language
+Subtag: sd
+Description: Sindhi
+Added: 2025-11-17
+%%
+Type: language
+Subtag: sn
+Description: Shona
+Added: 2025-11-17
+%%
+Type: language
+Subtag: so
+Description: Somali
+Added: 2025-11-17
+%%
+Type: language
+Subtag: ss
+Description: Swati
+Added: 2025-11-17
+%%
+Type: language
+Subtag: st
+Description: Sotho Southern
+Added: 2025-11-17
+%%
+Type: language
+Subtag: su
+Description: Sundanese
+Added: 2025-11-17
+%%
+Type: language
+Subtag: tg
+Description: Tajik
+Added: 2025-11-17
+%%
+Type: language
+Subtag: ti
+Description: Tigrinya
+Added: 2025-11-17
+%%
+Type: language
+Subtag: tk
+Description: Turkmen
+Added: 2025-11-17
+%%
+Type: language
+Subtag: tn
+Description: Tswana
+Added: 2025-11-17
+%%
+Type: language
+Subtag: ts
+Description: Tsonga
+Added: 2025-11-17
+%%
+Type: language
+Subtag: tt
+Description: Tatar
+Added: 2025-11-17
+%%
+Type: language
+Subtag: tw
+Description: Twi
+Added: 2025-11-17
+%%
+Type: language
+Subtag: uzn
+Description: Northern Uzbek
+Added: 2025-11-17
+%%
+Type: language
+Subtag: wo
+Description: Wolof
+Added: 2025-11-17
+%%
+Type: language
+Subtag: xh
+Description: Xhosa
+Added: 2025-11-17
+%%
+Type: language
+Subtag: yo
+Description: Yoruba
+Added: 2025-11-17
+%%
+Type: language
+Subtag: zsm
+Description: Standard Malay
+Added: 2025-11-17
 ''';
