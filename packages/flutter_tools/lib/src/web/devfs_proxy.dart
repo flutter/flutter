@@ -73,6 +73,7 @@ class RegexProxyRule extends ProxyRule {
   final RegExp _pattern;
   final String? _replacement;
   @override
+  /// The target URI to which the request should be proxied.
   final Uri targetUri;
 
   @override
