@@ -61,6 +61,8 @@ class TestSemantics {
     this.maxValueLength,
     this.currentValueLength,
     this.identifier = '',
+    this.traversalParentIdentifier,
+    this.traversalChildIdentifier,
     this.hintOverrides,
   }) : assert(flags is int || flags is List<SemanticsFlag> || flags is SemanticsFlags),
        assert(actions is int || actions is List<SemanticsAction>),
@@ -93,6 +95,8 @@ class TestSemantics {
     this.maxValueLength,
     this.currentValueLength,
     this.identifier = '',
+    this.traversalParentIdentifier,
+    this.traversalChildIdentifier,
     this.hintOverrides,
   }) : id = 0,
        assert(flags is int || flags is List<SemanticsFlag> || flags is SemanticsFlags),
@@ -137,6 +141,8 @@ class TestSemantics {
     this.maxValueLength,
     this.currentValueLength,
     this.identifier = '',
+    this.traversalParentIdentifier,
+    this.traversalChildIdentifier,
     this.hintOverrides,
   }) : assert(flags is int || flags is List<SemanticsFlag> || flags is SemanticsFlags),
        assert(actions is int || actions is List<SemanticsAction>),
@@ -284,6 +290,16 @@ class TestSemantics {
   ///
   /// Defaults to an empty string if not set.
   final String identifier;
+
+  /// The expected traversalParentIdentifier for the node.
+  ///
+  /// Defaults to null if not set.
+  final Object? traversalParentIdentifier;
+
+  /// The expected traversalChildIdentifier for the node.
+  ///
+  /// Defaults to null if not set.
+  final Object? traversalChildIdentifier;
 
   /// The expected hint overrides for the node.
   ///
@@ -482,10 +498,17 @@ class TestSemantics {
         'expected node id $id to have current value length $currentValueLength but found current value length ${node.currentValueLength}',
       );
     }
-    if (!ignoreTraversalIdentifier && identifier != node.identifier) {
-      return fail(
-        'expected node id $id to have identifier $identifier but found identifier ${node.identifier}',
-      );
+    if (!ignoreTraversalIdentifier) {
+      if (traversalChildIdentifier != node.traversalChildIdentifier) {
+        return fail(
+          'expected node id $id to have traversalChildIdentifier $traversalChildIdentifier but found identifier ${node.traversalChildIdentifier}',
+        );
+      }
+      if (traversalParentIdentifier != node.traversalParentIdentifier) {
+        return fail(
+          'expected node id $id to have traversalParentIdentifier $traversalParentIdentifier but found identifier ${node.traversalParentIdentifier}',
+        );
+      }
     }
     if (hintOverrides != node.hintOverrides) {
       return fail(
@@ -1063,7 +1086,7 @@ Matcher hasSemantics(
   bool ignoreRect = false,
   bool ignoreTransform = false,
   bool ignoreId = false,
-  bool ignoreTraversalIdentifier = false,
+  bool ignoreTraversalIdentifier = true,
   DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
 }) {
   return _HasSemantics(
