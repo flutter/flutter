@@ -119,7 +119,7 @@ LUCI tasks are run on Flutter-infrastructure-managed VMs, using an [out-of-repo 
 Integration tests on Android are run in real devices through the Firebase Test Lab infrastructure by [the `firebase-test-lab` command in the repository tooling](https://github.com/flutter/packages/blob/main/script/tool/lib/src/firebase_test_lab_command.dart). From time to time, the Firebase Test Lab will change what devices are available for testing, and tests will start timing out.
 
 #### Distinguishing features
-- `firebase_test_lab` task starts timing out. The output is normally just: `Timed out!` ([Example](https://github.com/flutter/plugins/runs/3930255308).)
+- `firebase_test_lab` task starts timing out. The output is normally just: `Timed out!`
   - These timeouts will start as "flake" tests, and get progressively worse, until no amount of "retries" helps them pass (as devices are phased out / less available).
   - `firebase_test_lab` timing out is almost always related to this. Either because of devices becoming unavailable, or by a temporary lack of resource availability.
 

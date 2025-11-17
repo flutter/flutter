@@ -16,7 +16,7 @@ FLUTTER_DARWIN_EXPORT
 /**
  * Represents a texture that can be shared with Flutter.
  *
- * See also: https://github.com/flutter/plugins/tree/master/packages/camera
+ * See also: https://github.com/flutter/packages/tree/main/packages/camera
  */
 @protocol FlutterTexture <NSObject>
 /**
