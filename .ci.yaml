@@ -2145,7 +2145,7 @@ targets:
 
   - name: Linux web_skwasm_tests_0
     recipe: flutter/flutter_drone
-    timeout: 60
+    timeout: 30
     properties:
       dependencies: >-
         [
@@ -2156,7 +2156,7 @@ targets:
       subshard: "0"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
+      test_timeout_secs: "1800" # 30 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -2167,7 +2167,7 @@ targets:
 
   - name: Linux web_skwasm_tests_1
     recipe: flutter/flutter_drone
-    timeout: 60
+    timeout: 30
     properties:
       dependencies: >-
         [
@@ -2175,143 +2175,10 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
       shard: web_skwasm_tests
-      subshard: "1"
+      subshard: "1_last"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
-    runIf:
-      - dev/**
-      - packages/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
-
-  - name: Linux web_skwasm_tests_2
-    recipe: flutter/flutter_drone
-    bringup: true # Failing: https://github.com/flutter/flutter/issues/178060
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
-        ]
-      shard: web_skwasm_tests
-      subshard: "2"
-      tags: >
-        ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
-    runIf:
-      - dev/**
-      - packages/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
-
-  - name: Linux web_skwasm_tests_3
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
-        ]
-      shard: web_skwasm_tests
-      subshard: "3"
-      tags: >
-        ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
-    runIf:
-      - dev/**
-      - packages/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
-
-  - name: Linux web_skwasm_tests_4
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
-        ]
-      shard: web_skwasm_tests
-      subshard: "4"
-      tags: >
-        ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
-    runIf:
-      - dev/**
-      - packages/**
-      - bin/**
-      - .ci.yaml
-      - DEPS
-      - engine/**
-
-  - name: Linux web_skwasm_tests_5
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
-        ]
-      shard: web_skwasm_tests
-      subshard: "5"
-      tags: >
-        ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
-    runIf:
-      - dev/**
-      - packages/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
-
-  - name: Linux web_skwasm_tests_6
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
-        ]
-      shard: web_skwasm_tests
-      subshard: "6"
-      tags: >
-        ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
-    runIf:
-      - dev/**
-      - packages/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
-
-  - name: Linux web_skwasm_tests_7_last
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
-        ]
-      shard: web_skwasm_tests
-      subshard: "7_last"
-      tags: >
-        ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
+      test_timeout_secs: "1800" # 30 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/**
@@ -5498,6 +5365,16 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: wide_gamut_ios
+
+  - name: Mac_ios high_bitrate_images
+    recipe: devicelab/devicelab_drone
+    presubmit: true
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: high_bitrate_images_ios
 
   - name: Mac_x64_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone

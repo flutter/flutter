@@ -16,6 +16,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/utils.dart';
+import '../project.dart';
 import 'analytics.dart';
 import 'dependency_graph.dart';
 import 'utils.dart';
@@ -30,16 +31,17 @@ class PreviewDetector {
   PreviewDetector({
     required this.platform,
     required this.previewAnalytics,
-    required this.projectRoot,
+    required this.project,
     required this.fs,
     required this.logger,
     required this.onChangeDetected,
     required this.onPubspecChangeDetected,
     @visibleForTesting this.watcherBuilder = _defaultWatcherBuilder,
-  });
+  }) : projectRoot = project.directory;
 
   final Platform platform;
   final WidgetPreviewAnalytics previewAnalytics;
+  final FlutterProject project;
   final Directory projectRoot;
   final FileSystem fs;
   final Logger logger;
@@ -53,7 +55,8 @@ class PreviewDetector {
   static const kWindowsFileWatcherRestartedMessage =
       'WindowsDirectoryWatcher has closed and been restarted.';
   StreamSubscription<WatchEvent>? _fileWatcher;
-  final _mutex = PreviewDetectorMutex();
+  @visibleForTesting
+  final mutex = PreviewDetectorMutex();
 
   var _disposed = false;
 
@@ -68,34 +71,36 @@ class PreviewDetector {
 
   /// Starts listening for changes to Dart sources under [projectRoot] and returns
   /// the initial [PreviewDependencyGraph] for the project.
-  Future<PreviewDependencyGraph> initialize() async {
-    // Find the initial set of previews.
-    await _findPreviewFunctions(projectRoot);
+  Future<PreviewDependencyGraph> initialize() {
+    return mutex.runGuarded(() async {
+      // Find the initial set of previews.
+      await findPreviewFunctions(projectRoot);
 
-    // Determine which files have transitive dependencies with compile time errors.
-    _propagateErrors();
+      // Determine which files have transitive dependencies with compile time errors.
+      _propagateErrors();
 
-    final Watcher watcher = watcherBuilder(projectRoot.path);
-    _fileWatcher = watcher.events.listen(
-      _onFileSystemEvent,
-      onError: (Object e, StackTrace st) {
-        if (platform.isWindows &&
-            e is FileSystemException &&
-            e.message.startsWith(kDirectoryWatcherClosedUnexpectedlyPrefix)) {
-          // The Windows directory watcher sometimes decides to shutdown on its own. It's
-          // automatically restarted by package:watcher, but we need to handle this exception.
-          // See https://github.com/dart-lang/tools/issues/1713 for details.
-          logger.printTrace(kWindowsFileWatcherRestartedMessage);
-          return;
-        }
-        Error.throwWithStackTrace(e, st);
-      },
-    );
+      final Watcher watcher = watcherBuilder(projectRoot.path);
+      _fileWatcher = watcher.events.listen(
+        _onFileSystemEvent,
+        onError: (Object e, StackTrace st) {
+          if (platform.isWindows &&
+              e is FileSystemException &&
+              e.message.startsWith(kDirectoryWatcherClosedUnexpectedlyPrefix)) {
+            // The Windows directory watcher sometimes decides to shutdown on its own. It's
+            // automatically restarted by package:watcher, but we need to handle this exception.
+            // See https://github.com/dart-lang/tools/issues/1713 for details.
+            logger.printTrace(kWindowsFileWatcherRestartedMessage);
+            return;
+          }
+          Error.throwWithStackTrace(e, st);
+        },
+      );
 
-    // Wait for file watcher to finish initializing, otherwise we might miss changes and cause
-    // tests to flake.
-    await watcher.ready;
-    return _dependencyGraph;
+      // Wait for file watcher to finish initializing, otherwise we might miss changes and cause
+      // tests to flake.
+      await watcher.ready;
+      return _dependencyGraph;
+    });
   }
 
   Future<void> dispose() async {
@@ -105,7 +110,7 @@ class PreviewDetector {
     _disposed = true;
     // Guard disposal behind a mutex to make sure the analyzer has finished
     // processing the latest file updates to avoid throwing an exception.
-    await _mutex.runGuarded(() async {
+    await mutex.runGuarded(() async {
       await _fileWatcher?.cancel();
       _fileWatcher = null;
       await collection.dispose();
@@ -115,17 +120,32 @@ class PreviewDetector {
   Future<void> _onFileSystemEvent(WatchEvent event) async {
     // Only process one FileSystemEntity at a time so we don't invalidate an AnalysisSession that's
     // in use when we call context.changeFile(...).
-    await _mutex.runGuarded(() async {
+    await mutex.runGuarded(() async {
       final String eventPath = event.path;
+      // Ignore any files under .dart_tool or ephemeral directories created by
+      // the tool (e.g., build/, plugin directories, etc.).
+      if (eventPath.doesContainDartTool ||
+          project.ephemeralDirectories.any((dir) => eventPath.contains(dir.path))) {
+        return;
+      }
       // If the pubspec has changed, new dependencies or assets could have been added, requiring
       // the preview scaffold's pubspec to be updated.
-      if (eventPath.isPubspec && !eventPath.doesContainDartTool) {
+      if (eventPath.isPubspec) {
         onPubspecChangeDetected(eventPath);
         return;
       }
       // Only trigger a reload when changes to Dart sources are detected. We
       // ignore the generated preview file to avoid getting stuck in a loop.
-      if (!eventPath.isDartFile || eventPath.doesContainDartTool) {
+      if (!eventPath.isDartFile) {
+        return;
+      }
+
+      AnalysisContext context;
+      try {
+        context = collection.contextFor(eventPath);
+      } on StateError {
+        // The modified file isn't part of the analysis context and is safe to
+        // ignore.
         return;
       }
 
@@ -143,10 +163,15 @@ class PreviewDetector {
       // extension which may be worth using here.
 
       // We need to notify the analyzer that this file has changed so it can reanalyze the file.
-      final AnalysisContext context = collection.contextFor(eventPath);
       final File file = fs.file(eventPath);
       context.changeFile(file.path);
-      final List<String> potentiallyAffectedFiles = await context.applyPendingFileChanges();
+      final List<String> potentiallyAffectedFiles;
+      try {
+        potentiallyAffectedFiles = await context.applyPendingFileChanges();
+      } on DisposedAnalysisContextResult {
+        // We're shutting down.
+        return;
+      }
 
       logger.printStatus('Detected change in $eventPath.');
       if (event.type == ChangeType.REMOVE) {
@@ -156,7 +181,7 @@ class PreviewDetector {
       }
 
       for (final filePath in potentiallyAffectedFiles) {
-        await _fileAddedOrUpdated(context: context, filePath: filePath);
+        await _fileAddedOrUpdated(filePath: filePath);
       }
 
       // TODO(bkonyi): If _fileAddedOrUpdated is called after _fileRemoved, it'll add the removed file back...
@@ -173,11 +198,8 @@ class PreviewDetector {
     });
   }
 
-  Future<void> _fileAddedOrUpdated({
-    required AnalysisContext context,
-    required String filePath,
-  }) async {
-    final PreviewDependencyGraph filePreviewsMapping = await _findPreviewFunctions(
+  Future<void> _fileAddedOrUpdated({required String filePath}) async {
+    final PreviewDependencyGraph filePreviewsMapping = await findPreviewFunctions(
       fs.file(filePath),
     );
     if (filePreviewsMapping.length > 1) {
@@ -210,7 +232,9 @@ class PreviewDetector {
   }
 
   /// Search for functions annotated with `@Preview` in the current project.
-  Future<PreviewDependencyGraph> _findPreviewFunctions(FileSystemEntity entity) async {
+  @visibleForTesting
+  Future<PreviewDependencyGraph> findPreviewFunctions(FileSystemEntity entity) async {
+    assert(mutex.isLocked);
     final PreviewDependencyGraph updatedPreviews = PreviewDependencyGraph();
 
     logger.printStatus('Finding previews in ${entity.path}...');
@@ -225,34 +249,43 @@ class PreviewDetector {
         // If filePath points to a file that's part of a library, retrieve its compilation unit first
         // in order to get the actual path to the library.
         if (lib is NotLibraryButPartResult) {
-          final unit =
-              (await context.currentSession.getResolvedUnit(filePath)) as ResolvedUnitResult;
+          final SomeResolvedUnitResult unit = await context.currentSession.getResolvedUnit(
+            filePath,
+          );
+          // Check that unit is a valid response. Otherwise, the analysis context has likely been
+          // disposed or we're shutting down.
+          if (unit is! ResolvedUnitResult) {
+            continue;
+          }
           lib = await context.currentSession.getResolvedLibrary(
             unit.libraryElement.firstFragment.source.fullName,
           );
         }
-        if (lib is ResolvedLibraryResult) {
-          final ResolvedLibraryResult resolvedLib = lib;
-          final PreviewPath previewPath = lib.element.toPreviewPath();
-          // This library has already been processed.
-          if (updatedPreviews.containsKey(previewPath)) {
-            continue;
-          }
-
-          final LibraryPreviewNode previewsForLibrary = _dependencyGraph.putIfAbsent(
-            previewPath,
-            () => LibraryPreviewNode(library: resolvedLib.element, logger: logger),
-          );
-
-          previewsForLibrary.updateDependencyGraph(graph: _dependencyGraph, units: lib.units);
-          updatedPreviews[previewPath] = previewsForLibrary;
-
-          // Check for errors in the library.
-          await previewsForLibrary.populateErrors(context: context);
-
-          // Iterate over each library's AST to find previews.
-          previewsForLibrary.findPreviews(lib: lib);
+        // Check that lib is a valid response. Otherwise, the analysis context has likely been
+        // disposed or we're shutting down.
+        if (lib is! ResolvedLibraryResult) {
+          continue;
         }
+        final ResolvedLibraryResult resolvedLib = lib;
+        final PreviewPath previewPath = lib.element.toPreviewPath();
+        // This library has already been processed.
+        if (updatedPreviews.containsKey(previewPath)) {
+          continue;
+        }
+
+        final LibraryPreviewNode previewsForLibrary = _dependencyGraph.putIfAbsent(
+          previewPath,
+          () => LibraryPreviewNode(library: resolvedLib.element, logger: logger),
+        );
+
+        previewsForLibrary.updateDependencyGraph(graph: _dependencyGraph, units: lib.units);
+        updatedPreviews[previewPath] = previewsForLibrary;
+
+        // Check for errors in the library.
+        await previewsForLibrary.populateErrors(context: context);
+
+        // Iterate over each library's AST to find previews.
+        previewsForLibrary.findPreviews(lib: lib);
       }
     }
     final int previewCount = updatedPreviews.values.fold<int>(
@@ -269,6 +302,7 @@ class PreviewDetector {
   /// as checking for newly introduced errors in files which had a transitive dependency on the
   /// removed file.
   Future<void> _fileRemoved({required AnalysisContext context, required String filePath}) async {
+    assert(mutex.isLocked);
     final File file = fs.file(filePath);
     final LibraryPreviewNode? node = _dependencyGraph.values.firstWhereOrNull(
       (LibraryPreviewNode e) => e.files.contains(file.path),
