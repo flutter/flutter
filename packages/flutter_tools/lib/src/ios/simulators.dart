@@ -381,7 +381,11 @@ class IOSSimulator extends Device {
   Future<bool> get supportsHardwareRendering async => false;
 
   @override
-  bool supportsRuntimeMode(BuildMode buildMode) => buildMode == BuildMode.debug;
+  bool supportsRuntimeMode(BuildMode buildMode) {
+    // Allow debug, profile, and release modes on simulator
+    // Note: Performance metrics on simulator are not representative of device performance
+    return buildMode != BuildMode.jitRelease;
+  }
 
   final _logReaders = <IOSApp?, DeviceLogReader>{};
   _IOSSimulatorDevicePortForwarder? _portForwarder;

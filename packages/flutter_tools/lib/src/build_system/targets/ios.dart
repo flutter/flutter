@@ -11,6 +11,7 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/logger.dart' show Logger;
+import '../../base/os.dart';
 import '../../base/process.dart';
 import '../../base/version.dart';
 import '../../build_info.dart';
@@ -72,7 +73,7 @@ abstract class AotAssemblyBase extends Target {
     final TargetPlatform targetPlatform = getTargetPlatformForName(environmentTargetPlatform);
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
     final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
-    final List<DarwinArch> darwinArchs =
+    List<DarwinArch> darwinArchs =
         environment.defines[kIosArchs]?.split(' ').map(getIOSArchForName).toList() ??
         <DarwinArch>[DarwinArch.arm64];
     if (targetPlatform != TargetPlatform.ios) {
@@ -83,11 +84,32 @@ abstract class AotAssemblyBase extends Target {
       sdkRoot,
       environment.fileSystem,
     );
+
+    // Warn when building for simulator - performance will not be representative
     if (environmentType == EnvironmentType.simulator) {
-      throw Exception(
-        'release/profile builds are only supported for physical devices. '
-        'attempted to build for simulator.',
+      environment.logger.printWarning(
+        '┌─────────────────────────────────────────────────────────────────────────┐\n'
+        '│ WARNING: Building in ${buildMode.cliName} mode for iOS Simulator       │\n'
+        '│                                                                         │\n'
+        '│ Performance on simulator is NOT representative of device performance.  │\n'
+        '│ Always test performance-critical code on physical devices.             │\n'
+        '└─────────────────────────────────────────────────────────────────────────┘',
       );
+
+      // For iOS simulator, filter out x86_64 architecture as there is no gen_snapshot
+      // available for it. On Apple Silicon, simulator runs on arm64.
+      darwinArchs = darwinArchs.where((arch) => arch != DarwinArch.x86_64).toList();
+      if (darwinArchs.isEmpty) {
+        // This can happen if the only specified arch is x86_64.
+        // The toolchain for x86_64 simulator AOT builds is not available.
+        if (globals.os.hostPlatform != HostPlatform.darwin_arm64) {
+          throwToolExit(
+            'Building for the iOS simulator in ${buildMode.cliName} mode is only supported on Apple Silicon Macs.',
+          );
+        }
+        // We fall back to arm64, which will work on Apple Silicon hosts.
+        darwinArchs = [DarwinArch.arm64];
+      }
     }
     final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];
 

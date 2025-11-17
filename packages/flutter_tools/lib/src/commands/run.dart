@@ -825,6 +825,21 @@ class RunCommand extends RunCommandBase {
           'mode is not supported by ${device.displayName}.',
         );
       }
+
+      // Warn when running release/profile on iOS simulator
+      if (await device.isLocalEmulator &&
+          device.platformType == PlatformType.ios &&
+          (buildMode == BuildMode.release || buildMode == BuildMode.profile)) {
+        globals.printWarning(
+          '┌─────────────────────────────────────────────────────────────────────────┐\n'
+          '│ WARNING: Running in ${buildMode.cliName} mode on iOS Simulator            │\n'
+          '│                                                                         │\n'
+          '│ Performance on simulator is NOT representative of device performance.  │\n'
+          '│ Always test performance-critical code on physical devices.             │\n'
+          '└─────────────────────────────────────────────────────────────────────────┘',
+        );
+      }
+
       if (hotMode) {
         if (!device.supportsHotReload) {
           throwToolExit(
