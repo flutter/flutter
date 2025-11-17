@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -15,6 +14,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
@@ -210,9 +210,11 @@ void main() {
   );
 
   testUsingContext(
-    'IosAssetBundle throws ToolExit if plutil fails',
+    'IosAssetBundle warns if plutil fails',
     () async {
       environment.defines[kBuildMode] = 'debug';
+      environment.defines[kCodesignIdentity] = 'ABC123';
+
       fileSystem
           .file(artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug))
           .createSync();
@@ -234,8 +236,10 @@ void main() {
       final File infoPlist = environment.outputDir
           .childDirectory('App.framework')
           .childFile('Info.plist');
+      final File frameworkBinary = environment.outputDir
+          .childDirectory('App.framework')
+          .childFile('App');
 
-      // fake plutil command that is configured to fail.
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: <String>[
@@ -249,24 +253,42 @@ void main() {
           exitCode: 1,
           stderr: 'plutil: error: invalid argument',
         ),
+
+        FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', frameworkBinary.path],
+        ),
+        FakeCommand(
+          command: <String>[
+            'codesign',
+            '--force',
+            '--sign',
+            'ABC123',
+            '--timestamp=none',
+            frameworkBinary.path,
+          ],
+        ),
       ]);
 
-      await expectLater(
-        const DebugIosApplicationBundle().build(environment),
-        throwsA(isA<ToolExit>()),
-      );
+      await const DebugIosApplicationBundle().build(environment);
 
       expect(logger.errorText, contains('Failed to update MinimumOSVersion in ${infoPlist.path}'));
       expect(logger.errorText, contains('plutil: error: invalid argument'));
+      final fakeStdio = globals.stdio as FakeStdio;
+      expect(
+        fakeStdio.buffer.toString(),
+        contains(
+          'warning: Failed to update MinimumOSVersion in ${infoPlist.path}. This may cause AppStore validation failures.',
+        ),
+      );
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Platform: () => macPlatform,
+      Stdio: () => FakeStdio(),
     },
   );
-
   testUsingContext(
     'DebugIosApplicationBundle',
     () async {
