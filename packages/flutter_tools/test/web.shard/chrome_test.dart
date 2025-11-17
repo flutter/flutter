@@ -30,7 +30,6 @@ const kChromeArgs = <String>[
   '--disable-default-apps',
   '--disable-translate',
   '--disable-search-engine-choice-screen',
-  '--no-sandbox',
 ];
 
 const kCodeCache = <String>['Cache', 'Code Cache', 'GPUCache'];
