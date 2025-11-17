@@ -685,4 +685,22 @@ Future<void> main() async {
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
+
+  testWidgets('CupertinoTabBar does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: CupertinoTabBar(
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(icon: Icon(CupertinoIcons.add), label: 'X'),
+                BottomNavigationBarItem(icon: Icon(CupertinoIcons.add_circled), label: 'Y'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoTabBar)), Size.zero);
+  });
 }
