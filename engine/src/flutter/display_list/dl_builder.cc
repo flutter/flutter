@@ -1284,7 +1284,7 @@ void DisplayListBuilder::drawPath(const DlPath& path) {
   DisplayListAttributeFlags flags = kDrawPathFlags;
   OpResult result = PaintResult(current_, flags);
   if (result != OpResult::kNoEffect) {
-    bool is_visible = AccumulateOpBounds(path.GetBounds(), flags);
+    bool is_visible = AccumulateOpBounds(path.GetBounds().GetPositive(), flags);
     if (is_visible) {
       Push<DrawPathOp>(0, path);
       CheckLayerOpacityHairlineCompatibility();
