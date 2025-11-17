@@ -213,7 +213,7 @@ features that are unique to one platform or another are unavailable.
 For Flutter, we want to avoid this by explicitly aiming to be the best way
 to develop for each platform individually. Our ability to be used cross-
 platform is secondary to our ability to be used on each platform. For example,
-[TextInputAction](https://master-api.flutter.dev/flutter/services/TextInputAction-class.html)
+[TextInputAction](https://main-api.flutter.dev/flutter/services/TextInputAction-class.html)
 has values that only make sense on some platforms. Similarly, our platform
 channel mechanism is designed to allow separate extensions to be created on
 each platform.
@@ -368,9 +368,9 @@ All code in all Flutter repositories must be contributed by developers who have 
 
 The subdirectory in question must contain a `LICENSE` file that details the license covering that code and a `README` describing the provenance of that code.
 
-"Third party code" that is part of a Dart package and is not Dart code must be in a subdirectory of a `third_party` directory at the root of the package, and the subdirectory in question must contain a `LICENSE` file that details the license covering that code and a `README` describing the provenance of that code. The license must then also be duplicated into the package's `LICENSE` file using the syntax described in the [LicenseRegistry](https://master-api.flutter.dev/flutter/foundation/LicenseRegistry-class.html) API docs.
+"Third party code" that is part of a Dart package and is not Dart code must be in a subdirectory of a `third_party` directory at the root of the package, and the subdirectory in question must contain a `LICENSE` file that details the license covering that code and a `README` describing the provenance of that code. The license must then also be duplicated into the package's `LICENSE` file using the syntax described in the [LicenseRegistry](https://main-api.flutter.dev/flutter/foundation/LicenseRegistry-class.html) API docs.
 
-"Third party code" that is part of a Dart package and is Dart code must be in a subdirectory of the package's `lib/src/third_party` directory, and the subdirectory in question must contain a `LICENSE` file that details the license covering that code and a `README` describing the provenance of that code. The license must then also be duplicated into the package's `LICENSE` file using the syntax described in the [LicenseRegistry](https://master-api.flutter.dev/flutter/foundation/LicenseRegistry-class.html) API docs.
+"Third party code" that is part of a Dart package and is Dart code must be in a subdirectory of the package's `lib/src/third_party` directory, and the subdirectory in question must contain a `LICENSE` file that details the license covering that code and a `README` describing the provenance of that code. The license must then also be duplicated into the package's `LICENSE` file using the syntax described in the [LicenseRegistry](https://main-api.flutter.dev/flutter/foundation/LicenseRegistry-class.html) API docs.
 
 All licenses included in this manner must have been reviewed and determined to be legally acceptable licenses.
 
