@@ -215,11 +215,14 @@ final class LibraryPreviewNode {
   Future<void> populateErrors({required AnalysisContext context}) async {
     errors.clear();
     for (final String file in files) {
-      errors.addAll(
-        ((await context.currentSession.getErrors(file)) as ErrorsResult).diagnostics
-            .where((error) => error.severity == Severity.error)
-            .toList(),
-      );
+      final SomeErrorsResult errorsResult = await context.currentSession.getErrors(file);
+      // If errorsResult isn't an ErrorsResult, the analysis context has likely been disposed and
+      // we're in the process of shutting down. Ignore those results.
+      if (errorsResult is ErrorsResult) {
+        errors.addAll(
+          errorsResult.diagnostics.where((error) => error.severity == Severity.error).toList(),
+        );
+      }
     }
   }
 
