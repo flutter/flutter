@@ -116,6 +116,7 @@ export 'src/widgets/restoration_properties.dart';
 export 'src/widgets/router.dart';
 export 'src/widgets/routes.dart';
 export 'src/widgets/safe_area.dart';
+export 'src/widgets/browser_scroll_zone.dart';
 export 'src/widgets/scroll_activity.dart';
 export 'src/widgets/scroll_aware_image_provider.dart';
 export 'src/widgets/scroll_configuration.dart';

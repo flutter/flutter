@@ -923,6 +923,80 @@ class _ButtonSanitizer {
 
 typedef _PointerEventListener = dynamic Function(DomPointerEvent event);
 
+/// Tracks touch gesture state to determine if it's a scroll gesture.
+class _TouchGestureTracker {
+  double? _startX;
+  double? _startY;
+  double? _currentX;
+  double? _currentY;
+  num? _startTime;
+  bool _isScrollGesture = false;
+  
+  // Thresholds for detecting scroll gestures
+  static const double _scrollThreshold = 10.0; // pixels
+  static const double _scrollAngleThreshold = 0.5; // radians (~30 degrees)
+  
+  void onPointerDown(DomPointerEvent event) {
+    _startX = event.clientX.toDouble();
+    _startY = event.clientY.toDouble();
+    _currentX = _startX;
+    _currentY = _startY;
+    _startTime = event.timeStamp;
+    _isScrollGesture = false;
+    
+    if (_debugLogPointerEvents) {
+      print('[TOUCH_GESTURE] Down at ($_startX, $_startY)');
+    }
+  }
+  
+  void onPointerMove(DomPointerEvent event) {
+    _currentX = event.clientX.toDouble();
+    _currentY = event.clientY.toDouble();
+    
+    if (_startX != null && _startY != null) {
+      final double deltaX = (_currentX! - _startX!).abs();
+      final double deltaY = (_currentY! - _startY!).abs();
+      
+      // Check if movement exceeds threshold
+      if (deltaY > _scrollThreshold || deltaX > _scrollThreshold) {
+        // Check if it's primarily vertical movement
+        if (deltaY > deltaX * 1.5) {
+          _isScrollGesture = true;
+          if (_debugLogPointerEvents) {
+            print('[TOUCH_GESTURE] Detected vertical scroll gesture: deltaX=$deltaX, deltaY=$deltaY');
+          }
+        } else if (deltaX > deltaY * 1.5) {
+          // Horizontal scroll - also consider it a scroll gesture
+          _isScrollGesture = true;
+          if (_debugLogPointerEvents) {
+            print('[TOUCH_GESTURE] Detected horizontal scroll gesture: deltaX=$deltaX, deltaY=$deltaY');
+          }
+        }
+      }
+    }
+  }
+  
+  void reset() {
+    _startX = null;
+    _startY = null;
+    _currentX = null;
+    _currentY = null;
+    _startTime = null;
+    _isScrollGesture = false;
+  }
+  
+  bool get isScrollGesture => _isScrollGesture;
+  
+  bool get hasMovedSignificantly {
+    if (_startX == null || _startY == null || _currentX == null || _currentY == null) {
+      return false;
+    }
+    final double deltaX = (_currentX! - _startX!).abs();
+    final double deltaY = (_currentY! - _startY!).abs();
+    return deltaX > _scrollThreshold || deltaY > _scrollThreshold;
+  }
+}
+
 /// Adapter class to be used with browsers that support native pointer events.
 ///
 /// For the difference between MouseEvent and PointerEvent, see _MouseAdapter.
@@ -930,6 +1004,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
   _PointerAdapter(super.owner);
 
   final Map<int, _ButtonSanitizer> _sanitizers = <int, _ButtonSanitizer>{};
+  final Map<int, _TouchGestureTracker> _touchTrackers = <int, _TouchGestureTracker>{};
 
   @visibleForTesting
   Iterable<int> debugTrackedDevices() => _sanitizers.keys;
@@ -997,20 +1072,43 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       _convertEventsToPointerData(data: pointerData, event: event, details: down);
       _callback(event, pointerData);
 
+      // Track touch gestures for scroll detection
+      final bool isTouchEvent = event.pointerType == 'touch';
+      if (isTouchEvent) {
+        final _TouchGestureTracker tracker = _touchTrackers.putIfAbsent(
+          device,
+          () => _TouchGestureTracker(),
+        );
+        tracker.onPointerDown(event);
+        
+        if (_debugLogPointerEvents) {
+          print('[TOUCH_PASSTHROUGH] Touch pointerdown - NOT calling preventDefault() to allow browser scroll');
+        }
+      }
+
       if (event.target == _viewTarget) {
         // Ensure smooth focus transitions between text fields within the Flutter view.
         // Without preventing the default and this delay, the engine may not have fully
         // rendered the next input element, leading to the focus incorrectly returning to
         // the main Flutter view instead.
         // A zero-length timer is sufficient in all tested browsers to achieve this.
-        event.preventDefault();
-        Timer(Duration.zero, () {
-          EnginePlatformDispatcher.instance.requestViewFocusChange(
-            viewId: _view.viewId,
-            state: ui.ViewFocusState.focused,
-            direction: ui.ViewFocusDirection.undefined,
-          );
-        });
+        //
+        // IMPORTANT: For touch events, we DON'T call preventDefault() to allow browser
+        // scrolling to work. This is part of the browser-driven scrolling solution.
+        // The trade-off is that focus transitions on touch might be slightly less smooth,
+        // but browser scrolling is more important for mobile UX.
+        if (!isTouchEvent) {
+          event.preventDefault();
+          Timer(Duration.zero, () {
+            EnginePlatformDispatcher.instance.requestViewFocusChange(
+              viewId: _view.viewId,
+              state: ui.ViewFocusState.focused,
+              direction: ui.ViewFocusDirection.undefined,
+            );
+          });
+        } else if (_debugLogPointerEvents) {
+          print('[TOUCH_PASSTHROUGH] Skipping preventDefault() for touch event to enable browser scroll');
+        }
       }
     });
 
@@ -1032,6 +1130,18 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       final _ButtonSanitizer sanitizer = _ensureSanitizer(device);
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
       final List<DomPointerEvent> expandedEvents = _expandEvents(moveEvent);
+      
+      // Track touch gesture movement
+      if (moveEvent.pointerType == 'touch') {
+        final _TouchGestureTracker? tracker = _touchTrackers[device];
+        if (tracker != null) {
+          tracker.onPointerMove(moveEvent);
+          if (_debugLogPointerEvents && tracker.isScrollGesture) {
+            print('[TOUCH_PASSTHROUGH] Touch scroll gesture detected in pointermove');
+          }
+        }
+      }
+      
       for (final DomPointerEvent event in expandedEvents) {
         final _SanitizedDetails? up = sanitizer.sanitizeMissingRightClickUp(
           buttons: event.buttons!.toInt(),
@@ -1084,6 +1194,14 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
           _callback(event, pointerData);
         }
       }
+      
+      // Clean up touch tracker
+      if (event.pointerType == 'touch') {
+        _touchTrackers.remove(device);
+        if (_debugLogPointerEvents) {
+          print('[TOUCH_PASSTHROUGH] Touch pointerup - cleaned up tracker for device $device');
+        }
+      }
     });
 
     // TODO(dit): Synthesize a "cancel" event when 'pointerup' happens outside of the flutterViewElement, https://github.com/flutter/flutter/issues/116561
@@ -1098,6 +1216,14 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         _removePointerIfUnhoverable(event);
         _convertEventsToPointerData(data: pointerData, event: event, details: details);
         _callback(event, pointerData);
+      }
+      
+      // Clean up touch tracker
+      if (event.pointerType == 'touch') {
+        _touchTrackers.remove(device);
+        if (_debugLogPointerEvents) {
+          print('[TOUCH_PASSTHROUGH] Touch pointercancel - cleaned up tracker for device $device');
+        }
       }
     }, checkModifiers: false);
 

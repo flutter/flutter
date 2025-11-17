@@ -160,6 +160,7 @@ class SingleChildScrollView extends StatelessWidget {
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.restorationId,
     this.keyboardDismissBehavior,
+    this.browserScrolling,
   }) : assert(
          !(controller != null && (primary ?? false)),
          'Primary ScrollViews obtain their ScrollController via inheritance '
@@ -239,6 +240,9 @@ class SingleChildScrollView extends StatelessWidget {
   /// [ScrollBehavior.getKeyboardDismissBehavior].
   final ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior;
 
+  /// {@macro flutter.widgets.scrollable.browserScrolling}
+  final bool? browserScrolling;
+
   AxisDirection _getDirection(BuildContext context) {
     return getAxisDirectionFromAxisReverseAndDirectionality(context, scrollDirection, reverse);
   }
@@ -266,6 +270,7 @@ class SingleChildScrollView extends StatelessWidget {
       restorationId: restorationId,
       clipBehavior: clipBehavior,
       hitTestBehavior: hitTestBehavior,
+      browserScrolling: browserScrolling,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return _SingleChildViewport(
           axisDirection: axisDirection,
