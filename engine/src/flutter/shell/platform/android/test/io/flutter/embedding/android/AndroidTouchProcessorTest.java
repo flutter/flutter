@@ -44,7 +44,7 @@ public class AndroidTouchProcessorTest {
   // 2 days in milliseconds
   final long eventTimeMilliseconds = 172800000;
   final float pressure = 0.8f;
-  // https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/gestures/events.dart
+  // https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/gestures/events.dart
   final int enginePrimaryStylusButton = 0x02;
 
   @Before

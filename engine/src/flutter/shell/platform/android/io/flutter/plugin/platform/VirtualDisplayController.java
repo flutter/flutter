@@ -53,7 +53,7 @@ class VirtualDisplayController {
     // Virtual Display crashes for some PlatformViews if the width or height is bigger
     // than the physical screen size. We have tried to clamp or scale down the size to prevent
     // the crash, but both solutions lead to unwanted behavior because the
-    // AndroidPlatformView(https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/widgets/platform_view.dart#L677) widget doesn't
+    // AndroidPlatformView(https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/widgets/platform_view.dart#L677) widget doesn't
     // scale or clamp, which leads to a mismatch between the size of the widget and the size of
     // virtual display.
     // This mismatch leads to some test failures: https://github.com/flutter/flutter/issues/106750

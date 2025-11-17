@@ -35,14 +35,14 @@ The [engine orchestrator recipe](https://flutter.googlesource.com/recipes/+/refs
 reads each file in that directory, shards their builds, collects artifacts and
 uploads them to the Google Cloud Storage bucket.
 
-The [.ci.yaml file](https://github.com/flutter/flutter/blob/master/engine/src/flutter/.ci.yaml) at the
+The [.ci.yaml file](https://github.com/flutter/flutter/blob/main/engine/src/flutter/.ci.yaml) at the
 `engine/src/flutter` dir of the `flutter/flutter` repository puts all the components together.
 Builds are specified in that file using a property pointing to the build definition
 file to be used by engine\_v2 recipes. Full documentation of the `.ci.yaml` file format
 can be found [in the Cocoon repository here](https://github.com/flutter/cocoon/blob/main/CI_YAML.md).
 
 The following is a sample build configuration referencing
-[android\_aot\_engine.json](https://github.com/flutter/flutter/blob/master/engine/src/flutter/ci/builders/mac_android_aot_engine.json)
+[android\_aot\_engine.json](https://github.com/flutter/flutter/blob/main/engine/src/flutter/ci/builders/mac_android_aot_engine.json)
 in the `config_name` under `properties`:
 
 ```yaml
@@ -481,7 +481,7 @@ The property's description is as follows:
 
 * **name** the name that will be assigned to the sub-build.
 * **shard** the flutter/flutter shard test to run. The supported shard names can be found
-on the flutter framework [test.dart](https://github.com/flutter/flutter/blob/master/dev/bots/test.dart#L244).
+on the flutter framework [test.dart](https://github.com/flutter/flutter/blob/main/dev/bots/test.dart#L244).
 * **subshard** one of the accepted subshard values for shard. Sub-shards are defined as part
 of the shard implementation, please look at the corresponding shard implementation to find the
 accepted values.

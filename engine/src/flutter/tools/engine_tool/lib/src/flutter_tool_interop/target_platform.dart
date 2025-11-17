@@ -7,7 +7,7 @@ import 'package:meta/meta.dart';
 /// Platforms that are supported by the Flutter tool.
 ///
 /// This is partially based on the `flutter_tools` `TargetPlatform` class:
-/// <https://github.com/flutter/flutter/blob/master/packages/flutter_tools/lib/src/build_info.dart>
+/// <https://github.com/flutter/flutter/blob/main/packages/flutter_tools/lib/src/build_info.dart>
 ///
 /// This class is used to represent the target platform of a device.
 @immutable
@@ -142,7 +142,7 @@ final class TargetPlatform {
   ///
   /// See:
   /// - <https://github.com/flutter/flutter/blob/9441f9d48fce1d0b425628731dd6ecab8c8b0826/packages/flutter_tools/lib/src/device.dart#L878>.
-  /// - <https://github.com/flutter/flutter/blob/master/packages/flutter_tools/lib/src/build_info.dart#L736>.
+  /// - <https://github.com/flutter/flutter/blob/main/packages/flutter_tools/lib/src/build_info.dart#L736>.
   final String identifier;
 
   @override
