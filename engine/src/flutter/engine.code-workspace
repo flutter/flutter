@@ -236,7 +236,12 @@
       "env": "${envObj}",
       "environment": "${envObjArray}",
       "sourceFileMap": "${sourceFileMapObj}"
-    }
+    },
+    "clangd.path": "/Users/bensonluk/development/flutter/engine/src/flutter/buildtools/mac-arm64/clang/bin/clangd",
+    "clangd.arguments": [
+      "--compile-commands-dir=/Users/bensonluk/development/flutter/engine/src/out/host_debug_unopt_arm64"
+      // "--compile-commands-dir=/Users/bensonluk/development/flutter/engine/src/out/android_debug_unopt_arm64"
+    ],
   },
   "tasks": {
     "version": "2.0.0",

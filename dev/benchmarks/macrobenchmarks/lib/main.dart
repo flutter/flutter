@@ -19,6 +19,7 @@ import 'src/color_filter_cache.dart';
 import 'src/color_filter_with_unstable_child.dart';
 import 'src/cubic_bezier.dart';
 import 'src/cull_opacity.dart';
+import 'src/draw_arcs.dart';
 import 'src/draw_atlas.dart';
 import 'src/draw_points.dart';
 import 'src/draw_vertices.dart';
@@ -113,6 +114,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kRSuperellipseBlurRouteName: (BuildContext context) => const RSuperellipseBlur(),
         kVeryLongPictureScrollingRouteName: (BuildContext context) =>
             const VeryLongPictureScrollingPerf(),
+        kDrawArcsPageRouteName: (BuildContext context) => const DrawArcsPage(),
       },
     );
   }
@@ -408,6 +410,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Very Long Picture Scrolling'),
             onPressed: () {
               Navigator.pushNamed(context, kVeryLongPictureScrollingRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kDrawArcsPageRouteName),
+            child: const Text('Draw Arcs'),
+            onPressed: () {
+              Navigator.pushNamed(context, kDrawArcsPageRouteName);
             },
           ),
         ],
