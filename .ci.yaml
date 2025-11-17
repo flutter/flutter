@@ -166,7 +166,7 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
-      os: Mac-15.5|	Mac-15.7.2
+      os: Mac-15.5|Mac-15.7.2
       device_type: none
       $flutter/osx_sdk : >-
         {
@@ -183,7 +183,7 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
-      os: Mac-15.5|	Mac-15.7.2
+      os: Mac-15.5|Mac-15.7.2
       device_type: none
       cpu: arm64
       $flutter/osx_sdk : >-
