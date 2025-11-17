@@ -7620,7 +7620,11 @@ base class _NativePicture extends NativeFieldWrapperClass1 implements Picture {
   external String? _toImage(int width, int height, void Function(_Image?) callback);
 
   @override
-  Image toImageSync(int width, int height, {TargetPixelFormat targetFormat = TargetPixelFormat.dontCare}) {
+  Image toImageSync(
+    int width,
+    int height, {
+    TargetPixelFormat targetFormat = TargetPixelFormat.dontCare,
+  }) {
     assert(!_disposed);
     if (width <= 0 || height <= 0) {
       throw Exception('Invalid image dimensions.');
@@ -7631,7 +7635,9 @@ base class _NativePicture extends NativeFieldWrapperClass1 implements Picture {
     return Image._(image, image.width, image.height);
   }
 
-  @Native<Void Function(Pointer<Void>, Uint32, Uint32, Int32, Handle)>(symbol: 'Picture::toImageSync')
+  @Native<Void Function(Pointer<Void>, Uint32, Uint32, Int32, Handle)>(
+    symbol: 'Picture::toImageSync',
+  )
   external void _toImageSync(int width, int height, int targetFormat, _Image outImage);
 
   @override

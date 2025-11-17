@@ -97,9 +97,9 @@ DlDeferredImageGPUImpeller::ImageWrapper::Make(
     int32_t target_format,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner) {
-  auto wrapper = std::shared_ptr<ImageWrapper>(new ImageWrapper(
-      size, target_format, std::move(snapshot_delegate),
-      std::move(raster_task_runner)));
+  auto wrapper = std::shared_ptr<ImageWrapper>(
+      new ImageWrapper(size, target_format, std::move(snapshot_delegate),
+                       std::move(raster_task_runner)));
   wrapper->SnapshotDisplayList(std::move(display_list));
   return wrapper;
 }
@@ -109,10 +109,9 @@ DlDeferredImageGPUImpeller::ImageWrapper::Make(
     std::unique_ptr<LayerTree> layer_tree,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner) {
-  auto wrapper = std::shared_ptr<ImageWrapper>(
-      new ImageWrapper(layer_tree->frame_size(), /*target_format=*/0,
-                       std::move(snapshot_delegate),
-                       std::move(raster_task_runner)));
+  auto wrapper = std::shared_ptr<ImageWrapper>(new ImageWrapper(
+      layer_tree->frame_size(), /*target_format=*/0,
+      std::move(snapshot_delegate), std::move(raster_task_runner)));
   wrapper->SnapshotDisplayList(std::move(layer_tree));
   return wrapper;
 }

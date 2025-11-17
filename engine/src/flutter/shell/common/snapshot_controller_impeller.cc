@@ -48,10 +48,22 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
     render_target_size.height *= scale_factor;
   }
 
+  std::optional<impeller::PixelFormat> pixel_format;
+  switch (target_format) {
+    case 0:
+      break;
+    case 1:
+      pixel_format = impeller::PixelFormat::kR32G32B32A32Float;
+      break;
+    default:
+      FML_DCHECK(false) << "unrecognized format";
+      break;
+  }
+
   return impeller::DlImageImpeller::Make(
       impeller::DisplayListToTexture(display_list, render_target_size, *context,
                                      /*reset_host_buffer=*/false,
-                                     /*generate_mips=*/true, target_format),
+                                     /*generate_mips=*/true, pixel_format),
       DlImage::OwningContext::kRaster);
 }
 
@@ -74,7 +86,8 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
     }
   }
 
-  return DoMakeRasterSnapshot(display_list, size, delegate.GetAiksContext(), target_format);
+  return DoMakeRasterSnapshot(display_list, size, delegate.GetAiksContext(),
+                              target_format);
 }
 
 sk_sp<DlImage> DoMakeRasterSnapshot(
@@ -90,7 +103,8 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
                            })
                            .SetIfFalse([&] {
                              result = DoMakeRasterSnapshot(
-                                 display_list, picture_size, context, target_format);
+                                 display_list, picture_size, context,
+                                 target_format);
                            }));
 
   return result;
@@ -114,7 +128,8 @@ void SnapshotControllerImpeller::MakeRasterSnapshot(
                   [context, sync_switch, display_list = std::move(display_list),
                    picture_size, callback, target_format] {
                     callback(DoMakeRasterSnapshot(display_list, picture_size,
-                                                  sync_switch, context, target_format));
+                                                  sync_switch, context,
+                                                  target_format));
                   },
                   [callback]() { callback(nullptr); });
             } else {
@@ -146,7 +161,8 @@ sk_sp<DlImage> SnapshotControllerImpeller::MakeRasterSnapshotSync(
     sk_sp<DisplayList> display_list,
     DlISize picture_size,
     int32_t target_format) {
-  return DoMakeRasterSnapshot(display_list, picture_size, GetDelegate(), target_format);
+  return DoMakeRasterSnapshot(display_list, picture_size, GetDelegate(),
+                              target_format);
 }
 
 void SnapshotControllerImpeller::CacheRuntimeStage(

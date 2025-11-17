@@ -448,9 +448,8 @@ sk_sp<DlImage> Rasterizer::MakeRasterSnapshotSync(
     sk_sp<DisplayList> display_list,
     DlISize picture_size,
     int32_t target_format) {
-  return snapshot_controller_->MakeRasterSnapshotSync(display_list,
-                                                      picture_size,
-                                                      target_format);
+  return snapshot_controller_->MakeRasterSnapshotSync(
+      display_list, picture_size, target_format);
 }
 
 sk_sp<SkImage> Rasterizer::ConvertToRasterImage(sk_sp<SkImage> image) {

@@ -63,8 +63,9 @@ TEST(DlDeferredImageGPUImpeller, TrashesDisplayList) {
     auto mock_texture = std::make_shared<impeller::testing::MockTexture>(desc);
     EXPECT_CALL(*mock_image, impeller_texture)
         .WillOnce(::testing::Return(mock_texture));
-    EXPECT_CALL(*snapshot_delegate,
-                MakeRasterSnapshotSync(::testing::_, ::testing::_, ::testing::_))
+    EXPECT_CALL(
+        *snapshot_delegate,
+        MakeRasterSnapshotSync(::testing::_, ::testing::_, ::testing::_))
         .WillOnce(::testing::Return(mock_image));
     snapshot_delegate_weak_ptr = snapshot_delegate->GetWeakPtr();
   });

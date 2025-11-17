@@ -53,7 +53,8 @@ void Picture::toImageSync(uint32_t width,
                           int32_t target_format,
                           Dart_Handle raw_image_handle) {
   FML_DCHECK(display_list_);
-  RasterizeToImageSync(display_list_, width, height, target_format, raw_image_handle);
+  RasterizeToImageSync(display_list_, width, height, target_format,
+                       raw_image_handle);
 }
 
 static sk_sp<DlImage> CreateDeferredImage(
@@ -102,8 +103,8 @@ void Picture::RasterizeToImageSync(sk_sp<DisplayList> display_list,
   auto image = CanvasImage::Create();
   auto dl_image = CreateDeferredImage(
       dart_state->IsImpellerEnabled(), std::move(display_list), width, height,
-      target_format, std::move(snapshot_delegate), std::move(raster_task_runner),
-      unref_queue);
+      target_format, std::move(snapshot_delegate),
+      std::move(raster_task_runner), unref_queue);
   image->set_image(dl_image);
   image->AssociateWithDartWrapper(raw_image_handle);
 }
@@ -224,7 +225,8 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
             [ui_task_runner, ui_task](const sk_sp<DlImage>& image) {
               fml::TaskRunner::RunNowOrPostTask(
                   ui_task_runner, [ui_task, image]() { ui_task(image); });
-            }, 0);
+            },
+            0);
       }));
 
   return Dart_Null();
