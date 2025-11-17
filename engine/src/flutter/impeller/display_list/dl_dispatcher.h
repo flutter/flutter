@@ -403,7 +403,8 @@ std::shared_ptr<Texture> DisplayListToTexture(
     ISize size,
     AiksContext& context,
     bool reset_host_buffer = true,
-    bool generate_mips = false);
+    bool generate_mips = false,
+    int32_t target_format = 0);
 
 /// @brief Render the provided display list to the render target.
 ///

@@ -22,7 +22,8 @@ namespace {
 sk_sp<DlImage> DoMakeRasterSnapshot(
     const sk_sp<DisplayList>& display_list,
     DlISize size,
-    const std::shared_ptr<impeller::AiksContext>& context) {
+    const std::shared_ptr<impeller::AiksContext>& context,
+    int32_t target_format) {
   TRACE_EVENT0("flutter", __FUNCTION__);
   if (!context) {
     return nullptr;
@@ -50,14 +51,15 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
   return impeller::DlImageImpeller::Make(
       impeller::DisplayListToTexture(display_list, render_target_size, *context,
                                      /*reset_host_buffer=*/false,
-                                     /*generate_mips=*/true),
+                                     /*generate_mips=*/true, target_format),
       DlImage::OwningContext::kRaster);
 }
 
 sk_sp<DlImage> DoMakeRasterSnapshot(
     const sk_sp<DisplayList>& display_list,
     DlISize size,
-    const SnapshotController::Delegate& delegate) {
+    const SnapshotController::Delegate& delegate,
+    int32_t target_format) {
   // Ensure that the current thread has a rendering context. This must be done
   // before calling GetAiksContext because constructing the AiksContext may
   // invoke graphics APIs.
@@ -72,14 +74,15 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
     }
   }
 
-  return DoMakeRasterSnapshot(display_list, size, delegate.GetAiksContext());
+  return DoMakeRasterSnapshot(display_list, size, delegate.GetAiksContext(), target_format);
 }
 
 sk_sp<DlImage> DoMakeRasterSnapshot(
     sk_sp<DisplayList> display_list,
     DlISize picture_size,
     const std::shared_ptr<const fml::SyncSwitch>& sync_switch,
-    const std::shared_ptr<impeller::AiksContext>& context) {
+    const std::shared_ptr<impeller::AiksContext>& context,
+    int32_t target_format) {
   sk_sp<DlImage> result;
   sync_switch->Execute(fml::SyncSwitch::Handlers()
                            .SetIfTrue([&] {
@@ -87,7 +90,7 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
                            })
                            .SetIfFalse([&] {
                              result = DoMakeRasterSnapshot(
-                                 display_list, picture_size, context);
+                                 display_list, picture_size, context, target_format);
                            }));
 
   return result;
@@ -97,7 +100,8 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
 void SnapshotControllerImpeller::MakeRasterSnapshot(
     sk_sp<DisplayList> display_list,
     DlISize picture_size,
-    std::function<void(const sk_sp<DlImage>&)> callback) {
+    std::function<void(const sk_sp<DlImage>&)> callback,
+    int32_t target_format) {
   std::shared_ptr<const fml::SyncSwitch> sync_switch =
       GetDelegate().GetIsGpuDisabledSyncSwitch();
   sync_switch->Execute(
@@ -108,9 +112,9 @@ void SnapshotControllerImpeller::MakeRasterSnapshot(
             if (context) {
               context->GetContext()->StoreTaskForGPU(
                   [context, sync_switch, display_list = std::move(display_list),
-                   picture_size, callback] {
+                   picture_size, callback, target_format] {
                     callback(DoMakeRasterSnapshot(display_list, picture_size,
-                                                  sync_switch, context));
+                                                  sync_switch, context, target_format));
                   },
                   [callback]() { callback(nullptr); });
             } else {
@@ -134,14 +138,15 @@ void SnapshotControllerImpeller::MakeRasterSnapshot(
             }
 #endif
             callback(DoMakeRasterSnapshot(display_list, picture_size,
-                                          GetDelegate()));
+                                          GetDelegate(), target_format));
           }));
 }
 
 sk_sp<DlImage> SnapshotControllerImpeller::MakeRasterSnapshotSync(
     sk_sp<DisplayList> display_list,
-    DlISize picture_size) {
-  return DoMakeRasterSnapshot(display_list, picture_size, GetDelegate());
+    DlISize picture_size,
+    int32_t target_format) {
+  return DoMakeRasterSnapshot(display_list, picture_size, GetDelegate(), target_format);
 }
 
 void SnapshotControllerImpeller::CacheRuntimeStage(

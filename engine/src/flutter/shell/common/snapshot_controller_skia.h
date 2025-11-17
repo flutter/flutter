@@ -20,10 +20,12 @@ class SnapshotControllerSkia : public SnapshotController {
   void MakeRasterSnapshot(
       sk_sp<DisplayList> display_list,
       DlISize picture_size,
-      std::function<void(const sk_sp<DlImage>&)> callback) override;
+      std::function<void(const sk_sp<DlImage>&)> callback,
+      int32_t target_format) override;
 
   sk_sp<DlImage> MakeRasterSnapshotSync(sk_sp<DisplayList> display_list,
-                                        DlISize size) override;
+                                        DlISize size,
+                                        int32_t target_format) override;
 
   virtual sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) override;
 

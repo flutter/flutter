@@ -1216,7 +1216,8 @@ std::shared_ptr<Texture> DisplayListToTexture(
     ISize size,
     AiksContext& context,
     bool reset_host_buffer,
-    bool generate_mips) {
+    bool generate_mips,
+    int32_t target_format) {
   int mip_count = 1;
   if (generate_mips) {
     mip_count = size.MipCount();
@@ -1234,7 +1235,12 @@ std::shared_ptr<Texture> DisplayListToTexture(
         /*mip_count=*/mip_count,
         "Picture Snapshot MSAA",  // label
         impeller::RenderTarget::
-            kDefaultColorAttachmentConfigMSAA  // color_attachment_config
+            kDefaultColorAttachmentConfigMSAA,  // color_attachment_config
+        std::nullopt,                           // stencil_attachment_config
+        nullptr,                                // existing_color_msaa_texture
+        nullptr,                                // existing_color_resolve_texture
+        nullptr,                                // existing_depth_stencil_texture
+        target_format                           // target_format
     );
   } else {
     target = render_target_allocator.CreateOffscreen(
@@ -1243,7 +1249,11 @@ std::shared_ptr<Texture> DisplayListToTexture(
         /*mip_count=*/mip_count,
         "Picture Snapshot",  // label
         impeller::RenderTarget::
-            kDefaultColorAttachmentConfig  // color_attachment_config
+            kDefaultColorAttachmentConfig,  // color_attachment_config
+        std::nullopt,                       // stencil_attachment_config
+        nullptr,                            // existing_color_texture
+        nullptr,                            // existing_depth_stencil_texture
+        target_format                       // target_format
     );
   }
   if (!target.IsValid()) {

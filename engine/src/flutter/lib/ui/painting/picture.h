@@ -32,6 +32,7 @@ class Picture : public RefCountedDartWrappable<Picture> {
 
   void toImageSync(uint32_t width,
                    uint32_t height,
+                   int32_t target_format,
                    Dart_Handle raw_image_handle);
 
   void dispose();
@@ -41,6 +42,7 @@ class Picture : public RefCountedDartWrappable<Picture> {
   static void RasterizeToImageSync(sk_sp<DisplayList> display_list,
                                    uint32_t width,
                                    uint32_t height,
+                                   int32_t target_format,
                                    Dart_Handle raw_image_handle);
 
   static Dart_Handle RasterizeToImage(const sk_sp<DisplayList>& display_list,

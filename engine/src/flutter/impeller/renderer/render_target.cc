@@ -327,7 +327,8 @@ RenderTarget RenderTargetAllocator::CreateOffscreen(
     RenderTarget::AttachmentConfig color_attachment_config,
     std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config,
     const std::shared_ptr<Texture>& existing_color_texture,
-    const std::shared_ptr<Texture>& existing_depth_stencil_texture) {
+    const std::shared_ptr<Texture>& existing_depth_stencil_texture,
+    int32_t target_pixel_format_int) {
   if (size.IsEmpty()) {
     return {};
   }
@@ -338,8 +339,17 @@ RenderTarget RenderTargetAllocator::CreateOffscreen(
   if (existing_color_texture) {
     color0_tex = existing_color_texture;
   } else {
-    PixelFormat pixel_format =
-        context.GetCapabilities()->GetDefaultColorFormat();
+    PixelFormat pixel_format;
+    switch (target_pixel_format_int) {
+      case 0:  // TargetPixelFormat::kDontCare
+        pixel_format = context.GetCapabilities()->GetDefaultColorFormat();
+        break;
+      case 1:  // TargetPixelFormat::kRGBAFloat32
+        pixel_format = PixelFormat::kR32G32B32A32Float;
+        break;
+      default:
+        FML_UNREACHABLE();
+    }
     TextureDescriptor color0_tex_desc;
     color0_tex_desc.storage_mode = color_attachment_config.storage_mode;
     color0_tex_desc.format = pixel_format;
@@ -382,13 +392,24 @@ RenderTarget RenderTargetAllocator::CreateOffscreenMSAA(
     std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config,
     const std::shared_ptr<Texture>& existing_color_msaa_texture,
     const std::shared_ptr<Texture>& existing_color_resolve_texture,
-    const std::shared_ptr<Texture>& existing_depth_stencil_texture) {
+    const std::shared_ptr<Texture>& existing_depth_stencil_texture,
+    int32_t target_pixel_format_int) {
   if (size.IsEmpty()) {
     return {};
   }
 
   RenderTarget target;
-  PixelFormat pixel_format = context.GetCapabilities()->GetDefaultColorFormat();
+  PixelFormat pixel_format;
+  switch (target_pixel_format_int) {
+    case 0:  // TargetPixelFormat::kDontCare
+      pixel_format = context.GetCapabilities()->GetDefaultColorFormat();
+      break;
+    case 1:  // TargetPixelFormat::kRGBAFloat32
+      pixel_format = PixelFormat::kR32G32B32A32Float;
+      break;
+    default:
+      FML_UNREACHABLE();
+  }
 
   // Create MSAA color texture.
   std::shared_ptr<Texture> color0_msaa_tex;
@@ -418,7 +439,8 @@ RenderTarget RenderTargetAllocator::CreateOffscreenMSAA(
   std::shared_ptr<Texture> color0_resolve_tex;
   if (existing_color_resolve_texture) {
     color0_resolve_tex = existing_color_resolve_texture;
-  } else {
+  }
+  else {
     TextureDescriptor color0_resolve_tex_desc;
     color0_resolve_tex_desc.storage_mode =
         color_attachment_config.resolve_storage_mode;

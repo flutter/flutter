@@ -24,12 +24,13 @@ sk_sp<DlDeferredImageGPUImpeller> DlDeferredImageGPUImpeller::Make(
 sk_sp<DlDeferredImageGPUImpeller> DlDeferredImageGPUImpeller::Make(
     sk_sp<DisplayList> display_list,
     const DlISize& size,
+    int32_t target_format,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner) {
   return sk_sp<DlDeferredImageGPUImpeller>(new DlDeferredImageGPUImpeller(
       DlDeferredImageGPUImpeller::ImageWrapper::Make(
-          std::move(display_list), size, std::move(snapshot_delegate),
-          std::move(raster_task_runner))));
+          std::move(display_list), size, target_format,
+          std::move(snapshot_delegate), std::move(raster_task_runner))));
 }
 
 DlDeferredImageGPUImpeller::DlDeferredImageGPUImpeller(
@@ -93,10 +94,12 @@ std::shared_ptr<DlDeferredImageGPUImpeller::ImageWrapper>
 DlDeferredImageGPUImpeller::ImageWrapper::Make(
     sk_sp<DisplayList> display_list,
     const DlISize& size,
+    int32_t target_format,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner) {
   auto wrapper = std::shared_ptr<ImageWrapper>(new ImageWrapper(
-      size, std::move(snapshot_delegate), std::move(raster_task_runner)));
+      size, target_format, std::move(snapshot_delegate),
+      std::move(raster_task_runner)));
   wrapper->SnapshotDisplayList(std::move(display_list));
   return wrapper;
 }
@@ -107,7 +110,8 @@ DlDeferredImageGPUImpeller::ImageWrapper::Make(
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner) {
   auto wrapper = std::shared_ptr<ImageWrapper>(
-      new ImageWrapper(layer_tree->frame_size(), std::move(snapshot_delegate),
+      new ImageWrapper(layer_tree->frame_size(), /*target_format=*/0,
+                       std::move(snapshot_delegate),
                        std::move(raster_task_runner)));
   wrapper->SnapshotDisplayList(std::move(layer_tree));
   return wrapper;
@@ -115,9 +119,11 @@ DlDeferredImageGPUImpeller::ImageWrapper::Make(
 
 DlDeferredImageGPUImpeller::ImageWrapper::ImageWrapper(
     const DlISize& size,
+    int32_t target_format,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner)
     : size_(size),
+      target_format_(target_format),
       snapshot_delegate_(std::move(snapshot_delegate)),
       raster_task_runner_(std::move(raster_task_runner)) {}
 
@@ -161,7 +167,7 @@ void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
         }
 
         auto snapshot = snapshot_delegate->MakeRasterSnapshotSync(
-            display_list, wrapper->size_);
+            display_list, wrapper->size_, wrapper->target_format_);
         if (!snapshot) {
           std::scoped_lock lock(wrapper->error_mutex_);
           wrapper->error_ = "Failed to create snapshot.";

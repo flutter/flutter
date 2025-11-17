@@ -31,6 +31,7 @@ class DlDeferredImageGPUImpeller final : public DlImage {
   static sk_sp<DlDeferredImageGPUImpeller> Make(
       sk_sp<DisplayList> display_list,
       const DlISize& size,
+      int32_t target_format,
       fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
       fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
@@ -74,6 +75,7 @@ class DlDeferredImageGPUImpeller final : public DlImage {
     static std::shared_ptr<ImageWrapper> Make(
         sk_sp<DisplayList> display_list,
         const DlISize& size,
+        int32_t target_format,
         fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
         fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
@@ -95,6 +97,7 @@ class DlDeferredImageGPUImpeller final : public DlImage {
    private:
     FML_FRIEND_TEST(testing::DlDeferredImageGPUImpeller, TrashesDisplayList);
     DlISize size_;
+    int32_t target_format_;
     std::shared_ptr<impeller::Texture> texture_;
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate_;
     fml::RefPtr<fml::TaskRunner> raster_task_runner_;
@@ -104,6 +107,7 @@ class DlDeferredImageGPUImpeller final : public DlImage {
 
     ImageWrapper(
         const DlISize& size,
+        int32_t target_format,
         fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
         fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
