@@ -72,6 +72,10 @@ class ParentData {
 /// Used by many of the methods of [PaintingContext].
 typedef PaintingContextCallback = void Function(PaintingContext context, Offset offset);
 
+/// Signature for transforming the given [Rect] to a different [Rect] with a
+/// [Matrix4] transform.
+typedef _TransformRect = Rect Function(Matrix4 transform, Rect rect);
+
 /// A place to paint.
 ///
 /// Rather than holding a canvas directly, [RenderObject]s paint using a painting
@@ -6399,12 +6403,12 @@ final class _SemanticsGeometry {
 
       final Rect? localPaintClipInParent = _transformRect(
         nodeParent.describeApproximatePaintClip(node),
-        transform, // paint transform from nodeParent to parent
+        transform, // paint transform of nodeParent in relation to parent
         MatrixUtils.transformRect,
       );
       final Rect? localSemanticsClipInParent = _transformRect(
         nodeParent.describeSemanticsClip(node),
-        transform, // paint transform from nodeParent to parent
+        transform, // paint transform of nodeParent in relation to parent
         MatrixUtils.transformRect,
       );
       paintClipRect = _intersectRects(paintClipRect, localPaintClipInParent);
@@ -6459,7 +6463,7 @@ final class _SemanticsGeometry {
   static Rect? _transformRect(
     Rect? rect,
     Matrix4 transform, [
-    Rect Function(Matrix4, Rect) apply = MatrixUtils.inverseTransformRect,
+    _TransformRect apply = MatrixUtils.inverseTransformRect,
   ]) {
     if (rect == null) {
       return null;
