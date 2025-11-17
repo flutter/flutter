@@ -32,6 +32,12 @@ import 'selection_container.dart';
 /// The text style to apply to descendant [Text] widgets which don't have an
 /// explicit style.
 ///
+/// A [MediaQuery] ancestor of a [Text] widget may still override the
+/// [TextStyle.height], [TextStyle.letterSpacing], and [TextStyle.wordSpacing] of
+/// the [TextStyle] set by this [DefaultTextStyle] widget through its
+/// [MediaQueryData.lineHeightScaleFactorOverride], [MediaQueryData.letterSpacingOverride],
+/// and [MediaQueryData.wordSpacingOverride] members.
+///
 /// {@tool dartpad}
 /// This example shows how to use [DefaultTextStyle.merge] to create a default
 /// text style that inherits styling information from the current default text
@@ -579,9 +585,19 @@ class Text extends StatelessWidget {
   /// If the style's "inherit" property is true, the style will be merged with
   /// the closest enclosing [DefaultTextStyle]. Otherwise, the style will
   /// replace the closest enclosing [DefaultTextStyle].
+  ///
+  /// The user or platform may override this [style]'s [TextStyle.fontWeight],
+  /// [TextStyle.height], [TextStyle.letterSpacing], and [TextStyle.wordSpacing]
+  /// via a [MediaQuery] ancestor's [MediaQueryData.boldText],
+  /// [MediaQueryData.lineHeightScaleFactorOverride],
+  /// [MediaQueryData.letterSpacingOverride], and [MediaQueryData.wordSpacingOverride]
+  /// regardless of its [TextStyle.inherit] value.
   final TextStyle? style;
 
   /// {@macro flutter.painting.textPainter.strutStyle}
+  ///
+  /// The user or platform may override this [strutStyle]'s [StrutStyle.height]
+  /// via a [MediaQuery] ancestor's [MediaQueryData.lineHeightScaleFactorOverride].
   final StrutStyle? strutStyle;
 
   /// How the text should be aligned horizontally.
@@ -706,6 +722,26 @@ class Text extends StatelessWidget {
     if (MediaQuery.boldTextOf(context)) {
       effectiveTextStyle = effectiveTextStyle!.merge(const TextStyle(fontWeight: FontWeight.bold));
     }
+    // TODO(Renzo-Olivares): Investigate ways the framework can automatically
+    // apply MediaQueryData.paragraphSpacingOverride to its own text components.
+    // See: https://github.com/flutter/flutter/issues/177953 and https://github.com/flutter/flutter/issues/177408.
+    final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(context);
+    final double? letterSpacing = MediaQuery.maybeLetterSpacingOverrideOf(context);
+    final double? wordSpacing = MediaQuery.maybeWordSpacingOverrideOf(context);
+    final TextSpan effectiveTextSpan = _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides(
+      lineHeightScaleFactor: lineHeightScaleFactor,
+      letterSpacing: letterSpacing,
+      wordSpacing: wordSpacing,
+      textSpan: TextSpan(
+        style: effectiveTextStyle,
+        text: data,
+        locale: locale,
+        children: textSpan != null ? <InlineSpan>[textSpan!] : null,
+      ),
+    );
+    final StrutStyle? effectiveStrutStyle = strutStyle?.merge(
+      StrutStyle(height: lineHeightScaleFactor),
+    );
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     final TextScaler textScaler = switch ((this.textScaler, textScaleFactor)) {
       (final TextScaler textScaler, _) => textScaler,
@@ -727,7 +763,7 @@ class Text extends StatelessWidget {
           overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
           textScaler: textScaler,
           maxLines: maxLines ?? defaultTextStyle.maxLines,
-          strutStyle: strutStyle,
+          strutStyle: effectiveStrutStyle,
           textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
           textHeightBehavior:
               textHeightBehavior ??
@@ -737,12 +773,7 @@ class Text extends StatelessWidget {
               selectionColor ??
               DefaultSelectionStyle.of(context).selectionColor ??
               DefaultSelectionStyle.defaultColor,
-          text: TextSpan(
-            style: effectiveTextStyle,
-            text: data,
-            locale: locale,
-            children: textSpan != null ? <InlineSpan>[textSpan!] : null,
-          ),
+          text: effectiveTextSpan,
         ),
       );
     } else {
@@ -755,7 +786,7 @@ class Text extends StatelessWidget {
         overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
         textScaler: textScaler,
         maxLines: maxLines ?? defaultTextStyle.maxLines,
-        strutStyle: strutStyle,
+        strutStyle: effectiveStrutStyle,
         textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
         textHeightBehavior:
             textHeightBehavior ??
@@ -765,12 +796,7 @@ class Text extends StatelessWidget {
             selectionColor ??
             DefaultSelectionStyle.of(context).selectionColor ??
             DefaultSelectionStyle.defaultColor,
-        text: TextSpan(
-          style: effectiveTextStyle,
-          text: data,
-          locale: locale,
-          children: textSpan != null ? <InlineSpan>[textSpan!] : null,
-        ),
+        text: effectiveTextSpan,
       );
     }
     if (semanticsLabel != null || semanticsIdentifier != null) {
@@ -1471,3 +1497,50 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
 /// The length of the content that can be selected, and the range that is
 /// selected.
 typedef _SelectionInfo = ({int contentLength, SelectedContentRange? range});
+
+/// A utility class for overriding the text styles of a [TextSpan] tree.
+// When changes are made to this class, the equivalent API in editable_text.dart
+// must also be updated.
+// TODO(Renzo-Olivares): Remove after investigating a solution for overriding all
+// styles for children in an [InlineSpan] tree, see: https://github.com/flutter/flutter/issues/177952.
+class _OverridingTextStyleTextSpanUtils {
+  static TextSpan applyTextSpacingOverrides({
+    double? lineHeightScaleFactor,
+    double? letterSpacing,
+    double? wordSpacing,
+    required TextSpan textSpan,
+  }) {
+    if (lineHeightScaleFactor == null && letterSpacing == null && wordSpacing == null) {
+      return textSpan;
+    }
+    return _applyTextStyleOverrides(
+      TextStyle(
+        height: lineHeightScaleFactor,
+        letterSpacing: letterSpacing,
+        wordSpacing: wordSpacing,
+      ),
+      textSpan,
+    );
+  }
+
+  static TextSpan _applyTextStyleOverrides(TextStyle overrideTextStyle, TextSpan textSpan) {
+    return TextSpan(
+      text: textSpan.text,
+      children: textSpan.children?.map((InlineSpan child) {
+        if (child is TextSpan && child.runtimeType == TextSpan) {
+          return _applyTextStyleOverrides(overrideTextStyle, child);
+        }
+        return child;
+      }).toList(),
+      style: textSpan.style?.merge(overrideTextStyle) ?? overrideTextStyle,
+      recognizer: textSpan.recognizer,
+      mouseCursor: textSpan.mouseCursor,
+      onEnter: textSpan.onEnter,
+      onExit: textSpan.onExit,
+      semanticsLabel: textSpan.semanticsLabel,
+      semanticsIdentifier: textSpan.semanticsIdentifier,
+      locale: textSpan.locale,
+      spellOut: textSpan.spellOut,
+    );
+  }
+}

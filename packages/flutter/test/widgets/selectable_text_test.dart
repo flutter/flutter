@@ -5598,6 +5598,32 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets(
+    'SelectableText respects MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, and MediaQueryData.wordSpacingOverride',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: MediaQueryData(
+              lineHeightScaleFactorOverride: 2.0,
+              letterSpacingOverride: 2.0,
+              wordSpacingOverride: 2.0,
+            ),
+            child: SelectableText('hello world', strutStyle: StrutStyle(height: 0.9)),
+          ),
+        ),
+      );
+
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final TextStyle? resultTextStyle = renderEditable.text?.style;
+      expect(resultTextStyle?.height, 2.0);
+      expect(resultTextStyle?.letterSpacing, 2.0);
+      expect(resultTextStyle?.wordSpacing, 2.0);
+      expect(renderEditable.strutStyle?.height, 2.0);
+    },
+  );
+
   group('context menu', () {
     // Regression test for https://github.com/flutter/flutter/issues/169001.
     testWidgets(
@@ -5635,5 +5661,21 @@ void main() {
       skip: kIsWeb, // [intended] on web the browser handles the context menu.
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
     );
+  });
+
+  testWidgets('SelectableText does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: SelectableText('XYZ'))),
+      ),
+    );
+    expect(tester.getSize(find.byType(SelectableText)), Size.zero);
+
+    // Manually set a selection to trigger the code path that was crashing.
+    final EditableTextState state = tester.state(find.byType(EditableText));
+    state.updateEditingValue(
+      const TextEditingValue(text: 'XYZ', selection: TextSelection(baseOffset: 0, extentOffset: 3)),
+    );
+    await tester.pump();
   });
 }
