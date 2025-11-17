@@ -9,11 +9,11 @@
     "description": "The ICU 'Short Time' pattern, such as 'HH:mm', 'h:mm a', 'H:mm'. See: http://demo.icu-project.org/icu-bin/locexp?d_=en&_=en_US",
     "x-flutter-type": "icuShortTimePattern"
   },
-  "openAppDrawerTooltip": "Open navigation menu",
+  "openAppDrawerTooltip": "नेविगेशन मेनू खोलीं",
   "@openAppDrawerTooltip": {
     "description": "The tooltip for the leading app bar menu (aka 'hamburger') button."
   },
-  "backButtonTooltip": "Back",
+  "backButtonTooltip": "वापस जाईं",
   "@backButtonTooltip": {
     "description": "The tooltip for the back button, which closes the current page and returns to the previous one."
   },
@@ -21,11 +21,11 @@
   "@clearButtonTooltip": {
     "description": "The tooltip for the button that clears the text input on the search view."
   },
-  "closeButtonTooltip": "Close",
+  "closeButtonTooltip": "बंद करीं",
   "@closeButtonTooltip": {
     "description": "The tooltip for the close button, which closes the current page and returns to the previous one."
   },
-  "deleteButtonTooltip": "Delete",
+  "deleteButtonTooltip": "मिटाईं",
   "@deleteButtonTooltip": {
     "description": "The tooltip for the delete button of chips."
   },
@@ -79,7 +79,7 @@
     "description": "The default title for the drawer item that shows an about page for the application. The value of $applicationName is the name of the application, like GMail or Chrome.",
     "parameters": "applicationName"
   },
-  "licensesPageTitle": "Licenses",
+  "licensesPageTitle": "लाइसेंस",
   "@licensesPageTitle": {
     "description": "The title for the Flutter licenses page."
   },
@@ -115,7 +115,7 @@
     "description": "The text shown in the footer of a paginated data table when the exact overall row count is unknown. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
     "parameters": "firstRow, lastRow, rowCount"
   },
-  "rowsPerPageTitle": "Rows per page:",
+  "rowsPerPageTitle": "हर पन्ना में पंक्ति के संख्या:",
   "@rowsPerPageTitle": {
     "description": "The caption for the drop-down button on a paginated data table's footer that allows the user to control the number of rows of data per page of the table."
   },
@@ -150,7 +150,7 @@
   "@cancelButtonLabel": {
     "description": "The label for cancel buttons and menu items."
   },
-  "closeButtonLabel": "Close",
+  "closeButtonLabel": "बंद करीं",
   "@closeButtonLabel": {
     "description": "The label for close buttons and menu items."
   },
@@ -158,7 +158,7 @@
   "@continueButtonLabel": {
     "description": "The label for continue buttons and menu items."
   },
-  "copyButtonLabel": "Copy",
+  "copyButtonLabel": "कॉपी करीं",
   "@copyButtonLabel": {
     "description": "The label for copy buttons and menu items."
   },
@@ -178,7 +178,7 @@
   "@searchWebButtonLabel": {
     "description": "The label for the Search Web button and menu items."
   },
-  "shareButtonLabel": "Share",
+  "shareButtonLabel": "साझा करीं",
   "@shareButtonLabel": {
     "description": "The label for the Share button and menu items."
   },
@@ -194,7 +194,7 @@
   "@selectAllButtonLabel": {
     "description": "The label for select-all buttons and menu items."
   },
-  "viewLicensesButtonLabel": "View licenses",
+  "viewLicensesButtonLabel": "लाइसेंस देखीं",
   "@viewLicensesButtonLabel": {
     "description": "The label for the button in the about box that leads the user to a list of all licenses that apply to the application."
   },
@@ -214,7 +214,7 @@
   "@timePickerMinuteModeAnnouncement": {
     "description": "The audio announcement made when the time picker dialog is set to minute mode."
   },
-  "modalBarrierDismissLabel": "Dismiss",
+  "modalBarrierDismissLabel": "खारिज करीं",
   "@modalBarrierDismissLabel": {
     "description": "Label read out by accessibility tools (TalkBack or VoiceOver) for a modal barrier to indicate that a tap dismisses the barrier. A modal barrier can for example be found behind a alert or popup to block user interaction with elements behind it."
   },
@@ -242,15 +242,15 @@
   "@unspecifiedDateRange": {
     "description": "The label used to indicate a date range that has not been entered or selected in the date range picker."
   },
-  "dateInputLabel": "Enter Date",
+  "dateInputLabel": "तारीख डालीं",
   "@dateInputLabel": {
     "description": "The label used to describe the input text field used in the date picker."
   },
-  "dateRangeStartLabel": "Start Date",
+  "dateRangeStartLabel": "शुरू के तारीख",
   "@dateRangeStartLabel": {
     "description": "The label used to describe the starting date input text field used in the date range picker."
   },
-  "dateRangeEndLabel": "End Date",
+  "dateRangeEndLabel": "अंत के तारीख",
   "@dateRangeEndLabel": {
     "description": "The label used to describe the ending date input text field used in the date range picker."
   },
@@ -280,11 +280,11 @@
   "@saveButtonLabel": {
     "description": "Label for a 'Save' button used in full screen dialogs."
   },
-  "datePickerHelpText": "Select date",
+  "datePickerHelpText": "तारीख चुनीं",
   "@datePickerHelpText": {
     "description": "Label used in the header of the date picker dialog"
   },
-  "dateRangePickerHelpText": "SELECT RANGE",
+  "dateRangePickerHelpText": "रेंज चुनीं",
   "@dateRangePickerHelpText": {
     "description": "Label used in the header of the date range picker dialog."
   },
@@ -336,7 +336,7 @@
   "@showAccountsLabel": {
     "description": "The accessibility label used for the button on a UserAccountsDrawerHeader that shows the list of accounts."
   },
-  "drawerLabel": "Navigation menu",
+  "drawerLabel": "नेविगेशन मेनू",
   "@drawerLabel": {
     "description": "The audio announcement made when the Drawer is opened."
   },
@@ -344,23 +344,23 @@
   "@menuBarMenuLabel": {
     "description": "The audio announcement made when a MenuBarMenu is opened."
   },
-  "popupMenuLabel": "Popup menu",
+  "popupMenuLabel": "पॉपअप मेनू",
   "@popupMenuLabel": {
     "description": "The audio announcement made when a PopupMenu is opened."
   },
-  "dialogLabel": "Dialog",
+  "dialogLabel": "डायलॉग",
   "@dialogLabel": {
     "description": "The audio announcement made when a Dialog is opened."
   },
-  "alertDialogLabel": "Alert",
+  "alertDialogLabel": "अलर्ट",
   "@alertDialogLabel": {
     "description": "The audio announcement made when an AlertDialog is opened."
   },
-  "searchFieldLabel": "Search",
+  "searchFieldLabel": "खोजीं",
   "@searchFieldLabel": {
     "description": "Label indicating that a text field is a search field. This will be used as a hint text in the text field."
   },
-  "currentDateLabel": "Current date",
+  "currentDateLabel": "वर्तमान तारीख",
   "@currentDateLabel": {
     "description": "Label indicating that the focused date is the current date."
   },

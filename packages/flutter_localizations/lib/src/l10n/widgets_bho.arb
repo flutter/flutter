@@ -23,15 +23,15 @@
   "@reorderItemRight": {
     "description": "The audio announcement to move an item in a Reorderable List right in the list when it is oriented horizontally."
   },
-  "searchResultsFound": "Search results found",
+  "searchResultsFound": "खोज के नतीजा मिलल",
   "@searchResultsFound": {
     "description": "The audio announcement when Autocomplete search results become available."
   },
-  "noResultsFound": "No results found",
+  "noResultsFound": "कोई नतीजा ना मिलल",
   "@noResultsFound": {
     "description": "The audio announcement when Autocomplete search results become unavailable."
   },
-  "copyButtonLabel": "Copy",
+  "copyButtonLabel": "कॉपी करीं",
   "@copyButtonLabel": {
     "description": "The label for copy buttons and menu items."
   },
@@ -47,7 +47,7 @@
   "@searchWebButtonLabel": {
     "description": "The label for the Search Web button and menu items."
   },
-  "shareButtonLabel": "Share",
+  "shareButtonLabel": "साझा करीं",
   "@shareButtonLabel": {
     "description": "The label for the Share button and menu items."
   },
@@ -59,7 +59,7 @@
   "@selectAllButtonLabel": {
     "description": "The label for select-all buttons and menu items."
   },
-  "radioButtonUnselectedLabel": "Not selected",
+  "radioButtonUnselectedLabel": "चुनल ना गइल",
   "@radioButtonUnselectedLabel": {
     "description": "The accessibility hint for an unselected radio button.",
     "type": "text"
