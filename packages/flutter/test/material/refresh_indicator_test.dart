@@ -1275,4 +1275,150 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
   });
+
+  testWidgets('RefreshIndicator.useActualViewportDimension defaults to false', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[SizedBox(height: 200.0, child: Text('X'))],
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).useActualViewportDimension,
+      false,
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/147363
+  // When RefreshIndicator is inside a NestedScrollView with a large header,
+  // the inner body viewport is very small, making the drag distance required
+  // to trigger refresh too small (overly sensitive).
+  testWidgets('RefreshIndicator with NestedScrollView uses actual viewport when enabled', (
+    WidgetTester tester,
+  ) async {
+    refreshCalled = false;
+    const double largeHeaderHeight = 550.0; // Large header leaves only 50px for body
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 2,
+          child: RefreshIndicator(
+            useActualViewportDimension: true,
+            onRefresh: refresh,
+            notificationPredicate: (ScrollNotification notification) => notification.depth == 2,
+            child: NestedScrollView(
+              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+                return <Widget>[
+                  SliverToBoxAdapter(
+                    child: Container(
+                      height: largeHeaderHeight,
+                      color: Colors.blue,
+                      child: const Center(child: Text('Large Header')),
+                    ),
+                  ),
+                ];
+              },
+              body: TabBarView(
+                children: <Widget>[
+                  ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: const <Widget>[SizedBox(height: 200.0, child: Text('Tab 1'))],
+                  ),
+                  ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: const <Widget>[SizedBox(height: 200.0, child: Text('Tab 2'))],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // With useActualViewportDimension: true, the threshold is based on
+    // RefreshIndicator's rendered size (600px), not the inner body viewport (50px).
+    // Expected threshold: 600px * 0.25 = 150px
+    // A small drag of 15px should NOT trigger refresh
+    await tester.fling(find.text('Large Header'), const Offset(0.0, 15.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(refreshCalled, false);
+
+    // A drag of 150px should trigger refresh
+    refreshCalled = false;
+    await tester.fling(find.text('Large Header'), const Offset(0.0, 150.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(refreshCalled, true);
+  });
+
+  testWidgets('RefreshIndicator with NestedScrollView is overly sensitive when disabled', (
+    WidgetTester tester,
+  ) async {
+    refreshCalled = false;
+    const double largeHeaderHeight = 550.0; // Large header leaves only 50px for body
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 2,
+          child: RefreshIndicator(
+            onRefresh: refresh,
+            notificationPredicate: (ScrollNotification notification) => notification.depth == 2,
+            child: NestedScrollView(
+              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+                return <Widget>[
+                  SliverToBoxAdapter(
+                    child: Container(
+                      height: largeHeaderHeight,
+                      color: Colors.blue,
+                      child: const Center(child: Text('Large Header')),
+                    ),
+                  ),
+                ];
+              },
+              body: TabBarView(
+                children: <Widget>[
+                  ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: const <Widget>[SizedBox(height: 200.0, child: Text('Tab 1'))],
+                  ),
+                  ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: const <Widget>[SizedBox(height: 200.0, child: Text('Tab 2'))],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // With useActualViewportDimension: false (default), the threshold is based on
+    // the inner body's viewport dimension reported by the Scrollable (50px).
+    // This makes even a very small drag trigger the refresh (overly sensitive behavior).
+    // Expected threshold: 50px * 0.25 = 12.5px
+    // A slight drag of 13px should trigger refresh with the old implementation.
+    await tester.fling(find.text('Large Header'), const Offset(0.0, 13.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(refreshCalled, true);
+  });
 }

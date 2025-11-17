@@ -150,6 +150,7 @@ class RefreshIndicator extends StatefulWidget {
     super.key,
     this.displacement = 40.0,
     this.edgeOffset = 0.0,
+    this.useActualViewportDimension = false,
     required this.onRefresh,
     this.color,
     this.backgroundColor,
@@ -184,6 +185,7 @@ class RefreshIndicator extends StatefulWidget {
     super.key,
     this.displacement = 40.0,
     this.edgeOffset = 0.0,
+    this.useActualViewportDimension = false,
     required this.onRefresh,
     this.color,
     this.backgroundColor,
@@ -204,6 +206,7 @@ class RefreshIndicator extends StatefulWidget {
   /// Events can be optionally listened by using the `onStatusChange` callback.
   const RefreshIndicator.noSpinner({
     super.key,
+    this.useActualViewportDimension = false,
     required this.onRefresh,
     this.onStatusChange,
     this.notificationPredicate = defaultScrollNotificationPredicate,
@@ -315,6 +318,20 @@ class RefreshIndicator extends StatefulWidget {
   ///
   /// Defaults to 2.0.
   final double elevation;
+
+  /// Whether to derive the container extent from the [RefreshIndicator]'s
+  /// rendered size.
+  ///
+  /// By default, [_checkDragOffset] uses the viewport dimension reported by the
+  /// surrounding [Scrollable]. When the viewport is intentionally very small
+  /// (for example when only part of the content is scrollable or clipped), dragging
+  /// the indicator can appear too sensitive. Setting this to true makes the
+  /// indicator compute its extent from its own rendered size instead,
+  /// resulting in more natural drag progress for those layouts. If the size
+  /// cannot be resolved, the widget falls back to the viewport dimension.
+  ///
+  /// Defaults to false.
+  final bool useActualViewportDimension;
 
   @override
   RefreshIndicatorState createState() => RefreshIndicatorState();
@@ -516,7 +533,8 @@ class RefreshIndicatorState extends State<RefreshIndicator>
 
   void _checkDragOffset(double containerExtent) {
     assert(_status == RefreshIndicatorStatus.drag || _status == RefreshIndicatorStatus.armed);
-    double newValue = _dragOffset! / (containerExtent * _kDragContainerExtentPercentage);
+    final double effectiveExtent = _resolveContainerExtent(containerExtent);
+    double newValue = _dragOffset! / (effectiveExtent * _kDragContainerExtentPercentage);
     if (_status == RefreshIndicatorStatus.armed) {
       newValue = math.max(newValue, 1.0 / _kDragSizeFactorLimit);
     }
@@ -526,6 +544,19 @@ class RefreshIndicatorState extends State<RefreshIndicator>
       _status = RefreshIndicatorStatus.armed;
       widget.onStatusChange?.call(_status);
     }
+  }
+
+  double _resolveContainerExtent(double containerExtent) {
+    if (!widget.useActualViewportDimension) {
+      return containerExtent;
+    }
+
+    final RenderObject? renderObject = context.findRenderObject();
+    if (renderObject is RenderBox && renderObject.hasSize) {
+      return renderObject.size.height;
+    }
+
+    return containerExtent;
   }
 
   // Stop showing the refresh indicator.
