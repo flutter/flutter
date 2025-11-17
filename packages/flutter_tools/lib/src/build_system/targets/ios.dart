@@ -847,7 +847,7 @@ Future<void> _updateMinimumOSVersion(File infoPlist, Environment environment) as
       '${result.stdout}\n---\n${result.stderr}',
     );
     printXcodeWarning(
-      'Failed to update MinimumOSVersion in ${infoPlist.path}. This may cause AppStore validation failures. Please file an issue at https://github.com/flutter/flutter/issues/new.',
+      'Failed to update MinimumOSVersion in ${infoPlist.path}. This may cause AppStore validation failures. Please file an issue at https://github.com/flutter/flutter/issues/new',
     );
   }
 }
