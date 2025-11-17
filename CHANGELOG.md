@@ -32,6 +32,17 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.38 Changes
 
+### [3.38.2](https://github.com/flutter/flutter/releases/tag/3.38.2)
+
+[flutter/178472](https://github.com/flutter/flutter/issues/178472) Widget preview command can crash on exit if in the middle of analyzing changes to a Dart file.
+[flutter/178452](https://github.com/flutter/flutter/issues/178452) Flutter fails to build on iOS with error message: "Improperly formatted define flag" in add-to-app scenarios.
+[flutter/178486](https://github.com/flutter/flutter/issues/178486) When running flutter widget-preview start with Flutter Web disabled, an exception is thrown and the widget previewer fails to start.
+[flutter/178317](https://github.com/flutter/flutter/issues/178317) Running flutter pub get can crash the widget previewer when plugin dependencies are added or updated.
+[flutter/178318](https://github.com/flutter/flutter/issues/178318) Certain flutter crash scenarios can result in multiple crash reports being submitted for a single process crash.
+[flutter/176399](https://github.com/flutter/flutter/issues/176399) Visual Studio 2026 is not supported when compiling Windows desktop applications.
+[flutter/175058](https://github.com/flutter/flutter/issues/175058) The widget previewer fails to start if flutter pub get has not been run in the target project.
+
+
 ### [3.38.1](https://github.com/flutter/flutter/releases/tag/3.38.1)
 
 - [flutter/178400](https://github.com/flutter/flutter/issues/178400) Adds support for Dart 3.10 stable.
