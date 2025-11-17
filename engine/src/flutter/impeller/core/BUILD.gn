@@ -59,6 +59,7 @@ impeller_component("allocator_unittests") {
   deps = [
     ":core",
     "../geometry",
+    "//flutter/impeller/renderer/testing:mocks",
     "//flutter/testing:testing_lib",
   ]
 }
