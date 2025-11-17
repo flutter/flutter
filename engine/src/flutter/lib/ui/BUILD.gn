@@ -186,6 +186,7 @@ source_set("ui") {
     "//flutter/skia",
     "//flutter/third_party/rapidjson",
     "//flutter/third_party/tonic",
+    "//third_party/abseil-cpp/absl/status:statusor",
     "//third_party/zlib",
   ]
 
@@ -278,11 +279,14 @@ if (enable_unittests) {
     ]
 
     deps = [
+      ":display_list_deferred_image_unittests",
       ":ui",
+      ":ui_testing_mocks",
       ":ui_unittests_fixtures",
       "$dart_src/runtime/bin:elf_loader",
       "//flutter/common",
       "//flutter/impeller",
+      "//flutter/impeller/renderer/testing:mocks",
       "//flutter/lib/snapshot",
       "//flutter/shell/common:shell_test_fixture_sources",
       "//flutter/testing",
@@ -298,5 +302,35 @@ if (enable_unittests) {
 
       deps += [ "//flutter/testing:opengl" ]
     }
+  }
+
+  source_set("display_list_deferred_image_unittests") {
+    testonly = true
+    sources = []
+
+    if (impeller_supports_rendering) {
+      sources +=
+          [ "painting/display_list_deferred_image_gpu_impeller_unittests.cc" ]
+    }
+
+    deps = [
+      ":ui",
+      ":ui_testing_mocks",
+      "//flutter/display_list",
+      "//flutter/fml",
+      "//flutter/impeller/renderer/testing:mocks",
+      "//flutter/testing:testing_lib",
+    ]
+  }
+
+  source_set("ui_testing_mocks") {
+    testonly = true
+    sources = [ "painting/testing/mocks.h" ]
+    public_deps = [
+      ":ui",
+      "//flutter/common/graphics",
+      "//flutter/display_list",
+      "//third_party/googletest:gmock",
+    ]
   }
 }

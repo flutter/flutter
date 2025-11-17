@@ -24,6 +24,7 @@ import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../features.dart';
 import '../globals.dart' as globals;
 import '../isolated/resident_web_runner.dart';
 import '../project.dart';
@@ -111,7 +112,7 @@ abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
   FlutterProject validateFlutterProjectForPreview(Directory directory) {
     logger.printTrace('Verifying that ${directory.path} is a Flutter project.');
     final FlutterProject flutterProject = projectFactory.fromDirectory(directory);
-    if (!flutterProject.dartTool.existsSync()) {
+    if (!flutterProject.pubspecFile.existsSync()) {
       throwToolExit('${flutterProject.directory.path} is not a valid Flutter project.');
     }
     return flutterProject;
@@ -234,7 +235,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   late final _previewDetector = PreviewDetector(
     platform: platform,
     previewAnalytics: previewAnalytics,
-    projectRoot: rootProject.directory,
+    project: rootProject,
     logger: logger,
     fs: fs,
     onChangeDetected: onChangeDetected,
@@ -280,7 +281,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     final bool generateScaffoldProject =
         customPreviewScaffoldOutput != null || _previewManifest.shouldGenerateProject();
     // TODO(bkonyi): can this be moved?
-    widgetPreviewScaffold.createSync();
+    widgetPreviewScaffold.createSync(recursive: true);
     fs.currentDirectory = widgetPreviewScaffold;
 
     if (generateScaffoldProject) {
@@ -389,6 +390,14 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   Future<int> runPreviewEnvironment({required FlutterProject widgetPreviewScaffoldProject}) async {
     try {
+      // In the rare case that Flutter Web is disabled, the device manager will not return any web
+      // devices which will cause us to crash.
+      if (!featureFlags.isWebEnabled) {
+        throwToolExit(
+          'Widget Previews requires Flutter Web to be enabled. Please run '
+          "'flutter config --enable-web' to enable Flutter Web and try again.",
+        );
+      }
       final Device device;
       if (boolArg(kWebServer)) {
         final List<Device> devices;

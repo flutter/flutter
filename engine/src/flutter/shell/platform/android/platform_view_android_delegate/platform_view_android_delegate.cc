@@ -210,6 +210,7 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
       buffer_int32[position++] = node.platformViewId;
       buffer_int32[position++] = node.scrollChildren;
       buffer_int32[position++] = node.scrollIndex;
+      buffer_int32[position++] = node.traversalParent;
       buffer_float32[position++] = static_cast<float>(node.scrollPosition);
       buffer_float32[position++] = static_cast<float>(node.scrollExtentMax);
       buffer_float32[position++] = static_cast<float>(node.scrollExtentMin);
@@ -250,12 +251,14 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
       buffer_float32[position++] = node.rect.bottom();
       node.transform.getColMajor(&buffer_float32[position]);
       position += 16;
-
+      node.hitTestTransform.getColMajor(&buffer_float32[position]);
+      position += 16;
       buffer_int32[position++] = node.childrenInTraversalOrder.size();
       for (int32_t child : node.childrenInTraversalOrder) {
         buffer_int32[position++] = child;
       }
 
+      buffer_int32[position++] = node.childrenInHitTestOrder.size();
       for (int32_t child : node.childrenInHitTestOrder) {
         buffer_int32[position++] = child;
       }

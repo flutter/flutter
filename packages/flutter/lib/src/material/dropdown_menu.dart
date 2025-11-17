@@ -925,48 +925,50 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
         );
       }
 
-      final Widget menuItemButton = ExcludeSemantics(
-        excluding: excludeSemantics,
-        child: MenuItemButton(
-          key: enableScrollToHighlight ? buttonItemKeys[i] : null,
-          style: effectiveStyle,
-          leadingIcon: entry.leadingIcon,
-          trailingIcon: entry.trailingIcon,
-          closeOnActivate: widget.closeBehavior == DropdownMenuCloseBehavior.all,
-          onPressed: entry.enabled && widget.enabled
-              ? () {
-                  if (!mounted) {
-                    // In some cases (e.g., nested menus), calling onSelected from MenuAnchor inside a postFrameCallback
-                    // can result in the MenuItemButton's onPressed callback being triggered after the state has been disposed.
-                    // TODO(ahmedrasar): MenuAnchor should avoid calling onSelected inside a postFrameCallback.
-                    widget.controller?.value = TextEditingValue(
+      final Widget menuItemButton = ExcludeFocus(
+        child: ExcludeSemantics(
+          excluding: excludeSemantics,
+          child: MenuItemButton(
+            key: enableScrollToHighlight ? buttonItemKeys[i] : null,
+            style: effectiveStyle,
+            leadingIcon: entry.leadingIcon,
+            trailingIcon: entry.trailingIcon,
+            closeOnActivate: widget.closeBehavior == DropdownMenuCloseBehavior.all,
+            onPressed: entry.enabled && widget.enabled
+                ? () {
+                    if (!mounted) {
+                      // In some cases (e.g., nested menus), calling onSelected from MenuAnchor inside a postFrameCallback
+                      // can result in the MenuItemButton's onPressed callback being triggered after the state has been disposed.
+                      // TODO(ahmedrasar): MenuAnchor should avoid calling onSelected inside a postFrameCallback.
+                      widget.controller?.value = TextEditingValue(
+                        text: entry.label,
+                        selection: TextSelection.collapsed(offset: entry.label.length),
+                      );
+                      widget.onSelected?.call(entry.value);
+                      return;
+                    }
+                    _effectiveTextEditingController.value = TextEditingValue(
                       text: entry.label,
                       selection: TextSelection.collapsed(offset: entry.label.length),
                     );
+                    currentHighlight = widget.enableSearch ? i : null;
                     widget.onSelected?.call(entry.value);
-                    return;
+                    _enableFilter = false;
+                    if (widget.closeBehavior == DropdownMenuCloseBehavior.self) {
+                      _controller.close();
+                    }
                   }
-                  _effectiveTextEditingController.value = TextEditingValue(
-                    text: entry.label,
-                    selection: TextSelection.collapsed(offset: entry.label.length),
-                  );
-                  currentHighlight = widget.enableSearch ? i : null;
-                  widget.onSelected?.call(entry.value);
-                  _enableFilter = false;
-                  if (widget.closeBehavior == DropdownMenuCloseBehavior.self) {
-                    _controller.close();
-                  }
-                }
-              : null,
-          requestFocusOnHover: false,
-          // MenuItemButton implementation is based on M3 spec for menu which specifies a
-          // horizontal padding of 12 pixels.
-          // In the context of DropdownMenu the M3 spec specifies that the menu item and the text
-          // field content should be aligned. The text field has a horizontal padding of 16 pixels.
-          // To conform with the 16 pixels padding, a 4 pixels padding is added in front of the item label.
-          child: Padding(
-            padding: EdgeInsetsDirectional.only(start: effectiveInputStartGap),
-            child: label,
+                : null,
+            requestFocusOnHover: false,
+            // MenuItemButton implementation is based on M3 spec for menu which specifies a
+            // horizontal padding of 12 pixels.
+            // In the context of DropdownMenu the M3 spec specifies that the menu item and the text
+            // field content should be aligned. The text field has a horizontal padding of 16 pixels.
+            // To conform with the 16 pixels padding, a 4 pixels padding is added in front of the item label.
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(start: effectiveInputStartGap),
+              child: label,
+            ),
           ),
         ),
       );
@@ -1034,7 +1036,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
     setState(() {});
   }
 
-  void _handleEditingComplete() {
+  void _handleSubmitted() {
     if (currentHighlight != null) {
       final DropdownMenuEntry<T> entry = filteredEntries[currentHighlight!];
       if (entry.enabled) {
@@ -1216,7 +1218,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
               cursorHeight: widget.cursorHeight,
               style: effectiveTextStyle,
               controller: _effectiveTextEditingController,
-              onEditingComplete: _handleEditingComplete,
+              onSubmitted: (_) => _handleSubmitted(),
               onTap: !widget.enabled
                   ? null
                   : () {
@@ -1256,9 +1258,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
                 // impact on the total width.
                 children: <Widget>[
                   textField,
-                  ..._initialMenu!.map(
-                    (Widget item) => ExcludeFocus(excluding: !controller.isOpen, child: item),
-                  ),
+                  ..._initialMenu!,
                   if (widget.label != null)
                     ExcludeSemantics(
                       child: Padding(
@@ -1325,7 +1325,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
       actions: <Type, Action<Intent>>{
         _ArrowUpIntent: CallbackAction<_ArrowUpIntent>(onInvoke: handleUpKeyInvoke),
         _ArrowDownIntent: CallbackAction<_ArrowDownIntent>(onInvoke: handleDownKeyInvoke),
-        _EnterIntent: CallbackAction<_EnterIntent>(onInvoke: (_) => _handleEditingComplete()),
+        _EnterIntent: CallbackAction<_EnterIntent>(onInvoke: (_) => _handleSubmitted()),
         DismissIntent: DismissMenuAction(controller: _controller),
       },
       child: Stack(
