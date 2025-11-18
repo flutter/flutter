@@ -244,70 +244,212 @@ class _RenderExclusiveMouseRegion extends RenderMouseRegion {
   }
 }
 
+/// A raw tooltip.
 ///
+/// It can be triggered in three ways:
+///
+///  * By a long press gesture.
+///  * By a tap gesture.
+///  * By hovering over the widget with a mouse pointer.
+///  * Manually, using the [RawTooltipState.ensureTooltipVisible] function.
 class RawTooltip extends StatefulWidget {
+  /// Creates a raw tooltip.
   ///
+  /// The [semanticsTooltip], [tooltipBuilder], and [child] arguments are
+  /// required.
   const RawTooltip({
     super.key,
     required this.semanticsTooltip,
     required this.tooltipBuilder,
     this.preferBelow = true,
     this.excludeFromSemantics = false,
+    this.waitDuration = Duration.zero,
+    this.showDuration = const Duration(milliseconds: 1500),
+    this.exitDuration = const Duration(milliseconds: 100),
     this.enableTapToDismiss = true,
     this.triggerMode = TooltipTriggerMode.longPress,
     this.enableFeedback = true,
     this.onTriggered,
     this.mouseCursor,
     this.ignorePointer = false,
-    this.waitDuration = Duration.zero,
-    this.showDuration = const Duration(milliseconds: 1500),
-    this.exitDuration = const Duration(milliseconds: 100),
     this.animationStyle = _kDefaultAnimationStyle,
     this.positionDelegate,
     required this.child,
   });
 
-  ///
+  /// The text to display in the tooltip's semantics announcement.
   final String semanticsTooltip;
 
+  /// Builds the widget that will be displayed in the tooltip's overlay.
   ///
+  /// The returned widget will be wrapped in an [IgnorePointer] widget if
+  /// [ignorePointer] is true.
   final TooltipComponentBuilder tooltipBuilder;
 
+  /// Whether the tooltip defaults to being displayed below the widget.
   ///
+  /// If there is insufficient space to display the tooltip in
+  /// the preferred direction, the tooltip will be displayed in the opposite
+  /// direction.
   final bool preferBelow;
 
+  /// Whether the tooltip's [semanticsTooltip] should be excluded from
+  /// the semantics tree.
   ///
+  /// Set this property to true if the app is going to provide its own custom
+  /// semantics label.
+  ///
+  /// Defaults to false. A tooltip will add a [Semantics] label that is set to
+  /// [semanticsTooltip] if non-empty.
   final bool excludeFromSemantics;
 
+  /// {@template flutter.widgets.RawTooltip.waitDuration}
+  /// The length of time that a pointer must hover over a tooltip's widget
+  /// before the tooltip will be shown.
   ///
+  /// Defaults to 0 milliseconds (tooltips are shown immediately upon hover).
+  /// {@endtemplate}
   final Duration waitDuration;
 
+  /// {@template flutter.widgets.RawTooltip.showDuration}
+  /// The length of time that the tooltip will be shown after a long press is
+  /// released (if triggerMode is [TooltipTriggerMode.longPress]) or a tap is
+  /// released (if triggerMode is [TooltipTriggerMode.tap]). This property
+  /// does not affect mouse pointer devices.
   ///
+  /// Defaults to 1.5 seconds for long press and tap released
+  ///
+  /// See also:
+  ///
+  ///  * [exitDuration], which allows configuring the time until a pointer
+  /// disappears when hovering.
+  /// {@endtemplate}
   final Duration showDuration;
 
+  /// {@template flutter.widgets.RawTooltip.exitDuration}
+  /// The length of time that a pointer must have stopped hovering over a
+  /// tooltip's widget before the tooltip will be hidden.
   ///
+  /// Defaults to 100 milliseconds.
+  ///
+  /// See also:
+  ///
+  ///  * [showDuration], which allows configuring the length of time that a
+  /// tooltip will be visible after touch events are released.
+  /// {@endtemplate}
   final Duration exitDuration;
 
+  /// {@template flutter.widgets.RawTooltip.enableTapToDismiss}
+  /// Whether the tooltip can be dismissed by tap.
   ///
+  /// The default value is true.
+  /// {@endtemplate}
   final bool enableTapToDismiss;
 
+  /// {@template flutter.widgets.RawTooltip.triggerMode}
+  /// The [TooltipTriggerMode] that will show the tooltip.
   ///
+  /// This property does not affect mouse devices. Setting [triggerMode] to
+  /// [TooltipTriggerMode.manual] will not prevent the tooltip from showing when
+  /// the mouse cursor hovers over it.
+  /// {@endtemplate}
   final TooltipTriggerMode triggerMode;
 
+  /// {@template flutter.widgets.RawTooltip.enableFeedback}
+  /// Whether the tooltip should provide acoustic and/or haptic feedback.
   ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// When null, the default value is true.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback], for providing platform-specific feedback to certain
+  ///  actions.
+  /// {@endtemplate}
   final bool enableFeedback;
 
+  /// {@template flutter.widgets.RawTooltip.onTriggered}
+  /// Called when the Tooltip is triggered.
   ///
+  /// The tooltip is triggered after a tap when [triggerMode] is
+  /// [TooltipTriggerMode.tap] or after a long press when [triggerMode] is
+  /// [TooltipTriggerMode.longPress].
+  /// {@endtemplate}
   final TooltipTriggeredCallback? onTriggered;
 
+  /// {@template flutter.widgets.RawTooltip.mouseCursor}
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
   ///
+  /// If this property is null, [MouseCursor.defer] will be used.
+  /// {@endtemplate}
   final MouseCursor? mouseCursor;
 
+  /// Whether this tooltip should be invisible to hit testing.
   ///
+  /// See also:
+  ///
+  /// * [IgnorePointer], for more information about how pointer events are
+  /// handled or ignored.
   final bool ignorePointer;
 
+  /// Used to override the curve and duration of the animation that shows and
+  /// hides the tooltip.
   ///
+  /// If [AnimationStyle.duration] is provided, it will be used to override
+  /// the show tooltip animation duration. If it is null, defaults to 150ms.
+  ///
+  /// If [AnimationStyle.curve] is provided, it will be used to override
+  /// the show tooltip animation curve. If it is null, defaults to
+  /// [Curves.fastOutSlowIn].
+  ///
+  /// If [AnimationStyle.reverseDuration] is provided, it will be used to
+  /// override the hide tooltip animation duration. If it is null, defaults to
+  /// 75ms.
+  ///
+  /// If [AnimationStyle.reverseCurve] is provided, it will be used to override
+  /// the hide tooltip animation curve. If it is null, the same curve will be
+  /// used as for the show tooltip animation.
+  ///
+  /// To disable the tooltip show/hide animation, use
+  /// [AnimationStyle.noAnimation].
   final AnimationStyle animationStyle;
+
+  /// {@template flutter.widgets.RawTooltip.positionDelegate}
+  /// A custom position delegate function for computing where the tooltip should
+  /// be positioned.
+  ///
+  /// If provided, this function will be called with a [TooltipPositionContext]
+  /// containing all the necessary information for positioning the tooltip. The
+  /// function should return an [Offset] indicating where to place the tooltip
+  /// relative to the overlay.
+  ///
+  /// This allows for custom positioning such as left/right positioning, or any
+  /// other arbitrary positioning logic.
+  ///
+  /// Example:
+  /// ```dart
+  /// positionDelegate: (TooltipPositionContext context) {
+  ///   // Position tooltip to the right of the target
+  ///   return Offset(
+  ///     context.target.dx + context.targetSize.width / 2,
+  ///     context.target.dy - context.tooltipSize.height / 2,
+  ///   );
+  /// }
+  /// ```
+  ///
+  /// If null, the default positioning behavior is used (above or below the
+  /// target).
+  ///
+  /// See also:
+  ///
+  ///  * [TooltipPositionContext], which contains the positioning parameters.
+  ///  * [TooltipPositionDelegate], the function signature for custom
+  ///  positioning.
+  /// {@endtemplate}
+  final TooltipPositionDelegate? positionDelegate;
 
   /// The widget below this widget in the tree.
   ///
@@ -315,9 +457,6 @@ class RawTooltip extends StatefulWidget {
   final Widget child;
 
   static final List<RawTooltipState> _openedTooltips = <RawTooltipState>[];
-
-  ///
-  final TooltipPositionDelegate? positionDelegate;
 
   /// Dismiss all of the tooltips that are currently shown on the screen,
   /// including those with mouse cursors currently hovering over them.
@@ -388,7 +527,10 @@ class RawTooltip extends StatefulWidget {
   }
 }
 
+/// Contains the state for a [RawTooltip].
 ///
+/// This class can be used to programmatically show the [RawTooltip], see the
+/// [ensureTooltipVisible] method.
 class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMixin {
   final OverlayPortalController _overlayController = OverlayPortalController();
 

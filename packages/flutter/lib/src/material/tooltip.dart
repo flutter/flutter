@@ -251,74 +251,32 @@ class Tooltip extends StatefulWidget {
   /// [TextAlign.start].
   final TextAlign? textAlign;
 
-  /// The length of time that a pointer must hover over a tooltip's widget
-  /// before the tooltip will be shown.
-  ///
-  /// Defaults to 0 milliseconds (tooltips are shown immediately upon hover).
+  /// {@macro flutter.widgets.RawTooltip.waitDuration}
   final Duration? waitDuration;
 
-  /// The length of time that the tooltip will be shown after a long press is
-  /// released (if triggerMode is [TooltipTriggerMode.longPress]) or a tap is
-  /// released (if triggerMode is [TooltipTriggerMode.tap]). This property
-  /// does not affect mouse pointer devices.
-  ///
-  /// Defaults to 1.5 seconds for long press and tap released
-  ///
-  /// See also:
-  ///
-  ///  * [exitDuration], which allows configuring the time until a pointer
-  /// disappears when hovering.
+  /// {@macro flutter.widgets.RawTooltip.showDuration}
   final Duration? showDuration;
 
-  /// The length of time that a pointer must have stopped hovering over a
-  /// tooltip's widget before the tooltip will be hidden.
-  ///
-  /// Defaults to 100 milliseconds.
-  ///
-  /// See also:
-  ///
-  ///  * [showDuration], which allows configuring the length of time that a
-  /// tooltip will be visible after touch events are released.
+  /// {@macro flutter.widgets.RawTooltip.exitDuration}
   final Duration? exitDuration;
 
-  /// Whether the tooltip can be dismissed by tap.
-  ///
-  /// The default value is true.
+  /// {@macro flutter.widgets.RawTooltip.enableTapToDismiss}
   final bool enableTapToDismiss;
 
-  /// The [TooltipTriggerMode] that will show the tooltip.
+  /// {@macro flutter.widgets.RawTooltip.triggerMode}
   ///
   /// If this property is null, then [TooltipThemeData.triggerMode] is used.
   /// If [TooltipThemeData.triggerMode] is also null, the default mode is
   /// [TooltipTriggerMode.longPress].
-  ///
-  /// This property does not affect mouse devices. Setting [triggerMode] to
-  /// [TooltipTriggerMode.manual] will not prevent the tooltip from showing when
-  /// the mouse cursor hovers over it.
   final TooltipTriggerMode? triggerMode;
 
-  /// Whether the tooltip should provide acoustic and/or haptic feedback.
-  ///
-  /// For example, on Android a tap will produce a clicking sound and a
-  /// long-press will produce a short vibration, when feedback is enabled.
-  ///
-  /// When null, the default value is true.
-  ///
-  /// See also:
-  ///
-  ///  * [Feedback], for providing platform-specific feedback to certain actions.
+  /// {@macro flutter.widgets.RawTooltip.enableFeedback}
   final bool? enableFeedback;
 
-  /// Called when the Tooltip is triggered.
-  ///
-  /// The tooltip is triggered after a tap when [triggerMode] is [TooltipTriggerMode.tap]
-  /// or after a long press when [triggerMode] is [TooltipTriggerMode.longPress].
+  /// {@macro flutter.widgets.RawTooltip.onTriggered}
   final TooltipTriggeredCallback? onTriggered;
 
-  /// The cursor for a mouse pointer when it enters or is hovering over the
-  /// widget.
-  ///
-  /// If this property is null, [MouseCursor.defer] will be used.
+  /// {@macro flutter.widgets.RawTooltip.mouseCursor}
   final MouseCursor? mouseCursor;
 
   /// Whether this tooltip should be invisible to hit testing.
@@ -332,32 +290,7 @@ class Tooltip extends StatefulWidget {
   /// handled or ignored.
   final bool? ignorePointer;
 
-  /// A custom position delegate function for computing where the tooltip should be positioned.
-  ///
-  /// If provided, this function will be called with a [TooltipPositionContext] containing
-  /// all the necessary information for positioning the tooltip. The function should return
-  /// an [Offset] indicating where to place the tooltip relative to the overlay.
-  ///
-  /// This allows for custom positioning such as left/right positioning, or any other
-  /// arbitrary positioning logic.
-  ///
-  /// Example:
-  /// ```dart
-  /// positionDelegate: (TooltipPositionContext context) {
-  ///   // Position tooltip to the right of the target
-  ///   return Offset(
-  ///     context.target.dx + context.targetSize.width / 2,
-  ///     context.target.dy - context.tooltipSize.height / 2,
-  ///   );
-  /// }
-  /// ```
-  ///
-  /// If null, the default positioning behavior is used (above or below the target).
-  ///
-  /// See also:
-  ///
-  ///  * [TooltipPositionContext], which contains the positioning parameters.
-  ///  * [TooltipPositionDelegate], the function signature for custom positioning.
+  /// {@macro flutter.widgets.RawTooltip.positionDelegate}
   final TooltipPositionDelegate? positionDelegate;
 
   /// Dismiss all of the tooltips that are currently shown on the screen,
