@@ -454,6 +454,7 @@ class CarouselView extends StatefulWidget {
 
   /// A callback invoked when the leading item changes.
   ///
+  /// {@template flutter.material.CarouselView.onIndexChanged}
   /// The “leading” item is the one resolved as primary within the viewport.
   /// Its definition depends on the carousel configuration:
   ///
@@ -466,10 +467,10 @@ class CarouselView extends StatefulWidget {
   ///   the largest effective `weight` in the current layout pass.
   ///   If multiple items share the same largest weight, the **one closest to the
   ///   start of the viewport** is considered the leading item.
+  /// {@endtemplate}
   ///
   /// This callback is invoked only when the leading item index actually
   /// changes, whether through user scrolling or programmatic movement.
-  ///
   /// {@tool dartpad}
   /// Example:
   ///
@@ -1773,16 +1774,11 @@ class CarouselController extends ScrollController {
 
   /// The index of the leading item in the controlled carousel.
   ///
-  /// If there are no clients attached to this controller, returns [initialItem].
+  /// Returns [initialItem] if the carousel is not attached yet.
   /// Otherwise, returns the index of the leading item as resolved by
   /// the first attached carousel.
   ///
-  /// For a standard [CarouselView], the leading item is
-  /// the one that becomes fully visible at the start of the viewport.
-  ///
-  /// For a [CarouselView.weighted], the leading item
-  /// is the visible child that occupies the primary position, determined by
-  /// the highest effective `weight` among the current layout weights.
+  /// {@macro flutter.material.CarouselView.onIndexChanged}
   int get leadingItem {
     if (_carouselState == null) {
       return initialItem;
