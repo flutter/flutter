@@ -773,6 +773,7 @@ void main() {
             plutilCommand,
             plutilCommand,
             plutilCommand,
+            plutilCommand,
           ]),
         ),
         Pub: ThrowingPub.new,
