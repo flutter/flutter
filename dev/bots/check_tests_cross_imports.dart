@@ -135,19 +135,16 @@ class TestsCrossImportChecker {
       widgetsTestsImportingMaterial.union(widgetsTestsImportingCupertino),
     );
     if (fixedWidgetsCrossImports.isNotEmpty) {
-      final StringBuffer buffer = StringBuffer(
-        'Huzzah! The following tests no longer contain cross imports!\n',
-      );
-      for (final String path in fixedWidgetsCrossImports) {
-        buffer.writeln('  $path');
-      }
-      buffer.writeln('However, they now need to be removed from the');
-      buffer.writeln('_knownWidgetsCrossImports or _knownCupertinoCrossImports');
-      buffer.write('list in the script $_scriptLocation.');
-      foundError(buffer.toString().trimRight().split('\n'));
+      foundError(getFixedImportError(fixedWidgetsCrossImports, Library.widgets).split('\n'));
     }
 
-    // TODO(justinmc): Do the same as above for Cupertino cross imports, and abstract the code.
+    final Set<String> fixedCupertinoCrossImports = differencePaths(
+      _knownCupertinoCrossImports,
+      cupertinoTestsImportingMaterial,
+    );
+    if (fixedCupertinoCrossImports.isNotEmpty) {
+      foundError(getFixedImportError(fixedCupertinoCrossImports, Library.cupertino).split('\n'));
+    }
 
     return false;
 
@@ -290,6 +287,31 @@ class TestsCrossImportChecker {
     for (final File file in files) {
       buffer.writeln('  ${getRelativePath(file)}');
     }
+    return buffer.toString().trimRight();
+  }
+
+  /// Returns the error message for the given known paths that no longer have a
+  /// cross import.
+  ///
+  /// `library` must not be `Library.Material`, because Material is allowed to
+  /// cross-import.
+  static String getFixedImportError(Set<String> fixedPaths, Library library) {
+    assert(fixedPaths.isNotEmpty);
+    final StringBuffer buffer = StringBuffer(
+      'Huzzah! The following tests in ${library.name} no longer contain cross imports!\n',
+    );
+    for (final String path in fixedPaths) {
+      buffer.writeln('  $path');
+    }
+    final String knownListName = switch (library) {
+      Library.widgets => '_knownWidgetsCrossImports',
+      Library.cupertino => '_knownCupertinoCrossImports',
+      Library.material => throw UnimplementedError(
+        'Material is responsible for testing its interactions with Cupertino, so it is allowed to cross-import.',
+      ),
+    };
+    buffer.writeln('However, they now need to be removed from the');
+    buffer.write('$knownListName list in the script $_scriptLocation.');
     return buffer.toString().trimRight();
   }
 
