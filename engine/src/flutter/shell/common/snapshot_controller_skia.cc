@@ -55,8 +55,8 @@ void SnapshotControllerSkia::MakeRasterSnapshot(
     sk_sp<DisplayList> display_list,
     DlISize picture_size,
     std::function<void(const sk_sp<DlImage>&)> callback,
-    int32_t target_format) {
-  callback(MakeRasterSnapshotSync(display_list, picture_size, target_format));
+    SnapshotPixelFormat pixel_format) {
+  callback(MakeRasterSnapshotSync(display_list, picture_size, pixel_format));
 }
 
 sk_sp<DlImage> SnapshotControllerSkia::DoMakeRasterSnapshot(
@@ -142,7 +142,7 @@ sk_sp<DlImage> SnapshotControllerSkia::DoMakeRasterSnapshot(
 sk_sp<DlImage> SnapshotControllerSkia::MakeRasterSnapshotSync(
     sk_sp<DisplayList> display_list,
     DlISize size,
-    int32_t target_format) {
+    SnapshotPixelFormat pixel_format) {
   return DoMakeRasterSnapshot(size, [display_list](SkCanvas* canvas) {
     DlSkCanvasAdapter(canvas).DrawDisplayList(display_list);
   });

@@ -39,11 +39,11 @@ class MockSnapshotDelegate : public SnapshotDelegate {
               (sk_sp<DisplayList>,
                DlISize,
                std::function<void(sk_sp<DlImage>)>,
-               int32_t target_format),
+               SnapshotPixelFormat target_format),
               (override));
   MOCK_METHOD(sk_sp<DlImage>,
               MakeRasterSnapshotSync,
-              (sk_sp<DisplayList>, DlISize, int32_t),
+              (sk_sp<DisplayList>, DlISize, SnapshotPixelFormat),
               (override));
   MOCK_METHOD(sk_sp<SkImage>,
               ConvertToRasterImage,

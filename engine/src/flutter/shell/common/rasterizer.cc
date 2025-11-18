@@ -439,17 +439,17 @@ void Rasterizer::MakeRasterSnapshot(
     sk_sp<DisplayList> display_list,
     DlISize picture_size,
     std::function<void(sk_sp<DlImage>)> callback,
-    int32_t target_format) {
+    SnapshotPixelFormat pixel_format) {
   return snapshot_controller_->MakeRasterSnapshot(display_list, picture_size,
-                                                  callback, target_format);
+                                                  callback, pixel_format);
 }
 
 sk_sp<DlImage> Rasterizer::MakeRasterSnapshotSync(
     sk_sp<DisplayList> display_list,
     DlISize picture_size,
-    int32_t target_format) {
+    SnapshotPixelFormat pixel_format) {
   return snapshot_controller_->MakeRasterSnapshotSync(
-      display_list, picture_size, target_format);
+      display_list, picture_size, pixel_format);
 }
 
 sk_sp<SkImage> Rasterizer::ConvertToRasterImage(sk_sp<SkImage> image) {

@@ -53,7 +53,21 @@ void Picture::toImageSync(uint32_t width,
                           int32_t target_format,
                           Dart_Handle raw_image_handle) {
   FML_DCHECK(display_list_);
-  RasterizeToImageSync(display_list_, width, height, target_format,
+  SnapshotPixelFormat snapshot_pixel_format;
+  // This must be kept in sync with painting.dart.
+  switch (target_format) {
+    case 0:
+      snapshot_pixel_format = SnapshotPixelFormat::kDontCare;
+      break;
+    case 1:
+      snapshot_pixel_format = SnapshotPixelFormat::kRGBA32Float;
+      break;
+    default:
+      FML_DCHECK(false) << "unknown target format: " << target_format;
+      snapshot_pixel_format = SnapshotPixelFormat::kDontCare;
+      break;
+  }
+  RasterizeToImageSync(display_list_, width, height, snapshot_pixel_format,
                        raw_image_handle);
 }
 
@@ -62,7 +76,7 @@ static sk_sp<DlImage> CreateDeferredImage(
     sk_sp<DisplayList> display_list,
     uint32_t width,
     uint32_t height,
-    int32_t target_format,
+    SnapshotPixelFormat target_format,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner,
     const fml::RefPtr<SkiaUnrefQueue>& unref_queue) {
@@ -90,7 +104,7 @@ static sk_sp<DlImage> CreateDeferredImage(
 void Picture::RasterizeToImageSync(sk_sp<DisplayList> display_list,
                                    uint32_t width,
                                    uint32_t height,
-                                   int32_t target_format,
+                                   SnapshotPixelFormat target_format,
                                    Dart_Handle raw_image_handle) {
   auto* dart_state = UIDartState::Current();
   if (!dart_state) {
@@ -226,7 +240,7 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
               fml::TaskRunner::RunNowOrPostTask(
                   ui_task_runner, [ui_task, image]() { ui_task(image); });
             },
-            0);
+            SnapshotPixelFormat::kDontCare);
       }));
 
   return Dart_Null();

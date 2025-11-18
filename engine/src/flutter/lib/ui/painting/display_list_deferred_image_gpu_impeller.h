@@ -13,6 +13,7 @@
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
+#include "flutter/shell/common/snapshot_pixel_format.h"
 #include "impeller/core/texture.h"
 
 namespace flutter {
@@ -31,7 +32,7 @@ class DlDeferredImageGPUImpeller final : public DlImage {
   static sk_sp<DlDeferredImageGPUImpeller> Make(
       sk_sp<DisplayList> display_list,
       const DlISize& size,
-      int32_t target_format,
+      SnapshotPixelFormat pixel_format,
       fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
       fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
@@ -75,7 +76,7 @@ class DlDeferredImageGPUImpeller final : public DlImage {
     static std::shared_ptr<ImageWrapper> Make(
         sk_sp<DisplayList> display_list,
         const DlISize& size,
-        int32_t target_format,
+        SnapshotPixelFormat pixel_format,
         fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
         fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
@@ -97,7 +98,7 @@ class DlDeferredImageGPUImpeller final : public DlImage {
    private:
     FML_FRIEND_TEST(testing::DlDeferredImageGPUImpeller, TrashesDisplayList);
     DlISize size_;
-    int32_t target_format_;
+    SnapshotPixelFormat pixel_format_;
     std::shared_ptr<impeller::Texture> texture_;
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate_;
     fml::RefPtr<fml::TaskRunner> raster_task_runner_;
@@ -107,7 +108,7 @@ class DlDeferredImageGPUImpeller final : public DlImage {
 
     ImageWrapper(
         const DlISize& size,
-        int32_t target_format,
+        SnapshotPixelFormat pixel_format,
         fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
         fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
