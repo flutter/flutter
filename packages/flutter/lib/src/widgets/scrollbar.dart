@@ -915,7 +915,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 ///
 /// Scrollbars are added to most [Scrollable] widgets by default on
 /// [TargetPlatformVariant.desktop] platforms. Scrollbars are also added
-/// to most [Scrollable] widgets by default on [TargetPlatformVariant.android]
+/// to most [Scrollable] widgets by default on [TargetPlatform.android]
 /// when [MaterialScrollBehavior] is used. This is done through
 /// [ScrollBehavior.buildScrollbar] as part of an app's
 /// [ScrollConfiguration]. Scrollables that do not use the
@@ -1025,7 +1025,7 @@ class RawScrollbar extends StatefulWidget {
   /// Typically a [Scrollbar] is created on desktop platforms by a
   /// [ScrollBehavior.buildScrollbar] method, in which case the child is usually
   /// the one provided as an argument to that method. This is also the case
-  /// for [TargetPlatformVariant.android] when using [MaterialScrollBehavior].
+  /// for [TargetPlatform.android] when using [MaterialScrollBehavior].
   ///
   /// Typically a [ListView] or [CustomScrollView].
   /// {@endtemplate}
