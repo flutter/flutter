@@ -974,9 +974,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   return self.currentCompositionParams.find(viewId)->second;
 }
 
-- (void)postTaskSync:(const fml::RefPtr<fml::TaskRunner>&)task_runner
-            withTask:(fml::closure)task {
-
+- (void)postTaskSync:(const fml::RefPtr<fml::TaskRunner>&)task_runner withTask:(fml::closure)task {
   FML_DCHECK(!task_runner->RunsTasksOnCurrentThread());
   fml::AutoResetWaitableEvent latch;
   task_runner->PostTask([&latch, task]() {

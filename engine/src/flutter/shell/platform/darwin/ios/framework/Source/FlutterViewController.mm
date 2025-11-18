@@ -175,7 +175,6 @@ typedef struct MouseState {
 
 @synthesize autoResizable = _autoResizable;
 
-
 // TODO(dkwingsmt): https://github.com/flutter/flutter/issues/138168
 // No backing ivar is currently required; when multiple views are supported, we'll need to
 // synthesize the ivar and store the view identifier.
