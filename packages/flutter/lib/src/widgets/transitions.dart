@@ -413,7 +413,7 @@ class RotationTransition extends MatrixTransition {
 ///
 /// [SizeTransition] acts as a [ClipRect] that animates either its width or its
 /// height, depending upon the value of [axis]. The alignment of the child along
-/// the [axis] is specified by the [axisAlignment].
+/// the [axis] is specified by the [alignment].
 ///
 /// Like most widgets, [SizeTransition] will conform to the constraints it is
 /// given, so be sure to put it in a context where it can change size. For
@@ -446,17 +446,17 @@ class RotationTransition extends MatrixTransition {
 class SizeTransition extends AnimatedWidget {
   /// Creates a size transition.
   ///
-  /// The [axis] argument defaults to [Axis.vertical]. The [axisAlignment]
-  /// defaults to zero, which centers the child along the main axis during the
-  /// transition.
+  /// to [Alignment.center].
   const SizeTransition({
     super.key,
     this.axis = Axis.vertical,
     required Animation<double> sizeFactor,
-    this.axisAlignment = 0.0,
+    @Deprecated('Use alignment instead. ') this.axisAlignment,
+    this.alignment,
     this.fixedCrossAxisSizeFactor,
     this.child,
   }) : assert(fixedCrossAxisSizeFactor == null || fixedCrossAxisSizeFactor >= 0.0),
+       assert(axisAlignment == null || alignment == null),
        super(listenable: sizeFactor);
 
   /// [Axis.horizontal] if [sizeFactor] modifies the width, otherwise
@@ -484,7 +484,11 @@ class SizeTransition extends AnimatedWidget {
   /// A value of 1.0 indicates the bottom or end, depending upon the [axis].
   ///
   /// A value of 0.0 (the default) indicates the center for either [axis] value.
-  final double axisAlignment;
+  @Deprecated('Use alignment instead. ')
+  final double? axisAlignment;
+
+  /// The alignment of the child along the main axis during the transition.
+  final AlignmentGeometry? alignment;
 
   /// The factor by which to multiply the cross axis size of the child.
   ///
@@ -503,10 +507,12 @@ class SizeTransition extends AnimatedWidget {
   Widget build(BuildContext context) {
     return ClipRect(
       child: Align(
-        alignment: switch (axis) {
-          Axis.horizontal => AlignmentDirectional(axisAlignment, -1.0),
-          Axis.vertical => AlignmentDirectional(-1.0, axisAlignment),
-        },
+        alignment:
+            alignment ??
+            switch (axis) {
+              Axis.horizontal => AlignmentDirectional(axisAlignment ?? 0.0, -1.0),
+              Axis.vertical => AlignmentDirectional(-1.0, axisAlignment ?? 0.0),
+            },
         heightFactor: axis == Axis.vertical
             ? math.max(sizeFactor.value, 0.0)
             : fixedCrossAxisSizeFactor,
