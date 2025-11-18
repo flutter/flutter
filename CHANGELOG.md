@@ -41,6 +41,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 - [flutter/178318](https://github.com/flutter/flutter/issues/178318) Certain flutter crash scenarios can result in multiple crash reports being submitted for a single process crash.
 - [flutter/176399](https://github.com/flutter/flutter/issues/176399) Visual Studio 2026 is not supported when compiling Windows desktop applications.
 - [flutter/175058](https://github.com/flutter/flutter/issues/175058) The widget previewer fails to start if flutter pub get has not been run in the target project.
+- [flutter/178421](https://github.com/flutter/flutter/issues/178421) When debugging from an IDE with a physical iOS 26 device, IDE installs an app but hangs on a white screen during launching.
 
 ### [3.38.1](https://github.com/flutter/flutter/releases/tag/3.38.1)
 
