@@ -753,8 +753,6 @@ class SemanticsUpdateBuilder {
     SemanticsHitTestBehavior hitTestBehavior = SemanticsHitTestBehavior.defer,
     required SemanticsInputType inputType,
     required Locale? locale,
-    required String minValue,
-    required String maxValue,
   }) {
     if (transform.length != 16) {
       throw ArgumentError('transform argument must have 16 entries.');
@@ -802,8 +800,6 @@ class SemanticsUpdateBuilder {
         hitTestBehavior: hitTestBehavior,
         inputType: inputType,
         locale: locale,
-        minValue: minValue,
-        maxValue: maxValue,
       ),
     );
   }

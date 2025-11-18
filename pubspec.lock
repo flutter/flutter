@@ -126,10 +126,10 @@ packages:
     dependency: "direct main"
     description:
       name: code_assets
-      sha256: ae0db647e668cbb295a3527f0938e4039e004c80099dce2f964102373f5ce0b5
+      sha256: "5865a34983367f6884e8311f67d9ae459945b99bad20c0e66484a1aae7feaae0"
       url: "https://pub.dev"
     source: hosted
-    version: "0.19.10"
+    version: "0.19.7"
   collection:
     dependency: "direct main"
     description:
@@ -158,10 +158,10 @@ packages:
     dependency: "direct main"
     description:
       name: crypto
-      sha256: c8ea0233063ba03258fbcf2ca4d6dadfefe14f02fab57702265467a19f27fadf
+      sha256: "1e445881f28f22d6140f181e07737b22f1e099a5e1ff94b0af2f9e4a463f4855"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.7"
+    version: "3.0.6"
   csslib:
     dependency: "direct main"
     description:
@@ -350,10 +350,10 @@ packages:
     dependency: "direct main"
     description:
       name: hooks
-      sha256: "5410b9f4f6c9f01e8ff0eb81c9801ea13a3c3d39f8f0b1613cda08e27eab3c18"
+      sha256: "22abd27b650a571e53576abe732e4d9053aacaaa6dee23e9ff106c63e3e5b96c"
       url: "https://pub.dev"
     source: hosted
-    version: "0.20.5"
+    version: "0.20.1"
   html:
     dependency: "direct main"
     description:
@@ -366,10 +366,10 @@ packages:
     dependency: "direct main"
     description:
       name: http
-      sha256: "87721a4a50b19c7f1d49001e51409bddc46303966ce89a65af4f4e6004896412"
+      sha256: bb2ce4590bc2667c96f318d68cac1b5a7987ec819351d32b1c987239a815e007
       url: "https://pub.dev"
     source: hosted
-    version: "1.6.0"
+    version: "1.5.0"
   http_multi_server:
     dependency: "direct main"
     description:
@@ -558,18 +558,18 @@ packages:
     dependency: "direct main"
     description:
       name: path_provider_android
-      sha256: e122c5ea805bb6773bb12ce667611265980940145be920cd09a4b0ec0285cb16
+      sha256: "3b4c1fc3aa55ddc9cd4aa6759984330d5c8e66aa7702a6223c61540dc6380c37"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.20"
+    version: "2.2.19"
   path_provider_foundation:
     dependency: "direct main"
     description:
       name: path_provider_foundation
-      sha256: efaec349ddfc181528345c56f8eda9d6cccd71c177511b132c6a0ddaefaa2738
+      sha256: "16eef174aacb07e09c351502740fa6254c165757638eba1e9116b0a781201bbd"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.3"
+    version: "2.4.2"
   path_provider_linux:
     dependency: "direct main"
     description:
@@ -646,10 +646,10 @@ packages:
     dependency: "direct main"
     description:
       name: process_runner
-      sha256: edb4a3764852cce0cdcb4db7a5c3c4adbad36e3cffeec9766edef5aeb9986db6
+      sha256: "4763f660895a1aea3c097bba3204794094b828cb9a279a65a2506a9b93d47d12"
       url: "https://pub.dev"
     source: hosted
-    version: "4.2.4"
+    version: "4.2.0"
   provider:
     dependency: "direct main"
     description:
@@ -875,10 +875,10 @@ packages:
     dependency: "direct main"
     description:
       name: url_launcher_ios
-      sha256: "6b63f1441e4f653ae799166a72b50b1767321ecc263a57aadf825a7a2a5477d9"
+      sha256: d80b3f567a617cb923546034cc94bfe44eb15f989fe670b37f26abdb9d939cb7
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.5"
+    version: "6.3.4"
   url_launcher_linux:
     dependency: "direct main"
     description:
@@ -891,10 +891,10 @@ packages:
     dependency: "direct main"
     description:
       name: url_launcher_macos
-      sha256: "8262208506252a3ed4ff5c0dc1e973d2c0e0ef337d0a074d35634da5d44397c9"
+      sha256: c043a77d6600ac9c38300567f33ef12b0ef4f4783a2c1f00231d2b1941fea13f
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.4"
+    version: "3.2.3"
   url_launcher_platform_interface:
     dependency: "direct main"
     description:
@@ -939,26 +939,26 @@ packages:
     dependency: "direct main"
     description:
       name: video_player_android
-      sha256: cf768d02924b91e333e2bc1ff928528f57d686445874f383bafab12d0bdfc340
+      sha256: a8dc4324f67705de057678372bedb66cd08572fe7c495605ac68c5f503324a39
       url: "https://pub.dev"
     source: hosted
-    version: "2.8.17"
+    version: "2.8.15"
   video_player_avfoundation:
     dependency: "direct main"
     description:
       name: video_player_avfoundation
-      sha256: "19ed1162a7a5520e7d7791e0b7b73ba03161b6a69428b82e4689e435b325432d"
+      sha256: f9a780aac57802b2892f93787e5ea53b5f43cc57dc107bee9436458365be71cd
       url: "https://pub.dev"
     source: hosted
-    version: "2.8.5"
+    version: "2.8.4"
   video_player_platform_interface:
     dependency: "direct main"
     description:
       name: video_player_platform_interface
-      sha256: "57c5d73173f76d801129d0531c2774052c5a7c11ccb962f1830630decd9f24ec"
+      sha256: cf2a1d29a284db648fd66cbd18aacc157f9862d77d2cc790f6f9678a46c1db5a
       url: "https://pub.dev"
     source: hosted
-    version: "6.6.0"
+    version: "6.4.0"
   video_player_web:
     dependency: "direct main"
     description:
@@ -1059,10 +1059,10 @@ packages:
     dependency: "direct main"
     description:
       name: webview_flutter_wkwebview
-      sha256: "5de608fdea144d4370c21d4c80f0528135529e0180aa129790064c345e457a43"
+      sha256: fea63576b3b7e02b2df8b78ba92b48ed66caec2bb041e9a0b1cbd586d5d80bfd
       url: "https://pub.dev"
     source: hosted
-    version: "3.23.2"
+    version: "3.23.1"
   xdg_directories:
     dependency: "direct main"
     description:
