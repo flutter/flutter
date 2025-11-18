@@ -1619,6 +1619,14 @@ MakeViewportMetricsFromWindowMetrics(
 
   metrics.physical_width = SAFE_ACCESS(flutter_metrics, width, 0.0);
   metrics.physical_height = SAFE_ACCESS(flutter_metrics, height, 0.0);
+  metrics.physical_min_width_constraint =
+      SAFE_ACCESS(flutter_metrics, min_width_constraint, 0.0);
+  metrics.physical_min_height_constraint =
+      SAFE_ACCESS(flutter_metrics, min_height_constraint, 0.0);
+  metrics.physical_max_width_constraint =
+      SAFE_ACCESS(flutter_metrics, max_width_constraint, 0.0);
+  metrics.physical_max_height_constraint =
+      SAFE_ACCESS(flutter_metrics, max_height_constraint, 0.0);
   metrics.device_pixel_ratio = SAFE_ACCESS(flutter_metrics, pixel_ratio, 1.0);
   metrics.physical_view_inset_top =
       SAFE_ACCESS(flutter_metrics, physical_view_inset_top, 0.0);
@@ -1649,10 +1657,14 @@ MakeViewportMetricsFromWindowMetrics(
            "physical height or width.";
   }
 
-  metrics.physical_min_width_constraint = metrics.physical_width;
-  metrics.physical_max_width_constraint = metrics.physical_width;
-  metrics.physical_min_height_constraint = metrics.physical_height;
-  metrics.physical_max_height_constraint = metrics.physical_height;
+  if (metrics.physical_width != 0) {
+    metrics.physical_min_width_constraint = metrics.physical_width;
+    metrics.physical_max_width_constraint = metrics.physical_width;
+  }
+  if (metrics.physical_height != 0) {
+    metrics.physical_min_height_constraint = metrics.physical_height;
+    metrics.physical_max_height_constraint = metrics.physical_height;
+  }
 
   return metrics;
 }
