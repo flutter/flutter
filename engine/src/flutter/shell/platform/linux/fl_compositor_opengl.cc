@@ -232,8 +232,18 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
   glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &saved_draw_framebuffer_binding);
   GLint saved_read_framebuffer_binding;
   glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &saved_read_framebuffer_binding);
+  GLint saved_current_program;
+  glGetIntegerv(GL_CURRENT_PROGRAM, &saved_current_program);
   GLboolean saved_scissor_test = glIsEnabled(GL_SCISSOR_TEST);
   GLboolean saved_blend = glIsEnabled(GL_BLEND);
+  GLint saved_src_rgb;
+  glGetIntegerv(GL_BLEND_SRC_RGB, &saved_src_rgb);
+  GLint saved_src_alpha;
+  glGetIntegerv(GL_BLEND_SRC_ALPHA, &saved_src_alpha);
+  GLint saved_dst_rgb;
+  glGetIntegerv(GL_BLEND_DST_RGB, &saved_dst_rgb);
+  GLint saved_dst_alpha;
+  glGetIntegerv(GL_BLEND_DST_ALPHA, &saved_dst_alpha);
 
   // Update framebuffer to write into.
   size_t width = layers[0]->size.width;
@@ -332,6 +342,9 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
   glBindVertexArray(saved_vao_binding);
   glBindBuffer(GL_ARRAY_BUFFER, saved_array_buffer_binding);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, saved_draw_framebuffer_binding);
+  glUseProgram(saved_current_program);
+  glBlendFuncSeparate(saved_src_rgb, saved_dst_rgb, saved_src_alpha,
+                      saved_dst_alpha);
 
   if (!self->shareable) {
     glBindFramebuffer(GL_READ_FRAMEBUFFER,
