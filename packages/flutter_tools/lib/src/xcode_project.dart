@@ -796,7 +796,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       projectInfo.reportFlavorNotFoundAndExit();
     }
     for (final String scheme in projectInfo.schemes) {
-      // Flutter assumes single build target per scheme, so skip defalt scheme.
+      // Flutter assumes single build target per scheme, so skip default scheme.
       if (scheme == defaultScheme) {
         continue;
       }
