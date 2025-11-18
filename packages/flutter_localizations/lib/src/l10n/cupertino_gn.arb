@@ -2,7 +2,7 @@
   "@datePickerHourSemanticsLabelZero": {
     "optional": true
   },
-  "datePickerHourSemanticsLabelOne": "$hour o'clock",
+  "datePickerHourSemanticsLabelOne": "Ára $hour",
   "@datePickerHourSemanticsLabelOne": {
     "optional": true
   },
@@ -15,7 +15,7 @@
   "@datePickerHourSemanticsLabelMany": {
     "optional": true
   },
-  "datePickerHourSemanticsLabelOther": "$hour o'clock",
+  "datePickerHourSemanticsLabelOther": "Ára $hour",
   "@datePickerHourSemanticsLabel": {
     "description": "Accessibility announcement for the selected hour on a time picker such as '5 o'clock' or '5点'",
     "plural": "hour"
@@ -23,7 +23,7 @@
   "@datePickerMinuteSemanticsLabelZero": {
     "optional": true
   },
-  "datePickerMinuteSemanticsLabelOne": "1 minute",
+  "datePickerMinuteSemanticsLabelOne": "1 min.",
   "@datePickerMinuteSemanticsLabelOne": {
     "optional": true
   },
@@ -36,7 +36,7 @@
   "@datePickerMinuteSemanticsLabelMany": {
     "optional": true
   },
-  "datePickerMinuteSemanticsLabelOther": "$minute minutes",
+  "datePickerMinuteSemanticsLabelOther": "$minute min.",
   "@datePickerMinuteSemanticsLabel": {
     "description": "Accessibility announcement for the selected minute on a time picker such as '15 minutes' or '15分'",
     "plural": "minute"
@@ -57,7 +57,7 @@
   "@postMeridiemAbbreviation": {
     "description": "The abbreviation for post meridiem (after noon) shown in the time picker when it's not using the 24h format. Reference the text iOS uses such as in the iOS clock app."
   },
-  "todayLabel": "Today",
+  "todayLabel": "Ko'ág̃a",
   "@todayLabel": {
     "description": "A label shown in the date picker when the date is today."
   },
@@ -65,7 +65,7 @@
   "@alertDialogLabel": {
     "description": "The accessibility audio announcement made when an iOS style alert dialog is opened."
   },
-  "tabSemanticsLabel": "Tab $tabIndex of $tabCount",
+  "tabSemanticsLabel": "Tab $tabIndex $tabCount gui",
   "@tabSemanticsLabel": {
     "description": "The accessibility label used on a tab. This message describes the index of the selected tab and how many tabs there are, e.g. 'tab, 1 of 2'. All values are greater than or equal to one.",
     "parameters": "tabIndex, tabCount"
@@ -73,7 +73,7 @@
   "@timerPickerHourLabelZero": {
     "optional": true
   },
-  "timerPickerHourLabelOne": "hour",
+  "timerPickerHourLabelOne": "ára",
   "@timerPickerHourLabelOne": {
     "optional": true
   },
@@ -86,7 +86,7 @@
   "@timerPickerHourLabelMany": {
     "optional": true
   },
-  "timerPickerHourLabelOther": "hours",
+  "timerPickerHourLabelOther": "ára",
   "@timerPickerHourLabel": {
     "description": "The label adjacent to an hour integer number in a countdown timer. The reference abbreviation is what iOS does in the stock clock app's countdown timer.",
     "plural": "hour"
@@ -115,7 +115,7 @@
   "@timerPickerSecondLabelZero": {
     "optional": true
   },
-  "timerPickerSecondLabelOne": "sec.",
+  "timerPickerSecondLabelOne": "seg.",
   "@timerPickerSecondLabelOne": {
     "optional": true
   },
@@ -128,7 +128,7 @@
   "@timerPickerSecondLabelMany": {
     "optional": true
   },
-  "timerPickerSecondLabelOther": "sec.",
+  "timerPickerSecondLabelOther": "seg.",
   "@timerPickerSecondLabel": {
     "description": "The label adjacent to a second integer number in a countdown timer. The reference abbreviation is what iOS does in the stock clock app's countdown timer.",
     "plural": "second"
@@ -137,7 +137,7 @@
   "@cutButtonLabel": {
     "description": "The label for cut buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
   },
-  "copyButtonLabel": "Copy",
+  "copyButtonLabel": "Ñembojuajúva",
   "@copyButtonLabel": {
     "description": "The label for copy buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
   },
@@ -145,7 +145,7 @@
   "@pasteButtonLabel": {
     "description": "The label for paste buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
   },
-  "clearButtonLabel": "Clear",
+  "clearButtonLabel": "Mopotĩ",
   "@clearButtonLabel": {
     "description": "The label for clear buttons and menu items."
   },
@@ -165,11 +165,11 @@
   "@shareButtonLabel": {
     "description": "The label for the Share button and menu items on iOS."
   },
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "noSpellCheckReplacementsLabel": "Ndojuhu'ỹi mba'e pyahu",
   "@noSpellCheckReplacementsLabel": {
     "description": "The label shown in the text selection context menu on iOS when a misspelled word is tapped but the spell checker found no reasonable fixes for it."
   },
-  "searchTextFieldPlaceholderLabel": "Search",
+  "searchTextFieldPlaceholderLabel": "Heka",
   "@searchTextFieldPlaceholderLabel": {
     "description": "The default placeholder label used in an iOS styled search bar."
   },
@@ -185,31 +185,31 @@
   "@cancelButtonLabel": {
     "description": "Label for the cancel button in modal views."
   },
-  "backButtonLabel": "Back",
+  "backButtonLabel": "Mboyve",
   "@backButtonLabel": {
     "description": "Label for the back button. Used as the semantic label for the back button in CupertinoNavigationBar and CupertinoSliverNavigationBar and as a fallback display when the previous page title is truncated."
   },
-  "expansionTileExpandedHint": "double tap to collapse",
+  "expansionTileExpandedHint": "eiporavo mokõi jey oñemboty hag̃ua",
   "@expansionTileExpandedHint": {
     "description": "The verb which describes the tap action on an expanded CupertinoExpansionTile. This is used by VoiceOver on iOS and macOS. This string will be appended to the collapsedHint string which describes the action to be performed on an expanded CupertinoExpansionTile. In the case of US english, this would be 'Expanded\n double tap to collapse.' The exact phrasing of the hint will vary based on locale"
   },
-  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileCollapsedHint": "eiporavo mokõi jey oñemyasãi hag̃ua",
   "@expansionTileCollapsedHint": {
     "description": "The verb which describes the tap action on a collapsed CupertinoExpansionTile. This is used by VoiceOver on iOS and macOS. This string will be appended to the expandedHint string which describes the action to be performed on a collapsed CupertinoExpansionTile. In the case of US english, this would be 'Collapsed\n double tap to expand.' The exact phrasing of the hint will vary based on locale"
   },
-  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileExpandedTapHint": "Ñemboty",
   "@expansionTileExpandedTapHint": {
     "description": "The verb which describes what happens when an expanded CupertinoExpansionTile is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to collapse.' The exact phrasing of the hint will vary based on locale"
   },
-  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expansionTileCollapsedTapHint": "Ñemyasãi mba'emimi hag̃ua",
   "@expansionTileCollapsedTapHint": {
     "description": "The verb which describes what happens when an expanded CupertinoExpansionTile is pressed. This is used by TalkBack on Android to replace the default hint on the accessibility action. The verb will be concatenated with a prefix string which describes how to perform the action, which by default is 'double tap to activate'. In the case of US english, this would be 'double tap to expand for more details.' The exact phrasing of the hint will vary based on locale"
   },
-  "expandedHint": "Collapsed",
+  "expandedHint": "Oñemboty",
   "@expandedHint": {
     "description": "The verb which describes the CupertinoExpansionTile state when an expanded CupertinoExpansionTile is pressed."
   },
-  "collapsedHint": "Expanded",
+  "collapsedHint": "Oñemyasãi",
   "@collapsedHint": {
     "description": "The verb which describes the CupertinoExpansionTile state when a collapsed CupertinoExpansionTile is pressed."
   }

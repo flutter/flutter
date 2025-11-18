@@ -83,11 +83,11 @@
   "@licensesPageTitle": {
     "description": "The title for the Flutter licenses page."
   },
-  "licensesPackageDetailTextZero": "No licenses",
+  "licensesPackageDetailTextZero": "Teu aya lisénsi",
   "@licensesPackageDetailTextZero": {
     "optional": true
   },
-  "licensesPackageDetailTextOne": "1 license",
+  "licensesPackageDetailTextOne": "1 lisénsi",
   "@licensesPackageDetailTextOne": {
     "optional": true
   },
@@ -100,17 +100,17 @@
   "@licensesPackageDetailTextMany": {
     "optional": true
   },
-  "licensesPackageDetailTextOther": "$licenseCount licenses",
+  "licensesPackageDetailTextOther": "$licenseCount lisénsi",
   "@licensesPackageDetailText": {
     "description": "The subtitle and detail text for a package displayed on the Flutter licenses page. The value of $licenseCount is an integer which indicates the number of licenses the package has.",
     "plural": "licenseCount"
   },
-  "pageRowsInfoTitle": "$firstRow–$lastRow of $rowCount",
+  "pageRowsInfoTitle": "$firstRow–$lastRow tina $rowCount",
   "@pageRowsInfoTitle": {
     "description": "The text shown in the footer of a paginated data table when the exact overall row count is known. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
     "parameters": "firstRow, lastRow, rowCount"
   },
-  "pageRowsInfoTitleApproximate": "$firstRow–$lastRow of about $rowCount",
+  "pageRowsInfoTitleApproximate": "$firstRow–$lastRow tina kira-kira $rowCount",
   "@pageRowsInfoTitleApproximate": {
     "description": "The text shown in the footer of a paginated data table when the exact overall row count is unknown. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
     "parameters": "firstRow, lastRow, rowCount"
@@ -119,16 +119,16 @@
   "@rowsPerPageTitle": {
     "description": "The caption for the drop-down button on a paginated data table's footer that allows the user to control the number of rows of data per page of the table."
   },
-  "tabLabel": "Tab $tabIndex of $tabCount",
+  "tabLabel": "Tab $tabIndex tina $tabCount",
   "@tabLabel": {
     "description": "The accessibility label used on a tab. This message describes the index of the selected tab and how many tabs there are, e.g. 'Tab 1 of 2'. All values are greater than or equal to one.",
     "parameters": "tabIndex, tabCount"
   },
-  "selectedRowCountTitleZero": "No items selected",
+  "selectedRowCountTitleZero": "Teu aya anu dipilih",
   "@selectedRowCountTitleZero": {
     "optional": true
   },
-  "selectedRowCountTitleOne": "1 item selected",
+  "selectedRowCountTitleOne": "1 anu dipilih",
   "@selectedRowCountTitleOne": {
     "optional": true
   },
@@ -141,7 +141,7 @@
   "@selectedRowCountTitleMany": {
     "optional": true
   },
-  "selectedRowCountTitleOther": "$selectedRowCount items selected",
+  "selectedRowCountTitleOther": "$selectedRowCount anu dipilih",
   "@selectedRowCountTitle": {
     "description": "The title for the header of a paginated data table when the user is selecting rows. The value of $selectedRowCount is an integer which indicates the number of data table row elements that have been selected.",
     "plural": "selectedRowCount"

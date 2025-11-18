@@ -105,12 +105,12 @@
     "description": "The subtitle and detail text for a package displayed on the Flutter licenses page. The value of $licenseCount is an integer which indicates the number of licenses the package has.",
     "plural": "licenseCount"
   },
-  "pageRowsInfoTitle": "$firstRow–$lastRow of $rowCount",
+  "pageRowsInfoTitle": "$firstRow–$lastRow $rowCount irraa",
   "@pageRowsInfoTitle": {
     "description": "The text shown in the footer of a paginated data table when the exact overall row count is known. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
     "parameters": "firstRow, lastRow, rowCount"
   },
-  "pageRowsInfoTitleApproximate": "$firstRow–$lastRow of about $rowCount",
+  "pageRowsInfoTitleApproximate": "$firstRow–$lastRow walakkaa $rowCount irraa",
   "@pageRowsInfoTitleApproximate": {
     "description": "The text shown in the footer of a paginated data table when the exact overall row count is unknown. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
     "parameters": "firstRow, lastRow, rowCount"
@@ -202,7 +202,7 @@
   "@anteMeridiemAbbreviation": {
     "description": "The abbreviation for ante meridiem (before noon) shown in the time picker. Translations for this abbreviation will only be provided for locales that support it."
   },
-  "postMeridiemAbbreviation": "MM",
+  "postMeridiemAbbreviation": "PM",
   "@postMeridiemAbbreviation": {
     "description": "The abbreviation for post meridiem (after noon) shown in the time picker. Translations for this abbreviation will only be provided for locales that support it."
   },

@@ -57,7 +57,7 @@
   "@postMeridiemAbbreviation": {
     "description": "The abbreviation for post meridiem (after noon) shown in the time picker when it's not using the 24h format. Reference the text iOS uses such as in the iOS clock app."
   },
-  "todayLabel": "Today",
+  "todayLabel": "आज",
   "@todayLabel": {
     "description": "A label shown in the date picker when the date is today."
   },
@@ -73,7 +73,7 @@
   "@timerPickerHourLabelZero": {
     "optional": true
   },
-  "timerPickerHourLabelOne": "hour",
+  "timerPickerHourLabelOne": "घंटा",
   "@timerPickerHourLabelOne": {
     "optional": true
   },
@@ -86,7 +86,7 @@
   "@timerPickerHourLabelMany": {
     "optional": true
   },
-  "timerPickerHourLabelOther": "hours",
+  "timerPickerHourLabelOther": "घंटे",
   "@timerPickerHourLabel": {
     "description": "The label adjacent to an hour integer number in a countdown timer. The reference abbreviation is what iOS does in the stock clock app's countdown timer.",
     "plural": "hour"
@@ -94,7 +94,7 @@
   "@timerPickerMinuteLabelZero": {
     "optional": true
   },
-  "timerPickerMinuteLabelOne": "min.",
+  "timerPickerMinuteLabelOne": "मिनट",
   "@timerPickerMinuteLabelOne": {
     "optional": true
   },
@@ -107,7 +107,7 @@
   "@timerPickerMinuteLabelMany": {
     "optional": true
   },
-  "timerPickerMinuteLabelOther": "min.",
+  "timerPickerMinuteLabelOther": "मिनट",
   "@timerPickerMinuteLabel": {
     "description": "The label adjacent to a minute integer number in a countdown timer. The reference abbreviation is what iOS does in the stock clock app's countdown timer.",
     "plural": "minute"
@@ -115,7 +115,7 @@
   "@timerPickerSecondLabelZero": {
     "optional": true
   },
-  "timerPickerSecondLabelOne": "sec.",
+  "timerPickerSecondLabelOne": "सेकंड",
   "@timerPickerSecondLabelOne": {
     "optional": true
   },
@@ -128,7 +128,7 @@
   "@timerPickerSecondLabelMany": {
     "optional": true
   },
-  "timerPickerSecondLabelOther": "sec.",
+  "timerPickerSecondLabelOther": "सेकंड",
   "@timerPickerSecondLabel": {
     "description": "The label adjacent to a second integer number in a countdown timer. The reference abbreviation is what iOS does in the stock clock app's countdown timer.",
     "plural": "second"
