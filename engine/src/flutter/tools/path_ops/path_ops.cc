@@ -42,10 +42,10 @@ void Reset(SkPathBuilder* path) {
 }
 
 void Op(SkPathBuilder* one, SkPathBuilder* two, SkPathOp op) {
-  SkPath p1 = one->detach();
+  SkPath p1 = one->snapshot();
   SkPath p2 = two->snapshot();
   if (std::optional<SkPath> result = Op(p1, p2, op)) {
-    one->addPath(result.value());
+    *one = result.value();
   }
 }
 

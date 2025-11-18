@@ -593,6 +593,8 @@ enum ImageByteFormat { rawRgba, rawStraightRgba, rawUnmodified, png }
 // This must be kept in sync with the `PixelFormat` enum in Skwasm's image.cpp.
 enum PixelFormat { rgba8888, bgra8888, rgbaFloat32 }
 
+enum TargetPixelFormat { dontCare, rgbaFloat32 }
+
 typedef ImageDecoderCallback = void Function(Image result);
 
 abstract class FrameInfo {
@@ -776,6 +778,7 @@ void decodeImageFromPixels(
   int? targetWidth,
   int? targetHeight,
   bool allowUpscaling = true,
+  TargetPixelFormat targetFormat = TargetPixelFormat.dontCare,
 }) => engine.renderer.decodeImageFromPixels(
   pixels,
   width,
@@ -961,7 +964,11 @@ class ImageDescriptor {
   int get bytesPerPixel =>
       throw UnsupportedError('ImageDescriptor.bytesPerPixel is not supported on web.');
   void dispose() => _data = null;
-  Future<Codec> instantiateCodec({int? targetWidth, int? targetHeight}) async {
+  Future<Codec> instantiateCodec({
+    int? targetWidth,
+    int? targetHeight,
+    TargetPixelFormat targetFormat = TargetPixelFormat.dontCare,
+  }) async {
     if (_data == null) {
       throw StateError('Object is disposed');
     }
