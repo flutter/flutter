@@ -78,6 +78,10 @@ class SkiaRenderContext : public RenderContext {
     }
   }
 
+  virtual void setResourceCacheLimit(int bytes) override {
+    _grContext->setResourceCacheLimit(bytes);
+  }
+
  private:
   sk_sp<GrDirectContext> _grContext = nullptr;
   sk_sp<SkSurface> _surface = nullptr;

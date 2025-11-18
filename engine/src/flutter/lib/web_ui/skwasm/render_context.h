@@ -19,7 +19,8 @@ class RenderContext {
   virtual ~RenderContext() = default;
   virtual void renderPicture(const sk_sp<flutter::DisplayList> displayList) = 0;
   virtual void renderImage(flutter::DlImage* image, ImageByteFormat format) = 0;
-  virtual void resize(int width, int height);
+  virtual void resize(int width, int height) = 0;
+  virtual void setResourceCacheLimit(int bytes) = 0;
 };
 }  // namespace Skwasm
 

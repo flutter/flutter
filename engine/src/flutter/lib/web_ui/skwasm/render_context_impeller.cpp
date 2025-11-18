@@ -71,6 +71,10 @@ class ImpellerRenderContext : public RenderContext {
     }
   }
 
+  virtual void setResourceCacheLimit(int bytes) override {
+    // No-op
+  }
+
  private:
   void _recreateSurface() {
     _surface = impeller::SurfaceGLES::WrapFBO(

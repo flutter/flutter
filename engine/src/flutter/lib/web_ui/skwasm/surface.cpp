@@ -39,7 +39,7 @@ void Surface::dispose() {
 
 // Main thread only
 void Surface::setResourceCacheLimit(int bytes) {
-  _grContext->setResourceCacheLimit(bytes);
+  _renderContext->setResourceCacheLimit(bytes);
 }
 
 // Main thread only
