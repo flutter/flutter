@@ -259,11 +259,7 @@ public class TextInputChannel {
 
   public void updateEditingStateWithTag(
       int inputClientId, @NonNull HashMap<String, TextEditState> editStates) {
-    Log.v(
-        TAG,
-        "Sending message to update editing state for "
-            + String.valueOf(editStates.size())
-            + " field(s).");
+    Log.v(TAG, "Sending message to update editing state for " + editStates.size() + " field(s).");
 
     final HashMap<String, HashMap<Object, Object>> json = new HashMap<>();
     for (Map.Entry<String, TextEditState> element : editStates.entrySet()) {
@@ -513,7 +509,6 @@ public class TextInputChannel {
     private static Integer inputActionFromTextInputAction(@NonNull String inputAction) {
       switch (inputAction) {
         case "TextInputAction.newline":
-          return EditorInfo.IME_ACTION_NONE;
         case "TextInputAction.none":
           return EditorInfo.IME_ACTION_NONE;
         case "TextInputAction.unspecified":
@@ -808,36 +803,25 @@ public class TextInputChannel {
       if ((selectionStart != -1 || selectionEnd != -1)
           && (selectionStart < 0 || selectionEnd < 0)) {
         throw new IndexOutOfBoundsException(
-            "invalid selection: ("
-                + String.valueOf(selectionStart)
-                + ", "
-                + String.valueOf(selectionEnd)
-                + ")");
+            "invalid selection: (" + selectionStart + ", " + selectionEnd + ")");
       }
 
       if ((composingStart != -1 || composingEnd != -1)
           && (composingStart < 0 || composingStart > composingEnd)) {
         throw new IndexOutOfBoundsException(
-            "invalid composing range: ("
-                + String.valueOf(composingStart)
-                + ", "
-                + String.valueOf(composingEnd)
-                + ")");
+            "invalid composing range: (" + composingStart + ", " + composingEnd + ")");
       }
 
       if (composingEnd > text.length()) {
-        throw new IndexOutOfBoundsException(
-            "invalid composing start: " + String.valueOf(composingStart));
+        throw new IndexOutOfBoundsException("invalid composing start: " + composingStart);
       }
 
       if (selectionStart > text.length()) {
-        throw new IndexOutOfBoundsException(
-            "invalid selection start: " + String.valueOf(selectionStart));
+        throw new IndexOutOfBoundsException("invalid selection start: " + selectionStart);
       }
 
       if (selectionEnd > text.length()) {
-        throw new IndexOutOfBoundsException(
-            "invalid selection end: " + String.valueOf(selectionEnd));
+        throw new IndexOutOfBoundsException("invalid selection end: " + selectionEnd);
       }
 
       this.text = text;
