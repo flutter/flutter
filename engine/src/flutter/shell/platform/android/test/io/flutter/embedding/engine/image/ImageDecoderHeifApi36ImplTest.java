@@ -9,7 +9,7 @@ import static org.junit.Assert.assertNotNull;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.media.ExifInterface;
+import androidx.exifinterface.media.ExifInterface;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.Build;
 import java.nio.ByteBuffer;

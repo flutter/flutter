@@ -1071,6 +1071,13 @@ class EditableText extends StatefulWidget {
   final bool enableSuggestions;
 
   /// The text style to use for the editable text.
+  ///
+  /// The user or platform may override this [style]'s [TextStyle.fontWeight],
+  /// [TextStyle.height], [TextStyle.letterSpacing], and [TextStyle.wordSpacing]
+  /// via a [MediaQuery] ancestor's [MediaQueryData.boldText],
+  /// [MediaQueryData.lineHeightScaleFactorOverride],
+  /// [MediaQueryData.letterSpacingOverride], and [MediaQueryData.wordSpacingOverride]
+  /// regardless of its [TextStyle.inherit] value.
   final TextStyle style;
 
   /// Controls the undo state of the current editable text.
@@ -1102,6 +1109,9 @@ class EditableText extends StatefulWidget {
   /// Within editable text and text fields, [StrutStyle] will not use its standalone
   /// default values, and will instead inherit omitted/null properties from the
   /// [TextStyle] instead. See [StrutStyle.inheritFromTextStyle].
+  ///
+  /// The user or platform may override this [strutStyle]'s [StrutStyle.height]
+  /// via a [MediaQuery] ancestor's [MediaQueryData.lineHeightScaleFactorOverride].
   StrutStyle get strutStyle {
     if (_strutStyle == null) {
       return StrutStyle.fromTextStyle(style, forceStrutHeight: true);
@@ -4463,13 +4473,24 @@ class EditableTextState extends State<EditableText>
       final List<SuggestionSpan>? suggestions = await _spellCheckConfiguration.spellCheckService!
           .fetchSpellCheckSuggestions(localeForSpellChecking!, text);
 
-      if (suggestions == null) {
-        // The request to fetch spell check suggestions was canceled due to ongoing request.
+      if (suggestions == null || !mounted) {
+        // The request to fetch spell check suggestions was canceled due to ongoing request,
+        // or the widget was unmounted.
         return;
       }
 
       spellCheckResults = SpellCheckResults(text, suggestions);
-      renderEditable.text = buildTextSpan();
+      final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(
+        context,
+      );
+      final double? letterSpacing = MediaQuery.maybeLetterSpacingOverrideOf(context);
+      final double? wordSpacing = MediaQuery.maybeWordSpacingOverrideOf(context);
+      renderEditable.text = _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides(
+        lineHeightScaleFactor: lineHeightScaleFactor,
+        letterSpacing: letterSpacing,
+        wordSpacing: wordSpacing,
+        textSpan: buildTextSpan(),
+      );
     } catch (exception, stack) {
       FlutterError.reportError(
         FlutterErrorDetails(
@@ -4809,6 +4830,7 @@ class EditableTextState extends State<EditableText>
     }
 
     final InlineSpan inlineSpan = renderEditable.text!;
+    final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(context);
     final TextScaler effectiveTextScaler = switch ((widget.textScaler, widget.textScaleFactor)) {
       (final TextScaler textScaler, _) => textScaler,
       (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
@@ -4822,7 +4844,7 @@ class EditableTextState extends State<EditableText>
       textScaler: effectiveTextScaler,
       textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
       locale: widget.locale,
-      structStyle: widget.strutStyle,
+      structStyle: widget.strutStyle.merge(StrutStyle(height: lineHeightScaleFactor)),
       placeholder: _placeholderLocation,
       size: renderEditable.size,
     );
@@ -5658,6 +5680,9 @@ class EditableTextState extends State<EditableText>
       (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
       (null, null) => MediaQuery.textScalerOf(context),
     };
+    final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(context);
+    final double? letterSpacing = MediaQuery.maybeLetterSpacingOverrideOf(context);
+    final double? wordSpacing = MediaQuery.maybeWordSpacingOverrideOf(context);
     final ui.SemanticsInputType inputType;
     switch (widget.keyboardType) {
       case TextInputType.phone:
@@ -5783,7 +5808,13 @@ class EditableTextState extends State<EditableText>
                                     key: _editableKey,
                                     startHandleLayerLink: _startHandleLayerLink,
                                     endHandleLayerLink: _endHandleLayerLink,
-                                    inlineSpan: buildTextSpan(),
+                                    inlineSpan:
+                                        _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides(
+                                          lineHeightScaleFactor: lineHeightScaleFactor,
+                                          letterSpacing: letterSpacing,
+                                          wordSpacing: wordSpacing,
+                                          textSpan: buildTextSpan(),
+                                        ),
                                     value: _value,
                                     cursorColor: _cursorColor,
                                     backgroundCursorColor: widget.backgroundCursorColor,
@@ -5794,7 +5825,9 @@ class EditableTextState extends State<EditableText>
                                     maxLines: widget.maxLines,
                                     minLines: widget.minLines,
                                     expands: widget.expands,
-                                    strutStyle: widget.strutStyle,
+                                    strutStyle: widget.strutStyle.merge(
+                                      StrutStyle(height: lineHeightScaleFactor),
+                                    ),
                                     selectionColor:
                                         _selectionOverlay?.spellCheckToolbarIsVisible ?? false
                                         ? _spellCheckConfiguration.misspelledSelectionColor ??
@@ -6737,5 +6770,52 @@ class _EditableTextTapUpOutsideAction extends ContextAction<EditableTextTapUpOut
   @override
   void invoke(EditableTextTapUpOutsideIntent intent, [BuildContext? context]) {
     // The default action is a no-op.
+  }
+}
+
+/// A utility class for overriding the text styles of a [TextSpan] tree.
+// When changes are made to this class, the equivalent API in text.dart
+// must also be updated.
+// TODO(Renzo-Olivares): Remove after investigating a solution for overriding all
+// styles for children in an [InlineSpan] tree, see: https://github.com/flutter/flutter/issues/177952.
+class _OverridingTextStyleTextSpanUtils {
+  static TextSpan applyTextSpacingOverrides({
+    double? lineHeightScaleFactor,
+    double? letterSpacing,
+    double? wordSpacing,
+    required TextSpan textSpan,
+  }) {
+    if (lineHeightScaleFactor == null && letterSpacing == null && wordSpacing == null) {
+      return textSpan;
+    }
+    return _applyTextStyleOverrides(
+      TextStyle(
+        height: lineHeightScaleFactor,
+        letterSpacing: letterSpacing,
+        wordSpacing: wordSpacing,
+      ),
+      textSpan,
+    );
+  }
+
+  static TextSpan _applyTextStyleOverrides(TextStyle overrideTextStyle, TextSpan textSpan) {
+    return TextSpan(
+      text: textSpan.text,
+      children: textSpan.children?.map((InlineSpan child) {
+        if (child is TextSpan && child.runtimeType == TextSpan) {
+          return _applyTextStyleOverrides(overrideTextStyle, child);
+        }
+        return child;
+      }).toList(),
+      style: textSpan.style?.merge(overrideTextStyle) ?? overrideTextStyle,
+      recognizer: textSpan.recognizer,
+      mouseCursor: textSpan.mouseCursor,
+      onEnter: textSpan.onEnter,
+      onExit: textSpan.onExit,
+      semanticsLabel: textSpan.semanticsLabel,
+      semanticsIdentifier: textSpan.semanticsIdentifier,
+      locale: textSpan.locale,
+      spellOut: textSpan.spellOut,
+    );
   }
 }

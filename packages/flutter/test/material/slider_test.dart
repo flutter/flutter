@@ -1352,6 +1352,7 @@ void main() {
                             increasedValue: '55%',
                             decreasedValue: '45%',
                             textDirection: TextDirection.ltr,
+                            children: <TestSemantics>[TestSemantics(id: 5)],
                           ),
                         ],
                       ),
@@ -1405,6 +1406,7 @@ void main() {
                             increasedValue: '55%',
                             decreasedValue: '45%',
                             textDirection: TextDirection.ltr,
+                            children: <TestSemantics>[TestSemantics(id: 5)],
                           ),
                         ],
                       ),
@@ -1446,6 +1448,7 @@ void main() {
                             increasedValue: '55%',
                             decreasedValue: '45%',
                             textDirection: TextDirection.ltr,
+                            children: <TestSemantics>[TestSemantics(id: 5)],
                           ),
                         ],
                       ),
@@ -1467,6 +1470,7 @@ void main() {
       TargetPlatform.fuchsia,
       TargetPlatform.linux,
     }),
+    skip: kIsWeb, // [intended] the web traversal order by using ARIA-OWNS.
   );
 
   testWidgets(
@@ -1520,6 +1524,7 @@ void main() {
                             increasedValue: '60%',
                             decreasedValue: '40%',
                             textDirection: TextDirection.ltr,
+                            children: <TestSemantics>[TestSemantics(id: 5)],
                           ),
                         ],
                       ),
@@ -1561,7 +1566,7 @@ void main() {
                         flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
-                            id: 5,
+                            id: 6,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isSlider,
@@ -1570,6 +1575,7 @@ void main() {
                             increasedValue: '60%',
                             decreasedValue: '40%',
                             textDirection: TextDirection.ltr,
+                            children: <TestSemantics>[TestSemantics(id: 7)],
                           ),
                         ],
                       ),
@@ -1589,170 +1595,179 @@ void main() {
       TargetPlatform.iOS,
       TargetPlatform.macOS,
     }),
+    skip: kIsWeb, // [intended] the web traversal order by using ARIA-OWNS.
   );
 
-  testWidgets('Slider Semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+  testWidgets(
+    'Slider Semantics',
+    (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(child: Slider(value: 0.5, onChanged: (double v) {})),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Material(child: Slider(value: 0.5, onChanged: (double v) {})),
+          ),
         ),
-      ),
-    );
+      );
 
-    await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 2,
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isEnabled,
-                            SemanticsFlag.isFocusable,
-                            SemanticsFlag.isSlider,
-                          ],
-                          actions: <SemanticsAction>[
-                            SemanticsAction.focus,
-                            SemanticsAction.increase,
-                            SemanticsAction.decrease,
-                            SemanticsAction.didGainAccessibilityFocus,
-                          ],
-                          value: '50%',
-                          increasedValue: '55%',
-                          decreasedValue: '45%',
-                          textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                textDirection: TextDirection.ltr,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 2,
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 3,
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 4,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable,
+                              SemanticsFlag.isSlider,
+                            ],
+                            actions: <SemanticsAction>[
+                              SemanticsAction.focus,
+                              SemanticsAction.increase,
+                              SemanticsAction.decrease,
+                              SemanticsAction.didGainAccessibilityFocus,
+                            ],
+                            value: '50%',
+                            increasedValue: '55%',
+                            decreasedValue: '45%',
+                            textDirection: TextDirection.ltr,
+                            children: <TestSemantics>[TestSemantics(id: 5)],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreRect: true,
+          ignoreTransform: true,
         ),
-        ignoreRect: true,
-        ignoreTransform: true,
-      ),
-    );
+      );
 
-    // Disable slider
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(child: Slider(value: 0.5, onChanged: null)),
+      // Disable slider
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Material(child: Slider(value: 0.5, onChanged: null)),
+          ),
         ),
-      ),
-    );
+      );
 
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 2,
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasEnabledState,
-                            // isFocusable is delayed by 1 frame.
-                            SemanticsFlag.isFocusable,
-                            SemanticsFlag.isSlider,
-                          ],
-                          actions: <SemanticsAction>[
-                            SemanticsAction.focus,
-                            SemanticsAction.didGainAccessibilityFocus,
-                          ],
-                          value: '50%',
-                          increasedValue: '55%',
-                          decreasedValue: '45%',
-                          textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                textDirection: TextDirection.ltr,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 2,
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 3,
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 4,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasEnabledState,
+                              // isFocusable is delayed by 1 frame.
+                              SemanticsFlag.isFocusable,
+                              SemanticsFlag.isSlider,
+                            ],
+                            actions: <SemanticsAction>[
+                              SemanticsAction.focus,
+                              SemanticsAction.didGainAccessibilityFocus,
+                            ],
+                            value: '50%',
+                            increasedValue: '55%',
+                            decreasedValue: '45%',
+                            textDirection: TextDirection.ltr,
+                            children: <TestSemantics>[TestSemantics(id: 5)],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreRect: true,
+          ignoreTransform: true,
         ),
-        ignoreRect: true,
-        ignoreTransform: true,
-      ),
-    );
+      );
 
-    await tester.pump();
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 2,
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          id: 4,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isSlider,
-                          ],
-                          actions: <SemanticsAction>[SemanticsAction.didGainAccessibilityFocus],
-                          value: '50%',
-                          increasedValue: '55%',
-                          decreasedValue: '45%',
-                          textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
+      await tester.pump();
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                textDirection: TextDirection.ltr,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 2,
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        id: 3,
+                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            id: 4,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isSlider,
+                            ],
+                            actions: <SemanticsAction>[SemanticsAction.didGainAccessibilityFocus],
+                            value: '50%',
+                            increasedValue: '55%',
+                            decreasedValue: '45%',
+                            textDirection: TextDirection.ltr,
+                            children: <TestSemantics>[TestSemantics(id: 5)],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreRect: true,
+          ignoreTransform: true,
         ),
-        ignoreRect: true,
-        ignoreTransform: true,
-      ),
-    );
+      );
 
-    semantics.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.windows}));
+      semantics.dispose();
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.windows}),
+    skip: kIsWeb, // [intended] the web traversal order by using ARIA-OWNS.
+  );
 
   testWidgets('Slider semantics with custom formatter', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1807,6 +1822,7 @@ void main() {
                           increasedValue: '60',
                           decreasedValue: '20',
                           textDirection: TextDirection.ltr,
+                          children: <TestSemantics>[TestSemantics(id: 5)],
                         ),
                       ],
                     ),
@@ -1821,7 +1837,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  });
+  }, skip: kIsWeb); // [intended] the web traversal order by using ARIA-OWNS.
 
   // Regression test for https://github.com/flutter/flutter/issues/101868
   testWidgets('Slider.label info should not write to semantic node', (WidgetTester tester) async {
@@ -1880,6 +1896,7 @@ void main() {
                           decreasedValue: '20',
                           textDirection: TextDirection.ltr,
                           label: label,
+                          children: <TestSemantics>[TestSemantics(id: 5)],
                         ),
                       ],
                     ),
@@ -1894,7 +1911,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  });
+  }, skip: kIsWeb); // [intended] the web traversal order by using ARIA-OWNS.
 
   testWidgets('Material3 - Slider is focusable and has correct focus color', (
     WidgetTester tester,
@@ -2828,6 +2845,7 @@ void main() {
                             increasedValue: '55%',
                             decreasedValue: '45%',
                             textDirection: TextDirection.ltr,
+                            children: <TestSemantics>[TestSemantics(id: 5)],
                           ),
                         ],
                       ),
@@ -2849,6 +2867,7 @@ void main() {
       semantics.dispose();
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.windows}),
+    skip: kIsWeb, // [intended] the web traversal order by using ARIA-OWNS.
   );
 
   testWidgets('Value indicator appears when it should', (WidgetTester tester) async {

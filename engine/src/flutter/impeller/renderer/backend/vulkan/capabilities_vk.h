@@ -261,6 +261,9 @@ class CapabilitiesVK final : public Capabilities,
   bool SupportsPrimitiveRestart() const override;
 
   // |Capabilities|
+  bool Supports32BitPrimitiveIndices() const override;
+
+  // |Capabilities|
   bool SupportsExtendedRangeFormats() const override;
 
   // |Capabilities|

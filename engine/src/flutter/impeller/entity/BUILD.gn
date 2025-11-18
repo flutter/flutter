@@ -294,6 +294,7 @@ impeller_component("entity_unittests") {
     "../geometry:geometry_asserts",
     "../playground:playground_test",
     "//flutter/display_list/testing:display_list_testing",
+    "//flutter/impeller/renderer/testing:mocks",
     "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
     "//flutter/txt",
   ]

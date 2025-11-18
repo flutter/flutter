@@ -481,7 +481,7 @@ public class PlatformChannel {
      * application.
      *
      * <p>{@link SystemUiMode#IMMERSIVE} refers to a fullscreen experience that restores system bars
-     * upon swiping from the edge of the viewport. This swipe gesture is not recived by the
+     * upon swiping from the edge of the viewport. This swipe gesture is not received by the
      * application.
      *
      * <p>{@link SystemUiMode#IMMERSIVE_STICKY} refers to a fullscreen experience that restores
@@ -675,7 +675,7 @@ public class PlatformChannel {
     EDGE_TO_EDGE("SystemUiMode.edgeToEdge");
 
     /**
-     * Returns the SystemUiMode for the provied encoded value. @throws NoSuchFieldException if any
+     * Returns the SystemUiMode for the provided encoded value. @throws NoSuchFieldException if any
      * of the given encoded overlay names are invalid.
      */
     @NonNull
@@ -690,7 +690,7 @@ public class PlatformChannel {
 
     @NonNull private String encodedName;
 
-    /** Returens the encoded {@link SystemUiMode} */
+    /** Returns the encoded {@link SystemUiMode} */
     SystemUiMode(@NonNull String encodedName) {
       this.encodedName = encodedName;
     }

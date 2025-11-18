@@ -220,4 +220,70 @@ void main() {
   final _TestRouteTransitionRecord testRouteTransitionRecord =
       _TestRouteTransitionRecord();
   testRouteTransitionRecord.markForComplete();
+
+  // Changes made in https://github.com/flutter/flutter/pull/177966
+  final ExpansibleController controller = ExpansibleController();
+  // All three parameters
+  Expansible(
+    animationStyle: AnimationStyle(duration: const Duration(milliseconds: 300), curve: Curves.easeIn, reverseCurve: Curves.easeOut),
+    controller: controller,
+    headerBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
+    bodyBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
+  );
+  // Only duration
+  Expansible(
+    animationStyle: AnimationStyle(duration: const Duration(milliseconds: 200)),
+    controller: controller,
+    headerBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
+    bodyBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
+  );
+  // Only curve
+  Expansible(
+    animationStyle: AnimationStyle(curve: Curves.bounceIn),
+    controller: controller,
+    headerBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
+    bodyBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
+  );
+  // Only reverseCurve
+  Expansible(
+    animationStyle: AnimationStyle(reverseCurve: Curves.bounceOut),
+    controller: controller,
+    headerBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
+    bodyBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
+  );
+  // duration + curve
+  Expansible(
+    animationStyle: AnimationStyle(duration: const Duration(milliseconds: 400), curve: Curves.linear),
+    controller: controller,
+    headerBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
+    bodyBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
+  );
+  // duration + reverseCurve
+  Expansible(
+    animationStyle: AnimationStyle(duration: const Duration(milliseconds: 500), reverseCurve: Curves.easeInOut),
+    controller: controller,
+    headerBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
+    bodyBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
+  );
+  // curve + reverseCurve
+  Expansible(
+    animationStyle: AnimationStyle(curve: Curves.elasticIn, reverseCurve: Curves.elasticOut),
+    controller: controller,
+    headerBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
+    bodyBuilder: (BuildContext context, Animation<double> animation) =>
+        Container(),
+  );
 }

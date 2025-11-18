@@ -60,7 +60,10 @@ class ImageDescriptor : public RefCountedDartWrappable<ImageDescriptor> {
                       PixelFormat pixel_format);
 
   /// @brief  Associates a flutter::Codec object with the dart.ui Codec handle.
-  void instantiateCodec(Dart_Handle codec, int target_width, int target_height);
+  void instantiateCodec(Dart_Handle codec,
+                        int32_t target_width,
+                        int32_t target_height,
+                        int32_t destination_format);
 
   /// @brief  The width of this image, EXIF oriented if applicable.
   int width() const { return image_info_.width(); }

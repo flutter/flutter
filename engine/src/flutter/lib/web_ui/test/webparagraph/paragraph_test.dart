@@ -981,4 +981,38 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_black_and_white_background.png', region: region);
   });
+
+  test('Pixels', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 500);
+    final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
+    final Paint whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 15,
+      color: const Color(0xFF000000),
+    );
+    final WebTextStyle style30 = WebTextStyle(
+      foreground: blackPaint,
+      background: whitePaint,
+      fontSize: 30,
+      fontFamily: 'Roboto',
+    );
+
+    {
+      final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+
+      builder.pushStyle(style30);
+      builder.addText('SsWwTt 30px');
+      builder.pop();
+      final WebParagraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: 800));
+      paragraph.paint(canvas, const Offset(100, 100));
+    }
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('pixels.png', region: region);
+  });
 }

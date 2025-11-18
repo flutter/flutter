@@ -24,6 +24,17 @@ shelf.Request proxyRequest(shelf.Request originalRequest, Uri finalTargetUrl) {
   );
 }
 
+/// Rewrites the request path based on the specified rule by:
+/// 1. Getting the base target URI from the rule.
+/// 2. Replacing the request path according to the rule's replacement logic.
+/// 3. Resolving the final target URL by combining the target URI, the rewritten
+///    request path and the request query
+Uri getFinalTargetUri(shelf.Request request, ProxyRule rule) {
+  final String rewrittenPath = rule.replace(request.requestedUri.path);
+  final Uri targetUri = rule.getTargetUri();
+  return targetUri.resolveUri(Uri(path: rewrittenPath, query: request.requestedUri.query));
+}
+
 /// Iterates through the provided [effectiveProxy] rules for each incoming [shelf.Request].
 ///
 /// If a rule's pattern matches the request's path, the request is
@@ -40,15 +51,8 @@ Future<shelf.Response> _applyProxyRules(
     if (!rule.matches(requestPath)) {
       continue;
     }
-
-    /// Rewrites the request path based on the matching rule by:
-    /// 1. Getting the base target URI from the rule.
-    /// 2. Replacing the request path according to the rule's replacement logic.
-    /// 3. Resolving the final target URL by combining the target URI and the rewritten
-    ///    request path.
     final Uri targetUri = rule.getTargetUri();
-    final String rewrittenPath = rule.replace(requestPath);
-    final Uri finalTargetUrl = targetUri.resolve(rewrittenPath);
+    final Uri finalTargetUrl = getFinalTargetUri(request, rule);
     try {
       final shelf.Request proxyBackendRequest = proxyRequest(request, finalTargetUrl);
       final shelf.Response proxyResponse = await proxyHandler(targetUri)(proxyBackendRequest);

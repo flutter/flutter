@@ -103,18 +103,21 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutDisplayP3) {
 #if IMPELLER_SUPPORTS_RENDERING
   std::shared_ptr<impeller::Allocator> allocator =
       std::make_shared<impeller::TestImpellerAllocator>();
-  std::optional<DecompressResult> wide_result =
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> wide_result =
       ImageDecoderImpeller::DecompressTexture(
-          descriptor.get(), SkISize::Make(100, 100), {100, 100},
+          descriptor.get(), {.target_width = 100, .target_height = 100},
+          {100, 100},
           /*supports_wide_gamut=*/true, capabilities, allocator);
-  ASSERT_TRUE(wide_result.has_value());
-  ASSERT_EQ(wide_result->image_info.colorType(), kRGBA_F16_SkColorType);
-  ASSERT_TRUE(wide_result->image_info.colorSpace()->isSRGB());
+  ASSERT_TRUE(wide_result.ok());
+  ASSERT_EQ(wide_result->image_info.format,
+            impeller::PixelFormat::kR16G16B16A16Float);
 
-  const SkPixmap& wide_pixmap = wide_result->sk_bitmap->pixmap();
-  const uint16_t* half_ptr = static_cast<const uint16_t*>(wide_pixmap.addr());
+  const uint16_t* half_ptr = reinterpret_cast<const uint16_t*>(
+      wide_result->device_buffer->OnGetContents());
   bool found_deep_red = false;
-  for (int i = 0; i < wide_pixmap.width() * wide_pixmap.height(); ++i) {
+  for (int i = 0; i < wide_result->image_info.size.width *
+                          wide_result->image_info.size.height;
+       ++i) {
     float red = HalfToFloat(*half_ptr++);
     float green = HalfToFloat(*half_ptr++);
     float blue = HalfToFloat(*half_ptr++);
@@ -127,13 +130,15 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutDisplayP3) {
   }
 
   ASSERT_TRUE(found_deep_red);
-  std::optional<DecompressResult> narrow_result =
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> narrow_result =
       ImageDecoderImpeller::DecompressTexture(
-          descriptor.get(), SkISize::Make(100, 100), {100, 100},
+          descriptor.get(), {.target_width = 100, .target_height = 100},
+          {100, 100},
           /*supports_wide_gamut=*/false, capabilities, allocator);
 
-  ASSERT_TRUE(narrow_result.has_value());
-  ASSERT_EQ(narrow_result->image_info.colorType(), kRGBA_8888_SkColorType);
+  ASSERT_TRUE(narrow_result.ok());
+  ASSERT_EQ(narrow_result->image_info.format,
+            impeller::PixelFormat::kR8G8B8A8UNormInt);
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
@@ -164,17 +169,21 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutIndexedPng) {
 #if IMPELLER_SUPPORTS_RENDERING
   std::shared_ptr<impeller::Allocator> allocator =
       std::make_shared<impeller::TestImpellerAllocator>();
-  std::optional<DecompressResult> wide_result =
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> wide_result =
       ImageDecoderImpeller::DecompressTexture(
-          descriptor.get(), SkISize::Make(100, 100), {100, 100},
+          descriptor.get(), {.target_width = 100, .target_height = 100},
+          {100, 100},
           /*supports_wide_gamut=*/true, capabilities, allocator);
-  ASSERT_EQ(wide_result->image_info.colorType(), kBGR_101010x_XR_SkColorType);
-  ASSERT_TRUE(wide_result->image_info.colorSpace()->isSRGB());
+  ASSERT_TRUE(wide_result.ok());
+  ASSERT_EQ(wide_result->image_info.format,
+            impeller::PixelFormat::kB10G10R10XR);
 
-  const SkPixmap& wide_pixmap = wide_result->sk_bitmap->pixmap();
-  const uint32_t* pixel_ptr = static_cast<const uint32_t*>(wide_pixmap.addr());
+  const uint32_t* pixel_ptr = reinterpret_cast<const uint32_t*>(
+      wide_result->device_buffer->OnGetContents());
   bool found_deep_red = false;
-  for (int i = 0; i < wide_pixmap.width() * wide_pixmap.height(); ++i) {
+  for (int i = 0; i < wide_result->image_info.size.width *
+                          wide_result->image_info.size.height;
+       ++i) {
     uint32_t pixel = *pixel_ptr++;
     float blue = DecodeBGR10((pixel >> 0) & 0x3ff);
     float green = DecodeBGR10((pixel >> 10) & 0x3ff);
@@ -187,13 +196,72 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutIndexedPng) {
   }
 
   ASSERT_TRUE(found_deep_red);
-  std::optional<DecompressResult> narrow_result =
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> narrow_result =
       ImageDecoderImpeller::DecompressTexture(
-          descriptor.get(), SkISize::Make(100, 100), {100, 100},
+          descriptor.get(), {.target_width = 100, .target_height = 100},
+          {100, 100},
           /*supports_wide_gamut=*/false, capabilities, allocator);
 
-  ASSERT_TRUE(narrow_result.has_value());
-  ASSERT_EQ(narrow_result->image_info.colorType(), kRGBA_8888_SkColorType);
+  ASSERT_TRUE(narrow_result.ok());
+  ASSERT_EQ(narrow_result->image_info.format,
+            impeller::PixelFormat::kR8G8B8A8UNormInt);
+#endif  // IMPELLER_SUPPORTS_RENDERING
+}
+
+TEST(ImageDecoderNoGLTest, ImpellerRGBA32FDecode) {
+#if defined(OS_FUCHSIA)
+  GTEST_SKIP() << "Fuchsia can't load the test fixtures.";
+#endif
+
+#if IMPELLER_SUPPORTS_RENDERING
+  // 1. Create a 1x1 pixel with float RGBA values.
+  float pixel_data[] = {1.0f, 0.5f, 0.25f, 1.0f};  // R, G, B, A
+  sk_sp<SkData> sk_data = SkData::MakeWithCopy(pixel_data, sizeof(pixel_data));
+  auto immutable_buffer =
+      fml::MakeRefCounted<ImmutableBuffer>(std::move(sk_data));
+
+  // 2. Create an ImageDescriptor using the private constructor.
+  SkImageInfo image_info =
+      SkImageInfo::Make(1, 1, kRGBA_F32_SkColorType, kPremul_SkAlphaType,
+                        SkColorSpace::MakeSRGB());
+  auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
+      immutable_buffer->data(), image_info, sizeof(pixel_data));
+
+  // Set up Impeller capabilities and allocator.
+  std::shared_ptr<impeller::Capabilities> capabilities =
+      impeller::CapabilitiesBuilder()
+          .SetSupportsTextureToTextureBlits(true)
+          .Build();
+  std::shared_ptr<impeller::Allocator> allocator =
+      std::make_shared<impeller::TestImpellerAllocator>();
+
+  // 3. Call ImageDecoderImpeller::DecompressTexture with this ImageDescriptor.
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> result =
+      ImageDecoderImpeller::DecompressTexture(
+          descriptor.get(),
+          /*options=*/
+          {.target_width = 1,
+           .target_height = 1,
+           .target_format =
+               ImageDecoder::TargetPixelFormat::kR32G32B32A32Float},
+          /*max_texture_size=*/{1, 1},
+          /*supports_wide_gamut=*/true, capabilities, allocator);
+
+  // 4. Assert that wide_result->image_info.format is
+  // impeller::PixelFormat::kR32G32B32A32Float.
+  ASSERT_TRUE(result.ok());
+  ASSERT_EQ(result->image_info.format,
+            impeller::PixelFormat::kR32G32B32A32Float);
+
+  // Optionally, verify the pixel data if needed.
+  const float* decompressed_pixel_ptr =
+      reinterpret_cast<const float*>(result->device_buffer->OnGetContents());
+  ASSERT_NE(decompressed_pixel_ptr, nullptr);
+  EXPECT_EQ(decompressed_pixel_ptr[0], 1.0f);   // R
+  EXPECT_EQ(decompressed_pixel_ptr[1], 0.5f);   // G
+  EXPECT_EQ(decompressed_pixel_ptr[2], 0.25f);  // B
+  EXPECT_EQ(decompressed_pixel_ptr[3], 1.0f);   // A
+
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
@@ -221,14 +289,16 @@ TEST(ImageDecoderNoGLTest, ImpellerUnmultipliedAlphaPng) {
 #if IMPELLER_SUPPORTS_RENDERING
   std::shared_ptr<impeller::Allocator> allocator =
       std::make_shared<impeller::TestImpellerAllocator>();
-  std::optional<DecompressResult> result =
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> result =
       ImageDecoderImpeller::DecompressTexture(
-          descriptor.get(), SkISize::Make(11, 11), {11, 11},
+          descriptor.get(), {.target_width = 11, .target_height = 11}, {11, 11},
           /*supports_wide_gamut=*/true, capabilities, allocator);
-  ASSERT_EQ(result->image_info.colorType(), kRGBA_8888_SkColorType);
+  ASSERT_TRUE(result.ok());
+  ASSERT_EQ(result->image_info.format,
+            impeller::PixelFormat::kR8G8B8A8UNormInt);
 
-  const SkPixmap& pixmap = result->sk_bitmap->pixmap();
-  const uint32_t* pixel_ptr = static_cast<const uint32_t*>(pixmap.addr());
+  const uint32_t* pixel_ptr =
+      reinterpret_cast<const uint32_t*>(result->device_buffer->OnGetContents());
   // Test the upper left pixel is premultiplied and not solid red.
   ASSERT_EQ(*pixel_ptr, (uint32_t)0x1000001);
   // Test a pixel in the green box is still green.

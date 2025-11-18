@@ -254,9 +254,7 @@ abstract class UnpackIOS extends UnpackDarwin {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/Flutter.framework/Flutter'),
-  ];
+  List<Source> get outputs => const <Source>[kFlutterIOSFrameworkBinarySource];
 
   @override
   List<Target> get dependencies => <Target>[];

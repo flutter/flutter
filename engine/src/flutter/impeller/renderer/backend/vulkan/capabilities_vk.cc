@@ -511,6 +511,10 @@ bool CapabilitiesVK::SupportsPrimitiveRestart() const {
   return has_primitive_restart_;
 }
 
+bool CapabilitiesVK::Supports32BitPrimitiveIndices() const {
+  return true;
+}
+
 void CapabilitiesVK::SetOffscreenFormat(PixelFormat pixel_format) const {
   default_color_format_ = pixel_format;
 }

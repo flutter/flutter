@@ -70,6 +70,37 @@ void main() {
         expect(logger.traceText, isEmpty);
       });
 
+      testWithoutContext('No misleading log when CODE_SIGN_STYLE is Manual', () async {
+        final logger = BufferLogger.test();
+        final Map<String, String>? signingConfigs =
+            await getCodeSigningIdentityDevelopmentTeamBuildSetting(
+              buildSettings: <String, String>{
+                'DEVELOPMENT_TEAM': 'abc',
+                'CODE_SIGN_STYLE': 'Manual',
+              },
+              platform: FakePlatform(operatingSystem: 'macos'),
+              processManager: FakeProcessManager.empty(),
+              logger: logger,
+              config: Config.test(),
+              terminal: FakeTerminal(),
+              fileSystem: MemoryFileSystem.test(),
+              fileSystemUtils: FakeFileSystemUtils(),
+              plistParser: FakePlistParser(),
+            );
+        expect(signingConfigs, isNull);
+        // Should not log "Automatically signing..." when CODE_SIGN_STYLE is Manual.
+        expect(
+          logger.statusText,
+          isNot(
+            contains(
+              'Automatically signing iOS for device deployment using specified development team in Xcode project',
+            ),
+          ),
+        );
+        expect(logger.errorText, isEmpty);
+        expect(logger.traceText, isEmpty);
+      });
+
       testWithoutContext(
         'No discovery if provisioning profile specified in Xcode project',
         () async {

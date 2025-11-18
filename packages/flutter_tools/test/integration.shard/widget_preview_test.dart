@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:dtd/dtd.dart';
 import 'package:file/file.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
@@ -123,6 +124,36 @@ void main() {
 
     testWithoutContext('--web-server starts a web server instance', () async {
       await runWidgetPreview(expectedMessages: firstLaunchMessagesWebServer, useWebServer: true);
+    });
+
+    testWithoutContext('runs flutter pub get in widget_preview_scaffold if '
+        "widget_preview_scaffold/.dart_tool doesn't exist", () async {
+      // Regression test for https://github.com/flutter/flutter/issues/178660
+      // Generate the widget preview scaffold, but don't bother launching it.
+      processManager.runSync(<String>[
+        flutterBin,
+        'widget-preview',
+        'start',
+        '--no-${WidgetPreviewStartCommand.kLaunchPreviewer}',
+      ], workingDirectory: tempDir.path);
+
+      // Ensure widget_preview_scaffold/.dart_tool/package_config.json exists.
+      final Directory widgetPreviewScaffoldDartTool = tempDir
+          .childDirectory('.dart_tool')
+          .childDirectory('widget_preview_scaffold')
+          .childDirectory('.dart_tool');
+      expect(widgetPreviewScaffoldDartTool, exists);
+      expect(widgetPreviewScaffoldDartTool.childFile('package_config.json'), exists);
+
+      // Delete widget_preview_scaffold/.dart_tool/. This simulates an interrupted
+      // flutter widget-preview start where 'flutter pub get' wasn't run after
+      // the widget_preview_scaffold project was created.
+      widgetPreviewScaffoldDartTool.deleteSync(recursive: true);
+
+      // Ensure we don't crash due to the package_config.json lookup pointing to
+      // the parent project's package_config.json due to
+      // widget_preview_scaffold/.dart_tool/package_config.json not existing.
+      await runWidgetPreview(expectedMessages: subsequentLaunchMessagesWeb);
     });
 
     testWithoutContext('does not recreate project on subsequent runs', () async {
