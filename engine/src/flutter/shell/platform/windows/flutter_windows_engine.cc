@@ -524,11 +524,15 @@ bool FlutterWindowsEngine::Stop() {
 }
 
 std::unique_ptr<FlutterWindowsView> FlutterWindowsEngine::CreateView(
-    std::unique_ptr<WindowBindingHandler> window) {
+    std::unique_ptr<WindowBindingHandler> window,
+    FlutterWindowsViewSizingDelegate* sizing_delegate) {
   auto view_id = next_view_id_;
   auto view = std::make_unique<FlutterWindowsView>(
       view_id, this, std::move(window), windows_proc_table_);
 
+  if (sizing_delegate) {
+    view->SetSizingDelegate(sizing_delegate);
+  }
   view->CreateRenderSurface();
   view->UpdateSemanticsEnabled(semantics_enabled_);
 

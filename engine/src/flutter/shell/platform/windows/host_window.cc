@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/windows/host_window.h"
 #include "flutter/shell/platform/windows/host_window_dialog.h"
 #include "flutter/shell/platform/windows/host_window_regular.h"
+#include "flutter/shell/platform/windows/host_window_tooltip.h"
 
 #include <dwmapi.h>
 
@@ -225,6 +226,17 @@ std::unique_ptr<HostWindow> HostWindow::CreateDialogWindow(
                            parent ? parent : std::optional<HWND>()));
 }
 
+std::unique_ptr<HostWindow> HostWindow::CreateTooltipWindow(
+    WindowManager* window_manager,
+    FlutterWindowsEngine* engine,
+    const WindowConstraints& preferred_constraints,
+    GetWindowPositionCallback get_position_callback,
+    HWND parent) {
+  return std::unique_ptr<HostWindowTooltip>(new HostWindowTooltip(
+      window_manager, engine, FromWindowConstraints(preferred_constraints),
+      get_position_callback, parent));
+}
+
 HostWindow::HostWindow(WindowManager* window_manager,
                        FlutterWindowsEngine* engine,
                        WindowArchetype archetype,
@@ -233,7 +245,8 @@ HostWindow::HostWindow(WindowManager* window_manager,
                        const BoxConstraints& box_constraints,
                        Rect const initial_window_rect,
                        LPCWSTR title,
-                       std::optional<HWND> const& owner_window)
+                       std::optional<HWND> const& owner_window,
+                       FlutterWindowsViewSizingDelegate* sizing_delegate)
     : window_manager_(window_manager),
       engine_(engine),
       archetype_(archetype),
@@ -244,7 +257,7 @@ HostWindow::HostWindow(WindowManager* window_manager,
       engine->display_manager(), engine->windows_proc_table());
 
   std::unique_ptr<FlutterWindowsView> view =
-      engine->CreateView(std::move(view_window));
+      engine->CreateView(std::move(view_window), sizing_delegate);
   FML_CHECK(view != nullptr);
 
   view_controller_ =

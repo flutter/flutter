@@ -17,6 +17,7 @@
 #include "shell/platform/windows/client_wrapper/include/flutter/flutter_view.h"
 #include "shell/platform/windows/flutter_windows_view.h"
 #include "shell/platform/windows/host_window.h"
+#include "shell/platform/windows/host_window_tooltip.h"
 
 namespace flutter {
 
@@ -53,6 +54,21 @@ FlutterViewId WindowManager::CreateDialogWindow(
   FlutterViewId const view_id = window->view_controller_->view()->view_id();
   active_windows_[window->GetWindowHandle()] = std::move(window);
   return view_id;
+}
+
+FlutterViewId WindowManager::CreateTooltipWindow(
+    const TooltipWindowCreationRequest* request) {
+  auto window = HostWindow::CreateTooltipWindow(
+      this, engine_, request->preferred_constraints,
+      request->get_position_callback, request->parent);
+  if (!window || !window->GetWindowHandle()) {
+    FML_LOG(ERROR) << "Failed to create host window";
+    return -1;
+  }
+  FlutterViewId const view_id = window->view_controller_->view()->view_id();
+  active_windows_[window->GetWindowHandle()] = std::move(window);
+  return view_id;
+  return -1;
 }
 
 void WindowManager::OnEngineShutdown() {
@@ -134,6 +150,15 @@ FlutterViewId InternalFlutterWindows_WindowManager_CreateDialogWindow(
   return engine->window_manager()->CreateDialogWindow(request);
 }
 
+FLUTTER_EXPORT
+FlutterViewId InternalFlutterWindows_WindowManager_CreateTooltipWindow(
+    int64_t engine_id,
+    const flutter::TooltipWindowCreationRequest* request) {
+  flutter::FlutterWindowsEngine* engine =
+      flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
+  return engine->window_manager()->CreateTooltipWindow(request);
+}
+
 HWND InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
     int64_t engine_id,
     FlutterViewId view_id) {
@@ -190,4 +215,12 @@ bool InternalFlutterWindows_WindowManager_GetFullscreen(HWND hwnd) {
   }
 
   return false;
+}
+
+FLUTTER_EXPORT
+void InternalFlutterWindows_WindowManager_UpdateTooltipPosition(HWND hwnd) {
+  flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
+  flutter::HostWindowTooltip* tooltip_window =
+      reinterpret_cast<flutter::HostWindowTooltip*>(window);
+  tooltip_window->UpdatePosition();
 }

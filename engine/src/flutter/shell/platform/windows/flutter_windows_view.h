@@ -29,6 +29,14 @@ namespace flutter {
 // A unique identifier for a view.
 using FlutterViewId = int64_t;
 
+// Optional delegate for views that are sized to contents.
+class FlutterWindowsViewSizingDelegate {
+ public:
+  virtual Size GetMinimumViewSize() const = 0;
+  virtual Size GetMaximumViewSize() const = 0;
+  virtual void DidUpdateViewSize(int32_t width, int32_t height) = 0;
+};
+
 // An OS-windowing neutral abstration for a Flutter view that works
 // with win32 HWNDs.
 class FlutterWindowsView : public WindowBindingHandlerDelegate {
@@ -247,6 +255,10 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // Returns true if the view was focused.
   virtual bool Focus();
 
+  void SetSizingDelegate(FlutterWindowsViewSizingDelegate* delegate) {
+    sizing_delegate_ = delegate;
+  }
+
  protected:
   virtual void NotifyWinEventWrapper(ui::AXPlatformNodeWin* node,
                                      ax::mojom::Event event);
@@ -413,6 +425,8 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // to prevent screen tearing.
   bool NeedsVsync() const;
 
+  bool IsSizedToContent() const;
+
   // The view's unique identifier.
   FlutterViewId view_id_;
 
@@ -454,6 +468,13 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
 
   // The accessibility bridge associated with this view.
   std::shared_ptr<AccessibilityBridgeWindows> accessibility_bridge_;
+
+  // Optional sizing delegate for views that are sized to content.
+  FlutterWindowsViewSizingDelegate* sizing_delegate_ = nullptr;
+
+  // Used to track whether the view is still in tasks scheduled from raster
+  // thread.
+  std::shared_ptr<int> view_alive_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterWindowsView);
 };
