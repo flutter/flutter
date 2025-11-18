@@ -47,31 +47,27 @@ class _SnackBarExampleState extends State<SnackBarExample> {
       ),
       body: ListView(
         children: <Widget>[
-          ExpansionTile(
-            title: const Text('Behavior'),
-            initiallyExpanded: true,
-            children: <Widget>[
-              RadioListTile<SnackBarBehavior>(
-                title: const Text('Fixed'),
-                value: SnackBarBehavior.fixed,
-                groupValue: _snackBarBehavior,
-                onChanged: (SnackBarBehavior? value) {
-                  setState(() {
-                    _snackBarBehavior = value;
-                  });
-                },
-              ),
-              RadioListTile<SnackBarBehavior>(
-                title: const Text('Floating'),
-                value: SnackBarBehavior.floating,
-                groupValue: _snackBarBehavior,
-                onChanged: (SnackBarBehavior? value) {
-                  setState(() {
-                    _snackBarBehavior = value;
-                  });
-                },
-              ),
-            ],
+          RadioGroup<SnackBarBehavior>(
+            groupValue: _snackBarBehavior,
+            onChanged: (SnackBarBehavior? value) {
+              setState(() {
+                _snackBarBehavior = value;
+              });
+            },
+            child: const ExpansionTile(
+              title: Text('Behavior'),
+              initiallyExpanded: true,
+              children: <Widget>[
+                RadioListTile<SnackBarBehavior>(
+                  title: Text('Fixed'),
+                  value: SnackBarBehavior.fixed,
+                ),
+                RadioListTile<SnackBarBehavior>(
+                  title: Text('Floating'),
+                  value: SnackBarBehavior.floating,
+                ),
+              ],
+            ),
           ),
           ExpansionTile(
             title: const Text('Content'),
