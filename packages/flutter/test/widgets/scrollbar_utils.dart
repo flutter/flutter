@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+/// A [MaterialScrollBehavior] that does not build scrollbars.
 class NoScrollbarBehavior extends MaterialScrollBehavior {
   const NoScrollbarBehavior();
 

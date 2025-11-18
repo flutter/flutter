@@ -9,7 +9,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../material/scrollbar_utils.dart';
+import 'scrollbar_utils.dart';
 
 List<Widget> children(int n) {
   return List<Widget>.generate(n, (int i) {

@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'scrollbar_utils.dart';
+import '../widgets/scrollbar_utils.dart';
 
 const Color _kAndroidThumbIdleColor = Color(0xffbcbcbc);
 

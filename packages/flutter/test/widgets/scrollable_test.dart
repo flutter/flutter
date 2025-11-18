@@ -11,7 +11,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../material/scrollbar_utils.dart';
+import 'scrollbar_utils.dart';
 import 'semantics_tester.dart';
 
 Future<void> pumpTest(

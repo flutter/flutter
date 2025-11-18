@@ -7,7 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../material/scrollbar_utils.dart';
+import 'scrollbar_utils.dart';
 
 class ExpandingBox extends StatefulWidget {
   const ExpandingBox({super.key, required this.collapsedSize, required this.expandedSize});
