@@ -105,6 +105,7 @@ void main() {
 
     expect(Localizations.maybeLocaleOf(contextKey.currentContext!), isNull);
   });
+  
   testWidgets('LocalizationsResolver.update notifies listeners when supportedLocales changes', (
     WidgetTester tester,
   ) async {
