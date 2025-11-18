@@ -62,10 +62,10 @@ void main(List<String> args) {
     flutterRoot: flutterRoot,
   );
 
-  if (!checker.checkCodeSamples()) {
-    reportErrorsAndExit('Some errors were found in the API docs code samples.');
+  if (!checker.check()) {
+    reportErrorsAndExit('Some errors were found in the framework test imports.');
   }
-  reportSuccessAndExit('All examples are linked and have tests.');
+  reportSuccessAndExit('No errors were detected with test cross imports.');
 }
 
 class TestsCrossImportChecker {
@@ -79,137 +79,12 @@ class TestsCrossImportChecker {
   final Directory flutterRoot;
   final FileSystem filesystem;
 
-  bool checkCodeSamples() {
-    filesystem.currentDirectory = flutterRoot;
+  static final Set<String> _knownCrossImports = _knownWidgetsCrossImports.union(
+    _knownCupertinoCrossImports,
+  );
 
-    final Map<Library, Set<File>> filesByLibrary = <Library, Set<File>>{};
-    for (final Library library in Library.values) {
-      filesByLibrary[library] = getTestFiles(testsDirectory, library);
-    }
-
-    final Set<File> widgetsTestsImportingMaterial = getFilesWithImports(
-      filesByLibrary[Library.widgets]!,
-      Library.material,
-    );
-    final Set<File> widgetsTestsImportingCupertino = getFilesWithImports(
-      filesByLibrary[Library.widgets]!,
-      Library.cupertino,
-    );
-    final Set<File> cupertinoTestsImportingMaterial = getFilesWithImports(
-      filesByLibrary[Library.cupertino]!,
-      Library.material,
-    );
-
-    // TODO(justinmc): If all good, return true.
-
-    if (widgetsTestsImportingMaterial.isNotEmpty) {
-      foundError(
-        getImportError(
-          widgetsTestsImportingMaterial,
-          Library.widgets.name,
-          Library.material.name,
-        ).split('\n'),
-      );
-    }
-    if (widgetsTestsImportingCupertino.isNotEmpty) {
-      foundError(
-        getImportError(
-          widgetsTestsImportingCupertino,
-          Library.widgets.name,
-          Library.cupertino.name,
-        ).split('\n'),
-      );
-    }
-    if (cupertinoTestsImportingMaterial.isNotEmpty) {
-      foundError(
-        getImportError(
-          cupertinoTestsImportingMaterial,
-          Library.cupertino.name,
-          Library.material.name,
-        ).split('\n'),
-      );
-    }
-
-    final Set<String> fixedWidgetsCrossImports = differencePaths(
-      _knownWidgetsCrossImports,
-      widgetsTestsImportingMaterial.union(widgetsTestsImportingCupertino),
-    );
-    if (fixedWidgetsCrossImports.isNotEmpty) {
-      foundError(getFixedImportError(fixedWidgetsCrossImports, Library.widgets).split('\n'));
-    }
-
-    final Set<String> fixedCupertinoCrossImports = differencePaths(
-      _knownCupertinoCrossImports,
-      cupertinoTestsImportingMaterial,
-    );
-    if (fixedCupertinoCrossImports.isNotEmpty) {
-      foundError(getFixedImportError(fixedCupertinoCrossImports, Library.cupertino).split('\n'));
-    }
-
-    return false;
-
-    /*
-    // Also add in any that might be found in the dart:ui directory.
-    exampleLinks.addAll(getExampleLinks(dartUIPath));
-
-    // Get a list of the filenames that were not found in the source files.
-    final List<String> missingFilenames = checkForMissingLinks(testFilenames, exampleLinks);
-
-    // Get a list of any tests that are missing, as well as any that used to be
-    // missing, but have been implemented.
-    final (List<File> missingTests, List<File> noLongerMissing) = checkForMissingTests(
-      testFilenames,
-    );
-
-    // Remove any that we know are exceptions (examples that aren't expected to be
-    // linked into any source files). These are typically template files used to
-    // generate new examples.
-    missingFilenames.removeWhere((String file) => _knownUnlinkedExamples.contains(file));
-
-    if (missingFilenames.isEmpty && missingTests.isEmpty && noLongerMissing.isEmpty) {
-      return true;
-    }
-
-    if (noLongerMissing.isNotEmpty) {
-      final StringBuffer buffer = StringBuffer(
-        'The following tests have been implemented! Huzzah!:\n',
-      );
-      for (final File name in noLongerMissing) {
-        buffer.writeln('  ${getRelativePath(name)}');
-      }
-      buffer.writeln('However, they now need to be removed from the _knownMissingTests');
-      buffer.write('list in the script $_scriptLocation.');
-      foundError(buffer.toString().split('\n'));
-    }
-
-    if (missingTests.isNotEmpty) {
-      final StringBuffer buffer = StringBuffer('The following example test files are missing:\n');
-      for (final File name in missingTests) {
-        buffer.writeln('  ${getRelativePath(name)}');
-      }
-      foundError(buffer.toString().trimRight().split('\n'));
-    }
-
-    if (missingFilenames.isNotEmpty) {
-      final StringBuffer buffer = StringBuffer(
-        'The following examples are not linked from any source file API doc comments:\n',
-      );
-      for (final String name in missingFilenames) {
-        buffer.writeln('  $name');
-      }
-      buffer.write('Either link them to a source file API doc comment, or remove them.');
-      foundError(buffer.toString().split('\n'));
-    }
-    return false;
-    */
-  }
-
-  String getRelativePath(File file, [Directory? root]) {
-    root ??= flutterRoot;
-    return path.relative(file.absolute.path, from: root.absolute.path);
-  }
-
-  static Set<String> differencePaths(Set<String> knownPaths, Set<File> files) {
+  /// Returns the Set of paths in `knownPaths` that are not in `files`.
+  static Set<String> _differencePaths(Set<String> knownPaths, Set<File> files) {
     final Set<String> testPaths = files.map((File file) {
       final int index = file.absolute.path.indexOf('packages/flutter/test');
       final int indexNormalized = index == -1 ? 0 : index;
@@ -220,7 +95,7 @@ class TestsCrossImportChecker {
 
   /// Returns a list of files in the given directory optionally matching the
   /// given filenamePattern.
-  static List<File> getFiles(Directory directory, [Pattern? filenamePattern]) {
+  static List<File> _getFiles(Directory directory, [Pattern? filenamePattern]) {
     final List<File> files = directory
         .listSync(recursive: true)
         .map((FileSystemEntity entity) {
@@ -237,8 +112,6 @@ class TestsCrossImportChecker {
           if (filenamePattern == null) {
             return true;
           }
-          return file.absolute.path.contains(filenamePattern);
-          /*
           if (!file.absolute.path.contains(filenamePattern)) {
             return false;
           }
@@ -249,8 +122,7 @@ class TestsCrossImportChecker {
           }
 
           final String comparablePath = file.absolute.path.substring(index);
-          return !_knownTestsWithCrossImports.contains(comparablePath);
-          */
+          return !_knownCrossImports.contains(comparablePath);
         })
         .map<File>((File? s) => s!)
         .toList();
@@ -258,36 +130,25 @@ class TestsCrossImportChecker {
   }
 
   // Get a list of all the filenames in the source directory that end in "_test.dart".
-  static Set<File> getTestFiles(Directory directory, Library library) {
-    return getFiles(directory.childDirectory(library.directory), RegExp(r'_test\.dart$')).toSet();
+  static Set<File> _getTestFiles(Directory directory, _Library library) {
+    return _getFiles(directory.childDirectory(library.directory), RegExp(r'_test\.dart$')).toSet();
   }
 
   /// Returns true only if the file imports the given Library.
-  static bool containsImport(File testFile, Library library) {
+  static bool _containsImport(File testFile, _Library library) {
     final String contents = testFile.readAsStringSync();
     return contents.contains(library.regExp);
   }
 
-  static Set<File> getFilesWithImports(Set<File> testFiles, Library library) {
+  /// Returns a Set of all Files that import the given Library.
+  static Set<File> _getFilesWithImports(Set<File> testFiles, _Library library) {
     final Set<File> filesWithCrossImports = <File>{};
     for (final File testFile in testFiles) {
-      if (containsImport(testFile, library)) {
+      if (_containsImport(testFile, library)) {
         filesWithCrossImports.add(testFile);
       }
     }
     return filesWithCrossImports;
-  }
-
-  String getImportError(Set<File> files, String testLibraryName, String importedLibraryName) {
-    final StringBuffer buffer = StringBuffer(
-      files.length < 2
-          ? 'The following test in $testLibraryName has a disallowed import of $importedLibraryName. Refactor it or move it to $importedLibraryName.\n'
-          : 'The following ${files.length} tests in $testLibraryName have a disallowed import of $importedLibraryName. Refactor them or move them to $importedLibraryName.\n',
-    );
-    for (final File file in files) {
-      buffer.writeln('  ${getRelativePath(file)}');
-    }
-    return buffer.toString().trimRight();
   }
 
   /// Returns the error message for the given known paths that no longer have a
@@ -295,7 +156,7 @@ class TestsCrossImportChecker {
   ///
   /// `library` must not be `Library.Material`, because Material is allowed to
   /// cross-import.
-  static String getFixedImportError(Set<String> fixedPaths, Library library) {
+  static String _getFixedImportError(Set<String> fixedPaths, _Library library) {
     assert(fixedPaths.isNotEmpty);
     final StringBuffer buffer = StringBuffer(
       'Huzzah! The following tests in ${library.name} no longer contain cross imports!\n',
@@ -304,9 +165,9 @@ class TestsCrossImportChecker {
       buffer.writeln('  $path');
     }
     final String knownListName = switch (library) {
-      Library.widgets => '_knownWidgetsCrossImports',
-      Library.cupertino => '_knownCupertinoCrossImports',
-      Library.material => throw UnimplementedError(
+      _Library.widgets => '_knownWidgetsCrossImports',
+      _Library.cupertino => '_knownCupertinoCrossImports',
+      _Library.material => throw UnimplementedError(
         'Material is responsible for testing its interactions with Cupertino, so it is allowed to cross-import.',
       ),
     };
@@ -315,51 +176,100 @@ class TestsCrossImportChecker {
     return buffer.toString().trimRight();
   }
 
-  List<String> checkForMissingLinks(List<File> exampleFilenames, Set<String> searchStrings) {
-    final List<String> missingFilenames = <String>[];
-    for (final File example in exampleFilenames) {
-      final String relativePath = getRelativePath(example);
-      if (!searchStrings.contains(relativePath)) {
-        missingFilenames.add(relativePath);
-      }
-    }
-    return missingFilenames;
-  }
+  /// Returns true if there are no errors, false otherwise.
+  bool check() {
+    filesystem.currentDirectory = flutterRoot;
 
-  String getTestNameForExample(File example, Directory examples) {
-    final String testPath = path.dirname(
-      path.join(
-        examples.absolute.path,
-        'test',
-        getRelativePath(example, examples.childDirectory('lib')),
-      ),
+    final Map<_Library, Set<File>> filesByLibrary = <_Library, Set<File>>{};
+    for (final _Library library in _Library.values) {
+      filesByLibrary[library] = _getTestFiles(testsDirectory, library);
+    }
+
+    final Set<File> widgetsTestsImportingMaterial = _getFilesWithImports(
+      filesByLibrary[_Library.widgets]!,
+      _Library.material,
     );
-    return '${path.join(testPath, path.basenameWithoutExtension(example.path))}_test.dart';
+    final Set<File> widgetsTestsImportingCupertino = _getFilesWithImports(
+      filesByLibrary[_Library.widgets]!,
+      _Library.cupertino,
+    );
+    final Set<File> cupertinoTestsImportingMaterial = _getFilesWithImports(
+      filesByLibrary[_Library.cupertino]!,
+      _Library.material,
+    );
+
+    bool error = false;
+    if (widgetsTestsImportingMaterial.isNotEmpty) {
+      error = true;
+      foundError(
+        _getImportError(
+          widgetsTestsImportingMaterial,
+          _Library.widgets.name,
+          _Library.material.name,
+        ).split('\n'),
+      );
+    }
+    if (widgetsTestsImportingCupertino.isNotEmpty) {
+      error = true;
+      foundError(
+        _getImportError(
+          widgetsTestsImportingCupertino,
+          _Library.widgets.name,
+          _Library.cupertino.name,
+        ).split('\n'),
+      );
+    }
+    if (cupertinoTestsImportingMaterial.isNotEmpty) {
+      error = true;
+      foundError(
+        _getImportError(
+          cupertinoTestsImportingMaterial,
+          _Library.cupertino.name,
+          _Library.material.name,
+        ).split('\n'),
+      );
+    }
+
+    final Set<String> fixedWidgetsCrossImports = _differencePaths(
+      _knownWidgetsCrossImports,
+      widgetsTestsImportingMaterial.union(widgetsTestsImportingCupertino),
+    );
+    if (fixedWidgetsCrossImports.isNotEmpty) {
+      error = true;
+      foundError(_getFixedImportError(fixedWidgetsCrossImports, _Library.widgets).split('\n'));
+    }
+
+    final Set<String> fixedCupertinoCrossImports = _differencePaths(
+      _knownCupertinoCrossImports,
+      cupertinoTestsImportingMaterial,
+    );
+    if (fixedCupertinoCrossImports.isNotEmpty) {
+      error = true;
+      foundError(_getFixedImportError(fixedCupertinoCrossImports, _Library.cupertino).split('\n'));
+    }
+
+    return error;
   }
 
-  /*
-  (List<File>, List<File>) checkForMissingTests(List<File> exampleFilenames) {
-    final List<File> missingTests = <File>[];
-    final List<File> noLongerMissingTests = <File>[];
-    for (final File example in exampleFilenames) {
-      final File testFile = filesystem.file(getTestNameForExample(example, tests));
-      final String name = path.relative(testFile.absolute.path, from: flutterRoot.absolute.path);
-      if (!testFile.existsSync()) {
-        missingTests.add(testFile);
-      } else if (_knownMissingTests.contains(name.replaceAll(r'\', '/'))) {
-        noLongerMissingTests.add(testFile);
-      }
-    }
-    // Skip any that we know are missing.
-    missingTests.removeWhere((File test) {
-      final String name = path
-          .relative(test.absolute.path, from: flutterRoot.absolute.path)
-          .replaceAll(r'\', '/');
-      return _knownMissingTests.contains(name);
-    });
-    return (missingTests, noLongerMissingTests);
+  /// Returns the File's relative path.
+  String _getRelativePath(File file, [Directory? root]) {
+    root ??= flutterRoot;
+    return path.relative(file.absolute.path, from: root.absolute.path);
   }
-  */
+
+  /// Returns the import error for the `files` in testLibraryName which import
+  /// importedLibraryName.
+  String _getImportError(Set<File> files, String testLibraryName, String importedLibraryName) {
+    final StringBuffer buffer = StringBuffer(
+      files.length < 2
+          ? 'The following test in $testLibraryName has a disallowed import of $importedLibraryName. Refactor it or move it to $importedLibraryName.\n'
+          : 'The following ${files.length} tests in $testLibraryName have a disallowed import of $importedLibraryName. Refactor them or move them to $importedLibraryName.\n',
+    );
+    for (final File file in files) {
+      buffer.writeln('  ${_getRelativePath(file)}');
+    }
+    return buffer.toString().trimRight();
+  }
 }
 
 // These tests are known to have cross imports. These cross imports should all
@@ -599,12 +509,13 @@ final Set<String> _knownCupertinoCrossImports = <String>{
   'packages/flutter/test/cupertino/slider_test.dart',
 };
 
-enum Library {
+/// The libraries that we are concerned with cross importing.
+enum _Library {
   widgets(directory: 'widgets', name: 'Widgets'),
   material(directory: 'material', name: 'Material'),
   cupertino(directory: 'cupertino', name: 'Cupertino');
 
-  const Library({required this.directory, required this.name});
+  const _Library({required this.directory, required this.name});
 
   final String directory;
   final String name;
@@ -616,9 +527,9 @@ enum Library {
   /// The RegExp that finds an import of this library.
   RegExp get regExp {
     return switch (this) {
-      Library.widgets => widgetsImportRegExp,
-      Library.material => materialImportRegExp,
-      Library.cupertino => cupertinoImportRegExp,
+      _Library.widgets => widgetsImportRegExp,
+      _Library.material => materialImportRegExp,
+      _Library.cupertino => cupertinoImportRegExp,
     };
   }
 }
