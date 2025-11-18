@@ -112,6 +112,8 @@ class TestsCrossImportChecker {
           if (filenamePattern == null) {
             return true;
           }
+          return file.absolute.path.contains(filenamePattern);
+          /*
           if (!file.absolute.path.contains(filenamePattern)) {
             return false;
           }
@@ -123,10 +125,19 @@ class TestsCrossImportChecker {
 
           final String comparablePath = file.absolute.path.substring(index);
           return !_knownCrossImports.contains(comparablePath);
+          */
         })
         .map<File>((File? s) => s!)
         .toList();
     return files;
+  }
+
+  static Set<File> _getUnknowns(Set<File> files, Set<String> knownPaths) {
+    return files.where((File file) {
+      final int index = file.absolute.path.indexOf('packages/flutter/test');
+      final String comparablePath = file.absolute.path.substring(index == -1 ? 0 : index);
+      return !knownPaths.contains(comparablePath);
+    }).toSet();
   }
 
   // Get a list of all the filenames in the source directory that end in "_test.dart".
@@ -185,6 +196,7 @@ class TestsCrossImportChecker {
       filesByLibrary[library] = _getTestFiles(testsDirectory, library);
     }
 
+    // Find all cross imports.
     final Set<File> widgetsTestsImportingMaterial = _getFilesWithImports(
       filesByLibrary[_Library.widgets]!,
       _Library.material,
@@ -198,53 +210,66 @@ class TestsCrossImportChecker {
       _Library.material,
     );
 
-    bool error = false;
-    if (widgetsTestsImportingMaterial.isNotEmpty) {
-      error = true;
+    // Find any cross imports that are not in the known list.
+    bool error = true;
+    final Set<File> unknownWidgetsTestsImportingMaterial = _getUnknowns(
+      widgetsTestsImportingMaterial,
+      _knownCrossImports,
+    );
+    if (unknownWidgetsTestsImportingMaterial.isNotEmpty) {
+      error = false;
       foundError(
         _getImportError(
-          widgetsTestsImportingMaterial,
+          unknownWidgetsTestsImportingMaterial,
           _Library.widgets.name,
           _Library.material.name,
         ).split('\n'),
       );
     }
-    if (widgetsTestsImportingCupertino.isNotEmpty) {
-      error = true;
+    final Set<File> unknownWidgetsTestsImportingCupertino = _getUnknowns(
+      widgetsTestsImportingCupertino,
+      _knownCrossImports,
+    );
+    if (unknownWidgetsTestsImportingCupertino.isNotEmpty) {
+      error = false;
       foundError(
         _getImportError(
-          widgetsTestsImportingCupertino,
+          unknownWidgetsTestsImportingCupertino,
           _Library.widgets.name,
           _Library.cupertino.name,
         ).split('\n'),
       );
     }
-    if (cupertinoTestsImportingMaterial.isNotEmpty) {
-      error = true;
+    final Set<File> unknownCupertinoTestsImportingMaterial = _getUnknowns(
+      cupertinoTestsImportingMaterial,
+      _knownCrossImports,
+    );
+    if (unknownCupertinoTestsImportingMaterial.isNotEmpty) {
+      error = false;
       foundError(
         _getImportError(
-          cupertinoTestsImportingMaterial,
+          unknownCupertinoTestsImportingMaterial,
           _Library.cupertino.name,
           _Library.material.name,
         ).split('\n'),
       );
     }
 
+    // Find any known cross imports that weren't found, and are therefore fixed.
     final Set<String> fixedWidgetsCrossImports = _differencePaths(
       _knownWidgetsCrossImports,
       widgetsTestsImportingMaterial.union(widgetsTestsImportingCupertino),
     );
     if (fixedWidgetsCrossImports.isNotEmpty) {
-      error = true;
+      error = false;
       foundError(_getFixedImportError(fixedWidgetsCrossImports, _Library.widgets).split('\n'));
     }
-
     final Set<String> fixedCupertinoCrossImports = _differencePaths(
       _knownCupertinoCrossImports,
       cupertinoTestsImportingMaterial,
     );
     if (fixedCupertinoCrossImports.isNotEmpty) {
-      error = true;
+      error = false;
       foundError(_getFixedImportError(fixedCupertinoCrossImports, _Library.cupertino).split('\n'));
     }
 
