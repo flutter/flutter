@@ -103,6 +103,11 @@ class _GtkContainer extends _GtkWidget {
 class _GtkWidget extends _GObject {
   const _GtkWidget(super.instance);
 
+  /// Creates the GDK resources associated with a widget.
+  void realize() {
+    _gtkWidgetRealize(instance);
+  }
+
   /// Show the widget (defaults to hidden).
   void show() {
     _gtkWidgetShow(instance);
@@ -117,6 +122,9 @@ class _GtkWidget extends _GObject {
   void destroy() {
     _gtkWindowDestroy(instance);
   }
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_widget_realize')
+  external static void _gtkWidgetRealize(ffi.Pointer<ffi.NativeType> widget);
 
   @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_widget_show')
   external static void _gtkWidgetShow(ffi.Pointer<ffi.NativeType> widget);
@@ -145,7 +153,7 @@ class _GdkWindow extends _GObject {
   external static int _gdkWindowGetState(ffi.Pointer<ffi.NativeType> window);
 }
 
-/// Wrapds GdkGeometry
+/// Wraps GdkGeometry
 final class _GdkGeometry extends ffi.Struct {
   factory _GdkGeometry() {
     return ffi.Struct.create();
@@ -190,6 +198,7 @@ const int _GDK_WINDOW_STATE_MAXIMIZED = 1 << 2;
 const int _GDK_WINDOW_STATE_FULLSCREEN = 1 << 4;
 
 const int _GDK_WINDOW_TYPE_HINT_DIALOG = 1;
+const int _GDK_WINDOW_TYPE_HINT_TOOLTIP = 10;
 
 /// Wraps GtkWindow
 class _GtkWindow extends _GtkContainer {
@@ -214,6 +223,11 @@ class _GtkWindow extends _GtkContainer {
   /// Set the type of this window.
   void setTypeHint(int hint) {
     _gtkWindowSetTypeHint(instance, hint);
+  }
+
+  /// Sets if this window has decorations (titlebar, borders, shadow).
+  void setDecorated(bool decorated) {
+    _gtkWindowSetDecorated(instance, decorated);
   }
 
   /// Sets the title of the window.
@@ -254,7 +268,7 @@ class _GtkWindow extends _GtkContainer {
     _gFree(geometry);
   }
 
-  /// Resize to [width]x[height].
+  /// Resize to [width]x[height] logical pixels.
   void resize(int width, int height) {
     _gtkWindowResize(instance, width, height);
   }
@@ -289,7 +303,7 @@ class _GtkWindow extends _GtkContainer {
     _gtkWindowUnfullscreen(instance);
   }
 
-  /// Get the current size of the window.
+  /// Get the current size of the window in logical pixels.
   Size getSize() {
     final ffi.Pointer<ffi.Int> width = _gMalloc0(ffi.sizeOf<ffi.Int>()).cast<ffi.Int>();
     final ffi.Pointer<ffi.Int> height = _gMalloc0(ffi.sizeOf<ffi.Int>()).cast<ffi.Int>();
@@ -336,6 +350,11 @@ class _GtkWindow extends _GtkContainer {
     ffi.Pointer<ffi.NativeType> window,
     ffi.Pointer<ffi.Uint8> title,
   );
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Bool)>(
+    symbol: 'gtk_window_set_decorated',
+  )
+  external static void _gtkWindowSetDecorated(ffi.Pointer<ffi.NativeType> window, bool decorated);
 
   @ffi.Native<ffi.Pointer<ffi.Uint8> Function(ffi.Pointer<ffi.NativeType>)>(
     symbol: 'gtk_window_get_title',
@@ -405,13 +424,19 @@ class _GtkWindow extends _GtkContainer {
 /// Wraps FlView
 class _FlView extends _GtkWidget {
   /// Create a new FlView widget.
-  _FlView()
+  _FlView({bool isSizedToContent = false})
     : super(
-        _flViewNewForEngine(
-          ffi.Pointer<ffi.NativeType>.fromAddress(
-            WidgetsBinding.instance.platformDispatcher.engineId!,
-          ),
-        ),
+        isSizedToContent
+            ? _flViewNewSizedToContent(
+                ffi.Pointer<ffi.NativeType>.fromAddress(
+                  WidgetsBinding.instance.platformDispatcher.engineId!,
+                ),
+              )
+            : _flViewNewForEngine(
+                ffi.Pointer<ffi.NativeType>.fromAddress(
+                  WidgetsBinding.instance.platformDispatcher.engineId!,
+                ),
+              ),
       );
 
   /// Get the ID for the Flutter view being shown in this widget.
@@ -423,6 +448,13 @@ class _FlView extends _GtkWidget {
     symbol: 'fl_view_new_for_engine',
   )
   external static ffi.Pointer<ffi.NativeType> _flViewNewForEngine(
+    ffi.Pointer<ffi.NativeType> engine,
+  );
+
+  @ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Pointer<ffi.NativeType>)>(
+    symbol: 'fl_view_new_sized_to_content',
+  )
+  external static ffi.Pointer<ffi.NativeType> _flViewNewSizedToContent(
     ffi.Pointer<ffi.NativeType> engine,
   );
 
@@ -604,7 +636,17 @@ class WindowingOwnerLinux extends WindowingOwner {
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
-    throw UnimplementedError('Tooltip windows are not yet implemented on Linux.');
+    final TooltipWindowControllerLinux controller = TooltipWindowControllerLinux(
+      owner: this,
+      delegate: delegate,
+      preferredConstraints: preferredConstraints,
+      isSizedToContent: isSizedToContent,
+      anchorRect: anchorRect,
+      positioner: positioner,
+      parent: parent,
+    );
+    _windows[controller.rootView.viewId] = controller._window;
+    return controller;
   }
 
   @internal
@@ -938,5 +980,111 @@ class DialogWindowControllerLinux extends DialogWindowController {
     } else {
       _window.deiconify();
     }
+  }
+}
+
+/// Implementation of [TooltipWindowController] for the Linux platform.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+///
+/// See also:
+///
+///  * [TooltipWindowController], the base class for tooltip windows.
+class TooltipWindowControllerLinux extends TooltipWindowController {
+  /// Creates a new tooltip window controller for Linux.
+  ///
+  /// When this constructor completes the native window has been created and
+  /// has a view associated with it.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  ///
+  /// See also:
+  ///
+  ///  * [TooltipWindowController], the base class for tooltip windows.
+  @internal
+  TooltipWindowControllerLinux({
+    required WindowingOwnerLinux owner,
+    required TooltipWindowControllerDelegate delegate,
+    required BoxConstraints preferredConstraints,
+    required bool isSizedToContent,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required BaseWindowController parent,
+  }) : _owner = owner,
+       _delegate = delegate,
+       _parent = parent,
+       _window = _GtkWindow(),
+       super.empty() {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
+    //_window.setTypeHint(_GDK_WINDOW_TYPE_HINT_TOOLTIP);
+    _window.setDecorated(false);
+    final _GtkWindow? parentWindow = owner._windows[parent.rootView.viewId];
+    if (parentWindow != null) {
+      _window.setTransientFor(parentWindow);
+    }
+    _window.realize();
+
+    // TODO(robert-ancell): Apply anchor and positioner.
+
+    _windowMonitor = _FlWindowMonitor(
+      _window,
+      onConfigure: notifyListeners,
+      onDestroy: _delegate.onWindowDestroyed,
+    );
+    setConstraints(preferredConstraints);
+    final _FlView view = _FlView(isSizedToContent: isSizedToContent);
+    final int viewId = view.getId();
+    rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
+      (FlutterView view) => view.viewId == viewId,
+    );
+    view.show();
+    _window.add(view);
+    _window.present();
+  }
+
+  final WindowingOwnerLinux _owner;
+  final TooltipWindowControllerDelegate _delegate;
+  final _GtkWindow _window;
+  final BaseWindowController _parent;
+  late final _FlWindowMonitor _windowMonitor;
+  bool _destroyed = false;
+
+  @override
+  @internal
+  Size get contentSize => _window.getSize();
+
+  @override
+  void destroy() {
+    if (_destroyed) {
+      return;
+    }
+    _window.destroy();
+    _windowMonitor.close();
+    _windowMonitor.unref();
+    _destroyed = true;
+    _owner._windows.remove(rootView.viewId);
+  }
+
+  @override
+  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {
+    // TODO(robert-ancell): Apply anchor and positioner.
+  }
+
+  @override
+  @internal
+  BaseWindowController get parent => _parent;
+
+  @override
+  @internal
+  void setConstraints(BoxConstraints constraints) {
+    _window.setGeometryHints(
+      minWidth: constraints.minWidth.toInt(),
+      minHeight: constraints.minHeight.toInt(),
+      maxWidth: constraints.maxWidth.isInfinite ? 0x7fffffff : constraints.maxWidth.toInt(),
+      maxHeight: constraints.maxHeight.isInfinite ? 0x7fffffff : constraints.maxHeight.toInt(),
+    );
   }
 }

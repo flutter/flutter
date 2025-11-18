@@ -228,3 +228,9 @@ TEST(FlViewTest, ViewDestroyError) {
   fl_gtk_widget_destroy(GTK_WIDGET(secondary_view));
   fl_gtk_widget_destroy(GTK_WIDGET(implicit_view));
 }
+
+// Check if sized to content selected view will change size when Flutter changes
+// frame size.
+TEST(FlViewTest, SizedToContent) {
+  // FIXME
+}

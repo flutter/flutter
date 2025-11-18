@@ -361,9 +361,29 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
   return TRUE;
 }
 
+static void fl_compositor_opengl_get_frame_size(FlCompositor* compositor,
+                                                size_t* width,
+                                                size_t* height) {
+  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
+
+  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
+
+  if (width != nullptr) {
+    *width = self->framebuffer != nullptr
+                 ? fl_framebuffer_get_width(self->framebuffer)
+                 : 0;
+  }
+  if (height != nullptr) {
+    *height = self->framebuffer != nullptr
+                  ? fl_framebuffer_get_height(self->framebuffer)
+                  : 0;
+  }
+}
+
 static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
                                             cairo_t* cr,
-                                            GdkWindow* window) {
+                                            GdkWindow* window,
+                                            gboolean wait_for_frame) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
 
   g_mutex_lock(&self->frame_mutex);
@@ -374,10 +394,16 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
 
   // If frame not ready, then wait for it.
   gint scale_factor = gdk_window_get_scale_factor(window);
-  size_t width = gdk_window_get_width(window) * scale_factor;
-  size_t height = gdk_window_get_height(window) * scale_factor;
-  while (fl_framebuffer_get_width(self->framebuffer) != width ||
-         fl_framebuffer_get_height(self->framebuffer) != height) {
+  size_t width, height;
+  while (true) {
+    width = gdk_window_get_width(window) * scale_factor;
+    height = gdk_window_get_height(window) * scale_factor;
+    size_t framebuffer_width = fl_framebuffer_get_width(self->framebuffer);
+    size_t framebuffer_height = fl_framebuffer_get_height(self->framebuffer);
+    if (!wait_for_frame ||
+        (framebuffer_width == width && framebuffer_height == height)) {
+      break;
+    }
     g_mutex_unlock(&self->frame_mutex);
     fl_task_runner_wait(self->task_runner);
     g_mutex_lock(&self->frame_mutex);
@@ -430,6 +456,8 @@ static void fl_compositor_opengl_dispose(GObject* object) {
 static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
   FL_COMPOSITOR_CLASS(klass)->present_layers =
       fl_compositor_opengl_present_layers;
+  FL_COMPOSITOR_CLASS(klass)->get_frame_size =
+      fl_compositor_opengl_get_frame_size;
   FL_COMPOSITOR_CLASS(klass)->render = fl_compositor_opengl_render;
 
   G_OBJECT_CLASS(klass)->dispose = fl_compositor_opengl_dispose;
