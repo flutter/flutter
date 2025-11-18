@@ -42,10 +42,7 @@ class _DrawArcsPageState extends State<DrawArcsPage> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.fromLTRB(numRows.toDouble(), 0, numRows * 2, numRows.toDouble()),
-      child: CustomPaint(
-        painter: ArcsPainter(tick),
-        child: Container(),
-      ),
+      child: CustomPaint(painter: ArcsPainter(tick), child: Container()),
     );
   }
 }
@@ -74,10 +71,7 @@ class ArcsPainter extends CustomPainter {
     canvas.drawPaint(Paint()..color = Colors.white);
     for (int row = 0; row < numRows; row++) {
       for (int col = 0; col < numCols; col++) {
-        final Offset center = Offset(
-          (col / numCols) * size.width,
-          (row / numRows) * size.height,
-        );
+        final Offset center = Offset((col / numCols) * size.width, (row / numRows) * size.height);
         // Radius increases with row.
         final double radius = row.toDouble();
         // Sweep angle repeatedly goes from -2pi to 2pi.
@@ -85,7 +79,7 @@ class ArcsPainter extends CustomPainter {
         // Stroke width is proportional to radius (row), and increases with column up to 2 * radius.
         final double strokeWidth = 2 * radius * (col / numCols);
         // Color changes with each arc.
-        final Color color = kColors[(row * numCols + col) % kColors.length].withValues(alpha:0.5);
+        final Color color = kColors[(row * numCols + col) % kColors.length].withValues(alpha: 0.5);
         // Stroke cap changes with each row.
         final StrokeCap cap = StrokeCap.values[row % StrokeCap.values.length];
         canvas.drawArc(
