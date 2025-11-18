@@ -43,7 +43,14 @@
 }
 
 - (void)onPresent:(CGSize)frameSize withBlock:(dispatch_block_t)block delay:(NSTimeInterval)delay {
-  [_resizeSynchronizer performCommitForSize:frameSize afterDelay:delay notify:block];
+  // This block will be called in main thread same run loop turn as the layer content
+  // update.
+  auto notifyBlock = ^{
+    NSSize scaledSize = [self convertSizeFromBacking:frameSize];
+    [self.sizingDelegate viewDidUpdateContents:self withSize:scaledSize];
+    block();
+  };
+  [_resizeSynchronizer performCommitForSize:frameSize afterDelay:delay notify:notifyBlock];
 }
 
 - (FlutterSurfaceManager*)surfaceManager {
@@ -62,14 +69,16 @@
 
 - (void)setFrameSize:(NSSize)newSize {
   [super setFrameSize:newSize];
-  CGSize scaledSize = [self convertSizeToBacking:self.bounds.size];
-  [_resizeSynchronizer beginResizeForSize:scaledSize
-      notify:^{
-        [_viewDelegate viewDidReshape:self];
-      }
-      onTimeout:^{
-        [FlutterLogger logError:@"Resize timed out"];
-      }];
+  if (!self.sizedToContents) {
+    CGSize scaledSize = [self convertSizeToBacking:self.bounds.size];
+    [_resizeSynchronizer beginResizeForSize:scaledSize
+        notify:^{
+          [_viewDelegate viewDidReshape:self];
+        }
+        onTimeout:^{
+          [FlutterLogger logError:@"Resize timed out"];
+        }];
+  }
 }
 
 /**
@@ -156,6 +165,23 @@
     applicationName = [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleName"];
   }
   return applicationName;
+}
+
+- (BOOL)sizedToContents {
+  return _sizingDelegate != nil &&
+         !NSEqualSizes([_sizingDelegate maximumViewSize:self], NSZeroSize);
+}
+
+- (NSSize)minimumContentSize {
+  return _sizingDelegate != nil ? [_sizingDelegate minimumViewSize:self] : NSZeroSize;
+}
+
+- (NSSize)maximumContentSize {
+  return _sizingDelegate != nil ? [_sizingDelegate maximumViewSize:self] : NSZeroSize;
+}
+
+- (void)constraintsDidChange {
+  [_viewDelegate viewDidReshape:self];
 }
 
 @end

@@ -1170,10 +1170,14 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   }
   NSAssert([self viewControllerForIdentifier:viewController.viewIdentifier] == viewController,
            @"The provided view controller is not attached to this engine.");
-  NSView* view = viewController.flutterView;
+  FlutterView* view = viewController.flutterView;
   CGRect scaledBounds = [view convertRectToBacking:view.bounds];
-  CGSize scaledSize = scaledBounds.size;
-  double pixelRatio = view.bounds.size.width == 0 ? 1 : scaledSize.width / view.bounds.size.width;
+  CGSize scaledSize = view.sizedToContents ? NSZeroSize : scaledBounds.size;
+  double pixelRatio = view.layer.contentsScale;
+  CGSize maximumContentSize =
+      view.sizedToContents ? [view convertSizeToBacking:view.maximumContentSize] : NSZeroSize;
+  CGSize minimumContentSize =
+      view.sizedToContents ? [view convertSizeToBacking:view.minimumContentSize] : NSZeroSize;
   auto displayId = [view.window.screen.deviceDescription[@"NSScreenNumber"] integerValue];
   const FlutterWindowMetricsEvent windowMetricsEvent = {
       .struct_size = sizeof(windowMetricsEvent),
@@ -1184,6 +1188,10 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
       .top = static_cast<size_t>(scaledBounds.origin.y),
       .display_id = static_cast<uint64_t>(displayId),
       .view_id = viewController.viewIdentifier,
+      .min_width_constraint = static_cast<size_t>(minimumContentSize.width),
+      .min_height_constraint = static_cast<size_t>(minimumContentSize.height),
+      .max_width_constraint = static_cast<size_t>(maximumContentSize.width),
+      .max_height_constraint = static_cast<size_t>(maximumContentSize.height),
   };
   _embedderAPI.SendWindowMetricsEvent(_engine, &windowMetricsEvent);
 }
