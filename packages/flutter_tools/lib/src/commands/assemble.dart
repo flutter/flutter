@@ -347,7 +347,7 @@ class AssembleCommand extends FlutterCommand {
       );
     }
     if (_flutterProject.manifest.deferredComponents != null &&
-        _environment.defines.containsKey('validate-deferred-components=true') &&
+        _environment.defines['validate-deferred-components'] == 'true' &&
         deferredTargets.isNotEmpty &&
         !isDebug()) {
       // Add deferred components validation target that require loading units.
