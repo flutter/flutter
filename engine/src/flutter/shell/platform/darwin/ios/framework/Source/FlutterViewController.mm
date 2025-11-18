@@ -2284,7 +2284,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [super traitCollectionDidChange:previousTraitCollection];
   [self onUserSettingsChanged:nil];
 
-  // Since this method can get triggered by changes in device orientation, reset and recalculate the instrinsic size.
+  // Since this method can get triggered by changes in device orientation, reset and recalculate the
+  // instrinsic size.
   if (self.isAutoResizable) {
     [self.flutterView resetIntrinsicContentSize];
   }

@@ -672,9 +672,10 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
       if (self.platformTaskRunner->RunsTasksOnCurrentThread()) {
         [self performResize:self.frameSize];
       } else {
-        fml::TaskRunner::PostTaskSync(
-            self.platformTaskRunner,
-            [self, frameSize = self.frameSize]() mutable { [self performResize:frameSize]; });
+        [self postTaskSync:self.platformTaskRunner
+                  withTask:[self, frameSize = self.frameSize]() mutable {
+                    [self performResize:frameSize];
+                  }];
       }
     }
 
@@ -971,6 +972,18 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
 - (const flutter::EmbeddedViewParams&)compositionParamsForView:(int64_t)viewId {
   return self.currentCompositionParams.find(viewId)->second;
+}
+
+- (void)postTaskSync:(const fml::RefPtr<fml::TaskRunner>&)task_runner
+            withTask:(const fml::closure&)task {
+  fml::AutoResetWaitableEvent latch;
+  task_runner->PostTask([&latch, task]() {
+    if (task) {
+      task();
+    }
+    latch.Signal();
+  });
+  latch.Wait();
 }
 
 #pragma mark - Properties
