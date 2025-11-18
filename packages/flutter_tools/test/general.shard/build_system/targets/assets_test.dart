@@ -461,6 +461,161 @@ flutter:
     },
   );
 
+  group('platform-specific assets', () {
+    /// All supported platforms that should be validated.
+    const kValidPluginPlatforms = <String>{'android', 'ios', 'web', 'windows', 'linux', 'macos'};
+
+    TargetPlatform targetFor(String platform) =>
+        TargetPlatform.values.firstWhere((p) => p.osName == platform);
+
+    /// Writes a `pubspec.yaml` with an asset, optionally restricted to
+    /// certain [platforms], then runs the build for [targetPlatform] and
+    /// returns whether the asset was bundled.
+    ///
+    /// This helper reflects how Flutter decides which assets to include
+    /// depending on the `platforms:` key in `pubspec.yaml`.
+    Future<bool> setupAndBuildPlatformAsset(String platform, TargetPlatform targetPlatform) async {
+      final filePath = 'assets/test-$platform.txt';
+
+      final pubspec = platform.isEmpty
+          ? '''
+name: example
+flutter:
+  assets:
+    - path: $filePath
+'''
+          : '''
+name: example
+flutter:
+  assets:
+    - path: $filePath
+      platforms:
+        - $platform
+''';
+
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(pubspec);
+      writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+      fileSystem.file(filePath).createSync(recursive: true);
+
+      await const CopyAssets().build(environment, targetPlatform: targetPlatform);
+
+      final File file = fileSystem.file('${environment.buildDir.path}/flutter_assets/$filePath');
+      return file.existsSync();
+    }
+
+    group('includes assets only for matching platform', () {
+      for (final platform in kValidPluginPlatforms) {
+        testUsingContext(
+          platform,
+          () async {
+            final TargetPlatform targetPlatform = targetFor(platform);
+            final bool didInclude = await setupAndBuildPlatformAsset(platform, targetPlatform);
+
+            expect(didInclude, isTrue, reason: 'Expected asset for $platform to be included');
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fileSystem,
+            ProcessManager: () => FakeProcessManager.any(),
+          },
+        );
+      }
+    });
+
+    group('skips assets for non-matching platform', () {
+      for (final platform in kValidPluginPlatforms) {
+        testUsingContext(
+          platform,
+          () async {
+            final TargetPlatform targetPlatform = platform == 'android'
+                ? TargetPlatform.ios
+                : TargetPlatform.android;
+            final bool didInclude = await setupAndBuildPlatformAsset(platform, targetPlatform);
+
+            expect(
+              didInclude,
+              isFalse,
+              reason: 'Expected asset for $platform to be skipped when target is $targetPlatform',
+            );
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fileSystem,
+            ProcessManager: () => FakeProcessManager.any(),
+          },
+        );
+      }
+    });
+
+    group('includes assets for all platforms when no restriction is set', () {
+      for (final platform in kValidPluginPlatforms) {
+        testUsingContext(
+          platform,
+          () async {
+            final TargetPlatform targetPlatform = targetFor(platform);
+            final bool didInclude = await setupAndBuildPlatformAsset('', targetPlatform);
+
+            expect(
+              didInclude,
+              isTrue,
+              reason:
+                  'Expected asset to be included for all platforms when no platforms are specified (platform: $platform)',
+            );
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fileSystem,
+            ProcessManager: () => FakeProcessManager.any(),
+          },
+        );
+      }
+    });
+
+    group('includes assets only for declared multiple platforms', () {
+      for (final platform in kValidPluginPlatforms) {
+        testUsingContext(
+          platform,
+          () async {
+            const filePath = 'assets/test-multi.txt';
+            final targetPlatforms = <String>['android', 'ios'];
+
+            fileSystem.file('pubspec.yaml')
+              ..createSync()
+              ..writeAsStringSync('''
+name: example
+flutter:
+  assets:
+    - path: $filePath
+      platforms: [${targetPlatforms.join(',')}]
+''');
+
+            writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+            fileSystem.file(filePath).createSync(recursive: true);
+
+            final TargetPlatform targetPlatform = targetFor(platform);
+
+            await const CopyAssets().build(environment, targetPlatform: targetPlatform);
+
+            final File bundledFile = fileSystem.file(
+              '${environment.buildDir.path}/flutter_assets/$filePath',
+            );
+
+            final bool exists = bundledFile.existsSync();
+
+            if (targetPlatforms.contains(platform)) {
+              expect(exists, isTrue, reason: 'Expected asset to be included for $platform');
+            } else {
+              expect(exists, isFalse, reason: 'Expected asset to be skipped for $platform');
+            }
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fileSystem,
+            ProcessManager: () => FakeProcessManager.any(),
+          },
+        );
+      }
+    });
+  });
+
   testUsingContext(
     'Uses processors~/2 to transform assets',
     () async {

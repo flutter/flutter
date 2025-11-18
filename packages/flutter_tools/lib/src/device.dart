@@ -1374,13 +1374,7 @@ class DebuggingOptions {
         webDevServerConfig: WebDevServerConfig(
           port: json['port'] is int ? json['port']! as int : 8080,
           host: json['hostname'] is String ? json['hostname']! as String : 'localhost',
-
-          https: (json['tlsCertPath'] != null || json['tlsCertKeyPath'] != null)
-              ? HttpsConfig(
-                  certPath: json['tlsCertPath'] as String?,
-                  certKeyPath: json['tlsCertKeyPath'] as String?,
-                )
-              : null,
+          https: HttpsConfig.parse(json['tlsCertPath'], json['tlsCertKeyPath']),
           headers: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
         ),
       );

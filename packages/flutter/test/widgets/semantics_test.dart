@@ -5,6 +5,7 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -2187,6 +2188,200 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('semantics grafting in traversal order', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const String identifier = '111';
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Scaffold(
+          body: Column(
+            children: <Widget>[
+              Semantics(
+                traversalParentIdentifier: identifier,
+                child: const SizedBox.square(dimension: 10),
+              ),
+              Semantics(
+                traversalChildIdentifier: identifier,
+                child: const SizedBox.square(dimension: 10),
+              ),
+              const SizedBox.square(dimension: 10),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Semantics tree in traversal order. On web, no grafting.
+    expect(
+      semantics,
+      kIsWeb
+          ? hasSemantics(
+              TestSemantics.root(
+                children: <TestSemantics>[
+                  TestSemantics(id: 1, traversalParentIdentifier: identifier),
+                  TestSemantics(id: 2, traversalChildIdentifier: identifier),
+                ],
+              ),
+              ignoreRect: true,
+              ignoreTransform: true,
+            )
+          : hasSemantics(
+              TestSemantics.root(
+                children: <TestSemantics>[
+                  TestSemantics.rootChild(
+                    id: 1,
+                    traversalParentIdentifier: identifier,
+                    children: <TestSemantics>[
+                      TestSemantics(id: 2, traversalChildIdentifier: identifier),
+                    ],
+                  ),
+                ],
+              ),
+              ignoreRect: true,
+              ignoreTransform: true,
+            ),
+    );
+
+    // Semantics tree in hit-test order.
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(id: 1, traversalParentIdentifier: identifier),
+            TestSemantics(id: 2, traversalChildIdentifier: identifier),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+        childOrder: DebugSemanticsDumpOrder.inverseHitTest,
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('semantics grafting in traversal order with multiple same traversalChildIdentifier', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const String identifier = '111';
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Scaffold(
+          body: Column(
+            children: <Widget>[
+              Semantics(
+                traversalParentIdentifier: identifier,
+                child: const SizedBox.square(dimension: 10),
+              ),
+              Semantics(
+                traversalChildIdentifier: identifier,
+                child: const SizedBox.square(dimension: 10),
+              ),
+              Semantics(
+                traversalChildIdentifier: identifier,
+                child: const SizedBox.square(dimension: 10),
+              ),
+              const SizedBox.square(dimension: 10),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Semantics tree in traversal order. On web, no grafting.
+    expect(
+      semantics,
+      kIsWeb
+          ? hasSemantics(
+              TestSemantics.root(
+                children: <TestSemantics>[
+                  TestSemantics(id: 1, traversalParentIdentifier: identifier),
+                  TestSemantics(id: 2, traversalChildIdentifier: identifier),
+                  TestSemantics(id: 3, traversalChildIdentifier: identifier),
+                ],
+              ),
+              ignoreRect: true,
+              ignoreTransform: true,
+            )
+          : hasSemantics(
+              TestSemantics.root(
+                children: <TestSemantics>[
+                  TestSemantics.rootChild(
+                    id: 1,
+                    traversalParentIdentifier: identifier,
+                    children: <TestSemantics>[
+                      TestSemantics(id: 2, traversalChildIdentifier: identifier),
+                      TestSemantics(id: 3, traversalChildIdentifier: identifier),
+                    ],
+                  ),
+                ],
+              ),
+              ignoreRect: true,
+              ignoreTransform: true,
+            ),
+    );
+
+    // Semantics tree in hit-test order.
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(id: 1, traversalParentIdentifier: identifier),
+            TestSemantics(id: 2, traversalChildIdentifier: identifier),
+            TestSemantics(id: 3, traversalChildIdentifier: identifier),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+        childOrder: DebugSemanticsDumpOrder.inverseHitTest,
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets(
+    'no grafting in traversal order when traversal child is the parent of its traversal parent',
+    (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      const String identifier = '111';
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Scaffold(
+            body: Column(
+              children: <Widget>[
+                Semantics(
+                  traversalChildIdentifier: identifier,
+                  child: TextButton(
+                    onPressed: () {},
+                    child: Semantics(traversalParentIdentifier: identifier),
+                  ),
+                ),
+                const SizedBox.square(dimension: 10),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(
+        error.message,
+        'The traversalParent 2 cannot be the child of the traversalChild 1 in hit-test order',
+      );
+      semantics.dispose();
+    },
+    skip: kIsWeb, // [intended] the web traversal order by using ARIA-OWNS.
+  );
 }
 
 class CustomSortKey extends OrdinalSortKey {
