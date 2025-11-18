@@ -19,14 +19,14 @@ import io.flutter.embedding.engine.systemchannels.DeferredComponentChannel;
  * <p>DeferredComponentManager handles the embedder/Android level tasks of downloading, installing,
  * and loading Dart deferred libraries. A typical code-flow begins with a Dart call to loadLibrary()
  * on deferred imported library. See <a
- * href="https://dart.dev/guides/language/language-tour#deferred-loading">https://dart.dev/guides/language/language-tour#deferred-loading</a> This call
- * retrieves a unique identifier called the loading unit id, which is assigned by gen_snapshot
- * during compilation. The loading unit id is passed down through the engine and invokes
- * installDeferredComponent. Once the component is downloaded, loadAssets and loadDartLibrary should
- * be invoked. loadDartLibrary should find shared library .so files for the engine to open and pass
- * the .so path to FlutterJNI.loadDartDeferredLibrary. loadAssets should typically ensure the new
- * assets are available to the engine's asset manager by passing an updated Android AssetManager to
- * the engine via FlutterJNI.updateAssetManager.
+ * href="https://dart.dev/guides/language/language-tour#deferred-loading">https://dart.dev/guides/language/language-tour#deferred-loading</a>
+ * This call retrieves a unique identifier called the loading unit id, which is assigned by
+ * gen_snapshot during compilation. The loading unit id is passed down through the engine and
+ * invokes installDeferredComponent. Once the component is downloaded, loadAssets and
+ * loadDartLibrary should be invoked. loadDartLibrary should find shared library .so files for the
+ * engine to open and pass the .so path to FlutterJNI.loadDartDeferredLibrary. loadAssets should
+ * typically ensure the new assets are available to the engine's asset manager by passing an updated
+ * Android AssetManager to the engine via FlutterJNI.updateAssetManager.
  *
  * <p>The loadAssets and loadDartLibrary methods are separated out because they may also be called
  * manually via platform channel messages. A full installDeferredComponent implementation should
