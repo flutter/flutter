@@ -73,6 +73,23 @@ void main() {
       expect(rule.toString(), r'{regex: ^/api/(.*), target: http://localhost:8080, replace: /$1}');
     });
 
+    test('fromYaml creates a RegexProxyRule with headers', () {
+      final yaml = loadYaml(r'''
+regex: ^/api/(.*)
+target: http://localhost:8080
+replace: /$1
+headers:
+  - name: Authorization
+    value: Bearer token
+  - name: X-Env
+    value: Local
+''') as YamlMap;
+      final RegexProxyRule? rule = RegexProxyRule.fromYaml(yaml, logger);
+      expect(rule, isNotNull);
+      expect(rule!.headers['Authorization'], 'Bearer token');
+      expect(rule.headers['X-Env'], 'Local');
+    });
+
     test('fromYaml logs warning for invalid regex format', () {
       final yaml = YamlMap.wrap(<String, String>{
         'regex': '[invalid',
@@ -210,6 +227,19 @@ void main() {
         rule.toString(),
         '{prefix: ^/old_path, target: http://localhost:8080/new_path, replace: /new_prefix}',
       );
+    });
+
+    test('fromYaml creates a PrefixProxyRule with headers', () {
+      final yaml = loadYaml('''
+prefix: /api
+target: http://localhost:8080
+headers:
+  - name: Authorization
+    value: Bearer abc
+''') as YamlMap;
+      final PrefixProxyRule? rule = PrefixProxyRule.fromYaml(yaml, logger);
+      expect(rule, isNotNull);
+      expect(rule!.headers['Authorization'], 'Bearer abc');
     });
 
     test('fromYaml returns null if target is missing', () {
@@ -364,6 +394,31 @@ void main() {
           expect(await proxiedRequest.readAsString(), '');
         }
       }
+    });
+
+    test('should merge injectedHeaders without overwriting existing (case-insensitive)', () async {
+      final Uri originalUrl = Uri.parse('http://original.example.com/path');
+      final Uri finalTargetUrl = Uri.parse('http://target.example.com/newpath');
+      final originalHeaders = <String, String>{
+        'Authorization': 'Bearer original',
+        'X-From': 'client',
+      };
+      final injected = <String, String>{
+        'authorization': 'Bearer injected', // lower-case to test case-insensitive detect
+        'X-Env': 'Local',
+      };
+      final originalRequest = Request('GET', originalUrl, headers: originalHeaders);
+      final Request proxiedRequest = proxyRequest(
+        originalRequest,
+        finalTargetUrl,
+        injectedHeaders: injected,
+      );
+      // Authorization must not be overwritten
+      expect(proxiedRequest.headers['Authorization'], 'Bearer original');
+      // X-Env should be added
+      expect(proxiedRequest.headers['X-Env'], 'Local');
+      // X-From should remain
+      expect(proxiedRequest.headers['X-From'], 'client');
     });
   });
 
