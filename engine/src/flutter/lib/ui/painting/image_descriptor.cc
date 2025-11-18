@@ -157,11 +157,13 @@ void ImageDescriptor::initRaw(Dart_Handle descriptor_handle,
                               int height,
                               int row_bytes,
                               int pixel_format) {
+  ImageDescriptor::PixelFormat image_descriptor_pixel_format =
+      toImageDescriptorPixelFormat(pixel_format);
   const ImageInfo image_info = {
       .width = static_cast<uint32_t>(width),
       .height = static_cast<uint32_t>(height),
-      .format = toImageDescriptorPixelFormat(pixel_format),
-      .alpha_type = pixel_format == PixelFormat::kRGBAFloat32
+      .format = image_descriptor_pixel_format,
+      .alpha_type = image_descriptor_pixel_format == PixelFormat::kRGBAFloat32
                         ? kUnpremul_SkAlphaType
                         : kPremul_SkAlphaType,
       .color_space = SkColorSpace::MakeSRGB(),
