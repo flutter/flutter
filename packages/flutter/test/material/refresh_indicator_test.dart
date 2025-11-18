@@ -1276,9 +1276,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('RefreshIndicator.useActualViewportDimension defaults to false', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('RefreshIndicator.useIndicatorExtent defaults to false', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: RefreshIndicator(
@@ -1292,7 +1290,7 @@ void main() {
     );
 
     expect(
-      tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).useActualViewportDimension,
+      tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).useIndicatorExtent,
       false,
     );
   });
@@ -1312,7 +1310,7 @@ void main() {
         home: DefaultTabController(
           length: 2,
           child: RefreshIndicator(
-            useActualViewportDimension: true,
+            useIndicatorExtent: true,
             onRefresh: refresh,
             notificationPredicate: (ScrollNotification notification) => notification.depth == 2,
             child: NestedScrollView(
@@ -1345,7 +1343,7 @@ void main() {
       ),
     );
 
-    // With useActualViewportDimension: true, the threshold is based on
+    // With useIndicatorExtent: true, the threshold is based on
     // RefreshIndicator's rendered size (600px), not the inner body viewport (50px).
     // Expected threshold: 600px * 0.25 = 150px
     // A small drag of 15px should NOT trigger refresh
@@ -1409,7 +1407,7 @@ void main() {
       ),
     );
 
-    // With useActualViewportDimension: false (default), the threshold is based on
+    // With useIndicatorExtent: false (default), the threshold is based on
     // the inner body's viewport dimension reported by the Scrollable (50px).
     // This makes even a very small drag trigger the refresh (overly sensitive behavior).
     // Expected threshold: 50px * 0.25 = 12.5px

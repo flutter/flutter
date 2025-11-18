@@ -150,7 +150,7 @@ class RefreshIndicator extends StatefulWidget {
     super.key,
     this.displacement = 40.0,
     this.edgeOffset = 0.0,
-    this.useActualViewportDimension = false,
+    this.useIndicatorExtent = false,
     required this.onRefresh,
     this.color,
     this.backgroundColor,
@@ -185,7 +185,7 @@ class RefreshIndicator extends StatefulWidget {
     super.key,
     this.displacement = 40.0,
     this.edgeOffset = 0.0,
-    this.useActualViewportDimension = false,
+    this.useIndicatorExtent = false,
     required this.onRefresh,
     this.color,
     this.backgroundColor,
@@ -206,7 +206,7 @@ class RefreshIndicator extends StatefulWidget {
   /// Events can be optionally listened by using the `onStatusChange` callback.
   const RefreshIndicator.noSpinner({
     super.key,
-    this.useActualViewportDimension = false,
+    this.useIndicatorExtent = false,
     required this.onRefresh,
     this.onStatusChange,
     this.notificationPredicate = defaultScrollNotificationPredicate,
@@ -331,7 +331,7 @@ class RefreshIndicator extends StatefulWidget {
   /// cannot be resolved, the widget falls back to the viewport dimension.
   ///
   /// Defaults to false.
-  final bool useActualViewportDimension;
+  final bool useIndicatorExtent;
 
   @override
   RefreshIndicatorState createState() => RefreshIndicatorState();
@@ -547,7 +547,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   }
 
   double _resolveContainerExtent(double containerExtent) {
-    if (!widget.useActualViewportDimension) {
+    if (!widget.useIndicatorExtent) {
       return containerExtent;
     }
 
