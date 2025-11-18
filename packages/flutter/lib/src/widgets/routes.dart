@@ -2313,6 +2313,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     // To be sorted before the _modalBarrier.
     return _modalScopeCache ??= Semantics(
       sortKey: const OrdinalSortKey(0.0),
+      hitTestBehavior: ui.SemanticsHitTestBehavior.opaque,
       child: _ModalScope<T>(
         key: _scopeKey,
         route: this,

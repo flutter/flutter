@@ -472,6 +472,36 @@ void main() {
     expect(dropdownMenu.inputDecorationTheme, inputDecorationTheme);
   });
 
+  testWidgets('Passes decorationBuilder to underlying DropdownMenu', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: DropdownMenuFormField<MenuItem>(dropdownMenuEntries: menuEntries)),
+      ),
+    );
+
+    // Check default value.
+    DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.decorationBuilder, null);
+
+    InputDecoration buildDecoration(BuildContext context, MenuController controller) {
+      return const InputDecoration(labelText: 'labelText');
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(
+            decorationBuilder: buildDecoration,
+            dropdownMenuEntries: menuEntries,
+          ),
+        ),
+      ),
+    );
+
+    dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.decorationBuilder, buildDecoration);
+  });
+
   testWidgets('Passes menuStyle to underlying DropdownMenu', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

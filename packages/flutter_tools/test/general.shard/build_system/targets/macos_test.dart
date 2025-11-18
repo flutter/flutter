@@ -329,17 +329,13 @@ void main() {
       binary.createSync(recursive: true);
       frameworkDsym.createSync(recursive: true);
       processManager.addCommands(<FakeCommand>[
-        copyFrameworkDsymCommand,
         releaseCopyFrameworkCommand,
         lipoInfoNonFatCommand,
         lipoVerifyX86_64Command,
+        copyFrameworkDsymCommand,
       ]);
 
-      const Target target = ReleaseUnpackMacOS();
-      for (final Target dep in target.dependencies) {
-        await dep.build(environment..defines[kBuildMode] = 'release');
-      }
-      await target.build(environment..defines[kBuildMode] = 'release');
+      await const ReleaseUnpackMacOS().build(environment..defines[kBuildMode] = 'release');
 
       expect(processManager, hasNoRemainingExpectations);
     },
@@ -367,10 +363,16 @@ void main() {
         ],
         exitCode: 1,
       );
-      processManager.addCommands(<FakeCommand>[failedCopyFrameworkDsymCommand]);
+      processManager.addCommands(<FakeCommand>[
+        releaseCopyFrameworkCommand,
+        lipoInfoFatCommand,
+        lipoVerifyX86_64Command,
+        lipoExtractX86_64Command,
+        failedCopyFrameworkDsymCommand,
+      ]);
 
       await expectLater(
-        const ReleaseUnpackMacOSDsym().build(environment..defines[kBuildMode] = 'release'),
+        const ReleaseUnpackMacOS().build(environment..defines[kBuildMode] = 'release'),
         throwsA(
           isException.having(
             (Exception exception) => exception.toString(),
