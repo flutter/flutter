@@ -132,16 +132,35 @@ Dart_Handle ImageDescriptor::initEncoded(Dart_Handle descriptor_handle,
   return Dart_Null();
 }
 
+namespace {
+// Must be kept in sync with painting.dart.
+ImageDescriptor::PixelFormat toImageDescriptorPixelFormat(int val) {
+  switch (val) {
+    case 0:
+      return ImageDescriptor::PixelFormat::kRGBA8888;
+    case 1:
+      return ImageDescriptor::PixelFormat::kBGRA8888;
+    case 2:
+      return ImageDescriptor::PixelFormat::kRGBAFloat32;
+    case 3:
+      return ImageDescriptor::PixelFormat::kR32Float;
+    default:
+      FML_DCHECK(false) << "unrecognized format";
+      return ImageDescriptor::PixelFormat::kRGBA8888;
+  }
+}
+}  // namespace
+
 void ImageDescriptor::initRaw(Dart_Handle descriptor_handle,
                               const fml::RefPtr<ImmutableBuffer>& data,
                               int width,
                               int height,
                               int row_bytes,
-                              PixelFormat pixel_format) {
+                              int pixel_format) {
   const ImageInfo image_info = {
       .width = static_cast<uint32_t>(width),
       .height = static_cast<uint32_t>(height),
-      .format = pixel_format,
+      .format = toImageDescriptorPixelFormat(pixel_format),
       .alpha_type = pixel_format == PixelFormat::kRGBAFloat32
                         ? kUnpremul_SkAlphaType
                         : kPremul_SkAlphaType,
