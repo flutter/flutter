@@ -78,15 +78,6 @@ class WebTestsSuite {
     ],
   };
 
-  /// The number of jobs that run Web tests in parallel.
-  ///
-  /// This used to use the `WEB_SHARD_COUNT` environment variable, but that
-  /// was never re-added in the migration to LUCI, so instead the count is
-  /// hardcoded below.
-  ///
-  /// The last shard also runs the Web plugin tests.
-  int get webShardCount => 8;
-
   static const List<String> _kAllBuildModes = <String>['debug', 'profile', 'release'];
 
   final List<String> flutterTestArgs;
@@ -197,48 +188,7 @@ class WebTestsSuite {
       () => _runGalleryE2eWebTest('debug'),
       () => _runGalleryE2eWebTest('profile'),
       () => _runGalleryE2eWebTest('release'),
-      () =>
-          runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withoutFlutterJs),
-      () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withFlutterJs),
-      () => runWebServiceWorkerTest(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJsShort,
-      ),
-      () => runWebServiceWorkerTest(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent,
-      ),
-      () => runWebServiceWorkerTest(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJsTrustedTypesOn,
-      ),
-      () => runWebServiceWorkerTest(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJsNonceOn,
-      ),
-      () => runWebServiceWorkerTestWithCachingResources(
-        headless: true,
-        testType: ServiceWorkerTestType.withoutFlutterJs,
-      ),
-      () => runWebServiceWorkerTestWithCachingResources(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJs,
-      ),
-      () => runWebServiceWorkerTestWithCachingResources(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJsShort,
-      ),
-      () => runWebServiceWorkerTestWithCachingResources(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent,
-      ),
-      () => runWebServiceWorkerTestWithCachingResources(
-        headless: true,
-        testType: ServiceWorkerTestType.withFlutterJsTrustedTypesOn,
-      ),
-      () => runWebServiceWorkerTestWithGeneratedEntrypoint(headless: true),
-      () => runWebServiceWorkerTestWithBlockedServiceWorkers(headless: true),
-      () => runWebServiceWorkerTestWithCustomServiceWorkerVersion(headless: true),
+      () => runServiceWorkerCleanupTest(headless: true),
       () => _runWebStackTraceTest('profile', 'lib/stack_trace.dart'),
       () => _runWebStackTraceTest('release', 'lib/stack_trace.dart'),
       () => _runWebStackTraceTest('profile', 'lib/framework_stack_trace.dart'),
@@ -291,11 +241,11 @@ class WebTestsSuite {
   }
 
   Future<void> runWebCanvasKitUnitTests() {
-    return _runWebUnitTests(useWasm: false);
+    return _runWebUnitTests(useWasm: false, webShardCount: 8);
   }
 
   Future<void> runWebSkwasmUnitTests() {
-    return _runWebUnitTests(useWasm: true);
+    return _runWebUnitTests(useWasm: true, webShardCount: 2);
   }
 
   /// Runs one of the `dev/integration_tests/web_e2e_tests` tests.
@@ -588,7 +538,7 @@ class WebTestsSuite {
     }
   }
 
-  Future<void> _runWebUnitTests({required bool useWasm}) async {
+  Future<void> _runWebUnitTests({required bool useWasm, required int webShardCount}) async {
     final Map<String, ShardRunner> subshards = <String, ShardRunner>{};
 
     final Directory flutterPackageDirectory = Directory(

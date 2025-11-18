@@ -7,6 +7,7 @@ library;
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -1937,7 +1938,7 @@ void main() {
     });
   });
 
-  testWidgets('Heading cell cursor resolves MaterialStateMouseCursor correctly', (
+  testWidgets('Heading cell cursor resolves WidgetStateMouseCursor correctly', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -1999,7 +2000,7 @@ void main() {
     );
   });
 
-  testWidgets('DataRow cursor resolves MaterialStateMouseCursor correctly', (
+  testWidgets('DataRow cursor resolves WidgetStateMouseCursor correctly', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -2094,7 +2095,7 @@ void main() {
     // Test that the checkbox cursor is not changed.
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     await gesture.moveTo(tester.getCenter(find.text('Data')));

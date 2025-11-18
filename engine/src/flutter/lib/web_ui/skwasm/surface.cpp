@@ -38,6 +38,11 @@ void Surface::dispose() {
 }
 
 // Main thread only
+void Surface::setResourceCacheLimit(int bytes) {
+  _grContext->setResourceCacheLimit(bytes);
+}
+
+// Main thread only
 uint32_t Surface::renderPictures(DisplayList** pictures,
                                  int width,
                                  int height,
@@ -239,6 +244,11 @@ SKWASM_EXPORT void surface_destroy(Surface* surface) {
 SKWASM_EXPORT void surface_dispose(Surface* surface) {
   // This should be called directly only on the worker
   surface->dispose();
+}
+
+SKWASM_EXPORT void surface_setResourceCacheLimitBytes(Surface* surface,
+                                                      int bytes) {
+  surface->setResourceCacheLimit(bytes);
 }
 
 SKWASM_EXPORT uint32_t surface_renderPictures(Surface* surface,

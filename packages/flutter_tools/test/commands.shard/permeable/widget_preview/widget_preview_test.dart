@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
@@ -265,7 +266,63 @@ void main() {
         }
         expectNoPreviewLaunchTimingEvents();
       });
+
+      testUsingContext(
+        'Flutter Web is disabled',
+        () async {
+          try {
+            await startWidgetPreview(rootProject: await createRootProject());
+            fail('Successfully executed with Flutter Web disabled.');
+          } on ToolExit catch (e) {
+            expect(
+              e.message,
+              'Error: Widget Previews requires Flutter Web to be enabled. Please run '
+              "'flutter config --enable-web' to enable Flutter Web and try again.",
+            );
+          }
+          expectNoPreviewLaunchTimingEvents();
+        },
+        overrides: {
+          FeatureFlags: () => TestFeatureFlags(
+            // ignore: avoid_redundant_argument_values, readability
+            isWebEnabled: false,
+          ),
+          Pub: () => Pub.test(
+            fileSystem: fs,
+            logger: logger,
+            processManager: loggingProcessManager,
+            botDetector: botDetector,
+            platform: platform,
+            stdio: mockStdio,
+          ),
+        },
+      );
     });
+
+    testUsingContext(
+      'start succeeds when no .dart_tool/ directory exists',
+      () async {
+        // Regression test for https://github.com/flutter/flutter/issues/178052
+        final Directory rootProject = await createRootProject();
+        rootProject.childDirectory('.dart_tool').deleteSync(recursive: true);
+        await startWidgetPreview(rootProject: rootProject);
+        expectSinglePreviewLaunchTimingEvent();
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        DeviceManager: () => fakeDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => loggingProcessManager,
+        Pub: () => Pub.test(
+          fileSystem: fs,
+          logger: logger,
+          processManager: loggingProcessManager,
+          botDetector: botDetector,
+          platform: platform,
+          stdio: mockStdio,
+        ),
+      },
+    );
 
     testUsingContext(
       'start creates .dart_tool/widget_preview_scaffold',
@@ -323,21 +380,22 @@ import 'package:flutter/widget_previews.dart';
 Widget preview() => Text('Foo');''';
 
     const expectedGeneratedFileContents = '''
+// ignore_for_file: implementation_imports
+
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'widget_preview.dart' as _i1;
-import 'package:flutter_project/foo.dart' as _i2;
+import 'utils.dart' as _i2;
+import 'package:flutter_project/foo.dart' as _i3;
+import 'package:flutter/src/widget_previews/widget_previews.dart' as _i4;
 
-List<_i1.WidgetPreviewGroup> previews() => [
-      _i1.WidgetPreviewGroup(
-        name: 'Default',
-        previews: [
-          _i1.WidgetPreview(
-            scriptUri: 'STRIPPED',
-            packageName: 'flutter_project',
-            name: 'preview',
-            builder: () => _i2.preview(),
-          )
-        ],
+List<_i1.WidgetPreview> previews() => [
+      _i2.buildWidgetPreview(
+        packageName: 'flutter_project',
+        scriptUri: 'STRIPPED',
+        line: 4,
+        column: 1,
+        previewFunction: () => _i3.preview(),
+        transformedPreview: const _i4.Preview(name: 'preview').transform(),
       )
     ];
 ''';

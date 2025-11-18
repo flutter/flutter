@@ -17,6 +17,7 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
 import 'base/process.dart';
+import 'base/utils.dart';
 import 'build_info.dart';
 import 'convert.dart';
 
@@ -378,10 +379,7 @@ class KernelCompiler {
     final Process server = await _processManager.start(command);
 
     server.stderr.transform<String>(utf8.decoder).listen(_logger.printError);
-    server.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen(_stdoutHandler.handler);
+    server.stdout.transform(utf8LineDecoder).listen(_stdoutHandler.handler);
     final int exitCode = await server.exitCode;
     if (exitCode == 0) {
       return _stdoutHandler.compilerOutput?.future;
@@ -464,6 +462,7 @@ class _CompileExpressionToJsRequest extends _CompilationRequest {
   _CompileExpressionToJsRequest(
     super.completer,
     this.libraryUri,
+    this.scriptUri,
     this.line,
     this.column,
     this.jsModules,
@@ -473,6 +472,7 @@ class _CompileExpressionToJsRequest extends _CompilationRequest {
   );
 
   final String? libraryUri;
+  final String? scriptUri;
   final int line;
   final int column;
   final Map<String, String>? jsModules;
@@ -591,6 +591,7 @@ abstract class ResidentCompiler {
   /// compilation result and a number of errors.
   Future<CompilerOutput?> compileExpressionToJs(
     String libraryUri,
+    String scriptUri,
     int line,
     int column,
     Map<String, String> jsModules,
@@ -890,8 +891,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _logger.printTrace(command.join(' '));
     _server = await _processManager.start(command);
     _server?.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
+        .transform(utf8LineDecoder)
         .listen(
           _stdoutHandler.handler,
           onDone: () {
@@ -904,10 +904,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
           },
         );
 
-    _server?.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen(_logger.printError);
+    _server?.stderr.transform(utf8LineDecoder).listen(_logger.printError);
 
     unawaited(
       _server?.exitCode.then((int code) {
@@ -1001,6 +998,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   @override
   Future<CompilerOutput?> compileExpressionToJs(
     String libraryUri,
+    String scriptUri,
     int line,
     int column,
     Map<String, String> jsModules,
@@ -1017,6 +1015,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       _CompileExpressionToJsRequest(
         completer,
         libraryUri,
+        scriptUri,
         line,
         column,
         jsModules,
@@ -1038,23 +1037,23 @@ class DefaultResidentCompiler implements ResidentCompiler {
       return null;
     }
 
-    final String inputKey = Uuid().generateV4();
     server.stdin
-      ..writeln('compile-expression-to-js $inputKey')
-      ..writeln(request.libraryUri ?? '')
-      ..writeln(request.line)
-      ..writeln(request.column);
-    request.jsModules?.forEach((String k, String v) {
-      server.stdin.writeln('$k:$v');
-    });
-    server.stdin.writeln(inputKey);
-    request.jsFrameValues?.forEach((String k, String v) {
-      server.stdin.writeln('$k:$v');
-    });
-    server.stdin
-      ..writeln(inputKey)
-      ..writeln(request.moduleName ?? '')
-      ..writeln(request.expression ?? '');
+      ..writeln('JSON_INPUT')
+      ..writeln(
+        json.encode({
+          'type': 'COMPILE_EXPRESSION_JS',
+          'data': {
+            'expression': request.expression,
+            'libraryUri': request.libraryUri,
+            'scriptUri': request.scriptUri,
+            'line': request.line,
+            'column': request.column,
+            'jsModules': request.jsModules,
+            'jsFrameValues': request.jsFrameValues,
+            'moduleName': request.moduleName,
+          },
+        }),
+      );
 
     return _stdoutHandler.compilerOutput?.future;
   }

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -102,7 +103,7 @@ void main() {
         return const TextStyle(color: Color(0xfffffff6), fontSize: 17.0);
       }),
       enableFeedback: false,
-      mouseCursor: MaterialStateMouseCursor.clickable,
+      mouseCursor: WidgetStateMouseCursor.clickable,
       position: PopupMenuPosition.over,
       iconColor: const Color(0xfffffff8),
       iconSize: 31.0,
@@ -230,7 +231,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test unchecked CheckedPopupMenuItem label.
@@ -571,7 +572,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.click,
+        kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
       );
 
       // Check popup menu padding.

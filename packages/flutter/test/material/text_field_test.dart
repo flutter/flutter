@@ -7247,29 +7247,29 @@ void main() {
     final Offset center = tester.getCenter(find.byType(EditableText).first);
     await gesture.moveTo(center);
     await tester.pump();
-    expect(statesController.value, <MaterialState>{MaterialState.hovered});
+    expect(statesController.value, <WidgetState>{WidgetState.hovered});
     expect(count, 1);
 
     await gesture.moveTo(Offset.zero);
     await tester.pump();
-    expect(statesController.value, <MaterialState>{});
+    expect(statesController.value, <WidgetState>{});
     expect(count, 2);
 
     await gesture.down(center);
     await tester.pump();
     await gesture.up();
     await tester.pump();
-    expect(statesController.value, <MaterialState>{MaterialState.hovered, MaterialState.focused});
+    expect(statesController.value, <WidgetState>{WidgetState.hovered, WidgetState.focused});
     expect(count, 4); // adds hovered and pressed - two changes.
 
     await gesture.moveTo(Offset.zero);
     await tester.pump();
-    expect(statesController.value, <MaterialState>{MaterialState.focused});
+    expect(statesController.value, <WidgetState>{WidgetState.focused});
     expect(count, 5);
 
     await gesture.down(Offset.zero);
     await tester.pump();
-    expect(statesController.value, <MaterialState>{});
+    expect(statesController.value, <WidgetState>{});
     expect(count, 6);
     await gesture.up();
     await tester.pump();
@@ -7278,7 +7278,7 @@ void main() {
     await tester.pump();
     await gesture.up();
     await tester.pump();
-    expect(statesController.value, <MaterialState>{MaterialState.hovered, MaterialState.focused});
+    expect(statesController.value, <WidgetState>{WidgetState.hovered, WidgetState.focused});
     expect(count, 8); // adds hovered and pressed - two changes.
 
     // If the text field is rebuilt disabled, then the focused state is
@@ -7297,12 +7297,12 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(statesController.value, <MaterialState>{MaterialState.hovered, MaterialState.disabled});
+    expect(statesController.value, <WidgetState>{WidgetState.hovered, WidgetState.disabled});
     expect(count, 10); // removes focused and adds disabled - two changes.
 
     await gesture.moveTo(Offset.zero);
     await tester.pump();
-    expect(statesController.value, <MaterialState>{MaterialState.disabled});
+    expect(statesController.value, <WidgetState>{WidgetState.disabled});
     expect(count, 11);
 
     // If the text field is rebuilt enabled and in an error state, then the error
@@ -7321,7 +7321,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(statesController.value, <MaterialState>{MaterialState.error});
+    expect(statesController.value, <WidgetState>{WidgetState.error});
     expect(count, 13); // removes disabled and adds error - two changes.
 
     // If the text field is rebuilt without an error, then the error
@@ -7336,7 +7336,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(statesController.value, <MaterialState>{});
+    expect(statesController.value, <WidgetState>{});
     expect(count, 14);
   });
 
@@ -7356,7 +7356,7 @@ void main() {
         ),
       ),
     );
-    expect(controller.value, <MaterialState>{MaterialState.disabled});
+    expect(controller.value, <WidgetState>{WidgetState.disabled});
     expect(count, 1);
   });
 
@@ -7375,8 +7375,8 @@ void main() {
             child: TextField(
               controller: controller,
               enabled: enabled,
-              style: MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.disabled)) {
+              style: WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
+                if (states.contains(WidgetState.disabled)) {
                   return const TextStyle(color: Colors.red);
                 }
                 return const TextStyle(color: Colors.blue);
@@ -15321,19 +15321,19 @@ void main() {
     await gesture.moveTo(iconArea);
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     await gesture.moveTo(prefixIconArea);
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     await gesture.moveTo(suffixIconArea);
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
 
@@ -15557,26 +15557,66 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/140607.
-  testWidgets('TextFields can inherit errorStyle color from InputDecorationThemeData.', (
+  testWidgets('TextFields can inherit errorStyle color from InputDecorationThemeData', (
     WidgetTester tester,
   ) async {
-    Widget textFieldBuilder() {
-      return MaterialApp(
-        theme: ThemeData(
-          inputDecorationTheme: const InputDecorationThemeData(
-            errorStyle: TextStyle(color: Colors.green),
-          ),
-        ),
+    const InputDecorationThemeData decorationTheme = InputDecorationThemeData(
+      errorStyle: TextStyle(color: Colors.green),
+    );
+
+    EditableTextState getEditableTextState() {
+      return tester.state<EditableTextState>(find.byType(EditableText));
+    }
+
+    // Global theme.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(inputDecorationTheme: decorationTheme),
         home: const Scaffold(
           body: TextField(decoration: InputDecoration(errorText: 'error')),
         ),
-      );
-    }
+      ),
+    );
+    expect(getEditableTextState().widget.cursorColor, Colors.green);
 
-    await tester.pumpWidget(textFieldBuilder());
-    await tester.pumpAndSettle();
-    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-    expect(state.widget.cursorColor, Colors.green);
+    // Local theme.
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: InputDecorationTheme(
+            data: decorationTheme,
+            child: TextField(decoration: InputDecoration(errorText: 'error')),
+          ),
+        ),
+      ),
+    );
+    expect(getEditableTextState().widget.cursorColor, Colors.green);
+  });
+
+  testWidgets('TextField can inherit decoration from local InputDecorationThemeData', (
+    WidgetTester tester,
+  ) async {
+    const InputDecoration decoration = InputDecoration(labelText: 'Label');
+    const InputDecorationThemeData decorationTheme = InputDecorationThemeData(
+      errorStyle: TextStyle(color: Colors.green),
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: InputDecorationTheme(
+            data: decorationTheme,
+            child: TextField(decoration: decoration),
+          ),
+        ),
+      ),
+    );
+
+    final InputDecorator decorator = tester.widget(find.byType(InputDecorator));
+    final InputDecoration expectedDecoration = decoration
+        .applyDefaults(decorationTheme)
+        .copyWith(enabled: true, hintMaxLines: 1);
+    expect(decorator.decoration, expectedDecoration);
   });
 
   group('MaxLengthEnforcement', () {
@@ -18859,6 +18899,23 @@ void main() {
     variant: TargetPlatformVariant.all(),
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
   );
+
+  testWidgets('TextField does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final TextEditingController controller = TextEditingController(text: 'X');
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(child: TextField(controller: controller)),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TextField)), Size.zero);
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    tester.pump();
+  });
 }
 
 /// A Simple widget for testing the obscure text.

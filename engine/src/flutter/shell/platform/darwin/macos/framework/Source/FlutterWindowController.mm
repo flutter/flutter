@@ -33,22 +33,31 @@
 
 @interface NSWindow (FlutterWindowSizing)
 
-- (void)flutterSetContentSize:(FlutterWindowSizing)contentSize;
+- (void)flutterSetContentSize:(FlutterWindowSize)contentSize;
+- (void)flutterSetConstraints:(FlutterWindowConstraints)constraints;
 
 @end
 
 @implementation NSWindow (FlutterWindowSizing)
-- (void)flutterSetContentSize:(FlutterWindowSizing)contentSize {
-  if (contentSize.has_size) {
-    [self setContentSize:NSMakeSize(contentSize.width, contentSize.height)];
+- (void)flutterSetContentSize:(FlutterWindowSize)contentSize {
+  [self setContentSize:NSMakeSize(contentSize.width, contentSize.height)];
+}
+
+- (void)flutterSetConstraints:(FlutterWindowConstraints)constraints {
+  NSSize size = [self frameRectForContentRect:self.frame].size;
+  NSSize originalSize = size;
+  [self setContentMinSize:NSMakeSize(constraints.min_width, constraints.min_height)];
+  size.width = std::max(size.width, constraints.min_width);
+  size.height = std::max(size.height, constraints.min_height);
+  if (constraints.max_width > 0 && constraints.max_height > 0) {
+    [self setContentMaxSize:NSMakeSize(constraints.max_width, constraints.max_height)];
+    size.width = std::min(size.width, constraints.max_width);
+    size.height = std::min(size.height, constraints.max_height);
+  } else {
+    [self setContentMaxSize:NSMakeSize(CGFLOAT_MAX, CGFLOAT_MAX)];
   }
-  if (contentSize.has_constraints) {
-    [self setContentMinSize:NSMakeSize(contentSize.min_width, contentSize.min_height)];
-    if (contentSize.max_width > 0 && contentSize.max_height > 0) {
-      [self setContentMaxSize:NSMakeSize(contentSize.max_width, contentSize.max_height)];
-    } else {
-      [self setContentMaxSize:NSMakeSize(CGFLOAT_MAX, CGFLOAT_MAX)];
-    }
+  if (!NSEqualSizes(originalSize, size)) {
+    [self setContentSize:size];
   }
 }
 
@@ -81,27 +90,41 @@
 
 - (BOOL)windowShouldClose:(NSWindow*)sender {
   flutter::IsolateScope isolate_scope(*_isolate);
-  _creationRequest.on_close();
+  _creationRequest.on_should_close();
   return NO;
+}
+
+- (void)windowWillClose {
+  _creationRequest.on_will_close();
 }
 
 - (void)windowDidResize:(NSNotification*)notification {
   flutter::IsolateScope isolate_scope(*_isolate);
-  _creationRequest.on_size_change();
+  _creationRequest.notify_listeners();
 }
 
 // Miniaturize does not trigger resize event, but for now there
 // is no other way to get notification about the state change.
 - (void)windowDidMiniaturize:(NSNotification*)notification {
   flutter::IsolateScope isolate_scope(*_isolate);
-  _creationRequest.on_size_change();
+  _creationRequest.notify_listeners();
 }
 
 // Deminiaturize does not trigger resize event, but for now there
 // is no other way to get notification about the state change.
 - (void)windowDidDeminiaturize:(NSNotification*)notification {
   flutter::IsolateScope isolate_scope(*_isolate);
-  _creationRequest.on_size_change();
+  _creationRequest.notify_listeners();
+}
+
+- (void)windowWillEnterFullScreen:(NSNotification*)notification {
+  flutter::IsolateScope isolate_scope(*_isolate);
+  _creationRequest.notify_listeners();
+}
+
+- (void)windowWillExitFullScreen:(NSNotification*)notification {
+  flutter::IsolateScope isolate_scope(*_isolate);
+  _creationRequest.notify_listeners();
 }
 
 @end
@@ -122,6 +145,59 @@
   return self;
 }
 
+- (FlutterViewIdentifier)createDialogWindow:(const FlutterWindowCreationRequest*)request {
+  FlutterViewController* c = [[FlutterViewController alloc] initWithEngine:_engine
+                                                                   nibName:nil
+                                                                    bundle:nil];
+
+  NSWindow* window = [[NSWindow alloc] init];
+  // If this is not set there will be double free on window close when
+  // using ARC.
+  [window setReleasedWhenClosed:NO];
+
+  window.contentViewController = c;
+  window.styleMask =
+      NSWindowStyleMaskResizable | NSWindowStyleMaskTitled | NSWindowStyleMaskClosable;
+  window.collectionBehavior = NSWindowCollectionBehaviorFullScreenAuxiliary;
+  if (request->has_size) {
+    [window flutterSetContentSize:request->size];
+  }
+  if (request->has_constraints) {
+    [window flutterSetConstraints:request->constraints];
+  }
+
+  FlutterWindowOwner* w = [[FlutterWindowOwner alloc] initWithWindow:window
+                                               flutterViewController:c
+                                                     creationRequest:*request];
+  window.delegate = w;
+  [_windows addObject:w];
+
+  NSWindow* parent = nil;
+
+  if (request->parent_view_id != 0) {
+    for (FlutterWindowOwner* owner in _windows) {
+      if (owner.flutterViewController.viewIdentifier == request->parent_view_id) {
+        parent = owner.window;
+        break;
+      }
+    }
+    if (parent == nil) {
+      FML_LOG(WARNING) << "Failed to find parent window for ID " << request->parent_view_id;
+    }
+  }
+
+  if (parent != nil) {
+    [parent beginCriticalSheet:window
+             completionHandler:^(NSModalResponse response){
+             }];
+  } else {
+    [window setIsVisible:YES];
+    [window makeKeyAndOrderFront:nil];
+  }
+
+  return c.viewIdentifier;
+}
+
 - (FlutterViewIdentifier)createRegularWindow:(const FlutterWindowCreationRequest*)request {
   FlutterViewController* c = [[FlutterViewController alloc] initWithEngine:_engine
                                                                    nibName:nil
@@ -135,7 +211,12 @@
   window.contentViewController = c;
   window.styleMask = NSWindowStyleMaskResizable | NSWindowStyleMaskTitled |
                      NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable;
-  [window flutterSetContentSize:request->contentSize];
+  if (request->has_size) {
+    [window flutterSetContentSize:request->size];
+  }
+  if (request->has_constraints) {
+    [window flutterSetConstraints:request->constraints];
+  }
   [window setIsVisible:YES];
   [window makeKeyAndOrderFront:nil];
 
@@ -158,11 +239,21 @@
   }
   if (owner != nil) {
     [_windows removeObject:owner];
+
+    for (NSWindow* win in owner.window.sheets) {
+      [self destroyWindow:win];
+    }
+
+    for (NSWindow* win in owner.window.childWindows) {
+      [self destroyWindow:win];
+    }
+
     // Make sure to unregister the controller from the engine and remove the FlutterView
     // before destroying the window and Flutter NSView.
     [owner.flutterViewController dispose];
     owner.window.delegate = nil;
     [owner.window close];
+    [owner windowWillClose];
   }
 }
 
@@ -186,6 +277,14 @@ int64_t InternalFlutter_WindowController_CreateRegularWindow(
   return [engine.windowController createRegularWindow:request];
 }
 
+int64_t InternalFlutter_WindowController_CreateDialogWindow(
+    int64_t engine_id,
+    const FlutterWindowCreationRequest* request) {
+  FlutterEngine* engine = [FlutterEngine engineForIdentifier:engine_id];
+  [engine enableMultiView];
+  return [engine.windowController createDialogWindow:request];
+}
+
 void InternalFlutter_Window_Destroy(int64_t engine_id, void* window) {
   NSWindow* w = (__bridge NSWindow*)window;
   FlutterEngine* engine = [FlutterEngine engineForIdentifier:engine_id];
@@ -200,15 +299,23 @@ void* InternalFlutter_Window_GetHandle(int64_t engine_id, FlutterViewIdentifier 
 
 FlutterWindowSize InternalFlutter_Window_GetContentSize(void* window) {
   NSWindow* w = (__bridge NSWindow*)window;
+  NSRect contentRect = [w contentRectForFrameRect:w.frame];
   return {
-      .width = w.frame.size.width,
-      .height = w.frame.size.height,
+      .width = contentRect.size.width,
+      .height = contentRect.size.height,
   };
 }
 
-void InternalFlutter_Window_SetContentSize(void* window, const FlutterWindowSizing* size) {
+void InternalFlutter_Window_SetContentSize(void* window, const FlutterWindowSize* size) {
   NSWindow* w = (__bridge NSWindow*)window;
   [w flutterSetContentSize:*size];
+}
+
+FLUTTER_DARWIN_EXPORT
+void InternalFlutter_Window_SetConstraints(void* window,
+                                           const FlutterWindowConstraints* constraints) {
+  NSWindow* w = (__bridge NSWindow*)window;
+  [w flutterSetConstraints:*constraints];
 }
 
 void InternalFlutter_Window_SetTitle(void* window, const char* title) {
@@ -264,6 +371,16 @@ void InternalFlutter_Window_Activate(void* window) {
   NSWindow* w = (__bridge NSWindow*)window;
   [NSApplication.sharedApplication activateIgnoringOtherApps:YES];
   [w makeKeyAndOrderFront:nil];
+}
+
+char* InternalFlutter_Window_GetTitle(void* window) {
+  NSWindow* w = (__bridge NSWindow*)window;
+  return strdup(w.title.UTF8String);
+}
+
+bool InternalFlutter_Window_IsActivated(void* window) {
+  NSWindow* w = (__bridge NSWindow*)window;
+  return w.isKeyWindow;
 }
 
 // NOLINTEND(google-objc-function-naming)

@@ -429,7 +429,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       (ButtonStyle? style) => style?.shape,
     );
 
-    final MaterialStateMouseCursor mouseCursor = _MouseCursor(
+    final WidgetStateMouseCursor mouseCursor = _MouseCursor(
       (Set<WidgetState> states) =>
           effectiveValue((ButtonStyle? style) => style?.mouseCursor?.resolve(states)),
     );
@@ -615,10 +615,10 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
   }
 }
 
-class _MouseCursor extends MaterialStateMouseCursor {
+class _MouseCursor extends WidgetStateMouseCursor {
   const _MouseCursor(this.resolveCallback);
 
-  final MaterialPropertyResolver<MouseCursor?> resolveCallback;
+  final WidgetPropertyResolver<MouseCursor?> resolveCallback;
 
   @override
   MouseCursor resolve(Set<WidgetState> states) => resolveCallback(states)!;
@@ -696,9 +696,9 @@ class _RenderInputPadding extends RenderShiftedBox {
   Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
     if (child != null) {
       final Size childSize = layoutChild(child!, constraints);
-      final double height = math.max(childSize.width, minSize.width);
-      final double width = math.max(childSize.height, minSize.height);
-      return constraints.constrain(Size(height, width));
+      final double width = math.max(childSize.width, minSize.width);
+      final double height = math.max(childSize.height, minSize.height);
+      return constraints.constrain(Size(width, height));
     }
     return Size.zero;
   }

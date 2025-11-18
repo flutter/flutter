@@ -23,27 +23,27 @@ void main() {
 Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
 
-  group('Filters', () {
-    const ui.Rect region = ui.Rect.fromLTWH(0, 0, 128, 128);
+  const ui.Rect region = ui.Rect.fromLTWH(0, 0, 128, 128);
 
-    Future<void> drawTestImageWithPaint(ui.Paint paint) async {
-      final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(
-        Uri(path: '/test_images/mandrill_128.png'),
-      );
-      expect(codec.frameCount, 1);
+  Future<void> drawTestImageWithPaint(ui.Paint paint) async {
+    final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(
+      Uri(path: '/test_images/mandrill_128.png'),
+    );
+    expect(codec.frameCount, 1);
 
-      final ui.FrameInfo info = await codec.getNextFrame();
-      codec.dispose();
-      final ui.Image image = info.image;
-      expect(image.width, 128);
-      expect(image.height, 128);
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder, region);
-      canvas.drawImage(image, ui.Offset.zero, paint);
+    final ui.FrameInfo info = await codec.getNextFrame();
+    codec.dispose();
+    final ui.Image image = info.image;
+    expect(image.width, 128);
+    expect(image.height, 128);
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ui.Canvas canvas = ui.Canvas(recorder, region);
+    canvas.drawImage(image, ui.Offset.zero, paint);
 
-      await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    }
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+  }
 
+  group('filters', () {
     test('blur filter', () async {
       await drawTestImageWithPaint(
         ui.Paint()..imageFilter = ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
@@ -158,6 +158,13 @@ Future<void> testMain() async {
       await drawTestImageWithPaint(ui.Paint()..colorFilter = sepia);
       await matchGoldenFile('ui_filter_matrix_colorfilter.png', region: region);
       expect(sepia.toString(), startsWith('ColorFilter.matrix([0.393, 0.769, 0.189, '));
+    });
+
+    test('saturation color filter', () async {
+      final ui.ColorFilter colorFilter = ui.ColorFilter.saturation(0);
+      await drawTestImageWithPaint(ui.Paint()..colorFilter = colorFilter);
+      await matchGoldenFile('ui_filter_saturation_colorfilter.png', region: region);
+      expect(colorFilter.toString(), startsWith('ColorFilter.matrix([0.2126, 0.7152, 0.0722'));
     });
 
     test('matrix color filter with 0..255 translation values', () async {
@@ -451,18 +458,7 @@ Future<void> testMain() async {
       );
     });
 
-    test('does not throw for both sigmaX and sigmaY set to 0', () async {
-      // Ignoring redundant arguments (the default sigma is 0) to make the
-      // test clearer.
-      final ui.ImageFilter imageFilter = ui.ImageFilter.blur(
-        // ignore: avoid_redundant_argument_values
-        sigmaX: 0,
-        // ignore: avoid_redundant_argument_values
-        sigmaY: 0,
-        tileMode: ui.TileMode.clamp,
-      );
-      expect(imageFilter, isNotNull);
-
+    Future<ui.Rect> drawTestCirclesComparison(ui.ImageFilter filter) async {
       const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 250);
 
       final ui.SceneBuilder builder = ui.SceneBuilder();
@@ -478,10 +474,10 @@ Future<void> testMain() async {
       final ui.Picture redCircle1 = recorder.endRecording();
       builder.addPicture(ui.Offset.zero, redCircle1);
 
-      builder.pushImageFilter(imageFilter);
+      builder.pushImageFilter(filter);
 
       // Draw another red circle and apply it to the scene.
-      // This one should also be red with the image filter doing nothing
+      // This one will be affected by the image filter.
       final ui.PictureRecorder recorder2 = ui.PictureRecorder();
       final ui.Canvas canvas2 = ui.Canvas(recorder2, region);
       canvas2.drawCircle(
@@ -495,10 +491,65 @@ Future<void> testMain() async {
 
       await renderScene(builder.build());
 
+      return region;
+    }
+
+    test('does not throw for blur filter with sigmaX and sigmaY set to 0', () async {
+      // Ignoring redundant arguments (the default sigma is 0) to make the
+      // test clearer.
+      final ui.ImageFilter imageFilter = ui.ImageFilter.blur(
+        // ignore: avoid_redundant_argument_values
+        sigmaX: 0,
+        // ignore: avoid_redundant_argument_values
+        sigmaY: 0,
+        tileMode: ui.TileMode.clamp,
+      );
+      expect(imageFilter, isNotNull);
+
+      final region = await drawTestCirclesComparison(imageFilter);
       await matchGoldenFile('ui_zero_sigma_blur.png', region: region);
-      // Unskip when Skwasm and CanvasKit are unified:
-      // https://github.com/flutter/flutter/issues/172311
-    }, skip: isSkwasm);
+    });
+
+    test('does not throw for dilate filter with both radiusX and radiusY set to 0', () async {
+      // Ignoring redundant arguments (the default radius is 0) to make the
+      // test clearer.
+      final ui.ImageFilter imageFilter = ui.ImageFilter.dilate(
+        // ignore: avoid_redundant_argument_values
+        radiusX: 0,
+        // ignore: avoid_redundant_argument_values
+        radiusY: 0,
+      );
+      expect(imageFilter, isNotNull);
+
+      final region = await drawTestCirclesComparison(imageFilter);
+      await matchGoldenFile('ui_filter_dilate_imagefilter_with_zeros.png', region: region);
+    });
+
+    test('does not throw for erode filter with both radiusX and radiusY set to 0', () async {
+      // Ignoring redundant arguments (the default radius is 0) to make the
+      // test clearer.
+      final ui.ImageFilter imageFilter = ui.ImageFilter.erode(
+        // ignore: avoid_redundant_argument_values
+        radiusX: 0,
+        // ignore: avoid_redundant_argument_values
+        radiusY: 0,
+      );
+      expect(imageFilter, isNotNull);
+
+      final region = await drawTestCirclesComparison(imageFilter);
+      await matchGoldenFile('ui_filter_erode_imagefilter_with_zeros.png', region: region);
+    });
+
+    test('does not throw for matrix filter with identity matrix', () async {
+      final ui.ImageFilter imageFilter = ui.ImageFilter.matrix(Matrix4.identity().toFloat64());
+      expect(imageFilter, isNotNull);
+
+      final region = await drawTestCirclesComparison(imageFilter);
+      await matchGoldenFile(
+        'ui_filter_matrix_imagefilter_with_identity_matrix.png',
+        region: region,
+      );
+    });
 
     test('== operator', () {
       final List<ui.ImageFilter> filters1 = <ui.ImageFilter>[
@@ -527,16 +578,16 @@ Future<void> testMain() async {
         }
       }
     });
-
-    group('MaskFilter', () {
-      test('with 0 sigma can be set on a Paint', () {
-        final ui.Paint paint = ui.Paint();
-        const ui.MaskFilter filter = ui.MaskFilter.blur(ui.BlurStyle.normal, 0);
-
-        expect(() => paint.maskFilter = filter, isNot(throwsException));
-      });
-    });
   }, skip: isWimp); // https://github.com/flutter/flutter/issues/175371
+
+  group('MaskFilter', () {
+    test('with 0 sigma can be set on a Paint', () {
+      final ui.Paint paint = ui.Paint();
+      const ui.MaskFilter filter = ui.MaskFilter.blur(ui.BlurStyle.normal, 0);
+
+      expect(() => paint.maskFilter = filter, isNot(throwsException));
+    });
+  });
 }
 
 List<ui.ColorFilter> createColorFilters() {
@@ -557,6 +608,7 @@ List<ui.ColorFilter> createColorFilters() {
     EngineColorFilter.linearToSrgbGamma(),
     // ignore: prefer_const_constructors
     EngineColorFilter.srgbToLinearGamma(),
+    EngineColorFilter.saturation(0.5),
   ];
 }
 

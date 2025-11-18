@@ -11,6 +11,10 @@ Capabilities::Capabilities() = default;
 
 Capabilities::~Capabilities() = default;
 
+size_t Capabilities::GetMinimumStorageBufferAlignment() const {
+  return GetMinimumUniformAlignment();
+}
+
 class StandardCapabilities final : public Capabilities {
  public:
   // |Capabilities|
@@ -90,6 +94,9 @@ class StandardCapabilities final : public Capabilities {
 
   // |Capabilities|
   bool SupportsPrimitiveRestart() const override { return true; }
+
+  // |Capabilities|
+  bool Supports32BitPrimitiveIndices() const override { return true; }
 
   // |Capabilities|
   bool SupportsExtendedRangeFormats() const override {

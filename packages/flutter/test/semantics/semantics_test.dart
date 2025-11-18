@@ -704,6 +704,8 @@ void main() {
       '   invisible\n'
       '   isHidden: false\n'
       '   identifier: ""\n'
+      '   traversalParentIdentifier: null\n'
+      '   traversalChildIdentifier: null\n'
       '   label: ""\n'
       '   value: ""\n'
       '   increasedValue: ""\n'
@@ -850,6 +852,8 @@ void main() {
       '   invisible\n'
       '   isHidden: false\n'
       '   identifier: ""\n'
+      '   traversalParentIdentifier: null\n'
+      '   traversalChildIdentifier: null\n'
       '   label: ""\n'
       '   value: ""\n'
       '   increasedValue: ""\n'
@@ -1034,6 +1038,34 @@ void main() {
     expect(config.onMoveCursorBackwardByCharacter, same(onMoveCursorBackwardByCharacter));
     expect(config.onTap, same(onTap));
     expect(config.customSemanticsActions[customAction], same(onCustomAction));
+  });
+
+  test('SemanticsConfiguration.copy() preserves hitTestBehavior', () {
+    final SemanticsConfiguration config = SemanticsConfiguration()
+      ..isSemanticBoundary = true
+      ..label = 'test'
+      ..hitTestBehavior = SemanticsHitTestBehavior.opaque;
+
+    expect(config.hitTestBehavior, SemanticsHitTestBehavior.opaque);
+
+    final SemanticsConfiguration copy = config.copy();
+
+    expect(copy.hitTestBehavior, SemanticsHitTestBehavior.opaque);
+    expect(copy.isSemanticBoundary, isTrue);
+    expect(copy.label, 'test');
+  });
+
+  test('SemanticsConfiguration.copy() preserves all hitTestBehavior values', () {
+    final SemanticsConfiguration deferConfig = SemanticsConfiguration();
+    expect(deferConfig.copy().hitTestBehavior, SemanticsHitTestBehavior.defer);
+
+    final SemanticsConfiguration opaqueConfig = SemanticsConfiguration()
+      ..hitTestBehavior = SemanticsHitTestBehavior.opaque;
+    expect(opaqueConfig.copy().hitTestBehavior, SemanticsHitTestBehavior.opaque);
+
+    final SemanticsConfiguration transparentConfig = SemanticsConfiguration()
+      ..hitTestBehavior = SemanticsHitTestBehavior.transparent;
+    expect(transparentConfig.copy().hitTestBehavior, SemanticsHitTestBehavior.transparent);
   });
 
   test('SemanticsOwner dispatches memory events', () async {

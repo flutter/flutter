@@ -367,14 +367,14 @@ void main() {
     const double hoveredElevation = 1.0;
     const double focusedElevation = 2.0;
     const double defaultElevation = 3.0;
-    double getElevation(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    double getElevation(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedElevation;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredElevation;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedElevation;
       }
       return defaultElevation;
@@ -607,27 +607,27 @@ void main() {
     const OutlinedBorder hoveredShape = ContinuousRectangleBorder();
     const OutlinedBorder focusedShape = CircleBorder();
     const OutlinedBorder defaultShape = StadiumBorder();
-    BorderSide getSide(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    BorderSide getSide(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedSide;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredSide;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedSide;
       }
       return defaultSide;
     }
 
-    OutlinedBorder getShape(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    OutlinedBorder getShape(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedShape;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoveredShape;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedShape;
       }
       return defaultShape;
@@ -3022,7 +3022,7 @@ void main() {
     expect(find.byWidget(iconButtonMaterial), findsOneWidget);
     expect(
       iconButtonMaterial.color,
-      localTheme.iconButtonTheme.style?.backgroundColor?.resolve(<MaterialState>{}),
+      localTheme.iconButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{}),
     );
 
     // Test the suggestion card color.
@@ -4242,6 +4242,60 @@ void main() {
     variant: TargetPlatformVariant.all(),
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
   );
+
+  testWidgets('smartDashesType and smartQuotesType are properly forwarded to inner text fields', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchAnchor.bar(
+            smartDashesType: SmartDashesType.disabled,
+            smartQuotesType: SmartQuotesType.disabled,
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Check anchor's text field.
+    final TextField anchorTextField = tester.widget(find.byType(TextField));
+    expect(anchorTextField.smartDashesType, SmartDashesType.disabled);
+    expect(anchorTextField.smartQuotesType, SmartQuotesType.disabled);
+
+    // Open view and check view's text field.
+    await tester.tap(find.byType(SearchBar));
+    await tester.pumpAndSettle();
+
+    final Finder viewTextFieldFinder = find.descendant(
+      of: find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_ViewContent',
+      ),
+      matching: find.byType(TextField),
+    );
+    expect(viewTextFieldFinder, findsOneWidget);
+    final TextField viewTextField = tester.widget(viewTextFieldFinder);
+    expect(viewTextField.smartDashesType, SmartDashesType.disabled);
+    expect(viewTextField.smartQuotesType, SmartQuotesType.disabled);
+  });
+
+  testWidgets('SearchBar does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final TextEditingController controller = TextEditingController(text: 'X');
+    addTearDown(controller.dispose);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(child: SearchBar(controller: controller)),
+      ),
+    );
+    expect(tester.getSize(find.byType(SearchBar)), Size.zero);
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    await tester.pump();
+    expect(find.text('X'), findsOne);
+  });
 }
 
 Future<void> checkSearchBarDefaults(
@@ -4290,14 +4344,14 @@ const Color hoveredColor = Colors.orange;
 const Color focusedColor = Colors.yellow;
 const Color defaultColor = Colors.green;
 
-Color _getColor(Set<MaterialState> states) {
-  if (states.contains(MaterialState.pressed)) {
+Color _getColor(Set<WidgetState> states) {
+  if (states.contains(WidgetState.pressed)) {
     return pressedColor;
   }
-  if (states.contains(MaterialState.hovered)) {
+  if (states.contains(WidgetState.hovered)) {
     return hoveredColor;
   }
-  if (states.contains(MaterialState.focused)) {
+  if (states.contains(WidgetState.focused)) {
     return focusedColor;
   }
   return defaultColor;
@@ -4308,14 +4362,14 @@ final TextStyle? pressedStyle = theme.textTheme.bodyLarge?.copyWith(color: press
 final TextStyle? hoveredStyle = theme.textTheme.bodyLarge?.copyWith(color: hoveredColor);
 final TextStyle? focusedStyle = theme.textTheme.bodyLarge?.copyWith(color: focusedColor);
 
-TextStyle? _getTextStyle(Set<MaterialState> states) {
-  if (states.contains(MaterialState.pressed)) {
+TextStyle? _getTextStyle(Set<WidgetState> states) {
+  if (states.contains(WidgetState.pressed)) {
     return pressedStyle;
   }
-  if (states.contains(MaterialState.hovered)) {
+  if (states.contains(WidgetState.hovered)) {
     return hoveredStyle;
   }
-  if (states.contains(MaterialState.focused)) {
+  if (states.contains(WidgetState.focused)) {
     return focusedStyle;
   }
   return null;

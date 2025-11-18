@@ -254,9 +254,7 @@ abstract class UnpackIOS extends UnpackDarwin {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/Flutter.framework/Flutter'),
-  ];
+  List<Source> get outputs => const <Source>[kFlutterIOSFrameworkBinarySource];
 
   @override
   List<Target> get dependencies => <Target>[];
@@ -459,10 +457,10 @@ class _IssueLaunchRootViewControllerAccess extends Target {
         flutterProject.ios.appDelegateSwift,
       );
     }
-    if (flutterProject.ios.appDelegateObjc.existsSync()) {
+    if (flutterProject.ios.appDelegateObjcImplementation.existsSync()) {
       await checkForLaunchRootViewControllerAccessDeprecationObjc(
         environment.logger,
-        flutterProject.ios.appDelegateObjc,
+        flutterProject.ios.appDelegateObjcImplementation,
       );
     }
   }
@@ -476,7 +474,10 @@ class _IssueLaunchRootViewControllerAccess extends Target {
       const Source.pattern(
         '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
       ),
-      Source.fromProject((FlutterProject project) => project.ios.appDelegateObjc, optional: true),
+      Source.fromProject(
+        (FlutterProject project) => project.ios.appDelegateObjcImplementation,
+        optional: true,
+      ),
       Source.fromProject((FlutterProject project) => project.ios.appDelegateSwift, optional: true),
     ];
   }

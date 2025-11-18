@@ -13,6 +13,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/template.dart';
+import '../base/utils.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../macos/xcode.dart';
@@ -311,27 +312,46 @@ class IOSCoreDeviceControl {
 
   /// A list of log patterns to ignore.
   static final _ignorePatterns = <Pattern>[
-    RegExp(r'\[PreviewsAgentExecutorLibrary\].*'),
-    RegExp(r'\[UIKit App Config\].*'),
-    RegExp(r'\[UIFocus\].*'),
+    // Ignore process logs that don't contain Flutter or user logs.
+    // Example:
+    //   * Ignore logs with prefix in brackets that doesn't match FML:
+    //     2025-09-16 12:15:47.939171-0500 Runner[1230:133819] [UIKit App Config] ...
+    //   * Ignore logs with timestamp/process prefix:
+    //     2025-09-16 12:15:47.939171-0500 Runner[1230:133819] CoreText note: ...
+    //   * Don't ignore FML logs:
+    //     2025-09-16 12:05:54.162621-0500 Runner[1215:129795] [FATAL:flutter/runtime/service_protocol.cc(121)] ...
+    //   * Don't ignore logs with no timestamp/process prefix:
+    //     A log with no prefix (NSLog, print in Swift, and FlutterLogger)
+    //   * Don't ignore flutter logs:
+    //     2025-09-16 12:50:07.953318-0500 Runner[1279:149305] flutter: ...
+    RegExp(
+      r'^\S* \S* \S*\[[0-9:]*] ((?!(\[INFO|\[WARNING|\[ERROR|\[IMPORTANT|\[FATAL):))(?!(flutter:)).*',
+    ),
+    // Ignore iOS execution mode and potential error. This is not meaningful to the developer.
+    // Example:
+    //   * Dart execution mode: JIT
+    //   * Dart execution mode: simulator
     RegExp(r'Dart execution mode: .*'),
+    'Failed to execute code (error: EXC_BAD_ACCESS, debugger assist: not detected)',
   ];
+
+  static const kCoreDeviceLaunchCompleteLog = 'Waiting for the application to terminate';
 
   /// Executes `devicectl` command to get list of devices. The command will
   /// likely complete before [timeout] is reached. If [timeout] is reached,
   /// the command will be stopped as a failure.
   Future<List<Object?>> _listCoreDevices({
     Duration timeout = const Duration(seconds: _minimumTimeoutInSeconds),
+    Completer<void>? cancelCompleter,
   }) async {
     if (!_xcode.isDevicectlInstalled) {
-      _logger.printError('devicectl is not installed.');
-      return <Object?>[];
+      _logger.printTrace('devicectl is not installed.');
+      return const <Object?>[];
     }
 
-    // Default to minimum timeout if needed to prevent error.
     var validTimeout = timeout;
     if (timeout.inSeconds < _minimumTimeoutInSeconds) {
-      _logger.printError(
+      _logger.printWarning(
         'Timeout of ${timeout.inSeconds} seconds is below the minimum timeout value '
         'for devicectl. Changing the timeout to the minimum value of $_minimumTimeoutInSeconds.',
       );
@@ -353,8 +373,26 @@ class IOSCoreDeviceControl {
       output.path,
     ];
 
+    Process? process;
     try {
-      final RunResult result = await _processUtils.run(command, throwOnError: true);
+      process = await _processUtils.start(command);
+
+      final Future<void> cancelFuture = cancelCompleter?.future ?? Completer<void>().future;
+      final Future<dynamic> firstCompleted = Future.any<dynamic>(<Future<dynamic>>[
+        process.exitCode,
+        cancelFuture,
+      ]);
+      await firstCompleted;
+
+      if (cancelCompleter?.isCompleted ?? false) {
+        process.kill();
+        return const <Object?>[];
+      }
+
+      final int exitCode = await process.exitCode;
+      final String stdout = await utf8.decodeStream(process.stdout);
+      final String stderr = await utf8.decodeStream(process.stderr);
+
       var isToolPossiblyShutdown = false;
       if (_fileSystem is ErrorHandlingFileSystem) {
         final FileSystem delegate = _fileSystem.fileSystem;
@@ -363,55 +401,64 @@ class IOSCoreDeviceControl {
         }
       }
 
-      // It's possible that the tool is in the process of shutting down, which
-      // could result in the temp directory being deleted after the shutdown hooks run
-      // before we check if `output` exists. If this happens, we shouldn't crash
-      // but just carry on as if no devices were found as the tool will exit on
-      // its own.
-      //
-      // See https://github.com/flutter/flutter/issues/141892 for details.
-      if (!isToolPossiblyShutdown && !output.existsSync()) {
-        _logger.printError('After running the command ${command.join(' ')} the file');
-        _logger.printError('${output.path} was expected to exist, but it did not.');
-        _logger.printError('The process exited with code ${result.exitCode} and');
-        _logger.printError('Stdout:\n\n${result.stdout.trim()}\n');
-        _logger.printError('Stderr:\n\n${result.stderr.trim()}');
-        throw StateError('Expected the file ${output.path} to exist but it did not');
-      } else if (isToolPossiblyShutdown) {
-        return <Object?>[];
+      if (isToolPossiblyShutdown) {
+        return const <Object?>[];
       }
+
+      if (exitCode != 0) {
+        _logger.printTrace('devicectl exited with a non-zero exit code: $exitCode');
+        _logger.printTrace('devicectl stdout:\n$stdout');
+        _logger.printTrace('devicectl stderr:\n$stderr');
+        return const <Object?>[];
+      }
+
+      if (!output.existsSync()) {
+        _logger.printTrace('After running the command ${command.join(' ')} the file');
+        _logger.printTrace('${output.path} was expected to exist, but it did not.');
+        _logger.printTrace('The process exited with code $exitCode and');
+        _logger.printTrace('Stdout:\n\n${stdout.trim()}\n');
+        _logger.printTrace('Stderr:\n\n${stderr.trim()}');
+        throw StateError('Expected the file ${output.path} to exist but it did not');
+      }
+
       final String stringOutput = output.readAsStringSync();
       _logger.printTrace(stringOutput);
 
-      try {
-        final Object? decodeResult = (json.decode(stringOutput) as Map<String, Object?>)['result'];
-        if (decodeResult is Map<String, Object?>) {
-          final Object? decodeDevices = decodeResult['devices'];
-          if (decodeDevices is List<Object?>) {
-            return decodeDevices;
-          }
+      final Object? decodeResult = (json.decode(stringOutput) as Map<String, Object?>)['result'];
+      if (decodeResult is Map<String, Object?>) {
+        final Object? decodeDevices = decodeResult['devices'];
+        if (decodeDevices is List<Object?>) {
+          return decodeDevices;
         }
-        _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
-        return <Object?>[];
-      } on FormatException {
-        // We failed to parse the devicectl output, or it returned junk.
-        _logger.printError('devicectl returned non-JSON response: $stringOutput');
-        return <Object?>[];
       }
-    } on ProcessException catch (err) {
-      _logger.printError('Error executing devicectl: $err');
-      return <Object?>[];
+      _logger.printTrace('devicectl returned unexpected JSON response: $stringOutput');
+      return const <Object?>[];
+    } on ProcessException catch (e) {
+      _logger.printTrace('Error executing devicectl: $e');
+      return const <Object?>[];
+    } on FileSystemException catch (e) {
+      _logger.printTrace('Error reading devicectl output: $e');
+      return const <Object?>[];
+    } on FormatException {
+      _logger.printTrace('devicectl returned non-JSON response.');
+      return const <Object?>[];
     } finally {
+      process?.kill();
       ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
     }
   }
 
   Future<List<IOSCoreDevice>> getCoreDevices({
     Duration timeout = const Duration(seconds: _minimumTimeoutInSeconds),
+    Completer<void>? cancelCompleter,
   }) async {
-    final List<Object?> devicesSection = await _listCoreDevices(timeout: timeout);
+    final List<Object?> coreDeviceObjects = await _listCoreDevices(
+      timeout: timeout,
+      cancelCompleter: cancelCompleter,
+    );
+
     return <IOSCoreDevice>[
-      for (final Object? deviceObject in devicesSection)
+      for (final Object? deviceObject in coreDeviceObjects)
         if (deviceObject is Map<String, Object?>)
           IOSCoreDevice.fromBetaJson(deviceObject, logger: _logger),
     ];
@@ -605,13 +652,21 @@ class IOSCoreDeviceControl {
   ///
   /// If [attachToConsole] is true, attaches the application to the console and waits for the app
   /// to terminate.
+  ///
+  /// When [jsonOutputFile] is provided, devicectl will write a JSON file with the command results
+  /// after the command has completed. This will not have the results when using [attachToConsole]
+  /// until the process has exited.
+  ///
+  /// When [logOutputFile] is provided, devicectl will write all logging otherwise passed to
+  /// stdout/stderr to the file. It will also continue to stream the logs to stdout/stderr.
   List<String> _launchAppCommand({
     required String deviceId,
     required String bundleId,
     List<String> launchArguments = const <String>[],
     bool startStopped = false,
     bool attachToConsole = false,
-    File? outputFile,
+    File? jsonOutputFile,
+    File? logOutputFile,
   }) {
     return <String>[
       ..._xcode.xcrunCommand(),
@@ -629,7 +684,8 @@ class IOSCoreDeviceControl {
         // See https://github.com/llvm/llvm-project/blob/19b43e1757b4fd3d0f188cf8a08e9febb0dbec2f/lldb/source/Plugins/Platform/MacOSX/PlatformDarwin.cpp#L1227-L1233
         '{"OS_ACTIVITY_DT_MODE": "enable"}',
       ],
-      if (outputFile != null) ...<String>['--json-output', outputFile.path],
+      if (jsonOutputFile != null) ...<String>['--json-output', jsonOutputFile.path],
+      if (logOutputFile != null) ...<String>['--log-output', logOutputFile.path],
       bundleId,
       if (launchArguments.isNotEmpty) ...launchArguments,
     ];
@@ -658,7 +714,7 @@ class IOSCoreDeviceControl {
       deviceId: deviceId,
       launchArguments: launchArguments,
       startStopped: startStopped,
-      outputFile: output,
+      jsonOutputFile: output,
     );
 
     try {
@@ -709,6 +765,9 @@ class IOSCoreDeviceControl {
       return false;
     }
 
+    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
+    final File output = tempDirectory.childFile('launch_log.txt')..createSync();
+
     final launchCompleter = Completer<bool>();
     final List<String> command = _launchAppCommand(
       bundleId: bundleId,
@@ -716,15 +775,15 @@ class IOSCoreDeviceControl {
       launchArguments: launchArguments,
       startStopped: startStopped,
       attachToConsole: true,
+      logOutputFile: output,
     );
-
+    Timer? timer;
     try {
       final Process launchProcess = await _processUtils.start(command);
       coreDeviceLogForwarder.launchProcess = launchProcess;
 
       final StreamSubscription<String> stdoutSubscription = launchProcess.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
+          .transform(utf8LineDecoder)
           .listen((String line) {
             if (launchCompleter.isCompleted && !_ignoreLog(line)) {
               coreDeviceLogForwarder.addLog(line);
@@ -732,14 +791,13 @@ class IOSCoreDeviceControl {
               _logger.printTrace(line);
             }
 
-            if (line.contains('Waiting for the application to terminate')) {
+            if (!launchCompleter.isCompleted && line.contains(kCoreDeviceLaunchCompleteLog)) {
               launchCompleter.complete(true);
             }
           });
 
       final StreamSubscription<String> stderrSubscription = launchProcess.stderr
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
+          .transform(utf8LineDecoder)
           .listen((String line) {
             if (launchCompleter.isCompleted && !_ignoreLog(line)) {
               coreDeviceLogForwarder.addLog(line);
@@ -762,10 +820,27 @@ class IOSCoreDeviceControl {
               }
             }),
       );
-      return launchCompleter.future;
+
+      // Sometimes devicectl launch logs don't stream to stdout.
+      // As a workaround, we also use the log output file to check if it has finished launching.
+      timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+        if (await output.exists()) {
+          final String contents = await output.readAsString();
+          if (!launchCompleter.isCompleted && contents.contains(kCoreDeviceLaunchCompleteLog)) {
+            launchCompleter.complete(true);
+          }
+        }
+      });
+
+      // Do not return the launchCompleter.future directly, otherwise, the timer will be canceled
+      // prematurely.
+      final bool status = await launchCompleter.future;
+      return status;
     } on ProcessException catch (err) {
       _logger.printTrace('Error executing devicectl: $err');
       return false;
+    } finally {
+      timer?.cancel();
     }
   }
 

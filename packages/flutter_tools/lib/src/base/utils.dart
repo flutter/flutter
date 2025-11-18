@@ -12,6 +12,7 @@ import 'package:file/file.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
+import 'package:stack_trace/stack_trace.dart';
 
 import '../convert.dart';
 import 'platform.dart';
@@ -573,3 +574,33 @@ extension DurationAgo on Duration {
     return '$inMinutes minutes ago';
   }
 }
+
+extension UriExtension on Uri {
+  /// Returns this [Uri] with its query parameters removed.
+  Uri withoutQueryParameters() {
+    return Uri(scheme: scheme, userInfo: userInfo, host: host, port: port, path: this.path);
+  }
+}
+
+extension StackTraceTransform<T> on Stream<T> {
+  /// A custom implementation of [transform] that captures the
+  /// stack trace at the point of invocation.
+  Stream<S> transformWithCallSite<S>(StreamTransformer<T, S> transformer) {
+    // Don't include this frame with the stack trace as it adds no value.
+    final callSiteTrace = Trace.current(1);
+    return transform(transformer).transform(
+      StreamTransformer.fromHandlers(
+        handleData: (data, sink) {
+          sink.add(data);
+        },
+        handleError: (error, stackTrace, sink) {
+          sink.addError(error, callSiteTrace);
+        },
+      ),
+    );
+  }
+}
+
+final utf8LineDecoder = StreamTransformer<List<int>, String>.fromBind(
+  (stream) => stream.transformWithCallSite(utf8.decoder).transform(const LineSplitter()),
+);

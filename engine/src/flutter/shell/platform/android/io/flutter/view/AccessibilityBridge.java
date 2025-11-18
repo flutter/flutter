@@ -31,12 +31,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
+import io.flutter.Build.API_LEVELS;
 import io.flutter.BuildConfig;
 import io.flutter.Log;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.plugin.platform.PlatformViewsAccessibilityDelegate;
 import io.flutter.util.Predicate;
 import io.flutter.util.ViewUtils;
+import io.flutter.view.AccessibilityBridge.Flag;
 import io.flutter.view.AccessibilityStringBuilder.LocaleStringAttribute;
 import io.flutter.view.AccessibilityStringBuilder.SpellOutStringAttribute;
 import io.flutter.view.AccessibilityStringBuilder.StringAttribute;
@@ -44,6 +46,7 @@ import io.flutter.view.AccessibilityStringBuilder.StringAttributeType;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -226,6 +229,16 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   // a bitmask whose values comes from {@link AccessibilityFeature}.
   private int accessibilityFeatureFlags = 0;
 
+  // The default locale for assistive technologies in BCP 47 format.
+  //
+  // For example "en-US", "de-DE", "fr-FR".
+  @Nullable private String defaultLocale;
+
+  @VisibleForTesting
+  public void setLocale(@NonNull String locale) {
+    defaultLocale = locale;
+  }
+
   // The {@code SemanticsNode} within Flutter that currently has the focus of Android's input
   // system.
   //
@@ -370,6 +383,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             args.order(ByteOrder.LITTLE_ENDIAN);
           }
           AccessibilityBridge.this.updateSemantics(buffer, strings, stringAttributeArgs);
+        }
+
+        @Override
+        public void setLocale(String locale) {
+          AccessibilityBridge.this.setLocale(locale);
         }
       };
 
@@ -555,6 +573,16 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     int stringIndex = buffer.getInt();
 
     return stringIndex == EMPTY_STRING_INDEX ? null : strings[stringIndex];
+  }
+
+  private static float[] getMatrix4FromBuffer(@NonNull ByteBuffer buffer, float[] transform) {
+    if (transform == null) {
+      transform = new float[16];
+    }
+    for (int i = 0; i < 16; ++i) {
+      transform[i] = buffer.getFloat();
+    }
+    return transform;
   }
 
   /**
@@ -809,7 +837,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       result.addAction(AccessibilityNodeInfo.ACTION_SET_TEXT);
     }
 
-    if (semanticsNode.hasFlag(Flag.IS_BUTTON)) {
+    if (semanticsNode.shouldBeTreatedAsButton()) {
       result.setClassName("android.widget.Button");
     }
     if (semanticsNode.hasFlag(Flag.IS_IMAGE)) {
@@ -1014,9 +1042,25 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
     result.setSelected(semanticsNode.hasFlag(Flag.IS_SELECTED));
 
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_36) {
+      if (semanticsNode.hasFlag(Flag.HAS_EXPANDED_STATE)) {
+        final boolean isExpanded = semanticsNode.hasFlag(Flag.IS_EXPANDED);
+        result.setExpandedState(
+            isExpanded
+                ? AccessibilityNodeInfo.EXPANDED_STATE_FULL
+                : AccessibilityNodeInfo.EXPANDED_STATE_COLLAPSED);
+        if (semanticsNode.hasAction(Action.EXPAND)) {
+          result.addAction(AccessibilityNodeInfo.ACTION_EXPAND);
+        }
+        if (semanticsNode.hasAction(Action.COLLAPSE)) {
+          result.addAction(AccessibilityNodeInfo.ACTION_COLLAPSE);
+        }
+      }
+    }
+
     // Heading support
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
-      result.setHeading(semanticsNode.hasFlag(Flag.IS_HEADER));
+      result.setHeading(semanticsNode.headingLevel > 0);
     }
 
     // Accessibility Focus
@@ -1290,6 +1334,16 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       case AccessibilityNodeInfo.ACTION_SET_TEXT:
         {
           return performSetText(semanticsNode, virtualViewId, arguments);
+        }
+      case AccessibilityNodeInfo.ACTION_EXPAND:
+        {
+          accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.EXPAND);
+          return true;
+        }
+      case AccessibilityNodeInfo.ACTION_COLLAPSE:
+        {
+          accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.COLLAPSE);
+          return true;
         }
       default:
         // might be a custom accessibility accessibilityAction.
@@ -1578,6 +1632,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    * View#onHoverEvent(MotionEvent)}.
    */
   public boolean onAccessibilityHoverEvent(MotionEvent event, boolean ignorePlatformViews) {
+
     if (!accessibilityManager.isTouchExplorationEnabled()) {
       return false;
     }
@@ -1637,6 +1692,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     if (flutterSemanticsTree.isEmpty()) {
       return;
     }
+
     SemanticsNode semanticsNodeUnderCursor =
         getRootSemanticsNode().hitTest(new float[] {x, y, 0, 1}, ignorePlatformViews);
     if (semanticsNodeUnderCursor != hoveredObject) {
@@ -1728,7 +1784,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
 
     // If all the routes are in the previous route, get the last route.
-    if (lastAdded == null && newRoutes.size() > 0) {
+    if (lastAdded == null && !newRoutes.isEmpty()) {
       lastAdded = newRoutes.get(newRoutes.size() - 1);
     }
 
@@ -2167,7 +2223,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     MOVE_CURSOR_BACKWARD_BY_WORD(1 << 20),
     SET_TEXT(1 << 21),
     FOCUS(1 << 22),
-    SCROLL_TO_OFFSET(1 << 23);
+    SCROLL_TO_OFFSET(1 << 23),
+    EXPAND(1 << 24),
+    COLLAPSE(1 << 25);
 
     public final int value;
 
@@ -2217,7 +2275,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     IS_EXPANDED(1 << 27),
     HAS_SELECTED_STATE(1 << 28),
     HAS_REQUIRED_STATE(1 << 29),
-    IS_REQUIRED(1 << 30);
+    IS_REQUIRED(1 << 30),
+    IS_ACCESSIBILITY_FOCUS_BLOCKED(1 << 31);
 
     final int value;
 
@@ -2335,6 +2394,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private int platformViewId;
     private int scrollChildren;
     private int scrollIndex;
+    private int traversalParent;
     private float scrollPosition;
     private float scrollExtentMax;
     private float scrollExtentMin;
@@ -2361,6 +2421,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     // The locale of the content of this node.
     @Nullable private String locale;
+
+    // The heading level for this node (0 means not a heading).
+    private int headingLevel;
 
     // The id of the sibling node that is before this node in traversal
     // order.
@@ -2394,6 +2457,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private float right;
     private float bottom;
     private float[] transform;
+    private float[] hitTestTransform;
 
     private SemanticsNode parent;
     private List<SemanticsNode> childrenInTraversalOrder = new ArrayList<>();
@@ -2457,6 +2521,18 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return (previousFlags & flag.value) != 0;
     }
 
+    private boolean shouldBeTreatedAsButton() {
+      if (hasFlag(Flag.IS_BUTTON)) {
+        return true;
+      }
+      if (linkUrl != null && !linkUrl.isEmpty()) {
+        // This will be represented as link through URLSpan.
+        return false;
+      }
+      // In Android, a link is treated as a button if and only if it does not have a URL
+      return hasFlag(Flag.IS_LINK);
+    }
+
     private boolean didScroll() {
       return !Float.isNaN(scrollPosition)
           && !Float.isNaN(previousScrollPosition)
@@ -2467,7 +2543,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (label == null && previousLabel == null) {
         return false;
       }
-      return label == null || previousLabel == null || !label.equals(previousLabel);
+      return label == null || !label.equals(previousLabel);
     }
 
     private void log(@NonNull String indent, boolean recursive) {
@@ -2485,6 +2561,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 + actions
                 + " flags="
                 + flags
+                + "\n"
+                + indent
+                + "  +-- headingLevel="
+                + headingLevel
                 + "\n"
                 + indent
                 + "  +-- textDirection="
@@ -2537,6 +2617,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       platformViewId = buffer.getInt();
       scrollChildren = buffer.getInt();
       scrollIndex = buffer.getInt();
+      traversalParent = buffer.getInt();
       scrollPosition = buffer.getFloat();
       scrollExtentMax = buffer.getFloat();
       scrollExtentMin = buffer.getFloat();
@@ -2562,6 +2643,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       linkUrl = getStringFromBuffer(buffer, strings);
       locale = getStringFromBuffer(buffer, strings);
 
+      headingLevel = buffer.getInt();
       textDirection = TextDirection.fromInt(buffer.getInt());
 
       left = buffer.getFloat();
@@ -2569,24 +2651,23 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       right = buffer.getFloat();
       bottom = buffer.getFloat();
 
-      if (transform == null) {
-        transform = new float[16];
-      }
-      for (int i = 0; i < 16; ++i) {
-        transform[i] = buffer.getFloat();
-      }
+      transform = getMatrix4FromBuffer(buffer, transform);
+      hitTestTransform = getMatrix4FromBuffer(buffer, hitTestTransform);
+
       inverseTransformDirty = true;
       globalGeometryDirty = true;
 
-      final int childCount = buffer.getInt();
+      final int traversalOrderChildCount = buffer.getInt();
       childrenInTraversalOrder.clear();
-      childrenInHitTestOrder.clear();
-      for (int i = 0; i < childCount; ++i) {
+      for (int i = 0; i < traversalOrderChildCount; ++i) {
         SemanticsNode child = accessibilityBridge.getOrCreateSemanticsNode(buffer.getInt());
         child.parent = this;
         childrenInTraversalOrder.add(child);
       }
-      for (int i = 0; i < childCount; ++i) {
+
+      final int hitTestOrderChildCount = buffer.getInt();
+      childrenInHitTestOrder.clear();
+      for (int i = 0; i < hitTestOrderChildCount; ++i) {
         SemanticsNode child = accessibilityBridge.getOrCreateSemanticsNode(buffer.getInt());
         child.parent = this;
         childrenInHitTestOrder.add(child);
@@ -2651,7 +2732,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
               attribute.start = start;
               attribute.end = end;
               attribute.type = type;
-              attribute.locale = Charset.forName("UTF-8").decode(args).toString();
+              attribute.locale = StandardCharsets.UTF_8.decode(args).toString();
               result.add(attribute);
               break;
             }
@@ -2670,7 +2751,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (inverseTransform == null) {
         inverseTransform = new float[16];
       }
-      if (!Matrix.invertM(inverseTransform, 0, transform, 0)) {
+      if (!Matrix.invertM(inverseTransform, 0, hitTestTransform, 0)) {
         Arrays.fill(inverseTransform, 0);
       }
     }
@@ -2722,6 +2803,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (hasFlag(Flag.IS_FOCUSABLE)) {
         return true;
       }
+      if (hasFlag(Flag.IS_ACCESSIBILITY_FOCUS_BLOCKED)) {
+        return false;
+      }
       // If not explicitly set as focusable, then use our legacy
       // algorithm. Once all focusable widgets have a Focus widget, then
       // this won't be needed.
@@ -2756,6 +2840,21 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         }
       }
       return null;
+    }
+
+    /**
+     * Returns the effective locale for this semantics node after taking app default locale into
+     * account.
+     *
+     * <p>Can be null if there is no preference.
+     *
+     * @return the effective locale.
+     */
+    private @Nullable String getEffectiveLocale() {
+      if (locale != null && !locale.isEmpty()) {
+        return locale;
+      }
+      return accessibilityBridge.defaultLocale;
     }
 
     private void updateRecursively(
@@ -2853,7 +2952,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return new AccessibilityStringBuilder()
           .addString(value)
           .addAttributes(valueAttributes)
-          .addLocale(locale)
+          .addLocale(getEffectiveLocale())
           .build();
     }
 
@@ -2862,7 +2961,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           .addString(label)
           .addAttributes(labelAttributes)
           .addUrl(linkUrl)
-          .addLocale(locale)
+          .addLocale(getEffectiveLocale())
           .build();
     }
 
@@ -2870,7 +2969,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return new AccessibilityStringBuilder()
           .addString(hint)
           .addAttributes(hintAttributes)
-          .addLocale(locale)
+          .addLocale(getEffectiveLocale())
           .build();
     }
 
