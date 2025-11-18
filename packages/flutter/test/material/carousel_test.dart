@@ -2268,6 +2268,52 @@ void main() {
       expect(mostVisibleFullDrag, equals(1));
     });
 
+    testWidgets(
+      'CarouselView.weighted resolves leading item correctly when multiple items share the largest weight',
+      (WidgetTester tester) async {
+        final CarouselController controller = CarouselController();
+        addTearDown(controller.dispose);
+        int leadingIndex = 0;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: CarouselView.weighted(
+                flexWeights: const <int>[5, 5, 2, 3],
+                controller: controller,
+                itemSnapping: true,
+                onIndexChanged: (int index) {
+                  leadingIndex = index;
+                },
+                children: List<Widget>.generate(4, (int i) => Text('Item $i')),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Initially, the first item with max weight should be leading (index 0).
+        expect(controller.leadingItem, equals(0));
+        expect(leadingIndex, equals(0));
+
+        final double visible0 = visiblePortionOf(tester, 'Item 0');
+        final double visible1 = visiblePortionOf(tester, 'Item 1');
+        expect(visible0, greaterThanOrEqualTo(visible1));
+
+        // Scroll forward so the second max weight item is more visible.
+        controller.animateToItem(
+          1,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.linear,
+        );
+        await tester.pumpAndSettle();
+
+        // Leading should now be the second item with max weight (index 1).
+        expect(controller.leadingItem, equals(1));
+        expect(leadingIndex, equals(1));
+      },
+    );
+
     testWidgets('CarouselView starts with the correct initial item', (WidgetTester tester) async {
       final CarouselController controller = CarouselController(initialItem: 2);
       addTearDown(controller.dispose);

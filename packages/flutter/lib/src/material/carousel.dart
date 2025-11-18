@@ -459,10 +459,13 @@ class CarouselView extends StatefulWidget {
   ///
   /// - For a standard [CarouselView], it is the item
   ///   that becomes fully visible at the start of the viewport.
+  ///   Partially visible items are not considered leading.
   ///
   /// - For a [CarouselView.weighted], it is the
   ///   visible item that occupies the primary position, determined by
   ///   the largest effective `weight` in the current layout pass.
+  ///   If multiple items share the same largest weight, the **one closest to the
+  ///   start of the viewport** is considered the leading item.
   ///
   /// This callback is invoked only when the leading item index actually
   /// changes, whether through user scrolling or programmatic movement.
@@ -681,11 +684,7 @@ class _CarouselViewState extends State<CarouselView> {
             if (notification.depth == 0 &&
                 widget.onIndexChanged != null &&
                 notification is ScrollUpdateNotification) {
-              final BuildContext? scrollContext = notification.context;
-              if (scrollContext == null) {
-                return false;
-              }
-              final ScrollPosition position = Scrollable.of(scrollContext).position;
+              final ScrollPosition position = _controller.position;
 
               final int currentLeadingIndex = (position as _CarouselPosition).leadingItem;
               if (currentLeadingIndex != _lastReportedLeadingIndex) {
@@ -1629,6 +1628,10 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     _flexWeights = value;
   }
 
+  // The index of the leading item in the carousel.
+  // getItemFromPixels may return a fractional value (e.g., 0.6 when mid-scroll).
+  // We use toInt() to truncate the fractional part, ensuring the leading item
+  // only advances after fully crossing the next item's boundary.
   int get leadingItem => getItemFromPixels(pixels, viewportDimension).toInt();
 
   double updateLeadingItem(List<int>? newFlexWeights, bool newConsumeMaxWeight) {
@@ -1781,7 +1784,7 @@ class CarouselController extends ScrollController {
   /// is the visible child that occupies the primary position, determined by
   /// the highest effective `weight` among the current layout weights.
   int get leadingItem {
-    if (!hasClients) {
+    if (_carouselState == null) {
       return initialItem;
     }
     return (position as _CarouselPosition).leadingItem;
