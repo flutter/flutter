@@ -1445,6 +1445,12 @@ name: my_app
   schemeFile.writeAsStringSync(_validScheme);
   // This is the expected output directory.
   fileSystem.directory('build/ios/iphoneos/My Super Awesome App.app').createSync(recursive: true);
+
+  // Create a dummy Info.plist with `UIApplicationSceneManifest` to spoof that the project has
+  // migrated to UIScene and avoid UIScene errors.
+  fileSystem.file('ios/Runner/Info.plist')
+    ..createSync(recursive: true)
+    ..writeAsStringSync('UIApplicationSceneManifest');
 }
 
 IOSDevice setUpIOSDevice({
