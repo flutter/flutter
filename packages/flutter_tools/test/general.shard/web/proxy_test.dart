@@ -170,7 +170,7 @@ void main() {
         target: 'http://localhost:8080/users/',
         replacement: r'$1',
       );
-      final Uri targetUri = rule.getTargetUri();
+      final Uri targetUri = rule.targetUri;
       expect(targetUri.toString(), 'http://localhost:8080/users/');
       expect(targetUri.scheme, 'http');
       expect(targetUri.host, 'localhost');
@@ -283,7 +283,7 @@ void main() {
 
     test('getTargetUri returns correct Uri', () {
       final rule = PrefixProxyRule(prefix: '/api/users', target: 'http://localhost:8080');
-      final Uri targetUri = rule.getTargetUri();
+      final Uri targetUri = rule.targetUri;
       expect(targetUri.toString(), 'http://localhost:8080');
       expect(targetUri.scheme, 'http');
       expect(targetUri.host, 'localhost');
@@ -371,13 +371,13 @@ void main() {
     test('should add query parameters if original request does have one', () {
       final rule = RegexProxyRule(pattern: RegExp(r'^/api'), target: 'http://mock-backend.com');
       final originalRequest = Request('GET', Uri.parse('http://localhost:8000/api?foo=bar&a=b'));
-      final Uri target = getFinalTargetUri(originalRequest, rule);
+      final Uri target = rule.finalTargetUri(originalRequest.requestedUri);
       expect('$target', 'http://mock-backend.com/api?foo=bar&a=b');
     });
     test('should not add empty query if original request does not have one', () {
       final rule = RegexProxyRule(pattern: RegExp(r'^/api'), target: 'http://mock-backend.com');
       final originalRequest = Request('GET', Uri.parse('http://localhost:8000/api'));
-      final Uri target = getFinalTargetUri(originalRequest, rule);
+      final Uri target = rule.finalTargetUri(originalRequest.requestedUri);
       expect('$target', 'http://mock-backend.com/api');
     });
   });
