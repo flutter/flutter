@@ -4897,6 +4897,42 @@ void main() {
         );
       }, throwsAssertionError);
     });
+
+    testWidgets('Preferred width takes labelText into account', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              decorationBuilder: (BuildContext context, MenuController controller) {
+                return const InputDecoration(labelText: 'Long label text');
+              },
+            ),
+          ),
+        ),
+      );
+
+      final double width = tester.getSize(find.byType(TextField)).width;
+      expect(width, 327.5);
+    });
+
+    testWidgets('Preferred width takes label into account', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              decorationBuilder: (BuildContext context, MenuController controller) {
+                return const InputDecoration(label: SizedBox(width: 200));
+              },
+            ),
+          ),
+        ),
+      );
+
+      final double width = tester.getSize(find.byType(TextField)).width;
+      expect(width, 280);
+    });
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/174609.
