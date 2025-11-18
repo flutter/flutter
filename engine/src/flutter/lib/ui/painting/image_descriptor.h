@@ -36,6 +36,8 @@ class ImageDescriptor : public RefCountedDartWrappable<ImageDescriptor> {
 
   // This must be kept in sync with the enum in painting.dart
   enum PixelFormat {
+    // Error pixel format for Skia compatibility.
+    kUnknown,
     kRGBA8888,
     kBGRA8888,
     kRGBAFloat32,

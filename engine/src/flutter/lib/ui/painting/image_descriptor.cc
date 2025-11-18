@@ -21,6 +21,9 @@ ImageDescriptor::ImageInfo ImageDescriptor::CreateImageInfo(
     const SkImageInfo& sk_image_info) {
   PixelFormat format;
   switch (sk_image_info.colorType()) {
+    case kUnknown_SkColorType:
+      format = kUnknown;
+      break;
     case kRGBA_8888_SkColorType:
       format = kRGBA8888;
       break;
@@ -50,6 +53,9 @@ ImageDescriptor::ImageInfo ImageDescriptor::CreateImageInfo(
 SkImageInfo ImageDescriptor::ToSkImageInfo(const ImageInfo& image_info) {
   SkColorType color_type = kUnknown_SkColorType;
   switch (image_info.format) {
+    case PixelFormat::kUnknown:
+      color_type = kUnknown_SkColorType;
+      break;
     case PixelFormat::kRGBA8888:
       color_type = kRGBA_8888_SkColorType;
       break;
@@ -193,6 +199,8 @@ bool ImageDescriptor::get_pixels(const SkPixmap& pixmap) const {
 
 int ImageDescriptor::bytesPerPixel() const {
   switch (image_info_.format) {
+    case kUnknown:
+      return 0;
     case kGray8:
       return 1;
     case kRGBA8888:
