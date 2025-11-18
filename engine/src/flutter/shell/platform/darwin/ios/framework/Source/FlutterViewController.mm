@@ -130,8 +130,8 @@ typedef struct MouseState {
 /// the same with frame rate of rendering.
 @property(nonatomic, strong) VSyncClient* touchRateCorrectionVSyncClient;
 
-/// Store FlutterView's frame size before as determiend by native's auto layout before flutter's
-/// custom auto resizing constraints are applied.
+/// The size of the FlutterView's frame, as determined by auto-layout,
+/// before Flutter's custom auto-resizing constraints are applied.
 @property(nonatomic, assign) CGSize sizeBeforeAutoResized;
 
 /*
@@ -172,6 +172,9 @@ typedef struct MouseState {
 // Synthesize properties with an overridden getter/setter.
 @synthesize viewOpaque = _viewOpaque;
 @synthesize displayingFlutterUI = _displayingFlutterUI;
+
+@synthesize autoResizable = _autoResizable;
+
 
 // TODO(dkwingsmt): https://github.com/flutter/flutter/issues/138168
 // No backing ivar is currently required; when multiple views are supported, we'll need to
@@ -1491,11 +1494,11 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 }
 
 - (BOOL)isAutoResizable {
-  return self.autoResizable;
+  return _autoResizable;
 }
 
 - (void)setAutoResizable:(BOOL)value {
-  self.autoResizable = value;
+  _autoResizable = value;
   self.flutterView.autoResizable = value;
   self.flutterView.contentMode = UIViewContentModeCenter;
 }
