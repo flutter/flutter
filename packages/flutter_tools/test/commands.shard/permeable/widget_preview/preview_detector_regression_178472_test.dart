@@ -33,7 +33,7 @@ void main() {
       logger = BufferLogger.test();
       project = FlutterProject.fromDirectoryTest(fs.systemTempDirectory.createTempSync('root'));
       previewDetector = PreviewDetector(
-        projectRoot: project.directory,
+        project: project,
         platform: FakePlatform(),
         previewAnalytics: WidgetPreviewAnalytics(
           analytics: getInitializedFakeAnalyticsInstance(
