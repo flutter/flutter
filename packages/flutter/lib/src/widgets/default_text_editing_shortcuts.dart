@@ -295,7 +295,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     // Xerox/Apple: ^X ^C ^V
     // -> Standard on Windows
     // -> Standard on Linux
-    // -> Standard on OS X (with Command as modifier)
+    // -> Standard on Mac OS X (with Command as modifier)
     const SingleActivator(LogicalKeyboardKey.keyX, control: true):
         const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
     const SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent.copy,
@@ -307,7 +307,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     // -> Standard on Windows
     // -> Standard on Linux (traditionally mapped to the Selection buffer rather than the Clipboard,
     //                       but the distinction is often no longer present with modern toolkits)
-    // -> Not standard on OS X
+    // -> Not standard on Mac OS X
     const SingleActivator(LogicalKeyboardKey.delete, shift: true):
         const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
     const SingleActivator(LogicalKeyboardKey.insert, control: true): CopySelectionTextIntent.copy,

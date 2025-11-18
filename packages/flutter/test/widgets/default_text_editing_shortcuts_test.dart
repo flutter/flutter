@@ -1165,9 +1165,11 @@ void main() {
       );
       expect(state.lastIntent, isA<PasteTextIntent>());
     },
-    variant: TargetPlatformVariant.desktop()
-        .and(TargetPlatform.android)
-        .except(TargetPlatform.macOS),
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+      TargetPlatform.android,
+    }),
   );
 
   testWidgets(
@@ -1208,9 +1210,11 @@ void main() {
       );
       expect(state.lastIntent, isA<PasteTextIntent>());
     },
-    variant: TargetPlatformVariant.desktop()
-        .and(TargetPlatform.android)
-        .except(TargetPlatform.macOS),
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+      TargetPlatform.android,
+    }),
   );
 }
 
