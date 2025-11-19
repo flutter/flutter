@@ -3739,8 +3739,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         if (inputType == SemanticsInputType.none) {
           inputType = node._inputType;
         }
-        if (hitTestBehavior == ui.SemanticsHitTestBehavior.defer &&
-            node._hitTestBehavior != ui.SemanticsHitTestBehavior.defer) {
+        if (node._hitTestBehavior != ui.SemanticsHitTestBehavior.defer) {
           hitTestBehavior = node._hitTestBehavior;
         }
         if (tooltip == '') {
@@ -6683,6 +6682,11 @@ class SemanticsConfiguration {
     );
 
     if (_hitTestBehavior == ui.SemanticsHitTestBehavior.defer) {
+      _hitTestBehavior = child._hitTestBehavior;
+    }
+
+    if (_hitTestBehavior == ui.SemanticsHitTestBehavior.defer &&
+        child._hitTestBehavior != ui.SemanticsHitTestBehavior.defer) {
       _hitTestBehavior = child._hitTestBehavior;
     }
 
