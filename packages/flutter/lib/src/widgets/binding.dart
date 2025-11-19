@@ -273,13 +273,17 @@ abstract mixin class WidgetsBindingObserver {
   ///
   /// ```dart
   /// class TextScaleFactorReactor extends StatefulWidget {
-  ///   const TextScaleFactorReactor({ super.key });
+  ///   const TextScaleFactorReactor({super.key});
   ///
   ///   @override
   ///   State<TextScaleFactorReactor> createState() => _TextScaleFactorReactorState();
   /// }
   ///
-  /// class _TextScaleFactorReactorState extends State<TextScaleFactorReactor> with WidgetsBindingObserver {
+  /// class _TextScaleFactorReactorState extends State<TextScaleFactorReactor>
+  ///     with WidgetsBindingObserver {
+  ///   double _lastTextScaleFactor =
+  ///       WidgetsBinding.instance.platformDispatcher.textScaleFactor;
+  ///
   ///   @override
   ///   void initState() {
   ///     super.initState();
@@ -292,11 +296,12 @@ abstract mixin class WidgetsBindingObserver {
   ///     super.dispose();
   ///   }
   ///
-  ///   late double _lastTextScaleFactor;
-  ///
   ///   @override
   ///   void didChangeTextScaleFactor() {
-  ///     setState(() { _lastTextScaleFactor = WidgetsBinding.instance.platformDispatcher.textScaleFactor; });
+  ///     setState(() {
+  ///       _lastTextScaleFactor =
+  ///           WidgetsBinding.instance.platformDispatcher.textScaleFactor;
+  ///     });
   ///   }
   ///
   ///   @override
