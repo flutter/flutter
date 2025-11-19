@@ -50,6 +50,7 @@ class DropdownMenuFormField<T extends Object> extends FormField<T> {
     TextAlign textAlign = TextAlign.start,
     // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
     Object? inputDecorationTheme,
+    DropdownMenuDecorationBuilder? decorationBuilder,
     MenuStyle? menuStyle,
     this.controller,
     T? initialSelection,
@@ -95,6 +96,7 @@ class DropdownMenuFormField<T extends Object> extends FormField<T> {
                textStyle: textStyle,
                textAlign: textAlign,
                inputDecorationTheme: inputDecorationTheme,
+               decorationBuilder: decorationBuilder,
                menuStyle: menuStyle,
                controller: state.textFieldController,
                initialSelection: state.value,

@@ -94,6 +94,7 @@
 /dev/devicelab/bin/tasks/textfield_perf__e2e_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/very_long_picture_scrolling_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/web_size__compile_test.dart @yjbanov @flutter/web
+/dev/devicelab/bin/tasks/high_bitrate_images_ios.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/wide_gamut_ios.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/animated_advanced_blend_perf__timeline_summary.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/animated_advanced_blend_perf_ios__timeline_summary.dart @gaaclarke @flutter/engine

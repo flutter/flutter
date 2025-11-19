@@ -4005,6 +4005,8 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required int? maxValueLength,
     required int? currentValueLength,
     required String? identifier,
+    required Object? traversalParentIdentifier,
+    required Object? traversalChildIdentifier,
     required String? label,
     required AttributedString? attributedLabel,
     required String? value,
@@ -4087,6 +4089,8 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            maxValueLength: maxValueLength,
            currentValueLength: currentValueLength,
            identifier: identifier,
+           traversalParentIdentifier: traversalParentIdentifier,
+           traversalChildIdentifier: traversalChildIdentifier,
            label: label,
            attributedLabel: attributedLabel,
            value: value,
@@ -4335,6 +4339,8 @@ class SliverSemantics extends _SemanticsBase {
     super.maxValueLength,
     super.currentValueLength,
     super.identifier,
+    super.traversalParentIdentifier,
+    super.traversalChildIdentifier,
     super.label,
     super.attributedLabel,
     super.value,
@@ -6452,7 +6458,11 @@ class Flow extends MultiChildRenderObjectWidget {
 ///
 /// Text displayed in a [RichText] widget must be explicitly styled. When
 /// picking which style to use, consider using [DefaultTextStyle.of] the current
-/// [BuildContext] to provide defaults. For more details on how to style text in
+/// [BuildContext] to provide defaults. [MediaQuery.maybeBoldTextOf],
+/// [MediaQuery.maybeLineHeightScaleFactorOverrideOf],
+/// [MediaQuery.maybeLetterSpacingOverrideOf], [MediaQuery.maybeWordSpacingOverrideOf],
+/// and [MediaQuery.maybeParagraphSpacingOverrideOf] can also be used to ensure the styling
+/// for your text is accessible. For more details on how to style text in
 /// a [RichText] widget, see the documentation for [TextStyle].
 ///
 /// Consider using the [Text] widget to integrate with the [DefaultTextStyle]
@@ -7911,6 +7921,8 @@ class Semantics extends _SemanticsBase {
     super.maxValueLength,
     super.currentValueLength,
     super.identifier,
+    super.traversalParentIdentifier,
+    super.traversalChildIdentifier,
     super.label,
     super.attributedLabel,
     super.value,
