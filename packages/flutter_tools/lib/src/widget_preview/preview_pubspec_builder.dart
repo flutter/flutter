@@ -76,6 +76,7 @@ class PreviewPubspecBuilder {
     return AssetsEntry(
       uri: transformAssetUri(asset.uri),
       flavors: asset.flavors,
+      platforms: asset.platforms,
       transformers: asset.transformers,
     );
   }
@@ -89,6 +90,8 @@ class PreviewPubspecBuilder {
       assets: component.assets.map(transformAssetsEntry).toList(),
     );
   }
+
+  PubOutputMode get _outputMode => verbose ? PubOutputMode.all : PubOutputMode.failuresOnly;
 
   Future<void> populatePreviewPubspec({
     required FlutterProject rootProject,
@@ -125,7 +128,6 @@ class PreviewPubspecBuilder {
           }),
     };
 
-    final PubOutputMode outputMode = verbose ? PubOutputMode.all : PubOutputMode.failuresOnly;
     await pub.interactively(
       <String>[
         pubAdd,
@@ -145,7 +147,7 @@ class PreviewPubspecBuilder {
       context: PubContext.pubAdd,
       command: pubAdd,
       touchesPackageConfig: true,
-      outputMode: outputMode,
+      outputMode: _outputMode,
     );
 
     // Adds dependencies required by the widget preview scaffolding.
@@ -160,18 +162,22 @@ class PreviewPubspecBuilder {
       context: PubContext.pubAdd,
       command: pubAdd,
       touchesPackageConfig: true,
-      outputMode: outputMode,
+      outputMode: _outputMode,
     );
 
+    await generatePackageConfig(widgetPreviewScaffoldProject: widgetPreviewScaffoldProject);
+    previewManifest.updatePubspecHash(updatedPubspecPath: updatedPubspecPath);
+  }
+
+  /// Generates `widget_preview_scaffold/.dart_tool/package_config.json`.
+  Future<void> generatePackageConfig({required FlutterProject widgetPreviewScaffoldProject}) async {
     // Generate package_config.json.
     await pub.get(
       context: PubContext.create,
       project: widgetPreviewScaffoldProject,
       offline: offline,
-      outputMode: outputMode,
+      outputMode: _outputMode,
     );
-
-    previewManifest.updatePubspecHash(updatedPubspecPath: updatedPubspecPath);
   }
 
   void onPubspecChangeDetected(String path) {

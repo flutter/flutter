@@ -9323,19 +9323,6 @@ void main() {
     expect((innerMaterial as dynamic).debugInkFeatures, hasLength(1));
   });
 
-  testWidgets('Tab does not crash at zero area', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: SizedBox.shrink(child: Tab(child: Text('X'))),
-          ),
-        ),
-      ),
-    );
-    expect(tester.getSize(find.byType(Tab)), Size.zero);
-  });
-
   testWidgets('Tab can have children with other semantics roles', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -9360,9 +9347,25 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('TabPageSelectorIndicator does not crash in 0x0 environment', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('TabBarView does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final TabController controller = TabController(length: 2, vsync: tester);
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: TabBarView(controller: controller, children: const <Widget>[Text('X'), Text('Y')]),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TabBarView)), Size.zero);
+    controller.animateTo(1);
+    await tester.pump();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('TabPageSelectorIndicator does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Center(
@@ -9377,5 +9380,29 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(TabPageSelectorIndicator)), Size.zero);
+  });
+
+  testWidgets('DefaultTabController does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: DefaultTabController(length: 2, child: Scaffold())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DefaultTabController)), Size.zero);
+  });
+
+  testWidgets('Tab does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(child: Tab(child: Text('X'))),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Tab)), Size.zero);
   });
 }

@@ -220,8 +220,7 @@ static SkiaGPUObject<SkImage> UploadRasterImage(
 
 // |ImageDecoder|
 void ImageDecoderSkia::Decode(fml::RefPtr<ImageDescriptor> descriptor_ref_ptr,
-                              uint32_t target_width,
-                              uint32_t target_height,
+                              const ImageDecoder::Options& options,
                               const ImageResult& callback) {
   TRACE_EVENT0("flutter", __FUNCTION__);
   fml::tracing::TraceFlow flow(__FUNCTION__);
@@ -271,8 +270,8 @@ void ImageDecoderSkia::Decode(fml::RefPtr<ImageDescriptor> descriptor_ref_ptr,
                          io_manager = io_manager_,                //
                          io_runner = runners_.GetIOTaskRunner(),  //
                          result,                                  //
-                         target_width = target_width,             //
-                         target_height = target_height,           //
+                         target_width = options.target_width,     //
+                         target_height = options.target_height,   //
                          flow = std::move(flow)                   //
   ]() mutable {
         // Step 1: Decompress the image.
