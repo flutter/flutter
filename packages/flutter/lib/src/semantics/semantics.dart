@@ -3739,7 +3739,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         if (inputType == SemanticsInputType.none) {
           inputType = node._inputType;
         }
-        if (node._hitTestBehavior != ui.SemanticsHitTestBehavior.defer) {
+        if (hitTestBehavior == ui.SemanticsHitTestBehavior.defer) {
           hitTestBehavior = node._hitTestBehavior;
         }
         if (tooltip == '') {
