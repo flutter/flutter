@@ -1,0 +1,137 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:async';
+import 'dart:math' show sqrt;
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(title: 'SDF Demo', theme: ThemeData.dark(), home: const MyHomePage());
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(body: SdfCanvas());
+  }
+}
+
+class SdfCanvas extends StatefulWidget {
+  const SdfCanvas({super.key});
+
+  @override
+  State<SdfCanvas> createState() => _SdfCanvasState();
+}
+
+class _SdfCanvasState extends State<SdfCanvas> {
+  ui.FragmentShader? _shader;
+  ui.Image? _sdfImage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadShader().then((ui.FragmentShader shader) {
+      setState(() {
+        _shader = shader;
+      });
+    });
+    _loadSdfImage().then((ui.Image image) {
+      setState(() {
+        _sdfImage = image;
+      });
+    });
+  }
+
+  Future<ui.FragmentShader> _loadShader() async {
+    final ui.FragmentProgram program = await ui.FragmentProgram.fromAsset('shaders/sdf.frag');
+    return program.fragmentShader();
+  }
+
+  Future<ui.Image> _loadSdfImage() async {
+    const int width = 1024;
+    const int height = 1024;
+    const double radius = width / 4.0;
+    final List<double> floats = List<double>.filled(width * height * 4, 0.0);
+    for (int i = 0; i < height; ++i) {
+      for (int j = 0; j < width; ++j) {
+        double x = j.toDouble();
+        double y = i.toDouble();
+        x -= width / 2.0;
+        y -= height / 2.0;
+        final double length = sqrt(x * x + y * y) - radius;
+        final int idx = i * width * 4 + j * 4;
+        floats[idx + 0] = length - radius;
+        floats[idx + 1] = 0.0;
+        floats[idx + 2] = 0.0;
+        floats[idx + 3] = 1.0;
+      }
+    }
+    final Float32List floatList = Float32List.fromList(floats);
+    final Uint8List intList = Uint8List.view(floatList.buffer);
+    final Completer<ui.Image> completer = Completer<ui.Image>();
+    ui.decodeImageFromPixels(
+      intList,
+      width,
+      height,
+      ui.PixelFormat.rgbaFloat32,
+      targetFormat: ui.TargetPixelFormat.rgbaFloat32,
+      (ui.Image image) {
+        completer.complete(image);
+      },
+    );
+    return completer.future;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_shader == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return SizedBox.expand(
+      child: (_shader != null && _sdfImage != null)
+          ? CustomPaint(painter: SdfPainter(_shader!, _sdfImage!))
+          : Container(),
+    );
+  }
+}
+
+class SdfPainter extends CustomPainter {
+  SdfPainter(this.shader, this.image);
+
+  final ui.FragmentShader shader;
+  final ui.Image image;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    shader.setFloat(0, size.width);
+    shader.setFloat(1, size.height);
+    shader.setImageSampler(0, image);
+    final Paint paint = Paint()..shader = shader;
+    canvas.drawRect(Offset.zero & size, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
+  }
+}
