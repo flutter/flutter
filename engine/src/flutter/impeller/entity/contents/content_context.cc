@@ -552,7 +552,8 @@ ContentContext::ContentContext(
       lazy_glyph_atlas_(
           std::make_shared<LazyGlyphAtlas>(std::move(typographer_context))),
       pipelines_(new Pipelines()),
-      tessellator_(std::make_shared<Tessellator>()),
+      tessellator_(std::make_shared<Tessellator>(
+          context_->GetCapabilities()->Supports32BitPrimitiveIndices())),
       render_target_cache_(render_target_allocator == nullptr
                                ? std::make_shared<RenderTargetCache>(
                                      context_->GetResourceAllocator())

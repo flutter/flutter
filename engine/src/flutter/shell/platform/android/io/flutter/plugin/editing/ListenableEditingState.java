@@ -117,7 +117,7 @@ class ListenableEditingState extends SpannableStringBuilder {
       }
 
       if (!mListeners.isEmpty()) {
-        Log.v(TAG, "didFinishBatchEdit with " + String.valueOf(mListeners.size()) + " listener(s)");
+        Log.v(TAG, "didFinishBatchEdit with " + mListeners.size() + " listener(s)");
         final boolean textChanged = !toString().equals(mTextWhenBeginBatchEdit);
         final boolean selectionChanged =
             mSelectionStartWhenBeginBatchEdit != getSelectionStart()

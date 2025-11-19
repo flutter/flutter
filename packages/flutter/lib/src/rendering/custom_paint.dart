@@ -696,17 +696,15 @@ class RenderCustomPaint extends RenderProxyBox {
       return true;
     }());
 
-    final List<CustomPainterSemantics> backgroundSemantics = _backgroundSemanticsBuilder != null
-        ? _backgroundSemanticsBuilder!(size)
-        : const <CustomPainterSemantics>[];
+    final List<CustomPainterSemantics> backgroundSemantics =
+        _backgroundSemanticsBuilder?.call(size) ?? const <CustomPainterSemantics>[];
     _backgroundSemanticsNodes = _updateSemanticsChildren(
       _backgroundSemanticsNodes,
       backgroundSemantics,
     );
 
-    final List<CustomPainterSemantics> foregroundSemantics = _foregroundSemanticsBuilder != null
-        ? _foregroundSemanticsBuilder!(size)
-        : const <CustomPainterSemantics>[];
+    final List<CustomPainterSemantics> foregroundSemantics =
+        _foregroundSemanticsBuilder?.call(size) ?? const <CustomPainterSemantics>[];
     _foregroundSemanticsNodes = _updateSemanticsChildren(
       _foregroundSemanticsNodes,
       foregroundSemantics,
@@ -1020,6 +1018,12 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.identifier != null) {
       config.identifier = properties.identifier!;
+    }
+    if (properties.traversalParentIdentifier != null) {
+      config.traversalParentIdentifier = properties.traversalParentIdentifier;
+    }
+    if (properties.traversalChildIdentifier != null) {
+      config.traversalChildIdentifier = properties.traversalChildIdentifier;
     }
     if (properties.tooltip != null) {
       config.tooltip = properties.tooltip!;
