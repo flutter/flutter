@@ -28,7 +28,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   EnginePlatformDispatcher() {
     _addBrightnessMediaQueryListener();
     HighContrastSupport.instance.addListener(_updateHighContrast);
-    _addFontSizeObserver();
+    _addTextScaleFactorListener();
     _addLocaleChangedListener();
     registerHotRestartListener(dispose);
     _appLifecycleState.addListener(_setAppLifecycleState);
@@ -62,9 +62,12 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   final DomElement accessibilityPlaceholder = EngineSemantics.instance.semanticsHelper
       .prepareAccessibilityPlaceholder();
 
-  PlatformConfiguration configuration = PlatformConfiguration(
+  final TextScaleFactorProvider _textScaleFactorProvider = TextScaleFactorProvider();
+  StreamSubscription<double>? _onTextScaleFactorChangedSubscription;
+
+  late PlatformConfiguration configuration = PlatformConfiguration(
     locales: parseBrowserLanguages(),
-    textScaleFactor: findBrowserTextScaleFactor(),
+    textScaleFactor: _textScaleFactorProvider.textScaleFactor,
     accessibilityFeatures: computeAccessibilityFeatures(),
   );
 
@@ -79,7 +82,8 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   void dispose() {
     _removeBrightnessMediaQueryListener();
-    _disconnectFontSizeObserver();
+    _removeTextScaleFactorListener();
+    _textScaleFactorProvider.dispose();
     _removeLocaleChangedListener();
     HighContrastSupport.instance.removeListener(_updateHighContrast);
     _appLifecycleState.removeListener(_setAppLifecycleState);
@@ -992,40 +996,19 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     }
   }
 
-  /// Watches for font-size changes in the browser's <html> element to
-  /// recalculate [textScaleFactor].
-  ///
-  /// Updates [textScaleFactor] with the new value.
-  DomMutationObserver? _fontSizeObserver;
-
-  /// Set the callback function for updating [textScaleFactor] based on
-  /// font-size changes in the browser's <html> element.
-  void _addFontSizeObserver() {
-    const String styleAttribute = 'style';
-
-    _fontSizeObserver = createDomMutationObserver((
-      JSArray<JSAny?> mutations,
-      DomMutationObserver _,
-    ) {
-      for (final JSAny? mutation in mutations.toDart) {
-        final DomMutationRecord record = mutation! as DomMutationRecord;
-        if (record.type == 'attributes' && record.attributeName == styleAttribute) {
-          final double newTextScaleFactor = findBrowserTextScaleFactor();
-          _updateTextScaleFactor(newTextScaleFactor);
-        }
-      }
-    });
-    _fontSizeObserver!.observe(
-      domDocument.documentElement!,
-      attributes: true,
-      attributeFilter: <String>[styleAttribute],
-    );
+  /// Configures the [_onTextScaleFactorChangedSubscription].
+  void _addTextScaleFactorListener() {
+    if (_onTextScaleFactorChangedSubscription != null) {
+      return;
+    }
+    _onTextScaleFactorChangedSubscription = _textScaleFactorProvider.onTextScaleFactorChanged
+        .listen(_updateTextScaleFactor);
   }
 
-  /// Remove the observer for font-size changes in the browser's <html> element.
-  void _disconnectFontSizeObserver() {
-    _fontSizeObserver?.disconnect();
-    _fontSizeObserver = null;
+  /// Removes the [_onTextScaleFactorChangedSubscription].
+  void _removeTextScaleFactorListener() {
+    _onTextScaleFactorChangedSubscription?.cancel();
+    _onTextScaleFactorChangedSubscription = null;
   }
 
   void _setAppLifecycleState(ui.AppLifecycleState state) {
@@ -1610,15 +1593,6 @@ void invoke3<A1, A2, A3>(
       callback(arg1, arg2, arg3);
     });
   }
-}
-
-const double _defaultRootFontSize = 16.0;
-
-/// Finds the text scale factor of the browser by looking at the computed style
-/// of the browser's <html> element.
-double findBrowserTextScaleFactor() {
-  final num fontSize = parseFontSize(domDocument.documentElement!) ?? _defaultRootFontSize;
-  return fontSize / _defaultRootFontSize;
 }
 
 class ViewConfiguration {

@@ -142,6 +142,7 @@ export 'engine/text_editing/input_type.dart';
 export 'engine/text_editing/text_capitalization.dart';
 export 'engine/text_editing/text_editing.dart';
 export 'engine/text_fragmenter.dart';
+export 'engine/text_scale_factor_provider.dart';
 export 'engine/util.dart';
 export 'engine/validators.dart';
 export 'engine/vector_math.dart';

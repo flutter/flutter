@@ -242,35 +242,6 @@ void testMain() {
       expect(domDocument.querySelector('html')!.getAttribute('lang'), 'es-MX');
     });
 
-    test('can find text scale factor', () async {
-      const double deltaTolerance = 1e-5;
-
-      final DomElement root = domDocument.documentElement!;
-      final String oldFontSize = root.style.fontSize;
-
-      addTearDown(() {
-        root.style.fontSize = oldFontSize;
-      });
-
-      root.style.fontSize = '16px';
-      expect(findBrowserTextScaleFactor(), 1.0);
-
-      root.style.fontSize = '20px';
-      expect(findBrowserTextScaleFactor(), 1.25);
-
-      root.style.fontSize = '24px';
-      expect(findBrowserTextScaleFactor(), 1.5);
-
-      root.style.fontSize = '14.4px';
-      expect(findBrowserTextScaleFactor(), closeTo(0.9, deltaTolerance));
-
-      root.style.fontSize = '12.8px';
-      expect(findBrowserTextScaleFactor(), closeTo(0.8, deltaTolerance));
-
-      root.style.fontSize = '';
-      expect(findBrowserTextScaleFactor(), 1.0);
-    });
-
     test("calls onTextScaleFactorChanged when the <html> element's font-size changes", () async {
       final DomElement root = domDocument.documentElement!;
       final String oldFontSize = root.style.fontSize;
@@ -289,18 +260,18 @@ void testMain() {
       };
 
       root.style.fontSize = '20px';
-      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
       expect(root.style.fontSize, '20px');
       expect(isCalled, isTrue);
-      expect(ui.PlatformDispatcher.instance.textScaleFactor, findBrowserTextScaleFactor());
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.25);
 
       isCalled = false;
 
       root.style.fontSize = '16px';
-      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
       expect(root.style.fontSize, '16px');
       expect(isCalled, isTrue);
-      expect(ui.PlatformDispatcher.instance.textScaleFactor, findBrowserTextScaleFactor());
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.0);
     });
 
     test('disposes all its views', () {
