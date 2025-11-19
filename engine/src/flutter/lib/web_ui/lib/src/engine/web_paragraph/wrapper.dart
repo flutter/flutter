@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import '../../../ui.dart';
+import 'package:ui/ui.dart' as ui;
 import 'code_unit_flags.dart';
 import 'debug.dart';
 import 'layout.dart';
@@ -421,8 +421,8 @@ class _LineBuilder {
         style: cluster.style,
         text: ellipsis,
         textDirection: _layout.getEllipsisBidiLevel().isEven
-            ? TextDirection.ltr
-            : TextDirection.rtl,
+            ? ui.TextDirection.ltr
+            : ui.TextDirection.rtl,
       );
       WebParagraphDebug.log(
         'Ellipsize: $clusterIndex $_widthConsumedText $_widthWhitespaces $_widthPendingText - $cutOffWidth - $widthCluster + ${ellipsisSpan.advanceWidth()!} ??? $_maxWidth',
