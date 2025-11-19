@@ -173,8 +173,6 @@ typedef struct MouseState {
 @synthesize viewOpaque = _viewOpaque;
 @synthesize displayingFlutterUI = _displayingFlutterUI;
 
-@synthesize autoResizable = _autoResizable;
-
 // TODO(dkwingsmt): https://github.com/flutter/flutter/issues/138168
 // No backing ivar is currently required; when multiple views are supported, we'll need to
 // synthesize the ivar and store the view identifier.
@@ -1493,11 +1491,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 }
 
 - (BOOL)isAutoResizable {
-  return _autoResizable;
+  return self.flutterView.autoResizable;
 }
 
 - (void)setAutoResizable:(BOOL)value {
-  _autoResizable = value;
   self.flutterView.autoResizable = value;
   self.flutterView.contentMode = UIViewContentModeCenter;
 }

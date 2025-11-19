@@ -1319,6 +1319,36 @@ testEngineConfigSyncMethodWillNotExecuteWhenViewControllerInEngineIsNotCurrentVi
   return mockTraitCollection;
 }
 
+- (void)testTraitCollectionDidChangeCallsResetIntrinsicContentSizeWhenAutoResizable {
+  // Setup test.
+  id mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                        nibName:nil
+                                                                         bundle:nil];
+  id partialMockVC = OCMPartialMock(realVC);
+
+  id mockFlutterView = OCMClassMock([FlutterView class]);
+  OCMStub([partialMockVC flutterView]).andReturn(mockFlutterView);
+
+  // Ensure isAutoResizable is YES
+  OCMStub([partialMockVC isAutoResizable]).andReturn(YES);
+
+  // Expect resetIntrinsicContentSize to be called on mockFlutterView
+  OCMExpect([mockFlutterView resetIntrinsicContentSize]);
+
+  // Exercise behavior under test.
+  [partialMockVC traitCollectionDidChange:nil];
+
+  // Verify behavior.
+  OCMVerifyAll(mockFlutterView);
+
+  // Clean up mocks
+  [partialMockVC stopMocking];
+  [mockFlutterView stopMocking];
+}
+
 #pragma mark - Platform Contrast
 
 - (void)testItReportsNormalPlatformContrastByDefault {
@@ -2641,68 +2671,4 @@ testSetupKeyboardAnimationVsyncClientWillNotCreateNewVsyncClientWhenKeyboardAnim
   [appDelegate setMockLaunchEngine:nil];
 }
 
-- (void)testUpdateAutoResizeConstraintsSetsViewportMetricsOnInitialLayout {
-  id mockEngine = OCMClassMock([FlutterEngine class]);
-  FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:mockEngine
-                                                                    nibName:nil
-                                                                     bundle:nil];
-  vc.autoResizable = YES;
-
-  vc.view.frame = CGRectMake(0, 0, 320, 480);
-  CGFloat scale = vc.flutterScreenIfViewLoaded.scale;
-
-  OCMExpect([mockEngine updateViewportMetrics:[OCMArg checkWithBlock:^BOOL(NSValue* value) {
-    flutter::ViewportMetrics metrics;
-    [value getValue:&metrics];
-    XCTAssertEqual(metrics.physical_min_width_constraint, 320 * scale);
-    XCTAssertEqual(metrics.physical_max_width_constraint, 320 * scale);
-    XCTAssertEqual(metrics.physical_min_height_constraint, 480 * scale);
-    XCTAssertEqual(metrics.physical_max_height_constraint, 480 * scale);
-    return YES;
-  }]]);
-
-  [vc performSelector:@selector(updateAutoResizeConstraints)];
-
-  OCMVerifyAll(mockEngine);
-
-  NSValue* sizeValue = [vc valueForKey:@"sizeBeforeAutoResized"];
-  CGSize sizeBefore = [sizeValue CGSizeValue];
-  XCTAssertEqual(sizeBefore.width, 320);
-  XCTAssertEqual(sizeBefore.height, 480);
-}
-
-- (void)testUpdateAutoResizeConstraintsDoesNotChangeSizeOnSubsequentLayouts {
-  id mockEngine = OCMClassMock([FlutterEngine class]);
-  FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:mockEngine
-                                                                    nibName:nil
-                                                                     bundle:nil];
-  vc.autoResizable = YES;
-  vc.view.frame = CGRectMake(0, 0, 320, 480);
-
-  [vc performSelector:@selector(updateAutoResizeConstraints)];
-
-  CGSize initialSize = [[vc valueForKey:@"sizeBeforeAutoResized"] CGSizeValue];
-  XCTAssertEqual(initialSize.width, 320);
-
-  FlutterAutoResizeLayoutConstraint* fakeConstraint =
-  [FlutterAutoResizeLayoutConstraint constraintWithItem:vc.view
-                                              attribute:NSLayoutAttributeWidth
-                                              relatedBy:NSLayoutRelationEqual
-                                                 toItem:nil
-                                              attribute:NSLayoutAttributeNotAnAttribute
-                                             multiplier:1.0
-                                               constant:320];
-  [vc.view addConstraint:fakeConstraint];
-
-  vc.view.frame = CGRectMake(0, 0, 400, 600);
-
-  [vc performSelector:@selector(updateAutoResizeConstraints)];
-
-  CGSize subsequentSize = [[vc valueForKey:@"sizeBeforeAutoResized"] CGSizeValue];
-  XCTAssertEqual(subsequentSize.width, 320,
-                 @"sizeBeforeAutoResized should not be updated after the initial layout.");
-  XCTAssertEqual(subsequentSize.height, 480,
-                 @"sizeBeforeAutoResized should not be updated after the initial layout.");
-
-}
 @end

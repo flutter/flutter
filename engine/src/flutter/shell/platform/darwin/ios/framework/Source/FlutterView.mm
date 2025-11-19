@@ -55,7 +55,7 @@ FLUTTER_ASSERT_ARC
   }
 
   CGFloat scale = self.window.windowScene.screen.scale;
-  CGSize scaledSize = CGSizeMake(roundf(size.width / scale), roundf(size.height / scale));
+  CGSize scaledSize = CGSizeMake(size.width / scale, size.height / scale);
 
   CGSize roundedScaleSize = CGSizeMake(roundf(scaledSize.width), roundf(scaledSize.height));
   CGSize roundedIntrinsicSize =
