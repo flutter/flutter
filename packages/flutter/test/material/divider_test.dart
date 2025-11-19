@@ -241,4 +241,70 @@ void main() {
     );
     expect(tester.getSize(find.byType(VerticalDivider)), Size.zero);
   });
+
+  testWidgets('M3 - dividerColor matches Divider actual color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Scaffold(body: Divider()),
+      ),
+    );
+
+    final ThemeData theme = Theme.of(tester.element(find.byType(Divider)));
+    final BorderSide border = Divider.createBorderSide(
+      tester.element(find.byType(Divider)),
+    );
+
+    expect(theme.dividerColor, equals(theme.colorScheme.outlineVariant));
+    expect(border.color, equals(theme.colorScheme.outlineVariant));
+    expect(theme.dividerColor, equals(border.color));
+  });
+
+  testWidgets('M3 with colorSchemeSeed - dividerColor is outlineVariant', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          colorSchemeSeed: Colors.blue,
+          useMaterial3: true,
+        ),
+        home: const Scaffold(body: Divider()),
+      ),
+    );
+
+    final ThemeData theme = Theme.of(tester.element(find.byType(Divider)));
+    expect(theme.dividerColor, equals(theme.colorScheme.outlineVariant));
+  });
+
+  testWidgets('M3 with ThemeData.from - dividerColor is outlineVariant', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+          useMaterial3: true,
+        ),
+        home: const Scaffold(body: Divider()),
+      ),
+    );
+
+    final ThemeData theme = Theme.of(tester.element(find.byType(Divider)));
+    expect(theme.dividerColor, equals(theme.colorScheme.outlineVariant));
+  });
+
+  testWidgets('M2 - dividerColor matches Divider actual color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: const Scaffold(body: Divider()),
+      ),
+    );
+
+    final ThemeData theme = Theme.of(tester.element(find.byType(Divider)));
+    final BorderSide border = Divider.createBorderSide(
+      tester.element(find.byType(Divider)),
+    );
+
+    final Color expectedColor = theme.colorScheme.onSurface.withOpacity(0.12);
+    expect(theme.dividerColor, equals(expectedColor));
+    expect(border.color, equals(expectedColor));
+  });
 }
