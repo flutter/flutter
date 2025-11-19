@@ -6,6 +6,7 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:ui' show SemanticsHitTestBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -743,6 +744,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
           namesRoute: true,
           label: routeLabel,
           explicitChildNodes: true,
+          hitTestBehavior: SemanticsHitTestBehavior.opaque,
           child: ClipRect(
             child: _BottomSheetLayoutWithSizeListener(
               onChildSizeChanged: (Size size) {

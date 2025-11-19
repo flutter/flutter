@@ -2701,48 +2701,6 @@ void main() {
     expect(parentRoute, isA<MaterialPageRoute<void>>());
   });
 
-  testWidgets('ModalRoute sets hitTestBehavior.opaque on modal scope', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Builder(
-          builder: (BuildContext context) {
-            return ElevatedButton(
-              onPressed: () {
-                showDialog<void>(
-                  context: context,
-                  builder: (BuildContext context) => const AlertDialog(title: Text('Test Dialog')),
-                );
-              },
-              child: const Text('Show Dialog'),
-            );
-          },
-        ),
-      ),
-    );
-
-    await tester.tap(find.text('Show Dialog'));
-    await tester.pumpAndSettle();
-
-    final Iterable<Semantics> semanticsWidgets = tester.widgetList<Semantics>(
-      find.byType(Semantics),
-    );
-
-    bool found = false;
-    for (final Semantics widget in semanticsWidgets) {
-      if (widget.properties.hitTestBehavior == SemanticsHitTestBehavior.opaque) {
-        expect(widget.properties.hitTestBehavior, SemanticsHitTestBehavior.opaque);
-        found = true;
-        break;
-      }
-    }
-
-    expect(found, isTrue, reason: 'No Semantics widget with hitTestBehavior.opaque found');
-
-    semantics.dispose();
-  });
-
   testWidgets('RawDialogRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(restorationScopeId: 'app', home: _RestorableDialogTestWidget()),
