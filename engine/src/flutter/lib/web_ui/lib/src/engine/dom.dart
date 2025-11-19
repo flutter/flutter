@@ -1746,8 +1746,7 @@ DomBlob createDomBlob(List<Object?> parts, [Map<String, dynamic>? options]) {
   }
 }
 
-typedef DomMutationCallback =
-    void Function(List<DomMutationRecord> mutations, DomMutationObserver observer);
+typedef DomMutationCallback = void Function(JSArray<JSAny?> mutation, DomMutationObserver observer);
 
 @JS('MutationObserver')
 extension type DomMutationObserver._(JSObject _) implements JSObject {
@@ -1767,15 +1766,8 @@ extension type DomMutationObserver._(JSObject _) implements JSObject {
   }
 }
 
-/// Creates a DomMutationObserver with a callback.
-///
-/// Internally converts the `List<dynamic>` of entries into the expected
-/// `List<DomMutationRecord>`
-DomMutationObserver createDomMutationObserver(DomMutationCallback callback) => DomMutationObserver(
-  (JSArray<JSAny?> entries, DomMutationObserver observer) {
-    callback(entries.toDart.cast<DomMutationRecord>(), observer);
-  }.toJS,
-);
+DomMutationObserver createDomMutationObserver(DomMutationCallback callback) =>
+    DomMutationObserver(callback.toJS);
 
 @JS()
 extension type DomMutationRecord._(JSObject _) implements JSObject {
