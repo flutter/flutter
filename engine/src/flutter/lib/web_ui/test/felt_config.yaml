@@ -144,7 +144,6 @@ test-suites:
     test-bundle: dart2wasm-skwasm-ui
     run-config: chrome-wimp
     artifact-deps: [ skwasm ]
-    enable-ci: false
 
   - name: chrome-dart2js-canvaskit-engine
     test-bundle: dart2js-canvaskit-engine
