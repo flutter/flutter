@@ -235,12 +235,6 @@ TEST(ShadowPathGeometryTest, ClockwiseRectTest) {
 
 #if SHOW_VERTICES
   ShowVertices("Impeller Vertices", shadow_vertices);
-
-#if EXPORT_SKIA_SHADOW
-  auto sk_shadow_vertices =
-      ShadowPathGeometry::MakeAmbientShadowVerticesSkia(path, height, matrix);
-  ShowVertices("Skia Vertices", sk_shadow_vertices);
-#endif
 #endif
 }
 

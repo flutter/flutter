@@ -8,11 +8,6 @@
 #include "flutter/impeller/geometry/path_source.h"
 #include "flutter/impeller/tessellator/path_tessellator.h"
 
-#if EXPORT_SKIA_SHADOW
-#include "flutter/third_party/skia/src/core/SkVerticesPriv.h"  // nogncheck
-#include "flutter/third_party/skia/src/utils/SkShadowTessellator.h"  // nogncheck
-#endif
-
 namespace {
 
 using impeller::kEhCloseEnough;
@@ -1253,51 +1248,5 @@ std::shared_ptr<ShadowVertices> ShadowPathGeometry::MakeAmbientShadowVertices(
 
   return polygon.TakeVertices();
 }
-
-#if EXPORT_SKIA_SHADOW
-std::shared_ptr<ShadowVertices>
-ShadowPathGeometry::MakeAmbientShadowVerticesSkia(const flutter::DlPath& path,
-                                                  Scalar occluder_height,
-                                                  const Matrix& matrix) {
-  const SkMatrix ctm = SkMatrix::MakeAll(
-      // clang-format off
-      matrix.m[0], matrix.m[4], matrix.m[12],
-      matrix.m[1], matrix.m[5], matrix.m[13],
-      matrix.m[3], matrix.m[7], matrix.m[15]
-      // clang-format on
-  );
-  SkPoint3 z_plane = {0, 0, occluder_height};
-  SkPoint3 light_pos = {0, -1, 1};
-  SkScalar light_radius = 800 / 600;
-  bool transparent = true;
-  bool directional = true;
-  auto sk_vertices =
-      SkShadowTessellator::MakeSpot(path.GetSkPath(), ctm, z_plane, light_pos,
-                                    light_radius, transparent, directional);
-  if (sk_vertices == nullptr) {
-    return nullptr;
-  }
-
-  auto sk_priv = sk_vertices->priv();
-
-  std::vector<Point> vertices;
-  std::vector<uint16_t> indices;
-  std::vector<Scalar> gaussians;
-  vertices.reserve(sk_priv.vertexCount());
-  indices.reserve(sk_priv.indexCount());
-  gaussians.reserve(sk_priv.vertexCount());
-
-  for (int i = 0; i < sk_priv.vertexCount(); i++) {
-    SkPoint vertex = sk_priv.positions()[i];
-    vertices.emplace_back(vertex.fX, vertex.fY);
-    gaussians.push_back(SkColorGetA(sk_priv.colors()[i]) / 255.0f);
-  }
-  for (int i = 0; i < sk_priv.indexCount(); i++) {
-    indices.push_back(sk_priv.indices()[i]);
-  }
-
-  return ShadowVertices::Make(vertices, indices, gaussians);
-}
-#endif
 
 }  // namespace impeller

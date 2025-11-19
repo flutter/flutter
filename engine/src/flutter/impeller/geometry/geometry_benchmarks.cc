@@ -119,22 +119,6 @@ static void BM_ShadowPathVerticesImpeller(benchmark::State& state,
   }
 }
 
-#if EXPORT_SKIA_SHADOW
-template <class... Args>
-static void BM_ShadowPathVerticesSkia(benchmark::State& state, Args&&... args) {
-  auto args_tuple = std::make_tuple(std::move(args)...);
-  auto path = std::get<flutter::DlPath>(args_tuple);
-  auto height = std::get<Scalar>(args_tuple);
-  auto matrix = std::get<Matrix>(args_tuple);
-
-  while (state.KeepRunning()) {
-    auto result =
-        ShadowPathGeometry::MakeAmbientShadowVerticesSkia(path, height, matrix);
-    FML_CHECK(result != nullptr);
-  }
-}
-#endif
-
 #define MAKE_SHADOW_BENCHMARK_CAPTURE(clockwise, shape, backend) \
   BENCHMARK_CAPTURE(BM_ShadowPathVertices##backend,              \
                     shadow_##clockwise##_##shape##_##backend,    \
@@ -151,9 +135,6 @@ static void BM_ShadowPathVerticesSkia(benchmark::State& state, Args&&... args) {
   MAKE_SHADOW_BENCHMARK_SHAPE_CAPTURE(Polygon, backend)
 
 MAKE_SHADOW_BENCHMARK_CAPTURE_ALL_SHAPES(Impeller);
-#if EXPORT_SKIA_SHADOW
-MAKE_SHADOW_BENCHMARK_CAPTURE_ALL_SHAPES(Skia);
-#endif
 
 #define MAKE_STROKE_PATH_BENCHMARK_CAPTURE(path, cap, join, closed) \
   BENCHMARK_CAPTURE(BM_StrokePath, stroke_##path##_##cap##_##join,  \

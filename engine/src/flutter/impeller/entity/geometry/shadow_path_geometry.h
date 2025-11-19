@@ -5,16 +5,6 @@
 #ifndef FLUTTER_IMPELLER_ENTITY_GEOMETRY_SHADOW_PATH_GEOMETRY_H_
 #define FLUTTER_IMPELLER_ENTITY_GEOMETRY_SHADOW_PATH_GEOMETRY_H_
 
-#ifdef NDEBUG
-#define EXPORT_SKIA_SHADOW false
-#else  // NDEBUG
-#define EXPORT_SKIA_SHADOW true
-#endif
-
-#if EXPORT_SKIA_SHADOW
-#include "flutter/display_list/geometry/dl_path.h"
-#endif
-
 #include "flutter/impeller/entity/geometry/geometry.h"
 #include "flutter/impeller/geometry/path_source.h"
 #include "flutter/impeller/tessellator/tessellator.h"
@@ -106,18 +96,6 @@ class ShadowPathGeometry : public Geometry {
       const PathSource& source,
       Scalar occluder_height,
       const Matrix& matrix);
-
-#if EXPORT_SKIA_SHADOW
-  /// This method poduces a similar |ShadowVertices| as the above method,
-  /// but using Skia utilities to generate the data in order to compare
-  /// output of the Impeller version of the algorithm for debugging.
-  /// This variant of the method is only defined for debug builds and
-  /// naturally disappears for profile and release builds.
-  static std::shared_ptr<ShadowVertices> MakeAmbientShadowVerticesSkia(
-      const flutter::DlPath& source,
-      Scalar occluder_height,
-      const Matrix& matrix);
-#endif
 
  private:
   const std::shared_ptr<ShadowVertices> shadow_vertices_;

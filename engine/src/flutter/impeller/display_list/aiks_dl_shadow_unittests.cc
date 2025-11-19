@@ -29,8 +29,7 @@ namespace {
 void DrawShadowMesh(DisplayListBuilder& builder,
                     const DlPath& path,
                     Scalar elevation,
-                    Scalar dpr,
-                    bool use_skia) {
+                    Scalar dpr) {
   std::shared_ptr<ShadowVertices> shadow_vertices;
   DlPaint paint;
   paint.setDrawStyle(DlDrawStyle::kStroke);
@@ -38,22 +37,12 @@ void DrawShadowMesh(DisplayListBuilder& builder,
   Point shadow_translate;
   Point path_translate = Point(0, elevation * dpr * 0.5f);
 
-  if (use_skia) {
-#if EXPORT_SKIA_SHADOW
-    shadow_vertices =
-        ShadowPathGeometry::MakeAmbientShadowVerticesSkia(path, elevation, {});
-    paint.setColor(should_optimize ? DlColor::kDarkGreen() : DlColor::kRed());
-#else
-    return;
-#endif
-  } else {
-    Tessellator tessellator;
-    shadow_vertices = ShadowPathGeometry::MakeAmbientShadowVertices(
-        tessellator, path, elevation, {});
-    EXPECT_EQ(shadow_vertices != nullptr, should_optimize);
-    shadow_translate = path_translate;
-    paint.setColor(DlColor::kDarkGrey());
-  }
+  Tessellator tessellator;
+  shadow_vertices = ShadowPathGeometry::MakeAmbientShadowVertices(
+      tessellator, path, elevation, {});
+  EXPECT_EQ(shadow_vertices != nullptr, should_optimize);
+  shadow_translate = path_translate;
+  paint.setColor(DlColor::kDarkGrey());
 
   if (shadow_vertices) {
     builder.Save();
@@ -83,6 +72,8 @@ void DrawShadowAndCompareMeshes(DisplayListBuilder& builder,
                                 const DlPath& path,
                                 Scalar elevation,
                                 Scalar dpr) {
+  builder.Save();
+
   builder.DrawShadow(path, DlColor::kBlue(), elevation, true, dpr);
 
   DlPathBuilder path_builder;
@@ -101,11 +92,9 @@ void DrawShadowAndCompareMeshes(DisplayListBuilder& builder,
 
   builder.Translate(0, 300);
   builder.DrawShadow(path, DlColor::kBlue(), elevation, true, dpr);
-  DrawShadowMesh(builder, path, elevation, dpr, false);
-  builder.Translate(300, 0);
-  builder.DrawShadow(complex_path, DlColor::kBlue(), elevation, true, dpr);
-  DrawShadowMesh(builder, path, elevation, dpr, true);
-  builder.Translate(-300, -300);
+  DrawShadowMesh(builder, path, elevation, dpr);
+
+  builder.Restore();
 }
 }  // namespace
 
