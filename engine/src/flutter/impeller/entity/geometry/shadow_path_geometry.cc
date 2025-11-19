@@ -26,6 +26,12 @@ using impeller::Tessellator;
 using impeller::Trig;
 using impeller::Vector2;
 
+// The |PolygonInfo| class does most of the work of generating a mesh from
+// a path, including transforming it into device space, computing new vertices
+// by applying the inset and outset for the indicated occluder_height, and
+// then stitching all of those vertices together into a mesh that can be
+// used to render the shadow complete with gaussian coefficients for the
+// location of the mesh points within the shadow.
 class PolygonInfo : impeller::PathTessellator::VertexWriter {
  public:
   static constexpr Scalar GetTrigRadiusForHeight(Scalar occluder_height) {
@@ -37,9 +43,24 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
               Scalar occluder_height,
               const Tessellator::Trigs& trigs);
 
+  // IsValid indicates whether the path was even "computable" - typically that
+  // it was convex, non-self-intersecting, and a single contour. Some paths
+  // that satisfy those constraints may also indicate that they were invalid
+  // if their geometry exceeded the ability of the algorithm to construct the
+  // mesh. The proper response if the mesh was invalid would be to use a
+  // backup algorithm, such as "render to temporary buffer and apply a
+  // gaussian image filter" instead.
   bool IsValid() const { return is_valid_; }
+
+  // IsEmpty indicates that there was no shadow to display. The proper
+  // responsse to this property being true is to render nothing.
   bool IsEmpty() const { return is_empty_; }
 
+  // Return the only copy of the data in a |ShadowVertices| structure if
+  // the path was valid and the shadow mesh was computable, otherwise return
+  // a null pointer which is an indicator to the caller that they should
+  // use another algorithm to render the shadow - consistent with the IsValid
+  // method returning false.
   std::shared_ptr<ShadowVertices> TakeVertices() {
     if (!is_valid_) {
       return nullptr;
@@ -59,6 +80,10 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
     return occluder_height;
   }
 
+  // An enum used to classify a point as a normal point to be appended, or
+  // a point that made the path invalid by being non-convex, or possibly
+  // a point that should replace the previous point because it was collinear
+  // with it.
   enum class PointClass {
     kNonConvex,
     kCollinear,
@@ -79,7 +104,7 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
   //
   // Each entry contains the direction of the pin at that location and the
   // depth to which the pin is inserted, expressed as a fraction of the full
-  // umbra size specified by the shadow parameters. A depth of 1.0 means
+  // umbra size indicated by the shadow parameters. A depth of 1.0 means
   // the pin was inserted all the way to the depth of the shadow gradient
   // and didn't collide with any other pins. A fraction less than 1.0 can
   // occur if either the shape was too small and the pins intersected with
@@ -88,8 +113,10 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
   // even if the overall size of the shape was larger than the shadow.
   //
   // Different pins will be shortened by different amounts in the same shape
-  // depending on the local geometry (tight curves or narrow cross section).
+  // depending on their local geometry (tight curves or narrow cross section).
   struct UmbraPin {
+    // An initial value for the pin fraction that indicates that we have
+    // not yet visited this pin during the clipping process.
     static constexpr Scalar kFractionUninitialized = -1.0f;
 
     // The point on the original path that generated this entry into the
@@ -98,7 +125,7 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
     // AKA the point on the path at which this pin was stabbed.
     Point path_vertex;
 
-    // The vector from this path segment to the next.
+    // The relative vector from this path segment to the next.
     Vector2 path_delta;
 
     // The vector from the path_vertex to the head of the pin (the part
@@ -114,9 +141,13 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
     // this is the same as the pin_tip, but can be reduced by intersecting
     // and clipping against other pins and even eliminated if the other
     // nearby pins make it redundant for defining the umbra polygon.
+    //
+    // Redundant or "removed" pins are indicated by no longer being a part
+    // of the linked list formed by the |pNext| and |pPrev| pointers.
+    //
     // Eventually, if this pin's umbra_vertex was eliminated, this location
     // will be overwritten by the surviving umbra vertex that best servies
-    // this pin's path_vertex.
+    // this pin's path_vertex in a follow-on step.
     Point umbra_vertex;
     uint16_t umbra_index = 0u;
 
@@ -124,11 +155,14 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
     // radius as modified by the global distance of the path segments to
     // the centroid, but can be shortened when pins are too crowded and start
     // intersecting each other due to tight curvature.
+    //
+    // It's initial value is actually the uninitialized constant so that the
+    // algorithm can treat it specially the first time it is encountered.
     Scalar umbra_fraction = kFractionUninitialized;
 
-    // Used to create a circular linked list while pruning the umbra polygon.
-    // The final vertices that are in the umbra polygon are the vertices that
-    // remain on this linked list from a "head" pin.
+    // Pointers used to create a circular linked list while pruning the umbra
+    // polygon. The final list of vertices that remain in the umbra polygon
+    // are the vertices that remain on this linked list from a "head" pin.
     UmbraPin* pNext = nullptr;
     UmbraPin* pPrev = nullptr;
 
@@ -171,7 +205,7 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
   // The vertex mesh result that represents the shadow, to be rendered
   // using a modified indexed variant of DrawVertices that also adjusts
   // the alpha of the colors on a per-pixel basis by mapping their linear
-  // alphas into the associated gaussian value.
+  // gaussian coefficients into the associated gaussian integral values.
   const impeller::Tessellator::Trigs& trigs_;
   std::vector<Point> vertices_;
   std::vector<uint16_t> indices_;
@@ -199,7 +233,7 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
 
   // Check the direction that the edge is heading and count the number of
   // times that the sign of the dx and dy values change. If either of those
-  // separated coordinate directions change more than 2 times, return false
+  // separated coordinate directions change more than 3 times, return false
   // to indicate that the path is not simple and convex.
   bool CheckEdgeDirection(const Vector2 edge_vector);
 
@@ -225,14 +259,15 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
   void FinalizeCentroid();
 
   // Run through the pins and determine the closest pin to the centroid
-  // and, in particular, if it is less than the required umbra distance.
+  // and, in particular, adjust the umbra_gaussian value if the closest pin
+  // is less than the required umbra distance.
   void ComputePinDirectionsAndMinDistanceToCentroid();
 
   // Run through the pins and determine if they intersect each other
   // internally, whether they are completely obscured by other pins,
   // their new relative lengths if they defer to another pin at some
-  // depth, and which remaining pins are part of the umbra polygon and
-  // return the pointer to the first pin in the "umbra polygon".
+  // depth, and which remaining pins are part of the umbra polygon,
+  // and then return the pointer to the first pin in the "umbra polygon".
   UmbraPin* ResolveUmbraIntersections();
 
   // Structure to store the result of computing the intersection between
@@ -246,6 +281,8 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
     Scalar fraction1;
   };
 
+  // Constants used to resolve pin intersections, adopted from the Skia
+  // version of the algorithm.
   static constexpr Scalar kCrossTolerance = 1.0f / 2048.0f;
   static constexpr Scalar kIntersectionTolerance = 1.0e-6f;
 
@@ -265,29 +302,47 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
   static std::optional<PinIntersection> ComputeIntersection(UmbraPin* pPin0,
                                                             UmbraPin* pPin1);
 
+  // Remove the pin at pPin from the linked list of pins because the caller
+  // determined that it should not contribute to the final umbra polygon.
+  // The pointer to the head pin at *pHead will also be adjusted if we've
+  // eliminated the head pin itself and it will be additionally set to
+  // nullptr if that was the last pin in the list.
   static void RemovePin(UmbraPin* pPin, UmbraPin** pHead);
 
+  // A helper method for resolving pin conflicts, adopted directly from the
+  // associated Skia algorithm.
   static int ComputeSide(const Point& p0, const Vector2& v, const Point& p);
 
   // Run through the path calculating the outset vertices for the penumbra
   // and connecting them to the inset vertices of the umbra and then to
   // the centroid in a system of triangles with the appropriate alpha values
   // representing the intensity of the (non-gamma-adjusted) shadow at those
-  // points.
+  // points. The resulting mesh should consist of 2 rings of triangles, an
+  // inner ring connecting the centroid to the umbra polygon, and another
+  // outer ring connecting vertices in the umbra polygon to vertices on the
+  // outer edge of the penumbra.
   void ComputeMesh();
 
-  // After the umbra_vertices of the pins are accumulated and linked into
-  // a ring using their pPrev/pNext pointers, compute the best surviving
-  // umbra vertex for each pin and set its location and index into the pin.
+  // After the umbra_vertices of the pins are accumulated and linked into a
+  // ring using their pPrev/pNext pointers, compute the best surviving umbra
+  // vertex for each pin and set its location and index into the UmbraPin.
   void PopulateUmbraVertices();
 
+  // Appends a fan of penumbra vertices centered on the path vertex of the
+  // |p_curr_pin| starting from the absolute point |fan_start| and ending
+  // at the absolute point |fan_end|, both of which should be equi-distant
+  // from the path vertex. The index of the vertex at |fan_start| should
+  // already be in the vector of vertices at an index given by |start_index|.
   uint16_t AppendFan(const UmbraPin* p_curr_pin,
                      const Point& fan_start,
                      const Point& fan_end,
                      uint16_t start_index);
 
-  uint16_t AppendVertex(const Point& vertex, Scalar opacity);
+  // Append a vertex and its associated gaussian coefficient to the lists
+  // of vertices and guassians and return their (shared) index.
+  uint16_t AppendVertex(const Point& vertex, Scalar gaussian);
 
+  // Append 3 indices to the indices vector to form a new triangle in the mesh.
   void AddTriangle(uint16_t v0, uint16_t v1, uint16_t v2);
 };
 
@@ -319,7 +374,7 @@ PolygonInfo::PolygonInfo(const impeller::PathSource& source,
     // umbra polygon that is 95% from the path polygon to the centroid,
     // but that result does not look great. If we run into this case
     // a lot we should either beef up the ResolveIntersections algorithm
-    // or find a better approximation.
+    // or find a better approximation than "95% to the centroid".
     Invalidate();
     return;
   }
@@ -397,7 +452,6 @@ void PolygonInfo::EndContour() {
 
 // Adjust the device point to its nearest sub-pixel grid location.
 Point PolygonInfo::ToDeviceGrid(Point point) {
-  // Transform to device space and round to nearest sub-pixel.
   return (point * kSubPixelCount).Round() * kSubPixelScale;
 }
 
@@ -411,7 +465,8 @@ bool PolygonInfo::CheckEdgeDirection(const Vector2 edge_vector) {
          y_direction_detector_.change_count <= 3u;
 }
 
-// This method performs 3 functions.
+// This method performs 4 functions.
+// - Make sure we never change direction in X or Y more than 3 times.
 // - Ensure that the 3 most recent vertices are turning in a consistent
 //   direction. (No concave sections.)
 // - Ensure that all vertices turn the same direction from the perspective
@@ -439,13 +494,9 @@ PolygonInfo::PointClass PolygonInfo::ValidatePointAndUpdateCentroid(
 
   PointClass result = PointClass::kConvex;
 
-  // We can only perform concavity detection once we have a direction.
+  // We can only perform concavity and collinear detection once we have at
+  // least 3 points (2 in the vector and the new point).
   if (pins_.size() >= 2u) {
-    // Note that if there are only 2 points in the path, the direction_
-    // will not yet have been determined and this check computes the same
-    // values as the global check below anyway.
-    // FML_DCHECK(pins_.size() > 2u);
-
     // Check that each triplet of points (this, prev, prev_prev) turn the
     // same direction.
     const Point& prev_prev = pins_.end()[-2].path_vertex;
@@ -453,12 +504,24 @@ PolygonInfo::PointClass PolygonInfo::ValidatePointAndUpdateCentroid(
     Vector2 v1 = new_point - prev_prev;
     Scalar cross = v0.Cross(v1);
     if (cross == 0) {
+      // We note that this point is collinear, but we don't return right
+      // away because we still need to adjust the areas below for proper
+      // centroid computation.
       result = PointClass::kCollinear;
     } else if (cross * direction_ < 0) {
       return PointClass::kNonConvex;
     }
   }
 
+  // Compute (twice) the area of the triangle of the most recent 2 points
+  // back to the first point. We do this both to get its sign to detect
+  // one of the conditions of convexity and also so we can use that area
+  // to accumulate the centroid with a weighted average.
+  //
+  // Note that the cross product is the area of the parallelogram projected
+  // by these 2 vectors (which is twice the area of the triangle between them)
+  // with a sign indicating its turning direction relative to that shared
+  // corner point (i.e. "first" in this case).
   const Point& first = pins_.front().path_vertex;
   Vector2 v0 = prev - first;
   Vector2 v1 = new_point - first;
@@ -563,7 +626,7 @@ void PolygonInfo::ComputePinDirectionsAndMinDistanceToCentroid() {
     auto newInset = umbra_size - kTolerance;
     auto ratio = 0.5f * (newInset / desired_umbra_size + 1);
     FML_DCHECK(std::isfinite(ratio));
-    // they aren't PMColors, but the interpolation algorithm is the same
+
     umbra_gaussian_ = ratio;
     umbra_size = newInset;
   } else {

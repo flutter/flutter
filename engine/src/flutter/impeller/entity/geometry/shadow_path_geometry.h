@@ -21,6 +21,16 @@
 
 namespace impeller {
 
+/// A class to hold a vertex mesh for rendering shadows. The vertices are
+/// each associated with a gaussian coefficent that represents where that
+/// vertex lives in the shadow from a value of 1.0 (at the edge of or fully
+/// in the darkest part of the umbra) to 0.0 at the edge of or fully outside
+/// the penumbra).
+///
+/// The vertices are also associated with a vector of indices that assemble
+/// them into a mesh that covers the full umbra and penumbra of the shape.
+///
+/// The mesh is usually intended to be rendered at device (pixel) resolution.
 class ShadowVertices {
  public:
   static std::shared_ptr<ShadowVertices> Make(std::vector<Point> vertices,
@@ -37,14 +47,22 @@ class ShadowVertices {
         indices_(std::move(indices)),
         gaussians_(std::move(gaussians)) {}
 
+  /// The count of the unique (duplicates minimized) vertices in the mesh.
+  /// This number is also the count of gaussian coefficients in the mesh
+  /// since the two are assigned 1:1.
   size_t GetVertexCount() const { return vertices_.size(); }
+
+  /// The count of the indices that define the mesh.
   size_t GetIndexCount() const { return indices_.size(); }
 
   const std::vector<Point>& GetVertices() const { return vertices_; }
   const std::vector<uint16_t>& GetIndices() const { return indices_; }
   const std::vector<Scalar>& GetGaussians() const { return gaussians_; }
 
+  /// True if and only if there was no shadow for the shape and therefore
+  /// no mesh to generate.
   bool IsEmpty() const { return vertices_.empty(); }
+
   std::optional<Rect> GetBounds() const;
 
  private:
@@ -53,6 +71,12 @@ class ShadowVertices {
   const std::vector<Scalar> gaussians_;
 };
 
+/// A class to compute and return the |ShadowVertices| for a path source
+/// viewed under a given transform. The |occluder_height| is measured in
+/// device pixels. The geometry of the |PathSource| is transformed by the
+/// indicated matrix to produce a device space set of vertices, but the
+/// shadow mesh is inset and outset by the indicated |occluder_height|
+/// without any adjustment for the matrix.
 class ShadowPathGeometry : public Geometry {
  public:
   ShadowPathGeometry(Tessellator& tessellator,
@@ -73,6 +97,10 @@ class ShadowPathGeometry : public Geometry {
 
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
+  /// Constructs a shadow mesh for the given |PathSource| at the given
+  /// |matrix| and with the indicated device-space |occluder_height|.
+  /// The tessellator is used to get a cached set of |Trigs| for the
+  /// radii associated with the mesh around various corners in the path.
   static std::shared_ptr<ShadowVertices> MakeAmbientShadowVertices(
       Tessellator& tessellator,
       const PathSource& source,
@@ -80,6 +108,11 @@ class ShadowPathGeometry : public Geometry {
       const Matrix& matrix);
 
 #if EXPORT_SKIA_SHADOW
+  /// This method poduces a similar |ShadowVertices| as the above method,
+  /// but using Skia utilities to generate the data in order to compare
+  /// output of the Impeller version of the algorithm for debugging.
+  /// This variant of the method is only defined for debug builds and
+  /// naturally disappears for profile and release builds.
   static std::shared_ptr<ShadowVertices> MakeAmbientShadowVerticesSkia(
       const flutter::DlPath& source,
       Scalar occluder_height,
