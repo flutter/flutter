@@ -3009,7 +3009,7 @@ void main() {
     expect(routeSemantics.properties.hitTestBehavior, SemanticsHitTestBehavior.opaque);
 
     final Semantics widgetSemantics = allSemantics.firstWhere(
-      (Semantics s) => s.properties.scopesRoute == true,
+      (Semantics s) => s.properties.scopesRoute ?? false,
     );
 
     expect(widgetSemantics.properties.scopesRoute, true);
