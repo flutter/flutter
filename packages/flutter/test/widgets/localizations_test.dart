@@ -105,7 +105,7 @@ void main() {
 
     expect(Localizations.maybeLocaleOf(contextKey.currentContext!), isNull);
   });
-  
+
   testWidgets('LocalizationsResolver.update notifies listeners when supportedLocales changes', (
     WidgetTester tester,
   ) async {
@@ -114,7 +114,9 @@ void main() {
     );
 
     bool notified = false;
-    resolver.addListener(() { notified = true; });
+    resolver.addListener(() {
+      notified = true;
+    });
 
     resolver.update(
       locale: null,
@@ -136,7 +138,9 @@ void main() {
     );
 
     bool notified = false;
-    resolver.addListener(() { notified = true; });
+    resolver.addListener(() {
+      notified = true;
+    });
 
     // Update with the same effective supportedLocales shouldn't change resolved locale.
     resolver.update(
