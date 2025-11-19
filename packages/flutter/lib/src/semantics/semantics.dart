@@ -6681,10 +6681,6 @@ class SemanticsConfiguration {
       child._accessiblityFocusBlockType,
     );
 
-    if (_hitTestBehavior == ui.SemanticsHitTestBehavior.defer) {
-      _hitTestBehavior = child._hitTestBehavior;
-    }
-
     if (_hitTestBehavior == ui.SemanticsHitTestBehavior.defer &&
         child._hitTestBehavior != ui.SemanticsHitTestBehavior.defer) {
       _hitTestBehavior = child._hitTestBehavior;
