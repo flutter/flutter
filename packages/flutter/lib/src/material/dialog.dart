@@ -10,7 +10,7 @@
 /// @docImport 'text_button.dart';
 library;
 
-import 'dart:ui' show SemanticsRole, clampDouble, lerpDouble;
+import 'dart:ui' show SemanticsHitTestBehavior, SemanticsRole, clampDouble, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -303,6 +303,7 @@ class Dialog extends StatelessWidget {
 
     return Semantics(
       role: semanticsRole,
+      hitTestBehavior: SemanticsHitTestBehavior.opaque,
       child: AnimatedPadding(
         padding: effectivePadding,
         duration: insetAnimationDuration,

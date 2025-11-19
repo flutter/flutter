@@ -2961,6 +2961,50 @@ void main() {
     // Test with theme.platform = iOS on different real platforms.
     await pumpModalBottomSheetWithTheme(TargetPlatform.iOS);
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Modal bottom sheet has hitTestBehavior.opaque to prevent dismissal on empty areas', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    late BuildContext savedContext;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return Container();
+          },
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    showModalBottomSheet<void>(
+      context: savedContext,
+      builder: (BuildContext context) => Container(
+        height: 200,
+        color: Colors.blue,
+        child: const Center(child: Text('Modal Bottom Sheet')),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Modal Bottom Sheet'), findsOneWidget);
+
+    // Verify the bottom sheet has opaque hitTestBehavior in semantics
+    // This prevents clicks inside the bottom sheet from passing through to the barrier
+    final Semantics bottomSheetSemantics = tester.widget<Semantics>(
+      find.ancestor(of: find.byType(ClipRect), matching: find.byType(Semantics)).first,
+    );
+
+    expect(bottomSheetSemantics.properties.hitTestBehavior, SemanticsHitTestBehavior.opaque);
+    expect(bottomSheetSemantics.properties.scopesRoute, true);
+
+    semantics.dispose();
+  });
 }
 
 class _TestPage extends StatelessWidget {
