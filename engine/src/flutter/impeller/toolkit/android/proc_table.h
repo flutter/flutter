@@ -39,10 +39,10 @@ ASurfaceTransaction* ASurfaceTransaction_fromJava(JNIEnv* env,
 ///
 #define FOR_EACH_ANDROID_PROC(INVOKE)                            \
   INVOKE(AChoreographer_getInstance, 24)                         \
-  _Pragma("clang diagnostic push")                               \
-  _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"") \
+  _Pragma("GCC diagnostic push")                               \
+  _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"") \
   INVOKE(AChoreographer_postFrameCallback, 24)                   \
-  _Pragma("clang diagnostic pop")                                \
+  _Pragma("GCC diagnostic pop")                                \
   INVOKE(AChoreographer_postFrameCallback64, 29)                 \
   INVOKE(AHardwareBuffer_acquire, 26)                            \
   INVOKE(AHardwareBuffer_allocate, 26)                           \
