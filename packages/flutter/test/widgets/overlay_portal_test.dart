@@ -2749,9 +2749,6 @@ void main() {
   group('Semantics', () {
     testWidgets('ordering and transform', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
-
-      final double rowOriginY = TestSemantics.fullScreen.height - 10;
-
       late final OverlayEntry entry;
       addTearDown(() {
         entry.remove();
