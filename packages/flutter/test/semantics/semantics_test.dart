@@ -723,9 +723,7 @@ void main() {
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
       '   indexInParent: null\n'
-      '   headingLevel: 0\n'
-      '   minValue: null\n'
-      '   maxValue: null\n',
+      '   headingLevel: 0\n',
     );
 
     final SemanticsConfiguration config = SemanticsConfiguration()
@@ -873,9 +871,7 @@ void main() {
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
       '   indexInParent: null\n'
-      '   headingLevel: 0\n'
-      '   minValue: null\n'
-      '   maxValue: null\n',
+      '   headingLevel: 0\n',
     );
   });
 

@@ -9,12 +9,24 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  test('scheduleForcedFrame sets up frame callbacks', () async {
+  test('scheduleForcedFrame sets up frame callbacks', () {
     SchedulerBinding.instance.scheduleForcedFrame();
     expect(SchedulerBinding.instance.platformDispatcher.onBeginFrame, isNotNull);
   });
 
-  test('debugAssertNoTimeDilation does not throw if time dilate already reset', () async {
+  test('Ticker.forceFrames requests forced frames', () async {
+    final Ticker t = Ticker((_) {});
+    t.forceFrames = true;
+    final TickerFuture f = t.start();
+    addTearDown(() async {
+      t.stop();
+      await f;
+    });
+    // A forced frame should be scheduled even if frames are otherwise disabled.
+    expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
+  });
+
+  test('debugAssertNoTimeDilation does not throw if time dilate already reset', () {
     timeDilation = 2.0;
     timeDilation = 1.0;
     SchedulerBinding.instance.debugAssertNoTimeDilation('reason'); // no error
