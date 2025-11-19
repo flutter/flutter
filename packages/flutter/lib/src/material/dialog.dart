@@ -1173,6 +1173,7 @@ class SimpleDialog extends StatelessWidget {
     this.titleTextStyle,
     this.children,
     this.contentPadding = const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 16.0),
+    this.contentTextStyle,
     this.backgroundColor,
     this.elevation,
     this.shadowColor,
@@ -1240,6 +1241,13 @@ class SimpleDialog extends StatelessWidget {
   /// {@macro flutter.material.dialog.surfaceTintColor}
   final Color? surfaceTintColor;
 
+  /// Style for the text in the [children] of this [SimpleDialog].
+  ///
+  /// If null, [DialogThemeData.contentTextStyle] is used. If that is also null,
+  /// defaults to [TextTheme.titleMedium] for Material 2, or [TextTheme.bodyMedium]
+  /// for Material 3.
+  final TextStyle? contentTextStyle;
+
   /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the dialog is opened and closed.
   ///
@@ -1273,6 +1281,11 @@ class SimpleDialog extends StatelessWidget {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
 
+    final DialogThemeData dialogTheme = DialogTheme.of(context);
+    final DialogThemeData defaults = theme.useMaterial3
+        ? _DialogDefaultsM3(context)
+        : _DialogDefaultsM2(context);
+
     String? label = semanticLabel;
     switch (defaultTargetPlatform) {
       case TargetPlatform.macOS:
@@ -1288,7 +1301,7 @@ class SimpleDialog extends StatelessWidget {
     // The paddingScaleFactor is used to adjust the padding of Dialog
     // children.
     final TextStyle defaultTextStyle =
-        titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.titleLarge!;
+        titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.titleLarge!;
     final double fontSize = defaultTextStyle.fontSize ?? kDefaultFontSize;
     final double fontSizeToScale = fontSize == 0.0 ? kDefaultFontSize : fontSize;
     final double effectiveTextScale =
@@ -1334,7 +1347,10 @@ class SimpleDialog extends StatelessWidget {
                 : effectiveContentPadding.top,
             bottom: effectiveContentPadding.bottom * paddingScaleFactor,
           ),
-          child: ListBody(children: children!),
+          child: DefaultTextStyle(
+            style: contentTextStyle ?? dialogTheme.contentTextStyle ?? defaults.contentTextStyle!,
+            child: ListBody(children: children!),
+          ),
         ),
       );
     }
