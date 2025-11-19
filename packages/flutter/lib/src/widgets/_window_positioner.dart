@@ -304,7 +304,7 @@ class WindowPositioner {
     );
   }
 
-  /// Defines the anchor point for the anchor rectangle.
+  /// Defines the point on the parent from which to position the child.
   ///
   /// The specified anchor is used to derive an anchor point that the child
   /// window will be positioned relative to. If a corner anchor is set
@@ -313,13 +313,14 @@ class WindowPositioner {
   /// otherwise, the derived anchor point will be centered on the specified
   /// edge, or in the center of the anchor rectangle if no edge is specified.
   ///
-  /// This is used in conjunction with [childAnchor] to determine the final position
-  /// of the child window.
+  /// The child is positioned by placing [childAnchor] on top of [parentAnchor] and then translating by [offset].
+  ///
+  /// Defaults to [WindowPositionerAnchor.center].
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   final WindowPositionerAnchor parentAnchor;
 
-  /// Defines the anchor point for the child window.
+  /// Defines the point on the child that is positioned relative to the parent.
   ///
   /// The specified anchor is used to derive an anchor point that will be positioned
   /// relative to the [parentAnchor]. If a corner anchor is set (e.g. [WindowPositionerAnchor.topLeft] or
@@ -327,14 +328,16 @@ class WindowPositioner {
   /// otherwise, the derived anchor point will be centered on the specified
   /// edge, or in the center of the anchor rectangle if no edge is specified.
   ///
-  /// This is used in conjunction with [parentAnchor] to determine the final position
-  /// of the child window.
+  /// The child is positioned by placing [childAnchor] on top of [parentAnchor] and then translating by [offset].
+  ///
+  /// Defaults to [WindowPositionerAnchor.center].
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   final WindowPositionerAnchor childAnchor;
 
-  /// Specify the window position offset relative to the position of the
-  /// anchor on the anchor rectangle and the anchor on the child.
+  /// The offset with which to place the child relative to the parent.
+  ///
+  /// The child is positioned by placing [childAnchor] on top of [parentAnchor] and then translating by [offset].
   ///
   /// For example if the anchor of the anchor rectangle is at (x, y), the window
   /// has a [childAnchor] of [WindowPositionerAnchor.topLeft], and the [offset]
@@ -345,6 +348,8 @@ class WindowPositioner {
   /// An example use case is placing a popup menu on top of a user interface
   /// element, while aligning the user interface element of the parent window
   /// with some user interface element placed somewhere in the popup window.
+  ///
+  /// Defaults to [Offset.zero].
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   final Offset offset;

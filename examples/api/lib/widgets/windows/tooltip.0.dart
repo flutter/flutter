@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 // TODO(mattkae): remove invalid_use_of_internal_member ignore comment when this API is stable.
+// See: https://github.com/flutter/flutter/issues/177586
+// TODO(mattkae): refactor this example for better widget position tracking
+// This positioning logic is simpler than you might want in production. See https://github.com/flutter/flutter/issues/178829.
 // ignore_for_file: invalid_use_of_internal_member
 // ignore_for_file: implementation_imports
 import 'package:flutter/material.dart';
