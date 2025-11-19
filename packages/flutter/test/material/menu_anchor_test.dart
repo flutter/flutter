@@ -4442,7 +4442,7 @@ void main() {
                             TestSemantics(
                               id: 4,
                               children: <TestSemantics>[
-TestSemantics(
+                                TestSemantics(
                                   id: 5,
                                   label: 'ABC',
                                   flags: <SemanticsFlag>[
@@ -4491,7 +4491,6 @@ TestSemantics(
                                     ),
                                   ],
                                 ),
-
                               ],
                             ),
                           ],
