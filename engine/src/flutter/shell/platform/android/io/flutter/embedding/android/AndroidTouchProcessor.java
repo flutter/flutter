@@ -254,9 +254,7 @@ public class AndroidTouchProcessor {
     boolean isMovementEvent =
         (event.getActionMasked() == MotionEvent.ACTION_HOVER_MOVE
             || event.getActionMasked() == MotionEvent.ACTION_SCROLL);
-    if (isPointerEvent && isMovementEvent) {
-      // Continue.
-    } else {
+    if (!isPointerEvent || !isMovementEvent) {
       return false;
     }
 
