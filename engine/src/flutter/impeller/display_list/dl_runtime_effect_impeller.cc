@@ -32,6 +32,10 @@ std::shared_ptr<impeller::RuntimeStage> DlRuntimeEffectImpeller::runtime_stage()
 }
 
 size_t DlRuntimeEffectImpeller::uniform_size() const {
+  if (!runtime_stage_) {
+    return 0;
+  }
+
   size_t total = 0;
   for (const auto& uniform : runtime_stage_->GetUniforms()) {
     total += uniform.GetSize();
