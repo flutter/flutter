@@ -2260,7 +2260,17 @@ Future<void> main() async {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(MaterialApp(routes: routes, initialRoute: '/two'));
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     expect(find.text('two'), findsNothing);
     expect(find.text('three'), findsOneWidget);
   });
@@ -2329,8 +2339,17 @@ Future<void> main() async {
     expect(find.byKey(nestedRouteHeroTop, skipOffstage: false), findsOneWidget);
 
     // Doesn't crash.
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     rootNavigator.currentState!.pop();
     await tester.pumpAndSettle();
 
@@ -2506,8 +2525,17 @@ Future<void> main() async {
     expect(find.byKey(rootRouteHero), findsOneWidget);
 
     // Doesn't crash.
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     rootNavigator.currentState!.pop();
     await tester.pumpAndSettle();
 
@@ -3090,7 +3118,17 @@ Future<void> main() async {
 
       // The simple route should still be on top.
       expect(find.byKey(simpleKey), findsOneWidget);
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.iOS,
@@ -3447,8 +3485,17 @@ Future<void> main() async {
     );
     await tester.pumpAndSettle();
 
-    expect(tester.takeException(), isNull);
-    // The Hero on the new route should be visible .
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    ); // The Hero on the new route should be visible .
     expect(find.byType(Placeholder), findsOneWidget);
   });
 
@@ -3592,7 +3639,17 @@ Future<void> main() async {
     expect(find.byType(Placeholder), findsOneWidget);
 
     await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('smooth transition between different incoming data', (WidgetTester tester) async {

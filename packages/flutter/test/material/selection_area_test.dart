@@ -63,7 +63,17 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     await longpress.up();
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/111370

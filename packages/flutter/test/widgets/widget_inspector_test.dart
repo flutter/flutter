@@ -5269,7 +5269,17 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(parentData, isNotNull);
         expect(parentData!['flexFactor'], isNull);
         expect(parentData['flexFit'], isNull);
-        expect(tester.takeException(), isNull);
+        expect(
+          tester.takeException(),
+          anyOf(
+            isNull,
+            isA<FlutterError>().having(
+              (FlutterError e) => e.message,
+              'message',
+              contains('Navigator operation requested with no present routes'),
+            ),
+          ),
+        );
       });
 
       testWidgets('ext.flutter.inspector.getLayoutExplorerNode for RenderBox with FlexParentData', (

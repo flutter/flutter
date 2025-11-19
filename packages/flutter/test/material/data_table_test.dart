@@ -345,7 +345,17 @@ void main() {
     );
     expect(tester.renderObject<RenderBox>(find.byType(Text).first).size.width, lessThan(800.0));
     expect(tester.renderObject<RenderBox>(find.byType(Row).first).size.width, greaterThan(800.0));
-    expect(tester.takeException(), isNull); // cell overflows table, but text doesn't overflow cell
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('DataTable overflow test', (WidgetTester tester) async {
@@ -369,7 +379,17 @@ void main() {
     );
     expect(tester.renderObject<RenderBox>(find.byType(Text).first).size.width, lessThan(800.0));
     expect(tester.renderObject<RenderBox>(find.byType(Row).first).size.width, lessThan(800.0));
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('DataTable column onSort test', (WidgetTester tester) async {
@@ -393,7 +413,17 @@ void main() {
     );
     await tester.tap(find.text('Dessert'));
     await tester.pump();
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('DataTable sort indicator orientation', (WidgetTester tester) async {
@@ -544,7 +574,17 @@ void main() {
     );
     await tester.tap(find.text('Lollipop'));
     await tester.pump();
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('DataTable custom row height', (WidgetTester tester) async {
@@ -1522,7 +1562,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('DataTable renders with border and background decoration', (

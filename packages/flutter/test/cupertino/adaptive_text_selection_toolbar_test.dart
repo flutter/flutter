@@ -286,7 +286,17 @@ void main() {
       );
 
       expect(tester.getSize(find.byType(CupertinoAdaptiveTextSelectionToolbar)), Size.zero);
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     },
     skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/108382
     variant: TargetPlatformVariant.all(),

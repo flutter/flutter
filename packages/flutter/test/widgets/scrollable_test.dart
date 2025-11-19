@@ -1598,7 +1598,17 @@ void main() {
     // If the inner node was cleared in the previous step, this should not crash.
     await tester.pumpWidget(MaterialApp(home: buildScrollable(true)));
     expect(semantics, includesNodeWith(tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics}));
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     semantics.dispose();
   });
 

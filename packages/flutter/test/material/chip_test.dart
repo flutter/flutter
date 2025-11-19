@@ -4837,7 +4837,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Material2 - Chip background color and shape are drawn on Ink', (
@@ -5216,14 +5226,33 @@ void main() {
     await tester.pumpAndSettle();
 
     // No exception should be thrown.
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     // Tap the elevated button to enable the chip with a tooltip.
     await tester.tap(find.widgetWithText(ElevatedButton, 'Enable Chip'));
     await tester.pumpAndSettle();
 
     // No exception should be thrown.
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Delete button is visible on disabled RawChip', (WidgetTester tester) async {

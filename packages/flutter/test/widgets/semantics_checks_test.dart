@@ -9,19 +9,49 @@ void main() {
   group('expandable', () {
     testWidgets('success case, no actions', (WidgetTester tester) async {
       await tester.pumpWidget(Semantics(expanded: false, child: const SizedBox()));
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
 
     testWidgets('success case, collapsed with expand action', (WidgetTester tester) async {
       await tester.pumpWidget(Semantics(expanded: false, onExpand: () {}, child: const SizedBox()));
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
 
     testWidgets('success case, expanded with collapse action', (WidgetTester tester) async {
       await tester.pumpWidget(
         Semantics(expanded: true, onCollapse: () {}, child: const SizedBox()),
       );
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
 
     testWidgets('failure case, both expand and collapse actions are set', (

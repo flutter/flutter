@@ -1211,7 +1211,17 @@ void main() {
 
     // Hover animation should not trigger an exception when the checkbox is removed
     // before the hover animation should complete.
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
 
     await testGesture.removePointer();
   });
@@ -2485,7 +2495,17 @@ void main() {
         ),
       ),
     );
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 }
 

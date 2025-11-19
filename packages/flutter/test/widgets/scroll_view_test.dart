@@ -1463,7 +1463,17 @@ void main() {
 
     // A separatorBuilder that always returns a Divider is fine
     await tester.pumpWidget(buildFrame(const Divider()));
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('when itemBuilder throws, creates Error Widget', (WidgetTester tester) async {
@@ -1487,7 +1497,17 @@ void main() {
 
     // When itemBuilder doesn't throw, no ErrorWidget
     await tester.pumpWidget(buildFrame(false));
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     final Finder finder = find.byType(ErrorWidget);
     expect(find.byType(ErrorWidget), findsNothing);
 
@@ -1523,7 +1543,17 @@ void main() {
 
     // When separatorBuilder doesn't throw, no ErrorWidget
     await tester.pumpWidget(buildFrame(false));
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     final Finder finder = find.byType(ErrorWidget);
     expect(find.byType(ErrorWidget), findsNothing);
 

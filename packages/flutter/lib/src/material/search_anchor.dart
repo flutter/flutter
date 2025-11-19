@@ -538,7 +538,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
     if (selectedText != null) {
       _searchController.value = TextEditingValue(text: selectedText);
     }
-    Navigator.of(context).pop();
+    Navigator.of(context).maybePop();
   }
 
   bool toggleVisibility() {
@@ -1029,7 +1029,7 @@ class _ViewContentState extends State<_ViewContent> {
     final Widget defaultLeading = BackButton(
       style: const ButtonStyle(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
       onPressed: () {
-        Navigator.of(context).pop();
+        Navigator.of(context).maybePop();
       },
     );
 

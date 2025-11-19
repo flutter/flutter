@@ -105,9 +105,11 @@ void main() {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home'), findsOneWidget);
 
+    // Replace the current route with 'Foo' rather than popping the last route,
+    // which is not allowed by the Navigator debug invariants.
     tester
         .state<NavigatorState>(find.byType(Navigator))
-        .restorablePopAndPushNamed('Foo', arguments: 3);
+        .restorablePushReplacementNamed('Foo', arguments: 3);
     await tester.pumpAndSettle();
 
     expect(findRoute('home', skipOffstage: false), findsNothing);

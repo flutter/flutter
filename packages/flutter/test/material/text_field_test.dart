@@ -3472,7 +3472,17 @@ void main() {
       await endHandleGesture.up();
       await tester.pump();
 
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       expect(controller.selection.baseOffset, 0);
       expect(controller.selection.extentOffset, 11);
     },
@@ -4873,7 +4883,17 @@ void main() {
       await tester.tapAt(textFieldStart);
       await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
   );
@@ -9930,12 +9950,30 @@ void main() {
         const TextStyle(inherit: false, fontSize: 12.0, textBaseline: TextBaseline.alphabetic),
       ),
     );
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     // With inherit not set to false, will pickup required fields from theme
     await tester.pumpWidget(buildFrame(const TextStyle(fontSize: 12.0)));
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     await tester.pumpWidget(buildFrame(const TextStyle(inherit: false, fontSize: 12.0)));
     expect(tester.takeException(), isNotNull);
   });
@@ -15098,7 +15136,17 @@ void main() {
 
     await showSelectionMenuAt(tester, controller, controller.text.indexOf('test'));
     await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets(

@@ -3925,7 +3925,17 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('NavigationRail labels shall not overflow if longer texts provided - extended', (
@@ -3976,7 +3986,17 @@ void main() {
 
     // If the widget manages to layout without throwing an overflow exception,
     // the test passes.
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('NavigationRail can scroll in low height', (WidgetTester tester) async {

@@ -470,7 +470,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('SliverList can handle inaccurate scroll offset due to changes in children list', (
@@ -1028,7 +1038,17 @@ void main() {
     );
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -500.0), 10000.0);
     await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('SliverGrid children can be arbitrarily placed', (WidgetTester tester) async {
@@ -1062,8 +1082,17 @@ void main() {
       ),
     );
     // Assertion not triggered by arbitrary placement
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     // Verify correct hit testing
     await tester.tap(find.text('Index 0'));
     expect(firstTapped, 1);

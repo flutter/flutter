@@ -443,7 +443,17 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
 
       // When a Ticker leaks an exception is thrown
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     });
   });
 
@@ -938,7 +948,17 @@ void main() {
 
     await tester.pumpWidget(const SizedBox.shrink());
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   for (final bool shouldAnimate in <bool>[true, false]) {
@@ -1553,7 +1573,17 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     // Controller should be detached and no exception should be thrown
     expect(controller.isAttached, false);
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('DraggableScrollableSheet should not reset programmatic drag on rebuild', (

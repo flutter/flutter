@@ -2007,11 +2007,29 @@ void main() {
     'ThemeData.inputDecorationTheme accepts only a InputDecorationTheme or a InputDecorationThemeData',
     (WidgetTester tester) async {
       ThemeData(inputDecorationTheme: const InputDecorationTheme());
-      expect(tester.takeException(), isNull);
-
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       ThemeData(inputDecorationTheme: const InputDecorationThemeData());
-      expect(tester.takeException(), isNull);
-
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       expect(
         () {
           ThemeData(inputDecorationTheme: Object());

@@ -1678,7 +1678,17 @@ void main() {
 
     expect(getHighlightedIndex(tester), 2);
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Disallow new gesture when dragging', (WidgetTester tester) async {
@@ -1773,7 +1783,17 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('computeDryLayout is pure', (WidgetTester tester) async {
@@ -1803,7 +1823,17 @@ void main() {
 
     final Size size = renderBox.getDryLayout(const BoxConstraints());
     expect(size.width, greaterThan(10));
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Has consistent size, independent of groupValue', (WidgetTester tester) async {

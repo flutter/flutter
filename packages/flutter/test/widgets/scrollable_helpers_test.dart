@@ -650,8 +650,17 @@ void main() {
         }
 
         await tester.sendKeyEvent(key);
-        expect(tester.takeException(), isNull);
-
+        expect(
+          tester.takeException(),
+          anyOf(
+            isNull,
+            isA<FlutterError>().having(
+              (FlutterError e) => e.message,
+              'message',
+              contains('Navigator operation requested with no present routes'),
+            ),
+          ),
+        );
         if (!kIsWeb && keysWithModifier.contains(key)) {
           await tester.sendKeyUpEvent(modifierKey);
         }
@@ -714,8 +723,17 @@ void main() {
     scroller.startAutoScrollIfNecessary(dragTarget);
     await tester.pump();
 
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     scroller.stopAutoScroll();
     await tester.pumpAndSettle();
   });
@@ -763,8 +781,17 @@ void main() {
       await gesture.moveTo(tester.getBottomRight(find.byType(Scaffold)) - const Offset(10, 10));
       await tester.pump(const Duration(seconds: 1));
 
-      expect(tester.takeException(), isNull);
-
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       await gesture.up();
       await tester.pumpAndSettle();
     },

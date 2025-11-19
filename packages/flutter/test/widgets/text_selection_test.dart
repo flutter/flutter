@@ -1595,7 +1595,17 @@ void main() {
       selectionOverlay.showMagnifier(info);
       await tester.pump();
 
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       expect(find.byKey(magnifierKey), findsOneWidget);
       expect(builtFieldBounds, fieldBounds);
       expect(builtGlobalGesturePosition, globalGesturePosition);

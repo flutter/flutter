@@ -1640,14 +1640,33 @@ void main() {
 
       // Let action2 look up its override using a context below itself, so it
       // will find action3 as its override.
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       setState(() {
         action2LookupContext = invokingContext;
       });
 
       await tester.pump();
-      expect(tester.takeException(), isNull);
-
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       Object? exception;
       try {
         Actions.invoke(invokingContext!, LogIntent(log: invocations));

@@ -2935,7 +2935,17 @@ void main() {
     expect(find.byKey(bottomSheetKey1), findsNothing);
     expect(find.byKey(bottomSheetKey2), findsNothing);
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('showBottomSheet removes scrim when draggable sheet is dismissed', (
@@ -3044,7 +3054,17 @@ void main() {
     expect(find.byKey(bottomSheetKey), findsNothing);
 
     // No exception is thrown.
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/115924.

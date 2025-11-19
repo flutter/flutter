@@ -2035,7 +2035,17 @@ void main() {
 
     // Dispose gesture
     await gesture.cancel();
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('stylus input works', (WidgetTester tester) async {

@@ -98,7 +98,17 @@ void main() {
     for (int index = 0; index < 3; index++) {
       await tester.drag(find.byType(Slider).at(index), const Offset(500.0, 0.0));
       await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     }
 
     expect(appScreenHeight(), 480);

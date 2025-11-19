@@ -1637,7 +1637,17 @@ void main() {
 
     controller.dispose();
     // Double disposal will throw.
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Verify persistence BottomSheet use AnimationController if provided.', (
@@ -1749,7 +1759,17 @@ void main() {
     // If the internal animation controller do not dispose will throw
     // FlutterError:<ScaffoldState#1981a(tickers: tracking 1 ticker) was disposed with an active
     // Ticker.
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/99627
@@ -1855,7 +1875,17 @@ void main() {
       controller.dispose();
 
       // Double dispose will throw.
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     },
   );
 

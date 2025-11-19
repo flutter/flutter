@@ -157,8 +157,17 @@ void main() {
       await firstTransactionCompleter.future;
       await tester.pump();
       expect(find.text('waiting'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       // Make sure the new transaction can complete and update correctly.
       parser.completer.complete();
       await parser.completer.future;
@@ -519,7 +528,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester tester) async {

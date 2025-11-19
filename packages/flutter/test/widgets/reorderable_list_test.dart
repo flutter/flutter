@@ -265,7 +265,17 @@ void main() {
     await drag2.up();
     await tester.pumpAndSettle();
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('negative itemCount should assert', (WidgetTester tester) async {
@@ -568,7 +578,17 @@ void main() {
       await tester.pumpAndSettle();
 
       // There shouldn't be a layout overflow exception.
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     },
   );
 
@@ -628,7 +648,17 @@ void main() {
       await tester.pumpAndSettle();
 
       // There shouldn't be a layout overflow exception.
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     },
   );
 

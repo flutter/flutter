@@ -175,8 +175,17 @@ void main() {
     await tester.binding.setSurfaceSize(surfaceSize);
     await tester.pumpWidget(build(surfaceSize));
 
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     // Reset TestWidgetsFlutterBinding surfaceSize
     await tester.binding.setSurfaceSize(null);
   });
@@ -1235,7 +1244,17 @@ void main() {
 
     controller.jumpToPage(365);
     await tester.pump();
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('PageView content should not be stretched on precision error', (

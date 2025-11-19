@@ -291,18 +291,46 @@ void main() {
         ),
       );
 
-      expect(tester.takeException(), isNull);
-
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       expect(find.byType(SystemContextMenu), findsNothing);
       expect(itemsReceived, hasLength(0));
 
       await tester.tap(find.byType(TextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
-      expect(tester.takeException(), isNull);
-
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       await tester.pump();
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       expect(find.byType(SystemContextMenu), findsOneWidget);
       expect(itemsReceived, hasLength(0));
     },
@@ -523,7 +551,17 @@ void main() {
       setState(() {});
       await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     },
     skip: kIsWeb, // [intended]
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),

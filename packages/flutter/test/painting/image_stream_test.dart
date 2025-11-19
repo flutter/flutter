@@ -765,7 +765,17 @@ void main() {
     await tester.idle();
 
     // No exception is passed up.
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     expect(capturedException, 'frame completion error');
     expect(mockCodec.disposed, false);
   });

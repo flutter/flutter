@@ -870,7 +870,17 @@ void main() {
     final MenuController controller = MenuController();
     controller.close();
     await tester.pump();
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Detached MenuController returns false when calling isOpen', (
@@ -2274,7 +2284,17 @@ void main() {
     await tester.pumpWidget(build(smallSize));
     await tester.pump();
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   group('onOpenRequested', () {

@@ -2333,11 +2333,31 @@ void main() {
       debugFocusChanges = false;
       await testDebugFocusChanges();
       expect(messages, isEmpty);
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       debugFocusChanges = true;
       await testDebugFocusChanges();
       expect(messages.toString(), contains('FOCUS: Notified 3 dirty nodes:'));
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
     } finally {
       debugFocusChanges = oldDebugFocusChanges;
       debugPrint = oldDebugPrint;

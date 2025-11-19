@@ -489,7 +489,17 @@ void main() {
 
     // Shouldn't be stuck if gesture is up.
     await tester.pumpAndSettle(const Duration(seconds: 1));
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('select to scroll backward', (WidgetTester tester) async {

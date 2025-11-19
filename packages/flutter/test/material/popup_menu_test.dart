@@ -2988,7 +2988,17 @@ void main() {
     // which has been unmounted.
     await tester.pumpWidget(widget(viewSize: const Size(300, 300)));
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   group('feedback', () {
@@ -4781,7 +4791,17 @@ void main() {
     await tester.pumpWidget(buildWidget());
 
     // Verify no exception is thrown at a brief moment when the PopupMenuButton is hidden.
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/43824.

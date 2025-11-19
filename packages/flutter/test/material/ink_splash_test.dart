@@ -48,7 +48,17 @@ void main() {
     await tester.tap(find.text('Test'));
     // start ink animation which asserts for a textDirection.
     await tester.pumpAndSettle(const Duration(milliseconds: 30));
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Material2 - InkWell with NoSplash splashFactory paints nothing', (

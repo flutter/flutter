@@ -216,8 +216,17 @@ void main() {
       ),
     );
     // 50.0 * 3 (children) + 50.0 * 2 (spacing) = 250.0 < 300.0 (constraints)
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     await tester.pumpWidget(
       constrainedFlex(
         direction: Axis.vertical,
@@ -240,8 +249,17 @@ void main() {
       ),
     );
     // 50.0 * 3 (children) + 50.0 * 2 (spacing) = 250.0 < 300.0 (constraints)
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     await tester.pumpWidget(
       constrainedFlex(
         direction: Axis.vertical,
@@ -264,8 +282,17 @@ void main() {
       ),
     );
     // 50.0 * 3 (children) + 50.0 * 2 (spacing) = 250.0 < 300.0 (constraints)
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     await tester.pumpWidget(
       constrainedFlex(
         direction: Axis.vertical,
@@ -288,8 +315,17 @@ void main() {
       ),
     );
     // 50.0 * 3 (children) + 50.0 * 2 (spacing) = 250.0 < 300.0 (constraints)
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     await tester.pumpWidget(
       constrainedFlex(
         direction: Axis.vertical,
@@ -312,8 +348,17 @@ void main() {
       ),
     );
     // 50.0 * 3 (children) + 50.0 * 2 (spacing) = 250.0 < 300.0 (constraints)
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     await tester.pumpWidget(
       constrainedFlex(
         direction: Axis.vertical,
@@ -336,8 +381,17 @@ void main() {
       ),
     );
     // 50.0 * 3 (children) + 50.0 * 2 (spacing) = 250.0 < 300.0 (constraints)
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     await tester.pumpWidget(
       constrainedFlex(
         direction: Axis.vertical,

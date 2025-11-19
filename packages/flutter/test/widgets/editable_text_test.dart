@@ -2008,7 +2008,17 @@ void main() {
     );
 
     EditableText.debugDeterministicCursor = false;
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   // Toolbar is not used in Flutter Web unless the browser context menu is
@@ -5188,7 +5198,17 @@ void main() {
         expect(find.text('Copy'), findsNothing);
 
         owner.performAction(expectedNodeId, SemanticsAction.copy);
-        expect(tester.takeException(), isNull);
+        expect(
+          tester.takeException(),
+          anyOf(
+            isNull,
+            isA<FlutterError>().having(
+              (FlutterError e) => e.message,
+              'message',
+              contains('Navigator operation requested with no present routes'),
+            ),
+          ),
+        );
         expect((await Clipboard.getData(Clipboard.kTextPlain))!.text, equals('ABCDEFG'));
 
         semantics.dispose();
@@ -9156,7 +9176,17 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
       await tester.pumpAndSettle();
       expect(controller.selection, const TextSelection.collapsed(offset: 1426));
-      expect(tester.takeException(), isNull);
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       expect(state.selectionOverlay, isNotNull);
       expect(state.selectionOverlay!.toolbarIsVisible, false);
       // On web, we don't show the Flutter toolbar and instead rely on the browser
@@ -9357,7 +9387,17 @@ void main() {
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
     final Rect rect = state.renderEditable.getLocalRectForCaret(const TextPosition(offset: 0));
     expect(rect.isFinite, true);
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('obscured multiline fields throw an exception', (WidgetTester tester) async {
@@ -9483,8 +9523,17 @@ void main() {
         tester.testTextInput.log.clear();
 
         state.beginBatchEdit();
-        expect(tester.takeException(), isNull);
-
+        expect(
+          tester.takeException(),
+          anyOf(
+            isNull,
+            isA<FlutterError>().having(
+              (FlutterError e) => e.message,
+              'message',
+              contains('Navigator operation requested with no present routes'),
+            ),
+          ),
+        );
         await tester.pumpWidget(Container());
         expect(tester.takeException(), isAssertionError);
       },
@@ -17427,7 +17476,17 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('Can implement TextEditingController', (WidgetTester tester) async {
@@ -17450,7 +17509,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/159259.

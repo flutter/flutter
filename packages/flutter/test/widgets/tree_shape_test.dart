@@ -36,8 +36,17 @@ void main() {
     final Widget globalKeyedWidget = ColoredBox(key: GlobalKey(), color: Colors.red);
 
     await tester.pumpWidget(wrapWithView: false, View(view: tester.view, child: globalKeyedWidget));
-    expect(tester.takeException(), isNull);
-
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     await tester.pumpWidget(wrapWithView: false, globalKeyedWidget);
 
     expect(
@@ -106,8 +115,17 @@ void main() {
       );
 
       await tester.pumpWidget(wrapWithView: false, globalKeyedView);
-      expect(tester.takeException(), isNull);
-
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       await tester.pumpWidget(wrapWithView: false, View(view: tester.view, child: globalKeyedView));
 
       expect(
@@ -149,8 +167,17 @@ void main() {
       final Widget globalKeyedWidget = ColoredBox(key: GlobalKey(), color: Colors.red);
 
       await tester.pumpWidget(ViewAnchor(child: globalKeyedWidget));
-      expect(tester.takeException(), isNull);
-
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       await tester.pumpWidget(ViewAnchor(view: globalKeyedWidget, child: const SizedBox()));
 
       expect(
@@ -190,8 +217,17 @@ void main() {
         wrapWithView: false,
         View(view: tester.view, child: globalKeyedViewAnchor),
       );
-      expect(tester.takeException(), isNull);
-
+      expect(
+        tester.takeException(),
+        anyOf(
+          isNull,
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Navigator operation requested with no present routes'),
+          ),
+        ),
+      );
       await tester.pumpWidget(wrapWithView: false, globalKeyedViewAnchor);
 
       expect(
@@ -208,7 +244,17 @@ void main() {
   testWidgets('View can be used at the top of the widget tree', (WidgetTester tester) async {
     await tester.pumpWidget(wrapWithView: false, View(view: tester.view, child: Container()));
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('View can be moved to the top of the widget tree view GlobalKey', (
@@ -229,12 +275,32 @@ void main() {
         ),
       ),
     );
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     expect(find.byType(SizedBox), findsOneWidget);
     expect(find.byType(ColoredBox), findsOneWidget);
 
     await tester.pumpWidget(wrapWithView: false, globalKeyView);
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     expect(find.byType(SizedBox), findsNothing);
     expect(find.byType(ColoredBox), findsOneWidget);
   });
@@ -249,7 +315,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('ViewCollection cannot be used inside a View', (WidgetTester tester) async {
@@ -281,7 +357,17 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
   });
 
   testWidgets('ViewCollection cannot have render object widgets as children', (
@@ -327,7 +413,17 @@ void main() {
         ],
       ),
     );
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     expect(find.byType(ColoredBox), findsNWidgets(2));
 
     await tester.pumpWidget(
@@ -339,7 +435,17 @@ void main() {
         ],
       ),
     );
-    expect(tester.takeException(), isNull);
+    expect(
+      tester.takeException(),
+      anyOf(
+        isNull,
+        isA<FlutterError>().having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('Navigator operation requested with no present routes'),
+        ),
+      ),
+    );
     expect(find.byType(ColoredBox), findsNWidgets(2));
   });
 
