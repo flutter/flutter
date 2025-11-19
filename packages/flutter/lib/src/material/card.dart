@@ -47,9 +47,16 @@ enum _CardVariant { elevated, filled, outlined }
 /// ** See code in examples/api/lib/material/card/card.1.dart **
 /// {@end-tool}
 ///
-/// Material Design 3 introduced new types of cards. The default [Card] is the
-/// elevated card. To create a filled card, use [Card.filled]; to create a outlined
-/// card, use [Card.outlined].
+/// For Material Design 2 (when [ThemeData.useMaterial3] is false), there is a
+/// single card type: the elevated card. In that mode the named constructors
+/// ([Card.filled], [Card.outlined]) behave the same as the default [Card].
+///
+/// For Material Design 3 (when [ThemeData.useMaterial3] is true), three visual
+/// variants are available: the default [Card] (elevated), [Card.filled], and
+/// [Card.outlined]. All variants share the same theme class, [CardThemeData],
+/// so theme properties (for example [CardThemeData.shape]) apply to every card
+/// variant within the theme's scope.
+///
 /// {@tool dartpad}
 /// This sample shows creation of [Card] widgets for elevated, filled and
 /// outlined types, as described in: https://m3.material.io/components/cards/overview
