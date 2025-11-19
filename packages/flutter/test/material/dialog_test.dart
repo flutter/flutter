@@ -3360,11 +3360,11 @@ void main() {
 
     expect(find.byType(Dialog), findsOneWidget);
 
-    final Semantics dialogSemantics = tester.widget<Semantics>(
-      find.ancestor(of: find.byType(AnimatedPadding), matching: find.byType(Semantics)).first,
+    final Semantics routeSemantics = tester.widget<Semantics>(
+      find.ancestor(of: find.byType(Dialog), matching: find.byType(Semantics)).first,
     );
 
-    expect(dialogSemantics.properties.hitTestBehavior, SemanticsHitTestBehavior.opaque);
+    expect(routeSemantics.properties.hitTestBehavior, SemanticsHitTestBehavior.opaque);
 
     semantics.dispose();
   });
@@ -3407,11 +3407,13 @@ void main() {
     expect(find.byType(AlertDialog), findsOneWidget);
     expect(find.byType(Dialog), findsOneWidget);
 
-    final Semantics dialogSemantics = tester.widget<Semantics>(
-      find.ancestor(of: find.byType(AnimatedPadding), matching: find.byType(Semantics)).first,
+    // Find the route-level Semantics with hitTestBehavior.opaque
+    // (wraps the entire dialog content, above the Dialog widget)
+    final Semantics routeSemantics = tester.widget<Semantics>(
+      find.ancestor(of: find.byType(Dialog), matching: find.byType(Semantics)).first,
     );
 
-    expect(dialogSemantics.properties.hitTestBehavior, SemanticsHitTestBehavior.opaque);
+    expect(routeSemantics.properties.hitTestBehavior, SemanticsHitTestBehavior.opaque);
 
     semantics.dispose();
   });

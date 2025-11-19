@@ -2994,14 +2994,25 @@ void main() {
 
     expect(find.text('Modal Bottom Sheet'), findsOneWidget);
 
-    // Verify the bottom sheet has opaque hitTestBehavior in semantics
+    // Verify the route-level Semantics has opaque hitTestBehavior
     // This prevents clicks inside the bottom sheet from passing through to the barrier
-    final Semantics bottomSheetSemantics = tester.widget<Semantics>(
-      find.ancestor(of: find.byType(ClipRect), matching: find.byType(Semantics)).first,
+    final List<Semantics> allSemantics = tester
+        .widgetList<Semantics>(
+          find.ancestor(of: find.text('Modal Bottom Sheet'), matching: find.byType(Semantics)),
+        )
+        .toList();
+
+    final Semantics routeSemantics = allSemantics.firstWhere(
+      (Semantics s) => s.properties.hitTestBehavior == SemanticsHitTestBehavior.opaque,
     );
 
-    expect(bottomSheetSemantics.properties.hitTestBehavior, SemanticsHitTestBehavior.opaque);
-    expect(bottomSheetSemantics.properties.scopesRoute, true);
+    expect(routeSemantics.properties.hitTestBehavior, SemanticsHitTestBehavior.opaque);
+
+    final Semantics widgetSemantics = allSemantics.firstWhere(
+      (Semantics s) => s.properties.scopesRoute == true,
+    );
+
+    expect(widgetSemantics.properties.scopesRoute, true);
 
     semantics.dispose();
   });

@@ -303,7 +303,6 @@ class Dialog extends StatelessWidget {
 
     return Semantics(
       role: semanticsRole,
-      hitTestBehavior: SemanticsHitTestBehavior.opaque,
       child: AnimatedPadding(
         padding: effectivePadding,
         duration: insetAnimationDuration,
@@ -1677,6 +1676,11 @@ class DialogRoute<T> extends RawDialogRoute<T> {
                if (useSafeArea) {
                  dialog = SafeArea(child: dialog);
                }
+               // Prevent clicks inside the dialog from passing through to the barrier
+               dialog = Semantics(
+                 hitTestBehavior: SemanticsHitTestBehavior.opaque,
+                 child: dialog,
+               );
                return dialog;
              },
          barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,
