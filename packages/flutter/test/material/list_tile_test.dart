@@ -965,29 +965,17 @@ void main() {
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
-      find.byType(Material),
+      find.byType(ListTile),
       paints
-        ..rect()
-        ..rect(color: Colors.orange[500], rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
-        ..rect(
-          color: const Color(0xffffffff),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        ),
+        ..path()
+        ..rect(color: Colors.orange[500], rect: const Rect.fromLTRB(0, 0, 100, 100)),
     );
 
     // Check when the list tile is disabled.
     await tester.pumpWidget(buildApp(enabled: false));
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isFalse);
-    expect(
-      find.byType(Material),
-      paints
-        ..rect()
-        ..rect(
-          color: const Color(0xffffffff),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        ),
-    );
+    expect(find.byType(ListTile), paints..path(color: Colors.transparent));
 
     focusNode.dispose();
   });
@@ -1021,19 +1009,7 @@ void main() {
 
     await tester.pump();
     await tester.pumpAndSettle();
-    expect(
-      find.byType(Material),
-      paints
-        ..rect()
-        ..rect(
-          color: const Color(0x1f000000),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        )
-        ..rect(
-          color: const Color(0xffffffff),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        ),
-    );
+    expect(find.byType(ListTile), paints..path(color: Colors.transparent));
 
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -1043,36 +1019,17 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
     expect(
-      find.byType(Material),
+      find.byType(ListTile),
       paints
-        ..rect()
-        ..rect(
-          color: const Color(0x1f000000),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        )
-        ..rect(color: Colors.orange[500], rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
-        ..rect(
-          color: const Color(0xffffffff),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        ),
+        ..path()
+        ..rect(color: const Color(0x1f000000), rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0))
+        ..rect(color: Colors.orange[500], rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0)),
     );
 
     await tester.pumpWidget(buildApp(enabled: false));
     await tester.pump();
     await tester.pumpAndSettle();
-    expect(
-      find.byType(Material),
-      paints
-        ..rect()
-        ..rect(
-          color: Colors.orange[500]!.withAlpha(0),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        )
-        ..rect(
-          color: const Color(0xffffffff),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        ),
-    );
+    expect(find.byType(ListTile), paints..path(color: Colors.transparent));
   });
 
   testWidgets('ListTile can be splashed and has correct splash color', (WidgetTester tester) async {
@@ -1095,7 +1052,10 @@ void main() {
       tester.getRect(find.byType(ListTile)).center,
     );
     await tester.pump(const Duration(milliseconds: 200));
-    expect(find.byType(Material), paints..circle(x: 50, y: 50, color: const Color(0xff88ff88)));
+    expect(
+      find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+      paints..circle(x: 50, y: 50, color: const Color(0xff88ff88)),
+    );
     await gesture.up();
   });
 
@@ -1197,25 +1157,31 @@ void main() {
 
     // Test rectangle shape
     await tester.pumpWidget(buildListTile(rectShape));
-    Rect rect = tester.getRect(find.byType(ListTile));
-
-    // Check if a rounded rectangle was painted with the correct color and shape
-    expect(find.byType(Material), paints..rect(color: tileColor, rect: rect));
-
-    // Test stadium shape
-    await tester.pumpWidget(buildListTile(stadiumShape));
-    rect = tester.getRect(find.byType(ListTile));
 
     // Check if a rounded rectangle was painted with the correct color and shape
     expect(
-      find.byType(Material),
-      paints
-        ..clipRect()
-        ..rrect(
-          color: tileColor,
-          rrect: RRect.fromRectAndRadius(rect, Radius.circular(rect.shortestSide / 2.0)),
-        ),
+      find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+      paints..path(color: tileColor),
     );
+
+    final Material materialWidget = tester.widget<Material>(
+      find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+    );
+    expect(materialWidget.shape, rectShape);
+
+    // Test stadium shape
+    await tester.pumpWidget(buildListTile(stadiumShape));
+
+    // Check if a rounded rectangle was painted with the correct color and shape
+    expect(
+      find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+      paints..path(color: tileColor),
+    );
+
+    final Material materialWidget2 = tester.widget<Material>(
+      find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+    );
+    expect(materialWidget2.shape, stadiumShape);
   });
 
   testWidgets('ListTile changes mouse cursor when hovered', (WidgetTester tester) async {
@@ -1359,14 +1325,20 @@ void main() {
     );
 
     // Initially, when isSelected is false, the ListTile should respect tileColor.
-    expect(find.byType(Material), paints..rect(color: tileColor));
+    expect(
+      find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+      paints..path(color: tileColor),
+    );
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
     // When isSelected is true, the ListTile should respect selectedTileColor.
-    expect(find.byType(Material), paints..rect(color: selectedTileColor));
+    expect(
+      find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+      paints..path(color: selectedTileColor),
+    );
   });
 
   testWidgets('ListTile shows Material ripple effects on top of tileColor', (
@@ -1387,7 +1359,10 @@ void main() {
     );
 
     // Before ListTile is tapped, it should be tileColor
-    expect(find.byType(Material), paints..rect(color: tileColor));
+    expect(
+      find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+      paints..path(color: tileColor),
+    );
 
     // Tap on tile to trigger ink effect and wait for it to be underway.
     await tester.tap(find.byType(ListTile));
@@ -1395,9 +1370,9 @@ void main() {
 
     // After tap, the tile could be drawn in tileColor, with the ripple (circle) on top
     expect(
-      find.byType(Material),
+      find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
       paints
-        ..rect(color: tileColor)
+        ..path(color: tileColor)
         ..circle(),
     );
   });
@@ -1428,13 +1403,19 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..rect(color: defaultColor));
+    expect(
+      find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+      paints..path(color: defaultColor),
+    );
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Material), paints..rect(color: defaultColor));
+    expect(
+      find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+      paints..path(color: defaultColor),
+    );
   });
 
   testWidgets('Default tile color when ListTile is wrapped with an elevated widget', (
@@ -1468,28 +1449,34 @@ void main() {
     );
 
     expect(
-      find.byType(Material),
+      find.byType(Card),
       paints
         ..path(color: const Color(0xff000000))
         ..path(color: const Color(0xfff7f2fa))
         ..save()
         ..save(),
     );
-    expect(find.byType(Material), paints..rect(color: defaultColor));
+    expect(
+      find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+      paints..path(color: defaultColor),
+    );
 
     // Tap on tile to change isSelected.
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();
 
     expect(
-      find.byType(Material),
+      find.byType(Card),
       paints
         ..path(color: const Color(0xff000000))
         ..path(color: const Color(0xfff7f2fa))
         ..save()
         ..save(),
     );
-    expect(find.byType(Material), paints..rect(color: defaultColor));
+    expect(
+      find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+      paints..path(color: defaultColor),
+    );
   });
 
   testWidgets('ListTile layout at zero size', (WidgetTester tester) async {
@@ -4225,13 +4212,19 @@ void main() {
         ),
       );
 
-      expect(find.byType(Material), paints..rect(color: defaultColor));
+      expect(
+        find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+        paints..path(color: defaultColor),
+      );
 
       // Tap on tile to change isSelected.
       await tester.tap(find.byType(ListTile));
       await tester.pumpAndSettle();
 
-      expect(find.byType(Material), paints..rect(color: defaultColor));
+      expect(
+        find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+        paints..path(color: defaultColor),
+      );
     });
 
     testWidgets('titleAlignment position with title widget', (WidgetTester tester) async {

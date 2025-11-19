@@ -19,7 +19,10 @@ void main() {
     await tester.pump(kLongPressTimeout + kPressTimeout);
     await tester.pumpAndSettle();
     final Material material = tester.widget<Material>(
-      find.ancestor(of: find.text('Item 1'), matching: find.byType(Material)),
+      find.ancestor(
+        of: find.text('Item 1'),
+        matching: find.ancestor(of: find.byType(ListTile), matching: find.byType(Material)),
+      ),
     );
     expect(material.color, theme.colorScheme.secondary);
 
