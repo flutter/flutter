@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../../asset.dart';
 import '../../base/logger.dart' show Logger;
 import '../../build_info.dart';
@@ -14,6 +16,9 @@ import 'native_assets.dart' show DartBuild;
 class FlutterHookRunnerNative implements FlutterHookRunner {
   FlutterHookResult? _flutterHookResult;
 
+  @visibleForTesting
+  static const kHooksOutputDirectory = 'native_hooks';
+
   @override
   Future<FlutterHookResult> runHooks({
     required TargetPlatform targetPlatform,
@@ -21,15 +26,40 @@ class FlutterHookRunnerNative implements FlutterHookRunner {
     Logger? logger,
   }) async {
     logger?.printTrace('runHooks() with ${environment.defines} and $targetPlatform');
-    if (_flutterHookResult != null && !_flutterHookResult!.hasAnyModifiedFiles(globals.fs)) {
+    if (_flutterHookResult != null &&
+        !_flutterHookResult!.hasAnyModifiedFiles(environment.fileSystem)) {
       logger?.printTrace('runHooks() - up-to-date already');
       return _flutterHookResult!;
     }
     logger?.printTrace('runHooks() - will perform dart build');
 
+    // Use a clone of the environment with a different output direectory
+    // to avoid conflicts with the primary build's outputs.
+    final String outputDirPath = environment.fileSystem.path.join(
+      environment.outputDir.path,
+      kHooksOutputDirectory,
+    );
+    final hooksEnvironment = Environment(
+      projectDir: environment.projectDir,
+      packageConfigPath: environment.packageConfigPath,
+      outputDir: environment.fileSystem.directory(outputDirPath),
+      cacheDir: environment.cacheDir,
+      flutterRootDir: environment.flutterRootDir,
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
+      artifacts: environment.artifacts,
+      processManager: environment.processManager,
+      platform: environment.platform,
+      analytics: environment.analytics,
+      engineVersion: environment.engineVersion,
+      generateDartPluginRegistry: environment.generateDartPluginRegistry,
+      buildDir: environment.rootBuildDir,
+      defines: environment.defines,
+      inputs: environment.inputs,
+    );
     final BuildResult lastBuild = await globals.buildSystem.build(
       DartBuild(specifiedTargetPlatform: targetPlatform),
-      environment,
+      hooksEnvironment,
     );
     if (!lastBuild.success) {
       for (final ExceptionMeasurement exceptionMeasurement in lastBuild.exceptions.values) {
