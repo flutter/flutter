@@ -4443,23 +4443,6 @@ void main() {
                               id: 4,
                               children: <TestSemantics>[
                                 TestSemantics(
-                                  id: 5,
-                                  label: 'ABC',
-                                  flags: <SemanticsFlag>[
-                                    SemanticsFlag.isFocused,
-                                    if (kIsWeb) SemanticsFlag.isButton,
-                                    SemanticsFlag.hasEnabledState,
-                                    SemanticsFlag.isEnabled,
-                                    SemanticsFlag.isFocusable,
-                                    SemanticsFlag.hasExpandedState,
-                                    SemanticsFlag.isExpanded,
-                                  ],
-                                  actions: <SemanticsAction>[
-                                    SemanticsAction.tap,
-                                    SemanticsAction.focus,
-                                  ],
-                                ),
-                                TestSemantics(
                                   id: 7,
                                   children: <TestSemantics>[
                                     TestSemantics(
@@ -4489,6 +4472,23 @@ void main() {
                                         ),
                                       ],
                                     ),
+                                  ],
+                                ),
+                                TestSemantics(
+                                  id: 5,
+                                  label: 'ABC',
+                                  flags: <SemanticsFlag>[
+                                    SemanticsFlag.isFocused,
+                                    if (kIsWeb) SemanticsFlag.isButton,
+                                    SemanticsFlag.hasEnabledState,
+                                    SemanticsFlag.isEnabled,
+                                    SemanticsFlag.isFocusable,
+                                    SemanticsFlag.hasExpandedState,
+                                    SemanticsFlag.isExpanded,
+                                  ],
+                                  actions: <SemanticsAction>[
+                                    SemanticsAction.tap,
+                                    SemanticsAction.focus,
                                   ],
                                 ),
                               ],
