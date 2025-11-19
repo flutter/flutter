@@ -99,7 +99,9 @@ void main() {
 
   test('TrainHoppingAnimation', () {
     final AnimationController currentTrain = AnimationController(vsync: const TestVSync());
+    addTearDown(currentTrain.dispose);
     final AnimationController nextTrain = AnimationController(vsync: const TestVSync());
+    addTearDown(nextTrain.dispose);
     currentTrain.value = 0.5;
     nextTrain.value = 0.75;
     bool didSwitchTrains = false;
@@ -131,6 +133,32 @@ void main() {
       ),
       areCreateAndDispose,
     );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/178336.
+  test('TrainHoppingAnimation notifies status listeners', () {
+    final AnimationController controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
+    );
+    addTearDown(controller.dispose);
+
+    final TrainHoppingAnimation animation = TrainHoppingAnimation(
+      Tween<double>(begin: 1.0, end: -1.0).animate(controller),
+      Tween<double>(begin: -1.0, end: 1.0).animate(controller),
+    );
+    addTearDown(animation.dispose);
+
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+    animation.addStatusListener(statusLog.add);
+    expect(statusLog, isEmpty);
+
+    controller.forward();
+    expect(statusLog, equals(<AnimationStatus>[AnimationStatus.forward]));
+    statusLog.clear();
+
+    controller.reverse();
+    expect(statusLog, equals(<AnimationStatus>[AnimationStatus.dismissed]));
   });
 
   test('AnimationMean control test', () {
