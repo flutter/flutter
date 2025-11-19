@@ -4065,7 +4065,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
             updatedChildren.add(node);
 
             if (!kIsWeb) {
-              _traversalTransform = _computeChildTransform(
+              node._traversalTransform = _computeChildTransform(
                 parentPaintClipRect: parentPaintClipRect,
                 parentSemanticsClipRect: parentSemanticsClipRect,
                 parentTransform: null,
