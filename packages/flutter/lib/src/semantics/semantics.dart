@@ -2718,6 +2718,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
   }
 
+  // null means this node is not a traversal child and the transform is
+  // the same as [transform].
+  Matrix4? _traversalTransform;
+
   /// The bounding box for this node in its coordinate system.
   Rect get rect => _rect;
   Rect _rect = Rect.zero;
@@ -3815,13 +3819,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
     );
   }
 
-  static Float64List _initIdentityTransform() {
-    return Matrix4.identity().storage;
-  }
-
   static final Int32List _kEmptyChildList = Int32List(0);
   static final Int32List _kEmptyCustomSemanticsActionsList = Int32List(0);
-  static final Float64List _kIdentityTransform = _initIdentityTransform();
+  static final Matrix4 _kIdentityTransform = Matrix4.identity();
 
   static Matrix4 _computeChildTransform({
     required Matrix4? parentTransform,
@@ -3943,21 +3943,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
         traversalParentId = owner!._traversalParentNodes[identifier]!.id;
       }
     }
-
-    final Float64List updatedTransform;
+    final Matrix4 traversalTransform;
     if (kIsWeb) {
-      updatedTransform = data.transform?.storage ?? _kIdentityTransform;
-    } else if (_isTraversalChild) {
-      traversalParent = owner!._traversalParentNodes[traversalChildIdentifier];
-      updatedTransform = _computeChildTransform(
-        parentPaintClipRect: traversalParent!.parentPaintClipRect,
-        parentSemanticsClipRect: traversalParent!.parentSemanticsClipRect,
-        parentTransform: null,
-        parent: traversalParent!,
-        child: this,
-      ).storage;
+      traversalTransform = data.transform ?? _kIdentityTransform;
     } else {
-      updatedTransform = transform?.storage ?? data.transform?.storage ?? _kIdentityTransform;
+      traversalParent = owner!._traversalParentNodes[traversalChildIdentifier];
+      traversalTransform = _traversalTransform ?? data.transform ?? _kIdentityTransform;
     }
 
     builder.updateNode(
@@ -3988,9 +3979,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
       scrollPosition: data.scrollPosition ?? double.nan,
       scrollExtentMax: data.scrollExtentMax ?? double.nan,
       scrollExtentMin: data.scrollExtentMin ?? double.nan,
-      transform: updatedTransform,
+      transform: traversalTransform.storage,
       traversalParent: traversalParentId,
-      hitTestTransform: data.transform?.storage ?? _kIdentityTransform,
+      hitTestTransform: (data.transform ?? _kIdentityTransform).storage,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
@@ -4054,10 +4045,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
     // children from _traversalChildNodes and add them to the children list
     // of this current node.
     if (_isTraversalParent) {
-      if (owner != null && owner!._traversalChildNodes.containsKey(traversalParentIdentifier)) {
-        final Set<SemanticsNode> traversalChildren =
-            owner!._traversalChildNodes[traversalParentIdentifier]!;
-
+      final Set<SemanticsNode>? traversalChildren =
+          owner?._traversalChildNodes[traversalParentIdentifier!];
+      if (traversalChildren != null) {
         // When traversal children are grafted from other branches, make sure
         // these children are not ancestors of the traversal parent. Otherwise,
         // it will cause infinite loop.
@@ -4073,6 +4063,16 @@ class SemanticsNode with DiagnosticableTreeMixin {
         for (final SemanticsNode node in traversalChildren) {
           if (node.attached) {
             updatedChildren.add(node);
+
+            if (!kIsWeb) {
+              _traversalTransform = _computeChildTransform(
+                parentPaintClipRect: parentPaintClipRect,
+                parentSemanticsClipRect: parentSemanticsClipRect,
+                parentTransform: null,
+                parent: this,
+                child: node,
+              );
+            }
           }
         }
       }
@@ -4547,11 +4547,18 @@ class _SemanticsSortGroup implements Comparable<_SemanticsSortGroup> {
 
 /// Converts `point` to the `node`'s parent's coordinate system.
 Offset _pointInParentCoordinates(SemanticsNode node, Offset point) {
-  if (node.transform == null) {
+  final Matrix4? traversalTransform;
+  if (kIsWeb) {
+    traversalTransform = node.transform;
+  } else {
+    traversalTransform = node._traversalTransform ?? node.transform;
+  }
+  if (traversalTransform == null) {
     return point;
   }
   final Vector3 vector = Vector3(point.dx, point.dy, 0.0);
-  node.transform!.transform3(vector);
+
+  traversalTransform.transform3(vector);
   return Offset(vector.x, vector.y);
 }
 
