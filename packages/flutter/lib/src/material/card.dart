@@ -88,7 +88,7 @@ class Card extends StatelessWidget {
   /// Create a filled variant of Card.
   ///
   /// Filled cards provide subtle separation from the background. This has less
-  /// emphasis than elevated (default) or outlined cards.
+  /// emphasis than elevated cards (the default) or outlined cards.
   ///
   /// If [ThemeData.useMaterial3] is false, this constructor is equivalent to
   /// the default constructor of [Card].
