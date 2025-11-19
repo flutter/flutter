@@ -241,8 +241,8 @@ class Canvas::PathBlurShape : public BlurShape {
   Rect GetBounds() const override { return source_.GetBounds(); }
 
   std::shared_ptr<SolidBlurContents> BuildBlurContent(Sigma sigma) override {
-    Radius radius = sigma;
-    Scalar device_radius = radius.radius * matrix_.GetMaxBasisLengthXY();
+    Scalar device_radius =
+        sigma.sigma * kSigmaScale * matrix_.GetMaxBasisLengthXY();
     shadow_geometry_.emplace(tessellator_, matrix_, source_, device_radius);
     if (!shadow_geometry_->CanRender() || shadow_geometry_->IsEmpty()) {
       return nullptr;
@@ -255,6 +255,11 @@ class Canvas::PathBlurShape : public BlurShape {
   }
 
  private:
+  // This value was determined by empirical eyesight tests so that the
+  // shadow mesh results will match the results of the shape-specific
+  // optimized shadow shaders.
+  static constexpr Scalar kSigmaScale = 2.8f;
+
   const PathSource& source_;
   Tessellator& tessellator_;
   const Matrix& matrix_;
@@ -968,10 +973,10 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
 void Canvas::DrawCircle(const Point& center,
                         Scalar radius,
                         const Paint& paint) {
-  Size half_size(radius, radius);
   if (IsShadowBlurDrawOperation(paint)) {
-    RRectBlurShape shape(
-        Rect::MakeOriginSize(center - half_size, half_size * 2), radius);
+    Rect bounds = Rect::MakeLTRB(center.x - radius, center.y - radius,
+                                 center.x + radius, center.y + radius);
+    RRectBlurShape shape(bounds, radius);
     if (AttemptDrawBlur(shape, paint)) {
       return;
     }
