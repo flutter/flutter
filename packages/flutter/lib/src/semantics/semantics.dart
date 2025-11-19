@@ -3938,13 +3938,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
     if (_isTraversalChild) {
       traversalParent = owner!._traversalParentNodes[traversalChildIdentifier];
-      transform = _computeChildTransform(
-        parentPaintClipRect: traversalParent!.parentPaintClipRect,
-        parentSemanticsClipRect: traversalParent!.parentSemanticsClipRect,
-        parentTransform: null,
-        parent: traversalParent!,
-        child: this,
-      );
     }
 
     int traversalParentId = -1;
@@ -3958,6 +3951,14 @@ class SemanticsNode with DiagnosticableTreeMixin {
     final Float64List updatedTransform;
     if (kIsWeb) {
       updatedTransform = data.transform?.storage ?? _kIdentityTransform;
+    } else if (_isTraversalChild) {
+      updatedTransform = _computeChildTransform(
+        parentPaintClipRect: traversalParent!.parentPaintClipRect,
+        parentSemanticsClipRect: traversalParent!.parentSemanticsClipRect,
+        parentTransform: null,
+        parent: traversalParent!,
+        child: this,
+      ).storage;
     } else {
       updatedTransform = transform?.storage ?? data.transform?.storage ?? _kIdentityTransform;
     }

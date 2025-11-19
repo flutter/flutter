@@ -2812,9 +2812,8 @@ void main() {
                   TestSemantics(
                     id: 4,
                     rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-                    transform: Matrix4.identity()
-                      ..scale(1 / 3, 1 / 3, 1)
-                      ..setTranslationRaw(0, -rowOriginY, 0),
+                    // The transform here is in relation to this node's render parent.
+                    transform: Matrix4.identity()..scale(3.0, 3.0, 1.0),
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 5,
