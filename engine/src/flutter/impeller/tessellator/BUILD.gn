@@ -67,11 +67,13 @@ impeller_component("tessellator_unittests") {
   testonly = true
   sources = [
     "path_tessellator_unittests.cc",
+    "tessellator_playground_unittests.cc",
     "tessellator_unittests.cc",
   ]
   deps = [
     ":tessellator_libtess",
     "../geometry:geometry_asserts",
+    "../playground:playground_test",
     "//flutter/testing",
   ]
 }

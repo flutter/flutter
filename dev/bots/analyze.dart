@@ -776,7 +776,7 @@ class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
         _addErrorWithLineInfo(
           versionLiteral,
           error:
-              'Deprecation notice does not accurately indicate a beta branch version number; please see https://flutter.dev/docs/development/tools/sdk/releases to find the latest beta build version number.',
+              'Deprecation notice does not accurately indicate a beta branch version number; please see https://docs.flutter.dev/install/archive to find the latest beta build version number.',
         );
         return;
       }

@@ -1364,7 +1364,6 @@ void main() {
           ),
           ignoreRect: true,
           ignoreTransform: true,
-          ignoreTraversalIdentifier: true,
         ),
       );
 
@@ -1419,7 +1418,6 @@ void main() {
           ),
           ignoreRect: true,
           ignoreTransform: true,
-          ignoreTraversalIdentifier: true,
         ),
       );
 
@@ -1462,7 +1460,6 @@ void main() {
           ),
           ignoreRect: true,
           ignoreTransform: true,
-          ignoreTraversalIdentifier: true,
         ),
       );
 
@@ -1539,7 +1536,6 @@ void main() {
           ),
           ignoreRect: true,
           ignoreTransform: true,
-          ignoreTraversalIdentifier: true,
         ),
       );
 
@@ -1591,7 +1587,6 @@ void main() {
           ),
           ignoreRect: true,
           ignoreTransform: true,
-          ignoreTraversalIdentifier: true,
         ),
       );
       semantics.dispose();
@@ -1665,7 +1660,6 @@ void main() {
           ),
           ignoreRect: true,
           ignoreTransform: true,
-          ignoreTraversalIdentifier: true,
         ),
       );
 
@@ -1723,7 +1717,6 @@ void main() {
           ),
           ignoreRect: true,
           ignoreTransform: true,
-          ignoreTraversalIdentifier: true,
         ),
       );
 
@@ -1767,7 +1760,6 @@ void main() {
           ),
           ignoreRect: true,
           ignoreTransform: true,
-          ignoreTraversalIdentifier: true,
         ),
       );
 
@@ -1842,7 +1834,6 @@ void main() {
         ),
         ignoreRect: true,
         ignoreTransform: true,
-        ignoreTraversalIdentifier: true,
       ),
     );
     semantics.dispose();
@@ -1917,7 +1908,6 @@ void main() {
         ),
         ignoreRect: true,
         ignoreTransform: true,
-        ignoreTraversalIdentifier: true,
       ),
     );
     semantics.dispose();
@@ -2867,7 +2857,6 @@ void main() {
           ),
           ignoreRect: true,
           ignoreTransform: true,
-          ignoreTraversalIdentifier: true,
         ),
       );
 
@@ -5489,5 +5478,18 @@ void main() {
       material,
       paints..circle(x: 800.0 - sliderPadding, y: 300.0, color: theme.colorScheme.primary),
     );
+  });
+
+  testWidgets('Slider does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(child: Slider(value: 1, onChanged: (_) {})),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Slider)), Size.zero);
   });
 }

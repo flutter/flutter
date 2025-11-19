@@ -1,4 +1,4 @@
-# Welcome to the Flutter API reference documentation!
+# Flutter API reference documentation
 
 Flutter is Google's SDK for crafting beautiful, fast user experiences for
 mobile, web, and desktop from a single codebase. Flutter works with existing
@@ -13,18 +13,10 @@ SDK.
 This site hosts Flutter's API documentation. Other documentation can be found at
 the following locations:
 
-* [flutter.dev](https://flutter.dev) (main Flutter site)
-* [Stable channel API Docs](https://api.flutter.dev)
-* [Main channel API Docs](https://main-api.flutter.dev)
-* Engine Embedder API documentation:
-  * [Android Embedder](../javadoc/index.html)
-  * [iOS Embedder](../ios-embedder/index.html)
-  * [macOS Embedder](../macos-embedder/index.html)
-  * [Linux Embedder](../linux-embedder/index.html)
-  * [Windows Embedder](../windows-embedder/index.html)
-  * [Web Embedder](dart-ui_web/dart-ui_web-library.html)
-* [Installation](https://flutter.dev/docs/get-started/install)
-* [Codelabs](https://flutter.dev/docs/codelabs)
+* [Install Flutter](https://docs.flutter.dev/get-started)
+* [Flutter documentation](https://docs.flutter.dev)
+* [Stable channel API reference documentation](https://api.flutter.dev)
+* [Main channel API reference documentation](https://main-api.flutter.dev)
 * [Contributing to Flutter](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md)
 
 ## Offline Documentation
@@ -33,8 +25,8 @@ In addition to the online sites above, Flutter's documentation can be downloaded
 as an HTML documentation ZIP file for use when offline or when you have a poor
 internet connection.
 
-**Warning: the offline documentation files are quite large, approximately 700 MB
-to 900 MB.**
+> [!NOTE]
+> The offline documentation files are quite large, approximately 300MB zipped, 1GB unzipped.
 
 Offline HTML documentation ZIP bundles:
 
