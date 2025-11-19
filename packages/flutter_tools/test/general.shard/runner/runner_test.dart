@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -283,6 +284,67 @@ void main() {
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         CrashReporter: () => WaitingCrashReporter(commandCompleter.future),
+        Artifacts: () => Artifacts.test(),
+        HttpClientFactory: () =>
+            () => FakeHttpClient.any(),
+      },
+    );
+
+    testUsingContext(
+      "doesn't send multiple events for additional asynchronous exceptions "
+      'thrown during shutdown',
+      () async {
+        // Regression test for https://github.com/flutter/flutter/issues/178318.
+        final command = MultipleExceptionCrashingFlutterCommand();
+        var exceptionCount = 0;
+        unawaited(
+          runZonedGuarded<Future<void>?>(
+            () {
+              unawaited(
+                runner.run(
+                  <String>['crash'],
+                  () => <FlutterCommand>[command],
+                  // This flutterVersion disables crash reporting.
+                  flutterVersion: '[user-branch]/',
+                  reportCrashes: true,
+                  shutdownHooks: ShutdownHooks(),
+                ),
+              );
+              return null;
+            },
+            (Object error, StackTrace stack) {
+              // Keep track of the number of exceptions thrown to ensure that
+              // the count matches the number of exceptions we expect.
+              exceptionCount++;
+            },
+          ),
+        );
+        await command.doneThrowing;
+
+        // This is the main check of this test.
+        //
+        // We are checking that, even though multiple asynchronous errors were
+        // thrown, only a single crash report is sent. This ensures that a
+        // single process crash can't result in multiple crash events.
+
+        // This test only makes sense if we've thrown more than one exception.
+        expect(exceptionCount, greaterThan(1));
+        expect(exceptionCount, command.exceptionCount);
+
+        // Ensure only a single exception analytics event was sent.
+        final List<Event> exceptionEvents = fakeAnalytics.sentEvents
+            .where((e) => e.eventName == DashEvent.exception)
+            .toList();
+        expect(exceptionEvents, hasLength(1));
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
+        ),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
         Artifacts: () => Artifacts.test(),
         HttpClientFactory: () =>
             () => FakeHttpClient.any(),
@@ -814,6 +876,34 @@ class CrashingFlutterCommand extends FlutterCommand {
 
     await completer.future;
     _completer!.complete();
+
+    return FlutterCommandResult.success();
+  }
+}
+
+class MultipleExceptionCrashingFlutterCommand extends FlutterCommand {
+  final _completer = Completer<void>();
+
+  @override
+  String get description => '';
+
+  @override
+  String get name => 'crash';
+
+  Future<void> get doneThrowing => _completer.future;
+
+  var exceptionCount = 0;
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    Timer.periodic(const Duration(milliseconds: 10), (timer) {
+      exceptionCount++;
+      if (exceptionCount < 5) {
+        throw Exception('ERROR: $exceptionCount');
+      }
+      timer.cancel();
+      _completer.complete();
+    });
 
     return FlutterCommandResult.success();
   }
