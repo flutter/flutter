@@ -322,7 +322,7 @@ class RefreshIndicator extends StatefulWidget {
   /// Whether to derive the container extent from the [RefreshIndicator]'s
   /// rendered size.
   ///
-  /// By default, [_checkDragOffset] uses the viewport dimension reported by the
+  /// By default, the drag offset logic uses the viewport dimension reported by the
   /// surrounding [Scrollable]. When the viewport is intentionally very small
   /// (for example when only part of the content is scrollable or clipped), dragging
   /// the indicator can appear too sensitive. Setting this to true makes the
