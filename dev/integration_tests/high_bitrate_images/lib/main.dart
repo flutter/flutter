@@ -80,7 +80,7 @@ class _SdfCanvasState extends State<SdfCanvas> {
     return program.fragmentShader();
   }
 
-  Future<ui.Image> _loadRGBA32FloatSdfImage() async {
+  Future<ui.Image> _loadR32FloatSdfImage() async {
     const int width = 1024;
     const int height = 1024;
     const double radius = width / 4.0;
@@ -112,7 +112,7 @@ class _SdfCanvasState extends State<SdfCanvas> {
     return completer.future;
   }
 
-  Future<ui.Image> _loadR32FloatSdfImage() async {
+  Future<ui.Image> _loadRGBA32FloatSdfImage() async {
     const int width = 1024;
     const int height = 1024;
     const double radius = width / 4.0;

@@ -85,7 +85,7 @@ void main() {
       // );
     });
 
-    testWidgets('renders sdfs with rgba32f', (WidgetTester tester) async {
+    testWidgets('renders sdfs with r32f', (WidgetTester tester) async {
       app.gTargetPixelFormat = ui.TargetPixelFormat.rFloat32;
       app.main();
       await tester.pumpAndSettle(const Duration(seconds: 2));
