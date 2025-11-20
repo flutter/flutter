@@ -39,23 +39,8 @@ class FlutterHookRunnerNative implements FlutterHookRunner {
       environment.outputDir.path,
       kHooksOutputDirectory,
     );
-    final hooksEnvironment = Environment(
-      projectDir: environment.projectDir,
-      packageConfigPath: environment.packageConfigPath,
+    final Environment hooksEnvironment = environment.copyWith(
       outputDir: environment.fileSystem.directory(outputDirPath),
-      cacheDir: environment.cacheDir,
-      flutterRootDir: environment.flutterRootDir,
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-      artifacts: environment.artifacts,
-      processManager: environment.processManager,
-      platform: environment.platform,
-      analytics: environment.analytics,
-      engineVersion: environment.engineVersion,
-      generateDartPluginRegistry: environment.generateDartPluginRegistry,
-      buildDir: environment.rootBuildDir,
-      defines: environment.defines,
-      inputs: environment.inputs,
     );
     final BuildResult lastBuild = await globals.buildSystem.build(
       DartBuild(specifiedTargetPlatform: targetPlatform),
