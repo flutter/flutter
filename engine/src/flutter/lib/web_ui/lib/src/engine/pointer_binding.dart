@@ -1003,7 +1003,12 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         // rendered the next input element, leading to the focus incorrectly returning to
         // the main Flutter view instead.
         // A zero-length timer is sufficient in all tested browsers to achieve this.
-        event.preventDefault();
+        //
+        // IMPORTANT: Don't prevent default on touch events to allow browser scrolling.
+        // Touch events need to pass through to enable native browser scrolling.
+        if (event.pointerType != 'touch') {
+          event.preventDefault();
+        }
         Timer(Duration.zero, () {
           EnginePlatformDispatcher.instance.requestViewFocusChange(
             viewId: _view.viewId,
