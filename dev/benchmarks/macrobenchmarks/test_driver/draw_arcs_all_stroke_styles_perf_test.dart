@@ -8,8 +8,8 @@ import 'util.dart';
 
 void main() {
   macroPerfTest(
-    'draw_arcs_perf',
-    kDrawArcsPageRouteName,
+    'draw_arcs_all_stroke_styles_perf',
+    kDrawArcsAllStrokeStylesPageRouteName,
     pageDelay: const Duration(seconds: 1),
     duration: const Duration(seconds: 10),
   );

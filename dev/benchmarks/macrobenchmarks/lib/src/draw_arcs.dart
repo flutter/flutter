@@ -10,7 +10,9 @@ const int numRows = 26;
 const int numCols = 39;
 
 class DrawArcsPage extends StatefulWidget {
-  const DrawArcsPage({super.key});
+  const DrawArcsPage({super.key, required this.paintStyle});
+
+  final PaintingStyle paintStyle;
 
   @override
   State<DrawArcsPage> createState() => _DrawArcsPageState();
@@ -42,15 +44,16 @@ class _DrawArcsPageState extends State<DrawArcsPage> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.fromLTRB(numRows.toDouble(), 0, numRows * 2, numRows.toDouble()),
-      child: CustomPaint(painter: ArcsPainter(tick), child: Container()),
+      child: CustomPaint(painter: ArcsPainter(tick, widget.paintStyle), child: Container()),
     );
   }
 }
 
 class ArcsPainter extends CustomPainter {
-  ArcsPainter(this.tick);
+  ArcsPainter(this.tick, this.paintStyle);
 
   final double tick;
+  final PaintingStyle paintStyle;
 
   static const List<Color> kColors = <Color>[
     Colors.red,
@@ -76,6 +79,8 @@ class ArcsPainter extends CustomPainter {
         final double radius = row.toDouble();
         // Sweep angle repeatedly goes from -2pi to 2pi.
         final double sweepAngle = (tick / 20) % (4 * pi) - 2 * pi;
+        // useCenter alternates with each row.
+        final bool useCenter = (row % 2).isEven;
         // Stroke width is proportional to radius (row), and increases with column up to 2 * radius.
         final double strokeWidth = 2 * radius * (col / numCols);
         // Color changes with each arc.
@@ -86,10 +91,10 @@ class ArcsPainter extends CustomPainter {
           Rect.fromCircle(center: center, radius: radius),
           0,
           sweepAngle,
-          false,
+          useCenter,
           Paint()
             ..color = color
-            ..style = PaintingStyle.stroke
+            ..style = paintStyle
             ..strokeWidth = strokeWidth
             ..strokeCap = cap,
         );

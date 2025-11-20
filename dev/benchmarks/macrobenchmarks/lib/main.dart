@@ -114,7 +114,10 @@ class MacrobenchmarksApp extends StatelessWidget {
         kRSuperellipseBlurRouteName: (BuildContext context) => const RSuperellipseBlur(),
         kVeryLongPictureScrollingRouteName: (BuildContext context) =>
             const VeryLongPictureScrollingPerf(),
-        kDrawArcsPageRouteName: (BuildContext context) => const DrawArcsPage(),
+        kDrawArcsAllFillStylesPageRouteName: (BuildContext context) =>
+            const DrawArcsPage(paintStyle: PaintingStyle.fill),
+        kDrawArcsAllStrokeStylesPageRouteName: (BuildContext context) =>
+            const DrawArcsPage(paintStyle: PaintingStyle.stroke),
       },
     );
   }
@@ -413,10 +416,17 @@ class HomePage extends StatelessWidget {
             },
           ),
           ElevatedButton(
-            key: const Key(kDrawArcsPageRouteName),
-            child: const Text('Draw Arcs'),
+            key: const Key(kDrawArcsAllFillStylesPageRouteName),
+            child: const Text('Draw Fill Style Arcs'),
             onPressed: () {
-              Navigator.pushNamed(context, kDrawArcsPageRouteName);
+              Navigator.pushNamed(context, kDrawArcsAllFillStylesPageRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kDrawArcsAllStrokeStylesPageRouteName),
+            child: const Text('Draw Stroke Style Arcs'),
+            onPressed: () {
+              Navigator.pushNamed(context, kDrawArcsAllStrokeStylesPageRouteName);
             },
           ),
         ],
