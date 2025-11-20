@@ -160,6 +160,7 @@ class SingleChildScrollView extends StatelessWidget {
     this.hitTestBehavior = HitTestBehavior.opaque,
     this.restorationId,
     this.keyboardDismissBehavior,
+    this.browserScrolling,
   }) : assert(
          !(controller != null && (primary ?? false)),
          'Primary ScrollViews obtain their ScrollController via inheritance '
@@ -239,6 +240,29 @@ class SingleChildScrollView extends StatelessWidget {
   /// [ScrollBehavior.getKeyboardDismissBehavior].
   final ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior;
 
+  /// Whether to use browser-driven scrolling on web platforms.
+  ///
+  /// When true on web platforms, scrolling is controlled by the browser's native
+  /// scrolling mechanism rather than Flutter's canvas-based scrolling. This provides
+  /// a more native scrolling experience and fixes issues with scroll event bubbling
+  /// in iframes.
+  ///
+  /// This parameter is only supported on web platforms. On other platforms, it is
+  /// ignored and Flutter's normal scrolling is used.
+  ///
+  /// When null (the default), browser scrolling is not used.
+  ///
+  /// Example:
+  /// ```dart
+  /// SingleChildScrollView(
+  ///   browserScrolling: true,
+  ///   child: Column(
+  ///     children: [...],
+  ///   ),
+  /// )
+  /// ```
+  final bool? browserScrolling;
+
   AxisDirection _getDirection(BuildContext context) {
     return getAxisDirectionFromAxisReverseAndDirectionality(context, scrollDirection, reverse);
   }
@@ -266,6 +290,7 @@ class SingleChildScrollView extends StatelessWidget {
       restorationId: restorationId,
       clipBehavior: clipBehavior,
       hitTestBehavior: hitTestBehavior,
+      browserScrolling: browserScrolling,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return _SingleChildViewport(
           axisDirection: axisDirection,

@@ -16,6 +16,7 @@ library;
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -32,6 +33,8 @@ import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'scroll_activity.dart';
 import 'scroll_configuration.dart';
+import 'scroll_configuration_web.dart'
+  if (dart.library.io) 'scroll_configuration_web_stub.dart' as scroll_config;
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
@@ -134,6 +137,7 @@ class Scrollable extends StatefulWidget {
     this.scrollBehavior,
     this.clipBehavior = Clip.hardEdge,
     this.hitTestBehavior = HitTestBehavior.opaque,
+    this.browserScrolling,
   }) : assert(semanticChildCount == null || semanticChildCount >= 0);
 
   /// {@template flutter.widgets.Scrollable.axisDirection}
@@ -254,6 +258,19 @@ class Scrollable extends StatefulWidget {
   ///
   ///  * [HitTestBehavior], for an explanation on different behaviors.
   final HitTestBehavior hitTestBehavior;
+
+  /// Whether to use browser-driven scrolling on web platforms.
+  ///
+  /// When true on web platforms, scrolling is controlled by the browser's native
+  /// scrolling mechanism rather than Flutter's canvas-based scrolling. This provides
+  /// a more native scrolling experience and fixes issues with scroll event bubbling
+  /// in iframes.
+  ///
+  /// This parameter is only supported on web platforms. On other platforms, it is
+  /// ignored and Flutter's normal scrolling is used.
+  ///
+  /// When null (the default), browser scrolling is not used.
+  final bool? browserScrolling;
 
   /// The number of children that will contribute semantic information.
   ///
@@ -613,6 +630,14 @@ class ScrollableState extends State<Scrollable>
   ScrollController? _fallbackScrollController;
   DeviceGestureSettings? _mediaQueryGestureSettings;
 
+  // Browser scrolling support
+  scroll_config.ExternalScroller? _browserScrollStrategy;
+
+  // Helper method to check if browser scrolling should be used
+  bool _shouldUseBrowserScrolling() {
+    return kIsWeb && (widget.browserScrolling ?? scroll_config.kDefaultBrowserScrollingEnabled);
+  }
+
   // Only call this from places that will definitely trigger a rebuild.
   void _updatePosition() {
     _configuration = widget.scrollBehavior ?? ScrollConfiguration.of(context);
@@ -671,6 +696,7 @@ class ScrollableState extends State<Scrollable>
     _devicePixelRatio =
         MediaQuery.maybeDevicePixelRatioOf(context) ?? View.of(context).devicePixelRatio;
     _updatePosition();
+    _initBrowserScrolling(); // Initialize browser scrolling after position is created
     super.didChangeDependencies();
   }
 
@@ -741,7 +767,64 @@ class ScrollableState extends State<Scrollable>
 
     position.dispose();
     _persistedScrollOffset.dispose();
+    _disposeBrowserScrolling(); // Clean up browser scrolling
     super.dispose();
+  }
+
+  // BROWSER SCROLLING
+
+  void _initBrowserScrolling() {
+    if (!_shouldUseBrowserScrolling()) {
+      return;
+    }
+
+    _disposeBrowserScrolling(); // Clean up any existing strategy
+
+    final int viewId = View.of(context).viewId;
+    _browserScrollStrategy = scroll_config.createBrowserScrollStrategy(viewId);
+    _browserScrollStrategy!.setup();
+
+    // Sync scroll position from browser to Flutter
+    _browserScrollStrategy!.addScrollListener(_syncScrollFromBrowser);
+
+    // Sync content height from Flutter to browser
+    position.addListener(_syncHeightToBrowser);
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _syncHeightToBrowser();
+    });
+  }
+
+  void _syncScrollFromBrowser() {
+    if (_browserScrollStrategy == null || !position.hasPixels) {
+      return;
+    }
+
+    final double targetScrollOffset = _browserScrollStrategy!.scrollTop;
+    final double clampedOffset = math.clampDouble(
+      targetScrollOffset,
+      position.minScrollExtent,
+      position.maxScrollExtent,
+    );
+
+    if ((position.pixels - clampedOffset).abs() > 1.0) {
+      position.jumpTo(clampedOffset);
+    }
+  }
+
+  void _syncHeightToBrowser() {
+    if (_browserScrollStrategy == null) {
+      return;
+    }
+
+    _browserScrollStrategy!.updateHeight(position.extentTotal);
+  }
+
+  void _disposeBrowserScrolling() {
+    if (_browserScrollStrategy != null) {
+      position.removeListener(_syncHeightToBrowser);
+      _browserScrollStrategy!.dispose();
+      _browserScrollStrategy = null;
+    }
   }
 
   // SEMANTICS
