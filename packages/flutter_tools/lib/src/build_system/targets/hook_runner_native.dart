@@ -33,7 +33,7 @@ class FlutterHookRunnerNative implements FlutterHookRunner {
     }
     logger?.printTrace('runHooks() - will perform dart build');
 
-    // Use a clone of the environment with a different output direectory
+    // Use a clone of the environment with a different output directory
     // to avoid conflicts with the primary build's outputs.
     final String outputDirPath = environment.fileSystem.path.join(
       environment.outputDir.path,
