@@ -2739,6 +2739,17 @@ void main() {
     lastOffset = tester.getTopLeft(find.text('11'));
     expect(tester.getTopLeft(find.text('2022')).dy, lastOffset.dy);
   });
+
+  testWidgets('CupertinoTimerPicker does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(child: CupertinoTimerPicker(onTimerDurationChanged: (_) {})),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoTimerPicker)), Size.zero);
+  });
 }
 
 Widget _buildPicker({
