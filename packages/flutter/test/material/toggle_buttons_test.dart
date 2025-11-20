@@ -1975,4 +1975,20 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('ToggleButtons does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      boilerplate(
+        child: Center(
+          child: SizedBox.shrink(
+            child: ToggleButtons(
+              isSelected: const <bool>[true],
+              children: const <Widget>[Text('X')],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ToggleButtons)), Size.zero);
+  });
 }
