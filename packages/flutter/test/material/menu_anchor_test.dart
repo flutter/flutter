@@ -4854,7 +4854,6 @@ void main() {
             ),
             ignoreTransform: true,
             ignoreRect: true,
-            ignoreTraversalIdentifier: true,
           ),
         );
 
