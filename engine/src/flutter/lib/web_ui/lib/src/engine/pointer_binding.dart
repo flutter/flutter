@@ -764,6 +764,20 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
   }
 
   void _handleWheelEvent(DomEvent event) {
+    // DEBUG: Log wheel event handling
+    print('[DEBUG] _handleWheelEvent called, browserScrollEnabled=${_view.isBrowserScrollEnabled}');
+
+    // If browser scroll mode is enabled, let the browser handle wheel events
+    // naturally instead of Flutter intercepting them. This solves the nested
+    // scrolling problem with iframes and HTML content.
+    if (_view.isBrowserScrollEnabled) {
+      // Don't call preventDefault() - let browser scroll
+      print('[DEBUG] Browser scroll enabled - NOT calling preventDefault()');
+      return;
+    }
+
+    print('[DEBUG] Browser scroll NOT enabled - calling preventDefault()');
+
     // Wheel events should switch semantics to pointer event mode, because wheel
     // events should always be handled by the framework.
     // See: https://github.com/flutter/flutter/issues/159358
@@ -931,11 +945,11 @@ class _TouchGestureTracker {
   double? _currentY;
   num? _startTime;
   bool _isScrollGesture = false;
-  
+
   // Thresholds for detecting scroll gestures
   static const double _scrollThreshold = 10.0; // pixels
   static const double _scrollAngleThreshold = 0.5; // radians (~30 degrees)
-  
+
   void onPointerDown(DomPointerEvent event) {
     _startX = event.clientX.toDouble();
     _startY = event.clientY.toDouble();
@@ -943,39 +957,43 @@ class _TouchGestureTracker {
     _currentY = _startY;
     _startTime = event.timeStamp;
     _isScrollGesture = false;
-    
+
     if (_debugLogPointerEvents) {
       print('[TOUCH_GESTURE] Down at ($_startX, $_startY)');
     }
   }
-  
+
   void onPointerMove(DomPointerEvent event) {
     _currentX = event.clientX.toDouble();
     _currentY = event.clientY.toDouble();
-    
+
     if (_startX != null && _startY != null) {
       final double deltaX = (_currentX! - _startX!).abs();
       final double deltaY = (_currentY! - _startY!).abs();
-      
+
       // Check if movement exceeds threshold
       if (deltaY > _scrollThreshold || deltaX > _scrollThreshold) {
         // Check if it's primarily vertical movement
         if (deltaY > deltaX * 1.5) {
           _isScrollGesture = true;
           if (_debugLogPointerEvents) {
-            print('[TOUCH_GESTURE] Detected vertical scroll gesture: deltaX=$deltaX, deltaY=$deltaY');
+            print(
+              '[TOUCH_GESTURE] Detected vertical scroll gesture: deltaX=$deltaX, deltaY=$deltaY',
+            );
           }
         } else if (deltaX > deltaY * 1.5) {
           // Horizontal scroll - also consider it a scroll gesture
           _isScrollGesture = true;
           if (_debugLogPointerEvents) {
-            print('[TOUCH_GESTURE] Detected horizontal scroll gesture: deltaX=$deltaX, deltaY=$deltaY');
+            print(
+              '[TOUCH_GESTURE] Detected horizontal scroll gesture: deltaX=$deltaX, deltaY=$deltaY',
+            );
           }
         }
       }
     }
   }
-  
+
   void reset() {
     _startX = null;
     _startY = null;
@@ -984,9 +1002,9 @@ class _TouchGestureTracker {
     _startTime = null;
     _isScrollGesture = false;
   }
-  
+
   bool get isScrollGesture => _isScrollGesture;
-  
+
   bool get hasMovedSignificantly {
     if (_startX == null || _startY == null || _currentX == null || _currentY == null) {
       return false;
@@ -1080,9 +1098,11 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
           () => _TouchGestureTracker(),
         );
         tracker.onPointerDown(event);
-        
+
         if (_debugLogPointerEvents) {
-          print('[TOUCH_PASSTHROUGH] Touch pointerdown - NOT calling preventDefault() to allow browser scroll');
+          print(
+            '[TOUCH_PASSTHROUGH] Touch pointerdown - NOT calling preventDefault() to allow browser scroll',
+          );
         }
       }
 
@@ -1107,7 +1127,9 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
             );
           });
         } else if (_debugLogPointerEvents) {
-          print('[TOUCH_PASSTHROUGH] Skipping preventDefault() for touch event to enable browser scroll');
+          print(
+            '[TOUCH_PASSTHROUGH] Skipping preventDefault() for touch event to enable browser scroll',
+          );
         }
       }
     });
@@ -1130,7 +1152,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       final _ButtonSanitizer sanitizer = _ensureSanitizer(device);
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
       final List<DomPointerEvent> expandedEvents = _expandEvents(moveEvent);
-      
+
       // Track touch gesture movement
       if (moveEvent.pointerType == 'touch') {
         final _TouchGestureTracker? tracker = _touchTrackers[device];
@@ -1141,7 +1163,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
           }
         }
       }
-      
+
       for (final DomPointerEvent event in expandedEvents) {
         final _SanitizedDetails? up = sanitizer.sanitizeMissingRightClickUp(
           buttons: event.buttons!.toInt(),
@@ -1194,7 +1216,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
           _callback(event, pointerData);
         }
       }
-      
+
       // Clean up touch tracker
       if (event.pointerType == 'touch') {
         _touchTrackers.remove(device);
@@ -1217,7 +1239,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         _convertEventsToPointerData(data: pointerData, event: event, details: details);
         _callback(event, pointerData);
       }
-      
+
       // Clean up touch tracker
       if (event.pointerType == 'touch') {
         _touchTrackers.remove(device);

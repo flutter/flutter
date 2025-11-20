@@ -110,6 +110,7 @@ class EngineFlutterView implements ui.FlutterView {
     _resizeSubscription.cancel();
     dimensionsProvider.close();
     pointerBinding.dispose();
+    _browserScrollController?.dispose();
     dom.rootElement.remove();
     // TODO(harryterkelsen): What should we do about this in multi-view?
     renderer.clearFragmentProgramCache();
@@ -164,6 +165,34 @@ class EngineFlutterView implements ui.FlutterView {
   final JsViewConstraints? _jsViewConstraints;
 
   late final EngineSemanticsOwner semantics = EngineSemanticsOwner(viewId, dom.semanticsHost);
+
+  /// Browser scroll controller (null if browser scrolling not enabled).
+  BrowserScrollController? _browserScrollController;
+
+  /// Whether browser-driven scrolling is enabled for this view.
+  bool get isBrowserScrollEnabled => _browserScrollController?.isEnabled ?? false;
+
+  /// Enable browser-driven scrolling for this view.
+  ///
+  /// This makes the browser handle all scrolling instead of Flutter,
+  /// which solves the nested scrolling problem with iframes and HTML content.
+  void enableBrowserScrolling() {
+    _browserScrollController ??= BrowserScrollController(this);
+    _browserScrollController!.enable();
+  }
+
+  /// Disable browser-driven scrolling and restore normal Flutter mode.
+  void disableBrowserScrolling() {
+    _browserScrollController?.disable();
+  }
+
+  /// Update the browser scroll extent (total content height).
+  ///
+  /// Called when Flutter's content height changes to update the browser's
+  /// scrollable area.
+  void updateBrowserScrollExtent(double height) {
+    _browserScrollController?.updateScrollExtent(height);
+  }
 
   @override
   ui.Size get physicalSize {
