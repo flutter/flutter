@@ -740,13 +740,24 @@ TaskFunction createAnimatedComplexImageFilteredPerfE2ETest({bool? enableImpeller
   ).run;
 }
 
-TaskFunction createDrawArcsPerfTest() {
+TaskFunction createDrawArcsAllFillStylesPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
-    'draw_arcs_perf',
+    'draw_arcs_all_fill_styles_perf',
     enableImpeller: true,
-    testDriver: 'test_driver/draw_arcs_perf_test.dart',
+    testDriver: 'test_driver/draw_arcs_all_fill_styles_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
+TaskFunction createDrawArcsAllStrokeStylesPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'draw_arcs_all_stroke_styles_perf',
+    enableImpeller: true,
+    testDriver: 'test_driver/draw_arcs_all_stroke_styles_perf_test.dart',
     saveTraceFile: true,
   ).run;
 }
