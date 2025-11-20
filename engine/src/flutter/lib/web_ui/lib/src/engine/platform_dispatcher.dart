@@ -1006,7 +1006,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Updates [textScaleFactor] and returns true if [textScaleFactor] changed.
   /// If not then returns false.
   bool _updateTextScaleFactor(double value) {
-    if (configuration.lineHeightScaleFactorOverride != value) {
+    if (configuration.textScaleFactor != value) {
       configuration = configuration.apply(textScaleFactor: value);
       return true;
     }
