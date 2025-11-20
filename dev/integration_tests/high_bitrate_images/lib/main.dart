@@ -51,9 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child = const PictureCanvas(key: Key('picture_canvas'));
         break;
     }
-    return Scaffold(
-      body: child,
-    );
+    return Scaffold(body: child);
   }
 }
 
@@ -67,21 +65,32 @@ class PictureCanvas extends StatefulWidget {
 class _PictureCanvasState extends State<PictureCanvas> {
   ui.Image? _image;
   ui.FragmentShader? _circle;
+  ui.FragmentShader? _sdfShader;
 
   @override
   void initState() {
     super.initState();
-    _loadShader().then((ui.FragmentShader shader) {
+    _loadCircleShader().then((ui.FragmentShader shader) {
       setState(() {
         _circle = shader;
       });
     });
+    _loadSdfShader().then((ui.FragmentShader shader) {
+      setState(() {
+        _sdfShader = shader;
+      });
+    });
   }
 
-  Future<ui.FragmentShader> _loadShader() async {
+  Future<ui.FragmentShader> _loadCircleShader() async {
     final program = await ui.FragmentProgram.fromAsset(
       'shaders/circle_sdf.frag',
     );
+    return program.fragmentShader();
+  }
+
+  Future<ui.FragmentShader> _loadSdfShader() async {
+    final program = await ui.FragmentProgram.fromAsset('shaders/sdf.frag');
     return program.fragmentShader();
   }
 
@@ -103,31 +112,29 @@ class _PictureCanvasState extends State<PictureCanvas> {
 
   @override
   Widget build(BuildContext context) {
-    if (_circle == null) {
+    if (_circle == null || _sdfShader == null) {
       return const Center(child: CircularProgressIndicator());
     }
     _image ??= _loadImage(_circle!);
     return SizedBox.expand(
-      child: CustomPaint(painter: CirclePainter(_image!)),
+      child: CustomPaint(painter: CirclePainter(_image!, _sdfShader!)),
     );
   }
 }
 
 class CirclePainter extends CustomPainter {
-  CirclePainter(this.image);
+  CirclePainter(this.image, this.shader);
 
   final ui.Image image;
+  final ui.FragmentShader shader;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Rect src = Rect.fromLTWH(
-      0,
-      0,
-      image.width.toDouble(),
-      image.height.toDouble(),
-    );
-    final Rect dst = Rect.fromLTWH(0, 0, size.width, size.height);
-    canvas.drawImageRect(image, src, dst, Paint());
+    shader.setFloat(0, size.width);
+    shader.setFloat(1, size.height);
+    shader.setImageSampler(0, image);
+    final Paint paint = Paint()..shader = shader;
+    canvas.drawRect(Offset.zero & size, paint);
   }
 
   @override
