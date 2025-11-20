@@ -1204,6 +1204,12 @@ void FirstPassDispatcher::setImageFilter(const flutter::DlImageFilter* filter) {
   }
 }
 
+namespace {
+bool PixelFormatSupportsMSAA(std::optional<PixelFormat> pixel_format) {
+  return !pixel_format.has_value();
+}
+}  // namespace
+
 std::pair<std::unordered_map<int64_t, BackdropData>, size_t>
 FirstPassDispatcher::TakeBackdropData() {
   std::unordered_map<int64_t, BackdropData> temp;
@@ -1228,7 +1234,8 @@ std::shared_ptr<Texture> DisplayListToTexture(
       impeller::RenderTargetAllocator(
           context.GetContext()->GetResourceAllocator());
   impeller::RenderTarget target;
-  if (context.GetContext()->GetCapabilities()->SupportsOffscreenMSAA()) {
+  if (context.GetContext()->GetCapabilities()->SupportsOffscreenMSAA() &&
+      PixelFormatSupportsMSAA(target_pixel_format)) {
     target = render_target_allocator.CreateOffscreenMSAA(
         *context.GetContext(),  // context
         size,                   // size

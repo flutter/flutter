@@ -11,6 +11,10 @@ import 'package:flutter/services.dart';
 
 ui.TargetPixelFormat gTargetPixelFormat = ui.TargetPixelFormat.rFloat32;
 
+enum TestType { sdf, circle }
+
+TestType testToRun = TestType.circle;
+
 void main() {
   runApp(const MyApp());
 }
@@ -20,7 +24,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: 'SDF Demo', theme: ThemeData.dark(), home: const MyHomePage());
+    return MaterialApp(
+      title: 'SDF Demo',
+      theme: ThemeData.dark(),
+      home: const MyHomePage(),
+    );
   }
 }
 
@@ -34,7 +42,92 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: SdfCanvas());
+    Widget child;
+    switch (testToRun) {
+      case TestType.sdf:
+        child = const SdfCanvas(key: Key('sdf_canvas'));
+        break;
+      case TestType.circle:
+        child = const PictureCanvas(key: Key('picture_canvas'));
+        break;
+    }
+    return Scaffold(
+      body: Center(child: SizedBox(height: 512, width: 512, child: child)),
+    );
+  }
+}
+
+class PictureCanvas extends StatefulWidget {
+  const PictureCanvas({super.key});
+
+  @override
+  State<PictureCanvas> createState() => _PictureCanvasState();
+}
+
+class _PictureCanvasState extends State<PictureCanvas> {
+  ui.Image? _image;
+  ui.FragmentShader? _circle;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadShader().then((ui.FragmentShader shader) {
+      setState(() {
+        _circle = shader;
+      });
+    });
+  }
+
+  Future<ui.FragmentShader> _loadShader() async {
+    final program = await ui.FragmentProgram.fromAsset(
+      'shaders/circle_sdf.frag',
+    );
+    return program.fragmentShader();
+  }
+
+  ui.Image _loadImage(ui.FragmentShader shader) {
+    const Size size = Size(512, 512);
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    shader.setFloat(0, size.width);
+    shader.setFloat(1, size.height);
+    final Paint paint = Paint()..shader = _circle;
+    canvas.drawRect(Offset.zero & size, paint);
+    final ui.Picture picture = recorder.endRecording();
+    return picture.toImageSync(
+      size.width.toInt(),
+      size.height.toInt(),
+      targetFormat: ui.TargetPixelFormat.rgbaFloat32,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_circle == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    _image ??= _loadImage(_circle!);
+    return SizedBox(
+      width: 512,
+      height: 512,
+      child: CustomPaint(painter: CirclePainter(_image!)),
+    );
+  }
+}
+
+class CirclePainter extends CustomPainter {
+  CirclePainter(this.image);
+
+  final ui.Image image;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawImage(image, Offset.zero, Paint());
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
   }
 }
 
@@ -76,7 +169,9 @@ class _SdfCanvasState extends State<SdfCanvas> {
   }
 
   Future<ui.FragmentShader> _loadShader() async {
-    final ui.FragmentProgram program = await ui.FragmentProgram.fromAsset('shaders/sdf.frag');
+    final ui.FragmentProgram program = await ui.FragmentProgram.fromAsset(
+      'shaders/sdf.frag',
+    );
     return program.fragmentShader();
   }
 

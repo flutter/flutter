@@ -7573,7 +7573,11 @@ abstract class Picture {
   ///
   /// If no GPU context is available, the image will be rasterized on the CPU.
   /// {@endtemplate}
-  Image toImageSync(int width, int height);
+  Image toImageSync(
+    int width,
+    int height, {
+    TargetPixelFormat targetFormat = TargetPixelFormat.dontCare,
+  });
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
