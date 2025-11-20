@@ -69,8 +69,7 @@ bool ShadowVerticesContents::Render(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info;
 
-  frame_info.mvp =
-      Entity::GetShaderTransform(entity.GetShaderClipDepth(), pass, {});
+  frame_info.mvp = entity.GetShaderTransform(pass);
 
   frag_info.shadow_color = shadow_color_.Premultiply();
 

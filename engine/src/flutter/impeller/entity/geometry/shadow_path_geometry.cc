@@ -85,6 +85,11 @@ class PolygonInfo : impeller::PathTessellator::VertexWriter {
     kConvex,
   };
 
+  // An inversion of the matrix so we can transform the vertices back
+  // into local space for better interactions with the rest of the
+  // geometry/entity system.
+  const Matrix inverted_matrix_;
+
   const Scalar occluder_height_;
 
   // The maximum gaussian of the umbra part of the shadow, usually 1.0f
@@ -345,7 +350,14 @@ PolygonInfo::PolygonInfo(const impeller::PathSource& source,
                          const Matrix& matrix,
                          Scalar occluder_height,
                          const Tessellator::Trigs& trigs)
-    : occluder_height_(occluder_height), trigs_(trigs) {
+    : inverted_matrix_(matrix.Invert()),
+      occluder_height_(occluder_height),
+      trigs_(trigs) {
+  if (!matrix.IsInvertible()) {
+    Invalidate();
+    return;
+  }
+
   Scalar scale = matrix.GetMaxBasisLengthXY();
 
   auto [point_count, contour_count] =
@@ -1148,7 +1160,7 @@ uint16_t PolygonInfo::AppendVertex(const Point& vertex, Scalar gaussian) {
   FML_DCHECK(index == gaussians_.size());
   // TODO(jimgraham): Turn this condition into a failure of the tessellation
   FML_DCHECK(index <= std::numeric_limits<uint16_t>::max());
-  vertices_.push_back(vertex);
+  vertices_.push_back(inverted_matrix_ * vertex);
   gaussians_.push_back(gaussian);
   return index;
 }
@@ -1233,8 +1245,7 @@ GeometryResult ShadowPathGeometry::GetPositionBuffer(
               .vertex_count = index_count,
               .index_type = IndexType::k16bit,
           },
-      .transform =
-          Entity::GetShaderTransform(entity.GetShaderClipDepth(), pass, {}),
+      .transform = entity.GetShaderTransform(pass),
   };
 }
 

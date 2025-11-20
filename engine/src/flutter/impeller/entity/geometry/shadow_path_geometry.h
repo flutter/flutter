@@ -64,9 +64,11 @@ class ShadowVertices {
 /// A class to compute and return the |ShadowVertices| for a path source
 /// viewed under a given transform. The |occluder_height| is measured in
 /// device pixels. The geometry of the |PathSource| is transformed by the
-/// indicated matrix to produce a device space set of vertices, but the
+/// indicated matrix to produce a device space set of vertices, and the
 /// shadow mesh is inset and outset by the indicated |occluder_height|
-/// without any adjustment for the matrix.
+/// without any adjustment for the matrix. The results are un-transformed
+/// and returned back iin the |ShadowVertices| in the original coordinate
+/// system.
 class ShadowPathGeometry : public Geometry {
  public:
   ShadowPathGeometry(Tessellator& tessellator,
