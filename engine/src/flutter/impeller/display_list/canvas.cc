@@ -1166,6 +1166,12 @@ void Canvas::DrawAtlas(const std::shared_ptr<AtlasContents>& atlas_contents,
 /// Compositor Functionality
 /////////////////////////////////////////
 
+namespace {
+bool PixelFormatSupportsMSAA(PixelFormat format) {
+  return format != PixelFormat::kR32G32B32A32Float;
+}
+}  // namespace
+
 void Canvas::SetupRenderPass() {
   renderer_.GetRenderTargetCache()->Start();
   ColorAttachment color0 = render_target_.GetColorAttachment(0);
@@ -1179,7 +1185,9 @@ void Canvas::SetupRenderPass() {
         *renderer_.GetContext(),
         *renderer_.GetContext()->GetResourceAllocator(),
         color0.texture->GetSize(),
-        renderer_.GetContext()->GetCapabilities()->SupportsOffscreenMSAA(),
+        renderer_.GetContext()->GetCapabilities()->SupportsOffscreenMSAA() &&
+            PixelFormatSupportsMSAA(
+                color0.texture->GetTextureDescriptor().format),
         "ImpellerOnscreen", kDefaultStencilConfig);
   }
 
