@@ -87,17 +87,11 @@ const double _kMenuViewPadding = 8;
 // The minimum horizontal spacing on the outside of the top level menu.
 const double _kTopLevelMenuHorizontalMinPadding = 4;
 
-// Menu animation constants obtained from Material Web implementation:
-// https://github.com/material-components/material-web/blob/e15f47e1a27d879d2cf46a6d6820cc81603621d3/menu/internal/menu.ts
-
 // The default opening animation duration for menus.
 const Duration _kMenuOpeningDuration = Duration(milliseconds: 500);
 
 // The default closing animation duration for menus.
 const Duration _kMenuClosingDuration = Duration(milliseconds: 150);
-
-// The default curve used to animate the height of the menu panel when opening.
-const Curve _kMenuPanelHeightForwardCurve = Cubic(.3, 0, 0, 1);
 
 // The default curve used to animate the height of the menu panel when closing.
 const Curve _kMenuPanelHeightReverseCurve = _TweenCurve(
@@ -107,31 +101,21 @@ const Curve _kMenuPanelHeightReverseCurve = _TweenCurve(
 );
 
 // The default curve used to animate the opacity of the menu panel when opening.
-//
-// Starts at 0 ms, ends at 50 ms of the 500 ms animation.
 const Curve _kMenuPanelOpacityForwardCurve = Interval(0, 50 / 500);
 
 // The default curve used to animate the opacity of the menu panel when closing.
-//
-// Starts at 100 ms, ends at 150 ms of the 150 ms animation.
 const Curve _kMenuPanelOpacityReverseCurve = FlippedCurve(Interval(100 / 150, 150 / 150));
 
 // The default fade-in duration of each menu item as a fraction of the opening
 // duration.
-//
-// 250 ms of the 500 ms animation.
 const double _kMenuItemRelativeFadeInDuration = 1 / 2;
 
 // The default fade-out duration of each menu item as a fraction of the closing
 // duration.
-//
-// 50 ms of the 150 ms animation.
 const double _kMenuItemRelativeFadeOutDuration = 1 / 3;
 
-// The default delay between the start of each menu item's fade-in as a
-// fraction of the opening duration.
-//
-// 50 ms of the 150 ms animation
+// The default delay between the start of each menu item's fade-out as a
+// fraction of the closing duration.
 const double _kMenuItemRelativeFadeOutDelay = 1 / 3;
 
 /// The type of builder function used by [MenuAnchor.builder] to build the
@@ -457,7 +441,7 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
   late final AnimationController _animationController = AnimationController(vsync: this);
   late final CurvedAnimation heightAnimation = CurvedAnimation(
     parent: _animationController,
-    curve: _kMenuPanelHeightForwardCurve,
+    curve: Curves.easeInOutCubicEmphasized,
     reverseCurve: _kMenuPanelHeightReverseCurve,
   );
   late final CurvedAnimation opacityAnimation = CurvedAnimation(
@@ -495,8 +479,6 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
     }
 
     if (oldWidget.animated != widget.animated || widget.menuChildren != oldWidget.menuChildren) {
-      // If animated changed, we need to re-resolve the menu items since the
-      // animations are part of how the menu items are built.
       _resolveMenuItems();
     }
 
@@ -533,7 +515,6 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
 
   void _resolveMenuItems() {
     _menuChildren = <Widget>[];
-
     for (final CurvedAnimation animation in _cachedAnimations) {
       animation.dispose();
     }

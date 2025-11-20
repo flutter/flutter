@@ -5880,7 +5880,7 @@ void main() {
       }
     });
 
-    testWidgets('Menu panel height eases out over while opening', (WidgetTester tester) async {
+    testWidgets('Menu panel height eases out while opening', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -5902,10 +5902,10 @@ void main() {
 
       const Map<int, double> animatedHeights = <int, double>{
         0: 0.0,
-        100: 60.5,
-        200: 125.5,
-        300: 148,
-        400: 157.5,
+        100: 101.5,
+        200: 146,
+        300: 155.7,
+        400: 159.2,
         500: 160,
       };
 
