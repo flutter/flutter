@@ -11,23 +11,19 @@ import UIKit
 ///
 /// - Important: must match the `AccessibilityFeatures` class in `window.dart`.
 struct AccessibilityFeatureFlag: OptionSet {
-    public let rawValue: Int32
+    let rawValue: Int32
     
-    public init(rawValue: Int32) {
-        self.rawValue = rawValue
-    }
-    
-    public static let accessibleNavigation = AccessibilityFeatureFlag(rawValue: 1 << 0)
-    public static let invertColors = AccessibilityFeatureFlag(rawValue: 1 << 1)
-    public static let disableAnimations = AccessibilityFeatureFlag(rawValue: 1 << 2)
-    public static let boldText = AccessibilityFeatureFlag(rawValue: 1 << 3)
-    public static let reduceMotion = AccessibilityFeatureFlag(rawValue: 1 << 4)
-    public static let highContrast = AccessibilityFeatureFlag(rawValue: 1 << 5)
-    public static let onOffSwitchLabels = AccessibilityFeatureFlag(rawValue: 1 << 6)
-    public static let noAnnounce = AccessibilityFeatureFlag(rawValue: 1 << 7)
-    public static let noAutoPlayAnimatedImages = AccessibilityFeatureFlag(rawValue: 1 << 8)
-    public static let noAutoPlayVideos = AccessibilityFeatureFlag(rawValue: 1 << 9)
-    public static let deterministicCursor = AccessibilityFeatureFlag(rawValue: 1 << 10)
+    static let accessibleNavigation = AccessibilityFeatureFlag(rawValue: 1 << 0)
+    static let invertColors = AccessibilityFeatureFlag(rawValue: 1 << 1)
+    static let disableAnimations = AccessibilityFeatureFlag(rawValue: 1 << 2)
+    static let boldText = AccessibilityFeatureFlag(rawValue: 1 << 3)
+    static let reduceMotion = AccessibilityFeatureFlag(rawValue: 1 << 4)
+    static let highContrast = AccessibilityFeatureFlag(rawValue: 1 << 5)
+    static let onOffSwitchLabels = AccessibilityFeatureFlag(rawValue: 1 << 6)
+    static let noAnnounce = AccessibilityFeatureFlag(rawValue: 1 << 7)
+    static let noAutoPlayAnimatedImages = AccessibilityFeatureFlag(rawValue: 1 << 8)
+    static let noAutoPlayVideos = AccessibilityFeatureFlag(rawValue: 1 << 9)
+    static let deterministicCursor = AccessibilityFeatureFlag(rawValue: 1 << 10)
 }
 
 /// A wrapper for native iOS accessibility settings.
