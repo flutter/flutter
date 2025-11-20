@@ -14,5 +14,5 @@ but with a `Test` suffix added (e.g. "FlutterEngineTest.mm" holds the tests for
 If you are working on the engine, you will want to be able to run tests locally.
 
 In order to learn the details of how do that, please consult the [Flutter Wiki
-page](https://github.com/flutter/flutter/wiki/Testing-the-engine) on the
+page](https://github.com/flutter/flutter/blob/main/docs/engine/testing/Testing-the-engine.md) on the
 subject.

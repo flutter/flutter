@@ -127,7 +127,10 @@ bool DrawImageRectAtlasGeometry::ShouldInvertBlendMode() const {
 
 std::optional<Rect> DrawImageRectAtlasGeometry::GetStrictSrcRect() const {
   if (use_strict_src_rect_) {
-    return source_;
+    // For a strict source rect, shrink the texture coordinate range by half a
+    // texel to ensure that linear filtering does not sample anything outside
+    // the source rect bounds.
+    return Rect::MakeSize(texture_->GetSize()).Project(source_.Expand(-0.5));
   }
   return std::nullopt;
 }
@@ -230,8 +233,8 @@ bool AtlasContents::Render(const ContentContext& renderer,
     if (auto rect = geometry_->GetStrictSrcRect(); rect.has_value()) {
       Rect src_rect = rect.value();
       frag_info.source_rect =
-          Vector4(src_rect.GetX(), src_rect.GetY(), src_rect.GetBottom(),
-                  src_rect.GetRight());
+          Vector4(src_rect.GetX(), src_rect.GetY(), src_rect.GetRight(),
+                  src_rect.GetBottom());
       frag_info.use_strict_source_rect = 1.0;
     } else {
       frag_info.use_strict_source_rect = 0.0;

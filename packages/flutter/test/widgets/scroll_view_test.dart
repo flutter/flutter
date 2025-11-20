@@ -2,12 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'states.dart';
+
+class ItemWidget extends StatefulWidget {
+  const ItemWidget({super.key, required this.value});
+  final String value;
+
+  @override
+  State<StatefulWidget> createState() => _ItemWidgetState();
+}
+
+class _ItemWidgetState extends State<ItemWidget> {
+  int randomInt = Random().nextInt(1000);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text('${widget.value}: $randomInt');
+  }
+}
 
 class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   @override
@@ -1793,5 +1812,103 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.testTextInput.isVisible, isFalse);
+  });
+
+  testWidgets('ListView.separated findItemIndexCallback preserves state correctly', (
+    WidgetTester tester,
+  ) async {
+    final List<String> items = <String>['A', 'B', 'C'];
+
+    Widget buildFrame(List<String> itemList) {
+      return MaterialApp(
+        home: Material(
+          child: ListView.separated(
+            itemCount: itemList.length,
+            findItemIndexCallback: (Key key) {
+              final ValueKey<String> valueKey = key as ValueKey<String>;
+              return itemList.indexOf(valueKey.value);
+            },
+            itemBuilder: (BuildContext context, int index) {
+              return ItemWidget(key: ValueKey<String>(itemList[index]), value: itemList[index]);
+            },
+            separatorBuilder: (BuildContext context, int index) => const Divider(),
+          ),
+        ),
+      );
+    }
+
+    // Build initial frame
+    await tester.pumpWidget(buildFrame(items));
+
+    final Finder texts = find.byType(Text);
+    expect(texts, findsNWidgets(3));
+
+    // Store all text in list
+    final List<String?> textValues = List<String?>.generate(3, (int index) {
+      return (tester.widget(texts.at(index)) as Text).data;
+    });
+
+    await tester.pumpWidget(buildFrame(items));
+    await tester.pump();
+
+    final Finder updatedTexts = find.byType(Text);
+    expect(updatedTexts, findsNWidgets(3));
+
+    final List<String?> updatedTextValues = List<String?>.generate(3, (int index) {
+      return (tester.widget(updatedTexts.at(index)) as Text).data;
+    });
+
+    expect(textValues, updatedTextValues);
+  });
+
+  testWidgets('SliverList.separated findItemIndexCallback preserves state correctly', (
+    WidgetTester tester,
+  ) async {
+    final List<String> items = <String>['A', 'B', 'C'];
+
+    Widget buildFrame(List<String> itemList) {
+      return MaterialApp(
+        home: Material(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverList.separated(
+                itemCount: itemList.length,
+                findItemIndexCallback: (Key key) {
+                  final ValueKey<String> valueKey = key as ValueKey<String>;
+                  return itemList.indexOf(valueKey.value);
+                },
+                itemBuilder: (BuildContext context, int index) {
+                  return ItemWidget(key: ValueKey<String>(itemList[index]), value: itemList[index]);
+                },
+                separatorBuilder: (BuildContext context, int index) => const Divider(),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Build initial frame
+    await tester.pumpWidget(buildFrame(items));
+
+    final Finder texts = find.byType(Text);
+    expect(texts, findsNWidgets(3));
+
+    // Store all text in list
+    final List<String?> textValues = List<String?>.generate(3, (int index) {
+      return (tester.widget(texts.at(index)) as Text).data;
+    });
+
+    await tester.pumpWidget(buildFrame(items));
+    await tester.pump();
+
+    final Finder updatedTexts = find.byType(Text);
+    expect(updatedTexts, findsNWidgets(3));
+
+    final List<String?> updatedTextValues = List<String?>.generate(3, (int index) {
+      return (tester.widget(updatedTexts.at(index)) as Text).data;
+    });
+
+    expect(textValues, updatedTextValues);
   });
 }

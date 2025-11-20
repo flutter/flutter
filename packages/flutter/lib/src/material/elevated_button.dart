@@ -80,7 +80,7 @@ class ElevatedButton extends ButtonStyleButton {
     super.clipBehavior,
     super.statesController,
     required super.child,
-  });
+  }) : _addPadding = false;
 
   /// Create an elevated button from a pair of widgets that serve as the button's
   /// [icon] and [label].
@@ -88,56 +88,38 @@ class ElevatedButton extends ButtonStyleButton {
   /// The icon and label are arranged in a row and padded by 12 logical pixels
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
   ///
-  /// If [icon] is null, will create an [ElevatedButton] instead.
+  /// If [icon] is null, this constructor will create an [ElevatedButton]
+  /// that doesn't display an icon.
   ///
   /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
   ///
-  factory ElevatedButton.icon({
-    Key? key,
-    required VoidCallback? onPressed,
-    VoidCallback? onLongPress,
-    ValueChanged<bool>? onHover,
-    ValueChanged<bool>? onFocusChange,
-    ButtonStyle? style,
-    FocusNode? focusNode,
-    bool? autofocus,
-    Clip? clipBehavior,
-    MaterialStatesController? statesController,
+  ElevatedButton.icon({
+    super.key,
+    required super.onPressed,
+    super.onLongPress,
+    super.onHover,
+    super.onFocusChange,
+    super.style,
+    super.focusNode,
+    super.autofocus = false,
+    super.clipBehavior = Clip.none,
+    super.statesController,
     Widget? icon,
     required Widget label,
     IconAlignment? iconAlignment,
-  }) {
-    if (icon == null) {
-      return ElevatedButton(
-        key: key,
-        onPressed: onPressed,
-        onLongPress: onLongPress,
-        onHover: onHover,
-        onFocusChange: onFocusChange,
-        style: style,
-        focusNode: focusNode,
-        autofocus: autofocus ?? false,
-        clipBehavior: clipBehavior ?? Clip.none,
-        statesController: statesController,
-        child: label,
-      );
-    }
-    return _ElevatedButtonWithIcon(
-      key: key,
-      onPressed: onPressed,
-      onLongPress: onLongPress,
-      onHover: onHover,
-      onFocusChange: onFocusChange,
-      style: style,
-      focusNode: focusNode,
-      autofocus: autofocus ?? false,
-      clipBehavior: clipBehavior ?? Clip.none,
-      statesController: statesController,
-      icon: icon,
-      label: label,
-      iconAlignment: iconAlignment,
-    );
-  }
+  }) : _addPadding = icon != null,
+       super(
+         child: icon != null
+             ? _ElevatedButtonWithIconChild(
+                 label: label,
+                 icon: icon,
+                 buttonStyle: style,
+                 iconAlignment: iconAlignment,
+               )
+             : label,
+       );
+
+  final bool _addPadding;
 
   /// A static convenience method that constructs an elevated button
   /// [ButtonStyle] given simple values.
@@ -411,8 +393,7 @@ class ElevatedButton extends ButtonStyleButton {
   ButtonStyle defaultStyleOf(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-
-    return Theme.of(context).useMaterial3
+    final ButtonStyle buttonStyle = theme.useMaterial3
         ? _ElevatedButtonDefaultsM3(context)
         : styleFrom(
             backgroundColor: colorScheme.primary,
@@ -435,6 +416,33 @@ class ElevatedButton extends ButtonStyleButton {
             alignment: Alignment.center,
             splashFactory: InkRipple.splashFactory,
           );
+
+    // Only apply padding when the ElevatedButton has an Icon.
+    if (_addPadding) {
+      final double defaultFontSize =
+          buttonStyle.textStyle?.resolve(const <WidgetState>{})?.fontSize ?? 14.0;
+      final double effectiveTextScale =
+          MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
+
+      final EdgeInsetsGeometry scaledPadding = theme.useMaterial3
+          ? ButtonStyleButton.scaledPadding(
+              const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
+              const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
+              const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
+              effectiveTextScale,
+            )
+          : ButtonStyleButton.scaledPadding(
+              const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
+              const EdgeInsets.symmetric(horizontal: 8),
+              const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
+              effectiveTextScale,
+            );
+      return buttonStyle.copyWith(
+        padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
+      );
+    }
+
+    return buttonStyle;
   }
 
   /// Returns the [ElevatedButtonThemeData.style] of the closest
@@ -457,59 +465,6 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
     EdgeInsets.symmetric(horizontal: padding1x / 2 / 2),
     effectiveTextScale,
   );
-}
-
-class _ElevatedButtonWithIcon extends ElevatedButton {
-  _ElevatedButtonWithIcon({
-    super.key,
-    required super.onPressed,
-    super.onLongPress,
-    super.onHover,
-    super.onFocusChange,
-    super.style,
-    super.focusNode,
-    bool? autofocus,
-    super.clipBehavior,
-    super.statesController,
-    required Widget icon,
-    required Widget label,
-    IconAlignment? iconAlignment,
-  }) : super(
-         autofocus: autofocus ?? false,
-         child: _ElevatedButtonWithIconChild(
-           icon: icon,
-           label: label,
-           buttonStyle: style,
-           iconAlignment: iconAlignment,
-         ),
-       );
-
-  @override
-  ButtonStyle defaultStyleOf(BuildContext context) {
-    final bool useMaterial3 = Theme.of(context).useMaterial3;
-    final ButtonStyle buttonStyle = super.defaultStyleOf(context);
-    final double defaultFontSize =
-        buttonStyle.textStyle?.resolve(const <WidgetState>{})?.fontSize ?? 14.0;
-    final double effectiveTextScale =
-        MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
-
-    final EdgeInsetsGeometry scaledPadding = useMaterial3
-        ? ButtonStyleButton.scaledPadding(
-            const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
-            const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
-            const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
-            effectiveTextScale,
-          )
-        : ButtonStyleButton.scaledPadding(
-            const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
-            const EdgeInsets.symmetric(horizontal: 8),
-            const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
-            effectiveTextScale,
-          );
-    return buttonStyle.copyWith(
-      padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
-    );
-  }
 }
 
 class _ElevatedButtonWithIconChild extends StatelessWidget {

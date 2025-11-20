@@ -2608,4 +2608,99 @@ void main() {
     expect(textColor(tester, buttonText), hoveredColor);
     expect(iconStyle(tester, buttonIcon).color, hoveredColor);
   });
+
+  testWidgets('ElevatedButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: ElevatedButton(onPressed: () {}, child: const Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ElevatedButton)), Size.zero);
+  });
+
+  testWidgets('When an ElevatedButton gains an icon, preserves the same SemanticsNode id', (
+    WidgetTester tester,
+  ) async {
+    bool toggled = false;
+    const Key key = Key('button');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Row(
+                children: <Widget>[
+                  ElevatedButton.icon(
+                    key: key,
+                    onPressed: () {
+                      setState(() {
+                        toggled = true;
+                      });
+                    },
+                    icon: toggled ? const Icon(Icons.favorite) : null,
+                    label: const Text('Button'),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Initially, no icons are present.
+    expect(find.byIcon(Icons.favorite), findsNothing);
+
+    // Find the original ElevatedButton with no icon and get its SemanticsNode.
+    final Finder elevatedButton = find.bySemanticsLabel('Button');
+    expect(elevatedButton, findsOneWidget);
+
+    final SemanticsNode origSemanticsNode = tester.getSemantics(elevatedButton);
+
+    // Tap the button. It should receive an icon now.
+    await tester.tap(elevatedButton);
+    await tester.pump();
+
+    // Now one icon should be present.
+    expect(find.byIcon(Icons.favorite), findsOneWidget);
+
+    // Check if the semantics has change.
+    final SemanticsNode semanticsNodeWithIcon = tester.getSemantics(elevatedButton);
+
+    expect(semanticsNodeWithIcon, origSemanticsNode);
+  });
+
+  testWidgets('ElevatedButton.icon does not lose focus when icon is nullified', (
+    WidgetTester tester,
+  ) async {
+    Widget buildButton({required Widget? icon}) {
+      return MaterialApp(
+        home: Center(
+          child: ElevatedButton.icon(onPressed: () {}, icon: icon, label: const Text('button')),
+        ),
+      );
+    }
+
+    // Build once with an icon.
+    await tester.pumpWidget(buildButton(icon: const Icon(Icons.abc)));
+
+    FocusNode getButtonFocusNode() {
+      return Focus.of(tester.element(find.text('button')));
+    }
+
+    getButtonFocusNode().requestFocus();
+    await tester.pumpAndSettle();
+    expect(getButtonFocusNode().hasFocus, true);
+
+    // Rebuild without icon.
+    await tester.pumpWidget(buildButton(icon: null));
+
+    // The button should still be focused.
+    expect(getButtonFocusNode().hasFocus, true);
+  });
 }

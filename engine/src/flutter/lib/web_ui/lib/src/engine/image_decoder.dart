@@ -134,7 +134,16 @@ abstract class BrowserImageDecoder implements ui.Codec {
     }
 
     final DecodeResult result = await webDecoder
-        .decode(DecodeOptions(frameIndex: _nextFrameIndex))
+        // Using `completeFramesOnly: false` to get frames even from partially decoded images.
+        // Typically, this wouldn't work well in Flutter because Flutter doesn't support progressive
+        // image rendering. So this could result in frames being rendered at lower quality than
+        // expected.
+        //
+        // However, since we wait for the entire image to be decoded using [webDecoder.completed],
+        // this ends up being a non-issue in practice.
+        //
+        // For more details, see: https://issues.chromium.org/issues/456445108
+        .decode(DecodeOptions(frameIndex: _nextFrameIndex, completeFramesOnly: false))
         .toDart;
     final VideoFrame frame = result.image;
     _nextFrameIndex = (_nextFrameIndex + 1) % frameCount;

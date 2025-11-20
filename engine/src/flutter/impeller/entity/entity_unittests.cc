@@ -1734,7 +1734,8 @@ TEST_P(EntityTest, YUVToRGBFilter) {
           textures[0], textures[1], yuv_color_space);
       Entity filter_entity;
       filter_entity.SetContents(filter_contents);
-      auto snapshot = filter_contents->RenderToSnapshot(context, filter_entity);
+      auto snapshot =
+          filter_contents->RenderToSnapshot(context, filter_entity, {});
 
       Entity entity;
       auto contents = TextureContents::MakeRect(Rect::MakeLTRB(0, 0, 256, 256));

@@ -327,6 +327,9 @@ void testMain() {
         isNot(same(skShader2)),
       );
 
+      final ui.UniformFloatSlot slot = shader.getUniformFloat('u_rotation1', 1);
+      expect(slot.shaderIndex, equals(3));
+
       shader.dispose();
       expect(shader.debugDisposed, true);
       expect(

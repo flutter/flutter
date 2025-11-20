@@ -15,6 +15,7 @@ import android.annotation.TargetApi;
 import android.util.DisplayMetrics;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.embedding.engine.systemchannels.SettingsChannel.ConfigurationQueue.SentConfiguration;
 import io.flutter.plugin.common.BasicMessageChannel;
 import java.nio.ByteBuffer;
 import org.junit.Test;
@@ -44,34 +45,50 @@ public class SettingsChannelTest {
   @Test
   public void configurationQueueWorks() {
     final SettingsChannel.ConfigurationQueue queue = new SettingsChannel.ConfigurationQueue();
-    final int baseId = Integer.MIN_VALUE;
 
-    queue.enqueueConfiguration(
-        new SettingsChannel.ConfigurationQueue.SentConfiguration(mock(DisplayMetrics.class)));
-    queue.enqueueConfiguration(
-        new SettingsChannel.ConfigurationQueue.SentConfiguration(mock(DisplayMetrics.class)));
-    assertEquals(baseId + 0, queue.getConfiguration(baseId + 0).generationNumber);
-    assertEquals(baseId + 1, queue.getConfiguration(baseId + 1).generationNumber);
-    assertEquals(baseId + 1, queue.getConfiguration(baseId + 1).generationNumber);
+    SentConfiguration config1 = new SentConfiguration(mock(DisplayMetrics.class));
+    SentConfiguration config2 = new SentConfiguration(mock(DisplayMetrics.class));
 
-    queue.enqueueConfiguration(
-        new SettingsChannel.ConfigurationQueue.SentConfiguration(mock(DisplayMetrics.class)));
-    queue.enqueueConfiguration(
-        new SettingsChannel.ConfigurationQueue.SentConfiguration(mock(DisplayMetrics.class)));
-    assertEquals(baseId + 3, queue.getConfiguration(baseId + 3).generationNumber);
+    queue.enqueueConfiguration(config1);
+    queue.enqueueConfiguration(config2);
+
+    assertEquals(
+        config1.generationNumber,
+        queue.getConfiguration(config1.generationNumber).generationNumber);
     // Can get the same configuration more than once.
-    assertEquals(baseId + 3, queue.getConfiguration(baseId + 3).generationNumber);
+    assertEquals(
+        config2.generationNumber,
+        queue.getConfiguration(config2.generationNumber).generationNumber);
+    assertEquals(
+        config2.generationNumber,
+        queue.getConfiguration(config2.generationNumber).generationNumber);
 
-    final BasicMessageChannel.Reply replyFor4 =
-        queue.enqueueConfiguration(
-            new SettingsChannel.ConfigurationQueue.SentConfiguration(mock(DisplayMetrics.class)));
+    SentConfiguration config3 = new SentConfiguration(mock(DisplayMetrics.class));
+    SentConfiguration config4 = new SentConfiguration(mock(DisplayMetrics.class));
+
+    queue.enqueueConfiguration(config3);
+    queue.enqueueConfiguration(config4);
+
+    assertEquals(
+        config4.generationNumber,
+        queue.getConfiguration(config4.generationNumber).generationNumber);
+    // Can get the same configuration more than once.
+    assertEquals(
+        config4.generationNumber,
+        queue.getConfiguration(config4.generationNumber).generationNumber);
+
     final BasicMessageChannel.Reply replyFor5 =
-        queue.enqueueConfiguration(
-            new SettingsChannel.ConfigurationQueue.SentConfiguration(mock(DisplayMetrics.class)));
-    replyFor4.reply(null);
+        queue.enqueueConfiguration(new SentConfiguration(mock(DisplayMetrics.class)));
+    final SentConfiguration config6 = new SentConfiguration(mock(DisplayMetrics.class));
+    final BasicMessageChannel.Reply replyFor6 = queue.enqueueConfiguration(config6);
     replyFor5.reply(null);
-    assertEquals(baseId + 5, queue.getConfiguration(baseId + 5).generationNumber);
-    assertEquals(baseId + 5, queue.getConfiguration(baseId + 5).generationNumber);
+    replyFor6.reply(null);
+    assertEquals(
+        config6.generationNumber,
+        queue.getConfiguration(config6.generationNumber).generationNumber);
+    assertEquals(
+        config6.generationNumber,
+        queue.getConfiguration(config6.generationNumber).generationNumber);
   }
 
   // TODO(LongCatIsLooong): add tests for API 34 code path.
