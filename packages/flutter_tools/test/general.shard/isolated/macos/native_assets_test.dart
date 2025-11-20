@@ -350,6 +350,20 @@ void main() {
           // Multi arch.
           expect(buildRunner.buildInvocations, flutterTester ? 1 : 2);
           expect(buildRunner.linkInvocations, buildMode == BuildMode.release ? 2 : 0);
+
+          if (!flutterTester) {
+            // Not running on the host system, so the code asset has been turned into a framework.
+            final Directory frameworkRoot = fileSystem.directory(
+              '/build/native_assets/macos/bar.framework',
+            );
+
+            // MacOS frameworks use symlinks for versioned content:
+            // https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPFrameworks/Concepts/FrameworkAnatomy.html
+            expect(frameworkRoot.childLink('bar').targetSync(), 'Versions/Current/bar');
+            expect(frameworkRoot.childLink('Resources').targetSync(), 'Versions/Current/Resources');
+
+            expect(frameworkRoot.childLink('Versions/Current').targetSync(), 'A');
+          }
         },
       );
     }
