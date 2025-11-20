@@ -28,7 +28,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   EnginePlatformDispatcher() {
     _addBrightnessMediaQueryListener();
     HighContrastSupport.instance.addListener(_updateHighContrast);
-    _addTextScaleFactorListener();
     _addTypographySettingsObserver();
     _addLocaleChangedListener();
     registerHotRestartListener(dispose);
@@ -63,12 +62,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   DomElement get accessibilityPlaceholder =>
       EngineSemantics.instance.semanticsHelper.accessibilityPlaceholder;
 
-  final TextScaleFactorProvider _textScaleFactorProvider = TextScaleFactorProvider();
-  StreamSubscription<double>? _onTextScaleFactorChangedSubscription;
-
-  late PlatformConfiguration configuration = PlatformConfiguration(
+  PlatformConfiguration configuration = PlatformConfiguration(
     locales: parseBrowserLanguages(),
-    textScaleFactor: _textScaleFactorProvider.textScaleFactor,
+    textScaleFactor: findBrowserTextScaleFactor(),
     accessibilityFeatures: computeAccessibilityFeatures(),
   );
 
@@ -83,12 +79,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   void dispose() {
     _removeBrightnessMediaQueryListener();
-    _removeTextScaleFactorListener();
-    _textScaleFactorProvider.dispose();
-    _removeTextScaleFactorListener();
     _disconnectTypographySettingsObserver();
     _removeLocaleChangedListener();
     HighContrastSupport.instance.removeListener(_updateHighContrast);
+    _appLifecycleState.removeListener(_setAppLifecycleState);
     _viewFocusBinding.dispose();
     accessibilityPlaceholder.remove();
     _onViewDisposedListener.cancel();
@@ -1000,31 +994,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   @override
   bool get alwaysUse24HourFormat => configuration.alwaysUse24HourFormat;
 
-  /// Updates [textScaleFactor] and invokes [onTextScaleFactorChanged] and
-  /// [onPlatformConfigurationChanged] callbacks if [textScaleFactor] changed.
-  void _updateTextScaleFactor(double value) {
-    if (configuration.textScaleFactor != value) {
-      configuration = configuration.copyWith(textScaleFactor: value);
-      invokeOnPlatformConfigurationChanged();
-      invokeOnTextScaleFactorChanged();
-    }
-  }
-
-  /// Configures the [_onTextScaleFactorChangedSubscription].
-  void _addTextScaleFactorListener() {
-    if (_onTextScaleFactorChangedSubscription != null) {
-      return;
-    }
-    _onTextScaleFactorChangedSubscription = _textScaleFactorProvider.onTextScaleFactorChanged
-        .listen(_updateTextScaleFactor);
-  }
-
-  /// Removes the [_onTextScaleFactorChangedSubscription].
-  void _removeTextScaleFactorListener() {
-    _onTextScaleFactorChangedSubscription?.cancel();
-    _onTextScaleFactorChangedSubscription = null;
-  }
-
   /// Watches for resize changes on an off-screen invisible element to
   /// recalculate [lineHeightScaleFactorOverride], [letterSpacingOverride],
   /// [wordSpacingOverride], and [paragraphSpacingOverride].
@@ -1033,6 +1002,16 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// [wordSpacingOverride], and [paragraphSpacingOverride] with the new values.
   DomResizeObserver? _typographySettingsObserver;
   DomElement? _typographyMeasurementElement;
+
+  /// Updates [textScaleFactor] and returns true if [textScaleFactor] changed.
+  /// If not then returns false.
+  bool _updateTextScaleFactor(double value) {
+    if (configuration.lineHeightScaleFactorOverride != value) {
+      configuration = configuration.apply(textScaleFactor: value);
+      return true;
+    }
+    return false;
+  }
 
   /// Updates [lineHeightScaleFactorOverride] and return true if
   /// [lineHeightScaleFactorOverride] changed. If not then returns false.
@@ -1074,9 +1053,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     return false;
   }
 
-  /// Set the callback function for updating [lineHeightScaleFactorOverride],
-  /// [letterSpacingOverride], [wordSpacingOverride], and [paragraphSpacingOverride]
-  /// based on the sizing changes of an off-screen element with text.
+  /// Sets the callback function for updating [textScaleFactor],
+  /// [lineHeightScaleFactorOverride], [letterSpacingOverride],
+  /// [wordSpacingOverride], and [paragraphSpacingOverride] based on the sizing
+  /// changes of an off-screen element with text.
   void _addTypographySettingsObserver() {
     _typographyMeasurementElement = createDomHTMLParagraphElement();
     _typographyMeasurementElement!.text = 'flutter typography measurement';
@@ -1109,14 +1089,16 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       List<DomResizeObserverEntry> entries,
       DomResizeObserver observer,
     ) {
+      final double computedTextScaleFactor = findBrowserTextScaleFactor();
       final double? lineHeight = parseNumericStyleProperty(
         _typographyMeasurementElement!,
         'line-height',
       )?.toDouble();
       final double? fontSize = parseFontSize(_typographyMeasurementElement!)?.toDouble();
-      final double? computedLineHeightScaleFactor = fontSize != null && lineHeight != null
+      final double computedLineHeightScaleFactor =
+          fontSize != null && lineHeight != null && lineHeight != spacingDefault
           ? lineHeight / fontSize
-          : null;
+          : defaultLineHeightFactor;
       final double? computedWordSpacing = parseNumericStyleProperty(
         _typographyMeasurementElement!,
         'word-spacing',
@@ -1134,11 +1116,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         'margin-bottom',
       )?.toDouble();
 
+      bool computedTextScaleFactorChanged = false;
       bool computedLineHeightScaleFactorChanged = false;
       bool computedLetterSpacingChanged = false;
       bool computedWordSpacingChanged = false;
       bool computedParagraphSpacingChanged = false;
 
+      computedTextScaleFactorChanged = _updateTextScaleFactor(computedTextScaleFactor);
       computedLineHeightScaleFactorChanged = _updateLineHeightScaleFactorOverride(
         computedLineHeightScaleFactor == defaultLineHeightFactor
             ? null
@@ -1154,12 +1138,22 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         computedParagraphSpacing == spacingDefault ? null : computedParagraphSpacing,
       );
 
-      if (computedLineHeightScaleFactorChanged ||
+      final bool metricsChanged =
+          computedLineHeightScaleFactorChanged ||
           computedLetterSpacingChanged ||
           computedWordSpacingChanged ||
-          computedParagraphSpacingChanged) {
+          computedParagraphSpacingChanged;
+
+      if (computedTextScaleFactorChanged || metricsChanged) {
         invokeOnPlatformConfigurationChanged();
-        invokeOnMetricsChanged();
+
+        if (computedTextScaleFactorChanged) {
+          invokeOnTextScaleFactorChanged();
+        }
+
+        if (metricsChanged) {
+          invokeOnMetricsChanged();
+        }
       }
     });
 
@@ -1757,6 +1751,15 @@ void invoke3<A1, A2, A3>(
       callback(arg1, arg2, arg3);
     });
   }
+}
+
+const double _defaultRootFontSize = 16.0;
+
+/// Finds the text scale factor of the browser by looking at the computed style
+/// of the browser's <html> element.
+double findBrowserTextScaleFactor() {
+  final num fontSize = parseFontSize(domDocument.documentElement!) ?? _defaultRootFontSize;
+  return fontSize / _defaultRootFontSize;
 }
 
 class ViewConfiguration {

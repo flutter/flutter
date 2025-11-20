@@ -242,6 +242,35 @@ void testMain() {
       expect(domDocument.querySelector('html')!.getAttribute('lang'), 'es-MX');
     });
 
+    test('can find text scale factor', () async {
+      const double deltaTolerance = 1e-5;
+
+      final DomElement root = domDocument.documentElement!;
+      final String oldFontSize = root.style.fontSize;
+
+      addTearDown(() {
+        root.style.fontSize = oldFontSize;
+      });
+
+      root.style.fontSize = '16px';
+      expect(findBrowserTextScaleFactor(), 1.0);
+
+      root.style.fontSize = '20px';
+      expect(findBrowserTextScaleFactor(), 1.25);
+
+      root.style.fontSize = '24px';
+      expect(findBrowserTextScaleFactor(), 1.5);
+
+      root.style.fontSize = '14.4px';
+      expect(findBrowserTextScaleFactor(), closeTo(0.9, deltaTolerance));
+
+      root.style.fontSize = '12.8px';
+      expect(findBrowserTextScaleFactor(), closeTo(0.8, deltaTolerance));
+
+      root.style.fontSize = '';
+      expect(findBrowserTextScaleFactor(), 1.0);
+    });
+
     test("calls onTextScaleFactorChanged when the <html> element's font-size changes", () async {
       final DomElement root = domDocument.documentElement!;
       final String oldFontSize = root.style.fontSize;
@@ -252,6 +281,15 @@ void testMain() {
         ui.PlatformDispatcher.instance.onTextScaleFactorChanged = oldCallback;
       });
 
+      // Wait for next frame.
+      Future<void> waitForResizeObserver() {
+        final Completer<void> completer = Completer<void>();
+        domWindow.requestAnimationFrame((_) {
+          Timer.run(completer.complete);
+        });
+        return completer.future;
+      }
+
       root.style.fontSize = '16px';
 
       bool isCalled = false;
@@ -260,7 +298,7 @@ void testMain() {
       };
 
       root.style.fontSize = '20px';
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await waitForResizeObserver();
       expect(root.style.fontSize, '20px');
       expect(isCalled, isTrue);
       expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.25);
@@ -268,7 +306,7 @@ void testMain() {
       isCalled = false;
 
       root.style.fontSize = '16px';
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await waitForResizeObserver();
       expect(root.style.fontSize, '16px');
       expect(isCalled, isTrue);
       expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.0);
@@ -342,6 +380,64 @@ void testMain() {
       expect(ui.PlatformDispatcher.instance.letterSpacingOverride, expectedLetterSpacing);
       expect(ui.PlatformDispatcher.instance.wordSpacingOverride, expectedWordSpacing);
       expect(ui.PlatformDispatcher.instance.paragraphSpacingOverride, expectedParagraphSpacing);
+    });
+
+    test('updates lineHeightScaleFactorOverride only when line-height is explicitly set', () async {
+      final DomElement root = domDocument.documentElement!;
+      final DomElement style = createDomHTMLStyleElement(null);
+
+      // Wait for next frame.
+      Future<void> waitForResizeObserver() {
+        final Completer<void> completer = Completer<void>();
+        domWindow.requestAnimationFrame((_) {
+          Timer.run(completer.complete);
+        });
+        return completer.future;
+      }
+
+      addTearDown(() {
+        style.text = null;
+        style.remove();
+      });
+
+      style.text = '*{ font-size: 20px !important; }';
+      root.append(style);
+      await waitForResizeObserver();
+      expect(root.contains(style), isTrue);
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.25);
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, null);
+
+      style.remove();
+      await waitForResizeObserver();
+      expect(root.contains(style), isFalse);
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.0);
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, null);
+
+      style.text = '*{ font-size: 20px !important; line-height: 2 !important; }';
+      root.append(style);
+      await waitForResizeObserver();
+      expect(root.contains(style), isTrue);
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.25);
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, 2.0);
+
+      style.remove();
+      await waitForResizeObserver();
+      expect(root.contains(style), isFalse);
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.0);
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, null);
+
+      style.text = '*{ font-size: 32px !important; line-height: 3 !important; }';
+      root.append(style);
+      await waitForResizeObserver();
+      expect(root.contains(style), isTrue);
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 2.0);
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, 3.0);
+
+      style.remove();
+      await waitForResizeObserver();
+      expect(root.contains(style), isFalse);
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.0);
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, null);
     });
 
     test('disposes all its views', () {
