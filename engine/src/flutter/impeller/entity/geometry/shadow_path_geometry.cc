@@ -1233,7 +1233,8 @@ GeometryResult ShadowPathGeometry::GetPositionBuffer(
               .vertex_count = index_count,
               .index_type = IndexType::k16bit,
           },
-      .transform = pass.GetOrthographicTransform(),
+      .transform =
+          Entity::GetShaderTransform(entity.GetShaderClipDepth(), pass, {}),
   };
 }
 

@@ -39,10 +39,6 @@ std::optional<Rect> ShadowVerticesContents::GetCoverage(
   return geometry_->GetCoverage({});
 }
 
-void ShadowVerticesContents::SetEffectTransform(Matrix transform) {
-  inverse_matrix_ = transform.Invert();
-}
-
 void ShadowVerticesContents::SetColor(Color color) {
   shadow_color_ = color;
 }
@@ -73,7 +69,8 @@ bool ShadowVerticesContents::Render(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info;
 
-  frame_info.mvp = geometry_result.transform;
+  frame_info.mvp =
+      Entity::GetShaderTransform(entity.GetShaderClipDepth(), pass, {});
 
   frag_info.shadow_color = shadow_color_.Premultiply();
 

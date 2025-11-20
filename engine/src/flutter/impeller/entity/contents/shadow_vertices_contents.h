@@ -22,8 +22,6 @@ class ShadowVerticesContents final : public SolidBlurContents {
   static std::shared_ptr<ShadowVerticesContents> Make(
       const ShadowPathGeometry* geometry);
 
-  void SetEffectTransform(Matrix transform);
-
   // |SolidBlurContents|
   void SetColor(Color color) override;
 
@@ -41,7 +39,6 @@ class ShadowVerticesContents final : public SolidBlurContents {
 
  private:
   const ShadowPathGeometry* geometry_;
-  Matrix inverse_matrix_;
   Color shadow_color_;
 
   ShadowVerticesContents(const ShadowVerticesContents&) = delete;
