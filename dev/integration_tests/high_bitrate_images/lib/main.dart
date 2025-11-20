@@ -52,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
         break;
     }
     return Scaffold(
-      body: Center(child: SizedBox(height: 512, width: 512, child: child)),
+      body: child,
     );
   }
 }
@@ -107,9 +107,7 @@ class _PictureCanvasState extends State<PictureCanvas> {
       return const Center(child: CircularProgressIndicator());
     }
     _image ??= _loadImage(_circle!);
-    return SizedBox(
-      width: 512,
-      height: 512,
+    return SizedBox.expand(
       child: CustomPaint(painter: CirclePainter(_image!)),
     );
   }
@@ -122,7 +120,14 @@ class CirclePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawImage(image, Offset.zero, Paint());
+    final Rect src = Rect.fromLTWH(
+      0,
+      0,
+      image.width.toDouble(),
+      image.height.toDouble(),
+    );
+    final Rect dst = Rect.fromLTWH(0, 0, size.width, size.height);
+    canvas.drawImageRect(image, src, dst, Paint());
   }
 
   @override
