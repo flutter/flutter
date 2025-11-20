@@ -146,18 +146,23 @@ Future<void> copyNativeCodeAssetsMacOS(
     await resourcesDir.create(recursive: true);
     final File dylibFile = versionADir.childFile(name);
     final Link currentLink = versionsDir.childLink('Current');
+    final Directory currentLinkAsDirectory = versionsDir.childDirectory('Current');
+
     await currentLink.create(
       fileSystem.path.relative(versionADir.path, from: currentLink.parent.path),
     );
     final Link resourcesLink = frameworkDir.childLink('Resources');
     await resourcesLink.create(
-      fileSystem.path.relative(resourcesDir.path, from: resourcesLink.parent.path),
+      fileSystem.path.relative(
+        currentLinkAsDirectory.childFile('Resources').path,
+        from: resourcesLink.parent.path,
+      ),
     );
     await lipoDylibs(dylibFile, sources);
     final Link dylibLink = frameworkDir.childLink(name);
     await dylibLink.create(
       fileSystem.path.relative(
-        versionsDir.childDirectory('Current').childFile(name).path,
+        currentLinkAsDirectory.childFile(name).path,
         from: dylibLink.parent.path,
       ),
     );

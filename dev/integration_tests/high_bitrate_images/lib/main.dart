@@ -9,6 +9,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+ui.TargetPixelFormat gTargetPixelFormat = ui.TargetPixelFormat.rFloat32;
+
 void main() {
   runApp(const MyApp());
 }
@@ -55,11 +57,22 @@ class _SdfCanvasState extends State<SdfCanvas> {
         _shader = shader;
       });
     });
-    _loadSdfImage().then((ui.Image image) {
-      setState(() {
-        _sdfImage = image;
-      });
-    });
+    switch (gTargetPixelFormat) {
+      case ui.TargetPixelFormat.rgbaFloat32:
+        _loadRGBA32FloatSdfImage().then((ui.Image image) {
+          setState(() {
+            _sdfImage = image;
+          });
+        });
+      case ui.TargetPixelFormat.rFloat32:
+        _loadR32FloatSdfImage().then((ui.Image image) {
+          setState(() {
+            _sdfImage = image;
+          });
+        });
+      case ui.TargetPixelFormat.dontCare:
+        assert(false);
+    }
   }
 
   Future<ui.FragmentShader> _loadShader() async {
@@ -67,7 +80,39 @@ class _SdfCanvasState extends State<SdfCanvas> {
     return program.fragmentShader();
   }
 
-  Future<ui.Image> _loadSdfImage() async {
+  Future<ui.Image> _loadR32FloatSdfImage() async {
+    const int width = 1024;
+    const int height = 1024;
+    const double radius = width / 4.0;
+    final List<double> floats = List<double>.filled(width * height, 0.0);
+    for (int i = 0; i < height; ++i) {
+      for (int j = 0; j < width; ++j) {
+        double x = j.toDouble();
+        double y = i.toDouble();
+        x -= width / 2.0;
+        y -= height / 2.0;
+        final double length = sqrt(x * x + y * y) - radius;
+        final int idx = i * width + j;
+        floats[idx] = length - radius;
+      }
+    }
+    final Float32List floatList = Float32List.fromList(floats);
+    final Uint8List intList = Uint8List.view(floatList.buffer);
+    final Completer<ui.Image> completer = Completer<ui.Image>();
+    ui.decodeImageFromPixels(
+      intList,
+      width,
+      height,
+      ui.PixelFormat.rFloat32,
+      targetFormat: ui.TargetPixelFormat.rFloat32,
+      (ui.Image image) {
+        completer.complete(image);
+      },
+    );
+    return completer.future;
+  }
+
+  Future<ui.Image> _loadRGBA32FloatSdfImage() async {
     const int width = 1024;
     const int height = 1024;
     const double radius = width / 4.0;
