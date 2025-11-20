@@ -38,7 +38,10 @@ void main() {
   final Logger logger = FakeLogger();
 
   setUp(() {
-    osx = FakePlatform(environment: <String, String>{}, operatingSystem: 'macos');
+    osx = FakePlatform(
+      environment: <String, String>{},
+      operatingSystem: 'macos',
+    );
     fileSystem = MemoryFileSystem.test();
     fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: osx);
   });
@@ -95,8 +98,8 @@ void main() {
       );
 
       expect(simulator.supportsRuntimeMode(BuildMode.debug), true);
-      expect(simulator.supportsRuntimeMode(BuildMode.profile), false);
-      expect(simulator.supportsRuntimeMode(BuildMode.release), false);
+      expect(simulator.supportsRuntimeMode(BuildMode.profile), true);
+      expect(simulator.supportsRuntimeMode(BuildMode.release), true);
       expect(simulator.supportsRuntimeMode(BuildMode.jitRelease), false);
     },
     overrides: <Type, Generator>{
@@ -124,7 +127,10 @@ void main() {
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
           logger: logger,
         );
-        expect(simulator.logFilePath, '/foo/bar/Library/Logs/CoreSimulator/123/system.log');
+        expect(
+          simulator.logFilePath,
+          '/foo/bar/Library/Logs/CoreSimulator/123/system.log',
+        );
       },
       overrides: <Type, Generator>{
         Platform: () => osx,
@@ -139,7 +145,8 @@ void main() {
       'respects IOS_SIMULATOR_LOG_FILE_PATH',
       () {
         osx.environment['HOME'] = '/foo/bar';
-        osx.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = '/baz/qux/%{id}/system.log';
+        osx.environment['IOS_SIMULATOR_LOG_FILE_PATH'] =
+            '/baz/qux/%{id}/system.log';
         final simulator = IOSSimulator(
           '456',
           name: 'iPhone 11',
@@ -404,7 +411,14 @@ void main() {
       final Logger logger = BufferLogger.test();
       final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
-          command: <String>['xcrun', 'simctl', 'io', 'x', 'screenshot', 'screenshot.png'],
+          command: <String>[
+            'xcrun',
+            'simctl',
+            'io',
+            'x',
+            'screenshot',
+            'screenshot.png',
+          ],
         ),
       ]);
 
@@ -450,7 +464,13 @@ void main() {
         );
         fakeProcessManager.addCommand(
           const FakeCommand(
-            command: <String>['tail', '-n', '0', '-F', '/Library/Logs/CoreSimulator/x/system.log'],
+            command: <String>[
+              'tail',
+              '-n',
+              '0',
+              '-F',
+              '/Library/Logs/CoreSimulator/x/system.log',
+            ],
           ),
         );
         await launchDeviceSystemLogTool(device);
@@ -460,7 +480,8 @@ void main() {
         ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
         Platform: () => macosPlatform,
-        FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
+        FileSystemUtils: () =>
+            FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
       },
     );
 
@@ -583,7 +604,13 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             )
             ..addCommand(
               const FakeCommand(
-                command: <String>['tail', '-n', '0', '-F', '/private/var/log/system.log'],
+                command: <String>[
+                  'tail',
+                  '-n',
+                  '0',
+                  '-F',
+                  '/private/var/log/system.log',
+                ],
               ),
             );
 
@@ -627,7 +654,13 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             )
             ..addCommand(
               const FakeCommand(
-                command: <String>['tail', '-n', '0', '-F', '/private/var/log/system.log'],
+                command: <String>[
+                  'tail',
+                  '-n',
+                  '0',
+                  '-F',
+                  '/private/var/log/system.log',
+                ],
               ),
             );
 
@@ -684,7 +717,13 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             )
             ..addCommand(
               const FakeCommand(
-                command: <String>['tail', '-n', '0', '-F', '/private/var/log/system.log'],
+                command: <String>[
+                  'tail',
+                  '-n',
+                  '0',
+                  '-F',
+                  '/private/var/log/system.log',
+                ],
               ),
             );
 
@@ -833,7 +872,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
 
           final List<String> lines = await logReader.logLines.toList();
           expect(lines, isEmpty);
-          expect(logger.errorText, contains('Logger returned non-JSON response'));
+          expect(
+            logger.errorText,
+            contains('Logger returned non-JSON response'),
+          );
           expect(fakeProcessManager, hasNoRemainingExpectations);
         },
         overrides: <Type, Generator>{
@@ -920,7 +962,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       ]);
       xcodeBadSimctl = Xcode.test(processManager: fakeProcessManagerBadSimctl);
       logger = BufferLogger.test();
-      simControl = SimControl(logger: logger, processManager: fakeProcessManager, xcode: xcode);
+      simControl = SimControl(
+        logger: logger,
+        processManager: fakeProcessManager,
+        xcode: xcode,
+      );
       simulatorUtils = IOSSimulatorUtils(
         logger: logger,
         processManager: fakeProcessManager,
@@ -936,12 +982,21 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     testWithoutContext('getConnectedDevices succeeds', () async {
       fakeProcessManager.addCommand(
         const FakeCommand(
-          command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted', 'iOS', '--json'],
+          command: <String>[
+            'xcrun',
+            'simctl',
+            'list',
+            'devices',
+            'booted',
+            'iOS',
+            '--json',
+          ],
           stdout: validSimControlOutput,
         ),
       );
 
-      final List<BootedSimDevice> devices = await simControl.getConnectedDevices();
+      final List<BootedSimDevice> devices = await simControl
+          .getConnectedDevices();
 
       final BootedSimDevice phone1 = devices[0];
       expect(phone1.category, 'com.apple.CoreSimulator.SimRuntime.iOS-14-0');
@@ -960,68 +1015,105 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('IOSSimulatorUtils.getAttachedDevices succeeds', () async {
-      fakeProcessManager.addCommand(
-        const FakeCommand(
-          command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted', 'iOS', '--json'],
-          stdout: validSimControlOutput,
-        ),
-      );
+    testWithoutContext(
+      'IOSSimulatorUtils.getAttachedDevices succeeds',
+      () async {
+        fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'simctl',
+              'list',
+              'devices',
+              'booted',
+              'iOS',
+              '--json',
+            ],
+            stdout: validSimControlOutput,
+          ),
+        );
 
-      final List<IOSSimulator> devices = await simulatorUtils.getAttachedDevices();
+        final List<IOSSimulator> devices = await simulatorUtils
+            .getAttachedDevices();
 
-      final IOSSimulator phone1 = devices[0];
-      expect(phone1.category, Category.mobile);
-      expect(phone1.name, 'iPhone 11');
-      expect(phone1.simulatorCategory, 'com.apple.CoreSimulator.SimRuntime.iOS-14-0');
+        final IOSSimulator phone1 = devices[0];
+        expect(phone1.category, Category.mobile);
+        expect(phone1.name, 'iPhone 11');
+        expect(
+          phone1.simulatorCategory,
+          'com.apple.CoreSimulator.SimRuntime.iOS-14-0',
+        );
 
-      final IOSSimulator phone2 = devices[1];
-      expect(phone2.category, Category.mobile);
-      expect(phone2.name, 'Phone w Watch');
-      expect(phone2.simulatorCategory, 'com.apple.CoreSimulator.SimRuntime.iOS-16-0');
+        final IOSSimulator phone2 = devices[1];
+        expect(phone2.category, Category.mobile);
+        expect(phone2.name, 'Phone w Watch');
+        expect(
+          phone2.simulatorCategory,
+          'com.apple.CoreSimulator.SimRuntime.iOS-16-0',
+        );
 
-      final IOSSimulator phone3 = devices[2];
-      expect(phone3.category, Category.mobile);
-      expect(phone3.name, 'iPhone 13');
-      expect(phone3.simulatorCategory, 'com.apple.CoreSimulator.SimRuntime.iOS-16-0');
-      expect(fakeProcessManager, hasNoRemainingExpectations);
-    });
-
-    testWithoutContext('getConnectedDevices handles bad simctl output', () async {
-      fakeProcessManager.addCommand(
-        const FakeCommand(
-          command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted', 'iOS', '--json'],
-          stdout: 'Install Started',
-        ),
-      );
-
-      final List<BootedSimDevice> devices = await simControl.getConnectedDevices();
-
-      expect(devices, isEmpty);
-      expect(fakeProcessManager, hasNoRemainingExpectations);
-    });
+        final IOSSimulator phone3 = devices[2];
+        expect(phone3.category, Category.mobile);
+        expect(phone3.name, 'iPhone 13');
+        expect(
+          phone3.simulatorCategory,
+          'com.apple.CoreSimulator.SimRuntime.iOS-16-0',
+        );
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+    );
 
     testWithoutContext(
-      'IOSSimulatorUtils.getAttachedDevices handles simctl not properly installed',
+      'getConnectedDevices handles bad simctl output',
       () async {
-        final List<IOSSimulator> devices = await simulatorUtilsBadSimctl.getAttachedDevices();
+        fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'simctl',
+              'list',
+              'devices',
+              'booted',
+              'iOS',
+              '--json',
+            ],
+            stdout: 'Install Started',
+          ),
+        );
+
+        final List<BootedSimDevice> devices = await simControl
+            .getConnectedDevices();
 
         expect(devices, isEmpty);
         expect(fakeProcessManager, hasNoRemainingExpectations);
       },
     );
 
-    testWithoutContext('sdkMajorVersion defaults to 11 when sdkNameAndVersion is junk', () async {
-      final iosSimulatorA = IOSSimulator(
-        'x',
-        name: 'Testo',
-        simulatorCategory: 'NaN',
-        simControl: simControl,
-        logger: logger,
-      );
+    testWithoutContext(
+      'IOSSimulatorUtils.getAttachedDevices handles simctl not properly installed',
+      () async {
+        final List<IOSSimulator> devices = await simulatorUtilsBadSimctl
+            .getAttachedDevices();
 
-      expect(await iosSimulatorA.sdkMajorVersion, 11);
-    });
+        expect(devices, isEmpty);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testWithoutContext(
+      'sdkMajorVersion defaults to 11 when sdkNameAndVersion is junk',
+      () async {
+        final iosSimulatorA = IOSSimulator(
+          'x',
+          name: 'Testo',
+          simulatorCategory: 'NaN',
+          simControl: simControl,
+          logger: logger,
+        );
+
+        expect(await iosSimulatorA.sdkMajorVersion, 11);
+      },
+    );
 
     testWithoutContext('.install() handles exceptions', () async {
       fakeProcessManager.addCommand(
@@ -1177,12 +1269,21 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
 ''';
       fakeProcessManager.addCommand(
         const FakeCommand(
-          command: <String>['xcrun', 'simctl', 'list', 'runtimes', 'available', 'iOS', '--json'],
+          command: <String>[
+            'xcrun',
+            'simctl',
+            'list',
+            'runtimes',
+            'available',
+            'iOS',
+            '--json',
+          ],
           stdout: validRuntimesOutput,
         ),
       );
 
-      final List<IOSSimulatorRuntime> runtimes = await simControl.listAvailableIOSRuntimes();
+      final List<IOSSimulatorRuntime> runtimes = await simControl
+          .listAvailableIOSRuntimes();
 
       final IOSSimulatorRuntime runtime1 = runtimes[0];
       expect(
@@ -1195,7 +1296,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         runtime1.runtimeRoot,
         '/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 15.4.simruntime/Contents/Resources/RuntimeRoot',
       );
-      expect(runtime1.identifier, 'com.apple.CoreSimulator.SimRuntime.iOS-15-4');
+      expect(
+        runtime1.identifier,
+        'com.apple.CoreSimulator.SimRuntime.iOS-15-4',
+      );
       expect(runtime1.version, Version(15, 4, null));
       expect(runtime1.isInternal, false);
       expect(runtime1.isAvailable, true);
@@ -1212,7 +1316,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         runtime2.runtimeRoot,
         '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot',
       );
-      expect(runtime2.identifier, 'com.apple.CoreSimulator.SimRuntime.iOS-16-4');
+      expect(
+        runtime2.identifier,
+        'com.apple.CoreSimulator.SimRuntime.iOS-16-4',
+      );
       expect(runtime2.version, Version(16, 4, null));
       expect(runtime2.isInternal, false);
       expect(runtime2.isAvailable, true);
@@ -1229,27 +1336,45 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         runtime3.runtimeRoot,
         '/Library/Developer/CoreSimulator/Volumes/iOS_21A5268h/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 17.0.simruntime/Contents/Resources/RuntimeRoot',
       );
-      expect(runtime3.identifier, 'com.apple.CoreSimulator.SimRuntime.iOS-17-0');
+      expect(
+        runtime3.identifier,
+        'com.apple.CoreSimulator.SimRuntime.iOS-17-0',
+      );
       expect(runtime3.version, Version(17, 0, null));
       expect(runtime3.isInternal, false);
       expect(runtime3.isAvailable, true);
       expect(runtime3.name, 'iOS 17.0');
     });
 
-    testWithoutContext('listAvailableIOSRuntimes handles bad simctl output', () async {
-      fakeProcessManager.addCommand(
-        const FakeCommand(
-          command: <String>['xcrun', 'simctl', 'list', 'runtimes', 'available', 'iOS', '--json'],
-          stdout: 'Install Started',
-        ),
-      );
+    testWithoutContext(
+      'listAvailableIOSRuntimes handles bad simctl output',
+      () async {
+        fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'xcrun',
+              'simctl',
+              'list',
+              'runtimes',
+              'available',
+              'iOS',
+              '--json',
+            ],
+            stdout: 'Install Started',
+          ),
+        );
 
-      final List<IOSSimulatorRuntime> runtimes = await simControl.listAvailableIOSRuntimes();
+        final List<IOSSimulatorRuntime> runtimes = await simControl
+            .listAvailableIOSRuntimes();
 
-      expect(runtimes, isEmpty);
-      expect(logger.errorText, contains('simctl returned non-JSON response:'));
-      expect(fakeProcessManager, hasNoRemainingExpectations);
-    });
+        expect(runtimes, isEmpty);
+        expect(
+          logger.errorText,
+          contains('simctl returned non-JSON response:'),
+        );
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+    );
 
     testWithoutContext(
       'IOSSimulatorUtils.getAvailableIOSRuntimes handles simctl not properly installed',
@@ -1303,7 +1428,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           packageConfigPath: '.dart_tool/package_config.json',
         );
         final mockOptions = DebuggingOptions.disabled(mockInfo);
-        await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
+        await device.startApp(
+          package,
+          prebuiltApplication: true,
+          debuggingOptions: mockOptions,
+        );
 
         expect(simControl.requests.single.appIdentifier, 'correct');
       },
@@ -1351,7 +1480,9 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         expect(simControl.requests, isEmpty);
         expect(
           logger.errorText,
-          contains('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier'),
+          contains(
+            'Invalid prebuilt iOS app. Info.plist does not contain bundle identifier',
+          ),
         );
       },
       overrides: <Type, Generator>{
@@ -1411,7 +1542,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           hostVmServicePort: 0,
         );
 
-        await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
+        await device.startApp(
+          package,
+          prebuiltApplication: true,
+          debuggingOptions: mockOptions,
+        );
         expect(
           simControl.requests.single.launchArgs,
           unorderedEquals(<String>[
@@ -1473,7 +1608,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           treeShakeIcons: false,
           packageConfigPath: '.dart_tool/package_config.json',
         );
-        final mockOptions = DebuggingOptions.enabled(mockInfo, enableSoftwareRendering: true);
+        final mockOptions = DebuggingOptions.enabled(
+          mockInfo,
+          enableSoftwareRendering: true,
+        );
         await device.startApp(
           package,
           prebuiltApplication: true,
@@ -1481,7 +1619,10 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           route: '/animation',
         );
 
-        expect(simControl.requests.single.launchArgs, contains('--route=/animation'));
+        expect(
+          simControl.requests.single.launchArgs,
+          contains('--route=/animation'),
+        );
       },
       overrides: <Type, Generator>{
         PlistParser: () => testPlistParser,
@@ -1597,10 +1738,12 @@ flutter:
 
 class FakeIosProject extends Fake implements IosProject {
   @override
-  Future<String> productBundleIdentifier(BuildInfo? buildInfo) async => 'com.example.test';
+  Future<String> productBundleIdentifier(BuildInfo? buildInfo) async =>
+      'com.example.test';
 
   @override
-  Future<String> productName(BuildInfo? buildInfo) async => 'My Super Awesome App';
+  Future<String> productName(BuildInfo? buildInfo) async =>
+      'My Super Awesome App';
 }
 
 class FakeSimControl extends Fake implements SimControl {

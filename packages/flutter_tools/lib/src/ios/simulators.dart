@@ -62,7 +62,11 @@ class IOSSimulatorUtils {
     required Xcode xcode,
     required Logger logger,
     required ProcessManager processManager,
-  }) : _simControl = SimControl(logger: logger, processManager: processManager, xcode: xcode),
+  }) : _simControl = SimControl(
+         logger: logger,
+         processManager: processManager,
+         xcode: xcode,
+       ),
        _xcode = xcode;
 
   final SimControl _simControl;
@@ -73,7 +77,8 @@ class IOSSimulatorUtils {
       return <IOSSimulator>[];
     }
 
-    final List<BootedSimDevice> connected = await _simControl.getConnectedDevices();
+    final List<BootedSimDevice> connected = await _simControl
+        .getConnectedDevices();
     return connected
         .map<IOSSimulator?>((BootedSimDevice device) {
           final String? udid = device.udid;
@@ -109,10 +114,16 @@ class IOSSimulatorUtils {
 
 /// A wrapper around the `simctl` command line tool.
 class SimControl {
-  SimControl({required Logger logger, required ProcessManager processManager, required Xcode xcode})
-    : _logger = logger,
-      _xcode = xcode,
-      _processUtils = ProcessUtils(processManager: processManager, logger: logger);
+  SimControl({
+    required Logger logger,
+    required ProcessManager processManager,
+    required Xcode xcode,
+  }) : _logger = logger,
+       _xcode = xcode,
+       _processUtils = ProcessUtils(
+         processManager: processManager,
+         logger: logger,
+       );
 
   final Logger _logger;
   final ProcessUtils _processUtils;
@@ -163,21 +174,28 @@ class SimControl {
     _logger.printTrace(command.join(' '));
     final RunResult results = await _processUtils.run(command);
     if (results.exitCode != 0) {
-      _logger.printError('Error executing simctl: ${results.exitCode}\n${results.stderr}');
+      _logger.printError(
+        'Error executing simctl: ${results.exitCode}\n${results.stderr}',
+      );
       return <String, Map<String, Object?>>{};
     }
     try {
-      final Object? decodeResult = (json.decode(results.stdout) as Map<String, Object?>)['devices'];
+      final Object? decodeResult =
+          (json.decode(results.stdout) as Map<String, Object?>)['devices'];
       if (decodeResult is Map<String, Object?>) {
         return decodeResult;
       }
-      _logger.printError('simctl returned unexpected JSON response: ${results.stdout}');
+      _logger.printError(
+        'simctl returned unexpected JSON response: ${results.stdout}',
+      );
       return <String, Object>{};
     } on FormatException {
       // We failed to parse the simctl output, or it returned junk.
       // One known message is "Install Started" isn't valid JSON but is
       // returned sometimes.
-      _logger.printError('simctl returned non-JSON response: ${results.stdout}');
+      _logger.printError(
+        'simctl returned non-JSON response: ${results.stdout}',
+      );
       return <String, Object>{};
     }
   }
@@ -189,8 +207,11 @@ class SimControl {
     return <BootedSimDevice>[
       for (final String deviceCategory in devicesSection.keys)
         if (devicesSection[deviceCategory] case final List<Object?> devicesData)
-          for (final Object? data in devicesData.map<Map<String, Object?>?>(castStringKeyedMap))
-            if (data is Map<String, Object?>) BootedSimDevice(deviceCategory, data),
+          for (final Object? data in devicesData.map<Map<String, Object?>?>(
+            castStringKeyedMap,
+          ))
+            if (data is Map<String, Object?>)
+              BootedSimDevice(deviceCategory, data),
     ];
   }
 
@@ -254,7 +275,9 @@ class SimControl {
         ...?launchArgs,
       ], throwOnError: true);
     } on ProcessException catch (exception) {
-      throwToolExit('Unable to launch $appIdentifier on $deviceId:\n$exception');
+      throwToolExit(
+        'Unable to launch $appIdentifier on $deviceId:\n$exception',
+      );
     }
     return result;
   }
@@ -270,7 +293,9 @@ class SimControl {
         appIdentifier,
       ], throwOnError: true);
     } on ProcessException catch (exception) {
-      throwToolExit('Unable to terminate $appIdentifier on $deviceId:\n$exception');
+      throwToolExit(
+        'Unable to terminate $appIdentifier on $deviceId:\n$exception',
+      );
     }
     return result;
   }
@@ -304,7 +329,9 @@ class SimControl {
     ]);
 
     if (results.exitCode != 0) {
-      _logger.printError('Error executing simctl: ${results.exitCode}\n${results.stderr}');
+      _logger.printError(
+        'Error executing simctl: ${results.exitCode}\n${results.stderr}',
+      );
       return runtimes;
     }
 
@@ -324,7 +351,9 @@ class SimControl {
       // We failed to parse the simctl output, or it returned junk.
       // One known message is "Install Started" isn't valid JSON but is
       // returned sometimes.
-      _logger.printError('simctl returned non-JSON response: ${results.stdout}');
+      _logger.printError(
+        'simctl returned non-JSON response: ${results.stdout}',
+      );
       return runtimes;
     }
   }
@@ -348,7 +377,11 @@ class IOSSimulator extends Device {
     required SimControl simControl,
     required super.logger,
   }) : _simControl = simControl,
-       super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true);
+       super(
+         category: Category.mobile,
+         platformType: PlatformType.ios,
+         ephemeral: true,
+       );
 
   @override
   final String name;
@@ -358,7 +391,10 @@ class IOSSimulator extends Device {
   final SimControl _simControl;
 
   @override
-  DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
+  DevFSWriter createDevFSWriter(
+    ApplicationPackage? app,
+    String? userIdentifier,
+  ) {
     return LocalDevFSWriter(fileSystem: globals.fs);
   }
 
@@ -381,13 +417,20 @@ class IOSSimulator extends Device {
   Future<bool> get supportsHardwareRendering async => false;
 
   @override
-  bool supportsRuntimeMode(BuildMode buildMode) => buildMode == BuildMode.debug;
+  bool supportsRuntimeMode(BuildMode buildMode) {
+    // Allow debug, profile, and release modes on simulator
+    // Note: Performance metrics on simulator are not representative of device performance
+    return buildMode != BuildMode.jitRelease;
+  }
 
   final _logReaders = <IOSApp?, DeviceLogReader>{};
   _IOSSimulatorDevicePortForwarder? _portForwarder;
 
   @override
-  Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) {
+  Future<bool> isAppInstalled(
+    ApplicationPackage app, {
+    String? userIdentifier,
+  }) {
     return _simControl.isInstalled(id, app.id);
   }
 
@@ -395,7 +438,10 @@ class IOSSimulator extends Device {
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
 
   @override
-  Future<bool> installApp(covariant IOSApp app, {String? userIdentifier}) async {
+  Future<bool> installApp(
+    covariant IOSApp app, {
+    String? userIdentifier,
+  }) async {
     try {
       await _simControl.install(id, app.simulatorBundlePath);
       return true;
@@ -405,7 +451,10 @@ class IOSSimulator extends Device {
   }
 
   @override
-  Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async {
+  Future<bool> uninstallApp(
+    ApplicationPackage app, {
+    String? userIdentifier,
+  }) async {
     try {
       await _simControl.uninstall(id, app.id);
       return true;
@@ -456,7 +505,11 @@ class IOSSimulator extends Device {
       globals.printTrace('Building ${package.name} for $id.');
 
       try {
-        await _setupUpdatedApplicationBundle(package, debuggingOptions.buildInfo, mainPath);
+        await _setupUpdatedApplicationBundle(
+          package,
+          debuggingOptions.buildInfo,
+          mainPath,
+        );
       } on ToolExit catch (e) {
         globals.printError('${e.message}');
         return LaunchResult.failed();
@@ -491,11 +544,15 @@ class IOSSimulator extends Device {
       // which should always yield the correct value and does not require
       // parsing the xcodeproj or configuration files.
       // See https://github.com/flutter/flutter/issues/31037 for more information.
-      final String plistPath = globals.fs.path.join(package.simulatorBundlePath, 'Info.plist');
-      final String? bundleIdentifier = globals.plistParser.getValueFromFile<String>(
-        plistPath,
-        PlistParser.kCFBundleIdentifierKey,
+      final String plistPath = globals.fs.path.join(
+        package.simulatorBundlePath,
+        'Info.plist',
       );
+      final String? bundleIdentifier = globals.plistParser
+          .getValueFromFile<String>(
+            plistPath,
+            PlistParser.kCFBundleIdentifierKey,
+          );
       if (bundleIdentifier == null) {
         globals.printError(
           'Invalid prebuilt iOS app. Info.plist does not contain bundle identifier',
@@ -566,7 +623,9 @@ class IOSSimulator extends Device {
     final Directory bundle = globals.fs.directory(app.simulatorBundlePath);
     final bool bundleExists = bundle.existsSync();
     if (!bundleExists) {
-      throwToolExit('Could not find the built application bundle at ${bundle.path}.');
+      throwToolExit(
+        'Could not find the built application bundle at ${bundle.path}.',
+      );
     }
 
     // Step 3: Install the updated bundle to the simulator.
@@ -574,7 +633,10 @@ class IOSSimulator extends Device {
   }
 
   @override
-  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
+  Future<bool> stopApp(
+    ApplicationPackage? app, {
+    String? userIdentifier,
+  }) async {
     if (app == null) {
       return false;
     }
@@ -582,7 +644,8 @@ class IOSSimulator extends Device {
   }
 
   String get logFilePath {
-    final String? logPath = globals.platform.environment['IOS_SIMULATOR_LOG_FILE_PATH'];
+    final String? logPath =
+        globals.platform.environment['IOS_SIMULATOR_LOG_FILE_PATH'];
     return logPath != null
         ? logPath.replaceAll('%{id}', id)
         : globals.fs.path.join(
@@ -609,9 +672,18 @@ class IOSSimulator extends Device {
   }
 
   @override
-  DeviceLogReader getLogReader({covariant IOSApp? app, bool includePastLogs = false}) {
-    assert(!includePastLogs, 'Past log reading not supported on iOS simulators.');
-    return _logReaders.putIfAbsent(app, () => _IOSSimulatorLogReader(this, app));
+  DeviceLogReader getLogReader({
+    covariant IOSApp? app,
+    bool includePastLogs = false,
+  }) {
+    assert(
+      !includePastLogs,
+      'Past log reading not supported on iOS simulators.',
+    );
+    return _logReaders.putIfAbsent(
+      app,
+      () => _IOSSimulatorLogReader(this, app),
+    );
   }
 
   @override
@@ -622,7 +694,9 @@ class IOSSimulator extends Device {
   void clearLogs() {
     final File logFile = globals.fs.file(logFilePath);
     if (logFile.existsSync()) {
-      final RandomAccessFile randomFile = logFile.openSync(mode: FileMode.write);
+      final RandomAccessFile randomFile = logFile.openSync(
+        mode: FileMode.write,
+      );
       randomFile.truncateSync(0);
       randomFile.closeSync();
     }
@@ -731,8 +805,12 @@ class IOSSimulatorRuntime {
       runtimeRoot: data['runtimeRoot']?.toString(),
       identifier: data['identifier']?.toString(),
       version: Version.parse(data['version']?.toString()),
-      isInternal: data['isInternal'] is bool? ? data['isInternal'] as bool? : null,
-      isAvailable: data['isAvailable'] is bool? ? data['isAvailable'] as bool? : null,
+      isInternal: data['isInternal'] is bool?
+          ? data['isInternal'] as bool?
+          : null,
+      isAvailable: data['isAvailable'] is bool?
+          ? data['isAvailable'] as bool?
+          : null,
       name: data['name']?.toString(),
     );
   }
@@ -751,12 +829,21 @@ class IOSSimulatorRuntime {
 /// Launches the device log reader process on the host and parses the syslog.
 @visibleForTesting
 Future<Process> launchDeviceSystemLogTool(IOSSimulator device) async {
-  return globals.processUtils.start(<String>['tail', '-n', '0', '-F', device.logFilePath]);
+  return globals.processUtils.start(<String>[
+    'tail',
+    '-n',
+    '0',
+    '-F',
+    device.logFilePath,
+  ]);
 }
 
 /// Launches the device log reader process on the host and parses unified logging.
 @visibleForTesting
-Future<Process> launchDeviceUnifiedLogging(IOSSimulator device, String? appName) async {
+Future<Process> launchDeviceUnifiedLogging(
+  IOSSimulator device,
+  String? appName,
+) async {
   // Make NSPredicate concatenation easier to read.
   String orP(List<String> clauses) => '(${clauses.join(" OR ")})';
   String andP(List<String> clauses) => clauses.join(' AND ');
@@ -772,7 +859,9 @@ Future<Process> launchDeviceUnifiedLogging(IOSSimulator device, String? appName)
       'processImageUUID == senderImageUUID',
     ]),
     // Filter out some messages that clearly aren't related to Flutter.
-    notP('eventMessage CONTAINS ": could not find icon for representation -> com.apple."'),
+    notP(
+      'eventMessage CONTAINS ": could not find icon for representation -> com.apple."',
+    ),
     notP('eventMessage BEGINSWITH "assertion failed: "'),
     notP('eventMessage CONTAINS " libxpc.dylib "'),
   ]);
@@ -809,7 +898,8 @@ Future<Process?> launchSystemLogTool(IOSSimulator device) async {
 }
 
 class _IOSSimulatorLogReader extends DeviceLogReader {
-  _IOSSimulatorLogReader(this.device, IOSApp? app) : _appName = app?.name?.replaceAll('.app', '');
+  _IOSSimulatorLogReader(this.device, IOSApp? app)
+    : _appName = app?.name?.replaceAll('.app', '');
 
   final IOSSimulator device;
 
@@ -834,14 +924,22 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     // Unified logging iOS 11 and greater (introduced in iOS 10).
     if (await device.sdkMajorVersion >= 11) {
       _deviceProcess = await launchDeviceUnifiedLogging(device, _appName);
-      _deviceProcess?.stdout.transform(utf8LineDecoder).listen(_onUnifiedLoggingLine);
-      _deviceProcess?.stderr.transform(utf8LineDecoder).listen(_onUnifiedLoggingLine);
+      _deviceProcess?.stdout
+          .transform(utf8LineDecoder)
+          .listen(_onUnifiedLoggingLine);
+      _deviceProcess?.stderr
+          .transform(utf8LineDecoder)
+          .listen(_onUnifiedLoggingLine);
     } else {
       // Fall back to syslog parsing.
       await device.ensureLogsExists();
       _deviceProcess = await launchDeviceSystemLogTool(device);
-      _deviceProcess?.stdout.transform(utf8LineDecoder).listen(_onSysLogDeviceLine);
-      _deviceProcess?.stderr.transform(utf8LineDecoder).listen(_onSysLogDeviceLine);
+      _deviceProcess?.stdout
+          .transform(utf8LineDecoder)
+          .listen(_onSysLogDeviceLine);
+      _deviceProcess?.stderr
+          .transform(utf8LineDecoder)
+          .listen(_onSysLogDeviceLine);
     }
 
     // Track system.log crashes.
@@ -866,7 +964,9 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   // Match the log prefix (in order to shorten it):
   // * Xcode 8: Sep 13 15:28:51 cbracken-macpro localhost Runner[37195]: (Flutter) The Dart VM service is listening on http://127.0.0.1:57701/
   // * Xcode 9: 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) The Dart VM service is listening on http://127.0.0.1:57701/
-  static final _mapRegex = RegExp(r'\S+ +\S+ +(?:\S+) (.+?(?=\[))\[\d+\]\)?: (\(.*?\))? *(.*)$');
+  static final _mapRegex = RegExp(
+    r'\S+ +\S+ +(?:\S+) (.+?(?=\[))\[\d+\]\)?: (\(.*?\))? *(.*)$',
+  );
 
   // Jan 31 19:23:28 --- last message repeated 1 time ---
   static final _lastMessageSingleRegex = RegExp(
@@ -903,7 +1003,9 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       }
 
       // Filter out some messages that clearly aren't related to Flutter.
-      if (string.contains(': could not find icon for representation -> com.apple.')) {
+      if (string.contains(
+        ': could not find icon for representation -> com.apple.',
+      )) {
         return null;
       }
 
@@ -916,7 +1018,8 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
       if (appName == null) {
         return '$category: $content';
-      } else if (category != null && (category == appName || category.endsWith(' $appName'))) {
+      } else if (category != null &&
+          (category == appName || category.endsWith(' $appName'))) {
         return content;
       }
 
@@ -935,7 +1038,10 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       return null;
     }
 
-    if (RegExp(r'assertion failed: .* libxpc.dylib .* 0x7d$').matchAsPrefix(string) != null) {
+    if (RegExp(
+          r'assertion failed: .* libxpc.dylib .* 0x7d$',
+        ).matchAsPrefix(string) !=
+        null) {
       return null;
     }
 
@@ -973,10 +1079,13 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   }
 
   //   "eventMessage" : "flutter: 21",
-  static final _unifiedLoggingEventMessageRegex = RegExp(r'.*"eventMessage" : (".*")');
+  static final _unifiedLoggingEventMessageRegex = RegExp(
+    r'.*"eventMessage" : (".*")',
+  );
   void _onUnifiedLoggingLine(String line) {
     // The log command predicate handles filtering, so every log eventMessage should be decoded and added.
-    final Match? eventMessageMatch = _unifiedLoggingEventMessageRegex.firstMatch(line);
+    final Match? eventMessageMatch = _unifiedLoggingEventMessageRegex
+        .firstMatch(line);
     if (eventMessageMatch != null) {
       final String message = eventMessageMatch.group(1)!;
       try {
