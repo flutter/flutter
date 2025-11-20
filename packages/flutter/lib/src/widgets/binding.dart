@@ -1489,7 +1489,7 @@ See: https://github.com/flutter/flutter/issues/30701.
   /// This setter can be used to provide a custom [WindowingOwner].
   ///
   /// {@macro flutter.widgets.binding.window.experimental}
-  @internal
+  @protected
   set windowingOwner(WindowingOwner owner) {
     if (!isWindowingEnabled) {
       throw UnsupportedError('''

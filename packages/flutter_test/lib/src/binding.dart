@@ -20,11 +20,13 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/src/widgets/_window.dart';
 import 'package:matcher/expect.dart' show fail;
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:test_api/scaffolding.dart' as test_package show Timeout;
 import 'package:vector_math/vector_math_64.dart';
 
+import '../flutter_test.dart';
 import '_binding_io.dart' if (dart.library.js_interop) '_binding_web.dart' as binding;
 import 'goldens.dart';
 import 'platform.dart';
@@ -146,6 +148,281 @@ class CapturedAccessibilityAnnouncement {
 
   /// Determines the assertiveness level of the accessibility announcement.
   final Assertiveness assertiveness;
+}
+
+class _WindowFlutterView implements FlutterView {
+  _WindowFlutterView({required this.controller});
+
+  final BaseWindowController controller;
+
+  @override
+  // TODO: implement devicePixelRatio
+  double get devicePixelRatio => 1.0;
+
+  @override
+  // TODO: implement display
+  ui.Display get display => throw UnimplementedError();
+
+  @override
+  List<ui.DisplayFeature> get displayFeatures => List<ui.DisplayFeature>.empty();
+
+  @override
+  ui.GestureSettings get gestureSettings => const ui.GestureSettings();
+
+  @override
+  ui.ViewPadding get padding => ui.ViewPadding.zero;
+
+  @override
+  ui.ViewConstraints get physicalConstraints => ui.ViewConstraints.tight(physicalSize);
+
+  @override
+  ui.Size get physicalSize => controller.contentSize * devicePixelRatio;
+
+  @override
+  // TODO: implement platformDispatcher
+  ui.PlatformDispatcher get platformDispatcher => throw UnimplementedError();
+
+  @override
+  // TODO: implement systemGestureInsets
+  ui.ViewPadding get systemGestureInsets => throw UnimplementedError();
+
+  @override
+  // TODO: implement viewId
+  int get viewId => 1;
+
+  @override
+  // TODO: implement viewInsets
+  ui.ViewPadding get viewInsets => throw UnimplementedError();
+
+  @override
+  // TODO: implement viewPadding
+  ui.ViewPadding get viewPadding => throw UnimplementedError();
+
+  @override
+  void render(ui.Scene scene, {ui.Size? size}) {}
+
+  @override
+  void updateSemantics(ui.SemanticsUpdate update) {}
+}
+
+class _TestRegularWindowController extends RegularWindowController {
+  _TestRegularWindowController({
+    required RegularWindowControllerDelegate delegate,
+    Size? preferredSize,
+    BoxConstraints? preferredConstraints,
+    String? title,
+  }) : _delegate = delegate,
+       _size = preferredSize ?? const Size(800, 600),
+       _constraints = preferredConstraints ?? BoxConstraints.loose(const Size(1920, 1080)),
+       _title = title ?? 'Test Window',
+       super.empty() {
+    _constrainToBounds();
+    // QUESTION: Do I have to do anything smart to get this into the list of views
+    // from the PlatformDispatcher?
+    rootView = _FakeFlutterView();
+  }
+
+  final RegularWindowControllerDelegate _delegate;
+  Size _size;
+  BoxConstraints _constraints;
+  String _title;
+  bool _isActivated = true;
+  bool _isMaximized = false;
+  bool _isMinimized = false;
+  bool _isFullscreen = false;
+
+  @override
+  Size get contentSize => _size;
+
+  @override
+  String get title => _title;
+
+  @override
+  bool get isActivated => _isActivated;
+
+  @override
+  bool get isMaximized => _isMaximized;
+
+  @override
+  bool get isMinimized => _isMinimized;
+
+  @override
+  bool get isFullscreen => _isFullscreen;
+
+  @override
+  void setSize(Size size) {
+    _size = size;
+    _constrainToBounds();
+    notifyListeners();
+  }
+
+  @override
+  void setConstraints(BoxConstraints constraints) {
+    _constraints = constraints;
+    _constrainToBounds();
+    notifyListeners();
+  }
+
+  @override
+  void setTitle(String title) {
+    _title = title;
+    notifyListeners();
+  }
+
+  @override
+  void activate() {
+    _isActivated = true;
+    notifyListeners();
+  }
+
+  @override
+  void setMaximized(bool maximized) {
+    _isMaximized = maximized;
+    notifyListeners();
+  }
+
+  @override
+  void setMinimized(bool minimized) {
+    _isMinimized = minimized;
+    notifyListeners();
+  }
+
+  @override
+  void setFullscreen(bool fullscreen, {ui.Display? display}) {
+    _isFullscreen = fullscreen;
+    notifyListeners();
+  }
+
+  void _constrainToBounds() {
+    final double width = _constraints.constrainWidth(_size.width);
+    final double height = _constraints.constrainHeight(_size.height);
+    _size = Size(width, height);
+  }
+
+  @override
+  void destroy() {
+    _delegate.onWindowDestroyed();
+  }
+}
+
+class _TestDialogWindowController extends DialogWindowController {
+  _TestDialogWindowController({
+    required DialogWindowControllerDelegate delegate,
+    BaseWindowController? parent,
+    Size? preferredSize,
+    BoxConstraints? preferredConstraints,
+    String? title,
+  }) : _delegate = delegate,
+       _parent = parent,
+       _size = preferredSize ?? const Size(800, 600),
+       _constraints = preferredConstraints ?? BoxConstraints.loose(const Size(1920, 1080)),
+       _title = title ?? 'Test Window',
+       super.empty() {
+    _constrainToBounds();
+    rootView = _FakeFlutterView();
+  }
+
+  final DialogWindowControllerDelegate _delegate;
+  final BaseWindowController? _parent;
+  Size _size;
+  BoxConstraints _constraints;
+  String _title;
+  bool _isActivated = true;
+  bool _isMinimized = false;
+
+  @override
+  Size get contentSize => _size;
+
+  @override
+  BaseWindowController? get parent => _parent;
+
+  @override
+  String get title => _title;
+
+  @override
+  bool get isActivated => _isActivated;
+
+  @override
+  bool get isMinimized => _isMinimized;
+
+  @override
+  void setSize(Size size) {
+    _size = size;
+    _constrainToBounds();
+    notifyListeners();
+  }
+
+  @override
+  void setConstraints(BoxConstraints constraints) {
+    _constraints = constraints;
+    _constrainToBounds();
+    notifyListeners();
+  }
+
+  @override
+  void setTitle(String title) {
+    _title = title;
+    notifyListeners();
+  }
+
+  @override
+  void activate() {
+    _isActivated = true;
+    notifyListeners();
+  }
+
+  @override
+  void setMinimized(bool minimized) {
+    _isMinimized = minimized;
+    notifyListeners();
+  }
+
+  void _constrainToBounds() {
+    final double width = _constraints.constrainWidth(_size.width);
+    final double height = _constraints.constrainHeight(_size.height);
+    _size = Size(width, height);
+  }
+
+  @override
+  void destroy() {
+    _delegate.onWindowDestroyed();
+  }
+}
+
+class _TestWindowingOwner extends WindowingOwner {
+  @internal
+  @override
+  RegularWindowController createRegularWindowController({
+    required RegularWindowControllerDelegate delegate,
+    Size? preferredSize,
+    BoxConstraints? preferredConstraints,
+    String? title,
+  }) {
+    return _TestRegularWindowController(
+      delegate: delegate,
+      preferredSize: preferredSize,
+      preferredConstraints: preferredConstraints,
+      title: title,
+    );
+  }
+
+  @internal
+  @override
+  DialogWindowController createDialogWindowController({
+    required DialogWindowControllerDelegate delegate,
+    Size? preferredSize,
+    BoxConstraints? preferredConstraints,
+    BaseWindowController? parent,
+    String? title,
+  }) {
+    return _TestDialogWindowController(
+      delegate: delegate,
+      parent: parent,
+      preferredSize: preferredSize,
+      preferredConstraints: preferredConstraints,
+      title: title,
+    );
+  }
 }
 
 // Examples can assume:
@@ -400,6 +677,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       binding.setupHttpOverrides();
     }
     _testTextInput = TestTextInput(onCleared: _resetFocusedEditable);
+    windowingOwner = _TestWindowingOwner();
   }
 
   @override
