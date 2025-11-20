@@ -239,7 +239,7 @@ void main() {
             fakeFlutterVersion: FakeFlutterVersion(),
           ),
         ),
-        projectRoot: projectDir,
+        project: project,
         fs: fs,
         logger: logger,
         onChangeDetected: (_) {},
