@@ -1015,6 +1015,7 @@ void main() {
         'frameworkRevision': '1234abcd',
         'frameworkCommitDate': '2023-04-28 12:34:56 -0400',
         'engineRevision': 'deadbeef',
+        'engineContentHash': '123456',
         'dartSdkVersion': 'deadbeef2',
         'devToolsVersion': devToolsVersion,
         'flutterVersion': 'foo',
@@ -1032,6 +1033,7 @@ void main() {
       expect(flutterVersion.dartSdkVersion, 'deadbeef2');
       expect(flutterVersion.devToolsVersion, devToolsVersion);
       expect(flutterVersion.engineRevision, 'deadbeef');
+      expect(flutterVersion.engineContentHash, '123456');
 
       expect(processManager, hasNoRemainingExpectations);
     },

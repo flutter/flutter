@@ -259,6 +259,9 @@ end
         engineVersion: globals.artifacts!.usesLocalArtifacts
             ? null
             : globals.flutterVersion.engineRevision,
+        contentHash: globals.artifacts!.usesLocalArtifacts
+            ? null
+            : globals.flutterVersion.engineContentHash,
         generateDartPluginRegistry: true,
       );
       Target target;

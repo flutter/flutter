@@ -720,6 +720,9 @@ class CustomDevice extends Device {
       'engineRevision': artifacts.usesLocalArtifacts
           ? 'local'
           : globals.flutterVersion.engineRevision,
+      'contentHash': artifacts.usesLocalArtifacts
+          ? 'local'
+          : globals.flutterVersion.engineContentHash ?? '',
     };
 
     if (!prebuiltApplication) {

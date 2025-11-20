@@ -30,6 +30,7 @@ export interface BuildConfig {
   /** @deprecated Flutter's service worker is deprecated and will be removed in a future Flutter release*/
   serviceWorkerVersion: string;
   engineRevision: string;
+  contentHash: string;
   useLocalCanvasKit?: boolean;
   builds: ApplicationBuild[];
 }

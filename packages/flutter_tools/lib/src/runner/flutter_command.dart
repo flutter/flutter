@@ -197,6 +197,10 @@ abstract class FlutterCommand extends Command<void> {
   @visibleForTesting
   static const flutterEngineRevisionDefine = 'FLUTTER_ENGINE_REVISION';
 
+  /// The dart define used for adding the Flutter engine revision at runtime.
+  @visibleForTesting
+  static const flutterContentHashDefine = 'FLUTTER_CONTENT_HASH';
+
   /// The dart define used for adding the Dart version at runtime.
   @visibleForTesting
   static const flutterDartVersionDefine = 'FLUTTER_DART_VERSION';
@@ -209,6 +213,7 @@ abstract class FlutterCommand extends Command<void> {
     flutterGitUrlDefine,
     flutterFrameworkRevisionDefine,
     flutterEngineRevisionDefine,
+    flutterContentHashDefine,
     flutterDartVersionDefine,
   ];
 
@@ -1482,6 +1487,7 @@ abstract class FlutterCommand extends Command<void> {
       '$flutterGitUrlDefine=${version.repositoryUrl}',
       '$flutterFrameworkRevisionDefine=${version.frameworkRevisionShort}',
       '$flutterEngineRevisionDefine=${version.engineRevisionShort}',
+      '$flutterContentHashDefine=${version.engineContentHash}',
       '$flutterDartVersionDefine=${version.dartSdkVersion}',
     ]);
   }

@@ -40,7 +40,7 @@ function stripRightSlashes(s) {
 
 /**
  * Calculates the proper base URL for CanvasKit/Skwasm assets.
- * 
+ *
  * @param {import("./types").FlutterConfiguration} config
  * @param {import("./types").BuildConfig} buildConfig
  */
@@ -48,8 +48,8 @@ export function getCanvaskitBaseUrl(config, buildConfig) {
   if (config.canvasKitBaseUrl) {
     return config.canvasKitBaseUrl;
   }
-  if (buildConfig.engineRevision && !buildConfig.useLocalCanvasKit) {
-    return joinPathSegments("https://www.gstatic.com/flutter-canvaskit", buildConfig.engineRevision);
+  if (buildConfig.contentHash && !buildConfig.useLocalCanvasKit) {
+    return joinPathSegments("https://www.gstatic.com/flutter-canvaskit", buildConfig.contentHash);
   }
   return "canvaskit";
 }

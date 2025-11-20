@@ -404,7 +404,7 @@ class FakeFlutterVersion implements FlutterVersion {
     this.flutterRoot = '/path/to/flutter',
     this.nextFlutterVersion,
     this.engineBuildDate = '12/01/02',
-    this.engineContentHash = 'cccccccccccccccccccccccccccccccccccccccc',
+    this.engineContentHash = '12345',
   });
 
   final String branch;

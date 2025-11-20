@@ -922,7 +922,7 @@ class PlatformDocGenerator {
 
   final FileSystem filesystem;
   final Directory outputDir;
-  final String engineRevision = FlutterInformation.instance.getEngineRevision();
+  final String contentHash = FlutterInformation.instance.getContentHash();
   final String engineRealm = FlutterInformation.instance.getEngineRealm();
 
   /// This downloads an archive of platform docs for the engine from the artifact
@@ -933,7 +933,7 @@ class PlatformDocGenerator {
     for (final String platform in kPlatformDocs.keys) {
       final String zipFile = kPlatformDocs[platform]!.zipName;
       final String url =
-          'https://storage.googleapis.com/${realm}flutter_infra_release/flutter/$engineRevision/$zipFile';
+          'https://storage.googleapis.com/${realm}flutter_infra_release/flutter/$contentHash/$zipFile';
       await _extractDocs(url, platform, kPlatformDocs[platform]!, outputDir);
     }
   }
@@ -1181,8 +1181,8 @@ class FlutterInformation {
   /// Gets the semver version of the Flutter framework in the repo.
   Version getFlutterVersion() => getFlutterInformation()['frameworkVersion']! as Version;
 
-  /// Gets the git hash of the engine used by the Flutter framework in the repo.
-  String getEngineRevision() => getFlutterInformation()['engineRevision']! as String;
+  /// Gets the unique content hash of the engine used by the Flutter framework in the repo.
+  String getContentHash() => getFlutterInformation()['engineContentHash']! as String;
 
   /// Gets the value stored in bin/internal/engine.realm used by the Flutter
   /// framework repo.
@@ -1263,7 +1263,7 @@ class FlutterInformation {
     final Directory flutterRoot = filesystem.directory(flutterVersion['flutterRoot']! as String);
     info['flutterRoot'] = flutterRoot;
     info['frameworkVersion'] = Version.parse(flutterVersion['frameworkVersion'] as String);
-    info['engineRevision'] = flutterVersion['engineRevision'] as String;
+    info['engineContentHash'] = flutterVersion['engineContentHash'] as String;
     final File engineRealm = flutterRoot
         .childDirectory('bin')
         .childDirectory('cache')
