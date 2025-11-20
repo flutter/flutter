@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/src/foundation/_error_dumper_io.dart'
-    if (dart.library.js) 'package:flutter/src/foundation/_error_dumper_web.dart';
+    if (dart.library.js_interop) 'package:flutter/src/foundation/_error_dumper_web.dart';
 
 List<String> captureOutput(VoidCallback fn) {
   final List<String> log = <String>[];
