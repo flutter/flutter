@@ -10,24 +10,17 @@ import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import io.flutter.embedding.engine.FlutterShellArgs;
 import java.io.IOException;
 import org.json.JSONArray;
 import org.xmlpull.v1.XmlPullParserException;
 
 /** Loads application information given a Context. */
 public final class ApplicationInfoLoader {
-  // XML Attribute keys supported in AndroidManifest.xml
-  public static final String PUBLIC_AOT_SHARED_LIBRARY_NAME =
-      FlutterLoader.class.getName() + '.' + FlutterLoader.AOT_SHARED_LIBRARY_NAME;
-  public static final String PUBLIC_VM_SNAPSHOT_DATA_KEY =
-      FlutterLoader.class.getName() + '.' + FlutterLoader.VM_SNAPSHOT_DATA_KEY;
-  public static final String PUBLIC_ISOLATE_SNAPSHOT_DATA_KEY =
-      FlutterLoader.class.getName() + '.' + FlutterLoader.ISOLATE_SNAPSHOT_DATA_KEY;
-  public static final String PUBLIC_FLUTTER_ASSETS_DIR_KEY =
-      FlutterLoader.class.getName() + '.' + FlutterLoader.FLUTTER_ASSETS_DIR_KEY;
+  // AndroidManifest.xml metadata keys for setting internal respective Flutter configuration values.
   public static final String NETWORK_POLICY_METADATA_KEY = "io.flutter.network-policy";
   public static final String PUBLIC_AUTOMATICALLY_REGISTER_PLUGINS_METADATA_KEY =
-      "io.flutter." + FlutterLoader.AUTOMATICALLY_REGISTER_PLUGINS_KEY;
+      "io.flutter.automatically-register-plugins";
 
   @NonNull
   private static ApplicationInfo getApplicationInfo(@NonNull Context applicationContext) {
@@ -147,10 +140,10 @@ public final class ApplicationInfoLoader {
   public static FlutterApplicationInfo load(@NonNull Context applicationContext) {
     ApplicationInfo appInfo = getApplicationInfo(applicationContext);
     return new FlutterApplicationInfo(
-        getString(appInfo.metaData, PUBLIC_AOT_SHARED_LIBRARY_NAME),
-        getString(appInfo.metaData, PUBLIC_VM_SNAPSHOT_DATA_KEY),
-        getString(appInfo.metaData, PUBLIC_ISOLATE_SNAPSHOT_DATA_KEY),
-        getString(appInfo.metaData, PUBLIC_FLUTTER_ASSETS_DIR_KEY),
+        getString(appInfo.metaData, FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.metadataKey),
+        getString(appInfo.metaData, FlutterShellArgs.VM_SNAPSHOT_DATA.metadataKey),
+        getString(appInfo.metaData, FlutterShellArgs.ISOLATE_SNAPSHOT_DATA.metadataKey),
+        getString(appInfo.metaData, FlutterShellArgs.FLUTTER_ASSETS_DIR.metadataKey),
         getNetworkPolicy(appInfo, applicationContext),
         appInfo.nativeLibraryDir,
         getBoolean(appInfo.metaData, PUBLIC_AUTOMATICALLY_REGISTER_PLUGINS_METADATA_KEY, true));
