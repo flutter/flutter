@@ -1123,10 +1123,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
         : MediaQuery.removePadding(context: context, removeTop: true, child: content);
 
     // Prevent clicks inside the bottom sheet from passing through to the barrier
-    bottomSheet = Semantics(
-      hitTestBehavior: SemanticsHitTestBehavior.opaque,
-      child: bottomSheet,
-    );
+    bottomSheet = Semantics(hitTestBehavior: SemanticsHitTestBehavior.opaque, child: bottomSheet);
 
     return capturedThemes?.wrap(bottomSheet) ?? bottomSheet;
   }

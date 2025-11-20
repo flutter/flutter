@@ -1677,10 +1677,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
                  dialog = SafeArea(child: dialog);
                }
                // Prevent clicks inside the dialog from passing through to the barrier
-               dialog = Semantics(
-                 hitTestBehavior: SemanticsHitTestBehavior.opaque,
-                 child: dialog,
-               );
+               dialog = Semantics(hitTestBehavior: SemanticsHitTestBehavior.opaque, child: dialog);
                return dialog;
              },
          barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,
