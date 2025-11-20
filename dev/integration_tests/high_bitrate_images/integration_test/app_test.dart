@@ -73,7 +73,7 @@ void main() {
 
   group('end-to-end test', () {
     testWidgets('renders sdfs with rgba32f', (WidgetTester tester) async {
-      app.gTargetPixelFormat = ui.TargetPixelFormat.rgbaFloat32;
+      app.testToRun = app.TestType.cpuRgba32fSdf;
       app.main();
       await tester.pumpAndSettle(const Duration(seconds: 2));
       await _getScreenshot();
@@ -86,7 +86,7 @@ void main() {
     });
 
     testWidgets('renders sdfs with r32f', (WidgetTester tester) async {
-      app.gTargetPixelFormat = ui.TargetPixelFormat.rFloat32;
+      app.testToRun = app.TestType.cpuR32fSdf;
       app.main();
       await tester.pumpAndSettle(const Duration(seconds: 2));
       await _getScreenshot();
