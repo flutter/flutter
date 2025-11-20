@@ -456,11 +456,14 @@ class Environment {
   });
 
   Environment copyWith({Directory? outputDir}) {
-    return Environment(
+    return Environment._(
+      outputDir: outputDir ?? this.outputDir,
       projectDir: projectDir,
       packageConfigPath: packageConfigPath,
-      outputDir: outputDir ?? this.outputDir,
+      buildDir: buildDir,
+      rootBuildDir: rootBuildDir,
       cacheDir: cacheDir,
+      defines: defines,
       flutterRootDir: flutterRootDir,
       fileSystem: fileSystem,
       logger: logger,
@@ -469,12 +472,8 @@ class Environment {
       platform: platform,
       analytics: analytics,
       engineVersion: engineVersion,
-      generateDartPluginRegistry: generateDartPluginRegistry,
-      // Use rootBuildDir, which represents the original buildDir passed to
-      // this environment's constructor
-      buildDir: rootBuildDir,
-      defines: defines,
       inputs: inputs,
+      generateDartPluginRegistry: generateDartPluginRegistry,
     );
   }
 
