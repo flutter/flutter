@@ -68,7 +68,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     }
 
     assert(
-      PlatformDispatcher.instance.engineId != null,
+      WidgetsBinding.instance.platformDispatcher.engineId != null,
       'WindowingOwnerMacOS must be created after the engine has been initialized.',
     );
   }
@@ -117,7 +117,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
   /// The window handle is a pointer to the NSWindow instance.
   static Pointer<Void> getWindowHandle(FlutterView view) {
     return _MacOSPlatformInterface.getWindowHandle(
-      PlatformDispatcher.instance.engineId!,
+      WidgetsBinding.instance.platformDispatcher.engineId!,
       view.viewId,
     );
   }
@@ -554,7 +554,10 @@ class _MacOSPlatformInterface {
         ..constraints.maxWidth = preferredConstraints.maxWidth
         ..constraints.maxHeight = preferredConstraints.maxHeight;
     }
-    final int viewId = _createRegularWindow(PlatformDispatcher.instance.engineId!, request);
+    final int viewId = _createRegularWindow(
+      WidgetsBinding.instance.platformDispatcher.engineId!,
+      request,
+    );
     _allocator.free(request);
     return viewId;
   }
@@ -595,7 +598,10 @@ class _MacOSPlatformInterface {
         ..constraints.maxHeight = preferredConstraints.maxHeight;
     }
     try {
-      final int viewId = _createDialogWindow(PlatformDispatcher.instance.engineId!, request);
+      final int viewId = _createDialogWindow(
+        WidgetsBinding.instance.platformDispatcher.engineId!,
+        request,
+      );
       return viewId;
     } finally {
       _allocator.free(request);
@@ -606,7 +612,7 @@ class _MacOSPlatformInterface {
   external static void _destroyWindow(int engineId, Pointer<Void> handle);
 
   static void destroyWindow(Pointer<Void> windowHandle) {
-    _destroyWindow(PlatformDispatcher.instance.engineId!, windowHandle);
+    _destroyWindow(WidgetsBinding.instance.platformDispatcher.engineId!, windowHandle);
   }
 
   @Native<_Size Function(Pointer<Void>)>(symbol: 'InternalFlutter_Window_GetContentSize')
