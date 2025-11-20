@@ -73,6 +73,20 @@ void main() {
 
   group('end-to-end test', () {
     testWidgets('renders sdfs with rgba32f', (WidgetTester tester) async {
+      app.gTargetPixelFormat = ui.TargetPixelFormat.rgbaFloat32;
+      app.main();
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+      await _getScreenshot();
+      // TODO(gaaclarke): Turn this into a golden test. This turned out to be
+      // quite involved so it's deferred.
+      // expect(
+      //   screenshot,
+      //   matchesGoldenFile('high_bitrate_images.rbga32f'),
+      // );
+    });
+
+    testWidgets('renders sdfs with r32f', (WidgetTester tester) async {
+      app.gTargetPixelFormat = ui.TargetPixelFormat.rFloat32;
       app.main();
       await tester.pumpAndSettle(const Duration(seconds: 2));
       await _getScreenshot();

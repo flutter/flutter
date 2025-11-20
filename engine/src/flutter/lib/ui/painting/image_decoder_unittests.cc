@@ -459,7 +459,8 @@ TEST_F(ImageDecoderFixtureTest, ImpellerNullColorspace) {
   EXPECT_EQ(nullptr, image->colorSpace());
 
   auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
-      std::move(data), image->imageInfo(), 10 * 4);
+      std::move(data), ImageDescriptor::CreateImageInfo(image->imageInfo()),
+      10 * 4);
 
 #if IMPELLER_SUPPORTS_RENDERING
   std::shared_ptr<impeller::Capabilities> capabilities =
@@ -492,7 +493,8 @@ TEST_F(ImageDecoderFixtureTest, ImpellerPixelConversion32F) {
   EXPECT_EQ(nullptr, image->colorSpace());
 
   auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
-      std::move(data), image->imageInfo(), 10 * 16);
+      std::move(data), ImageDescriptor::CreateImageInfo(image->imageInfo()),
+      10 * 16);
 
 #if IMPELLER_SUPPORTS_RENDERING
   std::shared_ptr<impeller::Capabilities> capabilities =
