@@ -19,8 +19,8 @@ class MockAccessibilityFeatures: AccessibilityFeatures {
     var mockDarkerSystemColorsEnabled = false
     var mockOnOffSwitchLabelsEnabled = false
     var mockAnimatedImagesAutoPlayEnabled = true
-    var mockVideoPreviewsAutoPlayEnabled = true
-    var mockNonBlinkingCursorEnabled = false
+    var mockVideosAutoPlayEnabled = true
+    var mockDeterministicCursorEnabled = false
     
     override func isVoiceOverRunning() -> Bool {
         return mockVoiceOverRunning
@@ -54,12 +54,12 @@ class MockAccessibilityFeatures: AccessibilityFeatures {
         return mockAnimatedImagesAutoPlayEnabled
     }
     
-    override func isVideoPreviewsAutoPlayEnabled() -> Bool {
-        return mockVideoPreviewsAutoPlayEnabled
+    override func isVideosAutoPlayEnabled() -> Bool {
+        return mockVideosAutoPlayEnabled
     }
     
-    override func isNonBlinkingCursorEnabled() -> Bool {
-        return mockNonBlinkingCursorEnabled
+    override func isDeterministicCursorEnabled() -> Bool {
+        return mockDeterministicCursorEnabled
     }
 }
 
@@ -74,8 +74,8 @@ class AccessibilityFeaturesTests: XCTestCase {
         XCTAssertEqual(AccessibilityFeatureFlag.onOffSwitchLabels.rawValue, 1 << 6)
         XCTAssertEqual(AccessibilityFeatureFlag.noAnnounce.rawValue, 1 << 7)
         XCTAssertEqual(AccessibilityFeatureFlag.noAutoPlayAnimatedImages.rawValue, 1 << 8)
-        XCTAssertEqual(AccessibilityFeatureFlag.noAutoPlayVideoPreviews.rawValue, 1 << 9)
-        XCTAssertEqual(AccessibilityFeatureFlag.nonBlinkingCursor.rawValue, 1 << 10)
+        XCTAssertEqual(AccessibilityFeatureFlag.noAutoPlayVideos.rawValue, 1 << 9)
+        XCTAssertEqual(AccessibilityFeatureFlag.deterministicCursor.rawValue, 1 << 10)
     }
     
     func testFlagsBitmaskIsCorrect() {
@@ -120,15 +120,15 @@ class AccessibilityFeaturesTests: XCTestCase {
         )
         features.mockAnimatedImagesAutoPlayEnabled = true
         
-        features.mockVideoPreviewsAutoPlayEnabled = false
+        features.mockVideosAutoPlayEnabled = false
         XCTAssertTrue(
-            AccessibilityFeatureFlag(rawValue: features.flags).contains(.noAutoPlayVideoPreviews)
+            AccessibilityFeatureFlag(rawValue: features.flags).contains(.noAutoPlayVideos)
         )
-        features.mockVideoPreviewsAutoPlayEnabled = true
+        features.mockVideosAutoPlayEnabled = true
         
-        features.mockNonBlinkingCursorEnabled = true
-        XCTAssertTrue(AccessibilityFeatureFlag(rawValue: features.flags).contains(.nonBlinkingCursor))
-        features.mockNonBlinkingCursorEnabled = false
+        features.mockDeterministicCursorEnabled = true
+        XCTAssertTrue(AccessibilityFeatureFlag(rawValue: features.flags).contains(.deterministicCursor))
+        features.mockDeterministicCursorEnabled = false
         
         features.mockBoldTextEnabled = true
         features.mockReduceMotionEnabled = true

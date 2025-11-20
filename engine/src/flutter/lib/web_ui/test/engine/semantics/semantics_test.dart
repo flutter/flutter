@@ -407,19 +407,19 @@ void _testEngineAccessibilityBuilder() {
     expect(features.autoPlayAnimatedImages, isFalse);
   });
 
-  test('autoPlayVideoPreviews', () {
-    // By default this starts off true, see EngineAccessibilityFeatures.autoPlayVideoPreviews.
-    expect(features.autoPlayVideoPreviews, isTrue);
-    builder.autoPlayVideoPreviews = false;
+  test('autoPlayVideos', () {
+    // By default this starts off true, see EngineAccessibilityFeatures.autoPlayVideos.
+    expect(features.autoPlayVideos, isTrue);
+    builder.autoPlayVideos = false;
     features = builder.build();
-    expect(features.autoPlayVideoPreviews, isFalse);
+    expect(features.autoPlayVideos, isFalse);
   });
 
-  test('nonBlinkingCursor', () {
-    expect(features.nonBlinkingCursor, isFalse);
-    builder.nonBlinkingCursor = true;
+  test('deterministicCursor', () {
+    expect(features.deterministicCursor, isFalse);
+    builder.deterministicCursor = true;
     features = builder.build();
-    expect(features.nonBlinkingCursor, isTrue);
+    expect(features.deterministicCursor, isTrue);
   });
 }
 
@@ -507,7 +507,7 @@ void _testEngineSemanticsOwner() {
   });
 
   test('accessibilityFeatures copyWith function works', () {
-    // Announce, autoPlayAnimatedImages and autoPlayVideoPreviews are inverted
+    // Announce, autoPlayAnimatedImages and autoPlayVideos are inverted
     // checks, see EngineAccessibilityFeatures. Therefore, we need to ensure
     // that the original copy starts with false values for them.
     const EngineAccessibilityFeatures original = EngineAccessibilityFeatures(
@@ -524,8 +524,8 @@ void _testEngineSemanticsOwner() {
     expect(copy.supportsAnnounce, false);
     expect(copy.reduceMotion, false);
     expect(copy.autoPlayAnimatedImages, false);
-    expect(copy.autoPlayVideoPreviews, false);
-    expect(copy.nonBlinkingCursor, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(boldText: true);
     expect(copy.accessibleNavigation, false);
@@ -536,8 +536,8 @@ void _testEngineSemanticsOwner() {
     expect(copy.onOffSwitchLabels, false);
     expect(copy.reduceMotion, false);
     expect(copy.autoPlayAnimatedImages, false);
-    expect(copy.autoPlayVideoPreviews, false);
-    expect(copy.nonBlinkingCursor, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(disableAnimations: true);
     expect(copy.accessibleNavigation, false);
@@ -549,8 +549,8 @@ void _testEngineSemanticsOwner() {
     expect(copy.supportsAnnounce, false);
     expect(copy.reduceMotion, false);
     expect(copy.autoPlayAnimatedImages, false);
-    expect(copy.autoPlayVideoPreviews, false);
-    expect(copy.nonBlinkingCursor, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(highContrast: true);
     expect(copy.accessibleNavigation, false);
@@ -562,8 +562,8 @@ void _testEngineSemanticsOwner() {
     expect(copy.supportsAnnounce, false);
     expect(copy.reduceMotion, false);
     expect(copy.autoPlayAnimatedImages, false);
-    expect(copy.autoPlayVideoPreviews, false);
-    expect(copy.nonBlinkingCursor, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(invertColors: true);
     expect(copy.accessibleNavigation, false);
@@ -575,8 +575,8 @@ void _testEngineSemanticsOwner() {
     expect(copy.supportsAnnounce, false);
     expect(copy.reduceMotion, false);
     expect(copy.autoPlayAnimatedImages, false);
-    expect(copy.autoPlayVideoPreviews, false);
-    expect(copy.nonBlinkingCursor, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(onOffSwitchLabels: true);
     expect(copy.accessibleNavigation, false);
@@ -587,8 +587,8 @@ void _testEngineSemanticsOwner() {
     expect(copy.onOffSwitchLabels, true);
     expect(copy.reduceMotion, false);
     expect(copy.autoPlayAnimatedImages, false);
-    expect(copy.autoPlayVideoPreviews, false);
-    expect(copy.nonBlinkingCursor, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(supportsAnnounce: true);
     expect(copy.accessibleNavigation, false);
@@ -600,8 +600,8 @@ void _testEngineSemanticsOwner() {
     expect(copy.supportsAnnounce, true);
     expect(copy.reduceMotion, false);
     expect(copy.autoPlayAnimatedImages, false);
-    expect(copy.autoPlayVideoPreviews, false);
-    expect(copy.nonBlinkingCursor, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(reduceMotion: true);
     expect(copy.accessibleNavigation, false);
@@ -613,8 +613,8 @@ void _testEngineSemanticsOwner() {
     expect(copy.supportsAnnounce, false);
     expect(copy.reduceMotion, true);
     expect(copy.autoPlayAnimatedImages, false);
-    expect(copy.autoPlayVideoPreviews, false);
-    expect(copy.nonBlinkingCursor, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(autoPlayAnimatedImages: true);
     expect(copy.accessibleNavigation, false);
@@ -626,10 +626,10 @@ void _testEngineSemanticsOwner() {
     expect(copy.supportsAnnounce, false);
     expect(copy.reduceMotion, false);
     expect(copy.autoPlayAnimatedImages, true);
-    expect(copy.autoPlayVideoPreviews, false);
-    expect(copy.nonBlinkingCursor, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
-    copy = original.copyWith(autoPlayVideoPreviews: true);
+    copy = original.copyWith(autoPlayVideos: true);
     expect(copy.accessibleNavigation, false);
     expect(copy.boldText, false);
     expect(copy.disableAnimations, false);
@@ -639,10 +639,10 @@ void _testEngineSemanticsOwner() {
     expect(copy.supportsAnnounce, false);
     expect(copy.reduceMotion, false);
     expect(copy.autoPlayAnimatedImages, false);
-    expect(copy.autoPlayVideoPreviews, true);
-    expect(copy.nonBlinkingCursor, false);
+    expect(copy.autoPlayVideos, true);
+    expect(copy.deterministicCursor, false);
 
-    copy = original.copyWith(nonBlinkingCursor: true);
+    copy = original.copyWith(deterministicCursor: true);
     expect(copy.accessibleNavigation, false);
     expect(copy.boldText, false);
     expect(copy.disableAnimations, false);
@@ -652,8 +652,8 @@ void _testEngineSemanticsOwner() {
     expect(copy.supportsAnnounce, false);
     expect(copy.reduceMotion, false);
     expect(copy.autoPlayAnimatedImages, false);
-    expect(copy.autoPlayVideoPreviews, false);
-    expect(copy.nonBlinkingCursor, true);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, true);
   });
 
   test('makes the semantic DOM tree invisible', () {

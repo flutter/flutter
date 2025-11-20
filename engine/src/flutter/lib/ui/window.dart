@@ -929,8 +929,8 @@ class AccessibilityFeatures {
   static const int _kOnOffSwitchLabelsIndex = 1 << 6;
   static const int _kNoAnnounceIndex = 1 << 7;
   static const int _kNoAutoPlayAnimatedImagesIndex = 1 << 8;
-  static const int _kNoAutoPlayVideoPreviewsIndex = 1 << 9;
-  static const int _kNonBlinkingCursorIndex = 1 << 10;
+  static const int _kNoAutoPlayVideosIndex = 1 << 9;
+  static const int _kDeterministicCursorIndex = 1 << 10;
 
   // A bitfield which represents each enabled feature.
   final int _index;
@@ -997,20 +997,20 @@ class AccessibilityFeatures {
   // don't have an option to disable animated images auto play.
   bool get autoPlayAnimatedImages => _kNoAutoPlayAnimatedImagesIndex & _index == 0;
 
-  /// Whether the platform allows auto-playing video previews.
+  /// Whether the platform allows auto-playing videos.
   ///
   /// Only supported on iOS.
   ///
   /// Always returns `true` on other platforms.
   // This index check is inverted (== 0 vs != 0) since most of the platforms
-  // don't have an option to disable video previews auto play.
-  bool get autoPlayVideoPreviews => _kNoAutoPlayVideoPreviewsIndex & _index == 0;
+  // don't have an option to disable videos auto play.
+  bool get autoPlayVideos => _kNoAutoPlayVideosIndex & _index == 0;
 
-  /// The platform is requesting to show non-blinking cursor in editable text
-  /// fields.
+  /// The platform is requesting to show deterministic (non-blinking) cursor in
+  /// editable text fields.
   ///
   /// Only supported on iOS.
-  bool get nonBlinkingCursor => _kNonBlinkingCursorIndex & _index != 0;
+  bool get deterministicCursor => _kDeterministicCursorIndex & _index != 0;
 
   @override
   String toString() {
@@ -1042,11 +1042,11 @@ class AccessibilityFeatures {
     if (autoPlayAnimatedImages) {
       features.add('autoPlayAnimatedImages');
     }
-    if (autoPlayVideoPreviews) {
-      features.add('autoPlayVideoPreviews');
+    if (autoPlayVideos) {
+      features.add('autoPlayVideos');
     }
-    if (nonBlinkingCursor) {
-      features.add('nonBlinkingCursor');
+    if (deterministicCursor) {
+      features.add('deterministicCursor');
     }
     return 'AccessibilityFeatures$features';
   }

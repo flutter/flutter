@@ -34,8 +34,8 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     this.onOffSwitchLabels = false,
     this.supportsAnnounce = false,
     this.autoPlayAnimatedImages = false,
-    this.autoPlayVideoPreviews = false,
-    this.nonBlinkingCursor = false,
+    this.autoPlayVideos = false,
+    this.deterministicCursor = false,
   });
 
   /// An instance of [AccessibilityFeatures] where all the features are enabled.
@@ -49,8 +49,8 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     onOffSwitchLabels: true,
     supportsAnnounce: true,
     autoPlayAnimatedImages: true,
-    autoPlayVideoPreviews: true,
-    nonBlinkingCursor: true,
+    autoPlayVideos: true,
+    deterministicCursor: true,
   );
 
   @override
@@ -81,10 +81,10 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
   final bool autoPlayAnimatedImages;
 
   @override
-  final bool autoPlayVideoPreviews;
+  final bool autoPlayVideos;
 
   @override
-  final bool nonBlinkingCursor;
+  final bool deterministicCursor;
 
   @override
   bool operator ==(Object other) {
@@ -101,8 +101,8 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
         other.onOffSwitchLabels == onOffSwitchLabels &&
         other.supportsAnnounce == supportsAnnounce &&
         other.autoPlayAnimatedImages == autoPlayAnimatedImages &&
-        other.autoPlayVideoPreviews == autoPlayVideoPreviews &&
-        other.nonBlinkingCursor == nonBlinkingCursor;
+        other.autoPlayVideos == autoPlayVideos &&
+        other.deterministicCursor == deterministicCursor;
   }
 
   @override
@@ -117,8 +117,8 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
       onOffSwitchLabels,
       supportsAnnounce,
       autoPlayAnimatedImages,
-      autoPlayVideoPreviews,
-      nonBlinkingCursor,
+      autoPlayVideos,
+      deterministicCursor,
     );
   }
 
