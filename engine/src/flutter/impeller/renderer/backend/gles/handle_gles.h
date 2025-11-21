@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_HANDLE_GLES_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_HANDLE_GLES_H_
 
+#include <cstdint>
 #include <optional>
 #include <sstream>
 #include <string>
