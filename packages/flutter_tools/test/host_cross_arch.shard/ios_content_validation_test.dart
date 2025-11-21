@@ -184,7 +184,7 @@ void main() {
             final File appFrameworkInfoPlist = outputAppFramework.childFile('Info.plist');
             expect(appFrameworkInfoPlist, exists);
 
-            final String expectedMinimumOSVersion = FlutterDarwinPlatform.ios
+            final expectedMinimumOSVersion = FlutterDarwinPlatform.ios
                 .deploymentTarget()
                 .toString();
 
