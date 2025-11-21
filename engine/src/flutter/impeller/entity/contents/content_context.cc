@@ -262,6 +262,7 @@ struct ContentContext::Pipelines {
   Variants<FramebufferBlendScreenPipeline> framebuffer_blend_screen;
   Variants<FramebufferBlendSoftLightPipeline> framebuffer_blend_softlight;
   Variants<GaussianBlurPipeline> gaussian_blur;
+  Variants<GaussianBlurBoundedPipeline> gaussian_blur_bounded;
   Variants<GlyphAtlasPipeline> glyph_atlas;
   Variants<LinePipeline> line;
   Variants<LinearGradientFillPipeline> linear_gradient_fill;
@@ -708,6 +709,8 @@ ContentContext::ContentContext(
                                             {supports_decal});
     pipelines_->gaussian_blur.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil, {supports_decal});
+    pipelines_->gaussian_blur_bounded.CreateDefault(
+        *context_, options_no_msaa_no_depth_stencil, {supports_decal});
     pipelines_->border_mask_blur.CreateDefault(*context_,
                                                options_trianglestrip);
     pipelines_->color_matrix_color_filter.CreateDefault(*context_,
@@ -1149,6 +1152,11 @@ PipelineRef ContentContext::GetTiledTexturePipeline(
 PipelineRef ContentContext::GetGaussianBlurPipeline(
     ContentContextOptions opts) const {
   return GetPipeline(this, pipelines_->gaussian_blur, opts);
+}
+
+PipelineRef ContentContext::GetGaussianBlurBoundedPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->gaussian_blur_bounded, opts);
 }
 
 PipelineRef ContentContext::GetBorderMaskBlurPipeline(

@@ -44,6 +44,7 @@ class FilterContents : public Contents {
       const FilterInput::Ref& input,
       Sigma sigma_x,
       Sigma sigma_y,
+      std::optional<Rect> bounds,
       Entity::TileMode tile_mode = Entity::TileMode::kDecal,
       BlurStyle mask_blur_style = BlurStyle::kNormal,
       const Geometry* mask_geometry = nullptr);
