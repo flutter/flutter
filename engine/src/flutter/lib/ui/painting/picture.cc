@@ -62,6 +62,9 @@ void Picture::toImageSync(uint32_t width,
     case 1:
       snapshot_pixel_format = SnapshotPixelFormat::kRGBA32Float;
       break;
+    case 2:
+      snapshot_pixel_format = SnapshotPixelFormat::kR32Float;
+      break;
     default:
       FML_DCHECK(false) << "unknown target format: " << target_format;
       snapshot_pixel_format = SnapshotPixelFormat::kDontCare;

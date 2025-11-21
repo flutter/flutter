@@ -56,6 +56,9 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
     case SnapshotPixelFormat::kRGBA32Float:
       impeller_pixel_format = impeller::PixelFormat::kR32G32B32A32Float;
       break;
+    case SnapshotPixelFormat::kR32Float:
+      impeller_pixel_format = impeller::PixelFormat::kR32Float;
+      break;
   }
 
   return impeller::DlImageImpeller::Make(
