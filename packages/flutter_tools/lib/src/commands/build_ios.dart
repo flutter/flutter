@@ -23,29 +23,11 @@ import '../darwin/darwin.dart';
 import '../doctor_validator.dart';
 import '../globals.dart' as globals;
 import '../ios/application_package.dart';
+import '../ios/code_signing.dart';
 import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
-
-/// Container for provisioning profile information extracted from a decoded profile.
-///
-/// Currently holds UUID and name, which are sufficient for generating ExportOptions.plist.
-/// Could be extended in the future to include:
-/// - Team ID (for validation)
-/// - Expiration date (for warning about expired profiles)
-/// - Entitlements (for debugging entitlement mismatches)
-/// - Supported bundle IDs (for multi-target support with extensions/widgets)
-@immutable
-class ProfileData {
-  const ProfileData({required this.uuid, required this.name});
-
-  /// The provisioning profile UUID (e.g., "12345678-1234-1234-1234-123456789012").
-  final String uuid;
-
-  /// The provisioning profile name (e.g., "MyApp Distribution"), or null if not available.
-  final String? name;
-}
 
 /// Builds an .app for an iOS app to be used for local testing on an iOS device
 /// or simulator. Can only be run on a macOS host.
@@ -805,7 +787,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   ///
   /// Returns the UUID of the matching profile, or null if not found or parsing fails.
   Future<String?> _findProvisioningProfileUuid(String profileSpecifier) async {
-    final Directory? profileDirectory = _getProvisioningProfileDirectory();
+    final Directory? profileDirectory = getProvisioningProfileDirectory(
+      fileSystemUtils: globals.fsUtils,
+      fileSystem: globals.fs,
+    );
     if (profileDirectory == null) {
       logger.printTrace(
         'Manual signing: provisioning profile "$profileSpecifier" not found. '
@@ -823,6 +808,18 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       return null;
     }
 
+    // Use XcodeCodeSigningSettings to parse provisioning profiles
+    final codeSigningSettings = XcodeCodeSigningSettings(
+      config: globals.config,
+      logger: logger,
+      platform: globals.platform,
+      processUtils: globals.processUtils,
+      fileSystem: globals.fs,
+      fileSystemUtils: globals.fsUtils,
+      terminal: globals.terminal,
+      plistParser: globals.plistParser,
+    );
+
     // Search for profiles matching the specifier (could be name or UUID)
     await for (final FileSystemEntity entity in profileDirectory.list()) {
       if (entity is! File || globals.fs.path.extension(entity.path) != '.mobileprovision') {
@@ -830,11 +827,13 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       }
 
       // Decode profile once and extract both UUID and name
-      final ProfileData? profileInfo = await _parseProvisioningProfileInfo(entity);
-      if (profileInfo != null) {
+      final ProvisioningProfile? profile = await codeSigningSettings.parseProvisioningProfile(
+        entity,
+      );
+      if (profile != null) {
         // Check if this profile matches the specifier (by UUID or name)
-        if (profileInfo.uuid == profileSpecifier || profileInfo.name == profileSpecifier) {
-          return profileInfo.uuid;
+        if (profile.uuid == profileSpecifier || profile.name == profileSpecifier) {
+          return profile.uuid;
         }
       }
     }
@@ -844,86 +843,6 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       'Falling back to basic ExportOptions.plist.',
     );
     return null;
-  }
-
-  /// Returns the standard Provisioning Profiles directory, or null if home directory is unavailable.
-  Directory? _getProvisioningProfileDirectory() {
-    final String? homeDir = globals.fsUtils.homeDirPath;
-    if (homeDir == null) {
-      return null;
-    }
-    return globals.fs.directory(
-      globals.fs.path.join(
-        homeDir,
-        'Library',
-        'Developer',
-        'Xcode',
-        'UserData',
-        'Provisioning Profiles',
-      ),
-    );
-  }
-
-  /// Parses a provisioning profile file and extracts both UUID and name in a single decode operation.
-  ///
-  /// **Format**: Provisioning profiles are DER-encoded data wrapped in CMS (pkcs7) format.
-  /// We use the macOS `security cms -D` command to decode them.
-  ///
-  /// **Performance**: Extracts both UUID and name in one decode operation to minimize file I/O
-  /// when searching for profiles (avoids decoding the same file twice).
-  ///
-  /// **Security considerations:**
-  /// - Profiles are stored in user's home directory (`~/Library/Developer/Xcode/UserData/Provisioning Profiles/`)
-  ///   which is a trusted location managed by Xcode.
-  /// - We validate `security` command exit code and decoded file existence before parsing.
-  /// - Failed parses are caught, logged at trace level, and do not propagate exceptions.
-  /// - Temporary decoded plist files are always cleaned up in `finally` block.
-  ///
-  /// Returns a [ProfileData] object with UUID and name if parsing succeeds, or null if:
-  /// - The security command fails (exit code != 0)
-  /// - The decoded plist file is not created
-  /// - The plist cannot be parsed
-  /// - The UUID field is missing (required field)
-  Future<ProfileData?> _parseProvisioningProfileInfo(File profileFile) async {
-    try {
-      // Decode the provisioning profile using security command
-      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
-        'flutter_provisioning_',
-      );
-      final File decodedPlist = tempDir.childFile('decoded.plist');
-
-      try {
-        final RunResult result = await globals.processUtils.run(<String>[
-          'security',
-          'cms',
-          '-D',
-          '-i',
-          profileFile.path,
-          '-o',
-          decodedPlist.path,
-        ]);
-
-        if (result.exitCode != 0 || !decodedPlist.existsSync()) {
-          return null;
-        }
-
-        // Parse the plist to get both UUID and name in a single operation
-        final Map<String, Object> plistData = globals.plistParser.parseFile(decodedPlist.path);
-        final uuid = plistData['UUID']?.toString();
-        final name = plistData['Name']?.toString();
-
-        if (uuid == null) {
-          return null;
-        }
-
-        return ProfileData(uuid: uuid, name: name);
-      } finally {
-        ErrorHandlingFileSystem.deleteIfExists(tempDir);
-      }
-    } on Exception catch (e) {
-      logger.printTrace('Failed to parse provisioning profile ${profileFile.path}: $e');
-      return null;
-    }
   }
 
   // As of Xcode 15.4, the old export methods 'app-store', 'ad-hoc', and 'development'
