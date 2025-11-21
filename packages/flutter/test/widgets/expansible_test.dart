@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -511,4 +512,98 @@ void main() {
     controller.expand();
     await tester.pump();
   });
+
+  testWidgets(
+    'Expansible includes correct Semantics for expanded and collapsed states iOS/MacOS devices',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const DefaultWidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      final ExpansibleController controller = ExpansibleController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Expansible(
+              controller: controller,
+              headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+                onTap: controller.isExpanded ? controller.collapse : controller.expand,
+                child: const Text('Header'),
+              ),
+              bodyBuilder: (BuildContext context, Animation<double> animation) =>
+                  const Text('Body'),
+            ),
+          ),
+        ),
+      );
+
+      // The header should have tap action and isExpanded is false initially.
+      final SemanticsNode semantics = tester.getSemantics(find.text('Header'));
+      expect(semantics, isNotNull);
+      // On iOS/macOS platform, the semantics hint should include expanded/collapsed state guidance
+      // even theme platform is set to Android.
+      expect(
+        semantics.hint,
+        '${localizations.expandedHint}\n ${localizations.expansibleCollapsedHint}',
+      );
+
+      controller.expand();
+      await tester.pumpAndSettle();
+
+      expect(semantics, isNotNull);
+      expect(
+        semantics.hint,
+        '${localizations.collapsedHint}\n ${localizations.expansibleExpandedHint}',
+      );
+
+      handle.dispose();
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
+
+  testWidgets(
+    'Expansible includes correct Semantics for expanded and collapsed states non iOS/MacOS devices',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const DefaultWidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      final ExpansibleController controller = ExpansibleController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Expansible(
+              controller: controller,
+              headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+                onTap: controller.isExpanded ? controller.collapse : controller.expand,
+                child: const Text('Header'),
+              ),
+              bodyBuilder: (BuildContext context, Animation<double> animation) =>
+                  const Text('Body'),
+            ),
+          ),
+        ),
+      );
+
+      // The header should have tap action and isExpanded is false initially.
+      final SemanticsNode semantics = tester.getSemantics(find.text('Header'));
+      expect(semantics, isNotNull);
+      // On iOS/macOS platform, the semantics hint should include expanded/collapsed state guidance
+      // even theme platform is set to Android.
+      expect(semantics.hint, localizations.collapsedHint);
+
+      controller.expand();
+      await tester.pumpAndSettle();
+
+      expect(semantics, isNotNull);
+      expect(semantics.hint, localizations.expandedHint);
+
+      handle.dispose();
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.windows,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+    }),
+  );
 }

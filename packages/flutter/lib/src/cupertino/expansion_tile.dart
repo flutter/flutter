@@ -170,33 +170,12 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
   }
 
   Widget _buildHeader(BuildContext context, Animation<double> animation) {
-    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
-    final String onTapHint = _tileController.isExpanded
-        ? localizations.expansionTileExpandedTapHint
-        : localizations.expansionTileCollapsedTapHint;
-    String? semanticsHint;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        semanticsHint = _tileController.isExpanded
-            ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
-            : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}';
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        break;
-    }
-    return Semantics(
-      hint: semanticsHint,
-      onTapHint: onTapHint,
-      child: CupertinoListTile(
-        key: _headerKey,
-        onTap: _onHeaderTap,
-        title: widget.title,
-        trailing: _buildIcon(context, animation),
-        backgroundColorActivated: CupertinoColors.transparent,
-      ),
+    return CupertinoListTile(
+      key: _headerKey,
+      onTap: _onHeaderTap,
+      title: widget.title,
+      trailing: _buildIcon(context, animation),
+      backgroundColorActivated: CupertinoColors.transparent,
     );
   }
 
