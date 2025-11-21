@@ -1592,7 +1592,7 @@ void main() {
           isA<AssertionError>().having(
             (AssertionError e) => e.message,
             'message',
-            'An OverlayEntry should be removed only once and it must be disposed after the removal.',
+            'An OverlayEntry should be removed only once.',
           ),
         ),
       );
