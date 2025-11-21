@@ -160,6 +160,7 @@ Future<T?> showCupertinoSheet<T>({
   bool enableDrag = true,
 }) {
   assert(pageBuilder != null || builder != null || scrollableBuilder != null);
+  assert((pageBuilder == null && builder == null) || scrollableBuilder == null);
 
   final WidgetBuilder? effectiveBuilder = builder ?? pageBuilder;
   final GlobalKey<NavigatorState> nestedNavigatorKey = GlobalKey<NavigatorState>();
@@ -172,49 +173,49 @@ Future<T?> showCupertinoSheet<T>({
           );
 
     return Navigator.of(context, rootNavigator: true).push<T>(route);
-  } else {
-    Widget nestedNavigationContent(Widget child) {
-      return NavigatorPopHandler(
-        onPopWithResult: (T? result) {
-          nestedNavigatorKey.currentState!.maybePop();
-        },
-        child: Navigator(
-          key: nestedNavigatorKey,
-          initialRoute: '/',
-          onGenerateInitialRoutes: (NavigatorState navigator, String initialRouteName) {
-            return <Route<void>>[
-              CupertinoPageRoute<void>(
-                builder: (BuildContext context) {
-                  return PopScope(
-                    canPop: false,
-                    onPopInvokedWithResult: (bool didPop, Object? result) {
-                      if (didPop) {
-                        return;
-                      }
-                      Navigator.of(context, rootNavigator: true).pop(result);
-                    },
-                    child: child,
-                  );
-                },
-              ),
-            ];
-          },
-        ),
-      );
-    }
-
-    final PageRoute<T> route = effectiveBuilder != null
-        ? CupertinoSheetRoute<T>(
-            builder: (BuildContext context) => nestedNavigationContent(effectiveBuilder(context)),
-            enableDrag: enableDrag,
-          )
-        : CupertinoSheetRoute<T>.scrollable(
-            scrollableBuilder: (BuildContext context, ScrollController controller) =>
-                nestedNavigationContent(scrollableBuilder!(context, controller)),
-            enableDrag: enableDrag,
-          );
-    return Navigator.of(context, rootNavigator: true).push<T>(route);
   }
+
+  Widget nestedNavigationContent(Widget child) {
+    return NavigatorPopHandler(
+      onPopWithResult: (T? result) {
+        nestedNavigatorKey.currentState!.maybePop();
+      },
+      child: Navigator(
+        key: nestedNavigatorKey,
+        initialRoute: '/',
+        onGenerateInitialRoutes: (NavigatorState navigator, String initialRouteName) {
+          return <Route<void>>[
+            CupertinoPageRoute<void>(
+              builder: (BuildContext context) {
+                return PopScope(
+                  canPop: false,
+                  onPopInvokedWithResult: (bool didPop, Object? result) {
+                    if (didPop) {
+                      return;
+                    }
+                    Navigator.of(context, rootNavigator: true).pop(result);
+                  },
+                  child: child,
+                );
+              },
+            ),
+          ];
+        },
+      ),
+    );
+  }
+
+  final PageRoute<T> route = effectiveBuilder != null
+      ? CupertinoSheetRoute<T>(
+          builder: (BuildContext context) => nestedNavigationContent(effectiveBuilder(context)),
+          enableDrag: enableDrag,
+        )
+      : CupertinoSheetRoute<T>.scrollable(
+          scrollableBuilder: (BuildContext context, ScrollController controller) =>
+              nestedNavigationContent(scrollableBuilder!(context, controller)),
+          enableDrag: enableDrag,
+        );
+  return Navigator.of(context, rootNavigator: true).push<T>(route);
 }
 
 /// Provides an iOS-style sheet transition.
@@ -834,14 +835,6 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
       _stretchDragController!.controller,
     );
   }
-
-  // void _handleScroll(DragUpdateDetails details) {
-  //   if (widget.scrollController == null || widget.scrollController?.hasClients != true) {
-  //     return;
-  //   }
-  //   final double newPosition = widget.scrollController!.offset + (details.primaryDelta! * -1);
-  //   widget.scrollController!.jumpTo(newPosition);
-  // }
 
   void _handleDragEnd(DragEndDetails details) {
     assert(mounted);
