@@ -206,9 +206,7 @@ abstract class Renderer {
   void clearFragmentProgramCache();
   Future<ui.FragmentProgram> createFragmentProgram(String assetKey);
 
-  ui.Path createPath();
-  ui.Path copyPath(ui.Path src);
-  ui.Path combinePaths(ui.PathOperation op, ui.Path path1, ui.Path path2);
+  DisposablePathConstructors get pathConstructors;
 
   ui.LineMetrics createLineMetrics({
     required bool hardBreak,
