@@ -7559,9 +7559,9 @@ abstract class Picture {
   /// Synchronously creates a handle to an image of this picture.
   ///
   /// {@template dart.ui.painting.Picture.toImageSync}
-  /// The returned image will be `width` pixels wide and `height` pixels high.
-  /// The picture is rasterized within the 0 (left), 0 (top), `width` (right),
-  /// `height` (bottom) bounds. Content outside these bounds is clipped.
+  /// The returned image will be [width] pixels wide and [height] pixels high.
+  /// The picture is rasterized within the 0 (left), 0 (top), [width] (right),
+  /// [height] (bottom) bounds. Content outside these bounds is clipped.
   ///
   /// The image object is created and returned synchronously, but is rasterized
   /// asynchronously. If the rasterization fails, an exception will be thrown
@@ -7572,6 +7572,10 @@ abstract class Picture {
   /// efficient to draw.
   ///
   /// If no GPU context is available, the image will be rasterized on the CPU.
+  ///
+  /// The [targetFormat] argument specifies the pixel format of the returned
+  /// [Image]. If [TargetPixelFormat.dontCare] is specified, the pixel format
+  /// will be chosen automatically based on the GPU capabilities.
   /// {@endtemplate}
   Image toImageSync(
     int width,
