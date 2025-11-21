@@ -84,7 +84,7 @@ wasm_toolchain("canvaskit_experimental_webparagraph") {
     # Remove all other text-related features that we don't need with WebParagraph.
     skia_enable_skparagraph = false
     skia_canvaskit_enable_paragraph = false
-    skia_enable_shaper = false
+    skia_enable_skshaper = false
     skia_use_harfbuzz = false
     skia_use_freetype = false
     flutter_use_freetype_woff2 = false
