@@ -5,8 +5,11 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
+import 'package:flutter/foundation.dart';
+
 import 'basic.dart';
 import 'framework.dart';
+import 'localizations.dart';
 import 'page_storage.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
@@ -438,22 +441,54 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     assert(!_animationController.isDismissed || !widget.controller.isExpanded);
     final bool closed = !widget.controller.isExpanded && _animationController.isDismissed;
     final bool shouldRemoveBody = closed && !widget.maintainState;
+    const DefaultWidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+    final String onTapHint = widget.controller.isExpanded
+        ? localizations.expansibleExpandedTapHint
+        : localizations.expansibleCollapsedTapHint;
+    String? semanticsHint;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        semanticsHint = widget.controller.isExpanded
+            ? '${localizations.collapsedHint}\n ${localizations.expansibleExpandedHint}'
+            : '${localizations.expandedHint}\n ${localizations.expansibleCollapsedHint}';
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        break;
+    }
 
     final Widget result = Offstage(
       offstage: closed,
       child: TickerMode(enabled: !closed, child: widget.bodyBuilder(context, _animationController)),
     );
 
-    return AnimatedBuilder(
-      animation: _animationController.view,
-      builder: (BuildContext context, Widget? child) {
-        final Widget header = widget.headerBuilder(context, _animationController);
-        final Widget body = ClipRect(
-          child: Align(heightFactor: _heightFactor.value, child: child),
-        );
-        return widget.expansibleBuilder(context, header, body, _animationController);
-      },
-      child: shouldRemoveBody ? null : result,
+    return Semantics(
+      hint: semanticsHint,
+      onTapHint: onTapHint,
+      expanded: widget.controller.isExpanded,
+      onExpand: widget.controller.isExpanded
+          ? null
+          : () {
+              widget.controller.expand();
+            },
+      onCollapse: !widget.controller.isExpanded
+          ? null
+          : () {
+              widget.controller.collapse();
+            },
+      child: AnimatedBuilder(
+        animation: _animationController.view,
+        builder: (BuildContext context, Widget? child) {
+          final Widget header = widget.headerBuilder(context, _animationController);
+          final Widget body = ClipRect(
+            child: Align(heightFactor: _heightFactor.value, child: child),
+          );
+          return widget.expansibleBuilder(context, header, body, _animationController);
+        },
+        child: shouldRemoveBody ? null : result,
+      ),
     );
   }
 }
