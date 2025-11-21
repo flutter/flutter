@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
@@ -49,6 +50,8 @@ PreviewDetector createTestPreviewDetector() {
     throw StateError('$initializeTestPreviewDetectorState was not called!');
   }
   _projectRoot = _fs.systemTempDirectory.createTempSync('root');
+  final FlutterProject project = FlutterProject.fromDirectoryTest(_projectRoot!);
+
   return PreviewDetector(
     platform: FakePlatform(),
     previewAnalytics: WidgetPreviewAnalytics(
@@ -59,7 +62,7 @@ PreviewDetector createTestPreviewDetector() {
         fs: MemoryFileSystem.test(),
       ),
     ),
-    projectRoot: _projectRoot!,
+    project: project,
     logger: BufferLogger.test(),
     fs: _fs,
     onChangeDetected: _onChangeDetectedRoot,

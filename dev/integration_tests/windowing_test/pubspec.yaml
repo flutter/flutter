@@ -18,5 +18,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^6.0.0
 
-# PUBSPEC CHECKSUM: 77jv2r
+# PUBSPEC CHECKSUM: c1u78t

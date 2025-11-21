@@ -94,6 +94,7 @@
 /dev/devicelab/bin/tasks/textfield_perf__e2e_summary.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/very_long_picture_scrolling_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/web_size__compile_test.dart @yjbanov @flutter/web
+/dev/devicelab/bin/tasks/high_bitrate_images_ios.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/wide_gamut_ios.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/animated_advanced_blend_perf__timeline_summary.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/animated_advanced_blend_perf_ios__timeline_summary.dart @gaaclarke @flutter/engine
@@ -113,6 +114,8 @@
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_impeller_gles__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/rrect_blur_perf__timeline_summary.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/platform_views_hcpp_scroll_perf__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/draw_arcs_all_fill_styles_perf__timeline_summary.dart @b-luk @flutter/engine
+/dev/devicelab/bin/tasks/draw_arcs_all_stroke_styles_perf__timeline_summary.dart @b-luk @flutter/engine
 
 ## Windows Android DeviceLab tests
 /dev/devicelab/bin/tasks/basic_material_app_win__compile.dart @bkonyi @flutter/tool
@@ -233,6 +236,8 @@
 /dev/devicelab/bin/tasks/static_path_stroke_tessellation_perf_ios__timeline_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/dynamic_path_stroke_tessellation_perf_ios__timeline_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/rrect_blur_perf_ios__timeline_summary.dart @gaaclarke @flutter/engine
+/dev/devicelab/bin/tasks/draw_arcs_all_fill_styles_perf_ios__timeline_summary.dart @b-luk @flutter/engine
+/dev/devicelab/bin/tasks/draw_arcs_all_stroke_styles_perf_ios__timeline_summary.dart @b-luk @flutter/engine
 
 ## Host only DeviceLab tests
 /dev/devicelab/bin/tasks/animated_complex_opacity_perf_macos__e2e_summary.dart @cbracken @flutter/desktop
