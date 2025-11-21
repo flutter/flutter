@@ -740,6 +740,28 @@ TaskFunction createAnimatedComplexImageFilteredPerfE2ETest({bool? enableImpeller
   ).run;
 }
 
+TaskFunction createDrawArcsAllFillStylesPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'draw_arcs_all_fill_styles_perf',
+    enableImpeller: true,
+    testDriver: 'test_driver/draw_arcs_all_fill_styles_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
+TaskFunction createDrawArcsAllStrokeStylesPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'draw_arcs_all_stroke_styles_perf',
+    enableImpeller: true,
+    testDriver: 'test_driver/draw_arcs_all_stroke_styles_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
 Map<String, dynamic> _average(List<Map<String, dynamic>> results, int iterations) {
   final Map<String, dynamic> tally = <String, dynamic>{};
   for (final Map<String, dynamic> item in results) {

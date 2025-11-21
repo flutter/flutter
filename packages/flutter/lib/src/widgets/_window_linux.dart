@@ -408,7 +408,9 @@ class _FlView extends _GtkWidget {
   _FlView()
     : super(
         _flViewNewForEngine(
-          ffi.Pointer<ffi.NativeType>.fromAddress(PlatformDispatcher.instance.engineId!),
+          ffi.Pointer<ffi.NativeType>.fromAddress(
+            WidgetsBinding.instance.platformDispatcher.engineId!,
+          ),
         ),
       );
 
@@ -543,7 +545,7 @@ class WindowingOwnerLinux extends WindowingOwner {
     }
 
     assert(
-      PlatformDispatcher.instance.engineId != null,
+      WidgetsBinding.instance.platformDispatcher.engineId != null,
       'WindowingOwnerLinux must be created after the engine has been initialized.',
     );
   }
