@@ -86,6 +86,8 @@ void Surface::setCallbackHandler(CallbackHandler* callbackHandler) {
 
 // Worker thread only
 void Surface::_init() {
+  // 256x256 is just an arbitrary size for the initial canvas, so that we can
+  // get a gl context off of it.
   _glContext = skwasm_createOffscreenCanvas(256, 256);
   if (!_glContext) {
     printf("Failed to create context!\n");

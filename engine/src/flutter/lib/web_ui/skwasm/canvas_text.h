@@ -11,7 +11,7 @@
 #include <memory>
 
 namespace flutter {
-extern std::shared_ptr<DlText> textFromBlob(const sk_sp<SkTextBlob>& blob);
+std::shared_ptr<DlText> textFromBlob(const sk_sp<SkTextBlob>& blob);
 }
 
 #endif  // FLUTTER_LIB_WEB_UI_SKWASM_CANVAS_TEXT_H_
