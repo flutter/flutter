@@ -78,12 +78,11 @@ class ImpellerRenderContext : public RenderContext {
  private:
   void _recreateSurface() {
     _surface = impeller::SurfaceGLES::WrapFBO(
-        _context,                                  // context
-        []() { return true; },                     // swap callback
-        0u,                                        // fbo
-        impeller::PixelFormat::kR8G8B8A8UNormInt,  // pixel format
-        {_width, _height}                          // surface size
-    );
+        /*context=*/_context,
+        /*swap_callback=*/[]() { return true; },
+        /*fbo=*/0u,
+        /*color_format=*/impeller::PixelFormat::kR8G8B8A8UNormInt,
+        /*fbo_size=*/{_width, _height});
   }
 
   std::shared_ptr<impeller::ContextGLES> _context;
@@ -101,7 +100,7 @@ std::unique_ptr<RenderContext> Skwasm::RenderContext::Make(int sampleCount,
   auto clearDepthEmulated = [](float depth) {};
   auto depthRangeEmulated = [](float nearVal, float farVal) {};
 
-  static std::map<std::string, void*> gl_procs;
+  std::map<std::string, void*> gl_procs;
 
   gl_procs["glGetError"] = (void*)&glGetError;
   gl_procs["glClearDepthf"] = (void*)&clearDepthEmulated;
@@ -120,7 +119,7 @@ std::unique_ptr<RenderContext> Skwasm::RenderContext::Make(int sampleCount,
 #undef IMPELLER_PROC
 
   auto gl = std::make_unique<impeller::ProcTableGLES>(
-      [](const char* function_name) -> void* {
+      [gl_procs = std::move(gl_procs)](const char* function_name) -> void* {
         auto found = gl_procs.find(function_name);
         if (found == gl_procs.end()) {
           return nullptr;

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "canvas_text.h"
 #include "export.h"
 #include "helpers.h"
 #include "text/text_types.h"
@@ -16,10 +17,6 @@
 
 using namespace Skwasm;
 using namespace flutter;
-
-namespace flutter {
-extern std::shared_ptr<DlText> textFromBlob(const sk_sp<SkTextBlob>& blob);
-}
 
 namespace {
 class SkwasmParagraphPainter : public skia::textlayout::ParagraphPainter {

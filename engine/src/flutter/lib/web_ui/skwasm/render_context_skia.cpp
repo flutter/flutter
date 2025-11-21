@@ -28,15 +28,12 @@ namespace {
 class SkiaRenderContext : public RenderContext {
  public:
   SkiaRenderContext(int sampleCount, int stencil)
-      : _sampleCount(sampleCount), _stencil(stencil) {
-    _grContext = GrDirectContexts::MakeGL(GrGLInterfaces::MakeWebGL());
+      : _sampleCount(sampleCount),
+        _stencil(stencil),
+        _grContext(GrDirectContexts::MakeGL(GrGLInterfaces::MakeWebGL())),
+        _fbInfo({0, GL_RGBA8_OES}) {
     _grContext->resetContext(kRenderTarget_GrGLBackendState |
                              kMisc_GrGLBackendState);
-
-    // The on-screen canvas is FBO 0. Wrap it in a Skia render target so Skia
-    // can render to it.
-    _fbInfo.fFBOID = 0;
-    _fbInfo.fFormat = GL_RGBA8_OES;
   }
 
   virtual void renderPicture(

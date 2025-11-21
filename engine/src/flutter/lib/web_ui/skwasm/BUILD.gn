@@ -10,6 +10,7 @@ template("skwasm_variant") {
 
     sources = [
       "canvas.cpp",
+      "canvas_text.h",
       "contour_measure.cpp",
       "data.cpp",
       "export.h",
