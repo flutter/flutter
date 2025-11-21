@@ -54,9 +54,7 @@ abstract class UnpackMacOS extends UnpackDarwin {
         xcodeProject.flutterFrameworkSwiftPackageDirectory.existsSync()) {
       return <Source>[];
     }
-    return <Source>[
-      kFlutterMacOSFrameworkBinarySource,
-    ];
+    return <Source>[kFlutterMacOSFrameworkBinarySource];
   }
 
   @override

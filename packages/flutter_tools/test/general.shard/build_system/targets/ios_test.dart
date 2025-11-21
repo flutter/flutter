@@ -1255,7 +1255,7 @@ void main() {
       );
 
       processManager.addCommands(<FakeCommand>[
-        copyPhysicalDebugFrameworkCommand,
+        copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
       ]);
