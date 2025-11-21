@@ -6,8 +6,8 @@
 #define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_GL_SKIA_H_
 
 #include "flutter/fml/macros.h"
-#include "flutter/shell/gpu/gpu_surface_gl_skia.h"
 #include "flutter/shell/platform/embedder/embedder_external_view_embedder.h"
+#include "flutter/shell/platform/embedder/embedder_gl_dispatch_table.h"
 #include "flutter/shell/platform/embedder/embedder_surface.h"
 
 namespace flutter {
@@ -15,18 +15,6 @@ namespace flutter {
 class EmbedderSurfaceGLSkia final : public EmbedderSurface,
                                     public GPUSurfaceGLDelegate {
  public:
-  struct GLDispatchTable {
-    std::function<bool(void)> gl_make_current_callback;           // required
-    std::function<bool(void)> gl_clear_current_callback;          // required
-    std::function<bool(GLPresentInfo)> gl_present_callback;       // required
-    std::function<intptr_t(GLFrameInfo)> gl_fbo_callback;         // required
-    std::function<bool(void)> gl_make_resource_current_callback;  // optional
-    std::function<DlMatrix(void)>
-        gl_surface_transformation_callback;                          // optional
-    std::function<void*(const char*)> gl_proc_resolver;              // optional
-    std::function<GLFBOInfo(intptr_t)> gl_populate_existing_damage;  // required
-  };
-
   EmbedderSurfaceGLSkia(
       GLDispatchTable gl_dispatch_table,
       bool fbo_reset_after_present,

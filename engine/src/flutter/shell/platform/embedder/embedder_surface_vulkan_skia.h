@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_VULKAN_H_
-#define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_VULKAN_H_
+#ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_VULKAN_SKIA_H_
+#define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_VULKAN_SKIA_H_
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/common/context_options.h"
@@ -16,8 +16,8 @@
 
 namespace flutter {
 
-class EmbedderSurfaceVulkan final : public EmbedderSurface,
-                                    public GPUSurfaceVulkanDelegate {
+class EmbedderSurfaceVulkanSkia final : public EmbedderSurface,
+                                        public GPUSurfaceVulkanDelegate {
  public:
   struct VulkanDispatchTable {
     PFN_vkGetInstanceProcAddr get_instance_proc_address;  // required
@@ -27,7 +27,7 @@ class EmbedderSurfaceVulkan final : public EmbedderSurface,
         present_image;  // required
   };
 
-  EmbedderSurfaceVulkan(
+  EmbedderSurfaceVulkanSkia(
       uint32_t version,
       VkInstance instance,
       size_t instance_extension_count,
@@ -41,7 +41,7 @@ class EmbedderSurfaceVulkan final : public EmbedderSurface,
       const VulkanDispatchTable& vulkan_dispatch_table,
       std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
 
-  ~EmbedderSurfaceVulkan() override;
+  ~EmbedderSurfaceVulkanSkia() override;
 
   // |GPUSurfaceVulkanDelegate|
   const vulkan::VulkanProcTable& vk() override;
@@ -80,9 +80,9 @@ class EmbedderSurfaceVulkan final : public EmbedderSurface,
 
   void* GetInstanceProcAddress(VkInstance instance, const char* proc_name);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(EmbedderSurfaceVulkan);
+  FML_DISALLOW_COPY_AND_ASSIGN(EmbedderSurfaceVulkanSkia);
 };
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_VULKAN_H_
+#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_VULKAN_SKIA_H_
