@@ -22,7 +22,7 @@ jobs:
 
     steps:
       # Note: we must check out the tree for the composite action to be available
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
       - uses: ./.github/actions/composite-flutter-setup
 
       - name: Tool Test
