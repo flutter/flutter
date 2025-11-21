@@ -120,8 +120,14 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
   /// [iconMargin] is only useful when [icon] and either one of [text] or
   /// [child] is non-null.
   const Tab({super.key, this.text, this.icon, this.iconMargin, this.height, this.child})
-    : assert(text != null || child != null || icon != null),
-      assert(text == null || child == null);
+    : assert(
+        text != null || child != null || icon != null,
+        'Tab requires at least one of text, child, or icon to be non-null.',
+      ),
+      assert(
+        text == null || child == null,
+        'Provide either text or child, not both, when creating a Tab.',
+      );
 
   /// The text to display as the tab's label.
   ///
