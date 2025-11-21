@@ -695,6 +695,14 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     updateTweens(anchorKey.currentContext!);
     toggleVisibility?.call();
     viewOnClose?.call();
+    // Unfocus the anchor to prevent the Enter key from triggering unwanted
+    // actions (like route pops) when the view closes and focus returns to
+    // the anchor's search bar.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (anchorKey.currentContext != null) {
+        FocusScope.of(anchorKey.currentContext!).unfocus();
+      }
+    });
     return super.didPop(result);
   }
 
