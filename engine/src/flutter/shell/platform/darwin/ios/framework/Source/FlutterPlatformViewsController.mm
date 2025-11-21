@@ -672,10 +672,9 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
       if (self.platformTaskRunner->RunsTasksOnCurrentThread()) {
         [self performResize:self.frameSize];
       } else {
-        [self postTaskSync:self.platformTaskRunner
-                  withTask:[self, frameSize = self.frameSize]() mutable {
-                    [self performResize:frameSize];
-                  }];
+        PostTaskSync(self.platformTaskRunner, [self, frameSize = self.frameSize]() mutable {
+          [self performResize:frameSize];
+        });
       }
     }
 
@@ -974,18 +973,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   return self.currentCompositionParams.find(viewId)->second;
 }
 
-- (void)postTaskSync:(const fml::RefPtr<fml::TaskRunner>&)task_runner withTask:(fml::closure)task {
-  FML_DCHECK(!task_runner->RunsTasksOnCurrentThread());
-  fml::AutoResetWaitableEvent latch;
-  task_runner->PostTask([&latch, task]() {
-    if (task) {
-      task();
-    }
-    latch.Signal();
-  });
-  latch.Wait();
-}
-
 #pragma mark - Properties
 
 - (flutter::OverlayLayerPool*)layerPool {
@@ -1030,6 +1017,21 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
 - (std::vector<int64_t>&)previousCompositionOrder {
   return _previousCompositionOrder;
+}
+
+namespace {
+  void PostTaskSync(const fml::RefPtr<fml::TaskRunner>& task_runner,
+                       fml::closure task) {
+    FML_DCHECK(!task_runner->RunsTasksOnCurrentThread());
+    fml::AutoResetWaitableEvent latch;
+    task_runner->PostTask([&latch, task = std::move(task)] () {
+      if (task) {
+        task();
+      }
+      latch.Signal();
+    });
+    latch.Wait();
+  }
 }
 
 @end
