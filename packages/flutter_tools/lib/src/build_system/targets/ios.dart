@@ -263,6 +263,9 @@ abstract class UnpackIOS extends UnpackDarwin {
   BuildMode get buildMode;
 
   @override
+  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.ios;
+
+  @override
   Future<void> build(Environment environment) async {
     final String? sdkRoot = environment.defines[kSdkRoot];
     if (sdkRoot == null) {
@@ -295,7 +298,12 @@ abstract class UnpackIOS extends UnpackDarwin {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
     await thinFramework(environment, frameworkBinaryPath, archs);
-    await _signFramework(environment, frameworkBinary, buildMode);
+
+    // Skip codesigning during pre-action since pre-actions are not passed the codesigning build
+    // settings.
+    if (environment.defines[kXcodeBuildScript] != kPrepareXcodeBuildScript) {
+      await _signFramework(environment, frameworkBinary, buildMode);
+    }
   }
 
   Future<void> _copyFrameworkDysm(

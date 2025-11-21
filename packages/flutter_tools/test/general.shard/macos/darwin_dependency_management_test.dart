@@ -729,6 +729,82 @@ void main() {
         });
       });
     }
+
+    testWithoutContext(
+      'resets output files containing FlutterMacOS when using SwiftPM with macOS project',
+      () async {
+        final testFileSystem = MemoryFileSystem.test();
+        final testLogger = BufferLogger.test();
+        final FakeAnalytics testAnalytics = getInitializedFakeAnalyticsInstance(
+          fs: testFileSystem,
+          fakeFlutterVersion: FakeFlutterVersion(),
+        );
+        final swiftPackageManager = FakeSwiftPackageManager(expectedPlugins: []);
+        final cocoaPods = FakeCocoaPods();
+        final FlutterProject project = FakeFlutterProject(
+          usesSwiftPackageManager: true,
+          fileSystem: testFileSystem,
+        );
+        final MacOSProject xcodeProject = project.macos;
+        xcodeProject.xcodeProjectInfoFile.createSync(recursive: true);
+        xcodeProject.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
+        xcodeProject.outputFileList
+          ..createSync(recursive: true)
+          ..writeAsStringSync('FlutterMacOS');
+
+        final dependencyManagement = DarwinDependencyManagement(
+          project: project,
+          plugins: [],
+          cocoapods: cocoaPods,
+          swiftPackageManager: swiftPackageManager,
+          fileSystem: testFileSystem,
+          featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+          logger: testLogger,
+          analytics: testAnalytics,
+          platform: FakePlatform(operatingSystem: 'macos'),
+        );
+        await dependencyManagement.setUp(platform: FlutterDarwinPlatform.macos);
+        expect(xcodeProject.outputFileList.readAsStringSync(), isEmpty);
+      },
+    );
+
+    testWithoutContext(
+      'does not reset output files not containing FlutterMacOS when using SwiftPM with macOS project',
+      () async {
+        final testFileSystem = MemoryFileSystem.test();
+        final testLogger = BufferLogger.test();
+        final FakeAnalytics testAnalytics = getInitializedFakeAnalyticsInstance(
+          fs: testFileSystem,
+          fakeFlutterVersion: FakeFlutterVersion(),
+        );
+        final swiftPackageManager = FakeSwiftPackageManager(expectedPlugins: []);
+        final cocoaPods = FakeCocoaPods();
+        final FlutterProject project = FakeFlutterProject(
+          usesSwiftPackageManager: true,
+          fileSystem: testFileSystem,
+        );
+        final MacOSProject xcodeProject = project.macos;
+        xcodeProject.xcodeProjectInfoFile.createSync(recursive: true);
+        xcodeProject.xcodeProjectInfoFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
+        xcodeProject.outputFileList
+          ..createSync(recursive: true)
+          ..writeAsStringSync('Something else');
+
+        final dependencyManagement = DarwinDependencyManagement(
+          project: project,
+          plugins: [],
+          cocoapods: cocoaPods,
+          swiftPackageManager: swiftPackageManager,
+          fileSystem: testFileSystem,
+          featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+          logger: testLogger,
+          analytics: testAnalytics,
+          platform: FakePlatform(operatingSystem: 'macos'),
+        );
+        await dependencyManagement.setUp(platform: FlutterDarwinPlatform.macos);
+        expect(xcodeProject.outputFileList.readAsStringSync(), 'Something else');
+      },
+    );
   });
 }
 
@@ -800,6 +876,12 @@ class FakeMacOSProject extends Fake implements MacOSProject {
 
   @override
   File xcodeConfigFor(String mode) => managedDirectory.childFile('Flutter-$mode.xcconfig');
+
+  @override
+  Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
+
+  @override
+  File get outputFileList => ephemeralDirectory.childFile('FlutterOutputs.xcfilelist');
 }
 
 class FakeFlutterProject extends Fake implements FlutterProject {
@@ -838,8 +920,9 @@ class FakeSwiftPackageManager extends Fake implements SwiftPackageManager {
   Future<void> generatePluginsSwiftPackage(
     List<Plugin> plugins,
     FlutterDarwinPlatform platform,
-    XcodeBasedProject project,
-  ) async {
+    XcodeBasedProject project, {
+    bool flutterAsADependency = true,
+  }) async {
     generated = true;
     expect(plugins, expectedPlugins);
   }
