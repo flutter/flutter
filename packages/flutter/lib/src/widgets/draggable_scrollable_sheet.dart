@@ -69,7 +69,7 @@ class DraggableScrollableController extends ChangeNotifier {
     }
   }
 
-  DraggableScrollableSheetScrollController? _attachedController;
+  _DraggableScrollableSheetScrollController? _attachedController;
   final Set<AnimationController> _animationControllers = <AnimationController>{};
 
   /// Get the current size (as a fraction of the parent height) of the attached sheet.
@@ -199,7 +199,7 @@ class DraggableScrollableController extends ChangeNotifier {
     );
   }
 
-  void _attach(DraggableScrollableSheetScrollController scrollController) {
+  void _attach(_DraggableScrollableSheetScrollController scrollController) {
     assert(
       _attachedController == null,
       'Draggable scrollable controller is already attached to a sheet.',
@@ -209,7 +209,7 @@ class DraggableScrollableController extends ChangeNotifier {
     _attachedController!.onPositionDetached = _disposeAnimationControllers;
   }
 
-  void _onExtentReplaced(DraggableSheetExtent previousExtent) {
+  void _onExtentReplaced(_DraggableSheetExtent previousExtent) {
     // When the extent has been replaced, the old extent is already disposed and
     // the controller will point to a new extent. We have to add our listener to
     // the new extent.
@@ -481,7 +481,7 @@ class DraggableScrollableNotification extends Notification with ViewportNotifica
 }
 
 /// Manages state between [_DraggableScrollableSheetState],
-/// [DraggableScrollableSheetScrollController], and
+/// [_DraggableScrollableSheetScrollController], and
 /// [_DraggableScrollableSheetScrollPosition].
 ///
 /// The State knows the pixels available along the axis the widget wants to
@@ -491,8 +491,8 @@ class DraggableScrollableNotification extends Notification with ViewportNotifica
 ///
 /// The [currentSize] will never be null.
 /// The [availablePixels] will never be null, but may be `double.infinity`.
-class DraggableSheetExtent {
-  DraggableSheetExtent({
+class _DraggableSheetExtent {
+  _DraggableSheetExtent({
     required this.minSize,
     required this.maxSize,
     required this.snap,
@@ -612,7 +612,7 @@ class DraggableSheetExtent {
     _currentSize.dispose();
   }
 
-  DraggableSheetExtent copyWith({
+  _DraggableSheetExtent copyWith({
     required double minSize,
     required double maxSize,
     required bool snap,
@@ -621,7 +621,7 @@ class DraggableSheetExtent {
     required Duration? snapAnimationDuration,
     required bool shouldCloseOnMinExtent,
   }) {
-    return DraggableSheetExtent(
+    return _DraggableSheetExtent(
       minSize: minSize,
       maxSize: maxSize,
       snap: snap,
@@ -641,13 +641,13 @@ class DraggableSheetExtent {
 }
 
 class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
-  late DraggableScrollableSheetScrollController _scrollController;
-  late DraggableSheetExtent _extent;
+  late _DraggableScrollableSheetScrollController _scrollController;
+  late _DraggableSheetExtent _extent;
 
   @override
   void initState() {
     super.initState();
-    _extent = DraggableSheetExtent(
+    _extent = _DraggableSheetExtent(
       minSize: widget.minChildSize,
       maxSize: widget.maxChildSize,
       snap: widget.snap,
@@ -656,7 +656,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       initialSize: widget.initialChildSize,
       shouldCloseOnMinExtent: widget.shouldCloseOnMinExtent,
     );
-    _scrollController = DraggableScrollableSheetScrollController(extent: _extent);
+    _scrollController = _DraggableScrollableSheetScrollController(extent: _extent);
     widget.controller?._attach(_scrollController);
   }
 
@@ -732,7 +732,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   }
 
   void _replaceExtent(covariant DraggableScrollableSheet oldWidget) {
-    final DraggableSheetExtent previousExtent = _extent;
+    final _DraggableSheetExtent previousExtent = _extent;
     _extent = previousExtent.copyWith(
       minSize: widget.minChildSize,
       maxSize: widget.maxChildSize,
@@ -793,12 +793,12 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
 ///  * [_DraggableScrollableSheetScrollPosition], which manages the positioning logic for
 ///    this controller.
 ///  * [PrimaryScrollController], which can be used to establish a
-///    [DraggableScrollableSheetScrollController] as the primary controller for
+///    [_DraggableScrollableSheetScrollController] as the primary controller for
 ///    descendants.
-class DraggableScrollableSheetScrollController extends ScrollController {
-  DraggableScrollableSheetScrollController({required this.extent});
+class _DraggableScrollableSheetScrollController extends ScrollController {
+  _DraggableScrollableSheetScrollController({required this.extent});
 
-  DraggableSheetExtent extent;
+  _DraggableSheetExtent extent;
   VoidCallback? onPositionDetached;
 
   @override
@@ -846,7 +846,7 @@ class DraggableScrollableSheetScrollController extends ScrollController {
 }
 
 /// A scroll position that manages scroll activities for
-/// [DraggableScrollableSheetScrollController].
+/// [_DraggableScrollableSheetScrollController].
 ///
 /// This class is a concrete subclass of [ScrollPosition] logic that handles a
 /// single [ScrollContext], such as a [Scrollable]. An instance of this class
@@ -856,7 +856,7 @@ class DraggableScrollableSheetScrollController extends ScrollController {
 ///
 /// See also:
 ///
-///  * [DraggableScrollableSheetScrollController], which uses this as its [ScrollPosition].
+///  * [_DraggableScrollableSheetScrollController], which uses this as its [ScrollPosition].
 class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleContext {
   _DraggableScrollableSheetScrollPosition({
     required super.physics,
@@ -866,11 +866,11 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   });
 
   VoidCallback? _dragCancelCallback;
-  final DraggableSheetExtent Function() getExtent;
+  final _DraggableSheetExtent Function() getExtent;
   final Set<AnimationController> _ballisticControllers = <AnimationController>{};
   bool get listShouldScroll => pixels > 0.0;
 
-  DraggableSheetExtent get extent => getExtent();
+  _DraggableSheetExtent get extent => getExtent();
 
   @override
   void absorb(ScrollPosition other) {
