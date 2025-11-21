@@ -56,7 +56,7 @@ vars = {
   # Dart SDK's DEPS file for that revision of Dart. The DEPS file for
   # Dart is: https://github.com/dart-lang/sdk/blob/main/DEPS
   # You can use //tools/dart/create_updated_flutter_deps.py to produce
-  # updated revision list of existing dependencies. You will need to 
+  # updated revision list of existing dependencies. You will need to
   # gclient sync before and after update deps to ensure all deps are updated.
   'dart_revision': 'c788b6a7aefd34b08784e9f08ae4c1b8fad3ec81',
 
