@@ -7,6 +7,7 @@
 #include <format>
 #include <sstream>
 
+#include "GLES3/gl3.h"
 #include "impeller/base/allocation.h"
 #include "impeller/base/comparable.h"
 #include "impeller/base/validation.h"
@@ -445,5 +446,12 @@ std::string ProcTableGLES::GetProgramInfoLogString(GLuint program) const {
   return std::string{reinterpret_cast<const char*>(allocation.GetBuffer()),
                      static_cast<size_t>(length)};
 }
+
+GLenum ProcTableGLES::CheckFramebufferStatusDebug(GLenum target) const {
+#ifdef IMPELLER_DEBUG
+  return CheckFramebufferStatus(target);
+#endif
+  return GL_FRAMEBUFFER_COMPLETE;
+};
 
 }  // namespace impeller
