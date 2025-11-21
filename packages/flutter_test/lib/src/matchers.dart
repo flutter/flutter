@@ -2708,10 +2708,6 @@ class _MatchesSemanticsData extends Matcher {
     String? expected,
     String? actual,
   ) {
-    if (expected == actual) {
-      return true;
-    }
-
     if (expected != null && actual != null && _ignoreNBSP(expected) == _ignoreNBSP(actual)) {
       final String actualWithNBSP = actual.replaceAll('\u202f', r'\u202f');
       return failWithDescription(matchState, '$prefixText was $actualWithNBSP');
@@ -2728,10 +2724,7 @@ class _MatchesSemanticsData extends Matcher {
     if (expected!.string != actual!.string) {
       return _checkStringMismatch(matchState, prefixText, expected.string, actual.string);
     }
-    if (!_stringAttributesEqual(expected.attributes, actual.attributes)) {
-      return failWithDescription(matchState, '$prefixText was: $actual');
-    }
-    return true;
+    return failWithDescription(matchState, '$prefixText was: $actual');
   }
 
   @override
@@ -2750,10 +2743,15 @@ class _MatchesSemanticsData extends Matcher {
       _ => node as SemanticsData,
     };
 
-    if (label != null) {
+    if (label != null && label != data.label) {
       return _checkStringMismatch(matchState, 'label', label, data.label);
     }
-    if (attributedLabel != null) {
+    if (attributedLabel != null &&
+        (attributedLabel!.string != data.attributedLabel.string ||
+            !_stringAttributesEqual(
+              attributedLabel!.attributes,
+              data.attributedLabel.attributes,
+            ))) {
       return _checkStringAttributeMismatch(
         matchState,
         'attributedLabel',
@@ -2761,10 +2759,12 @@ class _MatchesSemanticsData extends Matcher {
         data.attributedLabel,
       );
     }
-    if (hint != null) {
+    if (hint != null && hint != data.hint) {
       return _checkStringMismatch(matchState, 'hint', hint, data.hint);
     }
-    if (attributedHint != null) {
+    if (attributedHint != null &&
+        (attributedHint!.string != data.attributedHint.string ||
+            !_stringAttributesEqual(attributedHint!.attributes, data.attributedHint.attributes))) {
       return _checkStringAttributeMismatch(
         matchState,
         'attributedHint',
@@ -2772,10 +2772,15 @@ class _MatchesSemanticsData extends Matcher {
         data.attributedHint,
       );
     }
-    if (value != null) {
+    if (value != null && value != data.value) {
       return _checkStringMismatch(matchState, 'value', value, data.value);
     }
-    if (attributedValue != null) {
+    if (attributedValue != null &&
+        (attributedValue!.string != data.attributedValue.string ||
+            !_stringAttributesEqual(
+              attributedValue!.attributes,
+              data.attributedValue.attributes,
+            ))) {
       return _checkStringAttributeMismatch(
         matchState,
         'attributedValue',
@@ -2783,7 +2788,7 @@ class _MatchesSemanticsData extends Matcher {
         data.attributedValue,
       );
     }
-    if (increasedValue != null) {
+    if (increasedValue != null && increasedValue != data.increasedValue) {
       return _checkStringMismatch(
         matchState,
         'increasedValue',
@@ -2791,7 +2796,12 @@ class _MatchesSemanticsData extends Matcher {
         data.increasedValue,
       );
     }
-    if (attributedIncreasedValue != null) {
+    if (attributedIncreasedValue != null &&
+        (attributedIncreasedValue!.string != data.attributedIncreasedValue.string ||
+            !_stringAttributesEqual(
+              attributedIncreasedValue!.attributes,
+              data.attributedIncreasedValue.attributes,
+            ))) {
       return _checkStringAttributeMismatch(
         matchState,
         'attributedIncreasedValue',
@@ -2799,7 +2809,7 @@ class _MatchesSemanticsData extends Matcher {
         data.attributedIncreasedValue,
       );
     }
-    if (decreasedValue != null) {
+    if (decreasedValue != null && decreasedValue != data.decreasedValue) {
       return _checkStringMismatch(
         matchState,
         'decreasedValue',
@@ -2807,7 +2817,12 @@ class _MatchesSemanticsData extends Matcher {
         data.decreasedValue,
       );
     }
-    if (attributedDecreasedValue != null) {
+    if (attributedDecreasedValue != null &&
+        (attributedDecreasedValue!.string != data.attributedDecreasedValue.string ||
+            !_stringAttributesEqual(
+              attributedDecreasedValue!.attributes,
+              data.attributedDecreasedValue.attributes,
+            ))) {
       return _checkStringAttributeMismatch(
         matchState,
         'attributedDecreasedValue',
@@ -2815,7 +2830,7 @@ class _MatchesSemanticsData extends Matcher {
         data.attributedDecreasedValue,
       );
     }
-    if (tooltip != null) {
+    if (tooltip != null && tooltip != data.tooltip) {
       return _checkStringMismatch(matchState, 'tooltip', tooltip, data.tooltip);
     }
     if (textDirection != null && textDirection != data.textDirection) {
