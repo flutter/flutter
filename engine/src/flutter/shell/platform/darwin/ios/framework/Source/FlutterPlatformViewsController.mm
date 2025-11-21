@@ -1020,18 +1020,17 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 }
 
 namespace {
-  void PostTaskSync(const fml::RefPtr<fml::TaskRunner>& task_runner,
-                       fml::closure task) {
-    FML_DCHECK(!task_runner->RunsTasksOnCurrentThread());
-    fml::AutoResetWaitableEvent latch;
-    task_runner->PostTask([&latch, task = std::move(task)] () {
-      if (task) {
-        task();
-      }
-      latch.Signal();
-    });
-    latch.Wait();
-  }
+void PostTaskSync(const fml::RefPtr<fml::TaskRunner>& task_runner, fml::closure task) {
+  FML_DCHECK(!task_runner->RunsTasksOnCurrentThread());
+  fml::AutoResetWaitableEvent latch;
+  task_runner->PostTask([&latch, task = std::move(task)]() {
+    if (task) {
+      task();
+    }
+    latch.Signal();
+  });
+  latch.Wait();
 }
+}  // namespace
 
 @end
