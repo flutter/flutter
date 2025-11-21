@@ -150,18 +150,35 @@ class CapturedAccessibilityAnnouncement {
   final Assertiveness assertiveness;
 }
 
-class _WindowFlutterView implements FlutterView {
-  _WindowFlutterView({required this.controller});
-
-  final BaseWindowController controller;
-
+class _FakeDisplay implements ui.Display {
   @override
-  // TODO: implement devicePixelRatio
   double get devicePixelRatio => 1.0;
 
   @override
-  // TODO: implement display
-  ui.Display get display => throw UnimplementedError();
+  int get id => 1;
+
+  @override
+  double get refreshRate => 60.0;
+
+  @override
+  ui.Size get size => const ui.Size(1920, 1280);
+}
+
+class _WindowFlutterView implements FlutterView {
+  _WindowFlutterView({required this.controller, required ui.PlatformDispatcher platformDispatcher})
+    : _platformDispatcher = platformDispatcher,
+      _viewId = _nextViewId++;
+
+  static int _nextViewId = 1;
+  final BaseWindowController controller;
+  final ui.PlatformDispatcher _platformDispatcher;
+  final int _viewId;
+
+  @override
+  double get devicePixelRatio => display.devicePixelRatio;
+
+  @override
+  ui.Display get display => _FakeDisplay();
 
   @override
   List<ui.DisplayFeature> get displayFeatures => List<ui.DisplayFeature>.empty();
@@ -179,24 +196,19 @@ class _WindowFlutterView implements FlutterView {
   ui.Size get physicalSize => controller.contentSize * devicePixelRatio;
 
   @override
-  // TODO: implement platformDispatcher
-  ui.PlatformDispatcher get platformDispatcher => throw UnimplementedError();
+  ui.PlatformDispatcher get platformDispatcher => _platformDispatcher;
 
   @override
-  // TODO: implement systemGestureInsets
-  ui.ViewPadding get systemGestureInsets => throw UnimplementedError();
+  ui.ViewPadding get systemGestureInsets => ui.ViewPadding.zero;
 
   @override
-  // TODO: implement viewId
-  int get viewId => 1;
+  int get viewId => _viewId;
 
   @override
-  // TODO: implement viewInsets
-  ui.ViewPadding get viewInsets => throw UnimplementedError();
+  ui.ViewPadding get viewInsets => ui.ViewPadding.zero;
 
   @override
-  // TODO: implement viewPadding
-  ui.ViewPadding get viewPadding => throw UnimplementedError();
+  ui.ViewPadding get viewPadding => ui.ViewPadding.zero;
 
   @override
   void render(ui.Scene scene, {ui.Size? size}) {}
@@ -208,6 +220,7 @@ class _WindowFlutterView implements FlutterView {
 class _TestRegularWindowController extends RegularWindowController {
   _TestRegularWindowController({
     required RegularWindowControllerDelegate delegate,
+    required ui.PlatformDispatcher platformDispatcher,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
@@ -219,7 +232,7 @@ class _TestRegularWindowController extends RegularWindowController {
     _constrainToBounds();
     // QUESTION: Do I have to do anything smart to get this into the list of views
     // from the PlatformDispatcher?
-    rootView = _FakeFlutterView();
+    rootView = _WindowFlutterView(controller: this, platformDispatcher: platformDispatcher);
   }
 
   final RegularWindowControllerDelegate _delegate;
@@ -308,6 +321,7 @@ class _TestRegularWindowController extends RegularWindowController {
 class _TestDialogWindowController extends DialogWindowController {
   _TestDialogWindowController({
     required DialogWindowControllerDelegate delegate,
+    required ui.PlatformDispatcher platformDispatcher,
     BaseWindowController? parent,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
@@ -319,7 +333,7 @@ class _TestDialogWindowController extends DialogWindowController {
        _title = title ?? 'Test Window',
        super.empty() {
     _constrainToBounds();
-    rootView = _FakeFlutterView();
+    rootView = _WindowFlutterView(controller: this, platformDispatcher: platformDispatcher);
   }
 
   final DialogWindowControllerDelegate _delegate;
@@ -390,6 +404,11 @@ class _TestDialogWindowController extends DialogWindowController {
 }
 
 class _TestWindowingOwner extends WindowingOwner {
+  _TestWindowingOwner({required ui.PlatformDispatcher platformDispatcher})
+    : _platformDispatcher = platformDispatcher;
+
+  final ui.PlatformDispatcher _platformDispatcher;
+
   @internal
   @override
   RegularWindowController createRegularWindowController({
@@ -400,6 +419,7 @@ class _TestWindowingOwner extends WindowingOwner {
   }) {
     return _TestRegularWindowController(
       delegate: delegate,
+      platformDispatcher: _platformDispatcher,
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
@@ -417,6 +437,7 @@ class _TestWindowingOwner extends WindowingOwner {
   }) {
     return _TestDialogWindowController(
       delegate: delegate,
+      platformDispatcher: _platformDispatcher,
       parent: parent,
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
@@ -677,7 +698,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       binding.setupHttpOverrides();
     }
     _testTextInput = TestTextInput(onCleared: _resetFocusedEditable);
-    windowingOwner = _TestWindowingOwner();
+    windowingOwner = _TestWindowingOwner(platformDispatcher: platformDispatcher);
   }
 
   @override
