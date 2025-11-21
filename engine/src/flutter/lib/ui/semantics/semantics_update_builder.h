@@ -31,7 +31,7 @@ class SemanticsUpdateBuilder
 
   void updateNode(
       int id,
-      int flags,
+      Dart_Handle flags,
       int actions,
       int maxValueLength,
       int currentValueLength,
@@ -40,6 +40,7 @@ class SemanticsUpdateBuilder
       int platformViewId,
       int scrollChildren,
       int scrollIndex,
+      int traversalParent,
       double scrollPosition,
       double scrollExtentMax,
       double scrollExtentMin,
@@ -47,8 +48,6 @@ class SemanticsUpdateBuilder
       double top,
       double right,
       double bottom,
-      double elevation,
-      double thickness,
       std::string identifier,
       std::string label,
       const std::vector<NativeStringAttribute*>& labelAttributes,
@@ -63,6 +62,7 @@ class SemanticsUpdateBuilder
       std::string tooltip,
       int textDirection,
       const tonic::Float64List& transform,
+      const tonic::Float64List& hitTestTransform,
       const tonic::Int32List& childrenInTraversalOrder,
       const tonic::Int32List& childrenInHitTestOrder,
       const tonic::Int32List& customAccessibilityActions,
@@ -70,7 +70,10 @@ class SemanticsUpdateBuilder
       std::string linkUrl,
       int role,
       const std::vector<std::string>& controlsNodes,
-      int validationResult);
+      int validationResult,
+      int hitTestBehavior,
+      int inputType,
+      std::string locale);
 
   void updateCustomAction(int id,
                           std::string label,

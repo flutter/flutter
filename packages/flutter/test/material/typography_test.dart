@@ -123,11 +123,10 @@ void main() {
       tall: Typography.tall2018,
     ).debugFillProperties(builder);
 
-    final List<String> nonDefaultPropertyNames =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.name!)
-            .toList();
+    final List<String> nonDefaultPropertyNames = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.name!)
+        .toList();
 
     expect(nonDefaultPropertyNames, <String>['black', 'white', 'englishLike', 'dense', 'tall']);
   });
@@ -144,13 +143,7 @@ void main() {
 
     for (final Typography fromTypography in all) {
       for (final Typography toTypography in all) {
-        Object? error;
-        try {
-          Typography.lerp(fromTypography, toTypography, 0.5);
-        } catch (e) {
-          error = e;
-        }
-        expect(error, isNull);
+        Typography.lerp(fromTypography, toTypography, 0.5);
       }
     }
   });

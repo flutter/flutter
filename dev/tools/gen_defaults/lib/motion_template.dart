@@ -69,7 +69,8 @@ class MotionTemplate extends TokenTemplate {
   }
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 /// The set of durations in the Material specification.
 ///
 /// See also:

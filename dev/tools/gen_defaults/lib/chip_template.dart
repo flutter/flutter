@@ -17,7 +17,8 @@ class ChipTemplate extends TokenTemplate {
   static const String variant = '.flat';
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends ChipThemeData {
   _${blockName}DefaultsM3(this.context, this.isEnabled)
     : super(
@@ -39,7 +40,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   );
 
   @override
-  MaterialStateProperty<Color?>? get color => null; // Subclasses override this getter
+  WidgetStateProperty<Color?>? get color => null; // Subclasses override this getter
 
   @override
   Color? get shadowColor => ${colorOrTransparent("$tokenGroup.container.shadow-color")};

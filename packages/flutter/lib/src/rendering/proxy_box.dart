@@ -100,7 +100,8 @@ mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChi
   @override
   @protected
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
-    return child?.getDryBaseline(constraints, baseline);
+    final double? result = child?.getDryBaseline(constraints, baseline);
+    return result ?? super.computeDryBaseline(constraints, baseline);
   }
 
   @override
@@ -381,13 +382,13 @@ class RenderLimitedBox extends RenderProxyBox {
   BoxConstraints _limitConstraints(BoxConstraints constraints) {
     return BoxConstraints(
       minWidth: constraints.minWidth,
-      maxWidth:
-          constraints.hasBoundedWidth ? constraints.maxWidth : constraints.constrainWidth(maxWidth),
+      maxWidth: constraints.hasBoundedWidth
+          ? constraints.maxWidth
+          : constraints.constrainWidth(maxWidth),
       minHeight: constraints.minHeight,
-      maxHeight:
-          constraints.hasBoundedHeight
-              ? constraints.maxHeight
-              : constraints.constrainHeight(maxHeight),
+      maxHeight: constraints.hasBoundedHeight
+          ? constraints.maxHeight
+          : constraints.constrainHeight(maxHeight),
     );
   }
 
@@ -708,14 +709,12 @@ class RenderIntrinsicWidth extends RenderProxyBox {
 
   BoxConstraints _childConstraints(RenderBox child, BoxConstraints constraints) {
     return constraints.tighten(
-      width:
-          constraints.hasTightWidth
-              ? null
-              : _applyStep(child.getMaxIntrinsicWidth(constraints.maxHeight), _stepWidth),
-      height:
-          stepHeight == null
-              ? null
-              : _applyStep(child.getMaxIntrinsicHeight(constraints.maxWidth), _stepHeight),
+      width: constraints.hasTightWidth
+          ? null
+          : _applyStep(child.getMaxIntrinsicWidth(constraints.maxHeight), _stepWidth),
+      height: stepHeight == null
+          ? null
+          : _applyStep(child.getMaxIntrinsicHeight(constraints.maxWidth), _stepHeight),
     );
   }
 
@@ -1507,24 +1506,26 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   @override
   void debugPaintSize(PaintingContext context, Offset offset) {
     assert(() {
-      _debugPaint ??=
-          Paint()
-            ..shader = ui.Gradient.linear(
-              Offset.zero,
-              const Offset(10.0, 10.0),
-              <Color>[
-                const Color(0x00000000),
-                const Color(0xFFFF00FF),
-                const Color(0xFFFF00FF),
-                const Color(0x00000000),
-              ],
-              <double>[0.25, 0.25, 0.75, 0.75],
-              TileMode.repeated,
-            )
-            ..strokeWidth = 2.0
-            ..style = PaintingStyle.stroke;
+      _debugPaint ??= Paint()
+        ..shader = ui.Gradient.linear(
+          Offset.zero,
+          const Offset(10.0, 10.0),
+          <Color>[
+            const Color(0x00000000),
+            const Color(0xFFFF00FF),
+            const Color(0xFFFF00FF),
+            const Color(0x00000000),
+          ],
+          <double>[0.25, 0.25, 0.75, 0.75],
+          TileMode.repeated,
+        )
+        ..strokeWidth = 2.0
+        ..style = PaintingStyle.stroke;
       _debugText ??= TextPainter(
-        text: const TextSpan(text: '✂', style: TextStyle(color: Color(0xFFFF00FF), fontSize: 14.0)),
+        text: const TextSpan(
+          text: '✂',
+          style: TextStyle(color: Color(0xFFFF00FF), fontSize: 14.0),
+        ),
         textDirection: TextDirection.rtl, // doesn't matter, it's one character
       )..layout();
       return true;
@@ -2046,12 +2047,6 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     }
     _color = value;
     markNeedsPaint();
-  }
-
-  @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    super.describeSemanticsConfiguration(config);
-    config.elevation = elevation;
   }
 
   @override
@@ -2612,14 +2607,14 @@ class RenderTransform extends RenderProxyBox {
 
   /// Concatenates a translation by (x, y, z) into the transform.
   void translate(double x, [double y = 0.0, double z = 0.0]) {
-    _transform!.translate(x, y, z);
+    _transform!.translateByDouble(x, y, z, 1);
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
 
   /// Concatenates a scale into the transform.
   void scale(double x, [double? y, double? z]) {
-    _transform!.scale(x, y, z);
+    _transform!.scaleByDouble(x, y ?? x, z ?? x, 1);
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
@@ -2631,19 +2626,19 @@ class RenderTransform extends RenderProxyBox {
     }
     final Matrix4 result = Matrix4.identity();
     if (_origin != null) {
-      result.translate(_origin!.dx, _origin!.dy);
+      result.translateByDouble(_origin!.dx, _origin!.dy, 0, 1);
     }
     Offset? translation;
     if (resolvedAlignment != null) {
       translation = resolvedAlignment.alongSize(size);
-      result.translate(translation.dx, translation.dy);
+      result.translateByDouble(translation.dx, translation.dy, 0, 1);
     }
     result.multiply(_transform!);
     if (resolvedAlignment != null) {
-      result.translate(-translation!.dx, -translation.dy);
+      result.translateByDouble(-translation!.dx, -translation.dy, 0, 1);
     }
     if (_origin != null) {
-      result.translate(-_origin!.dx, -_origin!.dy);
+      result.translateByDouble(-_origin!.dx, -_origin!.dy, 0, 1);
     }
     return result;
   }
@@ -2695,10 +2690,9 @@ class RenderTransform extends RenderProxyBox {
           layer = null;
         }
       } else {
-        final Matrix4 effectiveTransform =
-            Matrix4.translationValues(offset.dx, offset.dy, 0.0)
-              ..multiply(transform)
-              ..translate(-offset.dx, -offset.dy);
+        final Matrix4 effectiveTransform = Matrix4.translationValues(offset.dx, offset.dy, 0.0)
+          ..multiply(transform)
+          ..translateByDouble(-offset.dx, -offset.dy, 0, 1);
         final ui.ImageFilter filter = ui.ImageFilter.matrix(
           effectiveTransform.storage,
           filterQuality: filterQuality!,
@@ -2849,6 +2843,13 @@ class RenderFittedBox extends RenderProxyBox {
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    // Returns the baseline of the child with unconstrained layout, without
+    // applying any transforms or scaling that would be applied during paint.
+    return child?.getDryBaseline(const BoxConstraints(), baseline);
+  }
+
+  @override
   void performLayout() {
     if (child != null) {
       child!.layout(const BoxConstraints(), parentUsesSize: true);
@@ -2915,10 +2916,9 @@ class RenderFittedBox extends RenderProxyBox {
       _hasVisualOverflow =
           sourceRect.width < childSize.width || sourceRect.height < childSize.height;
       assert(scaleX.isFinite && scaleY.isFinite);
-      _transform =
-          Matrix4.translationValues(destinationRect.left, destinationRect.top, 0.0)
-            ..scale(scaleX, scaleY, 1.0)
-            ..translate(-sourceRect.left, -sourceRect.top);
+      _transform = Matrix4.translationValues(destinationRect.left, destinationRect.top, 0.0)
+        ..scaleByDouble(scaleX, scaleY, 1.0, 1)
+        ..translateByDouble(-sourceRect.left, -sourceRect.top, 0, 1);
       assert(_transform!.storage.every((double value) => value.isFinite));
     }
   }
@@ -3054,10 +3054,9 @@ class RenderFractionalTranslation extends RenderProxyBox {
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     assert(!debugNeedsLayout);
     return result.addWithPaintOffset(
-      offset:
-          transformHitTests
-              ? Offset(translation.dx * size.width, translation.dy * size.height)
-              : null,
+      offset: transformHitTests
+          ? Offset(translation.dx * size.width, translation.dy * size.height)
+          : null,
       position: position,
       hitTest: (BoxHitTestResult result, Offset position) {
         return super.hitTestChildren(result, position: position);
@@ -3078,7 +3077,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    transform.translate(translation.dx * size.width, translation.dy * size.height);
+    transform.translateByDouble(translation.dx * size.width, translation.dy * size.height, 0, 1);
   }
 
   @override
@@ -4240,7 +4239,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
 }
 
 /// Add annotations to the [SemanticsNode] for this subtree.
-class RenderSemanticsAnnotations extends RenderProxyBox {
+class RenderSemanticsAnnotations extends RenderProxyBox with SemanticsAnnotationsMixin {
   /// Creates a render object that attaches a semantic annotation.
   ///
   /// If the [SemanticsProperties.attributedLabel] is not null, the [textDirection] must also not be null.
@@ -4251,462 +4250,18 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool explicitChildNodes = false,
     bool excludeSemantics = false,
     bool blockUserActions = false,
+    Locale? localeForSubtree,
     TextDirection? textDirection,
-  }) : _container = container,
-       _explicitChildNodes = explicitChildNodes,
-       _excludeSemantics = excludeSemantics,
-       _blockUserActions = blockUserActions,
-       _textDirection = textDirection,
-       _properties = properties,
-       super(child) {
-    _updateAttributedFields(_properties);
-  }
-
-  /// All of the [SemanticsProperties] for this [RenderSemanticsAnnotations].
-  SemanticsProperties get properties => _properties;
-  SemanticsProperties _properties;
-  set properties(SemanticsProperties value) {
-    if (_properties == value) {
-      return;
-    }
-    _properties = value;
-    _updateAttributedFields(_properties);
-    markNeedsSemanticsUpdate();
-  }
-
-  /// If 'container' is true, this [RenderObject] will introduce a new
-  /// node in the semantics tree. Otherwise, the semantics will be
-  /// merged with the semantics of any ancestors.
-  ///
-  /// Whether descendants of this [RenderObject] can add their semantic information
-  /// to the [SemanticsNode] introduced by this configuration is controlled by
-  /// [explicitChildNodes].
-  bool get container => _container;
-  bool _container;
-  set container(bool value) {
-    if (container == value) {
-      return;
-    }
-    _container = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// Whether descendants of this [RenderObject] are allowed to add semantic
-  /// information to the [SemanticsNode] annotated by this widget.
-  ///
-  /// When set to false descendants are allowed to annotate [SemanticsNode]s of
-  /// their parent with the semantic information they want to contribute to the
-  /// semantic tree.
-  /// When set to true the only way for descendants to contribute semantic
-  /// information to the semantic tree is to introduce new explicit
-  /// [SemanticsNode]s to the tree.
-  ///
-  /// This setting is often used in combination with
-  /// [SemanticsConfiguration.isSemanticBoundary] to create semantic boundaries
-  /// that are either writable or not for children.
-  bool get explicitChildNodes => _explicitChildNodes;
-  bool _explicitChildNodes;
-  set explicitChildNodes(bool value) {
-    if (_explicitChildNodes == value) {
-      return;
-    }
-    _explicitChildNodes = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// Whether descendants of this [RenderObject] should have their semantic
-  /// information ignored.
-  ///
-  /// When this flag is set to true, all child semantics nodes are ignored.
-  /// This can be used as a convenience for cases where a child is wrapped in
-  /// an [ExcludeSemantics] widget and then another [Semantics] widget.
-  bool get excludeSemantics => _excludeSemantics;
-  bool _excludeSemantics;
-  set excludeSemantics(bool value) {
-    if (_excludeSemantics == value) {
-      return;
-    }
-    _excludeSemantics = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  /// Whether to block user interactions for the semantics subtree.
-  ///
-  /// Setting this true prevents user from activating pointer related
-  /// [SemanticsAction]s, such as [SemanticsAction.tap] or
-  /// [SemanticsAction.longPress].
-  bool get blockUserActions => _blockUserActions;
-  bool _blockUserActions;
-  set blockUserActions(bool value) {
-    if (_blockUserActions == value) {
-      return;
-    }
-    _blockUserActions = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  void _updateAttributedFields(SemanticsProperties value) {
-    _attributedLabel = _effectiveAttributedLabel(value);
-    _attributedValue = _effectiveAttributedValue(value);
-    _attributedIncreasedValue = _effectiveAttributedIncreasedValue(value);
-    _attributedDecreasedValue = _effectiveAttributedDecreasedValue(value);
-    _attributedHint = _effectiveAttributedHint(value);
-  }
-
-  AttributedString? _effectiveAttributedLabel(SemanticsProperties value) {
-    return value.attributedLabel ?? (value.label == null ? null : AttributedString(value.label!));
-  }
-
-  AttributedString? _effectiveAttributedValue(SemanticsProperties value) {
-    return value.attributedValue ?? (value.value == null ? null : AttributedString(value.value!));
-  }
-
-  AttributedString? _effectiveAttributedIncreasedValue(SemanticsProperties value) {
-    return value.attributedIncreasedValue ??
-        (value.increasedValue == null ? null : AttributedString(value.increasedValue!));
-  }
-
-  AttributedString? _effectiveAttributedDecreasedValue(SemanticsProperties value) {
-    return properties.attributedDecreasedValue ??
-        (value.decreasedValue == null ? null : AttributedString(value.decreasedValue!));
-  }
-
-  AttributedString? _effectiveAttributedHint(SemanticsProperties value) {
-    return value.attributedHint ?? (value.hint == null ? null : AttributedString(value.hint!));
-  }
-
-  AttributedString? _attributedLabel;
-  AttributedString? _attributedValue;
-  AttributedString? _attributedIncreasedValue;
-  AttributedString? _attributedDecreasedValue;
-  AttributedString? _attributedHint;
-
-  /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given
-  /// value.
-  ///
-  /// This must not be null if [SemanticsProperties.attributedLabel],
-  /// [SemanticsProperties.attributedHint],
-  /// [SemanticsProperties.attributedValue],
-  /// [SemanticsProperties.attributedIncreasedValue], or
-  /// [SemanticsProperties.attributedDecreasedValue] are not null.
-  TextDirection? get textDirection => _textDirection;
-  TextDirection? _textDirection;
-  set textDirection(TextDirection? value) {
-    if (textDirection == value) {
-      return;
-    }
-    _textDirection = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  @override
-  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (excludeSemantics) {
-      return;
-    }
-    super.visitChildrenForSemantics(visitor);
-  }
-
-  @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    super.describeSemanticsConfiguration(config);
-    config.isSemanticBoundary = container;
-    config.explicitChildNodes = explicitChildNodes;
-    config.isBlockingUserActions = blockUserActions;
-    assert(
-      ((_properties.scopesRoute ?? false) && explicitChildNodes) ||
-          !(_properties.scopesRoute ?? false),
-      'explicitChildNodes must be set to true if scopes route is true',
+  }) : super(child) {
+    initSemanticsAnnotations(
+      properties: properties,
+      container: container,
+      explicitChildNodes: explicitChildNodes,
+      excludeSemantics: excludeSemantics,
+      blockUserActions: blockUserActions,
+      localeForSubtree: localeForSubtree,
+      textDirection: textDirection,
     );
-    assert(
-      !((_properties.toggled ?? false) && (_properties.checked ?? false)),
-      'A semantics node cannot be toggled and checked at the same time',
-    );
-
-    if (_properties.enabled != null) {
-      config.isEnabled = _properties.enabled;
-    }
-    if (_properties.checked != null) {
-      config.isChecked = _properties.checked;
-    }
-    if (_properties.mixed != null) {
-      config.isCheckStateMixed = _properties.mixed;
-    }
-    if (_properties.toggled != null) {
-      config.isToggled = _properties.toggled;
-    }
-    if (_properties.selected != null) {
-      config.isSelected = _properties.selected!;
-    }
-    if (_properties.button != null) {
-      config.isButton = _properties.button!;
-    }
-    if (_properties.expanded != null) {
-      config.isExpanded = _properties.expanded;
-    }
-    if (_properties.link != null) {
-      config.isLink = _properties.link!;
-    }
-    if (_properties.linkUrl != null) {
-      config.linkUrl = _properties.linkUrl;
-    }
-    if (_properties.slider != null) {
-      config.isSlider = _properties.slider!;
-    }
-    if (_properties.keyboardKey != null) {
-      config.isKeyboardKey = _properties.keyboardKey!;
-    }
-    if (_properties.header != null) {
-      config.isHeader = _properties.header!;
-    }
-    if (_properties.headingLevel != null) {
-      config.headingLevel = _properties.headingLevel!;
-    }
-    if (_properties.textField != null) {
-      config.isTextField = _properties.textField!;
-    }
-    if (_properties.readOnly != null) {
-      config.isReadOnly = _properties.readOnly!;
-    }
-    if (_properties.focusable != null) {
-      config.isFocusable = _properties.focusable!;
-    }
-    if (_properties.focused != null) {
-      config.isFocused = _properties.focused!;
-    }
-    if (_properties.inMutuallyExclusiveGroup != null) {
-      config.isInMutuallyExclusiveGroup = _properties.inMutuallyExclusiveGroup!;
-    }
-    if (_properties.obscured != null) {
-      config.isObscured = _properties.obscured!;
-    }
-    if (_properties.multiline != null) {
-      config.isMultiline = _properties.multiline!;
-    }
-    if (_properties.hidden != null) {
-      config.isHidden = _properties.hidden!;
-    }
-    if (_properties.image != null) {
-      config.isImage = _properties.image!;
-    }
-    if (_properties.isRequired != null) {
-      config.isRequired = _properties.isRequired;
-    }
-    if (_properties.identifier != null) {
-      config.identifier = _properties.identifier!;
-    }
-    if (_attributedLabel != null) {
-      config.attributedLabel = _attributedLabel!;
-    }
-    if (_attributedValue != null) {
-      config.attributedValue = _attributedValue!;
-    }
-    if (_attributedIncreasedValue != null) {
-      config.attributedIncreasedValue = _attributedIncreasedValue!;
-    }
-    if (_attributedDecreasedValue != null) {
-      config.attributedDecreasedValue = _attributedDecreasedValue!;
-    }
-    if (_attributedHint != null) {
-      config.attributedHint = _attributedHint!;
-    }
-    if (_properties.tooltip != null) {
-      config.tooltip = _properties.tooltip!;
-    }
-    if (_properties.hintOverrides != null && _properties.hintOverrides!.isNotEmpty) {
-      config.hintOverrides = _properties.hintOverrides;
-    }
-    if (_properties.scopesRoute != null) {
-      config.scopesRoute = _properties.scopesRoute!;
-    }
-    if (_properties.namesRoute != null) {
-      config.namesRoute = _properties.namesRoute!;
-    }
-    if (_properties.liveRegion != null) {
-      config.liveRegion = _properties.liveRegion!;
-    }
-    if (_properties.maxValueLength != null) {
-      config.maxValueLength = _properties.maxValueLength;
-    }
-    if (_properties.currentValueLength != null) {
-      config.currentValueLength = _properties.currentValueLength;
-    }
-    if (textDirection != null) {
-      config.textDirection = textDirection;
-    }
-    if (_properties.sortKey != null) {
-      config.sortKey = _properties.sortKey;
-    }
-    if (_properties.tagForChildren != null) {
-      config.addTagForChildren(_properties.tagForChildren!);
-    }
-    if (properties.role != null) {
-      config.role = _properties.role!;
-    }
-    if (_properties.controlsNodes != null) {
-      config.controlsNodes = _properties.controlsNodes;
-    }
-    if (config.validationResult != _properties.validationResult) {
-      config.validationResult = _properties.validationResult;
-    }
-
-    if (_properties.inputType != null) {
-      config.inputType = _properties.inputType!;
-    }
-
-    // Registering _perform* as action handlers instead of the user provided
-    // ones to ensure that changing a user provided handler from a non-null to
-    // another non-null value doesn't require a semantics update.
-    if (_properties.onTap != null) {
-      config.onTap = _performTap;
-    }
-    if (_properties.onLongPress != null) {
-      config.onLongPress = _performLongPress;
-    }
-    if (_properties.onDismiss != null) {
-      config.onDismiss = _performDismiss;
-    }
-    if (_properties.onScrollLeft != null) {
-      config.onScrollLeft = _performScrollLeft;
-    }
-    if (_properties.onScrollRight != null) {
-      config.onScrollRight = _performScrollRight;
-    }
-    if (_properties.onScrollUp != null) {
-      config.onScrollUp = _performScrollUp;
-    }
-    if (_properties.onScrollDown != null) {
-      config.onScrollDown = _performScrollDown;
-    }
-    if (_properties.onIncrease != null) {
-      config.onIncrease = _performIncrease;
-    }
-    if (_properties.onDecrease != null) {
-      config.onDecrease = _performDecrease;
-    }
-    if (_properties.onCopy != null) {
-      config.onCopy = _performCopy;
-    }
-    if (_properties.onCut != null) {
-      config.onCut = _performCut;
-    }
-    if (_properties.onPaste != null) {
-      config.onPaste = _performPaste;
-    }
-    if (_properties.onMoveCursorForwardByCharacter != null) {
-      config.onMoveCursorForwardByCharacter = _performMoveCursorForwardByCharacter;
-    }
-    if (_properties.onMoveCursorBackwardByCharacter != null) {
-      config.onMoveCursorBackwardByCharacter = _performMoveCursorBackwardByCharacter;
-    }
-    if (_properties.onMoveCursorForwardByWord != null) {
-      config.onMoveCursorForwardByWord = _performMoveCursorForwardByWord;
-    }
-    if (_properties.onMoveCursorBackwardByWord != null) {
-      config.onMoveCursorBackwardByWord = _performMoveCursorBackwardByWord;
-    }
-    if (_properties.onSetSelection != null) {
-      config.onSetSelection = _performSetSelection;
-    }
-    if (_properties.onSetText != null) {
-      config.onSetText = _performSetText;
-    }
-    if (_properties.onDidGainAccessibilityFocus != null) {
-      config.onDidGainAccessibilityFocus = _performDidGainAccessibilityFocus;
-    }
-    if (_properties.onDidLoseAccessibilityFocus != null) {
-      config.onDidLoseAccessibilityFocus = _performDidLoseAccessibilityFocus;
-    }
-    if (_properties.onFocus != null) {
-      config.onFocus = _performFocus;
-    }
-    if (_properties.customSemanticsActions != null) {
-      config.customSemanticsActions = _properties.customSemanticsActions!;
-    }
-  }
-
-  void _performTap() {
-    _properties.onTap?.call();
-  }
-
-  void _performLongPress() {
-    _properties.onLongPress?.call();
-  }
-
-  void _performDismiss() {
-    _properties.onDismiss?.call();
-  }
-
-  void _performScrollLeft() {
-    _properties.onScrollLeft?.call();
-  }
-
-  void _performScrollRight() {
-    _properties.onScrollRight?.call();
-  }
-
-  void _performScrollUp() {
-    _properties.onScrollUp?.call();
-  }
-
-  void _performScrollDown() {
-    _properties.onScrollDown?.call();
-  }
-
-  void _performIncrease() {
-    _properties.onIncrease?.call();
-  }
-
-  void _performDecrease() {
-    _properties.onDecrease?.call();
-  }
-
-  void _performCopy() {
-    _properties.onCopy?.call();
-  }
-
-  void _performCut() {
-    _properties.onCut?.call();
-  }
-
-  void _performPaste() {
-    _properties.onPaste?.call();
-  }
-
-  void _performMoveCursorForwardByCharacter(bool extendSelection) {
-    _properties.onMoveCursorForwardByCharacter?.call(extendSelection);
-  }
-
-  void _performMoveCursorBackwardByCharacter(bool extendSelection) {
-    _properties.onMoveCursorBackwardByCharacter?.call(extendSelection);
-  }
-
-  void _performMoveCursorForwardByWord(bool extendSelection) {
-    _properties.onMoveCursorForwardByWord?.call(extendSelection);
-  }
-
-  void _performMoveCursorBackwardByWord(bool extendSelection) {
-    _properties.onMoveCursorBackwardByWord?.call(extendSelection);
-  }
-
-  void _performSetSelection(TextSelection selection) {
-    _properties.onSetSelection?.call(selection);
-  }
-
-  void _performSetText(String text) {
-    _properties.onSetText?.call(text);
-  }
-
-  void _performDidGainAccessibilityFocus() {
-    _properties.onDidGainAccessibilityFocus?.call();
-  }
-
-  void _performDidLoseAccessibilityFocus() {
-    _properties.onDidLoseAccessibilityFocus?.call();
-  }
-
-  void _performFocus() {
-    _properties.onFocus?.call();
   }
 }
 
@@ -5080,10 +4635,9 @@ class RenderFollowerLayer extends RenderProxyBox {
       'leaderSize is required when leaderAnchor is not Alignment.topLeft '
       '(current value is $leaderAnchor).',
     );
-    final Offset effectiveLinkedOffset =
-        leaderSize == null
-            ? this.offset
-            : leaderAnchor.alongSize(leaderSize) - followerAnchor.alongSize(size) + this.offset;
+    final Offset effectiveLinkedOffset = leaderSize == null
+        ? this.offset
+        : leaderAnchor.alongSize(leaderSize) - followerAnchor.alongSize(size) + this.offset;
     if (layer == null) {
       layer = FollowerLayer(
         link: link,

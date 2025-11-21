@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show Tristate;
+
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -29,7 +31,12 @@ void main() {
       final GlobalKey<TestFocusState> keyA = GlobalKey();
       final GlobalKey<TestFocusState> keyB = GlobalKey();
       await tester.pumpWidget(
-        Column(children: <Widget>[TestFocus(key: keyA), TestFocus(key: keyB, name: 'b')]),
+        Column(
+          children: <Widget>[
+            TestFocus(key: keyA),
+            TestFocus(key: keyB, name: 'b'),
+          ],
+        ),
       );
 
       expect(keyA.currentState!.focusNode.hasFocus, isFalse);
@@ -131,7 +138,9 @@ void main() {
           debugLabel: 'Parent Scope',
           node: parentFocusScope,
           autofocus: true,
-          child: Column(children: <Widget>[TestFocus(key: key, debugLabel: 'Child')]),
+          child: Column(
+            children: <Widget>[TestFocus(key: key, debugLabel: 'Child')],
+          ),
         ),
       );
 
@@ -238,7 +247,9 @@ void main() {
         FocusScope(
           debugLabel: 'Parent Scope',
           node: parentFocusScope,
-          child: Column(children: <Widget>[TestFocus(key: key, debugLabel: 'Child')]),
+          child: Column(
+            children: <Widget>[TestFocus(key: key, debugLabel: 'Child')],
+          ),
         ),
       );
 
@@ -351,7 +362,12 @@ void main() {
       final GlobalKey<TestFocusState> keyB = GlobalKey();
 
       await tester.pumpWidget(
-        Column(children: <Widget>[TestFocus(key: keyA), TestFocus(key: keyB, name: 'b')]),
+        Column(
+          children: <Widget>[
+            TestFocus(key: keyA),
+            TestFocus(key: keyB, name: 'b'),
+          ],
+        ),
       );
 
       FocusScope.of(keyA.currentContext!).requestFocus(keyA.currentState!.focusNode);
@@ -363,7 +379,11 @@ void main() {
       expect(keyB.currentState!.focusNode.hasFocus, isFalse);
       expect(find.text('b'), findsOneWidget);
 
-      await tester.pumpWidget(Column(children: <Widget>[TestFocus(key: keyB, name: 'b')]));
+      await tester.pumpWidget(
+        Column(
+          children: <Widget>[TestFocus(key: keyB, name: 'b')],
+        ),
+      );
 
       await tester.pump();
 
@@ -381,7 +401,10 @@ void main() {
       addTearDown(childFocusScope.dispose);
 
       await tester.pumpWidget(
-        FocusScope(node: childFocusScope, child: TestFocus(debugLabel: 'Child', key: keyA)),
+        FocusScope(
+          node: childFocusScope,
+          child: TestFocus(debugLabel: 'Child', key: keyA),
+        ),
       );
 
       FocusScope.of(keyA.currentContext!).requestFocus(keyA.currentState!.focusNode);
@@ -573,7 +596,9 @@ void main() {
       await tester.pumpWidget(
         FocusScope(
           node: parentFocusScope,
-          child: Column(children: <Widget>[TestFocus(key: keyB, name: 'b')]),
+          child: Column(
+            children: <Widget>[TestFocus(key: keyB, name: 'b')],
+          ),
         ),
       );
 
@@ -602,7 +627,9 @@ void main() {
               FocusScope(
                 key: scopeKeyA,
                 node: parentFocusScope,
-                child: Column(children: <Widget>[TestFocus(debugLabel: 'Child A', key: keyA)]),
+                child: Column(
+                  children: <Widget>[TestFocus(debugLabel: 'Child A', key: keyA)],
+                ),
               ),
               FocusScope(
                 key: scopeKeyB,
@@ -657,7 +684,9 @@ void main() {
                 FocusScope(
                   key: scopeKeyA,
                   node: parentFocusScope1,
-                  child: Column(children: <Widget>[TestFocus(debugLabel: 'Child A', key: keyA)]),
+                  child: Column(
+                    children: <Widget>[TestFocus(debugLabel: 'Child A', key: keyA)],
+                  ),
                 ),
                 FocusScope(
                   key: scopeKeyB,
@@ -727,7 +756,9 @@ void main() {
               children: <Widget>[
                 FocusScope(
                   node: parentFocusScope1,
-                  child: Column(children: <Widget>[TestFocus(debugLabel: 'Child A', key: keyA)]),
+                  child: Column(
+                    children: <Widget>[TestFocus(debugLabel: 'Child A', key: keyA)],
+                  ),
                 ),
                 FocusScope(
                   node: parentFocusScope2,
@@ -797,7 +828,9 @@ void main() {
             ),
             FocusScope(
               node: parentFocusScope2,
-              child: Column(children: <Widget>[TestFocus(key: keyB, name: 'b')]),
+              child: Column(
+                children: <Widget>[TestFocus(key: keyB, name: 'b')],
+              ),
             ),
           ],
         ),
@@ -819,7 +852,9 @@ void main() {
           children: <Widget>[
             FocusScope(
               node: parentFocusScope1,
-              child: Column(children: <Widget>[TestFocus(key: keyB, name: 'b')]),
+              child: Column(
+                children: <Widget>[TestFocus(key: keyB, name: 'b')],
+              ),
             ),
             FocusScope(
               node: parentFocusScope2,
@@ -850,7 +885,9 @@ void main() {
           children: <Widget>[
             FocusScope(
               node: parentFocusScope1,
-              child: Column(children: <Widget>[TestFocus(debugLabel: 'Child A', key: keyA)]),
+              child: Column(
+                children: <Widget>[TestFocus(debugLabel: 'Child A', key: keyA)],
+              ),
             ),
             FocusScope(
               node: parentFocusScope2,
@@ -879,7 +916,9 @@ void main() {
           children: <Widget>[
             FocusScope(
               node: parentFocusScope2,
-              child: Column(children: <Widget>[TestFocus(debugLabel: 'Child A', key: keyA)]),
+              child: Column(
+                children: <Widget>[TestFocus(debugLabel: 'Child A', key: keyA)],
+              ),
             ),
             FocusScope(
               node: parentFocusScope1,
@@ -1066,7 +1105,11 @@ void main() {
               key: key3,
               child: Container(
                 key: key4,
-                child: Focus(debugLabel: 'Key 5', key: key5, child: Container(key: key6)),
+                child: Focus(
+                  debugLabel: 'Key 5',
+                  key: key5,
+                  child: Container(key: key6),
+                ),
               ),
             ),
           ),
@@ -1101,8 +1144,14 @@ void main() {
           child: Column(
             key: key1,
             children: <Widget>[
-              Focus(key: key2, child: Focus(key: key3, child: Container())),
-              Focus(key: key4, child: Focus(key: key5, child: Container())),
+              Focus(
+                key: key2,
+                child: Focus(key: key3, child: Container()),
+              ),
+              Focus(
+                key: key4,
+                child: Focus(key: key5, child: Container()),
+              ),
               Focus(
                 key: key6,
                 child: Column(
@@ -1147,7 +1196,10 @@ void main() {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       late bool gotFocus;
       await tester.pumpWidget(
-        Focus(onFocusChange: (bool focused) => gotFocus = focused, child: Container(key: key1)),
+        Focus(
+          onFocusChange: (bool focused) => gotFocus = focused,
+          child: Container(key: key1),
+        ),
       );
 
       final Element firstNode = tester.element(find.byKey(key1));
@@ -1231,7 +1283,11 @@ void main() {
         Focus(
           canRequestFocus: false,
           onFocusChange: (bool focused) => gotFocus = focused,
-          child: Focus(key: key1, focusNode: focusNode, child: Container(key: key2)),
+          child: Focus(
+            key: key1,
+            focusNode: focusNode,
+            child: Container(key: key2),
+          ),
         ),
       );
 
@@ -1289,23 +1345,20 @@ void main() {
       final SemanticsNode semantics = tester.getSemantics(find.byKey(key));
 
       expect(key.currentState!.focusNode.hasFocus, isFalse);
-      expect(semantics.flagsCollection.isFocused, isFalse);
-      expect(semantics.flagsCollection.isFocusable, isTrue);
+      expect(semantics.flagsCollection.isFocused, Tristate.isFalse);
 
       FocusScope.of(key.currentContext!).requestFocus(key.currentState!.focusNode);
       await tester.pumpAndSettle();
 
       expect(key.currentState!.focusNode.hasFocus, isTrue);
-      expect(semantics.flagsCollection.isFocused, isTrue);
-      expect(semantics.flagsCollection.isFocusable, isTrue);
+      expect(semantics.flagsCollection.isFocused, Tristate.isTrue);
 
       key.currentState!.focusNode.canRequestFocus = false;
       await tester.pumpAndSettle();
 
       expect(key.currentState!.focusNode.hasFocus, isFalse);
       expect(key.currentState!.focusNode.canRequestFocus, isFalse);
-      expect(semantics.flagsCollection.isFocused, isFalse);
-      expect(semantics.flagsCollection.isFocusable, isFalse);
+      expect(semantics.flagsCollection.isFocused, Tristate.none);
     });
 
     testWidgets('Setting canRequestFocus on focus node causes update.', (
@@ -1499,7 +1552,11 @@ void main() {
           descendantsAreFocusable: false,
           child: Focus(
             onFocusChange: (bool focused) => gotFocus = focused,
-            child: Focus(key: key1, focusNode: focusNode, child: Container(key: key2)),
+            child: Focus(
+              key: key1,
+              focusNode: focusNode,
+              child: Container(key: key2),
+            ),
           ),
         ),
       );
@@ -1823,7 +1880,11 @@ void main() {
         ExcludeFocus(
           child: Focus(
             onFocusChange: (bool focused) => gotFocus = focused,
-            child: Focus(key: key1, focusNode: focusNode, child: Container(key: key2)),
+            child: Focus(
+              key: key1,
+              focusNode: focusNode,
+              child: Container(key: key2),
+            ),
           ),
         ),
       );
@@ -1927,7 +1988,9 @@ void main() {
         Widget buildFocusTree({required bool parentCanRequestFocus}) {
           return FocusScope(
             canRequestFocus: parentCanRequestFocus,
-            child: Column(children: <Widget>[Focus(focusNode: childFocusNode, child: Container())]),
+            child: Column(
+              children: <Widget>[Focus(focusNode: childFocusNode, child: Container())],
+            ),
           );
         }
 

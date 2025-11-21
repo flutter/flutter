@@ -44,7 +44,7 @@ class EmbedderSurfaceSoftware final : public EmbedderSurface,
   sk_sp<GrDirectContext> CreateResourceContext() const override;
 
   // |GPUSurfaceSoftwareDelegate|
-  sk_sp<SkSurface> AcquireBackingStore(const SkISize& size) override;
+  sk_sp<SkSurface> AcquireBackingStore(const DlISize& size) override;
 
   // |GPUSurfaceSoftwareDelegate|
   bool PresentBackingStore(sk_sp<SkSurface> backing_store) override;

@@ -13,7 +13,7 @@ void main() {
     'AndroidPlugin throws tool exit if the plugin main class can not be found',
     () {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final AndroidPlugin androidPlugin = AndroidPlugin(
+      final androidPlugin = AndroidPlugin(
         name: 'pluginA',
         package: 'com.company',
         pluginClass: 'PluginA',
@@ -35,7 +35,7 @@ void main() {
 
   testWithoutContext('AndroidPlugin does not validate the main class for Dart-only plugins', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final AndroidPlugin androidPlugin = AndroidPlugin(
+    final androidPlugin = AndroidPlugin(
       name: 'pluginA',
       dartPluginClass: 'PluginA',
       pluginPath: '.pub_cache/plugin_a',
@@ -52,7 +52,7 @@ void main() {
 
   testWithoutContext('AndroidPlugin does not validate the main class for default_package', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final AndroidPlugin androidPlugin = AndroidPlugin(
+    final androidPlugin = AndroidPlugin(
       name: 'pluginA',
       defaultPackage: 'plugin_a_android',
       pluginPath: '.pub_cache/plugin_a',
@@ -69,7 +69,7 @@ void main() {
 
   testWithoutContext('AndroidPlugin parses embedding version 2 from the Java search path', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final AndroidPlugin androidPlugin = AndroidPlugin(
+    final androidPlugin = AndroidPlugin(
       name: 'pluginA',
       package: 'com.company',
       pluginClass: 'PluginA',
@@ -92,7 +92,7 @@ void main() {
 
   testWithoutContext('AndroidPlugin parses embedding version 1 from the Java search path', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final AndroidPlugin androidPlugin = AndroidPlugin(
+    final androidPlugin = AndroidPlugin(
       name: 'pluginA',
       package: 'com.company',
       pluginClass: 'PluginA',
@@ -115,7 +115,7 @@ void main() {
 
   testWithoutContext('AndroidPlugin parses embedding version 2 from the Kotlin search path', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final AndroidPlugin androidPlugin = AndroidPlugin(
+    final androidPlugin = AndroidPlugin(
       name: 'pluginA',
       package: 'com.company',
       pluginClass: 'PluginA',
@@ -138,7 +138,7 @@ void main() {
 
   testWithoutContext('AndroidPlugin parses embedding version 1 from the Kotlin search path', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final AndroidPlugin androidPlugin = AndroidPlugin(
+    final androidPlugin = AndroidPlugin(
       name: 'pluginA',
       package: 'com.company',
       pluginClass: 'PluginA',

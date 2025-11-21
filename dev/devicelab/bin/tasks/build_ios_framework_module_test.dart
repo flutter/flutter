@@ -13,11 +13,6 @@ import 'package:path/path.dart' as path;
 /// Tests that iOS and macOS .xcframeworks can be built.
 Future<void> main() async {
   await task(() async {
-    // TODO(matanlurey): Remove after default.
-    // https://github.com/flutter/flutter/issues/160257
-    section('Opt-in to --explicit-package-dependencies');
-    await flutter('config', options: <String>['--explicit-package-dependencies']);
-
     section('Create module project');
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
@@ -56,7 +51,8 @@ Future<void> main() async {
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     } finally {
       rmTree(tempDir);
@@ -454,14 +450,6 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
 
   if (File(path.join(outputPath, 'GeneratedPluginRegistrant.m')).existsSync() == isModule) {
     throw TaskResult.failure('Unexpected GeneratedPluginRegistrant.m.');
-  }
-
-  if (File(path.join(outputPath, 'flutter_lldbinit')).existsSync() == isModule) {
-    throw TaskResult.failure('Unexpected flutter_lldbinit');
-  }
-
-  if (File(path.join(outputPath, 'flutter_lldb_helper.py')).existsSync() == isModule) {
-    throw TaskResult.failure('Unexpected flutter_lldb_helper.py.');
   }
 
   section('Build frameworks without plugins');

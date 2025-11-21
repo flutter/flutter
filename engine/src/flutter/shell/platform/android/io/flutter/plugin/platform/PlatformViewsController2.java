@@ -31,6 +31,8 @@ import io.flutter.embedding.engine.FlutterOverlaySurface;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.mutatorsstack.*;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
+import io.flutter.embedding.engine.systemchannels.PlatformViewCreationRequest;
+import io.flutter.embedding.engine.systemchannels.PlatformViewTouch;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel2;
 import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.view.AccessibilityBridge;
@@ -93,8 +95,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     return false;
   }
 
-  public PlatformView createFlutterPlatformView(
-      @NonNull PlatformViewsChannel2.PlatformViewCreationRequest request) {
+  public PlatformView createFlutterPlatformView(@NonNull PlatformViewCreationRequest request) {
     final PlatformViewFactory viewFactory = registry.getFactory(request.viewType);
     if (viewFactory == null) {
       throw new IllegalStateException(
@@ -139,7 +140,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   }
 
   @VisibleForTesting
-  public MotionEvent toMotionEvent(float density, PlatformViewsChannel2.PlatformViewTouch touch) {
+  public MotionEvent toMotionEvent(float density, PlatformViewTouch touch) {
     MotionEventTracker.MotionEventId motionEventId =
         MotionEventTracker.MotionEventId.from(touch.motionEventId);
     MotionEvent trackedEvent = motionEventTracker.pop(motionEventId);
@@ -197,6 +198,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
               + "attach was called while the PlatformViewsController was already attached.");
     }
     this.context = context;
+    // TODO(gmackall): We should remove this channel once hcpp has been enabled on existing
+    //  platform view widgets.
     platformViewsChannel = new PlatformViewsChannel2(dartExecutor);
     platformViewsChannel.setPlatformViewsHandler(channelHandler);
   }
@@ -523,6 +526,15 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
   }
 
+  public void hidePlatformView(int viewId) {
+    if (!initializePlatformViewIfNeeded(viewId)) {
+      return;
+    }
+
+    final FlutterMutatorView parentView = platformViewParent.get(viewId);
+    parentView.setVisibility(View.GONE);
+  }
+
   @RequiresApi(API_LEVELS.API_34)
   public void onEndFrame() {
     SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
@@ -611,14 +623,20 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     tx.apply();
   }
 
+  public boolean isHcppEnabled() {
+    if (flutterJNI == null) {
+      return false;
+    }
+    return flutterJNI.IsSurfaceControlEnabled();
+  }
+
   //// Message Handler ///////
 
-  private final PlatformViewsChannel2.PlatformViewsHandler channelHandler =
+  final PlatformViewsChannel2.PlatformViewsHandler channelHandler =
       new PlatformViewsChannel2.PlatformViewsHandler() {
 
         @Override
-        public void createPlatformView(
-            @NonNull PlatformViewsChannel2.PlatformViewCreationRequest request) {
+        public void createPlatformView(@NonNull PlatformViewCreationRequest request) {
           createFlutterPlatformView(request);
         }
 
@@ -661,7 +679,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
         }
 
         @Override
-        public void onTouch(@NonNull PlatformViewsChannel2.PlatformViewTouch touch) {
+        public void onTouch(@NonNull PlatformViewTouch touch) {
           final int viewId = touch.viewId;
           final float density = context.getResources().getDisplayMetrics().density;
 
@@ -711,10 +729,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
         @Override
         public boolean isSurfaceControlEnabled() {
-          if (flutterJNI == null) {
-            return false;
-          }
-          return flutterJNI.IsSurfaceControlEnabled();
+          return isHcppEnabled();
         }
       };
 }

@@ -167,7 +167,7 @@ class _RadioDemoState extends State<_RadioDemo> with RestorationMixin {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             for (int index = 0; index < 2; ++index)
-              Radio<int>(value: index, groupValue: radioValue.value, onChanged: null),
+              Radio<int>(value: index, groupValue: radioValue.value),
           ],
         ),
       ],

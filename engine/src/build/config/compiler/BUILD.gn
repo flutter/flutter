@@ -33,7 +33,8 @@ declare_args() {
 
   # By default, API calls to deprecated methods are errors. While prototyping,
   # this flag may be set to allow such calls.
-  allow_deprecated_api_calls = false
+  # riscv64: https://github.com/flutter/flutter/issues/173656
+  allow_deprecated_api_calls = target_cpu == "riscv64"
 
   # This flag is deprecated and will be removed. The value will be ignored.
   use_fstack_protector = false
@@ -76,6 +77,14 @@ config("compiler") {
     configs += [ "//build/config/darwin:compiler" ]
   }
 
+  if (is_qnx) {
+    defines += [
+      "_XOPEN_SOURCE=700",
+      "_QNX_SOURCE",
+      "SKNX_NO_SIMD",
+    ]
+  }
+
   # In general, Windows is totally different, but all the other builds share
   # some common GCC configuration. This section sets up Windows and the common
   # GCC flags, and then we handle the other non-Windows platforms specifically
@@ -89,6 +98,8 @@ config("compiler") {
       "/guard:cf",  # Enable control flow guard security checks.
     ]
   } else {
+    cflags_c += [ "-std=c11" ]
+
     # Common GCC compiler flags setup.
     # --------------------------------
     cflags += [ "-fno-strict-aliasing" ]  # See http://crbug.com/32204
@@ -104,9 +115,10 @@ config("compiler") {
     # Stack protection.
     if (is_mac) {
       cflags += [ "-fstack-protector-all" ]
-    } else if (!is_ios && !is_wasm) {
+    } else if (!is_ios && !is_wasm && !is_qnx) {
       cflags += [
         "-fstack-protector",
+
         # 8 is the default, but make this explicit here so that we don't have to
         # go hunting for the flag name if we ever want a value that is
         # different from the default.
@@ -203,8 +215,6 @@ config("compiler") {
     # an Objective C struct won't be called, which is very bad.
     cflags_objcc += [ "-fobjc-call-cxx-cdtors" ]
 
-    cflags_c += [ "-std=c99" ]
-
     ldflags += common_mac_flags
   } else if (is_posix) {
     # CPU architecture. We may or may not be doing a cross compile now, so for
@@ -291,7 +301,8 @@ config("compiler") {
     if (wasm_use_workers) {
       cflags += [ "-sWASM_WORKERS=1" ]
       ldflags += [ "-sWASM_WORKERS=1" ]
-    } if (wasm_shared_memory) {
+    }
+    if (wasm_shared_memory) {
       cflags += [ "-sSHARED_MEMORY=1" ]
       ldflags += [ "-sSHARED_MEMORY=1" ]
     }
@@ -346,11 +357,14 @@ config("compiler") {
 
   # Linux/Android common flags setup.
   # ---------------------------------
-  if (is_linux || is_android) {
-    cflags += [
-      "-fPIC",
-      "-pipe",  # Use pipes for communicating between sub-processes. Faster.
-    ]
+  if (is_linux || is_android || is_qnx) {
+    cflags += [ "-fPIC" ]
+
+    if (!is_qnx) {
+      cflags += [
+        "-pipe",  # Use pipes for communicating between sub-processes. Faster.
+      ]
+    }
 
     ldflags += [
       "-fPIC",
@@ -361,6 +375,20 @@ config("compiler") {
     if (!using_sanitizer) {
       ldflags += [ "-Wl,-z,defs" ]
     }
+  }
+
+  if (is_qnx) {
+    qnx_arch_flags = []
+    if (target_cpu == "arm64") {
+      qnx_arch_flags += [
+        "-V",
+        "gcc_ntoaarch64le",
+      ]
+    } else {
+      assert(false, "Unknown QNX architecture")
+    }
+    cflags += qnx_arch_flags
+    ldflags += qnx_arch_flags
   }
 
   # Linux-specific compiler flags setup.
@@ -437,26 +465,64 @@ config("compiler") {
     } else if (current_cpu == "x64") {
       cflags += [ "--target=x86_64-linux-androideabi${android_api_level}" ]
       ldflags += [ "--target=x86_64-linux-androideabi${android_api_level}" ]
+    } else if (current_cpu == "riscv64") {
+      cflags += [ "--target=riscv64-linux-androideabi${android_api_level}" ]
+      ldflags += [ "--target=riscv64-linux-androideabi${android_api_level}" ]
     }
   }
 
   # Fuchsia-specific flags setup.
   # -----------------------------
   if (is_fuchsia) {
-    configs = ["//flutter/tools/fuchsia/gn-sdk/src/config:compiler"]
+    configs = [ "//flutter/tools/fuchsia/gn-sdk/src/config:compiler" ]
   }
 
   asmflags = cflags
 }
 
+# C++ modules (available and enabled by default in C++20 and above) are
+# prohibited by the style guide.
+config("cxx_disable_modules") {
+  disable_modules_flags = [
+    "-fno-modules",
+
+    # Some Clang versions do not disable ObjC modules (as tested by
+    # __has_feature(objc_modules)) when just -fno-modules is present.
+    "-Xclang",
+    "-fno-cxx-modules",
+  ]
+  cflags_c = disable_modules_flags
+  cflags_cc = disable_modules_flags
+  cflags_objc = disable_modules_flags
+  cflags_objcc = disable_modules_flags
+}
+
 config("cxx_version_default") {
   if (is_win) {
-    cc_std = [ "/std:c++17" ]
+    cc_std = [ "/std:c++20" ]
   } else {
-    cc_std = [ "-std=c++17" ]
+    cc_std = [ "-std=c++20" ]
   }
+
+  configs = [ ":cxx_disable_modules" ]
+
   cflags_cc = cc_std
   cflags_objcc = cc_std
+
+  # The following corrections are only in place for targets that have opted into
+  # the default version. These targets have not had to opportunity to upgrade to
+  # a newer version. Targets that have explicitly opted into the newer version
+  # must fix the errors they run into.
+
+  if (is_clang) {
+    extra_warning_flags_cc = [
+      # TODO(174665): Third-party dependency (Angle) needs to patched to work
+      # around this.
+      "-Wno-deprecated-this-capture",
+    ]
+    cflags_cc += extra_warning_flags_cc
+    cflags_objcc += extra_warning_flags_cc
+  }
 }
 
 config("cxx_version_11") {
@@ -497,6 +563,8 @@ config("cxx_version_20") {
   }
   cflags_cc = cc_std
   cflags_objcc = cc_std
+
+  configs = [ ":cxx_disable_modules" ]
 }
 
 config("compiler_arm_fpu") {
@@ -544,8 +612,10 @@ config("runtime_library") {
     # Add libcxx[abi]/include via cflags_cc, cflags_objcc to apply to
     # C++/Obj-C++ only. Adding them via include_dirs is problematic for Swift,
     # whose core libraries expect the Apple SDK C++ headers, module.modulemap.
-    _libcxx_include = rebase_path("//flutter/third_party/libcxx/include", root_build_dir)
-    _libcxxabi_include = rebase_path("//flutter/third_party/libcxxabi/include", root_build_dir)
+    _libcxx_include =
+        rebase_path("//flutter/third_party/libcxx/include", root_build_dir)
+    _libcxxabi_include =
+        rebase_path("//flutter/third_party/libcxxabi/include", root_build_dir)
     cflags_cc += [
       "-nostdinc++",
       "-I" + _libcxx_include,
@@ -573,9 +643,7 @@ config("runtime_library") {
 
     ldflags += [ "-nostdlib" ]
 
-    ldflags += [
-      "-Wl,--warn-shared-textrel",
-    ]
+    ldflags += [ "-Wl,--warn-shared-textrel" ]
 
     libs += [
       "c",
@@ -583,7 +651,7 @@ config("runtime_library") {
       "m",
     ]
 
-    lib_dirs += [ "${android_toolchain_root}/lib/clang/18/lib/linux/" ]
+    lib_dirs += [ "${android_toolchain_root}/lib/clang/19/lib/linux/" ]
     current_android_cpu = current_cpu
     if (current_cpu == "arm64") {
       current_android_cpu = "aarch64"
@@ -608,7 +676,7 @@ config("runtime_library") {
 
   # Fuchsia standard library setup.
   if (is_fuchsia) {
-    configs = ["//flutter/tools/fuchsia/gn-sdk/src/config:runtime_library"]
+    configs = [ "//flutter/tools/fuchsia/gn-sdk/src/config:runtime_library" ]
   }
 }
 
@@ -619,6 +687,10 @@ config("runtime_library") {
 
 default_warning_flags = []
 default_warning_flags_cc = []
+if (is_qnx) {
+  default_warning_flags_cc += [ "-fpermissive" ]
+}
+
 if (is_win) {
   default_warning_flags += [
     # Permanent.
@@ -652,6 +724,9 @@ if (is_win) {
 
       # Needed for nlohmann/json.
       "-Wno-deprecated-literal-operator",
+
+      # Needed by skia, imgui, swiftshader, and angle
+      "-Wno-nontrivial-memcall",
     ]
   }
 } else {
@@ -659,12 +734,17 @@ if (is_win) {
   default_warning_flags += [
     # Enables.
     "-Wendif-labels",  # Weird old-style text after an #endif.
-    "-Werror",  # Warnings as errors.
 
     # Disables.
     "-Wno-missing-field-initializers",  # "struct foo f = {0};"
     "-Wno-unused-parameter",  # Unused function parameters.
   ]
+
+  if (!is_qnx) {
+    default_warning_flags += [
+      "-Werror",  # Warnings as errors.
+    ]
+  }
 
   if (is_wasm) {
     default_warning_flags += [
@@ -674,33 +754,43 @@ if (is_win) {
       # freetype2 needs these two
       "-Wno-unused-function",
       "-Wno-unused-variable",
+
+      "-Wno-sign-conversion",
     ]
   }
 
   default_warning_flags += [
     "-Wno-unused-but-set-parameter",
     "-Wno-unused-but-set-variable",
-    "-Wno-implicit-int-float-conversion",
-    "-Wno-deprecated-copy",
 
     # Needed for compiling Skia with clang-12
     "-Wno-psabi",
   ]
 
-  if (!is_android) {
+  if (is_clang) {
+    default_warning_flags += [
+      "-Wno-implicit-int-float-conversion",
+      "-Wno-deprecated-copy",
+    ]
+  }
+
+  if (!is_android && is_clang) {
     default_warning_flags += [
       # Needed for nlohmann/json.
       "-Wno-deprecated-literal-operator",
     ]
   }
 
-  if (!is_wasm) {
+  if (!is_wasm && is_clang) {
     default_warning_flags += [
       # Unqualified std::move is pretty common.
       "-Wno-unqualified-std-cast-call",
+
+      # Needed by skia, imgui, swiftshader, and angle
+      "-Wno-nontrivial-memcall",
     ]
   }
-  if (!is_fuchsia) {
+  if (!is_fuchsia && is_clang) {
     default_warning_flags += [
       "-Wno-non-c-typedef-for-linkage",
       "-Wno-range-loop-construct",
@@ -728,10 +818,14 @@ config("chromium_code") {
   if (is_win || is_wasm) {
     cflags = []
   } else {
-    cflags = [
-      "-Wall",
-      "-Wextra",
-    ]
+    cflags = []
+
+    if (!is_qnx) {
+      cflags = [
+        "-Wall",
+        "-Wextra",
+      ]
+    }
 
     # In Chromium code, we define __STDC_foo_MACROS in order to get the
     # C99 macros on Mac and Linux.
@@ -921,11 +1015,15 @@ config("optimize") {
       cflags = [ "-O3" ]
     }
   } else {
-    cflags = [ "-O2" ] + common_optimize_on_cflags
+    if (optimize_for_size) {
+      cflags = [ "-Os" ] + common_optimize_on_cflags
+    } else {
+      cflags = [ "-O2" ] + common_optimize_on_cflags
+    }
   }
 
   lto_flags = []
-  if (enable_lto && (is_ios || is_mac || is_android || is_fuchsia || is_wasm)) {
+  if (enable_lto && (is_linux || is_ios || is_mac || is_android || is_fuchsia || is_wasm)) {
     lto_flags += [ "-flto" ]
   }
 
@@ -957,9 +1055,7 @@ config("no_optimize") {
     # On WASM we don't want to fully deoptimize the debug build because the
     # compiled binary will have some functions with too many local variables
     # and Chrome will reject it.
-    cflags = [
-      "-O1",
-    ]
+    cflags = [ "-O1" ]
     ldflags = common_optimize_on_ldflags
   } else {
     cflags = [ "-O0" ]
@@ -1056,10 +1152,16 @@ config("prevent_unsafe_narrowing") {
       "-Wshorten-64-to-32",
       "-Wimplicit-int-conversion",
       "-Wsign-compare",
-      "-Wsign-conversion",
+
       # Avoid bugs of the form `if (size_t i = size; i >= 0; --i)` while
       # fixing types to be sign-correct.
       "-Wtautological-unsigned-zero-compare",
     ]
+
+    if (!is_wasm) {
+      # emscripten's headers themselves trigger this warning, so we can't
+      # keep this enabled on the wasm target.
+      cflags += [ "-Wsign-conversion" ]
+    }
   }
 }

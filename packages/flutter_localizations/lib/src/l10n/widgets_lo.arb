@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "ຊອກຫາຢູ່ອິນເຕີເນັດ",
   "shareButtonLabel": "ແບ່ງປັນ",
   "pasteButtonLabel": "ວາງ",
-  "selectAllButtonLabel": "ເລືອກທັງໝົດ"
+  "selectAllButtonLabel": "ເລືອກທັງໝົດ",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found",
+  "radioButtonUnselectedLabel": "Not selected"
 }

@@ -134,7 +134,7 @@ struct KeyStateChange {
 //
 // See `IsKeyDownAltRight` for explaination for foged events.
 struct ExpectForgedMessage {
-  explicit ExpectForgedMessage(Win32Message message) : message(message){};
+  explicit ExpectForgedMessage(Win32Message message) : message(message) {};
 
   Win32Message message;
 };

@@ -25,6 +25,73 @@ import 'tooltip_visibility.dart';
 /// Signature for when a tooltip is triggered.
 typedef TooltipTriggeredCallback = void Function();
 
+/// Contextual information for positioning a tooltip.
+///
+/// This immutable data class contains all the necessary information for computing
+/// the position of a tooltip relative to its target widget.
+///
+/// See also:
+///
+///  * [TooltipPositionDelegate], which uses this context to compute tooltip positions.
+@immutable
+class TooltipPositionContext {
+  /// Creates a tooltip position context.
+  const TooltipPositionContext({
+    required this.target,
+    required this.targetSize,
+    required this.tooltipSize,
+    required this.verticalOffset,
+    required this.preferBelow,
+  });
+
+  /// The center point of the target widget in the global coordinate system.
+  final Offset target;
+
+  /// The size of the target widget that triggers the tooltip.
+  final Size targetSize;
+
+  /// The size of the tooltip itself.
+  final Size tooltipSize;
+
+  /// The configured vertical offset.
+  final double verticalOffset;
+
+  /// Whether the tooltip prefers to be positioned below the target.
+  final bool preferBelow;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is TooltipPositionContext &&
+        other.target == target &&
+        other.targetSize == targetSize &&
+        other.tooltipSize == tooltipSize &&
+        other.verticalOffset == verticalOffset &&
+        other.preferBelow == preferBelow;
+  }
+
+  @override
+  int get hashCode => Object.hash(target, targetSize, tooltipSize, verticalOffset, preferBelow);
+}
+
+/// Signature for computing the position of a tooltip.
+///
+/// The [TooltipPositionContext] contains all the necessary information for
+/// positioning the tooltip, including the target location, sizes, offset, and
+/// positioning preference.
+///
+/// Returns the offset from the top left of the overlay to the top left of the tooltip.
+///
+/// See also:
+///
+///  * [TooltipPositionContext], which contains the positioning parameters.
+typedef TooltipPositionDelegate = Offset Function(TooltipPositionContext context);
+
 /// A special [MouseRegion] that when nested, only the first [_ExclusiveMouseRegion]
 /// to be hit in hit-testing order will be added to the BoxHitTestResult (i.e.,
 /// child over parent, last sibling over first sibling).
@@ -192,6 +259,7 @@ class Tooltip extends StatefulWidget {
     this.onTriggered,
     this.mouseCursor,
     this.ignorePointer,
+    this.positionDelegate,
     this.child,
   }) : assert(
          (message == null) != (richMessage == null),
@@ -392,6 +460,34 @@ class Tooltip extends StatefulWidget {
   /// handled or ignored.
   final bool? ignorePointer;
 
+  /// A custom position delegate function for computing where the tooltip should be positioned.
+  ///
+  /// If provided, this function will be called with a [TooltipPositionContext] containing
+  /// all the necessary information for positioning the tooltip. The function should return
+  /// an [Offset] indicating where to place the tooltip relative to the overlay.
+  ///
+  /// This allows for custom positioning such as left/right positioning, or any other
+  /// arbitrary positioning logic.
+  ///
+  /// Example:
+  /// ```dart
+  /// positionDelegate: (TooltipPositionContext context) {
+  ///   // Position tooltip to the right of the target
+  ///   return Offset(
+  ///     context.target.dx + context.targetSize.width / 2,
+  ///     context.target.dy - context.tooltipSize.height / 2,
+  ///   );
+  /// }
+  /// ```
+  ///
+  /// If null, the default positioning behavior is used (above or below the target).
+  ///
+  /// See also:
+  ///
+  ///  * [TooltipPositionContext], which contains the positioning parameters.
+  ///  * [TooltipPositionDelegate], the function signature for custom positioning.
+  final TooltipPositionDelegate? positionDelegate;
+
   static final List<TooltipState> _openedTooltips = <TooltipState>[];
 
   /// Dismiss all of the tooltips that are currently shown on the screen,
@@ -469,6 +565,13 @@ class Tooltip extends StatefulWidget {
       FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true),
     );
     properties.add(DiagnosticsProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<TooltipPositionDelegate>(
+        'positionDelegate',
+        positionDelegate,
+        defaultValue: null,
+      ),
+    );
   }
 }
 
@@ -606,7 +709,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _handlePointerDown(PointerDownEvent event) {
-    assert(mounted);
     // PointerDeviceKinds that don't support hovering.
     const Set<PointerDeviceKind> triggerModeDeviceKinds = <PointerDeviceKind>{
       PointerDeviceKind.invertedStylus,
@@ -618,22 +720,18 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     };
     switch (_triggerMode) {
       case TooltipTriggerMode.longPress:
-        final LongPressGestureRecognizer recognizer =
-            _longPressRecognizer ??= LongPressGestureRecognizer(
-              debugOwner: this,
-              supportedDevices: triggerModeDeviceKinds,
-            );
+        final LongPressGestureRecognizer recognizer = _longPressRecognizer ??=
+            LongPressGestureRecognizer(debugOwner: this, supportedDevices: triggerModeDeviceKinds);
         recognizer
           ..onLongPressCancel = _handleTapToDismiss
           ..onLongPress = _handleLongPress
           ..onLongPressUp = _handlePressUp
           ..addPointer(event);
       case TooltipTriggerMode.tap:
-        final TapGestureRecognizer recognizer =
-            _tapRecognizer ??= TapGestureRecognizer(
-              debugOwner: this,
-              supportedDevices: triggerModeDeviceKinds,
-            );
+        final TapGestureRecognizer recognizer = _tapRecognizer ??= TapGestureRecognizer(
+          debugOwner: this,
+          supportedDevices: triggerModeDeviceKinds,
+        );
         recognizer
           ..onTapCancel = _handleTapToDismiss
           ..onTap = _handleTap
@@ -733,10 +831,9 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // before dispatching any `onEnter` events, so `event.device` must have
     // already been removed from _activeHoveringPointerDevices of the tooltips
     // that are no longer being hovered over.
-    final List<TooltipState> tooltipsToDismiss =
-        Tooltip._openedTooltips
-            .where((TooltipState tooltip) => tooltip._activeHoveringPointerDevices.isEmpty)
-            .toList();
+    final List<TooltipState> tooltipsToDismiss = Tooltip._openedTooltips
+        .where((TooltipState tooltip) => tooltip._activeHoveringPointerDevices.isEmpty)
+        .toList();
     for (final TooltipState tooltip in tooltipsToDismiss) {
       assert(tooltip.mounted);
       tooltip._scheduleDismissTooltip(withDelay: Duration.zero);
@@ -820,13 +917,16 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     };
   }
 
-  Widget _buildTooltipOverlay(BuildContext context) {
-    final OverlayState overlayState = Overlay.of(context, debugRequiredFor: widget);
-    final RenderBox box = this.context.findRenderObject()! as RenderBox;
-    final Offset target = box.localToGlobal(
-      box.size.center(Offset.zero),
-      ancestor: overlayState.context.findRenderObject(),
+  Widget _buildTooltipOverlay(BuildContext context, OverlayChildLayoutInfo layoutInfo) {
+    if (layoutInfo.childPaintTransform.determinant() == 0.0) {
+      // The child is not visible.
+      return const SizedBox.shrink();
+    }
+    final Offset target = MatrixUtils.transformPoint(
+      layoutInfo.childPaintTransform,
+      layoutInfo.childSize.center(Offset.zero),
     );
+    final Size tooltipSize = layoutInfo.childSize;
 
     final (TextStyle defaultTextStyle, BoxDecoration defaultDecoration) = switch (Theme.of(
       context,
@@ -879,9 +979,11 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       textAlign: widget.textAlign ?? tooltipTheme.textAlign ?? _defaultTextAlign,
       animation: _overlayAnimation,
       target: target,
+      targetSize: tooltipSize,
       verticalOffset:
           widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset,
       preferBelow: widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow,
+      positionDelegate: widget.positionDelegate,
       ignorePointer: widget.ignorePointer ?? widget.message != null,
     );
 
@@ -928,16 +1030,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       child: widget.child,
     );
 
-    bool visible = _visible;
-
-    // Check if there's an ongoing route transition
-    final ModalRoute<dynamic>? route = ModalRoute.of(context);
-    if (route?.secondaryAnimation != null && route!.secondaryAnimation!.isAnimating) {
-      visible = false;
-    }
-
     // Only check for gestures if tooltip should be visible.
-    if (visible) {
+    if (_visible) {
       result = _ExclusiveMouseRegion(
         onEnter: _handleMouseEnter,
         onExit: _handleMouseExit,
@@ -949,7 +1043,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         ),
       );
     }
-    return OverlayPortal(
+    return OverlayPortal.overlayChildLayoutBuilder(
       controller: _overlayController,
       overlayChildBuilder: _buildTooltipOverlay,
       child: result,
@@ -963,13 +1057,18 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   /// Creates a delegate for computing the layout of a tooltip.
   _TooltipPositionDelegate({
     required this.target,
+    required this.targetSize,
     required this.verticalOffset,
     required this.preferBelow,
+    this.positionDelegate,
   });
 
   /// The offset of the target the tooltip is positioned near in the global
   /// coordinate system.
   final Offset target;
+
+  /// The size of the target widget that triggers the tooltip.
+  final Size targetSize;
 
   /// The amount of vertical distance between the target and the displayed
   /// tooltip.
@@ -981,11 +1080,28 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   /// direction, the tooltip will be displayed in the opposite direction.
   final bool preferBelow;
 
+  /// A custom position delegate function for computing where the tooltip should be positioned.
+  ///
+  /// If provided, this function will be called with a [TooltipPositionContext] instead
+  /// of the default positioning logic.
+  final TooltipPositionDelegate? positionDelegate;
+
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) => constraints.loosen();
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
+    if (positionDelegate != null) {
+      return positionDelegate!(
+        TooltipPositionContext(
+          target: target,
+          targetSize: targetSize,
+          tooltipSize: childSize,
+          verticalOffset: verticalOffset,
+          preferBelow: preferBelow,
+        ),
+      );
+    }
     return positionDependentBox(
       size: size,
       childSize: childSize,
@@ -998,8 +1114,10 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   @override
   bool shouldRelayout(_TooltipPositionDelegate oldDelegate) {
     return target != oldDelegate.target ||
+        targetSize != oldDelegate.targetSize ||
         verticalOffset != oldDelegate.verticalOffset ||
-        preferBelow != oldDelegate.preferBelow;
+        preferBelow != oldDelegate.preferBelow ||
+        positionDelegate != oldDelegate.positionDelegate;
   }
 }
 
@@ -1014,9 +1132,11 @@ class _TooltipOverlay extends StatelessWidget {
     required this.textAlign,
     required this.animation,
     required this.target,
+    required this.targetSize,
     required this.verticalOffset,
     required this.preferBelow,
     required this.ignorePointer,
+    this.positionDelegate,
     this.onEnter,
     this.onExit,
   });
@@ -1030,8 +1150,10 @@ class _TooltipOverlay extends StatelessWidget {
   final TextAlign textAlign;
   final Animation<double> animation;
   final Offset target;
+  final Size targetSize;
   final double verticalOffset;
   final bool preferBelow;
+  final TooltipPositionDelegate? positionDelegate;
   final PointerEnterEventListener? onEnter;
   final PointerExitEventListener? onExit;
   final bool ignorePointer;
@@ -1069,8 +1191,10 @@ class _TooltipOverlay extends StatelessWidget {
       child: CustomSingleChildLayout(
         delegate: _TooltipPositionDelegate(
           target: target,
+          targetSize: targetSize,
           verticalOffset: verticalOffset,
           preferBelow: preferBelow,
+          positionDelegate: positionDelegate,
         ),
         child: IgnorePointer(ignoring: ignorePointer, child: result),
       ),

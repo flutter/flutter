@@ -8,6 +8,7 @@
 #include "impeller/entity/geometry/fill_path_geometry.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
+#include "impeller/geometry/round_rect.h"
 
 namespace impeller {
 

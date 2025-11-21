@@ -107,7 +107,7 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
         ),
         Switch(
           value: _networkEnabled,
-          onChanged: (bool? value) {
+          onChanged: (bool value) {
             setState(() {
               _networkEnabled = !_networkEnabled;
             });
@@ -115,23 +115,24 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
         ),
         const SizedBox(height: 32.0),
         Autocomplete<String>(
-          fieldViewBuilder: (
-            BuildContext context,
-            TextEditingController controller,
-            FocusNode focusNode,
-            VoidCallback onFieldSubmitted,
-          ) {
-            return TextFormField(
-              decoration: InputDecoration(
-                errorText: _networkError ? 'Network error, please try again.' : null,
-              ),
-              controller: controller,
-              focusNode: focusNode,
-              onFieldSubmitted: (String value) {
-                onFieldSubmitted();
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController controller,
+                FocusNode focusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                return TextFormField(
+                  decoration: InputDecoration(
+                    errorText: _networkError ? 'Network error, please try again.' : null,
+                  ),
+                  controller: controller,
+                  focusNode: focusNode,
+                  onFieldSubmitted: (String value) {
+                    onFieldSubmitted();
+                  },
+                );
               },
-            );
-          },
           optionsBuilder: (TextEditingValue textEditingValue) async {
             setState(() {
               _networkError = false;

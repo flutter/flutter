@@ -5,13 +5,13 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_CONTEXT_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_CONTEXT_VK_H_
 
+#include <format>
 #include <memory>
 
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/unique_fd.h"
 #include "impeller/base/backend_cast.h"
-#include "impeller/base/strings.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/runtime_types.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
@@ -160,7 +160,7 @@ class ContextVK final : public Context,
       // No-op if validation layers are not enabled.
       return true;
     }
-    std::string combined = SPrintF("%s %s", label.data(), trailing.data());
+    std::string combined = std::format("{} {}", label, trailing);
     return SetDebugName(GetDevice(), handle, combined);
   }
 

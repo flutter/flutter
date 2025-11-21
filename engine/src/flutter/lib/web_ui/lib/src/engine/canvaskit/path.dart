@@ -7,7 +7,7 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../scene_painting.dart';
+import '../lazy_path.dart';
 import '../vector_math.dart';
 import 'canvaskit_api.dart';
 import 'native_memory.dart';
@@ -16,33 +16,46 @@ import 'path_metrics.dart';
 /// An implementation of [ui.Path] which is backed by an `SkPath`.
 ///
 /// The `SkPath` is required for `CkCanvas` methods which take a path.
-class CkPath implements ScenePath {
+class CkPath implements DisposablePath {
   factory CkPath() {
-    final SkPath skPath = SkPath();
-    skPath.setFillType(toSkFillType(ui.PathFillType.nonZero));
-    return CkPath._(skPath, ui.PathFillType.nonZero);
+    final SkPathBuilder skPathBuilder = SkPathBuilder();
+    skPathBuilder.setFillType(toSkFillType(ui.PathFillType.nonZero));
+    return CkPath._(skPathBuilder, ui.PathFillType.nonZero);
   }
 
   factory CkPath.from(CkPath other) {
-    final SkPath skPath = other.skiaObject.copy();
-    skPath.setFillType(toSkFillType(other._fillType));
-    return CkPath._(skPath, other._fillType);
+    final SkPath skPath = other.snapshotSkPath();
+    final SkPathBuilder skPathBuilder = SkPathBuilder(skPath);
+    skPath.delete();
+
+    return CkPath._(skPathBuilder, other._fillType);
   }
 
   factory CkPath.fromSkPath(SkPath skPath, ui.PathFillType fillType) {
-    skPath.setFillType(toSkFillType(fillType));
-    return CkPath._(skPath, fillType);
+    final SkPathBuilder skPathBuilder = SkPathBuilder(skPath);
+    skPathBuilder.setFillType(toSkFillType(fillType));
+    return CkPath._(skPathBuilder, fillType);
   }
 
-  CkPath._(SkPath nativeObject, this._fillType) {
-    _ref = UniqueRef<SkPath>(this, nativeObject, 'Path');
+  CkPath._(SkPathBuilder nativeObject, this._fillType) {
+    _ref = UniqueRef<SkPathBuilder>(this, nativeObject, 'PathBuilder');
   }
 
-  late final UniqueRef<SkPath> _ref;
+  late final UniqueRef<SkPathBuilder> _ref;
 
-  SkPath get skiaObject => _ref.nativeObject;
+  SkPathBuilder get _skiaPathBuilder => _ref.nativeObject;
+
+  /// Returns an [SkPath] snapshot of the current path state.
+  ///
+  /// It is the responsibility of the caller to delete the returned [SkPath].
+  SkPath snapshotSkPath() => _skiaPathBuilder.snapshot();
 
   ui.PathFillType _fillType;
+
+  @override
+  void dispose() {
+    _ref.dispose();
+  }
 
   @override
   ui.PathFillType get fillType => _fillType;
@@ -53,18 +66,18 @@ class CkPath implements ScenePath {
       return;
     }
     _fillType = newFillType;
-    skiaObject.setFillType(toSkFillType(newFillType));
+    _skiaPathBuilder.setFillType(toSkFillType(newFillType));
   }
 
   @override
   void addArc(ui.Rect oval, double startAngle, double sweepAngle) {
     const double toDegrees = 180.0 / math.pi;
-    skiaObject.addArc(toSkRect(oval), startAngle * toDegrees, sweepAngle * toDegrees);
+    _skiaPathBuilder.addArc(toSkRect(oval), startAngle * toDegrees, sweepAngle * toDegrees);
   }
 
   @override
   void addOval(ui.Rect oval) {
-    skiaObject.addOval(toSkRect(oval), false, 1);
+    _skiaPathBuilder.addOval(toSkRect(oval), false, 1);
   }
 
   @override
@@ -80,8 +93,9 @@ class CkPath implements ScenePath {
       skMatrix[5] += offset.dy;
     }
     final CkPath otherPath = path as CkPath;
-    skiaObject.addPath(
-      otherPath.skiaObject,
+    final SkPath otherSkPath = otherPath.snapshotSkPath();
+    _skiaPathBuilder.addPath(
+      otherSkPath,
       skMatrix[0],
       skMatrix[1],
       skMatrix[2],
@@ -93,36 +107,36 @@ class CkPath implements ScenePath {
       skMatrix[8],
       false,
     );
+    otherSkPath.delete();
   }
 
   @override
   void addPolygon(List<ui.Offset> points, bool close) {
     final SkFloat32List encodedPoints = toMallocedSkPoints(points);
-    skiaObject.addPoly(encodedPoints.toTypedArray(), close);
+    _skiaPathBuilder.addPolygon(encodedPoints.toTypedArray(), close);
     free(encodedPoints);
   }
 
   @override
   void addRRect(ui.RRect rrect) {
-    skiaObject.addRRect(toSkRRect(rrect), false);
+    _skiaPathBuilder.addRRect(toSkRRect(rrect), false);
   }
 
   @override
   void addRSuperellipse(ui.RSuperellipse rsuperellipse) {
-    // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
-    // back to RRect.  https://github.com/flutter/flutter/issues/163718
-    addRRect(rsuperellipse.toApproximateRRect());
+    final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
+    addPath((path as LazyPath).builtPath, offset);
   }
 
   @override
   void addRect(ui.Rect rect) {
-    skiaObject.addRect(toSkRect(rect));
+    _skiaPathBuilder.addRect(toSkRect(rect));
   }
 
   @override
   void arcTo(ui.Rect rect, double startAngle, double sweepAngle, bool forceMoveTo) {
     const double toDegrees = 180.0 / math.pi;
-    skiaObject.arcToOval(
+    _skiaPathBuilder.arcToOval(
       toSkRect(rect),
       startAngle * toDegrees,
       sweepAngle * toDegrees,
@@ -138,7 +152,7 @@ class CkPath implements ScenePath {
     bool largeArc = false,
     bool clockwise = true,
   }) {
-    skiaObject.arcToRotated(
+    _skiaPathBuilder.arcToRotated(
       radius.x,
       radius.y,
       rotation,
@@ -151,27 +165,27 @@ class CkPath implements ScenePath {
 
   @override
   void close() {
-    skiaObject.close();
+    _skiaPathBuilder.close();
   }
 
   @override
-  ui.PathMetrics computeMetrics({bool forceClosed = false}) {
+  CkPathMetrics computeMetrics({bool forceClosed = false}) {
     return CkPathMetrics(this, forceClosed);
   }
 
   @override
   void conicTo(double x1, double y1, double x2, double y2, double w) {
-    skiaObject.conicTo(x1, y1, x2, y2, w);
+    _skiaPathBuilder.conicTo(x1, y1, x2, y2, w);
   }
 
   @override
   bool contains(ui.Offset point) {
-    return skiaObject.contains(point.dx, point.dy);
+    return _skiaPathBuilder.contains(point.dx, point.dy);
   }
 
   @override
   void cubicTo(double x1, double y1, double x2, double y2, double x3, double y3) {
-    skiaObject.cubicTo(x1, y1, x2, y2, x3, y3);
+    _skiaPathBuilder.cubicTo(x1, y1, x2, y2, x3, y3);
   }
 
   @override
@@ -186,9 +200,9 @@ class CkPath implements ScenePath {
       skMatrix[2] += offset.dx;
       skMatrix[5] += offset.dy;
     }
-    final CkPath otherPath = path as CkPath;
-    skiaObject.addPath(
-      otherPath.skiaObject,
+    final SkPath otherSkPath = (path as CkPath).snapshotSkPath();
+    _skiaPathBuilder.addPath(
+      otherSkPath,
       skMatrix[0],
       skMatrix[1],
       skMatrix[2],
@@ -200,24 +214,25 @@ class CkPath implements ScenePath {
       skMatrix[8],
       true,
     );
+    otherSkPath.delete();
   }
 
   @override
-  ui.Rect getBounds() => fromSkRect(skiaObject.getBounds());
+  ui.Rect getBounds() => fromSkRect(_skiaPathBuilder.getBounds());
 
   @override
   void lineTo(double x, double y) {
-    skiaObject.lineTo(x, y);
+    _skiaPathBuilder.lineTo(x, y);
   }
 
   @override
   void moveTo(double x, double y) {
-    skiaObject.moveTo(x, y);
+    _skiaPathBuilder.moveTo(x, y);
   }
 
   @override
   void quadraticBezierTo(double x1, double y1, double x2, double y2) {
-    skiaObject.quadTo(x1, y1, x2, y2);
+    _skiaPathBuilder.quadTo(x1, y1, x2, y2);
   }
 
   @override
@@ -228,7 +243,7 @@ class CkPath implements ScenePath {
     bool largeArc = false,
     bool clockwise = true,
   }) {
-    skiaObject.rArcTo(
+    _skiaPathBuilder.rArcTo(
       radius.x,
       radius.y,
       rotation,
@@ -241,72 +256,105 @@ class CkPath implements ScenePath {
 
   @override
   void relativeConicTo(double x1, double y1, double x2, double y2, double w) {
-    skiaObject.rConicTo(x1, y1, x2, y2, w);
+    _skiaPathBuilder.rConicTo(x1, y1, x2, y2, w);
   }
 
   @override
   void relativeCubicTo(double x1, double y1, double x2, double y2, double x3, double y3) {
-    skiaObject.rCubicTo(x1, y1, x2, y2, x3, y3);
+    _skiaPathBuilder.rCubicTo(x1, y1, x2, y2, x3, y3);
   }
 
   @override
   void relativeLineTo(double dx, double dy) {
-    skiaObject.rLineTo(dx, dy);
+    _skiaPathBuilder.rLineTo(dx, dy);
   }
 
   @override
   void relativeMoveTo(double dx, double dy) {
-    skiaObject.rMoveTo(dx, dy);
+    _skiaPathBuilder.rMoveTo(dx, dy);
   }
 
   @override
   void relativeQuadraticBezierTo(double x1, double y1, double x2, double y2) {
-    skiaObject.rQuadTo(x1, y1, x2, y2);
+    _skiaPathBuilder.rQuadTo(x1, y1, x2, y2);
   }
 
   @override
   void reset() {
     // Only reset the local field. Skia will reset its internal state via
-    // SkPath.reset() below.
+    // SkPathBuilder.reset() below.
     _fillType = ui.PathFillType.nonZero;
-    skiaObject.reset();
+    _skiaPathBuilder.reset();
   }
 
   @override
   CkPath shift(ui.Offset offset) {
-    // `SkPath.transform` mutates the existing path, so create a copy and call
-    // `transform` on the copy.
-    final SkPath shiftedPath = skiaObject.copy();
-    shiftedPath.transform(1.0, 0.0, offset.dx, 0.0, 1.0, offset.dy, 0.0, 0.0, 1.0);
-    return CkPath.fromSkPath(shiftedPath, _fillType);
+    final CkPath shiftedPath = CkPath.from(this);
+    shiftedPath._skiaPathBuilder.transform(1.0, 0.0, offset.dx, 0.0, 1.0, offset.dy, 0.0, 0.0, 1.0);
+    return shiftedPath;
   }
 
   static CkPath combine(ui.PathOperation operation, ui.Path uiPath1, ui.Path uiPath2) {
     final CkPath path1 = uiPath1 as CkPath;
     final CkPath path2 = uiPath2 as CkPath;
-    final SkPath newPath = canvasKit.Path.MakeFromOp(
-      path1.skiaObject,
-      path2.skiaObject,
+
+    final SkPath skPath1 = path1.snapshotSkPath();
+    final SkPath skPath2 = path2.snapshotSkPath();
+
+    final SkPath combinedSkPath = canvasKit.Path.MakeFromOp(
+      skPath1,
+      skPath2,
       toSkPathOp(operation),
     );
-    return CkPath.fromSkPath(newPath, path1._fillType);
+
+    final CkPath combinedPath = CkPath.fromSkPath(combinedSkPath, path1._fillType);
+
+    skPath1.delete();
+    skPath2.delete();
+    combinedSkPath.delete();
+
+    return combinedPath;
   }
 
   @override
-  ui.Path transform(Float64List matrix4) {
-    final SkPath newPath = skiaObject.copy();
+  CkPath transform(Float64List matrix4) {
+    final CkPath transformedPath = CkPath.from(this);
+
     final Float32List m = toSkMatrixFromFloat64(matrix4);
-    newPath.transform(m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8]);
-    return CkPath.fromSkPath(newPath, _fillType);
+    transformedPath._skiaPathBuilder.transform(
+      m[0],
+      m[1],
+      m[2],
+      m[3],
+      m[4],
+      m[5],
+      m[6],
+      m[7],
+      m[8],
+    );
+    return transformedPath;
   }
 
   @override
   String toSvgString() {
-    return skiaObject.toSVGString();
+    final SkPath skPath = snapshotSkPath();
+    final String result = skPath.toSVGString();
+    skPath.delete();
+    return result;
   }
 
   /// Return `true` if this path contains no segments.
   bool get isEmpty {
-    return skiaObject.isEmpty();
+    return _skiaPathBuilder.isEmpty();
+  }
+}
+
+class CkPathConstructors implements DisposablePathConstructors {
+  @override
+  CkPath createNew() => CkPath();
+
+  @override
+  CkPath combinePaths(ui.PathOperation operation, DisposablePath path1, DisposablePath path2) {
+    return CkPath.combine(operation, path1 as CkPath, path2 as CkPath);
   }
 }

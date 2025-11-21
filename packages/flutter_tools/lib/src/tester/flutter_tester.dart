@@ -99,7 +99,7 @@ class FlutterTesterDevice extends Device {
   @override
   void clearLogs() {}
 
-  final DesktopLogReader _logReader = DesktopLogReader();
+  final _logReader = DesktopLogReader();
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
@@ -116,7 +116,7 @@ class FlutterTesterDevice extends Device {
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   Future<LaunchResult> startApp(
@@ -153,7 +153,7 @@ class FlutterTesterDevice extends Device {
       assetDirPath: assetDirectory.path,
     );
 
-    final List<String> command = <String>[
+    final command = <String>[
       _artifacts.getArtifactPath(Artifact.flutterTester),
       '--run-forever',
       '--non-interactive',
@@ -252,9 +252,9 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
        ),
        super('Flutter tester');
 
-  static const String kTesterDeviceId = 'flutter-tester';
+  static const kTesterDeviceId = 'flutter-tester';
 
-  static bool showFlutterTesterDevice = false;
+  static var showFlutterTesterDevice = false;
 
   final FlutterTesterDevice _testerDevice;
 
@@ -265,7 +265,10 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
   bool get supportsPlatform => true;
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     return showFlutterTesterDevice ? <Device>[_testerDevice] : <Device>[];
   }
 

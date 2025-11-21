@@ -92,7 +92,7 @@ class DeferredComponent {
   /// configuration.
   @override
   String toString() {
-    final StringBuffer out = StringBuffer('\nDeferredComponent: $name\n  Libraries:');
+    final out = StringBuffer('\nDeferredComponent: $name\n  Libraries:');
     for (final String lib in libraries) {
       out.write('\n    - $lib');
     }
@@ -107,6 +107,9 @@ class DeferredComponent {
       out.write('\n    - ${asset.uri.path}');
       if (asset.flavors.isNotEmpty) {
         out.write(' (flavors: ${asset.flavors.join(', ')})');
+      }
+      if (asset.platforms.isNotEmpty) {
+        out.write(' (platforms: ${asset.platforms.join(', ')})');
       }
     }
     return out.toString();
@@ -138,7 +141,7 @@ class LoadingUnit {
   /// the [path] field. The [path] is not included as it is not relevant when the
   @override
   String toString() {
-    final StringBuffer out = StringBuffer('\nLoadingUnit $id\n  Libraries:');
+    final out = StringBuffer('\nLoadingUnit $id\n  Libraries:');
     for (final String lib in libraries) {
       out.write('\n  - $lib');
     }
@@ -161,13 +164,13 @@ class LoadingUnit {
     Logger logger, {
     List<String>? abis,
   }) {
-    final List<LoadingUnit> loadingUnits = <LoadingUnit>[];
+    final loadingUnits = <LoadingUnit>[];
     final List<FileSystemEntity> files = outputDir.listSync(recursive: true);
-    for (final FileSystemEntity fileEntity in files) {
+    for (final fileEntity in files) {
       if (fileEntity is File) {
         final File file = fileEntity;
         // Determine if the abi is one we build.
-        bool matchingAbi = abis == null;
+        var matchingAbi = abis == null;
         if (abis != null) {
           for (final String abi in abis) {
             if (file.parent.path.endsWith(abi)) {

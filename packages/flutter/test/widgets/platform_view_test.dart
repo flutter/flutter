@@ -1067,7 +1067,10 @@ void main() {
                 height: 100.0,
                 child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
               ),
-              Focus(debugLabel: 'container', child: Container(key: containerKey)),
+              Focus(
+                debugLabel: 'container',
+                child: Container(key: containerKey),
+              ),
             ],
           ),
         ),
@@ -1116,7 +1119,10 @@ void main() {
                 height: 100.0,
                 child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
               ),
-              Focus(debugLabel: 'container', child: Container(key: containerKey)),
+              Focus(
+                debugLabel: 'container',
+                child: Container(key: containerKey),
+              ),
             ],
           ),
         ),
@@ -1165,7 +1171,10 @@ void main() {
                 height: 100.0,
                 child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
               ),
-              Focus(debugLabel: 'container', child: Container(key: containerKey)),
+              Focus(
+                debugLabel: 'container',
+                child: Container(key: containerKey),
+              ),
             ],
           ),
         ),
@@ -2135,7 +2144,10 @@ void main() {
                 height: 100.0,
                 child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr),
               ),
-              Focus(debugLabel: 'container', child: Container(key: containerKey)),
+              Focus(
+                debugLabel: 'container',
+                child: Container(key: containerKey),
+              ),
             ],
           ),
         ),
@@ -3009,7 +3021,10 @@ void main() {
                 height: 100.0,
                 child: AppKitView(viewType: 'webview', layoutDirection: TextDirection.ltr),
               ),
-              Focus(debugLabel: 'container', child: Container(key: containerKey)),
+              Focus(
+                debugLabel: 'container',
+                child: Container(key: containerKey),
+              ),
             ],
           ),
         ),
@@ -3841,7 +3856,10 @@ void main() {
           child: Column(
             children: <Widget>[
               SizedBox(width: 300, height: 300, child: platformViewLink),
-              Focus(debugLabel: 'container', child: Container(key: containerKey)),
+              Focus(
+                debugLabel: 'container',
+                child: Container(key: containerKey),
+              ),
             ],
           ),
         ),

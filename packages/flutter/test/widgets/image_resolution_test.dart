@@ -93,21 +93,16 @@ Widget buildImageAtRatio(
     child: DefaultAssetBundle(
       bundle: bundle ?? TestAssetBundle(manifest: testManifest),
       child: Center(
-        child:
-            inferSize
-                ? Image(
-                  key: key,
-                  excludeFromSemantics: true,
-                  image: TestAssetImage(imageName, images),
-                )
-                : Image(
-                  key: key,
-                  excludeFromSemantics: true,
-                  image: TestAssetImage(imageName, images),
-                  height: imageSize,
-                  width: imageSize,
-                  fit: BoxFit.fill,
-                ),
+        child: inferSize
+            ? Image(key: key, excludeFromSemantics: true, image: TestAssetImage(imageName, images))
+            : Image(
+                key: key,
+                excludeFromSemantics: true,
+                image: TestAssetImage(imageName, images),
+                height: imageSize,
+                width: imageSize,
+                fit: BoxFit.fill,
+              ),
       ),
     ),
   );

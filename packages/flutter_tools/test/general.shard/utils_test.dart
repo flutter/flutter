@@ -2,17 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/base/version.dart';
+import 'package:stack_trace/stack_trace.dart';
 
 import '../src/common.dart';
 
 void main() {
   group('SettingsFile', () {
     testWithoutContext('parse', () {
-      final SettingsFile file = SettingsFile.parse('''
+      final file = SettingsFile.parse('''
 # ignore comment
 foo=bar
 baz=qux
@@ -51,7 +55,7 @@ baz=qux
       expect(v3, greaterThan(v2));
       expect(v2, greaterThan(v1));
 
-      final Version v5 = Version(1, 2, 0, text: 'foo');
+      final v5 = Version(1, 2, 0, text: 'foo');
       expect(v5, equals(v2));
 
       expect(Version.parse('Preview2.2'), isNull);
@@ -149,25 +153,25 @@ baz=qux
   });
 
   group('text wrapping', () {
-    const int lineLength = 40;
-    const String longLine = 'This is a long line that needs to be wrapped.';
-    final String longLineWithNewlines =
+    const lineLength = 40;
+    const longLine = 'This is a long line that needs to be wrapped.';
+    final longLineWithNewlines =
         'This is a long line with newlines that\n'
         'needs to be wrapped.\n\n'
         '${'0123456789' * 5}';
-    final String longAnsiLineWithNewlines =
+    final longAnsiLineWithNewlines =
         '${AnsiTerminal.red}This${AnsiTerminal.resetAll} is a long line with newlines that\n'
         'needs to be wrapped.\n\n'
         '${AnsiTerminal.green}0123456789${AnsiTerminal.resetAll}'
         '${'0123456789' * 3}'
         '${AnsiTerminal.green}0123456789${AnsiTerminal.resetAll}';
-    const String onlyAnsiSequences = '${AnsiTerminal.red}${AnsiTerminal.resetAll}';
-    final String indentedLongLineWithNewlines =
+    const onlyAnsiSequences = '${AnsiTerminal.red}${AnsiTerminal.resetAll}';
+    final indentedLongLineWithNewlines =
         '    This is an indented long line with newlines that\n'
         'needs to be wrapped.\n\tAnd preserves tabs.\n      \n  '
         '${'0123456789' * 5}';
-    const String shortLine = 'Short line.';
-    const String indentedLongLine =
+    const shortLine = 'Short line.';
+    const indentedLongLine =
         '    This is an indented long line that needs to be '
         'wrapped and indentation preserved.';
     testWithoutContext('does not wrap by default in tests', () {
@@ -520,5 +524,48 @@ needs to be wrapped.
       getSizeAsPlatformMB(10 * 1000 * 1000, platform: FakePlatform(operatingSystem: 'web')),
       '10.0MB',
     );
+  });
+
+  testWithoutContext('Stream.transformWithCallSite', () async {
+    final inputController = StreamController<String>();
+    const jsonMap = <String, Object?>{'foo': 123};
+    const invalidJson = 'Hello world!';
+
+    final validCompleter = Completer<void>();
+    final errorCompleter = Completer<void>();
+
+    // Wrap the callsite of `transformWithCallSite` with a named function to be more confident
+    // that the top frame is the location we expect without actually needing to check exact line
+    // and column numbers.
+    void listenToStream() {
+      inputController.stream
+          .transformWithCallSite(json.decoder)
+          .listen(
+            (result) {
+              expect(validCompleter.isCompleted, false);
+              expect(result, jsonMap);
+              validCompleter.complete();
+            },
+            onError: (Object e, StackTrace st) {
+              expect(errorCompleter.isCompleted, false);
+              expect(e, isA<FormatException>());
+              final trace = Trace.from(st);
+              // Validate that the top stack frame corresponds to where `transformWithCallSite`
+              // was invoked.
+              expect(trace.frames.first.member, 'main.<fn>.listenToStream');
+              errorCompleter.complete();
+            },
+          );
+    }
+
+    listenToStream();
+
+    // Write both valid and invalid JSON to the stream.
+    inputController.add(json.encode(jsonMap));
+    inputController.add(invalidJson);
+
+    await inputController.sink.close();
+    await validCompleter.future;
+    await errorCompleter.future;
   });
 }

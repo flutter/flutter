@@ -81,7 +81,11 @@ impeller::RoundSuperellipseParam RSuperellipse::param() const {
 }
 
 bool RSuperellipse::contains(double x, double y) {
-  return param().Contains(DlPoint(SafeNarrow(x), SafeNarrow(y)));
+  DlPoint point(SafeNarrow(x), SafeNarrow(y));
+  if (!bounds_.Contains(point)) {
+    return false;
+  }
+  return param().Contains(point);
 }
 
 }  // namespace flutter

@@ -91,8 +91,8 @@ bool _isAscii(int charCode) {
 
 /// Returns whether the `char` is a single character of a letter or a digit.
 bool isLetter(int charCode) {
-  return (charCode >= _kLowerA && charCode <= _kLowerZ)
-      || (charCode >= _kUpperA && charCode <= _kUpperZ);
+  return (charCode >= _kLowerA && charCode <= _kLowerZ) ||
+      (charCode >= _kUpperA && charCode <= _kUpperZ);
 }
 
 /// A set of rules that can derive a large number of logical keys simply from
@@ -128,10 +128,10 @@ class _StringStream {
 
   final String _data;
   final Map<int, String> _goalToEventCode = Map<int, String>.fromEntries(
-    kLayoutGoals
-      .entries
-      .map((MapEntry<String, String> beforeEntry) =>
-          MapEntry<int, String>(beforeEntry.value.codeUnitAt(0), beforeEntry.key))
+    kLayoutGoals.entries.map(
+      (MapEntry<String, String> beforeEntry) =>
+          MapEntry<int, String>(beforeEntry.value.codeUnitAt(0), beforeEntry.key),
+    ),
   );
 
   int get offest => _offset;
@@ -169,8 +169,7 @@ class _StringStream {
 Map<String, int> _unmarshallCodeMap(_StringStream stream) {
   final int entryNum = stream.readIntAsVerbatim();
   return <String, int>{
-    for (int i = 0; i < entryNum; i++)
-      stream.readEventKey(): stream.readIntAsChar(),
+    for (int i = 0; i < entryNum; i++) stream.readEventKey(): stream.readIntAsChar(),
   };
 }
 
@@ -179,8 +178,7 @@ Map<String, Map<String, int>> unmarshallMappingData(String compressed) {
   final _StringStream stream = _StringStream(compressed);
   final int eventCodeNum = stream.readIntAsVerbatim();
   return <String, Map<String, int>>{
-    for (int i = 0; i < eventCodeNum; i++)
-      stream.readEventCode() : _unmarshallCodeMap(stream),
+    for (int i = 0; i < eventCodeNum; i++) stream.readEventCode(): _unmarshallCodeMap(stream),
   };
 }
 
@@ -204,7 +202,7 @@ Map<String, Map<String, int>> getMappingDataWin() {
     r'v1@v'
     r'w3"w?w|w'
     r'x2#x)x'
-    r'z2(z>y'
+    r'z2(z>y',
   ); // 59 characters
 }
 
@@ -225,7 +223,7 @@ Map<String, Map<String, int>> getMappingDataLinux() {
     r'x1>x'
     r'y2¥ÿ←ÿ'
     r'z5<z»yŁwłw›y'
-    r';2µmºm'
+    r';2µmºm',
   ); // 53 characters
 }
 
@@ -267,6 +265,6 @@ Map<String, Map<String, int>> getMappingDataDarwin() {
     r'z5 z¥y‡y‹ÿ›w'
     r'.2√v◊v'
     r';4µmÍsÓmßs'
-    r'/2¸zΩz'
+    r'/2¸zΩz',
   ); // 209 characters
 }

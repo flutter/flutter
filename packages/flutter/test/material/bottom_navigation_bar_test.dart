@@ -109,10 +109,14 @@ void main() {
 
     const double selectedFontSize = 14.0;
     const double unselectedFontSize = 12.0;
-    final TextStyle selectedFontStyle =
-        tester.renderObject<RenderParagraph>(find.text('AC')).text.style!;
-    final TextStyle unselectedFontStyle =
-        tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style!;
+    final TextStyle selectedFontStyle = tester
+        .renderObject<RenderParagraph>(find.text('AC'))
+        .text
+        .style!;
+    final TextStyle unselectedFontStyle = tester
+        .renderObject<RenderParagraph>(find.text('Alarm'))
+        .text
+        .style!;
     final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
     final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
     expect(selectedFontStyle.color, equals(primaryColor));
@@ -174,10 +178,14 @@ void main() {
 
     const double selectedFontSize = 14.0;
     const double unselectedFontSize = 12.0;
-    final TextStyle selectedFontStyle =
-        tester.renderObject<RenderParagraph>(find.text('AC')).text.style!;
-    final TextStyle unselectedFontStyle =
-        tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style!;
+    final TextStyle selectedFontStyle = tester
+        .renderObject<RenderParagraph>(find.text('AC'))
+        .text
+        .style!;
+    final TextStyle unselectedFontStyle = tester
+        .renderObject<RenderParagraph>(find.text('Alarm'))
+        .text
+        .style!;
     final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
     final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
     expect(selectedFontStyle.color, equals(primaryColor));
@@ -235,10 +243,14 @@ void main() {
       ),
     );
 
-    final TextStyle selectedFontStyle =
-        tester.renderObject<RenderParagraph>(find.text('AC')).text.style!;
-    final TextStyle unselectedFontStyle =
-        tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style!;
+    final TextStyle selectedFontStyle = tester
+        .renderObject<RenderParagraph>(find.text('AC'))
+        .text
+        .style!;
+    final TextStyle unselectedFontStyle = tester
+        .renderObject<RenderParagraph>(find.text('Alarm'))
+        .text
+        .style!;
     expect(selectedFontStyle.fontSize, equals(selectedTextStyle.fontSize));
     expect(selectedFontStyle.fontWeight, equals(selectedTextStyle.fontWeight));
     expect(
@@ -278,8 +290,10 @@ void main() {
       ),
     );
 
-    final TextStyle selectedFontStyle =
-        tester.renderObject<RenderParagraph>(find.text('AC')).text.style!;
+    final TextStyle selectedFontStyle = tester
+        .renderObject<RenderParagraph>(find.text('AC'))
+        .text
+        .style!;
     expect(selectedFontStyle.fontSize, equals(selectedTextStyle.fontSize));
     expect(
       tester
@@ -347,10 +361,14 @@ void main() {
       ),
     );
 
-    final TextStyle selectedFontStyle =
-        tester.renderObject<RenderParagraph>(find.text('AC')).text.style!;
-    final TextStyle unselectedFontStyle =
-        tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style!;
+    final TextStyle selectedFontStyle = tester
+        .renderObject<RenderParagraph>(find.text('AC'))
+        .text
+        .style!;
+    final TextStyle unselectedFontStyle = tester
+        .renderObject<RenderParagraph>(find.text('Alarm'))
+        .text
+        .style!;
     final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
     final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
     expect(selectedIcon.color, equals(selectedIconTheme.color));
@@ -2538,35 +2556,25 @@ void main() {
                       flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.isButton,
-                                SemanticsFlag.isFocusable,
-                                SemanticsFlag.hasSelectedState,
-                                SemanticsFlag.isSelected,
-                              ],
-                              actions: <SemanticsAction>[
-                                SemanticsAction.tap,
-                                SemanticsAction.focus,
-                              ],
-                              label: 'A\nTab 1 of 2',
-                              textDirection: TextDirection.ltr,
-                            ),
-                            TestSemantics(
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.isButton,
-                                SemanticsFlag.isFocusable,
-                                SemanticsFlag.hasSelectedState,
-                              ],
-                              actions: <SemanticsAction>[
-                                SemanticsAction.tap,
-                                SemanticsAction.focus,
-                              ],
-                              label: 'B\nTab 2 of 2',
-                              textDirection: TextDirection.ltr,
-                            ),
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isButton,
+                            SemanticsFlag.isFocusable,
+                            SemanticsFlag.hasSelectedState,
+                            SemanticsFlag.isSelected,
                           ],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                          label: 'A\nTab 1 of 2',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isButton,
+                            SemanticsFlag.isFocusable,
+                            SemanticsFlag.hasSelectedState,
+                          ],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                          label: 'B\nTab 2 of 2',
+                          textDirection: TextDirection.ltr,
                         ),
                       ],
                     ),
@@ -3083,6 +3091,29 @@ void main() {
 
     expect(find.byKey(key1), findsOneWidget);
     expect(find.byKey(key2), findsOneWidget);
+  });
+
+  testWidgets('BottomNavigationBar and BottomNavigationBarItem render at zero size', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(
+              bottomNavigationBar: BottomNavigationBar(
+                items: const <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: 'X'),
+                  BottomNavigationBarItem(icon: Icon(Icons.access_alarm), label: 'Y'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
   });
 }
 

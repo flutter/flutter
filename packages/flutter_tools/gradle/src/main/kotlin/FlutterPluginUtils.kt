@@ -4,13 +4,15 @@
 
 package com.flutter.gradle
 
+import com.android.build.api.artifact.SingleArtifact
+import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
+import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
 import groovy.lang.Closure
-import groovy.util.Node
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -24,10 +26,6 @@ import java.util.Properties
  * A collection of static utility functions used by the Flutter Gradle Plugin.
  */
 object FlutterPluginUtils {
-    private const val MANIFEST_NAME_KEY = "android:name"
-    private const val MANIFEST_VALUE_KEY = "android:value"
-    private const val MANIFEST_VALUE_TRUE = "true"
-
     // Gradle properties. These must correspond to the values used in
     // flutter/packages/flutter_tools/lib/src/android/gradle.dart, and therefore it is not
     // recommended to use these const values in tests.
@@ -35,10 +33,10 @@ object FlutterPluginUtils {
     internal const val PROP_SPLIT_PER_ABI = "split-per-abi"
     internal const val PROP_LOCAL_ENGINE_REPO = "local-engine-repo"
     internal const val PROP_IS_VERBOSE = "verbose"
-    internal const val PROP_IS_FAST_START = "fast-start"
     internal const val PROP_TARGET = "target"
     internal const val PROP_LOCAL_ENGINE_BUILD_MODE = "local-engine-build-mode"
     internal const val PROP_TARGET_PLATFORM = "target-platform"
+    internal const val PROP_DISABLE_ABI_FILTERING = "disable-abi-filtering"
 
     // ----------------- Methods for string manipulation and comparison. -----------------
 
@@ -58,12 +56,8 @@ object FlutterPluginUtils {
     @Suppress("DEPRECATION")
     internal fun capitalize(string: String): String = string.capitalize()
 
-    // Kotlin's toLowerCase function is deprecated, but the suggested replacement is not supported
-    // by the minimum version of Kotlin that we support. Centralize the use to one place, so that
-    // when our minimum version does support the replacement we can replace by changing a single
-    // line.
-    @Suppress("DEPRECATION")
-    internal fun lowercase(string: String): String = string.toLowerCase()
+    @OptIn(ExperimentalStdlibApi::class)
+    internal fun lowercase(string: String): String = string.lowercase()
 
     // compareTo implementation of version strings in the format of ints and periods
     // Will not crash on RC candidate strings but considers all RC candidates the same version.
@@ -210,15 +204,9 @@ object FlutterPluginUtils {
     @JvmName("isProjectVerbose")
     internal fun isProjectVerbose(project: Project): Boolean = project.findProperty(PROP_IS_VERBOSE)?.toString()?.toBoolean() ?: false
 
-    /** Whether to build the debug app in "fast-start" mode. */
     @JvmStatic
-    @JvmName("isProjectFastStart")
-    internal fun isProjectFastStart(project: Project): Boolean =
-        project
-            .findProperty(
-                PROP_IS_FAST_START
-            )?.toString()
-            ?.toBoolean() ?: false
+    @JvmName("shouldProjectDisableAbiFiltering")
+    internal fun shouldProjectDisableAbiFiltering(project: Project): Boolean = project.hasProperty(PROP_DISABLE_ABI_FILTERING)
 
     /**
      * TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560
@@ -403,6 +391,7 @@ object FlutterPluginUtils {
         return project.extensions.findByType(BaseExtension::class.java)!!
     }
 
+    // Avoid new usages this class is not part of the public AGP DSL.
     private fun getAndroidAppExtensionOrNull(project: Project): AbstractAppExtension? =
         project.extensions.findByType(AbstractAppExtension::class.java)
 
@@ -787,16 +776,11 @@ object FlutterPluginUtils {
      * Add a task that can be called on Flutter projects that outputs app link related project
      * settings into a json file.
      * See https://developer.android.com/training/app-links/ for more information about app link.
-     * The json will be saved in path stored in outputPath parameter.
+     * The json will be saved in path stored in "outputPath" parameter or in the projects build
+     * directory with the file deeplink.json if not specified.
      *
-     * An example json:
-     *  {
-     *      applicationId: "com.example.app",
-     *          deeplinks: [
-     *              {"scheme":"http", "host":"example.com", "path":".*"},
-     *              {"scheme":"https","host":"example.com","path":".*"}
-     *          ]
-     *  }
+     * See DeepLinkJsonFromManifestTask for the structure of the json.
+     *
      * The output file is parsed and used by devtool.
      */
     @JvmStatic
@@ -804,182 +788,31 @@ object FlutterPluginUtils {
     internal fun addTasksForOutputsAppLinkSettings(project: Project) {
         // Integration test for AppLinkSettings task defined in
         // flutter/flutter/packages/flutter_tools/test/integration.shard/android_gradle_outputs_app_link_settings_test.dart
-        val android = getAndroidAppExtensionOrNull(project)
-        if (android == null) {
-            project.logger.info("addTasksForOutputsAppLinkSettings called on project without android extension.")
-            return
-        }
-        android.applicationVariants.configureEach {
-            val variant = this
-            project.tasks.register("output${capitalize(variant.name)}AppLinkSettings") {
-                val task: Task = this
-                task.description =
-                    "stores app links settings for the given build variant of this Android project into a json file."
-                variant.outputs.configureEach {
-                    // TODO(gmackall): Migrate to AGPs variant api.
-                    //    https://github.com/flutter/flutter/issues/166550
-                    @Suppress("DEPRECATION")
-                    val baseVariantOutput: com.android.build.gradle.api.BaseVariantOutput = this
-                    // Deeplinks are defined in AndroidManifest.xml and is only available after
-                    // processResourcesProvider.
-                    dependsOn(findProcessResources(baseVariantOutput))
-                }
-                doLast {
-                    // We are configuring the same object before a doLast and in a doLast.
-                    // without a clear reason why. That is not good.
-                    variant.outputs.configureEach {
-                        val appLinkSettings = createAppLinkSettings(variant, this)
-                        File(project.property("outputPath").toString()).writeText(
-                            appLinkSettings.toJson().toString()
+        val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+        androidComponents.onVariants { variant ->
+            val manifestUpdater =
+                project.tasks.register("output${capitalize(variant.name)}AppLinkSettings", DeepLinkJsonFromManifestTask::class.java) {
+                    namespace.set(variant.namespace)
+                    // Flutter should always use project.layout.buildDirectory.file("deeplink.json")
+                    // instead of relying on passing in a path.
+                    if (project.hasProperty("outputPath")) {
+                        deepLinkJson.set(
+                            File(project.property("outputPath").toString())
                         )
+                    } else {
+                        deepLinkJson.set(project.layout.buildDirectory.file("deeplink.json"))
                     }
                 }
-            }
+            // This task does not modify the manifest despite using an api
+            // designed for modification. The task is responsible for an exact copy of the input
+            // manifest being used for the output manifest.
+            variant.artifacts
+                .use(manifestUpdater)
+                .wiredWithFiles(
+                    DeepLinkJsonFromManifestTask::manifestFile,
+                    DeepLinkJsonFromManifestTask::updatedManifest
+                ).toTransform(SingleArtifact.MERGED_MANIFEST) // (3) Indicate the artifact and operation type.
         }
-    }
-
-    /**
-     * Extracts app deeplink information from the Android manifest file of a variant then returns
-     * an AppLinkSettings object.
-     *
-     * @param BaseVariantOutput The output of a specific build variant (e.g., debug, release).
-     * @param variant The application variant being processed.
-     */
-    @Suppress("KDocUnresolvedReference")
-    private fun createAppLinkSettings(
-        // TODO(gmackall): Migrate to AGPs variant api.
-        //    https://github.com/flutter/flutter/issues/166550
-        @Suppress("DEPRECATION") variant: com.android.build.gradle.api.ApplicationVariant,
-        @Suppress("DEPRECATION") baseVariantOutput: com.android.build.gradle.api.BaseVariantOutput
-    ): AppLinkSettings {
-        val appLinkSettings = AppLinkSettings(variant.applicationId)
-
-        // XmlParser is not namespace aware because it makes querying nodes cumbersome.
-        // TODO(gmackall): Migrate to AGPs variant api.
-        //    https://github.com/flutter/flutter/issues/166550
-        @Suppress("DEPRECATION")
-        val manifest: Node =
-            groovy.xml
-                .XmlParser(false, false)
-                .parse(findProcessResources(baseVariantOutput).manifestFile)
-        val applicationNode: Node? =
-            manifest.children().find { node ->
-                node is Node && node.name() == "application"
-            } as Node?
-        if (applicationNode == null) {
-            return appLinkSettings
-        }
-        val activities: List<Node> =
-            applicationNode.children().filterIsInstance<Node>().filter { item ->
-                item.name() == "activity"
-            }
-
-        activities.forEach { activity ->
-            val metaDataItems: List<Node> =
-                activity.children().filterIsInstance<Node>().filter { metaItem ->
-                    metaItem.name() == "meta-data"
-                }
-            metaDataItems.forEach { metaDataItem ->
-                val nameAttribute: Boolean =
-                    metaDataItem.attribute(MANIFEST_NAME_KEY) == "flutter_deeplinking_enabled"
-                val valueAttribute: Boolean =
-                    metaDataItem.attribute(MANIFEST_VALUE_KEY) == MANIFEST_VALUE_TRUE
-                if (nameAttribute && valueAttribute) {
-                    appLinkSettings.deeplinkingFlagEnabled = true
-                }
-            }
-            val intentFilterItems: List<Node> =
-                activity.children().filterIsInstance<Node>().filter { filterItem ->
-                    filterItem.name() == "intent-filter"
-                }
-            intentFilterItems.forEach { appLinkIntent ->
-                // Print out the host attributes in data tags.
-                val schemes: MutableSet<String?> = mutableSetOf()
-                val hosts: MutableSet<String?> = mutableSetOf()
-                val paths: MutableSet<String?> = mutableSetOf()
-                val intentFilterCheck = IntentFilterCheck()
-                if (appLinkIntent.attribute("android:autoVerify") == MANIFEST_VALUE_TRUE) {
-                    intentFilterCheck.hasAutoVerify = true
-                }
-
-                val actionItems: List<Node> =
-                    appLinkIntent.children().filterIsInstance<Node>().filter { item ->
-                        item.name() == "action"
-                    }
-                // Any action item causes intentFilterCheck to always be true
-                // and we keep looping instead of exiting out early.
-                // TODO: Exit out early per intent filter action view.
-                actionItems.forEach { action ->
-                    if (action.attribute(MANIFEST_NAME_KEY) == "android.intent.action.VIEW") {
-                        intentFilterCheck.hasActionView = true
-                    }
-                }
-                val categoryItems: List<Node> =
-                    appLinkIntent.children().filterIsInstance<Node>().filter { item ->
-                        item.name() == "category"
-                    }
-                categoryItems.forEach { category ->
-                    // TODO: Exit out early per intent filter default category.
-                    if (category.attribute(MANIFEST_NAME_KEY) == "android.intent.category.DEFAULT") {
-                        intentFilterCheck.hasDefaultCategory = true
-                    }
-                    // TODO: Exit out early per intent filter browsable category.
-                    if (category.attribute(MANIFEST_NAME_KEY) == "android.intent.category.BROWSABLE") {
-                        intentFilterCheck.hasBrowsableCategory =
-                            true
-                    }
-                }
-                val dataItems: List<Node> =
-                    appLinkIntent.children().filterIsInstance<Node>().filter { item ->
-                        item.name() == "data"
-                    }
-                dataItems.forEach { data ->
-                    data.attributes().forEach { entry ->
-                        when (entry.key) {
-                            "android:scheme" -> schemes.add(entry.value.toString())
-                            "android:host" -> hosts.add(entry.value.toString())
-                            // All path patterns add to paths.
-                            "android:pathAdvancedPattern" ->
-                                paths.add(
-                                    entry.value.toString()
-                                )
-
-                            "android:pathPattern" -> paths.add(entry.value.toString())
-                            "android:path" -> paths.add(entry.value.toString())
-                            "android:pathPrefix" -> paths.add(entry.value.toString() + ".*")
-                            "android:pathSuffix" -> paths.add(".*" + entry.value.toString())
-                        }
-                    }
-                }
-                if (hosts.isNotEmpty() || paths.isNotEmpty()) {
-                    if (schemes.isEmpty()) {
-                        schemes.add(null)
-                    }
-                    if (hosts.isEmpty()) {
-                        hosts.add(null)
-                    }
-                    if (paths.isEmpty()) {
-                        paths.add(".*")
-                    }
-                    // Sets are not ordered this could produce a bug.
-                    schemes.forEach { scheme ->
-                        hosts.forEach { host ->
-                            paths.forEach { path ->
-                                appLinkSettings.deeplinks.add(
-                                    Deeplink(
-                                        scheme,
-                                        host,
-                                        path,
-                                        intentFilterCheck
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return appLinkSettings
     }
 }
 

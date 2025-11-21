@@ -7,7 +7,7 @@ import 'package:yaml_edit/yaml_edit.dart' show YamlEditor;
 
 /// Converts a [YamlNode] to a valid YAML-formatted [String].
 String encodeYamlAsString(YamlNode contents) {
-  final YamlEditor editor = YamlEditor('');
+  final editor = YamlEditor('');
   editor.update(const <String>[], contents);
   return editor.toString();
 }

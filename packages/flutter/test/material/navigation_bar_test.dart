@@ -953,6 +953,47 @@ void main() {
     );
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/169249.
+  testWidgets('Material3 - Navigation indicator moves to selected item', (
+    WidgetTester tester,
+  ) async {
+    final ThemeData theme = ThemeData();
+    int index = 0;
+
+    Widget buildNavigationBar({Color? indicatorColor, ShapeBorder? indicatorShape}) {
+      return MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          bottomNavigationBar: RepaintBoundary(
+            child: NavigationBar(
+              indicatorColor: indicatorColor,
+              indicatorShape: indicatorShape,
+              selectedIndex: index,
+              destinations: const <Widget>[
+                NavigationDestination(icon: Icon(Icons.ac_unit), label: 'AC'),
+                NavigationDestination(icon: Icon(Icons.access_alarm), label: 'Alarm'),
+              ],
+              onDestinationSelected: (int i) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildNavigationBar());
+
+    // Move the selection to the second destination.
+    index = 1;
+    await tester.pumpWidget(buildNavigationBar());
+    await tester.pumpAndSettle();
+
+    // The navigation indicator should be on the second item.
+    await expectLater(
+      find.byType(NavigationBar),
+      matchesGoldenFile('m3.navigation_bar.indicator.ink.position.png'),
+    );
+  });
+
   testWidgets('Navigation indicator scale transform', (WidgetTester tester) async {
     int selectedIndex = 0;
 
@@ -975,10 +1016,9 @@ void main() {
 
     await tester.pumpWidget(buildNavigationBar());
     await tester.pumpAndSettle();
-    final Finder transformFinder =
-        find
-            .descendant(of: find.byType(NavigationIndicator), matching: find.byType(Transform))
-            .last;
+    final Finder transformFinder = find
+        .descendant(of: find.byType(NavigationIndicator), matching: find.byType(Transform))
+        .last;
     Matrix4 transform = tester.widget<Transform>(transformFinder).transform;
     expect(transform.getColumn(0)[0], 0.0);
 
@@ -1087,16 +1127,16 @@ void main() {
     const Color hoverColor = Color(0xff0000ff);
     const Color focusColor = Color(0xff00ffff);
     const Color pressedColor = Color(0xffff00ff);
-    final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color>((
-      Set<MaterialState> states,
+    final WidgetStateProperty<Color?> overlayColor = WidgetStateProperty.resolveWith<Color>((
+      Set<WidgetState> states,
     ) {
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverColor;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusColor;
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedColor;
       }
       return Colors.transparent;
@@ -1133,9 +1173,9 @@ void main() {
       inkFeatures,
       kIsWeb
           ? (paints
-            ..rrect()
-            ..rrect()
-            ..circle(color: hoverColor))
+              ..rrect()
+              ..rrect()
+              ..circle(color: hoverColor))
           : (paints..circle(color: hoverColor)),
     );
 
@@ -1147,12 +1187,12 @@ void main() {
       inkFeatures,
       kIsWeb
           ? (paints
-            ..circle()
-            ..circle()
-            ..circle(color: pressedColor))
+              ..circle()
+              ..circle()
+              ..circle(color: pressedColor))
           : (paints
-            ..circle()
-            ..circle(color: pressedColor)),
+              ..circle()
+              ..circle(color: pressedColor)),
     );
 
     await gesture.up();
@@ -1167,11 +1207,11 @@ void main() {
       inkFeatures,
       kIsWeb
           ? (paints
-            ..circle()
-            ..circle(color: focusColor))
+              ..circle()
+              ..circle(color: focusColor))
           : (paints
-            ..circle()
-            ..circle(color: focusColor)),
+              ..circle()
+              ..circle(color: focusColor)),
     );
   });
 
@@ -1695,9 +1735,30 @@ void main() {
       ),
     );
 
-    final double safeAreaBottomPadding =
-        tester.widget<Padding>(find.byType(Padding).first).padding.resolve(textDirection).bottom;
+    final double safeAreaBottomPadding = tester
+        .widget<Padding>(find.byType(Padding).first)
+        .padding
+        .resolve(textDirection)
+        .bottom;
     expect(safeAreaBottomPadding, equals(0));
+  });
+
+  testWidgets('NavigationBar does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: NavigationBar(
+              destinations: const <Widget>[
+                NavigationDestination(icon: Icon(Icons.add), label: 'X'),
+                NavigationDestination(icon: Icon(Icons.abc), label: 'Y'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(NavigationBar)), Size.zero);
   });
 }
 
@@ -1730,7 +1791,9 @@ class IconWithRandomColor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color randomColor = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
+    final Color randomColor = Color(
+      (Random().nextDouble() * 0xFFFFFF).toInt(),
+    ).withValues(alpha: 1.0);
     return Icon(icon, color: randomColor);
   }
 }

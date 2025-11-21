@@ -13,7 +13,9 @@ void main() {
 
     await tester.pumpWidget(
       const CupertinoApp(
-        home: Center(child: CupertinoFormRow(prefix: prefix, child: CupertinoTextField())),
+        home: Center(
+          child: CupertinoFormRow(prefix: prefix, child: CupertinoTextField()),
+        ),
       ),
     );
 
@@ -24,7 +26,9 @@ void main() {
     const Widget child = CupertinoTextField();
 
     await tester.pumpWidget(
-      const CupertinoApp(home: Center(child: CupertinoFormRow(child: child))),
+      const CupertinoApp(
+        home: Center(child: CupertinoFormRow(child: child)),
+      ),
     );
 
     expect(child, tester.widget(find.byType(CupertinoTextField)));
@@ -79,7 +83,9 @@ void main() {
 
     await tester.pumpWidget(
       const CupertinoApp(
-        home: Center(child: CupertinoFormRow(error: error, child: CupertinoTextField())),
+        home: Center(
+          child: CupertinoFormRow(error: error, child: CupertinoTextField()),
+        ),
       ),
     );
 
@@ -91,7 +97,9 @@ void main() {
 
     await tester.pumpWidget(
       const CupertinoApp(
-        home: Center(child: CupertinoFormRow(helper: helper, child: CupertinoTextField())),
+        home: Center(
+          child: CupertinoFormRow(helper: helper, child: CupertinoTextField()),
+        ),
       ),
     );
 

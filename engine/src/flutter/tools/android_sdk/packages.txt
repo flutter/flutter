@@ -3,4 +3,4 @@ cmdline-tools;latest:cmdline-tools
 build-tools;36.0.0:build-tools
 platform-tools:platform-tools
 tools:tools
-ndk;27.0.12077973:ndk
+ndk;28.2.13676358:ndk

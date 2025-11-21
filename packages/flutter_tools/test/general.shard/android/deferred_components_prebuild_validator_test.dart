@@ -29,7 +29,7 @@ void main() {
   });
 
   testWithoutContext('No checks passes', () async {
-    final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
+    final validator = DeferredComponentsPrebuildValidator(
       projectDir,
       logger,
       platform,
@@ -42,7 +42,7 @@ void main() {
   });
 
   testWithoutContext('clearTempDir passes', () async {
-    final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
+    final validator = DeferredComponentsPrebuildValidator(
       projectDir,
       logger,
       platform,
@@ -83,7 +83,7 @@ void main() {
         mode: FileMode.append,
       );
 
-      final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
+      final validator = DeferredComponentsPrebuildValidator(
         projectDir,
         logger,
         platform,
@@ -151,7 +151,7 @@ void main() {
         mode: FileMode.append,
       );
 
-      final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
+      final validator = DeferredComponentsPrebuildValidator(
         projectDir,
         logger,
         platform,
@@ -213,7 +213,7 @@ void main() {
       mode: FileMode.append,
     );
 
-    final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
+    final validator = DeferredComponentsPrebuildValidator(
       projectDir,
       logger,
       platform,
@@ -249,7 +249,7 @@ void main() {
   });
 
   testWithoutContext('androidStringMapping creates new file', () async {
-    final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
+    final validator = DeferredComponentsPrebuildValidator(
       projectDir,
       logger,
       platform,
@@ -342,7 +342,7 @@ void main() {
   });
 
   testWithoutContext('androidStringMapping modifies strings file', () async {
-    final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
+    final validator = DeferredComponentsPrebuildValidator(
       projectDir,
       logger,
       platform,

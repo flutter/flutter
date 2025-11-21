@@ -24,9 +24,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
-import androidx.lifecycle.DefaultLifecycleObserver;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.ProcessLifecycleOwner;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.view.TextureRegistry;
@@ -100,21 +97,23 @@ public class FlutterRenderer implements TextureRegistry {
   public FlutterRenderer(@NonNull FlutterJNI flutterJNI) {
     this.flutterJNI = flutterJNI;
     this.flutterJNI.addIsDisplayingFlutterUiListener(flutterUiDisplayListener);
-    ProcessLifecycleOwner.get()
-        .getLifecycle()
-        .addObserver(
-            new DefaultLifecycleObserver() {
-              @Override
-              public void onResume(@NonNull LifecycleOwner owner) {
-                Log.v(TAG, "onResume called; notifying SurfaceProducers");
-                for (ImageReaderSurfaceProducer producer : imageReaderProducers) {
-                  if (producer.callback != null && producer.notifiedDestroy) {
-                    producer.notifiedDestroy = false;
-                    producer.callback.onSurfaceAvailable();
-                  }
-                }
-              }
-            });
+  }
+
+  /**
+   * Restores {@code ImageReaderSurfaceProducer}s that were previously notified to be destroyed due
+   * to a call to {@code onTrimMemory} as part of an {@code onResume} app lifecycle event.
+   *
+   * <p>All {@code FlutterActivity}s and {@code FlutterFragment}s are expected to call this {@code
+   * onResume} to ensure surface producers are restored when the app returns to the foreground.
+   */
+  public void restoreSurfaceProducers() {
+    Log.v(TAG, "restoreSurfaceProducers called; notifying SurfaceProducers");
+    for (ImageReaderSurfaceProducer producer : imageReaderProducers) {
+      if (producer.callback != null && producer.notifiedDestroy) {
+        producer.notifiedDestroy = false;
+        producer.callback.onSurfaceAvailable();
+      }
+    }
   }
 
   /**
@@ -413,7 +412,6 @@ public class FlutterRenderer implements TextureRegistry {
           TextureRegistry.ImageConsumer,
           TextureRegistry.OnTrimMemoryListener {
     private static final String TAG = "ImageReaderSurfaceProducer";
-    private static final int MAX_IMAGES = 6;
     // The ImageReaderSurfaceProducer must not close images until the renderer,
     // either Skia OpenGL, Impeller OpenGL, or Impeller Vulkan is done reading
     // from them. The Vulkan renderer allows up to two frames in flight before
@@ -422,6 +420,7 @@ public class FlutterRenderer implements TextureRegistry {
     // the frame that references them has finished rendering can result in
     // tearing or other incorrect rendering.
     private static final int MAX_DEQUEUED_IMAGES = 2;
+    private static final int MAX_IMAGES = 5 + MAX_DEQUEUED_IMAGES;
 
     // Flip when debugging to see verbose logs.
     private static final boolean VERBOSE_LOGS = false;
@@ -452,7 +451,7 @@ public class FlutterRenderer implements TextureRegistry {
      *
      * <p>Used to avoid signaling {@link Callback#onSurfaceAvailable()} unnecessarily.
      */
-    private boolean notifiedDestroy = false;
+    @VisibleForTesting boolean notifiedDestroy = false;
 
     // State held to track latency of various stages.
     private long lastDequeueTime = 0;
@@ -466,7 +465,8 @@ public class FlutterRenderer implements TextureRegistry {
     private final HashMap<ImageReader, PerImageReader> perImageReaders = new HashMap<>();
     private ArrayList<PerImage> lastDequeuedImage = new ArrayList<PerImage>();
     private PerImageReader lastReaderDequeuedFrom = null;
-    private Callback callback = null;
+
+    @VisibleForTesting Callback callback = null;
 
     /** Internal class: state held per Image produced by ImageReaders. */
     private class PerImage {
@@ -555,10 +555,10 @@ public class FlutterRenderer implements TextureRegistry {
       return (double) deltaNanos / 1000000.0;
     }
 
-    PerImageReader getOrCreatePerImageReader(ImageReader reader) {
+    private PerImageReader getOrCreatePerImageReader(ImageReader reader) {
       PerImageReader r = perImageReaders.get(reader);
       if (r == null) {
-        r = new PerImageReader(reader);
+        r = createPerImageReader(reader);
         perImageReaders.put(reader, r);
         imageReaderQueue.add(r);
         if (VERBOSE_LOGS) {
@@ -566,6 +566,11 @@ public class FlutterRenderer implements TextureRegistry {
         }
       }
       return r;
+    }
+
+    @VisibleForTesting
+    public PerImageReader createPerImageReader(ImageReader reader) {
+      return new PerImageReader(reader);
     }
 
     void pruneImageReaderQueue() {
@@ -830,6 +835,12 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @Override
+    public Surface getForcedNewSurface() {
+      createNewReader = true;
+      return getSurface();
+    }
+
+    @Override
     public void scheduleFrame() {
       if (VERBOSE_LOGS) {
         long now = System.nanoTime();
@@ -855,17 +866,23 @@ public class FlutterRenderer implements TextureRegistry {
 
     private PerImageReader getActiveReader() {
       synchronized (lock) {
-        if (createNewReader) {
-          createNewReader = false;
-          // Create a new ImageReader and add it to the queue.
-          ImageReader reader = createImageReader();
-          if (VERBOSE_LOGS) {
-            Log.i(
-                TAG, reader.hashCode() + " created w=" + requestedWidth + " h=" + requestedHeight);
+        if (!createNewReader) {
+          // Verify we don't need a new ImageReader anyway because its Surface has been invalidated.
+          PerImageReader lastPerImageReader = imageReaderQueue.peekLast();
+          Surface lastImageReaderSurface = lastPerImageReader.reader.getSurface();
+          boolean lastImageReaderHasValidSurface = lastImageReaderSurface.isValid();
+          if (lastImageReaderHasValidSurface) {
+            return lastPerImageReader;
           }
-          return getOrCreatePerImageReader(reader);
         }
-        return imageReaderQueue.peekLast();
+
+        createNewReader = false;
+        // Create a new ImageReader and add it to the queue.
+        ImageReader reader = createImageReader();
+        if (VERBOSE_LOGS) {
+          Log.i(TAG, reader.hashCode() + " created w=" + requestedWidth + " h=" + requestedHeight);
+        }
+        return getOrCreatePerImageReader(reader);
       }
     }
 
@@ -909,7 +926,8 @@ public class FlutterRenderer implements TextureRegistry {
           HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
     }
 
-    private ImageReader createImageReader() {
+    @VisibleForTesting
+    public ImageReader createImageReader() {
       if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
         return createImageReader33();
       } else if (Build.VERSION.SDK_INT >= API_LEVELS.API_29) {

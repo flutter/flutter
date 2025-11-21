@@ -36,15 +36,20 @@ class LLDBInitMigration extends ProjectMigrator {
   String get _initPath =>
       _xcodeProject.lldbInitFile.path.replaceFirst(_xcodeProject.hostAppRoot.path, r'$(SRCROOT)');
 
-  static const String _launchActionIdentifier = 'LaunchAction';
-  static const String _testActionIdentifier = 'TestAction';
+  static const _launchActionIdentifier = 'LaunchAction';
+  static const _testActionIdentifier = 'TestAction';
 
   @override
   Future<void> migrate() async {
     SchemeInfo? schemeInfo;
+    // LLDB Init File is only needed for debug and profile mode.
+    if (_buildInfo.mode == BuildMode.release) {
+      return;
+    }
     try {
       if (!_xcodeProjectInfoFile.existsSync()) {
-        throw Exception('Xcode project not found.');
+        logger.printTrace('Xcode project not found.');
+        throw _exceptionMessage();
       }
 
       schemeInfo = await _getSchemeInfo();
@@ -54,10 +59,10 @@ class LLDBInitMigration extends ProjectMigrator {
         return;
       }
       _migrateScheme(schemeInfo);
-    } on Exception catch (e) {
+    } on _LLDBError catch (e) {
       logger.printError(
         'An error occurred when adding LLDB Init File:\n'
-        '$e',
+        '${e.message}',
       );
     }
   }
@@ -65,10 +70,12 @@ class LLDBInitMigration extends ProjectMigrator {
   Future<SchemeInfo> _getSchemeInfo() async {
     final XcodeProjectInfo? projectInfo = await _xcodeProject.projectInfo();
     if (projectInfo == null) {
-      throw Exception('Unable to get Xcode project info.');
+      logger.printTrace('Unable to get Xcode project info.');
+      throw _exceptionMessage();
     }
     if (_xcodeProject.xcodeWorkspace == null) {
-      throw Exception('Xcode workspace not found.');
+      logger.printTrace('Xcode workspace not found.');
+      throw _exceptionMessage();
     }
     final String? scheme = projectInfo.schemeFor(_buildInfo);
     if (scheme == null) {
@@ -77,7 +84,8 @@ class LLDBInitMigration extends ProjectMigrator {
 
     final File schemeFile = _xcodeProject.xcodeProjectSchemeFile(scheme: scheme);
     if (!schemeFile.existsSync()) {
-      throw Exception('Unable to get scheme file for $scheme.');
+      logger.printTrace('Unable to get scheme file for $scheme.');
+      throw _exceptionMessage(schemeName: scheme);
     }
 
     final String schemeContent = schemeFile.readAsStringSync();
@@ -89,17 +97,17 @@ class LLDBInitMigration extends ProjectMigrator {
     final String? lldbInitFileTestPath;
     try {
       // Check that both the LaunchAction and TestAction have the customLLDBInitFile set to flutter_lldbinit.
-      final XmlDocument document = XmlDocument.parse(schemeInfo.schemeContent);
+      final document = XmlDocument.parse(schemeInfo.schemeContent);
 
       lldbInitFileLaunchPath = _parseLLDBInitFileFromScheme(
         action: _launchActionIdentifier,
         document: document,
-        schemeFile: schemeInfo.schemeFile,
+        schemeInfo: schemeInfo,
       );
       lldbInitFileTestPath = _parseLLDBInitFileFromScheme(
         action: _testActionIdentifier,
         document: document,
-        schemeFile: schemeInfo.schemeFile,
+        schemeInfo: schemeInfo,
       );
       final bool launchActionMigrated =
           lldbInitFileLaunchPath != null && lldbInitFileLaunchPath.contains(_initPath);
@@ -111,16 +119,17 @@ class LLDBInitMigration extends ProjectMigrator {
       } else if (launchActionMigrated && !testActionMigrated) {
         // If LaunchAction has it set, but TestAction doesn't, give an error
         // with instructions to add it to the TestAction.
-        throw _missingActionException('Test', schemeInfo.schemeName);
+        throw _exceptionMessage(missingAction: 'Test', schemeName: schemeInfo.schemeName);
       } else if (testActionMigrated && !launchActionMigrated) {
         // If TestAction has it set, but LaunchAction doesn't, give an error
         // with instructions to add it to the LaunchAction.
-        throw _missingActionException('Launch', schemeInfo.schemeName);
+        throw _exceptionMessage(missingAction: 'Run', schemeName: schemeInfo.schemeName);
       }
     } on XmlException catch (exception) {
-      throw Exception(
+      logger.printTrace(
         'Failed to parse ${schemeInfo.schemeFile.basename}: Invalid xml: ${schemeInfo.schemeContent}\n$exception',
       );
+      throw _exceptionMessage(schemeName: schemeInfo.schemeName);
     }
 
     // If the scheme is using a LLDB Init File that is not flutter_lldbinit,
@@ -163,12 +172,13 @@ class LLDBInitMigration extends ProjectMigrator {
           return true;
         }
       } on XmlException catch (exception) {
-        throw Exception(
+        logger.printTrace(
           'Failed to parse ${schemeInfo.schemeFile.basename}: Invalid xml: ${schemeInfo.schemeContent}\n$exception',
         );
+        throw _exceptionMessage(schemeName: schemeInfo.schemeName);
       }
 
-      throw Exception(
+      throw _LLDBError(
         'Running Flutter in debug mode on new iOS versions requires a LLDB '
         'Init File, but the scheme already has one set. To ensure debug '
         'mode works, please complete one of the following:\n'
@@ -193,21 +203,22 @@ selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       customLLDBInitFile = "$_initPath"''',
     );
     try {
-      final XmlDocument document = XmlDocument.parse(newScheme);
+      final document = XmlDocument.parse(newScheme);
       _validateSchemeAction(
         action: _launchActionIdentifier,
         document: document,
-        schemeFile: schemeFile,
+        schemeInfo: schemeInfo,
       );
       _validateSchemeAction(
         action: _testActionIdentifier,
         document: document,
-        schemeFile: schemeFile,
+        schemeInfo: schemeInfo,
       );
     } on XmlException catch (exception) {
-      throw Exception(
+      logger.printTrace(
         'Failed to parse ${schemeFile.basename}: Invalid xml: $newScheme\n$exception',
       );
+      throw _exceptionMessage(schemeName: schemeInfo.schemeName);
     }
     schemeFile.writeAsStringSync(newScheme);
   }
@@ -217,17 +228,18 @@ selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
   void _validateSchemeAction({
     required String action,
     required XmlDocument document,
-    required File schemeFile,
+    required SchemeInfo schemeInfo,
   }) {
     final String? lldbInitFile = _parseLLDBInitFileFromScheme(
       action: action,
       document: document,
-      schemeFile: schemeFile,
+      schemeInfo: schemeInfo,
     );
     if (lldbInitFile == null || !lldbInitFile.contains(_initPath)) {
-      throw Exception(
-        'Failed to find correct customLLDBInitFile in $action for the Scheme in ${schemeFile.path}.',
+      logger.printTrace(
+        'Failed to find correct customLLDBInitFile in $action for the Scheme in ${schemeInfo.schemeFile.path}.',
       );
+      throw _exceptionMessage(schemeName: schemeInfo.schemeName);
     }
   }
 
@@ -235,17 +247,18 @@ selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
   String? _parseLLDBInitFileFromScheme({
     required String action,
     required XmlDocument document,
-    required File schemeFile,
+    required SchemeInfo schemeInfo,
   }) {
+    // ignore: experimental_member_use
     final Iterable<XmlNode> nodes = document.xpath('/Scheme/$action');
     if (nodes.isEmpty) {
-      throw Exception('Failed to find $action for the Scheme in ${schemeFile.path}.');
+      logger.printTrace('Failed to find $action for the Scheme in ${schemeInfo.schemeFile.path}.');
+      throw _exceptionMessage(schemeName: schemeInfo.schemeName);
     }
     final XmlNode actionNode = nodes.first;
-    final XmlAttribute? lldbInitFile =
-        actionNode.attributes
-            .where((XmlAttribute attribute) => attribute.localName == 'customLLDBInitFile')
-            .firstOrNull;
+    final XmlAttribute? lldbInitFile = actionNode.attributes
+        .where((XmlAttribute attribute) => attribute.localName == 'customLLDBInitFile')
+        .firstOrNull;
     return lldbInitFile?.value;
   }
 
@@ -263,17 +276,41 @@ selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
     return _fileSystem.file(lldbInitFilePath);
   }
 
-  Exception _missingActionException(String missingAction, String schemeName) {
-    return Exception(
-      'Running Flutter in debug mode on new iOS versions requires a LLDB '
-      'Init File, but the $missingAction action in the $schemeName scheme '
-      'does not have it set. To ensure debug mode works, please complete '
-      'the following:\n'
-      '  * Open Xcode > Product > Scheme > Edit Scheme and for the '
-      '$missingAction action, set LLDB Init File to:\n\n'
+  _LLDBError _exceptionMessage({String? missingAction, String? schemeName}) {
+    final String buildMode = _buildInfo.mode.cliName;
+    if (missingAction != null && schemeName != null) {
+      return _LLDBError(
+        'Running Flutter in $buildMode mode on new iOS versions requires a LLDB '
+        'Init File, but the $missingAction action in the $schemeName scheme '
+        'does not have it set. To ensure $buildMode mode works, please complete '
+        'the following:\n'
+        '  * Open Xcode > Product > Scheme > Edit Scheme and for the '
+        '$missingAction action, set LLDB Init File to:\n\n'
+        '  $_initPath\n',
+      );
+    } else if (schemeName != null) {
+      return _LLDBError(
+        'Running Flutter in $buildMode mode on new iOS versions requires a LLDB '
+        'Init File, but the $schemeName scheme does not have it set. To ensure '
+        '$buildMode mode works, please complete the following:\n'
+        '  * Open Xcode > Product > Scheme > Edit Scheme and for the Run and Test actions, set LLDB Init File to:\n\n'
+        '  $_initPath\n',
+      );
+    }
+    return _LLDBError(
+      'Running Flutter in $buildMode mode on new iOS versions requires a LLDB '
+      'Init File, but the scheme does not have it set. To ensure $buildMode mode '
+      'works, please complete the following:\n'
+      '  * Open Xcode > Product > Scheme > Edit Scheme and for the Run and Test actions, set LLDB Init File to:\n\n'
       '  $_initPath\n',
     );
   }
+}
+
+class _LLDBError implements Exception {
+  _LLDBError(this.message);
+
+  final String message;
 }
 
 class SchemeInfo {

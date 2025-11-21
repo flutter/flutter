@@ -2290,28 +2290,26 @@ void main() {
             Stack(
               children: <Widget>[
                 DragTarget<DragTargetData>(
-                  builder: (
-                    BuildContext context,
-                    List<DragTargetData?> data,
-                    List<dynamic> rejects,
-                  ) {
-                    return const IgnorePointer(
-                      child: SizedBox(height: 100.0, child: Text('Target1')),
-                    );
-                  },
+                  builder:
+                      (BuildContext context, List<DragTargetData?> data, List<dynamic> rejects) {
+                        return const IgnorePointer(
+                          child: SizedBox(height: 100.0, child: Text('Target1')),
+                        );
+                      },
                   onAccept: acceptedDragTargetDatas.add,
                   onAcceptWithDetails: acceptedDragTargetDataDetails.add,
                 ),
                 DragTarget<ExtendedDragTargetData>(
-                  builder: (
-                    BuildContext context,
-                    List<ExtendedDragTargetData?> data,
-                    List<dynamic> rejects,
-                  ) {
-                    return const IgnorePointer(
-                      child: SizedBox(height: 100.0, child: Text('Target2')),
-                    );
-                  },
+                  builder:
+                      (
+                        BuildContext context,
+                        List<ExtendedDragTargetData?> data,
+                        List<dynamic> rejects,
+                      ) {
+                        return const IgnorePointer(
+                          child: SizedBox(height: 100.0, child: Text('Target2')),
+                        );
+                      },
                   onAccept: acceptedExtendedDragTargetDatas.add,
                   onAcceptWithDetails: acceptedExtendedDragTargetDataDetails.add,
                 ),
@@ -2542,10 +2540,9 @@ void main() {
   testWidgets('Draggable disposes recognizer', (WidgetTester tester) async {
     late final OverlayEntry entry;
     addTearDown(
-      () =>
-          entry
-            ..remove()
-            ..dispose(),
+      () => entry
+        ..remove()
+        ..dispose(),
     );
 
     bool didTap = false;
@@ -2555,20 +2552,15 @@ void main() {
         child: Overlay(
           initialEntries: <OverlayEntry>[
             entry = OverlayEntry(
-              builder:
-                  (BuildContext context) => GestureDetector(
-                    onTap: () {
-                      didTap = true;
-                    },
-                    child: Draggable<Object>(
-                      feedback: Container(
-                        width: 100.0,
-                        height: 100.0,
-                        color: const Color(0xFFFF0000),
-                      ),
-                      child: Container(color: const Color(0xFFFFFF00)),
-                    ),
-                  ),
+              builder: (BuildContext context) => GestureDetector(
+                onTap: () {
+                  didTap = true;
+                },
+                child: Draggable<Object>(
+                  feedback: Container(width: 100.0, height: 100.0, color: const Color(0xFFFF0000)),
+                  child: Container(color: const Color(0xFFFFFF00)),
+                ),
+              ),
             ),
           ],
         ),
@@ -2592,10 +2584,9 @@ void main() {
   testWidgets('Draggable plays nice with onTap', (WidgetTester tester) async {
     late final OverlayEntry entry;
     addTearDown(
-      () =>
-          entry
-            ..remove()
-            ..dispose(),
+      () => entry
+        ..remove()
+        ..dispose(),
     );
 
     await tester.pumpWidget(
@@ -2604,20 +2595,15 @@ void main() {
         child: Overlay(
           initialEntries: <OverlayEntry>[
             entry = OverlayEntry(
-              builder:
-                  (BuildContext context) => GestureDetector(
-                    onTap: () {
-                      /* registers a tap recognizer */
-                    },
-                    child: Draggable<Object>(
-                      feedback: Container(
-                        width: 100.0,
-                        height: 100.0,
-                        color: const Color(0xFFFF0000),
-                      ),
-                      child: Container(color: const Color(0xFFFFFF00)),
-                    ),
-                  ),
+              builder: (BuildContext context) => GestureDetector(
+                onTap: () {
+                  /* registers a tap recognizer */
+                },
+                child: Draggable<Object>(
+                  feedback: Container(width: 100.0, height: 100.0, color: const Color(0xFFFF0000)),
+                  child: Container(color: const Color(0xFFFFFF00)),
+                ),
+              ),
             ),
           ],
         ),
@@ -3140,13 +3126,12 @@ void main() {
                   if (settings.name == '/') {
                     return MaterialPageRoute<void>(
                       settings: settings,
-                      builder:
-                          (BuildContext context) => const Draggable<int>(
-                            data: 1,
-                            feedback: Text('Dragging'),
-                            rootOverlay: true,
-                            child: Text('Source'),
-                          ),
+                      builder: (BuildContext context) => const Draggable<int>(
+                        data: 1,
+                        feedback: Text('Dragging'),
+                        rootOverlay: true,
+                        child: Text('Source'),
+                      ),
                     );
                   }
                   throw UnsupportedError('Unsupported route: $settings');
@@ -3203,13 +3188,12 @@ void main() {
                   if (settings.name == '/') {
                     return MaterialPageRoute<void>(
                       settings: settings,
-                      builder:
-                          (BuildContext context) => const LongPressDraggable<int>(
-                            data: 1,
-                            feedback: Text('Dragging'),
-                            rootOverlay: true,
-                            child: Text('Source'),
-                          ),
+                      builder: (BuildContext context) => const LongPressDraggable<int>(
+                        data: 1,
+                        feedback: Text('Dragging'),
+                        rootOverlay: true,
+                        child: Text('Source'),
+                      ),
                     );
                   }
                   throw UnsupportedError('Unsupported route: $settings');
@@ -3595,14 +3579,11 @@ void main() {
           children: <Widget>[
             Draggable<int>(
               feedback: const Text('Feedback'),
-              dragAnchorStrategy: (
-                Draggable<Object> widget,
-                BuildContext context,
-                Offset position,
-              ) {
-                dragAnchorStrategyCalled = true;
-                return Offset.zero;
-              },
+              dragAnchorStrategy:
+                  (Draggable<Object> widget, BuildContext context, Offset position) {
+                    dragAnchorStrategyCalled = true;
+                    return Offset.zero;
+                  },
               child: const Text('Source'),
             ),
           ],
@@ -3720,19 +3701,13 @@ void main() {
     await tester.pumpWidget(
       ValueListenableBuilder<bool>(
         valueListenable: mountedNotifier,
-        builder:
-            (_, bool value, _) =>
-                value
-                    ? const MaterialApp(
-                      home: Scaffold(
-                        body: Draggable<int>(
-                          data: 42,
-                          feedback: Text('Feedback'),
-                          child: Text('Source'),
-                        ),
-                      ),
-                    )
-                    : Container(),
+        builder: (_, bool value, _) => value
+            ? const MaterialApp(
+                home: Scaffold(
+                  body: Draggable<int>(data: 42, feedback: Text('Feedback'), child: Text('Source')),
+                ),
+              )
+            : Container(),
       ),
     );
 

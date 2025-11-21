@@ -19,7 +19,7 @@ import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   testUsingContext('obfuscate requires split-debug-info', () {
-    final FakeBuildInfoCommand command = FakeBuildInfoCommand();
+    final command = FakeBuildInfoCommand();
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
     expect(

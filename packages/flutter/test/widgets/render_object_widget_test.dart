@@ -121,7 +121,10 @@ void main() {
     }
 
     await tester.pumpWidget(
-      DecoratedBox(decoration: kBoxDecorationA, child: DecoratedBox(decoration: kBoxDecorationB)),
+      DecoratedBox(
+        decoration: kBoxDecorationA,
+        child: DecoratedBox(decoration: kBoxDecorationB),
+      ),
     );
 
     checkFullTree();
@@ -136,7 +139,10 @@ void main() {
     checkFullTree();
 
     await tester.pumpWidget(
-      DecoratedBox(decoration: kBoxDecorationA, child: DecoratedBox(decoration: kBoxDecorationB)),
+      DecoratedBox(
+        decoration: kBoxDecorationA,
+        child: DecoratedBox(decoration: kBoxDecorationB),
+      ),
     );
 
     checkFullTree();
@@ -148,7 +154,9 @@ void main() {
     await tester.pumpWidget(
       DecoratedBox(
         decoration: kBoxDecorationA,
-        child: TestWidget(child: TestWidget(child: DecoratedBox(decoration: kBoxDecorationB))),
+        child: TestWidget(
+          child: TestWidget(child: DecoratedBox(decoration: kBoxDecorationB)),
+        ),
       ),
     );
 
@@ -203,7 +211,10 @@ void main() {
     final TestOrientedBox box = TestOrientedBox(key: boxKey);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(400.0, 300.0)), child: box),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(400.0, 300.0)),
+        child: box,
+      ),
     );
 
     final RenderDecoratedBox renderBox = tester.renderObject(find.byKey(boxKey));
@@ -211,7 +222,10 @@ void main() {
     expect(decoration.color, equals(const Color(0xFF00FF00)));
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(300.0, 400.0)), child: box),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(300.0, 400.0)),
+        child: box,
+      ),
     );
 
     decoration = renderBox.decoration as BoxDecoration;

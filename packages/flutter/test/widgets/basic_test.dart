@@ -26,7 +26,10 @@ void main() {
       addTearDown(image1.dispose);
 
       await tester.pumpWidget(
-        Directionality(textDirection: TextDirection.ltr, child: RawImage(image: image1)),
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: RawImage(image: image1),
+        ),
       );
       final RenderImage renderObject = tester.firstRenderObject<RenderImage>(find.byType(RawImage));
 
@@ -48,8 +51,9 @@ void main() {
       expect(renderObject.filterQuality, FilterQuality.medium);
       expect(renderObject.isAntiAlias, false);
 
-      final ui.Image image2 =
-          (await tester.runAsync<ui.Image>(() => createTestImage(width: 2, height: 2)))!;
+      final ui.Image image2 = (await tester.runAsync<ui.Image>(
+        () => createTestImage(width: 2, height: 2),
+      ))!;
       addTearDown(image2.dispose);
       const String debugImageLabel = 'debugImageLabel';
       const double width = 1;
@@ -751,6 +755,20 @@ void main() {
       expect(listItemNode.role, SemanticsRole.listItem);
     });
 
+    testWidgets('Semantics can use form', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(key: key1, role: SemanticsRole.form, container: true),
+          ),
+        ),
+      );
+      final SemanticsNode formNode = tester.getSemantics(find.byKey(key1));
+
+      expect(formNode.role, SemanticsRole.form);
+    });
+
     testWidgets('Semantics can merge attributed strings with non attributed string', (
       WidgetTester tester,
     ) async {
@@ -840,7 +858,9 @@ void main() {
       'Semantics with decreasedValue should be recognized as containing text and not fail',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(home: Semantics(decreasedValue: 'test value', child: const Placeholder())),
+          MaterialApp(
+            home: Semantics(decreasedValue: 'test value', child: const Placeholder()),
+          ),
         );
         expect(tester.takeException(), isNull);
       },
@@ -850,7 +870,9 @@ void main() {
       'Semantics with increasedValue should be recognized as containing text and not fail',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(home: Semantics(increasedValue: 'test value', child: const Placeholder())),
+          MaterialApp(
+            home: Semantics(increasedValue: 'test value', child: const Placeholder()),
+          ),
         );
         expect(tester.takeException(), isNull);
       },
@@ -1022,8 +1044,9 @@ void main() {
 
   testWidgets('UnconstrainedBox can set and update clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(const UnconstrainedBox());
-    final RenderConstraintsTransformBox renderObject =
-        tester.allRenderObjects.whereType<RenderConstraintsTransformBox>().first;
+    final RenderConstraintsTransformBox renderObject = tester.allRenderObjects
+        .whereType<RenderConstraintsTransformBox>()
+        .first;
     expect(renderObject.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(const UnconstrainedBox(clipBehavior: Clip.antiAlias));
@@ -1042,19 +1065,19 @@ void main() {
         Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 200, maxWidth: 200),
-            child:
-                clip == null
-                    ? const UnconstrainedBox(child: SizedBox(width: 400, height: 400))
-                    : UnconstrainedBox(
-                      clipBehavior: clip,
-                      child: const SizedBox(width: 400, height: 400),
-                    ),
+            child: clip == null
+                ? const UnconstrainedBox(child: SizedBox(width: 400, height: 400))
+                : UnconstrainedBox(
+                    clipBehavior: clip,
+                    child: const SizedBox(width: 400, height: 400),
+                  ),
           ),
         ),
       );
 
-      final RenderConstraintsTransformBox renderObject =
-          tester.allRenderObjects.whereType<RenderConstraintsTransformBox>().first;
+      final RenderConstraintsTransformBox renderObject = tester.allRenderObjects
+          .whereType<RenderConstraintsTransformBox>()
+          .first;
 
       // Defaults to Clip.none
       expect(renderObject.clipBehavior, equals(clip ?? Clip.none), reason: 'for clip = $clip');
@@ -1142,7 +1165,11 @@ void main() {
         const Flex(
           direction: Axis.horizontal,
           textDirection: TextDirection.ltr,
-          children: <Widget>[SizedBox.shrink(child: ColoredBox(color: colorToPaint, child: child))],
+          children: <Widget>[
+            SizedBox.shrink(
+              child: ColoredBox(color: colorToPaint, child: child),
+            ),
+          ],
         ),
       );
       expect(find.byType(ColoredBox), findsOneWidget);
@@ -1192,6 +1219,214 @@ void main() {
       box.debugFillProperties(properties);
 
       expect(properties.properties.first.value, colorToPaint);
+    });
+
+    testWidgets('ColoredBox - default isAntiAlias', (WidgetTester tester) async {
+      await tester.pumpWidget(const ColoredBox(color: colorToPaint));
+      expect(find.byType(ColoredBox), findsOneWidget);
+      final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
+
+      renderColoredBox.paint(mockContext, Offset.zero);
+      expect(mockCanvas.paints.single.isAntiAlias, isTrue);
+    });
+
+    testWidgets('ColoredBox - passing isAntiAlias = false', (WidgetTester tester) async {
+      await tester.pumpWidget(const ColoredBox(color: colorToPaint, isAntiAlias: false));
+      expect(find.byType(ColoredBox), findsOneWidget);
+      final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
+
+      renderColoredBox.paint(mockContext, Offset.zero);
+      expect(mockCanvas.paints.single.isAntiAlias, isFalse);
+    });
+
+    // This test verifies how `ColoredBox.isAntiAlias` affects rendering.
+    // The first row uses `isAntiAlias: true`, showing gaps between the white backgrounds.
+    // The second row uses `isAntiAlias: false`, demonstrating no gaps between the white backgrounds.
+    // The third row contains three tilted boxes with `isAntiAlias` set to true, false, and false, respectively.
+    testWidgets('ColoredBox golden test - anti-aliasing and rotation variations', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Center(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: RepaintBoundary(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 8,
+                  children: <Widget>[
+                    // Intentionally 4% larger than the original size to test anti-aliasing
+                    Transform.scale(
+                      scale: 1.04,
+                      child: const ColoredBox(
+                        color: Colors.orange,
+                        child: Padding(
+                          padding: EdgeInsets.all(2),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              ColoredBox(
+                                color: Colors.white,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    'Short',
+                                    style: TextStyle(fontSize: 16, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                              ColoredBox(
+                                color: Colors.white,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    'Just text ',
+                                    style: TextStyle(fontSize: 14, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                              ColoredBox(
+                                color: Colors.white,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    ' Tall text ',
+                                    style: TextStyle(fontSize: 18, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                              ColoredBox(
+                                color: Colors.white,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    'Medium',
+                                    style: TextStyle(fontSize: 32, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Transform.scale(
+                      scale: 1.04,
+                      child: const ColoredBox(
+                        color: Colors.orange,
+                        isAntiAlias: false,
+                        child: Padding(
+                          padding: EdgeInsets.all(2),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              ColoredBox(
+                                color: Colors.white,
+                                isAntiAlias: false,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    'Short',
+                                    style: TextStyle(fontSize: 16, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                              ColoredBox(
+                                color: Colors.white,
+                                isAntiAlias: false,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    'Just text ',
+                                    style: TextStyle(fontSize: 14, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                              ColoredBox(
+                                color: Colors.white,
+                                isAntiAlias: false,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    ' Tall text ',
+                                    style: TextStyle(fontSize: 18, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                              ColoredBox(
+                                color: Colors.white,
+                                isAntiAlias: false,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    'Medium',
+                                    style: TextStyle(fontSize: 32, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        SizedBox.square(
+                          dimension: 80,
+                          child: Center(
+                            child: SizedBox.square(
+                              dimension: 50,
+                              child: Transform.rotate(
+                                angle: math.pi / 5,
+                                child: const ColoredBox(color: Colors.blue),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox.square(
+                          dimension: 80,
+                          child: Center(
+                            child: SizedBox.square(
+                              dimension: 50,
+                              child: Transform.rotate(
+                                angle: math.pi / 5,
+                                child: const ColoredBox(color: Colors.amber, isAntiAlias: false),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox.square(
+                          dimension: 80,
+                          child: Center(
+                            child: SizedBox.square(
+                              dimension: 50,
+                              child: Transform.rotate(
+                                angle: math.pi / 5,
+                                child: Transform.scale(
+                                  scale: 1.2,
+                                  child: const ColoredBox(color: Colors.teal, isAntiAlias: false),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      await expectLater(find.byType(RepaintBoundary), matchesGoldenFile('basic.ColoredBox.0.png'));
     });
   });
 
@@ -1549,11 +1784,10 @@ void main() {
       children: <Widget>[Text('Hamilton'), Text('Lafayette'), Text('Mulligan')],
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,

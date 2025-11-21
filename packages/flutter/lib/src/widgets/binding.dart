@@ -35,6 +35,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import '../foundation/_features.dart';
+import '_window.dart';
 import 'app.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
@@ -271,13 +273,17 @@ abstract mixin class WidgetsBindingObserver {
   ///
   /// ```dart
   /// class TextScaleFactorReactor extends StatefulWidget {
-  ///   const TextScaleFactorReactor({ super.key });
+  ///   const TextScaleFactorReactor({super.key});
   ///
   ///   @override
   ///   State<TextScaleFactorReactor> createState() => _TextScaleFactorReactorState();
   /// }
   ///
-  /// class _TextScaleFactorReactorState extends State<TextScaleFactorReactor> with WidgetsBindingObserver {
+  /// class _TextScaleFactorReactorState extends State<TextScaleFactorReactor>
+  ///     with WidgetsBindingObserver {
+  ///   double _lastTextScaleFactor =
+  ///       WidgetsBinding.instance.platformDispatcher.textScaleFactor;
+  ///
   ///   @override
   ///   void initState() {
   ///     super.initState();
@@ -290,11 +296,12 @@ abstract mixin class WidgetsBindingObserver {
   ///     super.dispose();
   ///   }
   ///
-  ///   late double _lastTextScaleFactor;
-  ///
   ///   @override
   ///   void didChangeTextScaleFactor() {
-  ///     setState(() { _lastTextScaleFactor = WidgetsBinding.instance.platformDispatcher.textScaleFactor; });
+  ///     setState(() {
+  ///       _lastTextScaleFactor =
+  ///           WidgetsBinding.instance.platformDispatcher.textScaleFactor;
+  ///     });
   ///   }
   ///
   ///   @override
@@ -459,6 +466,7 @@ mixin WidgetsBinding
       return true;
     }());
     platformMenuDelegate = DefaultPlatformMenuDelegate();
+    _windowingOwner = createDefaultWindowingOwner();
   }
 
   /// The current [WidgetsBinding], if one has been created.
@@ -809,9 +817,8 @@ mixin WidgetsBinding
   ///  * [addObserver], for the method that adds observers in the first place.
   ///  * [WidgetsBindingObserver], which has an example of using this method.
   bool removeObserver(WidgetsBindingObserver observer) {
-    if (observer == _backGestureObserver) {
-      _backGestureObserver = null;
-    }
+    _backGestureObservers.remove(observer);
+
     return _observers.remove(observer);
   }
 
@@ -948,32 +955,33 @@ mixin WidgetsBinding
     return false;
   }
 
-  // The observer that is currently handling an active predictive back gesture.
-  WidgetsBindingObserver? _backGestureObserver;
+  // The observers that are currently handling an active predictive back gesture.
+  final List<WidgetsBindingObserver> _backGestureObservers = <WidgetsBindingObserver>[];
 
-  Future<bool> _handleStartBackGesture(Map<String?, Object?> arguments) {
-    _backGestureObserver = null;
+  bool _handleStartBackGesture(Map<String?, Object?> arguments) {
+    _backGestureObservers.clear();
     final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (observer.handleStartBackGesture(backEvent)) {
-        _backGestureObserver = observer;
-        return Future<bool>.value(true);
+        _backGestureObservers.add(observer);
       }
     }
-    return Future<bool>.value(false);
+    return _backGestureObservers.isNotEmpty;
   }
 
-  Future<void> _handleUpdateBackGestureProgress(Map<String?, Object?> arguments) async {
-    if (_backGestureObserver == null) {
+  void _handleUpdateBackGestureProgress(Map<String?, Object?> arguments) {
+    if (_backGestureObservers.isEmpty) {
       return;
     }
 
     final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
-    _backGestureObserver!.handleUpdateBackGestureProgress(backEvent);
+    for (final WidgetsBindingObserver observer in _backGestureObservers) {
+      observer.handleUpdateBackGestureProgress(backEvent);
+    }
   }
 
   Future<void> _handleCommitBackGesture() async {
-    if (_backGestureObserver == null) {
+    if (_backGestureObservers.isEmpty) {
       // If the predictive back was not handled, then the route should be popped
       // like a normal, non-predictive back. For example, this will happen if a
       // back gesture occurs but no predictive back route transition exists to
@@ -982,15 +990,15 @@ mixin WidgetsBinding
       await handlePopRoute();
       return;
     }
-    _backGestureObserver?.handleCommitBackGesture();
+    for (final WidgetsBindingObserver observer in _backGestureObservers) {
+      observer.handleCommitBackGesture();
+    }
   }
 
-  Future<void> _handleCancelBackGesture() async {
-    if (_backGestureObserver == null) {
-      return;
+  void _handleCancelBackGesture() {
+    for (final WidgetsBindingObserver observer in _backGestureObservers) {
+      observer.handleCancelBackGesture();
     }
-
-    _backGestureObserver!.handleCancelBackGesture();
   }
 
   /// Called when the host tells the app to push a new route onto the
@@ -1041,9 +1049,9 @@ mixin WidgetsBinding
     };
   }
 
-  Future<dynamic> _handleBackGestureInvocation(MethodCall methodCall) {
-    final Map<String?, Object?>? arguments =
-        (methodCall.arguments as Map<Object?, Object?>?)?.cast<String?, Object?>();
+  Future<dynamic> _handleBackGestureInvocation(MethodCall methodCall) async {
+    final Map<String?, Object?>? arguments = (methodCall.arguments as Map<Object?, Object?>?)
+        ?.cast<String?, Object?>();
     return switch (methodCall.method) {
       'startBackGesture' => _handleStartBackGesture(arguments!),
       'updateBackGestureProgress' => _handleUpdateBackGestureProgress(arguments!),
@@ -1438,6 +1446,69 @@ mixin WidgetsBinding
   Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
     return platformDispatcher.computePlatformResolvedLocale(supportedLocales);
   }
+
+  /// The [WindowingOwner] is responsible for creating and managing [BaseWindowController]s.
+  ///
+  /// The default [WindowingOwner] supports macOS, Linux, and Windows.
+  ///
+  /// A custom [WindowingOwner] can be provided by the setter.
+  ///
+  /// {@template flutter.widgets.binding.window.experimental}
+  /// Do not use this API in production applications or packages published to
+  /// pub.dev. Flutter will make breaking changes to this API, even in patch
+  /// versions.
+  ///
+  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
+  /// feature is enabled by [isWindowingEnabled].
+  ///
+  /// See: https://github.com/flutter/flutter/issues/30701.
+  /// {@endtemplate}
+  @internal
+  WindowingOwner get windowingOwner {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError('''
+Windowing APIs are not enabled.
+
+Windowing APIs are currently experimental. Do not use windowing APIs in
+production applications or plugins published to pub.dev.
+
+To try experimental windowing APIs:
+1. Switch to Flutter's main release channel.
+2. Turn on the windowing feature flag.
+
+See: https://github.com/flutter/flutter/issues/30701.
+''');
+    }
+    return _windowingOwner;
+  }
+
+  /// Sets the [WindowingOwner].
+  ///
+  /// The default [WindowingOwner] supports macOS, Linux, and Windows.
+  ///
+  /// This setter can be used to provide a custom [WindowingOwner].
+  ///
+  /// {@macro flutter.widgets.binding.window.experimental}
+  @internal
+  set windowingOwner(WindowingOwner owner) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError('''
+Windowing APIs are not enabled.
+
+Windowing APIs are currently experimental. Do not use windowing APIs in
+production applications or plugins published to pub.dev.
+
+To try experimental windowing APIs:
+1. Switch to Flutter's main release channel.
+2. Turn on the windowing feature flag.
+
+See: https://github.com/flutter/flutter/issues/30701.
+''');
+    }
+    _windowingOwner = owner;
+  }
+
+  late WindowingOwner _windowingOwner;
 }
 
 /// Inflate the given widget and attach it to the view.
@@ -1578,12 +1649,11 @@ void _runWidget(Widget app, WidgetsBinding binding, String debugEntryPoint) {
 }
 
 String _debugDumpAppString() {
-  const String mode =
-      kDebugMode
-          ? 'DEBUG MODE'
-          : kReleaseMode
-          ? 'RELEASE MODE'
-          : 'PROFILE MODE';
+  const String mode = kDebugMode
+      ? 'DEBUG MODE'
+      : kReleaseMode
+      ? 'RELEASE MODE'
+      : 'PROFILE MODE';
   final StringBuffer buffer = StringBuffer();
   buffer.writeln('${WidgetsBinding.instance.runtimeType} - $mode');
   if (WidgetsBinding.instance.rootElement != null) {

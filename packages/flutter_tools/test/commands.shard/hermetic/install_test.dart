@@ -34,10 +34,10 @@ void main() {
     testUsingContext(
       'returns 0 when Android is connected and ready for an install',
       () async {
-        final InstallCommand command = InstallCommand(verboseHelp: false);
+        final command = InstallCommand(verboseHelp: false);
         command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
-        final FakeAndroidDevice device = FakeAndroidDevice();
+        final device = FakeAndroidDevice();
         testDeviceManager.addAttachedDevice(device);
 
         await createTestCommandRunner(command).run(<String>['install']);
@@ -52,10 +52,10 @@ void main() {
     testUsingContext(
       'returns 1 when targeted device is not Android with --device-user',
       () async {
-        final InstallCommand command = InstallCommand(verboseHelp: false);
+        final command = InstallCommand(verboseHelp: false);
         command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
-        final FakeIOSDevice device = FakeIOSDevice();
+        final device = FakeIOSDevice();
         testDeviceManager.addAttachedDevice(device);
 
         expect(
@@ -74,10 +74,10 @@ void main() {
     testUsingContext(
       'returns 0 when iOS is connected and ready for an install',
       () async {
-        final InstallCommand command = InstallCommand(verboseHelp: false);
+        final command = InstallCommand(verboseHelp: false);
         command.applicationPackages = FakeApplicationPackageFactory(FakeIOSApp());
 
-        final FakeIOSDevice device = FakeIOSDevice();
+        final device = FakeIOSDevice();
         testDeviceManager.addAttachedDevice(device);
 
         await createTestCommandRunner(command).run(<String>['install']);
@@ -92,10 +92,10 @@ void main() {
     testUsingContext(
       'fails when prebuilt binary not found',
       () async {
-        final InstallCommand command = InstallCommand(verboseHelp: false);
+        final command = InstallCommand(verboseHelp: false);
         command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
-        final FakeAndroidDevice device = FakeAndroidDevice();
+        final device = FakeAndroidDevice();
         testDeviceManager.addAttachedDevice(device);
 
         expect(
@@ -115,10 +115,10 @@ void main() {
     testUsingContext(
       'succeeds using prebuilt binary',
       () async {
-        final InstallCommand command = InstallCommand(verboseHelp: false);
+        final command = InstallCommand(verboseHelp: false);
         command.applicationPackages = FakeApplicationPackageFactory(FakeAndroidApk());
 
-        final FakeAndroidDevice device = FakeAndroidDevice();
+        final device = FakeAndroidDevice();
         testDeviceManager.addAttachedDevice(device);
         fileSystem.file('binary').createSync(recursive: true);
 
@@ -136,14 +136,12 @@ void main() {
     testUsingContext(
       'Passes flavor to application package.',
       () async {
-        const String flavor = 'free';
-        final InstallCommand command = InstallCommand(verboseHelp: false);
-        final FakeApplicationPackageFactory fakeAppFactory = FakeApplicationPackageFactory(
-          FakeIOSApp(),
-        );
+        const flavor = 'free';
+        final command = InstallCommand(verboseHelp: false);
+        final fakeAppFactory = FakeApplicationPackageFactory(FakeIOSApp());
         command.applicationPackages = fakeAppFactory;
 
-        final FakeIOSDevice device = FakeIOSDevice();
+        final device = FakeIOSDevice();
         testDeviceManager.addAttachedDevice(device);
 
         await createTestCommandRunner(command).run(<String>['install', '--flavor', flavor]);

@@ -4,10 +4,11 @@
 
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
 
+#include <format>
+
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/status_or.h"
 #include "flutter/fml/trace_event.h"
-#include "impeller/base/strings.h"
 #include "impeller/base/timing.h"
 #include "impeller/renderer/backend/vulkan/capabilities_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
@@ -163,7 +164,7 @@ static vk::UniqueRenderPass CreateCompatRenderPassForPipeline(
 #ifdef IMPELLER_DEBUG
   ContextVK::SetDebugName(
       device, pass.get(),
-      SPrintF("Compat Render Pass: %s", desc.GetLabel().data()));
+      std::format("Compat Render Pass: {}", desc.GetLabel()));
 #endif  // IMPELLER_DEBUG
 
   return pass;
@@ -214,7 +215,7 @@ fml::StatusOr<vk::UniqueDescriptorSetLayout> MakeDescriptorSetLayout(
 #ifdef IMPELLER_DEBUG
   ContextVK::SetDebugName(
       device_holder->GetDevice(), descs_layout.get(),
-      SPrintF("Descriptor Set Layout: %s", desc.GetLabel().data()));
+      std::format("Descriptor Set Layout: {}", desc.GetLabel()));
 #endif  // IMPELLER_DEBUG
 
   return fml::StatusOr<vk::UniqueDescriptorSetLayout>(std::move(descs_layout));
@@ -237,9 +238,8 @@ fml::StatusOr<vk::UniquePipelineLayout> MakePipelineLayout(
   }
 
 #ifdef IMPELLER_DEBUG
-  ContextVK::SetDebugName(
-      device_holder->GetDevice(), *pipeline_layout.value,
-      SPrintF("Pipeline Layout %s", desc.GetLabel().data()));
+  ContextVK::SetDebugName(device_holder->GetDevice(), *pipeline_layout.value,
+                          std::format("Pipeline Layout {}", desc.GetLabel()));
 #endif  // IMPELLER_DEBUG
 
   return std::move(pipeline_layout.value);
@@ -454,7 +454,7 @@ fml::StatusOr<vk::UniquePipeline> MakePipeline(
 
 #ifdef IMPELLER_DEBUG
   ContextVK::SetDebugName(device_holder->GetDevice(), *pipeline,
-                          SPrintF("Pipeline %s", desc.GetLabel().data()));
+                          std::format("Pipeline {}", desc.GetLabel()));
 #endif  // IMPELLER_DEBUG
 
   return std::move(pipeline);
@@ -582,8 +582,10 @@ std::shared_ptr<PipelineVK> PipelineVK::CreateVariantForImmutableSamplers(
   if (!device_holder) {
     return nullptr;
   }
+  // Note: immutable sampler variant of a pipeline is the negation of the
+  // existing pipeline key. This keeps the descriptors separate.
   return (immutable_sampler_variants_[cache_key] =
-              Create(desc_, device_holder, library_, pipeline_key_,
+              Create(desc_, device_holder, library_, -1 * pipeline_key_,
                      immutable_sampler));
 }
 

@@ -169,11 +169,13 @@ void main() {
     final SemanticsNode node = tester.getSemantics(find.text('item 0'));
     final SemanticsData data = node.getSemanticsData();
     expect(data.customSemanticsActionIds!.length, 2);
-    final CustomSemanticsAction action1 =
-        CustomSemanticsAction.getAction(data.customSemanticsActionIds![0])!;
+    final CustomSemanticsAction action1 = CustomSemanticsAction.getAction(
+      data.customSemanticsActionIds![0],
+    )!;
     expect(action1.label, 'Move down');
-    final CustomSemanticsAction action2 =
-        CustomSemanticsAction.getAction(data.customSemanticsActionIds![1])!;
+    final CustomSemanticsAction action2 = CustomSemanticsAction.getAction(
+      data.customSemanticsActionIds![1],
+    )!;
     expect(action2.label, 'Move to the end');
   });
 
@@ -194,8 +196,8 @@ void main() {
               slivers: <Widget>[
                 SliverReorderableList(
                   itemCount: itemCount,
-                  itemBuilder:
-                      (BuildContext _, int index) => Container(key: Key('$index'), height: 2000.0),
+                  itemBuilder: (BuildContext _, int index) =>
+                      Container(key: Key('$index'), height: 2000.0),
                   findChildIndexCallback: (Key key) {
                     finderCalled = true;
                     return null;
@@ -305,9 +307,9 @@ void main() {
           builder: (BuildContext outerContext, StateSetter setState) {
             return CustomScrollView(
               slivers: <Widget>[
-                SliverFixedExtentList(
+                SliverFixedExtentList.list(
                   itemExtent: 50.0,
-                  delegate: SliverChildListDelegate(<Widget>[const Text('before')]),
+                  children: const <Widget>[Text('before')],
                 ),
                 SliverReorderableList(
                   itemCount: 0,
@@ -323,9 +325,9 @@ void main() {
                     return SizedBox(height: 100, child: Text('item ${items[index]}'));
                   },
                 ),
-                SliverFixedExtentList(
+                SliverFixedExtentList.list(
                   itemExtent: 50.0,
-                  delegate: SliverChildListDelegate(<Widget>[const Text('after')]),
+                  children: const <Widget>[Text('after')],
                 ),
               ],
             );
@@ -431,7 +433,7 @@ void main() {
 
     // This SliverReorderableList has just one item: "item 0".
     await tester.pumpWidget(
-      TestList(items: List<int>.from(<int>[0]), textColor: textColor, iconColor: iconColor),
+      TestList(items: List<int>.of(<int>[0]), textColor: textColor, iconColor: iconColor),
     );
     expect(tester.getTopLeft(find.text('item 0')), Offset.zero);
     expect(getIconStyle().color, iconColor);
@@ -461,7 +463,7 @@ void main() {
 
     await tester.pumpWidget(
       TestList(
-        items: List<int>.from(<int>[0, 1, 2, 3]),
+        items: List<int>.of(<int>[0, 1, 2, 3]),
         proxyDecorator: (Widget child, int index, Animation<double> animation) {
           return AnimatedBuilder(
             animation: animation,
@@ -733,6 +735,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/150843
+    // This tests the overshoot case where an item is dragged back 110% of the way
     final List<int> items = List<int>.generate(3, (int index) => index);
 
     // The TestList is 300x100 SliverReorderableList with 3 items 100x100 each.
@@ -766,6 +769,7 @@ void main() {
     'SliverReorderableList - properly animates the drop at starting position with reverse:true',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/150843
+      // This tests the overshoot case where an item is dragged back 110% of the way in a reverse list
       final List<int> items = List<int>.generate(3, (int index) => index);
 
       // The TestList is 300x100 SliverReorderableList with 3 items 100x100 each.
@@ -795,6 +799,121 @@ void main() {
       expect(tester.getTopLeft(find.text('item 2')).dy, greaterThan(350));
     },
   );
+
+  testWidgets(
+    'SliverReorderableList - properly animates the drop at starting position (undershoot)',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/88331
+      // This tests the edge case where an item is dragged back only 90% of the way
+      final List<int> items = List<int>.generate(3, (int index) => index);
+
+      // The TestList is 300x100 SliverReorderableList with 3 items 100x100 each.
+      // Each item has a text widget with 'item $index' that can be moved by a
+      // press and drag gesture. For this test the first item is at the top
+      await tester.pumpWidget(TestList(items: items));
+
+      expect(tester.getTopLeft(find.text('item 0')), Offset.zero);
+      expect(tester.getTopLeft(find.text('item 1')), const Offset(0, 100));
+
+      // Drag item 0 downwards and then upwards (but not all the way back).
+      final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 0')));
+      await tester.pump(kPressTimeout);
+      await drag.moveBy(const Offset(0, 100));
+      await tester.pumpAndSettle();
+      await drag.moveBy(const Offset(0, -90));
+      await tester.pump();
+      expect(tester.getTopLeft(find.text('item 0')), const Offset(0, 10));
+      expect(tester.getTopLeft(find.text('item 1')), const Offset(0, 100));
+
+      // Now leave the drag, it should go to index 0.
+      await drag.up();
+      await tester.pump();
+
+      // It should animate back to the original position
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(tester.getTopLeft(find.text('item 0')).dy, lessThan(10));
+    },
+  );
+
+  testWidgets(
+    'SliverReorderableList - properly animates the drop at starting position with reverse:true (undershoot)',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/88331
+      // This tests the edge case where an item is dragged back only 90% of the way in a reverse list
+      final List<int> items = List<int>.generate(3, (int index) => index);
+
+      // The TestList is 300x100 SliverReorderableList with 3 items 100x100 each.
+      // Each item has a text widget with 'item $index' that can be moved by a
+      // press and drag gesture. For this test the first item is at the top
+      await tester.pumpWidget(TestList(items: items, reverse: true));
+
+      expect(tester.getTopLeft(find.text('item 2')), const Offset(0, 300.0));
+      expect(tester.getTopLeft(find.text('item 1')), const Offset(0, 400.0));
+
+      // Drag item 2 downwards and then upwards (but not all the way back).
+      final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 2')));
+      await tester.pump(kPressTimeout);
+      await drag.moveBy(const Offset(0, 100));
+      await tester.pumpAndSettle();
+      await drag.moveBy(const Offset(0, -90));
+      await tester.pump();
+      expect(tester.getTopLeft(find.text('item 2')), const Offset(0, 310));
+      expect(tester.getTopLeft(find.text('item 1')), const Offset(0, 300));
+
+      // Now leave the drag, it should go to index 1.
+      await drag.up();
+      await tester.pump();
+
+      // It should animate back to the original position
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(tester.getTopLeft(find.text('item 2')).dy, closeTo(300, 10));
+    },
+  );
+
+  testWidgets('ReorderableList animation jumping on interruption', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/173243
+    final List<int> items = List<int>.generate(3, (int index) => index);
+
+    await tester.pumpWidget(TestList(items: items));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.text('item 0')), Offset.zero);
+    expect(tester.getTopLeft(find.text('item 1')), const Offset(0, 100));
+
+    final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // Drag item 0 down past the swap threshold at 50px.
+    for (int i = 0; i < 6; i++) {
+      await drag.moveBy(const Offset(0, 10));
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+
+    final double item1YBeforeInterrupt = tester.getCenter(find.text('item 1')).dy;
+
+    // Drag back to trigger swap reversal.
+    await drag.moveBy(const Offset(0, -10));
+    await tester.pump(const Duration(milliseconds: 50));
+
+    final double item1YAfterInterrupt = tester.getCenter(find.text('item 1')).dy;
+
+    // Position should not jump when animation is interrupted.
+    expect(
+      item1YAfterInterrupt,
+      closeTo(item1YBeforeInterrupt, 5.0),
+      reason:
+          'Animation jumping detected! Position changed from '
+          '$item1YBeforeInterrupt to $item1YAfterInterrupt',
+    );
+
+    for (int i = 0; i < 5; i++) {
+      await drag.moveBy(const Offset(0, -10));
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+
+    await drag.up();
+    await tester.pumpAndSettle();
+  });
 
   testWidgets('SliverReorderableList calls onReorderStart and onReorderEnd correctly', (
     WidgetTester tester,
@@ -969,9 +1088,8 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: ReorderableList(
-          itemBuilder:
-              (BuildContext context, int index) =>
-                  SizedBox(key: ValueKey<double>(items[index]), child: Text('Item $index')),
+          itemBuilder: (BuildContext context, int index) =>
+              SizedBox(key: ValueKey<double>(items[index]), child: Text('Item $index')),
           itemCount: itemCount,
           onReorder: handleReorder,
           itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
@@ -1584,14 +1702,12 @@ void main() {
                           child: Builder(
                             builder: (BuildContext context) {
                               return SizedBox(
-                                height:
-                                    scrollDirection == Axis.vertical
-                                        ? itemSizes[index]
-                                        : double.infinity,
-                                width:
-                                    scrollDirection == Axis.horizontal
-                                        ? itemSizes[index]
-                                        : double.infinity,
+                                height: scrollDirection == Axis.vertical
+                                    ? itemSizes[index]
+                                    : double.infinity,
+                                width: scrollDirection == Axis.horizontal
+                                    ? itemSizes[index]
+                                    : double.infinity,
                                 child: Text('$index'),
                               );
                             },
@@ -1618,14 +1734,11 @@ void main() {
     }) async {
       await pumpFor(reverse, scrollDirection);
       final double targetOffset = (List<double>.of(itemSizes)..removeAt(from)).sublist(0, to).sum;
-      final Offset targetPosition =
-          reverse
-              ? (scrollDirection == Axis.vertical
-                  ? Offset(0, screenSize.height - targetOffset - itemSizes[from])
-                  : Offset(screenSize.width - targetOffset - itemSizes[from], 0))
-              : (scrollDirection == Axis.vertical
-                  ? Offset(0, targetOffset)
-                  : Offset(targetOffset, 0));
+      final Offset targetPosition = reverse
+          ? (scrollDirection == Axis.vertical
+                ? Offset(0, screenSize.height - targetOffset - itemSizes[from])
+                : Offset(screenSize.width - targetOffset - itemSizes[from], 0))
+          : (scrollDirection == Axis.vertical ? Offset(0, targetOffset) : Offset(targetOffset, 0));
       final Offset moveOffset = targetPosition - tester.getTopLeft(find.text('$from'));
       await tester.timedDrag(find.text('$from'), moveOffset, const Duration(seconds: 1));
       // Before the drop animation starts

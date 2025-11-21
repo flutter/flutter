@@ -384,7 +384,7 @@ List<Widget> createSwitchedChildList(List<Widget> childList, int i, int j) {
   final Widget w = childList[i];
   childList[i] = childList[j];
   childList[j] = w;
-  return List<Widget>.from(childList);
+  return List<Widget>.of(childList);
 }
 
 class SwitchingChildBuilderTest extends StatefulWidget {
@@ -497,7 +497,7 @@ class SwitchingSliverListTest extends StatelessWidget {
           height: 100,
           child: CustomScrollView(
             cacheExtent: 0,
-            slivers: <Widget>[SliverList(delegate: SliverChildListDelegate(children))],
+            slivers: <Widget>[SliverList.list(children: children)],
           ),
         ),
       ),

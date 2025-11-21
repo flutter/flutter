@@ -16,12 +16,11 @@ void main() {
       log.add(s ?? '');
     };
 
-    final TapGestureRecognizer tap =
-        TapGestureRecognizer()
-          ..onTapDown = (TapDownDetails details) {}
-          ..onTapUp = (TapUpDetails details) {}
-          ..onTap = () {}
-          ..onTapCancel = () {};
+    final TapGestureRecognizer tap = TapGestureRecognizer()
+      ..onTapDown = (TapDownDetails details) {}
+      ..onTapUp = (TapUpDetails details) {}
+      ..onTap = () {}
+      ..onTapCancel = () {};
     expect(log, isEmpty);
 
     event = const PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
@@ -75,12 +74,11 @@ void main() {
       log.add(s ?? '');
     };
 
-    final TapGestureRecognizer tap =
-        TapGestureRecognizer()
-          ..onTapDown = (TapDownDetails details) {}
-          ..onTapUp = (TapUpDetails details) {}
-          ..onTap = () {}
-          ..onTapCancel = () {};
+    final TapGestureRecognizer tap = TapGestureRecognizer()
+      ..onTapDown = (TapDownDetails details) {}
+      ..onTapUp = (TapUpDetails details) {}
+      ..onTap = () {}
+      ..onTapCancel = () {};
     expect(log, isEmpty);
 
     event = const PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
@@ -138,12 +136,11 @@ void main() {
       log.add(s ?? '');
     };
 
-    final TapGestureRecognizer tap =
-        TapGestureRecognizer()
-          ..onTapDown = (TapDownDetails details) {}
-          ..onTapUp = (TapUpDetails details) {}
-          ..onTap = () {}
-          ..onTapCancel = () {};
+    final TapGestureRecognizer tap = TapGestureRecognizer()
+      ..onTapDown = (TapDownDetails details) {}
+      ..onTapUp = (TapUpDetails details) {}
+      ..onTap = () {}
+      ..onTapCancel = () {};
     expect(log, isEmpty);
 
     event = const PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
@@ -208,8 +205,8 @@ void main() {
   });
 
   test('TapGestureRecognizer _sentTapDown toString', () {
-    final TapGestureRecognizer tap =
-        TapGestureRecognizer()..onTap = () {}; // Add a callback so that event can be added
+    final TapGestureRecognizer tap = TapGestureRecognizer()
+      ..onTap = () {}; // Add a callback so that event can be added
     expect(tap.toString(), equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: ready)'));
     const PointerDownEvent event = PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
     tap.addPointer(event);
@@ -435,11 +432,10 @@ void main() {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       // ignore: invalid_use_of_protected_member
       detail.debugFillProperties(builder);
-      final List<String> description =
-          builder.properties
-              .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-              .map((DiagnosticsNode node) => node.toString())
-              .toList();
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
       expect(description, expected);
     }
   });

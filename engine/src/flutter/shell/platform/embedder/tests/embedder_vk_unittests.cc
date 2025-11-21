@@ -120,7 +120,7 @@ TEST_F(EmbedderTest, CanSwapOutVulkanCalls) {
       });
 
   EmbedderConfigBuilder builder(context);
-  builder.SetSurface(SkISize::Make(1024, 1024));
+  builder.SetSurface(DlISize(1024, 1024));
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
   // Wait for the root isolate to launch.

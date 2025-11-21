@@ -294,6 +294,7 @@ void main() {
         matchesSemantics(
           label: 'Enter Date',
           isTextField: true,
+          isFocusable: true,
           hasEnabledState: true,
           isEnabled: true,
           isFocused: true,
@@ -313,13 +314,13 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('InputDecorationTheme is honored', (WidgetTester tester) async {
+    testWidgets('ThemeData.inputDecorationTheme is honored', (WidgetTester tester) async {
       const InputBorder border = InputBorder.none;
       await tester.pumpWidget(
         inputDatePickerField(
           theme: ThemeData.from(
             colorScheme: const ColorScheme.light(),
-          ).copyWith(inputDecorationTheme: const InputDecorationTheme(border: border)),
+          ).copyWith(inputDecorationTheme: const InputDecorationThemeData(border: border)),
         ),
       );
       await tester.pumpAndSettle();
@@ -420,7 +421,6 @@ void main() {
     testWidgets('Defaults to Gregorian calendar system', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: InputDatePickerFormField(
               initialDate: DateTime(2025, DateTime.february, 26),
@@ -440,7 +440,6 @@ void main() {
     testWidgets('Using custom calendar delegate implementation', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: InputDatePickerFormField(
               initialDate: DateTime(2025, DateTime.february, 26),
@@ -463,7 +462,6 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: InputDatePickerFormField(
               initialDate: DateTime(2025, DateTime.february, 26),
@@ -508,6 +506,43 @@ void main() {
 
       expect(selectedDate, DateTime(2025, DateTime.april, 21));
     });
+  });
+
+  testWidgets('InputDatePickerFormField does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: InputDatePickerFormField(firstDate: DateTime(2020), lastDate: DateTime(2030)),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(InputDatePickerFormField)), Size.zero);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/177088.
+  testWidgets('Local InputDecorationTheme is honored', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: InputDecorationTheme(
+              data: const InputDecorationThemeData(filled: true),
+              child: InputDatePickerFormField(
+                firstDate: DateTime(2025, DateTime.february),
+                lastDate: DateTime(2026, DateTime.may),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final InputDecoration decoration = tester.widget<TextField>(find.byType(TextField)).decoration!;
+    expect(decoration.filled, isTrue);
   });
 }
 

@@ -27,40 +27,7 @@ class SemanticsTester {
   /// for specifying flags, such as [isTextField].
   SemanticsNodeUpdate updateNode({
     required int id,
-
-    // Flags
-    int flags = 0,
-    bool? hasCheckedState,
-    bool? isChecked,
-    bool? isSelectable,
-    bool? isSelected,
-    bool? isExpandable,
-    bool? isExpanded,
-    bool? isButton,
-    bool? isLink,
-    bool? isTextField,
-    bool? isReadOnly,
-    bool? isFocusable,
-    bool? isFocused,
-    bool? hasEnabledState,
-    bool? isEnabled,
-    bool? isInMutuallyExclusiveGroup,
-    bool? isHeader,
-    bool? isObscured,
-    bool? scopesRoute,
-    bool? namesRoute,
-    bool? isHidden,
-    bool? isImage,
-    bool? isLiveRegion,
-    bool? hasToggledState,
-    bool? isToggled,
-    bool? hasImplicitScrolling,
-    bool? isMultiline,
-    bool? isSlider,
-    bool? isKeyboardKey,
-    bool? hasRequiredState,
-    bool? isRequired,
-
+    ui.SemanticsFlags? flags,
     // Actions
     int actions = 0,
     bool? hasTap,
@@ -95,11 +62,10 @@ class SemanticsTester {
     int? platformViewId,
     int? scrollChildren,
     int? scrollIndex,
+    int? traversalParent,
     double? scrollPosition,
     double? scrollExtentMax,
     double? scrollExtentMin,
-    double? elevation,
-    double? thickness,
     ui.Rect? rect,
     String? identifier,
     String? label,
@@ -115,6 +81,7 @@ class SemanticsTester {
     String? tooltip,
     ui.TextDirection? textDirection,
     Float64List? transform,
+    Float64List? hitTestTransform,
     Int32List? additionalActions,
     List<SemanticsNodeUpdate>? children,
     int? headingLevel,
@@ -122,100 +89,10 @@ class SemanticsTester {
     ui.SemanticsRole? role,
     List<String>? controlsNodes,
     ui.SemanticsValidationResult validationResult = ui.SemanticsValidationResult.none,
+    ui.SemanticsHitTestBehavior hitTestBehavior = ui.SemanticsHitTestBehavior.defer,
     ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
+    ui.Locale? locale,
   }) {
-    // Flags
-    if (hasCheckedState ?? false) {
-      flags |= ui.SemanticsFlag.hasCheckedState.index;
-    }
-    if (isChecked ?? false) {
-      flags |= ui.SemanticsFlag.isChecked.index;
-    }
-    if (isSelectable ?? false) {
-      flags |= ui.SemanticsFlag.hasSelectedState.index;
-    }
-    if (isSelected ?? false) {
-      flags |= ui.SemanticsFlag.isSelected.index;
-    }
-    if (isExpandable ?? false) {
-      flags |= ui.SemanticsFlag.hasExpandedState.index;
-    }
-    if (isExpanded ?? false) {
-      flags |= ui.SemanticsFlag.isExpanded.index;
-    }
-    if (isButton ?? false) {
-      flags |= ui.SemanticsFlag.isButton.index;
-    }
-    if (isLink ?? false) {
-      flags |= ui.SemanticsFlag.isLink.index;
-    }
-    if (isTextField ?? false) {
-      flags |= ui.SemanticsFlag.isTextField.index;
-    }
-    if (isReadOnly ?? false) {
-      flags |= ui.SemanticsFlag.isReadOnly.index;
-    }
-    if (isFocusable ?? false) {
-      flags |= ui.SemanticsFlag.isFocusable.index;
-    }
-    if (isFocused ?? false) {
-      flags |= ui.SemanticsFlag.isFocused.index;
-    }
-    if (hasEnabledState ?? false) {
-      flags |= ui.SemanticsFlag.hasEnabledState.index;
-    }
-    if (isEnabled ?? false) {
-      flags |= ui.SemanticsFlag.isEnabled.index;
-    }
-    if (isInMutuallyExclusiveGroup ?? false) {
-      flags |= ui.SemanticsFlag.isInMutuallyExclusiveGroup.index;
-    }
-    if (isHeader ?? false) {
-      flags |= ui.SemanticsFlag.isHeader.index;
-    }
-    if (isObscured ?? false) {
-      flags |= ui.SemanticsFlag.isObscured.index;
-    }
-    if (scopesRoute ?? false) {
-      flags |= ui.SemanticsFlag.scopesRoute.index;
-    }
-    if (namesRoute ?? false) {
-      flags |= ui.SemanticsFlag.namesRoute.index;
-    }
-    if (isHidden ?? false) {
-      flags |= ui.SemanticsFlag.isHidden.index;
-    }
-    if (isImage ?? false) {
-      flags |= ui.SemanticsFlag.isImage.index;
-    }
-    if (isLiveRegion ?? false) {
-      flags |= ui.SemanticsFlag.isLiveRegion.index;
-    }
-    if (hasToggledState ?? false) {
-      flags |= ui.SemanticsFlag.hasToggledState.index;
-    }
-    if (isToggled ?? false) {
-      flags |= ui.SemanticsFlag.isToggled.index;
-    }
-    if (hasImplicitScrolling ?? false) {
-      flags |= ui.SemanticsFlag.hasImplicitScrolling.index;
-    }
-    if (isMultiline ?? false) {
-      flags |= ui.SemanticsFlag.isMultiline.index;
-    }
-    if (isSlider ?? false) {
-      flags |= ui.SemanticsFlag.isSlider.index;
-    }
-    if (isKeyboardKey ?? false) {
-      flags |= ui.SemanticsFlag.isKeyboardKey.index;
-    }
-    if (hasRequiredState ?? false) {
-      flags |= ui.SemanticsFlag.hasRequiredState.index;
-    }
-    if (isRequired ?? false) {
-      flags |= ui.SemanticsFlag.isRequired.index;
-    }
-
     // Actions
     if (hasTap ?? false) {
       actions |= ui.SemanticsAction.tap.index;
@@ -310,7 +187,7 @@ class SemanticsTester {
 
     final SemanticsNodeUpdate update = SemanticsNodeUpdate(
       id: id,
-      flags: flags,
+      flags: flags ?? ui.SemanticsFlags.none,
       actions: actions,
       maxValueLength: maxValueLength ?? 0,
       currentValueLength: currentValueLength ?? 0,
@@ -319,6 +196,7 @@ class SemanticsTester {
       platformViewId: platformViewId ?? -1,
       scrollChildren: scrollChildren ?? 0,
       scrollIndex: scrollIndex ?? 0,
+      traversalParent: traversalParent ?? -1,
       scrollPosition: scrollPosition ?? 0,
       scrollExtentMax: scrollExtentMax ?? 0,
       scrollExtentMin: scrollExtentMin ?? 0,
@@ -336,8 +214,9 @@ class SemanticsTester {
       decreasedValueAttributes: decreasedValueAttributes ?? const <ui.StringAttribute>[],
       tooltip: tooltip ?? '',
       transform: transform != null ? toMatrix32(transform) : Matrix4.identity().storage,
-      elevation: elevation ?? 0,
-      thickness: thickness ?? 0,
+      hitTestTransform: hitTestTransform != null
+          ? toMatrix32(hitTestTransform)
+          : Matrix4.identity().storage,
       childrenInTraversalOrder: childIds,
       childrenInHitTestOrder: childIds,
       additionalActions: additionalActions ?? Int32List(0),
@@ -346,7 +225,9 @@ class SemanticsTester {
       role: role ?? ui.SemanticsRole.none,
       controlsNodes: controlsNodes,
       validationResult: validationResult,
+      hitTestBehavior: hitTestBehavior,
       inputType: inputType,
+      locale: locale,
     );
     _nodeUpdates.add(update);
     return update;

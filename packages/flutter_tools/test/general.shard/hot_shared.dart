@@ -23,7 +23,7 @@ class FakeDevFs extends Fake implements DevFS {
   Future<void> destroy() async {}
 
   @override
-  List<Uri> sources = <Uri>[];
+  var sources = <Uri>[];
 
   @override
   DateTime? lastCompiled;
@@ -32,10 +32,10 @@ class FakeDevFs extends Fake implements DevFS {
   PackageConfig? lastPackageConfig;
 
   @override
-  Set<String> assetPathsToEvict = <String>{};
+  var assetPathsToEvict = <String>{};
 
   @override
-  Set<String> shaderPathsToEvict = <String>{};
+  var shaderPathsToEvict = <String>{};
 
   @override
   Uri? baseUri;
@@ -47,22 +47,22 @@ class FakeDevice extends Fake implements Device {
 
   final TargetPlatform _targetPlatform;
 
-  bool disposed = false;
+  var disposed = false;
 
   @override
   final DartDevelopmentService dds = FakeDartDevelopmentService();
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
-  bool supportsHotReload = true;
+  var supportsHotReload = true;
 
   @override
-  bool supportsHotRestart = true;
+  var supportsHotRestart = true;
 
   @override
-  bool supportsFlutterExit = true;
+  var supportsFlutterExit = true;
 
   @override
   Future<TargetPlatform> get targetPlatform async => _targetPlatform;
@@ -88,7 +88,7 @@ class FakeDevice extends Fake implements Device {
 }
 
 class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
-  bool wasShutdown = false;
+  var wasShutdown = false;
 
   @override
   void shutdown() {
@@ -99,7 +99,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 class FakeFlutterDevice extends Fake implements FlutterDevice {
   FakeFlutterDevice(this.device);
 
-  bool stoppedEchoingDeviceLog = false;
+  var stoppedEchoingDeviceLog = false;
   late Future<UpdateFSReport> Function() updateDevFSReportCallback;
 
   @override
@@ -135,6 +135,9 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   }) => updateDevFSReportCallback();
 
   @override
+  Future<void> handleHotRestart() async {}
+
+  @override
   TargetPlatform? get targetPlatform => device._targetPlatform;
 }
 
@@ -164,7 +167,6 @@ class TestFlutterDevice extends FlutterDevice {
     int? hostVmServicePort,
     bool? ipv6 = false,
     bool enableDevTools = false,
-    bool allowExistingDdsInstance = false,
   }) async {
     throw exception;
   }
@@ -174,8 +176,8 @@ class TestHotRunnerConfig extends HotRunnerConfig {
   TestHotRunnerConfig({this.successfulHotRestartSetup, this.successfulHotReloadSetup});
   bool? successfulHotRestartSetup;
   bool? successfulHotReloadSetup;
-  bool shutdownHookCalled = false;
-  bool updateDevFSCompleteCalled = false;
+  var shutdownHookCalled = false;
+  var updateDevFSCompleteCalled = false;
 
   @override
   Future<bool?> setupHotRestart() async {

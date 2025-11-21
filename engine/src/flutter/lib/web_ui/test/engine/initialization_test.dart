@@ -20,15 +20,13 @@ external set didCreateEngineInitializer(JSFunction? callback);
 
 void main() {
   // Prepare _flutter.loader.didCreateEngineInitializer, so it's ready in the page ASAP.
-  loader =
-      <String, Object>{
-        'loader': <String, Object>{
-          'didCreateEngineInitializer':
-              () {
-                print('not mocked');
-              }.toJS,
-        },
-      }.jsify();
+  loader = <String, Object>{
+    'loader': <String, Object>{
+      'didCreateEngineInitializer': () {
+        print('not mocked');
+      }.toJS,
+    },
+  }.jsify();
   internalBootstrapBrowserTest(() => testMain);
 }
 

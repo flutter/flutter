@@ -10,14 +10,15 @@
 #include "flutter/display_list/effects/color_filters/dl_blend_color_filter.h"
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
+#include "flutter/display_list/effects/dl_runtime_effect_skia.h"
 #include "flutter/testing/testing.h"
 
-#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
+#include "third_party/skia/include/effects/SkRuntimeEffect.h"
 
 namespace flutter {
 namespace testing {
@@ -214,12 +215,12 @@ static sk_sp<DisplayList> TestDisplayList2 =
     MakeTestDisplayList(25, 25, SK_ColorBLUE);
 
 static const sk_sp<DlRuntimeEffect> kTestRuntimeEffect1 =
-    DlRuntimeEffect::MakeSkia(
+    DlRuntimeEffectSkia::Make(
         SkRuntimeEffect::MakeForShader(
             SkString("vec4 main(vec2 p) { return vec4(0); }"))
             .effect);
 static const sk_sp<DlRuntimeEffect> kTestRuntimeEffect2 =
-    DlRuntimeEffect::MakeSkia(
+    DlRuntimeEffectSkia::Make(
         SkRuntimeEffect::MakeForShader(
             SkString("vec4 main(vec2 p) { return vec4(1); }"))
             .effect);
@@ -229,6 +230,9 @@ SkFont CreateTestFontOfSize(DlScalar scalar);
 sk_sp<SkTextBlob> GetTestTextBlob(const std::string& str,
                                   DlScalar font_size = 20.0f);
 sk_sp<SkTextBlob> GetTestTextBlob(int index);
+#if IMPELLER_SUPPORTS_RENDERING
+std::shared_ptr<impeller::TextFrame> GetTestTextFrame(int index);
+#endif
 
 struct DisplayListInvocation {
   // ----------------------------------

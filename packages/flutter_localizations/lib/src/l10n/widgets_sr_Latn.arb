@@ -11,5 +11,6 @@
   "searchWebButtonLabel": "Pretraži veb",
   "shareButtonLabel": "Deli",
   "pasteButtonLabel": "Nalepi",
-  "selectAllButtonLabel": "Izaberi sve"
+  "selectAllButtonLabel": "Izaberi sve",
+  "radioButtonUnselectedLabel": "Not selected"
 }

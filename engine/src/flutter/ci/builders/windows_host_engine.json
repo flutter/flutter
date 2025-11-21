@@ -7,6 +7,9 @@
         "Tests to run on windows hosts should go in one of the other windows_ build ",
         "definition files."
     ],
+    "luci_flags": {
+      "upload_content_hash": true
+    },
     "builds": [
         {
             "archives": [
@@ -49,7 +52,6 @@
             "ninja": {
                 "config": "ci/host_debug",
                 "targets": [
-                    "flutter:unittests",
                     "flutter/build/archives:artifacts",
                     "flutter/build/archives:embedder",
                     "flutter/tools/font_subset",

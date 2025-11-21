@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -32,6 +33,7 @@ import androidx.lifecycle.Lifecycle;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import io.flutter.Build;
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.android.FlutterActivityAndFragmentDelegate.Host;
 import io.flutter.embedding.engine.FlutterEngine;
@@ -57,6 +59,7 @@ import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
+import io.flutter.plugin.platform.PlatformViewsControllerDelegator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -66,6 +69,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
+import org.robolectric.annotation.Config;
 
 @RunWith(AndroidJUnit4.class)
 public class FlutterActivityAndFragmentDelegateTest {
@@ -1098,7 +1102,94 @@ public class FlutterActivityAndFragmentDelegateTest {
   @SuppressWarnings("deprecation")
   // TRIM_MEMORY_COMPLETE, TRIM_MEMORY_MODERATE, TRIM_MEMORY_RUNNING_LOW,
   // TRIM_MEMORY_RUNNING_MODERATE, TRIM_MEMORY_RUNNING_CRITICAL
-  public void itNotifiesDartExecutorAndSendsMessageOverSystemChannelWhenToldToTrimMemory() {
+  @Config(minSdk = Build.API_LEVELS.API_26)
+  public void
+      itNotifiesDartExecutorAndSendsMessageOverSystemChannelWhenToldToTrimMemoryAboveApi25() {
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    // The FlutterEngine is set up in onAttach().
+    delegate.onAttach(ctx);
+
+    // Test assumes no frames have been displayed.
+    verify(mockHost, times(0)).onFlutterUiDisplayed();
+
+    // Emulate the host and call the method that we expect to be forwarded.
+    // This is below the warning threshold, so a warning shoud not be sent.
+    delegate.onTrimMemory(TRIM_MEMORY_RUNNING_MODERATE);
+    verify(mockFlutterEngine.getDartExecutor(), times(0)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(0)).sendMemoryPressureWarning();
+
+    // If the first frame has not ben displayed, the warning should not be sent even if this is
+    // above the threshold.
+    delegate.onTrimMemory(TRIM_MEMORY_RUNNING_LOW);
+    delegate.onTrimMemory(TRIM_MEMORY_RUNNING_CRITICAL);
+    delegate.onTrimMemory(TRIM_MEMORY_BACKGROUND);
+    delegate.onTrimMemory(TRIM_MEMORY_COMPLETE);
+    delegate.onTrimMemory(TRIM_MEMORY_MODERATE);
+    delegate.onTrimMemory(TRIM_MEMORY_UI_HIDDEN);
+    verify(mockFlutterEngine.getDartExecutor(), times(0)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(0)).sendMemoryPressureWarning();
+
+    verify(mockHost, times(0)).onFlutterUiDisplayed();
+
+    delegate.onCreateView(null, null, null, 0, false);
+    final FlutterRenderer renderer = mockFlutterEngine.getRenderer();
+    ArgumentCaptor<FlutterUiDisplayListener> listenerCaptor =
+        ArgumentCaptor.forClass(FlutterUiDisplayListener.class);
+    // 1 times: once for engine attachment
+    verify(renderer, times(1)).addIsDisplayingFlutterUiListener(listenerCaptor.capture());
+    // First frame is shown show nw the warning should be sent.
+    listenerCaptor.getValue().onFlutterUiDisplayed();
+
+    verify(mockHost, times(1)).onFlutterUiDisplayed();
+
+    // As long as the memory is below the warning threshold, the warning should be not
+    // be sent.
+    delegate.onTrimMemory(TRIM_MEMORY_RUNNING_MODERATE);
+    verify(mockFlutterEngine.getDartExecutor(), times(0)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(0)).sendMemoryPressureWarning();
+
+    // These are above (or equal) the threadshold, so each should send a warning (order does not
+    // matter).
+    delegate.onTrimMemory(TRIM_MEMORY_RUNNING_LOW);
+    verify(mockFlutterEngine.getDartExecutor(), times(1)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(1)).sendMemoryPressureWarning();
+    clearInvocations(mockFlutterEngine.getDartExecutor());
+    clearInvocations(mockFlutterEngine.getSystemChannel());
+    delegate.onTrimMemory(TRIM_MEMORY_RUNNING_CRITICAL);
+    verify(mockFlutterEngine.getDartExecutor(), times(1)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(1)).sendMemoryPressureWarning();
+    clearInvocations(mockFlutterEngine.getDartExecutor());
+    clearInvocations(mockFlutterEngine.getSystemChannel());
+    delegate.onTrimMemory(TRIM_MEMORY_BACKGROUND);
+    verify(mockFlutterEngine.getDartExecutor(), times(1)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(1)).sendMemoryPressureWarning();
+    clearInvocations(mockFlutterEngine.getDartExecutor());
+    clearInvocations(mockFlutterEngine.getSystemChannel());
+    delegate.onTrimMemory(TRIM_MEMORY_COMPLETE);
+    verify(mockFlutterEngine.getDartExecutor(), times(1)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(1)).sendMemoryPressureWarning();
+    clearInvocations(mockFlutterEngine.getDartExecutor());
+    clearInvocations(mockFlutterEngine.getSystemChannel());
+    delegate.onTrimMemory(TRIM_MEMORY_MODERATE);
+    verify(mockFlutterEngine.getDartExecutor(), times(1)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(1)).sendMemoryPressureWarning();
+    clearInvocations(mockFlutterEngine.getDartExecutor());
+    clearInvocations(mockFlutterEngine.getSystemChannel());
+    delegate.onTrimMemory(TRIM_MEMORY_UI_HIDDEN);
+    verify(mockFlutterEngine.getDartExecutor(), times(1)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(1)).sendMemoryPressureWarning();
+  }
+
+  @Test
+  @SuppressWarnings("deprecation")
+  // TRIM_MEMORY_COMPLETE, TRIM_MEMORY_MODERATE, TRIM_MEMORY_RUNNING_LOW,
+  // TRIM_MEMORY_RUNNING_MODERATE, TRIM_MEMORY_RUNNING_CRITICAL
+  @Config(minSdk = Build.API_LEVELS.FLUTTER_MIN, maxSdk = Build.API_LEVELS.API_25)
+  public void
+      itNotifiesDartExecutorAndSendsMessageOverSystemChannelWhenToldToTrimMemoryBelowApi26() {
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
@@ -1523,6 +1614,16 @@ public class FlutterActivityAndFragmentDelegateTest {
     }
   }
 
+  @Test
+  public void onResume_restoresSurfaceProducers() {
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    delegate.onAttach(ctx);
+    delegate.onResume();
+
+    verify(mockFlutterEngine.getRenderer()).restoreSurfaceProducers();
+  }
+
   /**
    * Creates a mock {@link io.flutter.embedding.engine.FlutterEngine}.
    *
@@ -1562,6 +1663,8 @@ public class FlutterActivityAndFragmentDelegateTest {
     when(engine.getBackGestureChannel()).thenReturn(mock(BackGestureChannel.class));
     when(engine.getPlatformViewsController()).thenReturn(mock(PlatformViewsController.class));
     when(engine.getPlatformViewsController2()).thenReturn(mock(PlatformViewsController2.class));
+    when(engine.getPlatformViewsControllerDelegator())
+        .thenReturn(mock(PlatformViewsControllerDelegator.class));
 
     FlutterRenderer renderer = mock(FlutterRenderer.class);
     when(engine.getRenderer()).thenReturn(renderer);

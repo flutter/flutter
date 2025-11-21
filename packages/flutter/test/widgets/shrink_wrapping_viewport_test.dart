@@ -27,8 +27,9 @@ void main() {
     );
 
     // 1st, check that the render object has received the default clip behavior.
-    final RenderShrinkWrappingViewport renderObject =
-        tester.allRenderObjects.whereType<RenderShrinkWrappingViewport>().first;
+    final RenderShrinkWrappingViewport renderObject = tester.allRenderObjects
+        .whereType<RenderShrinkWrappingViewport>()
+        .first;
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     // 2nd, check that the painting context has received the default clip behavior.

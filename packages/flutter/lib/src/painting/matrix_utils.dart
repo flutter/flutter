@@ -72,6 +72,65 @@ abstract final class MatrixUtils {
     return null;
   }
 
+  /// Computes the result of matrix multiplication `a x b` and stores the result
+  /// in `b`.
+  ///
+  /// This function does not alter the argument `a`, and is thus useful when you
+  /// want to left-multiply in-place. For right-multiply in-place, see
+  /// [Matrix4.multiply].
+  static void multiplyInPlace(Matrix4 a, Matrix4 b) {
+    final Float64List aStorage = a.storage;
+    final double m00 = aStorage[0];
+    final double m01 = aStorage[4];
+    final double m02 = aStorage[8];
+    final double m03 = aStorage[12];
+    final double m10 = aStorage[1];
+    final double m11 = aStorage[5];
+    final double m12 = aStorage[9];
+    final double m13 = aStorage[13];
+    final double m20 = aStorage[2];
+    final double m21 = aStorage[6];
+    final double m22 = aStorage[10];
+    final double m23 = aStorage[14];
+    final double m30 = aStorage[3];
+    final double m31 = aStorage[7];
+    final double m32 = aStorage[11];
+    final double m33 = aStorage[15];
+    final Float64List bStorage = b.storage;
+    final double n00 = bStorage[0];
+    final double n01 = bStorage[4];
+    final double n02 = bStorage[8];
+    final double n03 = bStorage[12];
+    final double n10 = bStorage[1];
+    final double n11 = bStorage[5];
+    final double n12 = bStorage[9];
+    final double n13 = bStorage[13];
+    final double n20 = bStorage[2];
+    final double n21 = bStorage[6];
+    final double n22 = bStorage[10];
+    final double n23 = bStorage[14];
+    final double n30 = bStorage[3];
+    final double n31 = bStorage[7];
+    final double n32 = bStorage[11];
+    final double n33 = bStorage[15];
+    bStorage[0] = (m00 * n00) + (m01 * n10) + (m02 * n20) + (m03 * n30);
+    bStorage[4] = (m00 * n01) + (m01 * n11) + (m02 * n21) + (m03 * n31);
+    bStorage[8] = (m00 * n02) + (m01 * n12) + (m02 * n22) + (m03 * n32);
+    bStorage[12] = (m00 * n03) + (m01 * n13) + (m02 * n23) + (m03 * n33);
+    bStorage[1] = (m10 * n00) + (m11 * n10) + (m12 * n20) + (m13 * n30);
+    bStorage[5] = (m10 * n01) + (m11 * n11) + (m12 * n21) + (m13 * n31);
+    bStorage[9] = (m10 * n02) + (m11 * n12) + (m12 * n22) + (m13 * n32);
+    bStorage[13] = (m10 * n03) + (m11 * n13) + (m12 * n23) + (m13 * n33);
+    bStorage[2] = (m20 * n00) + (m21 * n10) + (m22 * n20) + (m23 * n30);
+    bStorage[6] = (m20 * n01) + (m21 * n11) + (m22 * n21) + (m23 * n31);
+    bStorage[10] = (m20 * n02) + (m21 * n12) + (m22 * n22) + (m23 * n32);
+    bStorage[14] = (m20 * n03) + (m21 * n13) + (m22 * n23) + (m23 * n33);
+    bStorage[3] = (m30 * n00) + (m31 * n10) + (m32 * n20) + (m33 * n30);
+    bStorage[7] = (m30 * n01) + (m31 * n11) + (m32 * n21) + (m33 * n31);
+    bStorage[11] = (m30 * n02) + (m31 * n12) + (m32 * n22) + (m33 * n32);
+    bStorage[15] = (m30 * n03) + (m31 * n13) + (m32 * n23) + (m33 * n33);
+  }
+
   /// Returns true if the given matrices are exactly equal, and false
   /// otherwise. Null values are assumed to be the identity matrix.
   static bool matrixEquals(Matrix4? a, Matrix4? b) {
@@ -514,11 +573,10 @@ abstract final class MatrixUtils {
     //  [0.0, 1.0, 0.0, 0.0],
     //  [0.0, 0.0, 1.0, -radius],
     //  [0.0, 0.0, 0.0, 1.0]]
-    Matrix4 result =
-        Matrix4.identity()
-          ..setEntry(3, 2, -perspective)
-          ..setEntry(2, 3, -radius)
-          ..setEntry(3, 3, perspective * radius + 1.0);
+    Matrix4 result = Matrix4.identity()
+      ..setEntry(3, 2, -perspective)
+      ..setEntry(2, 3, -radius)
+      ..setEntry(3, 3, perspective * radius + 1.0);
 
     // Model matrix by first translating the object from the origin of the world
     // by radius in the z axis and then rotating against the world.

@@ -41,12 +41,11 @@ class _SwitchExampleState extends State<SwitchExample> {
     );
     // This object sets the track color based on two WidgetState attributes.
     // If neither state applies, it resolves to null.
-    final WidgetStateProperty<Color?> overlayColor = WidgetStateProperty<Color?>.fromMap(
-      <WidgetState, Color>{
-        WidgetState.selected: Colors.amber.withOpacity(0.54),
-        WidgetState.disabled: Colors.grey.shade400,
-      },
-    );
+    final WidgetStateProperty<Color?> overlayColor =
+        WidgetStateProperty<Color?>.fromMap(<WidgetState, Color>{
+          WidgetState.selected: Colors.amber.withValues(alpha: 0.54),
+          WidgetState.disabled: Colors.grey.shade400,
+        });
 
     return Switch(
       // This bool value toggles the switch.

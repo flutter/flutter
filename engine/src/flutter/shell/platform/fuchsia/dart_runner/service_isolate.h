@@ -13,8 +13,6 @@ Dart_Isolate CreateServiceIsolate(const char* uri,
                                   Dart_IsolateFlags* flags,
                                   char** error);
 
-Dart_Handle GetVMServiceAssetsArchiveCallback();
-
 }  // namespace dart_runner
 
 #endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_RUNNER_SERVICE_ISOLATE_H_

@@ -7,6 +7,8 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class RadioListTileUseCase extends UseCase {
+  RadioListTileUseCase() : super(useCaseCategory: UseCaseCategory.core);
+
   @override
   String get name => 'RadioListTile';
 

@@ -15,7 +15,6 @@
 library;
 
 import 'dart:async';
-import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -432,8 +431,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
         nextRoute.canTransitionFrom(this)) {
       final Animation<double>? current = _secondaryAnimation.parent;
       if (current != null) {
-        final Animation<double> currentTrain =
-            (current is TrainHoppingAnimation ? current.currentTrain : current)!;
+        final Animation<double> currentTrain = (current is TrainHoppingAnimation
+            ? current.currentTrain
+            : current)!;
         final Animation<double> nextTrain = nextRoute._animation!;
         if (currentTrain.value == nextTrain.value || !nextTrain.isAnimating) {
           _setSecondaryAnimation(nextTrain, nextRoute.completed);
@@ -592,34 +592,18 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   void _handleDragEnd({required bool animateForward}) {
     if (isCurrent) {
       if (animateForward) {
-        // The closer the panel is to dismissing, the shorter the animation is.
-        // We want to cap the animation time, but we want to use a linear curve
-        // to determine it.
-        // These values were eyeballed to match the native predictive back
-        // animation on a Pixel 2 running Android API 34.
-        final int droppedPageForwardAnimationTime = min(
-          ui.lerpDouble(800, 0, _controller!.value)!.floor(),
-          300,
-        );
-        _controller?.animateTo(
-          1.0,
-          duration: Duration(milliseconds: droppedPageForwardAnimationTime),
-          curve: Curves.fastLinearToSlowEaseIn,
-        );
+        // Typically, handleUpdateBackGestureProgress will have already
+        // completed the animation. If not, animate to completion.
+        if (!_controller!.isCompleted) {
+          _controller!.forward();
+        }
       } else {
         // This route is destined to pop at this point. Reuse navigator's pop.
         navigator?.pop();
 
         // The popping may have finished inline if already at the target destination.
         if (_controller?.isAnimating ?? false) {
-          // Otherwise, use a custom popping animation duration and curve.
-          final int droppedPageBackAnimationTime =
-              ui.lerpDouble(0, 800, _controller!.value)!.floor();
-          _controller!.animateBack(
-            0.0,
-            duration: Duration(milliseconds: droppedPageBackAnimationTime),
-            curve: Curves.fastLinearToSlowEaseIn,
-          );
+          _controller!.reverse(from: _controller!.upperBound);
         }
       }
     }
@@ -988,6 +972,18 @@ enum _ModalRouteAspect {
 
   /// Specifies the aspect corresponding to [ModalRoute.settings].
   settings,
+
+  /// Specifies the aspect corresponding to [ModalRoute.isActive].
+  isActive,
+
+  /// Specifies the aspect corresponding to [ModalRoute.isFirst].
+  isFirst,
+
+  /// Specifies the aspect corresponding to [ModalRoute.opaque].
+  opaque,
+
+  /// Specifies the aspect corresponding to [ModalRoute.popDisposition].
+  popDisposition,
 }
 
 class _ModalScopeStatus extends InheritedModel<_ModalRouteAspect> {
@@ -996,12 +992,14 @@ class _ModalScopeStatus extends InheritedModel<_ModalRouteAspect> {
     required this.canPop,
     required this.impliesAppBarDismissal,
     required this.route,
+    required this.opaque,
     required super.child,
   });
 
   final bool isCurrent;
   final bool canPop;
   final bool impliesAppBarDismissal;
+  final bool opaque;
   final Route<dynamic> route;
 
   @override
@@ -1009,7 +1007,8 @@ class _ModalScopeStatus extends InheritedModel<_ModalRouteAspect> {
     return isCurrent != old.isCurrent ||
         canPop != old.canPop ||
         impliesAppBarDismissal != old.impliesAppBarDismissal ||
-        route != old.route;
+        route != old.route ||
+        opaque != old.opaque;
   }
 
   @override
@@ -1038,6 +1037,10 @@ class _ModalScopeStatus extends InheritedModel<_ModalRouteAspect> {
         _ModalRouteAspect.isCurrent => isCurrent != oldWidget.isCurrent,
         _ModalRouteAspect.canPop => canPop != oldWidget.canPop,
         _ModalRouteAspect.settings => route.settings != oldWidget.route.settings,
+        _ModalRouteAspect.isActive => route.isActive != oldWidget.route.isActive,
+        _ModalRouteAspect.isFirst => route.isFirst != oldWidget.route.isFirst,
+        _ModalRouteAspect.opaque => opaque != oldWidget.opaque,
+        _ModalRouteAspect.popDisposition => route.popDisposition != oldWidget.route.popDisposition,
       },
     );
   }
@@ -1160,6 +1163,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
         route: widget.route,
         isCurrent: widget.route.isCurrent, // _routeSetState is called if this updates
         canPop: widget.route.canPop, // _routeSetState is called if this updates
+        opaque: widget.route.opaque, // _routeSetState is called if this updates
         impliesAppBarDismissal: widget.route.impliesAppBarDismissal,
         child: Offstage(
           offstage: widget.route.offstage, // _routeSetState is called if this updates
@@ -1198,19 +1202,18 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                               ),
                             );
                           },
-                          child:
-                              _page ??= RepaintBoundary(
-                                key: widget.route._subtreeKey, // immutable
-                                child: Builder(
-                                  builder: (BuildContext context) {
-                                    return widget.route.buildPage(
-                                      context,
-                                      widget.route.animation!,
-                                      widget.route.secondaryAnimation!,
-                                    );
-                                  },
-                                ),
-                              ),
+                          child: _page ??= RepaintBoundary(
+                            key: widget.route._subtreeKey, // immutable
+                            child: Builder(
+                              builder: (BuildContext context) {
+                                return widget.route.buildPage(
+                                  context,
+                                  widget.route.animation!,
+                                  widget.route.secondaryAnimation!,
+                                );
+                              },
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -1316,10 +1319,53 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// Returns null if the given context is not associated with a modal route.
   ///
-  /// Use of this method will cause the given [context] to rebuild any time that
-  /// the [ModalRoute.settings] property of the ancestor [_ModalScopeStatus] changes.
+  /// Calling this method creates a dependency on the [ModalRoute] associated
+  /// with the given [context]. As a result, the widget corresponding to [context]
+  /// will be rebuilt whenever the route's [ModalRoute.settings] changes.
   static RouteSettings? settingsOf(BuildContext context) =>
       _of(context, _ModalRouteAspect.settings)?.settings;
+
+  /// Returns [ModalRoute.isActive] for the modal route most closely associated
+  /// with the given context.
+  ///
+  /// Returns null if the given context is not associated with a modal route.
+  ///
+  /// Calling this method creates a dependency on the [ModalRoute] associated
+  /// with the given [context]. As a result, the widget corresponding to [context]
+  /// will be rebuilt whenever the route's [ModalRoute.isActive] changes.
+  static bool? isActiveOf(BuildContext context) =>
+      _of(context, _ModalRouteAspect.isActive)?.isActive;
+
+  /// Returns [ModalRoute.isFirst] for the modal route most closely associated
+  /// with the given context.
+  ///
+  /// Returns null if the given context is not associated with a modal route.
+  ///
+  /// Calling this method creates a dependency on the [ModalRoute] associated
+  /// with the given [context]. As a result, the widget corresponding to [context]
+  /// will be rebuilt whenever the route's [ModalRoute.isFirst] changes.
+  static bool? isFirstOf(BuildContext context) => _of(context, _ModalRouteAspect.isFirst)?.isFirst;
+
+  /// Returns [ModalRoute.opaque] for the modal route most closely associated
+  /// with the given context.
+  ///
+  /// Returns null if the given context is not associated with a modal route.
+  ///
+  /// Calling this method creates a dependency on the [ModalRoute] associated
+  /// with the given [context]. As a result, the widget corresponding to [context]
+  /// will be rebuilt whenever the route's [ModalRoute.opaque] changes.
+  static bool? opaqueOf(BuildContext context) => _of(context, _ModalRouteAspect.opaque)?.opaque;
+
+  /// Returns [ModalRoute.popDisposition] for the modal route most closely associated
+  /// with the given context.
+  ///
+  /// Returns null if the given context is not associated with a modal route.
+  ///
+  /// Calling this method creates a dependency on the [ModalRoute] associated
+  /// with the given [context]. As a result, the widget corresponding to [context]
+  /// will be rebuilt whenever the route's [ModalRoute.popDisposition] changes.
+  static RoutePopDisposition? popDispositionOf(BuildContext context) =>
+      _of(context, _ModalRouteAspect.popDisposition)?.popDisposition;
 
   /// Schedule a call to [buildTransitions].
   ///
@@ -1858,16 +1904,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     if (!animation!.isCompleted) {
       return false;
     }
-    // If we're being popped into, we also cannot be swiped until the pop above
-    // it completes. This translates to our secondary animation being
-    // dismissed.
-    if (!secondaryAnimation!.isDismissed) {
-      return false;
-    }
-    // If we're in a gesture already, we cannot start another.
-    if (popGestureInProgress) {
-      return false;
-    }
 
     // Looks like a back gesture would be welcome!
     return true;
@@ -1897,8 +1933,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       _offstage = value;
     });
     _animationProxy!.parent = _offstage ? kAlwaysCompleteAnimation : super.animation;
-    _secondaryAnimationProxy!.parent =
-        _offstage ? kAlwaysDismissedAnimation : super.secondaryAnimation;
+    _secondaryAnimationProxy!.parent = _offstage
+        ? kAlwaysDismissedAnimation
+        : super.secondaryAnimation;
     changedInternalState();
   }
 
@@ -2197,6 +2234,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// set to true
   bool get impliesAppBarDismissal => hasActiveRouteBelow || _entriesImpliesAppBarDismissal > 0;
 
+  /// {@macro flutter.widgets.RawDialogRoute.fullscreenDialog}
+  // TODO(dkwingsmt): Rename `ModalRoute.fullscreenDialog` something semantically suitable for a modal.
+  // https://github.com/flutter/flutter/issues/168949
+  bool get fullscreenDialog => false;
+
   // Internals
 
   final GlobalKey<_ModalScopeState<T>> _scopeKey = GlobalKey<_ModalScopeState<T>>();
@@ -2211,9 +2253,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       barrier = BackdropFilter(filter: filter!, child: barrier);
     }
     barrier = IgnorePointer(
-      ignoring:
-          !animation!
-              .isForwardOrCompleted, // changedInternalState is called when animation.status updates
+      ignoring: !animation!
+          .isForwardOrCompleted, // changedInternalState is called when animation.status updates
       child: barrier, // dismissed is possible when doing a manual pop gesture
     );
     if (semanticsDismissible && barrierDismissible) {
@@ -2524,6 +2565,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     this.anchorPoint,
     super.traversalEdgeBehavior,
     super.directionalTraversalEdgeBehavior,
+    this.fullscreenDialog = false,
   }) : _pageBuilder = pageBuilder,
        _barrierDismissible = barrierDismissible,
        _barrierLabel = barrierLabel,
@@ -2553,6 +2595,17 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 
   /// {@macro flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
   final Offset? anchorPoint;
+
+  /// {@template flutter.widgets.RawDialogRoute.fullscreenDialog}
+  /// Whether this route is a full-screen dialog.
+  ///
+  /// In Material and Cupertino, being fullscreen has the effects of making
+  /// the app bars have a close button instead of a back button. On
+  /// iOS, dialogs transitions animate differently and are also not closeable
+  /// with the back swipe gesture.
+  /// {@endtemplate}
+  @override
+  final bool fullscreenDialog;
 
   @override
   Widget buildPage(
@@ -2673,6 +2726,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
   Duration transitionDuration = const Duration(milliseconds: 200),
   RouteTransitionsBuilder? transitionBuilder,
   bool useRootNavigator = true,
+  bool fullscreenDialog = false,
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   bool? requestFocus,
@@ -2689,6 +2743,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
       settings: routeSettings,
       anchorPoint: anchorPoint,
       requestFocus: requestFocus,
+      fullscreenDialog: fullscreenDialog,
     ),
   );
 }

@@ -340,28 +340,28 @@ class StrutStyle with Diagnosticable {
     double? fontSize,
     double? height,
     TextLeadingDistribution? leadingDistribution,
-    this.leading, // TextStyle does not have an equivalent (yet).
+    double? leading, // TextStyle does not have an equivalent (yet).
     FontWeight? fontWeight,
     FontStyle? fontStyle,
-    this.forceStrutHeight,
+    bool? forceStrutHeight,
     String? debugLabel,
     String? package,
-  }) : assert(fontSize == null || fontSize > 0),
-       assert(leading == null || leading >= 0),
-       assert(package == null || fontFamily != null || fontFamilyFallback != null),
-       fontFamily =
-           fontFamily != null
-               ? (package == null ? fontFamily : 'packages/$package/$fontFamily')
-               : textStyle.fontFamily,
-       _fontFamilyFallback = fontFamilyFallback ?? textStyle.fontFamilyFallback,
-       height = height ?? textStyle.height,
-       leadingDistribution = leadingDistribution ?? textStyle.leadingDistribution,
-       fontSize = fontSize ?? textStyle.fontSize,
-       fontWeight = fontWeight ?? textStyle.fontWeight,
-       fontStyle = fontStyle ?? textStyle.fontStyle,
-       debugLabel = debugLabel ?? textStyle.debugLabel,
-       _package = package; // the textStyle._package data is embedded in the
-  // fontFamily names, so we no longer need it.
+  }) : this(
+         fontFamily: fontFamily != null
+             ? (package == null ? fontFamily : 'packages/$package/$fontFamily')
+             : textStyle.fontFamily,
+         fontFamilyFallback: fontFamilyFallback ?? textStyle.fontFamilyFallback,
+         height: height ?? textStyle.height,
+         leadingDistribution: leadingDistribution ?? textStyle.leadingDistribution,
+         fontSize: fontSize ?? textStyle.fontSize,
+         leading: leading,
+         fontWeight: fontWeight ?? textStyle.fontWeight,
+         fontStyle: fontStyle ?? textStyle.fontStyle,
+         forceStrutHeight: forceStrutHeight,
+         debugLabel: debugLabel ?? textStyle.debugLabel,
+         package: package, // the textStyle._package data is embedded in the
+         // fontFamily names, so we no longer need it.
+       );
 
   /// A [StrutStyle] that will have no impact on the text layout.
   ///
@@ -560,9 +560,36 @@ class StrutStyle with Diagnosticable {
       fontStyle: fontStyle ?? other.fontStyle,
       forceStrutHeight: forceStrutHeight, // StrutStyle-unique property.
       debugLabel: debugLabel ?? other.debugLabel,
-      leadingDistribution:
-          effectiveHeight != null ? (leadingDistribution ?? other.leadingDistribution) : null,
+      leadingDistribution: effectiveHeight != null
+          ? (leadingDistribution ?? other.leadingDistribution)
+          : null,
       // Package is embedded within the getters for fontFamilyFallback.
+    );
+  }
+
+  /// Returns a new strut style that is a combination of this style and the given
+  /// [other] style.
+  ///
+  /// All null values of the given style will be replaced with members from this
+  /// style.
+  ///
+  /// If the given strut style is null, returns this strut style.
+  StrutStyle merge(StrutStyle? other) {
+    if (other == null) {
+      return this;
+    }
+    return StrutStyle(
+      fontFamily: other.fontFamily ?? fontFamily,
+      fontFamilyFallback: other.fontFamilyFallback ?? fontFamilyFallback,
+      fontSize: other.fontSize ?? fontSize,
+      height: other.height ?? height,
+      leadingDistribution: other.leadingDistribution ?? leadingDistribution,
+      leading: other.leading ?? leading,
+      fontWeight: other.fontWeight ?? fontWeight,
+      fontStyle: other.fontStyle ?? fontStyle,
+      forceStrutHeight: other.forceStrutHeight ?? forceStrutHeight,
+      debugLabel: other.debugLabel ?? debugLabel,
+      package: other._package ?? _package,
     );
   }
 

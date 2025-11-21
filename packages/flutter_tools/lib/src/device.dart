@@ -20,6 +20,7 @@ import 'device_vm_service_discovery_for_attach.dart';
 import 'project.dart';
 import 'vmservice.dart';
 import 'web/compile.dart';
+import 'web/devfs_config.dart';
 
 DeviceManager? get deviceManager => context.get<DeviceManager>();
 
@@ -83,7 +84,7 @@ abstract class DeviceManager {
   }
 
   /// A minimum duration to use when discovering wireless iOS devices.
-  static const Duration minimumWirelessDeviceDiscoveryTimeout = Duration(seconds: 5);
+  static const minimumWirelessDeviceDiscoveryTimeout = Duration(seconds: 5);
 
   /// True when the user has specified a single specific device.
   bool get hasSpecifiedDeviceId => specifiedDeviceId != null;
@@ -112,22 +113,23 @@ abstract class DeviceManager {
     // Some discoverers have hard-coded device IDs and return quickly, and others
     // shell out to other processes and can take longer.
     // If an ID was specified, first check if it was a "well-known" device id.
-    final Set<String> wellKnownIds =
-        _platformDiscoverers.expand((DeviceDiscovery discovery) => discovery.wellKnownIds).toSet();
+    final Set<String> wellKnownIds = _platformDiscoverers
+        .expand((DeviceDiscovery discovery) => discovery.wellKnownIds)
+        .toSet();
     final bool hasWellKnownId = hasSpecifiedDeviceId && wellKnownIds.contains(specifiedDeviceId);
 
     // Process discoverers as they can return results, so if an exact match is
     // found quickly, we don't wait for all the discoverers to complete.
-    final List<Device> prefixMatches = <Device>[];
-    final Completer<Device> exactMatchCompleter = Completer<Device>();
-    final List<Future<List<Device>?>> futureDevices = <Future<List<Device>?>>[
+    final prefixMatches = <Device>[];
+    final exactMatchCompleter = Completer<Device>();
+    final futureDevices = <Future<List<Device>?>>[
       for (final DeviceDiscovery discoverer in _platformDiscoverers)
         if (!hasWellKnownId || discoverer.wellKnownIds.contains(specifiedDeviceId))
           discoverer
               .devices(filter: filter)
               .then(
                 (List<Device> devices) {
-                  for (final Device device in devices) {
+                  for (final device in devices) {
                     if (exactlyMatchesDeviceId(device)) {
                       exactMatchCompleter.complete(device);
                       return null;
@@ -217,8 +219,18 @@ abstract class DeviceManager {
     await Future.wait<List<Device>>(<Future<List<Device>>>[
       for (final DeviceDiscovery discoverer in _platformDiscoverers)
         if (discoverer.requiresExtendedWirelessDeviceDiscovery)
-          discoverer.discoverDevices(timeout: timeout),
+          discoverer.discoverDevices(timeout: timeout, forWirelessDiscovery: true),
     ]);
+  }
+
+  /// Stop any running extended wireless device discoverers.
+  void stopExtendedWirelessDeviceDiscoverers() {
+    for (final PollingDeviceDiscovery deviceDiscoverer
+        in _platformDiscoverers.whereType<PollingDeviceDiscovery>()) {
+      if (deviceDiscoverer.requiresExtendedWirelessDeviceDiscovery) {
+        deviceDiscoverer.cancelWirelessDiscovery();
+      }
+    }
   }
 
   /// Whether we're capable of listing any devices given the current environment configuration.
@@ -325,9 +337,9 @@ class DeviceDiscoverySupportFilter {
   final bool _excludeDevicesNotSupportedByAll;
 
   Future<bool> matchesRequirements(Device device) async {
-    final bool meetsSupportByFlutterRequirement = device.isSupported();
+    final bool meetsSupportByFlutterRequirement = await device.isSupported();
     final bool meetsSupportForProjectRequirement =
-        !_excludeDevicesNotSupportedByProject || isDeviceSupportedForProject(device);
+        !_excludeDevicesNotSupportedByProject || await isDeviceSupportedForProject(device);
     final bool meetsSupportForAllRequirement =
         !_excludeDevicesNotSupportedByAll || await isDeviceSupportedForAll(device);
 
@@ -344,11 +356,11 @@ class DeviceDiscoverySupportFilter {
   /// compilers, and web requires an entirely different resident runner.
   Future<bool> isDeviceSupportedForAll(Device device) async {
     final TargetPlatform devicePlatform = await device.targetPlatform;
-    return device.isSupported() &&
+    return await device.isSupported() &&
         devicePlatform != TargetPlatform.fuchsia_arm64 &&
         devicePlatform != TargetPlatform.fuchsia_x64 &&
         devicePlatform != TargetPlatform.web_javascript &&
-        isDeviceSupportedForProject(device);
+        await isDeviceSupportedForProject(device);
   }
 
   /// Returns whether the device is supported for the project.
@@ -358,8 +370,8 @@ class DeviceDiscoverySupportFilter {
   ///
   /// This also exists to allow the check to be overridden for google3 clients. If
   /// [_flutterProject] is null then return true.
-  bool isDeviceSupportedForProject(Device device) {
-    if (!device.isSupported()) {
+  Future<bool> isDeviceSupportedForProject(Device device) async {
+    if (!await device.isSupported()) {
       return false;
     }
     if (_flutterProject == null) {
@@ -438,7 +450,11 @@ abstract class DeviceDiscovery {
   Future<List<Device>> devices({DeviceDiscoveryFilter? filter});
 
   /// Return all connected devices. Discards existing cache of devices.
-  Future<List<Device>> discoverDevices({Duration? timeout, DeviceDiscoveryFilter? filter});
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+    bool forWirelessDiscovery = false,
+  });
 
   /// Gets a list of diagnostic messages pertaining to issues with any connected
   /// devices (will be an empty list if there are no issues).
@@ -459,18 +475,18 @@ abstract class DeviceDiscovery {
 abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   PollingDeviceDiscovery(this.name);
 
-  static const Duration _pollingInterval = Duration(seconds: 4);
-  static const Duration _pollingTimeout = Duration(seconds: 30);
+  static const _pollingInterval = Duration(seconds: 4);
+  static const _pollingTimeout = Duration(seconds: 30);
 
   final String name;
 
   @protected
   @visibleForTesting
-  final ItemListNotifier<Device> deviceNotifier = ItemListNotifier<Device>();
+  final deviceNotifier = ItemListNotifier<Device>();
 
   Timer? _timer;
 
-  Future<List<Device>> pollingGetDevices({Duration? timeout});
+  Future<List<Device>> pollingGetDevices({Duration? timeout, bool forWirelessDiscovery = false});
 
   void startPolling() {
     // Make initial population the default, fast polling timeout.
@@ -496,6 +512,9 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     _timer = null;
   }
 
+  /// Cancels any in-progress, long-running wireless discovery processes.
+  Future<void> cancelWirelessDiscovery() async {}
+
   /// Get devices from cache filtered by [filter].
   ///
   /// If the cache is empty, populate the cache.
@@ -512,8 +531,17 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   ///
   /// If [filter] is null, it may return devices that are not connected.
   @override
-  Future<List<Device>> discoverDevices({Duration? timeout, DeviceDiscoveryFilter? filter}) {
-    return _populateDevices(timeout: timeout, filter: filter, resetCache: true);
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+    bool forWirelessDiscovery = false,
+  }) {
+    return _populateDevices(
+      timeout: timeout,
+      filter: filter,
+      resetCache: true,
+      forWirelessDiscovery: forWirelessDiscovery,
+    );
   }
 
   /// Get devices from cache filtered by [filter].
@@ -525,9 +553,13 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     Duration? timeout,
     DeviceDiscoveryFilter? filter,
     bool resetCache = false,
+    bool forWirelessDiscovery = false,
   }) async {
     if (!deviceNotifier.isPopulated || resetCache) {
-      final List<Device> devices = await pollingGetDevices(timeout: timeout);
+      final List<Device> devices = await pollingGetDevices(
+        timeout: timeout,
+        forWirelessDiscovery: forWirelessDiscovery,
+      );
       // If the cache was populated while the polling was ongoing, do not
       // overwrite the cache unless it's explicitly refreshing the cache.
       if (!deviceNotifier.isPopulated || resetCache) {
@@ -667,11 +699,11 @@ abstract class Device {
   Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier});
 
   /// Check if the device is supported by Flutter.
-  bool isSupported();
+  Future<bool> isSupported();
 
   // String meant to be displayed to the user indicating if the device is
   // supported by Flutter, and, if not, why.
-  String supportMessage() => isSupported() ? 'Supported' : 'Unsupported';
+  Future<String> supportMessage() async => await isSupported() ? 'Supported' : 'Unsupported';
 
   /// The device's platform.
   Future<TargetPlatform> get targetPlatform;
@@ -706,6 +738,9 @@ abstract class Device {
 
   /// Get the DDS instance for this device.
   final DartDevelopmentService dds;
+
+  /// Get the DevTools URI for the application instance.
+  Uri? get devToolsUri => dds.devToolsUri;
 
   /// Clear the device's logs.
   void clearLogs();
@@ -766,9 +801,6 @@ abstract class Device {
   /// application.
   bool get supportsScreenshot => false;
 
-  /// Whether the device supports the '--fast-start' development mode.
-  bool get supportsFastStart => false;
-
   /// Whether the Flavors feature ('--flavor') is supported for this device.
   bool get supportsFlavors => false;
 
@@ -811,12 +843,12 @@ abstract class Device {
     }
 
     // Extract device information
-    final List<List<String>> table = <List<String>>[];
-    for (final Device device in devices) {
-      String supportIndicator = device.isSupported() ? '' : ' (unsupported)';
+    final table = <List<String>>[];
+    for (final device in devices) {
+      var supportIndicator = await device.isSupported() ? '' : ' (unsupported)';
       final TargetPlatform targetPlatform = await device.targetPlatform;
       if (await device.isLocalEmulator) {
-        final String type = targetPlatform == TargetPlatform.ios ? 'simulator' : 'emulator';
+        final type = targetPlatform == TargetPlatform.ios ? 'simulator' : 'emulator';
         supportIndicator += ' ($type)';
       }
       table.add(<String>[
@@ -828,9 +860,9 @@ abstract class Device {
     }
 
     // Calculate column widths
-    final List<int> indices = List<int>.generate(table[0].length - 1, (int i) => i);
+    final indices = List<int>.generate(table[0].length - 1, (int i) => i);
     List<int> widths = indices.map<int>((int i) => 0).toList();
-    for (final List<String> row in table) {
+    for (final row in table) {
       widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
     }
 
@@ -864,7 +896,7 @@ abstract class Device {
     return <String, Object>{
       'name': name,
       'id': id,
-      'isSupported': isSupported(),
+      'isSupported': await isSupported(),
       'targetPlatform': getNameForTargetPlatform(await targetPlatform),
       'emulator': isLocalEmu,
       'sdk': await sdkNameAndVersion,
@@ -872,7 +904,6 @@ abstract class Device {
         'hotReload': supportsHotReload,
         'hotRestart': supportsHotRestart,
         'screenshot': supportsScreenshot,
-        'fastStart': supportsFastStart,
         'flutterExit': supportsFlutterExit,
         'hardwareRendering': isLocalEmu && await supportsHardwareRendering,
         'startPaused': supportsStartPaused,
@@ -938,6 +969,7 @@ class DebuggingOptions {
     this.traceSystrace = false,
     this.traceToFile,
     this.endlessTraceBuffer = false,
+    this.profileMicrotasks = false,
     this.purgePersistentCache = false,
     this.useTestFonts = false,
     this.verboseSystemLogs = false,
@@ -946,10 +978,6 @@ class DebuggingOptions {
     this.deviceVmServicePort,
     this.ddsPort,
     this.devToolsServerAddress,
-    this.hostname,
-    this.port,
-    this.tlsCertPath,
-    this.tlsCertKeyPath,
     this.webEnableExposeUrl,
     this.webUseSseForDebugProxy = true,
     this.webUseSseForDebugBackend = true,
@@ -958,18 +986,17 @@ class DebuggingOptions {
     this.webBrowserDebugPort,
     this.webBrowserFlags = const <String>[],
     this.webEnableExpressionEvaluation = false,
-    this.webHeaders = const <String, String>{},
     this.webLaunchUrl,
     WebRendererMode? webRenderer,
     this.webUseWasm = false,
     this.vmserviceOutFile,
-    this.fastStart = false,
     this.nativeNullAssertions = false,
     this.enableImpeller = ImpellerStatus.platformDefault,
+    this.enableFlutterGpu = false,
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
-    this.serveObservatory = false,
     this.enableDartProfiling = true,
+    this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
@@ -977,16 +1004,13 @@ class DebuggingOptions {
     this.ipv6 = false,
     this.google3WorkspaceRoot,
     this.printDtd = false,
+    this.webDevServerConfig,
   }) : debuggingEnabled = true,
        webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
 
   DebuggingOptions.disabled(
     this.buildInfo, {
     this.dartEntrypointArgs = const <String>[],
-    this.port,
-    this.hostname,
-    this.tlsCertPath,
-    this.tlsCertKeyPath,
     this.webEnableExposeUrl,
     this.webUseSseForDebugProxy = true,
     this.webUseSseForDebugBackend = true,
@@ -995,17 +1019,19 @@ class DebuggingOptions {
     this.webBrowserDebugPort,
     this.webBrowserFlags = const <String>[],
     this.webLaunchUrl,
-    this.webHeaders = const <String, String>{},
     WebRendererMode? webRenderer,
     this.webUseWasm = false,
     this.traceAllowlist,
     this.enableImpeller = ImpellerStatus.platformDefault,
+    this.enableFlutterGpu = false,
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
     this.enableDartProfiling = true,
+    this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
+    this.webDevServerConfig,
   }) : debuggingEnabled = false,
        useTestFonts = false,
        startPaused = false,
@@ -1020,6 +1046,7 @@ class DebuggingOptions {
        traceSystrace = false,
        traceToFile = null,
        endlessTraceBuffer = false,
+       profileMicrotasks = false,
        purgePersistentCache = false,
        verboseSystemLogs = false,
        hostVmServicePort = null,
@@ -1028,10 +1055,8 @@ class DebuggingOptions {
        ddsPort = null,
        devToolsServerAddress = null,
        vmserviceOutFile = null,
-       fastStart = false,
        webEnableExpressionEvaluation = false,
        nativeNullAssertions = false,
-       serveObservatory = false,
        enableDevTools = false,
        ipv6 = false,
        google3WorkspaceRoot = null,
@@ -1055,6 +1080,7 @@ class DebuggingOptions {
     required this.traceSystrace,
     required this.traceToFile,
     required this.endlessTraceBuffer,
+    required this.profileMicrotasks,
     required this.purgePersistentCache,
     required this.useTestFonts,
     required this.verboseSystemLogs,
@@ -1063,10 +1089,6 @@ class DebuggingOptions {
     required this.disablePortPublication,
     required this.ddsPort,
     required this.devToolsServerAddress,
-    required this.port,
-    required this.hostname,
-    required this.tlsCertPath,
-    required this.tlsCertKeyPath,
     required this.webEnableExposeUrl,
     required this.webUseSseForDebugProxy,
     required this.webUseSseForDebugBackend,
@@ -1075,18 +1097,17 @@ class DebuggingOptions {
     required this.webBrowserDebugPort,
     required this.webBrowserFlags,
     required this.webEnableExpressionEvaluation,
-    required this.webHeaders,
     required this.webLaunchUrl,
     required this.webRenderer,
     required this.webUseWasm,
     required this.vmserviceOutFile,
-    required this.fastStart,
     required this.nativeNullAssertions,
     required this.enableImpeller,
+    required this.enableFlutterGpu,
     required this.enableVulkanValidation,
     required this.uninstallFirst,
-    required this.serveObservatory,
     required this.enableDartProfiling,
+    required this.profileStartup,
     required this.enableEmbedderApi,
     required this.usingCISystem,
     required this.debugLogsDirectoryPath,
@@ -1094,6 +1115,7 @@ class DebuggingOptions {
     required this.ipv6,
     required this.google3WorkspaceRoot,
     required this.printDtd,
+    this.webDevServerConfig,
   });
 
   final bool debuggingEnabled;
@@ -1113,6 +1135,7 @@ class DebuggingOptions {
   final bool traceSystrace;
   final String? traceToFile;
   final bool endlessTraceBuffer;
+  final bool profileMicrotasks;
   final bool purgePersistentCache;
   final bool useTestFonts;
   final bool verboseSystemLogs;
@@ -1121,18 +1144,15 @@ class DebuggingOptions {
   final bool disablePortPublication;
   final int? ddsPort;
   final Uri? devToolsServerAddress;
-  final String? port;
-  final String? hostname;
-  final String? tlsCertPath;
-  final String? tlsCertKeyPath;
   final bool? webEnableExposeUrl;
   final bool webUseSseForDebugProxy;
   final bool webUseSseForDebugBackend;
   final bool webUseSseForInjectedClient;
   final ImpellerStatus enableImpeller;
+  final bool enableFlutterGpu;
   final bool enableVulkanValidation;
-  final bool serveObservatory;
   final bool enableDartProfiling;
+  final bool profileStartup;
   final bool enableEmbedderApi;
   final bool usingCISystem;
   final String? debugLogsDirectoryPath;
@@ -1140,6 +1160,7 @@ class DebuggingOptions {
   final bool ipv6;
   final String? google3WorkspaceRoot;
   final bool printDtd;
+  final WebDevServerConfig? webDevServerConfig;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
@@ -1165,9 +1186,6 @@ class DebuggingOptions {
   /// Allow developers to customize the browser's launch URL
   final String? webLaunchUrl;
 
-  /// Allow developers to add custom headers to web server
-  final Map<String, String> webHeaders;
-
   /// Which web renderer to use for the debugging session
   final WebRendererMode webRenderer;
 
@@ -1176,7 +1194,6 @@ class DebuggingOptions {
 
   /// A file where the VM Service URL should be written after the application is started.
   final String? vmserviceOutFile;
-  final bool fastStart;
 
   /// Additional null runtime checks inserted for web applications.
   ///
@@ -1189,10 +1206,10 @@ class DebuggingOptions {
     String? route,
     Map<String, Object?> platformArgs, {
     DeviceConnectionInterface interfaceType = DeviceConnectionInterface.attached,
-    bool isCoreDevice = false,
   }) {
     return <String>[
       if (enableDartProfiling) '--enable-dart-profiling',
+      if (profileStartup) '--profile-startup',
       if (disableServiceAuthCodes) '--disable-service-auth-codes',
       if (disablePortPublication) '--disable-vm-service-publication',
       if (startPaused) '--start-paused',
@@ -1202,13 +1219,7 @@ class DebuggingOptions {
       if (environmentType == EnvironmentType.simulator && dartFlags.isNotEmpty)
         '--dart-flags=$dartFlags',
       if (useTestFonts) '--use-test-fonts',
-      // Core Devices (iOS 17 devices) are debugged through Xcode so don't
-      // include these flags, which are used to check if the app was launched
-      // via Flutter CLI and `ios-deploy`.
-      if (debuggingEnabled && !isCoreDevice) ...<String>[
-        '--enable-checked-mode',
-        '--verify-entry-points',
-      ],
+      if (debuggingEnabled) ...<String>['--enable-checked-mode', '--verify-entry-points'],
       if (enableSoftwareRendering) '--enable-software-rendering',
       if (traceSystrace) '--trace-systrace',
       if (traceToFile != null) '--trace-to-file="$traceToFile"',
@@ -1217,12 +1228,14 @@ class DebuggingOptions {
       if (traceAllowlist != null) '--trace-allowlist="$traceAllowlist"',
       if (traceSkiaAllowlist != null) '--trace-skia-allowlist="$traceSkiaAllowlist"',
       if (endlessTraceBuffer) '--endless-trace-buffer',
+      if (profileMicrotasks) '--profile-microtasks',
       if (verboseSystemLogs) '--verbose-logging',
       if (purgePersistentCache) '--purge-persistent-cache',
       if (route != null) '--route=$route',
       if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
       if (enableImpeller == ImpellerStatus.enabled) '--enable-impeller=true',
       if (enableImpeller == ImpellerStatus.disabled) '--enable-impeller=false',
+      if (enableFlutterGpu) '--enable-flutter-gpu',
       if (environmentType == EnvironmentType.physical && deviceVmServicePort != null)
         '--vm-service-port=$deviceVmServicePort',
       // The simulator "device" is actually on the host machine so no ports will be forwarded.
@@ -1252,6 +1265,7 @@ class DebuggingOptions {
     'traceSystrace': traceSystrace,
     'traceToFile': traceToFile,
     'endlessTraceBuffer': endlessTraceBuffer,
+    'profileMicrotasks': profileMicrotasks,
     'purgePersistentCache': purgePersistentCache,
     'useTestFonts': useTestFonts,
     'verboseSystemLogs': verboseSystemLogs,
@@ -1260,10 +1274,10 @@ class DebuggingOptions {
     'disablePortPublication': disablePortPublication,
     'ddsPort': ddsPort,
     'devToolsServerAddress': devToolsServerAddress.toString(),
-    'port': port,
-    'hostname': hostname,
-    'tlsCertPath': tlsCertPath,
-    'tlsCertKeyPath': tlsCertKeyPath,
+    'port': webDevServerConfig?.port,
+    'hostname': webDevServerConfig?.host,
+    'tlsCertPath': webDevServerConfig?.https?.certPath,
+    'tlsCertKeyPath': webDevServerConfig?.https?.certKeyPath,
     'webEnableExposeUrl': webEnableExposeUrl,
     'webUseSseForDebugProxy': webUseSseForDebugProxy,
     'webUseSseForDebugBackend': webUseSseForDebugBackend,
@@ -1273,18 +1287,20 @@ class DebuggingOptions {
     'webBrowserFlags': webBrowserFlags,
     'webEnableExpressionEvaluation': webEnableExpressionEvaluation,
     'webLaunchUrl': webLaunchUrl,
-    'webHeaders': webHeaders,
+    'webHeaders': webDevServerConfig?.headers ?? <String, String>{},
     'webRenderer': webRenderer.name,
     'webUseWasm': webUseWasm,
     'vmserviceOutFile': vmserviceOutFile,
-    'fastStart': fastStart,
     'nativeNullAssertions': nativeNullAssertions,
     'enableImpeller': enableImpeller.asBool,
+    'enableFlutterGpu': enableFlutterGpu,
     'enableVulkanValidation': enableVulkanValidation,
-    'serveObservatory': serveObservatory,
     'enableDartProfiling': enableDartProfiling,
+    'profileStartup': profileStartup,
     'enableEmbedderApi': enableEmbedderApi,
     'usingCISystem': usingCISystem,
+    // TODO(bkonyi): remove once fg3 is updated.
+    'fastStart': false,
     'debugLogsDirectoryPath': debugLogsDirectoryPath,
     'enableDevTools': enableDevTools,
     'ipv6': ipv6,
@@ -1318,6 +1334,7 @@ class DebuggingOptions {
         traceSystrace: json['traceSystrace']! as bool,
         traceToFile: json['traceToFile'] as String?,
         endlessTraceBuffer: json['endlessTraceBuffer']! as bool,
+        profileMicrotasks: json['profileMicrotasks']! as bool,
         purgePersistentCache: json['purgePersistentCache']! as bool,
         useTestFonts: json['useTestFonts']! as bool,
         verboseSystemLogs: json['verboseSystemLogs']! as bool,
@@ -1325,14 +1342,9 @@ class DebuggingOptions {
         deviceVmServicePort: json['deviceVmServicePort'] as int?,
         disablePortPublication: json['disablePortPublication']! as bool,
         ddsPort: json['ddsPort'] as int?,
-        devToolsServerAddress:
-            json['devToolsServerAddress'] != null
-                ? Uri.parse(json['devToolsServerAddress']! as String)
-                : null,
-        port: json['port'] as String?,
-        hostname: json['hostname'] as String?,
-        tlsCertPath: json['tlsCertPath'] as String?,
-        tlsCertKeyPath: json['tlsCertKeyPath'] as String?,
+        devToolsServerAddress: json['devToolsServerAddress'] != null
+            ? Uri.parse(json['devToolsServerAddress']! as String)
+            : null,
         webEnableExposeUrl: json['webEnableExposeUrl'] as bool?,
         webUseSseForDebugProxy: json['webUseSseForDebugProxy']! as bool,
         webUseSseForDebugBackend: json['webUseSseForDebugBackend']! as bool,
@@ -1341,18 +1353,17 @@ class DebuggingOptions {
         webBrowserDebugPort: json['webBrowserDebugPort'] as int?,
         webBrowserFlags: (json['webBrowserFlags']! as List<dynamic>).cast<String>(),
         webEnableExpressionEvaluation: json['webEnableExpressionEvaluation']! as bool,
-        webHeaders: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
         webLaunchUrl: json['webLaunchUrl'] as String?,
         webRenderer: WebRendererMode.values.byName(json['webRenderer']! as String),
         webUseWasm: json['webUseWasm']! as bool,
         vmserviceOutFile: json['vmserviceOutFile'] as String?,
-        fastStart: json['fastStart']! as bool,
         nativeNullAssertions: json['nativeNullAssertions']! as bool,
         enableImpeller: ImpellerStatus.fromBool(json['enableImpeller'] as bool?),
+        enableFlutterGpu: json['enableFlutterGpu']! as bool,
         enableVulkanValidation: (json['enableVulkanValidation'] as bool?) ?? false,
         uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
-        serveObservatory: (json['serveObservatory'] as bool?) ?? false,
         enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
+        profileStartup: (json['profileStartup'] as bool?) ?? false,
         enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
         usingCISystem: (json['usingCISystem'] as bool?) ?? false,
         debugLogsDirectoryPath: json['debugLogsDirectoryPath'] as String?,
@@ -1360,13 +1371,17 @@ class DebuggingOptions {
         ipv6: (json['ipv6'] as bool?) ?? false,
         google3WorkspaceRoot: json['google3WorkspaceRoot'] as String?,
         printDtd: (json['printDtd'] as bool?) ?? false,
+        webDevServerConfig: WebDevServerConfig(
+          port: json['port'] is int ? json['port']! as int : 8080,
+          host: json['hostname'] is String ? json['hostname']! as String : 'localhost',
+          https: HttpsConfig.parse(json['tlsCertPath'], json['tlsCertKeyPath']),
+          headers: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
+        ),
       );
 }
 
 class LaunchResult {
-  LaunchResult.succeeded({Uri? vmServiceUri, Uri? observatoryUri})
-    : started = true,
-      vmServiceUri = vmServiceUri ?? observatoryUri;
+  LaunchResult.succeeded({this.vmServiceUri}) : started = true;
 
   LaunchResult.failed() : started = false, vmServiceUri = null;
 
@@ -1377,7 +1392,7 @@ class LaunchResult {
 
   @override
   String toString() {
-    final StringBuffer buf = StringBuffer('started=$started');
+    final buf = StringBuffer('started=$started');
     if (vmServiceUri != null) {
       buf.write(', vmService=$vmServiceUri');
     }

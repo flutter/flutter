@@ -97,34 +97,106 @@ class TableBorder {
   /// Whether all the sides of the border (outside and inside) are identical.
   /// Uniform borders are typically more efficient to paint.
   bool get isUniform {
-    final Color topColor = top.color;
-    if (right.color != topColor ||
-        bottom.color != topColor ||
-        left.color != topColor ||
-        horizontalInside.color != topColor ||
-        verticalInside.color != topColor) {
-      return false;
+    return _allSidesMatch<Color>((BorderSide side) => side.color) &&
+        _allSidesMatch<double>((BorderSide side) => side.width) &&
+        _allSidesMatch<BorderStyle>((BorderSide side) => side.style);
+  }
+
+  /// Whether all the outer sides of the border are identical.
+  bool get _outerBorderIsUniform {
+    return _outerSidesMatch<Color>((BorderSide side) => side.color) &&
+        _outerSidesMatch<double>((BorderSide side) => side.width) &&
+        _outerSidesMatch<BorderStyle>((BorderSide side) => side.style);
+  }
+
+  bool _allSidesMatch<T>(T Function(BorderSide borderSide) selector) {
+    final T topValue = selector(top);
+
+    return selector(right) == topValue &&
+        selector(bottom) == topValue &&
+        selector(left) == topValue &&
+        selector(horizontalInside) == topValue &&
+        selector(verticalInside) == topValue;
+  }
+
+  bool _outerSidesMatch<T>(T Function(BorderSide borderSide) selector) {
+    final T topValue = selector(top);
+
+    return selector(right) == topValue &&
+        selector(bottom) == topValue &&
+        selector(left) == topValue;
+  }
+
+  /// Returns the set of distinct visible colors from the outer border sides.
+  ///
+  /// Only includes colors from border sides that are not [BorderStyle.none].
+  Set<Color> _distinctVisibleOuterColors() {
+    return <Color>{
+      if (top.style != BorderStyle.none) top.color,
+      if (right.style != BorderStyle.none) right.color,
+      if (bottom.style != BorderStyle.none) bottom.color,
+      if (left.style != BorderStyle.none) left.color,
+    };
+  }
+
+  void _paintTableBorder(Canvas canvas, Rect rect) {
+    if (_outerBorderIsUniform && borderRadius != BorderRadius.zero) {
+      final RRect outer = borderRadius.toRRect(rect);
+      final RRect inner = outer.deflate(top.width);
+      final Paint paint = Paint()..color = top.color;
+      canvas.drawDRRect(outer, inner, paint);
+      return;
     }
 
-    final double topWidth = top.width;
-    if (right.width != topWidth ||
-        bottom.width != topWidth ||
-        left.width != topWidth ||
-        horizontalInside.width != topWidth ||
-        verticalInside.width != topWidth) {
-      return false;
+    final Set<Color> visibleColors = _distinctVisibleOuterColors();
+    if (visibleColors.length == 1 && borderRadius != BorderRadius.zero) {
+      _paintNonUniformBorderWithRadius(
+        canvas,
+        rect,
+        borderRadius: borderRadius,
+        top: top.style == BorderStyle.none ? BorderSide.none : top,
+        right: right.style == BorderStyle.none ? BorderSide.none : right,
+        bottom: bottom.style == BorderStyle.none ? BorderSide.none : bottom,
+        left: left.style == BorderStyle.none ? BorderSide.none : left,
+        color: visibleColors.first,
+      );
+      return;
     }
 
-    final BorderStyle topStyle = top.style;
-    if (right.style != topStyle ||
-        bottom.style != topStyle ||
-        left.style != topStyle ||
-        horizontalInside.style != topStyle ||
-        verticalInside.style != topStyle) {
-      return false;
-    }
+    paintBorder(canvas, rect, top: top, right: right, bottom: bottom, left: left);
+  }
 
-    return true;
+  /// Paints a non-uniform border with border radius support.
+  ///
+  /// This is similar to [BoxBorder.paintNonUniformBorder] but adapted for table borders.
+  static void _paintNonUniformBorderWithRadius(
+    Canvas canvas,
+    Rect rect, {
+    required BorderRadius borderRadius,
+    required Color color,
+    required BorderSide top,
+    required BorderSide right,
+    required BorderSide bottom,
+    required BorderSide left,
+  }) {
+    final RRect borderRect = borderRadius.toRRect(rect);
+    final Paint paint = Paint()..color = color;
+
+    final RRect inner = EdgeInsets.fromLTRB(
+      left.strokeInset,
+      top.strokeInset,
+      right.strokeInset,
+      bottom.strokeInset,
+    ).deflateRRect(borderRect);
+
+    final RRect outer = EdgeInsets.fromLTRB(
+      left.strokeOutset,
+      top.strokeOutset,
+      right.strokeOutset,
+      bottom.strokeOutset,
+    ).inflateRRect(borderRect);
+
+    canvas.drawDRRect(outer, inner, paint);
   }
 
   /// Creates a copy of this border but with the widths scaled by the factor `t`.
@@ -257,14 +329,8 @@ class TableBorder {
         }
       }
     }
-    if (!isUniform || borderRadius == BorderRadius.zero) {
-      paintBorder(canvas, rect, top: top, right: right, bottom: bottom, left: left);
-    } else {
-      final RRect outer = borderRadius.toRRect(rect);
-      final RRect inner = outer.deflate(top.width);
-      final Paint paint = Paint()..color = top.color;
-      canvas.drawDRRect(outer, inner, paint);
-    }
+
+    _paintTableBorder(canvas, rect);
   }
 
   @override

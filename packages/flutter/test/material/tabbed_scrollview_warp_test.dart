@@ -58,16 +58,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       ),
       body: TabBarView(
         controller: tabController,
-        children:
-            List<Widget>.generate(tabCount, (int index) {
-              return CustomScrollView(
-                // The bug only occurs when this key is included
-                key: ValueKey<String>('Page $index'),
-                slivers: <Widget>[
-                  SliverPersistentHeader(delegate: MySliverPersistentHeaderDelegate()),
-                ],
-              );
-            }).toList(),
+        children: List<Widget>.generate(tabCount, (int index) {
+          return CustomScrollView(
+            // The bug only occurs when this key is included
+            key: ValueKey<String>('Page $index'),
+            slivers: <Widget>[SliverPersistentHeader(delegate: MySliverPersistentHeaderDelegate())],
+          );
+        }).toList(),
       ),
     );
   }

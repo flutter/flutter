@@ -119,15 +119,15 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
           widget.navigationBar!.preferredSize.height + existingMediaQuery.padding.top;
 
       // Propagate bottom padding and include viewInsets if appropriate
-      final double bottomPadding =
-          widget.resizeToAvoidBottomInset ? existingMediaQuery.viewInsets.bottom : 0.0;
+      final double bottomPadding = widget.resizeToAvoidBottomInset
+          ? existingMediaQuery.viewInsets.bottom
+          : 0.0;
 
-      final EdgeInsets newViewInsets =
-          widget.resizeToAvoidBottomInset
-              // The insets are consumed by the scaffolds and no longer exposed to
-              // the descendant subtree.
-              ? existingMediaQuery.viewInsets.copyWith(bottom: 0.0)
-              : existingMediaQuery.viewInsets;
+      final EdgeInsets newViewInsets = widget.resizeToAvoidBottomInset
+          // The insets are consumed by the scaffolds and no longer exposed to
+          // the descendant subtree.
+          ? existingMediaQuery.viewInsets.copyWith(bottom: 0.0)
+          : existingMediaQuery.viewInsets;
 
       final bool fullObstruction = widget.navigationBar!.shouldFullyObstruct(context);
 
@@ -151,7 +151,10 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
             padding: existingMediaQuery.padding.copyWith(top: topPadding),
             viewInsets: newViewInsets,
           ),
-          child: Padding(padding: EdgeInsets.only(bottom: bottomPadding), child: paddedContent),
+          child: Padding(
+            padding: EdgeInsets.only(bottom: bottomPadding),
+            child: paddedContent,
+          ),
         );
       }
     } else if (widget.resizeToAvoidBottomInset) {
@@ -223,8 +226,8 @@ class CupertinoPageScaffoldBackgroundColor extends InheritedWidget {
 
   /// Retrieve the [CupertinoPageScaffold] background color from the context.
   static Color? maybeOf(BuildContext context) {
-    final CupertinoPageScaffoldBackgroundColor? scaffoldBackgroundColor =
-        context.dependOnInheritedWidgetOfExactType<CupertinoPageScaffoldBackgroundColor>();
+    final CupertinoPageScaffoldBackgroundColor? scaffoldBackgroundColor = context
+        .dependOnInheritedWidgetOfExactType<CupertinoPageScaffoldBackgroundColor>();
     return scaffoldBackgroundColor?.color;
   }
 

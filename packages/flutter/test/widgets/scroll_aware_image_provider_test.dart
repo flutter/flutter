@@ -39,6 +39,128 @@ void main() {
     return Scrollable.of(find.byType(TestWidget).evaluate().first).position;
   }
 
+  Future<DisposableBuildContext> createContext(WidgetTester tester) async {
+    final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
+    await tester.pumpWidget(TestWidget(key));
+    final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
+    addTearDown(context.dispose);
+    return context;
+  }
+
+  group('equality and hashCode', () {
+    testWidgets('Two identical instances should be equal and have same hashCode', (
+      WidgetTester tester,
+    ) async {
+      final DisposableBuildContext context = await createContext(tester);
+
+      final ui.Image image = testImage.clone();
+      final TestImageProvider testImageProvider = TestImageProvider(image);
+
+      final ScrollAwareImageProvider<TestImageProvider> imageProvider1 =
+          ScrollAwareImageProvider<TestImageProvider>(
+            context: context,
+            imageProvider: testImageProvider,
+          );
+
+      final ScrollAwareImageProvider<TestImageProvider> imageProvider2 =
+          ScrollAwareImageProvider<TestImageProvider>(
+            context: context,
+            imageProvider: testImageProvider,
+          );
+
+      testImageProvider.complete();
+      image.dispose();
+
+      expect(imageProvider1 == imageProvider2, isTrue);
+      expect(imageProvider1.hashCode, equals(imageProvider2.hashCode));
+    });
+
+    testWidgets(
+      'ScrollAwareImageProvider instances with same context but different images should not be equal',
+      (WidgetTester tester) async {
+        final DisposableBuildContext context = await createContext(tester);
+
+        final ui.Image image1 = testImage.clone();
+        final ui.Image image2 = testImage.clone();
+
+        final TestImageProvider testImageProvider1 = TestImageProvider(image1);
+        final TestImageProvider testImageProvider2 = TestImageProvider(image2);
+
+        final ScrollAwareImageProvider<TestImageProvider> imageProvider1 =
+            ScrollAwareImageProvider<TestImageProvider>(
+              context: context,
+              imageProvider: testImageProvider1,
+            );
+
+        final ScrollAwareImageProvider<TestImageProvider> imageProvider2 =
+            ScrollAwareImageProvider<TestImageProvider>(
+              context: context,
+              imageProvider: testImageProvider2,
+            );
+
+        testImageProvider1.complete();
+        testImageProvider2.complete();
+        image1.dispose();
+        image2.dispose();
+
+        expect(imageProvider1 == imageProvider2, isFalse);
+        expect(imageProvider1.hashCode, isNot(equals(imageProvider2.hashCode)));
+      },
+    );
+
+    testWidgets('ScrollAwareImageProvider instance should be equal to itself', (
+      WidgetTester tester,
+    ) async {
+      final DisposableBuildContext context = await createContext(tester);
+
+      final ui.Image image = testImage.clone();
+      final TestImageProvider testImageProvider = TestImageProvider(image);
+
+      final ScrollAwareImageProvider<TestImageProvider> imageProvider =
+          ScrollAwareImageProvider<TestImageProvider>(
+            context: context,
+            imageProvider: testImageProvider,
+          );
+
+      testImageProvider.complete();
+      image.dispose();
+
+      expect(imageProvider == imageProvider, isTrue);
+    });
+
+    testWidgets('ScrollAwareImageProvider instances with different contexts should not be equal', (
+      WidgetTester tester,
+    ) async {
+      final DisposableBuildContext context1 = await createContext(tester);
+      final DisposableBuildContext context2 = await createContext(tester);
+
+      final ui.Image image1 = testImage.clone();
+      final ui.Image image2 = testImage.clone();
+
+      final TestImageProvider testImageProvider1 = TestImageProvider(image1);
+      final TestImageProvider testImageProvider2 = TestImageProvider(image2);
+
+      final ScrollAwareImageProvider<TestImageProvider> imageProvider1 =
+          ScrollAwareImageProvider<TestImageProvider>(
+            context: context1,
+            imageProvider: testImageProvider1,
+          );
+
+      final ScrollAwareImageProvider<TestImageProvider> imageProvider2 =
+          ScrollAwareImageProvider<TestImageProvider>(
+            context: context2,
+            imageProvider: testImageProvider2,
+          );
+
+      testImageProvider1.complete();
+      testImageProvider2.complete();
+      image1.dispose();
+      image2.dispose();
+
+      expect(imageProvider1 == imageProvider2, isFalse);
+    });
+  });
+
   testWidgets('ScrollAwareImageProvider does not delay if widget is not in scrollable', (
     WidgetTester tester,
   ) async {

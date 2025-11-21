@@ -18,7 +18,18 @@ inline SkBlendMode ToSk(DlBlendMode mode) {
   return static_cast<SkBlendMode>(mode);
 }
 
-inline SkColor ToSk(DlColor color) {
+// Returns an SkColor4f representing this color in the sRGB color space.
+inline SkColor4f ToSkColor4f(DlColor color) {
+  if (color.getColorSpace() == DlColorSpace::kSRGB ||
+      color.getColorSpace() == DlColorSpace::kExtendedSRGB) {
+    return SkColor4f{color.getRedF(), color.getGreenF(), color.getBlueF(),
+                     color.getAlphaF()};
+  } else {
+    return ToSkColor4f(color.withColorSpace(DlColorSpace::kExtendedSRGB));
+  }
+}
+
+inline SkColor ToSkColor(DlColor color) {
   return color.argb();
 }
 

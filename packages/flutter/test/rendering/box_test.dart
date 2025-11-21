@@ -60,6 +60,25 @@ class InvalidSizeAccessInDryLayoutBox extends RenderBox {
   }
 }
 
+class _BaselineSizeAccessRootRenderBox extends RenderProxyBox {
+  _BaselineSizeAccessRootRenderBox({required RenderBox child}) : super(child);
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    child!.getDistanceToBaseline(TextBaseline.alphabetic);
+  }
+}
+
+class _BaselineSizeAccessChildRenderBox extends RenderProxyBox {
+  _BaselineSizeAccessChildRenderBox({required RenderBox child}) : super(child);
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    return child!.size.height;
+  }
+}
+
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -268,6 +287,23 @@ void main() {
     );
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/157915.
+  test('Does not throw when accessing child size from computeDistanceToActualBaseline', () {
+    final RenderBox leaf = RenderPadding(padding: const EdgeInsets.all(10.0));
+    final _BaselineSizeAccessChildRenderBox child = _BaselineSizeAccessChildRenderBox(child: leaf);
+    final _BaselineSizeAccessRootRenderBox root = _BaselineSizeAccessRootRenderBox(child: child);
+
+    bool hadErrors = false;
+    void expectSizeAccessErrors() {
+      absorbOverflowedErrors();
+      hadErrors = true;
+    }
+
+    layout(root, onErrors: expectSizeAccessErrors);
+
+    expect(hadErrors, false);
+  });
+
   test('Flex and padding', () {
     final RenderBox size = RenderConstrainedBox(
       additionalConstraints: const BoxConstraints().tighten(height: 100.0),
@@ -444,8 +480,8 @@ void main() {
       final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
         alignment: Alignment.center,
         textDirection: TextDirection.ltr,
-        constraintsTransform:
-            (BoxConstraints constraints) => const BoxConstraints(maxHeight: -1, minHeight: 200),
+        constraintsTransform: (BoxConstraints constraints) =>
+            const BoxConstraints(maxHeight: -1, minHeight: 200),
         child: child,
       );
 
@@ -472,8 +508,8 @@ void main() {
             box = RenderConstraintsTransformBox(
               alignment: Alignment.center,
               textDirection: TextDirection.ltr,
-              constraintsTransform:
-                  (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+              constraintsTransform: (BoxConstraints constraints) =>
+                  constraints.copyWith(maxWidth: double.infinity),
               clipBehavior: clip!,
               child: RenderConstrainedBox(
                 additionalConstraints: const BoxConstraints.tightFor(
@@ -486,8 +522,8 @@ void main() {
             box = RenderConstraintsTransformBox(
               alignment: Alignment.center,
               textDirection: TextDirection.ltr,
-              constraintsTransform:
-                  (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+              constraintsTransform: (BoxConstraints constraints) =>
+                  constraints.copyWith(maxWidth: double.infinity),
               child: RenderConstrainedBox(
                 additionalConstraints: const BoxConstraints.tightFor(
                   width: double.maxFinite,
@@ -526,8 +562,8 @@ void main() {
       final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
         alignment: Alignment.center,
         textDirection: TextDirection.ltr,
-        constraintsTransform:
-            (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+        constraintsTransform: (BoxConstraints constraints) =>
+            constraints.copyWith(maxWidth: double.infinity),
         child: child,
       );
 
@@ -551,8 +587,8 @@ void main() {
       final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
         alignment: Alignment.center,
         textDirection: TextDirection.ltr,
-        constraintsTransform:
-            (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+        constraintsTransform: (BoxConstraints constraints) =>
+            constraints.copyWith(maxWidth: double.infinity),
         child: child,
       );
 

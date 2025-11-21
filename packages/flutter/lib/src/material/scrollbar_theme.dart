@@ -10,7 +10,6 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'material_state.dart';
 import 'theme.dart';
 
 // Examples can assume:
@@ -52,18 +51,18 @@ class ScrollbarThemeData with Diagnosticable {
 
   /// Overrides the default value of [Scrollbar.thumbVisibility] in all
   /// descendant [Scrollbar] widgets.
-  final MaterialStateProperty<bool?>? thumbVisibility;
+  final WidgetStateProperty<bool?>? thumbVisibility;
 
   /// Overrides the default value of [Scrollbar.thickness] in all
   /// descendant [Scrollbar] widgets.
   ///
   /// Resolves in the following states:
   ///  * [WidgetState.hovered] on web and desktop platforms.
-  final MaterialStateProperty<double?>? thickness;
+  final WidgetStateProperty<double?>? thickness;
 
   /// Overrides the default value of [Scrollbar.trackVisibility] in all
   /// descendant [Scrollbar] widgets.
-  final MaterialStateProperty<bool?>? trackVisibility;
+  final WidgetStateProperty<bool?>? trackVisibility;
 
   /// Overrides the default value of [Scrollbar.interactive] in all
   /// descendant [Scrollbar] widgets.
@@ -79,21 +78,21 @@ class ScrollbarThemeData with Diagnosticable {
   /// Resolves in the following states:
   ///  * [WidgetState.dragged].
   ///  * [WidgetState.hovered] on web and desktop platforms.
-  final MaterialStateProperty<Color?>? thumbColor;
+  final WidgetStateProperty<Color?>? thumbColor;
 
   /// Overrides the default [Color] of the [Scrollbar] track when
   /// [trackVisibility] is true in all descendant [Scrollbar] widgets.
   ///
   /// Resolves in the following states:
   ///  * [WidgetState.hovered] on web and desktop platforms.
-  final MaterialStateProperty<Color?>? trackColor;
+  final WidgetStateProperty<Color?>? trackColor;
 
   /// Overrides the default [Color] of the [Scrollbar] track border when
   /// [trackVisibility] is true in all descendant [Scrollbar] widgets.
   ///
   /// Resolves in the following states:
   ///  * [WidgetState.hovered] on web and desktop platforms.
-  final MaterialStateProperty<Color?>? trackBorderColor;
+  final WidgetStateProperty<Color?>? trackBorderColor;
 
   /// Overrides the default value of the [ScrollbarPainter.crossAxisMargin]
   /// property in all descendant [Scrollbar] widgets.
@@ -127,14 +126,14 @@ class ScrollbarThemeData with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   ScrollbarThemeData copyWith({
-    MaterialStateProperty<bool?>? thumbVisibility,
-    MaterialStateProperty<double?>? thickness,
-    MaterialStateProperty<bool?>? trackVisibility,
+    WidgetStateProperty<bool?>? thumbVisibility,
+    WidgetStateProperty<double?>? thickness,
+    WidgetStateProperty<bool?>? trackVisibility,
     bool? interactive,
     Radius? radius,
-    MaterialStateProperty<Color?>? thumbColor,
-    MaterialStateProperty<Color?>? trackColor,
-    MaterialStateProperty<Color?>? trackBorderColor,
+    WidgetStateProperty<Color?>? thumbColor,
+    WidgetStateProperty<Color?>? trackColor,
+    WidgetStateProperty<Color?>? trackBorderColor,
     double? crossAxisMargin,
     double? mainAxisMargin,
     double? minThumbLength,
@@ -162,14 +161,14 @@ class ScrollbarThemeData with Diagnosticable {
       return a;
     }
     return ScrollbarThemeData(
-      thumbVisibility: MaterialStateProperty.lerp<bool?>(
+      thumbVisibility: WidgetStateProperty.lerp<bool?>(
         a?.thumbVisibility,
         b?.thumbVisibility,
         t,
         _lerpBool,
       ),
-      thickness: MaterialStateProperty.lerp<double?>(a?.thickness, b?.thickness, t, lerpDouble),
-      trackVisibility: MaterialStateProperty.lerp<bool?>(
+      thickness: WidgetStateProperty.lerp<double?>(a?.thickness, b?.thickness, t, lerpDouble),
+      trackVisibility: WidgetStateProperty.lerp<bool?>(
         a?.trackVisibility,
         b?.trackVisibility,
         t,
@@ -177,9 +176,9 @@ class ScrollbarThemeData with Diagnosticable {
       ),
       interactive: _lerpBool(a?.interactive, b?.interactive, t),
       radius: Radius.lerp(a?.radius, b?.radius, t),
-      thumbColor: MaterialStateProperty.lerp<Color?>(a?.thumbColor, b?.thumbColor, t, Color.lerp),
-      trackColor: MaterialStateProperty.lerp<Color?>(a?.trackColor, b?.trackColor, t, Color.lerp),
-      trackBorderColor: MaterialStateProperty.lerp<Color?>(
+      thumbColor: WidgetStateProperty.lerp<Color?>(a?.thumbColor, b?.thumbColor, t, Color.lerp),
+      trackColor: WidgetStateProperty.lerp<Color?>(a?.trackColor, b?.trackColor, t, Color.lerp),
+      trackBorderColor: WidgetStateProperty.lerp<Color?>(
         a?.trackBorderColor,
         b?.trackBorderColor,
         t,
@@ -232,21 +231,17 @@ class ScrollbarThemeData with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<bool?>>(
+      DiagnosticsProperty<WidgetStateProperty<bool?>>(
         'thumbVisibility',
         thumbVisibility,
         defaultValue: null,
       ),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<double?>>(
-        'thickness',
-        thickness,
-        defaultValue: null,
-      ),
+      DiagnosticsProperty<WidgetStateProperty<double?>>('thickness', thickness, defaultValue: null),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<bool?>>(
+      DiagnosticsProperty<WidgetStateProperty<bool?>>(
         'trackVisibility',
         trackVisibility,
         defaultValue: null,
@@ -255,21 +250,21 @@ class ScrollbarThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<bool>('interactive', interactive, defaultValue: null));
     properties.add(DiagnosticsProperty<Radius>('radius', radius, defaultValue: null));
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<Color?>>(
+      DiagnosticsProperty<WidgetStateProperty<Color?>>(
         'thumbColor',
         thumbColor,
         defaultValue: null,
       ),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<Color?>>(
+      DiagnosticsProperty<WidgetStateProperty<Color?>>(
         'trackColor',
         trackColor,
         defaultValue: null,
       ),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<Color?>>(
+      DiagnosticsProperty<WidgetStateProperty<Color?>>(
         'trackBorderColor',
         trackBorderColor,
         defaultValue: null,
@@ -319,8 +314,8 @@ class ScrollbarTheme extends InheritedTheme {
   /// ScrollbarThemeData theme = ScrollbarTheme.of(context);
   /// ```
   static ScrollbarThemeData of(BuildContext context) {
-    final ScrollbarTheme? scrollbarTheme =
-        context.dependOnInheritedWidgetOfExactType<ScrollbarTheme>();
+    final ScrollbarTheme? scrollbarTheme = context
+        .dependOnInheritedWidgetOfExactType<ScrollbarTheme>();
     return scrollbarTheme?.data ?? Theme.of(context).scrollbarTheme;
   }
 

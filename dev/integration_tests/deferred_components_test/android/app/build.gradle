@@ -33,8 +33,8 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace "io.flutter.integration.deferred_components_test"
-    compileSdk flutter.compileSdkVersion
+    namespace = "io.flutter.integration.deferred_components_test"
+    compileSdk = flutter.compileSdkVersion
 
     // Flutter's CI installs the NDK at a non-standard path.
     // This non-standard structure is initially created by
@@ -73,13 +73,13 @@ android {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.release
+            signingConfig = signingConfigs.release
         }
     }
 }
 
 flutter {
-    source '../..'
+    source = '../..'
 }
 
 dependencies {

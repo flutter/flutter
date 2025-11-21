@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -661,8 +660,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(findRoute('route5'), findsOneWidget);
 
-    final Route<Object> route =
-        ModalRoute.of(tester.element(find.text('Route: route3', skipOffstage: false)))!;
+    final Route<Object> route = ModalRoute.of(
+      tester.element(find.text('Route: route3', skipOffstage: false)),
+    )!;
     expect(route.settings.name, 'route3');
     tester.state<NavigatorState>(find.byType(Navigator)).removeRoute(route);
     await tester.pumpAndSettle();
@@ -685,8 +685,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Return value: null'), findsOneWidget);
 
-    final RestorableRouteFuture<int> routeFuture =
-        tester.state<RouteFutureWidgetState>(find.byType(RouteFutureWidget)).routeFuture;
+    final RestorableRouteFuture<int> routeFuture = tester
+        .state<RouteFutureWidgetState>(find.byType(RouteFutureWidget))
+        .routeFuture;
     expect(routeFuture.route, isNull);
     expect(routeFuture.isPresent, isFalse);
     expect(routeFuture.enabled, isFalse);
@@ -701,10 +702,9 @@ void main() {
     await tester.restartAndRestore();
 
     expect(find.text('Route: Foo'), findsOneWidget);
-    final RestorableRouteFuture<int> restoredRouteFuture =
-        tester
-            .state<RouteFutureWidgetState>(find.byType(RouteFutureWidget, skipOffstage: false))
-            .routeFuture;
+    final RestorableRouteFuture<int> restoredRouteFuture = tester
+        .state<RouteFutureWidgetState>(find.byType(RouteFutureWidget, skipOffstage: false))
+        .routeFuture;
     expect(restoredRouteFuture.route!.settings.name, 'Foo');
     expect(restoredRouteFuture.isPresent, isTrue);
     expect(restoredRouteFuture.enabled, isTrue);
@@ -729,8 +729,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Return value: null'), findsOneWidget);
 
-    final RestorableRouteFuture<int> routeFuture =
-        tester.state<RouteFutureWidgetState>(find.byType(RouteFutureWidget)).routeFuture;
+    final RestorableRouteFuture<int> routeFuture = tester
+        .state<RouteFutureWidgetState>(find.byType(RouteFutureWidget))
+        .routeFuture;
     expect(routeFuture.route, isNull);
     expect(routeFuture.isPresent, isFalse);
     expect(routeFuture.enabled, isFalse);
@@ -1071,8 +1072,8 @@ void main() {
 
   testWidgets(
     'Helpful assert thrown all routes in onGenerateInitialRoutes are not restorable',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -1093,18 +1094,6 @@ void main() {
         (exception as AssertionError).message,
         contains('All routes returned by onGenerateInitialRoutes are not restorable.'),
       );
-
-      // The previous assert leaves the widget tree in a broken state, so the
-      // following code catches any remaining exceptions from attempting to build
-      // new widget tree.
-      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-      dynamic remainingException;
-      FlutterError.onError = (FlutterErrorDetails details) {
-        remainingException ??= details.exception;
-      };
-      await tester.pumpWidget(Container(key: UniqueKey()));
-      FlutterError.onError = oldHandler;
-      expect(remainingException, isAssertionError);
     },
   );
 }
@@ -1194,16 +1183,15 @@ class PagedTestNavigatorState extends State<PagedTestNavigator> with Restoration
         }
         return false;
       },
-      pages:
-          _routes.value.isEmpty
-              ? const <Page<Object?>>[]
-              : _routes.value.split(',').map((String name) {
-                if (name.startsWith('r-')) {
-                  name = name.substring(2);
-                  return TestPage(name: name, restorationId: name, key: ValueKey<String>(name));
-                }
-                return TestPage(name: name, key: ValueKey<String>(name));
-              }).toList(),
+      pages: _routes.value.isEmpty
+          ? const <Page<Object?>>[]
+          : _routes.value.split(',').map((String name) {
+              if (name.startsWith('r-')) {
+                name = name.substring(2);
+                return TestPage(name: name, restorationId: name, key: ValueKey<String>(name));
+              }
+              return TestPage(name: name, key: ValueKey<String>(name));
+            }).toList(),
       onGenerateRoute: (RouteSettings settings) {
         return MaterialPageRoute<int>(
           settings: settings,

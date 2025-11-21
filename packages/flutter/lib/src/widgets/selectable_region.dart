@@ -32,6 +32,7 @@ import 'media_query.dart';
 import 'overlay.dart';
 import 'platform_selectable_region_context_menu.dart';
 import 'selection_container.dart';
+import 'tap_region.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
 import 'text_selection_toolbar_anchors.dart';
@@ -302,18 +303,21 @@ class SelectableRegion extends StatefulWidget {
   }) {
     final bool canCopy = selectionGeometry.status == SelectionStatus.uncollapsed;
     final bool canSelectAll = selectionGeometry.hasContent;
-    final bool platformCanShare = switch (defaultTargetPlatform) {
-      TargetPlatform.android => selectionGeometry.status == SelectionStatus.uncollapsed,
-      TargetPlatform.macOS ||
-      TargetPlatform.fuchsia ||
-      TargetPlatform.linux ||
-      TargetPlatform.windows => false,
-      // TODO(bleroux): the share button should be shown on iOS but the share
-      // functionality requires some changes on the engine side because, on iPad,
-      // it needs an anchor for the popup.
-      // See: https://github.com/flutter/flutter/issues/141775.
-      TargetPlatform.iOS => false,
-    };
+    // The share button is not supported on the web.
+    final bool platformCanShare =
+        !kIsWeb &&
+        switch (defaultTargetPlatform) {
+          TargetPlatform.android => selectionGeometry.status == SelectionStatus.uncollapsed,
+          TargetPlatform.macOS ||
+          TargetPlatform.fuchsia ||
+          TargetPlatform.linux ||
+          TargetPlatform.windows => false,
+          // TODO(bleroux): the share button should be shown on iOS but the share
+          // functionality requires some changes on the engine side because, on iPad,
+          // it needs an anchor for the popup.
+          // See: https://github.com/flutter/flutter/issues/141775.
+          TargetPlatform.iOS => false,
+        };
     final bool canShare = onShare != null && platformCanShare;
 
     // On Android, the share button is before the select all button.
@@ -407,6 +411,16 @@ class SelectableRegionState extends State<SelectableRegion>
 
   Orientation? _lastOrientation;
   SelectedContent? _lastSelectedContent;
+
+  /// Whether the native browser context menu is enabled.
+  // TODO(Renzo-Olivares): Re-enable web context menu for Android
+  // and iOS when https://github.com/flutter/flutter/issues/177123
+  // is resolved.
+  bool get _webContextMenuEnabled =>
+      kIsWeb &&
+      BrowserContextMenu.enabled &&
+      defaultTargetPlatform != TargetPlatform.android &&
+      defaultTargetPlatform != TargetPlatform.iOS;
 
   /// The [SelectionOverlay] that is currently visible on the screen.
   ///
@@ -506,7 +520,7 @@ class SelectableRegionState extends State<SelectableRegion>
 
   void _handleFocusChanged() {
     if (!_focusNode.hasFocus) {
-      if (kIsWeb) {
+      if (_webContextMenuEnabled) {
         PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
       }
       if (SchedulerBinding.instance.lifecycleState == AppLifecycleState.resumed) {
@@ -522,7 +536,7 @@ class SelectableRegionState extends State<SelectableRegion>
         _finalizeSelectableRegionStatus();
       }
     }
-    if (kIsWeb) {
+    if (_webContextMenuEnabled) {
       PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
     }
   }
@@ -605,8 +619,8 @@ class SelectableRegionState extends State<SelectableRegion>
         return rawCount <= maxConsecutiveTap
             ? rawCount
             : (rawCount % maxConsecutiveTap == 0
-                ? maxConsecutiveTap
-                : rawCount % maxConsecutiveTap);
+                  ? maxConsecutiveTap
+                  : rawCount % maxConsecutiveTap);
       case TargetPlatform.linux:
         // From observation, these platforms reset their tap count to 0 when
         // the number of consecutive taps exceeds the max consecutive tap supported.
@@ -617,8 +631,8 @@ class SelectableRegionState extends State<SelectableRegion>
         return rawCount <= maxConsecutiveTap
             ? rawCount
             : (rawCount % maxConsecutiveTap == 0
-                ? maxConsecutiveTap
-                : rawCount % maxConsecutiveTap);
+                  ? maxConsecutiveTap
+                  : rawCount % maxConsecutiveTap);
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
@@ -653,11 +667,9 @@ class SelectableRegionState extends State<SelectableRegion>
   }
 
   void _onTapTrackStart() {
-    _isShiftPressed =
-        HardwareKeyboard.instance.logicalKeysPressed.intersection(<LogicalKeyboardKey>{
-          LogicalKeyboardKey.shiftLeft,
-          LogicalKeyboardKey.shiftRight,
-        }).isNotEmpty;
+    _isShiftPressed = HardwareKeyboard.instance.logicalKeysPressed.intersection(
+      <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight},
+    ).isNotEmpty;
   }
 
   void _onTapTrackReset() {
@@ -672,10 +684,9 @@ class SelectableRegionState extends State<SelectableRegion>
         GestureRecognizerFactoryWithHandlers<TapAndHorizontalDragGestureRecognizer>(
           () => TapAndHorizontalDragGestureRecognizer(
             debugOwner: this,
-            supportedDevices:
-                PointerDeviceKind.values.where((PointerDeviceKind device) {
-                  return device != PointerDeviceKind.mouse;
-                }).toSet(),
+            supportedDevices: PointerDeviceKind.values.where((PointerDeviceKind device) {
+              return device != PointerDeviceKind.mouse;
+            }).toSet(),
           ),
           (TapAndHorizontalDragGestureRecognizer instance) {
             instance
@@ -1122,17 +1133,12 @@ class SelectableRegionState extends State<SelectableRegion>
   }
 
   void _onAnyDragEnd(DragEndDetails details) {
-    if (widget.selectionControls is! TextSelectionHandleControls) {
+    final bool draggingHandles =
+        _selectionOverlay != null &&
+        (_selectionOverlay!.isDraggingStartHandle || _selectionOverlay!.isDraggingEndHandle);
+    if (!draggingHandles) {
       _selectionOverlay!.hideMagnifier();
-      _selectionOverlay!.showToolbar();
-    } else {
-      _selectionOverlay!.hideMagnifier();
-      _selectionOverlay!.showToolbar(
-        context: context,
-        contextMenuBuilder: (BuildContext context) {
-          return widget.contextMenuBuilder!(context, this);
-        },
-      );
+      _showToolbar();
     }
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
@@ -1353,7 +1359,7 @@ class SelectableRegionState extends State<SelectableRegion>
     // functionality depending on the browser (such as translate). Due to this,
     // we should not show a Flutter toolbar for the editable text elements
     // unless the browser's context menu is explicitly disabled.
-    if (kIsWeb && BrowserContextMenu.enabled) {
+    if (_webContextMenuEnabled) {
       return false;
     }
 
@@ -1362,6 +1368,9 @@ class SelectableRegionState extends State<SelectableRegion>
     }
 
     _selectionOverlay!.toolbarLocation = location;
+    // TODO(Renzo-Olivares): Remove the logic below that does a runtimeType
+    // check for TextSelectionHandleControls when TextSelectionHandleControls
+    // is fully removed, see: https://github.com/flutter/flutter/pull/124262.
     if (widget.selectionControls is! TextSelectionHandleControls) {
       _selectionOverlay!.showToolbar();
       return true;
@@ -1647,10 +1656,9 @@ class SelectableRegionState extends State<SelectableRegion>
       return;
     }
     final bool adjustingSelectionExtend = _determineIsAdjustingSelectionEnd(forward);
-    final SelectionPoint baseLinePoint =
-        adjustingSelectionExtend
-            ? _selectionDelegate.value.endSelectionPoint!
-            : _selectionDelegate.value.startSelectionPoint!;
+    final SelectionPoint baseLinePoint = adjustingSelectionExtend
+        ? _selectionDelegate.value.endSelectionPoint!
+        : _selectionDelegate.value.startSelectionPoint!;
     _directionalHorizontalBaseline ??= baseLinePoint.localPosition.dx;
     final Offset globalSelectionPointOffset = MatrixUtils.transformPoint(
       context.findRenderObject()!.getTransformTo(null),
@@ -1659,8 +1667,9 @@ class SelectableRegionState extends State<SelectableRegion>
     _selectable?.dispatchSelectionEvent(
       DirectionallyExtendSelectionEvent(
         isEnd: _adjustingSelectionEnd!,
-        direction:
-            forward ? SelectionExtendDirection.nextLine : SelectionExtendDirection.previousLine,
+        direction: forward
+            ? SelectionExtendDirection.nextLine
+            : SelectionExtendDirection.previousLine,
         dx: globalSelectionPointOffset.dx,
       ),
     );
@@ -1936,21 +1945,35 @@ class SelectableRegionState extends State<SelectableRegion>
       selectionStatusNotifier: _selectionStatusNotifier,
       child: SelectionContainer(registrar: this, delegate: _selectionDelegate, child: widget.child),
     );
-    if (kIsWeb) {
+    if (_webContextMenuEnabled) {
       result = PlatformSelectableRegionContextMenu(child: result);
     }
-    return CompositedTransformTarget(
-      link: _toolbarLayerLink,
-      child: RawGestureDetector(
-        gestures: _gestureRecognizers,
-        behavior: HitTestBehavior.translucent,
-        excludeFromSemantics: true,
-        child: Actions(
-          actions: _actions,
-          child: Focus.withExternalFocusNode(
-            includeSemantics: false,
-            focusNode: _focusNode,
-            child: result,
+    return TapRegion(
+      groupId: SelectableRegion,
+      onTapOutside: (PointerDownEvent event) {
+        // To match the native web behavior, this selectable region is
+        // unfocused when tapping outside of it causing the selection to
+        // be dismissed.
+        //
+        // Tapping outside the selectable region does not unfocus
+        // the region on non-web platforms.
+        if (kIsWeb) {
+          _focusNode.unfocus();
+        }
+      },
+      child: CompositedTransformTarget(
+        link: _toolbarLayerLink,
+        child: RawGestureDetector(
+          gestures: _gestureRecognizers,
+          behavior: HitTestBehavior.translucent,
+          excludeFromSemantics: true,
+          child: Actions(
+            actions: _actions,
+            child: Focus.withExternalFocusNode(
+              includeSemantics: false,
+              focusNode: _focusNode,
+              child: result,
+            ),
           ),
         ),
       ),
@@ -2672,21 +2695,21 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     // Need to collect selection rects from selectables ranging from the
     // currentSelectionStartIndex to the currentSelectionEndIndex.
     final List<Rect> selectionRects = <Rect>[];
-    final Rect? drawableArea =
-        hasSize ? Rect.fromLTWH(0, 0, containerSize.width, containerSize.height) : null;
+    final Rect? drawableArea = hasSize
+        ? Rect.fromLTWH(0, 0, containerSize.width, containerSize.height)
+        : null;
     for (int index = currentSelectionStartIndex; index <= currentSelectionEndIndex; index++) {
       final List<Rect> currSelectableSelectionRects = selectables[index].value.selectionRects;
-      final List<Rect> selectionRectsWithinDrawableArea =
-          currSelectableSelectionRects
-              .map((Rect selectionRect) {
-                final Matrix4 transform = getTransformFrom(selectables[index]);
-                final Rect localRect = MatrixUtils.transformRect(transform, selectionRect);
-                return drawableArea?.intersect(localRect) ?? localRect;
-              })
-              .where((Rect selectionRect) {
-                return selectionRect.isFinite && !selectionRect.isEmpty;
-              })
-              .toList();
+      final List<Rect> selectionRectsWithinDrawableArea = currSelectableSelectionRects
+          .map((Rect selectionRect) {
+            final Matrix4 transform = getTransformFrom(selectables[index]);
+            final Rect localRect = MatrixUtils.transformRect(transform, selectionRect);
+            return drawableArea?.intersect(localRect) ?? localRect;
+          })
+          .where((Rect selectionRect) {
+            return selectionRect.isFinite && !selectionRect.isEmpty;
+          })
+          .toList();
       selectionRects.addAll(selectionRectsWithinDrawableArea);
     }
 
@@ -2737,15 +2760,14 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     LayerLink? effectiveStartHandle = _startHandleLayer;
     LayerLink? effectiveEndHandle = _endHandleLayer;
     if (effectiveStartHandle != null || effectiveEndHandle != null) {
-      final Rect? drawableArea =
-          hasSize
-              ? Rect.fromLTWH(
-                0,
-                0,
-                containerSize.width,
-                containerSize.height,
-              ).inflate(_kSelectionHandleDrawableAreaPadding)
-              : null;
+      final Rect? drawableArea = hasSize
+          ? Rect.fromLTWH(
+              0,
+              0,
+              containerSize.width,
+              containerSize.height,
+            ).inflate(_kSelectionHandleDrawableAreaPadding)
+          : null;
       final bool hideStartHandle =
           value.startSelectionPoint == null ||
           drawableArea == null ||
@@ -2902,8 +2924,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       return;
     }
     if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
-      final int skipIndex =
-          currentSelectionStartIndex == -1 ? currentSelectionEndIndex : currentSelectionStartIndex;
+      final int skipIndex = currentSelectionStartIndex == -1
+          ? currentSelectionEndIndex
+          : currentSelectionStartIndex;
       selectables
           .where((Selectable target) => target != selectables[skipIndex])
           .forEach(
@@ -3060,12 +3083,11 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   SelectionResult handleDirectionallyExtendSelection(DirectionallyExtendSelectionEvent event) {
     assert((currentSelectionStartIndex == -1) == (currentSelectionEndIndex == -1));
     if (currentSelectionStartIndex == -1) {
-      currentSelectionStartIndex =
-          currentSelectionEndIndex = switch (event.direction) {
-            SelectionExtendDirection.previousLine ||
-            SelectionExtendDirection.backward => selectables.length - 1,
-            SelectionExtendDirection.nextLine || SelectionExtendDirection.forward => 0,
-          };
+      currentSelectionStartIndex = currentSelectionEndIndex = switch (event.direction) {
+        SelectionExtendDirection.previousLine ||
+        SelectionExtendDirection.backward => selectables.length - 1,
+        SelectionExtendDirection.nextLine || SelectionExtendDirection.forward => 0,
+      };
     }
     int targetIndex = event.isEnd ? currentSelectionEndIndex : currentSelectionStartIndex;
     SelectionResult result = dispatchSelectionEventToChild(selectables[targetIndex], event);
@@ -3272,14 +3294,12 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     //
     // This can happen when there is a scrollable child and the edge being adjusted
     // has been scrolled out of view.
-    final bool isCurrentEdgeWithinViewport =
-        isEnd
-            ? _selectionGeometry.endSelectionPoint != null
-            : _selectionGeometry.startSelectionPoint != null;
-    final bool isOppositeEdgeWithinViewport =
-        isEnd
-            ? _selectionGeometry.startSelectionPoint != null
-            : _selectionGeometry.endSelectionPoint != null;
+    final bool isCurrentEdgeWithinViewport = isEnd
+        ? _selectionGeometry.endSelectionPoint != null
+        : _selectionGeometry.startSelectionPoint != null;
+    final bool isOppositeEdgeWithinViewport = isEnd
+        ? _selectionGeometry.startSelectionPoint != null
+        : _selectionGeometry.endSelectionPoint != null;
     int newIndex = switch ((isEnd, isCurrentEdgeWithinViewport, isOppositeEdgeWithinViewport)) {
       (true, true, true) => currentSelectionEndIndex,
       (true, true, false) => currentSelectionEndIndex,

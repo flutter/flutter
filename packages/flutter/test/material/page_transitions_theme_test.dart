@@ -14,8 +14,9 @@ void main() {
 
   testWidgets('Default PageTransitionsTheme platform', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: Text('home')));
-    final PageTransitionsTheme theme =
-        Theme.of(tester.element(find.text('home'))).pageTransitionsTheme;
+    final PageTransitionsTheme theme = Theme.of(
+      tester.element(find.text('home')),
+    ).pageTransitionsTheme;
     expect(theme.builders, isNotNull);
     for (final TargetPlatform platform in TargetPlatform.values) {
       switch (platform) {
@@ -43,15 +44,14 @@ void main() {
     'Default PageTransitionsTheme builds a CupertinoPageTransition',
     (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/':
-            (BuildContext context) => Material(
-              child: TextButton(
-                child: const Text('push'),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/b');
-                },
-              ),
-            ),
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
+          ),
+        ),
         '/b': (BuildContext context) => const Text('page b'),
       };
 
@@ -75,28 +75,27 @@ void main() {
   );
 
   testWidgets(
-    'Default PageTransitionsTheme builds a _ZoomPageTransition for android',
+    'Default PageTransitionsTheme builds a _FadeForwardsPageTransition for android',
     (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/':
-            (BuildContext context) => Material(
-              child: TextButton(
-                child: const Text('push'),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/b');
-                },
-              ),
-            ),
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
+          ),
+        ),
         '/b': (BuildContext context) => const Text('page b'),
       };
 
       await tester.pumpWidget(MaterialApp(routes: routes));
 
-      Finder findZoomPageTransition() {
+      Finder findFadeForwardsPageTransition() {
         return find.descendant(
           of: find.byType(MaterialApp),
           matching: find.byWidgetPredicate(
-            (Widget w) => '${w.runtimeType}' == '_ZoomPageTransition',
+            (Widget w) => '${w.runtimeType}' == '_FadeForwardsPageTransition',
           ),
         );
       }
@@ -105,12 +104,12 @@ void main() {
         Theme.of(tester.element(find.text('push'))).platform,
         debugDefaultTargetPlatformOverride,
       );
-      expect(findZoomPageTransition(), findsOneWidget);
+      expect(findFadeForwardsPageTransition(), findsOneWidget);
 
       await tester.tap(find.text('push'));
       await tester.pumpAndSettle();
       expect(find.text('page b'), findsOneWidget);
-      expect(findZoomPageTransition(), findsOneWidget);
+      expect(findFadeForwardsPageTransition(), findsOneWidget);
     },
     variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
@@ -119,15 +118,14 @@ void main() {
     'Default background color when FadeForwardsPageTransitionBuilder is used',
     (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/':
-            (BuildContext context) => Material(
-              child: TextButton(
-                child: const Text('push'),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/b');
-                },
-              ),
-            ),
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
+          ),
+        ),
         '/b': (BuildContext context) => const Text('page b'),
       };
 
@@ -175,15 +173,14 @@ void main() {
     'Override background color in FadeForwardsPageTransitionBuilder',
     (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/':
-            (BuildContext context) => Material(
-              child: TextButton(
-                child: const Text('push'),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/b');
-                },
-              ),
-            ),
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
+          ),
+        ),
         '/b': (BuildContext context) => const Text('page b'),
       };
 
@@ -258,10 +255,9 @@ void main() {
           ),
         );
 
-        final RenderAnimatedOpacity? renderOpacity =
-            tester
-                .element(find.byType(SizedBox))
-                .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+        final RenderAnimatedOpacity? renderOpacity = tester
+            .element(find.byType(SizedBox))
+            .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
 
         // Since secondary animation is forward, transition will be reverse between duration 0 to 0.25.
         controller.value = 0.0;
@@ -303,10 +299,9 @@ void main() {
           ),
         );
 
-        final RenderAnimatedOpacity? renderOpacity =
-            tester
-                .element(find.byType(SizedBox))
-                .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
+        final RenderAnimatedOpacity? renderOpacity = tester
+            .element(find.byType(SizedBox))
+            .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
 
         // Since secondary animation is reverse, transition will be forward between duration 0.75 to 1.0.
         controller.value = 0.75;
@@ -319,21 +314,95 @@ void main() {
       },
       variant: TargetPlatformVariant.only(TargetPlatform.android),
     );
+
+    testWidgets(
+      'FadeForwardsPageTransitionBuilder does not use ColoredBox for non-opaque routes',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(
+              pageTransitionsTheme: const PageTransitionsTheme(
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  TargetPlatform.android: FadeForwardsPageTransitionsBuilder(
+                    backgroundColor: Colors.lightGreen,
+                  ),
+                },
+              ),
+            ),
+            home: Builder(
+              builder: (BuildContext context) {
+                return Material(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder<void>(
+                          opaque: false,
+                          pageBuilder: (_, _, _) {
+                            return Material(
+                              child: TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute<void>(builder: (_) => const Text('page b')),
+                                  );
+                                },
+                                child: const Text('push b'),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    child: const Text('push a'),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('push a'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('push b'));
+        await tester.pump(const Duration(milliseconds: 400));
+
+        void findColoredBox() {
+          expect(
+            find.byWidgetPredicate((Widget w) => w is ColoredBox && w.color == Colors.lightGreen),
+            findsNothing,
+          );
+        }
+
+        // Check that ColoredBox is not used for non-opaque route.
+        findColoredBox();
+
+        await tester.pumpAndSettle();
+
+        Navigator.pop(tester.element(find.text('page b')));
+
+        await tester.pumpAndSettle(const Duration(milliseconds: 400));
+
+        // Check that ColoredBox is not used for non-opaque route
+        findColoredBox();
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
   });
 
   testWidgets(
     'FadeForwardsPageTransitionBuilder default duration is 800ms',
     (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/':
-            (BuildContext context) => Material(
-              child: TextButton(
-                child: const Text('push'),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/b');
-                },
-              ),
-            ),
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
+          ),
+        ),
         '/b': (BuildContext context) => const Text('page b'),
       };
 
@@ -382,15 +451,14 @@ void main() {
     'CupertinoPageTransitionsBuilder default duration is 500ms',
     (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/':
-            (BuildContext context) => Material(
-              child: TextButton(
-                child: const Text('push'),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/b');
-                },
-              ),
-            ),
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
+          ),
+        ),
         '/b': (BuildContext context) => const Text('page b'),
       };
 
@@ -433,30 +501,28 @@ void main() {
             ),
           ),
           routes: <String, WidgetBuilder>{
-            '/':
-                (BuildContext context) => Material(
-                  child: TextButton(
-                    child: const Text('push'),
+            '/': (BuildContext context) => Material(
+              child: TextButton(
+                child: const Text('push'),
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/b');
+                },
+              ),
+            ),
+            '/b': (BuildContext context) => Material(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  TextButton(
+                    child: const Text('pop'),
                     onPressed: () {
-                      Navigator.of(context).pushNamed('/b');
+                      Navigator.of(context).pop();
                     },
                   ),
-                ),
-            '/b':
-                (BuildContext context) => Material(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      TextButton(
-                        child: const Text('pop'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      const Text('page b'),
-                    ],
-                  ),
-                ),
+                  const Text('page b'),
+                ],
+              ),
+            ),
           },
         );
       }
@@ -516,71 +582,17 @@ void main() {
   );
 
   testWidgets(
-    'PageTransitionsTheme override builds a _OpenUpwardsPageTransition',
-    (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/':
-            (BuildContext context) => Material(
-              child: TextButton(
-                child: const Text('push'),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/b');
-                },
-              ),
-            ),
-        '/b': (BuildContext context) => const Text('page b'),
-      };
-
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(
-            pageTransitionsTheme: const PageTransitionsTheme(
-              builders: <TargetPlatform, PageTransitionsBuilder>{
-                TargetPlatform.android:
-                    OpenUpwardsPageTransitionsBuilder(), // creates a _OpenUpwardsPageTransition
-              },
-            ),
-          ),
-          routes: routes,
-        ),
-      );
-
-      Finder findOpenUpwardsPageTransition() {
-        return find.descendant(
-          of: find.byType(MaterialApp),
-          matching: find.byWidgetPredicate(
-            (Widget w) => '${w.runtimeType}' == '_OpenUpwardsPageTransition',
-          ),
-        );
-      }
-
-      expect(
-        Theme.of(tester.element(find.text('push'))).platform,
-        debugDefaultTargetPlatformOverride,
-      );
-      expect(findOpenUpwardsPageTransition(), findsOneWidget);
-
-      await tester.tap(find.text('push'));
-      await tester.pumpAndSettle();
-      expect(find.text('page b'), findsOneWidget);
-      expect(findOpenUpwardsPageTransition(), findsOneWidget);
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.android),
-  );
-
-  testWidgets(
     'PageTransitionsTheme override builds a CupertinoPageTransition on android',
     (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/':
-            (BuildContext context) => Material(
-              child: TextButton(
-                child: const Text('push'),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/b');
-                },
-              ),
-            ),
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
+          ),
+        ),
         '/b': (BuildContext context) => const Text('page b'),
       };
 
@@ -615,15 +627,14 @@ void main() {
     'CupertinoPageTransition on android does not block gestures on backswipe',
     (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/':
-            (BuildContext context) => Material(
-              child: TextButton(
-                child: const Text('push'),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/b');
-                },
-              ),
-            ),
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
+          ),
+        ),
         '/b': (BuildContext context) => const Text('page b'),
       };
 
@@ -672,15 +683,14 @@ void main() {
     'PageTransitionsTheme override builds a _FadeUpwardsTransition',
     (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/':
-            (BuildContext context) => Material(
-              child: TextButton(
-                child: const Text('push'),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/b');
-                },
-              ),
-            ),
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
+          ),
+        ),
         '/b': (BuildContext context) => const Text('page b'),
       };
 
@@ -865,27 +875,25 @@ void main() {
       int builtCount = 0;
 
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/':
-            (BuildContext context) => Material(
-              child: TextButton(
-                child: const Text('push'),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/b');
-                },
-              ),
-            ),
-        '/b':
-            (BuildContext context) => StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                builtCount++; // Increase [builtCount] each time the widget build
-                return TextButton(
-                  child: const Text('pop'),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                );
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
+          ),
+        ),
+        '/b': (BuildContext context) => StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            builtCount++; // Increase [builtCount] each time the widget build
+            return TextButton(
+              child: const Text('pop'),
+              onPressed: () {
+                Navigator.pop(context);
               },
-            ),
+            );
+          },
+        ),
       };
 
       await tester.pumpWidget(
@@ -918,15 +926,14 @@ void main() {
     'predictive back gestures pop the route on all platforms regardless of whether their transition handles predictive back',
     (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/':
-            (BuildContext context) => Material(
-              child: TextButton(
-                child: const Text('push'),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/b');
-                },
-              ),
-            ),
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
+          ),
+        ),
         '/b': (BuildContext context) => const Text('page b'),
       };
 
@@ -975,7 +982,18 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('push'), findsNothing);
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+          // Shows both pages while doing the "peek" predicitve back transition.
+          expect(find.text('push'), findsOneWidget);
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.windows:
+          // Does no transition yet; still shows page b only.
+          expect(find.text('push'), findsNothing);
+      }
       expect(find.text('page b'), findsOneWidget);
 
       // Commit the system back gesture.
@@ -988,12 +1006,236 @@ void main() {
         (ByteData? _) {},
       );
       await tester.pumpAndSettle();
-
       expect(find.text('push'), findsOneWidget);
       expect(find.text('page b'), findsNothing);
     },
     variant: TargetPlatformVariant.all(),
   );
+
+  testWidgets('predictive back is the default on Android', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('push'),
+          onPressed: () {
+            Navigator.of(context).pushNamed('/b');
+          },
+        ),
+      ),
+    };
+    await tester.pumpWidget(MaterialApp(routes: routes));
+
+    final ThemeData themeData = Theme.of(tester.element(find.text('push')));
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        expect(
+          themeData.pageTransitionsTheme.builders[defaultTargetPlatform],
+          isA<PredictiveBackPageTransitionsBuilder>(),
+        );
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        expect(
+          themeData.pageTransitionsTheme.builders[defaultTargetPlatform],
+          isNot(isA<PredictiveBackPageTransitionsBuilder>()),
+        );
+    }
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('predictive back falls back to FadeForwardsPageTransition', (
+    WidgetTester tester,
+  ) async {
+    Finder findPredictiveBackPageTransition() {
+      return find.descendant(
+        of: find.byType(PrimaryScrollController),
+        matching: find.byWidgetPredicate(
+          (Widget w) => '${w.runtimeType}' == '_PredictiveBackSharedElementPageTransition',
+        ),
+      );
+    }
+
+    Finder findFallbackPageTransition() {
+      return find.descendant(
+        of: find.byType(PrimaryScrollController),
+        matching: find.byWidgetPredicate(
+          (Widget w) => '${w.runtimeType}' == '_FadeForwardsPageTransition',
+        ),
+      );
+    }
+
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('push'),
+          onPressed: () {
+            Navigator.of(context).pushNamed('/b');
+          },
+        ),
+      ),
+      '/b': (BuildContext context) => const Text('page b'),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        routes: routes,
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
+              TargetPlatform.iOS: PredictiveBackPageTransitionsBuilder(),
+              TargetPlatform.macOS: PredictiveBackPageTransitionsBuilder(),
+              TargetPlatform.windows: PredictiveBackPageTransitionsBuilder(),
+              TargetPlatform.linux: PredictiveBackPageTransitionsBuilder(),
+              TargetPlatform.fuchsia: PredictiveBackPageTransitionsBuilder(),
+            },
+          ),
+        ),
+      ),
+    );
+
+    final ThemeData themeData = Theme.of(tester.element(find.text('push')));
+    expect(
+      themeData.pageTransitionsTheme.builders[defaultTargetPlatform],
+      isA<PredictiveBackPageTransitionsBuilder>(),
+    );
+
+    expect(find.text('push'), findsOneWidget);
+    expect(find.text('page b'), findsNothing);
+
+    await tester.tap(find.text('push'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('push'), findsNothing);
+    expect(find.text('page b'), findsOneWidget);
+
+    // Only Android sends system back gestures.
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('startBackGesture', <String, dynamic>{
+          'touchOffset': <double>[5.0, 300.0],
+          'progress': 0.0,
+          'swipeEdge': 0, // left
+        }),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        startMessage,
+        (ByteData? _) {},
+      );
+      await tester.pump();
+    }
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        expect(findPredictiveBackPageTransition(), findsOneWidget);
+        expect(findFallbackPageTransition(), findsNothing);
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        expect(findPredictiveBackPageTransition(), findsNothing);
+        expect(findFallbackPageTransition(), findsOneWidget);
+    }
+
+    expect(find.text('push'), findsNothing);
+    expect(find.text('page b'), findsOneWidget);
+
+    // Drag the system back gesture far enough to commit.
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      final ByteData updateMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('updateBackGestureProgress', <String, dynamic>{
+          'x': 100.0,
+          'y': 300.0,
+          'progress': 0.35,
+          'swipeEdge': 0, // left
+        }),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        updateMessage,
+        (ByteData? _) {},
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('push'), findsOneWidget);
+    } else {
+      expect(find.text('push'), findsNothing);
+    }
+
+    expect(find.text('page b'), findsOneWidget);
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        expect(findPredictiveBackPageTransition(), findsNWidgets(2));
+        expect(findFallbackPageTransition(), findsNothing);
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        expect(findPredictiveBackPageTransition(), findsNothing);
+        expect(findFallbackPageTransition(), findsOneWidget);
+    }
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      // Commit the system back gesture on Android.
+      final ByteData commitMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('commitBackGesture'),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        commitMessage,
+        (ByteData? _) {},
+      );
+    } else {
+      // On other platforms, send a one-off system pop.
+      final ByteData popMessage = const JSONMethodCodec().encodeMethodCall(
+        const MethodCall('popRoute'),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/navigation',
+        popMessage,
+        (ByteData? _) {},
+      );
+    }
+    await tester.pump();
+
+    expect(find.text('push'), findsOneWidget);
+    expect(find.text('page b'), findsOneWidget);
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        expect(findPredictiveBackPageTransition(), findsNWidgets(2));
+        expect(findFallbackPageTransition(), findsNothing);
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        expect(findPredictiveBackPageTransition(), findsNothing);
+        expect(findFallbackPageTransition(), findsNWidgets(2));
+    }
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('push'), findsOneWidget);
+    expect(find.text('page b'), findsNothing);
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        expect(findPredictiveBackPageTransition(), findsNothing);
+        expect(findFallbackPageTransition(), findsOneWidget);
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        expect(findPredictiveBackPageTransition(), findsNothing);
+        expect(findFallbackPageTransition(), findsOneWidget);
+    }
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets(
     'ZoomPageTransitionsBuilder uses theme color during transition effects',
@@ -1002,56 +1244,53 @@ void main() {
       const Color themeTestSurfaceColor = Color.fromARGB(255, 195, 255, 0);
 
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/':
-            (BuildContext context) => Material(
-              child: Scaffold(
-                appBar: AppBar(title: const Text('Home Page')),
-                body: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/scaffolded');
-                        },
-                        child: const Text('Route with scaffold!'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/not-scaffolded');
-                        },
-                        child: const Text('Route with NO scaffold!'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-        '/scaffolded':
-            (BuildContext context) => Material(
-              child: Scaffold(
-                appBar: AppBar(title: const Text('Scaffolded Page')),
-                body: Center(
-                  child: ElevatedButton(
+        '/': (BuildContext context) => Material(
+          child: Scaffold(
+            appBar: AppBar(title: const Text('Home Page')),
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  ElevatedButton(
                     onPressed: () {
-                      Navigator.pop(context);
+                      Navigator.pushNamed(context, '/scaffolded');
                     },
-                    child: const Text('Back to home route...'),
+                    child: const Text('Route with scaffold!'),
                   ),
-                ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/not-scaffolded');
+                    },
+                    child: const Text('Route with NO scaffold!'),
+                  ),
+                ],
               ),
             ),
-        '/not-scaffolded':
-            (BuildContext context) => Material(
-              child: Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Back to home route...'),
-                ),
+          ),
+        ),
+        '/scaffolded': (BuildContext context) => Material(
+          child: Scaffold(
+            appBar: AppBar(title: const Text('Scaffolded Page')),
+            body: Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('Back to home route...'),
               ),
             ),
+          ),
+        ),
+        '/not-scaffolded': (BuildContext context) => Material(
+          child: Center(
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Back to home route...'),
+            ),
+          ),
+        ),
       };
 
       await tester.pumpWidget(
@@ -1120,56 +1359,53 @@ void main() {
       const Color testSurfaceColor = Colors.red;
 
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/':
-            (BuildContext context) => Material(
-              child: Scaffold(
-                appBar: AppBar(title: const Text('Home Page')),
-                body: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/scaffolded');
-                        },
-                        child: const Text('Route with scaffold!'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/not-scaffolded');
-                        },
-                        child: const Text('Route with NO scaffold!'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-        '/scaffolded':
-            (BuildContext context) => Material(
-              child: Scaffold(
-                appBar: AppBar(title: const Text('Scaffolded Page')),
-                body: Center(
-                  child: ElevatedButton(
+        '/': (BuildContext context) => Material(
+          child: Scaffold(
+            appBar: AppBar(title: const Text('Home Page')),
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  ElevatedButton(
                     onPressed: () {
-                      Navigator.pop(context);
+                      Navigator.pushNamed(context, '/scaffolded');
                     },
-                    child: const Text('Back to home route...'),
+                    child: const Text('Route with scaffold!'),
                   ),
-                ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/not-scaffolded');
+                    },
+                    child: const Text('Route with NO scaffold!'),
+                  ),
+                ],
               ),
             ),
-        '/not-scaffolded':
-            (BuildContext context) => Material(
-              child: Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Back to home route...'),
-                ),
+          ),
+        ),
+        '/scaffolded': (BuildContext context) => Material(
+          child: Scaffold(
+            appBar: AppBar(title: const Text('Scaffolded Page')),
+            body: Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('Back to home route...'),
               ),
             ),
+          ),
+        ),
+        '/not-scaffolded': (BuildContext context) => Material(
+          child: Center(
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Back to home route...'),
+            ),
+          ),
+        ),
       };
 
       await tester.pumpWidget(
@@ -1232,24 +1468,22 @@ void main() {
     'Can interact with incoming route during FadeForwards back navigation',
     (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/':
-            (BuildContext context) => Material(
-              child: TextButton(
-                child: const Text('push'),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/b');
-                },
-              ),
-            ),
-        '/b':
-            (BuildContext context) => Material(
-              child: TextButton(
-                child: const Text('go back'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ),
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
+          ),
+        ),
+        '/b': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('go back'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
       };
 
       await tester.pumpWidget(

@@ -65,22 +65,21 @@ class _MyHomePageState extends State<MyHomePage> {
                     height: 200,
                     decoration: ShapeDecoration(
                       color: Colors.blue.shade100,
-                      shape:
-                          lerpBorder(
-                            StarBorder.polygon(
-                              side: const BorderSide(
-                                strokeAlign: BorderSide.strokeAlignCenter,
-                                width: 2,
-                              ),
-                              sides: _model.points,
-                              pointRounding: _model.pointRounding,
-                              rotation: _model.rotation,
-                              squash: _model.squash,
-                            ),
-                            _model._lerpTarget,
-                            _model._lerpAmount,
-                            to: _model.lerpTo,
-                          )!,
+                      shape: lerpBorder(
+                        StarBorder.polygon(
+                          side: const BorderSide(
+                            strokeAlign: BorderSide.strokeAlignCenter,
+                            width: 2,
+                          ),
+                          sides: _model.points,
+                          pointRounding: _model.pointRounding,
+                          rotation: _model.rotation,
+                          squash: _model.squash,
+                        ),
+                        _model._lerpTarget,
+                        _model._lerpAmount,
+                        to: _model.lerpTo,
+                      )!,
                     ),
                     child: const Text('Polygon'),
                   ),
@@ -90,24 +89,23 @@ class _MyHomePageState extends State<MyHomePage> {
                     height: 200,
                     decoration: ShapeDecoration(
                       color: Colors.blue.shade100,
-                      shape:
-                          lerpBorder(
-                            StarBorder(
-                              side: const BorderSide(
-                                strokeAlign: BorderSide.strokeAlignCenter,
-                                width: 2,
-                              ),
-                              points: _model.points,
-                              innerRadiusRatio: _model.innerRadiusRatio,
-                              pointRounding: _model.pointRounding,
-                              valleyRounding: _model.valleyRounding,
-                              rotation: _model.rotation,
-                              squash: _model.squash,
-                            ),
-                            _model._lerpTarget,
-                            _model._lerpAmount,
-                            to: _model.lerpTo,
-                          )!,
+                      shape: lerpBorder(
+                        StarBorder(
+                          side: const BorderSide(
+                            strokeAlign: BorderSide.strokeAlignCenter,
+                            width: 2,
+                          ),
+                          points: _model.points,
+                          innerRadiusRatio: _model.innerRadiusRatio,
+                          pointRounding: _model.pointRounding,
+                          valleyRounding: _model.valleyRounding,
+                          rotation: _model.rotation,
+                          squash: _model.squash,
+                        ),
+                        _model._lerpTarget,
+                        _model._lerpAmount,
+                        to: _model.lerpTo,
+                      )!,
                     ),
                     child: const Text('Star'),
                   ),
@@ -401,15 +399,14 @@ class _OptionsState extends State<Options> {
                   children: <Widget>[
                     Expanded(
                       child: DropdownButton<LerpTarget>(
-                        items:
-                            LerpTarget.values.map<DropdownMenuItem<LerpTarget>>((
-                              LerpTarget target,
-                            ) {
-                              return DropdownMenuItem<LerpTarget>(
-                                value: target,
-                                child: Text(target.name),
-                              );
-                            }).toList(),
+                        items: LerpTarget.values.map<DropdownMenuItem<LerpTarget>>((
+                          LerpTarget target,
+                        ) {
+                          return DropdownMenuItem<LerpTarget>(
+                            value: target,
+                            child: Text(target.name),
+                          );
+                        }).toList(),
                         value: widget.model.lerpTarget,
                         onChanged: (LerpTarget? value) {
                           if (value == null) {

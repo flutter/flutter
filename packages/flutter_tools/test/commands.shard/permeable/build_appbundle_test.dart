@@ -74,7 +74,7 @@ void main() {
     );
 
     testUsingContext('alias aab', () async {
-      final BuildAppBundleCommand command = BuildAppBundleCommand(logger: BufferLogger.test());
+      final command = BuildAppBundleCommand(logger: BufferLogger.test());
       expect(command.aliases, contains('aab'));
     });
 
@@ -292,7 +292,7 @@ void main() {
           testLogger.statusText,
           containsIgnoringWhitespace(
             'To avoid potential build failures, you can quickly migrate your app by '
-            'following the steps on https://goo.gl/CP92wY',
+            'following the steps on https://docs.flutter.dev/release/breaking-changes/androidx-migration',
           ),
         );
 
@@ -367,7 +367,7 @@ Future<BuildAppBundleCommand> runBuildAppBundleCommand(
   String target, {
   List<String>? arguments,
 }) async {
-  final BuildAppBundleCommand command = BuildAppBundleCommand(logger: BufferLogger.test());
+  final command = BuildAppBundleCommand(logger: BufferLogger.test());
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
     'appbundle',
@@ -387,5 +387,5 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
 class FakeProcessInfo extends Fake implements ProcessInfo {
   @override
-  int maxRss = 123456789;
+  var maxRss = 123456789;
 }

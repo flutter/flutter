@@ -14,11 +14,16 @@ void main() {
 }
 
 class HeroApp extends StatelessWidget {
-  const HeroApp({super.key});
+  const HeroApp({super.key, this.navigatorObservers});
+
+  final List<NavigatorObserver>? navigatorObservers;
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: HeroExample());
+    return MaterialApp(
+      navigatorObservers: navigatorObservers ?? <NavigatorObserver>[],
+      home: const HeroExample(),
+    );
   }
 }
 
@@ -36,7 +41,7 @@ class HeroExample extends StatelessWidget {
               tag: 'hero-default-tween',
               child: BoxWidget(
                 size: const Size(50.0, 50.0),
-                color: Colors.red[700]!.withOpacity(0.5),
+                color: Colors.red[700]!.withValues(alpha: 0.5),
               ),
             ),
             title: const Text(
@@ -52,7 +57,7 @@ class HeroExample extends StatelessWidget {
               },
               child: BoxWidget(
                 size: const Size(50.0, 50.0),
-                color: Colors.blue[700]!.withOpacity(0.5),
+                color: Colors.blue[700]!.withValues(alpha: 0.5),
               ),
             ),
             title: const Text(
@@ -72,34 +77,33 @@ class HeroExample extends StatelessWidget {
   void _gotoDetailsPage(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder:
-            (BuildContext context) => Scaffold(
-              appBar: AppBar(title: const Text('Second Page')),
-              body: Align(
-                alignment: Alignment.bottomRight,
-                child: Stack(
-                  children: <Widget>[
-                    Hero(
-                      tag: 'hero-custom-tween',
-                      createRectTween: (Rect? begin, Rect? end) {
-                        return MaterialRectCenterArcTween(begin: begin, end: end);
-                      },
-                      child: BoxWidget(
-                        size: const Size(400.0, 400.0),
-                        color: Colors.blue[700]!.withOpacity(0.5),
-                      ),
-                    ),
-                    Hero(
-                      tag: 'hero-default-tween',
-                      child: BoxWidget(
-                        size: const Size(400.0, 400.0),
-                        color: Colors.red[700]!.withOpacity(0.5),
-                      ),
-                    ),
-                  ],
+        builder: (BuildContext context) => Scaffold(
+          appBar: AppBar(title: const Text('Second Page')),
+          body: Align(
+            alignment: Alignment.bottomRight,
+            child: Stack(
+              children: <Widget>[
+                Hero(
+                  tag: 'hero-custom-tween',
+                  createRectTween: (Rect? begin, Rect? end) {
+                    return MaterialRectCenterArcTween(begin: begin, end: end);
+                  },
+                  child: BoxWidget(
+                    size: const Size(400.0, 400.0),
+                    color: Colors.blue[700]!.withOpacity(0.5),
+                  ),
                 ),
-              ),
+                Hero(
+                  tag: 'hero-default-tween',
+                  child: BoxWidget(
+                    size: const Size(400.0, 400.0),
+                    color: Colors.red[700]!.withOpacity(0.5),
+                  ),
+                ),
+              ],
             ),
+          ),
+        ),
       ),
     );
   }

@@ -10,7 +10,6 @@
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "impeller/typographer/typographer_context.h"
-#include "include/core/SkRect.h"
 
 namespace impeller {
 
@@ -54,9 +53,9 @@ bool AiksPlayground::OpenPlaygroundHere(
             renderer.GetContentContext(),  //
             render_target,                 //
             callback(),                    //
-            SkIRect::MakeWH(render_target.GetRenderTargetSize().width,
-                            render_target.GetRenderTargetSize().height),  //
-            /*reset_host_buffer=*/true,                                   //
+            Rect::MakeWH(render_target.GetRenderTargetSize().width,
+                         render_target.GetRenderTargetSize().height),  //
+            /*reset_host_buffer=*/true,                                //
             /*is_onscreen=*/false);
       });
 }

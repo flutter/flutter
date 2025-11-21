@@ -18,7 +18,7 @@ struct UniqueEngineTraits {
 
   static bool IsValid(const FlutterEngine& value) { return value != nullptr; }
 
-  static void Free(FlutterEngine& engine) {
+  static void Free(FlutterEngine engine) {
     auto result = FlutterEngineShutdown(engine);
     FML_CHECK(result == kSuccess);
   }
@@ -92,7 +92,7 @@ class EmbedderConfigBuilder {
 
   FlutterCompositor& GetCompositor();
 
-  void SetSurface(SkISize surface_size) { context_.SetSurface(surface_size); }
+  void SetSurface(DlISize surface_size) { context_.SetSurface(surface_size); }
 
   void SetRenderTargetType(
       EmbedderTestBackingStoreProducer::RenderTargetType type,

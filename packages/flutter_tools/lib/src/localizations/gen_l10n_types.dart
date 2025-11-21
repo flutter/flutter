@@ -28,7 +28,7 @@ import 'message_parser.dart';
 // * <https://pub.dev/packages/intl>
 // * <https://pub.dev/documentation/intl/latest/intl/DateFormat-class.html>
 // * <https://api.dartlang.org/stable/2.7.0/dart-core/DateTime-class.html>
-const Set<String> validDateFormats = <String>{
+const validDateFormats = <String>{
   'd',
   'E',
   'EEEE',
@@ -72,7 +72,7 @@ const Set<String> validDateFormats = <String>{
   's',
 };
 
-const String _dateFormatPartsDelimiter = '+';
+const _dateFormatPartsDelimiter = '+';
 
 // The set of number formats that can be automatically localized.
 //
@@ -90,7 +90,7 @@ const String _dateFormatPartsDelimiter = '+';
 //
 // * <https://pub.dev/packages/intl>
 // * <https://pub.dev/documentation/intl/latest/intl/NumberFormat-class.html>
-const Set<String> _validNumberFormats = <String>{
+const _validNumberFormats = <String>{
   'compact',
   'compactCurrency',
   'compactSimpleCurrency',
@@ -116,7 +116,7 @@ const Set<String> _validNumberFormats = <String>{
 //
 // Example of code that uses positional parameters:
 // final NumberFormat format = NumberFormat.scientificPattern(localeName);
-const Set<String> _numberFormatsWithNamedParameters = <String>{
+const _numberFormatsWithNamedParameters = <String>{
   'compact',
   'compactCurrency',
   'compactSimpleCurrency',
@@ -245,10 +245,10 @@ class Placeholder {
   final bool? isCustomDateFormat;
   // The following will be initialized after all messages are parsed in the Message constructor.
   String? type;
-  bool isPlural = false;
-  bool isSelect = false;
-  bool isDateTime = false;
-  bool requiresDateFormatting = false;
+  var isPlural = false;
+  var isSelect = false;
+  var isDateTime = false;
+  var requiresDateFormatting = false;
 
   bool get requiresFormatting => requiresDateFormatting || requiresNumFormatting;
   bool get requiresNumFormatting =>
@@ -363,35 +363,34 @@ class Message {
        messages = <LocaleInfo, String?>{},
        parsedMessages = <LocaleInfo, Node?>{} {
     // Filenames for error handling.
-    final Map<LocaleInfo, String> filenames = <LocaleInfo, String>{};
+    final filenames = <LocaleInfo, String>{};
     // Collect all translations from allBundles and parse them.
     for (final AppResourceBundle bundle in allBundles.bundles) {
       filenames[bundle.locale] = bundle.file.basename;
       final String? translation = bundle.translationFor(resourceId);
       messages[bundle.locale] = translation;
 
-      localePlaceholders[bundle.locale] =
-          templateBundle.locale == bundle.locale
-              ? templatePlaceholders
-              : _placeholders(bundle.resources, resourceId, false);
+      localePlaceholders[bundle.locale] = templateBundle.locale == bundle.locale
+          ? templatePlaceholders
+          : _placeholders(bundle.resources, resourceId, false);
 
       List<String>? validPlaceholders;
       if (useRelaxedSyntax) {
-        validPlaceholders =
-            templatePlaceholders.entries.map((MapEntry<String, Placeholder> e) => e.key).toList();
+        validPlaceholders = templatePlaceholders.entries
+            .map((MapEntry<String, Placeholder> e) => e.key)
+            .toList();
       }
       try {
-        parsedMessages[bundle.locale] =
-            translation == null
-                ? null
-                : Parser(
-                  resourceId,
-                  bundle.file.basename,
-                  translation,
-                  useEscaping: useEscaping,
-                  placeholders: validPlaceholders,
-                  logger: logger,
-                ).parse();
+        parsedMessages[bundle.locale] = translation == null
+            ? null
+            : Parser(
+                resourceId,
+                bundle.file.basename,
+                translation,
+                useEscaping: useEscaping,
+                placeholders: validPlaceholders,
+                logger: logger,
+              ).parse();
       } on L10nParserException catch (error) {
         logger?.printError(error.toString());
         // Treat it as an untranslated message in case we can't parse.
@@ -413,7 +412,7 @@ class Message {
   final bool useEscaping;
   final bool useRelaxedSyntax;
   final Logger? logger;
-  bool hadErrors = false;
+  var hadErrors = false;
 
   Iterable<Placeholder> getPlaceholders(LocaleInfo locale) {
     final Map<String, Placeholder>? placeholders = localePlaceholders[locale];
@@ -531,7 +530,7 @@ class Message {
   // For undeclared placeholders, create a new placeholder.
   void _inferPlaceholders() {
     // We keep the undeclared placeholders separate so that we can sort them alphabetically afterwards.
-    final Map<String, Placeholder> undeclaredPlaceholders = <String, Placeholder>{};
+    final undeclaredPlaceholders = <String, Placeholder>{};
     // Helper for getting placeholder by name.
     for (final LocaleInfo locale in parsedMessages.keys) {
       Placeholder? getPlaceholder(String name) =>
@@ -541,7 +540,7 @@ class Message {
       if (parsedMessages[locale] == null) {
         continue;
       }
-      final List<Node> traversalStack = <Node>[parsedMessages[locale]!];
+      final traversalStack = <Node>[parsedMessages[locale]!];
       while (traversalStack.isNotEmpty) {
         final Node node = traversalStack.removeLast();
         if (<ST>[
@@ -634,12 +633,12 @@ class AppResourceBundle {
       );
     }
 
-    String? localeString = resources['@@locale'] as String?;
+    var localeString = resources['@@locale'] as String?;
 
     // Look for the first instance of an ISO 639-1 language code, matching exactly.
     final String fileName = file.fileSystem.path.basenameWithoutExtension(file.path);
 
-    for (int index = 0; index < fileName.length; index += 1) {
+    for (var index = 0; index < fileName.length; index += 1) {
       // If an underscore was found, check if locale string follows.
       if (fileName[index] == '_') {
         // If Locale.tryParse fails, it returns null.
@@ -717,9 +716,9 @@ class AppResourceBundleCollection {
   factory AppResourceBundleCollection(Directory directory) {
     // Assuming that the caller has verified that the directory is readable.
 
-    final RegExp filenameRE = RegExp(r'(\w+)\.arb$');
-    final Map<LocaleInfo, AppResourceBundle> localeToBundle = <LocaleInfo, AppResourceBundle>{};
-    final Map<String, List<LocaleInfo>> languageToLocales = <String, List<LocaleInfo>>{};
+    final filenameRE = RegExp(r'(\w+)\.arb$');
+    final localeToBundle = <LocaleInfo, AppResourceBundle>{};
+    final languageToLocales = <String, List<LocaleInfo>>{};
     // We require the list of files to be sorted so that
     // "languageToLocales[bundle.locale.languageCode]" is not null
     // by the time we handle locales with country codes.
@@ -730,8 +729,8 @@ class AppResourceBundleCollection {
             .where((File e) => filenameRE.hasMatch(e.path))
             .toList()
           ..sort(sortFilesByPath);
-    for (final File file in files) {
-      final AppResourceBundle bundle = AppResourceBundle(file);
+    for (final file in files) {
+      final bundle = AppResourceBundle(file);
       if (localeToBundle[bundle.locale] != null) {
         throw L10nException(
           "Multiple arb files with the same '${bundle.locale}' locale detected. \n"
@@ -744,10 +743,9 @@ class AppResourceBundleCollection {
     }
 
     languageToLocales.forEach((String language, List<LocaleInfo> listOfCorrespondingLocales) {
-      final List<String> localeStrings =
-          listOfCorrespondingLocales.map((LocaleInfo locale) {
-            return locale.toString();
-          }).toList();
+      final List<String> localeStrings = listOfCorrespondingLocales.map((LocaleInfo locale) {
+        return locale.toString();
+      }).toList();
       if (!localeStrings.contains(language)) {
         throw L10nException(
           'Arb file for a fallback, $language, does not exist, even though \n'
@@ -788,7 +786,7 @@ class AppResourceBundleCollection {
 }
 
 // A set containing all the ISO630-1 languages. This list was pulled from https://datahub.io/core/language-codes.
-final Set<String> _iso639Languages = <String>{
+final _iso639Languages = <String>{
   'aa',
   'ab',
   'ae',

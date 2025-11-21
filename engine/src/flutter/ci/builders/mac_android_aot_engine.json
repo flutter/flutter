@@ -7,6 +7,9 @@
         "Tests to run on mac hosts should go in one of the other mac_ build ",
         "definition files."
     ],
+    "luci_flags": {
+      "upload_content_hash": true
+    },
     "builds": [
         {
             "archives": [
@@ -22,7 +25,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-14",
+                "os=Mac-15.5",
                 "cpu=x86"
             ],
             "gclient_variables": {
@@ -80,7 +83,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-14",
+                "os=Mac-15.5",
                 "cpu=x86"
             ],
             "gclient_variables": {
@@ -140,7 +143,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-14",
+                "os=Mac-15.5",
                 "cpu=x86"
             ],
             "gclient_variables": {
@@ -200,7 +203,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-14",
+                "os=Mac-15.5",
                 "cpu=x86"
             ],
             "gclient_variables": {
@@ -258,7 +261,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-14",
+                "os=Mac-15.5",
                 "cpu=x86"
             ],
             "gclient_variables": {
@@ -318,7 +321,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-14",
+                "os=Mac-15.5",
                 "cpu=x86"
             ],
             "gclient_variables": {

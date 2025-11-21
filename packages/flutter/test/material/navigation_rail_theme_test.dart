@@ -238,12 +238,11 @@ void main() {
   testWidgets('NavigationRailThemeData lerps correctly with null iconThemes', (
     WidgetTester tester,
   ) async {
-    final NavigationRailThemeData lerp =
-        NavigationRailThemeData.lerp(
-          const NavigationRailThemeData(),
-          const NavigationRailThemeData(),
-          0.5,
-        )!;
+    final NavigationRailThemeData lerp = NavigationRailThemeData.lerp(
+      const NavigationRailThemeData(),
+      const NavigationRailThemeData(),
+      0.5,
+    )!;
 
     expect(lerp.selectedIconTheme, isNull);
     expect(lerp.unselectedIconTheme, isNull);
@@ -253,11 +252,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationRailThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -278,11 +276,10 @@ void main() {
       indicatorShape: CircleBorder(),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description[0], 'backgroundColor: ${const Color(0x00000099)}');
     expect(description[1], 'elevation: 5.0');
@@ -372,10 +369,10 @@ Size _destinationSize(WidgetTester tester) {
 }
 
 Align _destinationsAlign(WidgetTester tester) {
-  // The first Expanded widget is the one within the main Column for the rail
+  // The first Flexible widget is the one within the main Column for the rail
   // content.
   return tester.firstWidget<Align>(
-    find.descendant(of: find.byType(Expanded), matching: find.byType(Align)),
+    find.descendant(of: find.byType(Flexible), matching: find.byType(Align)),
   );
 }
 

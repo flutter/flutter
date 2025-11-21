@@ -1120,8 +1120,9 @@ class KeyEventManager {
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
-          collector =
-              () => <DiagnosticsNode>[DiagnosticsProperty<KeyMessage>('KeyMessage', message)];
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<KeyMessage>('KeyMessage', message),
+          ];
           return true;
         }());
         FlutterError.reportError(

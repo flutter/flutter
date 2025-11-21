@@ -13,7 +13,8 @@ class ProgressIndicatorTemplate extends TokenTemplate {
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _Circular${blockName}DefaultsM3 extends ProgressIndicatorThemeData {
   _Circular${blockName}DefaultsM3(this.context, { required this.indeterminate });
 

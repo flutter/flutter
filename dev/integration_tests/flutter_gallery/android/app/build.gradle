@@ -21,8 +21,11 @@ if (flutterRoot == null) {
 }
 
 // The Gallery app's version is defined by the Flutter framework's version.
-def flutterVersion = file("$flutterRoot/version").text
+def flutterVersionFile = file("$flutterRoot/bin/cache/flutter.version.json")
+def flutterVersionJson = new groovy.json.JsonSlurper().parse(flutterVersionFile)
+def flutterVersion = flutterVersionJson.frameworkVersion
 def flutterVersionComponents = flutterVersion.split(/[^0-9]+/)
+
 // Let the integer version code of xx.yy.zz-pre.nnn be xxyyzznnn.
 int flutterVersionNumber = Math.min(flutterVersionComponents[0].toInteger(), 20) * 100000000
 flutterVersionNumber += Math.min(flutterVersionComponents[1].toInteger(), 99) * 1000000
@@ -42,8 +45,8 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "io.flutter.demo.gallery"
-    compileSdk flutter.compileSdkVersion
+    namespace = "io.flutter.demo.gallery"
+    compileSdk = flutter.compileSdkVersion
 
     // Flutter's CI installs the NDK at a non-standard path.
     // This non-standard structure is initially created by
@@ -66,20 +69,20 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        multiDexEnabled true
+        multiDexEnabled = true
     }
 
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            signingConfig = signingConfigs.debug
         }
     }
 }
 
 flutter {
-    source '../..'
+    source = '../..'
 }
 
 dependencies {

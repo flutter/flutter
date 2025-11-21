@@ -10,6 +10,7 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 #include "impeller.h"
 
@@ -50,6 +51,7 @@ struct Proc {
   PROC(ImpellerColorFilterRelease)                                \
   PROC(ImpellerColorFilterRetain)                                 \
   PROC(ImpellerColorSourceCreateConicalGradientNew)               \
+  PROC(ImpellerColorSourceCreateFragmentProgramNew)               \
   PROC(ImpellerColorSourceCreateImageNew)                         \
   PROC(ImpellerColorSourceCreateLinearGradientNew)                \
   PROC(ImpellerColorSourceCreateRadialGradientNew)                \
@@ -97,6 +99,9 @@ struct Proc {
   PROC(ImpellerDisplayListBuilderTranslate)                       \
   PROC(ImpellerDisplayListRelease)                                \
   PROC(ImpellerDisplayListRetain)                                 \
+  PROC(ImpellerFragmentProgramNew)                                \
+  PROC(ImpellerFragmentProgramRelease)                            \
+  PROC(ImpellerFragmentProgramRetain)                             \
   PROC(ImpellerGetVersion)                                        \
   PROC(ImpellerGlyphInfoGetGraphemeClusterBounds)                 \
   PROC(ImpellerGlyphInfoGetGraphemeClusterCodeUnitRangeBegin)     \
@@ -109,6 +114,7 @@ struct Proc {
   PROC(ImpellerImageFilterCreateComposeNew)                       \
   PROC(ImpellerImageFilterCreateDilateNew)                        \
   PROC(ImpellerImageFilterCreateErodeNew)                         \
+  PROC(ImpellerImageFilterCreateFragmentProgramNew)               \
   PROC(ImpellerImageFilterCreateMatrixNew)                        \
   PROC(ImpellerImageFilterRelease)                                \
   PROC(ImpellerImageFilterRetain)                                 \
@@ -168,6 +174,7 @@ struct Proc {
   PROC(ImpellerParagraphStyleRelease)                             \
   PROC(ImpellerParagraphStyleRetain)                              \
   PROC(ImpellerParagraphStyleSetBackground)                       \
+  PROC(ImpellerParagraphStyleSetEllipsis)                         \
   PROC(ImpellerParagraphStyleSetFontFamily)                       \
   PROC(ImpellerParagraphStyleSetFontSize)                         \
   PROC(ImpellerParagraphStyleSetFontStyle)                        \
@@ -232,7 +239,7 @@ struct ProcTable {
     return true;
   }
 
-#define IMPELLER_HPP_PROC(name) Proc<decltype(name)> name = {#name, nullptr};
+#define IMPELLER_HPP_PROC(name) Proc<decltype(name)> name = {#name};
   IMPELLER_HPP_EACH_PROC(IMPELLER_HPP_PROC)
 #undef IMPELLER_HPP_PROC
 };
@@ -311,6 +318,7 @@ IMPELLER_HPP_DEFINE_TRAITS(ImpellerColorSource);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerContext);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerDisplayList);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerDisplayListBuilder);
+IMPELLER_HPP_DEFINE_TRAITS(ImpellerFragmentProgram);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerGlyphInfo);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerImageFilter);
 IMPELLER_HPP_DEFINE_TRAITS(ImpellerLineMetrics);
@@ -336,6 +344,12 @@ class Mapping {
       : mapping_(mapping),
         size_(size),
         release_callback_(std::move(release_callback)) {}
+
+  ~Mapping() {
+    if (release_callback_) {
+      release_callback_();
+    }
+  }
 
   const uint8_t* GetMapping() const { return mapping_; }
 
@@ -458,6 +472,28 @@ class ColorFilter
   static ColorFilter Matrix(const ImpellerColorMatrix& color_matrix) {
     return ColorFilter(
         gGlobalProcTable.ImpellerColorFilterCreateColorMatrixNew(&color_matrix),
+        AdoptTag::kAdopt);
+  }
+};
+
+//------------------------------------------------------------------------------
+/// @see      ImpellerFragmentProgram
+///
+class FragmentProgram
+    : public Object<ImpellerFragmentProgram, ImpellerFragmentProgramTraits> {
+ public:
+  FragmentProgram(ImpellerFragmentProgram program, AdoptTag tag)
+      : Object(program, tag) {}
+
+  static FragmentProgram WithData(std::unique_ptr<Mapping> data) {
+    ImpellerMapping c_mapping = {};
+    c_mapping.data = data->GetMapping();
+    c_mapping.length = data->GetSize();
+    c_mapping.on_release = [](void* user_data) {
+      delete reinterpret_cast<Mapping*>(user_data);
+    };
+    return FragmentProgram(
+        gGlobalProcTable.ImpellerFragmentProgramNew(&c_mapping, data.release()),
         AdoptTag::kAdopt);
   }
 };
@@ -589,6 +625,26 @@ class ColorSource
             ),
         AdoptTag::kAdopt);
   }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerColorSourceCreateFragmentProgramNew
+  ///
+  static ColorSource FragmentProgram(
+      const Context& context,
+      const FragmentProgram& program,
+      const std::vector<ImpellerTexture>& samplers,
+      const Mapping* uniform_data) {
+    return ColorSource(
+        gGlobalProcTable.ImpellerColorSourceCreateFragmentProgramNew(
+            context.Get(),                                                   //
+            program.Get(),                                                   //
+            const_cast<ImpellerTexture*>(samplers.data()),                   //
+            samplers.size(),                                                 //
+            uniform_data != nullptr ? uniform_data->GetMapping() : nullptr,  //
+            uniform_data != nullptr ? uniform_data->GetSize() : 0u           //
+            ),
+        AdoptTag::kAdopt);
+  }
 };
 
 //------------------------------------------------------------------------------
@@ -645,6 +701,26 @@ class ImageFilter
                             ImpellerTextureSampling sampling) {
     return ImageFilter(
         gGlobalProcTable.ImpellerImageFilterCreateMatrixNew(&matrix, sampling),
+        AdoptTag::kAdopt);
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerImageFilterCreateFragmentProgramNew
+  ///
+  static ImageFilter FragmentProgram(
+      const Context& context,
+      const FragmentProgram& program,
+      const std::vector<ImpellerTexture>& samplers,
+      const Mapping* uniform_data) {
+    return ImageFilter(
+        gGlobalProcTable.ImpellerImageFilterCreateFragmentProgramNew(
+            context.Get(),                                                   //
+            program.Get(),                                                   //
+            const_cast<ImpellerTexture*>(samplers.data()),                   //
+            samplers.size(),                                                 //
+            uniform_data != nullptr ? uniform_data->GetMapping() : nullptr,  //
+            uniform_data != nullptr ? uniform_data->GetSize() : 0u           //
+            ),
         AdoptTag::kAdopt);
   }
 };
@@ -1085,6 +1161,14 @@ class ParagraphStyle
   ///
   ParagraphStyle& SetLocale(const char* locale) {
     gGlobalProcTable.ImpellerParagraphStyleSetLocale(Get(), locale);
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerParagraphStyleSetEllipsis
+  ///
+  ParagraphStyle& SetEllipsis(const char* ellipsis) {
+    gGlobalProcTable.ImpellerParagraphStyleSetEllipsis(Get(), ellipsis);
     return *this;
   }
 

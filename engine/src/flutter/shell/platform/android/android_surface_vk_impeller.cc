@@ -58,9 +58,9 @@ std::unique_ptr<Surface> AndroidSurfaceVKImpeller::CreateGPUSurface(
   return gpu_surface;
 }
 
-bool AndroidSurfaceVKImpeller::OnScreenSurfaceResize(const SkISize& size) {
+bool AndroidSurfaceVKImpeller::OnScreenSurfaceResize(const DlISize& size) {
   surface_context_vk_->UpdateSurfaceSize(
-      impeller::ISize{size.width(), size.height()});
+      impeller::ISize{size.width, size.height});
   return true;
 }
 

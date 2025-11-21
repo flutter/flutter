@@ -107,8 +107,9 @@ class PathAnimation {
       commands.add(PathCommandAnimation(commandType, points));
     }
 
-    final List<double> opacities =
-        frames.map<double>((FrameData d) => d.paths[pathIdx].opacity).toList();
+    final List<double> opacities = frames
+        .map<double>((FrameData d) => d.paths[pathIdx].opacity)
+        .toList();
 
     return PathAnimation(commands, opacities: opacities);
   }
@@ -321,8 +322,9 @@ class SvgPath {
   }
 
   SvgPath _applyTransform(_Transform transform) {
-    final List<SvgPathCommand> transformedCommands =
-        commands.map<SvgPathCommand>((SvgPathCommand c) => c._applyTransform(transform)).toList();
+    final List<SvgPathCommand> transformedCommands = commands
+        .map<SvgPathCommand>((SvgPathCommand c) => c._applyTransform(transform))
+        .toList();
     return SvgPath(id, transformedCommands, opacity: opacity * transform.opacity);
   }
 

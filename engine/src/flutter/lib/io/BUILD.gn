@@ -12,7 +12,7 @@ source_set("io") {
 
   deps = [
     "$dart_src/runtime:dart_api",
-    "$dart_src/runtime/bin:dart_io_api",
+    "$dart_src/runtime/bin:common_embedder_dart_io",
     "//flutter/fml",
     "//flutter/third_party/tonic",
   ]

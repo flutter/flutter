@@ -28,7 +28,7 @@ class ParagraphStyle final
 
   void SetBackground(ScopedObject<Paint> paint);
 
-  void SetFontWeight(txt::FontWeight weight);
+  void SetFontWeight(int weight);
 
   void SetFontStyle(txt::FontStyle style);
 
@@ -47,6 +47,8 @@ class ParagraphStyle final
   void SetMaxLines(size_t max_lines);
 
   void SetLocale(std::string locale);
+
+  void SetEllipsis(const std::string& string);
 
   txt::TextStyle CreateTextStyle() const;
 

@@ -40,8 +40,8 @@ class SliverDecorationExample extends StatelessWidget {
               stops: <double>[0.4, 0.8],
             ),
           ),
-          sliver: SliverList(
-            delegate: SliverChildListDelegate(<Widget>[
+          sliver: SliverList.list(
+            children: <Widget>[
               SizedBox(
                 height: 200.0,
                 child: Center(
@@ -51,7 +51,7 @@ class SliverDecorationExample extends StatelessWidget {
                   ),
                 ),
               ),
-            ]),
+            ],
           ),
         ),
         DecoratedSliver(
@@ -72,8 +72,8 @@ class SliverDecorationExample extends StatelessWidget {
               ],
             ),
           ),
-          sliver: SliverList(
-            delegate: SliverChildListDelegate(<Widget>[
+          sliver: SliverList.list(
+            children: <Widget>[
               SizedBox(
                 height: 500.0,
                 child: Container(
@@ -82,7 +82,7 @@ class SliverDecorationExample extends StatelessWidget {
                   child: Text('A blue sky', style: Theme.of(context).textTheme.titleLarge),
                 ),
               ),
-            ]),
+            ],
           ),
         ),
       ],

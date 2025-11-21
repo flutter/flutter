@@ -6,7 +6,6 @@ import 'package:archive/archive.dart';
 
 import '../application_package.dart';
 import '../base/file_system.dart';
-import '../base/utils.dart';
 import '../build_info.dart';
 import '../cmake.dart';
 import '../cmake_project.dart';
@@ -50,7 +49,7 @@ abstract class WindowsApp extends ApplicationPackage {
       globals.printError('Invalid prebuilt Windows app. Unable to extract from archive.');
       return null;
     }
-    final List<FileSystemEntity> exeFilesFound = <FileSystemEntity>[
+    final exeFilesFound = <FileSystemEntity>[
       for (final FileSystemEntity file in tempDir.listSync())
         if (file.basename.endsWith('.exe')) file,
     ];
@@ -106,7 +105,7 @@ class BuildableWindowsApp extends WindowsApp {
     return globals.fs.path.join(
       getWindowsBuildDirectory(targetPlatform),
       'runner',
-      sentenceCase(buildMode.cliName),
+      buildMode.uppercaseName,
       '$binaryName.exe',
     );
   }

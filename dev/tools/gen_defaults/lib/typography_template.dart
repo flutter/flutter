@@ -8,7 +8,8 @@ class TypographyTemplate extends TokenTemplate {
   const TypographyTemplate(super.blockName, super.fileName, super.tokens);
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 abstract final class _M3Typography {
   ${_textTheme('englishLike', 'alphabetic')}
 
@@ -87,8 +88,9 @@ abstract final class _M3Typography {
   }
 
   String _fontWeight(String textStyleTokenName) {
-    final String weightValue =
-        getToken(getToken('$textStyleTokenName.weight') as String).toString();
+    final String weightValue = getToken(
+      getToken('$textStyleTokenName.weight') as String,
+    ).toString();
     return 'FontWeight.w$weightValue';
   }
 

@@ -16,7 +16,7 @@ import 'test_utils.dart';
 
 void main() {
   late Directory tempDir;
-  final BasicProject project = BasicProject();
+  final project = BasicProject();
   late FlutterRunTestDriver flutter;
 
   setUp(() async {
@@ -50,6 +50,18 @@ void main() {
         !proc.stdout.toString().contains('No supported devices found with name or id matching')) {
       fail("'flutter run -d invalid-device-id' did not produce the expected error");
     }
+  });
+
+  testWithoutContext('flutter run outputs DTD and DevTools events', () async {
+    await flutter.run(startPaused: true, withDebugger: true);
+    expect(flutter.devToolsUri, isNotNull);
+    expect(flutter.dtdUri, isNotNull);
+  });
+
+  testWithoutContext('flutter run does not output DTD and DevTools events', () async {
+    await flutter.run(startPaused: true, withDebugger: true, noDevtools: true);
+    expect(flutter.devToolsUri, isNull);
+    expect(flutter.dtdUri, isNull);
   });
 
   testWithoutContext('sets activeDevToolsServerAddress extension', () async {

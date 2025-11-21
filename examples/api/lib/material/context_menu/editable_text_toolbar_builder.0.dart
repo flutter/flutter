@@ -61,27 +61,23 @@ class _EditableTextToolbarBuilderExampleAppState
                     // Build the default buttons, but make them look custom.
                     // In a real project you may want to build different
                     // buttons depending on the platform.
-                    children:
-                        editableTextState.contextMenuButtonItems.map((
-                          ContextMenuButtonItem buttonItem,
-                        ) {
-                          return CupertinoButton(
-                            color: const Color(0xffaaaa00),
-                            disabledColor: const Color(0xffaaaaff),
-                            onPressed: buttonItem.onPressed,
-                            padding: const EdgeInsets.all(10.0),
-                            pressedOpacity: 0.7,
-                            child: SizedBox(
-                              width: 200.0,
-                              child: Text(
-                                CupertinoTextSelectionToolbarButton.getButtonLabel(
-                                  context,
-                                  buttonItem,
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                    children: editableTextState.contextMenuButtonItems.map((
+                      ContextMenuButtonItem buttonItem,
+                    ) {
+                      return CupertinoButton(
+                        color: const Color(0xffaaaa00),
+                        disabledColor: const Color(0xffaaaaff),
+                        onPressed: buttonItem.onPressed,
+                        padding: const EdgeInsets.all(10.0),
+                        pressedOpacity: 0.7,
+                        child: SizedBox(
+                          width: 200.0,
+                          child: Text(
+                            CupertinoTextSelectionToolbarButton.getButtonLabel(context, buttonItem),
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   );
                 },
               ),

@@ -553,15 +553,14 @@ void main() {
                 visualDensity: visualDensity,
                 key: key,
                 onPressed: () {},
-                child:
-                    useText
-                        ? const Text('Text', key: childKey)
-                        : Container(
-                          key: childKey,
-                          width: 100,
-                          height: 100,
-                          color: const Color(0xffff0000),
-                        ),
+                child: useText
+                    ? const Text('Text', key: childKey)
+                    : Container(
+                        key: childKey,
+                        width: 100,
+                        height: 100,
+                        color: const Color(0xffff0000),
+                      ),
               ),
             ),
           ),
@@ -607,7 +606,9 @@ void main() {
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
 
-  testWidgets('RawMaterialButton changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton changes mouse cursor as expected when hovered', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -644,7 +645,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test default cursor when disabled

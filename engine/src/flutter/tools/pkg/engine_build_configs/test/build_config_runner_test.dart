@@ -810,6 +810,37 @@ void main() {
       emptyDir.deleteSync(recursive: true);
     }
   });
+
+  test('Bootstrap collects reproxy status before shutting down reproxy', () async {
+    final Build targetBuild = buildConfig.builds[0];
+    final commandLog = <FakeCommandLogEntry>[];
+    final BuildRunner buildRunner = BuildRunner(
+      platform: FakePlatform(operatingSystem: Platform.linux, numberOfProcessors: 32),
+      processRunner: ProcessRunner(
+        processManager: _fakeProcessManager(commandLog: commandLog, failUnknown: false),
+      ),
+      abi: ffi.Abi.linuxX64,
+      engineSrcDir: engine.srcDir,
+      build: targetBuild,
+      extraGnArgs: <String>['--rbe'],
+    );
+    void handler(RunnerEvent event) {}
+    final bool runResult = await buildRunner.run(handler);
+    expect(runResult, isTrue);
+
+    int? reproxyStatusIndex;
+    int? bootstrapShutdownIndex;
+    for (int i = 0; i < commandLog.length; i++) {
+      final FakeCommandLogEntry entry = commandLog[i];
+      if (entry.command[0].endsWith('reproxystatus')) {
+        reproxyStatusIndex = i;
+      }
+      if (entry.command[0].endsWith('bootstrap') && entry.command.contains('--shutdown')) {
+        bootstrapShutdownIndex = i;
+      }
+    }
+    expect(reproxyStatusIndex, lessThan(bootstrapShutdownIndex!));
+  });
 }
 
 FakeProcessManager _fakeProcessManager({
@@ -818,6 +849,7 @@ FakeProcessManager _fakeProcessManager({
   io.ProcessResult? ninjaResult,
   bool Function(Object?, {String? workingDirectory})? canRun,
   bool failUnknown = true,
+  List<FakeCommandLogEntry>? commandLog,
 }) {
   final io.ProcessResult success = io.ProcessResult(1, 0, '', '');
   FakeProcess fakeProcess(io.ProcessResult? result) => FakeProcess(
@@ -827,16 +859,20 @@ FakeProcessManager _fakeProcessManager({
   );
   return FakeProcessManager(
     canRun: canRun ?? (Object? exe, {String? workingDirectory}) => true,
-    onRun:
-        (FakeCommandLogEntry entry) => switch (entry.command) {
-          _ => failUnknown ? io.ProcessResult(1, 1, '', '') : success,
-        },
-    onStart:
-        (FakeCommandLogEntry entry) => switch (entry.command) {
-          [final String exe, ...] when exe.endsWith('gn') => fakeProcess(gnResult),
-          [final String exe, ...] when exe.endsWith('bootstrap') => fakeProcess(bootstrapResult),
-          [final String exe, ...] when exe.endsWith('ninja') => fakeProcess(ninjaResult),
-          _ => failUnknown ? FakeProcess(exitCode: 1) : FakeProcess(),
-        },
+    onRun: (FakeCommandLogEntry entry) {
+      commandLog?.add(entry);
+      return switch (entry.command) {
+        _ => failUnknown ? io.ProcessResult(1, 1, '', '') : success,
+      };
+    },
+    onStart: (FakeCommandLogEntry entry) {
+      commandLog?.add(entry);
+      return switch (entry.command) {
+        [final String exe, ...] when exe.endsWith('gn') => fakeProcess(gnResult),
+        [final String exe, ...] when exe.endsWith('bootstrap') => fakeProcess(bootstrapResult),
+        [final String exe, ...] when exe.endsWith('ninja') => fakeProcess(ninjaResult),
+        _ => failUnknown ? FakeProcess(exitCode: 1) : FakeProcess(),
+      };
+    },
   );
 }

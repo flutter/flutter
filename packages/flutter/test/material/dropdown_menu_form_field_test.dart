@@ -456,7 +456,7 @@ void main() {
     DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.inputDecorationTheme, null);
 
-    const InputDecorationTheme inputDecorationTheme = InputDecorationTheme();
+    const InputDecorationThemeData inputDecorationTheme = InputDecorationThemeData();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -470,6 +470,36 @@ void main() {
 
     dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.inputDecorationTheme, inputDecorationTheme);
+  });
+
+  testWidgets('Passes decorationBuilder to underlying DropdownMenu', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: DropdownMenuFormField<MenuItem>(dropdownMenuEntries: menuEntries)),
+      ),
+    );
+
+    // Check default value.
+    DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.decorationBuilder, null);
+
+    InputDecoration buildDecoration(BuildContext context, MenuController controller) {
+      return const InputDecoration(labelText: 'labelText');
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(
+            decorationBuilder: buildDecoration,
+            dropdownMenuEntries: menuEntries,
+          ),
+        ),
+      ),
+    );
+
+    dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.decorationBuilder, buildDecoration);
   });
 
   testWidgets('Passes menuStyle to underlying DropdownMenu', (WidgetTester tester) async {
@@ -506,12 +536,13 @@ void main() {
       ),
     );
 
-    // Check default value.
-    DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
-    expect(dropdownMenu.controller, null);
-
     final TextEditingController controller = TextEditingController();
     addTearDown(controller.dispose);
+
+    // Check default value.
+    DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.controller, isNotNull); // A default controller is created.
+    expect(dropdownMenu.controller, isNot(controller));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -967,6 +998,92 @@ void main() {
     expect(fieldKey.currentState!.value, MenuItem.menuItem0);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/174578.
+  testWidgets(
+    'Inner text field is cleared on reset when initialSelection is null - Default controller',
+    (WidgetTester tester) async {
+      final GlobalKey<FormFieldState<MenuItem>> fieldKey = GlobalKey<FormFieldState<MenuItem>>();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenuFormField<MenuItem>(key: fieldKey, dropdownMenuEntries: menuEntries),
+          ),
+        ),
+      );
+
+      final TextField textField = tester.widget(find.byType(TextField));
+
+      // Select menuItem1.
+      await tester.tap(find.byType(DropdownMenu<MenuItem>));
+      await tester.pump();
+      await tester.tap(findMenuItem(MenuItem.menuItem1));
+      await tester.pump();
+      expect(fieldKey.currentState!.value, MenuItem.menuItem1);
+      expect(
+        textField.controller?.value,
+        const TextEditingValue(text: 'Item 1', selection: TextSelection.collapsed(offset: 6)),
+      );
+
+      // After reset the text field content is cleared.
+      fieldKey.currentState!.reset();
+      await tester.pump();
+
+      expect(fieldKey.currentState!.value, null);
+      expect(
+        textField.controller?.value,
+        const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
+      );
+    },
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/174578.
+  testWidgets(
+    'Inner text field is cleared on reset when initialSelection is null - Custom controller',
+    (WidgetTester tester) async {
+      final GlobalKey<FormFieldState<MenuItem>> fieldKey = GlobalKey<FormFieldState<MenuItem>>();
+      final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenuFormField<MenuItem>(
+              key: fieldKey,
+              controller: controller,
+              dropdownMenuEntries: menuEntries,
+            ),
+          ),
+        ),
+      );
+
+      // Custom controller is correctly passed to the inner TextField.
+      final TextField textField = tester.widget(find.byType(TextField));
+      expect(textField.controller, controller);
+
+      // Select menuItem1.
+      await tester.tap(find.byType(DropdownMenu<MenuItem>));
+      await tester.pump();
+      await tester.tap(findMenuItem(MenuItem.menuItem1));
+      await tester.pump();
+      expect(fieldKey.currentState!.value, MenuItem.menuItem1);
+      expect(
+        textField.controller?.value,
+        const TextEditingValue(text: 'Item 1', selection: TextSelection.collapsed(offset: 6)),
+      );
+
+      // After reset the text field content is cleared.
+      fieldKey.currentState!.reset();
+      await tester.pump();
+
+      expect(fieldKey.currentState!.value, null);
+      expect(
+        controller.value,
+        const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
+      );
+    },
+  );
+
   testWidgets('isValid and hasError results are correct', (WidgetTester tester) async {
     final GlobalKey<FormFieldState<MenuItem>> fieldKey = GlobalKey<FormFieldState<MenuItem>>();
 
@@ -1175,5 +1292,68 @@ void main() {
     await tester.pump();
 
     expect(formFieldState.currentState!.value, MenuItem.menuItem2);
+  });
+
+  testWidgets('onSelect is called exactly once when a selection is made.', (
+    WidgetTester tester,
+  ) async {
+    int onSelectedCallCount = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(
+            dropdownMenuEntries: menuEntries,
+            initialSelection: MenuItem.menuItem0,
+            onSelected: (MenuItem? value) {
+              onSelectedCallCount++;
+            },
+          ),
+        ),
+      ),
+    );
+    // Select a different item than the initial one.
+    await tester.tap(find.byType(DropdownMenu<MenuItem>));
+    await tester.pump();
+    await tester.tap(findMenuItem(MenuItem.menuItem2));
+    await tester.pump();
+
+    expect(onSelectedCallCount, 1);
+  });
+
+  testWidgets('onSelect is called exactly once when reseted', (WidgetTester tester) async {
+    int onSelectedCallCount = 0;
+    final GlobalKey<FormFieldState<MenuItem>> fieldKey = GlobalKey<FormFieldState<MenuItem>>();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(
+            key: fieldKey,
+            dropdownMenuEntries: menuEntries,
+            onSelected: (MenuItem? value) {
+              onSelectedCallCount++;
+            },
+          ),
+        ),
+      ),
+    );
+
+    fieldKey.currentState!.reset();
+    await tester.pump();
+    expect(onSelectedCallCount, 1);
+  });
+
+  testWidgets('DropdownMenuFormField does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: DropdownMenuFormField<MenuItem>(dropdownMenuEntries: menuEntries),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DropdownMenuFormField<MenuItem>)), Size.zero);
   });
 }

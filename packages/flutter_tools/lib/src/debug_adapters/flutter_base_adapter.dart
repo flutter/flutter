@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart' as vm;
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
+import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
 import 'flutter_adapter_args.dart';
@@ -147,25 +148,26 @@ abstract class FlutterBaseDebugAdapter
     required List<String> processArgs,
     required Map<String, String>? env,
   }) async {
-    final Process process = await (
-      String executable,
-      List<String> processArgs, {
-      required Map<String, String>? env,
-    }) async {
-      logger?.call('Spawning $executable with $processArgs in ${args.cwd}');
-      final Process process = await Process.start(
-        executable,
-        processArgs,
-        workingDirectory: args.cwd,
-        environment: env,
-      );
-      pidsToTerminate.add(process.pid);
-      return process;
-    }(executable, processArgs, env: env);
+    final Process process =
+        await (
+          String executable,
+          List<String> processArgs, {
+          required Map<String, String>? env,
+        }) async {
+          logger?.call('Spawning $executable with $processArgs in ${args.cwd}');
+          final Process process = await Process.start(
+            executable,
+            processArgs,
+            workingDirectory: args.cwd,
+            environment: env,
+          );
+          pidsToTerminate.add(process.pid);
+          return process;
+        }(executable, processArgs, env: env);
     this.process = process;
 
-    process.stdout.transform(ByteToLineTransformer()).listen(handleStdout);
-    process.stderr.transform(utf8.decoder).listen(handleStderr);
+    process.stdout.transformWithCallSite(ByteToLineTransformer()).listen(handleStdout);
+    process.stderr.transformWithCallSite(utf8.decoder).listen(handleStderr);
     unawaited(process.exitCode.then(handleExitCode));
   }
 

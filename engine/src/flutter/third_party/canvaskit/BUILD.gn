@@ -75,13 +75,23 @@ wasm_toolchain("canvaskit_experimental_webparagraph") {
     # ICU data.
     skia_use_icu = false
     skia_use_client_icu = false
+
+    # We still need BiDi information since there's no browser API for it.
     skia_use_bidi = true
+    skia_canvaskit_enable_bidi = true
     skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
 
+    # Remove all other text-related features that we don't need with WebParagraph.
     skia_enable_skparagraph = false
-    # TODO(mdebbar): This can't be set to false now because it causes font registration to fail.
-    # Once we update the font registration logic, we can come back and uncomment the next line.
-    # skia_canvaskit_enable_paragraph = false
+    skia_canvaskit_enable_paragraph = false
+    skia_enable_shaper = false
+    skia_use_harfbuzz = false
+    skia_use_freetype = false
+    flutter_use_freetype_woff2 = false
+    skia_enable_fontmgr_custom_embedded = false
+    skia_enable_fontmgr_custom_empty = false
+    skia_canvaskit_enable_font = false
+    skia_canvaskit_enable_alias_font = false
 
     # TODO(mdebbar): Set these to false once all image decoding can be done
     # using the browser's built-in codecs.
@@ -97,22 +107,26 @@ wasm_toolchain("canvaskit_experimental_webparagraph") {
 
 copy("canvaskit_experimental_webparagraph_group") {
   visibility = [ "//flutter/web_sdk:*" ]
-  public_deps = [ "//flutter/skia/modules/canvaskit(:canvaskit_experimental_webparagraph)" ]
+  public_deps = [
+    "//flutter/skia/modules/canvaskit(:canvaskit_experimental_webparagraph)",
+  ]
 
   sources = [
     "$root_out_dir/canvaskit_experimental_webparagraph/canvaskit.js",
     "$root_out_dir/canvaskit_experimental_webparagraph/canvaskit.js.symbols",
     "$root_out_dir/canvaskit_experimental_webparagraph/canvaskit.wasm",
   ]
-  outputs = [
-    "$root_out_dir/flutter_web_sdk/canvaskit/experimental_webparagraph/{{source_file_part}}",
-  ]
+  outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/experimental_webparagraph/{{source_file_part}}" ]
 }
 
 # This toolchain is only to be used by skwasm_group below.
 template("skwasm_toolchain") {
   assert(defined(invoker.skwasm_is_heavy))
-  forward_variables_from(invoker, ["skwasm_is_mt",  "skwasm_is_heavy"])
+  forward_variables_from(invoker,
+                         [
+                           "skwasm_is_mt",
+                           "skwasm_is_heavy",
+                         ])
   wasm_toolchain(target_name) {
     extra_toolchain_args = {
       # In Chromium browsers, we can use the browser's APIs to get the necessary
@@ -120,7 +134,8 @@ template("skwasm_toolchain") {
       skia_use_icu = skwasm_is_heavy
       skia_use_client_icu = !skwasm_is_heavy
       if (!skwasm_is_heavy) {
-        skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
+        skia_icu_bidi_third_party_dir =
+            "//flutter/third_party/canvaskit/icu_bidi"
       }
 
       skia_use_libjpeg_turbo_decode = skwasm_is_heavy

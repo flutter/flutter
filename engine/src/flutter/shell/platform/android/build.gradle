@@ -8,6 +8,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
+        // Consult the Android team before bumping. This is only used for IDE support, so
+        // it does not need to be bumped as part of most repo-wide upgrades.
         classpath "com.android.tools.build:gradle:8.9.1"
     }
 }
@@ -20,11 +22,11 @@ repositories {
 apply plugin: "com.android.library"
 
 android {
-    namespace "io.flutter.embedding"
-    compileSdk 36
+    namespace = "io.flutter.embedding"
+    compileSdk = 36
 
     defaultConfig {
-        minSdkVersion 21
+        minSdk = 24
     }
 
     sourceSets {
@@ -53,7 +55,7 @@ android {
         implementation "androidx.test:core:1.4.0"
         implementation "com.google.android.play:core:1.8.0"
         implementation "com.ibm.icu:icu4j:69.1"
-        implementation "org.robolectric:robolectric:4.14.1"
+        implementation "org.robolectric:robolectric:4.16"
         implementation "junit:junit:4.13.2"
         implementation "androidx.test.ext:junit:1.1.4-alpha07"
 

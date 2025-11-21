@@ -18,7 +18,7 @@ abstract class ChromiumValidator extends DoctorValidator {
   Future<ValidationResult> validateImpl() async {
     final bool canRunChromium = _chromiumLauncher.canFindExecutable();
     final String chromiumSearchLocation = _chromiumLauncher.findExecutable();
-    final List<ValidationMessage> messages = <ValidationMessage>[
+    final messages = <ValidationMessage>[
       if (_platform.environment.containsKey(kChromeEnvironment))
         if (!canRunChromium)
           ValidationMessage.hint('$chromiumSearchLocation is not executable.')

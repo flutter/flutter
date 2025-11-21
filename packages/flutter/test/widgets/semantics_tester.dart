@@ -9,7 +9,7 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-export 'dart:ui' show SemanticsAction, SemanticsFlag;
+export 'dart:ui' show SemanticsAction, SemanticsFlag, SemanticsFlags;
 export 'package:flutter/rendering.dart' show SemanticsData;
 
 const String _matcherHelp =
@@ -48,8 +48,6 @@ class TestSemantics {
     this.textDirection,
     this.rect,
     this.transform,
-    this.elevation,
-    this.thickness,
     this.textSelection,
     this.children = const <TestSemantics>[],
     this.scrollIndex,
@@ -63,8 +61,10 @@ class TestSemantics {
     this.maxValueLength,
     this.currentValueLength,
     this.identifier = '',
+    this.traversalParentIdentifier,
+    this.traversalChildIdentifier,
     this.hintOverrides,
-  }) : assert(flags is int || flags is List<SemanticsFlag>),
+  }) : assert(flags is int || flags is List<SemanticsFlag> || flags is SemanticsFlags),
        assert(actions is int || actions is List<SemanticsAction>),
        tags = tags?.toSet() ?? <SemanticsTag>{};
 
@@ -95,13 +95,13 @@ class TestSemantics {
     this.maxValueLength,
     this.currentValueLength,
     this.identifier = '',
+    this.traversalParentIdentifier,
+    this.traversalChildIdentifier,
     this.hintOverrides,
   }) : id = 0,
-       assert(flags is int || flags is List<SemanticsFlag>),
+       assert(flags is int || flags is List<SemanticsFlag> || flags is SemanticsFlags),
        assert(actions is int || actions is List<SemanticsAction>),
        rect = TestSemantics.rootRect,
-       elevation = 0.0,
-       thickness = 0.0,
        tags = tags?.toSet() ?? <SemanticsTag>{};
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
@@ -128,8 +128,6 @@ class TestSemantics {
     this.textDirection,
     this.rect,
     Matrix4? transform,
-    this.elevation,
-    this.thickness,
     this.textSelection,
     this.children = const <TestSemantics>[],
     this.scrollIndex,
@@ -143,8 +141,10 @@ class TestSemantics {
     this.maxValueLength,
     this.currentValueLength,
     this.identifier = '',
+    this.traversalParentIdentifier,
+    this.traversalChildIdentifier,
     this.hintOverrides,
-  }) : assert(flags is int || flags is List<SemanticsFlag>),
+  }) : assert(flags is int || flags is List<SemanticsFlag> || flags is SemanticsFlags),
        assert(actions is int || actions is List<SemanticsAction>),
        transform = _applyRootChildScale(transform),
        tags = tags?.toSet() ?? <SemanticsTag>{};
@@ -155,12 +155,15 @@ class TestSemantics {
   /// they are created.
   final int? id;
 
-  /// The [SemanticsFlag]s set on this node.
+  /// The SemanticsFlags on this node.
   ///
-  /// There are two ways to specify this property: as an `int` that encodes the
-  /// flags as a bit field, or as a `List<SemanticsFlag>` that are _on_.
+  /// There are three ways to specify this property: as an `int` that encodes the
+  /// flags as a bit field, or as a `List<SemanticsFlag>` that are _on_, or as a `SemanticsFlags`.
   ///
-  /// Using `List<SemanticsFlag>` is recommended due to better readability.
+  /// Using `SemanticsFlags` is recommended.
+  ///
+  /// The `int` and `List<SemanticsFlag>` types are considered deprecated as they
+  /// have limited bits and only support the first 31 flags.
   final dynamic flags;
 
   /// The [SemanticsAction]s set on this node.
@@ -233,21 +236,6 @@ class TestSemantics {
   /// parent).
   final Matrix4? transform;
 
-  /// The elevation of this node relative to the parent node.
-  ///
-  /// See also:
-  ///
-  ///  * [SemanticsConfiguration.elevation] for a detailed discussion regarding
-  ///    elevation and semantics.
-  final double? elevation;
-
-  /// The extend that this node occupies in z-direction starting at [elevation].
-  ///
-  /// See also:
-  ///
-  ///  * [SemanticsConfiguration.thickness] for a more detailed definition.
-  final double? thickness;
-
   /// The index of the first visible semantic node within a scrollable.
   final int? scrollIndex;
 
@@ -303,6 +291,16 @@ class TestSemantics {
   /// Defaults to an empty string if not set.
   final String identifier;
 
+  /// The expected traversalParentIdentifier for the node.
+  ///
+  /// Defaults to null if not set.
+  final Object? traversalParentIdentifier;
+
+  /// The expected traversalChildIdentifier for the node.
+  ///
+  /// Defaults to null if not set.
+  final Object? traversalChildIdentifier;
+
   /// The expected hint overrides for the node.
   ///
   /// Defaults to null if not set.
@@ -328,6 +326,7 @@ class TestSemantics {
     bool ignoreRect = false,
     bool ignoreTransform = false,
     bool ignoreId = false,
+    bool ignoreTraversalIdentifier = false,
     DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.inverseHitTest,
   }) {
     bool fail(String message) {
@@ -344,24 +343,33 @@ class TestSemantics {
 
     final SemanticsData nodeData = node.getSemanticsData();
 
-    final int flagsBitmask =
-        flags is int
-            ? flags as int
-            : (flags as List<SemanticsFlag>).fold<int>(
+    if (flags is SemanticsFlags) {
+      if (flags != nodeData.flagsCollection) {
+        return fail(
+          'expected node id $id to have flags $flags but found flags ${nodeData.flagsCollection}.',
+        );
+      }
+    }
+    // the bitmask flags only support first 31 flags.
+    else {
+      final int flagsBitmask = flags is int
+          ? flags as int
+          : (flags as List<SemanticsFlag>).fold<int>(
               0,
               (int bitmask, SemanticsFlag flag) => bitmask | flag.index,
             );
-    if (flagsBitmask != nodeData.flags) {
-      return fail('expected node id $id to have flags $flags but found flags ${nodeData.flags}.');
+
+      if (flagsBitmask != nodeData.flags) {
+        return fail('expected node id $id to have flags $flags but found flags ${nodeData.flags}.');
+      }
     }
 
-    final int actionsBitmask =
-        actions is int
-            ? actions as int
-            : (actions as List<SemanticsAction>).fold<int>(
-              0,
-              (int bitmask, SemanticsAction action) => bitmask | action.index,
-            );
+    final int actionsBitmask = actions is int
+        ? actions as int
+        : (actions as List<SemanticsAction>).fold<int>(
+            0,
+            (int bitmask, SemanticsAction action) => bitmask | action.index,
+          );
     if (actionsBitmask != nodeData.actions) {
       return fail(
         'expected node id $id to have actions $actions but found actions ${nodeData.actions}.',
@@ -419,16 +427,6 @@ class TestSemantics {
         'expected node id $id to have transform $transform but found transform:\n${nodeData.transform}.',
       );
     }
-    if (elevation != null && elevation != nodeData.elevation) {
-      return fail(
-        'expected node id $id to have elevation $elevation but found elevation:\n${nodeData.elevation}.',
-      );
-    }
-    if (thickness != null && thickness != nodeData.thickness) {
-      return fail(
-        'expected node id $id to have thickness $thickness but found thickness:\n${nodeData.thickness}.',
-      );
-    }
     if (textSelection?.baseOffset != nodeData.textSelection?.baseOffset ||
         textSelection?.extentOffset != nodeData.textSelection?.extentOffset) {
       return fail(
@@ -445,7 +443,14 @@ class TestSemantics {
         'expected node id $id to have scrollIndex $scrollChildren but found scrollIndex ${nodeData.scrollChildCount}.',
       );
     }
-    final int childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
+
+    final int childrenCount;
+    if (childOrder == DebugSemanticsDumpOrder.traversalOrder) {
+      childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCountInTraversalOrder;
+    } else {
+      childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
+    }
+
     if (children.length != childrenCount) {
       return fail(
         'expected node id $id to have ${children.length} child${children.length == 1 ? "" : "ren"} but found $childrenCount.',
@@ -493,10 +498,17 @@ class TestSemantics {
         'expected node id $id to have current value length $currentValueLength but found current value length ${node.currentValueLength}',
       );
     }
-    if (identifier != node.identifier) {
-      return fail(
-        'expected node id $id to have identifier $identifier but found identifier ${node.identifier}',
-      );
+    if (!ignoreTraversalIdentifier) {
+      if (traversalChildIdentifier != node.traversalChildIdentifier) {
+        return fail(
+          'expected node id $id to have traversalChildIdentifier $traversalChildIdentifier but found identifier ${node.traversalChildIdentifier}',
+        );
+      }
+      if (traversalParentIdentifier != node.traversalParentIdentifier) {
+        return fail(
+          'expected node id $id to have traversalParentIdentifier $traversalParentIdentifier but found identifier ${node.traversalParentIdentifier}',
+        );
+      }
     }
     if (hintOverrides != node.hintOverrides) {
       return fail(
@@ -517,6 +529,7 @@ class TestSemantics {
         ignoreRect: ignoreRect,
         ignoreTransform: ignoreTransform,
         ignoreId: ignoreId,
+        ignoreTraversalIdentifier: ignoreTraversalIdentifier,
         childOrder: childOrder,
       );
       if (!childMatches) {
@@ -538,8 +551,9 @@ class TestSemantics {
     if (id != null) {
       buf.writeln('$indent  id: $id,');
     }
-    if (flags is int && flags != 0 ||
-        flags is List<SemanticsFlag> && (flags as List<SemanticsFlag>).isNotEmpty) {
+    if ((flags is int && flags != 0) ||
+        (flags is List<SemanticsFlag> && (flags as List<SemanticsFlag>).isNotEmpty) ||
+        (flags is SemanticsFlags && (flags as SemanticsFlags) != SemanticsFlags.none)) {
       buf.writeln('$indent  flags: ${SemanticsTester._flagsToSemanticsFlagExpression(flags)},');
     }
     if (actions is int && actions != 0 ||
@@ -582,12 +596,6 @@ class TestSemantics {
       buf.writeln(
         '$indent  transform:\n${transform.toString().trim().split('\n').map<String>((String line) => '$indent    $line').join('\n')},',
       );
-    }
-    if (elevation != null) {
-      buf.writeln('$indent  elevation: $elevation,');
-    }
-    if (thickness != null) {
-      buf.writeln('$indent  thickness: $thickness,');
     }
     if (inputType != SemanticsInputType.none) {
       buf.writeln('$indent  inputType: $inputType,');
@@ -698,6 +706,7 @@ class SemanticsTester {
     TextDirection? textDirection,
     List<SemanticsAction>? actions,
     List<SemanticsFlag>? flags,
+    SemanticsFlags? flagsCollection,
     Set<SemanticsTag>? tags,
     double? scrollPosition,
     double? scrollExtentMax,
@@ -758,7 +767,16 @@ class SemanticsTester {
           return false;
         }
       }
-      if (flags != null) {
+
+      if (flagsCollection != null) {
+        final SemanticsFlags expectedFlags = flagsCollection;
+        final SemanticsFlags actualFlags = node.getSemanticsData().flagsCollection;
+        if (expectedFlags != actualFlags) {
+          return false;
+        }
+      }
+      // `flags` are deprecated and only support the first 31 flags.
+      else if (flags != null) {
         final int expectedFlags = flags.fold<int>(
           0,
           (int value, SemanticsFlag flag) => value | flag.index,
@@ -866,7 +884,9 @@ class SemanticsTester {
 
   static String _flagsToSemanticsFlagExpression(dynamic flags) {
     Iterable<SemanticsFlag> list;
-    if (flags is int) {
+    if (flags is SemanticsFlags) {
+      return '<SemanticsFlag>[${flags.toStrings().join(', ')}]';
+    } else if (flags is int) {
       list = SemanticsFlag.values.where((SemanticsFlag flag) => (flag.index & flags) != 0);
     } else {
       list = flags as List<SemanticsFlag>;
@@ -985,6 +1005,7 @@ class _HasSemantics extends Matcher {
     required this.ignoreRect,
     required this.ignoreTransform,
     required this.ignoreId,
+    required this.ignoreTraversalIdentifier,
     required this.childOrder,
   });
 
@@ -992,6 +1013,7 @@ class _HasSemantics extends Matcher {
   final bool ignoreRect;
   final bool ignoreTransform;
   final bool ignoreId;
+  final bool ignoreTraversalIdentifier;
   final DebugSemanticsDumpOrder childOrder;
 
   @override
@@ -1002,6 +1024,7 @@ class _HasSemantics extends Matcher {
       ignoreTransform: ignoreTransform,
       ignoreRect: ignoreRect,
       ignoreId: ignoreId,
+      ignoreTraversalIdentifier: ignoreTraversalIdentifier,
       childOrder: childOrder,
     );
     if (!doesMatch) {
@@ -1063,6 +1086,7 @@ Matcher hasSemantics(
   bool ignoreRect = false,
   bool ignoreTransform = false,
   bool ignoreId = false,
+  bool ignoreTraversalIdentifier = true,
   DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
 }) {
   return _HasSemantics(
@@ -1070,6 +1094,7 @@ Matcher hasSemantics(
     ignoreRect: ignoreRect,
     ignoreTransform: ignoreTransform,
     ignoreId: ignoreId,
+    ignoreTraversalIdentifier: ignoreTraversalIdentifier,
     childOrder: childOrder,
   );
 }
@@ -1087,6 +1112,7 @@ class _IncludesNodeWith extends Matcher {
     this.textDirection,
     this.actions,
     this.flags,
+    this.flagsCollection,
     this.tags,
     this.scrollPosition,
     this.scrollExtentMax,
@@ -1099,6 +1125,7 @@ class _IncludesNodeWith extends Matcher {
              value != null ||
              actions != null ||
              flags != null ||
+             flagsCollection != null ||
              tags != null ||
              increasedValue != null ||
              decreasedValue != null ||
@@ -1120,6 +1147,7 @@ class _IncludesNodeWith extends Matcher {
   final TextDirection? textDirection;
   final List<SemanticsAction>? actions;
   final List<SemanticsFlag>? flags;
+  final SemanticsFlags? flagsCollection;
   final Set<SemanticsTag>? tags;
   final double? scrollPosition;
   final double? scrollExtentMax;
@@ -1143,6 +1171,7 @@ class _IncludesNodeWith extends Matcher {
           textDirection: textDirection,
           actions: actions,
           flags: flags,
+          flagsCollection: flagsCollection,
           tags: tags,
           scrollPosition: scrollPosition,
           scrollExtentMax: scrollExtentMax,
@@ -1207,6 +1236,7 @@ Matcher includesNodeWith({
   TextDirection? textDirection,
   List<SemanticsAction>? actions,
   List<SemanticsFlag>? flags,
+  SemanticsFlags? flagsCollection,
   Set<SemanticsTag>? tags,
   double? scrollPosition,
   double? scrollExtentMax,
@@ -1227,6 +1257,7 @@ Matcher includesNodeWith({
     decreasedValue: decreasedValue,
     actions: actions,
     flags: flags,
+    flagsCollection: flagsCollection,
     tags: tags,
     scrollPosition: scrollPosition,
     scrollExtentMax: scrollExtentMax,

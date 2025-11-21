@@ -36,9 +36,9 @@ application (which is necessary to use `flutter run` with a test).
 
 Unit tests run with `flutter test` run inside a headless flutter shell on your workstation,
 you won't see any UI. You can use `print` to generate console output or you can interact
-with the Dart VM via the Dart Observatory at [http://localhost:8181/](http://localhost:8181/).
+with the Dart VM via Flutter DevTools at [http://localhost:8181/](http://localhost:8181/).
 
-To debug tests in Observatory, use the `--start-paused` option to start the test in a
+To debug tests in Flutter DevTools, use the `--start-paused` option to start the test in a
 paused state and wait for connection from a debugger. This option lets you set breakpoints
 before the test runs.
 
@@ -47,7 +47,7 @@ runs them, run `dart dev/bots/test.dart` and `dart --enable-asserts dev/bots/ana
 
 ### Locally built engines
 
-If you've built your own flutter engine (see [Setting up the Engine development environment](../../../engine/src/flutter/docs/contributing/Setting-up-the-Engine-development-environment.md)), you
+If you've built your own flutter engine (see [Setting up the Engine development environment](../../../docs/engine/contributing/Setting-up-the-Engine-development-environment.md)), you
 can pass `--local-engine` to change what flutter shell `flutter test` uses. For example,
 if you built an engine in the `out/host_debug_unopt` directory, you can use:
 
@@ -120,8 +120,8 @@ The following is an example of what running the local engine command might look 
 
 The above command would use the local Flutter engine located at `/Users/myname/flutter/engine` to execute the `external_ui_integration_test` test on an Android emulator, which is why the `android_debug_unopt_x86` version of the engine is used.
 
-Note that some tests may require `profile` mode instead of `debug` mode when running with local engine. Make sure to pass in the correct local engine. See [Compiling the engine](../../../engine/src/flutter/docs/contributing/Compiling-the-engine.md) for more details.
+Note that some tests may require `profile` mode instead of `debug` mode when running with local engine. Make sure to pass in the correct local engine. See [Compiling the engine](../../../docs/engine/contributing/Compiling-the-engine.md) for more details.
 
 ## For the engine
 
-See the [Testing the engine](../../../engine/src/flutter/docs/testing/Testing-the-engine.md) wiki.
+See the [Testing the engine](../../../docs/engine/testing/Testing-the-engine.md) wiki.

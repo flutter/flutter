@@ -61,14 +61,13 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return CupertinoSwitch(
                   value: value,
-                  onChanged:
-                      enabled
-                          ? (bool newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (bool newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                 );
               },
             ),
@@ -260,7 +259,7 @@ void main() {
       ),
     );
 
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(56.0, 0.0));
     expect(value, isTrue);
     await tester.pump();
 
@@ -354,21 +353,21 @@ void main() {
 
     expect(value, isFalse);
 
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-48.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-56.0, 0.0));
 
     expect(value, isFalse);
 
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(48.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(56.0, 0.0));
 
     expect(value, isTrue);
 
     await tester.pump();
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(48.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(56.0, 0.0));
 
     expect(value, isTrue);
 
     await tester.pump();
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-48.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-56.0, 0.0));
 
     expect(value, isFalse);
   });
@@ -398,16 +397,16 @@ void main() {
     );
 
     expect(value, isFalse);
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-56.0, 0.0));
     expect(value, isFalse);
 
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(56.0, 0.0));
     expect(value, isTrue);
     await tester.pump();
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(56.0, 0.0));
     expect(value, isTrue);
     await tester.pump();
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-56.0, 0.0));
     expect(value, isFalse);
 
     await tester.pumpWidget(
@@ -437,7 +436,7 @@ void main() {
     // We have to execute the drag in two frames because the first update will
     // just set the start position.
     await gesture.moveBy(const Offset(20.0, 0.0));
-    await gesture.moveBy(const Offset(20.0, 0.0));
+    await gesture.moveBy(const Offset(36.0, 0.0));
     expect(value, isFalse);
     await gesture.up();
     expect(value, isTrue);
@@ -445,14 +444,14 @@ void main() {
 
     gesture = await tester.startGesture(switchRect.center);
     await gesture.moveBy(const Offset(20.0, 0.0));
-    await gesture.moveBy(const Offset(20.0, 0.0));
+    await gesture.moveBy(const Offset(36.0, 0.0));
     expect(value, isTrue);
     await gesture.up();
     await tester.pump();
 
     gesture = await tester.startGesture(switchRect.center);
     await gesture.moveBy(const Offset(-20.0, 0.0));
-    await gesture.moveBy(const Offset(-20.0, 0.0));
+    await gesture.moveBy(const Offset(-36.0, 0.0));
     expect(value, isTrue);
     await gesture.up();
     expect(value, isFalse);
@@ -485,21 +484,21 @@ void main() {
 
     expect(value, isFalse);
 
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(56.0, 0.0));
 
     expect(value, isFalse);
 
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-56.0, 0.0));
 
     expect(value, isTrue);
 
     await tester.pump();
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-56.0, 0.0));
 
     expect(value, isTrue);
 
     await tester.pump();
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(56.0, 0.0));
 
     expect(value, isFalse);
   });
@@ -519,6 +518,8 @@ void main() {
                   value: value,
                   onChanged: (bool newValue) {
                     setState(() {
+                      // Once the value is true, it remains true, meaning the
+                      // switch cannot be toggled off.
                       value = value || newValue;
                     });
                   },
@@ -534,48 +535,134 @@ void main() {
     TestGesture gesture = await tester.startGesture(
       tester.getRect(find.byType(CupertinoSwitch)).center,
     );
-    await gesture.moveBy(const Offset(kTouchSlop + 0.1, 0.0));
-    await tester.pump();
-    await gesture.moveBy(const Offset(-kTouchSlop + 5.1, 0.0));
+    await gesture.moveBy(const Offset(21.0, 0.0));
     await tester.pump();
     await gesture.up();
     await tester.pump();
     expect(value, isFalse);
     final CurvedAnimation position =
         (tester.state(find.byType(CupertinoSwitch)) as dynamic).position as CurvedAnimation;
-    expect(position.value, lessThan(0.5));
-    await tester.pump();
+    expect(position.value, 0.0);
     await tester.pumpAndSettle();
     expect(value, isFalse);
-    expect(position.value, 0);
+    expect(position.value, 0.0);
 
     // Move past the middle.
     gesture = await tester.startGesture(tester.getRect(find.byType(CupertinoSwitch)).center);
-    await gesture.moveBy(const Offset(kTouchSlop + 0.1, 0.0));
+    await gesture.moveBy(const Offset(36.0, 0.0));
     await tester.pump();
     await gesture.up();
     await tester.pump();
     expect(value, isTrue);
-    expect(position.value, greaterThan(0.5));
+    expect(position.value, 0.0);
 
-    await tester.pump();
+    // Wait for the toggle animation to finish.
     await tester.pumpAndSettle();
     expect(value, isTrue);
     expect(position.value, 1.0);
 
     // Now move back to the left, the revert animation should play.
     gesture = await tester.startGesture(tester.getRect(find.byType(CupertinoSwitch)).center);
-    await gesture.moveBy(const Offset(-kTouchSlop - 0.1, 0.0));
+    await gesture.moveBy(const Offset(-36.0, 0.0));
     await tester.pump();
     await gesture.up();
     await tester.pump();
     expect(value, isTrue);
-    expect(position.value, lessThan(0.5));
+    expect(position.value, 1.0);
 
-    await tester.pump();
+    // Wait for the revert animation to finish.
     await tester.pumpAndSettle();
     expect(value, isTrue);
     expect(position.value, 1.0);
+  });
+
+  testWidgets('Switch thumb snaps to the side on drag', (WidgetTester tester) async {
+    bool value = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: Center(
+                child: CupertinoSwitch(
+                  dragStartBehavior: DragStartBehavior.down,
+                  value: value,
+                  onChanged: (bool newValue) {
+                    setState(() => value = newValue);
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    Future<void> dragBy(TestGesture gesture, Offset offset) async {
+      // The distance required for a gesture to be considered a drag.
+      const double dragActivationDistance = kTouchSlop + 0.1;
+      await gesture.moveBy(const Offset(dragActivationDistance, 0));
+      await gesture.moveBy(const Offset(-dragActivationDistance, 0));
+      await gesture.moveBy(offset);
+    }
+
+    final Rect switchRect = tester.getRect(find.byType(CupertinoSwitch));
+    final CurvedAnimation position =
+        (tester.state(find.byType(CupertinoSwitch)) as dynamic).position as CurvedAnimation;
+
+    // Move to the right, not past the middle.
+    TestGesture gesture = await tester.startGesture(switchRect.center);
+    await dragBy(gesture, const Offset(35, 0));
+    expect(position.value, 0);
+    expect(value, false);
+    await tester.pumpAndSettle();
+    expect(position.value, 0);
+    expect(value, false);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(position.value, 0);
+    expect(value, false);
+
+    // Move to the right, past the middle.
+    gesture = await tester.startGesture(switchRect.center);
+    await dragBy(gesture, const Offset(36, 0));
+    expect(position.value, 0);
+    expect(value, false);
+    await tester.pumpAndSettle();
+    expect(position.value, 1);
+    expect(value, false);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(position.value, 1);
+    expect(value, true);
+
+    // Move to the left, not past the middle.
+    gesture = await tester.startGesture(switchRect.center);
+    await dragBy(gesture, const Offset(-35, 0));
+    expect(position.value, 1);
+    expect(value, true);
+    await tester.pumpAndSettle();
+    expect(position.value, 1);
+    expect(value, true);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(position.value, 1);
+    expect(value, true);
+
+    // Move to the left, past the middle.
+    gesture = await tester.startGesture(switchRect.center);
+    await dragBy(gesture, const Offset(-36, 0));
+    expect(position.value, 1);
+    expect(value, true);
+    await tester.pumpAndSettle();
+    expect(position.value, 0);
+    expect(value, true);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(position.value, 0);
+    expect(value, false);
   });
 
   testWidgets('Switch is translucent when disabled', (WidgetTester tester) async {
@@ -703,7 +790,7 @@ void main() {
         ..rrect()
         ..rrect(color: inactiveThumbColor),
     );
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-56.0, 0.0));
     await tester.pump();
     expect(
       find.byType(CupertinoSwitch),
@@ -839,26 +926,26 @@ void main() {
     await expectLater(find.byKey(switchKey), matchesGoldenFile('switch.tap.on.png'));
   });
 
-  PaintPattern onLabelPaintPattern({required int alpha, bool isRtl = false}) =>
-      paints..rect(
-        rect: Rect.fromLTWH(isRtl ? 43.5 : 14.5, 14.5, 1.0, 10.0),
-        color: const Color(0xffffffff).withAlpha(alpha),
-        style: PaintingStyle.fill,
-      );
+  PaintPattern onLabelPaintPattern({required int alpha, bool isRtl = false}) => paints
+    ..rect(
+      rect: Rect.fromLTWH(isRtl ? 43.5 : 14.5, 14.5, 1.0, 10.0),
+      color: const Color(0xffffffff).withAlpha(alpha),
+      style: PaintingStyle.fill,
+    );
 
   PaintPattern offLabelPaintPattern({
     required int alpha,
     bool highContrast = false,
     bool isRtl = false,
-  }) =>
-      paints..circle(
-        x: isRtl ? 16.0 : 43.0,
-        y: 19.5,
-        radius: 5.0,
-        color: (highContrast ? const Color(0xffffffff) : const Color(0xffb3b3b3)).withAlpha(alpha),
-        strokeWidth: 1.0,
-        style: PaintingStyle.stroke,
-      );
+  }) => paints
+    ..circle(
+      x: isRtl ? 16.0 : 43.0,
+      y: 19.5,
+      radius: 5.0,
+      color: (highContrast ? const Color(0xffffffff) : const Color(0xffb3b3b3)).withAlpha(alpha),
+      strokeWidth: 1.0,
+      style: PaintingStyle.stroke,
+    );
 
   testWidgets('Switch renders switch labels correctly before, during, and after being tapped', (
     WidgetTester tester,
@@ -892,8 +979,9 @@ void main() {
       ),
     );
 
-    final RenderObject switchRenderObject =
-        tester.element(find.byType(CupertinoSwitch)).renderObject!;
+    final RenderObject switchRenderObject = tester
+        .element(find.byType(CupertinoSwitch))
+        .renderObject!;
 
     expect(switchRenderObject, offLabelPaintPattern(alpha: 255));
     expect(switchRenderObject, onLabelPaintPattern(alpha: 0));
@@ -944,8 +1032,9 @@ void main() {
         ),
       );
 
-      final RenderObject switchRenderObject =
-          tester.element(find.byType(CupertinoSwitch)).renderObject!;
+      final RenderObject switchRenderObject = tester
+          .element(find.byType(CupertinoSwitch))
+          .renderObject!;
 
       expect(switchRenderObject, offLabelPaintPattern(highContrast: true, alpha: 255));
       expect(switchRenderObject, onLabelPaintPattern(alpha: 0));
@@ -997,8 +1086,9 @@ void main() {
         ),
       );
 
-      final RenderObject switchRenderObject =
-          tester.element(find.byType(CupertinoSwitch)).renderObject!;
+      final RenderObject switchRenderObject = tester
+          .element(find.byType(CupertinoSwitch))
+          .renderObject!;
 
       expect(switchRenderObject, offLabelPaintPattern(isRtl: true, alpha: 255));
       expect(switchRenderObject, onLabelPaintPattern(isRtl: true, alpha: 0));
@@ -1235,14 +1325,13 @@ void main() {
             return Center(
               child: CupertinoSwitch(
                 value: value,
-                onChanged:
-                    enabled
-                        ? (bool newValue) {
-                          setState(() {
-                            value = newValue;
-                          });
-                        }
-                        : null,
+                onChanged: enabled
+                    ? (bool newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      }
+                    : null,
                 focusColor: focusColor,
                 focusNode: focusNode,
                 autofocus: true,

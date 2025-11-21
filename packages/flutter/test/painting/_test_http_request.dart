@@ -39,7 +39,7 @@ class TestHttpRequest {
       setRequestHeader: setRequestHeader.toJS,
       addEventListener: addEventListener.toJS,
     );
-    final JSAny mock = _mock as JSAny;
+    final JSAny mock = _mock.jsify()!;
     createGetter(mock, 'headers', () => headers.jsify());
     createGetter(mock, 'responseHeaders', () => responseHeaders.jsify());
     createGetter(mock, 'status', () => status.toJS);
@@ -67,7 +67,7 @@ class TestHttpRequest {
     }
   }
 
-  web.XMLHttpRequest getMock() => _mock as web.XMLHttpRequest;
+  web.XMLHttpRequest getMock() => _mock.jsify()! as web.XMLHttpRequest;
 }
 
 class MockEvent {
@@ -87,16 +87,15 @@ class ImgElementMock {
 class TestImgElement {
   TestImgElement() {
     _mock = ImgElementMock(decode: decode.toJS);
-    final JSAny mock = _mock as JSAny;
+    final JSAny mock = _mock.jsify()!;
     objectDefineProperty(
       mock,
       'src',
       <String, JSFunction>{
         'get': (() => src).toJS,
-        'set':
-            ((JSString newValue) {
-              src = newValue.toDart;
-            }).toJS,
+        'set': ((JSString newValue) {
+          src = newValue.toDart;
+        }).toJS,
       }.jsify()!,
     );
     objectDefineProperty(
@@ -104,10 +103,9 @@ class TestImgElement {
       'naturalWidth',
       <String, JSFunction>{
         'get': (() => naturalWidth).toJS,
-        'set':
-            ((JSNumber newValue) {
-              naturalWidth = newValue.toDartInt;
-            }).toJS,
+        'set': ((JSNumber newValue) {
+          naturalWidth = newValue.toDartInt;
+        }).toJS,
       }.jsify()!,
     );
     objectDefineProperty(
@@ -115,10 +113,9 @@ class TestImgElement {
       'naturalHeight',
       <String, JSFunction>{
         'get': (() => naturalHeight).toJS,
-        'set':
-            ((JSNumber newValue) {
-              naturalHeight = newValue.toDartInt;
-            }).toJS,
+        'set': ((JSNumber newValue) {
+          naturalHeight = newValue.toDartInt;
+        }).toJS,
       }.jsify()!,
     );
   }
@@ -126,8 +123,8 @@ class TestImgElement {
   late ImgElementMock _mock;
 
   String src = '';
-  int naturalWidth = -1;
-  int naturalHeight = -1;
+  int naturalWidth = 1;
+  int naturalHeight = 1;
 
   // Either `decode` or `decodeSuccess/Failure` may be called first.
   // The following fields allow properly handling either case.
@@ -172,5 +169,5 @@ class TestImgElement {
     }
   }
 
-  web.HTMLImageElement getMock() => _mock as web.HTMLImageElement;
+  web.HTMLImageElement getMock() => _mock.jsify()! as web.HTMLImageElement;
 }

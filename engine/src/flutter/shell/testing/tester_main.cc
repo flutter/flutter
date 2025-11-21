@@ -24,8 +24,8 @@
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/gpu/gpu_surface_software.h"
-#include "flutter/third_party/abseil-cpp/absl/base/no_destructor.h"
 
+#include "third_party/abseil-cpp/absl/base/no_destructor.h"
 #include "third_party/dart/runtime/include/bin/dart_io_api.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -140,6 +140,10 @@ static void ConfigureShell(Shell* shell) {
   metrics.physical_width = physical_width;
   metrics.physical_height = physical_height;
   metrics.display_id = 0;
+  metrics.physical_min_width_constraint = physical_width;
+  metrics.physical_max_width_constraint = physical_width;
+  metrics.physical_min_height_constraint = physical_height;
+  metrics.physical_max_height_constraint = physical_height;
   shell->GetPlatformView()->SetViewportMetrics(kImplicitViewId, metrics);
 }
 
@@ -156,7 +160,7 @@ class TesterExternalViewEmbedder : public ExternalViewEmbedder {
                       raster_thread_merger) override {}
 
   // |ExternalViewEmbedder|
-  void PrepareFlutterView(SkISize frame_size,
+  void PrepareFlutterView(DlISize frame_size,
                           double device_pixel_ratio) override {}
 
   // |ExternalViewEmbedder|
@@ -227,16 +231,16 @@ class TesterPlatformView : public PlatformView,
   }
 
   // |GPUSurfaceSoftwareDelegate|
-  sk_sp<SkSurface> AcquireBackingStore(const SkISize& size) override {
-    if (sk_surface_ != nullptr &&
-        SkISize::Make(sk_surface_->width(), sk_surface_->height()) == size) {
+  sk_sp<SkSurface> AcquireBackingStore(const DlISize& size) override {
+    if (sk_surface_ != nullptr &&  //
+        sk_surface_->width() == size.width &&
+        sk_surface_->height() == size.height) {
       // The old and new surface sizes are the same. Nothing to do here.
       return sk_surface_;
     }
 
-    SkImageInfo info =
-        SkImageInfo::MakeN32(size.fWidth, size.fHeight, kPremul_SkAlphaType,
-                             SkColorSpace::MakeSRGB());
+    SkImageInfo info = SkImageInfo::MakeN32(
+        size.width, size.height, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
     sk_surface_ = SkSurfaces::Raster(info, nullptr);
 
     if (sk_surface_ == nullptr) {

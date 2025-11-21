@@ -49,12 +49,11 @@ class NestedScrollViewExample extends StatelessWidget {
                 SliverOverlapInjector(
                   handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                 ),
-                SliverFixedExtentList(
+                SliverFixedExtentList.builder(
                   itemExtent: 48.0,
-                  delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) => ListTile(title: Text('Item $index')),
-                    childCount: 30,
-                  ),
+                  itemCount: 30,
+                  itemBuilder: (BuildContext context, int index) =>
+                      ListTile(title: Text('Item $index')),
                 ),
               ],
             );

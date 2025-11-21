@@ -307,11 +307,11 @@ class _DemoButtonState extends State<DemoButton> {
       focusNode: _focusNode,
       style: ButtonStyle(
         foregroundColor: const MaterialStatePropertyAll<Color>(Colors.black),
-        overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-          if (states.contains(MaterialState.focused)) {
+        overlayColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+          if (states.contains(WidgetState.focused)) {
             return Colors.red;
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return Colors.blue;
           }
           return Colors.transparent;
@@ -384,18 +384,16 @@ class _FocusDemoState extends State<FocusDemo> {
         child: Shortcuts(
           shortcuts: <ShortcutActivator, Intent>{
             SingleActivator(
-                  LogicalKeyboardKey.keyZ,
-                  meta: Platform.isMacOS,
-                  control: !Platform.isMacOS,
-                  shift: true,
-                ):
-                const RedoIntent(),
+              LogicalKeyboardKey.keyZ,
+              meta: Platform.isMacOS,
+              control: !Platform.isMacOS,
+              shift: true,
+            ): const RedoIntent(),
             SingleActivator(
-                  LogicalKeyboardKey.keyZ,
-                  meta: Platform.isMacOS,
-                  control: !Platform.isMacOS,
-                ):
-                const UndoIntent(),
+              LogicalKeyboardKey.keyZ,
+              meta: Platform.isMacOS,
+              control: !Platform.isMacOS,
+            ): const UndoIntent(),
           },
           child: FocusScope(
             key: FocusDemo.appKey,
@@ -441,24 +439,22 @@ class _FocusDemoState extends State<FocusDemo> {
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: ElevatedButton(
-                                  onPressed:
-                                      canUndo
-                                          ? () {
-                                            Actions.invoke(context, const UndoIntent());
-                                          }
-                                          : null,
+                                  onPressed: canUndo
+                                      ? () {
+                                          Actions.invoke(context, const UndoIntent());
+                                        }
+                                      : null,
                                   child: const Text('UNDO'),
                                 ),
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: ElevatedButton(
-                                  onPressed:
-                                      canRedo
-                                          ? () {
-                                            Actions.invoke(context, const RedoIntent());
-                                          }
-                                          : null,
+                                  onPressed: canRedo
+                                      ? () {
+                                          Actions.invoke(context, const RedoIntent());
+                                        }
+                                      : null,
                                   child: const Text('REDO'),
                                 ),
                               ),

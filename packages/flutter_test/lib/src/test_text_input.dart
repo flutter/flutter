@@ -126,6 +126,7 @@ class TestTextInput {
     setClientArgs = null;
     editingState = null;
     _isVisible = false;
+    _keyHandler = null;
   }
 
   Future<dynamic> _handleTextInputCall(MethodCall methodCall) async {
@@ -184,7 +185,10 @@ class TestTextInput {
   ///    also change the selection.
   void enterText(String text) {
     updateEditingValue(
-      TextEditingValue(text: text, selection: TextSelection.collapsed(offset: text.length)),
+      TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(offset: text.length),
+      ),
     );
   }
 
@@ -336,10 +340,9 @@ class TestTextInput {
         ]),
       ),
       (ByteData? data) {
-        response =
-            (SystemChannels.textInput.codec.decodeEnvelope(data!) as List<dynamic>)
-                .map((dynamic element) => element as List<dynamic>)
-                .toList();
+        response = (SystemChannels.textInput.codec.decodeEnvelope(data!) as List<dynamic>)
+            .map((dynamic element) => element as List<dynamic>)
+            .toList();
       },
     );
 

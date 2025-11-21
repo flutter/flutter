@@ -565,7 +565,9 @@ class _HeroFlight {
           right: offsets.right,
           bottom: offsets.bottom,
           left: offsets.left,
-          child: IgnorePointer(child: FadeTransition(opacity: _heroOpacity, child: child)),
+          child: IgnorePointer(
+            child: FadeTransition(opacity: _heroOpacity, child: child),
+          ),
         );
       },
     );
@@ -638,18 +640,16 @@ class _HeroFlight {
   }
 
   void onTick() {
-    final RenderBox? toHeroBox =
-        (!_aborted && manifest.toHero.mounted)
-            ? manifest.toHero.context.findRenderObject() as RenderBox?
-            : null;
+    final RenderBox? toHeroBox = (!_aborted && manifest.toHero.mounted)
+        ? manifest.toHero.context.findRenderObject() as RenderBox?
+        : null;
     // Try to find the new origin of the toHero, if the flight isn't aborted.
-    final Offset? toHeroOrigin =
-        toHeroBox != null && toHeroBox.attached && toHeroBox.hasSize
-            ? toHeroBox.localToGlobal(
-              Offset.zero,
-              ancestor: manifest.toRoute.subtreeContext?.findRenderObject() as RenderBox?,
-            )
-            : null;
+    final Offset? toHeroOrigin = toHeroBox != null && toHeroBox.attached && toHeroBox.hasSize
+        ? toHeroBox.localToGlobal(
+            Offset.zero,
+            ancestor: manifest.toRoute.subtreeContext?.findRenderObject() as RenderBox?,
+          )
+        : null;
 
     if (toHeroOrigin != null && toHeroOrigin.isFinite) {
       // If the new origin of toHero is available and also paintable, try to
@@ -677,12 +677,11 @@ class _HeroFlight {
       final HeroFlightDirection type = initialManifest.type;
       switch (type) {
         case HeroFlightDirection.pop:
-          return initial.value == 1.0 && initialManifest.isUserGestureTransition
+          return initialManifest.isUserGestureTransition
               // During user gesture transitions, the animation controller isn't
-              // driving the reverse transition, but should still be in a previously
-              // completed stage with the initial value at 1.0.
-              ? initial.status == AnimationStatus.completed
-              : initial.status == AnimationStatus.reverse;
+              // driving the reverse transition, so the status is not important.
+              ||
+              initial.status == AnimationStatus.reverse;
         case HeroFlightDirection.push:
           return initial.value == 0.0 && initial.status == AnimationStatus.forward;
       }
@@ -923,8 +922,15 @@ class HeroController extends NavigatorObserver {
 
     // For pop transitions driven by a user gesture: if the "to" page has
     // maintainState = true, then the hero's final dimensions can be measured
-    // immediately because their page's layout is still valid.
-    if (isUserGestureTransition && flightType == HeroFlightDirection.pop && toRoute.maintainState) {
+    // immediately because their page's layout is still valid. Unless due to directly
+    // adding routes to the pages stack causing the route to never get laid out.
+    final RenderBox? fromRouteRenderBox = toRoute.subtreeContext?.findRenderObject() as RenderBox?;
+    final bool hasValidSize =
+        (fromRouteRenderBox?.hasSize ?? false) && fromRouteRenderBox!.size.isFinite;
+    if (isUserGestureTransition &&
+        flightType == HeroFlightDirection.pop &&
+        toRoute.maintainState &&
+        hasValidSize) {
       _startHeroTransition(fromRoute, toRoute, flightType, isUserGestureTransition);
     } else {
       // Otherwise, delay measuring until the end of the next frame to allow
@@ -934,7 +940,6 @@ class HeroController extends NavigatorObserver {
       // frame completes, we'll know where the heroes in the `to` route are
       // going to end up, and the `to` route will go back onstage.
       toRoute.offstage = toRoute.animation!.value == 0.0;
-
       WidgetsBinding.instance.addPostFrameCallback((Duration value) {
         if (fromRoute.navigator == null || toRoute.navigator == null) {
           return;
@@ -982,40 +987,37 @@ class HeroController extends NavigatorObserver {
     // If `fromSubtreeContext` is null, call endFlight on all toHeroes, for good measure.
     // If `toSubtreeContext` is null abort existingFlights.
     final BuildContext? fromSubtreeContext = from.subtreeContext;
-    final Map<Object, _HeroState> fromHeroes =
-        fromSubtreeContext != null
-            ? Hero._allHeroesFor(fromSubtreeContext, isUserGestureTransition, navigator)
-            : const <Object, _HeroState>{};
+    final Map<Object, _HeroState> fromHeroes = fromSubtreeContext != null
+        ? Hero._allHeroesFor(fromSubtreeContext, isUserGestureTransition, navigator)
+        : const <Object, _HeroState>{};
     final BuildContext? toSubtreeContext = to.subtreeContext;
-    final Map<Object, _HeroState> toHeroes =
-        toSubtreeContext != null
-            ? Hero._allHeroesFor(toSubtreeContext, isUserGestureTransition, navigator)
-            : const <Object, _HeroState>{};
+    final Map<Object, _HeroState> toHeroes = toSubtreeContext != null
+        ? Hero._allHeroesFor(toSubtreeContext, isUserGestureTransition, navigator)
+        : const <Object, _HeroState>{};
 
     for (final MapEntry<Object, _HeroState> fromHeroEntry in fromHeroes.entries) {
       final Object tag = fromHeroEntry.key;
       final _HeroState fromHero = fromHeroEntry.value;
       final _HeroState? toHero = toHeroes[tag];
       final _HeroFlight? existingFlight = _flights[tag];
-      final _HeroFlightManifest? manifest =
-          toHero == null || flightType == null
-              ? null
-              : _HeroFlightManifest(
-                type: flightType,
-                overlay: overlay,
-                navigatorSize: navigatorRenderObject.size,
-                fromRoute: from,
-                toRoute: to,
-                fromHero: fromHero,
-                toHero: toHero,
-                createRectTween: createRectTween,
-                shuttleBuilder:
-                    toHero.widget.flightShuttleBuilder ??
-                    fromHero.widget.flightShuttleBuilder ??
-                    _defaultHeroFlightShuttleBuilder,
-                isUserGestureTransition: isUserGestureTransition,
-                isDiverted: existingFlight != null,
-              );
+      final _HeroFlightManifest? manifest = toHero == null || flightType == null
+          ? null
+          : _HeroFlightManifest(
+              type: flightType,
+              overlay: overlay,
+              navigatorSize: navigatorRenderObject.size,
+              fromRoute: from,
+              toRoute: to,
+              fromHero: fromHero,
+              toHero: toHero,
+              createRectTween: createRectTween,
+              shuttleBuilder:
+                  toHero.widget.flightShuttleBuilder ??
+                  fromHero.widget.flightShuttleBuilder ??
+                  _defaultHeroFlightShuttleBuilder,
+              isUserGestureTransition: isUserGestureTransition,
+              isDiverted: existingFlight != null,
+            );
 
       // Only proceed with a valid manifest. Otherwise abort the existing
       // flight, and call endFlight when this for loop finishes.
@@ -1070,16 +1072,9 @@ class HeroController extends NavigatorObserver {
       builder: (BuildContext context, Widget? child) {
         return MediaQuery(
           data: toMediaQueryData.copyWith(
-            padding:
-                (flightDirection == HeroFlightDirection.push)
-                    ? EdgeInsetsTween(
-                      begin: fromHeroPadding,
-                      end: toHeroPadding,
-                    ).evaluate(animation)
-                    : EdgeInsetsTween(
-                      begin: toHeroPadding,
-                      end: fromHeroPadding,
-                    ).evaluate(animation),
+            padding: (flightDirection == HeroFlightDirection.push)
+                ? EdgeInsetsTween(begin: fromHeroPadding, end: toHeroPadding).evaluate(animation)
+                : EdgeInsetsTween(begin: toHeroPadding, end: fromHeroPadding).evaluate(animation),
           ),
           child: toHero.child,
         );

@@ -7,6 +7,7 @@
 
 #include "gmock/gmock.h"
 
+#include <atk/atk.h>
 #include <gtk/gtk.h>
 
 namespace flutter {
@@ -74,6 +75,11 @@ class MockGtk {
       void,
       gtk_im_context_set_surrounding,
       (GtkIMContext * context, const gchar* text, gint len, gint cursor_index));
+  MOCK_METHOD(void,
+              atk_object_notify_state_change,
+              (AtkObject * accessible, AtkState state, gboolean value));
+
+  GThread* thread;
 };
 
 }  // namespace testing

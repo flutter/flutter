@@ -12,10 +12,10 @@ import 'test_utils.dart';
 // This test file does not use [getLocalEngineArguments] because it requires
 // multiple specific artifact output types.
 
-const String apkDebugMessage = 'A summary of your APK analysis can be found at: ';
-const String iosDebugMessage = 'A summary of your iOS bundle analysis can be found at: ';
-const String macOSDebugMessage = 'A summary of your macOS bundle analysis can be found at: ';
-const String runDevToolsMessage = 'dart devtools ';
+const apkDebugMessage = 'A summary of your APK analysis can be found at: ';
+const iosDebugMessage = 'A summary of your iOS bundle analysis can be found at: ';
+const macOSDebugMessage = 'A summary of your macOS bundle analysis can be found at: ';
+const runDevToolsMessage = 'dart devtools ';
 
 void main() {
   testWithoutContext(
@@ -184,7 +184,7 @@ void main() {
   testWithoutContext(
     '--analyze-size is not supported in combination with --split-debug-info',
     () async {
-      final List<String> command = <String>[
+      final command = <String>[
         flutterBin,
         'build',
         'apk',
@@ -218,7 +218,7 @@ void main() {
     () async {
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_size_test.');
 
-      final List<String> command = <String>[
+      final command = <String>[
         flutterBin,
         'build',
         'apk',

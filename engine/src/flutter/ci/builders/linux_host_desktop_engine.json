@@ -7,6 +7,9 @@
         "Tests to run on linux hosts should go in one of the other linux_ build ",
         "definition files."
     ],
+    "luci_flags": {
+      "upload_content_hash": true
+    },
     "builds": [
         {
             "archives": [
@@ -34,6 +37,7 @@
                 "debug",
                 "--enable-fontconfig",
                 "--prebuilt-dart-sdk",
+                "--no-lto",
                 "--rbe",
                 "--no-goma",
                 "--target-dir",
@@ -72,9 +76,9 @@
             "gn": [
                 "--runtime-mode",
                 "profile",
-                "--no-lto",
                 "--enable-fontconfig",
                 "--prebuilt-dart-sdk",
+                "--no-lto",
                 "--rbe",
                 "--no-goma",
                 "--target-dir",
@@ -115,6 +119,7 @@
                 "release",
                 "--enable-fontconfig",
                 "--prebuilt-dart-sdk",
+                "--no-lto",
                 "--rbe",
                 "--no-goma",
                 "--target-dir",

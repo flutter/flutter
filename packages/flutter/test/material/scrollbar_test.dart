@@ -884,7 +884,7 @@ void main() {
         MaterialApp(
           theme: ThemeData(
             useMaterial3: false,
-            scrollbarTheme: ScrollbarThemeData(thumbVisibility: MaterialStateProperty.all(true)),
+            scrollbarTheme: ScrollbarThemeData(thumbVisibility: WidgetStateProperty.all(true)),
           ),
           home: const SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
         ),
@@ -933,13 +933,10 @@ void main() {
           theme: ThemeData(
             useMaterial3: false,
             scrollbarTheme: ScrollbarThemeData(
-              thumbVisibility: MaterialStateProperty.all(true),
-              trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.hovered)) {
-                  return true;
-                }
-                return false;
-              }),
+              thumbVisibility: WidgetStateProperty.all(true),
+              trackVisibility: WidgetStateProperty.resolveWith(
+                (Set<WidgetState> states) => states.contains(WidgetState.hovered),
+              ),
             ),
           ),
           home: const SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
@@ -1013,14 +1010,12 @@ void main() {
           theme: ThemeData(
             useMaterial3: false,
             scrollbarTheme: ScrollbarThemeData(
-              thumbVisibility: MaterialStateProperty.resolveWith(
-                (Set<MaterialState> states) => true,
-              ),
-              trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                return states.contains(MaterialState.hovered);
+              thumbVisibility: WidgetStateProperty.resolveWith((Set<WidgetState> states) => true),
+              trackVisibility: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                return states.contains(WidgetState.hovered);
               }),
-              thickness: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.hovered)) {
+              thickness: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                if (states.contains(WidgetState.hovered)) {
                   return 40.0;
                 }
                 // Default thickness
@@ -1087,13 +1082,10 @@ void main() {
           theme: ThemeData(
             useMaterial3: false,
             scrollbarTheme: ScrollbarThemeData(
-              thumbVisibility: MaterialStateProperty.all(true),
-              trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.hovered)) {
-                  return true;
-                }
-                return false;
-              }),
+              thumbVisibility: WidgetStateProperty.all(true),
+              trackVisibility: WidgetStateProperty.resolveWith(
+                (Set<WidgetState> states) => states.contains(WidgetState.hovered),
+              ),
             ),
           ),
           home: const SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
@@ -1155,13 +1147,10 @@ void main() {
           theme: ThemeData(
             useMaterial3: false,
             scrollbarTheme: ScrollbarThemeData(
-              thumbVisibility: MaterialStateProperty.all(true),
-              trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.hovered)) {
-                  return true;
-                }
-                return false;
-              }),
+              thumbVisibility: WidgetStateProperty.all(true),
+              trackVisibility: WidgetStateProperty.resolveWith(
+                (Set<WidgetState> states) => states.contains(WidgetState.hovered),
+              ),
             ),
           ),
           home: const SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
@@ -1765,5 +1754,16 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     );
 
     scrollController.dispose();
+  });
+
+  testWidgets('Scrollbar does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: Scrollbar(child: SingleChildScrollView())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Scrollbar)), Size.zero);
   });
 }

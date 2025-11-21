@@ -3,7 +3,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-14",
+        "os=Mac-15.5",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -36,7 +36,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-14",
+        "os=Mac-15.5",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -70,7 +70,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-14",
+        "os=Mac-15.5",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -103,7 +103,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-14",
+        "os=Mac-15.5",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -136,7 +136,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-14",
+        "os=Mac-15.5",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -170,7 +170,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-14",
+        "os=Mac-15.5",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -206,7 +206,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-14",
+        "os=Mac-15.5",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -258,6 +258,32 @@
       "description": "Builds a debug mode engine that targets 64-bit arm Android from a Linux host.",
       "ninja": {
         "config": "android_debug_arm64",
+        "targets": []
+      }
+    },
+    {
+      "cas_archive": false,
+      "drone_dimensions": [
+        "os=Linux",
+        "device_type=none"
+      ],
+      "gclient_variables": {
+        "use_rbe": true
+      },
+      "gn": [
+        "--runtime-mode",
+        "debug",
+        "--android",
+        "--android-cpu=riscv64",
+        "--no-stripped",
+        "--no-lto",
+        "--rbe",
+        "--no-goma"
+      ],
+      "name": "linux/android_debug_riscv64",
+      "description": "Builds a debug mode engine that targets riscv64 Android from a Linux host.",
+      "ninja": {
+        "config": "android_debug_riscv64",
         "targets": []
       }
     },
@@ -344,7 +370,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-14",
+        "os=Mac-15.5",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -377,7 +403,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-14",
+        "os=Mac-15.5",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -410,7 +436,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-14",
+        "os=Mac-15.5",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -494,7 +520,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-14",
+        "os=Mac-15.5",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -578,7 +604,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-14",
+        "os=Mac-15.5",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -610,7 +636,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-14",
+        "os=Mac-15.5",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -643,7 +669,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-14",
+        "os=Mac-15.5",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -676,7 +702,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-14",
+        "os=Mac-15.5",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -815,7 +841,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-14",
+        "os=Mac-15.5",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -899,7 +925,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-14",
+        "os=Mac-15.5",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -1037,7 +1063,7 @@
       "name": "macos/wasm_release",
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-14"
+        "os=Mac-15.5"
       ],
       "gclient_variables": {
         "download_android_deps": false,
@@ -1067,7 +1093,7 @@
       "name": "macos/wasm_debug_unopt",
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-14"
+        "os=Mac-15.5"
       ],
       "gclient_variables": {
         "download_android_deps": false,

@@ -6,13 +6,13 @@ flutter_defines = [
   # Flutter always wants this https://github.com/flutter/flutter/issues/11402
   "SK_ENABLE_DUMP_GPU",
 
-  # Remove software rasterizers to save some code size.
-  "SK_FORCE_AAA",
-
   # Staging
   "SK_LEGACY_IGNORE_DRAW_VERTICES_BLEND_WITH_NO_SHADER",
-  "SK_DISABLE_LEGACY_METAL_BACKEND_SURFACE",
   "SK_DISABLE_LEGACY_PARAGRAPH_UNICODE",
+
+  "SK_DISABLE_LEGACY_PNG_WRITEBUFFER",
+  "SK_DISABLE_LEGACY_IMAGE_READBUFFER",
+  "SK_HIDE_PATH_EDIT_METHODS",
 
   # Fast low-precision software rendering isn't a priority for Flutter.
   "SK_DISABLE_LEGACY_SHADERCONTEXT",

@@ -145,26 +145,26 @@ void main() {
     const Color defaultOverlayColor = Color(0xffffff00);
 
     final ButtonStyle customButtonStyle = ButtonStyle(
-      backgroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.focused)) {
+      backgroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.focused)) {
           return focusedBackgroundColor;
         }
         return defaultBackgroundColor;
       }),
-      foregroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.focused)) {
+      foregroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.focused)) {
           return focusedForegroundColor;
         }
         return defaultForegroundColor;
       }),
-      iconColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.focused)) {
+      iconColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.focused)) {
           return focusedIconColor;
         }
         return defaultIconColor;
       }),
-      overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.focused)) {
+      overlayColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.focused)) {
           return focusedOverlayColor;
         }
         return defaultOverlayColor;
@@ -379,10 +379,10 @@ void main() {
 
       const Color luckyColor = Color(0xff777777);
       final ButtonStyle singleColorButtonStyle = ButtonStyle(
-        backgroundColor: MaterialStateProperty.all(luckyColor),
-        foregroundColor: MaterialStateProperty.all(luckyColor),
-        iconColor: MaterialStateProperty.all(luckyColor),
-        overlayColor: MaterialStateProperty.all(luckyColor),
+        backgroundColor: WidgetStateProperty.all(luckyColor),
+        foregroundColor: WidgetStateProperty.all(luckyColor),
+        iconColor: WidgetStateProperty.all(luckyColor),
+        overlayColor: WidgetStateProperty.all(luckyColor),
       );
 
       await tester.pumpWidget(
@@ -443,8 +443,8 @@ void main() {
 
       const Color luckyColor = Color(0xff777777);
       final ButtonStyle partialButtonStyle = ButtonStyle(
-        backgroundColor: MaterialStateProperty.all(luckyColor),
-        foregroundColor: MaterialStateProperty.all(luckyColor),
+        backgroundColor: WidgetStateProperty.all(luckyColor),
+        foregroundColor: WidgetStateProperty.all(luckyColor),
       );
 
       final List<DropdownMenuEntry<TestMenu>> partiallyStyledMenuEntries =
@@ -582,10 +582,9 @@ void main() {
       await tester.tap(find.byType(DropdownMenu<TestMenu>));
       await tester.pumpAndSettle();
 
-      final Finder menuMaterial =
-          find
-              .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Material))
-              .first;
+      final Finder menuMaterial = find
+          .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Material))
+          .first;
       final Size menuSize = tester.getSize(menuMaterial);
       expect(menuSize, const Size(180.0, 304.0));
 
@@ -600,10 +599,9 @@ void main() {
       await tester.tap(anchor);
       await tester.pumpAndSettle();
 
-      final Finder updatedMenu =
-          find
-              .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Material))
-              .first;
+      final Finder updatedMenu = find
+          .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Material))
+          .first;
       final double updatedMenuWidth = tester.getSize(updatedMenu).width;
       expect(updatedMenuWidth, 200.0);
     },
@@ -629,10 +627,9 @@ void main() {
       await tester.tap(find.byType(DropdownMenu<TestMenu>));
       await tester.pumpAndSettle();
 
-      final Finder menuMaterial =
-          find
-              .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Material))
-              .first;
+      final Finder menuMaterial = find
+          .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Material))
+          .first;
       final double menuWidth = tester.getSize(menuMaterial).width;
       expect(menuWidth, closeTo(184.5, 0.1));
 
@@ -647,10 +644,9 @@ void main() {
       await tester.tap(anchor);
       await tester.pumpAndSettle();
 
-      final Finder updatedMenu =
-          find
-              .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Material))
-              .first;
+      final Finder updatedMenu = find
+          .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Material))
+          .first;
       final double updatedMenuWidth = tester.getSize(updatedMenu).width;
       expect(updatedMenuWidth, 200.0);
     },
@@ -932,6 +928,57 @@ void main() {
     expect(buttonSize.width, parentWidth - 35.0 - 20.0);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/172680.
+  testWidgets('Menu panel width can expand to full-screen width', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<int>(
+            expandedInsets: EdgeInsets.zero,
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(value: 0, label: 'Flutter'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final double dropdownWidth = tester.getSize(find.byType(DropdownMenu<int>)).width;
+    expect(dropdownWidth, 800);
+
+    await tester.tap(find.byType(DropdownMenu<int>));
+    await tester.pump();
+
+    final double menuWidth = tester.getSize(findMenuItemButton('Flutter')).width;
+    expect(dropdownWidth, menuWidth);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/176501
+  testWidgets('_RenderDropdownMenuBody.computeDryLayout does not access this.constraints', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: _TestDryLayout(
+              child: DropdownMenu<int>(
+                dropdownMenuEntries: <DropdownMenuEntry<int>>[
+                  DropdownMenuEntry<int>(value: 1, label: 'One'),
+                  DropdownMenuEntry<int>(value: 2, label: 'Two'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The test passes if no exception is thrown during the layout phase.
+    expect(tester.takeException(), isNull);
+    expect(find.byType(DropdownMenu<int>), findsOneWidget);
+  });
+
   testWidgets(
     'Material2 - The menuHeight property can be used to show a shorter scrollable menu list instead of the complete list',
     (WidgetTester tester) async {
@@ -950,10 +997,9 @@ void main() {
       // height = height of MenuItemButton * 6 = 48 * 6
       expect(bottomRight.dy - topLeft.dy, 288.0);
 
-      final Finder menuView =
-          find
-              .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Padding))
-              .first;
+      final Finder menuView = find
+          .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Padding))
+          .first;
       final Size menuViewSize = tester.getSize(menuView);
       expect(menuViewSize, const Size(180.0, 304.0)); // 304 = 288 + vertical padding(2 * 8)
 
@@ -965,10 +1011,9 @@ void main() {
       await tester.tap(find.byType(DropdownMenu<TestMenu>));
       await tester.pumpAndSettle();
 
-      final Finder updatedMenu =
-          find
-              .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Padding))
-              .first;
+      final Finder updatedMenu = find
+          .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Padding))
+          .first;
 
       final Size updatedMenuSize = tester.getSize(updatedMenu);
       expect(updatedMenuSize, const Size(180.0, 100.0));
@@ -993,10 +1038,9 @@ void main() {
       // height = height of MenuItemButton * 6 = 48 * 6
       expect(bottomRight.dy - topLeft.dy, 288.0);
 
-      final Finder menuView =
-          find
-              .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Padding))
-              .first;
+      final Finder menuView = find
+          .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Padding))
+          .first;
       final Size menuViewSize = tester.getSize(menuView);
       expect(menuViewSize.height, equals(304.0)); // 304 = 288 + vertical padding(2 * 8)
 
@@ -1008,10 +1052,9 @@ void main() {
       await tester.tap(find.byType(DropdownMenu<TestMenu>));
       await tester.pumpAndSettle();
 
-      final Finder updatedMenu =
-          find
-              .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Padding))
-              .first;
+      final Finder updatedMenu = find
+          .ancestor(of: find.byType(SingleChildScrollView), matching: find.byType(Padding))
+          .first;
 
       final Size updatedMenuSize = tester.getSize(updatedMenu);
       expect(updatedMenuSize.height, equals(100.0));
@@ -1204,8 +1247,9 @@ void main() {
       ),
     );
 
-    final Finder dropdownIcon =
-        find.descendant(of: find.byIcon(Icons.search).first, matching: find.byType(RichText)).last;
+    final Finder dropdownIcon = find
+        .descendant(of: find.byIcon(Icons.search).first, matching: find.byType(RichText))
+        .last;
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
@@ -1231,8 +1275,9 @@ void main() {
       ),
     );
 
-    final Finder dropdownIcon =
-        find.descendant(of: find.byIcon(Icons.search).first, matching: find.byType(RichText)).last;
+    final Finder dropdownIcon = find
+        .descendant(of: find.byIcon(Icons.search).first, matching: find.byType(RichText))
+        .last;
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
@@ -1252,13 +1297,9 @@ void main() {
     await tester.tap(iconButton);
     await tester.pump();
 
-    final Finder menuMaterial =
-        find
-            .ancestor(
-              of: findMenuItemButton(TestMenu.mainMenu0.label),
-              matching: find.byType(Material),
-            )
-            .last;
+    final Finder menuMaterial = find
+        .ancestor(of: findMenuItemButton(TestMenu.mainMenu0.label), matching: find.byType(Material))
+        .last;
     expect(menuMaterial, findsOneWidget);
   });
 
@@ -1410,13 +1451,9 @@ void main() {
     await tester.tap(iconButton);
     await tester.pump();
 
-    final Finder menuMaterial =
-        find
-            .ancestor(
-              of: findMenuItemButton(TestMenu.mainMenu0.label),
-              matching: find.byType(Material),
-            )
-            .last;
+    final Finder menuMaterial = find
+        .ancestor(of: findMenuItemButton(TestMenu.mainMenu0.label), matching: find.byType(Material))
+        .last;
     expect(menuMaterial, findsOneWidget);
   });
 
@@ -2013,15 +2050,13 @@ void main() {
     expect(isItemHighlighted(tester, themeData, 'Menu 1'), true);
 
     // Press up to the upper item (Item 0).
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowUp);
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pumpAndSettle();
     expect(find.widgetWithText(TextField, 'Item 0'), findsOneWidget);
     expect(isItemHighlighted(tester, themeData, 'Item 0'), true);
 
     // Continue to move up to the last item (Item 5).
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowUp);
-    await simulateKeyUpEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pumpAndSettle();
     expect(find.widgetWithText(TextField, 'Item 5'), findsOneWidget);
     expect(isItemHighlighted(tester, themeData, 'Item 5'), true);
@@ -2236,9 +2271,9 @@ void main() {
     final ThemeData themeData = ThemeData();
     final List<DropdownMenuEntry<TestMenu>> menuWithDisabledItems = <DropdownMenuEntry<TestMenu>>[
       const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
-      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 1', enabled: false),
-      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 2'),
-      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 3'),
+      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu1, label: 'Item 1', enabled: false),
+      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu2, label: 'Item 2'),
+      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu3, label: 'Item 3'),
     ];
     final TextEditingController controller = TextEditingController();
     addTearDown(controller.dispose);
@@ -2274,7 +2309,7 @@ void main() {
     int expectedCount = 1;
 
     // Test onSelected on key press
-    await simulateKeyDownEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
 
     // On mobile platforms, the TextField cannot gain focus by default; the focus is
@@ -2699,24 +2734,23 @@ void main() {
 
     await tester.pumpWidget(
       StatefulBuilder(
-        builder:
-            (BuildContext context, StateSetter setState) => MaterialApp(
-              home: Scaffold(
-                body: Center(
-                  child: DropdownMenu<TestMenu>(
-                    requestFocusOnTap: true,
-                    dropdownMenuEntries: menuChildren,
-                    hintText: hintText,
-                    onSelected: (TestMenu? value) {
-                      setState(() {
-                        selectedValue = value;
-                      });
-                    },
-                    controller: controller,
-                  ),
-                ),
+        builder: (BuildContext context, StateSetter setState) => MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: DropdownMenu<TestMenu>(
+                requestFocusOnTap: true,
+                dropdownMenuEntries: menuChildren,
+                hintText: hintText,
+                onSelected: (TestMenu? value) {
+                  setState(() {
+                    selectedValue = value;
+                  });
+                },
+                controller: controller,
               ),
             ),
+          ),
+        ),
       ),
     );
     final SemanticsNode node = tester.getSemantics(find.text(hintText));
@@ -2920,10 +2954,9 @@ void main() {
           body: DropdownMenu<TestMenu>(
             controller: controller,
             width: 100,
-            dropdownMenuEntries:
-                TestMenu.values.map<DropdownMenuEntry<TestMenu>>((TestMenu item) {
-                  return DropdownMenuEntry<TestMenu>(value: item, label: '${item.label} $longText');
-                }).toList(),
+            dropdownMenuEntries: TestMenu.values.map<DropdownMenuEntry<TestMenu>>((TestMenu item) {
+              return DropdownMenuEntry<TestMenu>(value: item, label: '${item.label} $longText');
+            }).toList(),
           ),
         ),
       ),
@@ -2965,14 +2998,13 @@ void main() {
             key: ValueKey<int>(maxLines),
             controller: controller,
             width: 100,
-            dropdownMenuEntries:
-                TestMenu.values.map<DropdownMenuEntry<TestMenu>>((TestMenu item) {
-                  return DropdownMenuEntry<TestMenu>(
-                    value: item,
-                    label: '${item.label} $longText',
-                    labelWidget: Text('${item.label} $longText', maxLines: maxLines),
-                  );
-                }).toList(),
+            dropdownMenuEntries: TestMenu.values.map<DropdownMenuEntry<TestMenu>>((TestMenu item) {
+              return DropdownMenuEntry<TestMenu>(
+                value: item,
+                label: '${item.label} $longText',
+                labelWidget: Text('${item.label} $longText', maxLines: maxLines),
+              );
+            }).toList(),
           ),
         ),
       );
@@ -3288,7 +3320,9 @@ void main() {
     ];
 
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuItems))),
+      MaterialApp(
+        home: Scaffold(body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuItems)),
+      ),
     );
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
@@ -3336,14 +3370,19 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/131120.
   testWidgets('Focus traversal ignores non visible entries', (WidgetTester tester) async {
     final FocusNode buttonFocusNode = FocusNode();
+    final FocusNode textFieldFocusNode = FocusNode();
     addTearDown(buttonFocusNode.dispose);
+    addTearDown(textFieldFocusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Column(
             children: <Widget>[
-              DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren),
+              DropdownMenu<TestMenu>(
+                dropdownMenuEntries: menuChildren,
+                focusNode: textFieldFocusNode,
+              ),
               ElevatedButton(
                 focusNode: buttonFocusNode,
                 onPressed: () {},
@@ -3355,17 +3394,16 @@ void main() {
       ),
     );
 
-    // Move the focus to the text field.
-    primaryFocus!.nextFocus();
-    await tester.pump();
-    final Element textField = tester.element(find.byType(TextField));
-    expect(Focus.of(textField).hasFocus, isTrue);
-
     // Move the focus to the dropdown trailing icon.
     primaryFocus!.nextFocus();
     await tester.pump();
     final Element iconButton = tester.firstElement(find.byIcon(Icons.arrow_drop_down));
     expect(Focus.of(iconButton).hasFocus, isTrue);
+
+    // Move the focus to the text field.
+    primaryFocus!.nextFocus();
+    await tester.pump();
+    expect(textFieldFocusNode.hasFocus, isTrue);
 
     // Move the focus to the elevated button.
     primaryFocus!.nextFocus();
@@ -3622,7 +3660,7 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/151686.
-  testWidgets('Setting DropdownMenu.requestFocusOnTap to false makes TextField read only', (
+  testWidgets('Setting DropdownMenu.requestFocusOnTap to false makes TextField a button', (
     WidgetTester tester,
   ) async {
     const String label = 'Test';
@@ -3648,10 +3686,12 @@ void main() {
         hasFocusAction: true,
         hasTapAction: true,
         isTextField: true,
+        isFocusable: true,
         hasEnabledState: true,
         isEnabled: true,
         label: 'Test',
         textDirection: TextDirection.ltr,
+        hasExpandedState: true,
       ),
     );
 
@@ -3659,15 +3699,20 @@ void main() {
 
     expect(
       tester.getSemantics(find.byType(TextField)),
-      matchesSemantics(
-        hasFocusAction: true,
-        isTextField: true,
-        hasEnabledState: true,
-        isEnabled: true,
-        label: 'Test',
-        isReadOnly: true,
-        textDirection: TextDirection.ltr,
-      ),
+      kIsWeb
+          ? matchesSemantics(isButton: true, hasExpandedState: true)
+          : matchesSemantics(
+              isButton: true,
+              hasExpandedState: true,
+              hasFocusAction: true,
+              isTextField: true,
+              isFocusable: true,
+              hasEnabledState: true,
+              isEnabled: true,
+              label: 'Test',
+              isReadOnly: true,
+              textDirection: TextDirection.ltr,
+            ),
     );
   });
 
@@ -3951,11 +3996,11 @@ void main() {
         ),
       ),
     );
-    // Pressing the tab key 3 times moves the focus to the icon button.
-    for (int i = 0; i < 3; i++) {
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      await tester.pump();
-    }
+
+    // Adding FocusNode to IconButton causes the IconButton to receive focus.
+    // Thus it does not matter if the TextField has a FocusNode or not.
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
 
     // Now the focus is on the icon button.
     final Element iconButton = tester.firstElement(find.byIcon(Icons.arrow_drop_down));
@@ -3992,17 +4037,11 @@ void main() {
           ),
         ),
       );
-      // If there is no `FocusNode`, by default, `TextField` can receive focus
-      // on desktop platforms, but not on mobile platforms. Therefore, on desktop
-      // platforms, it takes 3 tabs to reach the icon button.
-      final int tabCount = switch (defaultTargetPlatform) {
-        TargetPlatform.iOS || TargetPlatform.android || TargetPlatform.fuchsia => 2,
-        TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => 3,
-      };
-      for (int i = 0; i < tabCount; i++) {
-        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-        await tester.pump();
-      }
+
+      // Adding FocusNode to IconButton causes the IconButton to receive focus.
+      // Thus it does not matter if the TextField has a FocusNode or not.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
 
       // Now the focus is on the icon button.
       final Element iconButton = tester.firstElement(find.byIcon(Icons.arrow_drop_down));
@@ -4022,9 +4061,102 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/177993.
+  testWidgets('Pressing ESC key closes the menu when requestFocusOnTap is false', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              requestFocusOnTap: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Move focus to the TextField and open the menu.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(findMenuPanel(), findsOne);
+
+    // Press ESC to close the menu.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(findMenuPanel(), findsNothing);
+  });
+
+  testWidgets('Pressing ESC key closes the menu when requestFocusOnTap is true', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              requestFocusOnTap: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Move focus to the TextField and open the menu.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(findMenuPanel(), findsOne);
+
+    // Press ESC to close the menu.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(findMenuPanel(), findsNothing);
+  });
+
+  testWidgets(
+    'Pressing ESC key after changing the selected item closes the menu',
+    (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Material(
+            child: Center(
+              child: DropdownMenu<TestMenu>(
+                dropdownMenuEntries: menuChildren,
+                initialSelection: menuChildren[2].value,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Move focus to the TextField and open the menu.
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+      expect(findMenuPanel(), findsOne);
+
+      // Move the selection.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(isItemHighlighted(tester, themeData, menuChildren[3].label), isTrue);
+
+      // Press ESC to close the menu.
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pump();
+      expect(findMenuPanel(), findsNothing);
+    },
+    variant: TargetPlatformVariant.all(),
+  );
+
   testWidgets('DropdownMenu passes maxLines to TextField', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren))),
+      MaterialApp(
+        home: Scaffold(body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren)),
+      ),
     );
     TextField textField = tester.widget(find.byType(TextField));
     // Default behavior.
@@ -4053,7 +4185,9 @@ void main() {
 
   testWidgets('DropdownMenu passes textInputAction to TextField', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren))),
+      MaterialApp(
+        home: Scaffold(body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren)),
+      ),
     );
     TextField textField = tester.widget(find.byType(TextField));
     // Default behavior.
@@ -4138,7 +4272,76 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(tester.getSize(findMenuItemButton(menuChildren.first.label)).width, 150.0);
+
+    // The overwrite of menuStyle is different when a width is provided but maximumSize is not,
+    // So it needs to be tested separately.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            width: 200.0,
+            dropdownMenuEntries: menuChildren,
+            menuStyle: const MenuStyle(),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(findMenuItemButton(menuChildren.first.label)).width, 200.0);
   });
+
+  testWidgets(
+    'ensure items are constrained to intrinsic size of DropdownMenu (width or anchor) when no maximumSize',
+    (WidgetTester tester) async {
+      const String shortLabel = 'Male';
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<int>(
+              width: 200,
+              dropdownMenuEntries: <DropdownMenuEntry<int>>[
+                DropdownMenuEntry<int>(value: 0, label: shortLabel),
+              ],
+              menuStyle: MenuStyle(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+
+      expect(tester.getSize(findMenuItemButton(shortLabel)).width, 200);
+
+      // Use expandedInsets to anchor the TextField to the same size as the parent.
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: double.infinity,
+              child: DropdownMenu<int>(
+                expandedInsets: EdgeInsets.symmetric(horizontal: 20),
+                dropdownMenuEntries: <DropdownMenuEntry<int>>[
+                  DropdownMenuEntry<int>(value: 0, label: shortLabel),
+                ],
+                menuStyle: MenuStyle(),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      // Default width is 800, so the expected width is 800 - padding (20 + 20).
+      expect(tester.getSize(findMenuItemButton(shortLabel)).width, 760.0);
+    },
+  );
 
   // Regression test for https://github.com/flutter/flutter/issues/164905.
   testWidgets('ensure exclude semantics for trailing button', (WidgetTester tester) async {
@@ -4172,35 +4375,34 @@ void main() {
                       id: 3,
                       flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
-                        TestSemantics(
-                          id: 5,
-                          inputType: SemanticsInputType.text,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.isTextField,
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isEnabled,
-                            SemanticsFlag.isReadOnly,
-                          ],
-                          actions: <SemanticsAction>[SemanticsAction.focus],
-                          textDirection: TextDirection.ltr,
-                          currentValueLength: 0,
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              id: 6,
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.hasSelectedState,
-                                SemanticsFlag.isButton,
-                                SemanticsFlag.hasEnabledState,
-                                SemanticsFlag.isEnabled,
-                                SemanticsFlag.isFocusable,
-                              ],
-                              actions: <SemanticsAction>[
-                                SemanticsAction.tap,
-                                SemanticsAction.focus,
-                              ],
-                            ),
-                          ],
-                        ),
+                        if (kIsWeb)
+                          TestSemantics(
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isButton,
+                              SemanticsFlag.hasExpandedState,
+                            ],
+                            actions: <SemanticsAction>[SemanticsAction.expand],
+                          )
+                        else
+                          TestSemantics(
+                            id: 5,
+                            inputType: SemanticsInputType.text,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isTextField,
+                              SemanticsFlag.isFocusable,
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isEnabled,
+                              SemanticsFlag.isReadOnly,
+                              SemanticsFlag.isButton,
+                              SemanticsFlag.hasExpandedState,
+                            ],
+                            actions: <SemanticsAction>[
+                              SemanticsAction.focus,
+                              SemanticsAction.expand,
+                            ],
+                            textDirection: TextDirection.ltr,
+                            currentValueLength: 0,
+                          ),
                       ],
                     ),
                   ],
@@ -4279,6 +4481,616 @@ void main() {
       expect(iconButton, findsNothing);
     },
   );
+
+  testWidgets('Explicitly provided controllers should not be disposed when switched out.', (
+    WidgetTester tester,
+  ) async {
+    final TextEditingController controller1 = TextEditingController();
+    final TextEditingController controller2 = TextEditingController();
+    Future<void> pumpDropdownMenu(TextEditingController? controller) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(controller: controller, dropdownMenuEntries: menuChildren),
+          ),
+        ),
+      );
+    }
+
+    await pumpDropdownMenu(controller1);
+    await pumpDropdownMenu(controller2);
+    controller1.dispose();
+    controller2.dispose();
+    expect(tester.takeException(), isNull);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/169942.
+  testWidgets(
+    'DropdownMenu disabled state applies proper styling to label and selected value text',
+    (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData();
+      final Color disabledColor = themeData.colorScheme.onSurface.withOpacity(0.38);
+
+      Widget buildDropdownMenu({required bool isEnabled}) {
+        return MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            body: DropdownMenu<String>(
+              width: double.infinity,
+              enabled: isEnabled,
+              initialSelection: 'One',
+              label: const Text('Choose number'),
+              dropdownMenuEntries: const <DropdownMenuEntry<String>>[
+                DropdownMenuEntry<String>(value: 'One', label: 'One'),
+              ],
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildDropdownMenu(isEnabled: true));
+
+      // Find the TextField and its EditableText from DropdownMenu.
+      final TextField enabledTextField = tester.widget(find.byType(TextField));
+      final EditableText enabledEditableText = tester.widget(find.byType(EditableText));
+
+      // Verify enabled state styling for the TextField.
+      expect(enabledTextField.enabled, isTrue);
+      expect(enabledEditableText.style.color, isNot(disabledColor));
+
+      // Switch to the disabled state by rebuilding the widget.
+      await tester.pumpWidget(buildDropdownMenu(isEnabled: false));
+
+      // Find the TextField and its EditableText in disabled state.
+      final TextField textField = tester.widget(find.byType(TextField));
+      final EditableText disabledEditableText = tester.widget(find.byType(EditableText));
+
+      // Verify disabled state styling for the TextField.
+      expect(textField.enabled, isFalse);
+      expect(disabledEditableText.style.color, disabledColor);
+
+      // Verify the selected value text has disabled color.
+      final EditableText selectedValueText = tester.widget<EditableText>(
+        find.descendant(of: find.byType(TextField), matching: find.byType(EditableText)),
+      );
+      expect(selectedValueText.style.color, disabledColor);
+    },
+  );
+
+  testWidgets('DropdownMenu trailingIconFocusNode is created when not provided', (
+    WidgetTester tester,
+  ) async {
+    final FocusNode textFieldFocusNode = FocusNode();
+    final FocusNode buttonFocusNode = FocusNode();
+    addTearDown(textFieldFocusNode.dispose);
+    addTearDown(buttonFocusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              DropdownMenu<TestMenu>(
+                dropdownMenuEntries: menuChildren,
+                focusNode: textFieldFocusNode,
+              ),
+              ElevatedButton(
+                focusNode: buttonFocusNode,
+                onPressed: () {},
+                child: const Text('Button'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    primaryFocus!.nextFocus();
+    await tester.pump();
+
+    // Ensure the trailing icon does not have focus.
+    // If FocusNode is not created then the TextField will have focus.
+    final Element iconButton = tester.firstElement(find.byIcon(Icons.arrow_drop_down));
+    expect(Focus.of(iconButton).hasFocus, isTrue);
+
+    // Ensure the TextField has focus.
+    primaryFocus!.nextFocus();
+    await tester.pump();
+    expect(textFieldFocusNode.hasFocus, isTrue);
+
+    // Ensure the button has focus.
+    primaryFocus!.nextFocus();
+    await tester.pump();
+    expect(buttonFocusNode.hasFocus, isTrue);
+  });
+
+  testWidgets('DropdownMenu trailingIconFocusNode is used when provided', (
+    WidgetTester tester,
+  ) async {
+    final FocusNode textFieldFocusNode = FocusNode();
+    final FocusNode trailingIconFocusNode = FocusNode();
+    final FocusNode buttonFocusNode = FocusNode();
+    addTearDown(textFieldFocusNode.dispose);
+    addTearDown(trailingIconFocusNode.dispose);
+    addTearDown(buttonFocusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              DropdownMenu<TestMenu>(
+                dropdownMenuEntries: menuChildren,
+                focusNode: textFieldFocusNode,
+                trailingIconFocusNode: trailingIconFocusNode,
+              ),
+              ElevatedButton(
+                focusNode: buttonFocusNode,
+                onPressed: () {},
+                child: const Text('Button'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    primaryFocus!.nextFocus();
+    await tester.pump();
+
+    // Ensure the trailing icon has focus.
+    expect(trailingIconFocusNode.hasFocus, isTrue);
+
+    // Ensure the TextField has focus.
+    primaryFocus!.nextFocus();
+    await tester.pump();
+    expect(textFieldFocusNode.hasFocus, isTrue);
+
+    // Ensure the button has focus.
+    primaryFocus!.nextFocus();
+    await tester.pump();
+    expect(buttonFocusNode.hasFocus, isTrue);
+  });
+
+  testWidgets(
+    'Throw assertion error when showTrailingIcon is false and trailingIconFocusNode is provided',
+    (WidgetTester tester) async {
+      expect(() {
+        final FocusNode focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              showTrailingIcon: false,
+              trailingIconFocusNode: focusNode,
+              dropdownMenuEntries: menuChildren,
+            ),
+          ),
+        );
+      }, throwsAssertionError);
+    },
+  );
+
+  testWidgets('DropdownMenu can set cursorHeight', (WidgetTester tester) async {
+    const double cursorHeight = 4.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            cursorHeight: cursorHeight,
+            dropdownMenuEntries: menuChildren,
+          ),
+        ),
+      ),
+    );
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.cursorHeight, cursorHeight);
+  });
+
+  testWidgets('DropdownMenu accepts a MenuController', (WidgetTester tester) async {
+    final MenuController menuController = MenuController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            menuController: menuController,
+            dropdownMenuEntries: menuChildren,
+          ),
+        ),
+      ),
+    );
+    expect(findMenuItemButton('Item 0').hitTestable(), findsNothing);
+    menuController.open();
+    await tester.pumpAndSettle();
+    expect(findMenuItemButton('Item 0').hitTestable(), findsOne);
+    menuController.close();
+    await tester.pumpAndSettle();
+    expect(findMenuItemButton('Item 0').hitTestable(), findsNothing);
+  });
+
+  group('DropdownMenu.decorationBuilder', () {
+    const String labelText = 'labelText';
+    InputDecoration buildDecorationWithSuffixIcon(BuildContext context, MenuController controller) {
+      return InputDecoration(
+        labelText: labelText,
+        suffixIcon: controller.isOpen
+            ? const Icon(Icons.arrow_drop_up)
+            : const Icon(Icons.arrow_drop_down),
+      );
+    }
+
+    InputDecoration buildDecoration(BuildContext context, MenuController controller) {
+      return const InputDecoration(labelText: labelText);
+    }
+
+    testWidgets('Decoration properties set by decorationBuilder are applied', (
+      WidgetTester tester,
+    ) async {
+      final MenuController menuController = MenuController();
+      const InputDecoration decoration = InputDecoration(
+        labelText: labelText,
+        helperText: 'helperText',
+        hintText: 'hintText',
+        filled: true,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              menuController: menuController,
+              dropdownMenuEntries: menuChildren,
+              decorationBuilder: (BuildContext context, MenuController controller) {
+                return decoration;
+              },
+            ),
+          ),
+        ),
+      );
+
+      final TextField textField = tester.firstWidget(find.byType(TextField));
+      final InputDecoration effectiveDecoration = textField.decoration!;
+
+      expect(effectiveDecoration.labelText, decoration.labelText);
+      expect(effectiveDecoration.helperText, decoration.helperText);
+      expect(effectiveDecoration.hintText, decoration.hintText);
+      expect(effectiveDecoration.filled, decoration.filled);
+    });
+
+    testWidgets('Custom decorationBuilder can replace default suffixIcon', (
+      WidgetTester tester,
+    ) async {
+      final MenuController menuController = MenuController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              menuController: menuController,
+              dropdownMenuEntries: menuChildren,
+              decorationBuilder: buildDecorationWithSuffixIcon,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.arrow_drop_down), findsNWidgets(2));
+      expect(find.byType(IconButton), findsNothing);
+    });
+
+    testWidgets('Custom decorationBuilder is called when the menu opens and closes', (
+      WidgetTester tester,
+    ) async {
+      final MenuController menuController = MenuController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              menuController: menuController,
+              dropdownMenuEntries: menuChildren,
+              decorationBuilder: buildDecorationWithSuffixIcon,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.arrow_drop_down), findsNWidgets(2));
+      expect(find.byIcon(Icons.arrow_drop_up), findsNothing);
+
+      // Open the menu.
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+
+      // Check that the custom decorationBuilder updated the icon.
+      expect(find.byIcon(Icons.arrow_drop_down), findsNothing);
+      expect(find.byIcon(Icons.arrow_drop_up), findsNWidgets(2));
+    });
+
+    testWidgets(
+      'Default IconButton is used when decorationBuilder does not set InputDecoration.suffixIcon',
+      (WidgetTester tester) async {
+        final MenuController menuController = MenuController();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                menuController: menuController,
+                dropdownMenuEntries: menuChildren,
+                decorationBuilder: buildDecoration,
+              ),
+            ),
+          ),
+        );
+
+        expect(find.byType(IconButton), findsNWidgets(2));
+      },
+    );
+
+    testWidgets('Passing label and decorationBuilder throws', (WidgetTester tester) async {
+      final MenuController menuController = MenuController();
+      await expectLater(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                menuController: menuController,
+                dropdownMenuEntries: menuChildren,
+                label: const Text('Label'),
+                decorationBuilder: buildDecoration,
+              ),
+            ),
+          ),
+        );
+      }, throwsAssertionError);
+    });
+
+    testWidgets('Passing hintText and decorationBuilder throws', (WidgetTester tester) async {
+      final MenuController menuController = MenuController();
+      await expectLater(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                menuController: menuController,
+                dropdownMenuEntries: menuChildren,
+                hintText: 'hintText',
+                decorationBuilder: buildDecoration,
+              ),
+            ),
+          ),
+        );
+      }, throwsAssertionError);
+    });
+
+    testWidgets('Passing helperText and decorationBuilder throws', (WidgetTester tester) async {
+      final MenuController menuController = MenuController();
+      await expectLater(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                menuController: menuController,
+                dropdownMenuEntries: menuChildren,
+                hintText: 'hintText',
+                decorationBuilder: buildDecoration,
+              ),
+            ),
+          ),
+        );
+      }, throwsAssertionError);
+    });
+
+    testWidgets('Passing errorText and decorationBuilder throws', (WidgetTester tester) async {
+      final MenuController menuController = MenuController();
+      await expectLater(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                menuController: menuController,
+                dropdownMenuEntries: menuChildren,
+                errorText: 'errorText',
+                decorationBuilder: buildDecoration,
+              ),
+            ),
+          ),
+        );
+      }, throwsAssertionError);
+    });
+
+    testWidgets('Preferred width takes labelText into account', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              decorationBuilder: (BuildContext context, MenuController controller) {
+                return const InputDecoration(labelText: 'Long label text');
+              },
+            ),
+          ),
+        ),
+      );
+
+      final double width = tester.getSize(find.byType(TextField)).width;
+      expect(width, 327.5);
+    });
+
+    testWidgets('Preferred width takes label into account', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              decorationBuilder: (BuildContext context, MenuController controller) {
+                return const InputDecoration(label: SizedBox(width: 200));
+              },
+            ),
+          ),
+        ),
+      );
+
+      final double width = tester.getSize(find.byType(TextField)).width;
+      expect(width, 280);
+    });
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/174609.
+  testWidgets(
+    'DropdownMenu keeps the selected item from filtered list after entries list is updated',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return DropdownMenu<TestMenu>(
+                  controller: controller,
+                  requestFocusOnTap: true,
+                  enableFilter: true,
+                  // toList() is used here to simulate list update.
+                  dropdownMenuEntries: menuChildren.toList(),
+                  onSelected: (_) {
+                    setState(() {});
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Open the menu.
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+
+      // Filter the entries to only show 'Menu 1'.
+      await tester.enterText(find.byType(TextField).first, TestMenu.mainMenu1.label);
+      await tester.pump();
+
+      // Select the 'Menu 1' item.
+      await tester.tap(findMenuItemButton(TestMenu.mainMenu1.label));
+      await tester.pumpAndSettle();
+
+      expect(controller.text, TestMenu.mainMenu1.label);
+    },
+  );
+
+  testWidgets('DropdownMenu does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final TextEditingController controller = TextEditingController(text: 'I');
+    addTearDown(controller.dispose);
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DropdownMenu<TestMenu>)), Size.zero);
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    await tester.pump();
+    expect(find.byType(MenuItemButton), findsWidgets);
+  });
+
+  // The variants to test in the focus handling test.
+  final ValueVariant<TextInputAction> focusVariants = ValueVariant<TextInputAction>(
+    TextInputAction.values.toSet(),
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/177009.
+  testWidgets('Handles focus correctly when TextInputAction is invoked', (
+    WidgetTester tester,
+  ) async {
+    Future<void> ensureCorrectFocusHandlingForAction(
+      TextInputAction textInputAction, {
+      required bool shouldLoseFocus,
+      bool shouldFocusNext = false,
+      bool shouldFocusPrevious = false,
+    }) async {
+      final FocusNode previousFocusNode = FocusNode();
+      final FocusNode textFieldFocusNode = FocusNode();
+      final FocusNode nextFocusNode = FocusNode();
+      addTearDown(previousFocusNode.dispose);
+      addTearDown(textFieldFocusNode.dispose);
+      addTearDown(nextFocusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                TextButton(
+                  focusNode: previousFocusNode,
+                  child: const Text('Previous'),
+                  onPressed: () {},
+                ),
+                DropdownMenu<TestMenu>(
+                  dropdownMenuEntries: menuChildren,
+                  focusNode: textFieldFocusNode,
+                  textInputAction: textInputAction,
+                  requestFocusOnTap: true,
+                  showTrailingIcon: false,
+                ),
+                TextButton(focusNode: nextFocusNode, child: const Text('Next'), onPressed: () {}),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(textFieldFocusNode.hasFocus, isFalse);
+
+      // Tap on DropdownMenu to request focus on the TextField.
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pumpAndSettle();
+      expect(textFieldFocusNode.hasFocus, isTrue);
+
+      await tester.testTextInput.receiveAction(textInputAction);
+      await tester.pumpAndSettle();
+
+      expect(previousFocusNode.hasFocus, equals(shouldFocusPrevious));
+      expect(textFieldFocusNode.hasFocus, equals(!shouldLoseFocus));
+      expect(nextFocusNode.hasFocus, equals(shouldFocusNext));
+    }
+
+    // The expectations for each of the types of TextInputAction.
+    const Map<TextInputAction, bool> actionShouldLoseFocus = <TextInputAction, bool>{
+      TextInputAction.none: false,
+      TextInputAction.unspecified: false,
+      TextInputAction.done: true,
+      TextInputAction.go: true,
+      TextInputAction.search: true,
+      TextInputAction.send: true,
+      TextInputAction.continueAction: false,
+      TextInputAction.join: false,
+      TextInputAction.route: false,
+      TextInputAction.emergencyCall: false,
+      TextInputAction.newline: true,
+      TextInputAction.next: true,
+      TextInputAction.previous: true,
+    };
+
+    final TextInputAction textInputAction = focusVariants.currentValue!;
+    expect(actionShouldLoseFocus.containsKey(textInputAction), isTrue);
+
+    await ensureCorrectFocusHandlingForAction(
+      textInputAction,
+      shouldLoseFocus: actionShouldLoseFocus[textInputAction]!,
+      shouldFocusNext: textInputAction == TextInputAction.next,
+      shouldFocusPrevious: textInputAction == TextInputAction.previous,
+    );
+  }, variant: focusVariants);
 }
 
 enum TestMenu {
@@ -4300,4 +5112,30 @@ enum ShortMenu {
 
   const ShortMenu(this.label);
   final String label;
+}
+
+// A helper widget that creates a render object designed to call `getDryLayout`
+// on its child during its own `performLayout` phase. This is used to test
+// that a child's `computeDryLayout` implementation is valid.
+class _TestDryLayout extends SingleChildRenderObjectWidget {
+  const _TestDryLayout({super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderTestDryLayout();
+  }
+}
+
+class _RenderTestDryLayout extends RenderProxyBox {
+  @override
+  void performLayout() {
+    if (child == null) {
+      size = constraints.smallest;
+      return;
+    }
+
+    child!.getDryLayout(constraints);
+    child!.layout(constraints, parentUsesSize: true);
+    size = child!.size;
+  }
 }

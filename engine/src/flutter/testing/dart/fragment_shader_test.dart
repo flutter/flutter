@@ -56,6 +56,87 @@ void main() async {
     expect(identical(programA, programB), true);
   });
 
+  test('FragmentProgram uniform info', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
+    final FragmentShader shader = program.fragmentShader();
+    final List<UniformFloatSlot> slots = [
+      shader.getUniformFloat('iFloatUniform'),
+      shader.getUniformFloat('iVec2Uniform', 0),
+      shader.getUniformFloat('iVec2Uniform', 1),
+      shader.getUniformFloat('iMat2Uniform', 0),
+      shader.getUniformFloat('iMat2Uniform', 1),
+      shader.getUniformFloat('iMat2Uniform', 2),
+      shader.getUniformFloat('iMat2Uniform', 3),
+    ];
+    for (int i = 0; i < slots.length; ++i) {
+      expect(slots[i].shaderIndex, equals(i));
+    }
+  });
+
+  test('FragmentProgram getUniformFloat unknown', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
+    final FragmentShader shader = program.fragmentShader();
+    try {
+      shader.getUniformFloat('unknown');
+      fail('Unreachable');
+    } catch (e) {
+      expect(e.toString(), contains('No uniform named "unknown".'));
+    }
+  });
+
+  test('FragmentProgram getUniformFloat offset overflow', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
+    final FragmentShader shader = program.fragmentShader();
+    try {
+      shader.getUniformFloat('iVec2Uniform', 2);
+      fail('Unreachable');
+    } catch (e) {
+      expect(e.toString(), contains('Index `2` out of bounds for `iVec2Uniform`.'));
+    }
+  });
+
+  test('FragmentProgram getUniformFloat offset underflow', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
+    final FragmentShader shader = program.fragmentShader();
+    try {
+      shader.getUniformFloat('iVec2Uniform', -1);
+      fail('Unreachable');
+    } catch (e) {
+      expect(e.toString(), contains('Index `-1` out of bounds for `iVec2Uniform`.'));
+    }
+  });
+
+  test('FragmentProgram getImageSampler', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniform_ordering.frag.iplr');
+    final FragmentShader shader = program.fragmentShader();
+    final Image blueGreenImage = await _createBlueGreenImage();
+    final ImageSamplerSlot slot = shader.getImageSampler('u_texture');
+    slot.set(blueGreenImage);
+    expect(slot.shaderIndex, equals(0));
+  });
+
+  test('FragmentProgram getImageSampler unknown', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniform_ordering.frag.iplr');
+    final FragmentShader shader = program.fragmentShader();
+    try {
+      shader.getImageSampler('unknown');
+      fail('Unreachable');
+    } catch (e) {
+      expect(e.toString(), contains('No uniform named "unknown".'));
+    }
+  });
+
+  test('FragmentProgram getImageSampler wrong type', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniform_ordering.frag.iplr');
+    final FragmentShader shader = program.fragmentShader();
+    try {
+      shader.getImageSampler('b');
+      fail('Unreachable');
+    } catch (e) {
+      expect(e.toString(), contains('Uniform "b" is not an image sampler.'));
+    }
+  });
+
   test('FragmentShader setSampler throws with out-of-bounds index', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('blue_green_sampler.frag.iplr');
     final Image blueGreenImage = await _createBlueGreenImage();
@@ -233,15 +314,14 @@ void main() async {
   test('FragmentShader with uniforms renders correctly', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
 
-    final FragmentShader shader =
-        program.fragmentShader()
-          ..setFloat(0, 0.0)
-          ..setFloat(1, 0.25)
-          ..setFloat(2, 0.75)
-          ..setFloat(3, 0.0)
-          ..setFloat(4, 0.0)
-          ..setFloat(5, 0.0)
-          ..setFloat(6, 1.0);
+    final FragmentShader shader = program.fragmentShader()
+      ..setFloat(0, 0.0)
+      ..setFloat(1, 0.25)
+      ..setFloat(2, 0.75)
+      ..setFloat(3, 0.0)
+      ..setFloat(4, 0.0)
+      ..setFloat(5, 0.0)
+      ..setFloat(6, 1.0);
 
     final ByteData renderedBytes = (await _imageByteDataFromShader(shader: shader))!;
 
@@ -495,8 +575,10 @@ void _expectFragmentShadersRenderGreen(Map<String, FragmentProgram> programs) {
 }
 
 Future<void> _expectShaderRendersColor(Shader shader, Color color) async {
-  final ByteData renderedBytes =
-      (await _imageByteDataFromShader(shader: shader, imageDimension: _shaderImageDimension))!;
+  final ByteData renderedBytes = (await _imageByteDataFromShader(
+    shader: shader,
+    imageDimension: _shaderImageDimension,
+  ))!;
   for (final int c in renderedBytes.buffer.asUint32List()) {
     expect(toHexString(c), toHexString(color.value));
   }

@@ -54,11 +54,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SearchViewThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -80,11 +79,10 @@ void main() {
       shrinkWrap: true,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description[0], 'backgroundColor: ${const Color(0xfffffff1)}');
     expect(description[1], 'elevation: 3.5');
@@ -181,10 +179,9 @@ void main() {
           body: Center(
             // If the SearchViewThemeData widget is present, it's used
             // instead of the Theme's ThemeData.searchViewTheme.
-            child:
-                searchViewThemeData == null
-                    ? child
-                    : SearchViewTheme(data: searchViewThemeData, child: child),
+            child: searchViewThemeData == null
+                ? child
+                : SearchViewTheme(data: searchViewThemeData, child: child),
           ),
         ),
       );

@@ -10,6 +10,7 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/lib/ui/painting/image.h"
+#include "flutter/lib/ui/painting/testing/mocks.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/common/shell_test.h"
 #include "flutter/shell/common/thread_host.h"
@@ -33,22 +34,6 @@ namespace testing {
 namespace {
 fml::AutoResetWaitableEvent message_latch;
 
-class MockDlImage : public DlImage {
- public:
-  MOCK_METHOD(sk_sp<SkImage>, skia_image, (), (const, override));
-  MOCK_METHOD(std::shared_ptr<impeller::Texture>,
-              impeller_texture,
-              (),
-              (const, override));
-  MOCK_METHOD(bool, isOpaque, (), (const, override));
-  MOCK_METHOD(bool, isTextureBacked, (), (const, override));
-  MOCK_METHOD(bool, isUIThreadSafe, (), (const, override));
-  MOCK_METHOD(DlISize, GetSize, (), (const, override));
-  MOCK_METHOD(size_t, GetApproximateByteSize, (), (const, override));
-};
-
-}  // namespace
-
 class MockSyncSwitch {
  public:
   struct Handlers {
@@ -67,6 +52,7 @@ class MockSyncSwitch {
   MOCK_METHOD(void, Execute, (const Handlers& handlers), (const));
   MOCK_METHOD(void, SetSwitch, (bool value));
 };
+}  // namespace
 
 TEST_F(ShellTest, EncodeImageGivesExternalTypedData) {
   auto native_encode_image = [&](Dart_NativeArguments args) {
@@ -223,7 +209,7 @@ std::shared_ptr<impeller::Context> MakeConvertDlImageToSkImageContext(
   EXPECT_CALL(*context, GetResourceAllocator).WillRepeatedly(Return(allocator));
   EXPECT_CALL(*context, CreateCommandBuffer).WillOnce(Return(command_buffer));
   EXPECT_CALL(*device_buffer, OnGetContents).WillOnce(Return(buffer.data()));
-  EXPECT_CALL(*command_queue, Submit(_, _))
+  EXPECT_CALL(*command_queue, Submit(_, _, _))
       .WillRepeatedly(
           DoAll(InvokeArgument<1>(impeller::CommandBuffer::Status::kCompleted),
                 Return(fml::Status())));
@@ -269,6 +255,7 @@ TEST_F(ShellTest, EncodeImageRetries) {
   AddNativeCallback("ValidateNotNull", CREATE_NATIVE_ENTRY(validate_not_null));
 
   ASSERT_TRUE(shell->IsSetup());
+
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("toByteDataRetries");
 
@@ -317,6 +304,7 @@ TEST_F(ShellTest, EncodeImageRetryOverflows) {
   AddNativeCallback("ValidateNotNull", CREATE_NATIVE_ENTRY(validate_not_null));
 
   ASSERT_TRUE(shell->IsSetup());
+
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("toByteDataRetryOverflows");
 
@@ -505,6 +493,9 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage16Float) {
   buffer.reserve(100 * 100 * 8);
   auto context = MakeConvertDlImageToSkImageContext(buffer);
   bool did_call = false;
+  MockSnapshotDelegate snapshot_delegate;
+  EXPECT_CALL(snapshot_delegate, MakeRenderContextCurrent)
+      .WillRepeatedly(Return(true));
   ImageEncodingImpeller::ConvertDlImageToSkImage(
       image,
       [&did_call](const fml::StatusOr<sk_sp<SkImage>>& image) {
@@ -516,7 +507,7 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage16Float) {
         EXPECT_EQ(kRGBA_F16_SkColorType, image.value()->colorType());
         EXPECT_EQ(nullptr, image.value()->colorSpace());
       },
-      context);
+      snapshot_delegate.GetWeakPtr(), context);
   EXPECT_TRUE(did_call);
 }
 
@@ -532,6 +523,9 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage10XR) {
   buffer.reserve(100 * 100 * 4);
   auto context = MakeConvertDlImageToSkImageContext(buffer);
   bool did_call = false;
+  MockSnapshotDelegate snapshot_delegate;
+  EXPECT_CALL(snapshot_delegate, MakeRenderContextCurrent)
+      .WillRepeatedly(Return(true));
   ImageEncodingImpeller::ConvertDlImageToSkImage(
       image,
       [&did_call](const fml::StatusOr<sk_sp<SkImage>>& image) {
@@ -543,7 +537,7 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage10XR) {
         EXPECT_EQ(kBGR_101010x_XR_SkColorType, image.value()->colorType());
         EXPECT_EQ(nullptr, image.value()->colorSpace());
       },
-      context);
+      snapshot_delegate.GetWeakPtr(), context);
   EXPECT_TRUE(did_call);
 }
 

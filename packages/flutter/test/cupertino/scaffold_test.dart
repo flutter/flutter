@@ -226,12 +226,12 @@ void main() {
           tabBuilder: (BuildContext context, int index) {
             return index == 0
                 ? const CupertinoPageScaffold(
-                  navigationBar: CupertinoNavigationBar(
-                    backgroundColor: CupertinoColors.white,
-                    middle: Text('Title'),
-                  ),
-                  child: page1Center,
-                )
+                    navigationBar: CupertinoNavigationBar(
+                      backgroundColor: CupertinoColors.white,
+                      middle: Text('Title'),
+                    ),
+                    child: page1Center,
+                  )
                 : const Stack();
           },
         ),
@@ -266,9 +266,9 @@ void main() {
             tabBuilder: (BuildContext context, int index) {
               return index == 0
                   ? CupertinoPageScaffold(
-                    navigationBar: const CupertinoNavigationBar(middle: Text('Title')),
-                    child: ListView(children: const <Widget>[content]),
-                  )
+                      navigationBar: const CupertinoNavigationBar(middle: Text('Title')),
+                      child: ListView(children: const <Widget>[content]),
+                    )
                   : const Stack();
             },
           ),
@@ -495,15 +495,13 @@ void main() {
             viewInsets: EdgeInsets.only(bottom: showKeyboard ? 300 : 20),
           ),
           child: CupertinoPageScaffold(
-            navigationBar:
-                showNavigationBar ? const CupertinoNavigationBar(middle: Text('Title')) : null,
+            navigationBar: showNavigationBar
+                ? const CupertinoNavigationBar(middle: Text('Title'))
+                : null,
             child: Builder(
-              builder:
-                  (BuildContext context) => Center(
-                    child: CupertinoTextField(
-                      placeholder: MediaQuery.viewInsetsOf(context).toString(),
-                    ),
-                  ),
+              builder: (BuildContext context) => Center(
+                child: CupertinoTextField(placeholder: MediaQuery.viewInsetsOf(context).toString()),
+              ),
             ),
           ),
         ),

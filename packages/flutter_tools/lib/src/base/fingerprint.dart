@@ -47,7 +47,7 @@ class Fingerprinter {
         return false;
       }
 
-      final Fingerprint oldFingerprint = Fingerprint.fromJson(fingerprintFile.readAsStringSync());
+      final oldFingerprint = Fingerprint.fromJson(fingerprintFile.readAsStringSync());
       final Fingerprint newFingerprint = buildFingerprint();
       return oldFingerprint == newFingerprint;
     } on Exception catch (e) {
@@ -100,8 +100,9 @@ class Fingerprint {
   /// serializing framework and this framework.
   factory Fingerprint.fromJson(String jsonData) {
     final Map<String, dynamic>? content = castStringKeyedMap(json.decode(jsonData));
-    final Map<String, String>? files =
-        content == null ? null : castStringKeyedMap(content['files'])?.cast<String, String>();
+    final Map<String, String>? files = content == null
+        ? null
+        : castStringKeyedMap(content['files'])?.cast<String, String>();
     return Fingerprint._(checksums: files ?? <String, String>{});
   }
 

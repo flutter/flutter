@@ -8,8 +8,7 @@
         "definition files."
     ],
     "luci_flags": {
-      "delay_collect_builds": true,
-      "parallel_download_builds": true
+      "upload_content_hash": true
     },
     "builds": [
         {

@@ -161,10 +161,9 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
           CupertinoTextSelectionToolbarButton.getButtonLabel(context, widget.buttonItem!),
       overflow: TextOverflow.ellipsis,
       style: _kToolbarButtonFontStyle.copyWith(
-        color:
-            widget.onPressed != null
-                ? _kToolbarTextColor.resolveFrom(context)
-                : CupertinoColors.inactiveGray,
+        color: widget.onPressed != null
+            ? _kToolbarTextColor.resolveFrom(context)
+            : CupertinoColors.inactiveGray,
       ),
     );
     switch (widget.buttonItem?.type) {
@@ -196,12 +195,11 @@ class _LiveTextIconPainter extends CustomPainter {
 
   final Color color;
 
-  final Paint _painter =
-      Paint()
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round
-        ..strokeWidth = 1.0
-        ..style = PaintingStyle.stroke;
+  final Paint _painter = Paint()
+    ..strokeCap = StrokeCap.round
+    ..strokeJoin = StrokeJoin.round
+    ..strokeWidth = 1.0
+    ..style = PaintingStyle.stroke;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -211,12 +209,11 @@ class _LiveTextIconPainter extends CustomPainter {
 
     final Offset origin = Offset(-size.width / 2.0, -size.height / 2.0);
     // Path for the one corner.
-    final Path path =
-        Path()
-          ..moveTo(origin.dx, origin.dy + 3.5)
-          ..lineTo(origin.dx, origin.dy + 1.0)
-          ..arcToPoint(Offset(origin.dx + 1.0, origin.dy), radius: const Radius.circular(1))
-          ..lineTo(origin.dx + 3.5, origin.dy);
+    final Path path = Path()
+      ..moveTo(origin.dx, origin.dy + 3.5)
+      ..lineTo(origin.dx, origin.dy + 1.0)
+      ..arcToPoint(Offset(origin.dx + 1.0, origin.dy), radius: const Radius.circular(1))
+      ..lineTo(origin.dx + 3.5, origin.dy);
 
     // Rotate to draw corner four times.
     final Matrix4 rotationMatrix = Matrix4.identity()..rotateZ(pi / 2.0);

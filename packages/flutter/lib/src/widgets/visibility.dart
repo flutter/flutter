@@ -12,6 +12,7 @@ library;
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
 import 'sliver.dart';
 import 'ticker_provider.dart';
@@ -66,6 +67,7 @@ class Visibility extends StatelessWidget {
     this.maintainSize = false,
     this.maintainSemantics = false,
     this.maintainInteractivity = false,
+    this.maintainFocusability = false,
   }) : assert(
          maintainState || !maintainAnimation,
          'Cannot maintain animations if the state is not also maintained.',
@@ -81,6 +83,10 @@ class Visibility extends StatelessWidget {
        assert(
          maintainSize || !maintainInteractivity,
          'Cannot maintain interactivity if size is not maintained.',
+       ),
+       assert(
+         maintainState || !maintainFocusability,
+         'Cannot maintain focusability if the state is not also maintained.',
        );
 
   /// Control whether the given [child] is [visible].
@@ -95,6 +101,7 @@ class Visibility extends StatelessWidget {
       maintainSize = true,
       maintainSemantics = true,
       maintainInteractivity = true,
+      maintainFocusability = true,
       replacement = const SizedBox.shrink(); // Unused since maintainState is always true.
 
   /// The widget to show or hide, as controlled by [visible].
@@ -139,6 +146,8 @@ class Visibility extends StatelessWidget {
   /// instead of replacing it with [replacement].
   ///
   /// If this property is false, then [maintainAnimation] must also be false.
+  ///
+  /// If this property is false, then [maintainFocusability] must also be false.
   ///
   /// Dynamically changing this value may cause the current state of the
   /// subtree to be lost (and a new instance of the subtree, with new [State]
@@ -215,6 +224,16 @@ class Visibility extends StatelessWidget {
   /// true, then touch events will nonetheless be passed through.
   final bool maintainInteractivity;
 
+  /// Whether to allow the widget to receive focus when hidden. Only in effect if [visible] is false.
+  ///
+  /// To set this to true, [maintainState] must also be set to true.
+  ///
+  /// By default, with [maintainFocusability] set to false, focus events cannot
+  /// reach the [child] when this widget is not [visible] because an [ExcludeFocus]
+  /// widget is used to exclude the child subtree from the focus tree. If this flag
+  /// is set to true, then focus events will reach the child subtree.
+  final bool maintainFocusability;
+
   /// Tells the visibility state of an element in the tree based off its
   /// ancestor [Visibility] elements.
   ///
@@ -229,8 +248,8 @@ class Visibility extends StatelessWidget {
   static bool of(BuildContext context) {
     bool isVisible = true;
     BuildContext ancestorContext = context;
-    InheritedElement? ancestor =
-        ancestorContext.getElementForInheritedWidgetOfExactType<_VisibilityScope>();
+    InheritedElement? ancestor = ancestorContext
+        .getElementForInheritedWidgetOfExactType<_VisibilityScope>();
     while (isVisible && ancestor != null) {
       final _VisibilityScope scope = context.dependOnInheritedElement(ancestor) as _VisibilityScope;
       isVisible = scope.isVisible;
@@ -245,7 +264,7 @@ class Visibility extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget result = child;
+    Widget result = ExcludeFocus(excluding: !visible && !maintainFocusability, child: child);
     if (maintainSize) {
       result = _Visibility(
         visible: visible,

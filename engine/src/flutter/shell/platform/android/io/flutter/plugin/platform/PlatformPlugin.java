@@ -209,6 +209,21 @@ public class PlatformPlugin {
       case SELECTION_CLICK:
         view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
         break;
+      case SUCCESS_NOTIFICATION:
+        if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
+          view.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
+        }
+        break;
+      case WARNING_NOTIFICATION:
+        if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
+          view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+        }
+        break;
+      case ERROR_NOTIFICATION:
+        if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
+          view.performHapticFeedback(HapticFeedbackConstants.REJECT);
+        }
+        break;
     }
   }
 
@@ -270,10 +285,13 @@ public class PlatformPlugin {
       // LEAN BACK
       // Available starting at Android SDK 4.1 (API 16).
       //
-      // If the Flutter Android app targets Android SDK 15 (API 35) or later then the Android
+      // If the Flutter Android app targets Android SDK 15 (API 35), then the Android
       // system will ignore this value unless the app also follows the opt out
       // instructions found in
       // https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge.
+      //
+      // If the Flutter Android app targets Android SDK 16 (API 36) or later, then the Android
+      // system will ignore this value.
       //
       // Should not show overlays, tap to reveal overlays, needs onChange callback
       // When the overlays come in on tap, the app does not receive the gesture and does not know
@@ -290,10 +308,13 @@ public class PlatformPlugin {
       // IMMERSIVE
       // Available starting at Android SDK 4.4 (API 19).
       //
-      // If the Flutter Android app targets Android SDK 15 (API 35) or later then the Android
+      // If the Flutter Android app targets Android SDK 15 (API 35), then the Android
       // system will ignore this value unless the app also follows the opt out
       // instructions found in
       // https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge.
+      //
+      // If the Flutter Android app targets Android SDK 16 (API 36) or later, then the Android
+      // system will ignore this value.
       //
       // Should not show overlays, swipe from edges to reveal overlays, needs onChange callback
       // When the overlays come in on swipe, the app does not receive the gesture and does not know
@@ -311,10 +332,13 @@ public class PlatformPlugin {
       // STICKY IMMERSIVE
       // Available starting at Android SDK 4.4 (API 19).
       //
-      // If the Flutter Android app targets Android SDK 15 (API 35) or later then the Android
+      // If the Flutter Android app targets Android SDK 15 (API 35), then the Android
       // system will ignore this value unless the app also follows the opt out
       // instructions found in
       // https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge.
+      //
+      // If the Flutter Android app targets Android SDK 16 (API 36) or later, then the Android
+      // system will ignore this value.
       //
       // Should not show overlays, swipe from edges to reveal overlays. The app will also receive
       // the swipe gesture. The overlays cannot be dismissed, so adding callback support will
@@ -362,7 +386,7 @@ public class PlatformPlugin {
             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 
-    if (overlaysToShow.size() == 0) {
+    if (overlaysToShow.isEmpty()) {
       enabledOverlays |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
     }
 

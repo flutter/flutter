@@ -128,10 +128,10 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
     return kEmptyResult;
   }
 
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 
   size_t count = 4;
-  BufferView vertex_buffer = host_buffer.Emplace(
+  BufferView vertex_buffer = data_host_buffer.Emplace(
       count * sizeof(VT), alignof(VT), [&corners](uint8_t* buffer) {
         auto vertices = reinterpret_cast<VT*>(buffer);
         for (auto& corner : corners) {

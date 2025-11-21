@@ -6,7 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget wrap({required Widget child, ThemeData? theme}) {
-  return MaterialApp(theme: theme, home: Center(child: Material(child: child)));
+  return MaterialApp(
+    theme: theme,
+    home: Center(child: Material(child: child)),
+  );
 }
 
 void main() {
@@ -210,7 +213,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      wrap(theme: ThemeData(useMaterial3: false), child: ExpandIcon(onPressed: (bool _) {})),
+      wrap(
+        theme: ThemeData(useMaterial3: false),
+        child: ExpandIcon(onPressed: (bool _) {}),
+      ),
     );
 
     expect(
@@ -375,5 +381,18 @@ void main() {
     await tester.pumpAndSettle();
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);
     expect(iconTheme.data.color, equals(Colors.cyan));
+  });
+
+  testWidgets('Expand icon does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(child: ExpandIcon(onPressed: (bool value) {})),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ExpandIcon)), Size.zero);
   });
 }

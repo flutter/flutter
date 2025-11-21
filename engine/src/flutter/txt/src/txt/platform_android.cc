@@ -6,6 +6,7 @@
 
 #if defined(SK_FONTMGR_ANDROID_AVAILABLE)
 #include "third_party/skia/include/ports/SkFontMgr_android.h"
+#include "third_party/skia/include/ports/SkFontScanner_FreeType.h"
 #endif
 
 #if defined(SK_FONTMGR_FREETYPE_EMPTY_AVAILABLE)
@@ -20,7 +21,8 @@ std::vector<std::string> GetDefaultFontFamilies() {
 
 sk_sp<SkFontMgr> GetDefaultFontManager(uint32_t font_initialization_data) {
 #if defined(SK_FONTMGR_ANDROID_AVAILABLE)
-  static sk_sp<SkFontMgr> mgr = SkFontMgr_New_Android(nullptr);
+  static sk_sp<SkFontMgr> mgr =
+      SkFontMgr_New_Android(nullptr, SkFontScanner_Make_FreeType());
 #elif defined(SK_FONTMGR_FREETYPE_EMPTY_AVAILABLE)
   static sk_sp<SkFontMgr> mgr = SkFontMgr_New_Custom_Empty();
 #else

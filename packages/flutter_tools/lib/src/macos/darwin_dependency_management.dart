@@ -7,6 +7,8 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
+import '../darwin/darwin.dart';
 import '../features.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -27,6 +29,7 @@ class DarwinDependencyManagement {
     required FeatureFlags featureFlags,
     required Logger logger,
     required Analytics analytics,
+    required Platform platform,
   }) : _project = project,
        _plugins = plugins,
        _cocoapods = cocoapods,
@@ -34,7 +37,8 @@ class DarwinDependencyManagement {
        _fileSystem = fileSystem,
        _featureFlags = featureFlags,
        _logger = logger,
-       _analytics = analytics;
+       _analytics = analytics,
+       _hostPlatform = platform;
 
   final FlutterProject _project;
   final List<Plugin> _plugins;
@@ -44,6 +48,7 @@ class DarwinDependencyManagement {
   final FeatureFlags _featureFlags;
   final Logger _logger;
   final Analytics _analytics;
+  final Platform _hostPlatform;
 
   /// Generates/updates required files and project settings for Darwin
   /// Dependency Managers (CocoaPods and Swift Package Manager). Projects may
@@ -57,14 +62,8 @@ class DarwinDependencyManagement {
   /// Swift Package Manager requires a generated Package.swift and certain
   /// settings in the Xcode project's project.pbxproj and xcscheme (done later
   /// before build).
-  Future<void> setUp({required SupportedPlatform platform}) async {
-    if (platform != SupportedPlatform.ios && platform != SupportedPlatform.macos) {
-      throwToolExit(
-        'The platform ${platform.name} is incompatible with Darwin Dependency Managers. Only iOS and macOS are allowed.',
-      );
-    }
-    final XcodeBasedProject xcodeProject =
-        platform == SupportedPlatform.ios ? _project.ios : _project.macos;
+  Future<void> setUp({required FlutterDarwinPlatform platform}) async {
+    final XcodeBasedProject xcodeProject = platform.xcodeProject(_project);
     if (xcodeProject.usesSwiftPackageManager) {
       await _swiftPackageManager.generatePluginsSwiftPackage(_plugins, platform, xcodeProject);
     } else if (xcodeProject.flutterPluginSwiftPackageInProjectSettings) {
@@ -84,7 +83,11 @@ class DarwinDependencyManagement {
       :int totalCount,
       :int swiftPackageCount,
       :int podCount,
-    ) = await _evaluatePluginsAndPrintWarnings(platform: platform, xcodeProject: xcodeProject);
+    ) = await _evaluatePluginsAndPrintWarnings(
+      platform: platform,
+      xcodeProject: xcodeProject,
+      hostPlatformIsMacOS: _hostPlatform.isMacOS,
+    );
 
     final bool useCocoapods;
     if (xcodeProject.usesSwiftPackageManager) {
@@ -106,7 +109,7 @@ class DarwinDependencyManagement {
       _cocoapods.addPodsDependencyToFlutterXcconfig(xcodeProject);
     }
 
-    final Event event = Event.flutterInjectDarwinPlugins(
+    final event = Event.flutterInjectDarwinPlugins(
       platform: platform.name,
       isModule: _project.isModule,
       swiftPackageManagerUsable: xcodeProject.usesSwiftPackageManager,
@@ -123,22 +126,23 @@ class DarwinDependencyManagement {
     _analytics.send(event);
   }
 
-  /// Returns count of total number of plugins, number of Swift Package Manager
-  /// compatible plugins, and number of CocoaPods compatible plugins. A plugin
-  /// can be both Swift Package Manager and CocoaPods compatible.
+  /// Returns count of total number of plugins, number of Swift Package Manager compatible plugins,
+  /// and number of CocoaPods compatible plugins. A plugin can be both Swift Package Manager and
+  /// CocoaPods compatible.
   ///
-  /// Prints warnings when using a plugin incompatible with the available Darwin
-  /// Dependency Manager (Swift Package Manager or CocoaPods).
+  /// If [hostPlatformIsMacOS], prints warnings when using a plugin incompatible with the available
+  /// Darwin Dependency Manager (Swift Package Manager or CocoaPods).
   ///
-  /// Prints message prompting the user to deintegrate CocoaPods if using all
-  /// Swift Package plugins.
+  /// If [hostPlatformIsMacOS], prints message prompting the user to deintegrate CocoaPods if
+  /// using all Swift Package plugins.
   Future<({int totalCount, int swiftPackageCount, int podCount})> _evaluatePluginsAndPrintWarnings({
-    required SupportedPlatform platform,
+    required FlutterDarwinPlatform platform,
     required XcodeBasedProject xcodeProject,
+    required bool hostPlatformIsMacOS,
   }) async {
-    int pluginCount = 0;
-    int swiftPackageCount = 0;
-    int cocoapodCount = 0;
+    var pluginCount = 0;
+    var swiftPackageCount = 0;
+    var cocoapodCount = 0;
     for (final Plugin plugin in _plugins) {
       if (plugin.platforms[platform.name] == null) {
         continue;
@@ -173,7 +177,8 @@ class DarwinDependencyManagement {
       // If not using Swift Package Manager and plugin does not have podspec
       // but does have a Package.swift, throw an error. Otherwise, it'll error
       // when it builds.
-      if (!xcodeProject.usesSwiftPackageManager &&
+      if (hostPlatformIsMacOS &&
+          !xcodeProject.usesSwiftPackageManager &&
           !cocoaPodsCompatible &&
           swiftPackageManagerCompatible) {
         throwToolExit(
@@ -201,11 +206,12 @@ class DarwinDependencyManagement {
           xcodeProject.xcodeProject,
         );
 
-        final String configWarning =
+        final configWarning =
             '${_podIncludeInConfigWarning(xcodeProject, 'Debug')}'
             '${_podIncludeInConfigWarning(xcodeProject, 'Release')}';
 
-        if (xcodeProject.podfile.readAsStringSync() == podfileTemplate.readAsStringSync()) {
+        if (hostPlatformIsMacOS &&
+            xcodeProject.podfile.readAsStringSync() == podfileTemplate.readAsStringSync()) {
           _logger.printWarning(
             'All plugins found for ${platform.name} are Swift Packages, but your '
             'project still has CocoaPods integration. To remove CocoaPods '
@@ -215,7 +221,7 @@ class DarwinDependencyManagement {
             '$configWarning\n'
             "Removing CocoaPods integration will improve the project's build time.",
           );
-        } else {
+        } else if (hostPlatformIsMacOS) {
           // If all plugins are Swift Packages, but the Podfile has custom logic,
           // recommend migrating manually.
           _logger.printWarning(

@@ -90,11 +90,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const Material().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>['type: canvas']);
   });
@@ -109,11 +108,10 @@ void main() {
       borderRadius: BorderRadiusDirectional.all(Radius.circular(10)),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'type: canvas',
@@ -286,7 +284,10 @@ void main() {
   ) async {
     final ThemeData lightTheme = ThemeData();
     await tester.pumpWidget(
-      MaterialApp(theme: lightTheme, home: const Scaffold(body: Center(child: Text('test')))),
+      MaterialApp(
+        theme: lightTheme,
+        home: const Scaffold(body: Center(child: Text('test'))),
+      ),
     );
 
     expect(lightTheme.colorScheme.brightness, Brightness.light);
@@ -298,7 +299,10 @@ void main() {
   ) async {
     final ThemeData darkTheme = ThemeData.dark();
     await tester.pumpWidget(
-      MaterialApp(theme: darkTheme, home: const Scaffold(body: Center(child: Text('test')))),
+      MaterialApp(
+        theme: darkTheme,
+        home: const Scaffold(body: Center(child: Text('test'))),
+      ),
     );
 
     expect(darkTheme.colorScheme.brightness, Brightness.dark);
@@ -332,7 +336,10 @@ void main() {
 
       // With no surfaceTintColor specified, it should not apply an overlay
       await tester.pumpWidget(
-        Theme(data: ThemeData(), child: buildMaterial(color: baseColor, elevation: 12.0)),
+        Theme(
+          data: ThemeData(),
+          child: buildMaterial(color: baseColor, elevation: 12.0),
+        ),
       );
       await tester.pumpAndSettle();
       final RenderPhysicalShape noTintModel = getModel(tester);
@@ -1233,6 +1240,15 @@ void main() {
     expect(outsideViewAnchor, isNotNull);
     expect(outsideView, isNull);
     expect(insideView, isNull);
+  });
+
+  testWidgets('Material does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox(child: Material())),
+      ),
+    );
+    expect(tester.getSize(find.byType(Material)), Size.zero);
   });
 }
 

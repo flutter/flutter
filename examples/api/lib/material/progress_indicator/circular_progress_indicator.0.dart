@@ -32,12 +32,11 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
   @override
   void initState() {
     super.initState();
-    controller =
-        AnimationController(vsync: this, duration: const Duration(seconds: 5))
-          ..addListener(() {
-            setState(() {});
-          })
-          ..repeat(reverse: true);
+    controller = AnimationController(vsync: this, duration: const Duration(seconds: 5))
+      ..addListener(() {
+        setState(() {});
+      })
+      ..repeat(reverse: true);
   }
 
   @override
@@ -66,10 +65,9 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
             ),
             SwitchListTile(
               value: year2023,
-              title:
-                  year2023
-                      ? const Text('Switch to latest M3 style')
-                      : const Text('Switch to year2023 M3 style'),
+              title: year2023
+                  ? const Text('Switch to latest M3 style')
+                  : const Text('Switch to year2023 M3 style'),
               onChanged: (bool value) {
                 setState(() {
                   year2023 = !year2023;

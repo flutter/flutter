@@ -14,10 +14,10 @@ Stream<Uint8List> debounceDataStream(
   Stream<Uint8List> stream, [
   Duration duration = const Duration(milliseconds: 100),
 ]) {
-  final StreamController<Uint8List> controller = StreamController<Uint8List>();
-  final BytesBuilder buffer = BytesBuilder(copy: false);
+  final controller = StreamController<Uint8List>();
+  final buffer = BytesBuilder(copy: false);
 
-  bool isDone = false;
+  var isDone = false;
   Timer? timer;
 
   // Called when timer triggers, sends out the buffered messages.

@@ -39,6 +39,8 @@ class AndroidContext {
 
   virtual AndroidRenderingAPI RenderingApi() const;
 
+  virtual bool IsDynamicSelection() const;
+
   virtual bool IsValid() const;
 
   //----------------------------------------------------------------------------

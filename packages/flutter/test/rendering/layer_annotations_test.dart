@@ -10,15 +10,14 @@ import 'package:vector_math/vector_math_64.dart';
 
 void main() {
   test('ContainerLayer.findAllAnnotations returns all results from its children', () {
-    final Layer root =
-        _Layers(
-          ContainerLayer(),
-          children: <Object>[
-            _TestAnnotatedLayer(1, opaque: false),
-            _TestAnnotatedLayer(2, opaque: false),
-            _TestAnnotatedLayer(3, opaque: false),
-          ],
-        ).build();
+    final Layer root = _Layers(
+      ContainerLayer(),
+      children: <Object>[
+        _TestAnnotatedLayer(1, opaque: false),
+        _TestAnnotatedLayer(2, opaque: false),
+        _TestAnnotatedLayer(3, opaque: false),
+      ],
+    ).build();
 
     expect(
       root.findAllAnnotations<int>(Offset.zero).entries.toList(),
@@ -31,58 +30,54 @@ void main() {
   });
 
   test('ContainerLayer.find returns the first result from its children', () {
-    final Layer root =
-        _Layers(
-          ContainerLayer(),
-          children: <Object>[
-            _TestAnnotatedLayer(1, opaque: false),
-            _TestAnnotatedLayer(2, opaque: false),
-            _TestAnnotatedLayer(3, opaque: false),
-          ],
-        ).build();
+    final Layer root = _Layers(
+      ContainerLayer(),
+      children: <Object>[
+        _TestAnnotatedLayer(1, opaque: false),
+        _TestAnnotatedLayer(2, opaque: false),
+        _TestAnnotatedLayer(3, opaque: false),
+      ],
+    ).build();
 
     final int result = root.find<int>(Offset.zero)!;
     expect(result, 3);
   });
 
   test('ContainerLayer.findAllAnnotations returns empty result when finding nothing', () {
-    final Layer root =
-        _Layers(
-          ContainerLayer(),
-          children: <Object>[
-            _TestAnnotatedLayer(1, opaque: false),
-            _TestAnnotatedLayer(2, opaque: false),
-            _TestAnnotatedLayer(3, opaque: false),
-          ],
-        ).build();
+    final Layer root = _Layers(
+      ContainerLayer(),
+      children: <Object>[
+        _TestAnnotatedLayer(1, opaque: false),
+        _TestAnnotatedLayer(2, opaque: false),
+        _TestAnnotatedLayer(3, opaque: false),
+      ],
+    ).build();
 
     expect(root.findAllAnnotations<double>(Offset.zero).entries.isEmpty, isTrue);
   });
 
   test('ContainerLayer.find returns null when finding nothing', () {
-    final Layer root =
-        _Layers(
-          ContainerLayer(),
-          children: <Object>[
-            _TestAnnotatedLayer(1, opaque: false),
-            _TestAnnotatedLayer(2, opaque: false),
-            _TestAnnotatedLayer(3, opaque: false),
-          ],
-        ).build();
+    final Layer root = _Layers(
+      ContainerLayer(),
+      children: <Object>[
+        _TestAnnotatedLayer(1, opaque: false),
+        _TestAnnotatedLayer(2, opaque: false),
+        _TestAnnotatedLayer(3, opaque: false),
+      ],
+    ).build();
 
     expect(root.find<double>(Offset.zero), isNull);
   });
 
   test('ContainerLayer.findAllAnnotations stops at the first opaque child', () {
-    final Layer root =
-        _Layers(
-          ContainerLayer(),
-          children: <Object>[
-            _TestAnnotatedLayer(1, opaque: false),
-            _TestAnnotatedLayer(2, opaque: true),
-            _TestAnnotatedLayer(3, opaque: false),
-          ],
-        ).build();
+    final Layer root = _Layers(
+      ContainerLayer(),
+      children: <Object>[
+        _TestAnnotatedLayer(1, opaque: false),
+        _TestAnnotatedLayer(2, opaque: true),
+        _TestAnnotatedLayer(3, opaque: false),
+      ],
+    ).build();
 
     expect(
       root.findAllAnnotations<int>(Offset.zero).entries.toList(),
@@ -323,11 +318,10 @@ void main() {
 
   test('TransformLayer.findAllAnnotations correctly transforms with perspective', () {
     // Test the 4 corners of a transformed annotated region.
-    final Matrix4 transform =
-        Matrix4.identity()
-          ..setEntry(3, 2, 0.005)
-          ..rotateX(-0.2)
-          ..rotateY(0.2);
+    final Matrix4 transform = Matrix4.identity()
+      ..setEntry(3, 2, 0.005)
+      ..rotateX(-0.2)
+      ..rotateY(0.2);
 
     final Layer root = _withBackgroundAnnotation(
       0,

@@ -68,7 +68,7 @@ class FakeResponse {
     this.headers = const <String, List<String>>{},
   });
 
-  static const FakeResponse empty = FakeResponse();
+  static const empty = FakeResponse();
 
   final int statusCode;
   final List<int> body;
@@ -91,11 +91,11 @@ class FakeHttpClient implements HttpClient {
   /// Creates an HTTP client that always returns an empty 200 request.
   FakeHttpClient.any() : _any = true, _requests = <FakeRequest>[];
 
-  bool _any = false;
+  var _any = false;
   final List<FakeRequest> _requests;
 
   @override
-  bool autoUncompress = true;
+  var autoUncompress = true;
 
   @override
   Duration? connectionTimeout;
@@ -140,7 +140,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> delete(String host, int port, String path) {
-    final Uri uri = Uri(host: host, port: port, path: path);
+    final uri = Uri(host: host, port: port, path: path);
     return deleteUrl(uri);
   }
 
@@ -154,7 +154,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> get(String host, int port, String path) {
-    final Uri uri = Uri(host: host, port: port, path: path);
+    final uri = Uri(host: host, port: port, path: path);
     return getUrl(uri);
   }
 
@@ -165,7 +165,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> head(String host, int port, String path) {
-    final Uri uri = Uri(host: host, port: port, path: path);
+    final uri = Uri(host: host, port: port, path: path);
     return headUrl(uri);
   }
 
@@ -176,7 +176,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> open(String method, String host, int port, String path) {
-    final Uri uri = Uri(host: host, port: port, path: path);
+    final uri = Uri(host: host, port: port, path: path);
     return openUrl(method, uri);
   }
 
@@ -187,7 +187,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> patch(String host, int port, String path) {
-    final Uri uri = Uri(host: host, port: port, path: path);
+    final uri = Uri(host: host, port: port, path: path);
     return patchUrl(uri);
   }
 
@@ -198,7 +198,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> post(String host, int port, String path) {
-    final Uri uri = Uri(host: host, port: port, path: path);
+    final uri = Uri(host: host, port: port, path: path);
     return postUrl(uri);
   }
 
@@ -209,7 +209,7 @@ class FakeHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> put(String host, int port, String path) {
-    final Uri uri = Uri(host: host, port: port, path: path);
+    final uri = Uri(host: host, port: port, path: path);
     return putUrl(uri);
   }
 
@@ -218,7 +218,7 @@ class FakeHttpClient implements HttpClient {
     return _findRequest(HttpMethod.put, url, StackTrace.current);
   }
 
-  int _requestCount = 0;
+  var _requestCount = 0;
 
   _FakeHttpClientRequest _findRequest(HttpMethod method, Uri uri, StackTrace stackTrace) {
     // Ensure the fake client throws similar errors to the real client.
@@ -271,27 +271,27 @@ class _FakeHttpClientRequest implements HttpClientRequest {
   final String _method;
   final Uri _uri;
   final Object? _responseError;
-  final List<int> _body = <int>[];
+  final _body = <int>[];
   final List<int>? _expectedBody;
   final StackTrace _stackTrace;
 
   @override
-  bool bufferOutput = true;
+  var bufferOutput = true;
 
   @override
-  int contentLength = 0;
+  var contentLength = 0;
 
   @override
   late Encoding encoding;
 
   @override
-  bool followRedirects = true;
+  var followRedirects = true;
 
   @override
-  int maxRedirects = 5;
+  var maxRedirects = 5;
 
   @override
-  bool persistentConnection = true;
+  var persistentConnection = true;
 
   @override
   void abort([Object? exception, StackTrace? stackTrace]) {
@@ -308,14 +308,14 @@ class _FakeHttpClientRequest implements HttpClientRequest {
 
   @override
   Future<void> addStream(Stream<List<int>> stream) async {
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     stream.listen(_body.addAll, onDone: completer.complete);
     await completer.future;
   }
 
   @override
   Future<HttpClientResponse> close() async {
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     Timer.run(() {
       if (_expectedBody != null && !const ListEquality<int>().equals(_expectedBody, _body)) {
         completer.completeError(
@@ -416,7 +416,7 @@ class _FakeHttpClientResponse extends Stream<List<int>> implements HttpClientRes
     void Function()? onDone,
     bool? cancelOnError,
   }) {
-    final Stream<List<int>> response = Stream<List<int>>.fromIterable(<List<int>>[_response.body]);
+    final response = Stream<List<int>>.fromIterable(<List<int>>[_response.body]);
     return response.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 
@@ -461,7 +461,7 @@ class _FakeHttpHeaders implements HttpHeaders {
   }
 
   @override
-  int contentLength = -1;
+  var contentLength = -1;
 
   @override
   ContentType? contentType;

@@ -29,7 +29,8 @@ bool CommandBufferGLES::IsValid() const {
 }
 
 // |CommandBuffer|
-bool CommandBufferGLES::OnSubmitCommands(CompletionCallback callback) {
+bool CommandBufferGLES::OnSubmitCommands(bool block_on_schedule,
+                                         CompletionCallback callback) {
   const auto result = reactor_->React();
   if (callback) {
     callback(result ? CommandBuffer::Status::kCompleted

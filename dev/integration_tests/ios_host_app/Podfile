@@ -10,3 +10,7 @@ end
 target 'FlutterUITests' do
   inherit! :search_paths
 end
+
+post_install do |installer|
+  flutter_post_install(installer)
+end

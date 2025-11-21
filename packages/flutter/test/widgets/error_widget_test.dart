@@ -46,8 +46,8 @@ void main() {
 
   testWidgets(
     'when constructing an ErrorWidget due to a build failure throws an error, fail gracefully',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       final Key container = UniqueKey();
       await tester.pumpWidget(

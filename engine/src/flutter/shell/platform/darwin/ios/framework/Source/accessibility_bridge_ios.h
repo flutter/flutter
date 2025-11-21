@@ -39,6 +39,7 @@ class AccessibilityBridgeIos {
    * The input id is the uid of the newly focused SemanticObject.
    */
   virtual void AccessibilityObjectDidLoseFocus(int32_t id) = 0;
+  virtual NSString* GetDefaultLocale() = 0;
   virtual FlutterPlatformViewsController* GetPlatformViewsController() const = 0;
 };
 

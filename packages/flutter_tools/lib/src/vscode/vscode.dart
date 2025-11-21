@@ -13,8 +13,8 @@ import '../base/version.dart';
 import '../convert.dart';
 import '../doctor_validator.dart';
 
-const String extensionIdentifier = 'Dart-Code.flutter';
-const String extensionMarketplaceUrl =
+const extensionIdentifier = 'Dart-Code.flutter';
+const extensionMarketplaceUrl =
     'https://marketplace.visualstudio.com/items?itemName=$extensionIdentifier';
 
 class VsCode {
@@ -34,7 +34,7 @@ class VsCode {
 
     // If the extensions directory doesn't exist at all, the listSync()
     // below will fail, so just bail out early.
-    const ValidationMessage notInstalledMessage = ValidationMessage(
+    const notInstalledMessage = ValidationMessage(
       'Flutter extension can be installed from:',
       contextUrl: extensionMarketplaceUrl,
     );
@@ -68,10 +68,11 @@ class VsCode {
     String extensionDirectory, {
     String? edition,
     required FileSystem fileSystem,
+    required Platform platform,
   }) {
     final String packageJsonPath = fileSystem.path.join(
       installPath,
-      'Resources',
+      platform.isLinux ? 'resources' : 'Resources',
       'app',
       'package.json',
     );
@@ -95,7 +96,7 @@ class VsCode {
   final String? edition;
 
   Version? _extensionVersion;
-  final List<ValidationMessage> _validationMessages = <ValidationMessage>[];
+  final _validationMessages = <ValidationMessage>[];
 
   String get productName => 'VS Code${edition != null ? ', $edition' : ''}';
 
@@ -132,11 +133,13 @@ class VsCode {
     Platform platform,
     ProcessManager processManager,
   ) {
-    final String? homeDirPath =
-        FileSystemUtils(fileSystem: fileSystem, platform: platform).homeDirPath;
+    final String? homeDirPath = FileSystemUtils(
+      fileSystem: fileSystem,
+      platform: platform,
+    ).homeDirPath;
 
-    String vsCodeSpotlightResult = '';
-    String vsCodeInsiderSpotlightResult = '';
+    var vsCodeSpotlightResult = '';
+    var vsCodeInsiderSpotlightResult = '';
     // Query Spotlight for unexpected installation locations.
     try {
       final ProcessResult vsCodeSpotlightQueryResult = processManager.runSync(<String>[
@@ -209,7 +212,7 @@ class VsCode {
     final String? progFiles = platform.environment['programfiles'];
     final String? localAppData = platform.environment['localappdata'];
 
-    final List<VsCodeInstallLocation> searchLocations = <VsCodeInstallLocation>[
+    final searchLocations = <VsCodeInstallLocation>[
       if (localAppData != null)
         VsCodeInstallLocation(
           fileSystem.path.join(localAppData, r'Programs\Microsoft VS Code'),
@@ -294,11 +297,13 @@ class VsCode {
     FileSystem fileSystem,
     Platform platform,
   ) {
-    final List<VsCode> results = <VsCode>[];
+    final results = <VsCode>[];
 
-    for (final VsCodeInstallLocation searchLocation in allLocations) {
-      final String? homeDirPath =
-          FileSystemUtils(fileSystem: fileSystem, platform: platform).homeDirPath;
+    for (final searchLocation in allLocations) {
+      final String? homeDirPath = FileSystemUtils(
+        fileSystem: fileSystem,
+        platform: platform,
+      ).homeDirPath;
       if (homeDirPath != null && fileSystem.isDirectorySync(searchLocation.installPath)) {
         final String extensionDirectory = fileSystem.path.join(
           homeDirPath,
@@ -311,6 +316,7 @@ class VsCode {
             extensionDirectory,
             edition: searchLocation.edition,
             fileSystem: fileSystem,
+            platform: platform,
           ),
         );
       }

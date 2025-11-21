@@ -2,7 +2,7 @@
 
 Tests external texture rendering between a native[^1] platform and Flutter.
 
-Part of Flutter's API for [plugins](https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin) includes passing _external textures_, or textures
+Part of Flutter's API for [plugins](https://docs.flutter.dev/development/packages-and-plugins/developing-packages#plugin) includes passing _external textures_, or textures
 created outside of Flutter, to Flutter, typically using the [`Texture`][texture]
 widget. This is useful for plugins that render video, or for plugins that
 interact with the camera.

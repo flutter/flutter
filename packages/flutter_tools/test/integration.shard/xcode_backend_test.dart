@@ -11,15 +11,15 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import '../src/common.dart';
 import 'test_utils.dart';
 
-const String xcodeBackendPath = 'bin/xcode_backend.sh';
-const String xcodeBackendErrorHeader =
+const xcodeBackendPath = 'bin/xcode_backend.sh';
+const xcodeBackendErrorHeader =
     '========================================================================';
 
 // Acceptable $CONFIGURATION/$FLUTTER_BUILD_MODE values should be debug, profile, or release
-const Map<String, String> unknownConfiguration = <String, String>{'CONFIGURATION': 'Custom'};
+const unknownConfiguration = <String, String>{'CONFIGURATION': 'Custom'};
 
 // $FLUTTER_BUILD_MODE will override $CONFIGURATION
-const Map<String, String> unknownFlutterBuildMode = <String, String>{
+const unknownFlutterBuildMode = <String, String>{
   'FLUTTER_BUILD_MODE': 'Custom',
   'CONFIGURATION': 'Debug',
 };
@@ -52,16 +52,6 @@ void main() {
   test('Xcode backend fails for on unsupported configuration combinations', () async {
     await expectXcodeBackendFails(unknownConfiguration);
     await expectXcodeBackendFails(unknownFlutterBuildMode);
-  }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
-
-  test('Xcode backend warns archiving a non-release build.', () async {
-    final ProcessResult result = await Process.run(
-      xcodeBackendPath,
-      <String>['build'],
-      environment: <String, String>{'CONFIGURATION': 'Debug', 'ACTION': 'install'},
-    );
-    expect(result.stderr, contains('warning: Flutter archive not built in Release mode.'));
-    expect(result.exitCode, isNot(0));
   }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
 
   test('Xcode backend warns when unable to determine platform', () async {
@@ -98,7 +88,7 @@ void main() {
       expect(result, const ProcessResultMatcher(stdoutPattern: 'Info.plist does not exist.'));
     });
 
-    const String emptyPlist = '''
+    const emptyPlist = '''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -127,27 +117,48 @@ void main() {
       expect(result, const ProcessResultMatcher());
     });
 
-    for (final String buildConfiguration in <String>['Debug', 'Profile']) {
-      test('add keys in $buildConfiguration', () async {
-        infoPlist.writeAsStringSync(emptyPlist);
+    for (final buildConfiguration in <String>['Debug', 'Profile']) {
+      for (final verbose in <bool>[true, false]) {
+        test(
+          'add keys in $buildConfiguration under ${verbose ? 'verbose' : 'non-verbose'} mode',
+          () async {
+            infoPlist.writeAsStringSync(emptyPlist);
+            final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
 
-        final ProcessResult result = await Process.run(
-          xcodeBackendPath,
-          <String>['test_vm_service_bonjour_service'],
-          environment: <String, String>{
-            'CONFIGURATION': buildConfiguration,
-            'BUILT_PRODUCTS_DIR': buildDirectory.path,
-            'INFOPLIST_PATH': 'Info.plist',
+            final ProcessResult result = await Process.run(
+              xcodeBackendPath,
+              <String>['test_vm_service_bonjour_service'],
+              environment: <String, String>{
+                'CONFIGURATION': buildConfiguration,
+                'BUILT_PRODUCTS_DIR': buildDirectory.path,
+                'INFOPLIST_PATH': 'Info.plist',
+                if (verbose) 'VERBOSE_SCRIPT_LOGGING': 'YES',
+                'SCRIPT_OUTPUT_STREAM_FILE': pipe.path,
+              },
+            );
+
+            final String actualInfoPlist = infoPlist.readAsStringSync();
+            expect(actualInfoPlist, contains('NSBonjourServices'));
+            expect(actualInfoPlist, contains('dartVmService'));
+            expect(actualInfoPlist, contains('NSLocalNetworkUsageDescription'));
+
+            // Make sure no Xcode compilation error.
+            expect(result.stderr, isNot(startsWith('error:')));
+
+            const plutilErrorMessage =
+                'Could not extract value, error: No value at that key path or invalid key path: NSBonjourServices';
+            expect(pipe.readAsStringSync(), isNot(contains(plutilErrorMessage)));
+            expect(result.stderr, isNot(contains(plutilErrorMessage)));
+            if (verbose) {
+              expect(result.stdout, contains(plutilErrorMessage));
+            } else {
+              expect(result.stdout, isNot(contains(plutilErrorMessage)));
+            }
+
+            expect(result, const ProcessResultMatcher());
           },
         );
-
-        final String actualInfoPlist = infoPlist.readAsStringSync();
-        expect(actualInfoPlist, contains('NSBonjourServices'));
-        expect(actualInfoPlist, contains('dartVmService'));
-        expect(actualInfoPlist, contains('NSLocalNetworkUsageDescription'));
-
-        expect(result, const ProcessResultMatcher());
-      });
+      }
     }
 
     test(
@@ -192,6 +203,8 @@ void main() {
 </dict>
 </plist>
 ''');
+
+        expect(result.stderr, isNot(startsWith('error:')));
         expect(result, const ProcessResultMatcher());
       },
     );

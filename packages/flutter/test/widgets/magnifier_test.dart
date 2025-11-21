@@ -214,10 +214,9 @@ void main() {
 
         final OverlayEntry fakeBeforeOverlayEntry = OverlayEntry(builder: (_) => fakeBefore);
         addTearDown(
-          () =>
-              fakeBeforeOverlayEntry
-                ..remove()
-                ..dispose(),
+          () => fakeBeforeOverlayEntry
+            ..remove()
+            ..dispose(),
         );
 
         Overlay.of(context).insert(fakeBeforeOverlayEntry);
@@ -230,10 +229,9 @@ void main() {
         WidgetsBinding.instance.scheduleFrame();
         await tester.pumpAndSettle();
 
-        final Iterable<Element> allOverlayChildren =
-            find
-                .descendant(of: find.byType(Overlay), matching: find.byType(Placeholder))
-                .evaluate();
+        final Iterable<Element> allOverlayChildren = find
+            .descendant(of: find.byType(Overlay), matching: find.byType(Placeholder))
+            .evaluate();
 
         // Expect the magnifier to be the first child, even though it was inserted
         // after the fakeBefore.

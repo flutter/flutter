@@ -96,8 +96,9 @@ class FirstComponentList extends StatelessWidget {
     // Fully traverse this list before moving on.
     return FocusTraversalGroup(
       child: ListView(
-        padding:
-            showSecondList ? const EdgeInsetsDirectional.only(end: smallSpacing) : EdgeInsets.zero,
+        padding: showSecondList
+            ? const EdgeInsetsDirectional.only(end: smallSpacing)
+            : EdgeInsets.zero,
         children: <Widget>[
           const Actions(),
           colDivider,
@@ -613,48 +614,43 @@ class _DialogsState extends State<Dialogs> {
   void openDialog(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder:
-          (BuildContext context) => AlertDialog(
-            title: const Text('What is a dialog?'),
-            content: const Text(
-              'A dialog is a type of modal window that appears in front of app content to provide critical information, or prompt for a decision to be made.',
-            ),
-            actions: <Widget>[
-              TextButton(child: const Text('Okay'), onPressed: () => Navigator.of(context).pop()),
-              FilledButton(
-                child: const Text('Dismiss'),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-          ),
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('What is a dialog?'),
+        content: const Text(
+          'A dialog is a type of modal window that appears in front of app content to provide critical information, or prompt for a decision to be made.',
+        ),
+        actions: <Widget>[
+          TextButton(child: const Text('Okay'), onPressed: () => Navigator.of(context).pop()),
+          FilledButton(child: const Text('Dismiss'), onPressed: () => Navigator.of(context).pop()),
+        ],
+      ),
     );
   }
 
   void openFullscreenDialog(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder:
-          (BuildContext context) => Dialog.fullscreen(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Scaffold(
-                appBar: AppBar(
-                  title: const Text('Full-screen dialog'),
-                  centerTitle: false,
-                  leading: IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                  actions: <Widget>[
-                    TextButton(
-                      child: const Text('Close'),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ],
-                ),
+      builder: (BuildContext context) => Dialog.fullscreen(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('Full-screen dialog'),
+              centerTitle: false,
+              leading: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(context).pop(),
               ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Close'),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
             ),
           ),
+        ),
+      ),
     );
   }
 
@@ -722,10 +718,10 @@ class _SwitchRowState extends State<SwitchRow> {
   bool value0 = false;
   bool value1 = true;
 
-  final MaterialStateProperty<Icon?> thumbIcon = MaterialStateProperty.resolveWith<Icon?>((
-    Set<MaterialState> states,
+  final WidgetStateProperty<Icon?> thumbIcon = WidgetStateProperty.resolveWith<Icon?>((
+    Set<WidgetState> states,
   ) {
-    if (states.contains(MaterialState.selected)) {
+    if (states.contains(WidgetState.selected)) {
       return const Icon(Icons.check);
     }
     return const Icon(Icons.close);
@@ -738,26 +734,24 @@ class _SwitchRowState extends State<SwitchRow> {
       children: <Widget>[
         Switch(
           value: value0,
-          onChanged:
-              widget.isEnabled
-                  ? (bool value) {
-                    setState(() {
-                      value0 = value;
-                    });
-                  }
-                  : null,
+          onChanged: widget.isEnabled
+              ? (bool value) {
+                  setState(() {
+                    value0 = value;
+                  });
+                }
+              : null,
         ),
         Switch(
           thumbIcon: thumbIcon,
           value: value1,
-          onChanged:
-              widget.isEnabled
-                  ? (bool value) {
-                    setState(() {
-                      value1 = value;
-                    });
-                  }
-                  : null,
+          onChanged: widget.isEnabled
+              ? (bool value) {
+                  setState(() {
+                    value1 = value;
+                  });
+                }
+              : null,
         ),
       ],
     );
@@ -870,7 +864,6 @@ class _RadiosState extends State<Radios> {
             title: const Text('Option 3'),
             value: Options.option3,
             groupValue: _selectedOption,
-            onChanged: null,
           ),
         ],
       ),
@@ -1053,12 +1046,11 @@ class _NavigationBarsState extends State<NavigationBars> {
             widget.onSelectItem!(index);
           }
         },
-        destinations:
-            widget.isExampleBar && widget.isBadgeExample
-                ? barWithBadgeDestinations
-                : widget.isExampleBar
-                ? exampleBarDestinations
-                : appBarDestinations,
+        destinations: widget.isExampleBar && widget.isBadgeExample
+            ? barWithBadgeDestinations
+            : widget.isExampleBar
+            ? exampleBarDestinations
+            : appBarDestinations,
       ),
     );
 
@@ -1180,14 +1172,13 @@ class _IconToggleButtonState extends State<IconToggleButton> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colors = Theme.of(context).colorScheme;
-    final VoidCallback? onPressed =
-        widget.isEnabled
-            ? () {
-              setState(() {
-                selected = !selected;
-              });
-            }
-            : null;
+    final VoidCallback? onPressed = widget.isEnabled
+        ? () {
+            setState(() {
+              selected = !selected;
+            });
+          }
+        : null;
     final ButtonStyle? style = widget.getDefaultStyle?.call(selected, colors);
 
     return IconButton(
@@ -1210,8 +1201,9 @@ ButtonStyle enabledFilledButtonStyle(bool selected, ColorScheme colors) {
     disabledBackgroundColor: colors.onSurface.withOpacity(0.12),
     hoverColor: selected ? colors.onPrimary.withOpacity(0.08) : colors.primary.withOpacity(0.08),
     focusColor: selected ? colors.onPrimary.withOpacity(0.12) : colors.primary.withOpacity(0.12),
-    highlightColor:
-        selected ? colors.onPrimary.withOpacity(0.12) : colors.primary.withOpacity(0.12),
+    highlightColor: selected
+        ? colors.onPrimary.withOpacity(0.12)
+        : colors.primary.withOpacity(0.12),
   );
 }
 
@@ -1226,18 +1218,15 @@ ButtonStyle enabledFilledTonalButtonStyle(bool selected, ColorScheme colors) {
   return IconButton.styleFrom(
     foregroundColor: selected ? colors.onSecondaryContainer : colors.onSurfaceVariant,
     backgroundColor: selected ? colors.secondaryContainer : colors.surfaceContainerHighest,
-    hoverColor:
-        selected
-            ? colors.onSecondaryContainer.withOpacity(0.08)
-            : colors.onSurfaceVariant.withOpacity(0.08),
-    focusColor:
-        selected
-            ? colors.onSecondaryContainer.withOpacity(0.12)
-            : colors.onSurfaceVariant.withOpacity(0.12),
-    highlightColor:
-        selected
-            ? colors.onSecondaryContainer.withOpacity(0.12)
-            : colors.onSurfaceVariant.withOpacity(0.12),
+    hoverColor: selected
+        ? colors.onSecondaryContainer.withOpacity(0.08)
+        : colors.onSurfaceVariant.withOpacity(0.08),
+    focusColor: selected
+        ? colors.onSecondaryContainer.withOpacity(0.12)
+        : colors.onSurfaceVariant.withOpacity(0.12),
+    highlightColor: selected
+        ? colors.onSecondaryContainer.withOpacity(0.12)
+        : colors.onSurfaceVariant.withOpacity(0.12),
   );
 }
 
@@ -1251,23 +1240,22 @@ ButtonStyle disabledFilledTonalButtonStyle(bool selected, ColorScheme colors) {
 ButtonStyle enabledOutlinedButtonStyle(bool selected, ColorScheme colors) {
   return IconButton.styleFrom(
     backgroundColor: selected ? colors.inverseSurface : null,
-    hoverColor:
-        selected
-            ? colors.onInverseSurface.withOpacity(0.08)
-            : colors.onSurfaceVariant.withOpacity(0.08),
-    focusColor:
-        selected
-            ? colors.onInverseSurface.withOpacity(0.12)
-            : colors.onSurfaceVariant.withOpacity(0.12),
-    highlightColor:
-        selected ? colors.onInverseSurface.withOpacity(0.12) : colors.onSurface.withOpacity(0.12),
+    hoverColor: selected
+        ? colors.onInverseSurface.withOpacity(0.08)
+        : colors.onSurfaceVariant.withOpacity(0.08),
+    focusColor: selected
+        ? colors.onInverseSurface.withOpacity(0.12)
+        : colors.onSurfaceVariant.withOpacity(0.12),
+    highlightColor: selected
+        ? colors.onInverseSurface.withOpacity(0.12)
+        : colors.onSurface.withOpacity(0.12),
     side: BorderSide(color: colors.outline),
   ).copyWith(
-    foregroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    foregroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return colors.onInverseSurface;
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return colors.onSurface;
       }
       return null;

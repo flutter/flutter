@@ -4,7 +4,7 @@
             "cas_archive": false,
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-14",
+                "os=Mac-15.5",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -57,7 +57,7 @@
             "cas_archive": false,
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-14",
+                "os=Mac-15.5",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -108,7 +108,7 @@
             "cas_archive": false,
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-14",
+                "os=Mac-15.5",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -157,6 +157,57 @@
         },
         {
             "cas_archive": false,
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-15.5",
+                "cpu=arm64"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false,
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
+                "ci/host_release_arm64_licenses",
+                "--runtime-mode",
+                "release",
+                "--mac-cpu",
+                "arm64",
+                "--no-lto",
+                "--rbe",
+                "--no-goma",
+                "--xcode-symlinks"
+            ],
+            "name": "ci/host_release_arm64_licenses",
+            "description": "Runs the license_cpp script.",
+            "ninja": {
+                "config": "ci/host_release_arm64_licenses",
+                "targets": [
+                    "flutter/tools/licenses_cpp",
+                    "flutter/tools/licenses_cpp:licenses_cpp_testrunner"
+                ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "16c5032a"
+                }
+            },
+            "tests": [
+                {
+                    "name": "Run license_cpp unittests",
+                    "script": "out/ci/host_release_arm64_licenses/licenses_cpp_testrunner"
+                },
+                {
+                    "name": "Run license_cpp",
+                    "script": "flutter/ci/licenses_cpp.sh",
+                    "parameters": [
+                        "ci/host_release_arm64_licenses"
+                    ]
+                }
+            ]
+        },
+        {
+            "cas_archive": false,
             "dependencies": [
                 {
                     "dependency": "goldctl",
@@ -165,7 +216,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-14",
+                "os=Mac-15.5",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -224,7 +275,7 @@
             },
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-14",
+                "os=Mac-15.5",
                 "cpu=x86"
             ],
             "gclient_variables": {
@@ -281,7 +332,7 @@
             "cas_archive": false,
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-14",
+                "os=Mac-15.5",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -299,7 +350,6 @@
                 "--prebuilt-dart-sdk",
                 "--mac-cpu",
                 "arm64",
-                "--enable-impeller-3d",
                 "--rbe",
                 "--no-goma",
                 "--xcode-symlinks",
@@ -350,7 +400,7 @@
             },
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-14",
+                "os=Mac-15.5",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -418,7 +468,7 @@
             },
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-14",
+                "os=Mac-15.5",
                 "cpu=arm64"
             ],
             "gclient_variables": {

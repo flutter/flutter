@@ -25,10 +25,9 @@ extension HtmlElementViewImpl on HtmlElementView {
   }) {
     return HtmlElementView(
       key: key,
-      viewType:
-          isVisible
-              ? ui_web.PlatformViewRegistry.defaultVisibleViewType
-              : ui_web.PlatformViewRegistry.defaultInvisibleViewType,
+      viewType: isVisible
+          ? ui_web.PlatformViewRegistry.defaultVisibleViewType
+          : ui_web.PlatformViewRegistry.defaultInvisibleViewType,
       onPlatformViewCreated: _createPlatformViewCallbackForElementCallback(onElementCreated),
       creationParams: <dynamic, dynamic>{'tagName': tagName},
       hitTestBehavior: hitTestBehavior,
@@ -78,7 +77,7 @@ PlatformViewCreatedCallback? _createPlatformViewCallbackForElementCallback(
     return null;
   }
   return (int id) {
-    onElementCreated(_platformViewsRegistry.getViewById(id));
+    onElementCreated(ui_web.platformViewRegistry.getViewById(id));
   };
 }
 
@@ -126,11 +125,3 @@ class _HtmlElementViewController extends PlatformViewController {
     }
   }
 }
-
-/// Overrides the [ui_web.PlatformViewRegistry] used by [HtmlElementView].
-///
-/// This is used for testing view factory registration.
-@visibleForTesting
-ui_web.PlatformViewRegistry? debugOverridePlatformViewRegistry;
-ui_web.PlatformViewRegistry get _platformViewsRegistry =>
-    debugOverridePlatformViewRegistry ?? ui_web.platformViewRegistry;

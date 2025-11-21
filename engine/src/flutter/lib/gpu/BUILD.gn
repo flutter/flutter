@@ -63,6 +63,10 @@ source_set("gpu") {
     "//flutter/third_party/tonic",
   ]
 
+  if (impeller_supports_rendering) {
+    deps += [ "//flutter/impeller/display_list" ]
+  }
+
   if (is_win) {
     # Required for M_PI and others.
     defines += [ "_USE_MATH_DEFINES" ]

@@ -75,6 +75,12 @@ config("relative_flutter_linux_headers") {
   include_dirs = [ "public" ]
 }
 
+config("disable_warnings") {
+  warning_flags = [ "-Wno-deprecated-volatile" ]
+  cflags = warning_flags
+  cflags_cc = warning_flags
+}
+
 source_set("flutter_linux_sources") {
   public = _public_headers + [
              "fl_binary_messenger_private.h",
@@ -91,12 +97,16 @@ source_set("flutter_linux_sources") {
              "fl_method_codec_private.h",
              "fl_plugin_registrar_private.h",
              "fl_pointer_manager.h",
+             "fl_task_runner.h",
              "fl_view_private.h",
+             "fl_window_monitor.h",
              "fl_window_state_monitor.h",
              "key_mapping.h",
            ]
 
   configs += [ "//flutter/shell/platform/linux/config:gtk" ]
+
+  public_configs = [ ":disable_warnings" ]
 
   sources = [
     "fl_accessible_node.cc",
@@ -107,6 +117,7 @@ source_set("flutter_linux_sources") {
     "fl_binary_messenger.cc",
     "fl_compositor.cc",
     "fl_compositor_opengl.cc",
+    "fl_compositor_software.cc",
     "fl_dart_project.cc",
     "fl_display_monitor.cc",
     "fl_engine.cc",
@@ -148,7 +159,6 @@ source_set("flutter_linux_sources") {
     "fl_standard_method_codec.cc",
     "fl_string_codec.cc",
     "fl_task_runner.cc",
-    "fl_task_runner.h",
     "fl_text_input_channel.cc",
     "fl_text_input_handler.cc",
     "fl_texture.cc",
@@ -158,6 +168,7 @@ source_set("flutter_linux_sources") {
     "fl_value.cc",
     "fl_view.cc",
     "fl_view_accessible.cc",
+    "fl_window_monitor.cc",
     "fl_window_state_monitor.cc",
     "fl_windowing_channel.cc",
     "fl_windowing_handler.cc",
@@ -171,9 +182,11 @@ source_set("flutter_linux_sources") {
   ]
 
   deps = [
+    "$dart_src/runtime:dart_api",
     "//flutter/fml",
     "//flutter/shell/platform/common:common_cpp_enums",
     "//flutter/shell/platform/common:common_cpp_input",
+    "//flutter/shell/platform/common:common_cpp_isolate_scope",
     "//flutter/shell/platform/common:common_cpp_switches",
     "//flutter/shell/platform/embedder:embedder_headers",
     "//flutter/third_party/rapidjson",
@@ -215,6 +228,7 @@ executable("flutter_linux_unittests") {
     "fl_binary_codec_test.cc",
     "fl_binary_messenger_test.cc",
     "fl_compositor_opengl_test.cc",
+    "fl_compositor_software_test.cc",
     "fl_dart_project_test.cc",
     "fl_display_monitor_test.cc",
     "fl_engine_test.cc",

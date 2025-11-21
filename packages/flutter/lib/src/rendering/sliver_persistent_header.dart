@@ -454,13 +454,9 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
   }) {
-    final Rect? localBounds =
-        descendant != null
-            ? MatrixUtils.transformRect(
-              descendant.getTransformTo(this),
-              rect ?? descendant.paintBounds,
-            )
-            : rect;
+    final Rect? localBounds = descendant != null
+        ? MatrixUtils.transformRect(descendant.getTransformTo(this), rect ?? descendant.paintBounds)
+        : rect;
 
     final Rect? newRect = switch (applyGrowthDirectionToAxisDirection(
       constraints.axisDirection,
@@ -603,8 +599,8 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   void _updateAnimation(Duration duration, double endValue, Curve curve) {
     assert(vsync != null, 'vsync must not be null if the floating header changes size animatedly.');
 
-    final AnimationController effectiveController =
-        _controller ??= AnimationController(vsync: vsync!, duration: duration)..addListener(() {
+    final AnimationController effectiveController = _controller ??=
+        AnimationController(vsync: vsync!, duration: duration)..addListener(() {
           if (_effectiveScrollOffset == _animation.value) {
             return;
           }
@@ -716,13 +712,12 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     // headers), the leading edge of the sliver and the leading edge of the child
     // will not be aligned. The only exception is when child is null (and thus
     // descendant == null).
-    final Rect? childBounds =
-        descendant != null
-            ? MatrixUtils.transformRect(
-              descendant.getTransformTo(child),
-              rect ?? descendant.paintBounds,
-            )
-            : rect;
+    final Rect? childBounds = descendant != null
+        ? MatrixUtils.transformRect(
+            descendant.getTransformTo(child),
+            rect ?? descendant.paintBounds,
+          )
+        : rect;
 
     double targetExtent;
     Rect? targetRect;
@@ -815,8 +810,9 @@ abstract class RenderSliverFloatingPinnedPersistentHeader
   @override
   double updateGeometry() {
     final double minExtent = this.minExtent;
-    final double minAllowedExtent =
-        constraints.remainingPaintExtent > minExtent ? minExtent : constraints.remainingPaintExtent;
+    final double minAllowedExtent = constraints.remainingPaintExtent > minExtent
+        ? minExtent
+        : constraints.remainingPaintExtent;
     final double maxExtent = this.maxExtent;
     final double paintExtent = maxExtent - _effectiveScrollOffset!;
     final double clampedPaintExtent = clampDouble(

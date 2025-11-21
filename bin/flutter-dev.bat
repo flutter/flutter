@@ -27,7 +27,26 @@ REM If available, add location of bundled mingit to PATH
 SET mingit_path=%FLUTTER_ROOT%\bin\mingit\cmd
 IF EXIST "%mingit_path%" SET PATH=%PATH%;%mingit_path%
 
-REM We test if Git is available on the Host as we run git in shared.bat
+REM Test if Git is available on the host
+WHERE /Q git
+IF "%ERRORLEVEL%" NEQ "0" (
+  ECHO Error: Unable to find git in your PATH.
+  EXIT /B 1
+)
+
+REM Detect which PowerShell executable is available on the host
+REM PowerShell version <= 5: PowerShell.exe
+REM PowerShell version >= 6: pwsh.exe
+WHERE /Q pwsh && (
+    SET "powershell_executable=call pwsh"
+) || WHERE /Q PowerShell.exe && (
+    SET powershell_executable=PowerShell.exe
+) || (
+    ECHO Error: PowerShell executable not found.                        1>&2
+    ECHO        Either pwsh.exe or PowerShell.exe must be in your PATH. 1>&2
+    EXIT /B 1
+)
+
 REM  Test if the flutter directory is a git clone, otherwise git rev-parse HEAD would fail
 IF NOT EXIST "%flutter_root%\.git" (
   ECHO Error: The Flutter directory is not a clone of the GitHub project.

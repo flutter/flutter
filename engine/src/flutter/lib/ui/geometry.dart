@@ -419,7 +419,7 @@ class Size extends OffsetBase {
   ///  * [isFinite], which checks whether both dimensions are finite.
   static const Size infinite = Size(double.infinity, double.infinity);
 
-  /// Whether this size encloses a non-zero area.
+  /// Whether this size encloses a zero area.
   ///
   /// Negative areas are considered empty.
   bool get isEmpty => width <= 0.0 || height <= 0.0;
@@ -533,7 +533,7 @@ class Size extends OffsetBase {
   /// The offset to the center of the right edge of the rectangle described by the
   /// given offset (which is interpreted as the top-left corner) and this size.
   ///
-  /// See also [Rect.centerLeft].
+  /// See also [Rect.centerRight].
   Offset centerRight(Offset origin) => Offset(origin.dx + width, origin.dy + height / 2.0);
 
   /// The offset to the intersection of the bottom and left edges of the
@@ -547,7 +547,7 @@ class Size extends OffsetBase {
   /// the given offset (which is interpreted as the top-left corner) and this
   /// size.
   ///
-  /// See also [Rect.bottomLeft].
+  /// See also [Rect.bottomCenter].
   Offset bottomCenter(Offset origin) => Offset(origin.dx + width / 2.0, origin.dy + height);
 
   /// The offset to the intersection of the bottom and right edges of the
@@ -845,7 +845,7 @@ class Rect {
 
   /// The offset to the center of the right edge of this rectangle.
   ///
-  /// See also [Size.centerLeft].
+  /// See also [Size.centerRight].
   Offset get centerRight => Offset(right, top + height / 2.0);
 
   /// The offset to the intersection of the bottom and left edges of this rectangle.
@@ -855,7 +855,7 @@ class Rect {
 
   /// The offset to the center of the bottom edge of this rectangle.
   ///
-  /// See also [Size.bottomLeft].
+  /// See also [Size.bottomCenter].
   Offset get bottomCenter => Offset(left + width / 2.0, bottom);
 
   /// The offset to the intersection of the bottom and right edges of this rectangle.
@@ -1090,7 +1090,7 @@ class Radius {
     return x == y
         ? 'Radius.circular(${x.toStringAsFixed(1)})'
         : 'Radius.elliptical(${x.toStringAsFixed(1)}, '
-            '${y.toStringAsFixed(1)})';
+              '${y.toStringAsFixed(1)})';
   }
 }
 

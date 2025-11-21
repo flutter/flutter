@@ -7,6 +7,8 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class NavigationBarUseCase extends UseCase {
+  NavigationBarUseCase() : super(useCaseCategory: UseCaseCategory.core);
+
   @override
   String get name => 'NavigationBar';
 
@@ -58,12 +60,11 @@ class MainWidgetState extends State<MainWidget> {
           ),
         ],
       ),
-      body:
-          <Widget>[
-            Container(alignment: Alignment.center, child: const Text('Page 1')),
-            Container(alignment: Alignment.center, child: const Text('Page 2')),
-            Container(alignment: Alignment.center, child: const Text('Page 3')),
-          ][currentPageIndex],
+      body: <Widget>[
+        Container(alignment: Alignment.center, child: const Text('Page 1')),
+        Container(alignment: Alignment.center, child: const Text('Page 2')),
+        Container(alignment: Alignment.center, child: const Text('Page 3')),
+      ][currentPageIndex],
     );
   }
 }

@@ -165,10 +165,9 @@ class _MyWidgetState extends State<MyWidget> {
               child = _getLeading(constraints, isForward);
             } else {
               child = Container(
-                color:
-                    isForward
-                        ? (index.isEven ? Colors.amber[100] : Colors.amberAccent)
-                        : (index.isEven ? Colors.green[100] : Colors.lightGreen),
+                color: isForward
+                    ? (index.isEven ? Colors.amber[100] : Colors.amberAccent)
+                    : (index.isEven ? Colors.green[100] : Colors.lightGreen),
                 padding: const EdgeInsets.all(8.0),
                 child: Center(child: Text(_alphabet[index - 1])),
               );
@@ -211,7 +210,9 @@ class _MyWidgetState extends State<MyWidget> {
             key: _center,
             child: const Padding(
               padding: EdgeInsets.all(8.0),
-              child: Center(child: Text('0', style: TextStyle(fontWeight: FontWeight.bold))),
+              child: Center(
+                child: Text('0', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
             ),
           ),
           _getList(isForward: true),

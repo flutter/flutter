@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// reduced-test-set:
+//   This file is run as part of a reduced test set in CI on Mac and Windows
+//   machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:clock/clock.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -14,8 +20,15 @@ void main() {
   const double kOpenScale = 1.15;
   const double kMinScaleFactor = 1.02;
 
-  Widget getChild() {
-    return Container(width: 300.0, height: 100.0, color: CupertinoColors.activeOrange);
+  Widget getChild({double width = 300.0, double height = 100.0}) {
+    return Container(width: width, height: height, color: CupertinoColors.activeOrange);
+  }
+
+  List<Widget> getActions({int number = 10}) {
+    return List<Widget>.generate(
+      number,
+      (int index) => CupertinoContextMenuAction(child: Text('Action $index')),
+    );
   }
 
   Widget getBuilder(BuildContext context, Animation<double> animation) {
@@ -104,7 +117,7 @@ void main() {
   }
 
   Finder findStaticDefaultPreview() {
-    return find.descendant(of: findFittedBox(), matching: find.byType(ClipRRect));
+    return find.descendant(of: findFittedBox(), matching: find.byType(ClipRSuperellipse));
   }
 
   group('CupertinoContextMenu before and during opening', () {
@@ -114,7 +127,9 @@ void main() {
       // Measure the child in the scene with no CupertinoContextMenu.
       final Widget child = getChild();
       await tester.pumpWidget(
-        CupertinoApp(home: CupertinoPageScaffold(child: Center(child: child))),
+        CupertinoApp(
+          home: CupertinoPageScaffold(child: Center(child: child)),
+        ),
       );
       final Rect childRect = tester.getRect(find.byWidget(child));
 
@@ -183,17 +198,14 @@ void main() {
                   child: Navigator(
                     onGenerateRoute: (RouteSettings settings) {
                       return CupertinoPageRoute<void>(
-                        builder:
-                            (BuildContext context) => Align(
-                              child: CupertinoContextMenu(
-                                actions: const <CupertinoContextMenuAction>[
-                                  CupertinoContextMenuAction(
-                                    child: Text('CupertinoContextMenuAction'),
-                                  ),
-                                ],
-                                child: child,
-                              ),
-                            ),
+                        builder: (BuildContext context) => Align(
+                          child: CupertinoContextMenu(
+                            actions: const <CupertinoContextMenuAction>[
+                              CupertinoContextMenuAction(child: Text('CupertinoContextMenuAction')),
+                            ],
+                            child: child,
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -370,12 +382,11 @@ void main() {
         ),
       );
 
-      final Widget child =
-          find
-              .descendant(of: find.byType(TickerMode), matching: find.byType(Container))
-              .evaluate()
-              .single
-              .widget;
+      final Widget child = find
+          .descendant(of: find.byType(TickerMode), matching: find.byType(Container))
+          .evaluate()
+          .single
+          .widget;
       final Rect childRect = tester.getRect(find.byWidget(child));
       expect(
         find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'),
@@ -698,7 +709,8 @@ void main() {
 
       // Check border radius.
       expect(findStaticDefaultPreview(), findsOneWidget);
-      final ClipRRect previewWidget = tester.firstWidget(findStaticDefaultPreview()) as ClipRRect;
+      final ClipRSuperellipse previewWidget =
+          tester.firstWidget(findStaticDefaultPreview()) as ClipRSuperellipse;
       expect(previewWidget.borderRadius, equals(BorderRadius.circular(12.0)));
     });
 
@@ -752,6 +764,9 @@ void main() {
     });
 
     testWidgets('CupertinoContextMenu minimizes scaling offscreen', (WidgetTester tester) async {
+      const Size portraitScreenSize = Size(600.0, 800.0);
+      await binding.setSurfaceSize(portraitScreenSize);
+      addTearDown(() => binding.setSurfaceSize(null));
       final Widget child = getChild();
 
       // Pump a CupertinoContextMenu on the top-left of the screen and open it.
@@ -787,7 +802,7 @@ void main() {
 
       // Open and then close the CupertinoContextMenu.
       await tester.pumpAndSettle();
-      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.tapAt(const Offset(599.0, 799.0));
       await tester.pumpAndSettle();
       expect(findStatic(), findsNothing);
 
@@ -843,26 +858,25 @@ void main() {
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 return ListView(
-                  children:
-                      items
-                          .map(
-                            (int index) => CupertinoContextMenu(
-                              actions: <CupertinoContextMenuAction>[
-                                CupertinoContextMenuAction(
-                                  child: const Text('DELETE'),
-                                  onPressed: () {
-                                    setState(() {
-                                      items.remove(index);
-                                      Navigator.of(context).pop();
-                                    });
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                              ],
-                              child: Text('Item $index'),
+                  children: items
+                      .map(
+                        (int index) => CupertinoContextMenu(
+                          actions: <CupertinoContextMenuAction>[
+                            CupertinoContextMenuAction(
+                              child: const Text('DELETE'),
+                              onPressed: () {
+                                setState(() {
+                                  items.remove(index);
+                                  Navigator.of(context).pop();
+                                });
+                                Navigator.of(context).pop();
+                              },
                             ),
-                          )
-                          .toList(),
+                          ],
+                          child: Text('Item $index'),
+                        ),
+                      )
+                      .toList(),
                 );
               },
             ),
@@ -890,6 +904,7 @@ void main() {
     testWidgets('Portrait', (WidgetTester tester) async {
       const Size portraitScreenSize = Size(600.0, 800.0);
       await binding.setSurfaceSize(portraitScreenSize);
+      addTearDown(() => binding.setSurfaceSize(null));
 
       // Pump a CupertinoContextMenu in the center of the screen and open it.
       final Widget child = getChild();
@@ -932,7 +947,7 @@ void main() {
       expect(left.dx, lessThan(center.dx));
 
       // Close the CupertinoContextMenu.
-      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.tapAt(const Offset(559.0, 799.0));
       await tester.pumpAndSettle();
       expect(findStatic(), findsNothing);
 
@@ -955,9 +970,6 @@ void main() {
       expect(find.byType(CupertinoContextMenuAction), findsOneWidget);
       final Offset right = tester.getTopLeft(find.byType(CupertinoContextMenuAction));
       expect(right.dx, greaterThan(center.dx));
-
-      // Set the screen back to its normal size.
-      await binding.setSurfaceSize(const Size(800.0, 600.0));
     });
 
     testWidgets('Landscape', (WidgetTester tester) async {
@@ -1143,5 +1155,389 @@ void main() {
     // Verify the first items are still visible.
     expect(find.text('Item 0'), findsOneWidget);
     expect(find.text('Item 1'), findsOneWidget);
+  });
+
+  testWidgets('Pushing a new route removes overlay', (WidgetTester tester) async {
+    final Widget child = getChild();
+    const String page = 'Page 2';
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Center(
+              child: CupertinoContextMenu(
+                actions: const <Widget>[CupertinoContextMenuAction(child: Text('Test'))],
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      CupertinoPageRoute<Widget>(
+                        builder: (BuildContext context) =>
+                            const CupertinoPageScaffold(child: Text(page)),
+                      ),
+                    );
+                  },
+                  child: child,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.byWidget(child), findsOneWidget);
+    final Rect childRect = tester.getRect(find.byWidget(child));
+    expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsNothing);
+
+    // Start a press on the child.
+    final TestGesture gesture = await tester.startGesture(childRect.center);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text(page), findsNothing);
+
+    await tester.pump(const Duration(milliseconds: 300));
+    await gesture.up();
+
+    // Kickstart the route transition.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // As the transition starts, the overlay has been removed.
+    // Only the child transitioning out is shown.
+    expect(find.text(page), findsOneWidget);
+    expect(find.byWidget(child), findsOneWidget);
+  });
+
+  testWidgets('Removing context menu from widget tree removes overlay', (
+    WidgetTester tester,
+  ) async {
+    final Widget child = getChild();
+    bool ctxMenuRemoved = false;
+    late StateSetter setState;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter stateSetter) {
+            setState = stateSetter;
+            return Center(
+              child: ctxMenuRemoved
+                  ? const SizedBox()
+                  : CupertinoContextMenu(
+                      actions: <Widget>[
+                        CupertinoContextMenuAction(child: const Text('Test'), onPressed: () {}),
+                      ],
+                      child: child,
+                    ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.byWidget(child), findsOneWidget);
+    final Rect childRect = tester.getRect(find.byWidget(child));
+
+    // Start a press on the child.
+    final TestGesture gesture = await tester.startGesture(childRect.center);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    setState(() {
+      ctxMenuRemoved = true;
+    });
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.byWidget(child), findsNothing);
+  });
+
+  testWidgets('CupertinoContextMenu goldens in portrait orientation', (WidgetTester tester) async {
+    const Size portraitScreenSize = Size(800.0, 900.0);
+    await binding.setSurfaceSize(portraitScreenSize);
+    addTearDown(() => binding.setSurfaceSize(null));
+
+    final Widget leftChild = getChild(width: 200, height: 300);
+    final Widget rightChild = getChild(width: 200, height: 300);
+    final Widget centerChild = getChild(width: 200, height: 300);
+    final List<Widget> children = <Widget>[leftChild, centerChild, rightChild];
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: GridView.count(
+          crossAxisCount: 3,
+          children: children.map((Widget child) {
+            return CupertinoContextMenu(actions: getActions(), child: child);
+          }).toList(),
+        ),
+      ),
+    );
+
+    Future<void> expectGolden(String name, Widget child) async {
+      // Open the child's CupertinoContextMenu.
+      final Rect childRect = tester.getRect(find.byWidget(child));
+      final TestGesture gesture = await tester.startGesture(childRect.center);
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsOneWidget);
+
+      await expectLater(findStatic(), matchesGoldenFile('context_menu.portrait.$name.png'));
+
+      // Tap and ensure that the CupertinoContextMenu is closed.
+      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsNothing);
+    }
+
+    await expectGolden('left', leftChild);
+    await expectGolden('center', centerChild);
+    await expectGolden('right', rightChild);
+  });
+
+  testWidgets('CupertinoContextMenu goldens in landscape orientation', (WidgetTester tester) async {
+    const Size landscapeScreenSize = Size(800.0, 600.0);
+    await binding.setSurfaceSize(landscapeScreenSize);
+    addTearDown(() => binding.setSurfaceSize(null));
+
+    final Widget leftChild = getChild(width: 200, height: 300);
+    final Widget rightChild = getChild(width: 200, height: 300);
+    final Widget centerChild = getChild(width: 200, height: 300);
+    final List<Widget> children = <Widget>[leftChild, centerChild, rightChild];
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: GridView.count(
+          crossAxisCount: 3,
+          children: children.map((Widget child) {
+            return CupertinoContextMenu(actions: getActions(), child: child);
+          }).toList(),
+        ),
+      ),
+    );
+
+    Future<void> expectGolden(String name, Widget child) async {
+      // Open the child's CupertinoContextMenu.
+      final Rect childRect = tester.getRect(find.byWidget(child));
+      final TestGesture gesture = await tester.startGesture(childRect.center);
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsOneWidget);
+
+      await expectLater(findStatic(), matchesGoldenFile('context_menu.landscape.$name.png'));
+
+      // Tap and ensure that the CupertinoContextMenu is closed.
+      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsNothing);
+    }
+
+    await expectGolden('left', leftChild);
+    await expectGolden('center', centerChild);
+    await expectGolden('right', rightChild);
+  });
+
+  group('CupertinoContextMenu sheet shrink animation alignment - ', () {
+    Future<void> testShrinkAlignment({
+      required WidgetTester tester,
+      required Alignment alignment,
+      required Size screenSize,
+      required AlignmentDirectional expectedAlignment,
+    }) async {
+      final Widget child = getChild();
+      await tester.pumpWidget(
+        getContextMenu(alignment: alignment, screenSize: screenSize, child: child),
+      );
+
+      // Open the CupertinoContextMenu.
+      final Rect childRect = tester.getRect(find.byWidget(child));
+      final TestGesture openGesture = await tester.startGesture(childRect.center);
+      await tester.pumpAndSettle();
+      await openGesture.up();
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsOneWidget);
+
+      final Finder sheetFinder = find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_ContextMenuSheet',
+      );
+      expect(sheetFinder, findsOneWidget);
+      final Rect initialSheetRect = tester.getRect(sheetFinder);
+      final Finder staticChildFinder = findStaticChild(child);
+      expect(staticChildFinder, findsOneWidget);
+      await tester.pump();
+
+      // Drag down enough to trigger the shrink animation.
+      await tester.fling(staticChildFinder, Offset(0.0, childRect.height / 2), 1000.0);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // The sheet has shrunk.
+      expect(sheetFinder, findsOneWidget);
+      final Rect shrunkSheetRect = tester.getRect(sheetFinder);
+      expect(shrunkSheetRect.width, lessThan(initialSheetRect.width));
+      expect(shrunkSheetRect.height, lessThan(initialSheetRect.height));
+
+      // Verify alignment based on how the rect has shrunk.
+      switch (expectedAlignment) {
+        case AlignmentDirectional.topStart:
+          expect(
+            shrunkSheetRect.left,
+            moreOrLessEquals(initialSheetRect.left, epsilon: Tolerance.defaultTolerance.distance),
+          );
+        case AlignmentDirectional.topCenter:
+          expect(
+            shrunkSheetRect.center.dx,
+            moreOrLessEquals(
+              initialSheetRect.center.dx,
+              epsilon: Tolerance.defaultTolerance.distance,
+            ),
+          );
+        case AlignmentDirectional.topEnd:
+          expect(
+            shrunkSheetRect.right,
+            moreOrLessEquals(initialSheetRect.right, epsilon: Tolerance.defaultTolerance.distance),
+          );
+        default:
+          fail('Unhandled alignment: $expectedAlignment');
+      }
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('Portrait', (WidgetTester tester) async {
+      const Size portraitScreenSize = Size(600.0, 800.0);
+      await binding.setSurfaceSize(portraitScreenSize);
+      addTearDown(() => binding.setSurfaceSize(null));
+
+      await testShrinkAlignment(
+        tester: tester,
+        alignment: Alignment.centerLeft,
+        screenSize: portraitScreenSize,
+        expectedAlignment: AlignmentDirectional.topStart,
+      );
+      await testShrinkAlignment(
+        tester: tester,
+        alignment: Alignment.center,
+        screenSize: portraitScreenSize,
+        expectedAlignment: AlignmentDirectional.topCenter,
+      );
+      await testShrinkAlignment(
+        tester: tester,
+        alignment: Alignment.centerRight,
+        screenSize: portraitScreenSize,
+        expectedAlignment: AlignmentDirectional.topEnd,
+      );
+    });
+
+    testWidgets('Landscape', (WidgetTester tester) async {
+      const Size landscapeScreenSize = Size(800.0, 600.0);
+      await binding.setSurfaceSize(landscapeScreenSize);
+      addTearDown(() => binding.setSurfaceSize(null));
+
+      await testShrinkAlignment(
+        tester: tester,
+        alignment: Alignment.centerLeft,
+        screenSize: landscapeScreenSize,
+        expectedAlignment: AlignmentDirectional.topStart,
+      );
+      await testShrinkAlignment(
+        tester: tester,
+        alignment: Alignment.center,
+        screenSize: landscapeScreenSize,
+        expectedAlignment: AlignmentDirectional.topStart,
+      );
+      await testShrinkAlignment(
+        tester: tester,
+        alignment: Alignment.centerRight,
+        screenSize: landscapeScreenSize,
+        expectedAlignment: AlignmentDirectional.topEnd,
+      );
+    });
+  });
+
+  testWidgets('CupertinoContextMenu respects available screen width - Portrait', (
+    WidgetTester tester,
+  ) async {
+    const Size portraitScreenSize = Size(300.0, 350.0);
+    await binding.setSurfaceSize(portraitScreenSize);
+    addTearDown(() => binding.setSurfaceSize(null));
+
+    final Widget child = getChild();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(size: portraitScreenSize),
+        child: CupertinoApp(
+          home: Center(
+            child: CupertinoContextMenu(
+              actions: <Widget>[
+                CupertinoContextMenuAction(child: const Text('Test'), onPressed: () {}),
+              ],
+              child: child,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byWidget(child), findsOneWidget);
+    final Rect childRect = tester.getRect(find.byWidget(child));
+
+    // Start a press on the child.
+    final TestGesture gesture = await tester.startGesture(childRect.center);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), null);
+
+    // Verify the child width is constrained correctly.
+    expect(findStatic(), findsOneWidget);
+    final Size fittedBoxSize = tester.getSize(findFittedBox());
+    // availableWidth = 300.0 (screen width) - 2 * 20.0 (padding) = 260.0
+    expect(fittedBoxSize.width, 260.0);
+  });
+
+  testWidgets('CupertinoContextMenu respects available screen width - Landscape', (
+    WidgetTester tester,
+  ) async {
+    const Size landscapeScreenSize = Size(350.0, 300.0);
+    await binding.setSurfaceSize(landscapeScreenSize);
+    addTearDown(() => binding.setSurfaceSize(null));
+
+    final Widget child = getChild(width: 500);
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(size: landscapeScreenSize),
+        child: CupertinoApp(
+          home: Center(
+            child: CupertinoContextMenu(
+              actions: <Widget>[
+                CupertinoContextMenuAction(child: const Text('Test'), onPressed: () {}),
+              ],
+              child: child,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byWidget(child), findsOneWidget);
+    final Rect childRect = tester.getRect(find.byWidget(child));
+
+    // Start a press on the child.
+    final TestGesture gesture = await tester.startGesture(childRect.center);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), null);
+
+    // Verify the child width is constrained correctly.
+    expect(findStatic(), findsOneWidget);
+    final Size fittedBoxSize = tester.getSize(findFittedBox());
+    // availableWidth = 350.0 (screen width) - 2 * 20.0 (padding) = 310.0
+    // availableWidthForChild = 310.0 - 250.0 (menu width) = 60.0
+    expect(fittedBoxSize.width, 60.0);
   });
 }

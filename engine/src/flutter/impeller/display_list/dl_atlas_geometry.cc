@@ -67,11 +67,11 @@ BlendMode DlAtlasGeometry::GetBlendMode() const {
 }
 
 VertexBuffer DlAtlasGeometry::CreateSimpleVertexBuffer(
-    HostBuffer& host_buffer) const {
+    HostBuffer& data_host_buffer) const {
   using VS = TextureFillVertexShader;
   constexpr size_t indices[6] = {0, 1, 2, 1, 2, 3};
 
-  BufferView buffer_view = host_buffer.Emplace(
+  BufferView buffer_view = data_host_buffer.Emplace(
       sizeof(VS::PerVertexData) * count_ * 6, alignof(VS::PerVertexData),
       [&](uint8_t* raw_data) {
         VS::PerVertexData* data =
@@ -99,11 +99,11 @@ VertexBuffer DlAtlasGeometry::CreateSimpleVertexBuffer(
 }
 
 VertexBuffer DlAtlasGeometry::CreateBlendVertexBuffer(
-    HostBuffer& host_buffer) const {
+    HostBuffer& data_host_buffer) const {
   using VS = PorterDuffBlendVertexShader;
   constexpr size_t indices[6] = {0, 1, 2, 1, 2, 3};
 
-  BufferView buffer_view = host_buffer.Emplace(
+  BufferView buffer_view = data_host_buffer.Emplace(
       sizeof(VS::PerVertexData) * count_ * 6, alignof(VS::PerVertexData),
       [&](uint8_t* raw_data) {
         VS::PerVertexData* data =

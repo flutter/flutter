@@ -50,14 +50,13 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
     };
     goalsSource.forEach((String flagName, List<String> keys) {
       int? lineId;
-      final List<String> keysString =
-          keys.map((String keyName) {
-            final PhysicalKeyEntry physicalKey = keyData.entryByName(keyName);
-            final LogicalKeyEntry logicalKey = logicalData.entryByName(keyName);
-            lineId ??= physicalKey.usbHidCode;
-            return '              new KeyPair(${toHex(physicalKey.usbHidCode)}L, '
-                '${toHex(logicalKey.value, digits: 10)}L), // ${physicalKey.name}';
-          }).toList();
+      final List<String> keysString = keys.map((String keyName) {
+        final PhysicalKeyEntry physicalKey = keyData.entryByName(keyName);
+        final LogicalKeyEntry logicalKey = logicalData.entryByName(keyName);
+        lineId ??= physicalKey.usbHidCode;
+        return '              new KeyPair(${toHex(physicalKey.usbHidCode)}L, '
+            '${toHex(logicalKey.value, digits: 10)}L), // ${physicalKey.name}';
+      }).toList();
       lines.add(
         lineId!,
         '        new PressingGoal(\n'

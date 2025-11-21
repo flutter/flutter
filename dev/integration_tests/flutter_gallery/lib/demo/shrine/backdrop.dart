@@ -143,11 +143,10 @@ class _BackdropTitle extends AnimatedWidget {
           Stack(
             children: <Widget>[
               Opacity(
-                opacity:
-                    CurvedAnimation(
-                      parent: ReverseAnimation(animation),
-                      curve: const Interval(0.5, 1.0),
-                    ).value,
+                opacity: CurvedAnimation(
+                  parent: ReverseAnimation(animation),
+                  curve: const Interval(0.5, 1.0),
+                ).value,
                 child: FractionalTranslation(
                   translation: Tween<Offset>(
                     begin: Offset.zero,
@@ -344,6 +343,9 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
         ),
       ],
     );
-    return Scaffold(appBar: appBar, body: LayoutBuilder(builder: _buildStack));
+    return Scaffold(
+      appBar: appBar,
+      body: LayoutBuilder(builder: _buildStack),
+    );
   }
 }

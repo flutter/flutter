@@ -12,13 +12,13 @@
 
 #include "display_list/dl_sampling_options.h"
 #include "display_list/effects/dl_image_filter.h"
-#include "display_list/geometry/dl_path_builder.h"
 #include "flutter/fml/logging.h"
 #include "fml/closure.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/canvas.h"
 #include "impeller/display_list/dl_atlas_geometry.h"
+#include "impeller/display_list/dl_text_impeller.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/display_list/nine_patch_converter.h"
 #include "impeller/display_list/skia_conversions.h"
@@ -366,56 +366,42 @@ void DlDispatcherBase::skew(DlScalar sx, DlScalar sy) {
   GetCanvas().Skew(sx, sy);
 }
 
+// clang-format off
 // |flutter::DlOpReceiver|
-void DlDispatcherBase::transform2DAffine(DlScalar mxx,
-                                         DlScalar mxy,
-                                         DlScalar mxt,
-                                         DlScalar myx,
-                                         DlScalar myy,
-                                         DlScalar myt) {
+void DlDispatcherBase::transform2DAffine(
+    DlScalar mxx, DlScalar mxy, DlScalar mxt,
+    DlScalar myx, DlScalar myy, DlScalar myt) {
   AUTO_DEPTH_WATCHER(0u);
 
-  // clang-format off
   transformFullPerspective(
-    mxx, mxy,  0, mxt,
-    myx, myy,  0, myt,
-    0  ,   0,  1,   0,
-    0  ,   0,  0,   1
+      mxx, mxy,  0, mxt,
+      myx, myy,  0, myt,
+      0  ,   0,  1,   0,
+      0  ,   0,  0,   1
   );
-  // clang-format on
 }
+// clang-format on
 
+// clang-format off
 // |flutter::DlOpReceiver|
-void DlDispatcherBase::transformFullPerspective(DlScalar mxx,
-                                                DlScalar mxy,
-                                                DlScalar mxz,
-                                                DlScalar mxt,
-                                                DlScalar myx,
-                                                DlScalar myy,
-                                                DlScalar myz,
-                                                DlScalar myt,
-                                                DlScalar mzx,
-                                                DlScalar mzy,
-                                                DlScalar mzz,
-                                                DlScalar mzt,
-                                                DlScalar mwx,
-                                                DlScalar mwy,
-                                                DlScalar mwz,
-                                                DlScalar mwt) {
+void DlDispatcherBase::transformFullPerspective(
+    DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
+    DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
+    DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
+    DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) {
   AUTO_DEPTH_WATCHER(0u);
 
   // The order of arguments is row-major but Impeller matrices are
   // column-major.
-  // clang-format off
   auto transform = Matrix{
-    mxx, myx, mzx, mwx,
-    mxy, myy, mzy, mwy,
-    mxz, myz, mzz, mwz,
-    mxt, myt, mzt, mwt
+      mxx, myx, mzx, mwx,
+      mxy, myy, mzy, mwy,
+      mxz, myz, mzz, mwz,
+      mxt, myt, mzt, mwt
   };
-  // clang-format on
   GetCanvas().Transform(transform);
 }
+// clang-format on
 
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::transformReset() {
@@ -547,46 +533,14 @@ void DlDispatcherBase::drawLine(const DlPoint& p0, const DlPoint& p1) {
   GetCanvas().DrawLine(p0, p1, paint_);
 }
 
+// |flutter::DlOpReceiver|
 void DlDispatcherBase::drawDashedLine(const DlPoint& p0,
                                       const DlPoint& p1,
                                       DlScalar on_length,
                                       DlScalar off_length) {
   AUTO_DEPTH_WATCHER(1u);
 
-  Scalar length = p0.GetDistance(p1);
-  // Reasons to defer to regular DrawLine:
-  //   length is non-positive - drawLine will draw appropriate "dot"
-  //   off_length is non-positive - no gaps, drawLine will draw it solid
-  //   on_length is negative - invalid dashing
-  // Note that a 0 length "on" dash will draw "dot"s every "off" distance
-  // apart
-  if (length > 0.0f && on_length >= 0.0f && off_length > 0.0f) {
-    Point delta = (p1 - p0) / length;  // length > 0 already tested
-    flutter::DlPathBuilder builder;
-
-    Scalar consumed = 0.0f;
-    while (consumed < length) {
-      builder.MoveTo(p0 + delta * consumed);
-
-      Scalar dash_end = consumed + on_length;
-      if (dash_end < length) {
-        builder.LineTo(p0 + delta * dash_end);
-      } else {
-        builder.LineTo(p1);
-        // Should happen anyway due to the math, but let's make it explicit
-        // in case of bit errors. We're done with this line.
-        break;
-      }
-
-      consumed = dash_end + off_length;
-    }
-
-    Paint stroke_paint = paint_;
-    stroke_paint.style = Paint::Style::kStroke;
-    GetCanvas().DrawPath(builder.TakePath(), stroke_paint);
-  } else {
-    drawLine(p0, p1);
-  }
+  GetCanvas().DrawDashedLine(p0, p1, on_length, off_length, paint_);
 }
 
 // |flutter::DlOpReceiver|
@@ -679,7 +633,8 @@ void DlDispatcherBase::drawArc(const DlRect& oval_bounds,
                                bool use_center) {
   AUTO_DEPTH_WATCHER(1u);
 
-  GetCanvas().DrawArc(oval_bounds, start_degrees, sweep_degrees, use_center,
+  GetCanvas().DrawArc(Arc(oval_bounds, Degrees(start_degrees),
+                          Degrees(sweep_degrees), use_center),
                       paint_);
 }
 
@@ -885,21 +840,16 @@ void DlDispatcherBase::drawDisplayList(
 }
 
 // |flutter::DlOpReceiver|
-void DlDispatcherBase::drawTextBlob(const sk_sp<SkTextBlob> blob,
-                                    DlScalar x,
-                                    DlScalar y) {
-  // When running with Impeller enabled Skia text blobs are converted to
-  // Impeller text frames in paragraph_skia.cc
-  UNIMPLEMENTED;
-}
-
-// |flutter::DlOpReceiver|
-void DlDispatcherBase::drawTextFrame(
-    const std::shared_ptr<TextFrame>& text_frame,
-    DlScalar x,
-    DlScalar y) {
+void DlDispatcherBase::drawText(const std::shared_ptr<flutter::DlText>& text,
+                                DlScalar x,
+                                DlScalar y) {
   AUTO_DEPTH_WATCHER(1u);
 
+  auto text_frame = text->GetTextFrame();
+
+  // When running with Impeller enabled Skia text blobs are converted to
+  // Impeller text frames in paragraph_skia.cc
+  FML_CHECK(text_frame != nullptr);
   GetCanvas().DrawTextFrame(text_frame,             //
                             impeller::Point{x, y},  //
                             paint_                  //
@@ -982,7 +932,7 @@ CanvasDlDispatcher::CanvasDlDispatcher(ContentContext& renderer,
                                        bool is_onscreen,
                                        bool has_root_backdrop_filter,
                                        flutter::DlBlendMode max_root_blend_mode,
-                                       IRect cull_rect)
+                                       IRect32 cull_rect)
     : canvas_(renderer,
               render_target,
               is_onscreen,
@@ -1093,44 +1043,52 @@ void FirstPassDispatcher::skew(DlScalar sx, DlScalar sy) {
 }
 
 // clang-format off
-  // 2x3 2D affine subset of a 4x4 transform in row major order
-  void FirstPassDispatcher::transform2DAffine(DlScalar mxx, DlScalar mxy, DlScalar mxt,
-                                              DlScalar myx, DlScalar myy, DlScalar myt) {
-    matrix_ = matrix_ * Matrix::MakeColumn(
-        mxx,  myx,  0.0f, 0.0f,
-        mxy,  myy,  0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        mxt,  myt,  0.0f, 1.0f
-    );
-  }
+// 2x3 2D affine subset of a 4x4 transform in row major order
+void FirstPassDispatcher::transform2DAffine(
+    DlScalar mxx, DlScalar mxy, DlScalar mxt,
+    DlScalar myx, DlScalar myy, DlScalar myt) {
+  matrix_ = matrix_ * Matrix::MakeColumn(
+      mxx,  myx,  0.0f, 0.0f,
+      mxy,  myy,  0.0f, 0.0f,
+      0.0f, 0.0f, 1.0f, 0.0f,
+      mxt,  myt,  0.0f, 1.0f
+  );
+}
+// clang-format on
 
-  // full 4x4 transform in row major order
-  void FirstPassDispatcher::transformFullPerspective(
-      DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
-      DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
-      DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
-      DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) {
-    matrix_ = matrix_ * Matrix::MakeColumn(
-        mxx, myx, mzx, mwx,
-        mxy, myy, mzy, mwy,
-        mxz, myz, mzz, mwz,
-        mxt, myt, mzt, mwt
-    );
-  }
+// clang-format off
+// full 4x4 transform in row major order
+void FirstPassDispatcher::transformFullPerspective(
+    DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
+    DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
+    DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
+    DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) {
+  matrix_ = matrix_ * Matrix::MakeColumn(
+      mxx, myx, mzx, mwx,
+      mxy, myy, mzy, mwy,
+      mxz, myz, mzz, mwz,
+      mxt, myt, mzt, mwt
+  );
+}
 // clang-format on
 
 void FirstPassDispatcher::transformReset() {
   matrix_ = Matrix();
 }
 
-void FirstPassDispatcher::drawTextFrame(
-    const std::shared_ptr<impeller::TextFrame>& text_frame,
-    DlScalar x,
-    DlScalar y) {
+void FirstPassDispatcher::drawText(const std::shared_ptr<flutter::DlText>& text,
+                                   DlScalar x,
+                                   DlScalar y) {
   GlyphProperties properties;
+  auto text_frame = text->GetTextFrame();
+  if (text_frame == nullptr) {
+    return;
+  }
+
   if (paint_.style == Paint::Style::kStroke) {
     properties.stroke = paint_.stroke;
   }
+
   if (text_frame->HasColor()) {
     // Alpha is always applied when rendering, remove it here so
     // we do not double-apply the alpha.
@@ -1302,14 +1260,15 @@ std::shared_ptr<Texture> DisplayListToTexture(
       /*is_onscreen=*/false,                     //
       display_list->root_has_backdrop_filter(),  //
       display_list->max_root_blend_mode(),       //
-      impeller::IRect::MakeSize(size)            //
+      impeller::IRect32::MakeSize(size)          //
   );
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
   context.GetContentContext().GetTextShadowCache().MarkFrameStart();
   fml::ScopedCleanupClosure cleanup([&] {
     if (reset_host_buffer) {
-      context.GetContentContext().GetTransientsBuffer().Reset();
+      context.GetContentContext().GetTransientsDataBuffer().Reset();
+      context.GetContentContext().GetTransientsIndexesBuffer().Reset();
     }
     context.GetContentContext().GetTextShadowCache().MarkFrameEnd();
     context.GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
@@ -1325,13 +1284,11 @@ std::shared_ptr<Texture> DisplayListToTexture(
 bool RenderToTarget(ContentContext& context,
                     RenderTarget render_target,
                     const sk_sp<flutter::DisplayList>& display_list,
-                    SkIRect cull_rect,
+                    Rect cull_rect,
                     bool reset_host_buffer,
                     bool is_onscreen) {
-  Rect ip_cull_rect = Rect::MakeLTRB(cull_rect.left(), cull_rect.top(),
-                                     cull_rect.right(), cull_rect.bottom());
-  FirstPassDispatcher collector(context, impeller::Matrix(), ip_cull_rect);
-  display_list->Dispatch(collector, ip_cull_rect);
+  FirstPassDispatcher collector(context, impeller::Matrix(), cull_rect);
+  display_list->Dispatch(collector, cull_rect);
 
   impeller::CanvasDlDispatcher impeller_dispatcher(
       context,                                   //
@@ -1339,19 +1296,19 @@ bool RenderToTarget(ContentContext& context,
       /*is_onscreen=*/is_onscreen,               //
       display_list->root_has_backdrop_filter(),  //
       display_list->max_root_blend_mode(),       //
-      IRect::RoundOut(ip_cull_rect)              //
+      IRect32::RoundOut(cull_rect)               //
   );
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
   context.GetTextShadowCache().MarkFrameStart();
   fml::ScopedCleanupClosure cleanup([&] {
     if (reset_host_buffer) {
-      context.GetTransientsBuffer().Reset();
+      context.ResetTransientsBuffers();
     }
     context.GetTextShadowCache().MarkFrameEnd();
   });
 
-  display_list->Dispatch(impeller_dispatcher, ip_cull_rect);
+  display_list->Dispatch(impeller_dispatcher, cull_rect);
   impeller_dispatcher.FinishRecording();
   context.GetLazyGlyphAtlas()->ResetTextFrames();
 

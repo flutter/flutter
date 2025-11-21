@@ -7,14 +7,14 @@ import '../../base/project_migrator.dart';
 import '../../cmake_project.dart';
 import 'utils.dart';
 
-const String _before = r'''
+const _before = r'''
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
     this->Show();
   });
 
   return true;
 ''';
-const String _after = r'''
+const _after = r'''
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
     this->Show();
   });

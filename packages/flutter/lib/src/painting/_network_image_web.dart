@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:js_interop';
 import 'dart:ui' as ui;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 import '../web.dart' as web;
@@ -113,11 +114,10 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   InformationCollector? _imageStreamInformationCollector(image_provider.NetworkImage key) {
     InformationCollector? collector;
     assert(() {
-      collector =
-          () => <DiagnosticsNode>[
-            DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
-            DiagnosticsProperty<NetworkImage>('Image key', key as NetworkImage),
-          ];
+      collector = () => <DiagnosticsNode>[
+        DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
+        DiagnosticsProperty<NetworkImage>('Image key', key as NetworkImage),
+      ];
       return true;
     }());
     return collector;
@@ -221,9 +221,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     request.addEventListener(
       'error',
       ((JSObject e) => completer.completeError(
-            image_provider.NetworkImageLoadException(statusCode: request.status, uri: resolved),
-          ))
-          .toJS,
+        image_provider.NetworkImageLoadException(statusCode: request.status, uri: resolved),
+      )).toJS,
     );
 
     request.send();
@@ -244,15 +243,24 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is NetworkImage && other.url == url && other.scale == scale;
+    return other is NetworkImage &&
+        other.url == url &&
+        other.scale == scale &&
+        other.webHtmlElementStrategy == webHtmlElementStrategy &&
+        mapEquals(other.headers, headers);
   }
 
   @override
-  int get hashCode => Object.hash(url, scale);
+  int get hashCode => Object.hash(
+    url,
+    scale,
+    webHtmlElementStrategy,
+    const MapEquality<String, String>().hash(headers),
+  );
 
   @override
   String toString() =>
-      '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: ${scale.toStringAsFixed(1)})';
+      '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: ${scale.toStringAsFixed(1)}, webHtmlElementStrategy: ${webHtmlElementStrategy.name}, headers: $headers)';
 }
 
 /// An [ImageStreamCompleter] that delegates to another [ImageStreamCompleter]

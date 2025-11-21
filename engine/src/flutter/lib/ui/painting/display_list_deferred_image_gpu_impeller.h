@@ -5,6 +5,7 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_DISPLAY_LIST_DEFERRED_IMAGE_GPU_IMPELLER_H_
 #define FLUTTER_LIB_UI_PAINTING_DISPLAY_LIST_DEFERRED_IMAGE_GPU_IMPELLER_H_
 
+#include <variant>
 #include "flutter/common/graphics/texture.h"
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/flow/layers/layer_tree.h"
@@ -16,6 +17,10 @@
 
 namespace flutter {
 
+namespace testing {
+FML_TEST_CLASS(DlDeferredImageGPUImpeller, TrashesDisplayList);
+}  // namespace testing
+
 class DlDeferredImageGPUImpeller final : public DlImage {
  public:
   static sk_sp<DlDeferredImageGPUImpeller> Make(
@@ -25,7 +30,7 @@ class DlDeferredImageGPUImpeller final : public DlImage {
 
   static sk_sp<DlDeferredImageGPUImpeller> Make(
       sk_sp<DisplayList> display_list,
-      const SkISize& size,
+      const DlISize& size,
       fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
       fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
@@ -59,6 +64,8 @@ class DlDeferredImageGPUImpeller final : public DlImage {
   }
 
  private:
+  FML_FRIEND_TEST(testing::DlDeferredImageGPUImpeller, TrashesDisplayList);
+
   class ImageWrapper final : public std::enable_shared_from_this<ImageWrapper>,
                              public ContextListener {
    public:
@@ -66,7 +73,7 @@ class DlDeferredImageGPUImpeller final : public DlImage {
 
     static std::shared_ptr<ImageWrapper> Make(
         sk_sp<DisplayList> display_list,
-        const SkISize& size,
+        const DlISize& size,
         fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
         fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
@@ -81,32 +88,29 @@ class DlDeferredImageGPUImpeller final : public DlImage {
       return texture_;
     }
 
-    const SkISize size() const { return size_; }
+    const DlISize size() const { return size_; }
 
     std::optional<std::string> get_error();
 
    private:
-    SkISize size_;
-    sk_sp<DisplayList> display_list_;
+    FML_FRIEND_TEST(testing::DlDeferredImageGPUImpeller, TrashesDisplayList);
+    DlISize size_;
     std::shared_ptr<impeller::Texture> texture_;
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate_;
     fml::RefPtr<fml::TaskRunner> raster_task_runner_;
-    std::shared_ptr<TextureRegistry> texture_registry_;
 
     mutable std::mutex error_mutex_;
     std::optional<std::string> error_;
 
     ImageWrapper(
-        sk_sp<DisplayList> display_list,
-        const SkISize& size,
+        const DlISize& size,
         fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
         fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
-    // If a layer tree is provided, it will be flattened during the raster
-    // thread task spawned by this method. After being flattened into a display
-    // list, the image wrapper will be updated to hold this display list and the
-    // layer tree can be dropped.
-    void SnapshotDisplayList(std::unique_ptr<LayerTree> layer_tree = nullptr);
+    // If a layer tree is provided, it will be flattened into a display list
+    // during the raster thread task spawned by this method.
+    void SnapshotDisplayList(
+        std::variant<sk_sp<DisplayList>, std::unique_ptr<LayerTree>> content);
 
     // |ContextListener|
     void OnGrContextCreated() override;

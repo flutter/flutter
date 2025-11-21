@@ -40,6 +40,7 @@ source_set("testing_lib") {
   public_deps = [
     "//flutter/display_list",
     "//flutter/fml",
+    "//flutter/impeller/typographer",
     "//flutter/third_party/googletest:gmock",
     "//flutter/third_party/googletest:gtest",
   ]

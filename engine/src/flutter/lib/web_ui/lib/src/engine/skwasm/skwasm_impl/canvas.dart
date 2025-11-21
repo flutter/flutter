@@ -9,7 +9,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-class SkwasmCanvas implements SceneCanvas {
+class SkwasmCanvas implements LayerCanvas {
   factory SkwasmCanvas(SkwasmPictureRecorder recorder, ui.Rect cullRect) => SkwasmCanvas.fromHandle(
     withStackScope(
       (StackScope s) =>
@@ -34,16 +34,10 @@ class SkwasmCanvas implements SceneCanvas {
     final paintHandle = (paint as SkwasmPaint).toRawPaint();
     if (bounds != null) {
       withStackScope((StackScope s) {
-        canvasSaveLayer(
-          _handle,
-          s.convertRectToNative(bounds),
-          paintHandle,
-          nullptr,
-          ui.TileMode.clamp.index,
-        );
+        canvasSaveLayer(_handle, s.convertRectToNative(bounds), paintHandle, nullptr);
       });
     } else {
-      canvasSaveLayer(_handle, nullptr, paintHandle, nullptr, ui.TileMode.clamp.index);
+      canvasSaveLayer(_handle, nullptr, paintHandle, nullptr);
     }
     paintDispose(paintHandle);
   }
@@ -60,29 +54,16 @@ class SkwasmCanvas implements SceneCanvas {
     // and instead needs it supplied to the saveLayer call itself as a
     // separate argument.
     final SkwasmImageFilter nativeFilter = SkwasmImageFilter.fromUiFilter(imageFilter);
-    final ui.TileMode? backdropTileMode = nativeFilter.backdropTileMode;
     final paintHandle = (paint as SkwasmPaint).toRawPaint(/*ui.TileMode.decal*/);
     if (bounds != null) {
       withStackScope((StackScope s) {
         nativeFilter.withRawImageFilter((nativeFilterHandle) {
-          canvasSaveLayer(
-            _handle,
-            s.convertRectToNative(bounds),
-            paintHandle,
-            nativeFilterHandle,
-            (backdropTileMode ?? ui.TileMode.mirror).index,
-          );
+          canvasSaveLayer(_handle, s.convertRectToNative(bounds), paintHandle, nativeFilterHandle);
         }, defaultBlurTileMode: ui.TileMode.mirror);
       });
     } else {
       nativeFilter.withRawImageFilter((nativeFilterHandle) {
-        canvasSaveLayer(
-          _handle,
-          nullptr,
-          paintHandle,
-          nativeFilterHandle,
-          (backdropTileMode ?? ui.TileMode.mirror).index,
-        );
+        canvasSaveLayer(_handle, nullptr, paintHandle, nativeFilterHandle);
       }, defaultBlurTileMode: ui.TileMode.mirror);
     }
     paintDispose(paintHandle);
@@ -136,15 +117,15 @@ class SkwasmCanvas implements SceneCanvas {
 
   @override
   void clipRSuperellipse(ui.RSuperellipse rsuperellipse, {bool doAntiAlias = true}) {
-    // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
-    // back to RRect.  https://github.com/flutter/flutter/issues/163718
-    clipRRect(rsuperellipse.toApproximateRRect(), doAntiAlias: doAntiAlias);
+    final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
+    translate(offset.dx, offset.dy);
+    clipPath(path, doAntiAlias: doAntiAlias);
+    translate(-offset.dx, -offset.dy);
   }
 
   @override
   void clipPath(ui.Path path, {bool doAntiAlias = true}) {
-    path as SkwasmPath;
-    canvasClipPath(_handle, path.handle, doAntiAlias);
+    canvasClipPath(_handle, ((path as LazyPath).builtPath as SkwasmPath).handle, doAntiAlias);
   }
 
   @override
@@ -185,9 +166,10 @@ class SkwasmCanvas implements SceneCanvas {
 
   @override
   void drawRSuperellipse(ui.RSuperellipse rsuperellipse, ui.Paint paint) {
-    // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
-    // back to RRect.  https://github.com/flutter/flutter/issues/163718
-    drawRRect(rsuperellipse.toApproximateRRect(), paint);
+    final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
+    translate(offset.dx, offset.dy);
+    drawPath(path, paint);
+    translate(-offset.dx, -offset.dy);
   }
 
   @override
@@ -238,9 +220,8 @@ class SkwasmCanvas implements SceneCanvas {
 
   @override
   void drawPath(ui.Path path, ui.Paint paint) {
-    path as SkwasmPath;
     final paintHandle = (paint as SkwasmPaint).toRawPaint();
-    canvasDrawPath(_handle, path.handle, paintHandle);
+    canvasDrawPath(_handle, ((path as LazyPath).builtPath as SkwasmPath).handle, paintHandle);
     paintDispose(paintHandle);
   }
 
@@ -341,8 +322,9 @@ class SkwasmCanvas implements SceneCanvas {
   ) => withStackScope((StackScope scope) {
     final RawRSTransformArray rawTransforms = scope.convertRSTransformsToNative(transforms);
     final RawRect rawRects = scope.convertRectsToNative(rects);
-    final RawColorArray rawColors =
-        colors != null ? scope.convertColorArrayToNative(colors) : nullptr;
+    final RawColorArray rawColors = colors != null
+        ? scope.convertColorArrayToNative(colors)
+        : nullptr;
     final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
     final paintHandle = (paint as SkwasmPaint).toRawPaint(defaultBlurTileMode: ui.TileMode.clamp);
     canvasDrawAtlas(
@@ -371,8 +353,9 @@ class SkwasmCanvas implements SceneCanvas {
   ) => withStackScope((StackScope scope) {
     final RawRSTransformArray rawTransforms = scope.convertDoublesToNative(rstTransforms);
     final RawRect rawRects = scope.convertDoublesToNative(rects);
-    final RawColorArray rawColors =
-        colors != null ? scope.convertIntsToUint32Native(colors) : nullptr;
+    final RawColorArray rawColors = colors != null
+        ? scope.convertIntsToUint32Native(colors)
+        : nullptr;
     final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
     final paintHandle = (paint as SkwasmPaint).toRawPaint(defaultBlurTileMode: ui.TileMode.clamp);
     canvasDrawAtlas(
@@ -391,10 +374,9 @@ class SkwasmCanvas implements SceneCanvas {
 
   @override
   void drawShadow(ui.Path path, ui.Color color, double elevation, bool transparentOccluder) {
-    path as SkwasmPath;
     canvasDrawShadow(
       _handle,
-      path.handle,
+      ((path as LazyPath).builtPath as SkwasmPath).handle,
       elevation,
       EngineFlutterDisplay.instance.devicePixelRatio,
       color.value,
@@ -428,6 +410,18 @@ class SkwasmCanvas implements SceneCanvas {
       final Pointer<Float> outMatrix = scope.allocFloatArray(16);
       canvasGetTransform(_handle, outMatrix);
       return scope.convertMatrix44FromNative(outMatrix);
+    });
+  }
+
+  @override
+  void clear(ui.Color color) {
+    canvasClear(_handle, color.value);
+  }
+
+  @override
+  bool quickReject(ui.Rect rect) {
+    return withStackScope((StackScope s) {
+      return canvasQuickReject(_handle, s.convertRectToNative(rect));
     });
   }
 }

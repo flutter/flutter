@@ -90,8 +90,8 @@ void main() {
   final List<String> log = <String>[];
   final MemoryFileSystem fs = MemoryFileSystem();
   final Directory basedir = fs.directory('flutter/test/library/')..createSync(recursive: true);
-  final FakeSkiaGoldClient fakeSkiaClient =
-      FakeSkiaGoldClient()..expectationForTestValues['flutter.new_golden_test.1'] = '';
+  final FakeSkiaGoldClient fakeSkiaClient = FakeSkiaGoldClient()
+    ..expectationForTestValues['flutter.new_golden_test.1'] = '';
   final FlutterLocalFileComparator comparator = FlutterLocalFileComparator(
     basedir.uri,
     fakeSkiaClient,

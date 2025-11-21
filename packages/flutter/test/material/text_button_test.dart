@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -30,7 +31,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: Center(child: TextButton(onPressed: () {}, child: const Text('button'))),
+        home: Center(
+          child: TextButton(onPressed: () {}, child: const Text('button')),
+        ),
       ),
     );
 
@@ -377,11 +380,11 @@ void main() {
     (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
 
-      Color getTextColor(Set<MaterialState> states) {
-        final Set<MaterialState> interactiveStates = <MaterialState>{
-          MaterialState.pressed,
-          MaterialState.hovered,
-          MaterialState.focused,
+      Color getTextColor(Set<WidgetState> states) {
+        final Set<WidgetState> interactiveStates = <WidgetState>{
+          WidgetState.pressed,
+          WidgetState.hovered,
+          WidgetState.focused,
         };
         if (states.any(interactiveStates.contains)) {
           return Colors.blue[900]!;
@@ -396,7 +399,7 @@ void main() {
               child: TextButtonTheme(
                 data: TextButtonThemeData(
                   style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
+                    foregroundColor: WidgetStateProperty.resolveWith<Color>(getTextColor),
                   ),
                 ),
                 child: Builder(
@@ -516,14 +519,14 @@ void main() {
     const Color focusedColor = Color(0x00000003);
     const Color defaultColor = Color(0x00000004);
 
-    Color getTextColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    Color getTextColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedColor;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverColor;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedColor;
       }
       return defaultColor;
@@ -535,7 +538,7 @@ void main() {
           body: Center(
             child: TextButton(
               style: ButtonStyle(
-                foregroundColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
+                foregroundColor: WidgetStateProperty.resolveWith<Color>(getTextColor),
               ),
               onPressed: () {},
               focusNode: focusNode,
@@ -584,14 +587,14 @@ void main() {
     const Color focusedColor = Color(0x00000003);
     const Color defaultColor = Color(0x00000004);
 
-    Color getTextColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+    Color getTextColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedColor;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverColor;
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedColor;
       }
       return defaultColor;
@@ -603,8 +606,8 @@ void main() {
           body: Center(
             child: TextButton.icon(
               style: ButtonStyle(
-                foregroundColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
-                iconColor: MaterialStateProperty.resolveWith<Color>(getTextColor),
+                foregroundColor: WidgetStateProperty.resolveWith<Color>(getTextColor),
+                iconColor: WidgetStateProperty.resolveWith<Color>(getTextColor),
               ),
               key: buttonKey,
               icon: const Icon(Icons.add),
@@ -663,8 +666,8 @@ void main() {
   testWidgets('Does TextButton work with hover', (WidgetTester tester) async {
     const Color hoverColor = Color(0xff001122);
 
-    Color? getOverlayColor(Set<MaterialState> states) {
-      return states.contains(MaterialState.hovered) ? hoverColor : null;
+    Color? getOverlayColor(Set<WidgetState> states) {
+      return states.contains(WidgetState.hovered) ? hoverColor : null;
     }
 
     await tester.pumpWidget(
@@ -672,7 +675,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: TextButton(
           style: ButtonStyle(
-            overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
+            overlayColor: WidgetStateProperty.resolveWith<Color?>(getOverlayColor),
           ),
           child: Container(),
           onPressed: () {
@@ -696,8 +699,8 @@ void main() {
   testWidgets('Does TextButton work with focus', (WidgetTester tester) async {
     const Color focusColor = Color(0xff001122);
 
-    Color? getOverlayColor(Set<MaterialState> states) {
-      return states.contains(MaterialState.focused) ? focusColor : null;
+    Color? getOverlayColor(Set<WidgetState> states) {
+      return states.contains(WidgetState.focused) ? focusColor : null;
     }
 
     final FocusNode focusNode = FocusNode(debugLabel: 'TextButton Node');
@@ -706,7 +709,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: TextButton(
           style: ButtonStyle(
-            overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
+            overlayColor: WidgetStateProperty.resolveWith<Color?>(getOverlayColor),
           ),
           focusNode: focusNode,
           onPressed: () {},
@@ -782,7 +785,9 @@ void main() {
           textDirection: TextDirection.ltr,
           child: MediaQuery(
             data: const MediaQueryData(),
-            child: Center(child: TextButton(onPressed: () {}, child: const Text('ABC'))),
+            child: Center(
+              child: TextButton(onPressed: () {}, child: const Text('ABC')),
+            ),
           ),
         ),
       ),
@@ -800,7 +805,9 @@ void main() {
           child: MediaQuery.withClampedTextScaling(
             minScaleFactor: 1.25,
             maxScaleFactor: 1.25,
-            child: Center(child: TextButton(onPressed: () {}, child: const Text('ABC'))),
+            child: Center(
+              child: TextButton(onPressed: () {}, child: const Text('ABC')),
+            ),
           ),
         ),
       ),
@@ -820,7 +827,9 @@ void main() {
           child: MediaQuery.withClampedTextScaling(
             minScaleFactor: 3.0,
             maxScaleFactor: 3.0,
-            child: Center(child: TextButton(onPressed: () {}, child: const Text('ABC'))),
+            child: Center(
+              child: TextButton(onPressed: () {}, child: const Text('ABC')),
+            ),
           ),
         ),
       ),
@@ -1136,15 +1145,14 @@ void main() {
                 style: ButtonStyle(visualDensity: visualDensity),
                 key: key,
                 onPressed: () {},
-                child:
-                    useText
-                        ? const Text('Text', key: childKey)
-                        : Container(
-                          key: childKey,
-                          width: 100,
-                          height: 100,
-                          color: const Color(0xffff0000),
-                        ),
+                child: useText
+                    ? const Text('Text', key: childKey)
+                    : Container(
+                        key: childKey,
+                        width: 100,
+                        height: 100,
+                        color: const Color(0xffff0000),
+                      ),
               ),
             ),
           ),
@@ -1288,19 +1296,18 @@ void main() {
                         textDirection: textDirection,
                         child: Scaffold(
                           body: Center(
-                            child:
-                                icon == null
-                                    ? TextButton(
-                                      key: buttonKey,
-                                      onPressed: () {},
-                                      child: const Text('button', key: labelKey),
-                                    )
-                                    : TextButton.icon(
-                                      key: buttonKey,
-                                      onPressed: () {},
-                                      icon: icon,
-                                      label: const Text('button', key: labelKey),
-                                    ),
+                            child: icon == null
+                                ? TextButton(
+                                    key: buttonKey,
+                                    onPressed: () {},
+                                    child: const Text('button', key: labelKey),
+                                  )
+                                : TextButton.icon(
+                                    key: buttonKey,
+                                    onPressed: () {},
+                                    icon: icon,
+                                    label: const Text('button', key: labelKey),
+                                  ),
                           ),
                         ),
                       ),
@@ -1321,10 +1328,9 @@ void main() {
             final double expectedPaddingTop = paddingVertical[textScaleFactor]!;
             final double expectedPaddingBottom = paddingVertical[textScaleFactor]!;
 
-            final double expectedPaddingStart =
-                icon != null
-                    ? textPaddingWithIconHorizontal[textScaleFactor]!
-                    : textPaddingWithoutIconHorizontal[textScaleFactor]!;
+            final double expectedPaddingStart = icon != null
+                ? textPaddingWithIconHorizontal[textScaleFactor]!
+                : textPaddingWithoutIconHorizontal[textScaleFactor]!;
             final double expectedPaddingEnd = expectedPaddingStart;
 
             final EdgeInsets expectedPadding = EdgeInsetsDirectional.fromSTEB(
@@ -1341,11 +1347,13 @@ void main() {
 
             final RenderBox labelRenderBox = tester.renderObject<RenderBox>(find.byKey(labelKey));
             final Rect labelBounds = globalBounds(labelRenderBox);
-            final RenderBox? iconRenderBox =
-                icon == null ? null : tester.renderObject<RenderBox>(find.byKey(iconKey));
+            final RenderBox? iconRenderBox = icon == null
+                ? null
+                : tester.renderObject<RenderBox>(find.byKey(iconKey));
             final Rect? iconBounds = icon == null ? null : globalBounds(iconRenderBox!);
-            final Rect childBounds =
-                icon == null ? labelBounds : labelBounds.expandToInclude(iconBounds!);
+            final Rect childBounds = icon == null
+                ? labelBounds
+                : labelBounds.expandToInclude(iconBounds!);
 
             // We measure the `InkResponse` descendant of the button
             // element, because the button has a larger `RenderBox`
@@ -1379,10 +1387,9 @@ void main() {
 
             // Check the gap between the icon and the label
             if (icon != null) {
-              final double gapWidth =
-                  textDirection == TextDirection.ltr
-                      ? labelBounds.left - iconBounds!.right
-                      : iconBounds!.left - labelBounds.right;
+              final double gapWidth = textDirection == TextDirection.ltr
+                  ? labelBounds.left - iconBounds!.right
+                  : iconBounds!.left - labelBounds.right;
               expect(gapWidth, paddingWithIconGap[textScaleFactor]);
             }
 
@@ -1442,7 +1449,9 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return Scaffold(
-              body: Center(child: TextButton(onPressed: () {}, child: const Text('text'))),
+              body: Center(
+                child: TextButton(onPressed: () {}, child: const Text('text')),
+              ),
             );
           },
         ),
@@ -1577,7 +1586,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: theme,
-          home: Center(child: TextButton(onPressed: () {}, child: const Text('button'))),
+          home: Center(
+            child: TextButton(onPressed: () {}, child: const Text('button')),
+          ),
         ),
       );
 
@@ -1600,7 +1611,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: Center(child: TextButton(onPressed: () {}, child: const Text('button'))),
+        home: Center(
+          child: TextButton(onPressed: () {}, child: const Text('button')),
+        ),
       ),
     );
 
@@ -1810,7 +1823,7 @@ void main() {
 
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test default cursor when disabled
@@ -1901,24 +1914,23 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
-          child:
-              icon == null
-                  ? TextButton(
-                    statesController: controller,
-                    onPressed: () {},
-                    child: const Text('button'),
-                  )
-                  : TextButton.icon(
-                    statesController: controller,
-                    onPressed: () {},
-                    icon: icon,
-                    label: const Text('button'),
-                  ),
+          child: icon == null
+              ? TextButton(
+                  statesController: controller,
+                  onPressed: () {},
+                  child: const Text('button'),
+                )
+              : TextButton.icon(
+                  statesController: controller,
+                  onPressed: () {},
+                  icon: icon,
+                  label: const Text('button'),
+                ),
         ),
       ),
     );
 
-    expect(controller.value, <MaterialState>{});
+    expect(controller.value, <WidgetState>{});
     expect(count, 0);
 
     final Offset center = tester.getCenter(find.byType(Text));
@@ -1927,42 +1939,42 @@ void main() {
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(controller.value, <WidgetState>{WidgetState.hovered});
     expect(count, 1);
 
     await gesture.moveTo(Offset.zero);
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{});
+    expect(controller.value, <WidgetState>{});
     expect(count, 2);
 
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(controller.value, <WidgetState>{WidgetState.hovered});
     expect(count, 3);
 
     await gesture.down(center);
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
+    expect(controller.value, <WidgetState>{WidgetState.hovered, WidgetState.pressed});
     expect(count, 4);
 
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(controller.value, <WidgetState>{WidgetState.hovered});
     expect(count, 5);
 
     await gesture.moveTo(Offset.zero);
     await tester.pumpAndSettle();
 
-    expect(controller.value, <MaterialState>{});
+    expect(controller.value, <WidgetState>{});
     expect(count, 6);
 
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
+    expect(controller.value, <WidgetState>{WidgetState.hovered, WidgetState.pressed});
     expect(count, 8); // adds hovered and pressed - two changes
 
     // If the button is rebuilt disabled, then the pressed state is
@@ -1970,28 +1982,27 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
-          child:
-              icon == null
-                  ? TextButton(
-                    statesController: controller,
-                    onPressed: null,
-                    child: const Text('button'),
-                  )
-                  : TextButton.icon(
-                    statesController: controller,
-                    onPressed: null,
-                    icon: icon,
-                    label: const Text('button'),
-                  ),
+          child: icon == null
+              ? TextButton(
+                  statesController: controller,
+                  onPressed: null,
+                  child: const Text('button'),
+                )
+              : TextButton.icon(
+                  statesController: controller,
+                  onPressed: null,
+                  icon: icon,
+                  label: const Text('button'),
+                ),
         ),
       ),
     );
     await tester.pumpAndSettle();
-    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.disabled});
+    expect(controller.value, <WidgetState>{WidgetState.hovered, WidgetState.disabled});
     expect(count, 10); // removes pressed and adds disabled - two changes
     await gesture.moveTo(Offset.zero);
     await tester.pumpAndSettle();
-    expect(controller.value, <MaterialState>{MaterialState.disabled});
+    expect(controller.value, <WidgetState>{WidgetState.disabled});
     expect(count, 11);
     await gesture.removePointer();
   }
@@ -2025,7 +2036,7 @@ void main() {
         ),
       ),
     );
-    expect(controller.value, <MaterialState>{MaterialState.disabled});
+    expect(controller.value, <WidgetState>{WidgetState.disabled});
     expect(count, 1);
   });
 
@@ -2112,13 +2123,13 @@ void main() {
         textDirection: TextDirection.ltr,
         child: TextButton(
           style: TextButton.styleFrom(
-            backgroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+            backgroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
               return DecoratedBox(
                 decoration: const BoxDecoration(color: backgroundColor),
                 child: child,
               );
             },
-            foregroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+            foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
               return DecoratedBox(
                 decoration: const BoxDecoration(color: foregroundColor),
                 child: child,
@@ -2162,10 +2173,10 @@ void main() {
           textDirection: TextDirection.ltr,
           child: TextButton(
             style: TextButton.styleFrom(
-              backgroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+              backgroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
                 return const DecoratedBox(decoration: BoxDecoration(color: backgroundColor));
               },
-              foregroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+              foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
                 return const DecoratedBox(decoration: BoxDecoration(color: foregroundColor));
               },
             ),
@@ -2193,7 +2204,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: TextButton(
           style: TextButton.styleFrom(
-            foregroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+            foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
               return const DecoratedBox(decoration: BoxDecoration(color: foregroundColor));
             },
           ),
@@ -2215,8 +2226,8 @@ void main() {
   testWidgets('TextButton foreground and background builders are applied to the correct states', (
     WidgetTester tester,
   ) async {
-    Set<MaterialState> foregroundStates = <MaterialState>{};
-    Set<MaterialState> backgroundStates = <MaterialState>{};
+    Set<WidgetState> foregroundStates = <WidgetState>{};
+    Set<WidgetState> backgroundStates = <WidgetState>{};
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
@@ -2225,19 +2236,11 @@ void main() {
           body: Center(
             child: TextButton(
               style: ButtonStyle(
-                backgroundBuilder: (
-                  BuildContext context,
-                  Set<MaterialState> states,
-                  Widget? child,
-                ) {
+                backgroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
                   backgroundStates = states;
                   return child!;
                 },
-                foregroundBuilder: (
-                  BuildContext context,
-                  Set<MaterialState> states,
-                  Widget? child,
-                ) {
+                foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
                   foregroundStates = states;
                   return child!;
                 },
@@ -2255,18 +2258,18 @@ void main() {
     expect(backgroundStates.isEmpty, isTrue);
     expect(foregroundStates.isEmpty, isTrue);
 
-    const Set<MaterialState> focusedStates = <MaterialState>{MaterialState.focused};
-    const Set<MaterialState> focusedHoveredStates = <MaterialState>{
-      MaterialState.focused,
-      MaterialState.hovered,
+    const Set<WidgetState> focusedStates = <WidgetState>{WidgetState.focused};
+    const Set<WidgetState> focusedHoveredStates = <WidgetState>{
+      WidgetState.focused,
+      WidgetState.hovered,
     };
-    const Set<MaterialState> focusedHoveredPressedStates = <MaterialState>{
-      MaterialState.focused,
-      MaterialState.hovered,
-      MaterialState.pressed,
+    const Set<WidgetState> focusedHoveredPressedStates = <WidgetState>{
+      WidgetState.focused,
+      WidgetState.hovered,
+      WidgetState.pressed,
     };
 
-    bool sameStates(Set<MaterialState> expectedValue, Set<MaterialState> actualValue) {
+    bool sameStates(Set<WidgetState> expectedValue, Set<WidgetState> actualValue) {
       return expectedValue.difference(actualValue).isEmpty &&
           actualValue.difference(expectedValue).isEmpty;
     }
@@ -2646,5 +2649,48 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(textColor(tester, buttonText), hoveredColor);
     expect(iconStyle(tester, buttonIcon).color, hoveredColor);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/173944.
+  testWidgets('TextButton.icon does not lose focus when icon is nullified', (
+    WidgetTester tester,
+  ) async {
+    Widget buildTextButton({required Widget? icon}) {
+      return MaterialApp(
+        home: Center(
+          child: TextButton.icon(onPressed: () {}, icon: icon, label: const Text('button')),
+        ),
+      );
+    }
+
+    // Build once with an icon.
+    await tester.pumpWidget(buildTextButton(icon: const Icon(Icons.abc)));
+
+    FocusNode getButtonFocusNode() {
+      return Focus.of(tester.element(find.text('button')));
+    }
+
+    getButtonFocusNode().requestFocus();
+    await tester.pumpAndSettle();
+    expect(getButtonFocusNode().hasFocus, true);
+
+    // Rebuild without icon.
+    await tester.pumpWidget(buildTextButton(icon: null));
+
+    // The button should still be focused.
+    expect(getButtonFocusNode().hasFocus, true);
+  });
+
+  testWidgets('TextButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: TextButton(onPressed: () {}, child: const Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TextButton)), Size.zero);
   });
 }

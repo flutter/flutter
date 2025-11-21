@@ -179,7 +179,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "125.0.6422.141"
+          "version": "141.0.7390.76"
         }
       ],
       "tasks": [
@@ -328,7 +328,7 @@
         },
         {
           "dependency": "firefox",
-          "version": "version:132.0"
+          "version": "version:143.0"
         }
       ],
       "tasks": [
@@ -397,7 +397,7 @@
       "recipe": "engine_v2/tester_engine",
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-14",
+        "os=Mac-15.5",
         "cpu=arm64"
       ],
       "gclient_variables": {

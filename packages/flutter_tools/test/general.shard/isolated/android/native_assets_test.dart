@@ -8,7 +8,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/common.dart' show throwToolExit;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 
 import '../../../src/common.dart';
@@ -49,28 +50,26 @@ void main() {
     projectUri = environment.projectDir.uri;
   });
 
-  for (final BuildMode buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
+  for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
     testUsingContext(
       'build with assets $buildMode',
       // [intended] Backslashes in commands, but we will never run these commands on Windows.
       skip: const LocalPlatform().isWindows,
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-        ProcessManager: () => FakeProcessManager.empty(),
-      },
+      overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
       () async {
         final File packageConfig = environment.projectDir.childFile(
           '.dart_tool/package_config.json',
         );
-        final Uri nonFlutterTesterAssetUri =
-            environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename).uri;
+        final Uri nonFlutterTesterAssetUri = environment.buildDir
+            .childFile(InstallCodeAssets.nativeAssetsFilename)
+            .uri;
         await packageConfig.parent.create();
         await packageConfig.create();
         final File dylibAfterCompiling = fileSystem.file('libbar.so');
         // The mock doesn't create the file, so create it here.
         await dylibAfterCompiling.create();
 
-        final List<CodeAsset> codeAssets = <CodeAsset>[
+        final codeAssets = <CodeAsset>[
           CodeAsset(
             package: 'bar',
             name: 'bar.dart',
@@ -78,16 +77,16 @@ void main() {
             file: Uri.file('libbar.so'),
           ),
         ];
-        final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
+        final buildRunner = FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
           buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
           linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
         );
-        final Map<String, String> environmentDefines = <String, String>{
+        final environmentDefines = <String, String>{
           kBuildMode: buildMode.cliName,
           kMinSdkVersion: minSdkVersion,
         };
-        final DartBuildResult result = await runFlutterSpecificDartBuild(
+        final DartHooksResult result = await runFlutterSpecificHooks(
           environmentDefines: environmentDefines,
           targetPlatform: TargetPlatform.android_arm64,
           projectUri: projectUri,
@@ -95,7 +94,7 @@ void main() {
           buildRunner: buildRunner,
         );
         await installCodeAssets(
-          dartBuildResult: result,
+          dartHookResult: result,
           environmentDefines: environmentDefines,
           targetPlatform: TargetPlatform.android_arm64,
           projectUri: projectUri,
@@ -105,8 +104,8 @@ void main() {
         expect(
           (globals.logger as BufferLogger).traceText,
           stringContainsInOrder(<String>[
-            'Building native assets for android arm64.',
-            'Building native assets for android arm64 done.',
+            'Building native assets for android_arm64.',
+            'Building native assets for android_arm64 done.',
           ]),
         );
 
@@ -121,14 +120,11 @@ void main() {
   // assets have to be build.
   testUsingContext(
     'does not throw if NDK not present but no native assets present',
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager: () => FakeProcessManager.empty(),
-    },
+    overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       await packageConfig.create(recursive: true);
-      await runFlutterSpecificDartBuild(
+      await runFlutterSpecificHooks(
         environmentDefines: <String, String>{
           kBuildMode: BuildMode.debug.cliName,
           kMinSdkVersion: minSdkVersion,
@@ -153,7 +149,7 @@ void main() {
       await packageConfig.parent.create();
       await packageConfig.create();
       expect(
-        () => runFlutterSpecificDartBuild(
+        () => runFlutterSpecificHooks(
           environmentDefines: <String, String>{
             kBuildMode: BuildMode.debug.cliName,
             kMinSdkVersion: minSdkVersion,
@@ -173,6 +169,6 @@ class _BuildRunnerWithoutNdk extends FakeFlutterNativeAssetsBuildRunner {
   _BuildRunnerWithoutNdk({super.packagesWithNativeAssetsResult = const <String>[]});
 
   @override
-  Future<CCompilerConfig> get ndkCCompilerConfig async =>
+  CCompilerConfig? get ndkCCompilerConfigResult =>
       throwToolExit('Android NDK Clang could not be found.');
 }

@@ -1121,7 +1121,9 @@ public class FlutterView extends FrameLayout
             this,
             this.flutterEngine.getTextInputChannel(),
             this.flutterEngine.getScribeChannel(),
-            this.flutterEngine.getPlatformViewsController(),
+            this.flutterEngine
+                .getPlatformViewsController(), // TODO(gmackall): this can be changed to take a pvc
+            // delegator.
             this.flutterEngine.getPlatformViewsController2());
 
     try {
@@ -1143,13 +1145,14 @@ public class FlutterView extends FrameLayout
     keyboardManager = new KeyboardManager(this);
     androidTouchProcessor =
         new AndroidTouchProcessor(this.flutterEngine.getRenderer(), /*trackMotionEvents=*/ false);
+
     accessibilityBridge =
         new AccessibilityBridge(
             this,
             flutterEngine.getAccessibilityChannel(),
             (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE),
             getContext().getContentResolver(),
-            this.flutterEngine.getPlatformViewsController());
+            flutterEngine.getPlatformViewsControllerDelegator());
     accessibilityBridge.setOnAccessibilityChangeListener(onAccessibilityChangeListener);
     resetWillNotDraw(
         accessibilityBridge.isAccessibilityEnabled(),

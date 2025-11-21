@@ -38,10 +38,13 @@ const String kListTextLayoutRouteName = '/list_text_layout';
 const String kAnimatedBlurBackdropFilter = '/animated_blur_backdrop_filter';
 const String kSlidersRouteName = '/sliders';
 const String kDrawPointsPageRougeName = '/draw_points';
+const String kDrawArcsAllFillStylesPageRouteName = '/draw_arcs_fill';
+const String kDrawArcsAllStrokeStylesPageRouteName = '/draw_arcs_stroke';
 const String kDrawVerticesPageRouteName = '/draw_vertices';
 const String kDrawAtlasPageRouteName = '/draw_atlas';
 const String kAnimatedAdvancedBlend = '/animated_advanced_blend';
 const String kRRectBlurRouteName = '/rrect_blur';
+const String kRSuperellipseBlurRouteName = '/rsuperellipse_blur';
 
 const String kOpacityPeepholeOneRectRouteName = '$kOpacityPeepholeRouteName/one_big_rect';
 const String kOpacityPeepholeColumnOfOpacityRouteName =

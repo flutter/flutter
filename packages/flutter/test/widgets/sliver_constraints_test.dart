@@ -16,14 +16,14 @@ void main() {
           slivers: <Widget>[
             const SliverToBoxAdapter(child: SizedBox(width: double.infinity, height: 150.0)),
             const SliverToBoxAdapter(child: SizedBox(width: double.infinity, height: 150.0)),
-            SliverList(
-              delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+            SliverList.builder(
+              itemBuilder: (BuildContext context, int index) {
                 if (index < 100) {
                   return const SizedBox(width: double.infinity, height: 150.0);
                 } else {
                   return null;
                 }
-              }),
+              },
             ),
             const SliverToBoxAdapter(
               key: Key('final_sliver'),

@@ -4,7 +4,7 @@
 
 import '../framework/devices.dart';
 import '../framework/framework.dart';
-import '../framework/talkback.dart';
+import '../framework/talkback.dart' hide adbPath;
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
@@ -139,6 +139,14 @@ TaskFunction createSolidColorTest({required bool enableImpeller}) {
   ).call;
 }
 
+TaskFunction androidVerifiedInputTest({Map<String, String>? environment}) {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/android_verified_input',
+    'lib/main.dart',
+    environment: environment,
+  ).call;
+}
+
 // Can run on emulator or physical android device.
 // Device must have developer settings enabled.
 // Device must be android api 30 or higher.
@@ -188,6 +196,17 @@ TaskFunction dartDefinesTask() {
   ).call;
 }
 
+TaskFunction featureFlagsTask() {
+  return () async {
+    await flutter('config', options: const <String>['--enable-windowing']);
+
+    return DriverTest(
+      '${flutterDirectory.path}/dev/integration_tests/ui',
+      'lib/feature_flags.dart',
+    ).call();
+  };
+}
+
 TaskFunction createEndToEndIntegrationTest() {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
@@ -210,9 +229,27 @@ TaskFunction createWindowsStartupDriverTest({String? deviceIdOverride}) {
   ).call;
 }
 
+TaskFunction createWindowingDriverTest() {
+  return () async {
+    await flutter('config', options: const <String>['--enable-windowing']);
+    return DriverTest(
+      '${flutterDirectory.path}/dev/integration_tests/windowing_test',
+      'lib/main.dart',
+    ).call();
+  };
+}
+
 TaskFunction createWideGamutTest() {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/wide_gamut_test',
+    'integration_test/app_test.dart',
+    createPlatforms: <String>['ios'],
+  ).call;
+}
+
+TaskFunction createHighBitrateImagesTest() {
+  return IntegrationTest(
+    '${flutterDirectory.path}/dev/integration_tests/high_bitrate_images',
     'integration_test/app_test.dart',
     createPlatforms: <String>['ios'],
   ).call;
@@ -236,14 +273,39 @@ class DriverTest {
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
       String deviceId;
+      Device? selectedDevice;
       if (deviceIdOverride != null) {
         deviceId = deviceIdOverride!;
       } else {
-        final Device device = await devices.workingDevice;
-        await device.unlock();
-        deviceId = device.deviceId;
+        selectedDevice = await devices.workingDevice;
+        await selectedDevice.unlock();
+        deviceId = selectedDevice.deviceId;
       }
       await flutter('packages', options: <String>['get']);
+
+      final bool isAndroidRun = selectedDevice != null
+          ? selectedDevice is AndroidDevice
+          : const <DeviceOperatingSystem>{
+              DeviceOperatingSystem.android,
+              DeviceOperatingSystem.androidArm,
+              DeviceOperatingSystem.androidArm64,
+            }.contains(deviceOperatingSystem);
+
+      String? devicelabAdbPath;
+      if (isAndroidRun) {
+        try {
+          devicelabAdbPath = adbPath;
+        } on DeviceException {
+          devicelabAdbPath = null;
+        }
+      }
+      // Make the device ID available in the driver code, so tools like ADB can
+      // reference it if needed.
+      final Map<String, String> env = <String, String>{
+        if (environment != null) ...environment!,
+        'FLUTTER_DEVICE_ID_NUMBER': deviceId,
+        if (devicelabAdbPath != null) 'FLUTTER_ADB_PATH': devicelabAdbPath,
+      };
 
       final List<String> options = <String>[
         '--no-android-gradle-daemon',
@@ -254,7 +316,7 @@ class DriverTest {
         deviceId,
         ...extraOptions,
       ];
-      await flutter('drive', options: options, environment: environment);
+      await flutter('drive', options: options, environment: env);
       return TaskResult.success(null);
     });
   }

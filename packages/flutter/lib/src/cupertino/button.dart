@@ -76,6 +76,7 @@ class CupertinoButton extends StatefulWidget {
     this.sizeStyle = CupertinoButtonSize.large,
     this.padding,
     this.color,
+    this.foregroundColor,
     this.disabledColor = CupertinoColors.quaternarySystemFill,
     @Deprecated(
       'Use minimumSize instead. '
@@ -112,6 +113,7 @@ class CupertinoButton extends StatefulWidget {
     this.sizeStyle = CupertinoButtonSize.large,
     this.padding,
     this.color,
+    this.foregroundColor,
     this.disabledColor = CupertinoColors.tertiarySystemFill,
     @Deprecated(
       'Use minimumSize instead. '
@@ -143,6 +145,7 @@ class CupertinoButton extends StatefulWidget {
     this.padding,
     this.color,
     this.disabledColor = CupertinoColors.tertiarySystemFill,
+    this.foregroundColor,
     @Deprecated(
       'Use minimumSize instead. '
       'This feature was deprecated after v3.28.0-3.0.pre.',
@@ -188,6 +191,12 @@ class CupertinoButton extends StatefulWidget {
   /// Defaults to [CupertinoColors.quaternarySystemFill] when [color] is
   /// specified.
   final Color disabledColor;
+
+  /// The color of the button's text and icons.
+  ///
+  /// Defaults to the [CupertinoTheme]'s `primaryColor` when the
+  /// [CupertinoButton.filled] constructor is used.
+  final Color? foregroundColor;
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
@@ -419,18 +428,17 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       return;
     }
     final bool wasHeldDown = _buttonHeldDown;
-    final TickerFuture ticker =
-        _buttonHeldDown
-            ? _animationController.animateTo(
-              1.0,
-              duration: kFadeOutDuration,
-              curve: Curves.easeInOutCubicEmphasized,
-            )
-            : _animationController.animateTo(
-              0.0,
-              duration: kFadeInDuration,
-              curve: Curves.easeOutCubic,
-            );
+    final TickerFuture ticker = _buttonHeldDown
+        ? _animationController.animateTo(
+            1.0,
+            duration: kFadeOutDuration,
+            curve: Curves.easeInOutCubicEmphasized,
+          )
+        : _animationController.animateTo(
+            0.0,
+            duration: kFadeInDuration,
+            curve: Curves.easeOutCubic,
+          );
     ticker.then<void>((void value) {
       if (mounted && wasHeldDown != _buttonHeldDown) {
         _animate();
@@ -451,32 +459,33 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     final bool enabled = widget.enabled;
-    final Size? minimumSize =
-        widget.minimumSize == null
-            ? widget.minSize == null
-                ? null
-                : Size(widget.minSize!, widget.minSize!)
-            : widget.minimumSize!;
+    final Size? minimumSize = widget.minimumSize == null
+        ? widget.minSize == null
+              ? null
+              : Size(widget.minSize!, widget.minSize!)
+        : widget.minimumSize!;
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
     final Color primaryColor = themeData.primaryColor;
-    final Color? backgroundColor = (widget.color == null
-            ? widget._style != _CupertinoButtonStyle.plain
-                ? primaryColor
-                : null
-            : CupertinoDynamicColor.maybeResolve(widget.color, context))
-        ?.withOpacity(
-          widget._style == _CupertinoButtonStyle.tinted
-              ? CupertinoTheme.brightnessOf(context) == Brightness.light
-                  ? kCupertinoButtonTintedOpacityLight
-                  : kCupertinoButtonTintedOpacityDark
-              : widget.color?.opacity ?? 1.0,
-        );
-    final Color foregroundColor =
-        widget._style == _CupertinoButtonStyle.filled
-            ? themeData.primaryContrastingColor
-            : enabled
-            ? primaryColor
-            : CupertinoDynamicColor.resolve(CupertinoColors.tertiaryLabel, context);
+    final Color? backgroundColor =
+        (widget.color == null
+                ? widget._style != _CupertinoButtonStyle.plain
+                      ? primaryColor
+                      : null
+                : CupertinoDynamicColor.maybeResolve(widget.color, context))
+            ?.withOpacity(
+              widget._style == _CupertinoButtonStyle.tinted
+                  ? CupertinoTheme.brightnessOf(context) == Brightness.light
+                        ? kCupertinoButtonTintedOpacityLight
+                        : kCupertinoButtonTintedOpacityDark
+                  : widget.color?.opacity ?? 1.0,
+            );
+    final Color effectiveForegroundColor =
+        widget.foregroundColor ??
+        switch ((widget._style, enabled)) {
+          (_CupertinoButtonStyle.filled, _) => themeData.primaryContrastingColor,
+          (_, true) => primaryColor,
+          (_, false) => CupertinoDynamicColor.resolve(CupertinoColors.tertiaryLabel, context),
+        };
 
     final Color effectiveFocusOutlineColor =
         widget.focusColor ??
@@ -489,14 +498,16 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
             .withSaturation(kCupertinoFocusColorSaturation)
             .toColor();
 
-    final TextStyle textStyle = (widget.sizeStyle == CupertinoButtonSize.small
-            ? themeData.textTheme.actionSmallTextStyle
-            : themeData.textTheme.actionTextStyle)
-        .copyWith(color: foregroundColor);
+    final TextStyle textStyle =
+        (widget.sizeStyle == CupertinoButtonSize.small
+                ? themeData.textTheme.actionSmallTextStyle
+                : themeData.textTheme.actionTextStyle)
+            .copyWith(color: effectiveForegroundColor);
     final IconThemeData iconTheme = IconTheme.of(context).copyWith(
-      color: foregroundColor,
-      size:
-          textStyle.fontSize != null ? textStyle.fontSize! * 1.2 : kCupertinoButtonDefaultIconSize,
+      color: effectiveForegroundColor,
+      size: textStyle.fontSize != null
+          ? textStyle.fontSize! * 1.2
+          : kCupertinoButtonDefaultIconSize,
     );
 
     final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
@@ -509,6 +520,22 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     final MouseCursor effectiveMouseCursor =
         WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
         _defaultCursor.resolve(states);
+
+    final ShapeDecoration shapeDecoration = ShapeDecoration(
+      shape: RoundedSuperellipseBorder(
+        side: enabled && isFocused
+            ? BorderSide(
+                color: effectiveFocusOutlineColor,
+                width: 3.5,
+                strokeAlign: BorderSide.strokeAlignOutside,
+              )
+            : BorderSide.none,
+        borderRadius: widget.borderRadius ?? kCupertinoButtonSizeBorderRadius[widget.sizeStyle],
+      ),
+      color: backgroundColor != null && !enabled
+          ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
+          : backgroundColor,
+    );
 
     return MouseRegion(
       cursor: effectiveMouseCursor,
@@ -558,24 +585,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
               child: FadeTransition(
                 opacity: _opacityAnimation,
                 child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    border:
-                        enabled && isFocused
-                            ? Border.fromBorderSide(
-                              BorderSide(
-                                color: effectiveFocusOutlineColor,
-                                width: 3.5,
-                                strokeAlign: BorderSide.strokeAlignOutside,
-                              ),
-                            )
-                            : null,
-                    borderRadius:
-                        widget.borderRadius ?? kCupertinoButtonSizeBorderRadius[widget.sizeStyle],
-                    color:
-                        backgroundColor != null && !enabled
-                            ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
-                            : backgroundColor,
-                  ),
+                  decoration: shapeDecoration,
                   child: Padding(
                     padding: widget.padding ?? kCupertinoButtonPadding[widget.sizeStyle]!,
                     child: Align(

@@ -14,7 +14,8 @@ class PopupMenuTemplate extends TokenTemplate {
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends PopupMenuThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(elevation: ${elevation('md.comp.menu.container')});
@@ -24,11 +25,11 @@ class _${blockName}DefaultsM3 extends PopupMenuThemeData {
   late final ColorScheme _colors = _theme.colorScheme;
   late final TextTheme _textTheme = _theme.textTheme;
 
-  @override MaterialStateProperty<TextStyle?>? get labelTextStyle {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  @override WidgetStateProperty<TextStyle?>? get labelTextStyle {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
     // TODO(quncheng): Update this hard-coded value to use the latest tokens.
     final TextStyle style = _textTheme.labelLarge!;
-      if (states.contains(MaterialState.disabled)) {
+      if (states.contains(WidgetState.disabled)) {
         return style.apply(color: ${componentColor('md.comp.list.list-item.disabled.label-text')});
       }
       return style.apply(color: ${componentColor('md.comp.list.list-item.label-text')});

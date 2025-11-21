@@ -34,8 +34,8 @@ void main() {
   });
 
   testUsingContext('Regression test for type error in codec', () async {
-    final DwarfSymbolizationService symbolizationService = DwarfSymbolizationService.test();
-    final StreamController<List<int>> output = StreamController<List<int>>();
+    final symbolizationService = DwarfSymbolizationService.test();
+    final output = StreamController<List<int>>();
 
     unawaited(
       symbolizationService.decode(
@@ -56,7 +56,7 @@ void main() {
   testUsingContext(
     'symbolize exits when --debug-info and --unit-id-debug-info arguments are missing',
     () async {
-      final SymbolizeCommand command = SymbolizeCommand(
+      final command = SymbolizeCommand(
         stdio: stdio,
         fileSystem: fileSystem,
         dwarfSymbolizationService: DwarfSymbolizationService.test(),
@@ -77,8 +77,8 @@ void main() {
   testUsingContext(
     'symbolize exits when --debug-info dwarf file is missing',
     () async {
-      const String fileName = 'app.debug';
-      final SymbolizeCommand command = SymbolizeCommand(
+      const fileName = 'app.debug';
+      final command = SymbolizeCommand(
         stdio: stdio,
         fileSystem: fileSystem,
         dwarfSymbolizationService: DwarfSymbolizationService.test(),
@@ -95,8 +95,8 @@ void main() {
   testUsingContext(
     'symbolize exits when --unit-id-debug-info dwarf file is missing',
     () async {
-      const String fileName = 'app.debug';
-      final SymbolizeCommand command = SymbolizeCommand(
+      const fileName = 'app.debug';
+      final command = SymbolizeCommand(
         stdio: stdio,
         fileSystem: fileSystem,
         dwarfSymbolizationService: DwarfSymbolizationService.test(),
@@ -113,8 +113,8 @@ void main() {
   testUsingContext(
     'symbolize exits when --debug-info dSYM is missing',
     () async {
-      const String fileName = 'app.dSYM';
-      final SymbolizeCommand command = SymbolizeCommand(
+      const fileName = 'app.dSYM';
+      final command = SymbolizeCommand(
         stdio: stdio,
         fileSystem: fileSystem,
         dwarfSymbolizationService: DwarfSymbolizationService.test(),
@@ -131,8 +131,8 @@ void main() {
   testUsingContext(
     'symbolize exits when --unit-id-debug-info dSYM is missing',
     () async {
-      const String fileName = 'app.dSYM';
-      final SymbolizeCommand command = SymbolizeCommand(
+      const fileName = 'app.dSYM';
+      final command = SymbolizeCommand(
         stdio: stdio,
         fileSystem: fileSystem,
         dwarfSymbolizationService: DwarfSymbolizationService.test(),
@@ -149,8 +149,8 @@ void main() {
   testUsingContext(
     'symbolize exits when --debug-info dSYM is not a directory',
     () async {
-      const String fileName = 'app.dSYM';
-      final SymbolizeCommand command = SymbolizeCommand(
+      const fileName = 'app.dSYM';
+      final command = SymbolizeCommand(
         stdio: stdio,
         fileSystem: fileSystem,
         dwarfSymbolizationService: DwarfSymbolizationService.test(),
@@ -168,8 +168,8 @@ void main() {
   testUsingContext(
     'symbolize exits when --unit-id-debug-info dSYM is not a directory',
     () async {
-      const String fileName = 'app.dSYM';
-      final SymbolizeCommand command = SymbolizeCommand(
+      const fileName = 'app.dSYM';
+      final command = SymbolizeCommand(
         stdio: stdio,
         fileSystem: fileSystem,
         dwarfSymbolizationService: DwarfSymbolizationService.test(),
@@ -187,8 +187,8 @@ void main() {
   testUsingContext(
     'symbolize exits if --unit-id-debug-info is just given a path',
     () async {
-      const String fileName = 'app.debug';
-      final SymbolizeCommand command = SymbolizeCommand(
+      const fileName = 'app.debug';
+      final command = SymbolizeCommand(
         stdio: stdio,
         fileSystem: fileSystem,
         dwarfSymbolizationService: DwarfSymbolizationService.test(),
@@ -213,8 +213,8 @@ void main() {
   testUsingContext(
     'symbolize exits if the unit id for --unit-id-debug-info is not a valid integer',
     () async {
-      const String fileName = 'app.debug';
-      final SymbolizeCommand command = SymbolizeCommand(
+      const fileName = 'app.debug';
+      final command = SymbolizeCommand(
         stdio: stdio,
         fileSystem: fileSystem,
         dwarfSymbolizationService: DwarfSymbolizationService.test(),
@@ -239,9 +239,9 @@ void main() {
   testUsingContext(
     'symbolize exits when different paths are given for the root loading unit via --debug-info and --unit-id-debug-info',
     () async {
-      const String fileName1 = 'app.debug';
-      const String fileName2 = 'app2.debug';
-      final SymbolizeCommand command = SymbolizeCommand(
+      const fileName1 = 'app.debug';
+      const fileName2 = 'app2.debug';
+      final command = SymbolizeCommand(
         stdio: stdio,
         fileSystem: fileSystem,
         dwarfSymbolizationService: DwarfSymbolizationService.test(),
@@ -270,10 +270,10 @@ void main() {
   testUsingContext(
     'symbolize exits when different paths are given for a non-root loading unit via --unit-id-debug-info',
     () async {
-      const String fileName1 = 'app.debug';
-      const String fileName2 = 'app2.debug';
-      const String fileName3 = 'app3.debug';
-      final SymbolizeCommand command = SymbolizeCommand(
+      const fileName1 = 'app.debug';
+      const fileName2 = 'app2.debug';
+      const fileName3 = 'app3.debug';
+      final command = SymbolizeCommand(
         stdio: stdio,
         fileSystem: fileSystem,
         dwarfSymbolizationService: DwarfSymbolizationService.test(),
@@ -304,8 +304,8 @@ void main() {
   testUsingContext(
     'symbolize exits when --input file is missing',
     () async {
-      const String fileName = 'app.debug';
-      final SymbolizeCommand command = SymbolizeCommand(
+      const fileName = 'app.debug';
+      final command = SymbolizeCommand(
         stdio: stdio,
         fileSystem: fileSystem,
         dwarfSymbolizationService: DwarfSymbolizationService.test(),
@@ -326,8 +326,8 @@ void main() {
   testUsingContext(
     'symbolize exits when --debug-info argument is missing and --unit-id-debug-info is not provided for the root loading unit',
     () async {
-      const String fileName = 'app.debug';
-      final SymbolizeCommand command = SymbolizeCommand(
+      const fileName = 'app.debug';
+      final command = SymbolizeCommand(
         stdio: stdio,
         fileSystem: fileSystem,
         dwarfSymbolizationService: DwarfSymbolizationService.test(),
@@ -350,10 +350,10 @@ void main() {
   testUsingContext(
     'symbolize succeeds when DwarfSymbolizationService does not throw',
     () async {
-      const String debugName = 'app.debug';
-      const String inputName = 'foo.stack';
-      const String outputPath = 'results/foo.result';
-      final SymbolizeCommand command = SymbolizeCommand(
+      const debugName = 'app.debug';
+      const inputName = 'foo.stack';
+      const outputPath = 'results/foo.result';
+      final command = SymbolizeCommand(
         stdio: stdio,
         fileSystem: fileSystem,
         dwarfSymbolizationService: DwarfSymbolizationService.test(),
@@ -384,10 +384,10 @@ void main() {
   testUsingContext(
     'symbolize succeeds when DwarfSymbolizationService with a single --unit-id-debug-info argument for the root loading unit does not throw',
     () async {
-      const String debugName = 'app.debug';
-      const String inputName = 'foo.stack';
-      const String outputPath = 'results/foo.result';
-      final SymbolizeCommand command = SymbolizeCommand(
+      const debugName = 'app.debug';
+      const inputName = 'foo.stack';
+      const outputPath = 'results/foo.result';
+      final command = SymbolizeCommand(
         stdio: stdio,
         fileSystem: fileSystem,
         dwarfSymbolizationService: DwarfSymbolizationService.test(),
@@ -418,11 +418,11 @@ void main() {
   testUsingContext(
     'symbolize succeeds when DwarfSymbolizationService with --debug-info and --unit-id-debug-info arguments does not throw',
     () async {
-      const String debugName = 'app.debug';
-      const String debugName2 = '$debugName-2.part.so';
-      const String inputName = 'foo.stack';
-      const String outputPath = 'results/foo.result';
-      final SymbolizeCommand command = SymbolizeCommand(
+      const debugName = 'app.debug';
+      const debugName2 = '$debugName-2.part.so';
+      const inputName = 'foo.stack';
+      const outputPath = 'results/foo.result';
+      final command = SymbolizeCommand(
         stdio: stdio,
         fileSystem: fileSystem,
         dwarfSymbolizationService: DwarfSymbolizationService.test(),
@@ -455,11 +455,11 @@ void main() {
   testUsingContext(
     'symbolize succeeds when DwarfSymbolizationService with multiple --unit-id-debug-info arguments does not throw',
     () async {
-      const String debugName = 'app.debug';
-      const String debugName2 = '$debugName-2.part.so';
-      const String inputName = 'foo.stack';
-      const String outputPath = 'results/foo.result';
-      final SymbolizeCommand command = SymbolizeCommand(
+      const debugName = 'app.debug';
+      const debugName2 = '$debugName-2.part.so';
+      const inputName = 'foo.stack';
+      const outputPath = 'results/foo.result';
+      final command = SymbolizeCommand(
         stdio: stdio,
         fileSystem: fileSystem,
         dwarfSymbolizationService: DwarfSymbolizationService.test(),
@@ -492,10 +492,10 @@ void main() {
   testUsingContext(
     'symbolize throws when DwarfSymbolizationService throws',
     () async {
-      const String debugName = 'app.debug';
-      const String inputName = 'foo.stack';
-      const String outputPath = 'results/foo.result';
-      final SymbolizeCommand command = SymbolizeCommand(
+      const debugName = 'app.debug';
+      const inputName = 'foo.stack';
+      const outputPath = 'results/foo.result';
+      final command = SymbolizeCommand(
         stdio: stdio,
         fileSystem: fileSystem,
         dwarfSymbolizationService: ThrowingDwarfSymbolizationService(),
@@ -520,10 +520,10 @@ void main() {
   testUsingContext(
     'symbolize throws when DwarfSymbolizationService with a single --unit-id-debug-info argument for the root loading unit throws',
     () async {
-      const String debugName = 'app.debug';
-      const String inputName = 'foo.stack';
-      const String outputPath = 'results/foo.result';
-      final SymbolizeCommand command = SymbolizeCommand(
+      const debugName = 'app.debug';
+      const inputName = 'foo.stack';
+      const outputPath = 'results/foo.result';
+      final command = SymbolizeCommand(
         stdio: stdio,
         fileSystem: fileSystem,
         dwarfSymbolizationService: ThrowingDwarfSymbolizationService(),
@@ -548,11 +548,11 @@ void main() {
   testUsingContext(
     'symbolize throws when DwarfSymbolizationService with --debug-info and --unit-id-debug-info arguments throws',
     () async {
-      const String debugName = 'app.debug';
-      const String debugName2 = '$debugName-2.part.so';
-      const String inputName = 'foo.stack';
-      const String outputPath = 'results/foo.result';
-      final SymbolizeCommand command = SymbolizeCommand(
+      const debugName = 'app.debug';
+      const debugName2 = '$debugName-2.part.so';
+      const inputName = 'foo.stack';
+      const outputPath = 'results/foo.result';
+      final command = SymbolizeCommand(
         stdio: stdio,
         fileSystem: fileSystem,
         dwarfSymbolizationService: ThrowingDwarfSymbolizationService(),
@@ -579,11 +579,11 @@ void main() {
   testUsingContext(
     'symbolize throws when DwarfSymbolizationService with multiple --unit-id-debug-info arguments throws',
     () async {
-      const String debugName = 'app.debug';
-      const String debugName2 = '$debugName-2.part.so';
-      const String inputName = 'foo.stack';
-      const String outputPath = 'results/foo.result';
-      final SymbolizeCommand command = SymbolizeCommand(
+      const debugName = 'app.debug';
+      const debugName2 = '$debugName-2.part.so';
+      const inputName = 'foo.stack';
+      const outputPath = 'results/foo.result';
+      final command = SymbolizeCommand(
         stdio: stdio,
         fileSystem: fileSystem,
         dwarfSymbolizationService: ThrowingDwarfSymbolizationService(),

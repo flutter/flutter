@@ -100,13 +100,12 @@ class _ButtonStyleButtonIconAlignmentExampleState
                           });
                         },
                         selected: <IconAlignment>{_iconAlignment},
-                        segments:
-                            IconAlignment.values.map((IconAlignment iconAlignment) {
-                              return ButtonSegment<IconAlignment>(
-                                value: iconAlignment,
-                                label: Text(iconAlignment.name),
-                              );
-                            }).toList(),
+                        segments: IconAlignment.values.map((IconAlignment iconAlignment) {
+                          return ButtonSegment<IconAlignment>(
+                            value: iconAlignment,
+                            label: Text(iconAlignment.name),
+                          );
+                        }).toList(),
                       ),
                     ],
                   ),

@@ -13,10 +13,12 @@ import '../../../globals.dart' as globals;
 ///
 /// Search for the accompanying `clang`, `ar`, and `ld`.
 Future<CCompilerConfig> cCompilerConfigLinux() async {
-  const String kClangPlusPlusBinary = 'clang++';
-  const String kClangBinary = 'clang';
-  const String kArBinary = 'llvm-ar';
-  const String kLdBinary = 'ld.lld';
+  const kClangPlusPlusBinary = 'clang++';
+  // NOTE: these binaries sometimes have different names depending on the installation;
+  // thus, we check for a few possible options (in order of preference).
+  const kClangBinaryOptions = ['clang'];
+  const kArBinaryOptions = ['llvm-ar', 'ar'];
+  const kLdBinaryOptions = ['ld.lld', 'ld'];
 
   final ProcessResult whichResult = await globals.processManager.run(<String>[
     'which',
@@ -29,19 +31,24 @@ Future<CCompilerConfig> cCompilerConfigLinux() async {
   clangPpFile = globals.fs.file(await clangPpFile.resolveSymbolicLinks());
 
   final Directory clangDir = clangPpFile.parent;
-  final Map<String, Uri> binaryPaths = <String, Uri>{};
-  for (final String binary in <String>[kClangBinary, kArBinary, kLdBinary]) {
-    final File binaryFile = clangDir.childFile(binary);
-    if (!await binaryFile.exists()) {
-      throwToolExit("Failed to find $binary relative to $clangPpFile: $binaryFile doesn't exist.");
-    }
-    binaryPaths[binary] = binaryFile.uri;
-  }
-  final Uri? archiver = binaryPaths[kArBinary];
-  final Uri? compiler = binaryPaths[kClangBinary];
-  final Uri? linker = binaryPaths[kLdBinary];
-  if (archiver == null || compiler == null || linker == null) {
-    throwToolExit('Clang could not be found.');
-  }
-  return CCompilerConfig(archiver: archiver, compiler: compiler, linker: linker);
+  return CCompilerConfig(
+    linker: _findExecutableIfExists(path: clangDir, possibleExecutableNames: kLdBinaryOptions),
+    compiler: _findExecutableIfExists(path: clangDir, possibleExecutableNames: kClangBinaryOptions),
+    archiver: _findExecutableIfExists(path: clangDir, possibleExecutableNames: kArBinaryOptions),
+  );
+}
+
+/// Searches for an executable with a name in [possibleExecutableNames]
+/// at [path] and returns the first one it finds, if one is found.
+/// Otherwise, throws an error.
+Uri _findExecutableIfExists({
+  required List<String> possibleExecutableNames,
+  required Directory path,
+}) {
+  return possibleExecutableNames
+          .map((execName) => path.childFile(execName))
+          .where((file) => file.existsSync())
+          .map((file) => file.uri)
+          .firstOrNull ??
+      throwToolExit('Failed to find any of $possibleExecutableNames in $path');
 }

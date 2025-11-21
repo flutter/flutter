@@ -612,6 +612,170 @@ void main() {
     expect(overlayBuilds, equals(1));
   });
 
+  testWidgets('MenuController can be changed', (WidgetTester tester) async {
+    final MenuController controller = MenuController();
+    final MenuController groupController = MenuController();
+
+    final MenuController newController = MenuController();
+    final MenuController newGroupController = MenuController();
+
+    await tester.pumpWidget(
+      App(
+        RawMenuAnchorGroup(
+          controller: controller,
+          child: Menu(
+            controller: groupController,
+            menuPanel: Panel(children: <Widget>[Text(Tag.a.text)]),
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text(Tag.anchor.text));
+    await tester.pump();
+
+    expect(find.text(Tag.a.text), findsOneWidget);
+    expect(controller.isOpen, isTrue);
+    expect(groupController.isOpen, isTrue);
+    expect(newController.isOpen, isFalse);
+    expect(newGroupController.isOpen, isFalse);
+
+    // Swap the controllers.
+    await tester.pumpWidget(
+      App(
+        RawMenuAnchorGroup(
+          controller: newController,
+          child: Menu(
+            controller: newGroupController,
+            menuPanel: Panel(children: <Widget>[Text(Tag.a.text)]),
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(Tag.a.text), findsOneWidget);
+    expect(controller.isOpen, isFalse);
+    expect(groupController.isOpen, isFalse);
+    expect(newController.isOpen, isTrue);
+    expect(newGroupController.isOpen, isTrue);
+
+    // Close the new controller.
+    newController.close();
+    await tester.pump();
+
+    expect(newController.isOpen, isFalse);
+    expect(newGroupController.isOpen, isFalse);
+    expect(find.text(Tag.a.text), findsNothing);
+  });
+
+  testWidgets('[Group] MenuController can be moved to a different menu', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      App(
+        RawMenuAnchorGroup(
+          controller: controller,
+          child: Menu(
+            menuPanel: Panel(children: <Widget>[Text(Tag.a.text)]),
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text(Tag.anchor.text));
+    await tester.pump();
+
+    expect(find.text(Tag.a.text), findsOneWidget);
+    expect(controller.isOpen, isTrue);
+
+    // Swap the controllers.
+    await tester.pumpWidget(
+      App(
+        RawMenuAnchorGroup(
+          key: UniqueKey(),
+          controller: controller,
+          child: Menu(
+            menuPanel: Panel(children: <Widget>[Text(Tag.a.text)]),
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(Tag.a.text), findsNothing);
+    expect(controller.isOpen, isFalse);
+
+    await tester.tap(find.text(Tag.anchor.text));
+    await tester.pump();
+
+    expect(find.text(Tag.a.text), findsOneWidget);
+    expect(controller.isOpen, isTrue);
+
+    // Close the menu.
+    controller.close();
+    await tester.pump();
+
+    expect(controller.isOpen, isFalse);
+    expect(find.text(Tag.a.text), findsNothing);
+  });
+
+  testWidgets('[Default] MenuController can be moved to a different menu', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      App(
+        RawMenuAnchorGroup(
+          controller: MenuController(),
+          child: Menu(
+            controller: controller,
+            menuPanel: Panel(children: <Widget>[Text(Tag.a.text)]),
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text(Tag.anchor.text));
+    await tester.pump();
+
+    expect(find.text(Tag.a.text), findsOneWidget);
+    expect(controller.isOpen, isTrue);
+
+    // Swap the controllers.
+    await tester.pumpWidget(
+      App(
+        RawMenuAnchorGroup(
+          controller: MenuController(),
+          child: Menu(
+            key: UniqueKey(),
+            controller: controller,
+            menuPanel: Panel(children: <Widget>[Text(Tag.a.text)]),
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(Tag.a.text), findsNothing);
+    expect(controller.isOpen, isFalse);
+
+    await tester.tap(find.text(Tag.anchor.text));
+    await tester.pump();
+
+    expect(find.text(Tag.a.text), findsOneWidget);
+    expect(controller.isOpen, isTrue);
+
+    // Close the menu.
+    controller.close();
+    await tester.pump();
+
+    expect(controller.isOpen, isFalse);
+    expect(find.text(Tag.a.text), findsNothing);
+  });
+
   testWidgets('MenuController.maybeOf does not notify dependents when MenuController changes', (
     WidgetTester tester,
   ) async {
@@ -700,7 +864,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/156572.
-  testWidgets('Unattached MenuController does not throw when calling close', (
+  testWidgets('Detached MenuController does not throw when calling close', (
     WidgetTester tester,
   ) async {
     final MenuController controller = MenuController();
@@ -709,7 +873,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Unattached MenuController returns false when calling isOpen', (
+  testWidgets('Detached MenuController returns false when calling isOpen', (
     WidgetTester tester,
   ) async {
     final MenuController controller = MenuController();
@@ -1323,7 +1487,7 @@ void main() {
     expect(insideTap, isFalse);
   });
 
-  testWidgets('Menus close and consume tap when consumesOutsideTap is true', (
+  testWidgets('[Default] Menus close and consume tap when consumesOutsideTap is true', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -1390,12 +1554,12 @@ void main() {
     await tester.tap(find.text(Tag.outside.text));
     await tester.pump();
 
+    // When the menu is open, outside taps are consumed. As a result, tapping
+    // outside the menu will close it and not select the outside button.
+    expect(selected, isEmpty);
     expect(opened, isEmpty);
     expect(closed, equals(<NestedTag>[Tag.a, Tag.anchor]));
-    expect(selected, isEmpty);
 
-    // When the menu is open, don't expect the outside button to be selected.
-    expect(selected, isEmpty);
     selected.clear();
     opened.clear();
     closed.clear();
@@ -1569,11 +1733,10 @@ void main() {
 
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     menuAnchor.debugFillProperties(builder);
-    final List<String> properties =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> properties = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(properties, const <String>['has focusNode', 'use nearest overlay']);
   });
@@ -1629,7 +1792,7 @@ void main() {
   // Menu implementations differ as to whether tabbing traverses a closes a
   // menu or traverses its items. By default, we let the user choose whether
   // to close the menu or traverse its items.
-  testWidgets('Tab traversal is not handled.', (WidgetTester tester) async {
+  testWidgets('Tab traversal is not handled', (WidgetTester tester) async {
     final FocusNode bFocusNode = FocusNode(debugLabel: Tag.b.focusNode);
     final FocusNode bbFocusNode = FocusNode(debugLabel: Tag.b.b.focusNode);
     addTearDown(bFocusNode.dispose);
@@ -1730,8 +1893,6 @@ void main() {
   });
 
   testWidgets('Menu closes on view size change', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
-    addTearDown(scrollController.dispose);
     final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
 
     bool opened = false;
@@ -1741,25 +1902,18 @@ void main() {
       return MediaQuery(
         data: mediaQueryData.copyWith(size: size),
         child: App(
-          SingleChildScrollView(
-            controller: scrollController,
-            child: Container(
-              height: 1000,
-              alignment: Alignment.center,
-              child: Menu(
-                onOpen: () {
-                  opened = true;
-                  closed = false;
-                },
-                onClose: () {
-                  opened = false;
-                  closed = true;
-                },
-                controller: controller,
-                menuPanel: Panel(children: <Widget>[Text(Tag.a.text)]),
-                child: const AnchorButton(Tag.anchor),
-              ),
-            ),
+          Menu(
+            onOpen: () {
+              opened = true;
+              closed = false;
+            },
+            onClose: () {
+              opened = false;
+              closed = true;
+            },
+            controller: controller,
+            menuPanel: Panel(children: <Widget>[Text(Tag.a.text)]),
+            child: const AnchorButton(Tag.anchor),
           ),
         ),
       );
@@ -2122,6 +2276,695 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  group('onOpenRequested', () {
+    testWidgets('Triggered by MenuController.open', (WidgetTester tester) async {
+      final MenuController controller = MenuController();
+      int onOpenCalled = 0;
+      int onOpenRequestedCalled = 0;
+
+      await tester.pumpWidget(
+        App(
+          Menu(
+            controller: controller,
+            onOpen: () {
+              onOpenCalled += 1;
+            },
+            onOpenRequested: (ui.Offset? position, VoidCallback showMenu) {
+              onOpenRequestedCalled += 1;
+            },
+            menuPanel: const Panel(children: <Widget>[Text('Button 1')]),
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      );
+
+      expect(onOpenCalled, equals(0));
+      expect(onOpenRequestedCalled, equals(0));
+
+      controller.open();
+      await tester.pump();
+
+      expect(onOpenCalled, equals(0));
+      expect(onOpenRequestedCalled, equals(1));
+    });
+
+    testWidgets('Is passed a position', (WidgetTester tester) async {
+      final MenuController controller = MenuController();
+      ui.Offset? menuPosition;
+
+      await tester.pumpWidget(
+        App(
+          Menu(
+            controller: controller,
+            onOpenRequested: (ui.Offset? position, VoidCallback showOverlay) {
+              menuPosition = position;
+            },
+            menuPanel: const Panel(children: <Widget>[Text('Button 1')]),
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      );
+
+      expect(menuPosition, isNull);
+
+      controller.open();
+      await tester.pump();
+
+      expect(menuPosition, isNull);
+
+      controller.close();
+      await tester.pump();
+
+      expect(menuPosition, isNull);
+
+      controller.open(position: const Offset(10, 15));
+      await tester.pump();
+
+      expect(menuPosition, equals(const Offset(10, 15)));
+    });
+
+    testWidgets('showOverlay triggers onOpen', (WidgetTester tester) async {
+      final MenuController controller = MenuController();
+      int onOpenCalled = 0;
+      int onOpenRequestedCalled = 0;
+      VoidCallback? showMenuOverlay;
+
+      await tester.pumpWidget(
+        App(
+          Menu(
+            controller: controller,
+            onOpen: () {
+              onOpenCalled += 1;
+            },
+            onOpenRequested: (ui.Offset? position, VoidCallback showOverlay) {
+              onOpenRequestedCalled += 1;
+              showMenuOverlay = showOverlay;
+            },
+            menuPanel: const Panel(children: <Widget>[Text('Button 1')]),
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      );
+
+      expect(onOpenRequestedCalled, equals(0));
+      expect(onOpenCalled, equals(0));
+
+      controller.open();
+      await tester.pump();
+
+      expect(onOpenRequestedCalled, equals(1));
+      expect(onOpenCalled, equals(0));
+
+      controller.open();
+      await tester.pump();
+
+      // Calling open again will trigger onOpenRequested again.
+      expect(onOpenRequestedCalled, equals(2));
+      expect(onOpenCalled, equals(0));
+
+      showMenuOverlay!();
+      await tester.pump();
+
+      expect(onOpenRequestedCalled, equals(2));
+      expect(onOpenCalled, equals(1));
+
+      // Calling showOverlay again will trigger onOpen again.
+      showMenuOverlay!();
+      await tester.pump();
+
+      expect(onOpenRequestedCalled, equals(2));
+      expect(onOpenCalled, equals(2));
+    });
+
+    testWidgets('showOverlay shows the menu at a position', (WidgetTester tester) async {
+      final MenuController controller = MenuController();
+      await tester.pumpWidget(
+        App(
+          Menu(
+            controller: controller,
+            onOpenRequested: (ui.Offset? position, VoidCallback showOverlay) {
+              Timer(const Duration(milliseconds: 100), () {
+                showOverlay();
+              });
+            },
+            overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
+              return Positioned(
+                top: info.position?.dy ?? 0,
+                left: info.position?.dx ?? 0,
+                child: SizedBox.square(key: Tag.a.key, dimension: 300),
+              );
+            },
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      );
+
+      expect(find.byKey(Tag.a.key), findsNothing);
+
+      controller.open();
+      await tester.pump();
+
+      expect(find.byKey(Tag.a.key), findsNothing);
+
+      await tester.pump(const Duration(milliseconds: 101));
+
+      expect(find.byKey(Tag.a.key), findsOneWidget);
+      expect(tester.getTopLeft(find.byKey(Tag.a.key)), Offset.zero);
+
+      controller.open(position: const Offset(50, 50));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 101));
+
+      expect(find.byKey(Tag.a.key), findsOneWidget);
+      expect(tester.getTopLeft(find.byKey(Tag.a.key)), const Offset(50, 50));
+    });
+
+    testWidgets('showOverlay does nothing after the menu is disposed', (WidgetTester tester) async {
+      VoidCallback? showMenuOverlay;
+      int onOpenCalled = 0;
+      await tester.pumpWidget(
+        App(
+          Menu(
+            controller: controller,
+            onOpen: () {
+              onOpenCalled += 1;
+            },
+            onOpenRequested: (ui.Offset? position, VoidCallback showOverlay) {
+              showMenuOverlay = showOverlay;
+            },
+            overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
+              return const SizedBox.square(dimension: 300, child: Text('Overlay'));
+            },
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      );
+
+      controller.open();
+      showMenuOverlay!();
+      await tester.pump();
+
+      expect(onOpenCalled, equals(1));
+      expect(find.text('Overlay'), findsOneWidget);
+
+      controller.close();
+      await tester.pump();
+      await tester.pumpWidget(const App(SizedBox()));
+
+      showMenuOverlay!();
+
+      expect(onOpenCalled, equals(1));
+    });
+  });
+
+  group('onCloseRequested', () {
+    testWidgets('Triggered by MenuController.close', (WidgetTester tester) async {
+      final MenuController controller = MenuController();
+      int onCloseRequestedCalled = 0;
+
+      await tester.pumpWidget(
+        App(
+          Menu(
+            controller: controller,
+            onCloseRequested: (VoidCallback hideOverlay) {
+              onCloseRequestedCalled += 1;
+            },
+            menuPanel: const Panel(children: <Widget>[Text('Button 1')]),
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      );
+
+      expect(onCloseRequestedCalled, equals(0));
+
+      controller.open();
+      await tester.pump();
+
+      expect(onCloseRequestedCalled, equals(0));
+
+      controller.close();
+      await tester.pump();
+
+      expect(onCloseRequestedCalled, equals(1));
+    });
+
+    testWidgets('hideOverlay triggers onClose', (WidgetTester tester) async {
+      final MenuController controller = MenuController();
+      int onCloseCalled = 0;
+
+      await tester.pumpWidget(
+        App(
+          Menu(
+            controller: controller,
+            onClose: () {
+              onCloseCalled += 1;
+            },
+            onCloseRequested: (VoidCallback hideOverlay) {
+              Timer(const Duration(milliseconds: 100), hideOverlay);
+            },
+            menuPanel: const Panel(children: <Widget>[Text('Button 1')]),
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pump();
+
+      controller.close();
+      await tester.pump();
+
+      expect(onCloseCalled, equals(0));
+
+      await tester.pump(const Duration(milliseconds: 99));
+
+      expect(onCloseCalled, equals(0));
+
+      await tester.pump(const Duration(milliseconds: 2));
+
+      expect(onCloseCalled, equals(1));
+    });
+
+    testWidgets('hideOverlay hides the menu overlay', (WidgetTester tester) async {
+      final MenuController controller = MenuController();
+
+      await tester.pumpWidget(
+        App(
+          Menu(
+            controller: controller,
+            onCloseRequested: (VoidCallback hideOverlay) {
+              Timer(const Duration(milliseconds: 100), hideOverlay);
+            },
+            overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
+              return const SizedBox.square(dimension: 300, child: Text('Overlay'));
+            },
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      );
+
+      expect(find.text('Overlay'), findsNothing);
+
+      controller.open();
+      await tester.pump();
+
+      expect(find.text('Overlay'), findsOneWidget);
+
+      controller.close();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 99));
+
+      expect(find.text('Overlay'), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 2));
+
+      expect(find.text('Overlay'), findsNothing);
+    });
+
+    testWidgets('hideOverlay does nothing when called after disposal', (WidgetTester tester) async {
+      VoidCallback? hideMenuOverlay;
+      int onCloseCalled = 0;
+      await tester.pumpWidget(
+        App(
+          Menu(
+            controller: controller,
+            onClose: () {
+              onCloseCalled += 1;
+            },
+            onCloseRequested: (VoidCallback hideOverlay) {
+              hideMenuOverlay = hideOverlay;
+            },
+            overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
+              return const SizedBox.square(dimension: 300, child: Text('Overlay'));
+            },
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pump();
+
+      expect(find.text('Overlay'), findsOneWidget);
+
+      controller.close();
+      hideMenuOverlay!();
+      await tester.pump();
+
+      expect(onCloseCalled, equals(1));
+      expect(find.text('Overlay'), findsNothing);
+
+      controller.open();
+      await tester.pump();
+
+      expect(find.text('Overlay'), findsOneWidget);
+
+      await tester.pumpWidget(const App(SizedBox()));
+
+      hideMenuOverlay!();
+
+      expect(onCloseCalled, equals(1));
+    });
+
+    testWidgets('DismissMenuAction triggers onCloseRequested', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      int topCloseRequests = 0;
+      int middleCloseRequests = 0;
+      int bottomCloseRequests = 0;
+
+      await tester.pumpWidget(
+        App(
+          Menu(
+            onCloseRequested: (VoidCallback hideOverlay) {
+              topCloseRequests += 1;
+              Timer(const Duration(milliseconds: 100), hideOverlay);
+            },
+            menuPanel: Panel(
+              children: <Widget>[
+                Menu(
+                  onCloseRequested: (VoidCallback hideOverlay) {
+                    middleCloseRequests += 1;
+                  },
+                  menuPanel: Panel(
+                    children: <Widget>[
+                      Menu(
+                        controller: controller,
+                        onCloseRequested: (VoidCallback hideOverlay) {
+                          bottomCloseRequests += 1;
+                          Timer(const Duration(milliseconds: 10), hideOverlay);
+                        },
+                        menuPanel: Panel(children: <Widget>[Text(Tag.a.a.a.text)]),
+                        child: AnchorButton(Tag.a.a, focusNode: focusNode),
+                      ),
+                    ],
+                  ),
+                  child: const AnchorButton(Tag.a),
+                ),
+              ],
+            ),
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text(Tag.anchor.text));
+      await tester.pump();
+      await tester.tap(find.text(Tag.a.text));
+      await tester.pump();
+      await tester.tap(find.text(Tag.a.a.text));
+      await tester.pump();
+
+      focusNode.requestFocus();
+      await tester.pump();
+
+      expect(find.text(Tag.a.a.a.text), findsOneWidget);
+
+      const ActionDispatcher().invokeAction(
+        DismissMenuAction(controller: controller),
+        const DismissIntent(),
+        focusNode.context,
+      );
+
+      await tester.pump();
+
+      expect(topCloseRequests, equals(1));
+      expect(middleCloseRequests, equals(1));
+      expect(bottomCloseRequests, equals(1));
+      expect(find.text(Tag.a.a.a.text), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 11));
+
+      expect(topCloseRequests, equals(1));
+      expect(middleCloseRequests, equals(1));
+      expect(bottomCloseRequests, equals(1));
+      expect(find.text(Tag.a.a.a.text), findsNothing);
+      expect(find.text(Tag.a.text), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 88));
+
+      expect(topCloseRequests, equals(1));
+      expect(middleCloseRequests, equals(1));
+      expect(bottomCloseRequests, equals(1));
+      expect(find.text(Tag.a.a.a.text), findsNothing);
+      expect(find.text(Tag.a.text), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 2));
+
+      expect(topCloseRequests, equals(1));
+      // Middle menu closes again in response to the outer menu calling
+      // "hideOverlay"
+      expect(middleCloseRequests, equals(2));
+      expect(bottomCloseRequests, equals(1));
+      expect(find.text(Tag.a.a.a.text), findsNothing);
+      expect(find.text(Tag.a.text), findsNothing);
+    });
+
+    testWidgets('Outside tap triggers onCloseRequested', (WidgetTester tester) async {
+      int closeRequests = 0;
+      await tester.pumpWidget(
+        App(
+          Menu(
+            onCloseRequested: (VoidCallback hideOverlay) {
+              closeRequests += 1;
+              hideOverlay();
+            },
+            child: const AnchorButton(Tag.anchor),
+            overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
+              return Positioned(
+                left: info.anchorRect.left,
+                top: info.anchorRect.bottom,
+                child: TapRegion(
+                  groupId: info.tapRegionGroupId,
+                  onTapOutside: (PointerDownEvent event) {
+                    MenuController.maybeOf(context)?.close();
+                  },
+                  child: Text(Tag.a.text),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.tap(find.text(Tag.anchor.text));
+      await tester.pump();
+
+      expect(find.text(Tag.a.text), findsOneWidget);
+      expect(closeRequests, equals(0));
+
+      // Tap outside the menu to trigger the close request.
+      await tester.tapAt(Offset.zero);
+      await tester.pump();
+
+      expect(closeRequests, equals(1));
+      expect(find.text(Tag.a.text), findsNothing);
+    });
+
+    testWidgets('View size change triggers onCloseRequested on open menu', (
+      WidgetTester tester,
+    ) async {
+      final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
+
+      int onCloseRequestedCalled = 0;
+
+      Widget build(Size size) {
+        return MediaQuery(
+          data: mediaQueryData.copyWith(size: size),
+          child: App(
+            Menu(
+              onCloseRequested: (VoidCallback hideOverlay) {
+                onCloseRequestedCalled += 1;
+                hideOverlay();
+              },
+              controller: controller,
+              menuPanel: Panel(children: <Widget>[Text(Tag.a.text)]),
+              child: const AnchorButton(Tag.anchor),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(build(mediaQueryData.size));
+      await tester.pump();
+
+      // Test menu resize before first open.
+      await tester.pumpWidget(build(const Size(250, 250)));
+      await tester.tap(find.text(Tag.anchor.text));
+      await tester.pump();
+
+      expect(onCloseRequestedCalled, equals(0));
+      expect(find.text(Tag.a.text), findsOneWidget);
+
+      await tester.pumpWidget(build(const Size(200, 200)));
+
+      expect(onCloseRequestedCalled, equals(1));
+
+      await tester.pump();
+
+      expect(controller.isOpen, isFalse);
+
+      // Test menu resize after close.
+      await tester.pumpWidget(build(const Size(300, 300)));
+
+      expect(onCloseRequestedCalled, equals(1));
+    });
+
+    testWidgets('Ancestor scroll triggers onCloseRequested on open menu', (
+      WidgetTester tester,
+    ) async {
+      final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      int onCloseRequestedCalled = 0;
+
+      await tester.pumpWidget(
+        App(
+          SingleChildScrollView(
+            controller: scrollController,
+            child: SizedBox(
+              height: 1000,
+              child: Menu(
+                onCloseRequested: (VoidCallback hideOverlay) {
+                  onCloseRequestedCalled += 1;
+                  hideOverlay();
+                },
+                menuPanel: Panel(
+                  children: <Widget>[
+                    Button.tag(Tag.a),
+                    Button.tag(Tag.b),
+                    Button.tag(Tag.c),
+                    Button.tag(Tag.d),
+                  ],
+                ),
+                child: const AnchorButton(Tag.anchor),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      scrollController.jumpTo(10);
+      await tester.pump();
+
+      // The menu is not open, so onCloseRequested should not be called.
+      expect(onCloseRequestedCalled, equals(0));
+
+      await tester.tap(find.text(Tag.anchor.text));
+      await tester.pump();
+
+      expect(find.text(Tag.a.text), findsOneWidget);
+      expect(onCloseRequestedCalled, equals(0));
+
+      scrollController.jumpTo(500);
+      await tester.pump();
+
+      // Make sure we didn't just scroll the menu off-screen.
+      expect(find.text(Tag.anchor.text), findsOneWidget);
+      expect(onCloseRequestedCalled, equals(1));
+      expect(find.text(Tag.a.text), findsNothing);
+
+      scrollController.jumpTo(5);
+      await tester.pump();
+
+      expect(find.text(Tag.anchor.text), findsOneWidget);
+      expect(onCloseRequestedCalled, equals(1));
+    });
+  });
+
+  testWidgets('MenuController can be overridden after removing final modifier', (
+    WidgetTester tester,
+  ) async {
+    final CustomMenuController customController = CustomMenuController();
+
+    await tester.pumpWidget(
+      App(
+        Menu(
+          controller: customController,
+          menuPanel: Panel(children: <Widget>[Text(Tag.a.text)]),
+          child: const AnchorButton(Tag.anchor),
+        ),
+      ),
+    );
+
+    customController.open();
+    await tester.pump();
+
+    expect(customController.isOpen, isTrue);
+    expect(customController.openCallCount, equals(1));
+    expect(find.text(Tag.a.text), findsOneWidget);
+
+    customController.close();
+    await tester.pump();
+
+    expect(customController.isOpen, isFalse);
+    expect(customController.closeCallCount, equals(1));
+    expect(find.text(Tag.a.text), findsNothing);
+  });
+
+  testWidgets('RawMenuAnchor correctly updates anchorRect for overlayBuilder when anchor moves', (
+    WidgetTester tester,
+  ) async {
+    RawMenuOverlayInfo? overlayPosition;
+    late StateSetter setState;
+    bool showAdditionalWidget = true;
+
+    await tester.pumpWidget(
+      App(
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return Column(
+              children: <Widget>[
+                if (showAdditionalWidget) const SizedBox(width: 100, height: 100),
+                RawMenuAnchor(
+                  overlayBuilder: (BuildContext context, RawMenuOverlayInfo position) {
+                    overlayPosition = position;
+                    return const SizedBox();
+                  },
+                  controller: controller,
+                  child: AnchorButton(Tag.anchor, onPressed: onPressed),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text(Tag.anchor.text));
+    await tester.pump();
+
+    expect(overlayPosition!.anchorRect, tester.getRect(find.byType(Button)));
+
+    setState(() {
+      showAdditionalWidget = false;
+    });
+
+    await tester.pumpAndSettle();
+
+    expect(overlayPosition!.anchorRect, tester.getRect(find.byType(Button)));
+  });
+}
+
+// Custom MenuController that extends the base MenuController
+// This verifies that the final modifier has been removed
+class CustomMenuController extends MenuController {
+  int openCallCount = 0;
+  int closeCallCount = 0;
+
+  @override
+  void open({Offset? position}) {
+    openCallCount++;
+    super.open(position: position);
+  }
+
+  @override
+  void close() {
+    closeCallCount++;
+    super.close();
+  }
 }
 
 // ********* UTILITIES *********  //
@@ -2297,6 +3140,8 @@ class _ButtonState extends State<Button> {
   @override
   void dispose() {
     _internalFocusNode?.dispose();
+    _states.dispose();
+    _internalFocusNode = null;
     super.dispose();
   }
 
@@ -2446,7 +3291,7 @@ class Panel extends StatelessWidget {
 class Menu extends StatefulWidget {
   const Menu({
     super.key,
-    required this.menuPanel,
+    this.menuPanel,
     this.controller,
     this.child,
     this.builder,
@@ -2455,14 +3300,29 @@ class Menu extends StatefulWidget {
     this.onClose,
     this.useRootOverlay = false,
     this.consumeOutsideTaps = false,
+    this.overlayBuilder,
+    this.onOpenRequested = _defaultOnOpenRequested,
+    this.onCloseRequested = _defaultOnCloseRequested,
   });
-  final Widget menuPanel;
+
+  static void _defaultOnOpenRequested(Offset? position, VoidCallback showOverlay) {
+    showOverlay();
+  }
+
+  static void _defaultOnCloseRequested(VoidCallback hideOverlay) {
+    hideOverlay();
+  }
+
+  final Widget? menuPanel;
   final Widget? child;
   final bool useRootOverlay;
   final VoidCallback? onOpen;
   final VoidCallback? onClose;
   final FocusNode? focusNode;
   final RawMenuAnchorChildBuilder? builder;
+  final RawMenuAnchorOverlayBuilder? overlayBuilder;
+  final RawMenuAnchorOpenRequestedCallback onOpenRequested;
+  final RawMenuAnchorCloseRequestedCallback onCloseRequested;
   final MenuController? controller;
   final bool consumeOutsideTaps;
 
@@ -2479,16 +3339,20 @@ class _MenuState extends State<Menu> {
       controller: widget.controller ?? (_controller ??= MenuController()),
       onOpen: widget.onOpen,
       onClose: widget.onClose,
+      onOpenRequested: widget.onOpenRequested,
+      onCloseRequested: widget.onCloseRequested,
       consumeOutsideTaps: widget.consumeOutsideTaps,
       useRootOverlay: widget.useRootOverlay,
       builder: widget.builder,
-      overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
-        return Positioned(
-          top: info.anchorRect.bottom,
-          left: info.anchorRect.left,
-          child: widget.menuPanel,
-        );
-      },
+      overlayBuilder:
+          widget.overlayBuilder ??
+          (BuildContext context, RawMenuOverlayInfo info) {
+            return Positioned(
+              top: info.anchorRect.bottom,
+              left: info.anchorRect.left,
+              child: widget.menuPanel!,
+            );
+          },
       child: widget.child,
     );
   }

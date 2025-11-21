@@ -52,13 +52,12 @@ Future<BrowserInstallation> getEdgeInstallation(
 
     return BrowserInstallation(
       version: 'system',
-      executable:
-          io.Directory(
-            path.join(
-              edgeLauncher.launcherInstallationDir.path,
-              PlatformBinding.instance.getCommandToRunEdge(),
-            ),
-          ).path,
+      executable: io.Directory(
+        path.join(
+          edgeLauncher.launcherInstallationDir.path,
+          PlatformBinding.instance.getCommandToRunEdge(),
+        ),
+      ).path,
     );
   } else {
     infoLog.writeln('Unsupported version $requestedVersion.');

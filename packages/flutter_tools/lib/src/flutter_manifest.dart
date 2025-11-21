@@ -5,6 +5,7 @@
 /// @docImport 'localizations/gen_l10n.dart';
 library;
 
+import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
@@ -16,14 +17,7 @@ import 'base/utils.dart';
 import 'globals.dart' as globals;
 import 'plugins.dart';
 
-const Set<String> _kValidPluginPlatforms = <String>{
-  'android',
-  'ios',
-  'web',
-  'windows',
-  'linux',
-  'macos',
-};
+const _kValidPluginPlatforms = <String>{'android', 'ios', 'web', 'windows', 'linux', 'macos'};
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
 class FlutterManifest {
@@ -56,14 +50,13 @@ class FlutterManifest {
       return null;
     }
 
-    final FlutterManifest pubspec = FlutterManifest._(logger: logger);
+    final pubspec = FlutterManifest._(logger: logger);
     final Map<Object?, Object?>? yamlMap = yamlDocument as YamlMap?;
     if (yamlMap != null) {
       pubspec._descriptor = yamlMap.cast<String, Object?>();
     }
 
-    final Map<Object?, Object?>? flutterMap =
-        pubspec._descriptor['flutter'] as Map<Object?, Object?>?;
+    final flutterMap = pubspec._descriptor['flutter'] as Map<Object?, Object?>?;
     if (flutterMap != null) {
       pubspec._flutterDescriptor = flutterMap.cast<String, Object?>();
     }
@@ -79,9 +72,16 @@ class FlutterManifest {
     List<Font>? fonts,
     List<Uri>? shaders,
     List<DeferredComponent>? deferredComponents,
+    bool removeDependencies = false,
   }) {
-    final FlutterManifest copy = FlutterManifest._(logger: _logger);
+    final copy = FlutterManifest._(logger: _logger);
     copy._descriptor = <String, Object?>{..._descriptor};
+    if (removeDependencies) {
+      // Remove the non-Flutter SDK dependencies if they're going to be added back later.
+      copy._descriptor['dependencies'] = YamlMap.wrap(<String, Object?>{
+        'flutter': <String, Object?>{'sdk': 'flutter'},
+      });
+    }
     copy._flutterDescriptor = <String, Object?>{..._flutterDescriptor};
 
     if (assets != null && assets.isNotEmpty) {
@@ -120,10 +120,10 @@ class FlutterManifest {
   final Logger _logger;
 
   /// A map representation of the entire `pubspec.yaml` file.
-  Map<String, Object?> _descriptor = <String, Object?>{};
+  var _descriptor = <String, Object?>{};
 
   /// A map representation of the `flutter` section in the `pubspec.yaml` file.
-  Map<String, Object?> _flutterDescriptor = <String, Object?>{};
+  var _flutterDescriptor = <String, Object?>{};
 
   Map<String, Object?> get flutterDescriptor => _flutterDescriptor;
 
@@ -136,7 +136,7 @@ class FlutterManifest {
   /// Contains the name of the dependencies.
   /// These are the keys specified in the `dependency` map.
   Set<String> get dependencies {
-    final YamlMap? dependencies = _descriptor['dependencies'] as YamlMap?;
+    final dependencies = _descriptor['dependencies'] as YamlMap?;
     return dependencies != null ? <String>{...dependencies.keys.cast<String>()} : <String>{};
   }
 
@@ -145,12 +145,12 @@ class FlutterManifest {
       (_descriptor['workspace'] as YamlList?)?.cast<String>() ?? <String>[];
 
   // Flag to avoid printing multiple invalid version messages.
-  bool _hasShowInvalidVersionMsg = false;
+  var _hasShowInvalidVersionMsg = false;
 
   /// The version String from the `pubspec.yaml` file.
   /// Can be null if it isn't set or has a wrong format.
   String? get appVersion {
-    final String? verStr = _descriptor['version']?.toString();
+    final verStr = _descriptor['version']?.toString();
     if (verStr == null) {
       return null;
     }
@@ -255,7 +255,7 @@ class FlutterManifest {
       }
     }
 
-    late final YamlMap? plugin = _flutterDescriptor['plugin'] as YamlMap?;
+    late final plugin = _flutterDescriptor['plugin'] as YamlMap?;
 
     return switch (supportedPlatforms) {
       {'android': final YamlMap map} => map['package'] as String?,
@@ -265,6 +265,11 @@ class FlutterManifest {
     };
   }
 
+  /// Returns the MD5 hash of the manifest contents.
+  String computeMD5Hash() {
+    return md5.convert(toYaml().toString().codeUnits).toString();
+  }
+
   /// Returns the deferred components configuration if declared. Returns
   /// null if no deferred components are declared.
   late final List<DeferredComponent>? deferredComponents = computeDeferredComponents();
@@ -272,7 +277,7 @@ class FlutterManifest {
     if (!_flutterDescriptor.containsKey('deferred-components')) {
       return null;
     }
-    final List<DeferredComponent> components = <DeferredComponent>[];
+    final components = <DeferredComponent>[];
     final Object? deferredComponents = _flutterDescriptor['deferred-components'];
     if (deferredComponents is! YamlList) {
       return components;
@@ -285,10 +290,9 @@ class FlutterManifest {
       components.add(
         DeferredComponent(
           name: component['name'] as String,
-          libraries:
-              component['libraries'] == null
-                  ? <String>[]
-                  : (component['libraries'] as List<dynamic>).cast<String>(),
+          libraries: component['libraries'] == null
+              ? <String>[]
+              : (component['libraries'] as List<dynamic>).cast<String>(),
           assets: _computeAssets(component['assets']),
         ),
       );
@@ -312,9 +316,9 @@ class FlutterManifest {
   /// If the plugin uses the legacy pubspec format, this method returns null.
   Map<String, Object?>? get supportedPlatforms {
     if (isPlugin) {
-      final YamlMap? plugin = _flutterDescriptor['plugin'] as YamlMap?;
+      final plugin = _flutterDescriptor['plugin'] as YamlMap?;
       if (plugin?.containsKey('platforms') ?? false) {
-        final YamlMap? platformsMap = plugin!['platforms'] as YamlMap?;
+        final platformsMap = plugin!['platforms'] as YamlMap?;
         return platformsMap?.value.cast<String, Object?>();
       }
     }
@@ -327,7 +331,7 @@ class FlutterManifest {
     if (allPlatforms == null) {
       return null;
     }
-    final Map<String, Object?> platforms = <String, Object?>{}..addAll(allPlatforms);
+    final platforms = <String, Object?>{}..addAll(allPlatforms);
     platforms.removeWhere((String key, Object? _) => !_kValidPluginPlatforms.contains(key));
     if (platforms.isEmpty) {
       return null;
@@ -340,13 +344,13 @@ class FlutterManifest {
   }
 
   List<Map<String, Object?>> get _rawFontsDescriptor {
-    final List<Object?>? fontList = _flutterDescriptor['fonts'] as List<Object?>?;
+    final fontList = _flutterDescriptor['fonts'] as List<Object?>?;
     return fontList == null
         ? const <Map<String, Object?>>[]
         : fontList
-            .map<Map<String, Object?>?>(castStringKeyedMap)
-            .whereType<Map<String, Object?>>()
-            .toList();
+              .map<Map<String, Object?>?>(castStringKeyedMap)
+              .whereType<Map<String, Object?>>()
+              .toList();
   }
 
   late final List<AssetsEntry> assets = _computeAssets(_flutterDescriptor['assets']);
@@ -358,10 +362,10 @@ class FlutterManifest {
       return <Font>[];
     }
 
-    final List<Font> fonts = <Font>[];
+    final fonts = <Font>[];
     for (final Map<String, Object?> fontFamily in _rawFontsDescriptor) {
-      final YamlList? fontFiles = fontFamily['fonts'] as YamlList?;
-      final String? familyName = fontFamily['family'] as String?;
+      final fontFiles = fontFamily['fonts'] as YamlList?;
+      final familyName = fontFamily['family'] as String?;
       if (familyName == null) {
         _logger.printWarning('Warning: Missing family name for font.', emphasis: true);
         continue;
@@ -371,9 +375,9 @@ class FlutterManifest {
         continue;
       }
 
-      final List<FontAsset> fontAssets = <FontAsset>[];
+      final fontAssets = <FontAsset>[];
       for (final Map<Object?, Object?> fontFile in fontFiles.cast<Map<Object?, Object?>>()) {
-        final String? asset = fontFile['asset'] as String?;
+        final asset = fontFile['asset'] as String?;
         if (asset == null) {
           _logger.printWarning('Warning: Missing asset in fonts for $familyName', emphasis: true);
           continue;
@@ -401,18 +405,18 @@ class FlutterManifest {
       return <Uri>[];
     }
 
-    final List<Object?>? items = _flutterDescriptor[key] as List<Object?>?;
+    final items = _flutterDescriptor[key] as List<Object?>?;
     if (items == null) {
       return const <Uri>[];
     }
-    final List<Uri> results = <Uri>[];
+    final results = <Uri>[];
     for (final Object? item in items) {
       if (item is! String || item == '') {
         _logger.printError('$singularName manifest contains a null or empty uri.');
         continue;
       }
       try {
-        results.add(Uri(pathSegments: item.split('/')));
+        results.add(Uri.parse(item));
       } on FormatException {
         _logger.printError('$singularName manifest contains invalid uri: $item.');
       }
@@ -421,17 +425,7 @@ class FlutterManifest {
   }
 
   /// Whether localization Dart files should be generated.
-  ///
-  /// **NOTE**: This method was previously called `generateSyntheticPackage`,
-  /// which was incorrect; the presence of `generate: true` in `pubspec.yaml`
-  /// does _not_ imply a synthetic package (and never did); additional
-  /// introspection is required to determine whether a synthetic package is
-  /// required.
-  ///
-  /// See also:
-  ///
-  ///   * [Deprecate and remove synthethic `package:flutter_gen`](https://github.com/flutter/flutter/issues/102983)
-  late final bool generateLocalizations = _flutterDescriptor['generate'] == true;
+  late final generateLocalizations = _flutterDescriptor['generate'] == true;
 
   String? get defaultFlavor => _flutterDescriptor['default-flavor'] as String?;
 
@@ -465,7 +459,7 @@ class FontAsset {
   final String? style;
 
   Map<String, Object?> get descriptor {
-    final Map<String, Object?> descriptor = <String, Object?>{};
+    final descriptor = <String, Object?>{};
     if (weight != null) {
       descriptor['weight'] = weight;
     }
@@ -483,7 +477,7 @@ class FontAsset {
 }
 
 bool _validate(Object? manifest, Logger logger) {
-  final List<String> errors = <String>[];
+  final errors = <String>[];
   if (manifest is! YamlMap) {
     errors.add('Expected YAML map');
   } else {
@@ -636,15 +630,15 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
   String context,
   String typeAlias,
 ) {
-  final List<String> errors = <String>[];
+  final errors = <String>[];
 
   if (yamlList is! YamlList) {
-    final String message =
+    final message =
         'Expected $context to be a list of $typeAlias, but got $yamlList (${yamlList.runtimeType}).';
     return (null, <String>[message]);
   }
 
-  for (int i = 0; i < yamlList.length; i++) {
+  for (var i = 0; i < yamlList.length; i++) {
     if (yamlList[i] is! T) {
       errors.add(
         'Expected $context to be a list of $typeAlias, but element at index $i was a ${yamlList[i].runtimeType}.',
@@ -660,7 +654,7 @@ void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> er
   if (yamlList != null && (yamlList is! YamlList || yamlList[0] is! YamlMap)) {
     errors.add('Expected "${kvp.key}" to be a list, but got $yamlList (${yamlList.runtimeType}).');
   } else if (yamlList is YamlList) {
-    for (int i = 0; i < yamlList.length; i++) {
+    for (var i = 0; i < yamlList.length; i++) {
       final Object? valueMap = yamlList[i];
       if (valueMap is! YamlMap) {
         errors.add(
@@ -702,11 +696,11 @@ List<String> _validateAssets(Object? yaml) {
     return (const <AssetsEntry>[], const <String>[]);
   }
   if (yaml is! YamlList) {
-    final String error = 'Expected "assets" to be a list, but got $yaml (${yaml.runtimeType}).';
+    final error = 'Expected "assets" to be a list, but got $yaml (${yaml.runtimeType}).';
     return (const <AssetsEntry>[], <String>[error]);
   }
-  final List<AssetsEntry> results = <AssetsEntry>[];
-  final List<String> errors = <String>[];
+  final results = <AssetsEntry>[];
+  final errors = <String>[];
   for (final Object? rawAssetEntry in yaml) {
     final (AssetsEntry? parsed, String? error) = AssetsEntry.parseFromYamlSafe(rawAssetEntry);
     if (parsed != null) {
@@ -731,7 +725,7 @@ List<AssetsEntry> _computeAssets(Object? assetsSection) {
 }
 
 void _validateFonts(YamlList fonts, List<String> errors) {
-  const Set<int> fontWeights = <int>{100, 200, 300, 400, 500, 600, 700, 800, 900};
+  const fontWeights = <int>{100, 200, 300, 400, 500, 600, 700, 800, 900};
   for (final Object? fontMap in fonts) {
     if (fontMap is! YamlMap) {
       errors.add('Unexpected child "$fontMap" found under "fonts". Expected a map.');
@@ -751,7 +745,7 @@ void _validateFonts(YamlList fonts, List<String> errors) {
       errors.add('Expected "fonts" to either be null or a list.');
       continue;
     }
-    for (final Object? fontMapList in fontMap['fonts'] as List<Object?>) {
+    for (final fontMapList in fontMap['fonts'] as List<Object?>) {
       if (fontMapList is! YamlMap) {
         errors.add('Expected "fonts" to be a list of maps.');
         continue;
@@ -794,28 +788,32 @@ class AssetsEntry {
   const AssetsEntry({
     required this.uri,
     this.flavors = const <String>{},
+    this.platforms = const <String>{},
     this.transformers = const <AssetTransformerEntry>[],
   });
 
   final Uri uri;
   final Set<String> flavors;
+  final Set<String> platforms;
   final List<AssetTransformerEntry> transformers;
 
   Object? get descriptor {
-    if (transformers.isEmpty && flavors.isEmpty) {
+    if (transformers.isEmpty && flavors.isEmpty && platforms.isEmpty) {
       return uri.toString();
     }
     return <String, Object?>{
       _pathKey: uri.toString(),
       if (flavors.isNotEmpty) _flavorKey: flavors.toList(),
+      if (platforms.isNotEmpty) _platformsKey: platforms.toList(),
       if (transformers.isNotEmpty)
         _transformersKey: transformers.map((AssetTransformerEntry e) => e.descriptor).toList(),
     };
   }
 
-  static const String _pathKey = 'path';
-  static const String _flavorKey = 'flavors';
-  static const String _transformersKey = 'transformers';
+  static const _pathKey = 'path';
+  static const _flavorKey = 'flavors';
+  static const _platformsKey = 'platforms';
+  static const _transformersKey = 'transformers';
 
   static AssetsEntry? parseFromYaml(Object? yaml) {
     final (AssetsEntry? value, String? error) = parseFromYamlSafe(yaml);
@@ -828,7 +826,7 @@ class AssetsEntry {
   static (AssetsEntry? assetsEntry, String? error) parseFromYamlSafe(Object? yaml) {
     (Uri?, String?) tryParseUri(String uri) {
       try {
-        return (Uri(pathSegments: uri.split('/')), null);
+        return (Uri.parse(uri), null);
       } on FormatException {
         return (null, 'Asset manifest contains invalid uri: $uri.');
       }
@@ -862,13 +860,15 @@ class AssetsEntry {
       final (List<String>? flavors, List<String> flavorsErrors) = _parseFlavorsSection(
         yaml[_flavorKey],
       );
-      final (
-        List<AssetTransformerEntry>? transformers,
-        List<String> transformersErrors,
-      ) = _parseTransformersSection(yaml[_transformersKey]);
+      final (List<String>? platforms, List<String> platformsErrors) = _parsePlatformsSection(
+        yaml[_platformsKey],
+      );
+      final (List<AssetTransformerEntry>? transformers, List<String> transformersErrors) =
+          _parseTransformersSection(yaml[_transformersKey]);
 
-      final List<String> errors = <String>[
+      final errors = <String>[
         ...flavorsErrors.map((String e) => 'In $_flavorKey section of asset "$path": $e'),
+        ...platformsErrors.map((String e) => 'In $_platformsKey section of asset "$path": $e'),
         ...transformersErrors.map(
           (String e) => 'In $_transformersKey section of asset "$path": $e',
         ),
@@ -881,6 +881,7 @@ class AssetsEntry {
         AssetsEntry(
           uri: Uri(pathSegments: path.split('/')),
           flavors: Set<String>.from(flavors ?? <String>[]),
+          platforms: Set<String>.from(platforms ?? <String>[]),
           transformers: transformers ?? <AssetTransformerEntry>[],
         ),
         null,
@@ -902,6 +903,41 @@ class AssetsEntry {
     return _parseList<String>(yaml, _flavorKey, 'String');
   }
 
+  /// Parses and validates the "platforms" section of an asset entry in pubspec.yaml.
+  ///
+  /// Returns a tuple containing the parsed platforms list and any validation errors.
+  /// If errors are encountered, the platforms list will be null and errors will be non-empty.
+  static (List<String>? platforms, List<String> errors) _parsePlatformsSection(Object? yaml) {
+    if (yaml == null) {
+      return (null, <String>[]);
+    }
+
+    final (List<String>? platforms, List<String> errors) = _parseList<String>(
+      yaml,
+      _platformsKey,
+      'String',
+    );
+
+    if (errors.isNotEmpty) {
+      return (null, errors);
+    }
+
+    if (platforms != null) {
+      final Set<String> invalidPlatforms = platforms.toSet().difference(_kValidPluginPlatforms);
+
+      if (invalidPlatforms.isNotEmpty) {
+        return (
+          null,
+          <String>[
+            'Invalid platform(s): "${invalidPlatforms.join(", ")}". Supported platforms are: "${_kValidPluginPlatforms.join(", ")}".',
+          ],
+        );
+      }
+    }
+
+    return (platforms, errors);
+  }
+
   static (List<AssetTransformerEntry>?, List<String> errors) _parseTransformersSection(
     Object? yaml,
   ) {
@@ -918,13 +954,11 @@ class AssetsEntry {
       return (null, listErrors);
     }
 
-    final List<AssetTransformerEntry> transformers = <AssetTransformerEntry>[];
-    final List<String> errors = <String>[];
+    final transformers = <AssetTransformerEntry>[];
+    final errors = <String>[];
     for (final YamlMap yaml in yamlObjects!) {
-      final (
-        AssetTransformerEntry? transformerEntry,
-        List<String> transformerErrors,
-      ) = AssetTransformerEntry.tryParse(yaml);
+      final (AssetTransformerEntry? transformerEntry, List<String> transformerErrors) =
+          AssetTransformerEntry.tryParse(yaml);
       if (transformerEntry != null) {
         transformers.add(transformerEntry);
       } else {
@@ -944,18 +978,22 @@ class AssetsEntry {
       return false;
     }
 
-    return uri == other.uri && setEquals(flavors, other.flavors);
+    return uri == other.uri &&
+        setEquals(flavors, other.flavors) &&
+        setEquals(platforms, other.platforms);
   }
 
   @override
   int get hashCode => Object.hashAll(<Object?>[
     uri.hashCode,
     Object.hashAllUnordered(flavors),
+    Object.hashAllUnordered(platforms),
     Object.hashAll(transformers),
   ]);
 
   @override
-  String toString() => 'AssetsEntry(uri: $uri, flavors: $flavors, transformers: $transformers)';
+  String toString() =>
+      'AssetsEntry(uri: $uri, flavors: $flavors, platforms: $platforms, transformers: $transformers)';
 }
 
 /// Represents an entry in the "transformers" section of an asset.
@@ -965,14 +1003,14 @@ final class AssetTransformerEntry {
     : args = args ?? const <String>[];
 
   final String package;
-  final List<String>? args;
+  final List<String> args;
 
   Map<String, Object?> get descriptor {
-    return <String, Object?>{_kPackage: package, if (args != null) _kArgs: args};
+    return <String, Object?>{_kPackage: package, _kArgs: args};
   }
 
-  static const String _kPackage = 'package';
-  static const String _kArgs = 'args';
+  static const _kPackage = 'package';
+  static const _kArgs = 'args';
 
   static (AssetTransformerEntry? entry, List<String> errors) tryParse(Object? yaml) {
     if (yaml == null) {
@@ -1018,30 +1056,22 @@ final class AssetTransformerEntry {
     if (other is! AssetTransformerEntry) {
       return false;
     }
-
-    final bool argsAreEqual =
-        (() {
-          if (args == null && other.args == null) {
-            return true;
-          }
-          if (args?.length != other.args?.length) {
-            return false;
-          }
-
-          for (int index = 0; index < args!.length; index += 1) {
-            if (args![index] != other.args![index]) {
-              return false;
-            }
-          }
-          return true;
-        })();
-
-    return package == other.package && argsAreEqual;
+    if (package != other.package) {
+      return false;
+    }
+    if (args.length != other.args.length) {
+      return false;
+    }
+    for (var index = 0; index < args.length; index += 1) {
+      if (args[index] != other.args[index]) {
+        return false;
+      }
+    }
+    return true;
   }
 
   @override
-  int get hashCode =>
-      Object.hashAll(<Object?>[package.hashCode, args?.map((String e) => e.hashCode)]);
+  int get hashCode => Object.hash(package, Object.hashAll(args));
 
   @override
   String toString() {

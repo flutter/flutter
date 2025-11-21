@@ -51,12 +51,13 @@ class CopyArtifactsStep implements PipelineStep {
     final String realmComponent = switch (realm) {
       LuciRealm.Prod || LuciRealm.Staging => '',
       LuciRealm.Try => 'flutter_archives_v2/',
-      LuciRealm.Unknown =>
-        throw ToolExit('Could not generate artifact bucket url for unknown realm.'),
+      LuciRealm.Unknown => throw ToolExit(
+        'Could not generate artifact bucket url for unknown realm.',
+      ),
     };
     final Uri url = Uri.https(
       'storage.googleapis.com',
-      '${realmComponent}flutter_infra_release/flutter/$gitRevision/flutter-web-sdk.zip',
+      '${realmComponent}flutter_infra_release/flutter/${realm == LuciRealm.Try ? gitRevision : contentHash}/flutter-web-sdk.zip',
     );
     final http.Response response = await http.Client().get(url);
     if (response.statusCode != 200) {

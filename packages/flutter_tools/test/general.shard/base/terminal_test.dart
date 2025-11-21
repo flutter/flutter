@@ -15,7 +15,7 @@ import '../../src/fakes.dart';
 void main() {
   group('output preferences', () {
     testWithoutContext('can wrap output', () async {
-      final BufferLogger bufferLogger = BufferLogger(
+      final bufferLogger = BufferLogger(
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40),
         terminal: TestTerminal(platform: FakePlatform()..stdoutSupportsAnsi = true),
       );
@@ -25,7 +25,7 @@ void main() {
     });
 
     testWithoutContext('can turn off wrapping', () async {
-      final BufferLogger bufferLogger = BufferLogger(
+      final bufferLogger = BufferLogger(
         outputPreferences: OutputPreferences.test(),
         terminal: TestTerminal(platform: FakePlatform()..stdoutSupportsAnsi = true),
       );
@@ -38,11 +38,13 @@ void main() {
 
   group('ANSI coloring, bold, and clearing', () {
     late AnsiTerminal terminal;
+    late FakePlatform platform;
 
     setUp(() {
+      platform = FakePlatform()..stdoutSupportsAnsi = true;
       terminal = AnsiTerminal(
         stdio: Stdio(), // Danger, using real stdio.
-        platform: FakePlatform()..stdoutSupportsAnsi = true,
+        platform: platform,
       );
     });
 
@@ -53,6 +55,19 @@ void main() {
           equals('${AnsiTerminal.colorCode(color)}output${AnsiTerminal.resetColor}'),
         );
       }
+    });
+
+    testWithoutContext('can opt-out of color using NO_COLOR', () {
+      platform.environment = <String, String>{'NO_COLOR': ''};
+      expect(
+        terminal,
+        isA<Terminal>().having((Terminal t) => t.supportsColor, 'supportsColor', isFalse),
+      );
+
+      expect(
+        terminal.color('output-without-color', TerminalColor.red),
+        equals('output-without-color'),
+      );
     });
 
     testWithoutContext('adding bold works', () {
@@ -171,17 +186,16 @@ void main() {
     });
 
     testWithoutContext('character prompt', () async {
-      final BufferLogger bufferLogger = BufferLogger(
+      final bufferLogger = BufferLogger(
         terminal: terminalUnderTest,
         outputPreferences: OutputPreferences.test(),
       );
       terminalUnderTest.usesTerminalUi = true;
-      mockStdInStream =
-          Stream<String>.fromFutures(<Future<String>>[
-            Future<String>.value('d'), // Not in accepted list.
-            Future<String>.value('\n'), // Not in accepted list
-            Future<String>.value('b'),
-          ]).asBroadcastStream();
+      mockStdInStream = Stream<String>.fromFutures(<Future<String>>[
+        Future<String>.value('d'), // Not in accepted list.
+        Future<String>.value('\n'), // Not in accepted list
+        Future<String>.value('b'),
+      ]).asBroadcastStream();
       final String choice = await terminalUnderTest.promptForCharInput(
         <String>['a', 'b', 'c'],
         prompt: 'Please choose something',
@@ -197,15 +211,14 @@ void main() {
     });
 
     testWithoutContext('default character choice without displayAcceptedCharacters', () async {
-      final BufferLogger bufferLogger = BufferLogger(
+      final bufferLogger = BufferLogger(
         terminal: terminalUnderTest,
         outputPreferences: OutputPreferences.test(),
       );
       terminalUnderTest.usesTerminalUi = true;
-      mockStdInStream =
-          Stream<String>.fromFutures(<Future<String>>[
-            Future<String>.value('\n'), // Not in accepted list
-          ]).asBroadcastStream();
+      mockStdInStream = Stream<String>.fromFutures(<Future<String>>[
+        Future<String>.value('\n'), // Not in accepted list
+      ]).asBroadcastStream();
       final String choice = await terminalUnderTest.promptForCharInput(
         <String>['a', 'b', 'c'],
         prompt: 'Please choose something',
@@ -220,7 +233,7 @@ void main() {
 
     testWithoutContext('Does not set single char mode when a terminal is not attached', () {
       final Stdio stdio = FakeStdio()..stdinHasTerminal = false;
-      final AnsiTerminal ansiTerminal = AnsiTerminal(stdio: stdio, platform: const LocalPlatform());
+      final ansiTerminal = AnsiTerminal(stdio: stdio, platform: const LocalPlatform());
 
       expect(() => ansiTerminal.singleCharMode = true, returnsNormally);
     });
@@ -502,23 +515,20 @@ void main() {
   });
 
   testWithoutContext('set singleCharMode resilient to StdinException', () async {
-    final FakeStdio stdio = FakeStdio();
-    final AnsiTerminal terminal = AnsiTerminal(stdio: stdio, platform: const LocalPlatform());
+    final stdio = FakeStdio();
+    final terminal = AnsiTerminal(stdio: stdio, platform: const LocalPlatform());
     stdio.stdinHasTerminal = true;
-    stdio._stdin =
-        FakeStdin()
-          ..echoModeCallback =
-              (bool _) =>
-                  throw const StdinException(
-                    'Error setting terminal echo mode, OS Error: The handle is invalid.',
-                  );
+    stdio._stdin = FakeStdin()
+      ..echoModeCallback = (bool _) => throw const StdinException(
+        'Error setting terminal echo mode, OS Error: The handle is invalid.',
+      );
     terminal.singleCharMode = true;
   });
 
   testWithoutContext('singleCharMode is reset by shutdown hook', () {
-    final ShutdownHooks shutdownHooks = ShutdownHooks();
-    final FakeStdio stdio = FakeStdio();
-    final AnsiTerminal terminal = AnsiTerminal(
+    final shutdownHooks = ShutdownHooks();
+    final stdio = FakeStdio();
+    final terminal = AnsiTerminal(
       stdio: stdio,
       platform: const LocalPlatform(),
       shutdownHooks: shutdownHooks,
@@ -543,7 +553,7 @@ class TestTerminal extends AnsiTerminal {
     return mockStdInStream;
   }
 
-  bool _singleCharMode = false;
+  var _singleCharMode = false;
 
   @override
   bool get singleCharMode => _singleCharMode;
@@ -574,5 +584,5 @@ class FakeStdio extends Fake implements Stdio {
   }
 
   @override
-  bool stdinHasTerminal = false;
+  var stdinHasTerminal = false;
 }

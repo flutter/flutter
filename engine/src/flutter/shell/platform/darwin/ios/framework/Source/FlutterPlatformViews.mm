@@ -64,7 +64,7 @@ class CGPathReceiver final : public flutter::DlPathReceiver {
   }
   void Close() override { CGPathCloseSubpath(path_ref_); }
 
-  CGMutablePathRef TakePath() { return path_ref_; }
+  CGMutablePathRef TakePath() const { return path_ref_; }
 
  private:
   CGMutablePathRef path_ref_ = CGPathCreateMutable();
@@ -587,7 +587,11 @@ static BOOL _preparedOnce = NO;
       // from the web view plugin level. Right now we only observe this issue for
       // FlutterPlatformViewGestureRecognizersBlockingPolicyEager, but we should try it if a similar
       // issue arises for the other policy.
-      if (@available(iOS 18.2, *)) {
+      if (@available(iOS 26.0, *)) {
+        // This workaround does not work on iOS 26.
+        // TODO(hellohuanlin): find a solution for iOS 26,
+        // https://github.com/flutter/flutter/issues/175099.
+      } else if (@available(iOS 18.2, *)) {
         // This workaround is designed for WKWebView only. The 1P web view plugin provides a
         // WKWebView itself as the platform view. However, some 3P plugins provide wrappers of
         // WKWebView instead. So we perform DFS to search the view hierarchy (with a depth limit).

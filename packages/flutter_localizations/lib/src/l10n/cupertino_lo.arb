@@ -29,5 +29,11 @@
   "shareButtonLabel": "ແບ່ງປັນ...",
   "clearButtonLabel": "ລຶບລ້າງ",
   "cancelButtonLabel": "ຍົກເລີກ",
-  "backButtonLabel": "ກັບຄືນ"
+  "backButtonLabel": "ກັບຄືນ",
+  "expansionTileExpandedHint": "ແຕະສອງເທື່ອເພື່ອຫຍໍ້ລົງ",
+  "expansionTileCollapsedHint": "ແຕະສອງເທື່ອເພື່ອຂະຫຍາຍ",
+  "expansionTileExpandedTapHint": "ຫຍໍ້ລົງ",
+  "expansionTileCollapsedTapHint": "ຂະຫຍາຍສຳລັບຂໍ້ມູນເພີ່ມເຕີມ",
+  "expandedHint": "ຫຍໍ້ລົງແລ້ວ",
+  "collapsedHint": "ຂະຫຍາຍແລ້ວ"
 }

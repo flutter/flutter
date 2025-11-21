@@ -105,8 +105,9 @@ Future<void> main() async {
   // Shuffle the tests because we don't want order dependent tests.
   // It is the responsibility of the infra to tell us what the seed value is,
   // in case we want to have the seed stable for some time period.
-  final List<Benchmark> tests =
-      benchmarks.where((Benchmark e) => selectedTests.contains(e.$1)).toList();
+  final List<Benchmark> tests = benchmarks
+      .where((Benchmark e) => selectedTests.contains(e.$1))
+      .toList();
   tests.shuffle(Random(int.parse(results.option('seed')!)));
 
   print('╡ ••• Running microbenchmarks ••• ╞');
@@ -118,5 +119,12 @@ Future<void> main() async {
   }
 
   print('\n\n╡ ••• Done ••• ╞\n\n');
+
+  // Ensure stdout buffers are flushed so the collecting process gets Done
+  await stdout.flush();
+
+  // Now we're just being paranoid here and letting the process churn through
+  // log lines before handling the exit code.
+  await Future<void>.delayed(const Duration(seconds: 5));
   exit(0);
 }

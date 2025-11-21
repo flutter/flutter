@@ -181,7 +181,9 @@ void fl_method_channel_invoke_method(FlMethodChannel* channel,
  * @channel: an #FlMethodChannel.
  * @result:  #GAsyncResult.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is
+ * explicitly valid).
  *
  * Completes request started with fl_method_channel_invoke_method().
  *

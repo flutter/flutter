@@ -1618,7 +1618,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(body: InteractiveViewer(alignment: alignment, child: Container())),
+          home: Scaffold(
+            body: InteractiveViewer(alignment: alignment, child: Container()),
+          ),
         ),
       );
 

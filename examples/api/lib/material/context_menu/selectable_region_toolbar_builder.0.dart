@@ -60,24 +60,22 @@ class _SelectableRegionToolbarBuilderExampleAppState
           child: SizedBox(
             width: 200.0,
             child: SelectionArea(
-              contextMenuBuilder: (
-                BuildContext context,
-                SelectableRegionState selectableRegionState,
-              ) {
-                return AdaptiveTextSelectionToolbar.buttonItems(
-                  anchors: selectableRegionState.contextMenuAnchors,
-                  buttonItems: <ContextMenuButtonItem>[
-                    ...selectableRegionState.contextMenuButtonItems,
-                    ContextMenuButtonItem(
-                      onPressed: () {
-                        ContextMenuController.removeAny();
-                        _showDialog(context);
-                      },
-                      label: 'Print',
-                    ),
-                  ],
-                );
-              },
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    return AdaptiveTextSelectionToolbar.buttonItems(
+                      anchors: selectableRegionState.contextMenuAnchors,
+                      buttonItems: <ContextMenuButtonItem>[
+                        ...selectableRegionState.contextMenuButtonItems,
+                        ContextMenuButtonItem(
+                          onPressed: () {
+                            ContextMenuController.removeAny();
+                            _showDialog(context);
+                          },
+                          label: 'Print',
+                        ),
+                      ],
+                    );
+                  },
               child: ListView(children: const <Widget>[SizedBox(height: 20.0), Text(text)]),
             ),
           ),

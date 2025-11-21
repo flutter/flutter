@@ -7,7 +7,7 @@ import '../../base/project_migrator.dart';
 import '../../cmake_project.dart';
 import 'utils.dart';
 
-const String _cmakeFileToolBackendBefore = r'''
+const _cmakeFileToolBackendBefore = r'''
 add_custom_command(
   OUTPUT ${FLUTTER_LIBRARY} ${FLUTTER_LIBRARY_HEADERS}
     ${CPP_WRAPPER_SOURCES_CORE} ${CPP_WRAPPER_SOURCES_PLUGIN}
@@ -21,7 +21,7 @@ add_custom_command(
 )
 ''';
 
-const String _cmakeFileToolBackendAfter = r'''
+const _cmakeFileToolBackendAfter = r'''
 add_custom_command(
   OUTPUT ${FLUTTER_LIBRARY} ${FLUTTER_LIBRARY_HEADERS}
     ${CPP_WRAPPER_SOURCES_CORE} ${CPP_WRAPPER_SOURCES_PLUGIN}
@@ -35,7 +35,7 @@ add_custom_command(
 )
 ''';
 
-const String _cmakeFileTargetPlatformBefore = r'''
+const _cmakeFileTargetPlatformBefore = r'''
 # TODO: Move the rest of this into files in ephemeral. See
 # https://github.com/flutter/flutter/issues/57146.
 set(WRAPPER_ROOT "${EPHEMERAL_DIR}/cpp_client_wrapper")
@@ -43,7 +43,7 @@ set(WRAPPER_ROOT "${EPHEMERAL_DIR}/cpp_client_wrapper")
 # === Flutter Library ===
 ''';
 
-const String _cmakeFileTargetPlatformAfter = r'''
+const _cmakeFileTargetPlatformAfter = r'''
 # TODO: Move the rest of this into files in ephemeral. See
 # https://github.com/flutter/flutter/issues/57146.
 set(WRAPPER_ROOT "${EPHEMERAL_DIR}/cpp_client_wrapper")

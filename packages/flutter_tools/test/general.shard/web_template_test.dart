@@ -8,7 +8,7 @@ import 'package:flutter_tools/src/web_template.dart';
 
 import '../src/common.dart';
 
-const String htmlSample1 = '''
+const htmlSample1 = '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -24,7 +24,8 @@ const String htmlSample1 = '''
 </html>
 ''';
 
-const String htmlSample2 = '''
+const htmlSample2 =
+    '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -46,7 +47,7 @@ const String htmlSample2 = '''
 </html>
 ''';
 
-const String htmlSampleInlineFlutterJsBootstrap = '''
+const htmlSampleInlineFlutterJsBootstrap = '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -70,7 +71,7 @@ const String htmlSampleInlineFlutterJsBootstrap = '''
 </html>
 ''';
 
-const String htmlSampleInlineFlutterJsBootstrapOutput = '''
+const htmlSampleInlineFlutterJsBootstrapOutput = '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -86,7 +87,7 @@ const String htmlSampleInlineFlutterJsBootstrapOutput = '''
     (build config)
     _flutter.loader.load({
       serviceWorker: {
-        serviceWorkerVersion: "(service worker version)",
+        serviceWorkerVersion: "(service worker version)" /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */,
       },
     });
   </script>
@@ -94,7 +95,7 @@ const String htmlSampleInlineFlutterJsBootstrapOutput = '''
 </html>
 ''';
 
-const String htmlSampleFullFlutterBootstrapReplacement = '''
+const htmlSampleFullFlutterBootstrapReplacement = '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -112,7 +113,7 @@ const String htmlSampleFullFlutterBootstrapReplacement = '''
 </html>
 ''';
 
-const String htmlSampleFullFlutterBootstrapReplacementOutput = '''
+const htmlSampleFullFlutterBootstrapReplacementOutput = '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -130,7 +131,8 @@ const String htmlSampleFullFlutterBootstrapReplacementOutput = '''
 </html>
 ''';
 
-const String htmlSampleLegacyVar = '''
+const htmlSampleLegacyVar =
+    '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -152,7 +154,8 @@ const String htmlSampleLegacyVar = '''
 </html>
 ''';
 
-const String htmlSampleLegacyLoadEntrypoint = '''
+const htmlSampleLegacyLoadEntrypoint =
+    '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -178,7 +181,8 @@ const String htmlSampleLegacyLoadEntrypoint = '''
 </html>
 ''';
 
-String htmlSample2Replaced({required String baseHref, required String serviceWorkerVersion}) => '''
+String htmlSample2Replaced({required String baseHref, required String serviceWorkerVersion}) =>
+    '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -191,16 +195,16 @@ String htmlSample2Replaced({required String baseHref, required String serviceWor
   <div></div>
   <script src="main.dart.js"></script>
   <script>
-    const serviceWorkerVersion = "$serviceWorkerVersion";
+    const serviceWorkerVersion = "$serviceWorkerVersion" /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */;
   </script>
   <script>
-    navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion');
+    navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion') /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */;
   </script>
 </body>
 </html>
 ''';
 
-const String htmlSample3 = '''
+const htmlSample3 = '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -215,8 +219,72 @@ const String htmlSample3 = '''
 </html>
 ''';
 
+const htmlSampleStaticAssetsUrl =
+    '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <base href="/">
+  <meta charset="utf-8">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+</head>
+<body>
+  <div></div>
+  <script>
+    {{flutter_js}}
+    {{flutter_build_config}}
+    _flutter.loader.load({
+      config: {
+        entryPointBaseUrl: "$kStaticAssetsUrlPlaceholder",
+      },
+      onEntrypointLoaded: async function (engineInitializer) {
+        const appRunner = await engineInitializer.initializeEngine({
+          assetBase: "$kStaticAssetsUrlPlaceholder",
+        });
+
+        await appRunner.runApp();
+      },
+    });
+  </script>
+</body>
+</html>
+''';
+
+String htmlSampleStaticAssetsUrlReplaced({required String staticAssetsUrl}) =>
+    '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <base href="/">
+  <meta charset="utf-8">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+</head>
+<body>
+  <div></div>
+  <script>
+    (flutter.js content)
+    {{flutter_build_config}}
+    _flutter.loader.load({
+      config: {
+        entryPointBaseUrl: "$staticAssetsUrl",
+      },
+      onEntrypointLoaded: async function (engineInitializer) {
+        const appRunner = await engineInitializer.initializeEngine({
+          assetBase: "$staticAssetsUrl",
+        });
+
+        await appRunner.runApp();
+      },
+    });
+  </script>
+</body>
+</html>
+''';
+
 void main() {
-  final MemoryFileSystem fs = MemoryFileSystem();
+  final fs = MemoryFileSystem();
   final File flutterJs = fs.file('flutter.js');
   flutterJs.writeAsStringSync('(flutter.js content)');
 
@@ -241,7 +309,7 @@ void main() {
   });
 
   test('applies substitutions', () {
-    const WebTemplate indexHtml = WebTemplate(htmlSample2);
+    const indexHtml = WebTemplate(htmlSample2);
 
     expect(
       indexHtml.withSubstitutions(
@@ -254,7 +322,7 @@ void main() {
   });
 
   test('applies substitutions with legacy var version syntax', () {
-    const WebTemplate indexHtml = WebTemplate(htmlSampleLegacyVar);
+    const indexHtml = WebTemplate(htmlSampleLegacyVar);
     expect(
       indexHtml.withSubstitutions(
         baseHref: '/foo/333/',
@@ -266,7 +334,7 @@ void main() {
   });
 
   test('applies substitutions to inline flutter.js bootstrap script', () {
-    const WebTemplate indexHtml = WebTemplate(htmlSampleInlineFlutterJsBootstrap);
+    const indexHtml = WebTemplate(htmlSampleInlineFlutterJsBootstrap);
     expect(indexHtml.getWarnings(), isEmpty);
 
     expect(
@@ -281,7 +349,7 @@ void main() {
   });
 
   test('applies substitutions to full flutter_bootstrap.js replacement', () {
-    const WebTemplate indexHtml = WebTemplate(htmlSampleFullFlutterBootstrapReplacement);
+    const indexHtml = WebTemplate(htmlSampleFullFlutterBootstrapReplacement);
     expect(indexHtml.getWarnings(), isEmpty);
 
     expect(
@@ -296,8 +364,23 @@ void main() {
     );
   });
 
+  test('applies substitutions to static assets url', () {
+    const indexHtml = WebTemplate(htmlSampleStaticAssetsUrl);
+    const expectedStaticAssetsUrl = 'https://static.example.com/my-app/';
+
+    expect(
+      indexHtml.withSubstitutions(
+        baseHref: '/',
+        serviceWorkerVersion: 'v123xyz',
+        flutterJsFile: flutterJs,
+        staticAssetsUrl: expectedStaticAssetsUrl,
+      ),
+      htmlSampleStaticAssetsUrlReplaced(staticAssetsUrl: expectedStaticAssetsUrl),
+    );
+  });
+
   test('re-parses after substitutions', () {
-    const WebTemplate indexHtml = WebTemplate(htmlSample2);
+    const indexHtml = WebTemplate(htmlSample2);
     expect(WebTemplate.baseHref(htmlSample2), ''); // Placeholder base href.
 
     final String substituted = indexHtml.withSubstitutions(
@@ -310,16 +393,30 @@ void main() {
   });
 
   test('warns on legacy service worker patterns', () {
-    const WebTemplate indexHtml = WebTemplate(htmlSampleLegacyVar);
+    const indexHtml = WebTemplate(htmlSampleLegacyVar);
     final List<WebTemplateWarning> warnings = indexHtml.getWarnings();
-    expect(warnings.length, 2);
+    expect(warnings, hasLength(2));
 
-    expect(warnings.where((WebTemplateWarning warning) => warning.lineNumber == 13), isNotEmpty);
-    expect(warnings.where((WebTemplateWarning warning) => warning.lineNumber == 16), isNotEmpty);
+    final Iterable<WebTemplateWarning> serviceWorkerWarnings = warnings.where(
+      (WebTemplateWarning warning) => warning.lineNumber == 13 || warning.lineNumber == 16,
+    );
+    expect(serviceWorkerWarnings, hasLength(2));
+    expect(
+      serviceWorkerWarnings,
+      everyElement(
+        isA<WebTemplateWarning>().having(
+          (WebTemplateWarning warning) => warning.warningText,
+          'service worker warning message',
+          contains(
+            "Flutter's service worker is deprecated and will be removed in a future Flutter release.",
+          ),
+        ),
+      ),
+    );
   });
 
   test('warns on legacy FlutterLoader.loadEntrypoint', () {
-    const WebTemplate indexHtml = WebTemplate(htmlSampleLegacyLoadEntrypoint);
+    const indexHtml = WebTemplate(htmlSampleLegacyLoadEntrypoint);
     final List<WebTemplateWarning> warnings = indexHtml.getWarnings();
 
     expect(warnings.length, 1);

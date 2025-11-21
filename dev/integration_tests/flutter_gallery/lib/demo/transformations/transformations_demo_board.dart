@@ -147,10 +147,9 @@ class Board extends IterableMixin<BoardPoint?> {
   Vertices getVerticesForBoardPoint(BoardPoint boardPoint, Color color) {
     final Point<double> centerOfHexZeroCenter = boardPointToPoint(boardPoint);
 
-    final List<Offset> positions =
-        positionsForHexagonAtOrigin.map((Offset offset) {
-          return offset.translate(centerOfHexZeroCenter.x, centerOfHexZeroCenter.y);
-        }).toList();
+    final List<Offset> positions = positionsForHexagonAtOrigin.map((Offset offset) {
+      return offset.translate(centerOfHexZeroCenter.x, centerOfHexZeroCenter.y);
+    }).toList();
 
     return Vertices(
       VertexMode.triangleFan,

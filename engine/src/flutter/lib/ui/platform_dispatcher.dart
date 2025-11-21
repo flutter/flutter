@@ -531,21 +531,19 @@ class PlatformDispatcher {
     return PointerDataPacket(data: data);
   }
 
-  static ChannelCallback _keyDataListener(KeyDataCallback onKeyData, Zone zone) => (
-    ByteData? packet,
-    PlatformMessageResponseCallback callback,
-  ) {
-    _invoke1<KeyData>(
-      (KeyData keyData) {
-        final bool handled = onKeyData(keyData);
-        final Uint8List response = Uint8List(1);
-        response[0] = handled ? 1 : 0;
-        callback(response.buffer.asByteData());
-      },
-      zone,
-      _unpackKeyData(packet!),
-    );
-  };
+  static ChannelCallback _keyDataListener(KeyDataCallback onKeyData, Zone zone) =>
+      (ByteData? packet, PlatformMessageResponseCallback callback) {
+        _invoke1<KeyData>(
+          (KeyData keyData) {
+            final bool handled = onKeyData(keyData);
+            final Uint8List response = Uint8List(1);
+            response[0] = handled ? 1 : 0;
+            callback(response.buffer.asByteData());
+          },
+          zone,
+          _unpackKeyData(packet!),
+        );
+      };
 
   /// A callback that is invoked when key data is available.
   ///
@@ -577,12 +575,11 @@ class PlatformDispatcher {
 
     int offset = 0;
     final int charDataSize = packet.getUint64(kStride * offset++, _kFakeHostEndian);
-    final String? character =
-        charDataSize == 0
-            ? null
-            : utf8.decoder.convert(
-              packet.buffer.asUint8List(kStride * (offset + _kKeyDataFieldCount), charDataSize),
-            );
+    final String? character = charDataSize == 0
+        ? null
+        : utf8.decoder.convert(
+            packet.buffer.asUint8List(kStride * (offset + _kKeyDataFieldCount), charDataSize),
+          );
 
     final KeyData keyData = KeyData(
       timeStamp: Duration(microseconds: packet.getUint64(kStride * offset++, _kFakeHostEndian)),
@@ -718,6 +715,26 @@ class PlatformDispatcher {
 
   @Native<Void Function(Int64)>(symbol: 'PlatformConfigurationNativeApi::RegisterBackgroundIsolate')
   external static void __registerBackgroundIsolate(int rootIsolateId);
+
+  /// Informs the engine whether the framework is generating a semantics tree.
+  ///
+  /// Only framework knows when semantics tree should be generated. It uses this
+  /// method to notify the engine whether the framework will generate a semantics tree.
+  ///
+  /// In the case where platforms want to enable semantics, e.g. when
+  /// assistive technologies are enabled, it notifies framework through
+  /// [onSemanticsEnabledChanged].
+  ///
+  /// After this has been set to true, platforms are expected to prepare for accepting
+  /// semantics update sent via [FlutterView.updateSemantics]. When this is set to false, platforms
+  /// may dispose any resources associated with processing semantics as no further
+  /// semantics updates will be sent via [FlutterView.updateSemantics].
+  ///
+  /// One must call this method with true before sending update through [updateSemantics].
+  void setSemanticsTreeEnabled(bool enabled) => _setSemanticsTreeEnabled(enabled);
+
+  @Native<Void Function(Bool)>(symbol: 'PlatformConfigurationNativeApi::SetSemanticsTreeEnabled')
+  external static void _setSemanticsTreeEnabled(bool update);
 
   /// Deprecated. Migrate to [ChannelBuffers.setListener] instead.
   ///
@@ -959,6 +976,15 @@ class PlatformDispatcher {
   /// list has not been set or is empty.
   Locale get locale => locales.isEmpty ? const Locale.fromSubtags() : locales.first;
 
+  /// Sets the locale for the application in engine.
+  ///
+  /// This is typically called by framework to set the locale based on which
+  /// locale the Flutter app actually uses.
+  void setApplicationLocale(Locale locale) => _setApplicationLocale(locale.toLanguageTag());
+
+  @Native<Void Function(Handle)>(symbol: 'PlatformConfigurationNativeApi::SetApplicationLocale')
+  external static void _setApplicationLocale(String locale);
+
   /// The full system-reported supported locales of the device.
   ///
   /// This establishes the language and formatting conventions that application
@@ -1094,6 +1120,59 @@ class PlatformDispatcher {
   ///
   /// This option is used by [showTimePicker].
   bool get alwaysUse24HourFormat => _configuration.alwaysUse24HourFormat;
+
+  /// The system-suggested height of the text, as a multiple of the font size.
+  ///
+  /// This value takes precedence over any text height specified at the
+  /// application level. For example, at framework level, in the [TextStyle]
+  /// for [Text], [SelectableText], and [EditableText] widgets, this value
+  /// overrides the existing value of [TextStyle.height] and [StrutStyle.height].
+  ///
+  /// Returns null when no override has been set by the system.
+  ///
+  /// If this value changes, [onMetricsChanged] will be called.
+  double? get lineHeightScaleFactorOverride => _configuration.lineHeightScaleFactorOverride;
+
+  /// The system-suggested amount of additional space (in logical pixels)
+  /// to add between each letter.
+  ///
+  /// A negative value can be used to bring the letters closer.
+  ///
+  /// This value takes precedence over any text letter spacing specified at the
+  /// application level. For example, at framework level, in the [TextStyle]
+  /// for [Text], [SelectableText], and [EditableText] widgets, this value
+  /// overrides the existing value of [TextStyle.letterSpacing].
+  ///
+  /// Returns null when no override has been set by the system.
+  ///
+  /// If this value changes, [onMetricsChanged] will be called.
+  double? get letterSpacingOverride => _configuration.letterSpacingOverride;
+
+  /// The system-suggested amount of additional space (in logical pixels)
+  /// to add between each sequence of white-space (i.e. between each word).
+  ///
+  /// A negative value can be used to bring the words closer.
+  ///
+  /// This value takes precedence over any text word spacing specified at the
+  /// application level. For example, at framework level, in the [TextStyle]
+  /// for [Text], [SelectableText], and [EditableText] widgets, this value
+  /// overrides the existing value of [TextStyle.wordSpacing].
+  ///
+  /// Returns null when no override has been set by the system.
+  ///
+  /// If this value changes, [onMetricsChanged] will be called.
+  double? get wordSpacingOverride => _configuration.wordSpacingOverride;
+
+  /// The system-suggested amount of additional space (in logical pixels)
+  /// to add following each paragraph in text.
+  ///
+  /// This value takes precedence over any text paragraph spacing specified at
+  /// the application level.
+  ///
+  /// Returns null when no override has been set by the system.
+  ///
+  /// If this value changes, [onMetricsChanged] will be called.
+  double? get paragraphSpacingOverride => _configuration.paragraphSpacingOverride;
 
   /// The system-reported text scale.
   ///
@@ -1785,6 +1864,10 @@ class _PlatformConfiguration {
     this.defaultRouteName,
     this.systemFontFamily,
     this.configurationId,
+    this.lineHeightScaleFactorOverride,
+    this.letterSpacingOverride,
+    this.wordSpacingOverride,
+    this.paragraphSpacingOverride,
   });
 
   _PlatformConfiguration copyWith({
@@ -1808,6 +1891,10 @@ class _PlatformConfiguration {
       defaultRouteName: defaultRouteName ?? this.defaultRouteName,
       systemFontFamily: systemFontFamily ?? this.systemFontFamily,
       configurationId: configurationId ?? this.configurationId,
+      lineHeightScaleFactorOverride: lineHeightScaleFactorOverride,
+      letterSpacingOverride: letterSpacingOverride,
+      wordSpacingOverride: wordSpacingOverride,
+      paragraphSpacingOverride: paragraphSpacingOverride,
     );
   }
 
@@ -1855,6 +1942,25 @@ class _PlatformConfiguration {
   /// configuration updates from the embedder yet. The _getScaledFontSize
   /// function should not be called in either case.
   final int? configurationId;
+
+  /// The system-reported height of the text, as a multiple of the font size.
+  final double? lineHeightScaleFactorOverride;
+
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each letter.
+  ///
+  /// A negative value can be used to bring the letters closer.
+  final double? letterSpacingOverride;
+
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each sequence of white-space (i.e. between each word).
+  ///
+  /// A negative value can be used to bring the words closer.
+  final double? wordSpacingOverride;
+
+  /// The system-reported amount of additional space (in logical pixels)
+  /// to add between each paragraph in text.
+  final double? paragraphSpacingOverride;
 }
 
 /// An immutable view configuration.
@@ -1869,11 +1975,15 @@ class _ViewConfiguration {
     this.gestureSettings = const GestureSettings(),
     this.displayFeatures = const <DisplayFeature>[],
     this.displayId = 0,
+    this.viewConstraints = const ViewConstraints(maxWidth: 0, maxHeight: 0),
   });
 
   /// The identifier for a display for this view, in
   /// [PlatformDispatcher._displays].
   final int displayId;
+
+  /// The sizing constraints for this view in physical pixels.
+  final ViewConstraints viewConstraints;
 
   /// The pixel density of the output surface.
   final double devicePixelRatio;

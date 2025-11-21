@@ -131,6 +131,16 @@ class EngineFlutterView implements ui.FlutterView {
     semantics.updateSemantics(update);
   }
 
+  /// Sets the locale for this view.
+  ///
+  /// This method is typically called by the Flutter framework after it has
+  /// resolved the application's locale. It configures the view to reflect
+  /// the given locale, which is important for accessibility and for the
+  /// browser.
+  void setLocale(ui.Locale locale) {
+    embeddingStrategy.setLocale(locale);
+  }
+
   late final GlobalHtmlAttributes _globalHtmlAttributes = GlobalHtmlAttributes(
     rootElement: dom.rootElement,
     hostElement: embeddingStrategy.hostElement,
@@ -197,6 +207,7 @@ class EngineFlutterView implements ui.FlutterView {
   /// the CSS box-model restrictions imposed on its `hostElement` (especially when
   /// hiding `overflow`). Flutter does not attempt to interpret the styles of
   /// `hostElement` to compute its `physicalConstraints`, only its current size.
+  @visibleForTesting
   void resize(ui.Size newPhysicalSize) {
     // The browser uses CSS, and CSS operates in logical sizes.
     final ui.Size logicalSize = newPhysicalSize / devicePixelRatio;
@@ -205,7 +216,7 @@ class EngineFlutterView implements ui.FlutterView {
       ..height = '${logicalSize.height}px';
 
     // Force an update of the physicalSize so it's ready for the renderer.
-    _computePhysicalSize();
+    _physicalSize = _computePhysicalSize();
   }
 
   /// Lazily populated and cleared at the end of the frame.
@@ -475,12 +486,14 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
   }
 
   @override
-  ui.FrameData get frameData => const ui.FrameData.webOnly();
+  ui.FrameData get frameData => platformDispatcher.frameData;
 
   @override
-  ui.VoidCallback? get onFrameDataChanged => null;
+  ui.VoidCallback? get onFrameDataChanged => platformDispatcher.onFrameDataChanged;
   @override
-  set onFrameDataChanged(ui.VoidCallback? callback) {}
+  set onFrameDataChanged(ui.VoidCallback? callback) {
+    platformDispatcher.onFrameDataChanged = callback;
+  }
 
   @override
   ui.AccessibilityFeatures get accessibilityFeatures => platformDispatcher.accessibilityFeatures;
@@ -622,11 +635,6 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
           await _useSingleEntryBrowserHistory();
           return true;
         // the following cases assert that arguments are not null
-        case 'routeUpdated': // deprecated
-          assert(arguments != null);
-          await _useSingleEntryBrowserHistory();
-          browserHistory.setRouteName(arguments!.tryString('routeName'));
-          return true;
         case 'routeInformationUpdated':
           assert(arguments != null);
           final String? uriString = arguments!.tryString('uri');

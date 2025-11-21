@@ -20,7 +20,6 @@ import 'checkbox.dart';
 import 'checkbox_theme.dart';
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
-import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -319,7 +318,7 @@ class CheckboxListTile extends StatelessWidget {
   /// If null, then the value of [activeColor] is used in the selected
   /// state. If that is also null, the value of [CheckboxThemeData.fillColor]
   /// is used. If that is also null, then the default value is used.
-  final MaterialStateProperty<Color?>? fillColor;
+  final WidgetStateProperty<Color?>? fillColor;
 
   /// The color to use for the check icon when this checkbox is checked.
   ///
@@ -340,7 +339,7 @@ class CheckboxListTile extends StatelessWidget {
   /// and [hoverColor] is used in the pressed and hovered state. If that is also null,
   /// the value of [CheckboxThemeData.overlayColor] is used. If that is also null,
   /// then the default value is used in the pressed and hovered state.
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
 
   /// {@macro flutter.material.checkbox.splashRadius}
   ///
@@ -575,7 +574,7 @@ class CheckboxListTile extends StatelessWidget {
 
     final ThemeData theme = Theme.of(context);
     final CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);
-    final Set<MaterialState> states = <MaterialState>{if (selected) MaterialState.selected};
+    final Set<WidgetState> states = <WidgetState>{if (selected) WidgetState.selected};
     final Color effectiveActiveColor =
         activeColor ?? checkboxTheme.fillColor?.resolve(states) ?? theme.colorScheme.secondary;
     return MergeSemantics(

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui.dart' as ui;
 
 /// A [Rasterizer] that uses a single GL context in an OffscreenCanvas to do
 /// all the rendering. It transfers bitmaps created in the OffscreenCanvas to
@@ -44,18 +45,35 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
     createCanvas: () => RenderCanvas(),
   );
 
-  /// Render the given [pictures] so it is displayed by the given [canvas].
-  @override
-  Future<void> rasterizeToCanvas(DisplayCanvas canvas, List<CkPicture> pictures) async {
+  /// Render the given [picture] so it is displayed by the given [canvas].
+  Future<void> rasterizeToCanvas(DisplayCanvas canvas, ui.Picture picture) async {
     await rasterizer.offscreenSurface.rasterizeToCanvas(
       currentFrameSize,
       canvas as RenderCanvas,
-      pictures,
+      picture,
     );
   }
 
   @override
   void prepareToDraw() {
     rasterizer.offscreenSurface.createOrUpdateSurface(currentFrameSize);
+  }
+
+  @override
+  Future<void> rasterize(
+    List<DisplayCanvas> displayCanvases,
+    List<ui.Picture> pictures,
+    FrameTimingRecorder? recorder,
+  ) async {
+    if (displayCanvases.length != pictures.length) {
+      throw ArgumentError('Called rasterize() with a different number of canvases and pictures.');
+    }
+    final List<Future<void>> rasterizeFutures = <Future<void>>[];
+    for (int i = 0; i < displayCanvases.length; i++) {
+      rasterizeFutures.add(rasterizeToCanvas(displayCanvases[i], pictures[i]));
+    }
+    recorder?.recordRasterStart();
+    await Future.wait<void>(rasterizeFutures);
+    recorder?.recordRasterFinish();
   }
 }

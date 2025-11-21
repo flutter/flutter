@@ -361,11 +361,10 @@ void main() {
           case 'ContextMenu.showSystemContextMenu':
             final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
             final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
-            final List<IOSSystemContextMenuItemData> lastItems =
-                untypedItems.map((dynamic value) {
-                  final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
-                  return systemContextMenuItemDataFromJson(itemJson);
-                }).toList();
+            final List<IOSSystemContextMenuItemData> lastItems = untypedItems.map((dynamic value) {
+              final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
+              return systemContextMenuItemDataFromJson(itemJson);
+            }).toList();
             itemsReceived.add(lastItems);
         }
         return;
@@ -439,11 +438,10 @@ void main() {
           case 'ContextMenu.showSystemContextMenu':
             final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
             final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
-            final List<IOSSystemContextMenuItemData> lastItems =
-                untypedItems.map((dynamic value) {
-                  final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
-                  return systemContextMenuItemDataFromJson(itemJson);
-                }).toList();
+            final List<IOSSystemContextMenuItemData> lastItems = untypedItems.map((dynamic value) {
+              final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
+              return systemContextMenuItemDataFromJson(itemJson);
+            }).toList();
             itemsReceived.add(lastItems);
         }
         return;
@@ -533,8 +531,9 @@ void main() {
         editableTextState.textEditingValue.selection,
       ),
     );
-    final List<IOSSystemContextMenuItemData> defaultItemDatas =
-        defaultItems.map((IOSSystemContextMenuItem item) => item.getData(localizations)).toList();
+    final List<IOSSystemContextMenuItemData> defaultItemDatas = defaultItems
+        .map((IOSSystemContextMenuItem item) => item.getData(localizations))
+        .toList();
 
     expect(defaultItemDatas, isNotEmpty);
 
@@ -546,5 +545,292 @@ void main() {
     expect(systemContextMenuController.isVisible, isFalse);
     systemContextMenuController.showWithItems(anchor, defaultItemDatas);
     expect(systemContextMenuController.isVisible, isTrue);
+  });
+
+  test('custom action callbacks are properly managed', () {
+    final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+    final TextInputConnection connection = TextInput.attach(client, client.configuration);
+    addTearDown(() {
+      connection.close();
+    });
+
+    bool action1Called = false;
+    bool action2Called = false;
+
+    final SystemContextMenuController controller = SystemContextMenuController();
+    addTearDown(() {
+      controller.dispose();
+    });
+
+    final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
+      IOSSystemContextMenuItemDataCustom(
+        title: 'Action 1',
+        onPressed: () {
+          action1Called = true;
+        },
+      ),
+      IOSSystemContextMenuItemDataCustom(
+        title: 'Action 2',
+        onPressed: () {
+          action2Called = true;
+        },
+      ),
+    ];
+
+    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    controller.showWithItems(rect, items);
+
+    expect(controller.isVisible, isTrue);
+
+    // Get the actual callback IDs from the items.
+    final String callbackId1 = (items[0] as IOSSystemContextMenuItemDataCustom).callbackId;
+    final String callbackId2 = (items[1] as IOSSystemContextMenuItemDataCustom).callbackId;
+
+    controller.handleCustomContextMenuAction(callbackId1);
+    expect(action1Called, isTrue);
+    expect(action2Called, isFalse);
+
+    controller.handleCustomContextMenuAction(callbackId2);
+    expect(action1Called, isTrue);
+    expect(action2Called, isTrue);
+
+    controller.hide();
+    expect(controller.isVisible, isFalse);
+
+    expect(() => controller.handleCustomContextMenuAction(callbackId1), throwsAssertionError);
+  });
+
+  test('multiple controllers handle callbacks independently', () {
+    final FakeTextInputClient client1 = FakeTextInputClient(const TextEditingValue(text: 'test1'));
+    final TextInputConnection connection1 = TextInput.attach(client1, client1.configuration);
+    addTearDown(() {
+      connection1.close();
+    });
+
+    bool controller1ActionCalled = false;
+    bool controller2ActionCalled = false;
+
+    final SystemContextMenuController controller1 = SystemContextMenuController();
+    final SystemContextMenuController controller2 = SystemContextMenuController();
+    addTearDown(() {
+      controller1.dispose();
+      controller2.dispose();
+    });
+
+    final List<IOSSystemContextMenuItemData> items1 = <IOSSystemContextMenuItemData>[
+      IOSSystemContextMenuItemDataCustom(
+        title: 'Controller 1 Action',
+        onPressed: () {
+          controller1ActionCalled = true;
+        },
+      ),
+    ];
+
+    final List<IOSSystemContextMenuItemData> items2 = <IOSSystemContextMenuItemData>[
+      IOSSystemContextMenuItemDataCustom(
+        title: 'Controller 2 Action',
+        onPressed: () {
+          controller2ActionCalled = true;
+        },
+      ),
+    ];
+
+    const Rect rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    const Rect rect2 = Rect.fromLTWH(100.0, 100.0, 100.0, 100.0);
+
+    controller1.showWithItems(rect1, items1);
+    expect(controller1.isVisible, isTrue);
+
+    controller1.hide();
+    expect(controller1.isVisible, isFalse);
+
+    controller2.showWithItems(rect2, items2);
+    expect(controller2.isVisible, isTrue);
+
+    // Get the actual callback ID from the items.
+    final String callbackId2 = (items2[0] as IOSSystemContextMenuItemDataCustom).callbackId;
+
+    controller2.handleCustomContextMenuAction(callbackId2);
+    expect(controller2ActionCalled, isTrue);
+    expect(controller1ActionCalled, isFalse);
+
+    // Get the actual callback ID from controller1's items.
+    final String callbackId1 = (items1[0] as IOSSystemContextMenuItemDataCustom).callbackId;
+
+    expect(() => controller1.handleCustomContextMenuAction(callbackId1), throwsAssertionError);
+  });
+
+  test('platform dismissal clears callbacks', () {
+    final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+    final TextInputConnection connection = TextInput.attach(client, client.configuration);
+    addTearDown(() {
+      connection.close();
+    });
+
+    bool actionCalled = false;
+
+    final SystemContextMenuController controller = SystemContextMenuController();
+    addTearDown(() {
+      controller.dispose();
+    });
+
+    final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
+      IOSSystemContextMenuItemDataCustom(
+        title: 'Test Action',
+        onPressed: () {
+          actionCalled = true;
+        },
+      ),
+    ];
+
+    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    controller.showWithItems(rect, items);
+    expect(controller.isVisible, isTrue);
+
+    controller.handleSystemHide();
+    expect(controller.isVisible, isFalse);
+
+    // Get the actual callback ID from the item.
+    final String callbackId = (items[0] as IOSSystemContextMenuItemDataCustom).callbackId;
+
+    expect(() => controller.handleCustomContextMenuAction(callbackId), throwsAssertionError);
+    expect(actionCalled, isFalse);
+  });
+
+  test('calling handleCustomContextMenuAction with no systemContextMenuClient', () {
+    // Don't create a controller or set any client.
+    ServicesBinding.systemContextMenuClient = null;
+
+    expect(() async {
+      final ByteData message = const JSONMethodCodec().encodeMethodCall(
+        const MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[0, 'test-id']),
+      );
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/platform',
+        message,
+        (_) {},
+      );
+    }, returnsNormally);
+  });
+
+  test('handleCustomContextMenuAction with non-existent callbackId', () {
+    final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+    final TextInputConnection connection = TextInput.attach(client, client.configuration);
+    addTearDown(() {
+      connection.close();
+    });
+
+    final SystemContextMenuController controller = SystemContextMenuController();
+    addTearDown(() {
+      controller.dispose();
+    });
+
+    final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
+      IOSSystemContextMenuItemDataCustom(title: 'Test Action', onPressed: () {}),
+    ];
+
+    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    controller.showWithItems(rect, items);
+    expect(controller.isVisible, isTrue);
+
+    expect(() => controller.handleCustomContextMenuAction('non-existent-id'), throwsAssertionError);
+  });
+
+  test('handleCustomContextMenuAction after hide clears callbacks', () {
+    final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+    final TextInputConnection connection = TextInput.attach(client, client.configuration);
+    addTearDown(() {
+      connection.close();
+    });
+
+    bool actionCalled = false;
+
+    final SystemContextMenuController controller = SystemContextMenuController();
+    addTearDown(() {
+      controller.dispose();
+    });
+
+    final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
+      IOSSystemContextMenuItemDataCustom(
+        title: 'Test Action',
+        onPressed: () {
+          actionCalled = true;
+        },
+      ),
+    ];
+
+    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    controller.showWithItems(rect, items);
+    expect(controller.isVisible, isTrue);
+
+    final String callbackId = (items[0] as IOSSystemContextMenuItemDataCustom).callbackId;
+
+    // Test that it works before hiding.
+    controller.handleCustomContextMenuAction(callbackId);
+    expect(actionCalled, isTrue);
+    actionCalled = false;
+
+    controller.hide();
+    expect(controller.isVisible, isFalse);
+
+    expect(() => controller.handleCustomContextMenuAction(callbackId), throwsAssertionError);
+    expect(actionCalled, isFalse);
+  });
+
+  test('showing new menu invalidates old menu callbacks', () {
+    final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+    final TextInputConnection connection = TextInput.attach(client, client.configuration);
+    addTearDown(() {
+      connection.close();
+    });
+
+    bool oldActionCalled = false;
+    bool newActionCalled = false;
+
+    final SystemContextMenuController controller = SystemContextMenuController();
+    addTearDown(() {
+      controller.dispose();
+    });
+
+    // First menu with old action.
+    final List<IOSSystemContextMenuItemData> oldItems = <IOSSystemContextMenuItemData>[
+      IOSSystemContextMenuItemDataCustom(
+        title: 'Old Action',
+        onPressed: () {
+          oldActionCalled = true;
+        },
+      ),
+    ];
+
+    const Rect rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    controller.showWithItems(rect1, oldItems);
+    expect(controller.isVisible, isTrue);
+
+    final String oldCallbackId = (oldItems[0] as IOSSystemContextMenuItemDataCustom).callbackId;
+
+    // Show new menu with new action.
+    final List<IOSSystemContextMenuItemData> newItems = <IOSSystemContextMenuItemData>[
+      IOSSystemContextMenuItemDataCustom(
+        title: 'New Action',
+        onPressed: () {
+          newActionCalled = true;
+        },
+      ),
+    ];
+
+    const Rect rect2 = Rect.fromLTWH(100.0, 100.0, 100.0, 100.0);
+    controller.showWithItems(rect2, newItems);
+    expect(controller.isVisible, isTrue);
+
+    final String newCallbackId = (newItems[0] as IOSSystemContextMenuItemDataCustom).callbackId;
+
+    // Old callback should not work.
+    expect(() => controller.handleCustomContextMenuAction(oldCallbackId), throwsAssertionError);
+    expect(oldActionCalled, isFalse);
+
+    // New callback should work.
+    controller.handleCustomContextMenuAction(newCallbackId);
+    expect(newActionCalled, isTrue);
+    expect(oldActionCalled, isFalse);
   });
 }

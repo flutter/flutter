@@ -6,18 +6,35 @@
 #define FLUTTER_IMPELLER_ENTITY_GEOMETRY_STROKE_PATH_GEOMETRY_H_
 
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/geometry/dashed_line_path_source.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path_source.h"
 #include "impeller/geometry/stroke_parameters.h"
+#include "impeller/tessellator/path_tessellator.h"
 
 namespace impeller {
 
-/// @brief An abstract Geometry base class that produces fillable vertices
-///        representing the stroked outline from any |PathSource| provided
-///        by the type-specific subclass.
-class StrokePathSourceGeometry : public Geometry {
+/// @brief  A |SegmentReceiver| that also accepts Arc segments for optimal
+///         handling. A path or |PathSource| will typically represent such
+///         curves using Conic segments which are harder to iterate.
+class PathAndArcSegmentReceiver : public PathTessellator::SegmentReceiver {
  public:
-  ~StrokePathSourceGeometry() override;
+  virtual void RecordArc(const Arc& arc,
+                         const Point center,
+                         const Size radii) = 0;
+};
+
+/// @brief An abstract Geometry base class that produces fillable vertices
+///        representing the stroked outline of the segments provided by
+///        the subclass in the virtual |Dispatch| method.
+///
+/// Most subclasses will be based on an instance of |PathSource| and use the
+/// |StrokePathSourceGeometry| subclass to feed the segments from that path
+/// source object, but some subclasses may be able to operate more optimally
+/// by talking directly to the |StrokePathSegmentReceiver| (mainly arcs).
+class StrokeSegmentsGeometry : public Geometry {
+ public:
+  ~StrokeSegmentsGeometry() override;
 
   Scalar GetStrokeWidth() const;
 
@@ -30,14 +47,18 @@ class StrokePathSourceGeometry : public Geometry {
   Scalar ComputeAlphaCoverage(const Matrix& transform) const override;
 
  protected:
-  explicit StrokePathSourceGeometry(const StrokeParameters& parameters);
+  explicit StrokeSegmentsGeometry(const StrokeParameters& parameters);
 
-  /// The PathSource object that will be iterated to produce the stroked
-  /// outline vertices.
-  virtual const PathSource& GetSource() const = 0;
+  /// Dispatch the path segments to the StrokePathSegmentReceiver for
+  /// the provided transform scale.
+  virtual void Dispatch(PathAndArcSegmentReceiver& receiver,
+                        Tessellator& tessellator,
+                        Scalar scale) const = 0;
 
+  /// Provide the stroke-padded bounds for the provided bounds of the
+  /// segments themselves.
   std::optional<Rect> GetStrokeCoverage(const Matrix& transform,
-                                        const Rect& path_bounds) const;
+                                        const Rect& segment_bounds) const;
 
  private:
   // |Geometry|
@@ -48,11 +69,9 @@ class StrokePathSourceGeometry : public Geometry {
   // |Geometry|
   GeometryResult::Mode GetResultMode() const override;
 
-  // |Geometry|
-  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
-
   // Private for benchmarking and debugging
   static std::vector<Point> GenerateSolidStrokeVertices(
+      Tessellator& tessellator,
       const PathSource& source,
       const StrokeParameters& stroke,
       Scalar scale);
@@ -64,9 +83,29 @@ class StrokePathSourceGeometry : public Geometry {
 
   const StrokeParameters stroke_;
 
-  StrokePathSourceGeometry(const StrokePathSourceGeometry&) = delete;
+  StrokeSegmentsGeometry(const StrokeSegmentsGeometry&) = delete;
 
-  StrokePathSourceGeometry& operator=(const StrokePathSourceGeometry&) = delete;
+  StrokeSegmentsGeometry& operator=(const StrokeSegmentsGeometry&) = delete;
+};
+
+/// @brief An abstract Geometry base class that produces fillable vertices
+///        representing the stroked outline from any |PathSource| provided
+///        by the subclass.
+class StrokePathSourceGeometry : public StrokeSegmentsGeometry {
+ protected:
+  explicit StrokePathSourceGeometry(const StrokeParameters& parameters);
+
+  /// The PathSource object that will be iterated to produce the raw
+  /// vertices to be stroked.
+  virtual const PathSource& GetSource() const = 0;
+
+  // |Geometry|
+  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
+
+  // |StrokeSegmentsGeometry|
+  void Dispatch(PathAndArcSegmentReceiver& receiver,
+                Tessellator& tessellator,
+                Scalar scale) const override;
 };
 
 /// @brief A Geometry that produces fillable vertices representing the
@@ -79,6 +118,7 @@ class StrokePathGeometry final : public StrokePathSourceGeometry {
                      const StrokeParameters& parameters);
 
  protected:
+  // |StrokePathSourceGeometry|
   const PathSource& GetSource() const override;
 
  private:
@@ -86,28 +126,24 @@ class StrokePathGeometry final : public StrokePathSourceGeometry {
 };
 
 /// @brief A Geometry that produces fillable vertices representing the
-///        stroked outline of a |DlPath| object representing an arc with
-///        the provided oval bounds using the |StrokePathSourceGeometry|
-///        base class and a |DlPath| object to perform path iteration.
-///
-/// Note that this class will override the bounds to enforce the arc bounds
-/// since paths constructed from arcs sometimes have control opints outside
-/// the arc bounds, but don't draw pixels outside those bounds.
-class ArcStrokePathGeometry final : public StrokePathSourceGeometry {
+///        stroked outline of an |Arc| object using the base class
+///        |StrokeSegmentsGeometry| and utilizing the special |RecordArc|
+///        extension method provided by the |PathAndArcSegmentReceiver|.
+class ArcStrokeGeometry final : public StrokeSegmentsGeometry {
  public:
-  ArcStrokePathGeometry(const flutter::DlPath& path,
-                        const Rect& oval_bounds,
-                        const StrokeParameters& parameters);
+  ArcStrokeGeometry(const Arc& arc, const StrokeParameters& parameters);
 
  protected:
-  const PathSource& GetSource() const override;
-
- private:
-  const flutter::DlPath path_;
-  const Rect oval_bounds_;
-
   // |Geometry|
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
+
+  // |StrokeSegmentsGeometry|
+  void Dispatch(PathAndArcSegmentReceiver& receiver,
+                Tessellator& tessellator,
+                Scalar scale) const override;
+
+ private:
+  const Arc arc_;
 };
 
 /// @brief A Geometry that produces fillable vertices representing the
@@ -120,10 +156,30 @@ class StrokeDiffRoundRectGeometry final : public StrokePathSourceGeometry {
                                        const StrokeParameters& parameters);
 
  protected:
+  // |StrokePathSourceGeometry|
   const PathSource& GetSource() const override;
 
  private:
   const DiffRoundRectPathSource source_;
+};
+
+/// @brief A Geometry that produces fillable vertices representing the
+///        stroked outline of a |DlPath| object using the
+///        |StrokePathSourceGeometry| base class and a |DlPath| object
+///        to perform path iteration.
+class StrokeDashedLineGeometry final : public StrokePathSourceGeometry {
+ public:
+  StrokeDashedLineGeometry(Point p0,
+                           Point p1,
+                           Scalar on_length,
+                           Scalar off_length,
+                           const StrokeParameters& parameters);
+
+ protected:
+  const PathSource& GetSource() const override;
+
+ private:
+  const DashedLinePathSource source_;
 };
 
 }  // namespace impeller

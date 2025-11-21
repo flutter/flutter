@@ -135,10 +135,9 @@ void main() {
       );
       expect(result.exitCode, 0);
 
-      String sectionHeader =
-          !Platform.isWindows
-              ? '═════════════════════════╡ ••• A/B results so far ••• ╞═════════════════════════'
-              : 'A/B results so far';
+      String sectionHeader = !Platform.isWindows
+          ? '═════════════════════════╡ ••• A/B results so far ••• ╞═════════════════════════'
+          : 'A/B results so far';
       expect(
         result.stdout,
         contains(
@@ -150,10 +149,9 @@ void main() {
         ),
       );
 
-      sectionHeader =
-          !Platform.isWindows
-              ? '════════════════════════════╡ ••• Raw results ••• ╞═════════════════════════════'
-              : 'Raw results';
+      sectionHeader = !Platform.isWindows
+          ? '════════════════════════════╡ ••• Raw results ••• ╞═════════════════════════════'
+          : 'Raw results';
       expect(
         result.stdout,
         contains(
@@ -168,10 +166,9 @@ void main() {
         ),
       );
 
-      sectionHeader =
-          !Platform.isWindows
-              ? '═════════════════════════╡ ••• Final A/B results ••• ╞══════════════════════════'
-              : 'Final A/B results';
+      sectionHeader = !Platform.isWindows
+          ? '═════════════════════════╡ ••• Final A/B results ••• ╞══════════════════════════'
+          : 'Final A/B results';
       expect(
         result.stdout,
         contains(
@@ -194,6 +191,15 @@ void main() {
         <String>['--service-account-file=test-file', '--task-key=task123'],
       );
       expect(result.exitCode, 1);
+    });
+
+    test('passes build mode to the test', () async {
+      final ProcessResult result = await runScript(
+        <String>['build_mode_test'],
+        <String>['--build-mode=debug'],
+      );
+      expect(result.exitCode, 0);
+      expect(result.stdout, contains('buildMode: debug'));
     });
   });
 }

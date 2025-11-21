@@ -56,7 +56,7 @@ source_set("flutter_glfw") {
     ":flutter_glfw_headers",
     "//flutter/shell/platform/common:common_cpp",
     "//flutter/shell/platform/common:common_cpp_input",
-    "//flutter/shell/platform/common/client_wrapper:client_wrapper",
+    "//flutter/shell/platform/common/client_wrapper",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw",
     "//flutter/third_party/glfw",
@@ -73,6 +73,8 @@ source_set("flutter_glfw") {
       "IOKit.framework",
     ]
   }
+
+  cflags_cc = [ "-Wno-deprecated-declarations" ]
 }
 
 test_fixtures("flutter_glfw_fixtures") {

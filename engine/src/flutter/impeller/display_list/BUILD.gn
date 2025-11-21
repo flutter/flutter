@@ -34,6 +34,10 @@ impeller_component("display_list") {
     "dl_dispatcher.h",
     "dl_image_impeller.cc",
     "dl_image_impeller.h",
+    "dl_runtime_effect_impeller.cc",
+    "dl_runtime_effect_impeller.h",
+    "dl_text_impeller.cc",
+    "dl_text_impeller.h",
     "dl_vertices_geometry.cc",
     "dl_vertices_geometry.h",
     "image_filter.cc",
@@ -52,6 +56,10 @@ impeller_component("display_list") {
     "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
     "//flutter/skia",
   ]
+
+  if (impeller_supports_rendering) {
+    public_deps += [ "//flutter/impeller/runtime_stage" ]
+  }
 
   if (!defined(defines)) {
     defines = []
@@ -106,7 +114,9 @@ template("display_list_unittests_component") {
     deps += [
       ":display_list",
       "../playground:playground_test",
+      "//flutter/display_list/testing:display_list_testing",
       "//flutter/impeller/golden_tests:screenshot",
+      "//flutter/impeller/renderer/testing:mocks",
       "//flutter/txt",
     ]
     if (defined(invoker.public_configs)) {
@@ -149,7 +159,7 @@ impeller_component("aiks_playground") {
     ":display_list",
     "../playground:playground_test",
     "//flutter/display_list",
-    "//flutter/impeller/display_list:display_list",
+    "//flutter/impeller/display_list",
   ]
   public_deps = [
     "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",

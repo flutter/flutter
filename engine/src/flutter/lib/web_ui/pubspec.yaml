@@ -3,7 +3,7 @@ publish_to: none
 
 # Keep the SDK version range in sync with pubspecs under web_sdk
 environment:
-  sdk: ^3.7.0-0
+  sdk: ^3.8.0-0
 
 dependencies:
   meta: ^1.14.0
@@ -12,9 +12,6 @@ dependencies:
 
   web_test_fonts:
     path: ../../third_party/web_test_fonts
-
-  web_unicode:
-    path: ../../third_party/web_unicode
 
 
 dev_dependencies:
@@ -37,7 +34,7 @@ dev_dependencies:
   shelf_web_socket: any
   stack_trace: any
   stream_channel: 2.1.4
-  test: 1.25.15
+  test: 1.26.3
   test_api: any
   test_core: any
   typed_data: any

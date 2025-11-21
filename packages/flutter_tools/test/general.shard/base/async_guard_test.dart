@@ -10,8 +10,8 @@ import 'package:flutter_tools/src/base/async_guard.dart';
 import '../../src/common.dart';
 
 Future<void> asyncError() {
-  final Completer<void> completer = Completer<void>();
-  final Completer<void> errorCompleter = Completer<void>();
+  final completer = Completer<void>();
+  final errorCompleter = Completer<void>();
   errorCompleter.completeError(_CustomException('Async Doom'), StackTrace.current);
   return completer.future;
 }
@@ -31,7 +31,7 @@ Future<void> syncError() {
 }
 
 Future<void> syncAndAsyncError() {
-  final Completer<void> errorCompleter = Completer<void>();
+  final errorCompleter = Completer<void>();
   errorCompleter.completeError(_CustomException('Async Doom'), StackTrace.current);
   throw _CustomException('Sync Doom');
 }
@@ -49,8 +49,8 @@ Future<void> delayedThrow(FakeAsync time) {
 
 void main() {
   late Completer<void> caughtInZone;
-  bool caughtByZone = false;
-  bool caughtByHandler = false;
+  var caughtByZone = false;
+  var caughtByHandler = false;
   late Zone zone;
 
   setUp(() {
@@ -59,18 +59,13 @@ void main() {
     caughtByHandler = false;
     zone = Zone.current.fork(
       specification: ZoneSpecification(
-        handleUncaughtError: (
-          Zone self,
-          ZoneDelegate parent,
-          Zone zone,
-          Object error,
-          StackTrace stackTrace,
-        ) {
-          caughtByZone = true;
-          if (!caughtInZone.isCompleted) {
-            caughtInZone.complete();
-          }
-        },
+        handleUncaughtError:
+            (Zone self, ZoneDelegate parent, Zone zone, Object error, StackTrace stackTrace) {
+              caughtByZone = true;
+              if (!caughtInZone.isCompleted) {
+                caughtInZone.complete();
+              }
+            },
       ),
     );
   });
@@ -156,11 +151,11 @@ void main() {
   });
 
   test('asyncError is missed when catchError is attached too late', () async {
-    bool caughtByZone = false;
-    bool caughtByHandler = false;
-    bool caughtByCatchError = false;
+    var caughtByZone = false;
+    var caughtByHandler = false;
+    var caughtByCatchError = false;
 
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     await FakeAsync().run((FakeAsync time) {
       unawaited(
         runZonedGuarded(
@@ -199,11 +194,11 @@ void main() {
   });
 
   test('asyncError is propagated with binary onError', () async {
-    bool caughtByZone = false;
-    bool caughtByHandler = false;
-    bool caughtByOnError = false;
+    var caughtByZone = false;
+    var caughtByHandler = false;
+    var caughtByOnError = false;
 
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     await FakeAsync().run((FakeAsync time) {
       unawaited(
         runZonedGuarded(
@@ -242,11 +237,11 @@ void main() {
   });
 
   test('asyncError is propagated with unary onError', () async {
-    bool caughtByZone = false;
-    bool caughtByHandler = false;
-    bool caughtByOnError = false;
+    var caughtByZone = false;
+    var caughtByHandler = false;
+    var caughtByOnError = false;
 
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     await FakeAsync().run((FakeAsync time) {
       unawaited(
         runZonedGuarded(
@@ -285,12 +280,12 @@ void main() {
   });
 
   test('asyncError is propagated with optional stack trace', () async {
-    bool caughtByZone = false;
-    bool caughtByHandler = false;
-    bool caughtByOnError = false;
-    bool nonNullStackTrace = false;
+    var caughtByZone = false;
+    var caughtByHandler = false;
+    var caughtByOnError = false;
+    var nonNullStackTrace = false;
 
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     await FakeAsync().run((FakeAsync time) {
       unawaited(
         runZonedGuarded(

@@ -10,7 +10,7 @@ namespace testing {
 static thread_local std::unique_ptr<int> current_context;
 
 TestSwitchableGLContext::TestSwitchableGLContext(int context)
-    : context_(context){};
+    : context_(context) {};
 
 TestSwitchableGLContext::~TestSwitchableGLContext() = default;
 

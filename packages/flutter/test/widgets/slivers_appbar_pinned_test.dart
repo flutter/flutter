@@ -293,11 +293,7 @@ void main() {
           physics: const BouncingScrollPhysics(),
           slivers: <Widget>[
             SliverPersistentHeader(delegate: TestDelegate(), pinned: true),
-            SliverList(
-              delegate: SliverChildListDelegate(<Widget>[
-                const SizedBox(height: 300.0, child: Text('X')),
-              ]),
-            ),
+            SliverList.list(children: const <Widget>[SizedBox(height: 300.0, child: Text('X'))]),
           ],
         ),
       ),
@@ -336,7 +332,9 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(constraints: BoxConstraints(minHeight: minExtent, maxHeight: maxExtent));
+    return Container(
+      constraints: BoxConstraints(minHeight: minExtent, maxHeight: maxExtent),
+    );
   }
 
   @override
@@ -358,7 +356,9 @@ class TestDelegateThatCanThrow extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(constraints: BoxConstraints(minHeight: minExtent, maxHeight: maxExtent));
+    return Container(
+      constraints: BoxConstraints(minHeight: minExtent, maxHeight: maxExtent),
+    );
   }
 
   @override

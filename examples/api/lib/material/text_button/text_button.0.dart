@@ -99,16 +99,8 @@ class _TextButtonExampleState extends State<TextButtonExample> {
     // the current dark/light mode. Used to define TextButton #7's
     // gradients.
     final (Color color1, Color color2, Color color3) = switch (colorScheme.brightness) {
-      Brightness.light => (
-        Colors.blue.withOpacity(1.0),
-        Colors.orange.withOpacity(1.0),
-        Colors.yellow.withOpacity(1.0),
-      ),
-      Brightness.dark => (
-        Colors.purple.withOpacity(1.0),
-        Colors.cyan.withOpacity(1.0),
-        Colors.yellow.withOpacity(1.0),
-      ),
+      Brightness.light => (Colors.blue, Colors.orange, Colors.yellow),
+      Brightness.dark => (Colors.purple, Colors.cyan, Colors.yellow),
     };
 
     // This gradient's appearance reflects the button's state.
@@ -247,10 +239,9 @@ class _TextButtonExampleState extends State<TextButtonExample> {
           foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
             return DecoratedBox(
               decoration: BoxDecoration(
-                border:
-                    states.contains(WidgetState.hovered)
-                        ? Border(bottom: BorderSide(color: colorScheme.primary))
-                        : const Border(), // essentially "no border"
+                border: states.contains(WidgetState.hovered)
+                    ? Border(bottom: BorderSide(color: colorScheme.primary))
+                    : const Border(), // essentially "no border"
               ),
               child: child,
             );
@@ -279,23 +270,24 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       // the background gradient - shows through the border.
       TextButton(
         onPressed: () {},
-        style: TextButton.styleFrom(
-          overlayColor: color2,
-          backgroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 500),
-              decoration: statesToDecoration(states),
-              child: child,
-            );
-          },
-        ).copyWith(
-          side: WidgetStateProperty.resolveWith<BorderSide?>((Set<WidgetState> states) {
-            if (states.contains(WidgetState.hovered)) {
-              return BorderSide(width: 3, color: color3);
-            }
-            return null; // defer to the default
-          }),
-        ),
+        style:
+            TextButton.styleFrom(
+              overlayColor: color2,
+              backgroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 500),
+                  decoration: statesToDecoration(states),
+                  child: child,
+                );
+              },
+            ).copyWith(
+              side: WidgetStateProperty.resolveWith<BorderSide?>((Set<WidgetState> states) {
+                if (states.contains(WidgetState.hovered)) {
+                  return BorderSide(width: 3, color: color3);
+                }
+                return null; // defer to the default
+              }),
+            ),
         child: const Text('TextButton #7'),
       ),
       verticalSpacer,
@@ -372,7 +364,9 @@ class _TextButtonExampleState extends State<TextButtonExample> {
               height: 64,
               duration: const Duration(milliseconds: 300),
               curve: Curves.fastOutSlowIn,
-              decoration: BoxDecoration(image: DecorationImage(image: image, fit: BoxFit.contain)),
+              decoration: BoxDecoration(
+                image: DecorationImage(image: image, fit: BoxFit.contain),
+              ),
             );
           },
         ),

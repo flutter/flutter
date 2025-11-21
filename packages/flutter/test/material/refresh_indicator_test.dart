@@ -31,10 +31,9 @@ void main() {
           onRefresh: refresh,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children:
-                <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
-                  return SizedBox(height: 200.0, child: Text(item));
-                }).toList(),
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+              return SizedBox(height: 200.0, child: Text(item));
+            }).toList(),
           ),
         ),
       ),
@@ -68,10 +67,9 @@ void main() {
               width: 600.0,
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                children:
-                    <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
-                      return SizedBox(height: 200.0, child: Text(item));
-                    }).toList(),
+                children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+                  return SizedBox(height: 200.0, child: Text(item));
+                }).toList(),
               ),
             ),
           ),
@@ -435,10 +433,9 @@ void main() {
             child: ListView(
               controller: controller,
               physics: const AlwaysScrollableScrollPhysics(),
-              children:
-                  <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
-                    return SizedBox(height: 200.0, child: Text(item));
-                  }).toList(),
+              children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+                return SizedBox(height: 200.0, child: Text(item));
+              }).toList(),
             ),
           ),
         ),
@@ -473,16 +470,18 @@ void main() {
       layoutCount++;
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        children:
-            <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
-              return SizedBox(height: 200.0, child: Text(item));
-            }).toList(),
+        children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+          return SizedBox(height: 200.0, child: Text(item));
+        }).toList(),
       );
     }
 
     await tester.pumpWidget(
       MaterialApp(
-        home: RefreshIndicator(onRefresh: refresh, child: LayoutBuilder(builder: layoutCallback)),
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: LayoutBuilder(builder: layoutCallback),
+        ),
       ),
     );
 
@@ -503,10 +502,9 @@ void main() {
           onRefresh: () async {},
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children:
-                <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
-                  return SizedBox(height: 200.0, child: Text(item));
-                }).toList(),
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+              return SizedBox(height: 200.0, child: Text(item));
+            }).toList(),
           ),
         ),
       ),
@@ -525,10 +523,9 @@ void main() {
           strokeWidth: 4.0,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children:
-                <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
-                  return SizedBox(height: 200.0, child: Text(item));
-                }).toList(),
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+              return SizedBox(height: 200.0, child: Text(item));
+            }).toList(),
           ),
         ),
       ),
@@ -544,10 +541,9 @@ void main() {
           onRefresh: () async {},
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children:
-                <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
-                  return SizedBox(height: 200.0, child: Text(item));
-                }).toList(),
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+              return SizedBox(height: 200.0, child: Text(item));
+            }).toList(),
           ),
         ),
       ),
@@ -563,10 +559,9 @@ void main() {
           edgeOffset: kToolbarHeight,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children:
-                <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
-                  return SizedBox(height: 200.0, child: Text(item));
-                }).toList(),
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+              return SizedBox(height: 200.0, child: Text(item));
+            }).toList(),
           ),
         ),
       ),
@@ -589,10 +584,9 @@ void main() {
           },
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children:
-                <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
-                  return SizedBox(height: 200.0, child: Text(item));
-                }).toList(),
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+              return SizedBox(height: 200.0, child: Text(item));
+            }).toList(),
           ),
         ),
       ),
@@ -817,10 +811,9 @@ void main() {
           onRefresh: refresh,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children:
-                <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
-                  return SizedBox(height: 200.0, child: Text(item));
-                }).toList(),
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+              return SizedBox(height: 200.0, child: Text(item));
+            }).toList(),
           ),
         ),
       );
@@ -1007,10 +1000,9 @@ void main() {
                 },
                 child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  children:
-                      <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
-                        return SizedBox(height: 200.0, child: Text(item));
-                      }).toList(),
+                  children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+                    return SizedBox(height: 200.0, child: Text(item));
+                  }).toList(),
                 ),
               );
             },
@@ -1057,10 +1049,9 @@ void main() {
                 },
                 child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  children:
-                      <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
-                        return SizedBox(height: 200.0, child: Text(item));
-                      }).toList(),
+                  children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+                    return SizedBox(height: 200.0, child: Text(item));
+                  }).toList(),
                 ),
               );
             },
@@ -1110,10 +1101,9 @@ void main() {
             onRefresh: refresh,
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
-              children:
-                  <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
-                    return SizedBox(height: 200.0, child: Text(item));
-                  }).toList(),
+              children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+                return SizedBox(height: 200.0, child: Text(item));
+              }).toList(),
             ),
           ),
         ),
@@ -1260,5 +1250,29 @@ void main() {
       );
       await tester.pumpAndSettle();
     }
+  });
+
+  testWidgets('RefreshIndicator does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: RefreshIndicator(
+              onRefresh: refresh,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: const <Text>[Text('X')],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RefreshIndicator)), Size.zero);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Center)));
+    await gesture.moveBy(const Offset(0.0, 20.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 }

@@ -12,10 +12,12 @@ namespace flutter {
 SingleFrameCodec::SingleFrameCodec(
     const fml::RefPtr<ImageDescriptor>& descriptor,
     uint32_t target_width,
-    uint32_t target_height)
+    uint32_t target_height,
+    ImageDecoder::TargetPixelFormat target_format)
     : descriptor_(descriptor),
       target_width_(target_width),
-      target_height_(target_height) {}
+      target_height_(target_height),
+      target_format_(target_format) {}
 
 SingleFrameCodec::~SingleFrameCodec() = default;
 
@@ -68,9 +70,13 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
   fml::RefPtr<SingleFrameCodec>* raw_codec_ref =
       new fml::RefPtr<SingleFrameCodec>(this);
 
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
   decoder->Decode(
-      descriptor_, target_width_, target_height_,
-      [raw_codec_ref](auto image, auto decode_error) {
+      descriptor_,
+      {.target_width = target_width_,
+       .target_height = target_height_,
+       .target_format = target_format_},
+      [raw_codec_ref](const auto& image, const auto& decode_error) {
         std::unique_ptr<fml::RefPtr<SingleFrameCodec>> codec_ref(raw_codec_ref);
         fml::RefPtr<SingleFrameCodec> codec(std::move(*codec_ref));
 

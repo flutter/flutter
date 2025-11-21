@@ -233,6 +233,9 @@ HandleGLES ReactorGLES::CreateHandle(HandleType type, GLuint external_handle) {
 }
 
 void ReactorGLES::CollectHandle(HandleGLES handle) {
+  if (handle.IsDead()) {
+    return;
+  }
   if (handle.untracked_id_.has_value()) {
     LiveHandle live_handle(GLStorage{.integer = handle.untracked_id_.value()});
     live_handle.pending_collection = true;

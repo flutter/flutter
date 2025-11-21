@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/painting.dart';
+@Tags(<String>['reduced-test-set'])
+library;
+
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'common_matchers.dart';
@@ -158,8 +161,11 @@ void main() {
     expect(ShapeBorder.lerp(r, c, 0.1).hashCode, ShapeBorder.lerp(r, c, 0.1).hashCode);
 
     final ShapeBorder direct50 = ShapeBorder.lerp(r, c, 0.5)!;
-    final ShapeBorder indirect50 =
-        ShapeBorder.lerp(ShapeBorder.lerp(c, r, 0.1), ShapeBorder.lerp(c, r, 0.9), 0.5)!;
+    final ShapeBorder indirect50 = ShapeBorder.lerp(
+      ShapeBorder.lerp(c, r, 0.1),
+      ShapeBorder.lerp(c, r, 0.9),
+      0.5,
+    )!;
     expect(direct50, indirect50);
     expect(direct50.hashCode, indirect50.hashCode);
     expect(direct50.toString(), indirect50.toString());
@@ -206,5 +212,81 @@ void main() {
       side: BorderSide(width: 15.0, strokeAlign: BorderSide.strokeAlignCenter),
     );
     expect(ShapeBorder.lerp(rInside, rOutside, 0.5), rCenter);
+  });
+
+  testWidgets('RoundedSuperellipseBorder looks correct', (WidgetTester tester) async {
+    Widget containerWithBorder(Size size, BorderRadiusGeometry radius) {
+      return Center(
+        child: Container(
+          height: size.height,
+          width: size.width,
+          decoration: ShapeDecoration(
+            color: const Color.fromARGB(255, 120, 120, 120),
+            shape: RoundedSuperellipseBorder(
+              side: const BorderSide(color: Color.fromARGB(255, 255, 0, 0), width: 4.0),
+              borderRadius: radius,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(containerWithBorder(const Size(120, 300), BorderRadius.zero));
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('painting.rounded_superellipse_border.all_zero.png'),
+    );
+
+    await tester.pumpWidget(
+      containerWithBorder(const Size(120, 300), const BorderRadius.all(Radius.circular(36))),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('painting.rounded_superellipse_border.all_circular.png'),
+    );
+
+    await tester.pumpWidget(
+      containerWithBorder(const Size(120, 300), const BorderRadius.all(Radius.elliptical(20, 50))),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('painting.rounded_superellipse_border.all_elliptical.png'),
+    );
+
+    await tester.pumpWidget(
+      containerWithBorder(const Size(120, 300), const BorderRadius.all(Radius.circular(600))),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('painting.rounded_superellipse_border.clamping_uniform.png'),
+    );
+
+    await tester.pumpWidget(
+      containerWithBorder(
+        const Size(120, 300),
+        const BorderRadius.only(
+          topLeft: Radius.elliptical(1000, 1000),
+          topRight: Radius.elliptical(0, 1000),
+          bottomRight: Radius.elliptical(800, 1000),
+          bottomLeft: Radius.elliptical(100, 500),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('painting.rounded_superellipse_border.clamping_non_uniform.png'),
+    );
+
+    // Regression test for https://github.com/flutter/flutter/issues/170593
+    await tester.pumpWidget(
+      containerWithBorder(
+        const Size(120, 300),
+        const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('painting.rounded_superellipse_border.regression_1.png'),
+    );
   });
 }

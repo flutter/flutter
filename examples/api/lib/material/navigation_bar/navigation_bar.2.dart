@@ -44,30 +44,27 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
   void initState() {
     super.initState();
 
-    navigatorKeys =
-        List<GlobalKey<NavigatorState>>.generate(
-          allDestinations.length,
-          (int index) => GlobalKey(),
-        ).toList();
+    navigatorKeys = List<GlobalKey<NavigatorState>>.generate(
+      allDestinations.length,
+      (int index) => GlobalKey(),
+    ).toList();
 
-    destinationFaders =
-        List<AnimationController>.generate(
-          allDestinations.length,
-          (int index) => buildFaderController(),
-        ).toList();
+    destinationFaders = List<AnimationController>.generate(
+      allDestinations.length,
+      (int index) => buildFaderController(),
+    ).toList();
     destinationFaders[selectedIndex].value = 1.0;
 
     final CurveTween tween = CurveTween(curve: Curves.fastOutSlowIn);
-    destinationViews =
-        allDestinations.map<Widget>((Destination destination) {
-          return FadeTransition(
-            opacity: destinationFaders[destination.index].drive(tween),
-            child: DestinationView(
-              destination: destination,
-              navigatorKey: navigatorKeys[destination.index],
-            ),
-          );
-        }).toList();
+    destinationViews = allDestinations.map<Widget>((Destination destination) {
+      return FadeTransition(
+        opacity: destinationFaders[destination.index].drive(tween),
+        child: DestinationView(
+          destination: destination,
+          navigatorKey: navigatorKeys[destination.index],
+        ),
+      );
+    }).toList();
   }
 
   @override
@@ -81,7 +78,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
   @override
   Widget build(BuildContext context) {
     return NavigatorPopHandler(
-      onPop: () {
+      onPopWithResult: (void result) {
         final NavigatorState navigator = navigatorKeys[selectedIndex].currentState!;
         navigator.pop();
       },
@@ -90,21 +87,20 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
           top: false,
           child: Stack(
             fit: StackFit.expand,
-            children:
-                allDestinations.map((Destination destination) {
-                  final int index = destination.index;
-                  final Widget view = destinationViews[index];
-                  if (index == selectedIndex) {
-                    destinationFaders[index].forward();
-                    return Offstage(offstage: false, child: view);
-                  } else {
-                    destinationFaders[index].reverse();
-                    if (destinationFaders[index].isAnimating) {
-                      return IgnorePointer(child: view);
-                    }
-                    return Offstage(child: view);
-                  }
-                }).toList(),
+            children: allDestinations.map((Destination destination) {
+              final int index = destination.index;
+              final Widget view = destinationViews[index];
+              if (index == selectedIndex) {
+                destinationFaders[index].forward();
+                return Offstage(offstage: false, child: view);
+              } else {
+                destinationFaders[index].reverse();
+                if (destinationFaders[index].isAnimating) {
+                  return IgnorePointer(child: view);
+                }
+                return Offstage(child: view);
+              }
+            }).toList(),
           ),
         ),
         bottomNavigationBar: NavigationBar(
@@ -114,13 +110,12 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
               selectedIndex = index;
             });
           },
-          destinations:
-              allDestinations.map<NavigationDestination>((Destination destination) {
-                return NavigationDestination(
-                  icon: Icon(destination.icon, color: destination.color),
-                  label: destination.title,
-                );
-              }).toList(),
+          destinations: allDestinations.map<NavigationDestination>((Destination destination) {
+            return NavigationDestination(
+              icon: Icon(destination.icon, color: destination.color),
+              label: destination.title,
+            );
+          }).toList(),
         ),
       ),
     );

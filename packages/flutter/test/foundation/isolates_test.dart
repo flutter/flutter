@@ -88,7 +88,7 @@ Future<void> expectFileSuccessfullyCompletes(String filename) async {
   const FileSystem fs = LocalFileSystem();
   const Platform platform = LocalPlatform();
   final String flutterRoot = platform.environment['FLUTTER_ROOT']!;
-  final String dartPath = fs.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
+  final String dartPath = fs.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dartvm');
   final String scriptPath = fs.path.join(
     flutterRoot,
     'packages',
@@ -100,7 +100,6 @@ Future<void> expectFileSuccessfullyCompletes(String filename) async {
 
   // Enable asserts to also catch potentially invalid assertions.
   final ProcessResult result = await Process.run(dartPath, <String>[
-    'run',
     '--enable-asserts',
     scriptPath,
   ]);

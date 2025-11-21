@@ -40,7 +40,8 @@ template("android_toolchain") {
       remote_wrapper = ""
       if (host_os == "linux") {
         remote_wrapper =
-            rebase_path("//flutter/build/rbe/remote_wrapper_linux.sh", root_build_dir)
+            rebase_path("//flutter/build/rbe/remote_wrapper_linux.sh",
+                        root_build_dir)
       } else if (host_os == "mac") {
         remote_wrapper =
             rebase_path("//flutter/build/rbe/remote_wrapper.sh", root_build_dir)
@@ -50,10 +51,10 @@ template("android_toolchain") {
       local_wrapper =
           rebase_path("//flutter/build/rbe/local_wrapper.sh", root_build_dir)
       compiler_args = rewrapper_command + [
-        "--remote_wrapper=$remote_wrapper",
-        "--local_wrapper=$local_wrapper",
-        "--labels=type=compile,compiler=clang,lang=cpp ",
-      ]
+                        "--remote_wrapper=$remote_wrapper",
+                        "--local_wrapper=$local_wrapper",
+                        "--labels=type=compile,compiler=clang,lang=cpp ",
+                      ]
       assembler_prefix = ""
       compiler_prefix = string_join(" ", compiler_args)
       link_prefix = ""
@@ -151,4 +152,8 @@ android_toolchains_helper("arm64_apilevel26") {
   extra_toolchain_args = {
     android_api_level = 26
   }
+}
+
+android_toolchains_helper("riscv64") {
+  toolchain_cpu = "riscv64"
 }

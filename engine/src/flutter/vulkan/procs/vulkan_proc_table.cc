@@ -21,7 +21,7 @@
 
 namespace vulkan {
 
-VulkanProcTable::VulkanProcTable() : VulkanProcTable("libvulkan.so"){};
+VulkanProcTable::VulkanProcTable() : VulkanProcTable("libvulkan.so") {};
 
 VulkanProcTable::VulkanProcTable(const char* so_path)
     : handle_(nullptr), acquired_mandatory_proc_addresses_(false) {

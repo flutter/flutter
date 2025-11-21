@@ -15,7 +15,7 @@ mixin PidTracker {
   /// properly where signals may not be passed through the shell to the
   /// underlying VM process.
   /// https://github.com/Dart-Code/Dart-Code/issues/907
-  final Set<int> pidsToTerminate = <int>{};
+  final pidsToTerminate = <int>{};
 
   /// Terminates all processes with the PIDs registered in [pidsToTerminate].
   void terminatePids(ProcessSignal signal) {

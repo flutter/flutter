@@ -11,7 +11,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
-import '../convert.dart';
+import '../base/utils.dart';
 import '../device.dart';
 import '../emulator.dart';
 import 'android_sdk.dart';
@@ -58,10 +58,12 @@ class AndroidEmulators extends EmulatorDiscovery {
       return <AndroidEmulator>[];
     }
 
-    final String listAvdsOutput =
-        (await _processUtils.run(<String>[emulatorPath, '-list-avds'])).stdout.trim();
+    final String listAvdsOutput = (await _processUtils.run(<String>[
+      emulatorPath,
+      '-list-avds',
+    ])).stdout.trim();
 
-    final List<AndroidEmulator> emulators = <AndroidEmulator>[];
+    final emulators = <AndroidEmulator>[];
     _extractEmulatorAvdInfo(listAvdsOutput, emulators);
     return emulators;
   }
@@ -77,7 +79,7 @@ class AndroidEmulators extends EmulatorDiscovery {
   AndroidEmulator _loadEmulatorInfo(String id) {
     id = id.trim();
     final String? avdPath = _androidSdk?.getAvdPath();
-    final AndroidEmulator androidEmulatorWithoutProperties = AndroidEmulator(
+    final androidEmulatorWithoutProperties = AndroidEmulator(
       id,
       processManager: _processManager,
       logger: _logger,
@@ -150,24 +152,17 @@ class AndroidEmulator extends Emulator {
     if (emulatorPath == null) {
       throw Exception('Emulator is missing from the Android SDK');
     }
-    final List<String> command = <String>[
-      emulatorPath,
-      '-avd',
-      id,
-      if (coldBoot) '-no-snapshot-load',
-    ];
+    final command = <String>[emulatorPath, '-avd', id, if (coldBoot) '-no-snapshot-load'];
     final Process process = await _processUtils.start(command);
 
     // Record output from the emulator process.
-    final List<String> stdoutList = <String>[];
-    final List<String> stderrList = <String>[];
+    final stdoutList = <String>[];
+    final stderrList = <String>[];
     final StreamSubscription<String> stdoutSubscription = process.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
+        .transform(utf8LineDecoder)
         .listen(stdoutList.add);
     final StreamSubscription<String> stderrSubscription = process.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
+        .transform(utf8LineDecoder)
         .listen(stderrList.add);
     final Future<void> stdioFuture = Future.wait<void>(<Future<void>>[
       stdoutSubscription.asFuture<void>(),
@@ -178,7 +173,7 @@ class AndroidEmulator extends Emulator {
     // process to complete before continuing. However, if the process fails
     // after the startup phase (3 seconds), then we only echo its output if
     // its error code is non-zero and its stderr is non-empty.
-    bool earlyFailure = true;
+    var earlyFailure = true;
     unawaited(
       process.exitCode.then((int status) async {
         if (status == 0) {
@@ -197,7 +192,7 @@ class AndroidEmulator extends Emulator {
           _logger.printStatus('The Android emulator exited with code $status');
           return;
         }
-        final String when = earlyFailure ? 'during startup' : 'after startup';
+        final when = earlyFailure ? 'during startup' : 'after startup';
         _logger.printError('The Android emulator exited with code $status $when');
         _logger.printError('Android emulator stderr:');
         stderrList.forEach(_logger.printError);
@@ -214,7 +209,7 @@ class AndroidEmulator extends Emulator {
 
 @visibleForTesting
 Map<String, String> parseIniLines(List<String> contents) {
-  final Map<String, String> results = <String, String>{};
+  final results = <String, String>{};
 
   final Iterable<List<String>> properties = contents
       .map<String>((String l) => l.trim())
@@ -225,7 +220,7 @@ Map<String, String> parseIniLines(List<String> contents) {
       // Split into name/value
       .map<List<String>>((String l) => l.split('='));
 
-  for (final List<String> property in properties) {
+  for (final property in properties) {
     results[property[0].trim()] = property[1].trim();
   }
 

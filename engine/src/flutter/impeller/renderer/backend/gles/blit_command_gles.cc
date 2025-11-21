@@ -5,11 +5,11 @@
 #include "impeller/renderer/backend/gles/blit_command_gles.h"
 
 #include "flutter/fml/closure.h"
-#include "fml/trace_event.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/geometry/point.h"
 #include "impeller/renderer/backend/gles/device_buffer_gles.h"
+#include "impeller/renderer/backend/gles/formats_gles.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
 #include "impeller/renderer/backend/gles/texture_gles.h"
 
@@ -74,8 +74,10 @@ static std::optional<GLuint> ConfigureFBO(
     return std::nullopt;
   }
 
-  if (gl.CheckFramebufferStatus(fbo_type) != GL_FRAMEBUFFER_COMPLETE) {
-    VALIDATION_LOG << "Could not create a complete framebuffer.";
+  GLenum status = gl.CheckFramebufferStatus(fbo_type);
+  if (status != GL_FRAMEBUFFER_COMPLETE) {
+    VALIDATION_LOG << "Could not create a complete framebuffer: "
+                   << DebugToFramebufferError(status);
     DeleteFBO(gl, fbo, fbo_type);
     return std::nullopt;
   }
@@ -174,6 +176,11 @@ struct TexImage2DData {
       case PixelFormat::kR32G32B32A32Float:
         internal_format = GL_RGBA;
         external_format = GL_RGBA;
+        type = GL_FLOAT;
+        break;
+      case PixelFormat::kR32Float:
+        internal_format = GL_RED;
+        external_format = GL_RED;
         type = GL_FLOAT;
         break;
       case PixelFormat::kR16G16B16A16Float:
@@ -342,10 +349,10 @@ bool BlitCopyTextureToBufferCommandGLES::Encode(
 
   GLuint read_fbo = GL_NONE;
   fml::ScopedCleanupClosure delete_fbos(
-      [&gl, &read_fbo]() { DeleteFBO(gl, read_fbo, GL_READ_FRAMEBUFFER); });
+      [&gl, &read_fbo]() { DeleteFBO(gl, read_fbo, GL_FRAMEBUFFER); });
 
   {
-    auto read = ConfigureFBO(gl, source, GL_READ_FRAMEBUFFER);
+    auto read = ConfigureFBO(gl, source, GL_FRAMEBUFFER);
     if (!read.has_value()) {
       return false;
     }

@@ -210,8 +210,9 @@ bool ShellTestPlatformViewVulkan::OffScreenSurface::IsValid() {
 
 std::unique_ptr<SurfaceFrame>
 ShellTestPlatformViewVulkan::OffScreenSurface::AcquireFrame(
-    const SkISize& size) {
-  auto image_info = SkImageInfo::Make(size, SkColorType::kRGBA_8888_SkColorType,
+    const DlISize& size) {
+  auto image_info = SkImageInfo::Make(size.width, size.height,
+                                      SkColorType::kRGBA_8888_SkColorType,
                                       SkAlphaType::kOpaque_SkAlphaType);
   auto surface = SkSurfaces::RenderTarget(context_.get(), skgpu::Budgeted::kNo,
                                           image_info, 0, nullptr);
@@ -230,18 +231,16 @@ ShellTestPlatformViewVulkan::OffScreenSurface::AcquireFrame(
   return std::make_unique<SurfaceFrame>(std::move(surface), framebuffer_info,
                                         std::move(encode_callback),
                                         std::move(submit_callback),
-                                        /*frame_size=*/SkISize::Make(800, 600));
+                                        /*frame_size=*/DlISize(800, 600));
 }
 
 GrDirectContext* ShellTestPlatformViewVulkan::OffScreenSurface::GetContext() {
   return context_.get();
 }
 
-SkMatrix ShellTestPlatformViewVulkan::OffScreenSurface::GetRootTransformation()
+DlMatrix ShellTestPlatformViewVulkan::OffScreenSurface::GetRootTransformation()
     const {
-  SkMatrix matrix;
-  matrix.reset();
-  return matrix;
+  return DlMatrix();
 }
 
 }  // namespace flutter::testing

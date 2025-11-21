@@ -30,9 +30,7 @@ void main() {
   });
 
   testWithoutContext('simple build appbundle android-arm64 target succeeds', () async {
-    final DeferredComponentsProject project = DeferredComponentsProject(
-      BasicDeferredComponentsConfig(),
-    );
+    final project = DeferredComponentsProject(BasicDeferredComponentsConfig());
     await project.setUpIn(tempDir);
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
@@ -72,9 +70,7 @@ void main() {
   });
 
   testWithoutContext('simple build appbundle all targets succeeds', () async {
-    final DeferredComponentsProject project = DeferredComponentsProject(
-      BasicDeferredComponentsConfig(),
-    );
+    final project = DeferredComponentsProject(BasicDeferredComponentsConfig());
     await project.setUpIn(tempDir);
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
@@ -125,9 +121,7 @@ void main() {
   });
 
   testWithoutContext('simple build appbundle no-deferred-components succeeds', () async {
-    final DeferredComponentsProject project = DeferredComponentsProject(
-      BasicDeferredComponentsConfig(),
-    );
+    final project = DeferredComponentsProject(BasicDeferredComponentsConfig());
     await project.setUpIn(tempDir);
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
@@ -182,9 +176,7 @@ void main() {
   testWithoutContext(
     'simple build appbundle mismatched golden no-validate-deferred-components succeeds',
     () async {
-      final DeferredComponentsProject project = DeferredComponentsProject(
-        MismatchedGoldenDeferredComponentsConfig(),
-      );
+      final project = DeferredComponentsProject(MismatchedGoldenDeferredComponentsConfig());
       await project.setUpIn(tempDir);
       final ProcessResult result = await processManager.run(<String>[
         flutterBin,
@@ -243,7 +235,7 @@ void main() {
   );
 
   testWithoutContext('simple build appbundle missing android dynamic feature module fails', () async {
-    final DeferredComponentsProject project = DeferredComponentsProject(
+    final project = DeferredComponentsProject(
       NoAndroidDynamicFeatureModuleDeferredComponentsConfig(),
     );
     await project.setUpIn(tempDir);
@@ -285,9 +277,7 @@ void main() {
   });
 
   testWithoutContext('simple build appbundle missing golden fails', () async {
-    final DeferredComponentsProject project = DeferredComponentsProject(
-      NoGoldenDeferredComponentsConfig(),
-    );
+    final project = DeferredComponentsProject(NoGoldenDeferredComponentsConfig());
     await project.setUpIn(tempDir);
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
@@ -314,9 +304,7 @@ void main() {
   });
 
   testWithoutContext('simple build appbundle mismatched golden fails', () async {
-    final DeferredComponentsProject project = DeferredComponentsProject(
-      MismatchedGoldenDeferredComponentsConfig(),
-    );
+    final project = DeferredComponentsProject(MismatchedGoldenDeferredComponentsConfig());
     await project.setUpIn(tempDir);
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,

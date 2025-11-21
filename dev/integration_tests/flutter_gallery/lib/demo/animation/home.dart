@@ -331,7 +331,10 @@ class _AllSectionsView extends AnimatedWidget {
 
     for (int index = 0; index < sections.length; index++) {
       children.add(
-        LayoutId(id: 'indicator$index', child: SectionIndicator(opacity: indicatorOpacity(index))),
+        LayoutId(
+          id: 'indicator$index',
+          child: SectionIndicator(opacity: indicatorOpacity(index)),
+        ),
       );
     }
 
@@ -466,10 +469,9 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
   // Paging is enabled/disabled by setting the heading's PageView scroll physics.
   bool _handleScrollNotification(ScrollNotification notification, double midScrollOffset) {
     if (notification.depth == 0 && notification is ScrollUpdateNotification) {
-      final ScrollPhysics physics =
-          _scrollController.position.pixels >= midScrollOffset
-              ? const PageScrollPhysics()
-              : const NeverScrollableScrollPhysics();
+      final ScrollPhysics physics = _scrollController.position.pixels >= midScrollOffset
+          ? const PageScrollPhysics()
+          : const NeverScrollableScrollPhysics();
       if (physics != _headingScrollPhysics) {
         setState(() {
           _headingScrollPhysics = physics;
@@ -626,13 +628,12 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
                       },
                       child: PageView(
                         controller: _detailsPageController,
-                        children:
-                            allSections.map<Widget>((Section section) {
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: _detailItemsFor(section).toList(),
-                              );
-                            }).toList(),
+                        children: allSections.map<Widget>((Section section) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: _detailItemsFor(section).toList(),
+                          );
+                        }).toList(),
                       ),
                     ),
                   ),

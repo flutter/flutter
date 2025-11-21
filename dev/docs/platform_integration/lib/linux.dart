@@ -2,5 +2,5 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// [Flutter platform integration APIs for Linux.](https://api.flutter.dev/linux-embedder/)
+/// [Flutter Linux Embedder.](https://api.flutter.dev/linux-embedder/)
 library Linux;

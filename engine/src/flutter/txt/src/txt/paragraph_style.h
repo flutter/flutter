@@ -57,7 +57,7 @@ class ParagraphStyle {
  public:
   // Default TextStyle. Used in GetTextStyle() to obtain the base TextStyle to
   // inherit off of.
-  FontWeight font_weight = FontWeight::w400;
+  int font_weight = FontWeight::normal;
   FontStyle font_style = FontStyle::normal;
   std::string font_family = "";
   double font_size = 14;
@@ -69,7 +69,7 @@ class ParagraphStyle {
   // properties to take effect.
   // TODO(garyq): Break the strut properties into a separate class.
   bool strut_enabled = false;
-  FontWeight strut_font_weight = FontWeight::w400;
+  int strut_font_weight = FontWeight::normal;
   FontStyle strut_font_style = FontStyle::normal;
   std::vector<std::string> strut_font_families;
   double strut_font_size = 14;

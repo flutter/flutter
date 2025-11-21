@@ -94,6 +94,7 @@ class CustomDeviceConfig {
     this.forwardPortCommand,
     this.forwardPortSuccessRegex,
     this.screenshotCommand,
+    this.readLogsCommand,
   }) : assert(forwardPortCommand == null || forwardPortSuccessRegex != null),
        assert(
          platform == null ||
@@ -210,28 +211,35 @@ class CustomDeviceConfig {
         'array of strings with at least one element',
         minLength: 1,
       ),
+      readLogsCommand: _castStringListOrNull(
+        typedMap[_kReadLogsCommand],
+        _kReadLogsCommand,
+        'array of strings with at least one element',
+        minLength: 1,
+      ),
     );
   }
 
-  static const String _kId = 'id';
-  static const String _kLabel = 'label';
-  static const String _kSdkNameAndVersion = 'sdkNameAndVersion';
-  static const String _kPlatform = 'platform';
-  static const String _kEnabled = 'enabled';
-  static const String _kPingCommand = 'ping';
-  static const String _kPingSuccessRegex = 'pingSuccessRegex';
-  static const String _kPostBuildCommand = 'postBuild';
-  static const String _kInstallCommand = 'install';
-  static const String _kUninstallCommand = 'uninstall';
-  static const String _kRunDebugCommand = 'runDebug';
-  static const String _kForwardPortCommand = 'forwardPort';
-  static const String _kForwardPortSuccessRegex = 'forwardPortSuccessRegex';
-  static const String _kScreenshotCommand = 'screenshot';
+  static const _kId = 'id';
+  static const _kLabel = 'label';
+  static const _kSdkNameAndVersion = 'sdkNameAndVersion';
+  static const _kPlatform = 'platform';
+  static const _kEnabled = 'enabled';
+  static const _kPingCommand = 'ping';
+  static const _kPingSuccessRegex = 'pingSuccessRegex';
+  static const _kPostBuildCommand = 'postBuild';
+  static const _kInstallCommand = 'install';
+  static const _kUninstallCommand = 'uninstall';
+  static const _kRunDebugCommand = 'runDebug';
+  static const _kForwardPortCommand = 'forwardPort';
+  static const _kForwardPortSuccessRegex = 'forwardPortSuccessRegex';
+  static const _kScreenshotCommand = 'screenshot';
+  static const _kReadLogsCommand = 'readLogs';
 
   /// An example device config used for creating the default config file.
   /// Uses windows-specific ping and pingSuccessRegex. For the linux and macOs
   /// example config, see [exampleUnix].
-  static final CustomDeviceConfig exampleWindows = CustomDeviceConfig(
+  static final exampleWindows = CustomDeviceConfig(
     id: 'pi',
     label: 'Raspberry Pi',
     sdkNameAndVersion: 'Raspberry Pi 4 Model B+',
@@ -320,6 +328,7 @@ class CustomDeviceConfig {
   final List<String>? forwardPortCommand;
   final RegExp? forwardPortSuccessRegex;
   final List<String>? screenshotCommand;
+  final List<String>? readLogsCommand;
 
   /// Returns true when this custom device config uses port forwarding,
   /// which is the case when [forwardPortCommand] is not null.
@@ -328,6 +337,10 @@ class CustomDeviceConfig {
   /// Returns true when this custom device config supports screenshotting,
   /// which is the case when the [screenshotCommand] is not null.
   bool get supportsScreenshotting => screenshotCommand != null;
+
+  /// Returns true when this custom device config supports reading logs,
+  /// which is the case when the [readLogsCommand] is not null.
+  bool get supportsReadingLogs => readLogsCommand != null;
 
   /// Invokes and returns the result of [closure].
   ///
@@ -521,6 +534,7 @@ class CustomDeviceConfig {
       _kForwardPortCommand: forwardPortCommand,
       _kForwardPortSuccessRegex: forwardPortSuccessRegex?.pattern,
       _kScreenshotCommand: screenshotCommand,
+      _kReadLogsCommand: readLogsCommand,
     };
   }
 
@@ -545,6 +559,8 @@ class CustomDeviceConfig {
     RegExp? forwardPortSuccessRegex,
     bool explicitScreenshotCommand = false,
     List<String>? screenshotCommand,
+    bool explicitReadLogsCommand = false,
+    List<String>? readLogsCommand,
   }) {
     return CustomDeviceConfig(
       id: id ?? this.id,
@@ -553,25 +569,27 @@ class CustomDeviceConfig {
       platform: explicitPlatform ? platform : (platform ?? this.platform),
       enabled: enabled ?? this.enabled,
       pingCommand: pingCommand ?? this.pingCommand,
-      pingSuccessRegex:
-          explicitPingSuccessRegex ? pingSuccessRegex : (pingSuccessRegex ?? this.pingSuccessRegex),
-      postBuildCommand:
-          explicitPostBuildCommand ? postBuildCommand : (postBuildCommand ?? this.postBuildCommand),
+      pingSuccessRegex: explicitPingSuccessRegex
+          ? pingSuccessRegex
+          : (pingSuccessRegex ?? this.pingSuccessRegex),
+      postBuildCommand: explicitPostBuildCommand
+          ? postBuildCommand
+          : (postBuildCommand ?? this.postBuildCommand),
       installCommand: installCommand ?? this.installCommand,
       uninstallCommand: uninstallCommand ?? this.uninstallCommand,
       runDebugCommand: runDebugCommand ?? this.runDebugCommand,
-      forwardPortCommand:
-          explicitForwardPortCommand
-              ? forwardPortCommand
-              : (forwardPortCommand ?? this.forwardPortCommand),
-      forwardPortSuccessRegex:
-          explicitForwardPortSuccessRegex
-              ? forwardPortSuccessRegex
-              : (forwardPortSuccessRegex ?? this.forwardPortSuccessRegex),
-      screenshotCommand:
-          explicitScreenshotCommand
-              ? screenshotCommand
-              : (screenshotCommand ?? this.screenshotCommand),
+      forwardPortCommand: explicitForwardPortCommand
+          ? forwardPortCommand
+          : (forwardPortCommand ?? this.forwardPortCommand),
+      forwardPortSuccessRegex: explicitForwardPortSuccessRegex
+          ? forwardPortSuccessRegex
+          : (forwardPortSuccessRegex ?? this.forwardPortSuccessRegex),
+      screenshotCommand: explicitScreenshotCommand
+          ? screenshotCommand
+          : (screenshotCommand ?? this.screenshotCommand),
+      readLogsCommand: explicitReadLogsCommand
+          ? readLogsCommand
+          : (readLogsCommand ?? this.readLogsCommand),
     );
   }
 
@@ -591,7 +609,8 @@ class CustomDeviceConfig {
         _listsEqual(other.runDebugCommand, runDebugCommand) &&
         _listsEqual(other.forwardPortCommand, forwardPortCommand) &&
         _regexesEqual(other.forwardPortSuccessRegex, forwardPortSuccessRegex) &&
-        _listsEqual(other.screenshotCommand, screenshotCommand);
+        _listsEqual(other.screenshotCommand, screenshotCommand) &&
+        _listsEqual(other.readLogsCommand, readLogsCommand);
   }
 
   @override
@@ -609,7 +628,8 @@ class CustomDeviceConfig {
         runDebugCommand.hashCode ^
         forwardPortCommand.hashCode ^
         (forwardPortSuccessRegex?.pattern).hashCode ^
-        screenshotCommand.hashCode;
+        screenshotCommand.hashCode ^
+        readLogsCommand.hashCode;
   }
 
   @override
@@ -628,6 +648,7 @@ class CustomDeviceConfig {
         'runDebugCommand: $runDebugCommand, '
         'forwardPortCommand: $forwardPortCommand, '
         'forwardPortSuccessRegex: $forwardPortSuccessRegex, '
-        'screenshotCommand: $screenshotCommand)';
+        'screenshotCommand: $screenshotCommand, '
+        'readLogsCommand: $readLogsCommand)';
   }
 }

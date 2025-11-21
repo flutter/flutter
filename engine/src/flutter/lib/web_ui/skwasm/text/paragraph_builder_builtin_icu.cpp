@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 #include "../export.h"
+#include "../live_objects.h"
 #include "../wrappers.h"
 #include "modules/skunicode/include/SkUnicode_icu.h"
+#include "text_types.h"
 #include "third_party/skia/modules/skparagraph/include/ParagraphBuilder.h"
 
-using namespace skia::textlayout;
 using namespace Skwasm;
 
 SKWASM_EXPORT bool skwasm_isHeavy() {
@@ -17,13 +18,21 @@ SKWASM_EXPORT bool skwasm_isHeavy() {
 SKWASM_EXPORT ParagraphBuilder* paragraphBuilder_create(
     ParagraphStyle* style,
     FlutterFontCollection* collection) {
-  return ParagraphBuilder::make(*style, collection->collection,
-                                SkUnicodes::ICU::Make())
-      .release();
+  liveParagraphBuilderCount++;
+  std::vector<flutter::DlPaint> paints;
+  style->textStyle.populatePaintIds(paints);
+  style->skiaParagraphStyle.setTextStyle(style->textStyle.skiaStyle);
+  return new ParagraphBuilder{
+      skia::textlayout::ParagraphBuilder::make(style->skiaParagraphStyle,
+                                               collection->collection,
+                                               SkUnicodes::ICU::Make()),
+      std::move(paints)};
 }
 
 SKWASM_EXPORT Paragraph* paragraphBuilder_build(ParagraphBuilder* builder) {
-  return builder->Build().release();
+  liveParagraphCount++;
+  return new Paragraph{builder->skiaParagraphBuilder->Build(),
+                       std::move(builder->paints)};
 }
 
 SKWASM_EXPORT void paragraphBuilder_setGraphemeBreaksUtf16(

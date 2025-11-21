@@ -247,13 +247,12 @@ void main() {
   });
 
   test('RRect.scaleRadii() properly constrained radii should remain unchanged', () {
-    final RRect rrect =
-        RRect.fromRectAndCorners(
-          const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
-          topLeft: const Radius.circular(0.5),
-          topRight: const Radius.circular(0.25),
-          bottomRight: const Radius.elliptical(0.25, 0.75),
-        ).scaleRadii();
+    final RRect rrect = RRect.fromRectAndCorners(
+      const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+      topLeft: const Radius.circular(0.5),
+      topRight: const Radius.circular(0.25),
+      bottomRight: const Radius.elliptical(0.25, 0.75),
+    ).scaleRadii();
 
     // check sides
     expect(rrect.left, 1.0);
@@ -273,13 +272,12 @@ void main() {
   });
 
   test('RRect.scaleRadii() sum of radii that exceed side length should properly scale', () {
-    final RRect rrect =
-        RRect.fromRectAndCorners(
-          const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
-          topLeft: const Radius.circular(5000.0),
-          topRight: const Radius.circular(2500.0),
-          bottomRight: const Radius.elliptical(2500.0, 7500.0),
-        ).scaleRadii();
+    final RRect rrect = RRect.fromRectAndCorners(
+      const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+      topLeft: const Radius.circular(5000.0),
+      topRight: const Radius.circular(2500.0),
+      bottomRight: const Radius.elliptical(2500.0, 7500.0),
+    ).scaleRadii();
 
     // check sides
     expect(rrect.left, 1.0);
@@ -666,9 +664,9 @@ void main() {
     checkPointAndMirrors(const Offset(49.99, 49.99)); // Right mid-edge
   });
 
-  test('RSuperellipse.contains is correct for a slim diagnal shape', () {
-    // This shape has large radii on one diagnal and tiny radii on the other,
-    // resulting in a almond-like shape placed diagnally (NW to SE).
+  test('RSuperellipse.contains is correct for a slim diagonal shape', () {
+    // This shape has large radii on one diagonal and tiny radii on the other,
+    // resulting in a almond-like shape placed diagonally (NW to SE).
     final RSuperellipse rse = RSuperellipse.fromLTRBAndCorners(
       -50,
       -50,
@@ -691,18 +689,32 @@ void main() {
     checkPointWithOffset(rse, const Offset(49.70, 49.70), const Offset(0.02, 0.02));
 
     // Checks two points symmetrical to the origin.
-    void checkDiagnalPoints(Offset p) {
+    void checkDiagonalPoints(Offset p) {
       checkPointWithOffset(rse, p, const Offset(0.02, -0.02));
       checkPointWithOffset(rse, Offset(-p.dx, -p.dy), const Offset(-0.02, 0.02));
     }
 
     // A few other points along the edge
-    checkDiagnalPoints(const Offset(-40.0, -49.59));
-    checkDiagnalPoints(const Offset(-20.0, -45.64));
-    checkDiagnalPoints(const Offset(0.0, -37.01));
-    checkDiagnalPoints(const Offset(20.0, -21.96));
-    checkDiagnalPoints(const Offset(21.05, -20.92));
-    checkDiagnalPoints(const Offset(40.0, 5.68));
+    checkDiagonalPoints(const Offset(-40.0, -49.59));
+    checkDiagonalPoints(const Offset(-20.0, -45.64));
+    checkDiagonalPoints(const Offset(0.0, -37.01));
+    checkDiagonalPoints(const Offset(20.0, -21.96));
+    checkDiagonalPoints(const Offset(21.05, -20.92));
+    checkDiagonalPoints(const Offset(40.0, 5.68));
+  });
+
+  test('RSuperellipse.contains is correct for points outside of a sharp corner', () {
+    expect(
+      RSuperellipse.fromLTRBAndCorners(
+        196.0,
+        0.0,
+        294.0,
+        28.0,
+        topRight: const Radius.circular(3.0),
+        bottomRight: const Radius.circular(3.0),
+      ).contains(const Offset(147.0, 14.0)),
+      isFalse,
+    );
   });
 }
 

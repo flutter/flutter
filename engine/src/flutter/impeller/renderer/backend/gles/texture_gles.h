@@ -75,7 +75,9 @@ class TextureGLES final : public Texture,
       std::shared_ptr<ReactorGLES> reactor,
       TextureDescriptor desc);
 
-  TextureGLES(std::shared_ptr<ReactorGLES> reactor, TextureDescriptor desc);
+  TextureGLES(std::shared_ptr<ReactorGLES> reactor,
+              TextureDescriptor desc,
+              bool threadsafe = false);
 
   // |Texture|
   ~TextureGLES() override;
@@ -101,6 +103,10 @@ class TextureGLES final : public Texture,
   Type GetType() const;
 
   bool IsWrapped() const;
+
+  /// @brief Reset the internal texture state so that the reactor will not free
+  ///        the associated handle.
+  void Leak();
 
   std::optional<GLuint> GetFBO() const;
 
@@ -160,6 +166,7 @@ class TextureGLES final : public Texture,
 
   TextureGLES(std::shared_ptr<ReactorGLES> reactor,
               TextureDescriptor desc,
+              bool threadsafe,
               std::optional<GLuint> fbo,
               std::optional<HandleGLES> external_handle);
 

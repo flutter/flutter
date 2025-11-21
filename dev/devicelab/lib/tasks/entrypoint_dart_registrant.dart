@@ -14,7 +14,8 @@ import '../framework/utils.dart';
 const String _messagePrefix = 'entrypoint:';
 const String _entrypointName = 'entrypoint';
 
-const String _dartCode = '''
+const String _dartCode =
+    '''
 import 'package:flutter/widgets.dart';
 
 @pragma('vm:entry-point')
@@ -30,7 +31,8 @@ void $_entrypointName() {
 }
 ''';
 
-const String _kotlinCode = '''
+const String _kotlinCode =
+    '''
 package com.example.entrypoint_dart_registrant
 
 import io.flutter.embedding.android.FlutterActivity

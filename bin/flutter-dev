@@ -19,7 +19,7 @@ set -e
 # the effects immediately, but is much slower than using the prebuilt snapshot.
 
 # To debug the tool, you can uncomment the following lines to enable debug
-# mode and set an observatory port:
+# mode and set a VM service port:
 # FLUTTER_TOOL_ARGS="--enable-asserts $FLUTTER_TOOL_ARGS"
 # FLUTTER_TOOL_ARGS="$FLUTTER_TOOL_ARGS --observe=65432"
 

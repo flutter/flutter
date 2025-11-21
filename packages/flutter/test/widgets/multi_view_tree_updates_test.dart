@@ -44,8 +44,14 @@ void main() {
 
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
-    final Widget view1 = View(view: tester.view, child: TestWidget(key: key1));
-    final Widget view2 = View(view: FakeView(tester.view), child: TestWidget(key: key2));
+    final Widget view1 = View(
+      view: tester.view,
+      child: TestWidget(key: key1),
+    );
+    final Widget view2 = View(
+      view: FakeView(tester.view),
+      child: TestWidget(key: key2),
+    );
 
     await tester.pumpWidget(wrapWithView: false, ViewCollection(views: <Widget>[view1, view2]));
 
@@ -97,7 +103,12 @@ void main() {
       child: TestWidget(key: insideAnchoredViewKey),
     );
 
-    await tester.pumpWidget(ViewAnchor(view: view, child: TestWidget(key: outsideAnchoredViewKey)));
+    await tester.pumpWidget(
+      ViewAnchor(
+        view: view,
+        child: TestWidget(key: outsideAnchoredViewKey),
+      ),
+    );
 
     expect(find.text('Hello'), findsNWidgets(2));
     expect(renderParagraphTexts(), <String>['Hello', 'Hello']);

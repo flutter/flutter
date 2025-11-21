@@ -21,8 +21,8 @@ void main() {
   late Environment env;
 
   Environment createEnvironment() {
-    final Map<String, String> defines = <String, String>{kDeferredComponents: 'true'};
-    final Environment result = Environment.test(
+    final defines = <String, String>{kDeferredComponents: 'true'};
+    final result = Environment.test(
       fileSystem.directory('/project'),
       defines: defines,
       artifacts: Artifacts.test(),
@@ -40,7 +40,7 @@ void main() {
   });
 
   testWithoutContext('No checks passes', () async {
-    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
+    final validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
@@ -57,7 +57,7 @@ void main() {
     if (cacheFile.existsSync()) {
       cacheFile.deleteSync();
     }
-    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
+    final validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
@@ -74,7 +74,7 @@ void main() {
     final File expectedFile = env.projectDir.childFile('deferred_components_loading_units.yaml');
 
     expect(expectedFile.existsSync(), true);
-    const String expectedContents = '''
+    const expectedContents = '''
 loading-units:
   - id: 2
     libraries:
@@ -88,7 +88,7 @@ loading-units:
   });
 
   testWithoutContext('loadingUnitCache identical passes', () async {
-    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
+    final validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
@@ -118,7 +118,7 @@ loading-units:
   });
 
   testWithoutContext('loadingUnitCache finds new loading units', () async {
-    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
+    final validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
@@ -148,7 +148,7 @@ loading-units:
   });
 
   testWithoutContext('loadingUnitCache finds missing loading units', () async {
-    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
+    final validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
@@ -182,7 +182,7 @@ loading-units:
   });
 
   testWithoutContext('missing cache file counts as all new loading units', () async {
-    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
+    final validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
@@ -202,8 +202,11 @@ loading-units:
   testWithoutContext(
     'loadingUnitCache validator detects malformed file: missing main entry',
     () async {
-      final DeferredComponentsGenSnapshotValidator validator =
-          DeferredComponentsGenSnapshotValidator(env, exitOnFail: false, title: 'test check');
+      final validator = DeferredComponentsGenSnapshotValidator(
+        env,
+        exitOnFail: false,
+        title: 'test check',
+      );
       final File cacheFile = env.projectDir.childFile(
         DeferredComponentsValidator.kLoadingUnitsCacheFileName,
       );
@@ -240,7 +243,7 @@ loading-units-spelled-wrong:
   );
 
   testWithoutContext('loadingUnitCache validator detects malformed file: not a list', () async {
-    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
+    final validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
@@ -266,7 +269,7 @@ loading-units: hello
   });
 
   testWithoutContext('loadingUnitCache validator detects malformed file: not a list', () async {
-    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
+    final validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
@@ -294,7 +297,7 @@ loading-units:
   });
 
   testWithoutContext('loadingUnitCache validator detects malformed file: missing id', () async {
-    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
+    final validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
@@ -328,8 +331,11 @@ loading-units:
   testWithoutContext(
     'loadingUnitCache validator detects malformed file: libraries is list',
     () async {
-      final DeferredComponentsGenSnapshotValidator validator =
-          DeferredComponentsGenSnapshotValidator(env, exitOnFail: false, title: 'test check');
+      final validator = DeferredComponentsGenSnapshotValidator(
+        env,
+        exitOnFail: false,
+        title: 'test check',
+      );
       final File cacheFile = env.projectDir.childFile(
         DeferredComponentsValidator.kLoadingUnitsCacheFileName,
       );
@@ -359,8 +365,11 @@ loading-units:
   testWithoutContext(
     'loadingUnitCache validator detects malformed file: libraries is list of strings',
     () async {
-      final DeferredComponentsGenSnapshotValidator validator =
-          DeferredComponentsGenSnapshotValidator(env, exitOnFail: false, title: 'test check');
+      final validator = DeferredComponentsGenSnapshotValidator(
+        env,
+        exitOnFail: false,
+        title: 'test check',
+      );
       final File cacheFile = env.projectDir.childFile(
         DeferredComponentsValidator.kLoadingUnitsCacheFileName,
       );
@@ -392,8 +401,11 @@ loading-units:
   testWithoutContext(
     'loadingUnitCache validator detects malformed file: empty libraries allowed',
     () async {
-      final DeferredComponentsGenSnapshotValidator validator =
-          DeferredComponentsGenSnapshotValidator(env, exitOnFail: false, title: 'test check');
+      final validator = DeferredComponentsGenSnapshotValidator(
+        env,
+        exitOnFail: false,
+        title: 'test check',
+      );
       final File cacheFile = env.projectDir.childFile(
         DeferredComponentsValidator.kLoadingUnitsCacheFileName,
       );
@@ -417,7 +429,7 @@ loading-units:
   );
 
   testWithoutContext('androidStringMapping modifies strings file', () async {
-    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
+    final validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
@@ -501,7 +513,7 @@ loading-units:
   });
 
   testWithoutContext('androidStringMapping adds mapping when no existing mapping', () async {
-    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
+    final validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
@@ -573,7 +585,7 @@ loading-units:
 
   // The mapping is incorrectly placed in the activity instead of application.
   testWithoutContext('androidStringMapping detects improperly placed metadata mapping', () async {
-    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
+    final validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
@@ -646,7 +658,7 @@ loading-units:
   });
 
   testWithoutContext('androidStringMapping generates base module loading unit mapping', () async {
-    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
+    final validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',
@@ -721,7 +733,7 @@ loading-units:
 
   // Tests if all of the regexp whitespace detection is working.
   testWithoutContext('androidStringMapping handles whitespace within entry', () async {
-    final DeferredComponentsGenSnapshotValidator validator = DeferredComponentsGenSnapshotValidator(
+    final validator = DeferredComponentsGenSnapshotValidator(
       env,
       exitOnFail: false,
       title: 'test check',

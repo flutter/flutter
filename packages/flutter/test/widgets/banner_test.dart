@@ -304,13 +304,12 @@ void main() {
   test('BannerPainter dispatches memory events', () async {
     await expectLater(
       await memoryEvents(
-        () =>
-            BannerPainter(
-              message: 'foo',
-              textDirection: TextDirection.rtl,
-              location: BannerLocation.topStart,
-              layoutDirection: TextDirection.ltr,
-            ).dispose(),
+        () => BannerPainter(
+          message: 'foo',
+          textDirection: TextDirection.rtl,
+          location: BannerLocation.topStart,
+          layoutDirection: TextDirection.ltr,
+        ).dispose(),
         BannerPainter,
       ),
       areCreateAndDispose,

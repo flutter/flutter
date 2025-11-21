@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Fetch base commit and origin/master
         # Fetch what to compare the commit against
@@ -35,7 +35,7 @@ jobs:
           ./bin/dart run dev/tools/bin/get_files_changed.dart --since="${{ github.event.pull_request.base.sha }}" > changed_files.json
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: changed-files
           path: changed_files.json

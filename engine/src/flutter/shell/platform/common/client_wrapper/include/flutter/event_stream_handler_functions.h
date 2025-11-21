@@ -35,7 +35,7 @@ class StreamHandlerFunctions : public StreamHandler<T> {
   // for the corresponding StreamHandler outcomes.
   StreamHandlerFunctions(StreamHandlerListen<T> on_listen,
                          StreamHandlerCancel<T> on_cancel)
-      : on_listen_(on_listen), on_cancel_(on_cancel) {}
+      : on_listen_(std::move(on_listen)), on_cancel_(std::move(on_cancel)) {}
 
   virtual ~StreamHandlerFunctions() = default;
 

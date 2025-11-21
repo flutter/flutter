@@ -34,11 +34,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BadgeThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -56,11 +55,10 @@ void main() {
       offset: Offset.zero,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'backgroundColor: ${const Color(0xfffffff0)}',
@@ -91,7 +89,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(badgeTheme: badgeTheme),
-        home: const Scaffold(body: Badge(label: Text('1234'), child: Icon(Icons.add))),
+        home: const Scaffold(
+          body: Badge(label: Text('1234'), child: Icon(Icons.add)),
+        ),
       ),
     );
 
@@ -136,7 +136,9 @@ void main() {
       const MaterialApp(
         home: BadgeTheme(
           data: badgeTheme,
-          child: Scaffold(body: Badge(label: Text('1234'), child: Icon(Icons.add))),
+          child: Scaffold(
+            body: Badge(label: Text('1234'), child: Icon(Icons.add)),
+          ),
         ),
       ),
     );

@@ -24,10 +24,9 @@ void main() {
                 painted = true;
               },
             ),
-            child:
-                child = RenderConstrainedBox(
-                  additionalConstraints: const BoxConstraints.tightFor(height: 10.0, width: 10.0),
-                ),
+            child: child = RenderConstrainedBox(
+              additionalConstraints: const BoxConstraints.tightFor(height: 10.0, width: 10.0),
+            ),
           ),
         ),
       ),

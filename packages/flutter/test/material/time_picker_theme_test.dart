@@ -50,11 +50,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TimePickerThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -94,11 +93,10 @@ void main() {
       ),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -122,7 +120,7 @@ void main() {
         'hourMinuteShape: RoundedRectangleBorder(BorderSide(color: ${const Color(0xffffffff)}), BorderRadius.zero)',
         'hourMinuteTextColor: ${const Color(0xfffffff0)}',
         'hourMinuteTextStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff1)})',
-        'inputDecorationTheme: InputDecorationTheme#ff861(labelStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff2)}))',
+        'inputDecorationTheme: InputDecorationThemeData#ff861(labelStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff2)}))',
         'padding: EdgeInsets.all(1.0)',
         'shape: RoundedRectangleBorder(BorderSide(color: ${const Color(0xfffffff3)}), BorderRadius.zero)',
         'timeSelectorSeparatorColor: WidgetStatePropertyAll(${const Color(0xfffffff4)})',
@@ -130,6 +128,25 @@ void main() {
       ]),
     );
   });
+
+  test(
+    'TimePickerThemeData.inputDecorationTheme accepts only InputDecorationTheme or InputDecorationThemeData instances',
+    () {
+      const InputDecorationTheme decorationTheme = InputDecorationTheme();
+      TimePickerThemeData timePickerTheme = const TimePickerThemeData(
+        inputDecorationTheme: decorationTheme,
+      );
+      expect(timePickerTheme.inputDecorationTheme, decorationTheme.data);
+
+      timePickerTheme = TimePickerThemeData(inputDecorationTheme: decorationTheme.data);
+      expect(timePickerTheme.inputDecorationTheme, decorationTheme.data);
+
+      // Wrong type throws.
+      expect(() {
+        TimePickerThemeData(inputDecorationTheme: Object());
+      }, throwsA(isA<AssertionError>()));
+    },
+  );
 
   testWidgets('Material2 - Passing no TimePickerThemeData uses defaults', (
     WidgetTester tester,
@@ -241,19 +258,31 @@ void main() {
       defaultTheme.colorScheme.onSurface.withOpacity(0.38),
       defaultTheme.colorScheme.surface,
     );
-    final Material dayPeriodMaterial = _dayPeriodMaterial(tester);
-    expect(
-      dayPeriodMaterial.shape,
-      RoundedRectangleBorder(
-        borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-        side: BorderSide(color: expectedBorderColor),
+
+    final RoundedRectangleBorder expectedAmShape = RoundedRectangleBorder(
+      side: BorderSide(color: expectedBorderColor),
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(4.0),
+        bottomLeft: Radius.circular(4.0),
       ),
     );
+    expect(amMaterial.shape, expectedAmShape);
 
-    final Container dayPeriodDivider = _dayPeriodDivider(tester);
+    final RoundedRectangleBorder expectedPmShape = RoundedRectangleBorder(
+      side: BorderSide(color: expectedBorderColor),
+      borderRadius: const BorderRadius.only(
+        topRight: Radius.circular(4.0),
+        bottomRight: Radius.circular(4.0),
+      ),
+    );
+    expect(pmMaterial.shape, expectedPmShape);
+
     expect(
-      dayPeriodDivider.decoration,
-      BoxDecoration(border: Border(left: BorderSide(color: expectedBorderColor))),
+      find.descendant(
+        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl'),
+        matching: find.byType(Container),
+      ),
+      findsNothing,
     );
 
     final IconButton entryModeIconButton = _entryModeIconButton(tester);
@@ -397,19 +426,30 @@ void main() {
     final Material pmMaterial = _textMaterial(tester, 'PM');
     expect(pmMaterial.color, Colors.transparent);
 
-    final Material dayPeriodMaterial = _dayPeriodMaterial(tester);
-    expect(
-      dayPeriodMaterial.shape,
-      RoundedRectangleBorder(
-        borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-        side: BorderSide(color: defaultTheme.colorScheme.outline),
+    final RoundedRectangleBorder expectedAmShape = RoundedRectangleBorder(
+      side: BorderSide(color: defaultTheme.colorScheme.outline),
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(8.0),
+        bottomLeft: Radius.circular(8.0),
       ),
     );
+    expect(amMaterial.shape, expectedAmShape);
 
-    final Container dayPeriodDivider = _dayPeriodDivider(tester);
+    final RoundedRectangleBorder expectedPmShape = RoundedRectangleBorder(
+      side: BorderSide(color: defaultTheme.colorScheme.outline),
+      borderRadius: const BorderRadius.only(
+        topRight: Radius.circular(8.0),
+        bottomRight: Radius.circular(8.0),
+      ),
+    );
+    expect(pmMaterial.shape, expectedPmShape);
+
     expect(
-      dayPeriodDivider.decoration,
-      BoxDecoration(border: Border(left: BorderSide(color: defaultTheme.colorScheme.outline))),
+      find.descendant(
+        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl'),
+        matching: find.byType(Container),
+      ),
+      findsNothing,
     );
 
     final IconButton entryModeIconButton = _entryModeIconButton(tester);
@@ -442,8 +482,8 @@ void main() {
     expect(hourDecoration.filled, true);
     expect(
       hourDecoration.fillColor,
-      MaterialStateColor.resolveWith(
-        (Set<MaterialState> states) => defaultTheme.colorScheme.onSurface.withOpacity(0.12),
+      WidgetStateColor.resolveWith(
+        (Set<WidgetState> states) => defaultTheme.colorScheme.onSurface.withOpacity(0.12),
       ),
     );
     expect(
@@ -665,16 +705,34 @@ void main() {
     final Material pmMaterial = _textMaterial(tester, 'PM');
     expect(pmMaterial.color, _unselectedColor);
 
-    final Material dayPeriodMaterial = _dayPeriodMaterial(tester);
-    expect(
-      dayPeriodMaterial.shape,
-      timePickerTheme.dayPeriodShape!.copyWith(side: timePickerTheme.dayPeriodBorderSide),
-    );
+    final RoundedRectangleBorder dayPeriodShape =
+        timePickerTheme.dayPeriodShape! as RoundedRectangleBorder;
+    final BorderRadius borderRadius = dayPeriodShape.borderRadius as BorderRadius;
 
-    final Container dayPeriodDivider = _dayPeriodDivider(tester);
+    final RoundedRectangleBorder expectedAmShape = dayPeriodShape.copyWith(
+      side: timePickerTheme.dayPeriodBorderSide,
+      borderRadius: BorderRadius.only(
+        topLeft: borderRadius.topLeft,
+        bottomLeft: borderRadius.topRight,
+      ),
+    );
+    expect(amMaterial.shape, expectedAmShape);
+
+    final RoundedRectangleBorder expectedPmShape = dayPeriodShape.copyWith(
+      side: timePickerTheme.dayPeriodBorderSide,
+      borderRadius: BorderRadius.only(
+        topRight: borderRadius.topLeft,
+        bottomRight: borderRadius.topRight,
+      ),
+    );
+    expect(pmMaterial.shape, expectedPmShape);
+
     expect(
-      dayPeriodDivider.decoration,
-      BoxDecoration(border: Border(left: timePickerTheme.dayPeriodBorderSide!)),
+      find.descendant(
+        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl'),
+        matching: find.byType(Container),
+      ),
+      findsNothing,
     );
 
     final IconButton entryModeIconButton = _entryModeIconButton(tester);
@@ -797,16 +855,34 @@ void main() {
     final Material pmMaterial = _textMaterial(tester, 'PM');
     expect(pmMaterial.color, _unselectedColor);
 
-    final Material dayPeriodMaterial = _dayPeriodMaterial(tester);
-    expect(
-      dayPeriodMaterial.shape,
-      timePickerTheme.dayPeriodShape!.copyWith(side: timePickerTheme.dayPeriodBorderSide),
-    );
+    final RoundedRectangleBorder dayPeriodShape =
+        timePickerTheme.dayPeriodShape! as RoundedRectangleBorder;
+    final BorderRadius borderRadius = dayPeriodShape.borderRadius as BorderRadius;
 
-    final Container dayPeriodDivider = _dayPeriodDivider(tester);
+    final RoundedRectangleBorder expectedAmShape = dayPeriodShape.copyWith(
+      side: timePickerTheme.dayPeriodBorderSide,
+      borderRadius: BorderRadius.only(
+        topLeft: borderRadius.topLeft,
+        bottomLeft: borderRadius.topRight,
+      ),
+    );
+    expect(amMaterial.shape, expectedAmShape);
+
+    final RoundedRectangleBorder expectedPmShape = dayPeriodShape.copyWith(
+      side: timePickerTheme.dayPeriodBorderSide,
+      borderRadius: BorderRadius.only(
+        topRight: borderRadius.topLeft,
+        bottomRight: borderRadius.topRight,
+      ),
+    );
+    expect(pmMaterial.shape, expectedPmShape);
+
     expect(
-      dayPeriodDivider.decoration,
-      BoxDecoration(border: Border(left: timePickerTheme.dayPeriodBorderSide!)),
+      find.descendant(
+        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl'),
+        matching: find.byType(Container),
+      ),
+      findsNothing,
     );
 
     final IconButton entryModeIconButton = _entryModeIconButton(tester);
@@ -826,7 +902,7 @@ void main() {
   });
 
   testWidgets(
-    'Time picker uses values from TimePickerThemeData with InputDecorationTheme - input mode',
+    'Time picker uses values from TimePickerThemeData when TimePickerThemeData.inputDecorationTheme is provided - input mode',
     (WidgetTester tester) async {
       final TimePickerThemeData timePickerTheme = _timePickerTheme(includeInputDecoration: true);
       final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
@@ -851,7 +927,7 @@ void main() {
   );
 
   testWidgets(
-    'Time picker uses values from TimePickerThemeData without InputDecorationTheme - input mode',
+    'Time picker uses values from TimePickerThemeData when TimePickerThemeData.inputDecorationTheme is not provided - input mode',
     (WidgetTester tester) async {
       final TimePickerThemeData timePickerTheme = _timePickerTheme();
       final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
@@ -866,7 +942,7 @@ void main() {
     },
   );
 
-  testWidgets('Time picker dayPeriodColor does the right thing with non-MaterialStateColor', (
+  testWidgets('Time picker dayPeriodColor does the right thing with non-WidgetStateColor', (
     WidgetTester tester,
   ) async {
     final TimePickerThemeData timePickerTheme = _timePickerTheme().copyWith(
@@ -886,13 +962,11 @@ void main() {
     expect(pmMaterial.color, Colors.transparent);
   });
 
-  testWidgets('Time picker dayPeriodColor does the right thing with MaterialStateColor', (
+  testWidgets('Time picker dayPeriodColor does the right thing with WidgetStateColor', (
     WidgetTester tester,
   ) async {
-    final MaterialStateColor testColor = MaterialStateColor.resolveWith((
-      Set<MaterialState> states,
-    ) {
-      if (states.contains(MaterialState.selected)) {
+    final WidgetStateColor testColor = WidgetStateColor.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return Colors.green;
       }
       return Colors.blue;
@@ -997,11 +1071,11 @@ final Color _selectedColor = Colors.green[100]!;
 final Color _unselectedColor = Colors.green[200]!;
 
 TimePickerThemeData _timePickerTheme({bool includeInputDecoration = false}) {
-  Color getColor(Set<MaterialState> states) {
-    return states.contains(MaterialState.selected) ? _selectedColor : _unselectedColor;
+  Color getColor(Set<WidgetState> states) {
+    return states.contains(WidgetState.selected) ? _selectedColor : _unselectedColor;
   }
 
-  final MaterialStateColor materialStateColor = MaterialStateColor.resolveWith(getColor);
+  final WidgetStateColor materialStateColor = WidgetStateColor.resolveWith(getColor);
   return TimePickerThemeData(
     backgroundColor: Colors.orange,
     cancelButtonStyle: TextButton.styleFrom(foregroundColor: Colors.red),
@@ -1025,18 +1099,17 @@ TimePickerThemeData _timePickerTheme({bool includeInputDecoration = false}) {
       borderRadius: BorderRadius.all(Radius.circular(16.0)),
     ),
     dayPeriodBorderSide: const BorderSide(color: Colors.blueAccent),
-    inputDecorationTheme:
-        includeInputDecoration
-            ? const InputDecorationTheme(
-              filled: true,
-              fillColor: Colors.purple,
-              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
-              errorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.green)),
-              focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.yellow)),
-              focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
-              hintStyle: TextStyle(fontSize: 8),
-            )
-            : null,
+    inputDecorationTheme: includeInputDecoration
+        ? const InputDecorationTheme(
+            filled: true,
+            fillColor: Colors.purple,
+            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
+            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.green)),
+            focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.yellow)),
+            focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
+            hintStyle: TextStyle(fontSize: 8),
+          )
+        : null,
   );
 }
 
@@ -1087,28 +1160,6 @@ Material _textMaterial(WidgetTester tester, String text) {
 TextField _textField(WidgetTester tester, String text) {
   return tester.widget<TextField>(
     find.ancestor(of: find.text(text), matching: find.byType(TextField)).first,
-  );
-}
-
-Material _dayPeriodMaterial(WidgetTester tester) {
-  return tester.widget<Material>(
-    find
-        .descendant(
-          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl'),
-          matching: find.byType(Material),
-        )
-        .first,
-  );
-}
-
-Container _dayPeriodDivider(WidgetTester tester) {
-  return tester.widget<Container>(
-    find
-        .descendant(
-          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl'),
-          matching: find.byType(Container),
-        )
-        .at(0),
   );
 }
 

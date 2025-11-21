@@ -202,8 +202,9 @@ class CircleAvatar extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final Color? effectiveForegroundColor =
         foregroundColor ?? (theme.useMaterial3 ? theme.colorScheme.onPrimaryContainer : null);
-    final TextStyle effectiveTextStyle =
-        theme.useMaterial3 ? theme.textTheme.titleMedium! : theme.primaryTextTheme.titleMedium!;
+    final TextStyle effectiveTextStyle = theme.useMaterial3
+        ? theme.textTheme.titleMedium!
+        : theme.primaryTextTheme.titleMedium!;
     TextStyle textStyle = effectiveTextStyle.copyWith(color: effectiveForegroundColor);
     Color? effectiveBackgroundColor =
         backgroundColor ?? (theme.useMaterial3 ? theme.colorScheme.primaryContainer : null);
@@ -230,40 +231,37 @@ class CircleAvatar extends StatelessWidget {
       duration: kThemeChangeDuration,
       decoration: BoxDecoration(
         color: effectiveBackgroundColor,
-        image:
-            backgroundImage != null
-                ? DecorationImage(
-                  image: backgroundImage!,
-                  onError: onBackgroundImageError,
-                  fit: BoxFit.cover,
-                )
-                : null,
+        image: backgroundImage != null
+            ? DecorationImage(
+                image: backgroundImage!,
+                onError: onBackgroundImageError,
+                fit: BoxFit.cover,
+              )
+            : null,
         shape: BoxShape.circle,
       ),
-      foregroundDecoration:
-          foregroundImage != null
-              ? BoxDecoration(
-                image: DecorationImage(
-                  image: foregroundImage!,
-                  onError: onForegroundImageError,
-                  fit: BoxFit.cover,
-                ),
-                shape: BoxShape.circle,
-              )
-              : null,
-      child:
-          child == null
-              ? null
-              : Center(
-                // Need to disable text scaling here so that the text doesn't
-                // escape the avatar when the textScaleFactor is large.
-                child: MediaQuery.withNoTextScaling(
-                  child: IconTheme(
-                    data: theme.iconTheme.copyWith(color: textStyle.color),
-                    child: DefaultTextStyle(style: textStyle, child: child!),
-                  ),
+      foregroundDecoration: foregroundImage != null
+          ? BoxDecoration(
+              image: DecorationImage(
+                image: foregroundImage!,
+                onError: onForegroundImageError,
+                fit: BoxFit.cover,
+              ),
+              shape: BoxShape.circle,
+            )
+          : null,
+      child: child == null
+          ? null
+          : Center(
+              // Need to disable text scaling here so that the text doesn't
+              // escape the avatar when the textScaleFactor is large.
+              child: MediaQuery.withNoTextScaling(
+                child: IconTheme(
+                  data: theme.iconTheme.copyWith(color: textStyle.color),
+                  child: DefaultTextStyle(style: textStyle, child: child!),
                 ),
               ),
+            ),
     );
   }
 }

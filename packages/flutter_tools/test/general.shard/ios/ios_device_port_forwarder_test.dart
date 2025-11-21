@@ -9,7 +9,7 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-const Map<String, String> kDyLdLibEntry = <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libs'};
+const kDyLdLibEntry = <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libs'};
 
 void main() {
   // By default, the .forward() method will try every port between 1024
@@ -18,7 +18,7 @@ void main() {
   testWithoutContext(
     'IOSDevicePortForwarder.forward will kill iproxy processes before invoking a second',
     () async {
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         // iproxy does not exit with 0 when it cannot forward;
         // the FakeCommands below expect an exitCode of 0.
         const FakeCommand(
@@ -32,9 +32,9 @@ void main() {
           environment: kDyLdLibEntry,
         ),
       ]);
-      final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
+      final operatingSystemUtils = FakeOperatingSystemUtils();
 
-      final IOSDevicePortForwarder portForwarder = IOSDevicePortForwarder.test(
+      final portForwarder = IOSDevicePortForwarder.test(
         processManager: processManager,
         logger: BufferLogger.test(),
         operatingSystemUtils: operatingSystemUtils,

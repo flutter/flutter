@@ -155,9 +155,9 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
           const Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Radio<int>(value: 0, groupValue: 0, onChanged: null),
-              Radio<int>(value: 1, groupValue: 0, onChanged: null),
-              Radio<int>(value: 2, groupValue: 0, onChanged: null),
+              Radio<int>(value: 0, groupValue: 0),
+              Radio<int>(value: 1, groupValue: 0),
+              Radio<int>(value: 2, groupValue: 0),
             ],
           ),
         ],

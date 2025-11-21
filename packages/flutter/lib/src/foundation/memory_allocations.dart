@@ -252,14 +252,13 @@ class FlutterMemoryAllocations {
               'MemoryAllocations while '
               'dispatching notifications for $type',
             ),
-            informationCollector:
-                () => <DiagnosticsNode>[
-                  DiagnosticsProperty<Object>(
-                    'The $type sending notification was',
-                    event.object,
-                    style: DiagnosticsTreeStyle.errorProperty,
-                  ),
-                ],
+            informationCollector: () => <DiagnosticsNode>[
+              DiagnosticsProperty<Object>(
+                'The $type sending notification was',
+                event.object,
+                style: DiagnosticsTreeStyle.errorProperty,
+              ),
+            ],
           ),
         );
       }

@@ -530,7 +530,7 @@ void main() {
       createAppWithButtonThatLaunchesActionSheet(
         Builder(
           builder: (BuildContext context) {
-            screenHeight = MediaQuery.sizeOf(context).height;
+            screenHeight = MediaQuery.heightOf(context);
             return MediaQuery.withClampedTextScaling(
               minScaleFactor: 3.0,
               maxScaleFactor: 3.0,
@@ -579,15 +579,14 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    final List<CupertinoScrollbar> scrollbars =
-        find
-            .descendant(
-              of: find.byType(CupertinoActionSheet),
-              matching: find.byType(CupertinoScrollbar),
-            )
-            .evaluate()
-            .map((Element e) => e.widget as CupertinoScrollbar)
-            .toList();
+    final List<CupertinoScrollbar> scrollbars = find
+        .descendant(
+          of: find.byType(CupertinoActionSheet),
+          matching: find.byType(CupertinoScrollbar),
+        )
+        .evaluate()
+        .map((Element e) => e.widget as CupertinoScrollbar)
+        .toList();
 
     expect(scrollbars.length, 2);
     expect(scrollbars[0].controller != scrollbars[1].controller, isTrue);
@@ -706,7 +705,7 @@ void main() {
       createAppWithButtonThatLaunchesActionSheet(
         Builder(
           builder: (BuildContext context) {
-            screenHeight = MediaQuery.sizeOf(context).height;
+            screenHeight = MediaQuery.heightOf(context);
             return CupertinoActionSheet(
               message: Text('content ' * 1000),
               actions: <Widget>[
@@ -1774,20 +1773,32 @@ void main() {
                           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           children: <TestSemantics>[
                             TestSemantics(
-                              flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
+                                SemanticsFlag.isFocusable,
+                              ],
+                              actions: <SemanticsAction>[
+                                SemanticsAction.tap,
+                                SemanticsAction.focus,
+                              ],
                               label: 'One',
                             ),
                             TestSemantics(
-                              flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                              actions: <SemanticsAction>[SemanticsAction.tap],
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.isButton,
+                                SemanticsFlag.isFocusable,
+                              ],
+                              actions: <SemanticsAction>[
+                                SemanticsAction.tap,
+                                SemanticsAction.focus,
+                              ],
                               label: 'Two',
                             ),
                           ],
                         ),
                         TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                          actions: <SemanticsAction>[SemanticsAction.tap],
+                          flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.isFocusable],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                           label: 'Cancel',
                         ),
                       ],
@@ -1971,6 +1982,531 @@ void main() {
     },
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
+
+  testWidgets(
+    'CupertinoActionSheet appearance changes correctly when actions or cancel button is focused',
+    (WidgetTester tester) async {
+      final FocusNode focusNodeOne = FocusNode(debugLabel: 'CupertinoActionSheetAction One');
+      final FocusNode focusNodeTwo = FocusNode(debugLabel: 'CupertinoActionSheetAction Two');
+      final FocusNode focusNodeCancel = FocusNode(debugLabel: 'CupertinoActionSheetAction Cancel');
+
+      addTearDown(focusNodeOne.dispose);
+      addTearDown(focusNodeTwo.dispose);
+      addTearDown(focusNodeCancel.dispose);
+
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+      final Border defaultFocusedBorder = Border.fromBorderSide(
+        BorderSide(
+          color:
+              HSLColor.fromColor(
+                    CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity),
+                  )
+                  .withLightness(kCupertinoFocusColorBrightness)
+                  .withSaturation(kCupertinoFocusColorSaturation)
+                  .toColor(),
+          width: 3.5,
+        ),
+      );
+
+      await tester.pumpWidget(
+        createAppWithButtonThatLaunchesActionSheet(
+          CupertinoActionSheet(
+            title: const Text('Title'),
+            message: const Text('Message'),
+            actions: <Widget>[
+              CupertinoActionSheetAction(
+                onPressed: () {},
+                focusNode: focusNodeOne,
+                child: const Text('One'),
+              ),
+              CupertinoActionSheetAction(
+                onPressed: () {},
+                focusNode: focusNodeTwo,
+                child: const Text('Two'),
+              ),
+            ],
+            cancelButton: CupertinoActionSheetAction(
+              onPressed: () {},
+              focusNode: focusNodeCancel,
+              child: const Text('Cancel'),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Go'));
+      await tester.pumpAndSettle();
+
+      final Finder decoratedBoxBetweenTraversalGroupAndButtonBackgroundFinder = find.ancestor(
+        of: find.byElementPredicate((Element element) {
+          return element.widget.runtimeType.toString() == '_ActionSheetButtonBackground';
+        }),
+        matching: find.descendant(
+          of: find.byType(CupertinoFocusHalo),
+          matching: find.byType(DecoratedBox),
+        ),
+      );
+
+      final Finder actionsDecoratedBoxFinder = find.ancestor(
+        of: find.widgetWithText(CupertinoActionSheetAction, 'One'),
+        matching: decoratedBoxBetweenTraversalGroupAndButtonBackgroundFinder,
+      );
+
+      final Finder cancelDecoratedBoxFinder = find.ancestor(
+        of: find.widgetWithText(CupertinoActionSheetAction, 'Cancel'),
+        matching: decoratedBoxBetweenTraversalGroupAndButtonBackgroundFinder,
+      );
+
+      BoxBorder? getBorder(Finder decoratedBoxFinder) {
+        final DecoratedBox box = tester.widget(decoratedBoxFinder) as DecoratedBox;
+        final BoxDecoration decoration = box.decoration as BoxDecoration;
+
+        return decoration.border;
+      }
+
+      expect(actionsDecoratedBoxFinder, findsOneWidget);
+      expect(cancelDecoratedBoxFinder, findsOneWidget);
+
+      expect(getBorder(actionsDecoratedBoxFinder), isNull);
+      expect(getBorder(cancelDecoratedBoxFinder), isNull);
+
+      focusNodeOne.requestFocus();
+      await tester.pumpAndSettle();
+
+      expect(getBorder(actionsDecoratedBoxFinder), defaultFocusedBorder);
+      expect(getBorder(cancelDecoratedBoxFinder), isNull);
+
+      focusNodeTwo.requestFocus();
+      await tester.pumpAndSettle();
+
+      expect(getBorder(actionsDecoratedBoxFinder), defaultFocusedBorder);
+      expect(getBorder(cancelDecoratedBoxFinder), isNull);
+
+      focusNodeCancel.requestFocus();
+      await tester.pumpAndSettle();
+
+      expect(getBorder(actionsDecoratedBoxFinder), isNull);
+      expect(getBorder(cancelDecoratedBoxFinder), defaultFocusedBorder);
+
+      focusNodeCancel.unfocus();
+      await tester.pumpAndSettle();
+
+      expect(getBorder(actionsDecoratedBoxFinder), isNull);
+      expect(getBorder(cancelDecoratedBoxFinder), isNull);
+    },
+  );
+
+  testWidgets('CupertinoActionSheetActions in CupertinoActionSheet can be focused and unfocused', (
+    WidgetTester tester,
+  ) async {
+    final FocusNode focusNodeOne = FocusNode(debugLabel: 'CupertinoActionSheetAction One');
+    final FocusNode focusNodeTwo = FocusNode(debugLabel: 'CupertinoActionSheetAction Two');
+    final FocusNode focusNodeCancel = FocusNode(debugLabel: 'CupertinoActionSheetAction Cancel');
+
+    addTearDown(focusNodeOne.dispose);
+    addTearDown(focusNodeTwo.dispose);
+    addTearDown(focusNodeCancel.dispose);
+
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        CupertinoActionSheet(
+          title: const Text('Title'),
+          message: const Text('Message'),
+          actions: <Widget>[
+            CupertinoActionSheetAction(
+              onPressed: () {},
+              focusNode: focusNodeOne,
+              child: const Text('One'),
+            ),
+            CupertinoActionSheetAction(
+              onPressed: () {},
+              focusNode: focusNodeTwo,
+              child: const Text('Two'),
+            ),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () {},
+            focusNode: focusNodeCancel,
+            child: const Text('Cancel'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    expect(focusNodeOne.hasPrimaryFocus, isFalse);
+    expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+    expect(focusNodeCancel.hasPrimaryFocus, isFalse);
+
+    focusNodeOne.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(focusNodeOne.hasPrimaryFocus, isTrue);
+    expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+    expect(focusNodeCancel.hasPrimaryFocus, isFalse);
+
+    focusNodeTwo.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(focusNodeOne.hasPrimaryFocus, isFalse);
+    expect(focusNodeTwo.hasPrimaryFocus, isTrue);
+    expect(focusNodeCancel.hasPrimaryFocus, isFalse);
+
+    focusNodeTwo.unfocus();
+    await tester.pumpAndSettle();
+
+    expect(focusNodeOne.hasPrimaryFocus, isFalse);
+    expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+    expect(focusNodeCancel.hasPrimaryFocus, isFalse);
+
+    focusNodeCancel.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(focusNodeOne.hasPrimaryFocus, isFalse);
+    expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+    expect(focusNodeCancel.hasPrimaryFocus, isTrue);
+
+    focusNodeCancel.unfocus();
+    await tester.pumpAndSettle();
+
+    expect(focusNodeOne.hasPrimaryFocus, isFalse);
+    expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+    expect(focusNodeCancel.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets(
+    'CupertinoActionSheetActions in CupertinoActionSheet can be traversed with keyboard',
+    (WidgetTester tester) async {
+      final FocusNode focusNodeOne = FocusNode(debugLabel: 'CupertinoActionSheetAction One');
+      final FocusNode focusNodeTwo = FocusNode(debugLabel: 'CupertinoActionSheetAction Two');
+      final FocusNode focusNodeCancel = FocusNode(debugLabel: 'CupertinoActionSheetAction Cancel');
+
+      addTearDown(focusNodeOne.dispose);
+      addTearDown(focusNodeTwo.dispose);
+      addTearDown(focusNodeCancel.dispose);
+
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+      await tester.pumpWidget(
+        createAppWithButtonThatLaunchesActionSheet(
+          CupertinoActionSheet(
+            title: const Text('Title'),
+            message: const Text('Message'),
+            actions: <Widget>[
+              CupertinoActionSheetAction(
+                onPressed: () {},
+                focusNode: focusNodeOne,
+                child: const Text('One'),
+              ),
+              CupertinoActionSheetAction(
+                onPressed: () {},
+                focusNode: focusNodeTwo,
+                child: const Text('Two'),
+              ),
+            ],
+            cancelButton: CupertinoActionSheetAction(
+              onPressed: () {},
+              focusNode: focusNodeCancel,
+              child: const Text('Cancel'),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Go'));
+      await tester.pumpAndSettle();
+
+      expect(focusNodeOne.hasPrimaryFocus, isFalse);
+      expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+      expect(focusNodeCancel.hasPrimaryFocus, isFalse);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      expect(focusNodeOne.hasPrimaryFocus, isTrue);
+      expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+      expect(focusNodeCancel.hasPrimaryFocus, isFalse);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      expect(focusNodeOne.hasPrimaryFocus, isFalse);
+      expect(focusNodeTwo.hasPrimaryFocus, isTrue);
+      expect(focusNodeCancel.hasPrimaryFocus, isFalse);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      expect(focusNodeOne.hasPrimaryFocus, isFalse);
+      expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+      expect(focusNodeCancel.hasPrimaryFocus, isTrue);
+    },
+  );
+
+  testWidgets(
+    'CupertinoActionSheetAction in CupertinoActionSheet actions can be selected with keyboard',
+    (WidgetTester tester) async {
+      bool isOneSelected = false;
+
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+      await tester.pumpWidget(
+        createAppWithButtonThatLaunchesActionSheet(
+          CupertinoActionSheet(
+            title: const Text('Title'),
+            message: const Text('Message'),
+            actions: <Widget>[
+              CupertinoActionSheetAction(
+                onPressed: () {
+                  isOneSelected = true;
+                },
+                child: const Text('One'),
+              ),
+              CupertinoActionSheetAction(onPressed: () {}, child: const Text('Two')),
+            ],
+            cancelButton: CupertinoActionSheetAction(onPressed: () {}, child: const Text('Cancel')),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Go'));
+      await tester.pumpAndSettle();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      expect(isOneSelected, isFalse);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.space);
+      await tester.pumpAndSettle();
+
+      expect(isOneSelected, isTrue);
+    },
+  );
+
+  testWidgets(
+    'CupertinoActionSheetAction as CupertinoActionSheet cancel button can be selected with keyboard',
+    (WidgetTester tester) async {
+      bool isCancelSelected = false;
+
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+      await tester.pumpWidget(
+        createAppWithButtonThatLaunchesActionSheet(
+          CupertinoActionSheet(
+            title: const Text('Title'),
+            message: const Text('Message'),
+            actions: <Widget>[
+              CupertinoActionSheetAction(onPressed: () {}, child: const Text('One')),
+              CupertinoActionSheetAction(onPressed: () {}, child: const Text('Two')),
+            ],
+            cancelButton: CupertinoActionSheetAction(
+              onPressed: () {
+                isCancelSelected = true;
+              },
+              child: const Text('Cancel'),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Go'));
+      await tester.pumpAndSettle();
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+      await tester.pumpAndSettle();
+
+      expect(isCancelSelected, isFalse);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.space);
+      await tester.pumpAndSettle();
+
+      expect(isCancelSelected, isTrue);
+    },
+  );
+
+  testWidgets('CupertinoActionSheetAction has correct focused appearance in light theme', (
+    WidgetTester tester,
+  ) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoActionSheetAction');
+
+    addTearDown(focusNode.dispose);
+
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    final Color defaultLightFocusColor = HSLColor.fromColor(
+      CupertinoColors.activeBlue.withOpacity(kCupertinoButtonTintedOpacityLight),
+    ).toColor();
+
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        CupertinoActionSheet(
+          title: const Text('Title'),
+          message: const Text('Message'),
+          actions: <Widget>[
+            CupertinoActionSheetAction(onPressed: () {}, child: const Text('One')),
+            CupertinoActionSheetAction(onPressed: () {}, child: const Text('Two')),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () {},
+            focusNode: focusNode,
+            child: const Text('Cancel'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final Finder decoratedBoxFinder = find.descendant(
+      of: find.byType(CupertinoActionSheetAction),
+      matching: find.byType(DecoratedBox),
+    );
+
+    expect(decoratedBoxFinder, findsNothing);
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(decoratedBoxFinder, findsOneWidget);
+
+    final BoxDecoration decoration =
+        tester.widget<DecoratedBox>(decoratedBoxFinder).decoration as BoxDecoration;
+
+    expect(decoration.color, defaultLightFocusColor);
+
+    focusNode.unfocus();
+    await tester.pumpAndSettle();
+
+    expect(decoratedBoxFinder, findsNothing);
+  });
+
+  testWidgets('CupertinoActionSheetAction has correct focused appearance in dark theme', (
+    WidgetTester tester,
+  ) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoActionSheetAction');
+
+    addTearDown(focusNode.dispose);
+
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    final Color defaultDarkFocusColor = HSLColor.fromColor(
+      CupertinoColors.activeBlue.withOpacity(kCupertinoButtonTintedOpacityDark),
+    ).toColor();
+
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        CupertinoActionSheet(
+          title: const Text('Title'),
+          message: const Text('Message'),
+          actions: <Widget>[
+            CupertinoActionSheetAction(onPressed: () {}, child: const Text('One')),
+            CupertinoActionSheetAction(onPressed: () {}, child: const Text('Two')),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () {},
+            focusNode: focusNode,
+            child: const Text('Cancel'),
+          ),
+        ),
+        brightness: Brightness.dark,
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final Finder decoratedBoxFinder = find.descendant(
+      of: find.byType(CupertinoActionSheetAction),
+      matching: find.byType(DecoratedBox),
+    );
+
+    expect(decoratedBoxFinder, findsNothing);
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(decoratedBoxFinder, findsOneWidget);
+
+    final BoxDecoration decoration =
+        tester.widget<DecoratedBox>(decoratedBoxFinder).decoration as BoxDecoration;
+
+    expect(decoration.color, defaultDarkFocusColor);
+
+    focusNode.unfocus();
+    await tester.pumpAndSettle();
+
+    expect(decoratedBoxFinder, findsNothing);
+  });
+
+  testWidgets('CupertinoActionSheetAction has correct focused appearance with custom focus color', (
+    WidgetTester tester,
+  ) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoActionSheetAction');
+
+    addTearDown(focusNode.dispose);
+
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    const Color focusColor = Colors.orange;
+
+    final Color defaultDarkFocusColor = HSLColor.fromColor(
+      focusColor.withOpacity(kCupertinoButtonTintedOpacityDark),
+    ).toColor();
+
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        CupertinoActionSheet(
+          title: const Text('Title'),
+          message: const Text('Message'),
+          actions: <Widget>[
+            CupertinoActionSheetAction(onPressed: () {}, child: const Text('One')),
+            CupertinoActionSheetAction(onPressed: () {}, child: const Text('Two')),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () {},
+            focusNode: focusNode,
+            focusColor: focusColor,
+            child: const Text('Cancel'),
+          ),
+        ),
+        brightness: Brightness.dark,
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final Finder decoratedBoxFinder = find.descendant(
+      of: find.byType(CupertinoActionSheetAction),
+      matching: find.byType(DecoratedBox),
+    );
+
+    expect(decoratedBoxFinder, findsNothing);
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(decoratedBoxFinder, findsOneWidget);
+
+    final BoxDecoration decoration =
+        tester.widget<DecoratedBox>(decoratedBoxFinder).decoration as BoxDecoration;
+
+    expect(decoration.color, defaultDarkFocusColor);
+
+    focusNode.unfocus();
+    await tester.pumpAndSettle();
+
+    expect(decoratedBoxFinder, findsNothing);
+  });
 }
 
 RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
@@ -1983,8 +2519,12 @@ RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
   return actionsSection as RenderBox;
 }
 
-Widget createAppWithButtonThatLaunchesActionSheet(Widget actionSheet) {
+Widget createAppWithButtonThatLaunchesActionSheet(
+  Widget actionSheet, {
+  Brightness brightness = Brightness.light,
+}) {
   return CupertinoApp(
+    theme: CupertinoThemeData(brightness: brightness),
     home: Center(
       child: Builder(
         builder: (BuildContext context) {
@@ -2031,28 +2571,26 @@ class TestScaffoldAppState extends State<TestScaffoldApp> {
       debugShowCheckedModeBanner: false,
       theme: widget.theme,
       home: Builder(
-        builder:
-            (BuildContext context) => CupertinoPageScaffold(
-              child: Center(
-                child:
-                    _pressedButton
-                        ? Container()
-                        : CupertinoButton(
-                          onPressed: () {
-                            setState(() {
-                              _pressedButton = true;
-                            });
-                            showCupertinoModalPopup<void>(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return widget.actionSheet;
-                              },
-                            );
-                          },
-                          child: const Text('Go'),
-                        ),
-              ),
-            ),
+        builder: (BuildContext context) => CupertinoPageScaffold(
+          child: Center(
+            child: _pressedButton
+                ? Container()
+                : CupertinoButton(
+                    onPressed: () {
+                      setState(() {
+                        _pressedButton = true;
+                      });
+                      showCupertinoModalPopup<void>(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return widget.actionSheet;
+                        },
+                      );
+                    },
+                    child: const Text('Go'),
+                  ),
+          ),
+        ),
       ),
     );
   }

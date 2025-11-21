@@ -232,7 +232,9 @@ void main() {
         null,
       )..addAll(_buildGestureMap(() => TapGestureRecognizer(), null));
       await tester.pumpWidget(
-        Center(child: RawGestureDetector(gestures: gestures, child: Container())),
+        Center(
+          child: RawGestureDetector(gestures: gestures, child: Container()),
+        ),
       );
 
       expect(
@@ -278,7 +280,9 @@ void main() {
       expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap]));
 
       await tester.pumpWidget(
-        Center(child: RawGestureDetector(gestures: gestures, child: Container())),
+        Center(
+          child: RawGestureDetector(gestures: gestures, child: Container()),
+        ),
       );
 
       expect(
@@ -612,46 +616,46 @@ void main() {
         final SemanticsTester semantics = SemanticsTester(tester);
         final GlobalKey detectorKey = GlobalKey();
         final List<String> logs = <String>[];
-        final Map<Type, GestureRecognizerFactory> gestures = _buildGestureMap(
-          () => HorizontalDragGestureRecognizer(),
-          (HorizontalDragGestureRecognizer horizontal) {
-            horizontal
-              ..onStart = (_) {
-                logs.add('HStart');
-              }
-              ..onDown = (_) {
-                logs.add('HDown');
-              }
-              ..onEnd = (_) {
-                logs.add('HEnd');
-              }
-              ..onUpdate = (_) {
-                logs.add('HUpdate');
-              }
-              ..onCancel = () {
-                logs.add('WRONG');
-              };
-          },
-        )..addAll(
-          _buildGestureMap(() => PanGestureRecognizer(), (PanGestureRecognizer pan) {
-            pan
-              ..onStart = (_) {
-                logs.add('PStart');
-              }
-              ..onDown = (_) {
-                logs.add('PDown');
-              }
-              ..onEnd = (_) {
-                logs.add('PEnd');
-              }
-              ..onUpdate = (_) {
-                logs.add('PUpdate');
-              }
-              ..onCancel = () {
-                logs.add('WRONG');
-              };
-          }),
-        );
+        final Map<Type, GestureRecognizerFactory> gestures =
+            _buildGestureMap(() => HorizontalDragGestureRecognizer(), (
+              HorizontalDragGestureRecognizer horizontal,
+            ) {
+              horizontal
+                ..onStart = (_) {
+                  logs.add('HStart');
+                }
+                ..onDown = (_) {
+                  logs.add('HDown');
+                }
+                ..onEnd = (_) {
+                  logs.add('HEnd');
+                }
+                ..onUpdate = (_) {
+                  logs.add('HUpdate');
+                }
+                ..onCancel = () {
+                  logs.add('WRONG');
+                };
+            })..addAll(
+              _buildGestureMap(() => PanGestureRecognizer(), (PanGestureRecognizer pan) {
+                pan
+                  ..onStart = (_) {
+                    logs.add('PStart');
+                  }
+                  ..onDown = (_) {
+                    logs.add('PDown');
+                  }
+                  ..onEnd = (_) {
+                    logs.add('PEnd');
+                  }
+                  ..onUpdate = (_) {
+                    logs.add('PUpdate');
+                  }
+                  ..onCancel = () {
+                    logs.add('WRONG');
+                  };
+              }),
+            );
         await tester.pumpWidget(
           Center(
             child: RawGestureDetector(key: detectorKey, gestures: gestures, child: Container()),
@@ -744,46 +748,46 @@ void main() {
         final SemanticsTester semantics = SemanticsTester(tester);
         final GlobalKey detectorKey = GlobalKey();
         final List<String> logs = <String>[];
-        final Map<Type, GestureRecognizerFactory> gestures = _buildGestureMap(
-          () => VerticalDragGestureRecognizer(),
-          (VerticalDragGestureRecognizer horizontal) {
-            horizontal
-              ..onStart = (_) {
-                logs.add('VStart');
-              }
-              ..onDown = (_) {
-                logs.add('VDown');
-              }
-              ..onEnd = (_) {
-                logs.add('VEnd');
-              }
-              ..onUpdate = (_) {
-                logs.add('VUpdate');
-              }
-              ..onCancel = () {
-                logs.add('WRONG');
-              };
-          },
-        )..addAll(
-          _buildGestureMap(() => PanGestureRecognizer(), (PanGestureRecognizer pan) {
-            pan
-              ..onStart = (_) {
-                logs.add('PStart');
-              }
-              ..onDown = (_) {
-                logs.add('PDown');
-              }
-              ..onEnd = (_) {
-                logs.add('PEnd');
-              }
-              ..onUpdate = (_) {
-                logs.add('PUpdate');
-              }
-              ..onCancel = () {
-                logs.add('WRONG');
-              };
-          }),
-        );
+        final Map<Type, GestureRecognizerFactory> gestures =
+            _buildGestureMap(() => VerticalDragGestureRecognizer(), (
+              VerticalDragGestureRecognizer horizontal,
+            ) {
+              horizontal
+                ..onStart = (_) {
+                  logs.add('VStart');
+                }
+                ..onDown = (_) {
+                  logs.add('VDown');
+                }
+                ..onEnd = (_) {
+                  logs.add('VEnd');
+                }
+                ..onUpdate = (_) {
+                  logs.add('VUpdate');
+                }
+                ..onCancel = () {
+                  logs.add('WRONG');
+                };
+            })..addAll(
+              _buildGestureMap(() => PanGestureRecognizer(), (PanGestureRecognizer pan) {
+                pan
+                  ..onStart = (_) {
+                    logs.add('PStart');
+                  }
+                  ..onDown = (_) {
+                    logs.add('PDown');
+                  }
+                  ..onEnd = (_) {
+                    logs.add('PEnd');
+                  }
+                  ..onUpdate = (_) {
+                    logs.add('PUpdate');
+                  }
+                  ..onCancel = () {
+                    logs.add('WRONG');
+                  };
+              }),
+            );
         await tester.pumpWidget(
           Center(
             child: RawGestureDetector(key: detectorKey, gestures: gestures, child: Container()),

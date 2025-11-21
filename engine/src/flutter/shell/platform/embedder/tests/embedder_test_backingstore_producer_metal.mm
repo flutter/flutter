@@ -27,13 +27,13 @@ bool EmbedderTestBackingStoreProducerMetal::Create(const FlutterBackingStoreConf
                                                    FlutterBackingStore* backing_store_out) {
   // TODO(gw280): Use SkSurfaces::RenderTarget instead of generating our
   // own MTLTexture and wrapping it.
-  auto surface_size = SkISize::Make(config->size.width, config->size.height);
+  auto surface_size = DlISize(config->size.width, config->size.height);
   auto texture_info = test_metal_context_->CreateMetalTexture(surface_size);
 
   GrMtlTextureInfo skia_texture_info;
   skia_texture_info.fTexture.reset(SkCFSafeRetain(texture_info.texture));
   GrBackendTexture backend_texture = GrBackendTextures::MakeMtl(
-      surface_size.width(), surface_size.height(), skgpu::Mipmapped::kNo, skia_texture_info);
+      surface_size.width, surface_size.height, skgpu::Mipmapped::kNo, skia_texture_info);
 
   sk_sp<SkSurface> surface =
       SkSurfaces::WrapBackendTexture(context_.get(), backend_texture, kTopLeft_GrSurfaceOrigin, 1,

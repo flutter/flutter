@@ -162,10 +162,9 @@ void main() {
           builder: (BuildContext context, StateSetter setter) {
             setState = setter;
             return MediaQuery(
-              data:
-                  updated
-                      ? const MediaQueryData(platformBrightness: Brightness.dark)
-                      : const MediaQueryData(),
+              data: updated
+                  ? const MediaQueryData(platformBrightness: Brightness.dark)
+                  : const MediaQueryData(),
               child: LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
                   return Center(

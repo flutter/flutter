@@ -87,14 +87,7 @@ class AnalyzeCommand extends FlutterCommand {
       hide: !verboseHelp,
     );
     argParser.addFlag('suggestions', help: 'Show suggestions about the current flutter project.');
-    argParser.addFlag(
-      'machine',
-      negatable: false,
-      help:
-          'Dumps a JSON with a subset of relevant data about the tool, project, '
-          'and environment.',
-      hide: !verboseHelp,
-    );
+    addMachineOutputFlag(verboseHelp: verboseHelp);
 
     // Hidden option to enable a benchmarking mode.
     argParser.addFlag(
@@ -245,7 +238,7 @@ class AnalyzeCommand extends FlutterCommand {
     }
 
     // Don't run pub if asking for machine output.
-    if (boolArg('machine')) {
+    if (outputMachineFormat) {
       return false;
     }
 
@@ -370,7 +363,7 @@ class AnalyzeCommand extends FlutterCommand {
         allProjectValidators: _allProjectValidators,
         userPath: directoryPath,
         processManager: _processManager,
-        machine: boolArg('machine'),
+        machine: outputMachineFormat,
       ).run();
     } else if (boolArg('watch')) {
       await AnalyzeContinuously(

@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "वेबमा खोज्नुहोस्",
   "shareButtonLabel": "सेयर गर्नुहोस्",
   "pasteButtonLabel": "टाँस्नुहोस्",
-  "selectAllButtonLabel": "सबै बटनहरू चयन गर्नुहोस्"
+  "selectAllButtonLabel": "सबै बटनहरू चयन गर्नुहोस्",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found",
+  "radioButtonUnselectedLabel": "Not selected"
 }

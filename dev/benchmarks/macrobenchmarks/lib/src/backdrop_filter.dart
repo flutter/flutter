@@ -95,19 +95,17 @@ class _BackdropFilterPageState extends State<BackdropFilterPage> with TickerProv
                     const Text('Backdrop per txt:'),
                     Checkbox(
                       value: _blurTexts,
-                      onChanged:
-                          (bool? v) => setState(() {
-                            _blurTexts = v ?? false;
-                          }),
+                      onChanged: (bool? v) => setState(() {
+                        _blurTexts = v ?? false;
+                      }),
                     ),
                     const SizedBox(width: 10),
                     const Text('Backdrop grid:'),
                     Checkbox(
                       value: _blurGroup,
-                      onChanged:
-                          (bool? v) => setState(() {
-                            _blurGroup = v ?? false;
-                          }),
+                      onChanged: (bool? v) => setState(() {
+                        _blurGroup = v ?? false;
+                      }),
                     ),
                   ],
                 ),

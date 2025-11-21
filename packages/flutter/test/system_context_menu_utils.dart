@@ -18,6 +18,8 @@ IOSSystemContextMenuItemData systemContextMenuItemDataFromJson(Map<String, dynam
     'searchWeb' => IOSSystemContextMenuItemDataSearchWeb(title: title!),
     'share' => IOSSystemContextMenuItemDataShare(title: title!),
     'lookUp' => IOSSystemContextMenuItemDataLookUp(title: title!),
+    'captureTextFromCamera' => const IOSSystemContextMenuItemDataLiveText(),
+    'custom' => IOSSystemContextMenuItemDataCustom(title: title!, onPressed: () {}),
     _ => throw FlutterError('Invalid json for IOSSystemContextMenuItem.type $type.'),
   };
 }

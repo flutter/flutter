@@ -81,8 +81,10 @@ class CharacterBoundary extends TextBoundary {
     if (position < 0) {
       return null;
     }
-    final int graphemeStart =
-        CharacterRange.at(_text, min(position, _text.length)).stringBeforeLength;
+    final int graphemeStart = CharacterRange.at(
+      _text,
+      min(position, _text.length),
+    ).stringBeforeLength;
     assert(CharacterRange.at(_text, graphemeStart).isEmpty);
     return graphemeStart;
   }
@@ -108,14 +110,14 @@ class CharacterBoundary extends TextBoundary {
     final CharacterRange rangeAtPosition = CharacterRange.at(_text, position);
     return rangeAtPosition.isNotEmpty
         ? TextRange(
-          start: rangeAtPosition.stringBeforeLength,
-          end: rangeAtPosition.stringBeforeLength + rangeAtPosition.current.length,
-        )
+            start: rangeAtPosition.stringBeforeLength,
+            end: rangeAtPosition.stringBeforeLength + rangeAtPosition.current.length,
+          )
         // rangeAtPosition is empty means `position` is a grapheme boundary.
         : TextRange(
-          start: rangeAtPosition.stringBeforeLength,
-          end: getTrailingTextBoundaryAt(position) ?? -1,
-        );
+            start: rangeAtPosition.stringBeforeLength,
+            end: getTrailingTextBoundaryAt(position) ?? -1,
+          );
   }
 }
 

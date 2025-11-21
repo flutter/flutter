@@ -73,7 +73,7 @@ class RenderPassVK final : public RenderPass {
   void SetViewport(Viewport viewport) override;
 
   // |RenderPass|
-  void SetScissor(IRect scissor) override;
+  void SetScissor(IRect32 scissor) override;
 
   // |RenderPass|
   void SetElementCount(size_t count) override;

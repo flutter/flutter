@@ -15,7 +15,8 @@ import '../../src/fake_process_manager.dart';
 FakeCommand _clangPresentCommand(String version) {
   return FakeCommand(
     command: const <String>['clang++', '--version'],
-    stdout: '''
+    stdout:
+        '''
 clang version $version-6+build1
 Target: x86_64-pc-linux-gnu
 Thread model: posix
@@ -29,7 +30,8 @@ InstalledDir: /usr/bin
 FakeCommand _cmakePresentCommand(String version) {
   return FakeCommand(
     command: const <String>['cmake', '--version'],
-    stdout: '''
+    stdout:
+        '''
 cmake version $version
 
 CMake suite maintained and supported by Kitware (kitware.com/cmake).
@@ -74,7 +76,7 @@ FakeCommand _eglinfoPresentCommand({
   bool core = true,
   bool es = true,
 }) {
-  String stdout = '''
+  var stdout = '''
 EGL client extensions string:
     EGL_EXT_client_extensions
 ''';
@@ -359,7 +361,7 @@ void main() {
   });
 
   testWithoutContext('Missing validation when pkg-config is missing', () async {
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -391,7 +393,7 @@ void main() {
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
       userMessages: userMessages,
@@ -426,7 +428,7 @@ void main() {
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
       userMessages: userMessages,
@@ -461,7 +463,7 @@ void main() {
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
       userMessages: userMessages,
@@ -496,7 +498,7 @@ void main() {
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
       userMessages: userMessages,
@@ -531,7 +533,7 @@ void main() {
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
       userMessages: userMessages,
@@ -566,7 +568,7 @@ void main() {
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
       userMessages: userMessages,
@@ -601,7 +603,7 @@ void main() {
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
       userMessages: userMessages,
@@ -626,7 +628,7 @@ void main() {
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
       userMessages: userMessages,
@@ -651,7 +653,7 @@ void main() {
       ..._gtkLibrariesMissingCommands(),
       _eglinfoPresentCommand(),
     ]);
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
       userMessages: userMessages,
@@ -697,7 +699,7 @@ void main() {
   });
 
   testWithoutContext('Warning when eglinfo not available', () async {
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),

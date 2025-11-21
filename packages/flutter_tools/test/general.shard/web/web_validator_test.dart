@@ -38,8 +38,10 @@ void main() {
       browserFinder: findChromeExecutable,
       logger: BufferLogger.test(),
     );
-    webValidator =
-        webValidator = ChromeValidator(platform: platform, chromiumLauncher: chromeLauncher);
+    webValidator = webValidator = ChromeValidator(
+      platform: platform,
+      chromiumLauncher: chromeLauncher,
+    );
   });
 
   testWithoutContext('WebValidator can find executable on macOS', () async {

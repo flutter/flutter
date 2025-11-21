@@ -48,6 +48,7 @@ enum class AccessibilityFeatureFlag : int32_t {
   kReduceMotion = 1 << 4,
   kHighContrast = 1 << 5,
   kOnOffSwitchLabels = 1 << 6,
+  kNoAnnounce = 1 << 7,
 };
 
 //--------------------------------------------------------------------------
@@ -96,6 +97,20 @@ class PlatformConfigurationClient {
   /// @param[in] update The updated semantic tree to apply.
   ///
   virtual void UpdateSemantics(int64_t viewId, SemanticsUpdate* update) = 0;
+
+  //--------------------------------------------------------------------------
+  /// @brief      Framework sets the application locale
+  ///
+  /// @param[in] locale The application locale in BCP 47 format.
+  ///
+  virtual void SetApplicationLocale(std::string locale) = 0;
+
+  //--------------------------------------------------------------------------
+  /// @brief      Notifies whether Framework starts generating semantics tree.
+  ///
+  /// @param[in] enabled True if Framework starts generating semantics tree.
+  ///
+  virtual void SetSemanticsTreeEnabled(bool enabled) = 0;
 
   //--------------------------------------------------------------------------
   /// @brief      When the Flutter application has a message to send to the
@@ -624,6 +639,10 @@ class PlatformConfigurationNativeApi {
                      double height);
 
   static void UpdateSemantics(int64_t viewId, SemanticsUpdate* update);
+
+  static void SetApplicationLocale(std::string locale);
+
+  static void SetSemanticsTreeEnabled(bool enabled);
 
   static void SetNeedsReportTimings(bool value);
 

@@ -80,11 +80,11 @@
                 },
                 {
                     "language": "dart",
-                    "name": "test: observatory and service protocol",
-                    "script": "flutter/shell/testing/observatory/test.dart",
+                    "name": "test: service protocol",
+                    "script": "flutter/shell/testing/vm_service/test.dart",
                     "parameters": [
                         "out/ci/host_debug_unopt/flutter_tester",
-                        "flutter/shell/testing/observatory/empty_main.dart"
+                        "flutter/shell/testing/vm_service/empty_main.dart"
                     ]
                 },
                 {
@@ -279,6 +279,40 @@
             },
             "gn": [
                 "--target-dir",
+                "ci/host_release_licenses",
+                "--runtime-mode",
+                "release",
+                "--no-lto",
+                "--rbe",
+                "--no-goma"
+            ],
+            "name": "ci/host_release_licenses",
+            "description": "Runs the license_cpp script.",
+            "ninja": {
+                "config": "ci/host_release_licenses",
+                "targets": [
+                    "flutter/tools/licenses_cpp",
+                    "flutter/tools/licenses_cpp:licenses_cpp_testrunner"
+                ]
+            },
+            "tests": [
+                {
+                    "name": "Run license_cpp unittests",
+                    "script": "out/ci/host_release_licenses/licenses_cpp_testrunner"
+                }
+            ]
+        },
+        {
+            "cas_archive": false,
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux"
+            ],
+            "gclient_variables": {
+                "use_rbe": true
+            },
+            "gn": [
+                "--target-dir",
                 "ci/android_debug_test",
                 "--android",
                 "--android-cpu=arm",
@@ -334,6 +368,7 @@
                 "debug",
                 "--no-prebuilt-dart-sdk",
                 "--build-embedder-examples",
+                "--no-lto",
                 "--rbe",
                 "--no-goma"
             ],

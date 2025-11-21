@@ -48,7 +48,9 @@ void main() {
           key: rowKey,
           children: <Widget>[
             SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-            Expanded(child: SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2))),
+            Expanded(
+              child: SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
+            ),
             SizedBox(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
           ],
         ),
@@ -346,7 +348,9 @@ void main() {
           textDirection: TextDirection.ltr,
           children: <Widget>[
             SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-            Expanded(child: SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2))),
+            Expanded(
+              child: SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
+            ),
             SizedBox(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
           ],
         ),
@@ -778,7 +782,9 @@ void main() {
           textDirection: TextDirection.rtl,
           children: <Widget>[
             SizedBox(key: child0Key, width: 100.0, height: 100.0, child: log(1)),
-            Expanded(child: SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2))),
+            Expanded(
+              child: SizedBox(key: child1Key, width: 100.0, height: 100.0, child: log(2)),
+            ),
             SizedBox(key: child2Key, width: 100.0, height: 100.0, child: log(3)),
           ],
         ),

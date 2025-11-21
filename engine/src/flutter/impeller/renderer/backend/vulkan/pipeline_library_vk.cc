@@ -152,7 +152,8 @@ std::unique_ptr<ComputePipelineVK> PipelineLibraryVK::CreateComputePipeline(
 // |PipelineLibrary|
 PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
     PipelineDescriptor descriptor,
-    bool async) {
+    bool async,
+    bool threadsafe) {
   Lock lock(pipelines_mutex_);
   if (auto found = pipelines_.find(descriptor); found != pipelines_.end()) {
     return found->second;

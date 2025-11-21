@@ -25,7 +25,7 @@ extension type FlutterLoader._(JSObject _) implements JSObject {
 }
 
 /// Typedef for the function that initializes the flutter engine.
-/// ///
+///
 /// [JsFlutterConfiguration] comes from `../configuration.dart`. It is the same
 /// object that can be used to configure flutter "inline", through the
 /// (to be deprecated) `window.flutterConfiguration` object.
@@ -56,6 +56,15 @@ extension type FlutterEngineInitializer._primary(JSObject _) implements JSObject
     required JSFunction initializeEngine,
     required JSFunction autoStart,
   });
+
+  @JS('initializeEngine')
+  external JSPromise<FlutterAppRunner> _initializeEngine([JsFlutterConfiguration? config]);
+  Future<FlutterAppRunner> initializeEngine([JsFlutterConfiguration? config]) =>
+      _initializeEngine(config).toDart;
+
+  @JS('autoStart')
+  external JSPromise<FlutterApp> _autoStart();
+  Future<FlutterApp> autoStart() => _autoStart().toDart;
 }
 
 // FlutterAppRunner
@@ -70,6 +79,10 @@ extension type FlutterAppRunner._primary(JSObject _) implements JSObject {
   external factory FlutterAppRunner._({
     required JSFunction runApp, // Returns an App
   });
+
+  @JS('runApp')
+  external JSPromise<FlutterApp> _runApp([RunAppFnParameters? args]);
+  Future<FlutterApp> runApp([RunAppFnParameters? args]) => _runApp(args).toDart;
 }
 
 /// The shape of the object that can be passed as parameter to the

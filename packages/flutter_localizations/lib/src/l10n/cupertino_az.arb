@@ -29,5 +29,11 @@
   "searchWebButtonLabel": "Vebdə axtarın",
   "shareButtonLabel": "Paylaşın...",
   "cancelButtonLabel": "Ləğv edin",
-  "backButtonLabel": "Geri"
+  "backButtonLabel": "Geri",
+  "expansionTileExpandedHint": "yığcamlaşdırmaq üçün iki dəfə toxunun",
+  "expansionTileCollapsedHint": "genişləndirmək üçün iki dəfə toxunun",
+  "expansionTileExpandedTapHint": "Yığcamlaşdırın",
+  "expansionTileCollapsedTapHint": "Daha çox detallar üçün genişləndirin",
+  "expandedHint": "Yığcamlaşdırıldı",
+  "collapsedHint": "Genişləndirildi"
 }

@@ -65,7 +65,7 @@ void main() {
     testUsingContext(
       'retries if gradle fails while downloading',
       () async {
-        const String errorMessage = r'''
+        const errorMessage = r'''
 Exception in thread "main" java.io.FileNotFoundException: https://downloads.gradle.org/distributions/gradle-4.1.1-all.zip
 at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1872)
 at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1474)
@@ -101,7 +101,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
     );
 
     testUsingContext('retries if remote host terminated ssl handshake', () async {
-      const String errorMessage = r'''
+      const errorMessage = r'''
 Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host terminated the handshake
 	at java.base/sun.security.ssl.SSLSocketImpl.handleEOF(SSLSocketImpl.java:1696)
 	at java.base/sun.security.ssl.SSLSocketImpl.decode(SSLSocketImpl.java:1514)
@@ -149,7 +149,7 @@ Caused by: java.io.EOFException: SSL peer shut down incorrectly
     testUsingContext(
       'retries if gradle fails downloading with proxy error',
       () async {
-        const String errorMessage = r'''
+        const errorMessage = r'''
 Exception in thread "main" java.io.IOException: Unable to tunnel through proxy. Proxy returns "HTTP/1.1 400 Bad Request"
 at sun.net.www.protocol.http.HttpURLConnection.doTunneling(HttpURLConnection.java:2124)
 at sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:183)
@@ -189,7 +189,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
     testUsingContext(
       'retries if gradle fails downloading with bad gateway error',
       () async {
-        const String errorMessage = r'''
+        const errorMessage = r'''
 Exception in thread "main" java.io.IOException: Server returned HTTP response code: 502 for URL: https://objects.githubusercontent.com/github-production-release-asset-2e65be/696192900/1e77bbfb-4cde-4376-92ea-fc4ff57b8362?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=FFFF%2F20231220%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231220T160553Z&X-Amz-Expires=300&X-Amz-Signature=ffff&X-Amz-SignedHeaders=host&actor_id=0&key_id=0&repo_id=696192900&response-content-disposition=attachment%3B%20filename%3Dgradle-8.2.1-all.zip&response-content-type=application%2Foctet-stream
 at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1997)
 at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1589)
@@ -227,7 +227,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
     testUsingContext(
       'retries if gradle times out waiting for exclusive access to zip',
       () async {
-        const String errorMessage = '''
+        const errorMessage = '''
 Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached waiting for exclusive access to file: /User/documents/gradle-5.6.2-all.zip
 	at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:61)
 	at org.gradle.wrapper.Install.createDist(Install.java:48)
@@ -258,7 +258,7 @@ Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached
     testUsingContext(
       'retries if remote host closes connection',
       () async {
-        const String errorMessage = r'''
+        const errorMessage = r'''
 Downloading https://services.gradle.org/distributions/gradle-5.6.2-all.zip
 Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host closed connection during handshake
 	at sun.security.ssl.SSLSocketImpl.readRecord(SSLSocketImpl.java:994)
@@ -305,7 +305,7 @@ Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host clos
     testUsingContext(
       'retries if file opening fails',
       () async {
-        const String errorMessage = r'''
+        const errorMessage = r'''
 Downloading https://services.gradle.org/distributions/gradle-3.5.0-all.zip
 Exception in thread "main" java.io.FileNotFoundException: https://downloads.gradle-dn.com/distributions/gradle-3.5.0-all.zip
 	at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1890)
@@ -344,7 +344,7 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
     testUsingContext(
       'retries if the connection is reset',
       () async {
-        const String errorMessage = r'''
+        const errorMessage = r'''
 Downloading https://services.gradle.org/distributions/gradle-5.6.2-all.zip
 Exception in thread "main" java.net.SocketException: Connection reset
 	at java.net.SocketInputStream.read(SocketInputStream.java:210)
@@ -394,7 +394,7 @@ Exception in thread "main" java.net.SocketException: Connection reset
     testUsingContext(
       'retries if Gradle could not get a resource',
       () async {
-        const String errorMessage = '''
+        const errorMessage = '''
 A problem occurred configuring root project 'android'.
 > Could not resolve all artifacts for configuration ':classpath'.
    > Could not resolve net.sf.proguard:proguard-gradle:6.0.3.
@@ -431,7 +431,7 @@ A problem occurred configuring root project 'android'.
     testUsingContext(
       'retries if Gradle could not get a resource (non-Gateway)',
       () async {
-        const String errorMessage = '''
+        const errorMessage = '''
 * Error running Gradle:
 Exit code 1 from: /home/travis/build/flutter/flutter sdk/examples/flutter_gallery/android/gradlew app:properties:
 Starting a Gradle Daemon (subsequent builds will be faster)
@@ -472,7 +472,7 @@ A problem occurred configuring root project 'android'.
     testUsingContext(
       'retries if connection times out',
       () async {
-        const String errorMessage = r'''
+        const errorMessage = r'''
 Exception in thread "main" java.net.ConnectException: Connection timed out
 java.base/sun.nio.ch.Net.connect0(Native Method)
   at java.base/sun.nio.ch.Net.connect(Net.java:579)
@@ -512,7 +512,7 @@ java.base/sun.nio.ch.Net.connect0(Native Method)
 
   group('permission errors', () {
     testUsingContext('throws toolExit if gradle is missing execute permissions', () async {
-      const String errorMessage = '''
+      const errorMessage = '''
 Permission denied
 Command: /home/android/gradlew assembleRelease
 ''';
@@ -541,7 +541,7 @@ Command: /home/android/gradlew assembleRelease
     });
 
     testUsingContext('pattern', () async {
-      const String errorMessage = '''
+      const errorMessage = '''
 Permission denied
 Command: /home/android/gradlew assembleRelease
 ''';
@@ -725,7 +725,7 @@ assembleProfile
   });
 
   group('higher minSdkVersion', () {
-    const String stdoutLine =
+    const stdoutLine =
         'uses-sdk:minSdkVersion 16 cannot be smaller than version 21 declared in library [:webview_flutter] /tmp/cirrus-ci-build/all_plugins/build/webview_flutter/intermediates/library_manifest/release/AndroidManifest.xml as the library might be using APIs not available in 21';
 
     testWithoutContext('pattern', () {
@@ -971,7 +971,7 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
   });
 
   group('Bump Gradle', () {
-    const String errorMessage = '''
+    const errorMessage = '''
 A problem occurred evaluating project ':app'.
 > Failed to apply plugin [id 'kotlin-android']
    > The current Gradle version 4.10.2 is not compatible with the Kotlin Gradle plugin. Please use Gradle 6.1.1 or newer, or the previous version of the Kotlin plugin.
@@ -1000,7 +1000,7 @@ A problem occurred evaluating project ':app'.
             '│ To fix this issue, replace the following content:                                │\n'
             '│ /android/build.gradle:                                                           │\n'
             "│     - classpath 'com.android.tools.build:gradle:<current-version>'               │\n"
-            "│     + classpath 'com.android.tools.build:gradle:$templateAndroidGradlePluginVersion'                           │\n"
+            "│     + classpath 'com.android.tools.build:gradle:$templateAndroidGradlePluginVersion'                          │\n"
             '│ /android/gradle/wrapper/gradle-wrapper.properties:                               │\n'
             '│     - https://services.gradle.org/distributions/gradle-<current-version>-all.zip │\n'
             '│     + https://services.gradle.org/distributions/gradle-$templateDefaultGradleVersion-all.zip              │\n'
@@ -1018,7 +1018,7 @@ A problem occurred evaluating project ':app'.
   });
 
   group('Required compileSdkVersion', () {
-    const String errorMessage = '''
+    const errorMessage = '''
 Execution failed for task ':app:checkDebugAarMetadata'.
 > A failure occurred while executing com.android.build.gradle.internal.tasks.CheckAarMetadataWorkAction
    > One or more issues found when checking AAR metadata values:
@@ -1073,7 +1073,7 @@ Execution failed for task ':app:checkDebugAarMetadata'.
   });
 
   group('incompatible java and android gradle plugin versions error', () {
-    const String errorMessage = '''
+    const errorMessage = '''
 * What went wrong:
 An exception occurred applying plugin request [id: 'com.android.application']
 > Failed to apply plugin 'com.android.internal.application'.
@@ -1325,7 +1325,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''),
   });
 
   group('incompatible java and gradle versions error', () {
-    const String errorMessage = '''
+    const errorMessage = '''
 Could not compile build file '…/example/android/build.gradle'.
 > startup failed:
   General error during conversion: Unsupported class file major version 61
@@ -1398,7 +1398,7 @@ A problem occurred evaluating script.
   testUsingContext(
     'compileSdk 35 and AGP < 8.1',
     () async {
-      const String errorExample = r'''
+      const errorExample = r'''
 Execution failed for task ':app:bundleReleaseResources'.
 > A failure occurred while executing com.android.build.gradle.internal.res.Aapt2ProcessResourcesRunnable
    > Android resource linking failed
@@ -1447,7 +1447,7 @@ Execution failed for task ':app:bundleReleaseResources'.
   testUsingContext(
     'AGP 7.3.0 R8 bug',
     () async {
-      const String errorExample = r'''
+      const errorExample = r'''
 ERROR:/Users/mackall/.gradle/caches/transforms-3/bd2c84591857c6d4c308221ffece862e/transformed/jetified-media3-exoplayer-dash-1.4.0-runtime.jar: R8: com.android.tools.r8.internal.Y10: Unused argument with users in androidx
     ''';
 
@@ -1489,7 +1489,7 @@ ERROR:/Users/mackall/.gradle/caches/transforms-3/bd2c84591857c6d4c308221ffece862
   testUsingContext(
     'Usage of removed v1 embedding references',
     () async {
-      const String errorExample = r'''
+      const errorExample = r'''
 /Users/jesswon/.pub-cache/hosted/pub.dev/video_player_android-2.5.0/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java:42: error: cannot find symbol
   private VideoPlayerPlugin(io.flutter.plugin.common.PluginRegistry.Registrar registrar) {
                                                                    ^
@@ -1533,7 +1533,7 @@ FAILURE: Build failed with an exception.
   testUsingContext(
     'Java 21 and jlink bug',
     () async {
-      const String errorExample = r'''
+      const errorExample = r'''
 * What went wrong:
 Execution failed for task ':shared_preferences_android:compileReleaseJavaWithJavac'.
 > Could not resolve all files for configuration ':shared_preferences_android:androidJdkImage'.
@@ -1572,7 +1572,7 @@ Execution failed for task ':shared_preferences_android:compileReleaseJavaWithJav
   testUsingContext(
     'Missing NDK source.properties file',
     () async {
-      const String unixErrorExample = r'''
+      const unixErrorExample = r'''
 * What went wrong:
 A problem occurred configuring project ':app'.
 > [CXX1101] NDK at /Users/mackall/Library/Android/sdk/ndk/26.3.11579264 did not have a source.properties file
@@ -1594,7 +1594,7 @@ A problem occurred configuring project ':app'.
         contains('/Users/mackall/Library/Android/sdk/ndk/26.3.11579264'),
       );
 
-      const String windowsErrorExample = r'''
+      const windowsErrorExample = r'''
 * What went wrong:
 A problem occurred configuring project ':app'.
 > [CXX1101] NDK at C:\Users\mackall\Library\Android\sdk\ndk\26.3.11579264 did not have a source.properties file

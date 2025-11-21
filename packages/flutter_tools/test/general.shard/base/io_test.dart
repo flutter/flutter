@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:test/fake.dart';
@@ -15,17 +16,17 @@ import '../../src/io.dart';
 
 void main() {
   testWithoutContext('IOOverrides can inject a memory file system', () async {
-    final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
-    final FlutterIOOverrides flutterIOOverrides = FlutterIOOverrides(fileSystem: memoryFileSystem);
+    final memoryFileSystem = MemoryFileSystem.test();
+    final flutterIOOverrides = FlutterIOOverrides(fileSystem: memoryFileSystem);
     await io.IOOverrides.runWithIOOverrides(() async {
       // statics delegate correctly.
       expect(io.FileSystemEntity.isWatchSupported, memoryFileSystem.isWatchSupported);
       expect(io.Directory.systemTemp.path, memoryFileSystem.systemTempDirectory.path);
 
       // can create and write to files/directories sync.
-      final io.File file = io.File('abc');
+      final file = io.File('abc');
       file.writeAsStringSync('def');
-      final io.Directory directory = io.Directory('foobar');
+      final directory = io.Directory('foobar');
       directory.createSync();
 
       expect(memoryFileSystem.file('abc').existsSync(), true);
@@ -33,9 +34,9 @@ void main() {
       expect(memoryFileSystem.directory('foobar').existsSync(), true);
 
       // can create and write to files/directories async.
-      final io.File fileB = io.File('xyz');
+      final fileB = io.File('xyz');
       await fileB.writeAsString('def');
-      final io.Directory directoryB = io.Directory('barfoo');
+      final directoryB = io.Directory('barfoo');
       await directoryB.create();
 
       expect(memoryFileSystem.file('xyz').existsSync(), true);
@@ -43,8 +44,8 @@ void main() {
       expect(memoryFileSystem.directory('barfoo').existsSync(), true);
 
       // Links
-      final io.Link linkA = io.Link('hhh');
-      final io.Link linkB = io.Link('ggg');
+      final linkA = io.Link('hhh');
+      final linkB = io.Link('ggg');
       io.File('jjj').createSync();
       io.File('lll').createSync();
       await linkA.create('jjj');
@@ -62,8 +63,8 @@ void main() {
   });
 
   testWithoutContext('ProcessSignal signals are properly delegated', () async {
-    final FakeProcessSignal signal = FakeProcessSignal();
-    final ProcessSignal signalUnderTest = ProcessSignal(signal);
+    final signal = FakeProcessSignal();
+    final signalUnderTest = ProcessSignal(signal);
 
     signal.controller.add(signal);
 
@@ -104,10 +105,10 @@ void main() {
   });
 
   testWithoutContext('Does not listen to Posix process signals on windows', () async {
-    final FakePlatform windows = FakePlatform(operatingSystem: 'windows');
-    final FakePlatform linux = FakePlatform();
-    final FakeProcessSignal fakeSignalA = FakeProcessSignal();
-    final FakeProcessSignal fakeSignalB = FakeProcessSignal();
+    final windows = FakePlatform(operatingSystem: 'windows');
+    final linux = FakePlatform();
+    final fakeSignalA = FakeProcessSignal();
+    final fakeSignalB = FakeProcessSignal();
     fakeSignalA.controller.add(fakeSignalA);
     fakeSignalB.controller.add(fakeSignalB);
 
@@ -117,7 +118,7 @@ void main() {
 }
 
 class FakeProcessSignal extends Fake implements io.ProcessSignal {
-  final StreamController<io.ProcessSignal> controller = StreamController<io.ProcessSignal>();
+  final controller = StreamController<io.ProcessSignal>();
 
   @override
   Stream<io.ProcessSignal> watch() => controller.stream;

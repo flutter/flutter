@@ -60,9 +60,9 @@ Future<void> sendAccessibilityAnnouncement() async {
 
   // Standard message codec magic number identifiers.
   // See: https://github.com/flutter/flutter/blob/ee94fe262b63b0761e8e1f889ae52322fef068d2/packages/flutter/lib/src/services/message_codecs.dart#L262
-  const int valueMap = 13, valueString = 7;
+  const int valueMap = 13, valueString = 7, valueInt64 = 4;
 
-  // Corresponds to: {"type": "announce", "data": {"message": "hello"}}
+  // Corresponds to: {"type": "announce", "data": {"viewId": 0, "message": "hello"}}
   // See: https://github.com/flutter/flutter/blob/b781da9b5822de1461a769c3b245075359f5464d/packages/flutter/lib/src/semantics/semantics_event.dart#L86
   final Uint8List data = Uint8List.fromList([
     // Map with 2 entries
@@ -73,8 +73,12 @@ Future<void> sendAccessibilityAnnouncement() async {
     valueString, 'announce'.length, ...'announce'.codeUnits,
     // Map key: "data"
     valueString, 'data'.length, ...'data'.codeUnits,
-    // Map value: map with 1 entry
-    valueMap, 1,
+    // Map value: map with 2 entries
+    valueMap, 2,
+    // Map key: "viewId"
+    valueString, 'viewId'.length, ...'viewId'.codeUnits,
+    // Map value: 0
+    valueInt64, 0, 0, 0, 0, 0, 0, 0, 0,
     // Map key: "message"
     valueString, 'message'.length, ...'message'.codeUnits,
     // Map value: "hello"
@@ -333,10 +337,9 @@ void drawHelloWorld() {
     canvas.drawParagraph(paragraph, ui.Offset.zero);
 
     final ui.Picture picture = recorder.endRecording();
-    final ui.SceneBuilder sceneBuilder =
-        ui.SceneBuilder()
-          ..addPicture(ui.Offset.zero, picture)
-          ..pop();
+    final ui.SceneBuilder sceneBuilder = ui.SceneBuilder()
+      ..addPicture(ui.Offset.zero, picture)
+      ..pop();
 
     ui.PlatformDispatcher.instance.implicitView?.render(sceneBuilder.build());
   };
@@ -406,6 +409,11 @@ void testEngineId() {
 }
 
 @pragma('vm:entry-point')
+void testWindowController() {
+  signal();
+}
+
+@pragma('vm:entry-point')
 Future<void> sendSemanticsTreeInfo() async {
   // Wait until semantics are enabled.
   if (!ui.PlatformDispatcher.instance.semanticsEnabled) {
@@ -424,6 +432,7 @@ Future<void> sendSemanticsTreeInfo() async {
   ui.SemanticsUpdate createSemanticsUpdate(int nodeId) {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     final Float64List transform = Float64List(16);
+    final Float64List hitTestTransform = Float64List(16);
     final Int32List childrenInTraversalOrder = Int32List(0);
     final Int32List childrenInHitTestOrder = Int32List(0);
     final Int32List additionalActions = Int32List(0);
@@ -433,7 +442,7 @@ Future<void> sendSemanticsTreeInfo() async {
     transform[10] = 1;
     builder.updateNode(
       id: nodeId,
-      flags: 0,
+      flags: ui.SemanticsFlags.none,
       actions: 0,
       maxValueLength: 0,
       currentValueLength: 0,
@@ -442,12 +451,11 @@ Future<void> sendSemanticsTreeInfo() async {
       platformViewId: -1,
       scrollChildren: 0,
       scrollIndex: 0,
+      traversalParent: -1,
       scrollPosition: 0,
       scrollExtentMax: 0,
       scrollExtentMin: 0,
       rect: const ui.Rect.fromLTRB(0, 0, 10, 10),
-      elevation: 0,
-      thickness: 0,
       identifier: 'identifier',
       label: 'label',
       labelAttributes: const <ui.StringAttribute>[],
@@ -462,16 +470,19 @@ Future<void> sendSemanticsTreeInfo() async {
       tooltip: 'tooltip',
       textDirection: ui.TextDirection.ltr,
       transform: transform,
+      hitTestTransform: hitTestTransform,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: additionalActions,
       role: ui.SemanticsRole.tab,
       controlsNodes: null,
       inputType: ui.SemanticsInputType.none,
+      locale: null,
     );
     return builder.build();
   }
 
+  ui.PlatformDispatcher.instance.setSemanticsTreeEnabled(true);
   view1.updateSemantics(createSemanticsUpdate(view1.viewId + 1));
   view2.updateSemantics(createSemanticsUpdate(view2.viewId + 1));
   signal();

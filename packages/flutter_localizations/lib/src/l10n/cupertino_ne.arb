@@ -29,5 +29,11 @@
   "shareButtonLabel": "सेयर गर्नुहोस्...",
   "clearButtonLabel": "हटाउनुहोस्",
   "cancelButtonLabel": "रद्द गर्नुहोस्",
-  "backButtonLabel": "पछाडि"
+  "backButtonLabel": "पछाडि",
+  "expansionTileExpandedHint": "कोल्याप्स गर्न डबल ट्याप गर्नुहोस्",
+  "expansionTileCollapsedHint": "एक्स्पान्ड गर्न डबल ट्याप गर्नुहोस्",
+  "expansionTileExpandedTapHint": "कोल्याप्स गर्नुहोस्",
+  "expansionTileCollapsedTapHint": "थप विवरण हेर्न एक्स्पान्ड गर्नुहोस्",
+  "expandedHint": "कोल्याप्स गरियो",
+  "collapsedHint": "एक्स्पान्ड गरियो"
 }

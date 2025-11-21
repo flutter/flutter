@@ -6,11 +6,11 @@ import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
 import '../../xcode_project.dart';
 
-const String _appDelegateFileBefore = r'''
+const _appDelegateFileBefore = r'''
 @UIApplicationMain
 @objc class AppDelegate''';
 
-const String _appDelegateFileAfter = r'''
+const _appDelegateFileAfter = r'''
 @main
 @objc class AppDelegate''';
 

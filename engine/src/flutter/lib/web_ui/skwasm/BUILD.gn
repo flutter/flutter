@@ -17,6 +17,8 @@ template("skwasm_variant") {
       "fonts.cpp",
       "helpers.h",
       "image.cpp",
+      "live_objects.cpp",
+      "live_objects.h",
       "paint.cpp",
       "path.cpp",
       "picture.cpp",
@@ -30,6 +32,7 @@ template("skwasm_variant") {
       "text/paragraph_style.cpp",
       "text/strut_style.cpp",
       "text/text_style.cpp",
+      "text/text_types.h",
       "vertices.cpp",
       "wrappers.h",
     ]
@@ -68,7 +71,6 @@ template("skwasm_variant") {
 
     if (is_debug) {
       ldflags += [
-        "-sDEMANGLE_SUPPORT=1",
         "-sASSERTIONS=1",
         "-sGL_ASSERTIONS=1",
       ]
@@ -77,6 +79,7 @@ template("skwasm_variant") {
     }
 
     deps = [
+      "//flutter/display_list",
       "//flutter/skia",
       "//flutter/skia/modules/skparagraph",
       "//flutter/skia/modules/skunicode",

@@ -428,4 +428,76 @@ transforms:
       minSize:
         kind: fragment
         value: 'arguments[minSize]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/170625
+  - title: "Migrate to 'builder'"
+    date: 2025-06-14
+    element:
+      uris: [ 'cupertino.dart' ]
+      function: 'showCupertinoSheet'
+    oneOf:
+      - if: "pageBuilder != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'builder'
+            style: optional_named
+            argumentValue:
+              expression: '{% pageBuilder %}'
+              requiredIf: "pageBuilder != ''"
+          - kind: 'removeParameter'
+            name: 'pageBuilder'
+    variables:
+      pageBuilder:
+        kind: fragment
+        value: 'arguments[pageBuilder]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/171160
+  - title: "Rename from 'opacity' to 'a'"
+    date: 2025-06-24
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'opacity'
+      inClass: 'CupertinoDynamicColor'
+    changes:
+      - kind: 'rename'
+        newName: 'a'
+
+  # Changes made in https://github.com/flutter/flutter/pull/171160
+  - title: "Replace 'value' with 'toARGB32()'"
+    date: 2025-06-24
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'value'
+      inClass: 'CupertinoDynamicColor'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'cupertino.dart' ]
+          method: 'toARGB32'
+          inClass: 'CupertinoDynamicColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/171160
+  - title: "Rename 'withOpacity'"
+    date: 2025-06-24
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'withOpacity'
+      inClass: 'CupertinoDynamicColor'
+    changes:
+      - kind: 'rename'
+        newName: 'withValues'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addParameter'
+        index: 0
+        name: 'alpha'
+        style: optional_named
+        argumentValue:
+          expression: '{% opacity %}'
+          requiredIf: "opacity != ''"
+    variables:
+      opacity:
+        kind: 'fragment'
+        value: 'arguments[0]'
 # Before adding a new fix: read instructions at the top of this file.

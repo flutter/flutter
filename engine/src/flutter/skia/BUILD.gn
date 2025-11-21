@@ -7,10 +7,22 @@ _skia_root = "//flutter/third_party/skia"
 import("$_skia_root/gn/shared_sources.gni")
 import("$_skia_root/gn/skia.gni")
 import("$_skia_root/gn/toolchain/wasm.gni")
+import("$_skia_root/modules/pathops/pathops.gni")
 import("flutter_defines.gni")
 
 if (is_fuchsia) {
   import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
+
+  skia_use_gl = false
+  skia_use_icu = false
+  skia_use_freetype = true
+  skia_use_vulkan = true
+
+  # unit tests make use of loading FreeType files directly
+  skia_enable_fontmgr_custom_empty = true
+  skia_enable_fontmgr_custom_directory = false
+  skia_enable_fontmgr_custom_embedded = false
+  skia_use_dng_sdk = false
 }
 
 # Skia public API, generally provided by :skia.
@@ -65,6 +77,10 @@ config("skia_public") {
   # toolchains suppress the use of this macro till toolchain updates are made.
   if (is_mac || is_ios) {
     cflags_objcc += [ "-Wno-unguarded-availability" ]
+  }
+
+  if (is_qnx) {
+    defines += [ "SKRP_CPU_SCALAR" ]
   }
 }
 
@@ -226,6 +242,7 @@ optional("fontmgr_android") {
   ]
   public = skia_ports_fontmgr_android_public
   sources = skia_ports_fontmgr_android_sources
+  sources += skia_ports_fontmgr_android_parser_sources
 }
 
 optional("fontmgr_custom") {
@@ -291,15 +308,18 @@ optional("fontmgr_fontconfig") {
 }
 
 optional("fontmgr_fuchsia") {
-  enabled = skia_enable_fontmgr_fuchsia
+  enabled = is_fuchsia
   public_defines = [ "SK_FONTMGR_FUCHSIA_AVAILABLE" ]
 
-  deps = []
+  deps = [
+    ":typeface_freetype",
+    ":typeface_proxy",
+  ]
 
   if (is_fuchsia) {
     deps += [ "${fuchsia_sdk}/fidl/fuchsia.fonts" ]
   } else {
-    deps = [ "//sdk/fidl/fuchsia.fonts" ]
+    deps += [ "//sdk/fidl/fuchsia.fonts" ]
   }
   public = skia_ports_fontmgr_fuchsia_public
   sources = skia_ports_fontmgr_fuchsia_sources
@@ -653,6 +673,7 @@ skia_component("skia") {
   public += skia_utils_public
   public += skia_effects_public
   public += skia_effects_imagefilter_public
+  public += skia_pathops_public
 
   sources = []
   sources += skia_core_sources
@@ -666,6 +687,7 @@ skia_component("skia") {
   sources += skia_encode_srcs
   sources += skia_sksl_core_sources
   sources += skia_sksl_core_module_sources
+  sources += skia_pathops_sources
   sources += skia_ports_sources
   sources += [
     "$_skia_root/src/android/SkAndroidFrameworkUtils.cpp",
@@ -712,7 +734,9 @@ skia_component("skia") {
     }
   } else {
     sources += [ "$_skia_root/src/ports/SkOSFile_posix.cpp" ]
-    libs += [ "dl" ]
+    if (!is_qnx) {
+      libs += [ "dl" ]
+    }
   }
 
   if (is_android) {
@@ -725,7 +749,7 @@ skia_component("skia") {
     ]
   }
 
-  if (is_linux || is_wasm) {
+  if (is_linux || is_wasm || is_qnx) {
     sources += [ "$_skia_root/src/ports/SkDebug_stdio.cpp" ]
     if (skia_use_egl) {
       libs += [ "GLESv2" ]

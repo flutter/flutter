@@ -285,6 +285,7 @@ void main() async {
     expect(texture.height, 100);
     expect(texture.storageMode, gpu.StorageMode.hostVisible);
     expect(texture.sampleCount, 1);
+    expect(texture.textureType, gpu.TextureType.texture2D);
     expect(texture.format, gpu.PixelFormat.r8g8b8a8UNormInt);
     expect(texture.enableRenderTargetUsage, true);
     expect(texture.enableShaderReadUsage, true);
@@ -292,6 +293,25 @@ void main() async {
     expect(texture.bytesPerTexel, 4);
     expect(texture.getBaseMipLevelSizeInBytes(), 40000);
   }, skip: !impellerEnabled);
+
+  test(
+    'GpuContext.createTexture fails if invalid sampleCount and texture type is passed.',
+    () async {
+      try {
+        gpu.gpuContext.createTexture(
+          gpu.StorageMode.hostVisible,
+          100,
+          100,
+          sampleCount: 4,
+          textureType: gpu.TextureType.texture2D,
+        );
+        fail('Exception not thrown when creating an invalid texture.');
+      } catch (e) {
+        expect(e.toString(), contains('Texture creation failed'));
+      }
+    },
+    skip: !impellerEnabled,
+  );
 
   test('Texture.overwrite', () async {
     final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 2, 2);

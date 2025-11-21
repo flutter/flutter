@@ -6,7 +6,6 @@ import 'dart:js_interop';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart';
 
 import 'common.dart';
@@ -22,8 +21,8 @@ void testMain() {
 
   setUp(() {
     TestSkDeletableMock.deleteCount = 0;
-    nativeMemoryFinalizationRegistry =
-        mockFinalizationRegistry = _MockNativeMemoryFinalizationRegistry();
+    nativeMemoryFinalizationRegistry = mockFinalizationRegistry =
+        _MockNativeMemoryFinalizationRegistry();
   });
 
   tearDown(() {
@@ -256,14 +255,12 @@ extension type TestSkDeletable._primary(JSObject _) implements SkDeletable {
   factory TestSkDeletable() {
     final TestSkDeletableMock mock = TestSkDeletableMock();
     return TestSkDeletable._(
-      isDeleted:
-          () {
-            return mock.isDeleted();
-          }.toJS,
-      delete:
-          () {
-            return mock.delete();
-          }.toJS,
+      isDeleted: () {
+        return mock.isDeleted();
+      }.toJS,
+      delete: () {
+        return mock.delete();
+      }.toJS,
       constructor: mock.constructor,
     );
   }

@@ -11,6 +11,10 @@
   "@reorderItemLeft": {"description":"The audio announcement to move an item in a Reorderable List left in the list when it is oriented horizontally."},
   "reorderItemRight": "Move right",
   "@reorderItemRight": {"description":"The audio announcement to move an item in a Reorderable List right in the list when it is oriented horizontally."},
+  "searchResultsFound": "Search results found",
+  "@searchResultsFound": {"description":"The audio announcement when Autocomplete search results become available."},
+  "noResultsFound": "No results found",
+  "@noResultsFound": {"description":"The audio announcement when Autocomplete search results become unavailable."},
   "copyButtonLabel": "Copy",
   "@copyButtonLabel": {"description":"The label for copy buttons and menu items."},
   "cutButtonLabel": "Cut",
@@ -24,5 +28,10 @@
   "pasteButtonLabel": "Paste",
   "@pasteButtonLabel": {"description":"The label for paste buttons and menu items."},
   "selectAllButtonLabel": "Select all",
-  "@selectAllButtonLabel": {"description":"The label for select-all buttons and menu items."}
+  "@selectAllButtonLabel": {"description":"The label for select-all buttons and menu items."},
+  "radioButtonUnselectedLabel": "Not selected",
+  "@radioButtonUnselectedLabel": {
+    "description": "The accessibility hint for an unselected radio button.",
+    "type": "text"
+  }
 }

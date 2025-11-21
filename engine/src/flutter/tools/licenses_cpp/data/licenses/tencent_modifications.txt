@@ -1,0 +1,5 @@
+tencent modifications
+(?s)The above software in this distribution.*Tencent Modifications
+The above software in this distribution may have been modified by 
+THL A29 Limited \("Tencent Modifications"\). 
+All Tencent Modifications are Copyright \(C\) \d+ THL A29 Limited.

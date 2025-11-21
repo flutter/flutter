@@ -32,7 +32,7 @@ class Context {
   final List<String> arguments;
   RandomAccessFile? scriptOutputStream;
 
-  static const String incompatibleErrorMessage =
+  static const incompatibleErrorMessage =
       'Your Xcode project is incompatible with this version of Flutter. '
       'Run "rm -rf ios/Runner.xcodeproj" and "flutter create ." to regenerate.\n';
 
@@ -96,13 +96,20 @@ class Context {
   }
 
   bool existsFile(String path) {
-    final File file = File(path);
+    final file = File(path);
     return file.existsSync();
   }
 
   Directory directoryFromPath(String path) => Directory(path);
 
-  /// Run given command in a synchronous subprocess.
+  /// Run given command ([bin]) in a synchronous subprocess.
+  ///
+  /// If [allowFail] is true, an exception will not be thrown even if the process returns a
+  /// non-zero exit code. Also, `error:` will not be prefixed to the output to prevent Xcode
+  /// complication failures.
+  ///
+  /// If [skipErrorLog] is true, `stderr` from the process will not be output unless in [verbose]
+  /// mode. If in [verbose], pipes `stderr` to `stdout`.
   ///
   /// Will throw [Exception] if the exit code is not 0.
   ProcessResult runSync(
@@ -110,29 +117,56 @@ class Context {
     List<String> args, {
     bool verbose = false,
     bool allowFail = false,
+    bool skipErrorLog = false,
     String? workingDirectory,
   }) {
     if (verbose) {
       print('♦ $bin ${args.join(' ')}');
     }
-    final ProcessResult result = Process.runSync(bin, args, workingDirectory: workingDirectory);
+    final ProcessResult result = runSyncProcess(bin, args, workingDirectory: workingDirectory);
     if (verbose) {
       print((result.stdout as String).trim());
     }
     final String resultStderr = result.stderr.toString().trim();
     if (resultStderr.isNotEmpty) {
-      final StringBuffer errorOutput = StringBuffer();
-      if (result.exitCode != 0) {
+      final errorOutput = StringBuffer();
+      if (!allowFail && result.exitCode != 0) {
         // "error:" prefix makes this show up as an Xcode compilation error.
         errorOutput.write('error: ');
       }
       errorOutput.write(resultStderr);
-      echoError(errorOutput.toString());
+      if (skipErrorLog) {
+        // Even if skipErrorLog, we still want to write to stdout if verbose.
+        if (verbose) {
+          echo(errorOutput.toString());
+        }
+      } else {
+        echoError(errorOutput.toString());
+      }
+      // Stream stderr to the Flutter build process.
+      // When in verbose mode, `echoError` above will show the logs. So only
+      // stream if not in verbose mode to avoid duplicate logs.
+      // Also, only stream if exitCode is 0 since errors are handled separately
+      // by the tool on failure.
+      // Also check for `skipErrorLog`, because some errors should not be printed
+      // out. For example, on macOS 26, plutil reports NSBonjourServices key not
+      // found as an error. However, logging it in non-verbose mode would be
+      // confusing, since not having the key is one of the expected states.
+      if (!verbose && exitCode == 0 && !skipErrorLog) {
+        streamOutput(errorOutput.toString());
+      }
     }
     if (!allowFail && result.exitCode != 0) {
       throw Exception('Command "$bin ${args.join(' ')}" exited with code ${result.exitCode}');
     }
     return result;
+  }
+
+  // TODO(hellohuanlin): Instead of using inheritance to stub the function in
+  // the subclass, we should favor composition by injecting the dependencies.
+  // See: https://github.com/flutter/flutter/issues/173133
+  ProcessResult runSyncProcess(String bin, List<String> args, {String? workingDirectory}) {
+    return Process.runSync(bin, args, workingDirectory: workingDirectory);
   }
 
   /// Log message to stderr.
@@ -188,8 +222,8 @@ class Context {
     // Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
     // This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
     // they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
-    final String? buildMode =
-        (environment['FLUTTER_BUILD_MODE'] ?? environment['CONFIGURATION'])?.toLowerCase();
+    final String? buildMode = (environment['FLUTTER_BUILD_MODE'] ?? environment['CONFIGURATION'])
+        ?.toLowerCase();
 
     if (buildMode != null) {
       if (buildMode.contains('release')) {
@@ -246,7 +280,7 @@ class Context {
   void embedFlutterFrameworks(TargetPlatform platform) {
     // Embed App.framework from Flutter into the app (after creating the Frameworks directory
     // if it doesn't already exist).
-    final String xcodeFrameworksDir =
+    final xcodeFrameworksDir =
         '${environment['TARGET_BUILD_DIR']}/${environment['FRAMEWORKS_FOLDER_PATH']}';
     runSync('mkdir', <String>['-p', '--', xcodeFrameworksDir]);
     runRsync('${environment['BUILT_PRODUCTS_DIR']}/App.framework', xcodeFrameworksDir);
@@ -300,12 +334,12 @@ class Context {
   }) {
     // Copy the native assets.
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
-    String projectPath = '$sourceRoot/..';
+    var projectPath = '$sourceRoot/..';
     if (environment['FLUTTER_APPLICATION_PATH'] != null) {
       projectPath = environment['FLUTTER_APPLICATION_PATH']!;
     }
     final String flutterBuildDir = environment['FLUTTER_BUILD_DIR']!;
-    final String nativeAssetsPath = '$projectPath/$flutterBuildDir/native_assets/${platform.name}/';
+    final nativeAssetsPath = '$projectPath/$flutterBuildDir/native_assets/${platform.name}/';
     final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
     final Directory nativeAssetsDir = directoryFromPath(nativeAssetsPath);
     if (!nativeAssetsDir.existsSync()) {
@@ -391,7 +425,7 @@ class Context {
       return;
     }
 
-    final String builtProductsPlist =
+    final builtProductsPlist =
         '${environment['BUILT_PRODUCTS_DIR'] ?? ''}/${environment['INFOPLIST_PATH'] ?? ''}';
 
     if (!existsFile(builtProductsPlist)) {
@@ -405,16 +439,17 @@ class Context {
       return;
     }
 
+    final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
+
     // If there are already NSBonjourServices specified by the app (uncommon),
     // insert the vmService service name to the existing list.
-    ProcessResult result = runSync('plutil', <String>[
-      '-extract',
-      'NSBonjourServices',
-      'xml1',
-      '-o',
-      '-',
-      builtProductsPlist,
-    ], allowFail: true);
+    ProcessResult result = runSync(
+      'plutil',
+      <String>['-extract', 'NSBonjourServices', 'xml1', '-o', '-', builtProductsPlist],
+      verbose: verbose,
+      allowFail: true,
+      skipErrorLog: true,
+    );
     if (result.exitCode == 0) {
       runSync('plutil', <String>[
         '-insert',
@@ -439,14 +474,13 @@ class Context {
     // specified (uncommon). This text will appear below the "Your app would
     // like to find and connect to devices on your local network" permissions
     // popup.
-    result = runSync('plutil', <String>[
-      '-extract',
-      'NSLocalNetworkUsageDescription',
-      'xml1',
-      '-o',
-      '-',
-      builtProductsPlist,
-    ], allowFail: true);
+    result = runSync(
+      'plutil',
+      <String>['-extract', 'NSLocalNetworkUsageDescription', 'xml1', '-o', '-', builtProductsPlist],
+      verbose: verbose,
+      allowFail: true,
+      skipErrorLog: true,
+    );
     if (result.exitCode != 0) {
       runSync('plutil', <String>[
         '-insert',
@@ -541,7 +575,7 @@ class Context {
     required TargetPlatform platform,
     required bool verbose,
   }) {
-    String targetPath = 'lib/main.dart';
+    var targetPath = 'lib/main.dart';
     if (environment['FLUTTER_TARGET'] != null) {
       targetPath = environment['FLUTTER_TARGET']!;
     }
@@ -556,7 +590,7 @@ class Context {
       );
     }
 
-    final List<String> flutterArgs = <String>[];
+    final flutterArgs = <String>[];
 
     if (verbose) {
       flutterArgs.add('--verbose');
@@ -626,7 +660,6 @@ class Context {
       '--DartDefines=${environment['DART_DEFINES'] ?? ''}',
       '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',
       '-dSrcRoot=${environment['SRCROOT'] ?? ''}',
-      '-dDevDependenciesEnabled=${environment['FLUTTER_DEV_DEPENDENCIES_ENABLED'] ?? ''}',
     ]);
 
     if (platform == TargetPlatform.ios) {
@@ -639,9 +672,9 @@ class Context {
       }
     }
     if (platform == TargetPlatform.macos && command == 'build') {
-      final String ephemeralDirectory = '$sourceRoot/Flutter/ephemeral';
-      final String buildInputsPath = '$ephemeralDirectory/FlutterInputs.xcfilelist';
-      final String buildOutputsPath = '$ephemeralDirectory/FlutterOutputs.xcfilelist';
+      final ephemeralDirectory = '$sourceRoot/Flutter/ephemeral';
+      final buildInputsPath = '$ephemeralDirectory/FlutterInputs.xcfilelist';
+      final buildOutputsPath = '$ephemeralDirectory/FlutterOutputs.xcfilelist';
       flutterArgs.addAll(<String>[
         '--build-inputs=$buildInputsPath',
         '--build-outputs=$buildOutputsPath',
@@ -672,10 +705,4 @@ class Context {
   }
 }
 
-enum TargetPlatform {
-  ios('ios'),
-  macos('macos');
-
-  const TargetPlatform(this.name);
-  final String name;
-}
+enum TargetPlatform { ios, macos }

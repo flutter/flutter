@@ -90,8 +90,8 @@ bool SweepGradientContents::RenderSSBO(const ContentContext& renderer,
 
   VS::FrameInfo frame_info;
   frame_info.matrix = GetInverseEffectTransform();
-  VS::BindFrameInfo(pass,
-                    renderer.GetTransientsBuffer().EmplaceUniform(frame_info));
+  VS::BindFrameInfo(
+      pass, renderer.GetTransientsDataBuffer().EmplaceUniform(frame_info));
 
   PipelineBuilderCallback pipeline_callback =
       [&renderer](ContentContextOptions options) {
@@ -110,18 +110,19 @@ bool SweepGradientContents::RenderSSBO(const ContentContext& renderer,
             GetOpacityFactor() *
             GetGeometry()->ComputeAlphaCoverage(entity.GetTransform());
 
-        auto& host_buffer = renderer.GetTransientsBuffer();
+        auto& data_host_buffer = renderer.GetTransientsDataBuffer();
         auto colors = CreateGradientColors(colors_, stops_);
 
         frag_info.colors_length = colors.size();
-        auto color_buffer =
-            host_buffer.Emplace(colors.data(), colors.size() * sizeof(StopData),
-                                host_buffer.GetMinimumUniformAlignment());
+        auto color_buffer = data_host_buffer.Emplace(
+            colors.data(), colors.size() * sizeof(StopData),
+            renderer.GetDeviceCapabilities()
+                .GetMinimumStorageBufferAlignment());
 
         pass.SetCommandLabel("SweepGradientSSBOFill");
 
         FS::BindFragInfo(
-            pass, renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
+            pass, renderer.GetTransientsDataBuffer().EmplaceUniform(frag_info));
         FS::BindColorData(pass, color_buffer);
 
         return true;
@@ -136,8 +137,8 @@ bool SweepGradientContents::RenderUniform(const ContentContext& renderer,
 
   VS::FrameInfo frame_info;
   frame_info.matrix = GetInverseEffectTransform();
-  VS::BindFrameInfo(pass,
-                    renderer.GetTransientsBuffer().EmplaceUniform(frame_info));
+  VS::BindFrameInfo(
+      pass, renderer.GetTransientsDataBuffer().EmplaceUniform(frame_info));
 
   PipelineBuilderCallback pipeline_callback =
       [&renderer](ContentContextOptions options) {
@@ -162,7 +163,7 @@ bool SweepGradientContents::RenderUniform(const ContentContext& renderer,
         pass.SetCommandLabel("SweepGradientUniformFill");
 
         FS::BindFragInfo(
-            pass, renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
+            pass, renderer.GetTransientsDataBuffer().EmplaceUniform(frag_info));
 
         return true;
       });
@@ -213,7 +214,7 @@ bool SweepGradientContents::RenderTexture(const ContentContext& renderer,
         pass.SetCommandLabel("SweepGradientFill");
 
         FS::BindFragInfo(
-            pass, renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
+            pass, renderer.GetTransientsDataBuffer().EmplaceUniform(frag_info));
         FS::BindTextureSampler(
             pass, gradient_texture,
             renderer.GetContext()->GetSamplerLibrary()->GetSampler(

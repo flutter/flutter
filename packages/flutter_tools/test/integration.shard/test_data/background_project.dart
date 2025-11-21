@@ -8,7 +8,7 @@ import 'project.dart';
 /// Spawns a background isolate that prints a debug message.
 class BackgroundProject extends Project {
   @override
-  final String pubspec = '''
+  final pubspec = '''
   name: test
   environment:
     sdk: ^3.7.0-0
@@ -19,7 +19,7 @@ class BackgroundProject extends Project {
   ''';
 
   @override
-  final String main = r'''
+  final main = r'''
   import 'dart:async';
   import 'dart:isolate';
 
@@ -61,7 +61,7 @@ class BackgroundProject extends Project {
 // Spawns a background isolate that repeats a message.
 class RepeatingBackgroundProject extends Project {
   @override
-  final String pubspec = '''
+  final pubspec = '''
   name: test
   environment:
     sdk: ^3.7.0-0
@@ -72,7 +72,7 @@ class RepeatingBackgroundProject extends Project {
   ''';
 
   @override
-  final String main = r'''
+  final main = r'''
   import 'dart:async';
   import 'dart:isolate';
 

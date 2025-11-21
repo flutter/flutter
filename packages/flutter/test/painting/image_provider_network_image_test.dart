@@ -198,15 +198,16 @@ void main() {
         expect(await caughtError.future, true);
       },
       zoneSpecification: ZoneSpecification(
-        handleUncaughtError: (
-          Zone zone,
-          ZoneDelegate zoneDelegate,
-          Zone parent,
-          Object error,
-          StackTrace stackTrace,
-        ) {
-          uncaught = true;
-        },
+        handleUncaughtError:
+            (
+              Zone zone,
+              ZoneDelegate zoneDelegate,
+              Zone parent,
+              Object error,
+              StackTrace stackTrace,
+            ) {
+              uncaught = true;
+            },
       ),
     );
     expect(uncaught, false);
@@ -287,6 +288,51 @@ void main() {
     debugNetworkImageHttpClientProvider = null;
   }, skip: isBrowser); // [intended] Browser does not resolve images this way.
 
+  test('Network image with same arguments uses cache', () async {
+    final _FakeHttpClient mockHttpClient = _FakeHttpClient();
+    debugNetworkImageHttpClientProvider = () => mockHttpClient;
+    mockHttpClient.request.response
+      ..statusCode = HttpStatus.ok
+      ..contentLength = kTransparentImage.length
+      ..content = <Uint8List>[Uint8List.fromList(kTransparentImage)];
+
+    final Completer<void> imageAvailable1 = Completer<void>();
+    final ImageProvider imageProvider1 = NetworkImage(
+      nonconst('testing.url'),
+      headers: nonconst(<String, String>{'key': 'value'}),
+    );
+    expect(imageCache.liveImageCount, 0);
+
+    final ImageStream result1 = imageProvider1.resolve(ImageConfiguration.empty);
+    result1.addListener(
+      ImageStreamListener((ImageInfo image, bool synchronousCall) {
+        imageAvailable1.complete();
+      }),
+    );
+    await imageAvailable1.future;
+    expect(imageCache.liveImageCount, 1);
+
+    // NetworkImage should not make another request.
+    mockHttpClient.request.response.statusCode = HttpStatus.badRequest;
+
+    final Completer<void> imageAvailable2 = Completer<void>();
+    final ImageProvider imageProvider2 = NetworkImage(
+      nonconst('testing.url'),
+      headers: nonconst(<String, String>{'key': 'value'}),
+    );
+
+    final ImageStream result2 = imageProvider2.resolve(ImageConfiguration.empty);
+    result2.addListener(
+      ImageStreamListener((ImageInfo image, bool synchronousCall) {
+        imageAvailable2.complete();
+      }),
+    );
+    await imageAvailable2.future;
+    expect(imageCache.liveImageCount, 1);
+
+    debugNetworkImageHttpClientProvider = null;
+  }, skip: isBrowser); // [intended] Browser does not resolve images this way.
+
   test('Network image sets tag', () async {
     const String url = 'http://test.png';
     const int chunkSize = 8;
@@ -340,6 +386,9 @@ class _FakeHttpClientRequest extends Fake implements HttpClientRequest {
   final _FakeHttpClientResponse response = _FakeHttpClientResponse();
 
   @override
+  final HttpHeaders headers = _FakeHttpHeaders();
+
+  @override
   Future<HttpClientResponse> close() async {
     return response;
   }
@@ -377,4 +426,9 @@ class _FakeHttpClientResponse extends Fake implements HttpClientResponse {
     drained = true;
     return futureValue ?? futureValue as E; // Mirrors the implementation in Stream.
   }
+}
+
+class _FakeHttpHeaders extends Fake implements HttpHeaders {
+  @override
+  void add(String name, Object value, {bool preserveHeaderCase = false}) {}
 }

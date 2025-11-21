@@ -29,5 +29,11 @@
   "searchWebButtonLabel": "Cerca al web",
   "shareButtonLabel": "Comparteix...",
   "cancelButtonLabel": "Cancel·la",
-  "backButtonLabel": "Enrere"
+  "backButtonLabel": "Enrere",
+  "expansionTileExpandedHint": "fes doble toc per replegar",
+  "expansionTileCollapsedHint": "fes doble toc per desplegar",
+  "expansionTileExpandedTapHint": "Replega",
+  "expansionTileCollapsedTapHint": "Desplega per obtenir més informació",
+  "expandedHint": "S'ha replegat",
+  "collapsedHint": "S'ha desplegat"
 }

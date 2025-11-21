@@ -242,5 +242,72 @@ void testMain() {
       expect(contentManager.isVisible(viewId + 2), isTrue);
       expect(contentManager.isInvisible(viewId + 2), isFalse);
     });
+
+    group('updatePlatformViewAccessibility', () {
+      setUp(() {
+        contentManager.registerFactory(viewType, (int id) => createDomHTMLDivElement());
+      });
+
+      test('sets aria-hidden attribute by default when rendering', () {
+        final DomElement wrapper = contentManager.renderContent(viewType, viewId, null);
+
+        expect(
+          wrapper.getAttribute('aria-hidden'),
+          'true',
+          reason: 'Platform views should be aria-hidden by default for ExcludeSemantics support',
+        );
+      });
+
+      test('hides platform view from accessibility when isHidden is true', () {
+        final DomElement wrapper = contentManager.renderContent(viewType, viewId, null);
+
+        wrapper.removeAttribute('aria-hidden');
+        expect(wrapper.hasAttribute('aria-hidden'), isFalse);
+
+        contentManager.updatePlatformViewAccessibility(viewId, true);
+
+        expect(
+          wrapper.getAttribute('aria-hidden'),
+          'true',
+          reason: 'aria-hidden should be set to true when isHidden is true',
+        );
+      });
+
+      test('makes platform view accessible when isHidden is false', () {
+        final DomElement wrapper = contentManager.renderContent(viewType, viewId, null);
+
+        expect(
+          wrapper.getAttribute('aria-hidden'),
+          'true',
+          reason: 'Platform view should start with aria-hidden=true',
+        );
+
+        contentManager.updatePlatformViewAccessibility(viewId, false);
+
+        expect(
+          wrapper.hasAttribute('aria-hidden'),
+          isFalse,
+          reason: 'aria-hidden should be removed when isHidden is false',
+        );
+      });
+
+      test('handles toggle between hidden and accessible states', () {
+        final DomElement wrapper = contentManager.renderContent(viewType, viewId, null);
+
+        contentManager.updatePlatformViewAccessibility(viewId, false);
+        expect(wrapper.hasAttribute('aria-hidden'), isFalse);
+
+        contentManager.updatePlatformViewAccessibility(viewId, true);
+        expect(wrapper.getAttribute('aria-hidden'), 'true');
+
+        contentManager.updatePlatformViewAccessibility(viewId, false);
+        expect(wrapper.hasAttribute('aria-hidden'), isFalse);
+      });
+
+      test('does nothing when viewId does not exist', () {
+        expect(() => contentManager.updatePlatformViewAccessibility(999, true), returnsNormally);
+        expect(() => contentManager.updatePlatformViewAccessibility(999, false), returnsNormally);
+      });
+    });
   });
 }

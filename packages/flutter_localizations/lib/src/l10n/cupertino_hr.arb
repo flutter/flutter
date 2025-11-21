@@ -34,5 +34,11 @@
   "shareButtonLabel": "Dijeli...",
   "clearButtonLabel": "Izbriši",
   "cancelButtonLabel": "Odustani",
-  "backButtonLabel": "Natrag"
+  "backButtonLabel": "Natrag",
+  "expansionTileExpandedHint": "dvaput dodirnite za sažimanje",
+  "expansionTileCollapsedHint": "dvaput dodirnite za proširivanje",
+  "expansionTileExpandedTapHint": "Sažmi",
+  "expansionTileCollapsedTapHint": "Proširite da biste saznali više",
+  "expandedHint": "Sažeto",
+  "collapsedHint": "Prošireno"
 }

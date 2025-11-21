@@ -179,10 +179,9 @@ class TabBodyState extends State<TabBody> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child:
-          widget.marker.isEmpty
-              ? Text('${widget.index}')
-              : Text('${widget.index}-${widget.marker}'),
+      child: widget.marker.isEmpty
+          ? Text('${widget.index}')
+          : Text('${widget.index}-${widget.marker}'),
     );
   }
 }

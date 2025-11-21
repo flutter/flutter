@@ -61,15 +61,15 @@ class VulkanApplication {
   bool ExtensionSupported(
       const std::vector<VkExtensionProperties>& supported_extensions,
       const std::string& extension_name);
-  static VKAPI_ATTR VkBool32 DebugReportCallback(
-      VkDebugReportFlagsEXT flags,
-      VkDebugReportObjectTypeEXT objectType,
-      uint64_t object,
-      size_t location,
-      int32_t messageCode,
-      const char* pLayerPrefix,
-      const char* pMessage,
-      void* pUserData);
+  static VKAPI_ATTR VkBool32
+  DebugReportCallback(VkDebugReportFlagsEXT flags,
+                      VkDebugReportObjectTypeEXT objectType,
+                      uint64_t object,
+                      size_t location,
+                      int32_t messageCode,
+                      const char* pLayerPrefix,
+                      const char* pMessage,
+                      void* pUserData);
 
   FML_DISALLOW_COPY_AND_ASSIGN(VulkanApplication);
 };

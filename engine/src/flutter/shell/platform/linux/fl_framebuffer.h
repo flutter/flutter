@@ -24,12 +24,40 @@ G_DECLARE_FINAL_TYPE(FlFramebuffer, fl_framebuffer, FL, FRAMEBUFFER, GObject)
  * @format: format, e.g. GL_RGB, GL_BGR
  * @width: width of texture.
  * @height: height of texture.
+ * @shareable: %TRUE if this framebuffer can be shared between contexts
+ * (requires EGL).
  *
  * Creates a new frame buffer. Requires a valid OpenGL context to create.
  *
  * Returns: a new #FlFramebuffer.
  */
-FlFramebuffer* fl_framebuffer_new(GLint format, size_t width, size_t height);
+FlFramebuffer* fl_framebuffer_new(GLint format,
+                                  size_t width,
+                                  size_t height,
+                                  gboolean shareable);
+
+/**
+ * fl_framebuffer_get_shareable:
+ * @framebuffer: an #FlFramebuffer.
+ *
+ * Checks if this framebuffer can be shared between contexts (using
+ * fl_framebuffer_create_sibling).
+ *
+ * Returns: %TRUE if this framebuffer can be shared.
+ */
+gboolean fl_framebuffer_get_shareable(FlFramebuffer* framebuffer);
+
+/**
+ * fl_framebuffer_create_sibling:
+ * @framebuffer: an #FlFramebuffer.
+ *
+ * Creates a new framebuffer with the same backing texture as the original. This
+ * uses EGLImage to share the texture and allows a framebuffer created in one
+ * OpenGL context to be used in another.
+ *
+ * Returns: a new #FlFramebuffer.
+ */
+FlFramebuffer* fl_framebuffer_create_sibling(FlFramebuffer* framebuffer);
 
 /**
  * fl_framebuffer_get_id:
@@ -50,16 +78,6 @@ GLuint fl_framebuffer_get_id(FlFramebuffer* framebuffer);
  * Returns: OpenGL texture id or 0 if creation failed.
  */
 GLuint fl_framebuffer_get_texture_id(FlFramebuffer* framebuffer);
-
-/**
- * fl_framebuffer_get_target:
- * @framebuffer: an #FlFramebuffer.
- *
- * Gets target texture (example GL_TEXTURE_2D or GL_TEXTURE_RECTANGLE).
- *
- * Returns: target texture.
- */
-GLenum fl_framebuffer_get_target(FlFramebuffer* framebuffer);
 
 /**
  * fl_framebuffer_get_width:

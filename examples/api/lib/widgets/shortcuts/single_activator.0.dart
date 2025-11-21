@@ -46,10 +46,9 @@ class _SingleActivatorExampleState extends State<SingleActivatorExample> {
       child: Actions(
         actions: <Type, Action<Intent>>{
           IncrementIntent: CallbackAction<IncrementIntent>(
-            onInvoke:
-                (IncrementIntent intent) => setState(() {
-                  count = count + 1;
-                }),
+            onInvoke: (IncrementIntent intent) => setState(() {
+              count = count + 1;
+            }),
           ),
         },
         child: Focus(

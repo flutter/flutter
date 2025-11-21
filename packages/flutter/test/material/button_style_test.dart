@@ -51,11 +51,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ButtonStyle().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -83,11 +82,10 @@ void main() {
       enableFeedback: true,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'textStyle: WidgetStatePropertyAll(TextStyle(inherit: true, size: 10.0))',
@@ -112,42 +110,38 @@ void main() {
   });
 
   testWidgets('ButtonStyle copyWith, merge', (WidgetTester tester) async {
-    const MaterialStateProperty<TextStyle> textStyle = MaterialStatePropertyAll<TextStyle>(
+    const WidgetStateProperty<TextStyle> textStyle = MaterialStatePropertyAll<TextStyle>(
       TextStyle(fontSize: 10),
     );
-    const MaterialStateProperty<Color> backgroundColor = MaterialStatePropertyAll<Color>(
+    const WidgetStateProperty<Color> backgroundColor = MaterialStatePropertyAll<Color>(
       Color(0xfffffff1),
     );
-    const MaterialStateProperty<Color> foregroundColor = MaterialStatePropertyAll<Color>(
+    const WidgetStateProperty<Color> foregroundColor = MaterialStatePropertyAll<Color>(
       Color(0xfffffff2),
     );
-    const MaterialStateProperty<Color> overlayColor = MaterialStatePropertyAll<Color>(
+    const WidgetStateProperty<Color> overlayColor = MaterialStatePropertyAll<Color>(
       Color(0xfffffff3),
     );
-    const MaterialStateProperty<Color> shadowColor = MaterialStatePropertyAll<Color>(
+    const WidgetStateProperty<Color> shadowColor = MaterialStatePropertyAll<Color>(
       Color(0xfffffff4),
     );
-    const MaterialStateProperty<Color> surfaceTintColor = MaterialStatePropertyAll<Color>(
+    const WidgetStateProperty<Color> surfaceTintColor = MaterialStatePropertyAll<Color>(
       Color(0xfffffff5),
     );
-    const MaterialStateProperty<double> elevation = MaterialStatePropertyAll<double>(1);
-    const MaterialStateProperty<EdgeInsets> padding = MaterialStatePropertyAll<EdgeInsets>(
+    const WidgetStateProperty<double> elevation = MaterialStatePropertyAll<double>(1);
+    const WidgetStateProperty<EdgeInsets> padding = MaterialStatePropertyAll<EdgeInsets>(
       EdgeInsets.all(1),
     );
-    const MaterialStateProperty<Size> minimumSize = MaterialStatePropertyAll<Size>(Size(1, 2));
-    const MaterialStateProperty<Size> fixedSize = MaterialStatePropertyAll<Size>(Size(3, 4));
-    const MaterialStateProperty<Size> maximumSize = MaterialStatePropertyAll<Size>(Size(5, 6));
-    const MaterialStateProperty<Color> iconColor = MaterialStatePropertyAll<Color>(
-      Color(0xfffffff6),
-    );
-    const MaterialStateProperty<double> iconSize = MaterialStatePropertyAll<double>(48.0);
-    const MaterialStateProperty<BorderSide> side = MaterialStatePropertyAll<BorderSide>(
-      BorderSide(),
-    );
-    const MaterialStateProperty<OutlinedBorder> shape = MaterialStatePropertyAll<OutlinedBorder>(
+    const WidgetStateProperty<Size> minimumSize = MaterialStatePropertyAll<Size>(Size(1, 2));
+    const WidgetStateProperty<Size> fixedSize = MaterialStatePropertyAll<Size>(Size(3, 4));
+    const WidgetStateProperty<Size> maximumSize = MaterialStatePropertyAll<Size>(Size(5, 6));
+    const WidgetStateProperty<Color> iconColor = MaterialStatePropertyAll<Color>(Color(0xfffffff6));
+    const WidgetStateProperty<double> iconSize = MaterialStatePropertyAll<double>(48.0);
+    const WidgetStateProperty<BorderSide> side = MaterialStatePropertyAll<BorderSide>(BorderSide());
+    const WidgetStateProperty<OutlinedBorder> shape = MaterialStatePropertyAll<OutlinedBorder>(
       StadiumBorder(),
     );
-    const MaterialStateProperty<MouseCursor> mouseCursor = MaterialStatePropertyAll<MouseCursor>(
+    const WidgetStateProperty<MouseCursor> mouseCursor = MaterialStatePropertyAll<MouseCursor>(
       SystemMouseCursors.forbidden,
     );
     const VisualDensity visualDensity = VisualDensity.compact;
@@ -226,9 +220,9 @@ void main() {
       side: MaterialStatePropertyAll<BorderSide>(whiteSide),
     );
 
-    // MaterialState.all<Foo>(value) properties resolve to value
+    // WidgetState.all<Foo>(value) properties resolve to value
     // for any set of MaterialStates.
-    const Set<MaterialState> states = <MaterialState>{};
+    const Set<WidgetState> states = <WidgetState>{};
 
     expect(ButtonStyle.lerp(blackStyle, blackStyle, 0)?.side?.resolve(states), blackSide);
     expect(ButtonStyle.lerp(blackStyle, blackStyle, 0.5)?.side?.resolve(states), blackSide);

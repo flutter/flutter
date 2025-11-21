@@ -2,38 +2,43 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:args/args.dart';
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/deferred_component.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/terminal.dart';
 import '../build_info.dart';
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../convert.dart';
-import '../dart/pub.dart';
 import '../device.dart';
-import '../flutter_manifest.dart';
-import '../linux/build_linux.dart';
-import '../macos/build_macos.dart';
+import '../features.dart';
+import '../globals.dart' as globals;
+import '../isolated/resident_web_runner.dart';
 import '../project.dart';
+import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
-import '../runner/flutter_command_runner.dart';
+import '../web/web_device.dart';
+import '../widget_preview/analytics.dart';
+import '../widget_preview/dependency_graph.dart';
 import '../widget_preview/dtd_services.dart';
 import '../widget_preview/preview_code_generator.dart';
 import '../widget_preview/preview_detector.dart';
 import '../widget_preview/preview_manifest.dart';
-import '../windows/build_windows.dart';
+import '../widget_preview/preview_pubspec_builder.dart';
 import 'create_base.dart';
-import 'daemon.dart';
 
 class WidgetPreviewCommand extends FlutterCommand {
   WidgetPreviewCommand({
@@ -47,10 +52,11 @@ class WidgetPreviewCommand extends FlutterCommand {
     required OperatingSystemUtils os,
     required ProcessManager processManager,
     required Artifacts artifacts,
+    @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
   }) {
     addSubcommand(
       WidgetPreviewStartCommand(
-        verboseHelp: verboseHelp,
+        verbose: verboseHelp,
         logger: logger,
         fs: fs,
         projectFactory: projectFactory,
@@ -60,6 +66,7 @@ class WidgetPreviewCommand extends FlutterCommand {
         os: os,
         processManager: processManager,
         artifacts: artifacts,
+        dtdServicesOverride: dtdServicesOverride,
       ),
     );
     addSubcommand(
@@ -71,15 +78,11 @@ class WidgetPreviewCommand extends FlutterCommand {
   String get description => 'Manage the widget preview environment.';
 
   @override
-  String get name => 'widget-preview';
+  String get name => kWidgetPreview;
+  static const kWidgetPreview = 'widget-preview';
 
   @override
   String get category => FlutterCommandCategory.tools;
-
-  // TODO(bkonyi): show when --verbose is not provided when this feature is
-  // ready to ship.
-  @override
-  bool get hidden => true;
 
   @override
   Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.fail();
@@ -109,7 +112,7 @@ abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
   FlutterProject validateFlutterProjectForPreview(Directory directory) {
     logger.printTrace('Verifying that ${directory.path} is a Flutter project.');
     final FlutterProject flutterProject = projectFactory.fromDirectory(directory);
-    if (!flutterProject.dartTool.existsSync()) {
+    if (!flutterProject.pubspecFile.existsSync()) {
       throwToolExit('${flutterProject.directory.path} is not a valid Flutter project.');
     }
     return flutterProject;
@@ -118,8 +121,8 @@ abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
 
 final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with CreateBase {
   WidgetPreviewStartCommand({
-    this.verboseHelp = false,
-    required this.logger,
+    this.verbose = false,
+    required Logger logger,
     required this.fs,
     required this.projectFactory,
     required this.cache,
@@ -128,42 +131,58 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     required this.os,
     required this.processManager,
     required this.artifacts,
-  }) {
+    @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
+  }) : _logger = logger {
+    if (dtdServicesOverride != null) {
+      _dtdService = dtdServicesOverride;
+    }
     addPubOptions();
+    addMachineOutputFlag(verboseHelp: verbose);
+    addDevToolsOptions(verboseHelp: verbose);
     argParser
+      ..addFlag(
+        kWebServer,
+        help:
+            'Serve the widget preview environment using the web-server device instead of the '
+            'browser.',
+      )
+      ..addOption(
+        kDtdUrl,
+        help:
+            'The address of an existing Dart Tooling Daemon instance to be used by the Flutter CLI.',
+        hide: !verbose,
+      )
       ..addFlag(
         kLaunchPreviewer,
         defaultsTo: true,
         help: 'Launches the widget preview environment.',
         // Should only be used for testing.
-        hide: !verboseHelp,
+        hide: !verbose,
       )
-      ..addFlag(
-        kUseFlutterDesktop,
-        help: '(deprecated) Launches the widget preview environment using Flutter Desktop.',
-        hide: !verboseHelp,
-      )
-      ..addFlag(
-        kHeadlessWeb,
-        help: 'Launches Chrome in headless mode for testing.',
-        hide: !verboseHelp,
-      )
+      ..addFlag(kHeadless, help: 'Launches Chrome in headless mode for testing.', hide: !verbose)
       ..addOption(
         kWidgetPreviewScaffoldOutputDir,
         help:
             'Generated the widget preview environment scaffolding at a given location '
             'for testing purposes.',
+        hide: !verbose,
       );
   }
 
-  static const String kWidgetPreviewScaffoldName = 'widget_preview_scaffold';
-  static const String kLaunchPreviewer = 'launch-previewer';
-  static const String kUseFlutterDesktop = 'desktop';
-  static const String kHeadlessWeb = 'headless-web';
-  static const String kWidgetPreviewScaffoldOutputDir = 'scaffold-output-dir';
+  static const kDtdUrl = 'dtd-url';
+  static const kWidgetPreviewScaffoldName = 'widget_preview_scaffold';
+  static const kLaunchPreviewer = 'launch-previewer';
+  static const kHeadless = 'headless';
+  static const kWebServer = 'web-server';
+  static const kWidgetPreviewScaffoldOutputDir = 'scaffold-output-dir';
 
   /// Environment variable used to pass the DTD URI to the widget preview scaffold.
-  static const String kWidgetPreviewDtdUriEnvVar = 'WIDGET_PREVIEW_DTD_URI';
+  static const kWidgetPreviewDtdUriEnvVar = 'WIDGET_PREVIEW_DTD_URI';
+
+  @visibleForTesting
+  static const kBrowserNotFoundErrorMessage =
+      'Failed to locate browser. Make sure you are using an up-to-date Chrome or Edge. '
+      'Otherwise, consider running with --$kWebServer instead.';
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
@@ -177,15 +196,14 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   @override
   String get name => 'start';
 
-  final bool verboseHelp;
-
-  bool get isWeb => !boolArg(kUseFlutterDesktop);
+  final bool verbose;
 
   @override
   final FileSystem fs;
 
   @override
-  final Logger logger;
+  WidgetPreviewMachineAwareLogger get logger => _logger as WidgetPreviewMachineAwareLogger;
+  final Logger _logger;
 
   @override
   final FlutterProjectFactory projectFactory;
@@ -202,47 +220,69 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   final Artifacts artifacts;
 
+  late final previewAnalytics = WidgetPreviewAnalytics(analytics: analytics);
+
   late final FlutterProject rootProject = getRootProject();
 
-  late final PreviewDetector _previewDetector = PreviewDetector(
-    projectRoot: rootProject.directory,
+  late final _previewPubspecBuilder = PreviewPubspecBuilder(
+    logger: logger,
+    verbose: verbose,
+    offline: offline,
+    rootProject: rootProject,
+    previewManifest: _previewManifest,
+  );
+
+  late final _previewDetector = PreviewDetector(
+    platform: platform,
+    previewAnalytics: previewAnalytics,
+    project: rootProject,
     logger: logger,
     fs: fs,
     onChangeDetected: onChangeDetected,
-    onPubspecChangeDetected: onPubspecChangeDetected,
+    onPubspecChangeDetected: _previewPubspecBuilder.onPubspecChangeDetected,
   );
 
   late final PreviewCodeGenerator _previewCodeGenerator;
-  late final PreviewManifest _previewManifest = PreviewManifest(
+  late final _previewManifest = PreviewManifest(
     logger: logger,
     rootProject: rootProject,
     fs: fs,
     cache: cache,
   );
 
-  late final WidgetPreviewDtdServices _dtdService = WidgetPreviewDtdServices(
+  late var _dtdService = WidgetPreviewDtdServices(
+    previewAnalytics: previewAnalytics,
+    fs: fs,
     logger: logger,
     shutdownHooks: shutdownHooks,
+    onHotRestartPreviewerRequest: onHotRestartRequest,
     dtdLauncher: DtdLauncher(logger: logger, artifacts: artifacts, processManager: processManager),
+    project: rootProject.widgetPreviewScaffoldProject,
   );
 
   /// The currently running instance of the widget preview scaffold.
-  AppInstance? _widgetPreviewApp;
+  ResidentRunner? _widgetPreviewApp;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    assert(_logger is WidgetPreviewMachineAwareLogger);
+
+    // Start the timer tracking how long it takes to launch the preview environment.
+    previewAnalytics.initializeLaunchStopwatch();
+    logger.sendInitializingEvent();
+
     final String? customPreviewScaffoldOutput = stringArg(kWidgetPreviewScaffoldOutputDir);
-    final Directory widgetPreviewScaffold =
-        customPreviewScaffoldOutput != null
-            ? fs.directory(customPreviewScaffoldOutput)
-            : rootProject.widgetPreviewScaffold;
+    final Directory widgetPreviewScaffold = customPreviewScaffoldOutput != null
+        ? fs.directory(customPreviewScaffoldOutput)
+        : rootProject.widgetPreviewScaffold;
 
     // Check to see if a preview scaffold has already been generated. If not,
     // generate one.
     final bool generateScaffoldProject =
         customPreviewScaffoldOutput != null || _previewManifest.shouldGenerateProject();
     // TODO(bkonyi): can this be moved?
-    widgetPreviewScaffold.createSync();
+    widgetPreviewScaffold.createSync(recursive: true);
+    fs.currentDirectory = widgetPreviewScaffold;
 
     if (generateScaffoldProject) {
       // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
@@ -258,29 +298,29 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           titleCaseProjectName: 'Widget Preview Scaffold',
           flutterRoot: Cache.flutterRoot!,
           dartSdkVersionBounds: '^${cache.dartSdkBuild}',
-          linux: platform.isLinux && !isWeb,
-          macos: platform.isMacOS && !isWeb,
-          windows: platform.isWindows && !isWeb,
-          web: isWeb,
+          web: true,
         ),
         overwrite: true,
         generateMetadata: false,
+        printStatusWhenWriting: verbose,
       );
       if (customPreviewScaffoldOutput != null) {
         return FlutterCommandResult.success();
       }
       _previewManifest.generate();
 
-      // WARNING: this access of widgetPreviewScaffoldProject needs to happen
-      // after we generate the scaffold project as invoking the getter triggers
-      // lazy initialization of the preview scaffold's FlutterManifest before
-      // the scaffold project's pubspec has been generated.
-      // TODO(bkonyi): add logic to rebuild after SDK updates
-      await initialBuild(widgetPreviewScaffoldProject: rootProject.widgetPreviewScaffoldProject);
+      // Make the analytics instance aware that we generated the widget preview scaffold as part of
+      // launching the previewer.
+      previewAnalytics.generatedProject();
     }
 
+    // WARNING: this access of widgetPreviewScaffoldProject needs to happen
+    // after we generate the scaffold project as invoking the getter triggers
+    // lazy initialization of the preview scaffold's FlutterManifest before
+    // the scaffold project's pubspec has been generated.
+    final FlutterProject widgetPreviewScaffoldProject = rootProject.widgetPreviewScaffoldProject;
     _previewCodeGenerator = PreviewCodeGenerator(
-      widgetPreviewScaffoldProject: rootProject.widgetPreviewScaffoldProject,
+      widgetPreviewScaffoldProject: widgetPreviewScaffoldProject,
       fs: fs,
     );
 
@@ -291,46 +331,43 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           'widget preview scaffold.',
         );
       }
-      // TODO(matanlurey): Remove this comment once flutter_gen is removed.
-      //
-      // Tracking removal: https://github.com/flutter/flutter/issues/102983.
-      //
-      // Populate the pubspec after the initial build to avoid blowing away the package_config.json
-      // which may have manual changes for flutter_gen support.
-      await _populatePreviewPubspec(rootProject: rootProject);
+      await _previewPubspecBuilder.populatePreviewPubspec(rootProject: rootProject);
     }
 
-    final PreviewMapping initialPreviews = await _previewDetector.initialize();
-    _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(initialPreviews);
-
-    if (boolArg(kLaunchPreviewer)) {
-      shutdownHooks.addShutdownHook(() async {
-        await _widgetPreviewApp?.stop();
-      });
-      await configureDtd();
-      _widgetPreviewApp = await runPreviewEnvironment(
-        widgetPreviewScaffoldProject: rootProject.widgetPreviewScaffoldProject,
+    if (!widgetPreviewScaffoldProject.dartTool.existsSync()) {
+      await _previewPubspecBuilder.generatePackageConfig(
+        widgetPreviewScaffoldProject: widgetPreviewScaffoldProject,
       );
-      final int result = await _widgetPreviewApp!.runner.waitForAppToFinish();
-      if (result != 0) {
-        throwToolExit('Failed to launch the widget previewer.', exitCode: result);
-      }
     }
 
-    await _previewDetector.dispose();
+    shutdownHooks.addShutdownHook(() async {
+      await _widgetPreviewApp?.exitApp();
+      await _previewDetector.dispose();
+    });
+
+    final PreviewDependencyGraph graph = await _previewDetector.initialize();
+    _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(graph);
+
+    await configureDtd();
+    final int result = await runPreviewEnvironment(
+      widgetPreviewScaffoldProject: widgetPreviewScaffoldProject,
+    );
+    if (result != 0) {
+      throwToolExit('Failed to launch the widget previewer.', exitCode: result);
+    }
+
     return FlutterCommandResult.success();
   }
 
-  void onChangeDetected(PreviewMapping previews) {
+  void onChangeDetected(PreviewDependencyGraph previews) {
     _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(previews);
     logger.printStatus('Triggering reload based on change to preview set: $previews');
     _widgetPreviewApp?.restart();
   }
 
-  void onPubspecChangeDetected() {
-    // TODO(bkonyi): trigger hot reload or restart?
-    logger.printStatus('Changes to pubspec.yaml detected.');
-    _populatePreviewPubspec(rootProject: rootProject);
+  void onHotRestartRequest() {
+    logger.printStatus('Triggering restart based on request from preview environment.');
+    _widgetPreviewApp?.restart(fullRestart: true);
   }
 
   /// Configures the Dart Tooling Daemon connection.
@@ -340,7 +377,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   ///
   /// If --dtd-uri is not provided, a DTD instance managed by the tool will be started.
   Future<void> configureDtd() async {
-    final String? existingDtdUriStr = stringArg(FlutterGlobalOptions.kDtdUrl, global: true);
+    final String? existingDtdUriStr = stringArg(kDtdUrl);
     Uri? existingDtdUri;
     try {
       if (existingDtdUriStr != null) {
@@ -358,377 +395,126 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
   }
 
-  /// Builds the application binary for the widget preview scaffold the first
-  /// time the widget preview command is run.
-  ///
-  /// The resulting binary is used to speed up subsequent widget previewer launches
-  /// by acting as a basic scaffold to load previews into using hot reload / restart.
-  Future<void> initialBuild({required FlutterProject widgetPreviewScaffoldProject}) async {
-    // Generate initial package_config.json, otherwise the build will fail.
-    await pub.get(
-      context: PubContext.create,
-      project: widgetPreviewScaffoldProject,
-      offline: offline,
-      outputMode: PubOutputMode.summaryOnly,
-    );
-
-    // TODO(bkonyi): handle error case where desktop device isn't enabled.
-    await widgetPreviewScaffoldProject.ensureReadyForPlatformSpecificTooling(
-      releaseMode: false,
-      linuxPlatform: platform.isLinux && !isWeb,
-      macOSPlatform: platform.isMacOS && !isWeb,
-      windowsPlatform: platform.isWindows && !isWeb,
-      webPlatform: isWeb,
-    );
-
-    if (isWeb) {
-      return;
-    }
-
-    // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
-    logger.printStatus('Performing initial build of the Widget Preview Scaffold...');
-
-    final BuildInfo buildInfo = BuildInfo(
-      BuildMode.debug,
-      null,
-      treeShakeIcons: false,
-      packageConfigPath: widgetPreviewScaffoldProject.packageConfig.path,
-    );
-
-    if (platform.isMacOS) {
-      await buildMacOS(
-        flutterProject: widgetPreviewScaffoldProject,
-        buildInfo: buildInfo,
-        verboseLogging: false,
-      );
-    } else if (platform.isLinux) {
-      await buildLinux(
-        widgetPreviewScaffoldProject.linux,
-        buildInfo,
-        targetPlatform:
-            os.hostPlatform == HostPlatform.linux_x64
-                ? TargetPlatform.linux_x64
-                : TargetPlatform.linux_arm64,
-        logger: logger,
-      );
-    } else if (platform.isWindows) {
-      await buildWindows(
-        widgetPreviewScaffoldProject.windows,
-        buildInfo,
-        os.hostPlatform == HostPlatform.windows_x64
-            ? TargetPlatform.windows_x64
-            : TargetPlatform.windows_arm64,
-      );
-    } else {
-      throw UnimplementedError();
-    }
-    // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
-    logger.printStatus('Widget Preview Scaffold initial build complete.');
-  }
-
-  /// Returns the path to a prebuilt widget_preview_scaffold application binary.
-  String prebuiltApplicationBinaryPath({required FlutterProject widgetPreviewScaffoldProject}) {
-    assert(platform.isLinux || platform.isMacOS || platform.isWindows);
-    String path;
-    if (platform.isMacOS) {
-      path = fs.path.join(
-        getMacOSBuildDirectory(),
-        'Build/Products/Debug/widget_preview_scaffold.app',
-      );
-    } else if (platform.isLinux) {
-      path = fs.path.join(
-        getLinuxBuildDirectory(
-          os.hostPlatform == HostPlatform.linux_x64
-              ? TargetPlatform.linux_x64
-              : TargetPlatform.linux_arm64,
-        ),
-        'debug/bundle/widget_preview_scaffold',
-      );
-    } else if (platform.isWindows) {
-      path = fs.path.join(
-        getWindowsBuildDirectory(
-          os.hostPlatform == HostPlatform.windows_x64
-              ? TargetPlatform.windows_x64
-              : TargetPlatform.windows_arm64,
-        ),
-        'runner/Debug/widget_preview_scaffold.exe',
-      );
-    } else {
-      throw StateError('Unknown OS');
-    }
-    path = fs.path.join(widgetPreviewScaffoldProject.directory.path, path);
-    if (fs.typeSync(path) == FileSystemEntityType.notFound) {
-      logger.printStatus(fs.currentDirectory.toString());
-      throw StateError('Could not find prebuilt application binary at $path.');
-    }
-    return path;
-  }
-
-  Future<AppInstance> runPreviewEnvironment({
-    required FlutterProject widgetPreviewScaffoldProject,
-  }) async {
-    final AppInstance app;
+  Future<int> runPreviewEnvironment({required FlutterProject widgetPreviewScaffoldProject}) async {
     try {
-      // Since the only target supported by the widget preview scaffold is the host's desktop
-      // device, only a single desktop device should be returned.
-      final List<Device> devices = await deviceManager!.getDevices(
-        filter: DeviceDiscoveryFilter(
-          supportFilter: DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProject(
-            flutterProject: widgetPreviewScaffoldProject,
-          ),
-          deviceConnectionInterface: DeviceConnectionInterface.attached,
-        ),
-      );
-      assert(devices.length == 1);
-      final Device device = devices.first;
-
-      // We launch from a prebuilt widget preview scaffold instance to reduce launch times after
-      // the first run.
-      File? prebuiltApplicationBinary;
-      if (!isWeb) {
-        prebuiltApplicationBinary = fs.file(
-          prebuiltApplicationBinaryPath(widgetPreviewScaffoldProject: widgetPreviewScaffoldProject),
+      // In the rare case that Flutter Web is disabled, the device manager will not return any web
+      // devices which will cause us to crash.
+      if (!featureFlags.isWebEnabled) {
+        throwToolExit(
+          'Widget Previews requires Flutter Web to be enabled. Please run '
+          "'flutter config --enable-web' to enable Flutter Web and try again.",
         );
       }
-      const String? kEmptyRoute = null;
-      const bool kEnableHotReload = true;
+      final Device device;
+      if (boolArg(kWebServer)) {
+        final List<Device> devices;
+        try {
+          // The web-server device is hidden by default, make it visible before trying to look it up.
+          WebServerDevice.showWebServerDevice = true;
+          devices = await deviceManager!.getDevicesById(WebServerDevice.kWebServerDeviceId);
+        } finally {
+          // Reset the flag to false to avoid affecting other commands.
+          WebServerDevice.showWebServerDevice = false;
+        }
+        assert(devices.length == 1);
+        device = devices.single;
+      } else {
+        // Since the only target supported by the widget preview scaffold is the web
+        // device, only a single web device should be returned.
+        final List<Device> devices = await deviceManager!.getDevices(
+          filter: DeviceDiscoveryFilter(
+            supportFilter: DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProject(
+              flutterProject: widgetPreviewScaffoldProject,
+            ),
+            deviceConnectionInterface: DeviceConnectionInterface.attached,
+          ),
+        );
+
+        if (devices.isEmpty) {
+          throwToolExit(kBrowserNotFoundErrorMessage);
+        }
+        if (devices.length > 1) {
+          // Prefer Google Chrome as the target browser.
+          device =
+              devices.firstWhereOrNull((device) => device is GoogleChromeDevice) ?? devices.first;
+
+          logger.printTrace(
+            'Detected ${devices.length} web devices (${devices.map((e) => e.displayName).join(', ')}). '
+            'Defaulting to ${device.displayName}.',
+          );
+        } else {
+          device = devices.single;
+        }
+      }
 
       // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
-      logger.printStatus('Launching the Widget Preview Scaffold...');
+      logger.printStatus('Launching the Widget Preview Scaffold on ${device.displayName}...');
 
-      app = await Daemon.createMachineDaemon().appDomain.startApp(
-        device,
-        widgetPreviewScaffoldProject.directory.path,
-        bundle.defaultMainPath,
-        kEmptyRoute, // route
-        DebuggingOptions.enabled(
-          BuildInfo(
-            BuildMode.debug,
-            null,
-            treeShakeIcons: false,
-            // Provide the DTD connection information directly to the preview scaffold.
-            // This could, in theory, be provided via a follow up call to a service extension
-            // registered by the preview scaffold, but there's some uncertainty around how service
-            // extensions will work with Flutter web embedded in VSCode without a Chrome debugger
-            // connection.
-            dartDefines: <String>['$kWidgetPreviewDtdUriEnvVar=${_dtdService.dtdUri}'],
-            extraFrontEndOptions:
-                isWeb ? <String>['--dartdevc-canary', '--dartdevc-module-format=ddc'] : null,
-            packageConfigPath: widgetPreviewScaffoldProject.packageConfig.path,
-            packageConfig: PackageConfig.parseBytes(
-              widgetPreviewScaffoldProject.packageConfig.readAsBytesSync(),
-              widgetPreviewScaffoldProject.packageConfig.uri,
-            ),
-            // Don't try and download canvaskit from the CDN.
-            useLocalCanvasKit: true,
+      final debuggingOptions = DebuggingOptions.enabled(
+        BuildInfo(
+          BuildMode.debug,
+          null,
+          treeShakeIcons: false,
+          // Provide the DTD connection information directly to the preview scaffold.
+          // This could, in theory, be provided via a follow up call to a service extension
+          // registered by the preview scaffold, but there's some uncertainty around how service
+          // extensions will work with Flutter web embedded in VSCode without a Chrome debugger
+          // connection.
+          dartDefines: <String>['$kWidgetPreviewDtdUriEnvVar=${_dtdService.dtdUri}'],
+          packageConfigPath: widgetPreviewScaffoldProject.packageConfig.path,
+          packageConfig: PackageConfig.parseBytes(
+            widgetPreviewScaffoldProject.packageConfig.readAsBytesSync(),
+            widgetPreviewScaffoldProject.packageConfig.uri,
           ),
-          webEnableExposeUrl: false,
-          webRunHeadless: boolArg(kHeadlessWeb),
+          trackWidgetCreation: true,
+          // Don't try and download canvaskit from the CDN.
+          useLocalCanvasKit: true,
+          webEnableHotReload: true,
         ),
-        kEnableHotReload, // hot mode
-        applicationBinary: prebuiltApplicationBinary,
-        trackWidgetCreation: true,
-        projectRootPath: widgetPreviewScaffoldProject.directory.path,
+        webEnableExposeUrl: false,
+        webRunHeadless: boolArg(kHeadless),
+        enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
+        devToolsServerAddress: devToolsServerAddress,
       );
+      final String target = bundle.defaultMainPath;
+      final FlutterDevice flutterDevice = await FlutterDevice.create(
+        device,
+        target: target,
+        buildInfo: debuggingOptions.buildInfo,
+        platform: platform,
+      );
+
+      if (boolArg(kLaunchPreviewer)) {
+        final appStarted = Completer<void>();
+        _widgetPreviewApp = ResidentWebRunner(
+          flutterDevice,
+          target: target,
+          debuggingOptions: debuggingOptions,
+          analytics: analytics,
+          flutterProject: widgetPreviewScaffoldProject,
+          fileSystem: fs,
+          logger: logger,
+          terminal: globals.terminal,
+          platform: platform,
+          outputPreferences: globals.outputPreferences,
+          systemClock: globals.systemClock,
+        );
+        unawaited(_widgetPreviewApp!.run(appStartedCompleter: appStarted));
+        await appStarted.future;
+        logger.sendStartedEvent(applicationUrl: flutterDevice.devFS!.baseUri!);
+      }
     } on Exception catch (error) {
       throwToolExit(error.toString());
     }
 
-    if (!isWeb) {
-      // Immediately perform a hot restart to ensure new previews are loaded into the prebuilt
-      // application.
-      // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
-      logger.printStatus('Loading previews into the Widget Preview Scaffold...');
-      await app.restart(fullRestart: true);
-    }
     // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
     logger.printStatus('Done loading previews.');
-    return app;
-  }
 
-  @visibleForTesting
-  static const Map<String, String> flutterGenPackageConfigEntry = <String, String>{
-    'name': 'flutter_gen',
-    'rootUri': '../../flutter_gen',
-    'languageVersion': '2.12',
-  };
+    // Send an analytics event reporting how long it took for the widget previewer to start.
+    previewAnalytics.reportLaunchTiming();
 
-  /// Maps asset URIs to relative paths for the widget preview project to
-  /// include.
-  @visibleForTesting
-  static Uri transformAssetUri(Uri uri) {
-    // Assets provided by packages always start with 'packages' and do not
-    // require their URIs to be updated.
-    if (uri.path.startsWith('packages')) {
-      return uri;
-    }
-    // Otherwise, the asset is contained within the root project and needs
-    // to be referenced from the widget preview scaffold project's pubspec.
-    return Uri(path: '../../${uri.path}');
-  }
-
-  @visibleForTesting
-  static AssetsEntry transformAssetsEntry(AssetsEntry asset) {
-    return AssetsEntry(
-      uri: transformAssetUri(asset.uri),
-      flavors: asset.flavors,
-      transformers: asset.transformers,
-    );
-  }
-
-  @visibleForTesting
-  static FontAsset transformFontAsset(FontAsset asset) {
-    return FontAsset(transformAssetUri(asset.assetUri), weight: asset.weight, style: asset.style);
-  }
-
-  @visibleForTesting
-  static DeferredComponent transformDeferredComponent(DeferredComponent component) {
-    return DeferredComponent(
-      name: component.name,
-      // TODO(bkonyi): verify these library paths are always package: paths from the parent project.
-      libraries: component.libraries,
-      assets: component.assets.map(transformAssetsEntry).toList(),
-    );
-  }
-
-  @visibleForTesting
-  FlutterManifest buildPubspec({
-    required FlutterManifest rootManifest,
-    required FlutterManifest widgetPreviewManifest,
-  }) {
-    final List<AssetsEntry> assets = rootManifest.assets.map(transformAssetsEntry).toList();
-
-    final List<Font> fonts = <Font>[
-      ...widgetPreviewManifest.fonts,
-      ...rootManifest.fonts.map((Font font) {
-        return Font(font.familyName, font.fontAssets.map(transformFontAsset).toList());
-      }),
-    ];
-
-    final List<Uri> shaders = rootManifest.shaders.map(transformAssetUri).toList();
-
-    final List<DeferredComponent>? deferredComponents =
-        rootManifest.deferredComponents?.map(transformDeferredComponent).toList();
-
-    return widgetPreviewManifest.copyWith(
-      logger: logger,
-      assets: assets,
-      fonts: fonts,
-      shaders: shaders,
-      deferredComponents: deferredComponents,
-    );
-  }
-
-  Future<void> _populatePreviewPubspec({required FlutterProject rootProject}) async {
-    final FlutterProject widgetPreviewScaffoldProject = rootProject.widgetPreviewScaffoldProject;
-
-    // Overwrite the pubspec for the preview scaffold project to include assets
-    // from the root project.
-    widgetPreviewScaffoldProject.replacePubspec(
-      buildPubspec(
-        rootManifest: rootProject.manifest,
-        widgetPreviewManifest: widgetPreviewScaffoldProject.manifest,
-      ),
-    );
-
-    // Adds a path dependency on the parent project so previews can be
-    // imported directly into the preview scaffold.
-    const String pubAdd = 'add';
-    // Use `json.encode` to handle escapes correctly.
-    final String pathDescriptor = json.encode(<String, Object?>{
-      // `pub add` interprets relative paths relative to the current directory.
-      'path': rootProject.directory.fileSystem.path.relative(rootProject.directory.path),
-    });
-
-    await pub.interactively(
-      <String>[
-        pubAdd,
-        if (offline) '--offline',
-        '--directory',
-        widgetPreviewScaffoldProject.directory.path,
-        // Ensure the path using POSIX separators, otherwise the "path_not_posix" check will fail.
-        '${rootProject.manifest.appName}:$pathDescriptor',
-      ],
-      context: PubContext.pubAdd,
-      command: pubAdd,
-      touchesPackageConfig: true,
-    );
-
-    // Adds dependencies on:
-    //   - dtd, which is used to connect to the Dart Tooling Daemon to establish communication
-    //     with other developer tools.
-    //   - flutter_lints, which is referenced by the analysis_options.yaml generated by the 'app'
-    //     template.
-    //   - stack_trace, which is used to generate terse stack traces for displaying errors thrown
-    //     by widgets being previewed.
-    //   - url_launcher, which is used to open a browser to the preview documentation.
-    await pub.interactively(
-      <String>[
-        pubAdd,
-        if (offline) '--offline',
-        '--directory',
-        widgetPreviewScaffoldProject.directory.path,
-        'dtd',
-        'flutter_lints',
-        'stack_trace',
-        'url_launcher',
-      ],
-      context: PubContext.pubAdd,
-      command: pubAdd,
-      touchesPackageConfig: true,
-    );
-
-    // Generate package_config.json.
-    await pub.get(
-      context: PubContext.create,
-      project: widgetPreviewScaffoldProject,
-      offline: offline,
-      outputMode: PubOutputMode.summaryOnly,
-    );
-
-    maybeAddFlutterGenToPackageConfig(rootProject: rootProject);
-    _previewManifest.updatePubspecHash();
-  }
-
-  /// Manually adds an entry for package:flutter_gen to the preview scaffold's
-  /// package_config.json if the target project makes use of localization.
-  ///
-  /// The Flutter Tool does this when running a Flutter project with
-  /// localization instead of modifying the user's pubspec.yaml to depend on it
-  /// as a path dependency. Unfortunately, the preview scaffold still needs to
-  /// add it directly to its package_config.json as the generated package name
-  /// isn't actually flutter_gen, which pub doesn't really like, and using the
-  /// actual package name will break applications which import
-  /// package:flutter_gen.
-  @visibleForTesting
-  void maybeAddFlutterGenToPackageConfig({required FlutterProject rootProject}) {
-    // TODO(matanlurey): Remove this once flutter_gen is removed.
-    //
-    // This is actually incorrect logic; the presence of a `generate: true`
-    // does *NOT* mean that we need to add `flutter_gen` to the package config,
-    // and never did, but the name of the manifest field was labeled and
-    // described incorrectly.
-    //
-    // Tracking removal: https://github.com/flutter/flutter/issues/102983.
-    if (!rootProject.manifest.generateLocalizations) {
-      return;
-    }
-    final FlutterProject widgetPreviewScaffoldProject = rootProject.widgetPreviewScaffoldProject;
-    final File packageConfig = widgetPreviewScaffoldProject.packageConfig;
-    final String previewPackageConfigPath = packageConfig.path;
-    if (!packageConfig.existsSync()) {
-      throw StateError(
-        "Could not find preview project's package_config.json at "
-        '$previewPackageConfigPath',
-      );
-    }
-    final Map<String, Object?> packageConfigJson =
-        json.decode(packageConfig.readAsStringSync()) as Map<String, Object?>;
-    (packageConfigJson['packages'] as List<dynamic>?)!.cast<Map<String, String>>().add(
-      flutterGenPackageConfigEntry,
-    );
-    packageConfig.writeAsStringSync(json.encode(packageConfigJson));
-    logger.printStatus('Added flutter_gen dependency to $previewPackageConfigPath');
+    // If _widgetPreviewApp is null --no-launch-previewer was provided so return success.
+    return _widgetPreviewApp?.waitForAppToFinish() ?? 0;
   }
 }
 
@@ -761,5 +547,171 @@ final class WidgetPreviewCleanCommand extends WidgetPreviewSubCommandBase {
       logger.printStatus('Nothing to clean up.');
     }
     return FlutterCommandResult.success();
+  }
+}
+
+/// A custom logger for the widget-preview commands that disables non-event output to stdio when
+/// machine mode is enabled.
+final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
+  WidgetPreviewMachineAwareLogger(super.delegate, {required this.machine, required this.verbose});
+
+  final bool machine;
+  final bool verbose;
+
+  @override
+  void printError(
+    String message, {
+    StackTrace? stackTrace,
+    bool? emphasis,
+    TerminalColor? color,
+    int? indent,
+    int? hangingIndent,
+    bool? wrap,
+  }) {
+    if (machine) {
+      sendEvent('logMessage', <String, Object?>{
+        'level': 'error',
+        'message': message,
+        'stackTrace': ?stackTrace?.toString(),
+      });
+      return;
+    }
+    super.printError(
+      message,
+      stackTrace: stackTrace,
+      emphasis: emphasis,
+      color: color,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
+  }
+
+  @override
+  void printWarning(
+    String message, {
+    bool? emphasis,
+    TerminalColor? color,
+    int? indent,
+    int? hangingIndent,
+    bool? wrap,
+    bool fatal = true,
+  }) {
+    if (machine) {
+      sendEvent('logMessage', <String, Object?>{'level': 'warning', 'message': message});
+      return;
+    }
+    super.printWarning(
+      message,
+      emphasis: emphasis,
+      color: color,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+      fatal: fatal,
+    );
+  }
+
+  @override
+  void printStatus(
+    String message, {
+    bool? emphasis,
+    TerminalColor? color,
+    bool? newline,
+    int? indent,
+    int? hangingIndent,
+    bool? wrap,
+  }) {
+    if (machine) {
+      sendEvent('logMessage', <String, Object?>{'level': 'status', 'message': message});
+      return;
+    }
+    super.printStatus(
+      message,
+      emphasis: emphasis,
+      color: color,
+      newline: newline,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
+  }
+
+  @override
+  void printBox(String message, {String? title}) {
+    if (machine) {
+      return;
+    }
+    super.printBox(message, title: title);
+  }
+
+  @override
+  void printTrace(String message) {
+    if (!verbose) {
+      return;
+    }
+    if (machine) {
+      sendEvent('logMessage', <String, Object?>{'level': 'trace', 'message': message});
+      return;
+    }
+    super.printTrace(message);
+  }
+
+  /// Notifies tooling that the widget previewer is initializing.
+  void sendInitializingEvent() {
+    sendEvent('initializing', {'pid': pid});
+  }
+
+  /// Notifies tooling that the widget previewer has started and is being
+  /// served at [applicationUrl].
+  void sendStartedEvent({required Uri applicationUrl}) {
+    sendEvent('started', {'url': applicationUrl.toString()});
+  }
+
+  @override
+  void sendEvent(String name, [Map<String, dynamic>? args]) {
+    if (!machine) {
+      return;
+    }
+    super.printStatus(
+      json.encode([
+        {'event': 'widget_preview.$name', 'params': ?args},
+      ]),
+    );
+  }
+
+  @override
+  Status startProgress(
+    String message, {
+    String? progressId,
+    int progressIndicatorPadding = kDefaultStatusPadding,
+  }) {
+    if (machine) {
+      printStatus(message);
+      return SilentStatus(stopwatch: Stopwatch());
+    }
+    return super.startProgress(
+      message,
+      progressId: progressId,
+      progressIndicatorPadding: progressIndicatorPadding,
+    );
+  }
+
+  @override
+  Status startSpinner({
+    VoidCallback? onFinish,
+    Duration? timeout,
+    SlowWarningCallback? slowWarningCallback,
+    TerminalColor? warningColor,
+  }) {
+    if (machine) {
+      return SilentStatus(stopwatch: Stopwatch());
+    }
+    return super.startSpinner(
+      onFinish: onFinish,
+      timeout: timeout,
+      slowWarningCallback: slowWarningCallback,
+      warningColor: warningColor,
+    );
   }
 }

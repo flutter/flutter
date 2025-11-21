@@ -7,7 +7,6 @@ import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -327,6 +326,9 @@ void testMain() {
         skShader1,
         isNot(same(skShader2)),
       );
+
+      final ui.UniformFloatSlot slot = shader.getUniformFloat('u_rotation1', 1);
+      expect(slot.shaderIndex, equals(3));
 
       shader.dispose();
       expect(shader.debugDisposed, true);

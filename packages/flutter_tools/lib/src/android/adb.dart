@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-final RegExp _whitespace = RegExp(r'\s+');
+final _whitespace = RegExp(r'\s+');
 
 /// Convert adb device names into more human readable descriptions.
 String cleanAdbDeviceName(String name) {

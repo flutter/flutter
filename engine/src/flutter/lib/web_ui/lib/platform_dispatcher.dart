@@ -85,6 +85,18 @@ abstract class PlatformDispatcher {
 
   void scheduleWarmUpFrame({required VoidCallback beginFrame, required VoidCallback drawFrame});
 
+  void setSemanticsTreeEnabled(bool enabled) {}
+
+  void setApplicationLocale(Locale locale) {}
+
+  double? get lineHeightScaleFactorOverride;
+
+  double? get letterSpacingOverride;
+
+  double? get wordSpacingOverride;
+
+  double? get paragraphSpacingOverride;
+
   AccessibilityFeatures get accessibilityFeatures;
 
   VoidCallback? get onAccessibilityFeaturesChanged;
@@ -526,10 +538,10 @@ class Locale {
 
   String _rawToString(String separator) {
     final StringBuffer out = StringBuffer(languageCode);
-    if (scriptCode != null) {
+    if (scriptCode != null && scriptCode!.isNotEmpty) {
       out.write('$separator$scriptCode');
     }
-    if (_countryCode != null) {
+    if (_countryCode != null && countryCode!.isNotEmpty) {
       out.write('$separator$countryCode');
     }
     return out.toString();

@@ -75,13 +75,13 @@ bool GPUSurfaceVulkanImpeller::IsValid() {
 
 // |Surface|
 std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
-    const SkISize& size) {
+    const DlISize& size) {
   if (!IsValid()) {
     FML_LOG(ERROR) << "Vulkan surface was invalid.";
     return nullptr;
   }
 
-  if (size.isEmpty()) {
+  if (size.IsEmpty()) {
     FML_LOG(ERROR) << "Vulkan surface was asked for an empty frame.";
     return nullptr;
   }
@@ -97,7 +97,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
     }
 
     impeller::RenderTarget render_target = surface->GetRenderTarget();
-    auto cull_rect = render_target.GetRenderTargetSize();
+    auto cull_rect =
+        impeller::Rect::MakeSize(render_target.GetRenderTargetSize());
 
     SurfaceFrame::EncodeCallback encode_callback = [aiks_context =
                                                         aiks_context_,  //
@@ -114,12 +115,11 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
         return false;
       }
 
-      SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.width, cull_rect.height);
       return impeller::RenderToTarget(
           aiks_context->GetContentContext(),                                //
           render_target,                                                    //
           display_list,                                                     //
-          sk_cull_rect,                                                     //
+          cull_rect,                                                        //
           /*reset_host_buffer=*/surface_frame.submit_info().frame_boundary  //
       );
     };
@@ -156,7 +156,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
 
     impeller::TextureDescriptor desc;
     desc.format = format.value();
-    desc.size = impeller::ISize{size.width(), size.height()};
+    desc.size = impeller::ISize{size.width, size.height};
     desc.storage_mode = impeller::StorageMode::kDevicePrivate;
     desc.mip_count = 1;
     desc.compression_type = impeller::CompressionType::kLossless;
@@ -195,7 +195,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
     auto surface = impeller::SurfaceVK::WrapSwapchainImage(
         transients_, wrapped_onscreen, [&]() -> bool { return true; });
     impeller::RenderTarget render_target = surface->GetRenderTarget();
-    auto cull_rect = render_target.GetRenderTargetSize();
+    auto cull_rect =
+        impeller::Rect::MakeSize(render_target.GetRenderTargetSize());
 
     SurfaceFrame::EncodeCallback encode_callback = [aiks_context =
                                                         aiks_context_,  //
@@ -212,11 +213,10 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
         return false;
       }
 
-      SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.width, cull_rect.height);
       return impeller::RenderToTarget(aiks_context->GetContentContext(),  //
                                       render_target,                      //
                                       display_list,                       //
-                                      sk_cull_rect,                       //
+                                      cull_rect,                          //
                                       /*reset_host_buffer=*/true          //
       );
     };
@@ -277,7 +277,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
 }
 
 // |Surface|
-SkMatrix GPUSurfaceVulkanImpeller::GetRootTransformation() const {
+DlMatrix GPUSurfaceVulkanImpeller::GetRootTransformation() const {
   // This backend does not currently support root surface transformations. Just
   // return identity.
   return {};

@@ -1166,8 +1166,9 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     if (localDelta != Offset.zero) {
       _currentPosition = OffsetPair.fromEventPosition(event);
       final Offset correctedLocalPosition = _initialPosition.local + localDelta;
-      final Matrix4? localToGlobalTransform =
-          event.transform == null ? null : Matrix4.tryInvert(event.transform!);
+      final Matrix4? localToGlobalTransform = event.transform == null
+          ? null
+          : Matrix4.tryInvert(event.transform!);
       final Offset globalUpdateDelta = PointerEvent.transformDeltaViaPositions(
         transform: localToGlobalTransform,
         untransformedDelta: localDelta,
@@ -1180,8 +1181,9 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
   }
 
   void _checkDrag(PointerMoveEvent event) {
-    final Matrix4? localToGlobalTransform =
-        event.transform == null ? null : Matrix4.tryInvert(event.transform!);
+    final Matrix4? localToGlobalTransform = event.transform == null
+        ? null
+        : Matrix4.tryInvert(event.transform!);
     final Offset movedLocally = _getDeltaForDetails(event.localDelta);
     _globalDistanceMoved +=
         PointerEvent.transformDeltaViaPositions(

@@ -28,25 +28,25 @@ class Matrix4 {
     double arg13,
     double arg14,
     double arg15,
-  ) =>
-      Matrix4.zero()..setValues(
-        arg0,
-        arg1,
-        arg2,
-        arg3,
-        arg4,
-        arg5,
-        arg6,
-        arg7,
-        arg8,
-        arg9,
-        arg10,
-        arg11,
-        arg12,
-        arg13,
-        arg14,
-        arg15,
-      );
+  ) => Matrix4.zero()
+    ..setValues(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+      arg4,
+      arg5,
+      arg6,
+      arg7,
+      arg8,
+      arg9,
+      arg10,
+      arg11,
+      arg12,
+      arg13,
+      arg14,
+      arg15,
+    );
 
   /// Zero matrix.
   Matrix4.zero() : _m4storage = Float32List(16);
@@ -73,22 +73,19 @@ class Matrix4 {
   }
 
   /// Rotation of [radians_] around X.
-  factory Matrix4.rotationX(double radians) =>
-      Matrix4.zero()
-        .._m4storage[15] = 1.0
-        ..setRotationX(radians);
+  factory Matrix4.rotationX(double radians) => Matrix4.zero()
+    .._m4storage[15] = 1.0
+    ..setRotationX(radians);
 
   /// Rotation of [radians_] around Y.
-  factory Matrix4.rotationY(double radians) =>
-      Matrix4.zero()
-        .._m4storage[15] = 1.0
-        ..setRotationY(radians);
+  factory Matrix4.rotationY(double radians) => Matrix4.zero()
+    .._m4storage[15] = 1.0
+    ..setRotationY(radians);
 
   /// Rotation of [radians_] around Z.
-  factory Matrix4.rotationZ(double radians) =>
-      Matrix4.zero()
-        .._m4storage[15] = 1.0
-        ..setRotationZ(radians);
+  factory Matrix4.rotationZ(double radians) => Matrix4.zero()
+    .._m4storage[15] = 1.0
+    ..setRotationZ(radians);
 
   /// Translation matrix.
   factory Matrix4.translation(Vector3 translation) =>
@@ -99,12 +96,11 @@ class Matrix4 {
       Matrix4.identity()..setTranslationRaw(x, y, z);
 
   /// Scale matrix.
-  factory Matrix4.diagonal3Values(double x, double y, double z) =>
-      Matrix4.zero()
-        .._m4storage[15] = 1.0
-        .._m4storage[10] = z
-        .._m4storage[5] = y
-        .._m4storage[0] = x;
+  factory Matrix4.diagonal3Values(double x, double y, double z) => Matrix4.zero()
+    .._m4storage[15] = 1.0
+    .._m4storage[10] = z
+    .._m4storage[5] = y
+    .._m4storage[0] = x;
 
   /// Constructs Matrix4 with given [Float32List] as [storage].
   Matrix4.fromFloat32List(this._m4storage);

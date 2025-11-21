@@ -55,6 +55,7 @@ TEST_F(FlutterVSyncWaiterTest, RequestsInitialVSync) {
   [displayLink tickWithTimestamp:CACurrentMediaTime()
                  targetTimestamp:CACurrentMediaTime() + 1.0 / 60.0];
   EXPECT_TRUE(displayLink.paused);
+  [waiter invalidate];
 }
 
 static void BusyWait(CFTimeInterval duration) {
@@ -111,6 +112,8 @@ TEST_F(FlutterVSyncWaiterTest, FirstVSyncIsSynthesized) {
     EXPECT_DOUBLE_EQ(timestamp, expectedTimestamp);
     EXPECT_DOUBLE_EQ(targetTimestamp, expectedTimestamp + displayLink.nominalOutputRefreshPeriod);
     EXPECT_EQ(baton, size_t(1));
+
+    [waiter invalidate];
   };
 
   // First argument if the wait duration after reference vsync.
@@ -204,4 +207,6 @@ TEST_F(FlutterVSyncWaiterTest, VSyncWorks) {
   EXPECT_DOUBLE_EQ(entries[3].timestamp, now + 3 * displayLink.nominalOutputRefreshPeriod);
   EXPECT_DOUBLE_EQ(entries[3].targetTimestamp, now + 4 * displayLink.nominalOutputRefreshPeriod);
   EXPECT_EQ(entries[3].baton, size_t(3));
+
+  [waiter invalidate];
 }

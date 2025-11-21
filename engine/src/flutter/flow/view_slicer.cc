@@ -10,13 +10,13 @@
 
 namespace flutter {
 
-std::unordered_map<int64_t, SkRect> SliceViews(
+std::unordered_map<int64_t, DlRect> SliceViews(
     DlCanvas* background_canvas,
     const std::vector<int64_t>& composition_order,
     const std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>>&
         slices,
-    const std::unordered_map<int64_t, SkRect>& view_rects) {
-  std::unordered_map<int64_t, SkRect> overlay_layers;
+    const std::unordered_map<int64_t, DlRect>& view_rects) {
+  std::unordered_map<int64_t, DlRect> overlay_layers;
 
   auto current_frame_view_count = composition_order.size();
 
@@ -49,15 +49,15 @@ std::unordered_map<int64_t, SkRect> SliceViews(
         continue;
       }
 
-      const SkRect current_view_rect = maybe_rect->second;
+      const DlRect current_view_rect = maybe_rect->second;
       const DlIRect rounded_in_platform_view_rect =
-          DlIRect::RoundIn(ToDlRect(current_view_rect));
+          DlIRect::RoundIn(current_view_rect);
       const DlRect rounded_out_platform_view_rect =
-          DlRect::RoundOut(ToDlRect(current_view_rect));
+          DlRect::RoundOut(current_view_rect);
 
       // Each rect corresponds to a native view that renders Flutter UI.
       std::vector<DlIRect> intersection_rects =
-          slice->region(ToDlRect(current_view_rect)).getRects();
+          slice->region(current_view_rect).getRects();
 
       // Ignore intersections of single width/height on the edge of the platform
       // view.
@@ -108,7 +108,7 @@ std::unordered_map<int64_t, SkRect> SliceViews(
     }
 
     if (!full_joined_rect.IsEmpty()) {
-      overlay_layers.insert({view_id, ToSkRect(full_joined_rect)});
+      overlay_layers.insert({view_id, full_joined_rect});
 
       // Clip the background canvas, so it doesn't contain any of the pixels
       // drawn on the overlay layer.

@@ -64,10 +64,10 @@ void main() {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     controller.value = 0.5;
     bool didReceiveCallback = false;
-    final ProxyAnimation animation =
-        ProxyAnimation()..addListener(() {
-          didReceiveCallback = true;
-        });
+    final ProxyAnimation animation = ProxyAnimation()
+      ..addListener(() {
+        didReceiveCallback = true;
+      });
     expect(didReceiveCallback, isFalse);
     animation.parent = controller;
     expect(didReceiveCallback, isTrue);
@@ -99,7 +99,9 @@ void main() {
 
   test('TrainHoppingAnimation', () {
     final AnimationController currentTrain = AnimationController(vsync: const TestVSync());
+    addTearDown(currentTrain.dispose);
     final AnimationController nextTrain = AnimationController(vsync: const TestVSync());
+    addTearDown(nextTrain.dispose);
     currentTrain.value = 0.5;
     nextTrain.value = 0.75;
     bool didSwitchTrains = false;
@@ -123,15 +125,40 @@ void main() {
   test('TrainHoppingAnimation dispatches memory events', () async {
     await expectLater(
       await memoryEvents(
-        () =>
-            TrainHoppingAnimation(
-              const AlwaysStoppedAnimation<double>(1),
-              const AlwaysStoppedAnimation<double>(1),
-            ).dispose(),
+        () => TrainHoppingAnimation(
+          const AlwaysStoppedAnimation<double>(1),
+          const AlwaysStoppedAnimation<double>(1),
+        ).dispose(),
         TrainHoppingAnimation,
       ),
       areCreateAndDispose,
     );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/178336.
+  test('TrainHoppingAnimation notifies status listeners', () {
+    final AnimationController controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
+    );
+    addTearDown(controller.dispose);
+
+    final TrainHoppingAnimation animation = TrainHoppingAnimation(
+      Tween<double>(begin: 1.0, end: -1.0).animate(controller),
+      Tween<double>(begin: -1.0, end: 1.0).animate(controller),
+    );
+    addTearDown(animation.dispose);
+
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+    animation.addStatusListener(statusLog.add);
+    expect(statusLog, isEmpty);
+
+    controller.forward();
+    expect(statusLog, equals(<AnimationStatus>[AnimationStatus.forward]));
+    statusLog.clear();
+
+    controller.reverse();
+    expect(statusLog, equals(<AnimationStatus>[AnimationStatus.dismissed]));
   });
 
   test('AnimationMean control test', () {
@@ -477,14 +504,13 @@ FlutterError
   test('$CurvedAnimation dispatches memory events', () async {
     await expectLater(
       await memoryEvents(
-        () =>
-            CurvedAnimation(
-              parent: AnimationController(
-                duration: const Duration(milliseconds: 100),
-                vsync: const TestVSync(),
-              ),
-              curve: Curves.linear,
-            ).dispose(),
+        () => CurvedAnimation(
+          parent: AnimationController(
+            duration: const Duration(milliseconds: 100),
+            vsync: const TestVSync(),
+          ),
+          curve: Curves.linear,
+        ).dispose(),
         CurvedAnimation,
       ),
       areCreateAndDispose,

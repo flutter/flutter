@@ -138,7 +138,7 @@ class _DriverBinding extends BindingBase
 ///   String get finderType => 'SomeFinder';
 ///
 ///   @override
-///   SerializableFinder deserialize(Map<String, String> params, DeserializeFinderFactory finderFactory) {
+///   SerializableFinder deserialize(Map<String, String> params, DeserializeFinderFactory finderFactory, {String? path}) {
 ///     return SomeFinder(params['title']!);
 ///   }
 ///
@@ -441,13 +441,13 @@ class FlutterDriverExtension
   }
 
   @override
-  SerializableFinder deserializeFinder(Map<String, String> json) {
+  SerializableFinder deserializeFinder(Map<String, String> json, {String? path}) {
     final String? finderType = json['finderType'];
     if (_finderExtensions.containsKey(finderType)) {
       return _finderExtensions[finderType]!.deserialize(json, this);
     }
 
-    return super.deserializeFinder(json);
+    return super.deserializeFinder(json, path: path);
   }
 
   @override
@@ -461,13 +461,17 @@ class FlutterDriverExtension
   }
 
   @override
-  Command deserializeCommand(Map<String, String> params, DeserializeFinderFactory finderFactory) {
+  Command deserializeCommand(
+    Map<String, String> params,
+    DeserializeFinderFactory finderFactory, {
+    String? path,
+  }) {
     final String? kind = params['command'];
     if (_commandExtensions.containsKey(kind)) {
       return _commandExtensions[kind]!.deserialize(params, finderFactory, this);
     }
 
-    return super.deserializeCommand(params, finderFactory);
+    return super.deserializeCommand(params, finderFactory, path: path);
   }
 
   @override

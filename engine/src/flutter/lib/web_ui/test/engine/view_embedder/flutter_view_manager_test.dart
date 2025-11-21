@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:js_util';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -52,9 +51,9 @@ Future<void> doTests() async {
           createDomElement('div'),
         );
         final int viewId = view.viewId;
-        final JsFlutterViewOptions expectedOptions =
-            jsify(<String, Object?>{'hostElement': createDomElement('div')})
-                as JsFlutterViewOptions;
+        final JsFlutterViewOptions expectedOptions = JsFlutterViewOptions(
+          hostElement: createDomElement('div'),
+        );
 
         viewManager.registerView(view, jsViewOptions: expectedOptions);
 

@@ -150,14 +150,15 @@ void main() {
               TreeSliver<String>(
                 tree: simpleNodeSet,
                 controller: controller,
-                treeNodeBuilder: (
-                  BuildContext context,
-                  TreeSliverNode<Object?> node,
-                  AnimationStyle toggleAnimationStyle,
-                ) {
-                  returnedController ??= TreeSliverController.of(context);
-                  return TreeSliver.defaultTreeNodeBuilder(context, node, toggleAnimationStyle);
-                },
+                treeNodeBuilder:
+                    (
+                      BuildContext context,
+                      TreeSliverNode<Object?> node,
+                      AnimationStyle toggleAnimationStyle,
+                    ) {
+                      returnedController ??= TreeSliverController.of(context);
+                      return TreeSliver.defaultTreeNodeBuilder(context, node, toggleAnimationStyle);
+                    },
               ),
             ],
           ),
@@ -174,14 +175,15 @@ void main() {
             slivers: <Widget>[
               TreeSliver<String>(
                 tree: simpleNodeSet,
-                treeNodeBuilder: (
-                  BuildContext context,
-                  TreeSliverNode<Object?> node,
-                  AnimationStyle toggleAnimationStyle,
-                ) {
-                  returnedController ??= TreeSliverController.maybeOf(context);
-                  return TreeSliver.defaultTreeNodeBuilder(context, node, toggleAnimationStyle);
-                },
+                treeNodeBuilder:
+                    (
+                      BuildContext context,
+                      TreeSliverNode<Object?> node,
+                      AnimationStyle toggleAnimationStyle,
+                    ) {
+                      returnedController ??= TreeSliverController.maybeOf(context);
+                      return TreeSliver.defaultTreeNodeBuilder(context, node, toggleAnimationStyle);
+                    },
               ),
             ],
           ),
@@ -408,44 +410,44 @@ void main() {
                 toggled = true;
                 toggledNode = node as TreeSliverNode<String>;
               },
-              treeNodeBuilder: (
-                BuildContext context,
-                TreeSliverNode<Object?> node,
-                AnimationStyle toggleAnimationStyle,
-              ) {
-                final Duration animationDuration =
-                    toggleAnimationStyle.duration ?? TreeSliver.defaultAnimationDuration;
-                final Curve animationCurve =
-                    toggleAnimationStyle.curve ?? TreeSliver.defaultAnimationCurve;
-                // This makes the whole row trigger toggling.
-                return TreeSliver.wrapChildToToggleNode(
-                  node: node,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      children: <Widget>[
-                        // Icon for parent nodes
-                        SizedBox.square(
-                          dimension: 30.0,
-                          child:
-                              node.children.isNotEmpty
+              treeNodeBuilder:
+                  (
+                    BuildContext context,
+                    TreeSliverNode<Object?> node,
+                    AnimationStyle toggleAnimationStyle,
+                  ) {
+                    final Duration animationDuration =
+                        toggleAnimationStyle.duration ?? TreeSliver.defaultAnimationDuration;
+                    final Curve animationCurve =
+                        toggleAnimationStyle.curve ?? TreeSliver.defaultAnimationCurve;
+                    // This makes the whole row trigger toggling.
+                    return TreeSliver.wrapChildToToggleNode(
+                      node: node,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: <Widget>[
+                            // Icon for parent nodes
+                            SizedBox.square(
+                              dimension: 30.0,
+                              child: node.children.isNotEmpty
                                   ? AnimatedRotation(
-                                    turns: node.isExpanded ? 0.25 : 0.0,
-                                    duration: animationDuration,
-                                    curve: animationCurve,
-                                    child: const Icon(IconData(0x25BA), size: 14),
-                                  )
+                                      turns: node.isExpanded ? 0.25 : 0.0,
+                                      duration: animationDuration,
+                                      curve: animationCurve,
+                                      child: const Icon(IconData(0x25BA), size: 14),
+                                    )
                                   : null,
+                            ),
+                            // Spacer
+                            const SizedBox(width: 8.0),
+                            // Content
+                            Text(node.content.toString()),
+                          ],
                         ),
-                        // Spacer
-                        const SizedBox(width: 8.0),
-                        // Content
-                        Text(node.content.toString()),
-                      ],
-                    ),
-                  ),
-                );
-              },
+                      ),
+                    );
+                  },
             ),
           ],
         ),
@@ -489,14 +491,15 @@ void main() {
           slivers: <Widget>[
             TreeSliver<String>(
               tree: simpleNodeSet,
-              treeNodeBuilder: (
-                BuildContext context,
-                TreeSliverNode<Object?> node,
-                AnimationStyle toggleAnimationStyle,
-              ) {
-                style ??= toggleAnimationStyle;
-                return Text(node.content.toString());
-              },
+              treeNodeBuilder:
+                  (
+                    BuildContext context,
+                    TreeSliverNode<Object?> node,
+                    AnimationStyle toggleAnimationStyle,
+                  ) {
+                    style ??= toggleAnimationStyle;
+                    return Text(node.content.toString());
+                  },
             ),
           ],
         ),
@@ -512,14 +515,15 @@ void main() {
             TreeSliver<String>(
               tree: simpleNodeSet,
               toggleAnimationStyle: AnimationStyle.noAnimation,
-              treeNodeBuilder: (
-                BuildContext context,
-                TreeSliverNode<Object?> node,
-                AnimationStyle toggleAnimationStyle,
-              ) {
-                style = toggleAnimationStyle;
-                return Text(node.content.toString());
-              },
+              treeNodeBuilder:
+                  (
+                    BuildContext context,
+                    TreeSliverNode<Object?> node,
+                    AnimationStyle toggleAnimationStyle,
+                  ) {
+                    style = toggleAnimationStyle;
+                    return Text(node.content.toString());
+                  },
             ),
           ],
         ),
@@ -540,14 +544,15 @@ void main() {
                 curve: Curves.easeIn,
                 duration: Duration(milliseconds: 200),
               ),
-              treeNodeBuilder: (
-                BuildContext context,
-                TreeSliverNode<Object?> node,
-                AnimationStyle toggleAnimationStyle,
-              ) {
-                style ??= toggleAnimationStyle;
-                return Text(node.content.toString());
-              },
+              treeNodeBuilder:
+                  (
+                    BuildContext context,
+                    TreeSliverNode<Object?> node,
+                    AnimationStyle toggleAnimationStyle,
+                  ) {
+                    style ??= toggleAnimationStyle;
+                    return Text(node.content.toString());
+                  },
             ),
           ],
         ),
@@ -737,19 +742,20 @@ void main() {
                 tree: tree,
                 controller: controller,
                 toggleAnimationStyle: AnimationStyle.noAnimation,
-                treeNodeBuilder: (
-                  BuildContext context,
-                  TreeSliverNode<Object?> node,
-                  AnimationStyle animationStyle,
-                ) {
-                  final Widget child = GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () => controller.toggleNode(node),
-                    child: TreeSliver.defaultTreeNodeBuilder(context, node, animationStyle),
-                  );
+                treeNodeBuilder:
+                    (
+                      BuildContext context,
+                      TreeSliverNode<Object?> node,
+                      AnimationStyle animationStyle,
+                    ) {
+                      final Widget child = GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: () => controller.toggleNode(node),
+                        child: TreeSliver.defaultTreeNodeBuilder(context, node, animationStyle),
+                      );
 
-                  return child;
-                },
+                      return child;
+                    },
               ),
             ],
           ),
@@ -828,19 +834,20 @@ void main() {
                     curve: Curves.easeInOut,
                     duration: Duration(milliseconds: 200),
                   ),
-                  treeNodeBuilder: (
-                    BuildContext context,
-                    TreeSliverNode<Object?> node,
-                    AnimationStyle animationStyle,
-                  ) {
-                    final Widget child = GestureDetector(
-                      key: ValueKey<String>(node.content! as String),
-                      behavior: HitTestBehavior.translucent,
-                      onTap: () => controller.toggleNode(node),
-                      child: TreeSliver.defaultTreeNodeBuilder(context, node, animationStyle),
-                    );
-                    return child;
-                  },
+                  treeNodeBuilder:
+                      (
+                        BuildContext context,
+                        TreeSliverNode<Object?> node,
+                        AnimationStyle animationStyle,
+                      ) {
+                        final Widget child = GestureDetector(
+                          key: ValueKey<String>(node.content! as String),
+                          behavior: HitTestBehavior.translucent,
+                          onTap: () => controller.toggleNode(node),
+                          child: TreeSliver.defaultTreeNodeBuilder(context, node, animationStyle),
+                        );
+                        return child;
+                      },
                 ),
               ],
             ),
@@ -887,13 +894,14 @@ void main() {
                   TreeSliver<Object>(
                     tree: <TreeSliverNode<Object>>[TreeSliverNode<Object>(Object())],
                     treeRowExtentBuilder: (_, _) => 10,
-                    treeNodeBuilder: (
-                      BuildContext context,
-                      TreeSliverNode<Object?> node,
-                      AnimationStyle animationStyle,
-                    ) {
-                      return const ColoredBox(color: Colors.red);
-                    },
+                    treeNodeBuilder:
+                        (
+                          BuildContext context,
+                          TreeSliverNode<Object?> node,
+                          AnimationStyle animationStyle,
+                        ) {
+                          return const ColoredBox(color: Colors.red);
+                        },
                   ),
                 ],
               ),
@@ -922,13 +930,14 @@ void main() {
                 ),
               ],
               treeRowExtentBuilder: (_, _) => 20,
-              treeNodeBuilder: (
-                BuildContext context,
-                TreeSliverNode<Object?> node,
-                AnimationStyle animationStyle,
-              ) {
-                return Container(key: node.content! as Key);
-              },
+              treeNodeBuilder:
+                  (
+                    BuildContext context,
+                    TreeSliverNode<Object?> node,
+                    AnimationStyle animationStyle,
+                  ) {
+                    return Container(key: node.content! as Key);
+                  },
             ),
           ],
         ),
@@ -957,13 +966,14 @@ void main() {
                   TreeSliver<Object>(
                     tree: <TreeSliverNode<Object>>[TreeSliverNode<Object>(Object())],
                     treeRowExtentBuilder: (_, _) => 10,
-                    treeNodeBuilder: (
-                      BuildContext context,
-                      TreeSliverNode<Object?> node,
-                      AnimationStyle animationStyle,
-                    ) {
-                      return const ColoredBox(color: Colors.red);
-                    },
+                    treeNodeBuilder:
+                        (
+                          BuildContext context,
+                          TreeSliverNode<Object?> node,
+                          AnimationStyle animationStyle,
+                        ) {
+                          return const ColoredBox(color: Colors.red);
+                        },
                   ),
                   const SliverToBoxAdapter(child: SizedBox(height: 20)),
                 ],

@@ -20,7 +20,6 @@ import 'button_theme.dart';
 import 'constants.dart';
 import 'ink_well.dart';
 import 'material.dart';
-import 'material_state.dart';
 import 'material_state_mixin.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -124,7 +123,7 @@ class RawMaterialButton extends StatefulWidget {
   ///  * [WidgetState.disabled].
   /// {@endtemplate}
   ///
-  /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
+  /// If this property is null, [WidgetStateMouseCursor.adaptiveClickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// Defines the default text style, with [Material.textStyle], for the
@@ -314,19 +313,19 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
   @override
   void initState() {
     super.initState();
-    setMaterialState(MaterialState.disabled, !widget.enabled);
+    setMaterialState(WidgetState.disabled, !widget.enabled);
   }
 
   @override
   void didUpdateWidget(RawMaterialButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    setMaterialState(MaterialState.disabled, !widget.enabled);
+    setMaterialState(WidgetState.disabled, !widget.enabled);
     // If the button is disabled while a press gesture is currently ongoing,
     // InkWell makes a call to handleHighlightChanged. This causes an exception
     // because it calls setState in the middle of a build. To preempt this, we
     // manually update pressed to false when this situation occurs.
     if (isDisabled && isPressed) {
-      removeMaterialState(MaterialState.pressed);
+      removeMaterialState(WidgetState.pressed);
     }
   }
 
@@ -350,11 +349,11 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
 
   @override
   Widget build(BuildContext context) {
-    final Color? effectiveTextColor = MaterialStateProperty.resolveAs<Color?>(
+    final Color? effectiveTextColor = WidgetStateProperty.resolveAs<Color?>(
       widget.textStyle?.color,
       materialStates,
     );
-    final ShapeBorder? effectiveShape = MaterialStateProperty.resolveAs<ShapeBorder?>(
+    final ShapeBorder? effectiveShape = WidgetStateProperty.resolveAs<ShapeBorder?>(
       widget.shape,
       materialStates,
     );
@@ -362,8 +361,8 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
     final BoxConstraints effectiveConstraints = widget.visualDensity.effectiveConstraints(
       widget.constraints,
     );
-    final MouseCursor? effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
+    final MouseCursor? effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor?>(
+      widget.mouseCursor ?? WidgetStateMouseCursor.adaptiveClickable,
       materialStates,
     );
     final EdgeInsetsGeometry padding = widget.padding
@@ -392,17 +391,17 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
         child: InkWell(
           focusNode: widget.focusNode,
           canRequestFocus: widget.enabled,
-          onFocusChange: updateMaterialState(MaterialState.focused),
+          onFocusChange: updateMaterialState(WidgetState.focused),
           autofocus: widget.autofocus,
           onHighlightChanged: updateMaterialState(
-            MaterialState.pressed,
+            WidgetState.pressed,
             onChanged: widget.onHighlightChanged,
           ),
           splashColor: widget.splashColor,
           highlightColor: widget.highlightColor,
           focusColor: widget.focusColor,
           hoverColor: widget.hoverColor,
-          onHover: updateMaterialState(MaterialState.hovered),
+          onHover: updateMaterialState(WidgetState.hovered),
           onTap: widget.onPressed,
           onLongPress: widget.onLongPress,
           enableFeedback: widget.enableFeedback,
@@ -509,9 +508,9 @@ class _RenderInputPadding extends RenderShiftedBox {
   Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
     if (child != null) {
       final Size childSize = layoutChild(child!, constraints);
-      final double height = math.max(childSize.width, minSize.width);
-      final double width = math.max(childSize.height, minSize.height);
-      return constraints.constrain(Size(height, width));
+      final double width = math.max(childSize.width, minSize.width);
+      final double height = math.max(childSize.height, minSize.height);
+      return constraints.constrain(Size(width, height));
     }
     return Size.zero;
   }

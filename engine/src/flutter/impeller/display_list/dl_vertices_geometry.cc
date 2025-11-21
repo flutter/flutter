@@ -117,7 +117,7 @@ GeometryResult DlVerticesGeometry::GetPositionBuffer(
     const Entity& entity,
     RenderPass& pass) const {
   int vertex_count = vertices_->vertex_count();
-  BufferView vertex_buffer = renderer.GetTransientsBuffer().Emplace(
+  BufferView vertex_buffer = renderer.GetTransientsDataBuffer().Emplace(
       vertices_->vertex_data(), vertex_count * sizeof(Point), alignof(Point));
 
   BufferView index_buffer = {};
@@ -126,7 +126,7 @@ GeometryResult DlVerticesGeometry::GetPositionBuffer(
   const uint16_t* indices_data =
       performed_normalization_ ? indices_.data() : vertices_->indices();
   if (index_count) {
-    index_buffer = renderer.GetTransientsBuffer().Emplace(
+    index_buffer = renderer.GetTransientsIndexesBuffer().Emplace(
         indices_data, index_count * sizeof(uint16_t), alignof(uint16_t));
   }
 
@@ -161,7 +161,7 @@ GeometryResult DlVerticesGeometry::GetPositionUVColorBuffer(
   const Point* coordinates = has_texture_coordinates
                                  ? vertices_->texture_coordinate_data()
                                  : vertices_->vertex_data();
-  BufferView vertex_buffer = renderer.GetTransientsBuffer().Emplace(
+  BufferView vertex_buffer = renderer.GetTransientsDataBuffer().Emplace(
       vertex_count * sizeof(VS::PerVertexData), alignof(VS::PerVertexData),
       [&](uint8_t* data) {
         VS::PerVertexData* vtx_contents =
@@ -187,7 +187,7 @@ GeometryResult DlVerticesGeometry::GetPositionUVColorBuffer(
   const uint16_t* indices_data =
       performed_normalization_ ? indices_.data() : vertices_->indices();
   if (index_count) {
-    index_buffer = renderer.GetTransientsBuffer().Emplace(
+    index_buffer = renderer.GetTransientsIndexesBuffer().Emplace(
         indices_data, index_count * sizeof(uint16_t), alignof(uint16_t));
   }
 
@@ -218,6 +218,10 @@ bool DlVerticesGeometry::MaybePerformIndexNormalization(
                               vertices_->index_count(), vertices_->indices());
     return true;
   }
+  return false;
+}
+
+bool DlVerticesGeometry::CanApplyMaskFilter() const {
   return false;
 }
 

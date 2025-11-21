@@ -12,6 +12,9 @@
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/backend/vulkan/workarounds_vk.h"
 
+// vulkan.hpp generates some clang-tidy warnings.
+// NOLINTBEGIN(clang-analyzer-security.PointerSub)
+
 namespace impeller {
 
 static constexpr const char* kInstanceLayer = "ImpellerInstance";
@@ -269,8 +272,9 @@ CapabilitiesVK::GetEnabledDeviceExtensions(
     }
     exts = maybe_exts.value();
   } else {
-    exts = std::set(embedder_device_extensions_.begin(),
-                    embedder_device_extensions_.end());
+    for (const auto& ext : embedder_device_extensions_) {
+      exts.insert(ext);
+    }
   }
 
   std::vector<std::string> enabled;
@@ -507,6 +511,10 @@ bool CapabilitiesVK::SupportsPrimitiveRestart() const {
   return has_primitive_restart_;
 }
 
+bool CapabilitiesVK::Supports32BitPrimitiveIndices() const {
+  return true;
+}
+
 void CapabilitiesVK::SetOffscreenFormat(PixelFormat pixel_format) const {
   default_color_format_ = pixel_format;
 }
@@ -580,8 +588,9 @@ bool CapabilitiesVK::SetPhysicalDevice(
       }
       exts = maybe_exts.value();
     } else {
-      exts = std::set(embedder_device_extensions_.begin(),
-                      embedder_device_extensions_.end());
+      for (const auto& ext : embedder_device_extensions_) {
+        exts.insert(ext);
+      }
     }
 
     IterateExtensions<RequiredCommonDeviceExtensionVK>([&](auto ext) -> bool {
@@ -642,6 +651,8 @@ bool CapabilitiesVK::SetPhysicalDevice(
 
   minimum_uniform_alignment_ =
       device_properties_.limits.minUniformBufferOffsetAlignment;
+  minimum_storage_alignment_ =
+      device_properties_.limits.minStorageBufferOffsetAlignment;
 
   return true;
 }
@@ -723,6 +734,14 @@ PixelFormat CapabilitiesVK::GetDefaultGlyphAtlasFormat() const {
 
 size_t CapabilitiesVK::GetMinimumUniformAlignment() const {
   return minimum_uniform_alignment_;
+}
+
+size_t CapabilitiesVK::GetMinimumStorageBufferAlignment() const {
+  return minimum_storage_alignment_;
+}
+
+bool CapabilitiesVK::NeedsPartitionedHostBuffer() const {
+  return false;
 }
 
 bool CapabilitiesVK::HasExtension(RequiredCommonDeviceExtensionVK ext) const {
@@ -824,3 +843,5 @@ bool CapabilitiesVK::SupportsExtendedRangeFormats() const {
 }
 
 }  // namespace impeller
+
+// NOLINTEND(clang-analyzer-security.PointerSub)

@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/src/gestures/monodrag.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -91,12 +92,11 @@ void main() {
             home: SimpleBuilderTableView(
               verticalDetails: ScrollableDetails.vertical(controller: verticalController),
               horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
-              delegate:
-                  delegate = TwoDimensionalChildBuilderDelegate(
-                    builder: _testChildBuilder,
-                    maxXIndex: 99,
-                    maxYIndex: 99,
-                  ),
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                builder: _testChildBuilder,
+                maxXIndex: 99,
+                maxYIndex: 99,
+              ),
             ),
           ),
         );
@@ -149,23 +149,20 @@ void main() {
                 mainAxis: mainAxis,
                 primary: explicitPrimary,
                 verticalDetails: ScrollableDetails.vertical(
-                  controller:
-                      addControllerConflict && mainAxis == Axis.vertical
-                          ? verticalController
-                          : null,
+                  controller: addControllerConflict && mainAxis == Axis.vertical
+                      ? verticalController
+                      : null,
                 ),
                 horizontalDetails: ScrollableDetails.horizontal(
-                  controller:
-                      addControllerConflict && mainAxis == Axis.horizontal
-                          ? horizontalController
-                          : null,
+                  controller: addControllerConflict && mainAxis == Axis.horizontal
+                      ? horizontalController
+                      : null,
                 ),
-                delegate:
-                    delegate = TwoDimensionalChildBuilderDelegate(
-                      builder: _testChildBuilder,
-                      maxXIndex: 99,
-                      maxYIndex: 99,
-                    ),
+                delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                  builder: _testChildBuilder,
+                  maxXIndex: 99,
+                  maxYIndex: 99,
+                ),
               ),
             ),
           );
@@ -334,13 +331,12 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: SimpleBuilderTableView(
-              delegate:
-                  delegate1 = TwoDimensionalChildBuilderDelegate(
-                    builder: (BuildContext context, ChildVicinity vicinity) {
-                      capturedContext = context;
-                      return Text(vicinity.toString());
-                    },
-                  ),
+              delegate: delegate1 = TwoDimensionalChildBuilderDelegate(
+                builder: (BuildContext context, ChildVicinity vicinity) {
+                  capturedContext = context;
+                  return Text(vicinity.toString());
+                },
+              ),
             ),
           ),
         );
@@ -395,12 +391,11 @@ void main() {
                 ),
                 SimpleBuilderTableView(
                   hitTestBehavior: HitTestBehavior.translucent,
-                  delegate:
-                      delegate = TwoDimensionalChildBuilderDelegate(
-                        builder: (BuildContext context, ChildVicinity vicinity) {
-                          return const SizedBox(width: 50, height: 50);
-                        },
-                      ),
+                  delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                    builder: (BuildContext context, ChildVicinity vicinity) {
+                      return const SizedBox(width: 50, height: 50);
+                    },
+                  ),
                 ),
               ],
             ),
@@ -430,19 +425,18 @@ void main() {
             verticalDetails: ScrollableDetails.vertical(controller: verticalController),
             horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
             diagonalDragBehavior: DiagonalDragBehavior.free,
-            delegate:
-                delegate = TwoDimensionalChildBuilderDelegate(
-                  maxXIndex: 100,
-                  maxYIndex: 100,
-                  builder: (BuildContext context, ChildVicinity vicinity) {
-                    return GestureDetector(
-                      onTapUp: (TapUpDetails details) {
-                        log.add('Tapped: $vicinity');
-                      },
-                      child: Text('$vicinity'),
-                    );
+            delegate: delegate = TwoDimensionalChildBuilderDelegate(
+              maxXIndex: 100,
+              maxYIndex: 100,
+              builder: (BuildContext context, ChildVicinity vicinity) {
+                return GestureDetector(
+                  onTapUp: (TapUpDetails details) {
+                    log.add('Tapped: $vicinity');
                   },
-                ),
+                  child: Text('$vicinity'),
+                );
+              },
+            ),
           ),
         ),
       );
@@ -576,19 +570,18 @@ void main() {
             verticalDetails: ScrollableDetails.vertical(controller: verticalController),
             horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
             diagonalDragBehavior: DiagonalDragBehavior.free,
-            delegate:
-                delegate = TwoDimensionalChildBuilderDelegate(
-                  maxXIndex: 100,
-                  maxYIndex: 100,
-                  builder: (BuildContext context, ChildVicinity vicinity) {
-                    return GestureDetector(
-                      onTapUp: (TapUpDetails details) {
-                        log.add('Tapped: $vicinity');
-                      },
-                      child: Text('$vicinity'),
-                    );
+            delegate: delegate = TwoDimensionalChildBuilderDelegate(
+              maxXIndex: 100,
+              maxYIndex: 100,
+              builder: (BuildContext context, ChildVicinity vicinity) {
+                return GestureDetector(
+                  onTapUp: (TapUpDetails details) {
+                    log.add('Tapped: $vicinity');
                   },
-                ),
+                  child: Text('$vicinity'),
+                );
+              },
+            ),
           ),
         ),
       );
@@ -664,12 +657,11 @@ void main() {
               verticalDetails: ScrollableDetails.vertical(controller: verticalController),
               horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
               diagonalDragBehavior: DiagonalDragBehavior.free,
-              delegate:
-                  delegate = TwoDimensionalChildBuilderDelegate(
-                    maxXIndex: 20,
-                    maxYIndex: 1,
-                    builder: _testChildBuilder,
-                  ),
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                maxXIndex: 20,
+                maxYIndex: 1,
+                builder: _testChildBuilder,
+              ),
             ),
           ),
         );
@@ -715,12 +707,11 @@ void main() {
               verticalDetails: ScrollableDetails.vertical(controller: verticalController),
               horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
               diagonalDragBehavior: DiagonalDragBehavior.weightedEvent,
-              delegate:
-                  delegate = TwoDimensionalChildBuilderDelegate(
-                    maxXIndex: 20,
-                    maxYIndex: 1,
-                    builder: _testChildBuilder,
-                  ),
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                maxXIndex: 20,
+                maxYIndex: 1,
+                builder: _testChildBuilder,
+              ),
             ),
           ),
         );
@@ -766,12 +757,11 @@ void main() {
               verticalDetails: ScrollableDetails.vertical(controller: verticalController),
               horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
               diagonalDragBehavior: DiagonalDragBehavior.weightedContinuous,
-              delegate:
-                  delegate = TwoDimensionalChildBuilderDelegate(
-                    maxXIndex: 20,
-                    maxYIndex: 1,
-                    builder: _testChildBuilder,
-                  ),
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                maxXIndex: 20,
+                maxYIndex: 1,
+                builder: _testChildBuilder,
+              ),
             ),
           ),
         );
@@ -819,12 +809,11 @@ void main() {
               verticalDetails: ScrollableDetails.vertical(controller: verticalController),
               horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
               diagonalDragBehavior: DiagonalDragBehavior.free,
-              delegate:
-                  delegate = TwoDimensionalChildBuilderDelegate(
-                    maxXIndex: 1,
-                    maxYIndex: 20,
-                    builder: _testChildBuilder,
-                  ),
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                maxXIndex: 1,
+                maxYIndex: 20,
+                builder: _testChildBuilder,
+              ),
             ),
           ),
         );
@@ -870,12 +859,11 @@ void main() {
               verticalDetails: ScrollableDetails.vertical(controller: verticalController),
               horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
               diagonalDragBehavior: DiagonalDragBehavior.weightedEvent,
-              delegate:
-                  delegate = TwoDimensionalChildBuilderDelegate(
-                    maxXIndex: 1,
-                    maxYIndex: 20,
-                    builder: _testChildBuilder,
-                  ),
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                maxXIndex: 1,
+                maxYIndex: 20,
+                builder: _testChildBuilder,
+              ),
             ),
           ),
         );
@@ -921,12 +909,11 @@ void main() {
               verticalDetails: ScrollableDetails.vertical(controller: verticalController),
               horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
               diagonalDragBehavior: DiagonalDragBehavior.weightedContinuous,
-              delegate:
-                  delegate = TwoDimensionalChildBuilderDelegate(
-                    maxXIndex: 1,
-                    maxYIndex: 20,
-                    builder: _testChildBuilder,
-                  ),
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                maxXIndex: 1,
+                maxYIndex: 20,
+                builder: _testChildBuilder,
+              ),
             ),
           ),
         );
@@ -975,12 +962,11 @@ void main() {
                 Expanded(
                   child: SimpleBuilderTableView(
                     keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                    delegate:
-                        delegate = TwoDimensionalChildBuilderDelegate(
-                          builder: _testChildBuilder,
-                          maxXIndex: 99,
-                          maxYIndex: 99,
-                        ),
+                    delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                      builder: _testChildBuilder,
+                      maxXIndex: 99,
+                      maxYIndex: 99,
+                    ),
                   ),
                 ),
               ],
@@ -1004,6 +990,31 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.testTextInput.isVisible, isFalse);
+    });
+
+    testWidgets('cacheExtentStyle is passed to viewport', (WidgetTester tester) async {
+      late final TwoDimensionalChildBuilderDelegate delegate;
+      addTearDown(() => delegate.dispose());
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SimpleBuilderTableView(
+            cacheExtent: 1.0,
+            cacheExtentStyle: CacheExtentStyle.viewport,
+            delegate: delegate = TwoDimensionalChildBuilderDelegate(
+              builder: _testChildBuilder,
+              maxXIndex: 5,
+              maxYIndex: 5,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final SimpleBuilderTableViewport viewport = tester.widget(
+        find.byType(SimpleBuilderTableViewport),
+      );
+      expect(viewport.cacheExtent, 1.0);
+      expect(viewport.cacheExtentStyle, CacheExtentStyle.viewport);
     });
   });
 }

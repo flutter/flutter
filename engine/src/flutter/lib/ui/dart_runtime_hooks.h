@@ -13,7 +13,9 @@ namespace flutter {
 
 class DartRuntimeHooks {
  public:
-  static void Install(bool is_ui_isolate, const std::string& script_uri);
+  static void Install(bool is_ui_isolate,
+                      bool enable_microtask_profiling,
+                      const std::string& script_uri);
 
   static void Logger_PrintDebugString(const std::string& message);
 

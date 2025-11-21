@@ -143,8 +143,9 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
     final List<Widget> children = _buildToolbarButtons(context);
     return CupertinoTextSelectionToolbar(
       anchorAbove: anchors.primaryAnchor,
-      anchorBelow:
-          anchors.secondaryAnchor == null ? anchors.primaryAnchor : anchors.secondaryAnchor!,
+      anchorBelow: anchors.secondaryAnchor == null
+          ? anchors.primaryAnchor
+          : anchors.secondaryAnchor!,
       children: children,
     );
   }

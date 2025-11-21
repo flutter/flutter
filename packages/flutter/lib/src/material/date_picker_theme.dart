@@ -80,13 +80,19 @@ class DatePickerThemeData with Diagnosticable {
     this.rangeSelectionBackgroundColor,
     this.rangeSelectionOverlayColor,
     this.dividerColor,
-    this.inputDecorationTheme,
+    // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
+    Object? inputDecorationTheme,
     this.cancelButtonStyle,
     this.confirmButtonStyle,
     this.locale,
     this.toggleButtonTextStyle,
     this.subHeaderForegroundColor,
-  });
+  }) : assert(
+         inputDecorationTheme == null ||
+             (inputDecorationTheme is InputDecorationTheme ||
+                 inputDecorationTheme is InputDecorationThemeData),
+       ),
+       _inputDecorationTheme = inputDecorationTheme;
 
   /// Overrides the default value of [Dialog.backgroundColor].
   final Color? backgroundColor;
@@ -413,7 +419,17 @@ class DatePickerThemeData with Diagnosticable {
 
   /// Overrides the [InputDatePickerFormField]'s input decoration theme.
   /// If this is null, [ThemeData.inputDecorationTheme] is used instead.
-  final InputDecorationTheme? inputDecorationTheme;
+  // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
+  InputDecorationThemeData? get inputDecorationTheme {
+    if (_inputDecorationTheme == null) {
+      return null;
+    }
+    return _inputDecorationTheme is InputDecorationTheme
+        ? _inputDecorationTheme.data
+        : _inputDecorationTheme as InputDecorationThemeData;
+  }
+
+  final Object? _inputDecorationTheme;
 
   /// Overrides the default style of the cancel button of a [DatePickerDialog].
   final ButtonStyle? cancelButtonStyle;
@@ -931,7 +947,7 @@ class DatePickerThemeData with Diagnosticable {
     );
     properties.add(ColorProperty('dividerColor', dividerColor, defaultValue: null));
     properties.add(
-      DiagnosticsProperty<InputDecorationTheme>(
+      DiagnosticsProperty<InputDecorationThemeData>(
         'inputDecorationTheme',
         inputDecorationTheme,
         defaultValue: null,

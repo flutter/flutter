@@ -248,10 +248,9 @@ void main() async {
       print('Disabled - see https://github.com/flutter/flutter/issues/135712');
       return;
     }
-    final Paint paint =
-        Paint()
-          ..color = green
-          ..imageFilter = makeBlur(1.0, 1.0, TileMode.decal);
+    final Paint paint = Paint()
+      ..color = green
+      ..imageFilter = makeBlur(1.0, 1.0, TileMode.decal);
 
     final Uint32List bytes = await getBytesForPaint(paint);
     checkBytes(bytes, greenCenterBlurred, greenSideBlurred, greenCornerBlurred);
@@ -275,20 +274,18 @@ void main() async {
   });
 
   test('ImageFilter - dilate', () async {
-    final Paint paint =
-        Paint()
-          ..color = green
-          ..imageFilter = makeDilate(1.0, 1.0);
+    final Paint paint = Paint()
+      ..color = green
+      ..imageFilter = makeDilate(1.0, 1.0);
 
     final Uint32List bytes = await getBytesForPaint(paint);
     checkBytes(bytes, green.value, green.value, green.value);
   });
 
   test('ImageFilter - erode', () async {
-    final Paint paint =
-        Paint()
-          ..color = green
-          ..imageFilter = makeErode(1.0, 1.0);
+    final Paint paint = Paint()
+      ..color = green
+      ..imageFilter = makeErode(1.0, 1.0);
 
     final Uint32List bytes = await getBytesForPaint(paint);
     checkBytes(bytes, 0, 0, 0);
@@ -300,10 +297,9 @@ void main() async {
       return;
     }
 
-    final Paint paint =
-        Paint()
-          ..color = green
-          ..imageFilter = makeScale(2.0, 2.0, 1.5, 1.5);
+    final Paint paint = Paint()
+      ..color = green
+      ..imageFilter = makeScale(2.0, 2.0, 1.5, 1.5);
 
     final Uint32List bytes = await getBytesForPaint(paint);
     checkBytes(bytes, greenCenterScaled, greenSideScaled, greenCornerScaled);
@@ -347,10 +343,9 @@ void main() async {
       return;
     }
 
-    final Paint paint =
-        Paint()
-          ..color = green
-          ..imageFilter = const ColorFilter.matrix(constValueColorMatrix);
+    final Paint paint = Paint()
+      ..color = green
+      ..imageFilter = const ColorFilter.matrix(constValueColorMatrix);
 
     final Uint32List bytes = await getBytesForColorPaint(paint);
     expect(bytes[0], 0xFF020202);
@@ -372,10 +367,9 @@ void main() async {
       inner: const ColorFilter.matrix(halvesBrightnessColorMatrix),
     );
 
-    final Paint paint =
-        Paint()
-          ..color = green
-          ..imageFilter = compOrder1;
+    final Paint paint = Paint()
+      ..color = green
+      ..imageFilter = compOrder1;
 
     Uint32List bytes = await getBytesForColorPaint(paint);
     expect(bytes[0], 0xFF010101);

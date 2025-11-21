@@ -67,7 +67,11 @@ class Marker extends StatelessWidget {
       top: position!.dy - size / 2.0,
       width: size,
       height: size,
-      child: IgnorePointer(child: CustomPaint(painter: _MarkerPainter(size: size, type: type))),
+      child: IgnorePointer(
+        child: CustomPaint(
+          painter: _MarkerPainter(size: size, type: type),
+        ),
+      ),
     );
   }
 }

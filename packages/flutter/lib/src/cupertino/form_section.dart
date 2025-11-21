@@ -201,27 +201,25 @@ class CupertinoFormSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget? headerWidget =
-        header == null
-            ? null
-            : DefaultTextStyle(
-              style: TextStyle(
-                fontSize: 13.0,
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-              ),
-              child: header!,
-            );
+    final Widget? headerWidget = header == null
+        ? null
+        : DefaultTextStyle(
+            style: TextStyle(
+              fontSize: 13.0,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            ),
+            child: header!,
+          );
 
-    final Widget? footerWidget =
-        footer == null
-            ? null
-            : DefaultTextStyle(
-              style: TextStyle(
-                fontSize: 13.0,
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-              ),
-              child: footer!,
-            );
+    final Widget? footerWidget = footer == null
+        ? null
+        : DefaultTextStyle(
+            style: TextStyle(
+              fontSize: 13.0,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            ),
+            child: footer!,
+          );
 
     switch (_type) {
       case CupertinoListSectionType.base:

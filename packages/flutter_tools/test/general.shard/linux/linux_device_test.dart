@@ -18,19 +18,19 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-final FakePlatform linux = FakePlatform();
-final FakePlatform windows = FakePlatform(operatingSystem: 'windows');
+final linux = FakePlatform();
+final windows = FakePlatform(operatingSystem: 'windows');
 
 void main() {
   testWithoutContext('LinuxDevice defaults', () async {
-    final LinuxDevice device = LinuxDevice(
+    final device = LinuxDevice(
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
       fileSystem: MemoryFileSystem.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
-    final PrebuiltLinuxApp linuxApp = PrebuiltLinuxApp(executable: 'foo');
+    final linuxApp = PrebuiltLinuxApp(executable: 'foo');
     expect(await device.targetPlatform, TargetPlatform.linux_x64);
     expect(device.name, 'Linux');
     expect(await device.installApp(linuxApp), true);
@@ -47,7 +47,7 @@ void main() {
   });
 
   testWithoutContext('LinuxDevice on arm64 hosts is arm64', () async {
-    final LinuxDevice deviceArm64Host = LinuxDevice(
+    final deviceArm64Host = LinuxDevice(
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
       fileSystem: MemoryFileSystem.test(),
@@ -161,8 +161,8 @@ void main() {
   testWithoutContext(
     'LinuxDevice.executablePathForDevice uses the correct package executable',
     () async {
-      final FakeLinuxApp mockApp = FakeLinuxApp();
-      final LinuxDevice device = LinuxDevice(
+      final mockApp = FakeLinuxApp();
+      final device = LinuxDevice(
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
         fileSystem: MemoryFileSystem.test(),
@@ -177,7 +177,7 @@ void main() {
 }
 
 FlutterProject setUpFlutterProject(Directory directory) {
-  final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(
+  final flutterProjectFactory = FlutterProjectFactory(
     fileSystem: directory.fileSystem,
     logger: BufferLogger.test(),
   );

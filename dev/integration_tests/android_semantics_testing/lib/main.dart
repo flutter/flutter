@@ -31,15 +31,14 @@ class TestApp extends StatelessWidget {
         builder: (BuildContext context) {
           return Scaffold(
             body: ListView(
-              children:
-                  routes.keys.map<Widget>((String value) {
-                    return MaterialButton(
-                      child: Text(value),
-                      onPressed: () {
-                        Navigator.of(context).pushNamed(value);
-                      },
-                    );
-                  }).toList(),
+              children: routes.keys.map<Widget>((String value) {
+                return MaterialButton(
+                  child: Text(value),
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(value);
+                  },
+                );
+              }).toList(),
             ),
           );
         },

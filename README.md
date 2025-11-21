@@ -22,8 +22,8 @@ open source.
 
 ## Documentation
 
-* [Install Flutter](https://flutter.dev/get-started/)
-* [Flutter documentation](https://docs.flutter.dev/)
+* [Install Flutter](https://docs.flutter.dev/get-started)
+* [Flutter documentation](https://docs.flutter.dev)
 * [Development wiki](./docs/README.md)
 * [Contributing to Flutter](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md)
 
@@ -62,7 +62,7 @@ graphics, video, text, and controls without limitation. Flutter includes a full
 you're building for iOS ([Cupertino]) or other platforms ([Material]), along with
 support for customizing or creating entirely new visual components.
 
-<p align="center"><img src="https://github.com/flutter/website/blob/main/src/content/assets/images/docs/homepage/reflectly-hero-600px.png?raw=true" alt="Reflectly hero image"></p>
+<p align="center"><img src="https://github.com/flutter/website/blob/main/site/web/assets/images/docs/homepage/reflectly-hero-600px.png?raw=true" alt="Reflectly hero image"></p>
 
 ### Fast results
 
@@ -76,7 +76,7 @@ compilation to 32-bit and 64-bit ARM machine code for iOS and Android,
 JavaScript and WebAssembly for the web, as well as Intel x64 and ARM
 for desktop devices.
 
-<p align="center"><img src="https://github.com/flutter/website/blob/main/src/content/assets/images/docs/homepage/dart-diagram-small.png?raw=true" alt="Dart diagram"></p>
+<p align="center"><img src="https://github.com/flutter/website/blob/main/site/web/assets/images/docs/homepage/dart-diagram-small.png?raw=true" alt="Dart diagram"></p>
 
 ### Productive development
 
@@ -113,7 +113,7 @@ Information on how to get started can be found in our
 [Material]: https://docs.flutter.dev/development/ui/widgets/material
 [Skia]: https://skia.org/
 [Dart platform]: https://dart.dev/
-[Hot reload animation]: https://github.com/flutter/website/blob/main/src/content/assets/images/docs/tools/android-studio/hot-reload.gif?raw=true
+[Hot reload animation]: https://github.com/flutter/website/blob/main/site/web/assets/images/docs/tools/android-studio/hot-reload.gif?raw=true
 [Hot reload]: https://docs.flutter.dev/development/tools/hot-reload
 [Visual Studio Code]: https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter
 [IntelliJ / Android Studio]: https://plugins.jetbrains.com/plugin/9212-flutter

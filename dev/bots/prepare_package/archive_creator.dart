@@ -133,13 +133,12 @@ class ArchiveCreator {
   late String _flutter;
   late String _dart;
 
-  late final Future<String> _dartArch =
-      (() async {
-        // Parse 'arch' out of a string like '... "os_arch"\n'.
-        return (await _runDart(<String>[
-          '--version',
-        ])).trim().split(' ').last.replaceAll('"', '').split('_')[1];
-      })();
+  late final Future<String> _dartArch = (() async {
+    // Parse 'arch' out of a string like '... "os_arch"\n'.
+    return (await _runDart(<String>[
+      '--version',
+    ])).trim().split(' ').last.replaceAll('"', '').split('_')[1];
+  })();
 
   /// Returns a default archive name when given a Git revision.
   /// Used when an output filename is not given.
@@ -193,7 +192,6 @@ class ArchiveCreator {
     }
     // Validate that the dart binary is codesigned
     try {
-      // TODO(fujino): Use the conductor https://github.com/flutter/flutter/issues/81701
       await _processRunner.runProcess(<String>[
         'codesign',
         '-vvvv',
@@ -325,11 +323,8 @@ class ArchiveCreator {
                         }
                         return description['version'] == version;
                       },
-                      orElse:
-                          () =>
-                              throw FormatException(
-                                'Could not find $name-$version in package listing',
-                              ),
+                      orElse: () =>
+                          throw FormatException('Could not find $name-$version in package listing'),
                     )
                     as Map<String, dynamic>;
             final dynamic downloadUrl = versionDescription['archive_url'];

@@ -35,13 +35,13 @@ class DebugAdapterCommand extends FlutterCommand {
   }
 
   @override
-  final String name = 'debug-adapter';
+  final name = 'debug-adapter';
 
   @override
   List<String> get aliases => const <String>['debug_adapter'];
 
   @override
-  final String description =
+  final description =
       'Run a Debug Adapter Protocol (DAP) server to communicate with the Flutter tool.';
 
   @override
@@ -52,7 +52,7 @@ class DebugAdapterCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final DapServer server = DapServer(
+    final server = DapServer(
       globals.stdio.stdin,
       globals.stdio.stdout.nonBlocking,
       fileSystem: globals.fs,

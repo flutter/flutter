@@ -16,7 +16,7 @@ import '../../../src/test_flutter_command_runner.dart';
 /// A ProcessManager that invokes a real process manager, but keeps
 /// track of all commands sent to it.
 class LoggingProcessManager extends LocalProcessManager {
-  List<List<String>> commands = <List<String>>[];
+  var commands = <List<String>>[];
 
   @override
   Future<Process> start(
@@ -38,6 +38,28 @@ class LoggingProcessManager extends LocalProcessManager {
     );
   }
 
+  @override
+  Future<ProcessResult> run(
+    List<Object> command, {
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding? stdoutEncoding = systemEncoding,
+    Encoding? stderrEncoding = systemEncoding,
+  }) {
+    commands.add(command.map((Object arg) => arg.toString()).toList());
+    return super.run(
+      command,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      stdoutEncoding: stdoutEncoding,
+      stderrEncoding: stderrEncoding,
+    );
+  }
+
   void clear() {
     commands.clear();
   }
@@ -51,7 +73,7 @@ Future<void> analyzeProject(
     globals.fs.path.join(Cache.flutterRoot!, 'bin', 'cache', 'flutter_tools.snapshot'),
   );
 
-  final List<String> args = <String>[flutterToolsSnapshotPath, 'analyze'];
+  final args = <String>[flutterToolsSnapshotPath, 'analyze'];
 
   final ProcessResult exec = await Process.run(
     globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
@@ -68,7 +90,7 @@ Future<void> analyzeProject(
   expect(exec.exitCode, isNot(0));
   String lineParser(String line) {
     try {
-      final String analyzerSeparator = globals.platform.isWindows ? ' - ' : ' • ';
+      final analyzerSeparator = globals.platform.isWindows ? ' - ' : ' • ';
       final List<String> lineComponents = line.trim().split(analyzerSeparator);
       final String lintName = lineComponents.removeLast();
       final String location = lineComponents.removeLast();
@@ -78,10 +100,10 @@ Future<void> analyzeProject(
     }
   }
 
-  final String stdout = exec.stdout.toString();
-  final List<String> errors = <String>[];
+  final stdout = exec.stdout.toString();
+  final errors = <String>[];
   try {
-    bool analyzeLineFound = false;
+    var analyzeLineFound = false;
     const LineSplitter().convert(stdout).forEach((String line) {
       // Conditional to filter out any stdout from `pub get`
       if (!analyzeLineFound && line.startsWith('Analyzing')) {
@@ -115,7 +137,7 @@ Future<void> ensureFlutterToolsSnapshot() async {
     snapshotFile.renameSync('$flutterToolsSnapshotPath.bak');
   }
 
-  final List<String> snapshotArgs = <String>[
+  final snapshotArgs = <String>[
     '--snapshot=$flutterToolsSnapshotPath',
     '--packages=$packageConfig',
     flutterToolsPath,

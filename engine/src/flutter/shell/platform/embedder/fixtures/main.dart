@@ -162,158 +162,162 @@ Future<void> a11y_main() async {
   notifyAccessibilityFeatures(PlatformDispatcher.instance.accessibilityFeatures.reduceMotion);
 
   // 5: Fire semantics update.
-  final SemanticsUpdateBuilder builder =
-      SemanticsUpdateBuilder()
-        ..updateNode(
-          id: 42,
-          identifier: '',
-          label: 'A: root',
-          labelAttributes: <StringAttribute>[],
-          rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-          transform: kTestTransform,
-          childrenInTraversalOrder: Int32List.fromList(<int>[84, 96]),
-          childrenInHitTestOrder: Int32List.fromList(<int>[96, 84]),
-          actions: 0,
-          flags: 0,
-          maxValueLength: 0,
-          currentValueLength: 0,
-          textSelectionBase: 0,
-          textSelectionExtent: 0,
-          platformViewId: 0,
-          scrollChildren: 0,
-          scrollIndex: 0,
-          scrollPosition: 0.0,
-          scrollExtentMax: 0.0,
-          scrollExtentMin: 0.0,
-          elevation: 0.0,
-          thickness: 0.0,
-          hint: '',
-          hintAttributes: <StringAttribute>[],
-          value: '',
-          valueAttributes: <StringAttribute>[],
-          increasedValue: '',
-          increasedValueAttributes: <StringAttribute>[],
-          decreasedValue: '',
-          decreasedValueAttributes: <StringAttribute>[],
-          tooltip: 'tooltip',
-          textDirection: TextDirection.ltr,
-          additionalActions: Int32List(0),
-          controlsNodes: null,
-          inputType: SemanticsInputType.none,
-        )
-        ..updateNode(
-          id: 84,
-          identifier: '',
-          label: 'B: leaf',
-          labelAttributes: <StringAttribute>[],
-          rect: const Rect.fromLTRB(40.0, 40.0, 80.0, 80.0),
-          transform: kTestTransform,
-          actions: 0,
-          flags: 0,
-          maxValueLength: 0,
-          currentValueLength: 0,
-          textSelectionBase: 0,
-          textSelectionExtent: 0,
-          platformViewId: 0,
-          scrollChildren: 0,
-          scrollIndex: 0,
-          scrollPosition: 0.0,
-          scrollExtentMax: 0.0,
-          scrollExtentMin: 0.0,
-          elevation: 0.0,
-          thickness: 0.0,
-          hint: '',
-          hintAttributes: <StringAttribute>[],
-          value: '',
-          valueAttributes: <StringAttribute>[],
-          increasedValue: '',
-          increasedValueAttributes: <StringAttribute>[],
-          decreasedValue: '',
-          decreasedValueAttributes: <StringAttribute>[],
-          tooltip: 'tooltip',
-          textDirection: TextDirection.ltr,
-          additionalActions: Int32List(0),
-          childrenInHitTestOrder: Int32List(0),
-          childrenInTraversalOrder: Int32List(0),
-          controlsNodes: null,
-          inputType: SemanticsInputType.none,
-        )
-        ..updateNode(
-          id: 96,
-          identifier: '',
-          label: 'C: branch',
-          labelAttributes: <StringAttribute>[],
-          rect: const Rect.fromLTRB(40.0, 40.0, 80.0, 80.0),
-          transform: kTestTransform,
-          childrenInTraversalOrder: Int32List.fromList(<int>[128]),
-          childrenInHitTestOrder: Int32List.fromList(<int>[128]),
-          actions: 0,
-          flags: 0,
-          maxValueLength: 0,
-          currentValueLength: 0,
-          textSelectionBase: 0,
-          textSelectionExtent: 0,
-          platformViewId: 0,
-          scrollChildren: 0,
-          scrollIndex: 0,
-          scrollPosition: 0.0,
-          scrollExtentMax: 0.0,
-          scrollExtentMin: 0.0,
-          elevation: 0.0,
-          thickness: 0.0,
-          hint: '',
-          hintAttributes: <StringAttribute>[],
-          value: '',
-          valueAttributes: <StringAttribute>[],
-          increasedValue: '',
-          increasedValueAttributes: <StringAttribute>[],
-          decreasedValue: '',
-          decreasedValueAttributes: <StringAttribute>[],
-          tooltip: 'tooltip',
-          textDirection: TextDirection.ltr,
-          additionalActions: Int32List(0),
-          controlsNodes: null,
-          inputType: SemanticsInputType.none,
-        )
-        ..updateNode(
-          id: 128,
-          identifier: '',
-          label: 'D: leaf',
-          labelAttributes: <StringAttribute>[],
-          rect: const Rect.fromLTRB(40.0, 40.0, 80.0, 80.0),
-          transform: kTestTransform,
-          additionalActions: Int32List.fromList(<int>[21]),
-          platformViewId: 0x3f3,
-          actions: 0,
-          flags: 0,
-          maxValueLength: 0,
-          currentValueLength: 0,
-          textSelectionBase: 0,
-          textSelectionExtent: 0,
-          scrollChildren: 0,
-          scrollIndex: 0,
-          scrollPosition: 0.0,
-          scrollExtentMax: 0.0,
-          scrollExtentMin: 0.0,
-          elevation: 0.0,
-          thickness: 0.0,
-          hint: '',
-          hintAttributes: <StringAttribute>[],
-          value: '',
-          valueAttributes: <StringAttribute>[],
-          increasedValue: '',
-          increasedValueAttributes: <StringAttribute>[],
-          decreasedValue: '',
-          decreasedValueAttributes: <StringAttribute>[],
-          tooltip: 'tooltip',
-          textDirection: TextDirection.ltr,
-          childrenInHitTestOrder: Int32List(0),
-          childrenInTraversalOrder: Int32List(0),
-          controlsNodes: null,
-          inputType: SemanticsInputType.none,
-        )
-        ..updateCustomAction(id: 21, label: 'Archive', hint: 'archive message');
+  final SemanticsUpdateBuilder builder = SemanticsUpdateBuilder()
+    ..updateNode(
+      id: 42,
+      identifier: '',
+      label: 'A: root',
+      labelAttributes: <StringAttribute>[],
+      rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+      transform: kTestTransform,
+      hitTestTransform: kTestTransform,
+      traversalParent: 0,
+      childrenInTraversalOrder: Int32List.fromList(<int>[84, 96]),
+      childrenInHitTestOrder: Int32List.fromList(<int>[96, 84]),
+      actions: 0,
+      flags: SemanticsFlags.none,
+      maxValueLength: 0,
+      currentValueLength: 0,
+      textSelectionBase: 0,
+      textSelectionExtent: 0,
+      platformViewId: 0,
+      scrollChildren: 0,
+      scrollIndex: 0,
+      scrollPosition: 0.0,
+      scrollExtentMax: 0.0,
+      scrollExtentMin: 0.0,
+      hint: '',
+      hintAttributes: <StringAttribute>[],
+      value: '',
+      valueAttributes: <StringAttribute>[],
+      increasedValue: '',
+      increasedValueAttributes: <StringAttribute>[],
+      decreasedValue: '',
+      decreasedValueAttributes: <StringAttribute>[],
+      tooltip: 'tooltip',
+      textDirection: TextDirection.ltr,
+      additionalActions: Int32List(0),
+      controlsNodes: null,
+      inputType: SemanticsInputType.none,
+      locale: null,
+    )
+    ..updateNode(
+      id: 84,
+      identifier: '',
+      label: 'B: leaf',
+      labelAttributes: <StringAttribute>[],
+      rect: const Rect.fromLTRB(40.0, 40.0, 80.0, 80.0),
+      transform: kTestTransform,
+      hitTestTransform: kTestTransform,
+      traversalParent: 0,
+      actions: 0,
+      flags: SemanticsFlags.none,
+      maxValueLength: 0,
+      currentValueLength: 0,
+      textSelectionBase: 0,
+      textSelectionExtent: 0,
+      platformViewId: 0,
+      scrollChildren: 0,
+      scrollIndex: 0,
+      scrollPosition: 0.0,
+      scrollExtentMax: 0.0,
+      scrollExtentMin: 0.0,
+      hint: '',
+      hintAttributes: <StringAttribute>[],
+      value: '',
+      valueAttributes: <StringAttribute>[],
+      increasedValue: '',
+      increasedValueAttributes: <StringAttribute>[],
+      decreasedValue: '',
+      decreasedValueAttributes: <StringAttribute>[],
+      tooltip: 'tooltip',
+      textDirection: TextDirection.ltr,
+      additionalActions: Int32List(0),
+      childrenInHitTestOrder: Int32List(0),
+      childrenInTraversalOrder: Int32List(0),
+      controlsNodes: null,
+      inputType: SemanticsInputType.none,
+      locale: null,
+    )
+    ..updateNode(
+      id: 96,
+      identifier: '',
+      label: 'C: branch',
+      labelAttributes: <StringAttribute>[],
+      rect: const Rect.fromLTRB(40.0, 40.0, 80.0, 80.0),
+      transform: kTestTransform,
+      hitTestTransform: kTestTransform,
+      traversalParent: 0,
+      childrenInTraversalOrder: Int32List.fromList(<int>[128]),
+      childrenInHitTestOrder: Int32List.fromList(<int>[128]),
+      actions: 0,
+      flags: SemanticsFlags.none,
+      maxValueLength: 0,
+      currentValueLength: 0,
+      textSelectionBase: 0,
+      textSelectionExtent: 0,
+      platformViewId: 0,
+      scrollChildren: 0,
+      scrollIndex: 0,
+      scrollPosition: 0.0,
+      scrollExtentMax: 0.0,
+      scrollExtentMin: 0.0,
+      hint: '',
+      hintAttributes: <StringAttribute>[],
+      value: '',
+      valueAttributes: <StringAttribute>[],
+      increasedValue: '',
+      increasedValueAttributes: <StringAttribute>[],
+      decreasedValue: '',
+      decreasedValueAttributes: <StringAttribute>[],
+      tooltip: 'tooltip',
+      textDirection: TextDirection.ltr,
+      additionalActions: Int32List(0),
+      controlsNodes: null,
+      inputType: SemanticsInputType.none,
+      locale: null,
+    )
+    ..updateNode(
+      id: 128,
+      identifier: '',
+      label: 'D: leaf',
+      labelAttributes: <StringAttribute>[],
+      rect: const Rect.fromLTRB(40.0, 40.0, 80.0, 80.0),
+      transform: kTestTransform,
+      hitTestTransform: kTestTransform,
+      traversalParent: 0,
+      additionalActions: Int32List.fromList(<int>[21]),
+      platformViewId: 0x3f3,
+      actions: 0,
+      flags: SemanticsFlags.none,
+      maxValueLength: 0,
+      currentValueLength: 0,
+      textSelectionBase: 0,
+      textSelectionExtent: 0,
+      scrollChildren: 0,
+      scrollIndex: 0,
+      scrollPosition: 0.0,
+      scrollExtentMax: 0.0,
+      scrollExtentMin: 0.0,
+      hint: '',
+      hintAttributes: <StringAttribute>[],
+      value: '',
+      valueAttributes: <StringAttribute>[],
+      increasedValue: '',
+      increasedValueAttributes: <StringAttribute>[],
+      decreasedValue: '',
+      decreasedValueAttributes: <StringAttribute>[],
+      tooltip: 'tooltip',
+      textDirection: TextDirection.ltr,
+      childrenInHitTestOrder: Int32List(0),
+      childrenInTraversalOrder: Int32List(0),
+      controlsNodes: null,
+      inputType: SemanticsInputType.none,
+      locale: null,
+    )
+    ..updateCustomAction(id: 21, label: 'Archive', hint: 'archive message');
 
+  PlatformDispatcher.instance.setSemanticsTreeEnabled(true);
   PlatformDispatcher.instance.views.first.updateSemantics(builder.build());
 
   signalNativeTest();
@@ -340,68 +344,64 @@ Future<void> a11y_string_attributes() async {
   }
 
   // 2: Update semantics with string attributes.
-  final SemanticsUpdateBuilder builder =
-      SemanticsUpdateBuilder()..updateNode(
-        id: 42,
-        identifier: 'identifier',
-        label: 'What is the meaning of life?',
-        labelAttributes: <StringAttribute>[
-          LocaleStringAttribute(
-            range: const TextRange(start: 0, end: 'What is the meaning of life?'.length),
-            locale: const Locale('en'),
-          ),
-          SpellOutStringAttribute(range: const TextRange(start: 0, end: 1)),
-        ],
-        rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-        transform: kTestTransform,
-        childrenInTraversalOrder: Int32List.fromList(<int>[84, 96]),
-        childrenInHitTestOrder: Int32List.fromList(<int>[96, 84]),
-        actions: 0,
-        flags: 0,
-        maxValueLength: 0,
-        currentValueLength: 0,
-        textSelectionBase: 0,
-        textSelectionExtent: 0,
-        platformViewId: 0,
-        scrollChildren: 0,
-        scrollIndex: 0,
-        scrollPosition: 0.0,
-        scrollExtentMax: 0.0,
-        scrollExtentMin: 0.0,
-        elevation: 0.0,
-        thickness: 0.0,
-        hint: "It's a number",
-        hintAttributes: <StringAttribute>[
-          LocaleStringAttribute(
-            range: const TextRange(start: 0, end: 1),
-            locale: const Locale('en'),
-          ),
-          LocaleStringAttribute(
-            range: const TextRange(start: 2, end: 3),
-            locale: const Locale('fr'),
-          ),
-        ],
-        value: '42',
-        valueAttributes: <StringAttribute>[
-          LocaleStringAttribute(
-            range: const TextRange(start: 0, end: '42'.length),
-            locale: const Locale('en', 'US'),
-          ),
-        ],
-        increasedValue: '43',
-        increasedValueAttributes: <StringAttribute>[
-          SpellOutStringAttribute(range: const TextRange(start: 0, end: 1)),
-          SpellOutStringAttribute(range: const TextRange(start: 1, end: 2)),
-        ],
-        decreasedValue: '41',
-        decreasedValueAttributes: <StringAttribute>[],
-        tooltip: 'tooltip',
-        textDirection: TextDirection.ltr,
-        additionalActions: Int32List(0),
-        controlsNodes: null,
-        inputType: SemanticsInputType.none,
-      );
+  final SemanticsUpdateBuilder builder = SemanticsUpdateBuilder()
+    ..updateNode(
+      id: 42,
+      identifier: 'identifier',
+      label: 'What is the meaning of life?',
+      labelAttributes: <StringAttribute>[
+        LocaleStringAttribute(
+          range: const TextRange(start: 0, end: 'What is the meaning of life?'.length),
+          locale: const Locale('en'),
+        ),
+        SpellOutStringAttribute(range: const TextRange(start: 0, end: 1)),
+      ],
+      rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+      transform: kTestTransform,
+      hitTestTransform: kTestTransform,
+      traversalParent: 0,
+      childrenInTraversalOrder: Int32List.fromList(<int>[84, 96]),
+      childrenInHitTestOrder: Int32List.fromList(<int>[96, 84]),
+      actions: 0,
+      flags: SemanticsFlags.none,
+      maxValueLength: 0,
+      currentValueLength: 0,
+      textSelectionBase: 0,
+      textSelectionExtent: 0,
+      platformViewId: 0,
+      scrollChildren: 0,
+      scrollIndex: 0,
+      scrollPosition: 0.0,
+      scrollExtentMax: 0.0,
+      scrollExtentMin: 0.0,
+      hint: "It's a number",
+      hintAttributes: <StringAttribute>[
+        LocaleStringAttribute(range: const TextRange(start: 0, end: 1), locale: const Locale('en')),
+        LocaleStringAttribute(range: const TextRange(start: 2, end: 3), locale: const Locale('fr')),
+      ],
+      value: '42',
+      valueAttributes: <StringAttribute>[
+        LocaleStringAttribute(
+          range: const TextRange(start: 0, end: '42'.length),
+          locale: const Locale('en', 'US'),
+        ),
+      ],
+      increasedValue: '43',
+      increasedValueAttributes: <StringAttribute>[
+        SpellOutStringAttribute(range: const TextRange(start: 0, end: 1)),
+        SpellOutStringAttribute(range: const TextRange(start: 1, end: 2)),
+      ],
+      decreasedValue: '41',
+      decreasedValueAttributes: <StringAttribute>[],
+      tooltip: 'tooltip',
+      textDirection: TextDirection.ltr,
+      additionalActions: Int32List(0),
+      controlsNodes: null,
+      inputType: SemanticsInputType.none,
+      locale: null,
+    );
 
+  PlatformDispatcher.instance.setSemanticsTreeEnabled(true);
   PlatformDispatcher.instance.views.first.updateSemantics(builder.build());
   signalNativeTest();
 }
@@ -409,24 +409,19 @@ Future<void> a11y_string_attributes() async {
 @pragma('vm:entry-point')
 // ignore: non_constant_identifier_names
 void platform_messages_response() {
-  PlatformDispatcher.instance.onPlatformMessage = (
-    String name,
-    ByteData? data,
-    PlatformMessageResponseCallback? callback,
-  ) {
-    callback!(data);
-  };
+  PlatformDispatcher.instance.onPlatformMessage =
+      (String name, ByteData? data, PlatformMessageResponseCallback? callback) {
+        callback!(data);
+      };
   signalNativeTest();
 }
 
 @pragma('vm:entry-point')
 // ignore: non_constant_identifier_names
 void platform_messages_no_response() {
-  PlatformDispatcher.instance.onPlatformMessage = (
-    String name,
-    ByteData? data,
-    PlatformMessageResponseCallback? callback,
-  ) {
+  PlatformDispatcher
+      .instance
+      .onPlatformMessage = (String name, ByteData? data, PlatformMessageResponseCallback? callback) {
     final Uint8List list = data!.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
     signalNativeMessage(utf8.decode(list));
     // This does nothing because no one is listening on the other side. But complete the loop anyway
@@ -439,15 +434,12 @@ void platform_messages_no_response() {
 @pragma('vm:entry-point')
 // ignore: non_constant_identifier_names
 void null_platform_messages() {
-  PlatformDispatcher.instance.onPlatformMessage = (
-    String name,
-    ByteData? data,
-    PlatformMessageResponseCallback? callback,
-  ) {
-    // This checks if the platform_message null data is converted to Flutter null.
-    signalNativeMessage((null == data).toString());
-    callback!(data);
-  };
+  PlatformDispatcher.instance.onPlatformMessage =
+      (String name, ByteData? data, PlatformMessageResponseCallback? callback) {
+        // This checks if the platform_message null data is converted to Flutter null.
+        signalNativeMessage((null == data).toString());
+        callback!(data);
+      };
   signalNativeTest();
 }
 
@@ -1177,12 +1169,11 @@ Picture createArcEndCapsPicture() {
   final PictureRecorder baseRecorder = PictureRecorder();
   final Canvas canvas = Canvas(baseRecorder);
 
-  final style =
-      Paint()
-        ..strokeWidth = 12.0
-        ..style = PaintingStyle.stroke
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.miter;
+  final style = Paint()
+    ..strokeWidth = 12.0
+    ..style = PaintingStyle.stroke
+    ..strokeCap = StrokeCap.round
+    ..strokeJoin = StrokeJoin.miter;
 
   style.color = const Color.fromARGB(255, 255, 0, 0);
   canvas.drawArc(const Rect.fromLTRB(0.0, 0.0, 500.0, 500.0), 1.57, 1.0, false, style);
@@ -1589,8 +1580,8 @@ void render_impeller_text_test() {
     final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
       ParagraphStyle(fontFamily: 'sans-serif'),
     )..addText('Flutter is the best!');
-    final Paragraph paragraph =
-        paragraphBuilder.build()..layout(const ParagraphConstraints(width: 400));
+    final Paragraph paragraph = paragraphBuilder.build()
+      ..layout(const ParagraphConstraints(width: 400));
     canvas.drawParagraph(paragraph, const Offset(20, 20));
 
     builder.addPicture(Offset.zero, baseRecorder.endRecording());
@@ -1669,10 +1660,12 @@ Future<void> a11y_main_multi_view() async {
       labelAttributes: <StringAttribute>[],
       rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
       transform: kTestTransform,
+      hitTestTransform: kTestTransform,
+      traversalParent: 0,
       childrenInTraversalOrder: Int32List.fromList(<int>[84, 96]),
       childrenInHitTestOrder: Int32List.fromList(<int>[96, 84]),
       actions: 0,
-      flags: 0,
+      flags: SemanticsFlags.none,
       maxValueLength: 0,
       currentValueLength: 0,
       textSelectionBase: 0,
@@ -1683,8 +1676,6 @@ Future<void> a11y_main_multi_view() async {
       scrollPosition: 0.0,
       scrollExtentMax: 0.0,
       scrollExtentMin: 0.0,
-      elevation: 0.0,
-      thickness: 0.0,
       hint: '',
       hintAttributes: <StringAttribute>[],
       value: '',
@@ -1698,9 +1689,11 @@ Future<void> a11y_main_multi_view() async {
       additionalActions: Int32List(0),
       controlsNodes: null,
       inputType: SemanticsInputType.none,
+      locale: null,
     );
   }
 
+  PlatformDispatcher.instance.setSemanticsTreeEnabled(true);
   for (final view in PlatformDispatcher.instance.views) {
     view.updateSemantics(createForView(view).build());
   }

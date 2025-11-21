@@ -14,6 +14,7 @@ import 'src/base/async_guard.dart';
 import 'src/base/common.dart';
 import 'src/base/context.dart';
 import 'src/base/error_handling_io.dart';
+import 'src/base/exit.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -45,11 +46,16 @@ Future<int> run(
     args.removeWhere((String option) => option == '-vv' || option == '-v' || option == '--verbose');
   }
 
+  // Reset this on each run to ensure we don't leak state across tests.
+  _alreadyHandlingToolError = null;
+
+  final bool usingLocalEngine = args.any((a) => a.startsWith('--local-engine'));
+
   return runInContext<int>(() async {
     globals.terminal.applyFeatureFlags(featureFlags);
 
     reportCrashes ??= !await globals.isRunningOnBot;
-    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: verboseHelp);
+    final runner = FlutterCommandRunner(verboseHelp: verboseHelp);
     commands().forEach(runner.addCommand);
 
     // Initialize the system locale.
@@ -119,6 +125,8 @@ Future<int> run(
             reportCrashes!,
             getVersion,
             shutdownHooks,
+            featureFlags: featureFlags,
+            usingLocalEngine: usingLocalEngine,
           );
         }
       },
@@ -136,11 +144,20 @@ Future<int> run(
           reportCrashes!,
           getVersion,
           shutdownHooks,
+          featureFlags: featureFlags,
+          usingLocalEngine: usingLocalEngine,
         );
       },
     )!;
   }, overrides: overrides);
 }
+
+/// Track if we're actively processing an error so we don't try and process
+/// additional asynchronous exceptions while we're trying to shut down.
+///
+/// NOTE: This state is cleared at the beginning of [run] to ensure state
+/// doesn't leak when running tests.
+Future<int>? _alreadyHandlingToolError;
 
 Future<int> _handleToolError(
   Object error,
@@ -149,8 +166,34 @@ Future<int> _handleToolError(
   List<String> args,
   bool reportCrashes,
   String Function() getFlutterVersion,
-  ShutdownHooks shutdownHooks,
-) async {
+  ShutdownHooks shutdownHooks, {
+  required bool usingLocalEngine,
+  required FeatureFlags featureFlags,
+}) async {
+  return _alreadyHandlingToolError ??= _handleToolErrorImpl(
+    error,
+    stackTrace,
+    verbose,
+    args,
+    reportCrashes,
+    getFlutterVersion,
+    shutdownHooks,
+    usingLocalEngine: usingLocalEngine,
+    featureFlags: featureFlags,
+  );
+}
+
+Future<int> _handleToolErrorImpl(
+  Object error,
+  StackTrace? stackTrace,
+  bool verbose,
+  List<String> args,
+  bool reportCrashes,
+  String Function() getFlutterVersion,
+  ShutdownHooks shutdownHooks, {
+  required bool usingLocalEngine,
+  required FeatureFlags featureFlags,
+}) async {
   if (error is UsageException) {
     globals.printError('${error.message}\n');
     globals.printError(
@@ -180,53 +223,62 @@ Future<int> _handleToolError(
     globals.printError(
       'An error was encountered when trying to run git.\n'
       "Please ensure git is installed and available in your system's search path. "
-      'See https://docs.flutter.dev/get-started/install for instructions on '
+      'See https://docs.flutter.dev/get-started for instructions on '
       'installing git for your platform.',
     );
     return exitWithHooks(1, shutdownHooks: shutdownHooks);
   } else {
     // We've crashed; emit a log report.
     globals.stdio.stderrWrite('\n');
-
     if (!reportCrashes) {
       // Print the stack trace on the bots - don't write a crash report.
       globals.stdio.stderrWrite('$error\n');
       globals.stdio.stderrWrite('$stackTrace\n');
+
+      final String featureFlagsEnabled = allConfigurableFeatures
+          .where(featureFlags.isEnabled)
+          .map((Feature f) => f.configSetting)
+          .join(', ');
+      globals.stdio.stderrWrite('Feature flags enabled: $featureFlagsEnabled\n');
       return exitWithHooks(1, shutdownHooks: shutdownHooks);
     }
 
     globals.analytics.send(Event.exception(exception: error.runtimeType.toString()));
-    await asyncGuard(
-      () async {
-        final CrashReportSender crashReportSender = CrashReportSender(
-          platform: globals.platform,
-          logger: globals.logger,
-          operatingSystemUtils: globals.os,
-          analytics: globals.analytics,
-        );
-        await crashReportSender.sendReport(
-          error: error,
-          stackTrace: stackTrace!,
-          getFlutterVersion: getFlutterVersion,
-          command: args.join(' '),
-        );
-      },
-      onError: (dynamic error) {
-        globals.printError('Error sending crash report: $error');
-      },
-    );
+
+    if (!usingLocalEngine) {
+      await asyncGuard(
+        () async {
+          final crashReportSender = CrashReportSender(
+            platform: globals.platform,
+            logger: globals.logger,
+            operatingSystemUtils: globals.os,
+            analytics: globals.analytics,
+          );
+          await crashReportSender.sendReport(
+            error: error,
+            stackTrace: stackTrace!,
+            getFlutterVersion: getFlutterVersion,
+            command: args.join(' '),
+          );
+        },
+        onError: (dynamic error) {
+          globals.printError('Error sending crash report: $error');
+        },
+      );
+    }
 
     globals.printError('Oops; flutter has exited unexpectedly: "$error".');
 
     try {
-      final BufferLogger logger = BufferLogger(
+      final logger = BufferLogger(
         terminal: globals.terminal,
         outputPreferences: globals.outputPreferences,
+        verbose: true /* Capture flutter doctor -v */,
       );
 
-      final DoctorText doctorText = DoctorText(logger);
+      final doctorText = DoctorText(logger);
 
-      final CrashDetails details = CrashDetails(
+      final details = CrashDetails(
         command: _crashCommand(args),
         error: error,
         stackTrace: stackTrace!,
@@ -258,7 +310,7 @@ String _crashException(dynamic error) => '${error.runtimeType}: $error';
 
 /// Saves the crash report to a local file.
 Future<File> _createLocalCrashReport(CrashDetails details) async {
-  final StringBuffer buffer = StringBuffer();
+  final buffer = StringBuffer();
 
   buffer.writeln('Flutter crash report.');
   buffer.writeln('${globals.userMessages.flutterToolBugInstructions}\n');

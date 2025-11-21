@@ -68,6 +68,12 @@ class SkwasmCallbackHandler {
   }
 }
 
+typedef RenderResult = ({
+  List<DomImageBitmap> imageBitmaps,
+  int rasterStartMicros,
+  int rasterEndMicros,
+});
+
 class SkwasmSurface {
   factory SkwasmSurface() {
     final SurfaceHandle surfaceHandle = withStackScope((StackScope scope) {
@@ -87,14 +93,21 @@ class SkwasmSurface {
     surfaceSetCallbackHandler(handle, SkwasmCallbackHandler.instance.callbackPointer);
   }
 
-  Future<RenderResult> renderPictures(List<SkwasmPicture> pictures) =>
+  Future<RenderResult> renderPictures(List<SkwasmPicture> pictures, int width, int height) =>
       withStackScope((StackScope scope) async {
-        final Pointer<PictureHandle> pictureHandles =
-            scope.allocPointerArray(pictures.length).cast<PictureHandle>();
+        final Pointer<PictureHandle> pictureHandles = scope
+            .allocPointerArray(pictures.length)
+            .cast<PictureHandle>();
         for (int i = 0; i < pictures.length; i++) {
           pictureHandles[i] = pictures[i].handle;
         }
-        final int callbackId = surfaceRenderPictures(handle, pictureHandles, pictures.length);
+        final int callbackId = surfaceRenderPictures(
+          handle,
+          pictureHandles,
+          width,
+          height,
+          pictures.length,
+        );
         final RasterResult rasterResult =
             (await SkwasmCallbackHandler.instance.registerCallback(callbackId)) as RasterResult;
         final RenderResult result = (
@@ -118,6 +131,10 @@ class SkwasmSurface {
     }
     skDataDispose(dataHandle);
     return ByteData.sublistView(output);
+  }
+
+  void setSkiaResourceCacheMaxBytes(int bytes) {
+    surfaceSetResourceCacheLimitBytes(handle, bytes);
   }
 
   void dispose() {

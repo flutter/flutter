@@ -1,0 +1,13 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+config("libprotozero_config") {
+  configs = ["//flutter/third_party/dart/third_party/perfetto:libprotozero_config"]
+  include_dirs = [ "../../flutter/third_party/dart" ]
+}
+
+source_set("libprotozero") {
+  public_configs = [ ":libprotozero_config" ]
+  public_deps = [ "//flutter/third_party/dart/third_party/perfetto:libprotozero" ]
+}

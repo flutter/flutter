@@ -22,7 +22,8 @@ const String _githubCacheFileName = 'github-response.json';
 const String _githubTargetFolder = 'src/vs/workbench/services/keybinding/browser/keyboardLayouts';
 
 /// The full query string for GraphQL.
-const String _githubQuery = '''
+const String _githubQuery =
+    '''
 {
   repository(owner: "microsoft", name: "vscode") {
     defaultBranchRef {
@@ -306,14 +307,16 @@ Future<GithubResult> fetchFromGithub({
     commitJson,
     'file.object.entries',
   );
-  final Iterable<_GitHubFile> files = Iterable<_GitHubFile>.generate(
-    fileListJson.current.length,
-    (int index) => _jsonGetGithubFile(fileListJson, index),
-  ).where(
-    // Exclude controlling files, which contain no layout information.
-    (_GitHubFile file) =>
-        !file.name.startsWith('layout.contribution.') && !file.name.startsWith('_.contribution'),
-  );
+  final Iterable<_GitHubFile> files =
+      Iterable<_GitHubFile>.generate(
+        fileListJson.current.length,
+        (int index) => _jsonGetGithubFile(fileListJson, index),
+      ).where(
+        // Exclude controlling files, which contain no layout information.
+        (_GitHubFile file) =>
+            !file.name.startsWith('layout.contribution.') &&
+            !file.name.startsWith('_.contribution'),
+      );
 
   // Layouts must be sorted to ensure that the output file has a fixed order.
   final List<Layout> layouts = files.map(_parseLayoutFromGithubFile).toList()..sort(_sortLayout);

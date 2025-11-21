@@ -7,7 +7,7 @@ import '../../base/project_migrator.dart';
 import '../../cmake_project.dart';
 import 'utils.dart';
 
-const String _cmakeFileBefore = r'''
+const _cmakeFileBefore = r'''
 # Apply the standard set of build settings. This can be removed for applications
 # that need different build settings.
 apply_standard_settings(${BINARY_NAME})
@@ -15,7 +15,7 @@ apply_standard_settings(${BINARY_NAME})
 # Disable Windows macros that collide with C++ standard library functions.
 target_compile_definitions(${BINARY_NAME} PRIVATE "NOMINMAX")
 ''';
-const String _cmakeFileAfter = r'''
+const _cmakeFileAfter = r'''
 # Apply the standard set of build settings. This can be removed for applications
 # that need different build settings.
 apply_standard_settings(${BINARY_NAME})
@@ -31,7 +31,7 @@ target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION_BUILD=${FLUTT
 target_compile_definitions(${BINARY_NAME} PRIVATE "NOMINMAX")
 ''';
 
-const String _resourceFileBefore = '''
+const _resourceFileBefore = '''
 #ifdef FLUTTER_BUILD_NUMBER
 #define VERSION_AS_NUMBER FLUTTER_BUILD_NUMBER
 #else
@@ -44,7 +44,7 @@ const String _resourceFileBefore = '''
 #define VERSION_AS_STRING "1.0.0"
 #endif
 ''';
-const String _resourceFileAfter = '''
+const _resourceFileAfter = '''
 #if defined(FLUTTER_VERSION_MAJOR) && defined(FLUTTER_VERSION_MINOR) && defined(FLUTTER_VERSION_PATCH) && defined(FLUTTER_VERSION_BUILD)
 #define VERSION_AS_NUMBER FLUTTER_VERSION_MAJOR,FLUTTER_VERSION_MINOR,FLUTTER_VERSION_PATCH,FLUTTER_VERSION_BUILD
 #else

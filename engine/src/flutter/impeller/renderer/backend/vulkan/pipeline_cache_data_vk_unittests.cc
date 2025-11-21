@@ -10,6 +10,7 @@
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/pipeline_cache_data_vk.h"
 #include "impeller/renderer/backend/vulkan/surface_context_vk.h"
+#include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
 
 namespace impeller::testing {
 
@@ -90,6 +91,24 @@ TEST(PipelineCacheDataVKTest, CanCreateFromDeviceProperties) {
   for (size_t i = 0; i < uuid.size(); i++) {
     EXPECT_EQ(header.uuid[i], uuid.at(i));
   }
+}
+
+TEST(PipelineCacheDataVKTest, WritesIncompleteCacheData) {
+  fml::ScopedTemporaryDirectory temp_dir;
+  auto context = MockVulkanContextBuilder().Build();
+  auto cache = context->GetDevice().createPipelineCacheUnique({});
+  const auto& caps = CapabilitiesVK::Cast(*context->GetCapabilities());
+
+  ASSERT_TRUE(PipelineCacheDataPersist(
+      temp_dir.fd(), caps.GetPhysicalDeviceProperties(), cache.value));
+
+  std::unique_ptr<fml::FileMapping> mapping = fml::FileMapping::CreateReadOnly(
+      temp_dir.fd(), "flutter.impeller.vkcache");
+  ASSERT_TRUE(mapping);
+  PipelineCacheHeaderVK header;
+  ASSERT_GE(mapping->GetSize(), sizeof(header));
+  std::memcpy(&header, mapping->GetMapping(), sizeof(header));
+  ASSERT_EQ(mapping->GetSize(), sizeof(header) + header.data_size);
 }
 
 using PipelineCacheDataVKPlaygroundTest = PlaygroundTest;

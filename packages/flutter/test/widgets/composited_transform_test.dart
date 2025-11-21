@@ -76,7 +76,9 @@ void main() {
                 ),
               ),
             ),
-            Positioned.fill(child: RepaintBoundary(child: ColoredBox(color: siblingColor))),
+            Positioned.fill(
+              child: RepaintBoundary(child: ColoredBox(color: siblingColor)),
+            ),
           ],
         ),
       );

@@ -2,14 +2,30 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/toolchain/ccache.gni")
 import("//build/toolchain/clang.gni")
 import("//build/toolchain/rbe.gni")
-import("//build/toolchain/ccache.gni")
 import("//build/toolchain/toolchain.gni")
 
+if (target_cpu == "x64") {
+  target_triple = "x86_64-unknown-fuchsia"
+} else if (target_cpu == "arm64") {
+  target_triple = "aarch64-unknown-fuchsia"
+} else {
+  assert(false, "Unsupported target_cpu: $target_cpu")
+}
+
 if (use_rbe) {
-  compiler_args =
-      rewrapper_command + [ "--labels=type=compile,compiler=clang,lang=cpp " ]
+  remote_wrapper =
+      rebase_path("//flutter/build/rbe/remote_wrapper_linux.sh", root_build_dir)
+  local_wrapper =
+      rebase_path("//flutter/build/rbe/local_wrapper.sh", root_build_dir)
+  compiler_args = rewrapper_command + [
+                    "--remote_wrapper=$remote_wrapper",
+                    "--local_wrapper=$local_wrapper",
+                    "--labels=type=compile,compiler=clang,lang=cpp",
+                    "--inputs=$buildtools_path/${host_os}-${host_cpu}/clang/include/$target_triple/c++/v1/__config_site",
+                  ]
   compiler_prefix = string_join(" ", compiler_args)
   link_prefix = ""
 } else if (use_ccache) {
@@ -25,8 +41,8 @@ toolchain("fuchsia") {
   assert(target_cpu == "x64" || target_cpu == "arm64",
          "We currently only support 'x64' and 'arm64' targets for fuchsia.")
   toolchain_bin =
-      rebase_path("$buildtools_path/${host_os}-${host_cpu}/clang/bin", root_out_dir)
-  fuchsia_sdk = rebase_path("//fuchsia/sdk/$host_os", root_out_dir)
+      rebase_path("$buildtools_path/${host_os}-${host_cpu}/clang/bin",
+                  root_build_dir)
 
   # We can't do string interpolation ($ in strings) on things with dots in
   # them. To allow us to use $cc below, for example, we create copies of
@@ -39,14 +55,6 @@ toolchain("fuchsia") {
   nm = "${toolchain_bin}/llvm-nm"
   strip = "${toolchain_bin}/llvm-strip"
 
-  if (target_cpu == "arm64") {
-    target_triple_flags = "--target=aarch64-fuchsia"
-  } else {
-    target_triple_flags = "--target=x86_64-fuchsia"
-  }
-
-  sysroot_flags = "--sysroot ${fuchsia_sdk}/arch/${target_cpu}/sysroot"
-
   # These library switches can apply to all tools below.
   lib_switch = "-l"
   lib_dir_switch = "-L"
@@ -58,7 +66,7 @@ toolchain("fuchsia") {
 
   tool("cc") {
     depfile = "{{output}}.d"
-    command = "$compiler_prefix $cc -MD -MF $depfile $target_triple_flags $sysroot_flags $lto_flags {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+    command = "$compiler_prefix $cc -MMD -MF $depfile $lto_flags {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "CC {{output}}"
     outputs =
@@ -67,7 +75,7 @@ toolchain("fuchsia") {
 
   tool("cxx") {
     depfile = "{{output}}.d"
-    command = "$compiler_prefix $cxx -MD -MF $depfile $target_triple_flags $sysroot_flags $lto_flags {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
+    command = "$compiler_prefix $cxx -MMD -MF $depfile $lto_flags {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "CXX {{output}}"
     outputs =
@@ -76,7 +84,7 @@ toolchain("fuchsia") {
 
   tool("asm") {
     depfile = "{{output}}.d"
-    command = "$cc -MD -MF $depfile $target_triple_flags $sysroot_flags $lto_flags {{defines}} {{include_dirs}} {{asmflags}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+    command = "$cc -MMD -MF $depfile $lto_flags {{defines}} {{include_dirs}} {{asmflags}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "ASM {{output}}"
     outputs =
@@ -108,7 +116,7 @@ toolchain("fuchsia") {
     # existing .TOC file, overwrite it, otherwise, don't change it.
     tocfile = sofile + ".TOC"
     temporary_tocname = sofile + ".tmp"
-    link_command = "$link_prefix $ld $target_triple_flags $sysroot_flags $lto_flags -shared {{ldflags}} -o $unstripped_sofile -Wl,--build-id=sha1 -Wl,-soname=$soname @$rspfile"
+    link_command = "$link_prefix $ld $lto_flags -shared {{ldflags}} -o $unstripped_sofile -Wl,--build-id=sha1 -Wl,-soname=$soname @$rspfile"
     toc_command = "{ $readelf -d $unstripped_sofile | grep SONAME ; $nm -gD -f p $unstripped_sofile | cut -f1-2 -d' '; } > $temporary_tocname"
     replace_command = "if ! cmp -s $temporary_tocname $tocfile; then mv $temporary_tocname $tocfile; fi"
     strip_command = "$strip -o $sofile $unstripped_sofile"
@@ -145,7 +153,7 @@ toolchain("fuchsia") {
     outfile = "{{root_out_dir}}/$exename"
     rspfile = "$outfile.rsp"
     unstripped_outfile = "{{root_out_dir}}/exe.unstripped/$exename"
-    command = "$link_prefix $ld $target_triple_flags $sysroot_flags $lto_flags {{ldflags}} -o $unstripped_outfile -Wl,--build-id=sha1 -Wl,--start-group @$rspfile {{solibs}} -Wl,--end-group {{libs}} && ${strip} -o $outfile $unstripped_outfile"
+    command = "$link_prefix $ld $lto_flags {{ldflags}} -o $unstripped_outfile -Wl,--build-id=sha1 -Wl,--start-group @$rspfile {{solibs}} -Wl,--end-group {{libs}} && ${strip} -o $outfile $unstripped_outfile"
     description = "LINK $outfile"
     rspfile_content = "{{inputs}}"
     outputs = [

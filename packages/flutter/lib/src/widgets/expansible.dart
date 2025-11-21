@@ -55,11 +55,11 @@ typedef ExpansibleBuilder =
 /// state.
 ///
 /// The controller's [expand] and [collapse] methods cause the
-/// the [Expansible] to rebuild, so they may not be called from
+/// [Expansible] to rebuild, so they may not be called from
 /// a build method.
 ///
 /// Remember to [dispose] of the [ExpansibleController] when it is no longer
-/// needed. This will ensure we discard any resources used by the object.
+/// needed. This will ensure all resources used by the object are discarded.
 class ExpansibleController extends ChangeNotifier {
   /// Creates a controller to be used with [Expansible.controller].
   ExpansibleController();
@@ -222,8 +222,21 @@ class Expansible extends StatefulWidget {
     required this.bodyBuilder,
     required this.controller,
     this.expansibleBuilder = _defaultExpansibleBuilder,
+    this.animationStyle,
+    @Deprecated(
+      'Use animationStyle instead. '
+      'This feature was deprecated after v3.38.0-0.2.pre.',
+    )
     this.duration = const Duration(milliseconds: 200),
+    @Deprecated(
+      'Use animationStyle instead. '
+      'This feature was deprecated after v3.38.0-0.2.pre.',
+    )
     this.curve = Curves.ease,
+    @Deprecated(
+      'Use animationStyle instead. '
+      'This feature was deprecated after v3.38.0-0.2.pre.',
+    )
     this.reverseCurve,
     this.maintainState = true,
   });
@@ -246,19 +259,54 @@ class Expansible extends StatefulWidget {
   /// its fully extended height.
   final ExpansibleComponentBuilder bodyBuilder;
 
+  /// Used to override the expansion animation curve and duration.
+  ///
+  /// If [AnimationStyle.duration] is provided, it will be used instead of
+  /// [duration]. If not provided, [duration] is used, which defaults to
+  /// 200ms.
+  ///
+  /// If [AnimationStyle.curve] is provided, it will be used to override
+  /// [curve]. If it is null, then [curve] will be used. Otherwise, defaults
+  /// to [Curves.ease].
+  ///
+  /// If [AnimationStyle.reverseCurve] is provided, it will be used to
+  /// override [reverseCurve]. If it is null, then [reverseCurve] will be
+  /// used.
+  ///
+  /// To disable the theme animation, use [AnimationStyle.noAnimation].
+  final AnimationStyle? animationStyle;
+
   /// The duration of the expansion animation.
   ///
   /// Defaults to a duration of 200ms.
+  ///
+  /// This property is deprecated, use [animationStyle] instead.
+  @Deprecated(
+    'Use animationStyle instead. '
+    'This feature was deprecated after v3.38.0-0.2.pre.',
+  )
   final Duration duration;
 
   /// The curve of the expansion animation.
   ///
   /// Defaults to [Curves.ease].
+  ///
+  /// This property is deprecated, use [animationStyle] instead.
+  @Deprecated(
+    'Use animationStyle instead. '
+    'This feature was deprecated after v3.38.0-0.2.pre.',
+  )
   final Curve curve;
 
   /// The reverse curve of the expansion animation.
   ///
   /// If null, uses [curve] in both directions.
+  ///
+  /// This property is deprecated, use [animationStyle] instead.
+  @Deprecated(
+    'Use animationStyle instead. '
+    'This feature was deprecated after v3.38.0-0.2.pre.',
+  )
   final Curve? reverseCurve;
 
   /// Whether the state of the body is maintained when the widget expands or
@@ -268,7 +316,7 @@ class Expansible extends StatefulWidget {
   /// collapsed. Otherwise, the body is removed from the tree when the
   /// widget is collapsed and recreated upon expansion.
   ///
-  /// Defaults to false.
+  /// Defaults to true.
   final bool maintainState;
 
   /// Builds the widget with the results of [headerBuilder] and [bodyBuilder].
@@ -293,10 +341,22 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
   late AnimationController _animationController;
   late CurvedAnimation _heightFactor;
 
+  Duration get _duration {
+    return widget.animationStyle?.duration ?? widget.duration;
+  }
+
+  Curve get _curve {
+    return widget.animationStyle?.curve ?? widget.curve;
+  }
+
+  Curve? get _reverseCurve {
+    return widget.animationStyle?.reverseCurve ?? widget.reverseCurve;
+  }
+
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(duration: widget.duration, vsync: this);
+    _animationController = AnimationController(duration: _duration, vsync: this);
     final bool initiallyExpanded =
         PageStorage.maybeOf(context)?.readState(context) as bool? ?? widget.controller.isExpanded;
     if (initiallyExpanded) {
@@ -308,8 +368,8 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     final Tween<double> heightFactorTween = Tween<double>(begin: 0.0, end: 1.0);
     _heightFactor = CurvedAnimation(
       parent: _animationController.drive(heightFactorTween),
-      curve: widget.curve,
-      reverseCurve: widget.reverseCurve,
+      curve: _curve,
+      reverseCurve: _reverseCurve,
     );
     widget.controller.addListener(_toggleExpansion);
   }
@@ -317,18 +377,25 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
   @override
   void didUpdateWidget(covariant Expansible oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.curve != oldWidget.curve) {
-      _heightFactor.curve = widget.curve;
+    final Duration oldDuration = oldWidget.animationStyle?.duration ?? oldWidget.duration;
+    final Curve oldCurve = oldWidget.animationStyle?.curve ?? oldWidget.curve;
+    final Curve? oldReverseCurve = oldWidget.animationStyle?.reverseCurve ?? oldWidget.reverseCurve;
+
+    if (_curve != oldCurve) {
+      _heightFactor.curve = _curve;
     }
-    if (widget.reverseCurve != oldWidget.reverseCurve) {
-      _heightFactor.reverseCurve = widget.reverseCurve;
+    if (_reverseCurve != oldReverseCurve) {
+      _heightFactor.reverseCurve = _reverseCurve;
     }
-    if (widget.duration != oldWidget.duration) {
-      _animationController.duration = widget.duration;
+    if (_duration != oldDuration) {
+      _animationController.duration = _duration;
     }
     if (widget.controller != oldWidget.controller) {
       oldWidget.controller.removeListener(_toggleExpansion);
       widget.controller.addListener(_toggleExpansion);
+      if (oldWidget.controller.isExpanded != widget.controller.isExpanded) {
+        _toggleExpansion();
+      }
     }
   }
 
@@ -374,7 +441,9 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
       animation: _animationController.view,
       builder: (BuildContext context, Widget? child) {
         final Widget header = widget.headerBuilder(context, _animationController);
-        final Widget body = ClipRect(child: Align(heightFactor: _heightFactor.value, child: child));
+        final Widget body = ClipRect(
+          child: Align(heightFactor: _heightFactor.value, child: child),
+        );
         return widget.expansibleBuilder(context, header, body, _animationController);
       },
       child: shouldRemoveBody ? null : result,

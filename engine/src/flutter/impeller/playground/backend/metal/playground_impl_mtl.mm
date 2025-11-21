@@ -138,4 +138,8 @@ fml::Status PlaygroundImplMTL::SetCapabilities(
   return fml::Status();
 }
 
+void PlaygroundImplMTL::SetGPUDisabled(bool disabled) const {
+  is_gpu_disabled_sync_switch_->SetSwitch(disabled);
+}
+
 }  // namespace impeller

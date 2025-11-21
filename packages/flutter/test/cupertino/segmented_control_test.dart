@@ -13,6 +13,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -48,7 +49,10 @@ StatefulBuilder setupSimpleSegmentedControl() {
 }
 
 Widget boilerplate({required Widget child}) {
-  return Directionality(textDirection: TextDirection.ltr, child: Center(child: child));
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Center(child: child),
+  );
 }
 
 int getChildCount(WidgetTester tester) {
@@ -58,7 +62,7 @@ int getChildCount(WidgetTester tester) {
       .length;
 }
 
-ui.RRect getSurroundingRect(WidgetTester tester, {int child = 0}) {
+ui.RSuperellipse getSurroundingShape(WidgetTester tester, {int child = 0}) {
   return ((getRenderSegmentedControl(tester)
                       as RenderBoxContainerDefaultsMixin<
                         RenderBox,
@@ -68,7 +72,7 @@ ui.RRect getSurroundingRect(WidgetTester tester, {int child = 0}) {
                   .parentData!
               as dynamic)
           .surroundingRect
-      as ui.RRect;
+      as ui.RSuperellipse;
 }
 
 Size getChildSize(WidgetTester tester, {int child = 0}) {
@@ -703,9 +707,9 @@ void main() {
 
     expect(childWidth, 200.0);
 
-    expect(childWidth, getSurroundingRect(tester).width);
-    expect(childWidth, getSurroundingRect(tester, child: 1).width);
-    expect(childWidth, getSurroundingRect(tester, child: 2).width);
+    expect(childWidth, getSurroundingShape(tester).width);
+    expect(childWidth, getSurroundingShape(tester, child: 1).width);
+    expect(childWidth, getSurroundingShape(tester, child: 2).width);
   });
 
   testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
@@ -841,24 +845,31 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
-              label: 'Child 1',
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isButton,
-                SemanticsFlag.isInMutuallyExclusiveGroup,
-                SemanticsFlag.hasSelectedState,
-                SemanticsFlag.isSelected,
+              role: SemanticsRole.radioGroup,
+              children: <TestSemantics>[
+                TestSemantics(
+                  label: 'Child 1',
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isButton,
+                    SemanticsFlag.isInMutuallyExclusiveGroup,
+                    SemanticsFlag.hasSelectedState,
+                    SemanticsFlag.isSelected,
+                    SemanticsFlag.isFocusable,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                ),
+                TestSemantics(
+                  label: 'Child 2',
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isButton,
+                    SemanticsFlag.isInMutuallyExclusiveGroup,
+                    // Declares that it is selectable, but not currently selected.
+                    SemanticsFlag.hasSelectedState,
+                    SemanticsFlag.isFocusable,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                ),
               ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
-            ),
-            TestSemantics.rootChild(
-              label: 'Child 2',
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isButton,
-                SemanticsFlag.isInMutuallyExclusiveGroup,
-                // Declares that it is selectable, but not currently selected.
-                SemanticsFlag.hasSelectedState,
-              ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
             ),
           ],
         ),
@@ -877,24 +888,32 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
-              label: 'Child 1',
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isButton,
-                SemanticsFlag.isInMutuallyExclusiveGroup,
-                // Declares that it is selectable, but not currently selected.
-                SemanticsFlag.hasSelectedState,
+              role: SemanticsRole.radioGroup,
+              children: <TestSemantics>[
+                TestSemantics(
+                  label: 'Child 1',
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isButton,
+                    SemanticsFlag.isInMutuallyExclusiveGroup,
+                    // Declares that it is selectable, but not currently selected.
+                    SemanticsFlag.hasSelectedState,
+                    SemanticsFlag.isFocusable,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                ),
+                TestSemantics(
+                  label: 'Child 2',
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isButton,
+                    SemanticsFlag.isInMutuallyExclusiveGroup,
+                    SemanticsFlag.hasSelectedState,
+                    SemanticsFlag.isSelected,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.isFocused,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                ),
               ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
-            ),
-            TestSemantics.rootChild(
-              label: 'Child 2',
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isButton,
-                SemanticsFlag.isInMutuallyExclusiveGroup,
-                SemanticsFlag.hasSelectedState,
-                SemanticsFlag.isSelected,
-              ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
             ),
           ],
         ),
@@ -1370,7 +1389,7 @@ void main() {
                   sharedValue = newValue;
                 });
                 if (sharedValue == 1) {
-                  children = Map<int, Widget>.from(children);
+                  children = Map<int, Widget>.of(children);
                   children[3] = const Text('D');
                 }
               },
@@ -1419,7 +1438,7 @@ void main() {
                 });
                 if (sharedValue == 1) {
                   children.remove(2);
-                  children = Map<int, Widget>.from(children);
+                  children = Map<int, Widget>.of(children);
                 }
               },
               groupValue: sharedValue,
@@ -1464,7 +1483,7 @@ void main() {
                 });
                 if (sharedValue == 1) {
                   children.remove(1);
-                  children = Map<int, Widget>.from(children);
+                  children = Map<int, Widget>.of(children);
                   sharedValue = null;
                 }
               },
@@ -1778,5 +1797,103 @@ void main() {
     );
 
     expect(getBackgroundColor(tester, 0), isSameColorAs(CupertinoColors.systemGrey2));
+  });
+
+  testWidgets('Segmented control can use arrow keys', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{};
+    children[0] = const Text('Child 1');
+    children[1] = const Text('Child 2');
+    children[2] = const Text('Child 3');
+
+    int sharedValue = 0;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return boilerplate(
+            child: CupertinoSegmentedControl<int>(
+              children: children,
+              onValueChanged: (int newValue) {
+                setState(() {
+                  sharedValue = newValue;
+                });
+              },
+              groupValue: sharedValue,
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(sharedValue, 0);
+
+    await tester.tap(find.text('Child 1'));
+    await tester.pumpAndSettle();
+    expect(sharedValue, 0);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(sharedValue, 1);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(sharedValue, 2);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(sharedValue, 0);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(sharedValue, 2);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    expect(sharedValue, 1);
+  });
+
+  testWidgets('Segmented control skips disabled segments with keyboard', (
+    WidgetTester tester,
+  ) async {
+    final Map<int, Widget> children = <int, Widget>{};
+    children[0] = const Text('Child 1');
+    children[1] = const Text('Child 2');
+    children[2] = const Text('Child 3');
+
+    int sharedValue = 0;
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return boilerplate(
+            child: CupertinoSegmentedControl<int>(
+              children: children,
+              onValueChanged: (int newValue) {
+                setState(() {
+                  sharedValue = newValue;
+                });
+              },
+              groupValue: sharedValue,
+              disabledChildren: const <int>{1},
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(sharedValue, 0);
+
+    await tester.tap(find.text('Child 1'));
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(sharedValue, 2);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(sharedValue, 0);
   });
 }

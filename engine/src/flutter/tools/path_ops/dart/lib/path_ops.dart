@@ -144,7 +144,7 @@ class Path implements PathProxy {
     return FillType.values[_getFillTypeFn(_path!)];
   }
 
-  ffi.Pointer<_SkPath>? _path;
+  ffi.Pointer<_SkPathBuilder>? _path;
   ffi.Pointer<_PathData>? _pathData;
 
   /// The number of points used by each [PathVerb].
@@ -293,7 +293,7 @@ final ffi.DynamicLibrary _dylib = () {
   throw UnsupportedError('Unknown platform: ${Platform.operatingSystem}');
 }();
 
-final class _SkPath extends ffi.Opaque {}
+final class _SkPathBuilder extends ffi.Opaque {}
 
 final class _PathData extends ffi.Struct {
   external ffi.Pointer<ffi.Uint8> verbs;
@@ -307,28 +307,28 @@ final class _PathData extends ffi.Struct {
   external int point_count;
 }
 
-typedef _CreatePathType = ffi.Pointer<_SkPath> Function(int);
-typedef _create_path_type = ffi.Pointer<_SkPath> Function(ffi.Int);
+typedef _CreatePathType = ffi.Pointer<_SkPathBuilder> Function(int);
+typedef _create_path_type = ffi.Pointer<_SkPathBuilder> Function(ffi.Int);
 
 final _CreatePathType _createPathFn = _dylib.lookupFunction<_create_path_type, _CreatePathType>(
   'CreatePath',
 );
 
-typedef _MoveToType = void Function(ffi.Pointer<_SkPath>, double, double);
-typedef _move_to_type = ffi.Void Function(ffi.Pointer<_SkPath>, ffi.Float, ffi.Float);
+typedef _MoveToType = void Function(ffi.Pointer<_SkPathBuilder>, double, double);
+typedef _move_to_type = ffi.Void Function(ffi.Pointer<_SkPathBuilder>, ffi.Float, ffi.Float);
 
 final _MoveToType _moveToFn = _dylib.lookupFunction<_move_to_type, _MoveToType>('MoveTo');
 
-typedef _LineToType = void Function(ffi.Pointer<_SkPath>, double, double);
-typedef _line_to_type = ffi.Void Function(ffi.Pointer<_SkPath>, ffi.Float, ffi.Float);
+typedef _LineToType = void Function(ffi.Pointer<_SkPathBuilder>, double, double);
+typedef _line_to_type = ffi.Void Function(ffi.Pointer<_SkPathBuilder>, ffi.Float, ffi.Float);
 
 final _LineToType _lineToFn = _dylib.lookupFunction<_line_to_type, _LineToType>('LineTo');
 
 typedef _CubicToType =
-    void Function(ffi.Pointer<_SkPath>, double, double, double, double, double, double);
+    void Function(ffi.Pointer<_SkPathBuilder>, double, double, double, double, double, double);
 typedef _cubic_to_type =
     ffi.Void Function(
-      ffi.Pointer<_SkPath>,
+      ffi.Pointer<_SkPathBuilder>,
       ffi.Float,
       ffi.Float,
       ffi.Float,
@@ -339,28 +339,29 @@ typedef _cubic_to_type =
 
 final _CubicToType _cubicToFn = _dylib.lookupFunction<_cubic_to_type, _CubicToType>('CubicTo');
 
-typedef _CloseType = void Function(ffi.Pointer<_SkPath>, bool);
-typedef _close_type = ffi.Void Function(ffi.Pointer<_SkPath>, ffi.Bool);
+typedef _CloseType = void Function(ffi.Pointer<_SkPathBuilder>, bool);
+typedef _close_type = ffi.Void Function(ffi.Pointer<_SkPathBuilder>, ffi.Bool);
 
 final _CloseType _closeFn = _dylib.lookupFunction<_close_type, _CloseType>('Close');
 
-typedef _ResetType = void Function(ffi.Pointer<_SkPath>);
-typedef _reset_type = ffi.Void Function(ffi.Pointer<_SkPath>);
+typedef _ResetType = void Function(ffi.Pointer<_SkPathBuilder>);
+typedef _reset_type = ffi.Void Function(ffi.Pointer<_SkPathBuilder>);
 
 final _ResetType _resetFn = _dylib.lookupFunction<_reset_type, _ResetType>('Reset');
 
-typedef _DestroyType = void Function(ffi.Pointer<_SkPath>);
-typedef _destroy_type = ffi.Void Function(ffi.Pointer<_SkPath>);
+typedef _DestroyType = void Function(ffi.Pointer<_SkPathBuilder>);
+typedef _destroy_type = ffi.Void Function(ffi.Pointer<_SkPathBuilder>);
 
 final _DestroyType _destroyFn = _dylib.lookupFunction<_destroy_type, _DestroyType>('DestroyPath');
 
-typedef _OpType = void Function(ffi.Pointer<_SkPath>, ffi.Pointer<_SkPath>, int);
-typedef _op_type = ffi.Void Function(ffi.Pointer<_SkPath>, ffi.Pointer<_SkPath>, ffi.Int);
+typedef _OpType = void Function(ffi.Pointer<_SkPathBuilder>, ffi.Pointer<_SkPathBuilder>, int);
+typedef _op_type =
+    ffi.Void Function(ffi.Pointer<_SkPathBuilder>, ffi.Pointer<_SkPathBuilder>, ffi.Int);
 
 final _OpType _opFn = _dylib.lookupFunction<_op_type, _OpType>('Op');
 
-typedef _PathDataType = ffi.Pointer<_PathData> Function(ffi.Pointer<_SkPath>);
-typedef _path_data_type = ffi.Pointer<_PathData> Function(ffi.Pointer<_SkPath>);
+typedef _PathDataType = ffi.Pointer<_PathData> Function(ffi.Pointer<_SkPathBuilder>);
+typedef _path_data_type = ffi.Pointer<_PathData> Function(ffi.Pointer<_SkPathBuilder>);
 
 final _PathDataType _dataFn = _dylib.lookupFunction<_path_data_type, _PathDataType>('Data');
 
@@ -371,8 +372,8 @@ final _DestroyDataType _destroyDataFn = _dylib.lookupFunction<_destroy_data_type
   'DestroyData',
 );
 
-typedef _GetFillTypeType = int Function(ffi.Pointer<_SkPath>);
-typedef _get_fill_type_type = ffi.Int32 Function(ffi.Pointer<_SkPath>);
+typedef _GetFillTypeType = int Function(ffi.Pointer<_SkPathBuilder>);
+typedef _get_fill_type_type = ffi.Int32 Function(ffi.Pointer<_SkPathBuilder>);
 
 final _GetFillTypeType _getFillTypeFn = _dylib
     .lookupFunction<_get_fill_type_type, _GetFillTypeType>('GetFillType');

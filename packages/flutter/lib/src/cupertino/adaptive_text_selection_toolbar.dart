@@ -209,7 +209,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // If there aren't any buttons to build, build an empty toolbar.
-    if ((children?.isEmpty ?? false) || (buttonItems?.isEmpty ?? false)) {
+    if ((children ?? buttonItems)?.isEmpty ?? true) {
       return const SizedBox.shrink();
     }
 

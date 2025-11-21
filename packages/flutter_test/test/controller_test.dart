@@ -288,8 +288,8 @@ void main() {
           onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
           onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
           onPointerPanZoomStart: (PointerPanZoomStartEvent event) => logs.add('panZoomStart'),
-          onPointerPanZoomUpdate:
-              (PointerPanZoomUpdateEvent event) => logs.add('panZoomUpdate ${event.pan}'),
+          onPointerPanZoomUpdate: (PointerPanZoomUpdateEvent event) =>
+              logs.add('panZoomUpdate ${event.pan}'),
           onPointerPanZoomEnd: (PointerPanZoomEndEvent event) => logs.add('panZoomEnd'),
           child: const Text('test'),
         ),
@@ -575,8 +575,8 @@ void main() {
                     key: const Key('listView-a'),
                     itemCount: 50,
                     shrinkWrap: true,
-                    itemBuilder:
-                        (BuildContext context, int i) => ListTile(title: Text('Item a-$i')),
+                    itemBuilder: (BuildContext context, int i) =>
+                        ListTile(title: Text('Item a-$i')),
                   ),
                 ),
                 const Divider(thickness: 5),
@@ -585,8 +585,8 @@ void main() {
                     key: const Key('listView-b'),
                     itemCount: 50,
                     shrinkWrap: true,
-                    itemBuilder:
-                        (BuildContext context, int i) => ListTile(title: Text('Item b-$i')),
+                    itemBuilder: (BuildContext context, int i) =>
+                        ListTile(title: Text('Item b-$i')),
                   ),
                 ),
               ],
@@ -690,7 +690,9 @@ void main() {
       testWidgets('Returns the correct SemanticsData', (WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
-            home: Scaffold(body: OutlinedButton(onPressed: () {}, child: const Text('hello'))),
+            home: Scaffold(
+              body: OutlinedButton(onPressed: () {}, child: const Text('hello')),
+            ),
           ),
         );
 
@@ -706,7 +708,9 @@ void main() {
       ) async {
         await tester.pumpWidget(
           MaterialApp(
-            home: Scaffold(body: OutlinedButton(onPressed: () {}, child: const Text('hello'))),
+            home: Scaffold(
+              body: OutlinedButton(onPressed: () {}, child: const Text('hello')),
+            ),
           ),
         );
 
@@ -1001,13 +1005,10 @@ void main() {
 
         // Grab a sample of the matchers to validate that not every matcher is
         // needed to validate a traversal when using `containsAllInOrder`.
-        final Iterable<Matcher> expectedMatchers =
-            <Matcher>[...fullTraversalMatchers]
-              ..removeAt(0)
-              ..removeLast()
-              ..mapIndexed<Matcher?>(
-                (int i, Matcher element) => i.isEven ? element : null,
-              ).nonNulls;
+        final Iterable<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers]
+          ..removeAt(0)
+          ..removeLast()
+          ..mapIndexed<Matcher?>((int i, Matcher element) => i.isEven ? element : null).nonNulls;
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(),
@@ -1033,6 +1034,19 @@ void main() {
         expect(
           tester.semantics.simulatedAccessibilityTraversal(),
           orderedEquals(<Matcher>[containsSemantics(label: '1\n2\n3')]),
+        );
+      });
+      testWidgets('a node with only a tooltip is important for accessibility', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Tooltip(message: 'My tooltip', child: SizedBox()),
+          ),
+        );
+        expect(
+          tester.semantics.simulatedAccessibilityTraversal(),
+          contains(containsSemantics(tooltip: 'My tooltip')),
         );
       });
     });
@@ -1268,7 +1282,9 @@ void main() {
           int currentIndex = text.length;
           final TextEditingController controller = TextEditingController(text: text);
           await tester.pumpWidget(
-            MaterialApp(home: Material(child: TextField(controller: controller))),
+            MaterialApp(
+              home: Material(child: TextField(controller: controller)),
+            ),
           );
 
           void expectUnselectedIndex(int expectedIndex) {
@@ -1316,7 +1332,9 @@ void main() {
           int currentIndex = text.length;
           final TextEditingController controller = TextEditingController(text: text);
           await tester.pumpWidget(
-            MaterialApp(home: Material(child: TextField(controller: controller))),
+            MaterialApp(
+              home: Material(child: TextField(controller: controller)),
+            ),
           );
 
           void expectSelectedIndex(int start) {
@@ -1361,7 +1379,9 @@ void main() {
         const String expectedText = 'This is some text.';
         final TextEditingController controller = TextEditingController();
         await tester.pumpWidget(
-          MaterialApp(home: Material(child: TextField(controller: controller))),
+          MaterialApp(
+            home: Material(child: TextField(controller: controller)),
+          ),
         );
 
         final SemanticsFinder finder = find.semantics.byFlag(SemanticsFlag.isTextField);
@@ -1381,7 +1401,9 @@ void main() {
         const int expectedEnd = text.length - 4;
         final TextEditingController controller = TextEditingController(text: text);
         await tester.pumpWidget(
-          MaterialApp(home: Material(child: TextField(controller: controller))),
+          MaterialApp(
+            home: Material(child: TextField(controller: controller)),
+          ),
         );
 
         final SemanticsFinder finder = find.semantics.byFlag(SemanticsFlag.isTextField);
@@ -1399,7 +1421,9 @@ void main() {
       testWidgets('copy sends semantic copy', (WidgetTester tester) async {
         bool invoked = false;
         await tester.pumpWidget(
-          MaterialApp(home: Semantics(label: 'test', onCopy: () => invoked = true)),
+          MaterialApp(
+            home: Semantics(label: 'test', onCopy: () => invoked = true),
+          ),
         );
 
         tester.semantics.copy(find.semantics.byLabel('test'));
@@ -1409,7 +1433,9 @@ void main() {
       testWidgets('cut sends semantic cut', (WidgetTester tester) async {
         bool invoked = false;
         await tester.pumpWidget(
-          MaterialApp(home: Semantics(label: 'test', onCut: () => invoked = true)),
+          MaterialApp(
+            home: Semantics(label: 'test', onCut: () => invoked = true),
+          ),
         );
 
         tester.semantics.cut(find.semantics.byLabel('test'));
@@ -1419,7 +1445,9 @@ void main() {
       testWidgets('paste sends semantic paste', (WidgetTester tester) async {
         bool invoked = false;
         await tester.pumpWidget(
-          MaterialApp(home: Semantics(label: 'test', onPaste: () => invoked = true)),
+          MaterialApp(
+            home: Semantics(label: 'test', onPaste: () => invoked = true),
+          ),
         );
 
         tester.semantics.paste(find.semantics.byLabel('test'));
@@ -1501,21 +1529,18 @@ void main() {
 
   group('WidgetTester.tapOnText', () {
     final List<String> tapLogs = <String>[];
-    final TapGestureRecognizer tapA =
-        TapGestureRecognizer()
-          ..onTap = () {
-            tapLogs.add('A');
-          };
-    final TapGestureRecognizer tapB =
-        TapGestureRecognizer()
-          ..onTap = () {
-            tapLogs.add('B');
-          };
-    final TapGestureRecognizer tapC =
-        TapGestureRecognizer()
-          ..onTap = () {
-            tapLogs.add('C');
-          };
+    final TapGestureRecognizer tapA = TapGestureRecognizer()
+      ..onTap = () {
+        tapLogs.add('A');
+      };
+    final TapGestureRecognizer tapB = TapGestureRecognizer()
+      ..onTap = () {
+        tapLogs.add('B');
+      };
+    final TapGestureRecognizer tapC = TapGestureRecognizer()
+      ..onTap = () {
+        tapLogs.add('C');
+      };
     tearDown(tapLogs.clear);
     tearDownAll(() {
       tapA.dispose();
@@ -1758,7 +1783,12 @@ class _SemanticsTestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(child: ListTile(title: Text(label), trailing: SizedBox(width: 200, child: widget)));
+    return Card(
+      child: ListTile(
+        title: Text(label),
+        trailing: SizedBox(width: 200, child: widget),
+      ),
+    );
   }
 }
 

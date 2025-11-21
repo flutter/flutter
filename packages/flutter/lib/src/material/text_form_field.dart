@@ -4,7 +4,6 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -13,7 +12,6 @@ import 'adaptive_text_selection_toolbar.dart';
 import 'input_decorator.dart';
 import 'material_state.dart';
 import 'text_field.dart';
-import 'theme.dart';
 
 export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType;
 
@@ -43,7 +41,7 @@ export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType;
 /// when it is no longer needed. This will ensure any resources used by the object
 /// are discarded.
 ///
-/// By default, `decoration` will apply the [ThemeData.inputDecorationTheme] for
+/// By default, `decoration` will apply the ambient [InputDecorationThemeData] for
 /// the current context to the [InputDecoration], see
 /// [InputDecoration.applyDefaults].
 ///
@@ -179,8 +177,8 @@ class TextFormField extends FormField<String> {
     UndoHistoryController? undoController,
     AppPrivateCommandCallback? onAppPrivateCommand,
     bool? cursorOpacityAnimates,
-    ui.BoxHeightStyle selectionHeightStyle = ui.BoxHeightStyle.tight,
-    ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.tight,
+    ui.BoxHeightStyle? selectionHeightStyle,
+    ui.BoxWidthStyle? selectionWidthStyle,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     ContentInsertionConfiguration? contentInsertionConfiguration,
     MaterialStatesController? statesController,
@@ -192,6 +190,7 @@ class TextFormField extends FormField<String> {
     bool scribbleEnabled = true,
     bool stylusHandwritingEnabled = EditableText.defaultStylusHandwritingEnabled,
     bool canRequestFocus = true,
+    List<Locale>? hintLocales,
   }) : assert(initialValue == null || controller == null),
        assert(obscuringCharacter.length == 1),
        assert(maxLines == null || maxLines > 0),
@@ -213,14 +212,13 @@ class TextFormField extends FormField<String> {
          builder: (FormFieldState<String> field) {
            final _TextFormFieldState state = field as _TextFormFieldState;
            InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
-               .applyDefaults(Theme.of(field.context).inputDecorationTheme);
+               .applyDefaults(InputDecorationTheme.of(field.context));
 
            final String? errorText = field.errorText;
            if (errorText != null) {
-             effectiveDecoration =
-                 errorBuilder != null
-                     ? effectiveDecoration.copyWith(error: errorBuilder(state.context, errorText))
-                     : effectiveDecoration.copyWith(errorText: errorText);
+             effectiveDecoration = errorBuilder != null
+                 ? effectiveDecoration.copyWith(error: errorBuilder(state.context, errorText))
+                 : effectiveDecoration.copyWith(errorText: errorText);
            }
 
            void onChangedHandler(String value) {
@@ -297,14 +295,16 @@ class TextFormField extends FormField<String> {
                undoController: undoController,
                onAppPrivateCommand: onAppPrivateCommand,
                cursorOpacityAnimates: cursorOpacityAnimates,
-               selectionHeightStyle: selectionHeightStyle,
-               selectionWidthStyle: selectionWidthStyle,
+               selectionHeightStyle:
+                   selectionHeightStyle ?? EditableText.defaultSelectionHeightStyle,
+               selectionWidthStyle: selectionWidthStyle ?? EditableText.defaultSelectionWidthStyle,
                dragStartBehavior: dragStartBehavior,
                contentInsertionConfiguration: contentInsertionConfiguration,
                clipBehavior: clipBehavior,
                scribbleEnabled: scribbleEnabled,
                stylusHandwritingEnabled: stylusHandwritingEnabled,
                canRequestFocus: canRequestFocus,
+               hintLocales: hintLocales,
              ),
            );
          },
@@ -329,7 +329,7 @@ class TextFormField extends FormField<String> {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    if (defaultTargetPlatform == TargetPlatform.iOS && SystemContextMenu.isSupported(context)) {
+    if (SystemContextMenu.isSupportedByField(editableTextState)) {
       return SystemContextMenu.editableText(editableTextState: editableTextState);
     }
     return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
@@ -364,10 +364,9 @@ class _TextFormFieldState extends FormFieldState<String> {
 
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
-    _controller =
-        value == null
-            ? RestorableTextEditingController()
-            : RestorableTextEditingController.fromValue(value);
+    _controller = value == null
+        ? RestorableTextEditingController()
+        : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }

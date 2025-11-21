@@ -47,9 +47,18 @@ class BuildWebCommand extends BuildSubCommand {
           'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base',
     );
     argParser.addOption(
+      'static-assets-url',
+      help:
+          'Used when serving the static assets from a different domain the application is hosted on. '
+          'The value has to end with a slash "/". '
+          'When this is set, it will replace all $kStaticAssetsUrlPlaceholder in web/index.html for the given value.',
+    );
+    argParser.addOption(
       'pwa-strategy',
-      defaultsTo: ServiceWorkerStrategy.offlineFirst.cliName,
-      help: 'The caching strategy to be used by the PWA service worker.',
+      hide: true,
+      help:
+          'This option is deprecated and will be removed in a future Flutter release.\n'
+          'The caching strategy to be used by the PWA service worker.',
       allowed: ServiceWorkerStrategy.values.map((ServiceWorkerStrategy e) => e.cliName),
       allowedHelp: CliEnum.allowedHelp(ServiceWorkerStrategy.values),
     );
@@ -96,6 +105,28 @@ class BuildWebCommand extends BuildSubCommand {
       help:
           'Passes "--dump-info" to the Javascript compiler which generates '
           'information about the generated code in main.dart.js.info.json.',
+      hide: !verboseHelp,
+    );
+    argParser.addFlag(
+      'minify-js',
+      help:
+          'Generate minified output for js. '
+          'If not explicitly set, uses the compilation mode (debug, profile, release).',
+      hide: !verboseHelp,
+    );
+    argParser.addFlag(
+      'minify-wasm',
+      help:
+          'Generate minified output for wasm. '
+          'If not explicitly set, uses the compilation mode (debug, profile, release).',
+      hide: !verboseHelp,
+    );
+    argParser.addFlag(
+      'wasm-dry-run',
+      defaultsTo: true,
+      help:
+          'Compiles wasm in dry run mode during JS only compilations. '
+          'Disable to suppress warnings.',
     );
     argParser.addFlag(
       'no-frequency-based-minification',
@@ -103,6 +134,7 @@ class BuildWebCommand extends BuildSubCommand {
       help:
           'Disables the frequency based minifier. '
           'Useful for comparing the output between builds.',
+      hide: !verboseHelp,
     );
 
     //
@@ -129,13 +161,13 @@ class BuildWebCommand extends BuildSubCommand {
   };
 
   @override
-  final String name = 'web';
+  final name = 'web';
 
   @override
   bool get hidden => !featureFlags.isWebEnabled;
 
   @override
-  final String description = 'Build a web application bundle.';
+  final description = 'Build a web application bundle.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -146,26 +178,25 @@ class BuildWebCommand extends BuildSubCommand {
     }
 
     final String? optimizationLevelArg = stringArg('optimization-level');
-    final int? optimizationLevel =
-        optimizationLevelArg != null ? int.parse(optimizationLevelArg) : null;
+    final int? optimizationLevel = optimizationLevelArg != null
+        ? int.parse(optimizationLevelArg)
+        : null;
 
     final String? dart2jsOptimizationLevelValue = stringArg('dart2js-optimization');
-    final int? jsOptimizationLevel =
-        dart2jsOptimizationLevelValue != null
-            ? int.parse(dart2jsOptimizationLevelValue.substring(1))
-            : optimizationLevel;
+    final int? jsOptimizationLevel = dart2jsOptimizationLevelValue != null
+        ? int.parse(dart2jsOptimizationLevelValue.substring(1))
+        : optimizationLevel;
 
     final List<String> dartDefines = extractDartDefines(
       defineConfigJsonMap: extractDartDefineConfigJsonMap(),
     );
     final bool useWasm = boolArg(FlutterOptions.kWebWasmFlag);
     // See also: RunCommandBase.webRenderer and TestCommand.webRenderer.
-    final WebRendererMode webRenderer = WebRendererMode.fromDartDefines(
-      dartDefines,
-      useWasm: useWasm,
-    );
+    final webRenderer = WebRendererMode.fromDartDefines(dartDefines, useWasm: useWasm);
 
     final bool sourceMaps = boolArg('source-maps');
+    final bool? minifyJs = argResults!.wasParsed('minify-js') ? boolArg('minify-js') : null;
+    final bool? minifyWasm = argResults!.wasParsed('minify-wasm') ? boolArg('minify-wasm') : null;
 
     final List<WebCompilerConfig> compilerConfigs;
 
@@ -184,13 +215,15 @@ class BuildWebCommand extends BuildSubCommand {
           optimizationLevel: optimizationLevel,
           stripWasm: boolArg('strip-wasm'),
           sourceMaps: sourceMaps,
+          minify: minifyWasm,
         ),
         JsCompilerConfig(
           csp: boolArg('csp'),
-          optimizationLevel: jsOptimizationLevel,
           dumpInfo: boolArg('dump-info'),
+          minify: minifyJs,
           nativeNullAssertions: boolArg('native-null-assertions'),
           noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
+          optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
         ),
       ];
@@ -198,22 +231,38 @@ class BuildWebCommand extends BuildSubCommand {
       compilerConfigs = <WebCompilerConfig>[
         JsCompilerConfig(
           csp: boolArg('csp'),
-          optimizationLevel: jsOptimizationLevel,
           dumpInfo: boolArg('dump-info'),
+          minify: minifyJs,
           nativeNullAssertions: boolArg('native-null-assertions'),
           noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
+          optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
           renderer: webRenderer,
         ),
+        if (boolArg('wasm-dry-run'))
+          WasmCompilerConfig(
+            optimizationLevel: optimizationLevel,
+            stripWasm: boolArg('strip-wasm'),
+            sourceMaps: sourceMaps,
+            minify: minifyWasm,
+            dryRun: true,
+          ),
       ];
     }
 
     final BuildInfo buildInfo = await getBuildInfo();
     final String? baseHref = stringArg('base-href');
+    final String? staticAssetsUrl = stringArg('static-assets-url');
     if (baseHref != null && !(baseHref.startsWith('/') && baseHref.endsWith('/'))) {
       throwToolExit(
         'Received a --base-href value of "$baseHref"\n'
         '--base-href should start and end with /',
+      );
+    }
+    if (staticAssetsUrl != null && !staticAssetsUrl.endsWith('/')) {
+      throwToolExit(
+        'Received a --static-assets-url value of "$staticAssetsUrl"\n'
+        '--static-assets-url should end with /',
       );
     }
     if (!project.web.existsSync()) {
@@ -238,7 +287,7 @@ class BuildWebCommand extends BuildSubCommand {
     // valid approaches for setting output directory of build artifacts
     final String? outputDirectoryPath = stringArg('output');
 
-    final WebBuilder webBuilder = WebBuilder(
+    final webBuilder = WebBuilder(
       logger: globals.logger,
       processManager: globals.processManager,
       buildSystem: globals.buildSystem,
@@ -253,6 +302,7 @@ class BuildWebCommand extends BuildSubCommand {
       ServiceWorkerStrategy.fromCliName(stringArg('pwa-strategy')),
       compilerConfigs: compilerConfigs,
       baseHref: baseHref,
+      staticAssetsUrl: staticAssetsUrl,
       outputDirectoryPath: outputDirectoryPath,
     );
     return FlutterCommandResult.success();

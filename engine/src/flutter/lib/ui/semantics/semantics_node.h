@@ -13,6 +13,7 @@
 #include "third_party/skia/include/core/SkM44.h"
 #include "third_party/skia/include/core/SkRect.h"
 
+#include "flutter/lib/ui/semantics/semantics_flags.h"
 #include "flutter/lib/ui/semantics/string_attribute.h"
 
 namespace flutter {
@@ -44,6 +45,8 @@ enum class SemanticsAction : int32_t {
   kSetText = 1 << 21,
   kFocus = 1 << 22,
   kScrollToOffset = 1 << 23,
+  kExpand = 1 << 24,
+  kCollapse = 1 << 25,
 };
 
 constexpr int kVerticalScrollSemanticsActions =
@@ -97,6 +100,11 @@ enum class SemanticsRole : int32_t {
   kRadioGroup = 25,
   kStatus = 26,
   kAlert = 27,
+  kComplementary = 28,
+  kContentInfo = 29,
+  kMain = 30,
+  kNavigation = 31,
+  kRegion = 32,
 };
 
 /// C/C++ representation of `SemanticsValidationResult` defined in
@@ -109,40 +117,6 @@ enum class SemanticsValidationResult : int32_t {
   kNone = 0,
   kValid = 1,
   kInvalid = 2,
-};
-
-struct SemanticsFlags {
-  bool hasCheckedState = false;
-  bool isChecked = false;
-  bool isSelected = false;
-  bool isButton = false;
-  bool isTextField = false;
-  bool isFocused = false;
-  bool hasEnabledState = false;
-  bool isEnabled = false;
-  bool isInMutuallyExclusiveGroup = false;
-  bool isHeader = false;
-  bool isObscured = false;
-  bool scopesRoute = false;
-  bool namesRoute = false;
-  bool isHidden = false;
-  bool isImage = false;
-  bool isLiveRegion = false;
-  bool hasToggledState = false;
-  bool isToggled = false;
-  bool hasImplicitScrolling = false;
-  bool isMultiline = false;
-  bool isReadOnly = false;
-  bool isFocusable = false;
-  bool isLink = false;
-  bool isSlider = false;
-  bool isKeyboardKey = false;
-  bool isCheckStateMixed = false;
-  bool hasExpandedState = false;
-  bool isExpanded = false;
-  bool hasSelectedState = false;
-  bool hasRequiredState = false;
-  bool isRequired = false;
 };
 
 struct SemanticsNode {
@@ -167,11 +141,10 @@ struct SemanticsNode {
   int32_t platformViewId = -1;
   int32_t scrollChildren = 0;
   int32_t scrollIndex = 0;
+  int32_t traversalParent = 0;
   double scrollPosition = std::nan("");
   double scrollExtentMax = std::nan("");
   double scrollExtentMin = std::nan("");
-  double elevation = 0.0;
-  double thickness = 0.0;
   std::string identifier;
   std::string label;
   StringAttributes labelAttributes;
@@ -188,6 +161,7 @@ struct SemanticsNode {
 
   SkRect rect = SkRect::MakeEmpty();  // Local space, relative to parent.
   SkM44 transform = SkM44{};          // Identity
+  SkM44 hitTestTransform = SkM44{};   // Identity
   std::vector<int32_t> childrenInTraversalOrder;
   std::vector<int32_t> childrenInHitTestOrder;
   std::vector<int32_t> customAccessibilityActions;
@@ -196,6 +170,8 @@ struct SemanticsNode {
   std::string linkUrl;
   SemanticsRole role;
   SemanticsValidationResult validationResult = SemanticsValidationResult::kNone;
+  // A locale string in BCP 47 format
+  std::string locale;
 };
 
 // Contains semantic nodes that need to be updated.

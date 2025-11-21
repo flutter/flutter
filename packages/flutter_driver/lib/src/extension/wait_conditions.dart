@@ -165,8 +165,9 @@ class _InternalCombinedCondition implements WaitCondition {
       );
     }
     final CombinedCondition combinedCondition = condition as CombinedCondition;
-    final List<WaitCondition> conditions =
-        combinedCondition.conditions.map(deserializeCondition).toList();
+    final List<WaitCondition> conditions = combinedCondition.conditions
+        .map(deserializeCondition)
+        .toList();
     return _InternalCombinedCondition(conditions);
   }
 
@@ -204,9 +205,8 @@ WaitCondition deserializeCondition(SerializableWaitCondition waitCondition) {
       waitCondition,
     ),
     'CombinedCondition' => _InternalCombinedCondition.deserialize(waitCondition),
-    _ =>
-      throw SerializationException(
-        'Unsupported wait condition $conditionName in ${waitCondition.serialize()}',
-      ),
+    _ => throw SerializationException(
+      'Unsupported wait condition $conditionName in ${waitCondition.serialize()}',
+    ),
   };
 }

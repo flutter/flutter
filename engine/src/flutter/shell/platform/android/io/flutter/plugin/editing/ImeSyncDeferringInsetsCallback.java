@@ -8,6 +8,7 @@ import static io.flutter.Build.API_LEVELS;
 
 import android.annotation.SuppressLint;
 import android.graphics.Insets;
+import android.os.Build;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
@@ -15,6 +16,8 @@ import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import java.util.List;
 
 // Loosely based off of
@@ -52,6 +55,7 @@ class ImeSyncDeferringInsetsCallback {
   private WindowInsets lastWindowInsets;
   private AnimationCallback animationCallback;
   private InsetsListener insetsListener;
+  private ImeVisibilityListener imeVisibilityListener;
 
   // True when an animation that matches deferredInsetTypes is active.
   //
@@ -89,6 +93,11 @@ class ImeSyncDeferringInsetsCallback {
     view.setOnApplyWindowInsetsListener(null);
   }
 
+  // Set a listener to be notified when the IME visibility changes.
+  void setImeVisibilityListener(ImeVisibilityListener imeVisibilityListener) {
+    this.imeVisibilityListener = imeVisibilityListener;
+  }
+
   @VisibleForTesting
   View.OnApplyWindowInsetsListener getInsetsListener() {
     return insetsListener;
@@ -97,6 +106,11 @@ class ImeSyncDeferringInsetsCallback {
   @VisibleForTesting
   WindowInsetsAnimation.Callback getAnimationCallback() {
     return animationCallback;
+  }
+
+  @VisibleForTesting
+  ImeVisibilityListener getImeVisibilityListener() {
+    return imeVisibilityListener;
   }
 
   // WindowInsetsAnimation.Callback was introduced in API level 30.  The callback
@@ -133,15 +147,17 @@ class ImeSyncDeferringInsetsCallback {
         return insets;
       }
 
-      // The IME insets include the height of the navigation bar. If the app isn't laid out behind
-      // the navigation bar, this causes the IME insets to be too large during the animation.
-      // To fix this, we subtract the navigationBars bottom inset if the system UI flags for laying
-      // out behind the navigation bar aren't present.
+      // Pre 15, the IME insets include the height of the navigation bar. If the app
+      // isn't laid out behind the navigation bar, this causes the IME insets to be too large during
+      // the animation.  To fix this, we subtract the navigationBars bottom inset if the system UI
+      // flags for laying out behind the navigation bar aren't present.
       int excludedInsets = 0;
       int systemUiFlags = view.getWindowSystemUiVisibility();
-      if ((systemUiFlags & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
-          && (systemUiFlags & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0) {
-        excludedInsets = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
+      if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
+        if ((systemUiFlags & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
+            && (systemUiFlags & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0) {
+          excludedInsets = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
+        }
       }
 
       WindowInsets.Builder builder = new WindowInsets.Builder(lastWindowInsets);
@@ -173,6 +189,11 @@ class ImeSyncDeferringInsetsCallback {
           view.dispatchApplyWindowInsets(lastWindowInsets);
         }
       }
+      WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(view);
+      if (insets != null && imeVisibilityListener != null) {
+        boolean imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime());
+        imeVisibilityListener.onImeVisibilityChanged(imeVisible);
+      }
     }
   }
 
@@ -199,5 +220,10 @@ class ImeSyncDeferringInsetsCallback {
       // inset handling.
       return view.onApplyWindowInsets(windowInsets);
     }
+  }
+
+  // Listener for IME visibility changes.
+  public interface ImeVisibilityListener {
+    void onImeVisibilityChanged(boolean visible);
   }
 }

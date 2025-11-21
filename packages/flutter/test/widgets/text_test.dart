@@ -62,6 +62,111 @@ void main() {
     );
   });
 
+  testWidgets(
+    'Text respects MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, and MediaQueryData.wordSpacingOverride',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(
+            lineHeightScaleFactorOverride: 2.0,
+            letterSpacingOverride: 2.0,
+            wordSpacingOverride: 2.0,
+          ),
+          child: Center(child: Text('Hello', textDirection: TextDirection.ltr)),
+        ),
+      );
+
+      RichText text = tester.firstWidget(find.byType(RichText));
+      expect(text, isNotNull);
+      expect(text.text.style?.height, 2.0);
+      expect(text.text.style?.letterSpacing, 2.0);
+      expect(text.text.style?.wordSpacing, 2.0);
+
+      await tester.pumpWidget(const Center(child: Text('Hello', textDirection: TextDirection.ltr)));
+
+      text = tester.firstWidget(find.byType(RichText));
+      expect(text, isNotNull);
+      expect(text.text.style?.height, isNull);
+      expect(text.text.style?.letterSpacing, isNull);
+      expect(text.text.style?.wordSpacing, isNull);
+    },
+  );
+
+  testWidgets(
+    'Text.rich respects MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, and MediaQueryData.wordSpacingOverride',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(
+            lineHeightScaleFactorOverride: 2.0,
+            letterSpacingOverride: 2.0,
+            wordSpacingOverride: 2.0,
+          ),
+          child: Center(
+            child: Text.rich(
+              TextSpan(text: 'Hello'),
+              textDirection: TextDirection.ltr,
+              strutStyle: StrutStyle(height: 0.9),
+            ),
+          ),
+        ),
+      );
+
+      RichText text = tester.firstWidget(find.byType(RichText));
+      expect(text, isNotNull);
+      expect(text.text.style?.height, 2.0);
+      expect(text.text.style?.letterSpacing, 2.0);
+      expect(text.text.style?.wordSpacing, 2.0);
+      expect(text.strutStyle?.height, 2.0);
+
+      await tester.pumpWidget(
+        const Center(
+          child: Text.rich(
+            TextSpan(text: 'Hello'),
+            textDirection: TextDirection.ltr,
+            strutStyle: StrutStyle(height: 0.9),
+          ),
+        ),
+      );
+
+      text = tester.firstWidget(find.byType(RichText));
+      expect(text, isNotNull);
+      expect(text.text.style?.height, isNull);
+      expect(text.text.style?.letterSpacing, isNull);
+      expect(text.text.style?.wordSpacing, isNull);
+      expect(text.strutStyle?.height, 0.9);
+    },
+  );
+
+  testWidgets(
+    'RichText ignores MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, and MediaQueryData.wordSpacingOverride',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(
+            lineHeightScaleFactorOverride: 2.0,
+            letterSpacingOverride: 2.0,
+            wordSpacingOverride: 2.0,
+          ),
+          child: Center(
+            child: RichText(
+              text: const TextSpan(text: 'Hello'),
+              textDirection: TextDirection.ltr,
+              strutStyle: const StrutStyle(height: 0.9),
+            ),
+          ),
+        ),
+      );
+
+      final RichText text = tester.firstWidget(find.byType(RichText));
+      expect(text, isNotNull);
+      expect(text.text.style?.height, isNull);
+      expect(text.text.style?.letterSpacing, isNull);
+      expect(text.text.style?.wordSpacing, isNull);
+      expect(text.strutStyle?.height, 0.9);
+    },
+  );
+
   testWidgets('Text respects media query', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery.withClampedTextScaling(
@@ -139,8 +244,8 @@ void main() {
 
   testWidgets(
     "Text throws a nice error message if there's no Directionality",
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       await tester.pumpWidget(const Text('Hello'));
       final String message = tester.takeException().toString();
@@ -159,8 +264,14 @@ void main() {
           TextSpan(
             text: 'Hello',
             children: <TextSpan>[
-              TextSpan(text: ' beautiful ', style: TextStyle(fontStyle: FontStyle.italic)),
-              TextSpan(text: 'world', style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                text: ' beautiful ',
+                style: TextStyle(fontStyle: FontStyle.italic),
+              ),
+              TextSpan(
+                text: 'world',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ],
           ),
           textDirection: TextDirection.ltr,

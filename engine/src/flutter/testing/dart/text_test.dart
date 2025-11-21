@@ -13,6 +13,7 @@ import 'dart:ui';
 
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
+import 'goldens.dart';
 
 Future<Uint8List> readFile(String fileName) async {
   final File file = File(path.join('flutter', 'testing', 'resources', fileName));
@@ -414,6 +415,40 @@ void testFontVariation() {
       FontVariation.lerp(const FontVariation.width(90.0), const FontVariation.italic(0.2), 0.9),
       const FontVariation.italic(0.2),
     );
+  });
+
+  test('FontWeight is applied to variable fonts', () async {
+    final Uint8List fontData = await readFile('RobotoSlab-VariableFont_wght.ttf');
+    await loadFontFromList(fontData, fontFamily: 'RobotoSerif');
+
+    final ParagraphBuilder pb = ParagraphBuilder(
+      ParagraphStyle(fontFamily: 'RobotoSerif', fontSize: 40.0, fontWeight: FontWeight.w100),
+    );
+    pb.pushStyle(TextStyle(color: const Color(0xFF000000)));
+    pb.addText('Thin - 100\n');
+    pb.pushStyle(TextStyle(fontWeight: FontWeight.w300));
+    pb.addText('Light - 300\n');
+    pb.pushStyle(TextStyle(fontWeight: FontWeight.normal));
+    pb.addText('Normal - 400\n');
+    pb.pushStyle(TextStyle(fontWeight: FontWeight.w700));
+    pb.addText('Bold - 700\n');
+    pb.pushStyle(TextStyle(fontWeight: FontWeight.w900));
+    pb.addText('Black - 900\n');
+
+    const ParagraphConstraints paragraphConstraints = ParagraphConstraints(width: 300);
+    final Paragraph paragraph = pb.build()..layout(paragraphConstraints);
+
+    final PictureRecorder recorder = PictureRecorder();
+    const int imageSize = 300;
+    final Canvas canvas = Canvas(
+      recorder,
+      Rect.fromLTWH(0.0, 0.0, imageSize.toDouble(), imageSize.toDouble()),
+    );
+    canvas.drawParagraph(paragraph, const Offset(10, 10));
+    final Image image = await recorder.endRecording().toImage(imageSize, imageSize);
+
+    final ImageComparer comparer = await ImageComparer.create();
+    await comparer.addGoldenImage(image, 'text_test_fontWeightVariable.png');
   });
 }
 

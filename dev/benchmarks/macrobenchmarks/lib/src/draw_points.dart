@@ -76,12 +76,11 @@ class PointsPainter extends CustomPainter {
         data[j] = x;
         data[j + 1] = (size.height / (j + 1)) + 200;
       }
-      final Paint paint =
-          Paint()
-            ..color = kColors[i]
-            ..strokeWidth = 5
-            ..strokeCap = StrokeCap.round
-            ..style = PaintingStyle.stroke;
+      final Paint paint = Paint()
+        ..color = kColors[i]
+        ..strokeWidth = 5
+        ..strokeCap = StrokeCap.round
+        ..style = PaintingStyle.stroke;
       canvas.drawRawPoints(PointMode.points, data, paint);
     }
   }

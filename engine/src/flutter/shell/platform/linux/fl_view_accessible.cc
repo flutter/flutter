@@ -33,7 +33,7 @@ static FlAccessibleNode* create_node(FlViewAccessible* self,
     return nullptr;
   }
 
-  if (semantics->flags & kFlutterSemanticsFlagIsTextField) {
+  if (semantics->flags2->is_text_field) {
     return fl_accessible_text_field_new(engine, self->view_id, semantics->id);
   }
 
@@ -152,7 +152,7 @@ void fl_view_accessible_handle_update_semantics(
     FlutterSemanticsNode2* node = update->nodes[i];
     FlAccessibleNode* atk_node = get_node(self, node);
 
-    fl_accessible_node_set_flags(atk_node, node->flags);
+    fl_accessible_node_set_flags(atk_node, node->flags2);
     fl_accessible_node_set_actions(atk_node, node->actions);
     fl_accessible_node_set_name(atk_node, node->label);
     fl_accessible_node_set_extents(
@@ -184,7 +184,9 @@ void fl_view_accessible_handle_update_semantics(
         for (size_t i = 0; i < child_count; i++) {
           FlAccessibleNode* child =
               lookup_node(self, children_in_traversal_order[i]);
-          g_assert(child != nullptr);
+          if (child == nullptr) {
+            continue;
+          }
           fl_accessible_node_set_parent(child, ATK_OBJECT(parent), i);
           g_ptr_array_add(children, child);
         }

@@ -114,11 +114,10 @@ void main() {
         '  !ABC !!\n' // [40, 50)
         'A  𑗋𑗋 A\n'; // [50, 60)
 
-    final TextPainter textPainter =
-        TextPainter()
-          ..textDirection = TextDirection.ltr
-          ..text = const TextSpan(text: text)
-          ..layout();
+    final TextPainter textPainter = TextPainter()
+      ..textDirection = TextDirection.ltr
+      ..text = const TextSpan(text: text)
+      ..layout();
 
     final TextBoundary boundary = textPainter.wordBoundaries.moveByWordBoundary;
 

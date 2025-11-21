@@ -87,6 +87,8 @@ void main() {
     expect(localizations.collapsedIconTapHint, isNotNull);
     expect(localizations.expansionTileExpandedHint, isNotNull);
     expect(localizations.expansionTileCollapsedHint, isNotNull);
+    expect(localizations.expansionTileExpandedTapHint, isNotNull);
+    expect(localizations.expansionTileCollapsedTapHint, isNotNull);
     expect(localizations.expandedHint, isNotNull);
     expect(localizations.collapsedHint, isNotNull);
     expect(localizations.keyboardKeyAlt, isNotNull);
@@ -208,7 +210,9 @@ void main() {
     final GlobalKey localizations = GlobalKey();
 
     await tester.pumpWidget(
-      MaterialApp(home: Material(key: localizations, child: const SizedBox.expand())),
+      MaterialApp(
+        home: Material(key: localizations, child: const SizedBox.expand()),
+      ),
     );
 
     final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(

@@ -49,11 +49,10 @@ void main() {
       year2023: false,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -388,7 +387,10 @@ void main() {
       );
 
       await tester.pumpWidget(
-        Theme(data: theme, child: const Center(child: CircularProgressIndicator())),
+        Theme(
+          data: theme,
+          child: const Center(child: CircularProgressIndicator()),
+        ),
       );
 
       expect(tester.takeException(), null);
@@ -557,5 +559,162 @@ void main() {
         // Active track.
         ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 4.0), color: theme.colorScheme.primary),
     );
+  });
+
+  testWidgets('LinearProgressIndicator reflects the value of the theme controller', (
+    WidgetTester tester,
+  ) async {
+    Widget buildApp({
+      AnimationController? widgetController,
+      AnimationController? indicatorThemeController,
+      AnimationController? globalThemeController,
+    }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: Theme(
+              data: ThemeData(
+                progressIndicatorTheme: ProgressIndicatorThemeData(
+                  controller: globalThemeController,
+                ),
+              ),
+              child: ProgressIndicatorTheme(
+                data: ProgressIndicatorThemeData(controller: indicatorThemeController),
+                child: SizedBox(
+                  width: 200.0,
+                  child: LinearProgressIndicator(controller: widgetController),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    void expectProgressAt({required double left, required double right}) {
+      final PaintPattern expectedPaints = paints;
+      if (right < 200) {
+        // Right track
+        expectedPaints.rect(rect: Rect.fromLTRB(right, 0.0, 200, 4.0));
+      }
+      expectedPaints.rect(rect: Rect.fromLTRB(left, 0.0, right, 4.0));
+      if (left > 0) {
+        // Left track
+        expectedPaints.rect(rect: Rect.fromLTRB(0, 0.0, left, 4.0));
+      }
+      expect(find.byType(LinearProgressIndicator), expectedPaints);
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pump(const Duration(milliseconds: 500));
+    expectProgressAt(left: 16.028758883476257, right: 141.07513427734375);
+
+    final AnimationController globalThemeController = AnimationController(
+      vsync: tester,
+      value: 0.1,
+    );
+    addTearDown(globalThemeController.dispose);
+    await tester.pumpWidget(buildApp(globalThemeController: globalThemeController));
+    expectProgressAt(left: 0.0, right: 37.14974820613861);
+
+    final AnimationController indicatorThemeController = AnimationController(
+      vsync: tester,
+      value: 0.5,
+    );
+    addTearDown(indicatorThemeController.dispose);
+    await tester.pumpWidget(
+      buildApp(
+        globalThemeController: globalThemeController,
+        indicatorThemeController: indicatorThemeController,
+      ),
+    );
+    expectProgressAt(left: 127.79541015625, right: 200.0);
+
+    final AnimationController widgetController = AnimationController(vsync: tester, value: 0.8);
+    addTearDown(widgetController.dispose);
+    await tester.pumpWidget(
+      buildApp(
+        globalThemeController: globalThemeController,
+        indicatorThemeController: indicatorThemeController,
+        widgetController: widgetController,
+      ),
+    );
+    expectProgressAt(left: 98.24226796627045, right: 181.18448555469513);
+  });
+
+  testWidgets('CircularProgressIndicator reflects the value of the theme controller', (
+    WidgetTester tester,
+  ) async {
+    Widget buildApp({
+      AnimationController? widgetController,
+      AnimationController? indicatorThemeController,
+      AnimationController? globalThemeController,
+    }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: Theme(
+              data: ThemeData(
+                progressIndicatorTheme: ProgressIndicatorThemeData(
+                  color: Colors.black,
+                  linearTrackColor: Colors.green,
+                  controller: globalThemeController,
+                ),
+              ),
+              child: ProgressIndicatorTheme(
+                data: ProgressIndicatorThemeData(controller: indicatorThemeController),
+                child: SizedBox(
+                  width: 200.0,
+                  child: CircularProgressIndicator(controller: widgetController),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    void expectProgressAt({required double start, required double sweep}) {
+      expect(
+        find.byType(CircularProgressIndicator),
+        paints..arc(startAngle: start, sweepAngle: sweep),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pump(const Duration(milliseconds: 500));
+    expectProgressAt(start: 0.43225767465697107, sweep: 4.52182126629162);
+
+    final AnimationController globalThemeController = AnimationController(
+      vsync: tester,
+      value: 0.1,
+    );
+    addTearDown(globalThemeController.dispose);
+    await tester.pumpWidget(buildApp(globalThemeController: globalThemeController));
+    expectProgressAt(start: 0.628318530718057, sweep: 2.8904563625380906);
+
+    final AnimationController indicatorThemeController = AnimationController(
+      vsync: tester,
+      value: 0.5,
+    );
+    addTearDown(indicatorThemeController.dispose);
+    await tester.pumpWidget(
+      buildApp(
+        globalThemeController: globalThemeController,
+        indicatorThemeController: indicatorThemeController,
+      ),
+    );
+    expectProgressAt(start: 1.5707963267948966, sweep: 0.001);
+
+    final AnimationController widgetController = AnimationController(vsync: tester, value: 0.8);
+    addTearDown(widgetController.dispose);
+    await tester.pumpWidget(
+      buildApp(
+        globalThemeController: globalThemeController,
+        indicatorThemeController: indicatorThemeController,
+        widgetController: widgetController,
+      ),
+    );
+    expectProgressAt(start: 2.520489337828999, sweep: 4.076855234710353);
   });
 }

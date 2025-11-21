@@ -76,7 +76,7 @@ void main() {
     testUsingContext('AnalysisServer success', () async {
       createSampleProject(tempDir);
 
-      final Pub pub = Pub.test(
+      final pub = Pub.test(
         fileSystem: fileSystem,
         logger: logger,
         processManager: processManager,
@@ -89,7 +89,7 @@ void main() {
         project: FlutterProject.fromDirectoryTest(tempDir),
       );
 
-      final AnalysisServer server = AnalysisServer(
+      final server = AnalysisServer(
         globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath),
         <String>[tempDir.path],
         fileSystem: fileSystem,
@@ -100,7 +100,7 @@ void main() {
         suppressAnalytics: true,
       );
 
-      int errorCount = 0;
+      var errorCount = 0;
       final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => !analyzing).first;
       server.onErrors.listen((FileAnalysisErrors errors) => errorCount += errors.errors.length);
 
@@ -116,7 +116,7 @@ void main() {
   testUsingContext('AnalysisServer errors', () async {
     createSampleProject(tempDir, brokenCode: true);
 
-    final Pub pub = Pub.test(
+    final pub = Pub.test(
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
@@ -129,7 +129,7 @@ void main() {
       project: FlutterProject.fromDirectoryTest(tempDir),
     );
 
-    final AnalysisServer server = AnalysisServer(
+    final server = AnalysisServer(
       globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath),
       <String>[tempDir.path],
       fileSystem: fileSystem,
@@ -140,7 +140,7 @@ void main() {
       suppressAnalytics: true,
     );
 
-    int errorCount = 0;
+    var errorCount = 0;
     final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => !analyzing).first;
     server.onErrors.listen((FileAnalysisErrors errors) {
       errorCount += errors.errors.length;
@@ -155,9 +155,9 @@ void main() {
   });
 
   testUsingContext('Returns no errors when source is error-free', () async {
-    const String contents = "StringBuffer bar = StringBuffer('baz');";
+    const contents = "StringBuffer bar = StringBuffer('baz');";
     tempDir.childFile('main.dart').writeAsStringSync(contents);
-    final AnalysisServer server = AnalysisServer(
+    final server = AnalysisServer(
       globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath),
       <String>[tempDir.path],
       fileSystem: fileSystem,
@@ -168,7 +168,7 @@ void main() {
       suppressAnalytics: true,
     );
 
-    int errorCount = 0;
+    var errorCount = 0;
     final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => !analyzing).first;
     server.onErrors.listen((FileAnalysisErrors errors) {
       errorCount += errors.errors.length;
@@ -180,8 +180,8 @@ void main() {
   });
 
   testUsingContext('Can run AnalysisService without suppressing analytics', () async {
-    final StreamController<List<int>> stdin = StreamController<List<int>>();
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final stdin = StreamController<List<int>>();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>[
           'Artifact.engineDartSdkPath/bin/dart',
@@ -195,8 +195,8 @@ void main() {
       ),
     ]);
 
-    final Artifacts artifacts = Artifacts.test();
-    final AnalyzeCommand command = AnalyzeCommand(
+    final artifacts = Artifacts.test();
+    final command = AnalyzeCommand(
       terminal: Terminal.test(),
       artifacts: artifacts,
       logger: BufferLogger.test(),
@@ -207,7 +207,7 @@ void main() {
       suppressAnalytics: false,
     );
 
-    final TestFlutterCommandRunner commandRunner = TestFlutterCommandRunner();
+    final commandRunner = TestFlutterCommandRunner();
     commandRunner.addCommand(command);
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
     await stdin.stream.first;
@@ -216,8 +216,8 @@ void main() {
   });
 
   testUsingContext('Can run AnalysisService with customized cache location', () async {
-    final StreamController<List<int>> stdin = StreamController<List<int>>();
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final stdin = StreamController<List<int>>();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>[
           'Artifact.engineDartSdkPath/bin/dart',
@@ -232,8 +232,8 @@ void main() {
       ),
     ]);
 
-    final Artifacts artifacts = Artifacts.test();
-    final AnalyzeCommand command = AnalyzeCommand(
+    final artifacts = Artifacts.test();
+    final command = AnalyzeCommand(
       terminal: Terminal.test(),
       artifacts: artifacts,
       logger: BufferLogger.test(),
@@ -244,7 +244,7 @@ void main() {
       suppressAnalytics: true,
     );
 
-    final TestFlutterCommandRunner commandRunner = TestFlutterCommandRunner();
+    final commandRunner = TestFlutterCommandRunner();
     commandRunner.addCommand(command);
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
     await stdin.stream.first;
@@ -253,14 +253,14 @@ void main() {
   });
 
   testUsingContext('Can run AnalysisService with customized cache location --watch', () async {
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final fileSystem = MemoryFileSystem.test();
     fileSystem.directory('directoryA').childFile('foo').createSync(recursive: true);
 
-    final BufferLogger logger = BufferLogger.test();
+    final logger = BufferLogger.test();
 
-    final Completer<void> completer = Completer<void>();
-    final StreamController<List<int>> stdin = StreamController<List<int>>();
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final completer = Completer<void>();
+    final stdin = StreamController<List<int>>();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>[
           'Artifact.engineDartSdkPath/bin/dart',
@@ -280,8 +280,8 @@ void main() {
       ),
     ]);
 
-    final Artifacts artifacts = Artifacts.test();
-    final AnalyzeCommand command = AnalyzeCommand(
+    final artifacts = Artifacts.test();
+    final command = AnalyzeCommand(
       terminal: Terminal.test(),
       artifacts: artifacts,
       logger: logger,
@@ -293,7 +293,7 @@ void main() {
     );
 
     await FakeAsync().run((FakeAsync time) async {
-      final TestFlutterCommandRunner commandRunner = TestFlutterCommandRunner();
+      final commandRunner = TestFlutterCommandRunner();
       commandRunner.addCommand(command);
       unawaited(commandRunner.run(<String>['analyze', '--watch']));
 
@@ -310,10 +310,10 @@ void main() {
   });
 
   testUsingContext('AnalysisService --watch skips errors from non-files', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final Completer<void> completer = Completer<void>();
-    final StreamController<List<int>> stdin = StreamController<List<int>>();
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final logger = BufferLogger.test();
+    final completer = Completer<void>();
+    final stdin = StreamController<List<int>>();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>[
           'Artifact.engineDartSdkPath/bin/dart',
@@ -333,8 +333,8 @@ void main() {
       ),
     ]);
 
-    final Artifacts artifacts = Artifacts.test();
-    final AnalyzeCommand command = AnalyzeCommand(
+    final artifacts = Artifacts.test();
+    final command = AnalyzeCommand(
       terminal: Terminal.test(),
       artifacts: artifacts,
       logger: logger,
@@ -346,7 +346,7 @@ void main() {
     );
 
     await FakeAsync().run((FakeAsync time) async {
-      final TestFlutterCommandRunner commandRunner = TestFlutterCommandRunner();
+      final commandRunner = TestFlutterCommandRunner();
       commandRunner.addCommand(command);
       unawaited(commandRunner.run(<String>['analyze', '--watch']));
 
@@ -361,4 +361,65 @@ void main() {
     expect(logger.errorText, isEmpty);
     expect(processManager, hasNoRemainingExpectations);
   });
+
+  testUsingContext(
+    'AnalysisService --watch does not crash when the VM service is enabled',
+    () async {
+      // Pretend the VM service was enabled by sending SIGQUIT (CTRL + \) to ensure we don't try to
+      // invoke json.decode(...) on the VM service message.
+      //
+      // Regression test for https://github.com/flutter/flutter/issues/58391.
+      final logger = BufferLogger.test();
+      final completer = Completer<void>();
+      final stdin = StreamController<List<int>>();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'Artifact.engineDartSdkPath/bin/dart',
+            'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+            '--disable-server-feature-completion',
+            '--disable-server-feature-search',
+            '--sdk',
+            'Artifact.engineDartSdkPath',
+            '--suppress-analytics',
+          ],
+          stdin: IOSink(stdin.sink),
+          stdout: '''
+The Dart VM service is listening on http://127.0.0.1:65155/ZkxDXuYz2Aw=/
+{"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
+{"event":"analysis.errors","params":{"file":"/directoryA/bar","errors":[{"type":"TestError","message":"It's an error.","severity":"warning","code":"500","location":{"file":"/directoryA/bar","startLine":100,"startColumn":5,"offset":0}}]}}
+{"event":"server.status","params":{"analysis":{"isAnalyzing":false}}}
+''',
+        ),
+      ]);
+
+      final artifacts = Artifacts.test();
+      final command = AnalyzeCommand(
+        terminal: Terminal.test(),
+        artifacts: artifacts,
+        logger: logger,
+        platform: FakePlatform(),
+        fileSystem: MemoryFileSystem.test(),
+        processManager: processManager,
+        allProjectValidators: <ProjectValidator>[],
+        suppressAnalytics: true,
+      );
+
+      await FakeAsync().run((FakeAsync time) async {
+        final commandRunner = TestFlutterCommandRunner();
+        commandRunner.addCommand(command);
+        unawaited(commandRunner.run(<String>['analyze', '--watch']));
+
+        while (!logger.statusText.contains('analyzed 1 file')) {
+          time.flushMicrotasks();
+        }
+        completer.complete();
+        return completer.future;
+      });
+
+      expect(logger.statusText, contains('No issues found!'));
+      expect(logger.errorText, isEmpty);
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
 }

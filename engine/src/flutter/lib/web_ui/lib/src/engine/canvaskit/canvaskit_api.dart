@@ -17,12 +17,8 @@ import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import '../browser_detection.dart';
-import '../configuration.dart';
-import '../dom.dart';
-import 'renderer.dart';
 
 /// Entrypoint into the CanvasKit API.
 late CanvasKit canvasKit;
@@ -98,6 +94,10 @@ extension type CanvasKit(JSObject _) implements JSObject {
     Uint32List? colors,
     Uint16List? indices,
   ) => _MakeVertices(mode, positions.toJS, textureCoordinates?.toJS, colors?.toJS, indices?.toJS);
+
+  external BidiNamespace get Bidi;
+
+  external CodeUnitsNamespace get CodeUnits;
 
   external SkParagraphBuilderNamespace get ParagraphBuilder;
   external SkParagraphStyle ParagraphStyle(SkParagraphStyleProperties properties);
@@ -959,6 +959,7 @@ extension type SkPaint._(JSObject _) implements JSObject {
   external void setAntiAlias(bool isAntiAlias);
   external void setColorInt(int color);
   external void setShader(SkShader? shader);
+  external void setDither(bool isDither);
   external void setMaskFilter(SkMaskFilter? maskFilter);
   external void setColorFilter(SkColorFilter? colorFilter);
   external void setStrokeMiter(double miterLimit);
@@ -1144,10 +1145,9 @@ Float32List toSkPoint(ui.Offset offset) {
 }
 
 /// Color stops used when the framework specifies `null`.
-final Float32List _kDefaultSkColorStops =
-    Float32List(2)
-      ..[0] = 0
-      ..[1] = 1;
+final Float32List _kDefaultSkColorStops = Float32List(2)
+  ..[0] = 0
+  ..[1] = 1;
 
 /// Converts a list of color stops into a Skia-compatible JS array or color stops.
 ///
@@ -1289,8 +1289,32 @@ final SkFloat32List _sharedSkColor3 = mallocFloat32List(4);
 
 @JS('window.flutterCanvasKit.Path')
 extension type SkPath._(JSObject _) implements JSObject {
-  external SkPath();
-  external SkPath.from(SkPath other);
+  external void setFillType(SkFillType fillType);
+
+  @JS('getBounds')
+  external JSFloat32Array _getBounds();
+  Float32List getBounds() => _getBounds().toDart;
+
+  external bool contains(double x, double y);
+
+  external String toSVGString();
+  external bool isEmpty();
+  external SkPath copy();
+
+  /// Serializes the path into a list of commands.
+  ///
+  /// The list can be used to create a new [SkPath] using
+  /// [CanvasKit.Path.MakeFromCmds].
+  @JS('toCmds')
+  external JSAny _toCmds();
+  List<dynamic> toCmds() => _toCmds().toObjectShallow as List<dynamic>;
+
+  external void delete();
+}
+
+@JS('window.flutterCanvasKit.PathBuilder')
+extension type SkPathBuilder._(JSObject _) implements JSObject {
+  external SkPathBuilder([SkPath skPath]);
 
   external void setFillType(SkFillType fillType);
 
@@ -1318,9 +1342,9 @@ extension type SkPath._(JSObject _) implements JSObject {
     bool extendPath,
   );
 
-  @JS('addPoly')
-  external void _addPoly(JSFloat32Array points, bool close);
-  void addPoly(Float32List points, bool close) => _addPoly(points.toJS, close);
+  @JS('addPolygon')
+  external void _addPolygon(JSFloat32Array points, bool close);
+  void addPolygon(Float32List points, bool close) => _addPolygon(points.toJS, close);
 
   @JS('addRRect')
   external void _addRRect(JSFloat32Array rrect, bool counterClockWise);
@@ -1382,9 +1406,9 @@ extension type SkPath._(JSObject _) implements JSObject {
   external void rMoveTo(double x, double y);
   external void rQuadTo(double x1, double y1, double x2, double y2);
   external void reset();
-  external String toSVGString();
+
   external bool isEmpty();
-  external SkPath copy();
+
   external void transform(
     double scaleX,
     double skewX,
@@ -1397,13 +1421,7 @@ extension type SkPath._(JSObject _) implements JSObject {
     double pers2,
   );
 
-  /// Serializes the path into a list of commands.
-  ///
-  /// The list can be used to create a new [SkPath] using
-  /// [CanvasKit.Path.MakeFromCmds].
-  @JS('toCmds')
-  external JSAny _toCmds();
-  List<dynamic> toCmds() => _toCmds().toObjectShallow as List<dynamic>;
+  external SkPath snapshot();
 
   external void delete();
 }
@@ -1778,9 +1796,44 @@ extension type SkPicture(JSObject _) implements JSObject {
 
   @JS('cullRect')
   external JSFloat32Array _cullRect();
+
   Float32List cullRect() => _cullRect().toDart;
 
   external int approximateBytesUsed();
+}
+
+extension type BidiRegion(JSObject _) implements JSObject {
+  external int get start;
+  external int get end;
+  external int get level;
+}
+
+extension type BidiIndex(JSObject _) implements JSObject {
+  external int get index;
+}
+
+extension type BidiNamespace(JSObject _) implements JSObject {
+  @JS('getBidiRegions')
+  // TODO(jlavrova): Use a JSInt32Array return type instead of `List<BidiIndex>`
+  external JSArray<JSAny?> _getBidiRegions(String text, SkTextDirection dir);
+  List<BidiRegion> getBidiRegions(String text, ui.TextDirection dir) =>
+      _getBidiRegions(text, toSkTextDirection(dir)).toDart.cast<BidiRegion>();
+
+  @JS('reorderVisual')
+  // TODO(jlavrova): Use a JSInt32Array return type instead of `List<BidiIndex>`
+  external JSArray<JSAny?> _reorderVisual(JSUint8Array visuals);
+  List<BidiIndex> reorderVisual(Uint8List visuals) =>
+      _reorderVisual(visuals.toJS).toDart.cast<BidiIndex>();
+}
+
+extension type CodeUnitInfo(JSObject _) implements JSObject {
+  external int get flags;
+}
+
+extension type CodeUnitsNamespace(JSObject _) implements JSObject {
+  @JS('compute')
+  external JSArray<JSAny?> _compute(String text);
+  List<CodeUnitInfo> compute(String text) => _compute(text).toDart.cast<CodeUnitInfo>();
 }
 
 extension type SkParagraphBuilderNamespace(JSObject _) implements JSObject {
@@ -1796,6 +1849,8 @@ extension type SkParagraphBuilderNamespace(JSObject _) implements JSObject {
     return callMethod<JSBoolean>('RequiresClientICU'.toJS).toDart;
   }
 }
+
+final bool _ckRequiresClientICU = canvasKit.ParagraphBuilder.RequiresClientICU();
 
 extension type SkParagraphBuilder(JSObject _) implements JSObject {
   external void addText(String text);
@@ -1815,6 +1870,21 @@ extension type SkParagraphBuilder(JSObject _) implements JSObject {
   // SkParagraphBuilder.getText() returns a utf8 string, we need to decode it
   // into a utf16 string.
   String getText() => utf8.decode(getTextUtf8().codeUnits);
+
+  /// Injects required ICU data into the [SkParagraphBuilder] instance if needed.
+  ///
+  /// This only works in the CanvasKit Chromium variant that's compiled
+  /// without ICU data. In other variants, it's a no-op.
+  void injectClientICUIfNeeded() {
+    if (!_ckRequiresClientICU) {
+      return;
+    }
+
+    final SegmentationResult result = segmentText(getText());
+    setWordsUtf16(result.words);
+    setGraphemeBreaksUtf16(result.graphemes);
+    setLineBreaksUtf16(result.breaks);
+  }
 
   @JS('setWordsUtf8')
   external void _setWordsUtf8(JSUint32Array words);

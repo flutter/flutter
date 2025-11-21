@@ -259,17 +259,15 @@ class _TestWidget extends StatelessWidget {
             expandedHeight: 120.0,
             collapsedHeight: collapsedHeight,
             title: const Text('Hallo Welt!!1'),
-            bottom:
-                !bottom
-                    ? null
-                    : PreferredSize(preferredSize: const Size.fromHeight(35.0), child: Container()),
+            bottom: !bottom
+                ? null
+                : PreferredSize(preferredSize: const Size.fromHeight(35.0), child: Container()),
           ),
-          SliverList(
-            delegate: SliverChildListDelegate(
-              List<Widget>.generate(20, (int i) {
-                return SizedBox(height: 100.0, child: Text('Tile $i'));
-              }),
-            ),
+          SliverList.builder(
+            itemCount: 20,
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(height: 100.0, child: Text('Tile $index'));
+            },
           ),
         ],
       ),

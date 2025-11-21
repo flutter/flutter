@@ -4,6 +4,7 @@
 
 import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/util.dart';
+import 'package:ui/ui.dart' as ui;
 
 import '../hot_restart_cache_handler.dart' show registerElementForCleanup;
 import 'embedding_strategy.dart';
@@ -24,6 +25,11 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
 
   @override
   DomEventTarget get globalEventTarget => domWindow;
+
+  @override
+  void setLocale(ui.Locale locale) {
+    domDocument.documentElement!.setAttribute('lang', locale.toLanguageTag());
+  }
 
   @override
   void attachViewRoot(DomElement rootElement) {
@@ -82,13 +88,12 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
 
     // The meta viewport is always removed by the for method above, so we don't
     // need to do anything else here, other than create it again.
-    final DomHTMLMetaElement viewportMeta =
-        createDomHTMLMetaElement()
-          ..setAttribute('flt-viewport', '')
-          ..name = 'viewport'
-          ..content =
-              'width=device-width, initial-scale=1.0, '
-              'maximum-scale=1.0, user-scalable=no';
+    final DomHTMLMetaElement viewportMeta = createDomHTMLMetaElement()
+      ..setAttribute('flt-viewport', '')
+      ..name = 'viewport'
+      ..content =
+          'width=device-width, initial-scale=1.0, '
+          'maximum-scale=1.0, user-scalable=no';
 
     domDocument.head!.append(viewportMeta);
 

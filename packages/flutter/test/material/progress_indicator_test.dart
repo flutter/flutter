@@ -13,6 +13,8 @@
 @Tags(<String>['reduced-test-set', 'no-shuffle'])
 library;
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -169,8 +171,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
-        ..rect(rect: Rect.fromLTRB(0.0, 0.0, animationValue * 200.0, 4.0)),
+        ..rect(rect: Rect.fromLTRB(animationValue * 200.0, 0.0, 200.0, 4.0)) // Track
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, animationValue * 200.0, 4.0)), // Active indicator
     );
 
     expect(tester.binding.transientCallbackCount, 1);
@@ -197,7 +199,7 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0 - animationValue * 200.0, 4.0))
         ..rect(rect: Rect.fromLTRB(200.0 - animationValue * 200.0, 0.0, 200.0, 4.0)),
     );
 
@@ -387,7 +389,10 @@ void main() {
     (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
-        Theme(data: theme, child: const Center(child: CircularProgressIndicator())),
+        Theme(
+          data: theme,
+          child: const Center(child: CircularProgressIndicator()),
+        ),
       );
 
       expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics());
@@ -564,6 +569,26 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
+  testWidgets('LinearProgressIndicator reflects controller value', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: tester, value: 0.5);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox(width: 200, child: LinearProgressIndicator(controller: controller)),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints..rect(rect: const Rect.fromLTRB(127.79541015625, 0.0, 200.0, 4.0)),
+    );
+  });
+
   testWidgets('CircularProgressIndicator paint colors', (WidgetTester tester) async {
     const Color green = Color(0xFF00FF00);
     const Color blue = Color(0xFF0000FF);
@@ -583,7 +608,12 @@ void main() {
     expect(find.byType(CircularProgressIndicator), paints..arc(color: blue));
 
     // With just color provided
-    await tester.pumpWidget(Theme(data: theme, child: const CircularProgressIndicator(color: red)));
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const CircularProgressIndicator(color: red),
+      ),
+    );
     expect(find.byType(CircularProgressIndicator), paintsExactlyCountTimes(#drawArc, 1));
     expect(find.byType(CircularProgressIndicator), paints..arc(color: red));
 
@@ -652,7 +682,12 @@ void main() {
     expect(find.byType(RefreshProgressIndicator), paints..arc(color: blue));
 
     // With just color provided
-    await tester.pumpWidget(Theme(data: theme, child: const RefreshProgressIndicator(color: red)));
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const RefreshProgressIndicator(color: red),
+      ),
+    );
     expect(find.byType(RefreshProgressIndicator), paintsExactlyCountTimes(#drawArc, 1));
     expect(find.byType(RefreshProgressIndicator), paints..arc(color: red));
 
@@ -1134,10 +1169,9 @@ void main() {
       );
 
       expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
-      final double actualProgress =
-          tester
-              .widget<CupertinoActivityIndicator>(find.byType(CupertinoActivityIndicator))
-              .progress;
+      final double actualProgress = tester
+          .widget<CupertinoActivityIndicator>(find.byType(CupertinoActivityIndicator))
+          .progress;
       expect(actualProgress, 0.5);
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{
@@ -1149,13 +1183,12 @@ void main() {
   testWidgets(
     'Adaptive CircularProgressIndicator can use backgroundColor to change tick color for iOS',
     (WidgetTester tester) async {
+      const Color color = Color(0xFF5D3FD3);
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(),
           home: const Scaffold(
-            body: Material(
-              child: CircularProgressIndicator.adaptive(backgroundColor: Color(0xFF5D3FD3)),
-            ),
+            body: Material(child: CircularProgressIndicator.adaptive(backgroundColor: color)),
           ),
         ),
       );
@@ -1164,7 +1197,9 @@ void main() {
         find.byType(CupertinoActivityIndicator),
         paints..rrect(
           rrect: const RRect.fromLTRBXY(-1, -10 / 3, 1, -10, 1, 1),
-          color: const Color(0x935D3FD3),
+          // The value of 47 comes from the alpha that is applied to the first
+          // tick.
+          color: color.withAlpha(47),
         ),
       );
     },
@@ -1214,7 +1249,11 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(MaterialApp(home: Theme(data: theme, child: progressTheme)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Theme(data: theme, child: progressTheme),
+      ),
+    );
     final Widget wrappedTheme = progressTheme.wrap(builderContext, Container());
 
     // Make sure the returned widget is a new ProgressIndicatorTheme instance
@@ -1226,7 +1265,9 @@ void main() {
 
   testWidgets('Material3 - Default size of CircularProgressIndicator', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: Material(child: CircularProgressIndicator()))),
+      const MaterialApp(
+        home: Scaffold(body: Material(child: CircularProgressIndicator())),
+      ),
     );
 
     expect(tester.getSize(find.byType(CircularProgressIndicator)), const Size(36, 36));
@@ -1336,6 +1377,123 @@ void main() {
       paints..circle(x: 2.0, y: 2.0, radius: 2.0, color: theme.colorScheme.primary),
     );
   });
+
+  testWidgets(
+    'Determinate LinearProgressIndicator when year2023 is false',
+    (WidgetTester tester) async {
+      Future<ui.Image> getGoldenImage({
+        required TextDirection textDirection,
+        double? trackGap,
+      }) async {
+        final ValueNotifier<double> value = ValueNotifier<double>(0);
+        addTearDown(value.dispose);
+
+        final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
+          frameSize: const Size(250, 30),
+        );
+        addTearDown(animationSheet.dispose);
+
+        final Widget target = Material(
+          child: Directionality(
+            textDirection: textDirection,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50),
+              child: Center(
+                child: ValueListenableBuilder<double>(
+                  valueListenable: value,
+                  builder: (BuildContext context, double value, _) {
+                    return LinearProgressIndicator(
+                      year2023: false,
+                      value: value,
+                      trackGap: trackGap,
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        for (int i = 0; i <= 50; i++) {
+          value.value = i * 0.02;
+          await tester.pumpWidget(animationSheet.record(target));
+        }
+
+        return animationSheet.collate(3);
+      }
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.ltr),
+        matchesGoldenFile('m3_linear_progress_indicator.determinate.ltr.png'),
+      );
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.rtl),
+        matchesGoldenFile('m3_linear_progress_indicator.determinate.rtl.png'),
+      );
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.ltr, trackGap: 20),
+        matchesGoldenFile('m3_linear_progress_indicator.determinate.ltr.custom_track_gap.png'),
+      );
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.rtl, trackGap: 20),
+        matchesGoldenFile('m3_linear_progress_indicator.determinate.rtl.custom_track_gap.png'),
+      );
+    },
+    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+  );
+
+  testWidgets(
+    'Indeterminate LinearProgressIndicator when year2023 is false',
+    (WidgetTester tester) async {
+      Future<ui.Image> getGoldenImage({
+        required TextDirection textDirection,
+        double? trackGap,
+      }) async {
+        final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
+          frameSize: const Size(250, 30),
+        );
+        addTearDown(animationSheet.dispose);
+
+        final Widget target = Material(
+          child: Directionality(
+            textDirection: textDirection,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50),
+              child: Center(child: LinearProgressIndicator(year2023: false, trackGap: trackGap)),
+            ),
+          ),
+        );
+
+        await tester.pumpFrames(animationSheet.record(target), const Duration(milliseconds: 1800));
+
+        return animationSheet.collate(3);
+      }
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.ltr),
+        matchesGoldenFile('m3_linear_progress_indicator.indeterminate.ltr.png'),
+      );
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.rtl),
+        matchesGoldenFile('m3_linear_progress_indicator.indeterminate.rtl.png'),
+      );
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.ltr, trackGap: 20),
+        matchesGoldenFile('m3_linear_progress_indicator.indeterminate.ltr.custom_track_gap.png'),
+      );
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.rtl, trackGap: 20),
+        matchesGoldenFile('m3_linear_progress_indicator.indeterminate.rtl.custom_track_gap.png'),
+      );
+    },
+    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+  );
 
   testWidgets('Indeterminate LinearProgressIndicator does not paint stop indicator', (
     WidgetTester tester,
@@ -1781,6 +1939,62 @@ void main() {
         ),
       ),
     );
+  });
+
+  testWidgets('CircularProgressIndicator reflects controller value', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: tester, value: 0.5);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox(
+              width: 200,
+              height: 200,
+              child: AnimatedBuilder(
+                animation: controller,
+                builder: (BuildContext context, Widget? child) {
+                  return CircularProgressIndicator(controller: controller);
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byType(CircularProgressIndicator),
+      paints..arc(startAngle: 1.5707963267948966, sweepAngle: 0.001),
+    );
+  });
+
+  testWidgets('RefreshProgressIndicator does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: RefreshProgressIndicator())),
+      ),
+    );
+    expect(tester.getSize(find.byType(RefreshProgressIndicator)), Size.zero);
+  });
+
+  testWidgets('CircularProgressIndicator does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: CircularProgressIndicator())),
+      ),
+    );
+    expect(tester.getSize(find.byType(CircularProgressIndicator)), Size.zero);
+  });
+
+  testWidgets('LinearProgressIndicator does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(child: SizedBox.shrink(child: LinearProgressIndicator())),
+      ),
+    );
+    expect(tester.getSize(find.byType(LinearProgressIndicator)), Size.zero);
   });
 }
 

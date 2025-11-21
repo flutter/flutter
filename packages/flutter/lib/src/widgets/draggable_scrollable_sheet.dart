@@ -705,18 +705,17 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<double>(
       valueListenable: _extent._currentSize,
-      builder:
-          (BuildContext context, double currentSize, Widget? child) => LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
-              _extent.availablePixels = widget.maxChildSize * constraints.biggest.height;
-              final Widget sheet = FractionallySizedBox(
-                heightFactor: currentSize,
-                alignment: Alignment.bottomCenter,
-                child: child,
-              );
-              return widget.expand ? SizedBox.expand(child: sheet) : sheet;
-            },
-          ),
+      builder: (BuildContext context, double currentSize, Widget? child) => LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          _extent.availablePixels = widget.maxChildSize * constraints.biggest.height;
+          final Widget sheet = FractionallySizedBox(
+            heightFactor: currentSize,
+            alignment: Alignment.bottomCenter,
+            child: child,
+          );
+          return widget.expand ? SizedBox.expand(child: sheet) : sheet;
+        },
+      ),
       child: widget.builder(context, _scrollController),
     );
   }
@@ -770,14 +769,13 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   }
 
   String _snapSizeErrorMessage(int invalidIndex) {
-    final List<String> snapSizesWithIndicator =
-        widget.snapSizes!.asMap().keys.map((int index) {
-          final String snapSizeString = widget.snapSizes![index].toString();
-          if (index == invalidIndex) {
-            return '>>> $snapSizeString <<<';
-          }
-          return snapSizeString;
-        }).toList();
+    final List<String> snapSizesWithIndicator = widget.snapSizes!.asMap().keys.map((int index) {
+      final String snapSizeString = widget.snapSizes![index].toString();
+      if (index == invalidIndex) {
+        return '>>> $snapSizeString <<<';
+      }
+      return snapSizeString;
+    }).toList();
     return "Invalid snapSize '${widget.snapSizes![invalidIndex]}' at index $invalidIndex of:\n"
         '  $snapSizesWithIndicator';
   }
@@ -1047,8 +1045,8 @@ class DraggableScrollableActuator extends StatefulWidget {
   /// some [DraggableScrollableSheet] is listening for updates, `false`
   /// otherwise.
   static bool reset(BuildContext context) {
-    final _InheritedResetNotifier? notifier =
-        context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
+    final _InheritedResetNotifier? notifier = context
+        .dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
     return notifier?._sendReset() ?? false;
   }
 
@@ -1110,8 +1108,8 @@ class _InheritedResetNotifier extends InheritedNotifier<_ResetNotifier> {
   ///
   /// Returns true if the notifier requested a reset, false otherwise.
   static bool shouldReset(BuildContext context) {
-    final InheritedWidget? widget =
-        context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
+    final InheritedWidget? widget = context
+        .dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
     if (widget == null) {
       return false;
     }
@@ -1187,6 +1185,10 @@ class _SnappingSimulation extends Simulation {
       return pixelSnapSizes.first;
     }
     final double nextSize = pixelSnapSizes[indexOfNextSize];
+    // If already snapped - keep this as target size
+    if (nextSize == position) {
+      return nextSize;
+    }
     final double previousSize = pixelSnapSizes[indexOfNextSize - 1];
     if (initialVelocity.abs() <= tolerance.velocity) {
       // If velocity is zero, snap to the nearest snap size with the minimum velocity.

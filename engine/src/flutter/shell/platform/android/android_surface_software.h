@@ -40,7 +40,7 @@ class AndroidSurfaceSoftware final : public AndroidSurface,
   void TeardownOnScreenContext() override;
 
   // |AndroidSurface|
-  bool OnScreenSurfaceResize(const SkISize& size) override;
+  bool OnScreenSurfaceResize(const DlISize& size) override;
 
   // |AndroidSurface|
   bool SetNativeWindow(
@@ -48,7 +48,7 @@ class AndroidSurfaceSoftware final : public AndroidSurface,
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) override;
 
   // |GPUSurfaceSoftwareDelegate|
-  sk_sp<SkSurface> AcquireBackingStore(const SkISize& size) override;
+  sk_sp<SkSurface> AcquireBackingStore(const DlISize& size) override;
 
   // |GPUSurfaceSoftwareDelegate|
   bool PresentBackingStore(sk_sp<SkSurface> backing_store) override;

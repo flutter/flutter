@@ -20,15 +20,14 @@ import 'package:yaml/yaml.dart' as y;
 // Or, for more options:
 // $ dart bin/check.dart --help
 
-final _argParser =
-    ArgParser()
-      ..addFlag('verbose', abbr: 'v', help: 'Enable noisier diagnostic output', negatable: false)
-      ..addFlag('help', abbr: 'h', help: 'Output usage information.', negatable: false)
-      ..addOption(
-        'engine-src-path',
-        valueHelp: '/path/to/engine/src',
-        defaultsTo: Engine.tryFindWithin()?.srcDir.path,
-      );
+final _argParser = ArgParser()
+  ..addFlag('verbose', abbr: 'v', help: 'Enable noisier diagnostic output', negatable: false)
+  ..addFlag('help', abbr: 'h', help: 'Output usage information.', negatable: false)
+  ..addOption(
+    'engine-src-path',
+    valueHelp: '/path/to/engine/src',
+    defaultsTo: Engine.tryFindWithin()?.srcDir.path,
+  );
 
 void main(List<String> args) {
   run(
@@ -262,16 +261,17 @@ List<String> checkForInvalidBuildNames(Map<String, BuilderConfig> configs) {
   final List<String> errors = <String>[];
 
   // In local_engine.json, allowed OS names are linux, macos, and windows.
-  final List<String> osNames =
-      <String>[
-        Platform.linux,
-        Platform.macOS,
-        Platform.windows,
-      ].expand((String s) => <String>['$s/', '$s\\']).toList();
+  final List<String> osNames = <String>[
+    Platform.linux,
+    Platform.macOS,
+    Platform.windows,
+  ].expand((String s) => <String>['$s/', '$s\\']).toList();
 
   // In all other build json files, allowed prefix names are ci and web_tests.
-  final List<String> ciNames =
-      <String>['ci', 'web_tests'].expand((String s) => <String>['$s/', '$s\\']).toList();
+  final List<String> ciNames = <String>[
+    'ci',
+    'web_tests',
+  ].expand((String s) => <String>['$s/', '$s\\']).toList();
 
   _forEachBuild(configs, (String name, BuilderConfig config, Build build) {
     final List<String> goodPrefixes = name.contains('local_engine') ? osNames : ciNames;

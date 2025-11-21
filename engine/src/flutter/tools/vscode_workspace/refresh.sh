@@ -1,3 +1,6 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 WORKSPACE=../../engine.code-workspace
 # json5 "$WORKSPACE" -s 2 -o engine.code-workspace
 # yq eval -P engine.code-workspace > engine-workspace.yaml

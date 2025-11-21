@@ -7,6 +7,7 @@
 library;
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -16,11 +17,13 @@ import 'binding.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'navigator.dart';
 import 'pop_scope.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'routes.dart';
+import 'view.dart';
 import 'will_pop_scope.dart';
 
 // Duration for delay before announcement in IOS so that the announcement won't be interrupted.
@@ -270,27 +273,34 @@ class FormState extends State<Form> {
   Widget build(BuildContext context) {
     switch (widget.autovalidateMode) {
       case AutovalidateMode.always:
-        _validate();
+        _validate(View.of(context));
       case AutovalidateMode.onUserInteraction:
         if (_hasInteractedByUser) {
-          _validate();
+          _validate(View.of(context));
         }
       case AutovalidateMode.onUnfocus:
       case AutovalidateMode.disabled:
         break;
     }
 
+    final Widget form;
     if (widget.canPop != null || (widget.onPopInvokedWithResult ?? widget.onPopInvoked) != null) {
-      return PopScope<Object?>(
+      form = PopScope<Object?>(
         canPop: widget.canPop ?? true,
         onPopInvokedWithResult: widget._callPopInvoked,
         child: _FormScope(formState: this, generation: _generation, child: widget.child),
       );
+    } else {
+      form = WillPopScope(
+        onWillPop: widget.onWillPop,
+        child: _FormScope(formState: this, generation: _generation, child: widget.child),
+      );
     }
-
-    return WillPopScope(
-      onWillPop: widget.onWillPop,
-      child: _FormScope(formState: this, generation: _generation, child: widget.child),
+    return Semantics(
+      container: true,
+      explicitChildNodes: true,
+      role: SemanticsRole.form,
+      child: form,
     );
   }
 
@@ -327,7 +337,7 @@ class FormState extends State<Form> {
   bool validate() {
     _hasInteractedByUser = true;
     _forceRebuild();
-    return _validate();
+    return _validate(View.of(context));
   }
 
   /// Validates every [FormField] that is a descendant of this [Form], and
@@ -344,11 +354,11 @@ class FormState extends State<Form> {
     final Set<FormFieldState<Object?>> invalidFields = <FormFieldState<Object?>>{};
     _hasInteractedByUser = true;
     _forceRebuild();
-    _validate(invalidFields);
+    _validate(View.of(context), invalidFields);
     return invalidFields;
   }
 
-  bool _validate([Set<FormFieldState<Object?>>? invalidFields]) {
+  bool _validate(FlutterView view, [Set<FormFieldState<Object?>>? invalidFields]) {
     bool hasError = false;
     String errorMessage = '';
     final bool validateOnFocusChange = widget.autovalidateMode == AutovalidateMode.onUnfocus;
@@ -369,13 +379,14 @@ class FormState extends State<Form> {
       }
     }
 
-    if (errorMessage.isNotEmpty) {
+    if (errorMessage.isNotEmpty && MediaQuery.supportsAnnounceOf(context)) {
       final TextDirection directionality = Directionality.of(context);
       if (defaultTargetPlatform == TargetPlatform.iOS) {
         unawaited(
           Future<void>(() async {
             await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
-            SemanticsService.announce(
+            SemanticsService.sendAnnouncement(
+              view,
               errorMessage,
               directionality,
               assertiveness: Assertiveness.assertive,
@@ -383,7 +394,8 @@ class FormState extends State<Form> {
           }),
         );
       } else {
-        SemanticsService.announce(
+        SemanticsService.sendAnnouncement(
+          view,
           errorMessage,
           directionality,
           assertiveness: Assertiveness.assertive,
@@ -533,9 +545,6 @@ class FormField<T> extends StatefulWidget {
   final FormFieldErrorBuilder? errorBuilder;
 
   /// An optional value to initialize the form field to, or null otherwise.
-  ///
-  /// This is called `value` in the [DropdownButtonFormField] constructor to be
-  /// consistent with [DropdownButton].
   ///
   /// The `initialValue` affects the form field's state in two cases:
   /// 1. When the form field is first built, `initialValue` determines the field's initial state.
@@ -776,8 +785,9 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     Form.maybeOf(context)?._register(this);
 
     final Widget child = Semantics(
-      validationResult:
-          hasError ? SemanticsValidationResult.invalid : SemanticsValidationResult.valid,
+      validationResult: hasError
+          ? SemanticsValidationResult.invalid
+          : SemanticsValidationResult.valid,
       child: widget.builder(this),
     );
 

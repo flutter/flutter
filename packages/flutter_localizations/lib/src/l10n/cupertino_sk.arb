@@ -39,5 +39,11 @@
   "shareButtonLabel": "Zdieľať…",
   "clearButtonLabel": "Vymazať",
   "cancelButtonLabel": "Zrušiť",
-  "backButtonLabel": "Späť"
+  "backButtonLabel": "Späť",
+  "expansionTileExpandedHint": "zbalíte dvojitým klepnutím",
+  "expansionTileCollapsedHint": "rozbalíte dvojitým klepnutím",
+  "expansionTileExpandedTapHint": "Zbaliť",
+  "expansionTileCollapsedTapHint": "Rozbaliť a zobraziť ďalšie podrobnosti",
+  "expandedHint": "Zbalené",
+  "collapsedHint": "Rozbalené"
 }

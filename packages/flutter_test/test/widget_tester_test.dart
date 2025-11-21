@@ -156,8 +156,10 @@ void main() {
     });
 
     testWidgets('successfully taps material back buttons', (WidgetTester tester) async {
+      final TransitionDurationObserver observer = TransitionDurationObserver();
       await tester.pumpWidget(
         MaterialApp(
+          navigatorObservers: <NavigatorObserver>[observer],
           home: Center(
             child: Builder(
               builder: (BuildContext context) {
@@ -182,19 +184,24 @@ void main() {
 
       await tester.tap(find.text('Next'));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(observer.transitionDuration + const Duration(milliseconds: 1));
+
+      expect(find.text('Next'), findsNothing);
+      expect(find.text('Page 2'), findsOneWidget);
 
       await tester.pageBack();
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(observer.transitionDuration + const Duration(milliseconds: 1));
 
       expect(find.text('Next'), findsOneWidget);
       expect(find.text('Page 2'), findsNothing);
     });
 
     testWidgets('successfully taps cupertino back buttons', (WidgetTester tester) async {
+      final TransitionDurationObserver observer = TransitionDurationObserver();
       await tester.pumpWidget(
         MaterialApp(
+          navigatorObservers: <NavigatorObserver>[observer],
           home: Center(
             child: Builder(
               builder: (BuildContext context) {
@@ -222,7 +229,7 @@ void main() {
 
       await tester.tap(find.text('Next'));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(observer.transitionDuration);
 
       await tester.pageBack();
       await tester.pump();
@@ -486,7 +493,11 @@ void main() {
 
   group('showKeyboard', () {
     testWidgets('can be called twice', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(home: Material(child: Center(child: TextFormField()))));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(child: Center(child: TextFormField())),
+        ),
+      );
       await tester.showKeyboard(find.byType(TextField));
       await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pump();
@@ -502,7 +513,9 @@ void main() {
       'can focus on offstage text input field if finder says not to skip offstage nodes',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(home: Material(child: Offstage(child: TextFormField()))),
+          MaterialApp(
+            home: Material(child: Offstage(child: TextFormField())),
+          ),
         );
         await tester.showKeyboard(find.byType(TextField, skipOffstage: false));
       },
@@ -688,13 +701,14 @@ void main() {
         isFalse,
       );
 
-      await SemanticsService.announce('announcement 1', TextDirection.ltr);
-      await SemanticsService.announce(
+      await SemanticsService.sendAnnouncement(tester.view, 'announcement 1', TextDirection.ltr);
+      await SemanticsService.sendAnnouncement(
+        tester.view,
         'announcement 2',
         TextDirection.rtl,
         assertiveness: Assertiveness.assertive,
       );
-      await SemanticsService.announce('announcement 3', TextDirection.rtl);
+      await SemanticsService.sendAnnouncement(tester.view, 'announcement 3', TextDirection.rtl);
 
       final List<CapturedAccessibilityAnnouncement> list = tester.takeAnnouncements();
       expect(list, hasLength(3));
@@ -716,7 +730,7 @@ void main() {
       expect(emptyList, <CapturedAccessibilityAnnouncement>[]);
     });
 
-    test('New test API is not breaking existing tests', () async {
+    testWidgets('New test API is not breaking existing tests', (WidgetTester tester) async {
       final List<Map<dynamic, dynamic>> log = <Map<dynamic, dynamic>>[];
 
       Future<dynamic> handleMessage(dynamic mockMessage) async {
@@ -727,7 +741,8 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, handleMessage);
 
-      await SemanticsService.announce(
+      await SemanticsService.sendAnnouncement(
+        tester.view,
         'announcement 1',
         TextDirection.rtl,
         assertiveness: Assertiveness.assertive,
@@ -738,6 +753,7 @@ void main() {
           <String, dynamic>{
             'type': 'announce',
             'data': <String, dynamic>{
+              'viewId': 0,
               'message': 'announcement 1',
               'textDirection': 0,
               'assertiveness': 1,

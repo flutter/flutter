@@ -46,7 +46,9 @@ void main() {
       CustomPaint(
         painter: TestCustomPainter(log: log, name: 'background'),
         foregroundPainter: TestCustomPainter(log: log, name: 'foreground'),
-        child: CustomPaint(painter: TestCustomPainter(log: log, name: 'child')),
+        child: CustomPaint(
+          painter: TestCustomPainter(log: log, name: 'child'),
+        ),
       ),
     );
 
@@ -59,7 +61,11 @@ void main() {
     final GlobalKey target = GlobalKey();
     final List<String?> log = <String?>[];
     await tester.pumpWidget(
-      CustomPaint(key: target, isComplex: true, painter: TestCustomPainter(log: log)),
+      CustomPaint(
+        key: target,
+        isComplex: true,
+        painter: TestCustomPainter(log: log),
+      ),
     );
     final RenderCustomPaint renderCustom =
         target.currentContext!.findRenderObject()! as RenderCustomPaint;
@@ -122,22 +128,38 @@ void main() {
     await tester.pumpWidget(Center(child: CustomPaint(key: target)));
     expect(target.currentContext!.size, Size.zero);
 
-    await tester.pumpWidget(Center(child: CustomPaint(key: target, child: Container())));
+    await tester.pumpWidget(
+      Center(
+        child: CustomPaint(key: target, child: Container()),
+      ),
+    );
     expect(target.currentContext!.size, const Size(800.0, 600.0));
 
-    await tester.pumpWidget(Center(child: CustomPaint(key: target, size: const Size(20.0, 20.0))));
+    await tester.pumpWidget(
+      Center(
+        child: CustomPaint(key: target, size: const Size(20.0, 20.0)),
+      ),
+    );
     expect(target.currentContext!.size, const Size(20.0, 20.0));
 
     await tester.pumpWidget(
-      Center(child: CustomPaint(key: target, size: const Size(2000.0, 100.0))),
+      Center(
+        child: CustomPaint(key: target, size: const Size(2000.0, 100.0)),
+      ),
     );
     expect(target.currentContext!.size, const Size(800.0, 100.0));
 
-    await tester.pumpWidget(Center(child: CustomPaint(key: target, child: Container())));
+    await tester.pumpWidget(
+      Center(
+        child: CustomPaint(key: target, child: Container()),
+      ),
+    );
     expect(target.currentContext!.size, const Size(800.0, 600.0));
 
     await tester.pumpWidget(
-      Center(child: CustomPaint(key: target, child: const SizedBox.shrink())),
+      Center(
+        child: CustomPaint(key: target, child: const SizedBox.shrink()),
+      ),
     );
     expect(target.currentContext!.size, Size.zero);
   });
@@ -147,7 +169,11 @@ void main() {
 
     final List<String?> log = <String?>[];
     await tester.pumpWidget(
-      CustomPaint(key: target, isComplex: true, painter: TestCustomPainter(log: log)),
+      CustomPaint(
+        key: target,
+        isComplex: true,
+        painter: TestCustomPainter(log: log),
+      ),
     );
     RenderCustomPaint renderCustom =
         target.currentContext!.findRenderObject()! as RenderCustomPaint;
@@ -155,7 +181,11 @@ void main() {
     expect(renderCustom.willChange, false);
 
     await tester.pumpWidget(
-      CustomPaint(key: target, willChange: true, foregroundPainter: TestCustomPainter(log: log)),
+      CustomPaint(
+        key: target,
+        willChange: true,
+        foregroundPainter: TestCustomPainter(log: log),
+      ),
     );
     renderCustom = target.currentContext!.findRenderObject()! as RenderCustomPaint;
     expect(renderCustom.isComplex, false);

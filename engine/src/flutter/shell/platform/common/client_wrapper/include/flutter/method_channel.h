@@ -96,7 +96,7 @@ class MethodChannel {
   // Destroying the MethodChannel will not unregister the handler, so
   // the caller is responsible for unregistering explicitly if the handler
   // stops being valid before the engine is destroyed.
-  void SetMethodCallHandler(MethodCallHandler<T> handler) const {
+  void SetMethodCallHandler(const MethodCallHandler<T>& handler) const {
     if (!handler) {
       messenger_->SetMessageHandler(name_, nullptr);
       return;

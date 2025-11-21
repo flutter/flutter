@@ -35,24 +35,23 @@ Future<void> main() async {
         options: <String>['macos', '--flavor', 'bogus'],
       );
 
-      final Uint8List assetManifestFileData =
-          File(
-            path.join(
-              projectDir,
-              'build',
-              'macos',
-              'Build',
-              'Products',
-              'Debug-paid',
-              'Debug Paid.app',
-              'Contents',
-              'Frameworks',
-              'App.framework',
-              'Resources',
-              'flutter_assets',
-              'AssetManifest.bin',
-            ),
-          ).readAsBytesSync();
+      final Uint8List assetManifestFileData = File(
+        path.join(
+          projectDir,
+          'build',
+          'macos',
+          'Build',
+          'Products',
+          'Debug-paid',
+          'Debug Paid.app',
+          'Contents',
+          'Frameworks',
+          'App.framework',
+          'Resources',
+          'flutter_assets',
+          'AssetManifest.bin',
+        ),
+      ).readAsBytesSync();
 
       final Map<Object?, Object?> assetManifest =
           const StandardMessageCodec().decodeMessage(ByteData.sublistView(assetManifestFileData))
