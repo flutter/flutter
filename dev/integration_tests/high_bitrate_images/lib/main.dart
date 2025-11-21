@@ -8,9 +8,9 @@ import 'dart:ui' as ui;
 import 'cpu_sdf_canvas.dart';
 import 'gpu_sdf_canvas.dart';
 
-enum TestType { cpuR32fSdf, cpuRgba32fSdf, gpuSdf }
+enum TestType { cpuR32fSdf, cpuRgba32fSdf, gpuR32fSdf, gpuRgba32fSdf }
 
-TestType testToRun = TestType.gpuSdf;
+TestType testToRun = TestType.gpuR32fSdf;
 
 void main() {
   runApp(const MyApp());
@@ -49,8 +49,13 @@ class _MyHomePageState extends State<MyHomePage> {
           targetFormat: ui.TargetPixelFormat.rgbaFloat32,
         );
         break;
-      case TestType.gpuSdf:
-        child = const GpuSdfCanvas();
+      case TestType.gpuR32fSdf:
+        child = const GpuSdfCanvas(targetFormat: ui.TargetPixelFormat.rFloat32);
+        break;
+      case TestType.gpuRgba32fSdf:
+        child = const GpuSdfCanvas(
+          targetFormat: ui.TargetPixelFormat.rgbaFloat32,
+        );
         break;
     }
     return Scaffold(body: child);

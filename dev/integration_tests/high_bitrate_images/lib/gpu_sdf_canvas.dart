@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 class GpuSdfCanvas extends StatefulWidget {
-  const GpuSdfCanvas({super.key});
+  const GpuSdfCanvas({super.key, required this.targetFormat});
+
+  final ui.TargetPixelFormat targetFormat;
 
   @override
   State<GpuSdfCanvas> createState() => _GpuSdfCanvasState();
@@ -54,7 +55,11 @@ class _GpuSdfCanvasState extends State<GpuSdfCanvas> {
     final Paint paint = Paint()..shader = _circle;
     canvas.drawRect(Offset.zero & size, paint);
     final ui.Picture picture = recorder.endRecording();
-    return picture.toImageSync(size.width.toInt(), size.height.toInt());
+    return picture.toImageSync(
+      size.width.toInt(),
+      size.height.toInt(),
+      targetFormat: widget.targetFormat,
+    );
   }
 
   @override
