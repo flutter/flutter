@@ -156,6 +156,8 @@ TEST(FlCompositorOpenGLTest, RestoresGLState) {
 
   constexpr GLuint kFakeTextureName = 123;
   glBindTexture(GL_TEXTURE_2D, kFakeTextureName);
+  glDisable(GL_BLEND);
+  glEnable(GL_SCISSOR_TEST);
 
   // Present layer and render.
   std::thread([&]() {
@@ -175,6 +177,8 @@ TEST(FlCompositorOpenGLTest, RestoresGLState) {
   glGetIntegerv(GL_TEXTURE_BINDING_2D,
                 reinterpret_cast<GLint*>(&texture_2d_binding));
   EXPECT_EQ(texture_2d_binding, kFakeTextureName);
+  EXPECT_EQ(glIsEnabled(GL_BLEND), GL_FALSE);
+  EXPECT_EQ(glIsEnabled(GL_SCISSOR_TEST), GL_TRUE);
 }
 
 TEST(FlCompositorOpenGLTest, BlitFramebuffer) {
