@@ -81,5 +81,67 @@ void testMain() {
       implicitView.debugPhysicalSizeOverride = null;
       implicitView.debugForceResize();
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/176174
+    test('renderWithNoBitmapSupport clears canvas before drawing', () {
+      final RenderCanvas renderCanvas = RenderCanvas();
+      final DomHTMLCanvasElement canvas = renderCanvas.canvasElement;
+      final DomCanvasRenderingContext2D context = canvas.context2D;
+      canvas.width = 100;
+      canvas.height = 100;
+
+      // Render the first blue image
+      final DomHTMLCanvasElement firstImage = createDomCanvasElement(
+        width: 100,
+        height: 100,
+      );
+      final DomCanvasRenderingContext2D firstContext = firstImage.context2D;
+      firstContext.fillStyle = 'rgb(0, 0, 255)'.toJS;
+      firstContext.fillRect(0, 0, 100, 100);
+      renderCanvas.renderWithNoBitmapSupport(
+        firstImage as DomCanvasImageSource,
+        100,
+        const BitmapSize(100, 100),
+      );
+
+      // Verify the center pixel is blue after first render
+      final DomImageData blueData = context.getImageData(50, 50, 1, 1);
+      final bluePixels = blueData.data;
+      expect(bluePixels[0], equals(0));
+      expect(bluePixels[1], equals(0));
+      expect(bluePixels[2], equals(255));
+
+      // Second render, only draw a red square in top-left
+      final DomHTMLCanvasElement secondImage = createDomCanvasElement(
+        width: 100,
+        height: 100,
+      );
+      final DomCanvasRenderingContext2D secondContext = secondImage.context2D;
+      secondContext.fillStyle = 'rgb(255, 0, 0)'.toJS;
+      secondContext.fillRect(0, 0, 30, 30);
+      renderCanvas.renderWithNoBitmapSupport(
+        secondImage as DomCanvasImageSource,
+        100,
+        const BitmapSize(100, 100),
+      );
+
+      // Check center point (50, 50) - should be transparent in second image
+      final DomImageData centerData = context.getImageData(50, 50, 1, 1);
+      final centerPixels = centerData.data;
+
+      // Without clearRect: would still be blue (0, 0, 255, 255) from first render
+      // With clearRect: should be transparent/black (0, 0, 0, 0)
+      expect(centerPixels[0], equals(0));
+      expect(centerPixels[1], equals(0));
+      expect(centerPixels[2], equals(0));
+      expect(centerPixels[3], equals(0));
+
+      // Check top-left corner (15, 15) - should be red from second image
+      final DomImageData cornerData = context.getImageData(15, 15, 1, 1);
+      final cornerPixels = cornerData.data;
+      expect(cornerPixels[0], equals(255));
+      expect(cornerPixels[1], equals(0));
+      expect(cornerPixels[2], equals(0));
+    });
   });
 }
