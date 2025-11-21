@@ -16,12 +16,19 @@ class ScrollEndNotificationApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: ScrollEndNotificationExample());
+    final ScrollController scrollController = ScrollController();
+
+    return MaterialApp(
+      scrollBehavior: CustomScrollbarBehavior(scrollController),
+      home: ScrollEndNotificationExample(scrollController),
+    );
   }
 }
 
 class ScrollEndNotificationExample extends StatefulWidget {
-  const ScrollEndNotificationExample({super.key});
+  const ScrollEndNotificationExample(this.scrollController, {super.key});
+
+  final ScrollController scrollController;
 
   @override
   State<ScrollEndNotificationExample> createState() => _ScrollEndNotificationExampleState();
@@ -31,19 +38,17 @@ class _ScrollEndNotificationExampleState extends State<ScrollEndNotificationExam
   static const int itemCount = 25;
   static const double itemExtent = 100;
 
-  late final ScrollController scrollController;
   late double lastScrollOffset;
 
   @override
   void initState() {
-    scrollController = ScrollController();
     super.initState();
   }
 
   @override
   void dispose() {
     super.dispose();
-    scrollController.dispose();
+    widget.scrollController.dispose();
   }
 
   // After an interactive scroll "ends", auto-scroll so that last item in the
@@ -54,7 +59,7 @@ class _ScrollEndNotificationExampleState extends State<ScrollEndNotificationExam
   // since the alignedScrollOffset is guaranteed to be less than itemExtent.
   bool handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollStartNotification) {
-      lastScrollOffset = scrollController.position.pixels;
+      lastScrollOffset = widget.scrollController.position.pixels;
     }
     if (notification is ScrollEndNotification) {
       final ScrollMetrics m = notification.metrics;
@@ -63,10 +68,10 @@ class _ScrollEndNotificationExampleState extends State<ScrollEndNotificationExam
         itemCount - 1,
       );
       final double alignedScrollOffset = itemExtent * (lastIndex + 1) - m.extentInside;
-      final double scrollOffset = scrollController.position.pixels;
+      final double scrollOffset = widget.scrollController.position.pixels;
       if (scrollOffset > 0 && (scrollOffset - lastScrollOffset).abs() > itemExtent) {
         SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-          scrollController.animateTo(
+          widget.scrollController.animateTo(
             alignedScrollOffset,
             duration: const Duration(milliseconds: 400),
             curve: Curves.fastOutSlowIn,
@@ -81,28 +86,24 @@ class _ScrollEndNotificationExampleState extends State<ScrollEndNotificationExam
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Scrollbar(
-          controller: scrollController,
-          thumbVisibility: true,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: NotificationListener<ScrollNotification>(
-              onNotification: handleScrollNotification,
-              child: CustomScrollView(
-                controller: scrollController,
-                slivers: <Widget>[
-                  SliverFixedExtentList.builder(
-                    itemExtent: itemExtent,
-                    itemCount: itemCount,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Item(
-                        title: 'Item $index',
-                        color: Color.lerp(Colors.red, Colors.blue, index / itemCount)!,
-                      );
-                    },
-                  ),
-                ],
-              ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: NotificationListener<ScrollNotification>(
+            onNotification: handleScrollNotification,
+            child: CustomScrollView(
+              controller: widget.scrollController,
+              slivers: <Widget>[
+                SliverFixedExtentList.builder(
+                  itemExtent: itemExtent,
+                  itemCount: itemCount,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Item(
+                      title: 'Item $index',
+                      color: Color.lerp(Colors.red, Colors.blue, index / itemCount)!,
+                    );
+                  },
+                ),
+              ],
             ),
           ),
         ),
@@ -123,5 +124,16 @@ class Item extends StatelessWidget {
       color: color,
       child: ListTile(textColor: Colors.white, title: Text(title)),
     );
+  }
+}
+
+class CustomScrollbarBehavior extends MaterialScrollBehavior {
+  const CustomScrollbarBehavior(this.scrollController);
+
+  final ScrollController scrollController;
+
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
+    return Scrollbar(controller: scrollController, thumbVisibility: true, child: child);
   }
 }
