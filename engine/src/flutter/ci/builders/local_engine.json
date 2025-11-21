@@ -3,7 +3,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.5",
+        "os=Mac-15.5|Mac-15.7",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -36,7 +36,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.5",
+        "os=Mac-15.5|Mac-15.7",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -70,7 +70,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.5",
+        "os=Mac-15.5|Mac-15.7",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -103,7 +103,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.5",
+        "os=Mac-15.5|Mac-15.7",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -136,7 +136,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.5",
+        "os=Mac-15.5|Mac-15.7",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -170,7 +170,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.5",
+        "os=Mac-15.5|Mac-15.7",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -206,7 +206,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.5",
+        "os=Mac-15.5|Mac-15.7",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -370,7 +370,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.5",
+        "os=Mac-15.5|Mac-15.7",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -403,7 +403,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.5",
+        "os=Mac-15.5|Mac-15.7",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -436,7 +436,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.5",
+        "os=Mac-15.5|Mac-15.7",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -520,7 +520,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.5",
+        "os=Mac-15.5|Mac-15.7",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -604,7 +604,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.5",
+        "os=Mac-15.5|Mac-15.7",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -636,7 +636,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.5",
+        "os=Mac-15.5|Mac-15.7",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -669,7 +669,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.5",
+        "os=Mac-15.5|Mac-15.7",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -702,7 +702,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.5",
+        "os=Mac-15.5|Mac-15.7",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -841,7 +841,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.5",
+        "os=Mac-15.5|Mac-15.7",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -925,7 +925,7 @@
     {
       "cas_archive": false,
       "drone_dimensions": [
-        "os=Mac-15.5",
+        "os=Mac-15.5|Mac-15.7",
         "device_type=none"
       ],
       "gclient_variables": {
@@ -1063,7 +1063,7 @@
       "name": "macos/wasm_release",
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-15.5"
+        "os=Mac-15.5|Mac-15.7"
       ],
       "gclient_variables": {
         "download_android_deps": false,
@@ -1093,7 +1093,7 @@
       "name": "macos/wasm_debug_unopt",
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-15.5"
+        "os=Mac-15.5|Mac-15.7"
       ],
       "gclient_variables": {
         "download_android_deps": false,
