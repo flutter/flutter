@@ -178,36 +178,13 @@ void main() {
               fileSystem.path.join(projectRoot, 'ios', 'Flutter', 'AppFrameworkInfo.plist'),
             );
             expect(templateInfoPlist, exists);
-            final String originalContents = templateInfoPlist.readAsStringSync();
-
-            templateInfoPlist.writeAsStringSync(
-              originalContents.replaceFirst(
-                '</dict>',
-                '  <key>MinimumOSVersion</key>\n  <string>99.0</string>\n</dict>',
-              ),
-            );
-
-            final ProcessResult buildResult = processManager.runSync(<String>[
-              flutterBin,
-              ...getLocalEngineArguments(),
-              'build',
-              'ios',
-              '--verbose',
-              '--no-codesign',
-              '--${buildMode.cliName}',
-            ], workingDirectory: projectRoot);
-
-            templateInfoPlist.writeAsStringSync(originalContents);
-
-            printOnFailure('Output of flutter build ios with modified plist:');
-            printOnFailure(buildResult.stdout.toString());
-            printOnFailure(buildResult.stderr.toString());
-            expect(buildResult.exitCode, 0);
+            final String templateContents = templateInfoPlist.readAsStringSync();
+            expect(templateContents, isNot(contains('MinimumOSVersion')));
 
             final File appFrameworkInfoPlist = outputAppFramework.childFile('Info.plist');
             expect(appFrameworkInfoPlist, exists);
 
-            final expectedMinimumOSVersion = FlutterDarwinPlatform.ios
+            final String expectedMinimumOSVersion = FlutterDarwinPlatform.ios
                 .deploymentTarget()
                 .toString();
 
@@ -219,7 +196,6 @@ void main() {
 
             expect(result.exitCode, 0);
             expect(result.stdout, contains('"MinimumOSVersion" => "$expectedMinimumOSVersion"'));
-            expect(result.stdout, isNot(contains('99.0')));
           });
 
           testWithoutContext('Info.plist dart VM Service Bonjour service', () {

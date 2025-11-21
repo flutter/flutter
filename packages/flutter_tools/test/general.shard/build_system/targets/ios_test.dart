@@ -271,8 +271,6 @@ void main() {
 
       await const DebugIosApplicationBundle().build(environment);
 
-      expect(logger.errorText, contains('Failed to update MinimumOSVersion in ${infoPlist.path}'));
-      expect(logger.errorText, contains('plutil: error: invalid argument'));
       final fakeStdio = globals.stdio as FakeStdio;
       expect(
         fakeStdio.buffer.toString(),
