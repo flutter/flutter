@@ -32,6 +32,11 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.38 Changes
 
+### [3.38.3](https://github.com/flutter/flutter/releases/tag/3.38.3)
+
+- [flutter/178772](https://github.com/flutter/flutter/issues/178772) Flutter engine reports a different version than the framework.
+- [flutter/178804](https://github.com/flutter/flutter/issues/178804) Bump Dart version to [3.10.1](https://github.com/dart-lang/sdk/blob/3.10.1/CHANGELOG.md#3101).
+
 ### [3.38.2](https://github.com/flutter/flutter/releases/tag/3.38.2)
 
 - [flutter/178472](https://github.com/flutter/flutter/issues/178472) Widget preview command can crash on exit if in the middle of analyzing changes to a Dart file.
