@@ -511,7 +511,7 @@ class _DraggableSheetExtent {
        availablePixels = double.infinity,
        hasDragged = hasDragged ?? false,
        hasChanged = hasChanged ?? false {
-    assert(debugMaybeDispatchCreated('widgets', 'DraggableSheetExtent', this));
+    assert(debugMaybeDispatchCreated('widgets', '_DraggableSheetExtent', this));
   }
 
   VoidCallback? _cancelActivity;
@@ -851,7 +851,7 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
 /// This class is a concrete subclass of [ScrollPosition] logic that handles a
 /// single [ScrollContext], such as a [Scrollable]. An instance of this class
 /// manages [ScrollActivity] instances, which changes the
-/// [DraggableSheetExtent.currentSize] or visible content offset in the
+/// [_DraggableSheetExtent.currentSize] or visible content offset in the
 /// [Scrollable]'s [Viewport]
 ///
 /// See also:
