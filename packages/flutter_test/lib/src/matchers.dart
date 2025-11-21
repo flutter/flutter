@@ -2695,6 +2695,45 @@ class _MatchesSemanticsData extends Matcher {
     return true;
   }
 
+  String? _ignoreNBSP(String? input) {
+    if (input == null) {
+      return null;
+    }
+    return input.replaceAll('\u202f', ' ');
+  }
+
+  bool _checkStringMismatch(
+    Map<dynamic, dynamic> matchState,
+    String prefixText,
+    String? expected,
+    String? actual,
+  ) {
+    if (expected == actual) {
+      return true;
+    }
+
+    if (expected != null && actual != null && _ignoreNBSP(expected) == _ignoreNBSP(actual)) {
+      final String actualWithNBSP = actual.replaceAll('\u202f', r'\u202f');
+      return failWithDescription(matchState, '$prefixText was $actualWithNBSP');
+    }
+    return failWithDescription(matchState, '$prefixText was $actual');
+  }
+
+  bool _checkStringAttributeMismatch(
+    Map<dynamic, dynamic> matchState,
+    String prefixText,
+    AttributedString? expected,
+    AttributedString? actual,
+  ) {
+    if (expected!.string != actual!.string) {
+      return _checkStringMismatch(matchState, prefixText, expected.string, actual.string);
+    }
+    if (!_stringAttributesEqual(expected.attributes, actual.attributes)) {
+      return failWithDescription(matchState, '$prefixText was: $actual');
+    }
+    return true;
+  }
+
   @override
   bool matches(dynamic node, Map<dynamic, dynamic> matchState) {
     if (node == null) {
@@ -2711,66 +2750,73 @@ class _MatchesSemanticsData extends Matcher {
       _ => node as SemanticsData,
     };
 
-    if (label != null && label != data.label) {
-      return failWithDescription(matchState, 'label was: ${data.label}');
+    if (label != null) {
+      return _checkStringMismatch(matchState, 'label', label, data.label);
     }
-    if (attributedLabel != null &&
-        (attributedLabel!.string != data.attributedLabel.string ||
-            !_stringAttributesEqual(
-              attributedLabel!.attributes,
-              data.attributedLabel.attributes,
-            ))) {
-      return failWithDescription(matchState, 'attributedLabel was: ${data.attributedLabel}');
-    }
-    if (hint != null && hint != data.hint) {
-      return failWithDescription(matchState, 'hint was: ${data.hint}');
-    }
-    if (attributedHint != null &&
-        (attributedHint!.string != data.attributedHint.string ||
-            !_stringAttributesEqual(attributedHint!.attributes, data.attributedHint.attributes))) {
-      return failWithDescription(matchState, 'attributedHint was: ${data.attributedHint}');
-    }
-    if (value != null && value != data.value) {
-      return failWithDescription(matchState, 'value was: ${data.value}');
-    }
-    if (attributedValue != null &&
-        (attributedValue!.string != data.attributedValue.string ||
-            !_stringAttributesEqual(
-              attributedValue!.attributes,
-              data.attributedValue.attributes,
-            ))) {
-      return failWithDescription(matchState, 'attributedValue was: ${data.attributedValue}');
-    }
-    if (increasedValue != null && increasedValue != data.increasedValue) {
-      return failWithDescription(matchState, 'increasedValue was: ${data.increasedValue}');
-    }
-    if (attributedIncreasedValue != null &&
-        (attributedIncreasedValue!.string != data.attributedIncreasedValue.string ||
-            !_stringAttributesEqual(
-              attributedIncreasedValue!.attributes,
-              data.attributedIncreasedValue.attributes,
-            ))) {
-      return failWithDescription(
+    if (attributedLabel != null) {
+      return _checkStringAttributeMismatch(
         matchState,
-        'attributedIncreasedValue was: ${data.attributedIncreasedValue}',
+        'attributedLabel',
+        attributedLabel,
+        data.attributedLabel,
       );
     }
-    if (decreasedValue != null && decreasedValue != data.decreasedValue) {
-      return failWithDescription(matchState, 'decreasedValue was: ${data.decreasedValue}');
+    if (hint != null) {
+      return _checkStringMismatch(matchState, 'hint', hint, data.hint);
     }
-    if (attributedDecreasedValue != null &&
-        (attributedDecreasedValue!.string != data.attributedDecreasedValue.string ||
-            !_stringAttributesEqual(
-              attributedDecreasedValue!.attributes,
-              data.attributedDecreasedValue.attributes,
-            ))) {
-      return failWithDescription(
+    if (attributedHint != null) {
+      return _checkStringAttributeMismatch(
         matchState,
-        'attributedDecreasedValue was: ${data.attributedDecreasedValue}',
+        'attributedHint',
+        attributedHint,
+        data.attributedHint,
       );
     }
-    if (tooltip != null && tooltip != data.tooltip) {
-      return failWithDescription(matchState, 'tooltip was: ${data.tooltip}');
+    if (value != null) {
+      return _checkStringMismatch(matchState, 'value', value, data.value);
+    }
+    if (attributedValue != null) {
+      return _checkStringAttributeMismatch(
+        matchState,
+        'attributedValue',
+        attributedValue,
+        data.attributedValue,
+      );
+    }
+    if (increasedValue != null) {
+      return _checkStringMismatch(
+        matchState,
+        'increasedValue',
+        increasedValue,
+        data.increasedValue,
+      );
+    }
+    if (attributedIncreasedValue != null) {
+      return _checkStringAttributeMismatch(
+        matchState,
+        'attributedIncreasedValue',
+        attributedIncreasedValue,
+        data.attributedIncreasedValue,
+      );
+    }
+    if (decreasedValue != null) {
+      return _checkStringMismatch(
+        matchState,
+        'decreasedValue',
+        decreasedValue,
+        data.decreasedValue,
+      );
+    }
+    if (attributedDecreasedValue != null) {
+      return _checkStringAttributeMismatch(
+        matchState,
+        'attributedDecreasedValue',
+        attributedDecreasedValue,
+        data.attributedDecreasedValue,
+      );
+    }
+    if (tooltip != null) {
+      return _checkStringMismatch(matchState, 'tooltip', tooltip, data.tooltip);
     }
     if (textDirection != null && textDirection != data.textDirection) {
       return failWithDescription(matchState, 'textDirection was: $textDirection');
