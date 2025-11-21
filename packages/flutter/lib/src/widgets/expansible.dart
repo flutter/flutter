@@ -5,11 +5,11 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
-import 'basic.dart';
-import 'framework.dart';
-import 'page_storage.dart';
-import 'ticker_provider.dart';
-import 'transitions.dart';
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/semantics.dart';
+import 'package:flutter/widgets.dart';
 
 /// The type of the callback that returns the header or body of an [Expansible].
 ///
@@ -362,6 +362,7 @@ class Expansible extends StatefulWidget {
 class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late CurvedAnimation _heightFactor;
+  Timer? _timer;
 
   Duration get _duration {
     return widget.animationStyle?.duration ?? widget.duration;
@@ -424,12 +425,63 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
   @override
   void dispose() {
     widget.controller.removeListener(_toggleExpansion);
+    _timer?.cancel();
+    _timer = null;
     _animationController.dispose();
     _heightFactor.dispose();
     super.dispose();
   }
 
+  void _announceExpansionChange() {
+    final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
+    final TextDirection textDirection = localizations.textDirection;
+    final String stateHint = widget.controller.isExpanded
+        ? localizations.collapsedHint
+        : localizations.expandedHint;
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return;
+    }
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      // Match ExpansionTile's delayed VoiceOver announcement behavior.
+      _timer?.cancel();
+      _timer = Timer(const Duration(seconds: 1), () {
+        SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection).catchError((
+          Object exception,
+          StackTrace stack,
+        ) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: exception,
+              stack: stack,
+              library: 'widgets library',
+              context: ErrorDescription('while sending expansible semantics announcement'),
+            ),
+          );
+        });
+        _timer?.cancel();
+        _timer = null;
+      });
+      return;
+    }
+
+    SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection).catchError((
+      Object exception,
+      StackTrace stack,
+    ) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets library',
+          context: ErrorDescription('while sending expansible semantics announcement'),
+        ),
+      );
+    });
+  }
+
   void _toggleExpansion() {
+    _announceExpansionChange();
     setState(() {
       // Rebuild with the header and the animating body.
       if (widget.controller.isExpanded) {
@@ -454,21 +506,42 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     final bool closed = !widget.controller.isExpanded && _animationController.isDismissed;
     final bool shouldRemoveBody = closed && !widget.maintainState;
 
+    final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
+    final String stateHint = widget.controller.isExpanded
+        ? localizations.collapsedHint
+        : localizations.expandedHint;
+
     final Widget result = Offstage(
       offstage: closed,
       child: TickerMode(enabled: !closed, child: widget.bodyBuilder(context, _animationController)),
     );
 
-    return AnimatedBuilder(
-      animation: _animationController.view,
-      builder: (BuildContext context, Widget? child) {
-        final Widget header = widget.headerBuilder(context, _animationController);
-        final Widget body = ClipRect(
-          child: Align(heightFactor: _heightFactor.value, child: child),
-        );
-        return widget.expansibleBuilder(context, header, body, _animationController);
-      },
-      child: shouldRemoveBody ? null : result,
+    final Widget semanticsChild = Semantics(
+      expanded: widget.controller.isExpanded,
+      onExpand: widget.controller.isExpanded ? null : widget.controller.expand,
+      onCollapse: !widget.controller.isExpanded ? null : widget.controller.collapse,
+      child: AnimatedBuilder(
+        animation: _animationController.view,
+        builder: (BuildContext context, Widget? child) {
+          final Widget header = widget.headerBuilder(context, _animationController);
+          final Widget body = ClipRect(
+            child: Align(heightFactor: _heightFactor.value, child: child),
+          );
+          return widget.expansibleBuilder(context, header, body, _animationController);
+        },
+        child: shouldRemoveBody ? null : result,
+      ),
     );
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return Semantics(
+        label: stateHint,
+        liveRegion: true,
+        accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
+        child: semanticsChild,
+      );
+    }
+
+    return semanticsChild;
   }
 }

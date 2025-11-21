@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'widgets_app_tester.dart';
@@ -533,5 +536,186 @@ void main() {
     controller.toggle();
     await tester.pumpAndSettle();
     expect(find.text('Body'), findsOneWidget);
+  });
+
+  testWidgets(
+    'Expansible sends semantics announcements on non-Android',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final ExpansibleController controller = ExpansibleController();
+
+      const DefaultWidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Expansible(
+            controller: controller,
+            headerBuilder: (BuildContext context, Animation<double> animation) =>
+                GestureDetector(onTap: controller.toggle, child: const Text('Header')),
+            bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
+          ),
+        ),
+      );
+
+      expect(tester.takeAnnouncements(), isEmpty);
+
+      controller.expand();
+      await tester.pumpAndSettle();
+      expect(
+        tester.takeAnnouncements().first,
+        isAccessibilityAnnouncement(localizations.collapsedHint),
+      );
+
+      controller.collapse();
+      await tester.pumpAndSettle();
+      expect(
+        tester.takeAnnouncements().first,
+        isAccessibilityAnnouncement(localizations.expandedHint),
+      );
+      controller.dispose();
+      handle.dispose();
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+      TargetPlatform.linux,
+      TargetPlatform.fuchsia,
+    }),
+  );
+
+  testWidgets(
+    'Expansible sends semantics announcements on iOS Device',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final ExpansibleController controller = ExpansibleController();
+
+      const DefaultWidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Expansible(
+            controller: controller,
+            headerBuilder: (BuildContext context, Animation<double> animation) =>
+                GestureDetector(onTap: controller.toggle, child: const Text('Header')),
+            bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
+          ),
+        ),
+      );
+
+      expect(tester.takeAnnouncements(), isEmpty);
+
+      controller.expand();
+      await tester.pump(const Duration(seconds: 1));
+      expect(
+        tester.takeAnnouncements().first,
+        isAccessibilityAnnouncement(localizations.collapsedHint),
+      );
+      controller.dispose();
+      handle.dispose();
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
+  );
+
+  testWidgets(
+    'Expansible uses live region on Android',
+    (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+
+      final ExpansibleController controller = ExpansibleController();
+      addTearDown(controller.dispose);
+
+      const DefaultWidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Expansible(
+            controller: controller,
+            animationStyle: AnimationStyle.noAnimation,
+            headerBuilder: (BuildContext context, Animation<double> animation) =>
+                GestureDetector(onTap: controller.toggle, child: const Text('Header')),
+            bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
+          ),
+        ),
+      );
+
+      SemanticsData data = tester.getSemantics(find.byType(Expansible)).getSemanticsData();
+      expect(data.label, localizations.expandedHint);
+
+      controller.expand();
+      await tester.pump();
+
+      data = tester.getSemantics(find.byType(Expansible)).getSemanticsData();
+      expect(data.label, localizations.collapsedHint);
+      handle.dispose();
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
+  testWidgets('Expansible reports error when SemanticsService.sendAnnouncement fails', (
+    WidgetTester tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    try {
+      final SemanticsHandle handle = tester.ensureSemantics();
+
+      final ExpansibleController controller = ExpansibleController();
+      addTearDown(controller.dispose);
+      final errors = <FlutterErrorDetails>[];
+      final void Function(FlutterErrorDetails)? originalOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        final String contextStr = details.context?.toString() ?? '';
+        if (contextStr.contains('while sending semantics announcement')) {
+          errors.add(details);
+          return;
+        }
+        originalOnError?.call(details);
+      };
+      addTearDown(() {
+        FlutterError.onError = originalOnError;
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+          SystemChannels.accessibility.name,
+          null,
+        );
+      });
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+        SystemChannels.accessibility.name,
+        (ByteData? message) async {
+          const codec = StandardMessageCodec();
+          final Object? decoded = codec.decodeMessage(message);
+          if (decoded is Map && decoded['type'] == 'announce') {
+            final data = ByteData(1);
+            data.setUint8(0, 255); // Invalid type byte
+            return data;
+          }
+          return null; // Success for other events
+        },
+      );
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Expansible(
+            controller: controller,
+            headerBuilder: (BuildContext context, Animation<double> animation) =>
+                GestureDetector(onTap: controller.toggle, child: const Text('Header')),
+            bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Header'));
+      await tester.pump();
+
+      expect(errors, isNotEmpty);
+      final bool hasAnnouncementError = errors.any(
+        (e) =>
+            e.exception.toString().contains('FormatException') &&
+            e.context.toString().contains('while sending semantics announcement'),
+      );
+      expect(hasAnnouncementError, isTrue);
+      handle.dispose();
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
   });
 }

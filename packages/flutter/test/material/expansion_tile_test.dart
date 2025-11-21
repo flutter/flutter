@@ -911,6 +911,7 @@ void main() {
         isButton: true,
         hasTapAction: true,
         hasFocusAction: true,
+        hasExpandedState: true,
         hasEnabledState: true,
         hasSelectedState: true,
         isEnabled: true,
@@ -928,6 +929,8 @@ void main() {
         isButton: true,
         hasTapAction: true,
         hasFocusAction: true,
+        hasExpandedState: true,
+        isExpanded: true,
         hasEnabledState: true,
         hasSelectedState: true,
         isEnabled: true,
@@ -989,69 +992,6 @@ void main() {
         defaultTargetPlatform == TargetPlatform.iOS ||
         defaultTargetPlatform == TargetPlatform.android,
   );
-
-  testWidgets('ExpansionTile reports error when SemanticsService.sendAnnouncement fails', (
-    WidgetTester tester,
-  ) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
-    try {
-      final errors = <FlutterErrorDetails>[];
-      final void Function(FlutterErrorDetails)? originalOnError = FlutterError.onError;
-      FlutterError.onError = (FlutterErrorDetails details) {
-        final String contextStr = details.context?.toString() ?? '';
-        if (contextStr.contains('while sending semantics announcement')) {
-          errors.add(details);
-          return;
-        }
-        originalOnError?.call(details);
-      };
-      addTearDown(() {
-        FlutterError.onError = originalOnError;
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
-          SystemChannels.accessibility.name,
-          null,
-        );
-      });
-
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
-        SystemChannels.accessibility.name,
-        (ByteData? message) async {
-          const codec = StandardMessageCodec();
-          final Object? decoded = codec.decodeMessage(message);
-          if (decoded is Map && decoded['type'] == 'announce') {
-            final data = ByteData(1);
-            data.setUint8(0, 255); // Invalid type byte
-            return data;
-          }
-          return null; // Success for other events
-        },
-      );
-
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Material(
-            child: ExpansionTile(
-              title: Text('Title'),
-              children: <Widget>[SizedBox(height: 100, width: 100)],
-            ),
-          ),
-        ),
-      );
-
-      await tester.tap(find.text('Title'));
-      await tester.pump();
-
-      expect(errors, isNotEmpty);
-      final bool hasAnnouncementError = errors.any(
-        (e) =>
-            e.exception.toString().contains('FormatException') &&
-            e.context.toString().contains('while sending semantics announcement'),
-      );
-      expect(hasAnnouncementError, isTrue);
-    } finally {
-      debugDefaultTargetPlatformOverride = null;
-    }
-  });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/132264.
   testWidgets(
@@ -2141,7 +2081,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/173060
   group('Semantics tests for non-iOS/macOS/android platforms', () {
     testWidgets(
-      'Semantics hint should show current state',
+      'Semantics hint is null on non-iOS/macOS platforms',
       (WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         const localizations = DefaultMaterialLocalizations();
@@ -2158,19 +2098,19 @@ void main() {
           ),
         );
 
-        // Test collapsed tile - should show "Collapsed" hint.
+        // Test collapsed tile - hint should be null.
         SemanticsNode semantics = tester.getSemantics(
           find.ancestor(of: find.byType(ListTile).first, matching: find.byType(Semantics)).first,
         );
         expect(semantics, isNotNull);
-        expect(semantics.hint, localizations.expandedHint);
+        expect(semantics.hint, isEmpty);
 
-        // Test expanded tile - should show "Expanded" hint.
+        // Test expanded tile - hint should be null.
         semantics = tester.getSemantics(
           find.ancestor(of: find.byType(ListTile).last, matching: find.byType(Semantics)).first,
         );
         expect(semantics, isNotNull);
-        expect(semantics.hint, localizations.collapsedHint);
+        expect(semantics.hint, isEmpty);
 
         handle.dispose();
       },
@@ -2182,8 +2122,10 @@ void main() {
       }),
     );
 
+    // Semantic hints are only provided on iOS and macOS.
+    // On other platforms, hints are null.
     testWidgets(
-      'Semantics hint updates when expansion state changes',
+      'Semantics hint is null on non-iOS/macOS platforms',
       (WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         const localizations = DefaultMaterialLocalizations();
@@ -2195,31 +2137,21 @@ void main() {
           ),
         );
 
-        // Initially collapsed - should show "Collapsed".
+        // Semantic hints should be null on non-iOS/macOS platforms.
         SemanticsNode semantics = tester.getSemantics(
           find.ancestor(of: find.byType(ListTile), matching: find.byType(Semantics)).first,
         );
-        expect(semantics.hint, localizations.expandedHint);
+        expect(semantics.hint, isEmpty);
 
         // Tap to expand.
         await tester.tap(find.text('Test Tile'));
         await tester.pumpAndSettle();
 
-        // Now expanded - should show "Expanded".
+        // Hint should still be null.
         semantics = tester.getSemantics(
           find.ancestor(of: find.byType(ListTile), matching: find.byType(Semantics)).first,
         );
-        expect(semantics.hint, localizations.collapsedHint);
-
-        // Tap to collapse.
-        await tester.tap(find.text('Test Tile'));
-        await tester.pumpAndSettle();
-
-        // Back to collapsed - should show "Collapsed" again.
-        semantics = tester.getSemantics(
-          find.ancestor(of: find.byType(ListTile), matching: find.byType(Semantics)).first,
-        );
-        expect(semantics.hint, localizations.expandedHint);
+        expect(semantics.hint, isEmpty);
 
         handle.dispose();
       },
