@@ -72,6 +72,24 @@ void main() {
       expect(buttonItems.first.onPressed, isNull);
     },
   );
+
+  testWidgets('CupertinoSpellCheckSuggestionsToolbar does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: CupertinoSpellCheckSuggestionsToolbar(
+              anchors: const TextSelectionToolbarAnchors(primaryAnchor: Offset(1, 1)),
+              buttonItems: const <ContextMenuButtonItem>[],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoSpellCheckSuggestionsToolbar)), Size.zero);
+  });
 }
 
 class _FakeEditableText extends EditableText {
