@@ -1872,6 +1872,33 @@ abstract class InheritedWidget extends ProxyWidget {
   /// object.
   @protected
   bool updateShouldNotify(covariant InheritedWidget oldWidget);
+
+  /// Whether dependencies on this widget should be automatically cleaned up
+  /// when they are not re-established during a build.
+  ///
+  /// When true, if a widget stops calling [BuildContext.dependOnInheritedWidgetOfExactType]
+  /// for this widget during a build, the dependency will be removed and future
+  /// changes to this widget will no longer trigger rebuilds of that dependent, else
+  /// dependencies persist even if not re-established during a build.
+  ///
+  /// This is useful for widgets where dependencies might be established outside
+  /// of the build method (e.g., in event handlers) and should not persist across
+  /// rebuilds.
+  ///
+  /// For example:
+  ///
+  /// ```dart
+  /// class MyTheme extends InheritedWidget {
+  ///   const MyTheme({required super.key, required super.child});
+  ///
+  ///   @override
+  ///   bool get cleanupUnusedDependents => true;
+  ///
+  ///   @override
+  ///   bool updateShouldNotify(MyTheme oldWidget) => true;
+  /// }
+  /// ```
+  bool get cleanupUnusedDependents => false;
 }
 
 /// [RenderObjectWidget]s provide the configuration for [RenderObjectElement]s,
@@ -4763,6 +4790,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     // We unregistered our dependencies in deactivate, but never cleared the list.
     // Since we're going to be reused, let's clear our list now.
     _dependencies?.clear();
+    _currentBuildDependencies?.clear();
     _hadUnsatisfiedDependencies = false;
     _updateInheritance();
     attachNotificationTree();
@@ -4865,6 +4893,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     // defunct, but accidentally retained Elements.
     _widget = null;
     _dependencies = null;
+    _currentBuildDependencies = null;
     _lifecycleState = _ElementLifecycle.defunct;
   }
 
@@ -5044,6 +5073,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   PersistentHashMap<Type, InheritedElement>? _inheritedElements;
   Set<InheritedElement>? _dependencies;
+  Set<InheritedElement>? _currentBuildDependencies;
   bool _hadUnsatisfiedDependencies = false;
 
   bool _debugCheckStateIsActiveForAncestorLookup() {
@@ -5076,6 +5106,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   InheritedWidget dependOnInheritedElement(InheritedElement ancestor, {Object? aspect}) {
     (_dependencies ??= HashSet<InheritedElement>()).add(ancestor);
+    (_currentBuildDependencies ??= HashSet<InheritedElement>()).add(ancestor);
+
     ancestor.updateDependencies(this, aspect);
     return ancestor.widget as InheritedWidget;
   }
@@ -5100,6 +5132,38 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     return _inheritedElements?[T];
+  }
+
+  /// Called after every build to remove dependencies that are no longer used.
+  ///
+  /// This method only removes dependencies for InheritedWidgets that have
+  /// [InheritedWidget.cleanupUnusedDependents] set to true and were not
+  /// re-established in the current build. Dependencies on widgets with
+  /// [InheritedWidget.cleanupUnusedDependents] set to false persist across
+  /// rebuilds even if not re-established.
+  void cleanupRemovedDependencies() {
+    if (_dependencies != null && _currentBuildDependencies != null) {
+      final Set<InheritedElement> toRemove = HashSet<InheritedElement>();
+
+      for (final InheritedElement dependency in _dependencies!) {
+        // Check if this dependency was re-established in the current build
+        final bool inCurrentBuild = _currentBuildDependencies!.contains(dependency);
+
+        if (!inCurrentBuild) {
+          // Dependency was NOT re-established in this build
+          final InheritedWidget widget = dependency.widget as InheritedWidget;
+          if (widget.cleanupUnusedDependents) {
+            // The widget wants cleanup and the dependency wasn't re-established, so remove it
+            toRemove.add(dependency);
+          }
+        }
+      }
+
+      for (final InheritedElement dependency in toRemove) {
+        dependency.removeDependent(this);
+        _dependencies!.remove(dependency);
+      }
+    }
   }
 
   /// Called in [Element.mount] and [Element.activate] to register this element in
@@ -5811,6 +5875,8 @@ abstract class ComponentElement extends Element {
   @override
   @pragma('vm:notify-debugger-on-exception')
   void performRebuild() {
+    _currentBuildDependencies?.clear();
+
     Widget built;
     try {
       assert(() {
@@ -5860,6 +5926,7 @@ abstract class ComponentElement extends Element {
       } catch (_) {}
       _child = updateChild(null, built, slot);
     }
+    cleanupRemovedDependencies();
   }
 
   /// Subclasses should override this function to actually call the appropriate
