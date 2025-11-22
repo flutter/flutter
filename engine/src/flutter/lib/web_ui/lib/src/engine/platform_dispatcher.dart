@@ -28,7 +28,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   EnginePlatformDispatcher() {
     _addBrightnessMediaQueryListener();
     HighContrastSupport.instance.addListener(_updateHighContrast);
-    _addFontSizeObserver();
     _addTypographySettingsObserver();
     _addLocaleChangedListener();
     registerHotRestartListener(dispose);
@@ -80,7 +79,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   void dispose() {
     _removeBrightnessMediaQueryListener();
-    _disconnectFontSizeObserver();
     _disconnectTypographySettingsObserver();
     _removeLocaleChangedListener();
     HighContrastSupport.instance.removeListener(_updateHighContrast);
@@ -996,52 +994,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   @override
   bool get alwaysUse24HourFormat => configuration.alwaysUse24HourFormat;
 
-  /// Updates [textScaleFactor] and invokes [onTextScaleFactorChanged] and
-  /// [onPlatformConfigurationChanged] callbacks if [textScaleFactor] changed.
-  void _updateTextScaleFactor(double value) {
-    if (configuration.textScaleFactor != value) {
-      configuration = configuration.copyWith(textScaleFactor: value);
-      invokeOnPlatformConfigurationChanged();
-      invokeOnTextScaleFactorChanged();
-    }
-  }
-
-  /// Watches for font-size changes in the browser's <html> element to
-  /// recalculate [textScaleFactor].
-  ///
-  /// Updates [textScaleFactor] with the new value.
-  DomMutationObserver? _fontSizeObserver;
-
-  /// Set the callback function for updating [textScaleFactor] based on
-  /// font-size changes in the browser's <html> element.
-  void _addFontSizeObserver() {
-    const String styleAttribute = 'style';
-
-    _fontSizeObserver = createDomMutationObserver((
-      JSArray<JSAny?> mutations,
-      DomMutationObserver _,
-    ) {
-      for (final JSAny? mutation in mutations.toDart) {
-        final DomMutationRecord record = mutation! as DomMutationRecord;
-        if (record.type == 'attributes' && record.attributeName == styleAttribute) {
-          final double newTextScaleFactor = findBrowserTextScaleFactor();
-          _updateTextScaleFactor(newTextScaleFactor);
-        }
-      }
-    });
-    _fontSizeObserver!.observe(
-      domDocument.documentElement!,
-      attributes: true,
-      attributeFilter: <String>[styleAttribute],
-    );
-  }
-
-  /// Remove the observer for font-size changes in the browser's <html> element.
-  void _disconnectFontSizeObserver() {
-    _fontSizeObserver?.disconnect();
-    _fontSizeObserver = null;
-  }
-
   /// Watches for resize changes on an off-screen invisible element to
   /// recalculate [lineHeightScaleFactorOverride], [letterSpacingOverride],
   /// [wordSpacingOverride], and [paragraphSpacingOverride].
@@ -1050,6 +1002,16 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// [wordSpacingOverride], and [paragraphSpacingOverride] with the new values.
   DomResizeObserver? _typographySettingsObserver;
   DomElement? _typographyMeasurementElement;
+
+  /// Updates [textScaleFactor] and returns true if [textScaleFactor] changed.
+  /// If not then returns false.
+  bool _updateTextScaleFactor(double value) {
+    if (configuration.textScaleFactor != value) {
+      configuration = configuration.apply(textScaleFactor: value);
+      return true;
+    }
+    return false;
+  }
 
   /// Updates [lineHeightScaleFactorOverride] and return true if
   /// [lineHeightScaleFactorOverride] changed. If not then returns false.
@@ -1091,9 +1053,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     return false;
   }
 
-  /// Set the callback function for updating [lineHeightScaleFactorOverride],
-  /// [letterSpacingOverride], [wordSpacingOverride], and [paragraphSpacingOverride]
-  /// based on the sizing changes of an off-screen element with text.
+  /// Sets the callback function for updating [textScaleFactor],
+  /// [lineHeightScaleFactorOverride], [letterSpacingOverride],
+  /// [wordSpacingOverride], and [paragraphSpacingOverride] based on the sizing
+  /// changes of an off-screen element with text.
   void _addTypographySettingsObserver() {
     _typographyMeasurementElement = createDomHTMLParagraphElement();
     _typographyMeasurementElement!.text = 'flutter typography measurement';
@@ -1126,14 +1089,16 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       List<DomResizeObserverEntry> entries,
       DomResizeObserver observer,
     ) {
+      final double computedTextScaleFactor = findBrowserTextScaleFactor();
       final double? lineHeight = parseNumericStyleProperty(
         _typographyMeasurementElement!,
         'line-height',
       )?.toDouble();
       final double? fontSize = parseFontSize(_typographyMeasurementElement!)?.toDouble();
-      final double? computedLineHeightScaleFactor = fontSize != null && lineHeight != null
+      final double computedLineHeightScaleFactor =
+          fontSize != null && lineHeight != null && lineHeight != spacingDefault
           ? lineHeight / fontSize
-          : null;
+          : defaultLineHeightFactor;
       final double? computedWordSpacing = parseNumericStyleProperty(
         _typographyMeasurementElement!,
         'word-spacing',
@@ -1151,11 +1116,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         'margin-bottom',
       )?.toDouble();
 
+      bool computedTextScaleFactorChanged = false;
       bool computedLineHeightScaleFactorChanged = false;
       bool computedLetterSpacingChanged = false;
       bool computedWordSpacingChanged = false;
       bool computedParagraphSpacingChanged = false;
 
+      computedTextScaleFactorChanged = _updateTextScaleFactor(computedTextScaleFactor);
       computedLineHeightScaleFactorChanged = _updateLineHeightScaleFactorOverride(
         computedLineHeightScaleFactor == defaultLineHeightFactor
             ? null
@@ -1171,12 +1138,22 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         computedParagraphSpacing == spacingDefault ? null : computedParagraphSpacing,
       );
 
-      if (computedLineHeightScaleFactorChanged ||
+      final bool metricsChanged =
+          computedLineHeightScaleFactorChanged ||
           computedLetterSpacingChanged ||
           computedWordSpacingChanged ||
-          computedParagraphSpacingChanged) {
+          computedParagraphSpacingChanged;
+
+      if (computedTextScaleFactorChanged || metricsChanged) {
         invokeOnPlatformConfigurationChanged();
-        invokeOnMetricsChanged();
+
+        if (computedTextScaleFactorChanged) {
+          invokeOnTextScaleFactorChanged();
+        }
+
+        if (metricsChanged) {
+          invokeOnMetricsChanged();
+        }
       }
     });
 

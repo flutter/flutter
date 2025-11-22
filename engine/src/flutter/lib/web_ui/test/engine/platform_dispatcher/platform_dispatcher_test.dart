@@ -281,6 +281,15 @@ void testMain() {
         ui.PlatformDispatcher.instance.onTextScaleFactorChanged = oldCallback;
       });
 
+      // Wait for next frame.
+      Future<void> waitForResizeObserver() {
+        final Completer<void> completer = Completer<void>();
+        domWindow.requestAnimationFrame((_) {
+          Timer.run(completer.complete);
+        });
+        return completer.future;
+      }
+
       root.style.fontSize = '16px';
 
       bool isCalled = false;
@@ -289,18 +298,18 @@ void testMain() {
       };
 
       root.style.fontSize = '20px';
-      await Future<void>.delayed(Duration.zero);
+      await waitForResizeObserver();
       expect(root.style.fontSize, '20px');
       expect(isCalled, isTrue);
-      expect(ui.PlatformDispatcher.instance.textScaleFactor, findBrowserTextScaleFactor());
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.25);
 
       isCalled = false;
 
       root.style.fontSize = '16px';
-      await Future<void>.delayed(Duration.zero);
+      await waitForResizeObserver();
       expect(root.style.fontSize, '16px');
       expect(isCalled, isTrue);
-      expect(ui.PlatformDispatcher.instance.textScaleFactor, findBrowserTextScaleFactor());
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.0);
     });
 
     test('calls onMetricsChanged when the typography measurement element size changes', () async {
@@ -371,6 +380,64 @@ void testMain() {
       expect(ui.PlatformDispatcher.instance.letterSpacingOverride, expectedLetterSpacing);
       expect(ui.PlatformDispatcher.instance.wordSpacingOverride, expectedWordSpacing);
       expect(ui.PlatformDispatcher.instance.paragraphSpacingOverride, expectedParagraphSpacing);
+    });
+
+    test('updates lineHeightScaleFactorOverride only when line-height is explicitly set', () async {
+      final DomElement root = domDocument.documentElement!;
+      final DomElement style = createDomHTMLStyleElement(null);
+
+      // Wait for next frame.
+      Future<void> waitForResizeObserver() {
+        final Completer<void> completer = Completer<void>();
+        domWindow.requestAnimationFrame((_) {
+          Timer.run(completer.complete);
+        });
+        return completer.future;
+      }
+
+      addTearDown(() {
+        style.text = null;
+        style.remove();
+      });
+
+      style.text = '*{ font-size: 20px !important; }';
+      root.append(style);
+      await waitForResizeObserver();
+      expect(root.contains(style), isTrue);
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.25);
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, null);
+
+      style.remove();
+      await waitForResizeObserver();
+      expect(root.contains(style), isFalse);
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.0);
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, null);
+
+      style.text = '*{ font-size: 20px !important; line-height: 2 !important; }';
+      root.append(style);
+      await waitForResizeObserver();
+      expect(root.contains(style), isTrue);
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.25);
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, 2.0);
+
+      style.remove();
+      await waitForResizeObserver();
+      expect(root.contains(style), isFalse);
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.0);
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, null);
+
+      style.text = '*{ font-size: 32px !important; line-height: 3 !important; }';
+      root.append(style);
+      await waitForResizeObserver();
+      expect(root.contains(style), isTrue);
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 2.0);
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, 3.0);
+
+      style.remove();
+      await waitForResizeObserver();
+      expect(root.contains(style), isFalse);
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.0);
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, null);
     });
 
     test('disposes all its views', () {
