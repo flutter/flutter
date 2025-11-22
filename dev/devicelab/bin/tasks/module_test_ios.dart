@@ -54,6 +54,9 @@ Future<void> main() async {
       final File marquee = File(path.join(flutterModuleLibSource.path, 'marquee'));
       marquee.copySync(path.join(flutterModuleLibDestination.path, 'marquee.dart'));
 
+      final File resize = File(path.join(flutterModuleLibSource.path, 'resize'));
+      resize.copySync(path.join(flutterModuleLibDestination.path, 'resize.dart'));
+
       section('Create package with native assets');
 
       const String ffiPackageName = 'ffi_package';
