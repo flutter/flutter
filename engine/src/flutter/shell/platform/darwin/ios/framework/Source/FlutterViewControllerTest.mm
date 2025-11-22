@@ -142,6 +142,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
               nextAction:(void (^)())next API_AVAILABLE(ios(13.4));
 - (void)discreteScrollEvent:(UIPanGestureRecognizer*)recognizer;
 - (void)updateViewportMetricsIfNeeded;
+- (void)updateAutoResizeConstraints;
+- (void)checkAndUpdateAutoResizeConstraints;
 - (void)onUserSettingsChanged:(NSNotification*)notification;
 - (void)applicationWillTerminate:(NSNotification*)notification;
 - (void)goToApplicationLifecycle:(nonnull NSString*)state;
@@ -997,6 +999,44 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMVerifyAll(mockEngine);
 }
 
+- (void)testUpdatedViewportMetricsDoesResizeFlutterViewWhenAutoResizable {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                        nibName:nil
+                                                                         bundle:nil];
+  id mockVC = OCMPartialMock(realVC);
+  mockEngine.viewController = mockVC;
+
+  OCMExpect([mockVC updateAutoResizeConstraints]);
+
+  [mockVC setAutoResizable:YES];
+
+  [mockVC viewDidLayoutSubviews];
+
+  OCMVerifyAll(mockVC);
+}
+
+- (void)testUpdatedViewportMetricsDoesNotResizeFlutterViewWhenNotAutoResizable {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                        nibName:nil
+                                                                         bundle:nil];
+  id mockVC = OCMPartialMock(realVC);
+  mockEngine.viewController = mockVC;
+
+  OCMReject([mockVC updateAutoResizeConstraints]);
+
+  [mockVC setAutoResizable:NO];
+
+  [mockVC viewDidLayoutSubviews];
+
+  OCMVerifyAll(mockVC);
+}
+
 - (void)testUpdateViewportMetricsIfNeeded_DoesNotInvokeEngineWhenShouldBeIgnoredDuringRotation {
   FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
   [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
@@ -1277,6 +1317,36 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   id mockTraitCollection = OCMClassMock([UITraitCollection class]);
   OCMStub([mockTraitCollection userInterfaceStyle]).andReturn(style);
   return mockTraitCollection;
+}
+
+- (void)testTraitCollectionDidChangeCallsResetIntrinsicContentSizeWhenAutoResizable {
+  // Setup test.
+  id mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                        nibName:nil
+                                                                         bundle:nil];
+  id partialMockVC = OCMPartialMock(realVC);
+
+  id mockFlutterView = OCMClassMock([FlutterView class]);
+  OCMStub([partialMockVC flutterView]).andReturn(mockFlutterView);
+
+  // Ensure isAutoResizable is YES
+  OCMStub([partialMockVC isAutoResizable]).andReturn(YES);
+
+  // Expect resetIntrinsicContentSize to be called on mockFlutterView
+  OCMExpect([mockFlutterView resetIntrinsicContentSize]);
+
+  // Exercise behavior under test.
+  [partialMockVC traitCollectionDidChange:nil];
+
+  // Verify behavior.
+  OCMVerifyAll(mockFlutterView);
+
+  // Clean up mocks
+  [partialMockVC stopMocking];
+  [mockFlutterView stopMocking];
 }
 
 #pragma mark - Platform Contrast

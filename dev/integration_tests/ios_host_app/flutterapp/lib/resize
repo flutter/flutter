@@ -1,0 +1,42 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/material.dart';
+
+class ResizeApp extends StatefulWidget {
+  /// Creates the [ResizeApp].
+  const ResizeApp({super.key});
+
+  @override
+  State<ResizeApp> createState() => _ResizeAppState();
+}
+
+class _ResizeAppState extends State<ResizeApp> {
+  int _listSize = 1;
+  void _addToList() {
+    setState(() {
+      _listSize++;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _addToList, // The tap anywhere logic
+      child: Center(
+        heightFactor: 1,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              for (int i = 0; i < _listSize; i++)
+                Container(color: HSVColor.fromAHSV(1, (10.0 * i), 1, 1).toColor(), height: 100),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
