@@ -40,6 +40,7 @@ async function timeout(promise, duration, debugName) {
 }
 
 /**
+ * @deprecated Flutter's service worker is deprecated and will be removed in a future Flutter release.
  * Handles loading/reloading Flutter's service worker, if configured.
  *
  * @see: https://developers.google.com/web/fundamentals/primers/service-workers

@@ -8,10 +8,10 @@
 #include <cstdint>
 #include <memory>
 
-#include "flutter/third_party/abseil-cpp/absl/container/flat_hash_map.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/sigma.h"
+#include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
 
 namespace impeller {
 

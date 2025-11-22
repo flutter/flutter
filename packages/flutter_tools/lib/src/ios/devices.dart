@@ -1055,6 +1055,7 @@ class IOSDevice extends Device {
         bundlePath: package.deviceBundlePath,
         bundleId: package.id,
         launchArguments: launchArguments,
+        shutdownHooks: globals.shutdownHooks,
       );
 
       // If it succeeds to launch with LLDB, return, otherwise continue on to
@@ -1709,14 +1710,8 @@ class IOSDeviceLogReader extends DeviceLogReader {
       return;
     }
     _iMobileDevice.startLogger(_deviceId, _isWirelesslyConnected).then<void>((Process process) {
-      process.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen(_newSyslogLineHandler());
-      process.stderr
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen(_newSyslogLineHandler());
+      process.stdout.transform(utf8LineDecoder).listen(_newSyslogLineHandler());
+      process.stderr.transform(utf8LineDecoder).listen(_newSyslogLineHandler());
       process.exitCode.whenComplete(() {
         if (!linesController.hasListener) {
           return;

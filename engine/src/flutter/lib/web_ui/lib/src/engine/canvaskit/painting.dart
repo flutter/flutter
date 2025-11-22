@@ -323,21 +323,37 @@ class CkFragmentProgram implements ui.FragmentProgram {
 
   @override
   ui.FragmentShader fragmentShader() {
-    return CkFragmentShader(name, effect, floatCount, textureCount);
+    return CkFragmentShader(name, effect, this);
+  }
+
+  int _getShaderIndex(String name, int index) {
+    int result = 0;
+    for (final uniform in uniforms) {
+      if (uniform.name == name) {
+        if (index < 0 || index >= uniform.floatCount) {
+          throw IndexError.withLength(index, uniform.floatCount);
+        }
+        result += index;
+        break;
+      }
+      result += uniform.floatCount;
+    }
+    return result;
   }
 }
 
 class CkFragmentShader implements ui.FragmentShader, CkShader {
-  CkFragmentShader(this.name, this.effect, int floatCount, int textureCount)
-    : floats = mallocFloat32List(floatCount + textureCount * 2),
-      samplers = List<SkShader?>.filled(textureCount, null),
-      lastFloatIndex = floatCount;
+  CkFragmentShader(this.name, this.effect, this._program)
+    : floats = mallocFloat32List(_program.floatCount + _program.textureCount * 2),
+      samplers = List<SkShader?>.filled(_program.textureCount, null),
+      lastFloatIndex = _program.floatCount;
 
   final String name;
   final SkRuntimeEffect effect;
   final int lastFloatIndex;
   final SkFloat32List floats;
   final List<SkShader?> samplers;
+  final CkFragmentProgram _program;
 
   @visibleForTesting
   UniqueRef<SkShader>? ref;
@@ -404,6 +420,33 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
 
   @override
   ui.UniformFloatSlot getUniformFloat(String name, [int? index]) {
-    throw UnsupportedError('getUniformFloat is not supported on the web.');
+    index ??= 0;
+    final int shaderIndex = _program._getShaderIndex(name, index);
+    return CkUniformFloatSlot._(this, index, name, shaderIndex);
   }
+
+  @override
+  ui.ImageSamplerSlot getImageSampler(String name) {
+    throw UnsupportedError('getImageSampler is not supported on the web.');
+  }
+}
+
+class CkUniformFloatSlot implements ui.UniformFloatSlot {
+  CkUniformFloatSlot._(this._shader, this.index, this.name, this.shaderIndex);
+
+  final CkFragmentShader _shader;
+
+  @override
+  final int index;
+
+  @override
+  final String name;
+
+  @override
+  void set(double val) {
+    _shader.setFloat(shaderIndex, val);
+  }
+
+  @override
+  final int shaderIndex;
 }

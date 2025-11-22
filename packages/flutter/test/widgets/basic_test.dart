@@ -1220,6 +1220,214 @@ void main() {
 
       expect(properties.properties.first.value, colorToPaint);
     });
+
+    testWidgets('ColoredBox - default isAntiAlias', (WidgetTester tester) async {
+      await tester.pumpWidget(const ColoredBox(color: colorToPaint));
+      expect(find.byType(ColoredBox), findsOneWidget);
+      final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
+
+      renderColoredBox.paint(mockContext, Offset.zero);
+      expect(mockCanvas.paints.single.isAntiAlias, isTrue);
+    });
+
+    testWidgets('ColoredBox - passing isAntiAlias = false', (WidgetTester tester) async {
+      await tester.pumpWidget(const ColoredBox(color: colorToPaint, isAntiAlias: false));
+      expect(find.byType(ColoredBox), findsOneWidget);
+      final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
+
+      renderColoredBox.paint(mockContext, Offset.zero);
+      expect(mockCanvas.paints.single.isAntiAlias, isFalse);
+    });
+
+    // This test verifies how `ColoredBox.isAntiAlias` affects rendering.
+    // The first row uses `isAntiAlias: true`, showing gaps between the white backgrounds.
+    // The second row uses `isAntiAlias: false`, demonstrating no gaps between the white backgrounds.
+    // The third row contains three tilted boxes with `isAntiAlias` set to true, false, and false, respectively.
+    testWidgets('ColoredBox golden test - anti-aliasing and rotation variations', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Center(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: RepaintBoundary(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 8,
+                  children: <Widget>[
+                    // Intentionally 4% larger than the original size to test anti-aliasing
+                    Transform.scale(
+                      scale: 1.04,
+                      child: const ColoredBox(
+                        color: Colors.orange,
+                        child: Padding(
+                          padding: EdgeInsets.all(2),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              ColoredBox(
+                                color: Colors.white,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    'Short',
+                                    style: TextStyle(fontSize: 16, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                              ColoredBox(
+                                color: Colors.white,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    'Just text ',
+                                    style: TextStyle(fontSize: 14, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                              ColoredBox(
+                                color: Colors.white,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    ' Tall text ',
+                                    style: TextStyle(fontSize: 18, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                              ColoredBox(
+                                color: Colors.white,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    'Medium',
+                                    style: TextStyle(fontSize: 32, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Transform.scale(
+                      scale: 1.04,
+                      child: const ColoredBox(
+                        color: Colors.orange,
+                        isAntiAlias: false,
+                        child: Padding(
+                          padding: EdgeInsets.all(2),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              ColoredBox(
+                                color: Colors.white,
+                                isAntiAlias: false,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    'Short',
+                                    style: TextStyle(fontSize: 16, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                              ColoredBox(
+                                color: Colors.white,
+                                isAntiAlias: false,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    'Just text ',
+                                    style: TextStyle(fontSize: 14, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                              ColoredBox(
+                                color: Colors.white,
+                                isAntiAlias: false,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    ' Tall text ',
+                                    style: TextStyle(fontSize: 18, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                              ColoredBox(
+                                color: Colors.white,
+                                isAntiAlias: false,
+                                child: Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Text(
+                                    'Medium',
+                                    style: TextStyle(fontSize: 32, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        SizedBox.square(
+                          dimension: 80,
+                          child: Center(
+                            child: SizedBox.square(
+                              dimension: 50,
+                              child: Transform.rotate(
+                                angle: math.pi / 5,
+                                child: const ColoredBox(color: Colors.blue),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox.square(
+                          dimension: 80,
+                          child: Center(
+                            child: SizedBox.square(
+                              dimension: 50,
+                              child: Transform.rotate(
+                                angle: math.pi / 5,
+                                child: const ColoredBox(color: Colors.amber, isAntiAlias: false),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox.square(
+                          dimension: 80,
+                          child: Center(
+                            child: SizedBox.square(
+                              dimension: 50,
+                              child: Transform.rotate(
+                                angle: math.pi / 5,
+                                child: Transform.scale(
+                                  scale: 1.2,
+                                  child: const ColoredBox(color: Colors.teal, isAntiAlias: false),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      await expectLater(find.byType(RepaintBoundary), matchesGoldenFile('basic.ColoredBox.0.png'));
+    });
   });
 
   testWidgets('Inconsequential golden test', (WidgetTester tester) async {

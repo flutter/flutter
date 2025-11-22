@@ -30,11 +30,11 @@ void main() {
     );
     expect(
       radioBackgroundColor.backgroundColor!.resolve(const <WidgetState>{WidgetState.selected}),
-      Colors.greenAccent.withOpacity(0.5),
+      Colors.greenAccent.withValues(alpha: 0.5),
     );
     expect(
       radioBackgroundColor.backgroundColor!.resolve(const <WidgetState>{}),
-      Colors.grey.shade300.withOpacity(0.3),
+      Colors.grey.shade300.withValues(alpha: 0.3),
     );
 
     final Radio<example.RadioType> radioSide = tester.widget<Radio<example.RadioType>>(

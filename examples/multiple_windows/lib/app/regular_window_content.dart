@@ -140,16 +140,3 @@ class CallbackRegularWindowControllerDelegate
 
   final VoidCallback onDestroyed;
 }
-
-class CallbackDialogWindowControllerDelegate
-    with DialogWindowControllerDelegate {
-  CallbackDialogWindowControllerDelegate({required this.onDestroyed});
-
-  @override
-  void onWindowDestroyed() {
-    onDestroyed();
-    super.onWindowDestroyed();
-  }
-
-  final VoidCallback onDestroyed;
-}

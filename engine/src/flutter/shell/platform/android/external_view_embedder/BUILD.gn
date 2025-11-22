@@ -30,8 +30,7 @@ source_set("external_view_embedder") {
     "//flutter/skia",
   ]
 
-  public_deps =
-      [ "//flutter/third_party/abseil-cpp/absl/container:flat_hash_set" ]
+  public_deps = [ "//third_party/abseil-cpp/absl/container:flat_hash_set" ]
 }
 
 test_fixtures("external_view_embedder_fixtures") {

@@ -38,6 +38,7 @@
                 "--runtime-mode",
                 "debug",
                 "--prebuilt-dart-sdk",
+                "--no-lto",
                 "--rbe",
                 "--no-goma",
                 "--gn-args=dart_dynamic_modules=true"

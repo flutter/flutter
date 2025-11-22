@@ -1103,10 +1103,9 @@ void main() {
         ),
       ),
     );
-
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.click,
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
 
     // Test default cursor when disabled
@@ -2771,5 +2770,16 @@ void main() {
       // Radio semantics should not have hint.
       expect(semanticNode.hint, anyOf(isNull, isEmpty));
     });
+  });
+
+  testWidgets('Radio does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(child: SizedBox.shrink(child: Radio<bool>(value: true))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Radio<bool>)), Size.zero);
   });
 }

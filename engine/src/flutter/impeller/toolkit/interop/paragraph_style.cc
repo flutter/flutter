@@ -12,7 +12,7 @@ ParagraphStyle::ParagraphStyle() = default;
 
 ParagraphStyle::~ParagraphStyle() = default;
 
-void ParagraphStyle::SetFontWeight(txt::FontWeight weight) {
+void ParagraphStyle::SetFontWeight(int weight) {
   style_.font_weight = weight;
 }
 
