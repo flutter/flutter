@@ -1,0 +1,67 @@
+{
+  "reorderItemToStart": "प्रारंभ करबाक लेल घसकाबू",
+  "@reorderItemToStart": {
+    "description": "The audio announcement to move an item in a Reorderable List to the start of the list."
+  },
+  "reorderItemToEnd": "अंत मे जाउ",
+  "@reorderItemToEnd": {
+    "description": "The audio announcement to move an item in a Reorderable List to the end of the list."
+  },
+  "reorderItemUp": "उप्पर जाउ",
+  "@reorderItemUp": {
+    "description": "The audio announcement to move an item in a Reorderable List up in the list when it is oriented vertically."
+  },
+  "reorderItemDown": "नीच्चाँ जाउ",
+  "@reorderItemDown": {
+    "description": "The audio announcement to move an item in a Reorderable List down in the list when it is oriented vertically."
+  },
+  "reorderItemLeft": "बामाँ जाउ",
+  "@reorderItemLeft": {
+    "description": "The audio announcement to move an item in a Reorderable List left in the list when it is oriented horizontally."
+  },
+  "reorderItemRight": "दहिन्ना जाउ",
+  "@reorderItemRight": {
+    "description": "The audio announcement to move an item in a Reorderable List right in the list when it is oriented horizontally."
+  },
+  "searchResultsFound": "Search results found",
+  "@searchResultsFound": {
+    "description": "The audio announcement when Autocomplete search results become available."
+  },
+  "noResultsFound": "No results found",
+  "@noResultsFound": {
+    "description": "The audio announcement when Autocomplete search results become unavailable."
+  },
+  "copyButtonLabel": "कापी करू",
+  "@copyButtonLabel": {
+    "description": "The label for copy buttons and menu items."
+  },
+  "cutButtonLabel": "काटू",
+  "@cutButtonLabel": {
+    "description": "The label for cut buttons and menu items."
+  },
+  "lookUpButtonLabel": "उप्पर देखू",
+  "@lookUpButtonLabel": {
+    "description": "The label for the Look Up button and menu items."
+  },
+  "searchWebButtonLabel": "वेब खोजू",
+  "@searchWebButtonLabel": {
+    "description": "The label for the Search Web button and menu items."
+  },
+  "shareButtonLabel": "साझा",
+  "@shareButtonLabel": {
+    "description": "The label for the Share button and menu items."
+  },
+  "pasteButtonLabel": "साटू",
+  "@pasteButtonLabel": {
+    "description": "The label for paste buttons and menu items."
+  },
+  "selectAllButtonLabel": "सभटा चुनू",
+  "@selectAllButtonLabel": {
+    "description": "The label for select-all buttons and menu items."
+  },
+  "radioButtonUnselectedLabel": "Not selected",
+  "@radioButtonUnselectedLabel": {
+    "description": "The accessibility hint for an unselected radio button.",
+    "type": "text"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "reorderItemToStart": "Beno yantika",
+  "@reorderItemToStart": {
+    "description": "The audio announcement to move an item in a Reorderable List to the start of the list."
+  },
+  "reorderItemToEnd": "Kwenda tii na nsuka",
+  "@reorderItemToEnd": {
+    "description": "The audio announcement to move an item in a Reorderable List to the end of the list."
+  },
+  "reorderItemUp": "Telama na zulu",
+  "@reorderItemUp": {
+    "description": "The audio announcement to move an item in a Reorderable List up in the list when it is oriented vertically."
+  },
+  "reorderItemDown": "Beno kwenda na nsi",
+  "@reorderItemDown": {
+    "description": "The audio announcement to move an item in a Reorderable List down in the list when it is oriented vertically."
+  },
+  "reorderItemLeft": "Kwenda na diboko ya kimama",
+  "@reorderItemLeft": {
+    "description": "The audio announcement to move an item in a Reorderable List left in the list when it is oriented horizontally."
+  },
+  "reorderItemRight": "Kwenda na diboko ya kitata",
+  "@reorderItemRight": {
+    "description": "The audio announcement to move an item in a Reorderable List right in the list when it is oriented horizontally."
+  },
+  "searchResultsFound": "Search results found",
+  "@searchResultsFound": {
+    "description": "The audio announcement when Autocomplete search results become available."
+  },
+  "noResultsFound": "No results found",
+  "@noResultsFound": {
+    "description": "The audio announcement when Autocomplete search results become unavailable."
+  },
+  "copyButtonLabel": "Kubaka yo",
+  "@copyButtonLabel": {
+    "description": "The label for copy buttons and menu items."
+  },
+  "cutButtonLabel": "Katula",
+  "@cutButtonLabel": {
+    "description": "The label for cut buttons and menu items."
+  },
+  "lookUpButtonLabel": "Tala na zulu",
+  "@lookUpButtonLabel": {
+    "description": "The label for the Look Up button and menu items."
+  },
+  "searchWebButtonLabel": "Sosa na Internet",
+  "@searchWebButtonLabel": {
+    "description": "The label for the Search Web button and menu items."
+  },
+  "shareButtonLabel": "Kabula",
+  "@shareButtonLabel": {
+    "description": "The label for the Share button and menu items."
+  },
+  "pasteButtonLabel": "Bima ya kutula",
+  "@pasteButtonLabel": {
+    "description": "The label for paste buttons and menu items."
+  },
+  "selectAllButtonLabel": "Pona yonso",
+  "@selectAllButtonLabel": {
+    "description": "The label for select-all buttons and menu items."
+  },
+  "radioButtonUnselectedLabel": "Not selected",
+  "@radioButtonUnselectedLabel": {
+    "description": "The accessibility hint for an unselected radio button.",
+    "type": "text"
+  }
+}

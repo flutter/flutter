@@ -1,0 +1,67 @@
+{
+  "reorderItemToStart": "Paglihok aron magsugod",
+  "@reorderItemToStart": {
+    "description": "The audio announcement to move an item in a Reorderable List to the start of the list."
+  },
+  "reorderItemToEnd": "Paglihok hangtod sa kataposan",
+  "@reorderItemToEnd": {
+    "description": "The audio announcement to move an item in a Reorderable List to the end of the list."
+  },
+  "reorderItemUp": "Pag-uswag",
+  "@reorderItemUp": {
+    "description": "The audio announcement to move an item in a Reorderable List up in the list when it is oriented vertically."
+  },
+  "reorderItemDown": "Pag-adto sa ubos",
+  "@reorderItemDown": {
+    "description": "The audio announcement to move an item in a Reorderable List down in the list when it is oriented vertically."
+  },
+  "reorderItemLeft": "Pag-adto sa wala",
+  "@reorderItemLeft": {
+    "description": "The audio announcement to move an item in a Reorderable List left in the list when it is oriented horizontally."
+  },
+  "reorderItemRight": "Paglihok sa tuo",
+  "@reorderItemRight": {
+    "description": "The audio announcement to move an item in a Reorderable List right in the list when it is oriented horizontally."
+  },
+  "searchResultsFound": "Search results found",
+  "@searchResultsFound": {
+    "description": "The audio announcement when Autocomplete search results become available."
+  },
+  "noResultsFound": "No results found",
+  "@noResultsFound": {
+    "description": "The audio announcement when Autocomplete search results become unavailable."
+  },
+  "copyButtonLabel": "Copy",
+  "@copyButtonLabel": {
+    "description": "The label for copy buttons and menu items."
+  },
+  "cutButtonLabel": "Pagputol",
+  "@cutButtonLabel": {
+    "description": "The label for cut buttons and menu items."
+  },
+  "lookUpButtonLabel": "Tan-awa sa itaas",
+  "@lookUpButtonLabel": {
+    "description": "The label for the Look Up button and menu items."
+  },
+  "searchWebButtonLabel": "Pagpangita sa Web",
+  "@searchWebButtonLabel": {
+    "description": "The label for the Search Web button and menu items."
+  },
+  "shareButtonLabel": "Pag-ambit",
+  "@shareButtonLabel": {
+    "description": "The label for the Share button and menu items."
+  },
+  "pasteButtonLabel": "Paste",
+  "@pasteButtonLabel": {
+    "description": "The label for paste buttons and menu items."
+  },
+  "selectAllButtonLabel": "Pagpili sa tanan",
+  "@selectAllButtonLabel": {
+    "description": "The label for select-all buttons and menu items."
+  },
+  "radioButtonUnselectedLabel": "Not selected",
+  "@radioButtonUnselectedLabel": {
+    "description": "The accessibility hint for an unselected radio button.",
+    "type": "text"
+  }
+}
