@@ -70,7 +70,7 @@ Future<CCompilerConfig?> cCompilerConfigLinux({required bool throwIfNotFound}) a
 
 /// Searches for an executable with a name in [possibleExecutableNames]
 /// at [path] and returns the first one it finds, if one is found.
-/// Otherwise, throws an error.
+/// Otherwise, returns `null`.
 Uri? _findExecutableIfExists({
   required List<String> possibleExecutableNames,
   required Directory path,

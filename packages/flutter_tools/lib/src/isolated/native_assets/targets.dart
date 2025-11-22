@@ -236,6 +236,9 @@ class WindowsAssetTarget extends CodeAssetTarget {
 
   @override
   Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
+      // On Windows specifically, mustMatchAppBuild is ignored because we want to invoke hooks even
+      // without a Visual Studio installation. This is different to Linux and Apple targets, where
+      // a compiler toolchain is required for builds and only optional for tests.
       cCompilerConfigSync = await cCompilerConfigWindows();
 }
 
