@@ -796,6 +796,58 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
+  testWidgets('GridView.count respects mainAxisExtent', (
+    WidgetTester tester,
+  ) async {
+    const int crossAxisCount = 4;
+    const double mainAxisExtent = 100.0;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: GridView.count(
+          crossAxisCount: crossAxisCount,
+          mainAxisExtent: mainAxisExtent,
+          children: List<Widget>.generate(20, (int i) {
+            return Builder(
+              builder: (BuildContext context) {
+                return Text('$i');
+              },
+            );
+          }),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.text('4')), equals(const Size(200.0, mainAxisExtent)));
+  });
+
+  testWidgets('GridView.extent respects mainAxisExtent', (
+    WidgetTester tester,
+  ) async {
+    const double maxCrossAxisExtent = 200.0;
+    const double mainAxisExtent = 100.0;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: GridView.extent(
+          maxCrossAxisExtent: maxCrossAxisExtent,
+          mainAxisExtent: mainAxisExtent,
+          children: List<Widget>.generate(20, (int i) {
+            return Builder(
+              builder: (BuildContext context) {
+                return Text('$i');
+              },
+            );
+          }),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.text('4')), equals(const Size(200.0, mainAxisExtent)));
+  });
+
   testWidgets('SliverGridDelegateWithFixedCrossAxisCount mainAxisExtent works as expected', (
     WidgetTester tester,
   ) async {
