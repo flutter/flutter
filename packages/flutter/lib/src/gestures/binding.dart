@@ -37,6 +37,9 @@ export 'pointer_signal_resolver.dart' show PointerSignalResolver;
 
 typedef _HandleSampleTimeChangedCallback = void Function();
 
+/// Abstract class that represents a hit test target backed by a embedded native view.
+abstract class NativeHitTestTarget {}
+
 /// Class that implements clock used for sampling.
 class SamplingClock {
   /// Returns current time.
@@ -278,7 +281,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void initInstances() {
     super.initInstances();
     _instance = this;
-    platformDispatcher.onPointerDataPacket = _handlePointerDataPacket;
+    platformDispatcher
+      ..onPointerDataPacket = _handlePointerDataPacket
+      ..onPlatformViewShouldAcceptGesture = _handlePlatformViewShouldAcceptGesture;
   }
 
   /// The singleton instance of this object.
@@ -317,6 +322,17 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
         ),
       );
     }
+  }
+
+  bool _handlePlatformViewShouldAcceptGesture(int viewId, double x, double y) {
+    final HitTestResult result = HitTestResult();
+    hitTestInView(result, Offset(x, y), viewId);
+
+    if (result.path.isEmpty) {
+      return false;
+    }
+    final HitTestTarget firstHit = result.path.first.target;
+    return firstHit is NativeHitTestTarget;
   }
 
   double? _devicePixelRatioForView(int viewId) {

@@ -18,6 +18,7 @@
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/platform_configuration.h"
+#include "flutter/lib/ui/window/point_data.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/lib/ui/window/pointer_data_packet_converter.h"
 #include "flutter/lib/ui/window/view_focus.h"
@@ -475,6 +476,23 @@ class RuntimeController : public PlatformConfigurationClient,
   ///             an isolate is not running.
   ///
   bool DispatchPointerDataPacket(const PointerDataPacket& packet);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Requests from the engine if an embedded native view should
+  /// accept
+  ///             gesture at a given touch location.
+  ///
+  ///
+  /// @param[in]  view_id               The identifier of the flutter view that
+  ///                                   hosts the embedded view.
+  /// @param[in]  touch_began_location  The touch began location of a gesture.
+  ///
+  /// @return     true if the embedded view should accept gesture; false
+  /// otherwise.
+  ///
+  bool EmbeddedNativeViewShouldAcceptGesture(
+      int64_t view_id,
+      const flutter::PointData& touch_began_location);
 
   //----------------------------------------------------------------------------
   /// @brief      Dispatch the semantics action to the specified accessibility
