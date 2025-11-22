@@ -453,7 +453,7 @@ class SizeTransition extends AnimatedWidget {
     required Animation<double> sizeFactor,
     @Deprecated(
       'Use alignment instead. '
-      'This feature was deprecated after v3.38.0-1.0.pre-681',
+      'This feature was deprecated after v3.38.0-1.0.pre-716',
     ) this.axisAlignment,
     this.alignment,
     this.fixedCrossAxisSizeFactor,
@@ -489,7 +489,7 @@ class SizeTransition extends AnimatedWidget {
   /// A value of 0.0 (the default) indicates the center for either [axis] value.
   @Deprecated(
     'Use alignment instead. '
-    'This feature was deprecated after v3.38.0-1.0.pre-681',
+    'This feature was deprecated after v3.38.0-1.0.pre-716',
   )
   final double? axisAlignment;
 
