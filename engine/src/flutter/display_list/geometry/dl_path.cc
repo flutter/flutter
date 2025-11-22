@@ -37,32 +37,32 @@ using FillType = impeller::FillType;
 using Convexity = impeller::Convexity;
 
 DlPath DlPath::MakeRect(const DlRect& rect) {
-  return DlPath(SkPath::Rect(ToSkRect(rect)));
+  return DlPath(SkPath::Rect(ToSkRect(rect.GetPositive())));
 }
 
 DlPath DlPath::MakeRectLTRB(DlScalar left,
                             DlScalar top,
                             DlScalar right,
                             DlScalar bottom) {
-  return DlPath(SkPath::Rect(SkRect::MakeLTRB(left, top, right, bottom)));
+  return MakeRect(DlRect::MakeLTRB(left, top, right, bottom));
 }
 
 DlPath DlPath::MakeRectXYWH(DlScalar x,
                             DlScalar y,
                             DlScalar width,
                             DlScalar height) {
-  return DlPath(SkPath::Rect(SkRect::MakeXYWH(x, y, width, height)));
+  return MakeRect(DlRect::MakeXYWH(x, y, width, height));
 }
 
 DlPath DlPath::MakeOval(const DlRect& bounds) {
-  return DlPath(SkPath::Oval(ToSkRect(bounds)));
+  return DlPath(SkPath::Oval(ToSkRect(bounds.GetPositive())));
 }
 
 DlPath DlPath::MakeOvalLTRB(DlScalar left,
                             DlScalar top,
                             DlScalar right,
                             DlScalar bottom) {
-  return DlPath(SkPath::Oval(SkRect::MakeLTRB(left, top, right, bottom)));
+  return MakeOval(DlRect::MakeLTRB(left, top, right, bottom));
 }
 
 DlPath DlPath::MakeCircle(const DlPoint center, DlScalar radius) {
@@ -78,7 +78,7 @@ DlPath DlPath::MakeRoundRectXY(const DlRect& rect,
                                DlScalar y_radius,
                                bool counter_clock_wise) {
   return DlPath(SkPath::RRect(
-      ToSkRect(rect), x_radius, y_radius,
+      ToSkRect(rect.GetPositive()), x_radius, y_radius,
       counter_clock_wise ? SkPathDirection::kCCW : SkPathDirection::kCW));
 }
 
