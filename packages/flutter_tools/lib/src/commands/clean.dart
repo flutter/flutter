@@ -52,7 +52,7 @@ class CleanCommand extends FlutterCommand {
     final Directory buildDir = globals.fs.directory(getBuildDirectory());
     deleteFile(buildDir);
 
-    _cleanDartTool(flutterProject);
+    deleteFile(flutterProject.dartTool);
 
     deleteFile(flutterProject.android.ephemeralDirectory);
 
@@ -114,27 +114,6 @@ class CleanCommand extends FlutterCommand {
       }
     } finally {
       xcodeStatus.stop();
-    }
-  }
-
-  void _cleanDartTool(FlutterProject flutterProject) {
-    if (!flutterProject.widgetPreviewScaffold.existsSync()) {
-      deleteFile(flutterProject.dartTool);
-      return;
-    }
-    // If widget_preview_scaffold exists, it's possible that the widget previewer is actively
-    // running. Deleting the entire .dart_tool directory could result in the widget previewer
-    // crashing, so we instead delete everything under .dart_tool except for the
-    // widget_preview_scaffold.
-    //
-    // See https://github.com/flutter/flutter/issues/175534 for details.
-    // TODO(bkonyi): consider alternatives where we gracefully shutdown the previewer when the
-    // .dart_tool/widget_preview_scaffold directory is deleted to avoid special casing the clean
-    // operation.
-    for (final FileSystemEntity entity in flutterProject.dartTool.listSync()) {
-      if (entity.basename != flutterProject.widgetPreviewScaffold.basename) {
-        deleteFile(entity);
-      }
     }
   }
 
