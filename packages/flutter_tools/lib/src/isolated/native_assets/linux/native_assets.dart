@@ -9,17 +9,16 @@ import '../../../base/file_system.dart';
 import '../../../base/io.dart';
 import '../../../globals.dart' as globals;
 
-/// Returns a [CCompilerConfig] matching a toolchain that would be used to
-/// compile the main app with CMake on Linux.
+/// Returns a [CCompilerConfig] matching a toolchain that would be used to compile the main app with
+/// CMake on Linux.
 ///
-/// Flutter expects `clang++` to be on the path on Linux hosts, which this uses
-/// to search for the accompanying `clang`, `ar`, and `ld`.
+/// Flutter expects `clang++` to be on the path on Linux hosts, which this uses to search for the
+/// accompanying `clang`, `ar`, and `ld`.
 ///
-/// If [mustMatchAppBuild] is false, this is allowed to fail (in which case
-/// `null`) is returned. This is used for `flutter test` setups, where no main
-/// app is compiled and we thus don't want a `clang` toolchain to be a
-/// requirement.
-Future<CCompilerConfig?> cCompilerConfigLinux({required bool mustMatchAppBuild}) async {
+/// If [throwIfNotFound] is false, this is allowed to fail (in which case `null`) is returned. This
+/// is used for `flutter test` setups, where no main app is compiled and we thus don't want a
+/// `clang` toolchain to be a requirement.
+Future<CCompilerConfig?> cCompilerConfigLinux({required bool throwIfNotFound}) async {
   const kClangPlusPlusBinary = 'clang++';
   // NOTE: these binaries sometimes have different names depending on the installation;
   // thus, we check for a few possible options (in order of preference).
@@ -32,7 +31,7 @@ Future<CCompilerConfig?> cCompilerConfigLinux({required bool mustMatchAppBuild})
     kClangPlusPlusBinary,
   ]);
   if (whichResult.exitCode != 0) {
-    if (mustMatchAppBuild) {
+    if (throwIfNotFound) {
       throwToolExit('Failed to find $kClangPlusPlusBinary on PATH.');
     } else {
       return null;
@@ -48,7 +47,7 @@ Future<CCompilerConfig?> cCompilerConfigLinux({required bool mustMatchAppBuild})
       path: path,
     );
 
-    if (found == null && mustMatchAppBuild) {
+    if (found == null && throwIfNotFound) {
       throwToolExit('Failed to find any of $possibleExecutableNames in $path');
     }
 
@@ -63,7 +62,7 @@ Future<CCompilerConfig?> cCompilerConfigLinux({required bool mustMatchAppBuild})
   final Uri? archiver = findExecutable(path: clangDir, possibleExecutableNames: kArBinaryOptions);
 
   if (linker == null || compiler == null || archiver == null) {
-    assert(!mustMatchAppBuild); // otherwise, findExecutable would have thrown
+    assert(!throwIfNotFound); // otherwise, findExecutable would have thrown
     return null;
   }
   return CCompilerConfig(linker: linker, compiler: compiler, archiver: archiver);

@@ -93,7 +93,7 @@ void main() {
       await fileSystem.file('/some/path/to/llvm-ar').create();
       await fileSystem.file('/some/path/to/ld.lld').create();
 
-      final CCompilerConfig result = (await cCompilerConfigLinux(mustMatchAppBuild: true))!;
+      final CCompilerConfig result = (await cCompilerConfigLinux(throwIfNotFound: true))!;
       expect(result.compiler, Uri.file('/some/path/to/clang'));
     },
   );
@@ -115,7 +115,7 @@ void main() {
         await fileSystem.file('/path/to/$execName').create(recursive: true);
       }
 
-      final CCompilerConfig result = (await cCompilerConfigLinux(mustMatchAppBuild: true))!;
+      final CCompilerConfig result = (await cCompilerConfigLinux(throwIfNotFound: true))!;
       expect(result.linker, Uri.file('/path/to/ld'));
       expect(result.compiler, Uri.file('/path/to/clang'));
       expect(result.archiver, Uri.file('/path/to/ar'));
@@ -137,8 +137,8 @@ void main() {
 
       await fileSystem.file('/a/path/to/clang++').create(recursive: true);
 
-      expect(cCompilerConfigLinux(mustMatchAppBuild: true), throwsA(isA<ToolExit>()));
-      expect(cCompilerConfigLinux(mustMatchAppBuild: false), completes);
+      expect(cCompilerConfigLinux(throwIfNotFound: true), throwsA(isA<ToolExit>()));
+      expect(cCompilerConfigLinux(throwIfNotFound: false), completes);
     },
   );
 }

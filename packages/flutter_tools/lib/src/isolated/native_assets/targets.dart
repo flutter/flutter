@@ -245,7 +245,7 @@ final class LinuxAssetTarget extends CodeAssetTarget {
 
   @override
   Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
-      cCompilerConfigSync = await cCompilerConfigLinux(mustMatchAppBuild: mustMatchAppBuild);
+      cCompilerConfigSync = await cCompilerConfigLinux(throwIfNotFound: mustMatchAppBuild);
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
