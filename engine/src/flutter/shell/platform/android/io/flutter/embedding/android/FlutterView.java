@@ -59,6 +59,7 @@ import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.FlutterRenderer.DisplayFeatureState;
 import io.flutter.embedding.engine.renderer.FlutterRenderer.DisplayFeatureType;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
+import io.flutter.embedding.engine.renderer.FlutterUiResizeListener;
 import io.flutter.embedding.engine.renderer.RenderSurface;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.plugin.common.BinaryMessenger;
@@ -76,6 +77,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Displays a Flutter UI on an Android device.
@@ -110,12 +112,23 @@ public class FlutterView extends FrameLayout
   private static final String TAG = "FlutterView";
   private static final String GBOARD_PACKAGE_NAME = "com.google.android.inputmethod.latin";
 
+  // Boolean that gates if view port metrics should be sent.  When the
+  // engine informs the embedder of a resize, it is not necessary to send
+  // the viewport metrics back to the engine.
+  private AtomicBoolean shouldSendViewportMetrics = new AtomicBoolean(true);
+
+  // Maximum size allowed for a content sized view.
+  @VisibleForTesting static final int CONTENT_SIZING_MAX = 2 << 12;
+
   // Internal view hierarchy references.
   @Nullable private FlutterSurfaceView flutterSurfaceView;
   @Nullable private FlutterTextureView flutterTextureView;
   @Nullable private FlutterImageView flutterImageView;
+
+  @Nullable @VisibleForTesting /* package */ View flutterEngineView;
   @Nullable @VisibleForTesting /* package */ RenderSurface renderSurface;
   @Nullable private RenderSurface previousRenderSurface;
+  @Nullable private View previousEngineView;
   private final Set<FlutterUiDisplayListener> flutterUiDisplayListeners = new HashSet<>();
   private boolean isFlutterUiDisplayed;
 
@@ -175,6 +188,32 @@ public class FlutterView extends FrameLayout
         }
       };
 
+  @VisibleForTesting
+  final FlutterUiResizeListener flutterUiResizeListener =
+      new FlutterUiResizeListener() {
+        @Override
+        public void resizeEngineView(int width, int height) {
+          boolean changed = false;
+          if (flutterEngineView != null) {
+            ViewGroup.LayoutParams surfaceParams = flutterEngineView.getLayoutParams();
+            if (flutterEngineView.getHeight() != height) {
+              changed = true;
+              surfaceParams.height = height;
+            }
+            if (flutterEngineView.getWidth() != width) {
+              changed = true;
+              surfaceParams.width = width;
+            }
+            if (changed) {
+              shouldSendViewportMetrics.set(false);
+              flutterEngineView.setLayoutParams(surfaceParams);
+            }
+          } else {
+            Log.e(TAG, "Flutter engine view not set.");
+          }
+        }
+      };
+
   private final FlutterUiDisplayListener flutterUiDisplayListener =
       new FlutterUiDisplayListener() {
         @Override
@@ -197,6 +236,8 @@ public class FlutterView extends FrameLayout
       };
 
   private Consumer<WindowLayoutInfo> windowInfoListener;
+  private int widthMode;
+  private int heightMode;
 
   /**
    * Constructs a {@code FlutterView} programmatically, without any XML attributes.
@@ -227,9 +268,11 @@ public class FlutterView extends FrameLayout
     if (renderMode == RenderMode.surface) {
       flutterSurfaceView = new FlutterSurfaceView(context);
       renderSurface = flutterSurfaceView;
+      flutterEngineView = flutterSurfaceView;
     } else if (renderMode == RenderMode.texture) {
       flutterTextureView = new FlutterTextureView(context);
       renderSurface = flutterTextureView;
+      flutterEngineView = flutterTextureView;
     } else {
       throw new IllegalArgumentException(
           "RenderMode not supported with this constructor: " + renderMode);
@@ -320,9 +363,11 @@ public class FlutterView extends FrameLayout
       flutterSurfaceView =
           new FlutterSurfaceView(context, transparencyMode == TransparencyMode.transparent);
       renderSurface = flutterSurfaceView;
+      flutterEngineView = flutterSurfaceView;
     } else if (renderMode == RenderMode.texture) {
       flutterTextureView = new FlutterTextureView(context);
       renderSurface = flutterTextureView;
+      flutterEngineView = flutterTextureView;
     } else {
       throw new IllegalArgumentException(
           "RenderMode not supported with this constructor: " + renderMode);
@@ -339,6 +384,7 @@ public class FlutterView extends FrameLayout
 
     this.flutterSurfaceView = flutterSurfaceView;
     this.renderSurface = flutterSurfaceView;
+    this.flutterEngineView = flutterSurfaceView;
 
     init();
   }
@@ -351,6 +397,7 @@ public class FlutterView extends FrameLayout
 
     this.flutterTextureView = flutterTextureView;
     this.renderSurface = flutterTextureView;
+    this.flutterEngineView = flutterTextureView;
 
     init();
   }
@@ -363,6 +410,7 @@ public class FlutterView extends FrameLayout
 
     this.flutterImageView = flutterImageView;
     this.renderSurface = flutterImageView;
+    this.flutterEngineView = flutterImageView;
 
     init();
   }
@@ -477,7 +525,31 @@ public class FlutterView extends FrameLayout
             + height);
     viewportMetrics.width = width;
     viewportMetrics.height = height;
-    sendViewportMetricsToFlutter();
+
+    if (heightMode == MeasureSpec.UNSPECIFIED) {
+      Log.d(TAG, "FlutterView height is set to wrap content - updating viewport metrics to max");
+      viewportMetrics.minHeight = 0;
+      viewportMetrics.maxHeight = CONTENT_SIZING_MAX;
+    } else {
+      viewportMetrics.minHeight = viewportMetrics.height;
+      viewportMetrics.maxHeight = viewportMetrics.height;
+    }
+    if (widthMode == MeasureSpec.UNSPECIFIED) {
+      Log.d(TAG, "FlutterView width is set to wrap content - updating viewport metrics to max");
+      viewportMetrics.minWidth = 0;
+      viewportMetrics.maxWidth = CONTENT_SIZING_MAX;
+    } else {
+      viewportMetrics.minWidth = viewportMetrics.width;
+      viewportMetrics.maxWidth = viewportMetrics.width;
+    }
+
+    if (shouldSendViewportMetrics.compareAndSet(false, true)) {
+      Log.d(
+          TAG,
+          "Resize was in response to the engine resizing the view. Not sending viewport metrics.");
+    } else {
+      sendViewportMetricsToFlutter();
+    }
   }
 
   @VisibleForTesting()
@@ -1111,6 +1183,7 @@ public class FlutterView extends FrameLayout
     isFlutterUiDisplayed = flutterRenderer.isDisplayingFlutterUi();
     renderSurface.attachToRenderer(flutterRenderer);
     flutterRenderer.addIsDisplayingFlutterUiListener(flutterUiDisplayListener);
+    flutterRenderer.addResizingFlutterUiListener(flutterUiResizeListener);
 
     // Initialize various components that know how to process Android View I/O
     // in a way that Flutter understands.
@@ -1262,14 +1335,18 @@ public class FlutterView extends FrameLayout
     flutterRenderer.setSemanticsEnabled(false);
 
     // Revert the image view to previous surface
-    if (previousRenderSurface != null && renderSurface == flutterImageView) {
+    if (previousRenderSurface != null
+        && renderSurface == flutterImageView
+        && previousEngineView != null) {
       renderSurface = previousRenderSurface;
+      flutterEngineView = previousEngineView;
     }
     renderSurface.detachFromRenderer();
 
     releaseImageView();
 
     previousRenderSurface = null;
+    previousEngineView = null;
     flutterEngine = null;
   }
 
@@ -1281,6 +1358,7 @@ public class FlutterView extends FrameLayout
       // FlutterActivity/FlutterFragment share one engine.
       removeView(flutterImageView);
       flutterImageView = null;
+      flutterEngineView = null;
     }
   }
 
@@ -1310,8 +1388,10 @@ public class FlutterView extends FrameLayout
       flutterImageView.resizeIfNeeded(getWidth(), getHeight());
     }
 
+    previousEngineView = flutterEngineView;
     previousRenderSurface = renderSurface;
     renderSurface = flutterImageView;
+    flutterEngineView = flutterImageView;
     if (flutterEngine != null) {
       renderSurface.attachToRenderer(flutterEngine.getRenderer());
     }
@@ -1333,8 +1413,15 @@ public class FlutterView extends FrameLayout
       Log.v(TAG, "Tried to revert the image view, but no previous surface was used.");
       return;
     }
+    if (previousEngineView == null) {
+      Log.v(TAG, "Tried to revert the image view, but no previous engine view was used.");
+      return;
+    }
+
     renderSurface = previousRenderSurface;
+    flutterEngineView = previousEngineView;
     previousRenderSurface = null;
+    previousEngineView = null;
 
     final FlutterRenderer renderer = flutterEngine.getRenderer();
 
@@ -1488,6 +1575,13 @@ public class FlutterView extends FrameLayout
     this.delegate = delegate;
   }
 
+  @Override
+  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    widthMode = MeasureSpec.getMode(widthMeasureSpec);
+    heightMode = MeasureSpec.getMode(heightMeasureSpec);
+    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+  }
+
   private void sendViewportMetricsToFlutter() {
     if (!isAttachedToFlutterEngine()) {
       Log.w(
@@ -1499,7 +1593,6 @@ public class FlutterView extends FrameLayout
 
     viewportMetrics.devicePixelRatio = getResources().getDisplayMetrics().density;
     viewportMetrics.physicalTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
-
     flutterEngine.getRenderer().setViewportMetrics(viewportMetrics);
   }
 
