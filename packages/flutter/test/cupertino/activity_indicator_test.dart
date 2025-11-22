@@ -224,6 +224,19 @@ void main() {
     );
     expect(tester.getSize(find.byType(CupertinoActivityIndicator)), Size.zero);
   });
+
+  testWidgets('CupertinoLinearActivityIndicator does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(child: CupertinoLinearActivityIndicator(progress: 0.5)),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoLinearActivityIndicator)), Size.zero);
+  });
 }
 
 Widget buildCupertinoActivityIndicator([bool? animating]) {
