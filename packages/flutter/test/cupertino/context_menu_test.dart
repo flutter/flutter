@@ -1540,4 +1540,20 @@ void main() {
     // availableWidthForChild = 310.0 - 250.0 (menu width) = 60.0
     expect(fittedBoxSize.width, 60.0);
   });
+
+  testWidgets('CupertinoContextMenu does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: CupertinoContextMenu(
+              actions: const <Widget>[Text('X'), Text('Y')],
+              child: const Text('Y'),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoContextMenu)), Size.zero);
+  });
 }
