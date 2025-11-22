@@ -123,7 +123,7 @@ void main() {
   );
 
   testUsingContext(
-    'cCompilerConfigLinux with missing binaries',
+    'cCompilerConfigLinux with missing binaries when required',
     overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <Pattern>['which', 'clang++'], stdout: '/a/path/to/clang++'),
@@ -138,6 +138,23 @@ void main() {
       await fileSystem.file('/a/path/to/clang++').create(recursive: true);
 
       expect(cCompilerConfigLinux(throwIfNotFound: true), throwsA(isA<ToolExit>()));
+    },
+  );
+
+  testUsingContext(
+    'cCompilerConfigLinux with missing binaries when not required',
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <Pattern>['which', 'clang++'], stdout: '/a/path/to/clang++'),
+      ]),
+      FileSystem: () => fileSystem,
+    },
+    () async {
+      if (!const LocalPlatform().isLinux) {
+        return;
+      }
+
+      await fileSystem.file('/a/path/to/clang++').create(recursive: true);
       expect(cCompilerConfigLinux(throwIfNotFound: false), completes);
     },
   );
