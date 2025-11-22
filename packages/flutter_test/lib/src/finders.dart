@@ -9,7 +9,6 @@ library;
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -361,7 +360,7 @@ class CommonFinders {
     );
   }
 
-  /// Finds [Tooltip] widgets with the given `message`.
+  /// Finds [RawTooltip] widgets with the given `message`.
   ///
   /// ## Sample code
   ///
@@ -374,12 +373,10 @@ class CommonFinders {
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byTooltip(Pattern message, {bool skipOffstage = true}) {
     return byWidgetPredicate((Widget widget) {
-      return widget is Tooltip &&
+      return widget is RawTooltip &&
           (message is RegExp
-              ? ((widget.message != null && message.hasMatch(widget.message!)) ||
-                    (widget.richMessage != null &&
-                        message.hasMatch(widget.richMessage!.toPlainText())))
-              : ((widget.message ?? widget.richMessage?.toPlainText()) == message));
+              ? message.hasMatch(widget.semanticsTooltip)
+              : (widget.semanticsTooltip == message));
     }, skipOffstage: skipOffstage);
   }
 
