@@ -404,4 +404,253 @@ void main() {
     expect(table.size, equals(size));
     expect(table.defaultVerticalAlignment, TableCellVerticalAlignment.intrinsicHeight);
   });
+
+  group('RenderTable colSpan and rowSpan tests', () {
+    RenderBox constrainedBox([BoxConstraints constraints = const BoxConstraints()]) {
+      return RenderConstrainedBox(additionalConstraints: constraints);
+    }
+
+    test('TableCellParentData default colSpan and rowSpan', () {
+      final TableCellParentData parentData = TableCellParentData();
+      expect(parentData.colSpan, equals(1));
+      expect(parentData.rowSpan, equals(1));
+    });
+
+    test('TableCellParentData custom colSpan and rowSpan', () {
+      final TableCellParentData parentData = TableCellParentData()
+        ..colSpan = 3
+        ..rowSpan = 2;
+      expect(parentData.colSpan, equals(3));
+      expect(parentData.rowSpan, equals(2));
+    });
+
+    test('TableCellParentData toString includes colSpan and rowSpan', () {
+      final TableCellParentData parentData = TableCellParentData()
+        ..colSpan = 2
+        ..rowSpan = 3;
+      final String description = parentData.toString();
+      expect(description, contains('2 cols'));
+      expect(description, contains('3 rows'));
+
+      // Test default case (should not show cols/rows when they are 1)
+      final TableCellParentData defaultParentData = TableCellParentData();
+      final String defaultDescription = defaultParentData.toString();
+      expect(defaultDescription, isNot(contains('cols')));
+      expect(defaultDescription, isNot(contains('rows')));
+    });
+
+    test('RenderTable correctly distributes column widths when using colSpan', () {
+      final RenderTable table = RenderTable(
+        textDirection: TextDirection.ltr,
+        columns: 3,
+        rows: 1,
+        columnWidths: const <int, TableColumnWidth>{
+          0: FlexColumnWidth(),
+          1: FlexColumnWidth(),
+          2: FlexColumnWidth(),
+        },
+      );
+
+      final RenderBox spanningCell = constrainedBox();
+      final RenderBox regularCell = constrainedBox();
+
+      // Set up colSpan
+      final TableCellParentData spanningCellParentData = TableCellParentData()..colSpan = 2;
+      spanningCell.parentData = spanningCellParentData;
+
+      table.setChild(0, 0, spanningCell); // spans columns 0 and 1
+      table.setChild(2, 0, regularCell); // column 2
+
+      layout(table, constraints: const BoxConstraints.tightFor(width: 300.0));
+
+      // With 3 equal flex columns and 300.0 total width, each column should
+      // be 100.0 wide. The spanning cell spans 2 columns, so it should be
+      // 200.0 wide.
+      expect(spanningCell.size.width, equals(200.0));
+      expect(regularCell.size.width, equals(100.0));
+      expect(spanningCellParentData.colSpan, equals(2));
+    });
+
+    test('RenderTable correctly merges row heights when using rowSpan', () {
+      final RenderTable table = RenderTable(textDirection: TextDirection.ltr, columns: 2, rows: 2);
+
+      final RenderBox spanningCell = constrainedBox(
+        const BoxConstraints(minHeight: 200, maxHeight: 200),
+      );
+      final RenderBox regularCell1 = constrainedBox(
+        const BoxConstraints(minHeight: 150, maxHeight: 150),
+      );
+      final RenderBox regularCell2 = constrainedBox(
+        const BoxConstraints(minHeight: 50, maxHeight: 50),
+      );
+
+      // Set up rowSpan - spanning cell should span rows 0 and 1
+      final TableCellParentData spanningCellParentData = TableCellParentData()..rowSpan = 2;
+      spanningCell.parentData = spanningCellParentData;
+
+      table.setChild(0, 0, spanningCell); // column 0, row 0 - spans to row 1
+      table.setChild(1, 0, regularCell1); // column 1, row 0
+      table.setChild(1, 1, regularCell2); // column 1, row 1
+
+      layout(table, constraints: const BoxConstraints.tightFor(width: 300.0));
+
+      expect(spanningCellParentData.rowSpan, equals(2));
+
+      expect(regularCell1.size.height, equals(150.0));
+      expect(regularCell2.size.height, equals(50.0));
+
+      // The table height should be determined by the spanning cell that takes up both rows
+      expect(table.size.height, equals(200.0));
+    });
+
+    test('RenderTable correctly handles cells spanning multiple rows and columns', () {
+      final RenderTable table = RenderTable(
+        textDirection: TextDirection.ltr,
+        columns: 3,
+        rows: 3,
+        columnWidths: const <int, TableColumnWidth>{
+          0: FlexColumnWidth(),
+          1: FlexColumnWidth(),
+          2: FlexColumnWidth(),
+        },
+      );
+
+      final RenderBox spanningCell = constrainedBox(
+        const BoxConstraints(minHeight: 200, maxHeight: 200),
+      );
+      final RenderBox regularCell1 = constrainedBox(
+        const BoxConstraints(minHeight: 80, maxHeight: 80),
+      );
+      final RenderBox regularCell2 = constrainedBox(
+        const BoxConstraints(minHeight: 120, maxHeight: 120),
+      );
+      final RenderBox regularCell3 = constrainedBox(
+        const BoxConstraints(minHeight: 60, maxHeight: 60),
+      );
+
+      // Set up colSpan and rowSpan - spanning cell spans 2 columns and 2 rows
+      final TableCellParentData spanningCellParentData = TableCellParentData()
+        ..colSpan = 2
+        ..rowSpan = 2;
+      spanningCell.parentData = spanningCellParentData;
+
+      table.setChild(0, 0, spanningCell); // column 0-1, row 0-1 (spans 2x2)
+      table.setChild(2, 0, regularCell1); // column 2, row 0
+      table.setChild(2, 1, regularCell2); // column 2, row 1
+      table.setChild(0, 2, regularCell3); // column 0, row 2
+
+      layout(table, constraints: const BoxConstraints.tightFor(width: 300.0));
+
+      expect(spanningCellParentData.colSpan, equals(2));
+      expect(spanningCellParentData.rowSpan, equals(2));
+
+      // With 3 equal flex columns and 300.0 total width, each column should
+      // be 100.0 wide. The spanning cell spans 2 columns, so it should be
+      // 200.0 wide.
+      expect(spanningCell.size.width, equals(200.0));
+      expect(regularCell1.size.width, equals(100.0));
+      expect(regularCell2.size.width, equals(100.0));
+      expect(regularCell3.size.width, equals(100.0));
+
+      // Height checks
+      expect(regularCell1.size.height, equals(80.0));
+      expect(regularCell2.size.height, equals(120.0));
+      expect(regularCell3.size.height, equals(60.0));
+
+      // The spanning cell should have its preferred height
+      expect(spanningCell.size.height, equals(200.0));
+    });
+
+    test('TableCellVerticalAlignment works correctly with colSpan and rowSpan', () {
+      late RenderTable table;
+      const double testCellSize = 50;
+      const double regularCellSize = 80;
+
+      void testAlignment(
+        TableCellVerticalAlignment verticalAlignment,
+        void Function(Size rowSpanningSize, Size columnSpanningSize) handler,
+      ) {
+        table = RenderTable(textDirection: TextDirection.ltr, columns: 3, rows: 2);
+        final RenderBox rowSpanningCell = constrainedBox(
+          const BoxConstraints(minHeight: testCellSize, maxHeight: testCellSize),
+        );
+        final RenderBox columnSpanningCell = constrainedBox(
+          const BoxConstraints(minHeight: testCellSize, maxHeight: testCellSize),
+        );
+        final RenderBox regularCell1 = constrainedBox(
+          const BoxConstraints(minHeight: regularCellSize, maxHeight: regularCellSize),
+        );
+        final RenderBox regularCell2 = constrainedBox(
+          const BoxConstraints(minHeight: regularCellSize, maxHeight: regularCellSize),
+        );
+
+        final TableCellParentData rowSpanningCellParentData = TableCellParentData()
+          ..rowSpan = 2
+          ..verticalAlignment = verticalAlignment;
+        rowSpanningCell.parentData = rowSpanningCellParentData;
+
+        final TableCellParentData columnSpanningCellParentData = TableCellParentData()
+          ..colSpan = 2
+          ..verticalAlignment = verticalAlignment;
+        columnSpanningCell.parentData = columnSpanningCellParentData;
+
+        table.setChild(0, 0, rowSpanningCell); // column 0 , rows 0-1
+        table.setChild(1, 0, columnSpanningCell); // column 1-2 , rows 0
+        table.setChild(1, 1, regularCell1); // column 1, row 1
+        table.setChild(2, 1, regularCell2); // column 2, row 1
+
+        layout(table, constraints: const BoxConstraints.tightFor(width: 300.0));
+
+        expect(columnSpanningCellParentData.colSpan, equals(2));
+        expect(rowSpanningCellParentData.rowSpan, equals(2));
+        expect(columnSpanningCellParentData.verticalAlignment, equals(verticalAlignment));
+        expect(rowSpanningCellParentData.verticalAlignment, equals(verticalAlignment));
+
+        expect(rowSpanningCell.size.width, equals(table.size.width / 3));
+        expect(columnSpanningCell.size.width, equals(table.size.width / 3 * 2));
+
+        handler(rowSpanningCell.size, columnSpanningCell.size);
+      }
+
+      testAlignment(TableCellVerticalAlignment.fill, (
+        Size rowSpanningSize,
+        Size columnSpanningSize,
+      ) {
+        expect(rowSpanningSize.height, equals(table.size.height));
+        expect(columnSpanningSize.height, equals(table.size.height - regularCellSize));
+      });
+
+      testAlignment(TableCellVerticalAlignment.intrinsicHeight, (
+        Size rowSpanningSize,
+        Size columnSpanningSize,
+      ) {
+        expect(rowSpanningSize.height, equals(table.size.height));
+        expect(columnSpanningSize.height, lessThanOrEqualTo(regularCellSize));
+      });
+
+      testAlignment(TableCellVerticalAlignment.top, (
+        Size rowSpanningSize,
+        Size columnSpanningSize,
+      ) {
+        expect(rowSpanningSize.height, equals(testCellSize));
+        expect(columnSpanningSize.height, equals(testCellSize));
+      });
+
+      testAlignment(TableCellVerticalAlignment.middle, (
+        Size rowSpanningSize,
+        Size columnSpanningSize,
+      ) {
+        expect(rowSpanningSize.height, equals(testCellSize));
+        expect(columnSpanningSize.height, equals(testCellSize));
+      });
+
+      testAlignment(TableCellVerticalAlignment.bottom, (
+        Size rowSpanningSize,
+        Size columnSpanningSize,
+      ) {
+        expect(rowSpanningSize.height, equals(testCellSize));
+        expect(columnSpanningSize.height, equals(testCellSize));
+      });
+    });
+  });
 }
