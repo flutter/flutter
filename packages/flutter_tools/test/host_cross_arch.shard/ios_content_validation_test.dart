@@ -88,8 +88,6 @@ void main() {
           late Directory buildPath;
           late Directory buildAppFrameworkDsym;
           late File buildAppFrameworkDsymBinary;
-          late Directory flutterFrameworkDsym;
-          late File flutterFrameworkDsymBinary;
           late ProcessResult buildResult;
 
           setUpAll(() {
@@ -139,11 +137,6 @@ void main() {
             buildAppFrameworkDsymBinary = buildAppFrameworkDsym.childFile(
               'Contents/Resources/DWARF/App',
             );
-
-            flutterFrameworkDsym = buildPath.childDirectory('Flutter.framework.dSYM');
-            flutterFrameworkDsymBinary = flutterFrameworkDsym.childFile(
-              'Contents/Resources/DWARF/Flutter',
-            );
           });
 
           testWithoutContext('flutter build ios builds a valid app', () {
@@ -171,7 +164,6 @@ void main() {
             expect(outputAppFramework.childFile('Info.plist'), exists);
 
             expect(buildAppFrameworkDsymBinary.existsSync(), buildMode != BuildMode.debug);
-            expect(flutterFrameworkDsymBinary.existsSync(), buildMode != BuildMode.debug);
 
             final File vmSnapshot = fileSystem.file(
               fileSystem.path.join(outputAppFramework.path, 'flutter_assets', 'vm_snapshot_data'),
@@ -216,36 +208,22 @@ void main() {
             if (buildMode == BuildMode.debug) {
               expect(symbols, isEmpty);
             } else {
-              expect(symbols, equals(AppleTestUtils.requiredAppSymbols));
+              expect(symbols, equals(AppleTestUtils.requiredSymbols));
             }
-
-            final List<String> flutterSymbols = AppleTestUtils.getExportedSymbols(
-              outputFlutterFrameworkBinary.path,
-            );
-            expect(flutterSymbols, containsAll(AppleTestUtils.expectedFlutterSymbols));
           });
 
           testWithoutContext('check symbols in dSYM', () {
             if (buildMode == BuildMode.debug) {
               // dSYM is not created for a debug build.
               expect(buildAppFrameworkDsymBinary.existsSync(), isFalse);
-              expect(flutterFrameworkDsymBinary.existsSync(), isFalse);
             } else {
-              final List<String> appSymbols = AppleTestUtils.getExportedSymbols(
+              final List<String> symbols = AppleTestUtils.getExportedSymbols(
                 buildAppFrameworkDsymBinary.path,
               );
-              expect(appSymbols, containsAll(AppleTestUtils.requiredAppSymbols));
+              expect(symbols, containsAll(AppleTestUtils.requiredSymbols));
               // The actual number of symbols is going to vary but there should
               // be "many" in the dSYM. At the time of writing, it was 7656.
-              expect(appSymbols.length, greaterThanOrEqualTo(5000));
-
-              final List<String> flutterSymbols = AppleTestUtils.getExportedSymbols(
-                flutterFrameworkDsymBinary.path,
-              );
-              expect(flutterSymbols, containsAll(AppleTestUtils.expectedFlutterSymbols));
-              // The actual number of symbols is going to vary but there should
-              // be "many" in the dSYM. At the time of writing, it was 35940.
-              expect(flutterSymbols.length, greaterThanOrEqualTo(35000));
+              expect(symbols.length, greaterThanOrEqualTo(5000));
             }
           });
 

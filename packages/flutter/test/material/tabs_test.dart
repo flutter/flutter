@@ -9347,6 +9347,22 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('TabPageSelector does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final TabController controller = TabController(length: 2, vsync: tester);
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(child: TabPageSelector(controller: controller)),
+      ),
+    );
+    expect(tester.getSize(find.byType(TabPageSelector)), Size.zero);
+    controller.animateTo(1);
+    await tester.pump();
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('TabBarView does not crash at zero area', (WidgetTester tester) async {
     tester.view.physicalSize = Size.zero;
     final TabController controller = TabController(length: 2, vsync: tester);
@@ -9404,5 +9420,23 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(Tab)), Size.zero);
+  });
+
+  testWidgets('TabBar does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final TabController controller = TabController(length: 2, vsync: tester);
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: TabBar(controller: controller, tabs: const <Widget>[Text('X'), Text('Y')]),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TabBar)), Size.zero);
+    controller.animateTo(1);
+    await tester.pump();
+    await tester.pumpAndSettle();
   });
 }
