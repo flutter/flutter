@@ -199,28 +199,44 @@ class Tessellator {
     /// |VertexGenerator|
     void GenerateVertices(const TessellatedVertexProc& proc) const override;
 
+    static ArcVertexGenerator MakeFilled(const Arc::Iteration& iteration,
+                                         Trigs&& trigs,
+                                         const Rect& oval_bounds,
+                                         bool use_center,
+                                         bool supports_triangle_fans);
+
+    static ArcVertexGenerator MakeStroked(
+        const Arc::Iteration& iteration,
+        Trigs&& trigs,
+        const Rect& oval_bounds,
+        Scalar half_width,
+        Cap cap,
+        std::unique_ptr<Trigs> round_cap_trigs);
+
    private:
     friend class Tessellator;
 
     const Arc::Iteration iteration_;
     const Trigs trigs_;
     const Rect oval_bounds_;
+
+    // Used only in filled arcs.
     const bool use_center_;
+    const bool supports_triangle_fans_;
+
+    // Used only in stroked arcs. half_width_ is set to -1.0f for filled arcs.
     const Scalar half_width_;
     const Cap cap_;
-    const bool supports_triangle_fans_;
+    const std::unique_ptr<Trigs> round_cap_trigs_;
 
     ArcVertexGenerator(const Arc::Iteration& iteration,
                        Trigs&& trigs,
                        const Rect& oval_bounds,
                        bool use_center,
-                       bool supports_triangle_fans);
-
-    ArcVertexGenerator(const Arc::Iteration& iteration,
-                       Trigs&& trigs,
-                       const Rect& oval_bounds,
+                       bool supports_triangle_fans,
                        Scalar half_width,
-                       Cap cap);
+                       Cap cap,
+                       std::unique_ptr<Trigs> round_cap_trigs);
   };
 
   explicit Tessellator(bool supports_32bit_primitive_indices = true);
@@ -428,6 +444,7 @@ class Tessellator {
                                  const Rect& oval_bounds,
                                  Scalar half_width,
                                  Cap cap,
+                                 const std::unique_ptr<Trigs>& round_cap_trigs,
                                  const TessellatedVertexProc& proc);
 
   static void GenerateRoundCapLine(const Trigs& trigs,
@@ -442,6 +459,43 @@ class Tessellator {
       const Trigs& trigs,
       const EllipticalVertexGenerator::Data& data,
       const TessellatedVertexProc& proc);
+
+  // Generates vertices for the start round cap of a stroke.
+  //
+  // The perpendicular input points 90 degrees clockwise to the direction the
+  // stroke is traveling and is the length of half of the stroke width.
+  //
+  // The start round cap covers a semicircle formed by sweeping the
+  // perpendicular input clockwise 180 degrees about point p. This sweeps a
+  // semicircle with a curve facing away from the stroke's direction of travel.
+  //
+  // The first generated vertex is the midpoint of the semicircle's curve,
+  // directly opposite the semicircle's straight diameter. Vertices progress
+  // in the stroke's direction of travel, ending with two vertices at
+  // (p + perpendicular) and (p - perpendicular) that form the semicircle's
+  // diameter.
+  static void GenerateStartRoundCap(const Point& p,
+                                    const Vector2& perpendicular,
+                                    const Trigs& trigs,
+                                    const TessellatedVertexProc& proc);
+
+  // Generates vertices for the end round cap of a stroke.
+  //
+  // The perpendicular input points 90 degrees clockwise to the direction the
+  // stroke is traveling and is the length of half of the stroke width.
+  //
+  // The end round cap covers a semicircle formed by sweeping the
+  // perpendicular input counterclockwise 180 degrees about point p. This sweeps
+  // a semicircle with a curve facing toward the stroke's direction of travel.
+  //
+  // The generated vertices begin with two vertices at (p + perpendicular) and
+  // (p - perpendicular) which form the semicircle's diameter. Vertices progress
+  // in the stroke's direction of travel, ending with the vertex at the midpoint
+  // of the semicircle's curve.
+  static void GenerateEndRoundCap(const Point& p,
+                                  const Vector2& perpendicular,
+                                  const Trigs& trigs,
+                                  const TessellatedVertexProc& proc);
 
   Tessellator(const Tessellator&) = delete;
 
