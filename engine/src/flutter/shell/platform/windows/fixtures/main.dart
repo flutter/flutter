@@ -225,7 +225,7 @@ Future<void> enableLifecycleToFrom() async {
 @pragma('vm:entry-point')
 Future<void> sendCreatePlatformViewMethod() async {
   // The platform view method channel uses the standard method codec.
-  // See https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/services/message_codecs.dart#L262
+  // See https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/services/message_codecs.dart#L262
   // for the implementation of the encoding and magic number identifiers.
   const int valueString = 7;
   const int valueMap = 13;
@@ -258,7 +258,7 @@ Future<void> sendCreatePlatformViewMethod() async {
 @pragma('vm:entry-point')
 Future<void> sendGetKeyboardState() async {
   // The keyboard method channel uses the standard method codec.
-  // See https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/services/message_codecs.dart#L262
+  // See https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/services/message_codecs.dart#L262
   // for the implementation of the encoding and magic number identifiers.
   const int valueNull = 0;
   const int valueString = 7;

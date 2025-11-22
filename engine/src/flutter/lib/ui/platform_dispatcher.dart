@@ -2785,8 +2785,8 @@ class Locale {
   ///
   /// The subtag values are _case sensitive_ and must be one of the valid
   /// subtags according to CLDR supplemental data:
-  /// [language](https://github.com/unicode-org/cldr/blob/master/common/validity/language.xml),
-  /// [region](https://github.com/unicode-org/cldr/blob/master/common/validity/region.xml). The
+  /// [language](https://github.com/unicode-org/cldr/blob/main/common/validity/language.xml),
+  /// [region](https://github.com/unicode-org/cldr/blob/main/common/validity/region.xml). The
   /// primary language subtag must be at least two and at most eight lowercase
   /// letters, but not four letters. The region subtag must be two
   /// uppercase letters or three digits. See the [Unicode Language
@@ -2810,9 +2810,9 @@ class Locale {
   ///
   /// The subtag values are _case sensitive_ and must be valid subtags according
   /// to CLDR supplemental data:
-  /// [language](https://github.com/unicode-org/cldr/blob/master/common/validity/language.xml),
-  /// [script](https://github.com/unicode-org/cldr/blob/master/common/validity/script.xml) and
-  /// [region](https://github.com/unicode-org/cldr/blob/master/common/validity/region.xml) for
+  /// [language](https://github.com/unicode-org/cldr/blob/main/common/validity/language.xml),
+  /// [script](https://github.com/unicode-org/cldr/blob/main/common/validity/script.xml) and
+  /// [region](https://github.com/unicode-org/cldr/blob/main/common/validity/region.xml) for
   /// each of languageCode, scriptCode and countryCode respectively.
   ///
   /// The [languageCode] subtag is optional. When there is no language subtag,
@@ -2848,7 +2848,7 @@ class Locale {
   ///
   /// This must be a valid Unicode Language subtag as listed in [Unicode CLDR
   /// supplemental
-  /// data](https://github.com/unicode-org/cldr/blob/master/common/validity/language.xml).
+  /// data](https://github.com/unicode-org/cldr/blob/main/common/validity/language.xml).
   ///
   /// See also:
   ///
@@ -2946,7 +2946,7 @@ class Locale {
   ///
   /// This must be a valid Unicode Language Identifier script subtag as listed
   /// in [Unicode CLDR supplemental
-  /// data](https://github.com/unicode-org/cldr/blob/master/common/validity/script.xml).
+  /// data](https://github.com/unicode-org/cldr/blob/main/common/validity/script.xml).
   ///
   /// See also:
   ///

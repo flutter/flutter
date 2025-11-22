@@ -7,7 +7,7 @@ Flutter has the following channels, in increasing order of stability.
 The current tip-of-tree, absolute latest cutting edge build. Usually functional, though sometimes we accidentally break things. We do not run the entirety of our testing before allowing patches to land on this branch. We do not
 recommend using this branch unless [you are contributing to Flutter](../../CONTRIBUTING.md).
 
-The API documentation for the most recent commit on `master` is staged at: <https://master-api.flutter.dev>
+The API documentation for the most recent commit on `master` is staged at: <https://main-api.flutter.dev>
 
 The Flutter team's plugins and packages are regularly tested against the `master` branch.
 
@@ -21,7 +21,7 @@ We branch from `master` for a new beta release at the beginning of the month, us
 
 On average it takes about two weeks for a fix to end up in the beta branch after it lands in our repository (in the `master` channel).
 
-We do not host the API documentation for the current `beta` branch. The documentation for the `stable` branch at <https://api.flutter.dev> is usually correct, but may be missing new features. The documentation for the `master` branch at <https://master-api.flutter.dev> is likely to be more up to date but may mention features that are not yet on the `beta` branch.
+We do not host the API documentation for the current `beta` branch. The documentation for the `stable` branch at <https://api.flutter.dev> is usually correct, but may be missing new features. The documentation for the `master` branch at <https://main-api.flutter.dev> is likely to be more up to date but may mention features that are not yet on the `beta` branch.
 
 ### `stable`
 

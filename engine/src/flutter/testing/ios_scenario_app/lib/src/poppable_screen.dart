@@ -70,7 +70,7 @@ class PoppableScreenScenario extends Scenario {
       dispatcher: view.platformDispatcher,
       // 'flutter/platform' is the hardcoded name of the 'platform'
       // `SystemChannel` from the `SystemNavigator` API.
-      // https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/services/system_navigator.dart.
+      // https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/services/system_navigator.dart.
       channel: 'flutter/platform',
       method: 'SystemNavigator.pop',
       // Don't care about the response. If it doesn't go through, the test

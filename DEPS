@@ -27,7 +27,7 @@ vars = {
   # for the web engine.
   'download_emsdk': False,
 
-  # For experimental features some dependencies may only be avaialable in the master/main
+  # For experimental features some dependencies may only be available in the master/main
   # channels. This variable is being set when CI is checking out the repository.
   'release_candidate': False,
 

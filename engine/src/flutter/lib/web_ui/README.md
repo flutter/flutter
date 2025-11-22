@@ -333,7 +333,7 @@ Once you know the version for the Emscripten SDK, change the line in
 [2]: https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/web_ui/test/README.md
 [3]: https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/web_ui/dev/package_lock.yaml
 [4]: https://chrome-infra-packages.appspot.com/p/flutter_internal
-[5]: https://cs.opensource.google/flutter/recipes/+/master:recipes/engine/web_engine.py
+[5]: https://cs.opensource.google/flutter/recipes/+/main:recipes/engine/web_engine.py
 [6]: https://chromium.googlesource.com/chromium/src.git/+/main/docs/cipd_and_3pp.md#What-is-CIPD
 [7]: https://developer.chrome.com/docs/devtools
 [8]: https://developer.chrome.com/docs/devtools/sources

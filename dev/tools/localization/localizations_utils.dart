@@ -272,7 +272,7 @@ class GeneratorOptions {
   final bool widgetsOnly;
 }
 
-// See also //master/tools/gen_locale.dart in the engine repo.
+// See also https://github.com/flutter/flutter/blob/main/engine/src/flutter/tools/gen_locale.dart.
 Map<String, List<String>> _parseSection(String section) {
   final Map<String, List<String>> result = <String, List<String>>{};
   late List<String> lastHeading;

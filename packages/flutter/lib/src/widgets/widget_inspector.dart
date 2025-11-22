@@ -762,7 +762,7 @@ class _WidgetInspectorService with WidgetInspectorService {
 /// Service used by GUI tools to interact with the [WidgetInspector].
 ///
 /// Calls to this object are typically made from GUI tools such as the [Flutter
-/// IntelliJ Plugin](https://github.com/flutter/flutter-intellij/blob/master/README.md)
+/// IntelliJ Plugin](https://github.com/flutter/flutter-intellij/blob/main/README.md)
 /// using the [Dart VM Service](https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md).
 /// This class uses its own object id and manages object lifecycles itself
 /// instead of depending on the [object ids](https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#getobject)
@@ -775,7 +775,7 @@ class _WidgetInspectorService with WidgetInspectorService {
 /// using the VM service protocol to evaluate Dart expressions of the
 /// form `WidgetInspectorService.instance.methodName(arg1, arg2, ...)`. If you
 /// make changes to any instance method of this class you need to verify that
-/// the [Flutter IntelliJ Plugin](https://github.com/flutter/flutter-intellij/blob/master/README.md)
+/// the [Flutter IntelliJ Plugin](https://github.com/flutter/flutter-intellij/blob/main/README.md)
 /// widget inspector support still works with the changes.
 ///
 /// All methods returning String values return JSON.
