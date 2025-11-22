@@ -128,6 +128,11 @@ enum OptionsViewOpenDirection {
 /// The user's text input is received in a field built with the
 /// [fieldViewBuilder] parameter. The options to be displayed are determined
 /// using [optionsBuilder] and rendered with [optionsViewBuilder].
+///
+/// The options view opens when the field gains focus or when the field's text
+/// changes, as long as [optionsBuilder] returns at least one option. The options
+/// view closes when the user selects an option, when there are no matching
+/// options, or when the field loses focus.
 /// {@endtemplate}
 ///
 /// This is a core framework widget with very basic UI.
@@ -329,6 +334,14 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   // up/down keys.
   static const int _pageSize = 4;
 
+  /// Whether the field currently has focus.
+  ///
+  /// This is used to determine whether the focus state has changed.
+  late bool _hasFocus;
+
+  /// Whether an option is currently being selected.
+  bool _selecting = false;
+
   TextEditingController? _internalTextEditingController;
   TextEditingController get _textEditingController {
     return widget.textEditingController ??
@@ -337,8 +350,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   FocusNode? _internalFocusNode;
   FocusNode get _focusNode {
-    return widget.focusNode ??
-        (_internalFocusNode ??= FocusNode()..addListener(_updateOptionsViewVisibility));
+    return widget.focusNode ?? (_internalFocusNode ??= FocusNode()..addListener(_onFocusChange));
   }
 
   late final Map<Type, CallbackAction<Intent>> _actionMap = <Type, CallbackAction<Intent>>{
@@ -406,8 +418,21 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     },
   };
 
-  bool get _canShowOptionsView => _focusNode.hasFocus && _selection == null && _options.isNotEmpty;
+  /// The options view is considered eligible to show only while the field has
+  /// focus and there is at least one option to display.
+  bool get _canShowOptionsView => _focusNode.hasFocus && _options.isNotEmpty;
 
+  void _onFocusChange() {
+    if (_focusNode.hasFocus != _hasFocus) {
+      _hasFocus = _focusNode.hasFocus;
+      // Gaining focus can open the options view (if there are options). Losing
+      // focus always closes it.
+      _updateOptionsViewVisibility();
+    }
+  }
+
+  /// Shows the options view when the field is focused and there is at least one
+  /// option to display; otherwise hides the options view.
   void _updateOptionsViewVisibility() {
     if (_canShowOptionsView) {
       _optionsViewController.show();
@@ -433,6 +458,11 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   int _onChangedCallId = 0;
   // Called when _textEditingController changes.
   Future<void> _onChangedField() async {
+    // During a selection, changes to the field text should not trigger
+    // options update.
+    if (_selecting) {
+      return;
+    }
     final TextEditingValue value = _textEditingController.value;
 
     // Makes sure that options change only when content of the field changes.
@@ -474,6 +504,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     if (nextSelection == _selection) {
       return;
     }
+    _selecting = true;
     _selection = nextSelection;
     final String selectionString = widget.displayStringForOption(nextSelection);
     _textEditingController.value = TextEditingValue(
@@ -481,7 +512,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       text: selectionString,
     );
     widget.onSelected?.call(nextSelection);
-    _updateOptionsViewVisibility();
+    if (_optionsViewController.isShowing) {
+      _optionsViewController.hide(); // Close the options view after a selection is made.
+    }
+    _selecting = false;
   }
 
   void _updateHighlight(int nextIndex) {
@@ -606,7 +640,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
         widget.textEditingController ??
         (_internalTextEditingController = TextEditingController.fromValue(widget.initialValue));
     initialController.addListener(_onChangedField);
-    widget.focusNode?.addListener(_updateOptionsViewVisibility);
+    _hasFocus = _focusNode.hasFocus;
+    widget.focusNode?.addListener(_onFocusChange);
   }
 
   @override
