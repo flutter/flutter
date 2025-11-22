@@ -42,9 +42,7 @@ class FakeXcodeProjectInterpreterWithProfile extends FakeXcodeProjectInterpreter
 }
 
 class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInterpreter {
-  FakeXcodeProjectInterpreterWithBuildSettings({
-    this.overrides = const <String, String>{},
-  });
+  FakeXcodeProjectInterpreterWithBuildSettings({this.overrides = const <String, String>{}});
 
   final Map<String, String> overrides;
 
@@ -61,10 +59,7 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
     XcodeProjectBuildContext? buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
-    return <String, String>{
-      ...overrides,
-      'PRODUCT_BUNDLE_IDENTIFIER': 'com.example.test',
-    };
+    return <String, String>{...overrides, 'PRODUCT_BUNDLE_IDENTIFIER': 'com.example.test'};
   }
 }
 
@@ -1066,9 +1061,9 @@ STDERR STUFF
         osUtils: FakeOperatingSystemUtils(),
       );
 
-      await createTestCommandRunner(command).run(
-        <String>['build', 'macos', '--release', '--no-pub'],
-      );
+      await createTestCommandRunner(
+        command,
+      ).run(<String>['build', 'macos', '--release', '--no-pub']);
 
       expect(fakeProcessManager, hasNoRemainingExpectations);
     },
@@ -1110,9 +1105,9 @@ STDERR STUFF
         osUtils: FakeOperatingSystemUtils(),
       );
 
-      await createTestCommandRunner(command).run(
-        <String>['build', 'macos', '--release', '--no-pub'],
-      );
+      await createTestCommandRunner(
+        command,
+      ).run(<String>['build', 'macos', '--release', '--no-pub']);
 
       expect(fakeProcessManager, hasNoRemainingExpectations);
     },
