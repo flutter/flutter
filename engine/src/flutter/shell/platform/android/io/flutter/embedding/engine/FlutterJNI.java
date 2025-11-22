@@ -12,6 +12,7 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
+import android.os.Debug;
 import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -43,6 +44,7 @@ import io.flutter.view.FlutterCallbackInformation;
 import io.flutter.view.TextureRegistry;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -141,6 +143,8 @@ public class FlutterJNI {
    * <p>This method should only be called once across all FlutterJNI instances.
    */
   public void loadLibrary(Context context) {
+    Log.w(TAG, "FlutterJNI.loadLibrary called");
+    Debug.waitForDebugger();
     if (FlutterJNI.loadLibraryCalled) {
       Log.w(TAG, "FlutterJNI.loadLibrary called more than once");
     }
@@ -1105,6 +1109,13 @@ public class FlutterJNI {
   @UiThread
   public void dispatchPlatformMessage(
       @NonNull String channel, @Nullable ByteBuffer message, int position, int responseId) {
+
+    Log.v(TAG, "dispatch platform message: " + message);
+    if (message != null) {
+      String decodedString = StandardCharsets.UTF_8.decode(message).toString();
+      // You can now use decodedString
+      Log.v(TAG, "dispatch platform message: " + decodedString);
+    }
     ensureRunningOnMainThread();
     if (isAttached()) {
       nativeDispatchPlatformMessage(nativeShellHolderId, channel, message, position, responseId);
