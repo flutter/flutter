@@ -4289,6 +4289,7 @@ class EditableTextState extends State<EditableText>
               return contextMenuBuilder(context, this);
             },
       magnifierConfiguration: widget.magnifierConfiguration,
+      cursorWidth: widget.cursorWidth,
     );
 
     return selectionOverlay;
@@ -4394,6 +4395,7 @@ class EditableTextState extends State<EditableText>
         final Offset anchor = _selectionOverlay!.selectionControls!.getHandleAnchor(
           TextSelectionHandleType.collapsed,
           lineHeight,
+          cursorWidth: widget.cursorWidth,
         );
         final double handleCenter = handleHeight / 2 - anchor.dy;
         bottomSpacing = math.max(handleCenter + interactiveHandleHeight / 2, bottomSpacing);
