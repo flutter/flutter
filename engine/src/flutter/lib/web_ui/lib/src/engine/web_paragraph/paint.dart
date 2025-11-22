@@ -103,7 +103,10 @@ class TextPaint {
           : block.clusterRangeWithoutWhitespaces.start - 1;
       final int step = block.isLtr ? 1 : -1;
       for (int i = start; i != end; i += step) {
-        final clusterText = layout.allClusters[i];
+        final clusterText = block is EllipsisBlock
+            ? layout.ellipsisClusters[i]
+            : layout.allClusters[i];
+        // We need to adjust the canvas size to fit the block in case there is scaling or zoom involved
         // We need to adjust the canvas size to fit the block in case there is scaling or zoom involved
         final (ui.Rect sourceRect, ui.Rect targetRect) = calculateCluster(
           layout,
@@ -126,12 +129,12 @@ class TextPaint {
           case StyleElements.shadows:
             paintContext.save();
             for (final ui.Shadow shadow in clusterText.style.shadows!) {
-              painter.fillShadow(clusterText, shadow, layout.isDefaultLtr);
+              painter.fillShadow(clusterText, shadow, block.isLtr);
               painter.paintShadow(canvas, sourceRect, targetRect);
             }
             paintContext.restore();
           case StyleElements.text:
-            painter.fillTextCluster(clusterText, layout.isDefaultLtr);
+            painter.fillTextCluster(clusterText, block.isLtr);
             painter.paintTextCluster(canvas, sourceRect, targetRect);
           default:
             assert(false);
@@ -177,7 +180,9 @@ class TextPaint {
         .translate(lineOffset.dx, lineOffset.dy);
 
     if (WebParagraphDebug.logging) {
-      final String text = paragraph.getText1(webTextCluster.start, webTextCluster.end);
+      final String text = block is EllipsisBlock
+          ? block.getText(webTextCluster.start, webTextCluster.end)
+          : paragraph.getText(webTextCluster.start, webTextCluster.end);
       final double left = clusterOffset.dx + webTextCluster.advance.left + lineOffset.dx;
       final double shift = left - left.floorToDouble();
       WebParagraphDebug.log(
@@ -220,9 +225,8 @@ class TextPaint {
         .translate(blockOffset.dx, blockOffset.dy)
         .translate(paragraphOffset.dx, paragraphOffset.dy);
 
-    final String text = paragraph.getText(block.textRange);
     WebParagraphDebug.log(
-      'calculateBlock "$text" ${block.textRange}-${block.span.start} ${block.clusterRange} '
+      'calculateBlock "${block.span.text}" ${block.textRange}-${block.span.start} ${block.clusterRange} '
       'source: ${sourceRect.left}:${sourceRect.right}x${sourceRect.top}:${sourceRect.bottom} => '
       'target: ${targetRect.left}:${targetRect.right}x${targetRect.top}:${targetRect.bottom}',
     );
