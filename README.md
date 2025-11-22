@@ -46,8 +46,8 @@ upgrade` command).
 
 ## About Flutter
 
-We think Flutter will help you create beautiful, fast apps, with a productive,
-extensible and open development model, whether you're targeting iOS or Android,
+We think Flutter will help you create beautiful, fast apps with a productive,
+extensible and open development model- whether you're targeting iOS or Android,
 web, Windows, macOS, Linux or embedding it as the UI toolkit for a platform of
 your choice.
 
@@ -66,7 +66,7 @@ support for customizing or creating entirely new visual components.
 
 ### Fast results
 
-Flutter is fast. It's powered by hardware-accelerated 2D graphics
+Flutter is fast. It's powered by hardware-accelerated 2D graphic
 libraries like [Skia] (which underpins Chrome and Android) and
 [Impeller]. We architected Flutter to
 support glitch-free, jank-free graphics at the native speed of your device.
