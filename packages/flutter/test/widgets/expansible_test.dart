@@ -539,7 +539,7 @@ void main() {
   });
 
   testWidgets(
-    'Expansible sends semantics announcements on non-Android',
+    'Expansible includes correct Semantics hint for expanded and collapsed states iOS/MacOS devices',
     (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       final ExpansibleController controller = ExpansibleController();
@@ -557,7 +557,13 @@ void main() {
         ),
       );
 
-      expect(tester.takeAnnouncements(), isEmpty);
+      // The header should have tap action and isExpanded is false initially.
+      final SemanticsNode semantics = tester.getSemantics(find.text('Header'));
+      expect(semantics, isNotNull);
+      expect(
+        semantics.hint,
+        '${localizations.expandedHint}\n ${localizations.expansibleCollapsedHint}',
+      );
 
       controller.expand();
       await tester.pumpAndSettle();
@@ -584,7 +590,7 @@ void main() {
   );
 
   testWidgets(
-    'Expansible sends semantics announcements on iOS Device',
+    'Expansible includes correct Semantics hint for expanded and collapsed states non iOS/MacOS devices',
     (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       final ExpansibleController controller = ExpansibleController();
@@ -638,6 +644,10 @@ void main() {
         ),
       );
 
+      // The header should have tap action and isExpanded is false initially.
+      final SemanticsNode semantics = tester.getSemantics(find.text('Header'));
+      expect(semantics, isNotNull);
+      expect(semantics.hint, isEmpty);
       SemanticsData data = tester.getSemantics(find.byType(Expansible)).getSemanticsData();
       expect(data.label, localizations.expandedHint);
 

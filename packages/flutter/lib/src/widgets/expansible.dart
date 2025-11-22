@@ -505,11 +505,23 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     assert(!_animationController.isDismissed || !widget.controller.isExpanded);
     final bool closed = !widget.controller.isExpanded && _animationController.isDismissed;
     final bool shouldRemoveBody = closed && !widget.maintainState;
-
     final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
-    final String stateHint = widget.controller.isExpanded
-        ? localizations.collapsedHint
-        : localizations.expandedHint;
+    final String onTapHint = widget.controller.isExpanded
+        ? localizations.expansibleExpandedTapHint
+        : localizations.expansibleCollapsedTapHint;
+    String? semanticsHint;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        semanticsHint = widget.controller.isExpanded
+            ? '${localizations.collapsedHint}\n ${localizations.expansibleExpandedHint}'
+            : '${localizations.expandedHint}\n ${localizations.expansibleCollapsedHint}';
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        break;
+    }
 
     final Widget result = Offstage(
       offstage: closed,
