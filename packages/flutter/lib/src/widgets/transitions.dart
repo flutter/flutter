@@ -451,7 +451,10 @@ class SizeTransition extends AnimatedWidget {
     super.key,
     this.axis = Axis.vertical,
     required Animation<double> sizeFactor,
-    @Deprecated('Use alignment instead. ') this.axisAlignment,
+    @Deprecated(
+      'Use alignment instead. '
+      'This feature was deprecated after v3.38.0-1.0.pre-681',
+    ) this.axisAlignment,
     this.alignment,
     this.fixedCrossAxisSizeFactor,
     this.child,
@@ -484,7 +487,10 @@ class SizeTransition extends AnimatedWidget {
   /// A value of 1.0 indicates the bottom or end, depending upon the [axis].
   ///
   /// A value of 0.0 (the default) indicates the center for either [axis] value.
-  @Deprecated('Use alignment instead. ')
+  @Deprecated(
+    'Use alignment instead. '
+    'This feature was deprecated after v3.38.0-1.0.pre-681',
+  )
   final double? axisAlignment;
 
   /// The alignment of the child along the main axis during the transition.
