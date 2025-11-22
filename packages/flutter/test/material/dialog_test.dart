@@ -303,6 +303,22 @@ void main() {
     expect(materialWidget.clipBehavior, Clip.antiAlias);
   });
 
+  testWidgets('SimpleDialog Custom Content Text Style', (WidgetTester tester) async {
+    const String contentText = 'Content';
+    const TextStyle contentTextStyle = TextStyle(color: Colors.pink);
+    const SimpleDialog dialog = SimpleDialog(
+      contentTextStyle: contentTextStyle,
+      children: <Widget>[Text(contentText)],
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
+    expect(content.text.style, contentTextStyle);
+  });
+
   testWidgets('Custom dialog shape', (WidgetTester tester) async {
     const RoundedRectangleBorder customBorder = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(16.0)),
