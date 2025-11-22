@@ -441,7 +441,7 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     assert(!_animationController.isDismissed || !widget.controller.isExpanded);
     final bool closed = !widget.controller.isExpanded && _animationController.isDismissed;
     final bool shouldRemoveBody = closed && !widget.maintainState;
-    const DefaultWidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+    final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
     final String onTapHint = widget.controller.isExpanded
         ? localizations.expansibleExpandedTapHint
         : localizations.expansibleCollapsedTapHint;
