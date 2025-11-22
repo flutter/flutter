@@ -271,7 +271,7 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
                   + "' is defined in the base module's AndroidManifest.");
           return;
         }
-        if (rawMappingString.equals("")) {
+        if (rawMappingString.isEmpty()) {
           // Asset-only components, so no loading units to map.
           return;
         }
@@ -298,7 +298,7 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
     }
 
     // Handle a loading unit that is included in the base module that does not need download.
-    if (resolvedComponentName.equals("") && loadingUnitId > 0) {
+    if (resolvedComponentName.isEmpty() && loadingUnitId > 0) {
       // No need to load assets as base assets are already loaded.
       loadDartLibrary(loadingUnitId, resolvedComponentName);
       return;
@@ -350,7 +350,7 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
                           "Install of deferred component module \"%s\" failed with error %d: %s",
                           componentName,
                           ((SplitInstallException) exception).getErrorCode(),
-                          ((SplitInstallException) exception).getMessage()),
+                          exception.getMessage()),
                       false);
                   break;
               }
@@ -465,9 +465,7 @@ public class PlayStoreDeferredComponentManager implements DeferredComponentManag
     for (String path : apkPaths) {
       searchPaths.add(path + "!lib/" + abi + "/" + aotSharedLibraryName);
     }
-    for (String path : soPaths) {
-      searchPaths.add(path);
-    }
+    searchPaths.addAll(soPaths);
 
     flutterJNI.loadDartDeferredLibrary(
         loadingUnitId, searchPaths.toArray(new String[searchPaths.size()]));
