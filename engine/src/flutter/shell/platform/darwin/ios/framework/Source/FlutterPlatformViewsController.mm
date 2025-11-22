@@ -665,19 +665,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
      withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext {
   TRACE_EVENT0("flutter", "PlatformViewsController::SubmitFrame");
 
-  // No platform views to render.
+  // No platform views to render; we're done.
   if (self.flutterView == nil || (self.compositionOrder.empty() && !self.hadPlatformViews)) {
-    // No platform views to render but the FlutterView may need to be resized.
-    if (self.flutterView != nil) {
-      if (self.platformTaskRunner->RunsTasksOnCurrentThread()) {
-        [self performResize:self.frameSize];
-      } else {
-        PostTaskSync(self.platformTaskRunner, [self, frameSize = self.frameSize]() mutable {
-          [self performResize:frameSize];
-        });
-      }
-    }
-
     self.hadPlatformViews = NO;
     return background_frame->Submit();
   }
@@ -763,13 +752,15 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::vector<std::shared_ptr<flutter::OverlayLayer>> unusedLayers =
       self.layerPool->RemoveUnusedLayers();
   self.layerPool->RecycleLayers();
+
   auto task = [self,                                                      //
                platformViewLayers = std::move(platformViewLayers),        //
                currentCompositionParams = self.currentCompositionParams,  //
                viewsToRecomposite = self.viewsToRecomposite,              //
                compositionOrder = self.compositionOrder,                  //
                unusedLayers = std::move(unusedLayers),                    //
-               surfaceFrames = std::move(surfaceFrames)]() mutable {
+               surfaceFrames = std::move(surfaceFrames)                   //
+  ]() mutable {
     [self performSubmit:platformViewLayers
         currentCompositionParams:currentCompositionParams
               viewsToRecomposite:viewsToRecomposite
@@ -779,6 +770,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   };
 
   fml::TaskRunner::RunNowOrPostTask(self.platformTaskRunner, fml::MakeCopyable(std::move(task)));
+
   return didEncode;
 }
 
@@ -804,16 +796,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
       });
   if (![[NSThread currentThread] isMainThread]) {
     latch->Wait();
-  }
-}
-
-- (void)performResize:(const flutter::DlISize&)frameSize {
-  TRACE_EVENT0("flutter", "PlatformViewsController::PerformResize");
-  FML_DCHECK([[NSThread currentThread] isMainThread]);
-
-  if (self.flutterView != nil) {
-    [(FlutterView*)self.flutterView
-        setIntrinsicContentSize:CGSizeMake(frameSize.width, frameSize.height)];
   }
 }
 
@@ -1018,19 +1000,5 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 - (std::vector<int64_t>&)previousCompositionOrder {
   return _previousCompositionOrder;
 }
-
-namespace {
-void PostTaskSync(const fml::RefPtr<fml::TaskRunner>& task_runner, fml::closure task) {
-  FML_DCHECK(!task_runner->RunsTasksOnCurrentThread());
-  fml::AutoResetWaitableEvent latch;
-  task_runner->PostTask([&latch, task = std::move(task)]() {
-    if (task) {
-      task();
-    }
-    latch.Signal();
-  });
-  latch.Wait();
-}
-}  // namespace
 
 @end
